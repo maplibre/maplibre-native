@@ -90,6 +90,7 @@ public:
                    LineAtlas& lineAtlas_,
                    PatternAtlas& patternAtlas_,
                    RenderLayerReferences layersNeedPlacement_,
+                   RenderLayerReferences layersFollowingPlacement_,
                    Immutable<Placement> placement_,
                    bool updateSymbolOpacities_,
                    double startTime_)
@@ -99,6 +100,7 @@ public:
           lineAtlas(lineAtlas_),
           patternAtlas(patternAtlas_),
           layersNeedPlacement(std::move(layersNeedPlacement_)),
+          layersFollowingPlacement(std::move(layersFollowingPlacement_)),
           placement(std::move(placement_)),
           updateSymbolOpacities(updateSymbolOpacities_) {}
 
@@ -107,6 +109,9 @@ public:
 
         for (auto it = layersNeedPlacement.rbegin(); it != layersNeedPlacement.rend(); ++it) {
             placement->updateLayerBuckets(*it, parameters->transformParams.state, updateSymbolOpacities);
+        }
+        for (const RenderLayer& layer : layersFollowingPlacement) {
+            placement->updateFollowerBuckets(layer, parameters->transformParams.state);
         }
     }
 
@@ -126,6 +131,7 @@ public:
     std::reference_wrapper<LineAtlas> lineAtlas;
     std::reference_wrapper<PatternAtlas> patternAtlas;
     RenderLayerReferences layersNeedPlacement;
+    RenderLayerReferences layersFollowingPlacement;
     Immutable<Placement> placement;
     bool updateSymbolOpacities;
 };
@@ -393,6 +399,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     std::set<LayerRenderItem> layerRenderItems;
     layersNeedPlacement.clear();
+    layersFollowingPlacement.clear();
     auto renderItemsEmplaceHint = layerRenderItems.begin();
 
     // Reserve size for filteredLayersForSource if there are sources.
@@ -518,6 +525,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (renderLayer.needsPlacement()) {
             layersNeedPlacement.emplace_back(renderLayer);
         }
+        if (!renderLayer.getFollowerData().empty()) {
+            layersFollowingPlacement.emplace_back(renderLayer);
+        }
         if (renderTreeParameters->opaquePassCutOff == 0) {
             --opaquePassCutOffEstimation;
             if (renderLayer.is3D()) {
@@ -614,6 +624,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                             *lineAtlas,
                                             *patternAtlas,
                                             std::move(layersNeedPlacement),
+                                            std::move(layersFollowingPlacement),
                                             placementController.getPlacement(),
                                             symbolBucketsChanged,
                                             startTime);

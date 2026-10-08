@@ -246,6 +246,7 @@ private:
     std::vector<Immutable<style::LayerProperties>> filteredLayersForSource;
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
+    RenderLayerReferences layersFollowingPlacement;
 
     TaggedScheduler threadPool;
 

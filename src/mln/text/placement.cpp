@@ -807,6 +807,12 @@ void Placement::updateLayerBuckets(const RenderLayer& layer, const TransformStat
     }
 }
 
+void Placement::updateFollowerBuckets(const RenderLayer& layer, const TransformState& state) const {
+    for (const auto& item : layer.getFollowerData()) {
+        static_cast<SymbolBucket&>(item.bucket.get()).updateLayerVertices(*this, state, item, layer.getID());
+    }
+}
+
 namespace {
 Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
                                           float width,
@@ -824,7 +830,8 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
 
 bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                                  const TransformState& state,
-                                                 const BucketPlacementData& data) const {
+                                                 const BucketPlacementData& data,
+                                                 const std::string* layerID) const {
     using namespace style;
     const RenderTile& tile = data.tile;
     const auto& layout = *bucket.layout;
@@ -835,13 +842,33 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                    (bucket.hasIconData() || bucket.hasSdfIconData());
     bool result = false;
     const TileProjector tileProjector(state, tile.id, tile.projection);
+    const Point<float> textTranslation = translationPoint(tile.id, data.textTranslate, state);
+    const Point<float> iconTranslation = translationPoint(tile.id, data.iconTranslate, state);
+    if (!layerID) {
+        bucket.dynamicTextTranslation = textTranslation;
+        bucket.dynamicIconTranslation = iconTranslation;
+    } else if ((!alongLine && !hasVariableAnchors) ||
+               (textTranslation == bucket.dynamicTextTranslation && iconTranslation == bucket.dynamicIconTranslation)) {
+        return false;
+    }
+    // GL JS rewrites a shared bucket's positions for each layer it draws; one at another translation keeps its own.
+    const auto positions = [&](SymbolBucket::Buffer& buffer) -> SymbolBucket::DynamicAttributeVector& {
+        if (!layerID) {
+            return buffer.dynamicAttributeData();
+        }
+        auto& layerData = buffer.layerDynamicAttributeData[*layerID];
+        if (!layerData) {
+            layerData = std::make_shared<SymbolBucket::DynamicAttributeVector>();
+        }
+        return *layerData;
+    };
 
     if (alongLine) {
         if (layout.get<IconRotationAlignment>() == AlignmentType::Map) {
             const bool pitchWithMap = layout.get<style::IconPitchAlignment>() == style::AlignmentType::Map;
             const bool keepUpright = layout.get<style::IconKeepUpright>();
             if (bucket.hasSdfIconData()) {
-                reprojectLineLabels(bucket.sdfIcon.dynamicAttributeData(),
+                reprojectLineLabels(positions(bucket.sdfIcon),
                                     bucket.sdfIcon.placedSymbols,
                                     tileProjector,
                                     pitchWithMap,
@@ -850,11 +877,11 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     tile,
                                     *bucket.iconSizeBinder,
                                     state,
-                                    translationPoint(tile.id, data.iconTranslate, state));
+                                    iconTranslation);
                 result = true;
             }
             if (bucket.hasIconData()) {
-                reprojectLineLabels(bucket.icon.dynamicAttributeData(),
+                reprojectLineLabels(positions(bucket.icon),
                                     bucket.icon.placedSymbols,
                                     tileProjector,
                                     pitchWithMap,
@@ -863,7 +890,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     tile,
                                     *bucket.iconSizeBinder,
                                     state,
-                                    translationPoint(tile.id, data.iconTranslate, state));
+                                    iconTranslation);
                 result = true;
             }
         }
@@ -871,7 +898,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         if (bucket.hasTextData() && layout.get<TextRotationAlignment>() == AlignmentType::Map) {
             const bool pitchWithMap = layout.get<style::TextPitchAlignment>() == style::AlignmentType::Map;
             const bool keepUpright = layout.get<style::TextKeepUpright>();
-            reprojectLineLabels(bucket.text.dynamicAttributeData(),
+            reprojectLineLabels(positions(bucket.text),
                                 bucket.text.placedSymbols,
                                 tileProjector,
                                 pitchWithMap,
@@ -880,12 +907,13 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                 tile,
                                 *bucket.textSizeBinder,
                                 state,
-                                translationPoint(tile.id, data.textTranslate, state));
+                                textTranslation);
             result = true;
         }
     } else if (hasVariableAnchors) {
-        bucket.text.sharedDynamicAttributeData->clear();
-        bucket.hasVariablePlacement = false;
+        auto& textPositions = positions(bucket.text);
+        textPositions.clear();
+        bool hasVariablePlacement = false;
 
         const auto partiallyEvaluatedSize = bucket.textSizeBinder->evaluateForZoom(static_cast<float>(state.getZoom()));
         const auto tileScale = static_cast<float>(
@@ -894,7 +922,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         const bool pitchWithMap = layout.get<TextPitchAlignment>() == AlignmentType::Map;
         const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
         // The shader leaves the translation to us for variable anchors, so the shifted anchor carries it.
-        const Point<float> translation = translationPoint(tile.id, data.textTranslate, state);
+        const Point<float> translation = textTranslation;
         const LabelPlaneProjector labelPlane(
             tileProjector, pitchWithMap, rotateWithMap, pixelsToTileUnits, translation);
         // The shift follows the axes the collision box was projected along, so the label lands in its own box.
@@ -915,7 +943,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
             if (!symbol.hidden && symbol.crossTileID != 0u && !skipOrientation) {
                 auto it = variableOffsets.find(symbol.crossTileID);
                 if (it != variableOffsets.end()) {
-                    bucket.hasVariablePlacement = true;
+                    hasVariablePlacement = true;
                     variableOffset = it->second;
                 }
             }
@@ -924,7 +952,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 // These symbols are from a justification that is not being
                 // used, or a label that wasn't placed so we don't need to do
                 // the extra math to figure out what incremental shift to apply.
-                hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicAttributeData());
+                hideGlyphs(symbol.glyphOffsets.size(), textPositions);
             } else {
                 const Point<float> tileAnchor = symbol.anchorPoint;
                 const ProjectedTilePoint projected = pitchWithMap ? labelPlane.toClipSpaceFromTile(tileAnchor)
@@ -978,26 +1006,29 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 }
 
                 for (std::size_t j = 0; j < symbol.glyphOffsets.size(); ++j) {
-                    addDynamicAttributes(shiftedAnchor, symbol.angle, bucket.text.dynamicAttributeData());
+                    addDynamicAttributes(shiftedAnchor, symbol.angle, textPositions);
                 }
             }
         }
+        if (!layerID) {
+            bucket.hasVariablePlacement = hasVariablePlacement;
+        }
 
-        if (updateTextFitIcon && bucket.hasVariablePlacement) {
+        if (updateTextFitIcon && hasVariablePlacement) {
             auto updateIcon = [&](SymbolBucket::Buffer& iconBuffer) {
-                iconBuffer.sharedDynamicAttributeData->clear();
+                auto& iconPositions = positions(iconBuffer);
+                iconPositions.clear();
                 for (std::size_t i = 0; i < iconBuffer.placedSymbols.size(); ++i) {
                     const PlacedSymbol& placedIcon = iconBuffer.placedSymbols[i];
                     if (placedIcon.hidden || (!placedIcon.placedOrientation && bucket.allowVerticalPlacement)) {
-                        hideGlyphs(placedIcon.glyphOffsets.size(), iconBuffer.dynamicAttributeData());
+                        hideGlyphs(placedIcon.glyphOffsets.size(), iconPositions);
                     } else {
                         const auto& pair = placedTextShifts.find(i);
                         if (pair == placedTextShifts.end()) {
-                            hideGlyphs(placedIcon.glyphOffsets.size(), iconBuffer.dynamicAttributeData());
+                            hideGlyphs(placedIcon.glyphOffsets.size(), iconPositions);
                         } else {
                             for (std::size_t j = 0; j < placedIcon.glyphOffsets.size(); ++j) {
-                                addDynamicAttributes(
-                                    pair->second.second, placedIcon.angle, iconBuffer.dynamicAttributeData());
+                                addDynamicAttributes(pair->second.second, placedIcon.angle, iconPositions);
                             }
                         }
                     }

@@ -204,6 +204,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     addRenderPassesFromTiles();
 
     placementData.clear();
+    followerData.clear();
 
     const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
     const SymbolTranslate textTranslate{.offset = evaluated.get<style::TextTranslate>(),
@@ -249,6 +250,14 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
                     placementData.insert(sortPosition, std::move(layerData));
                 }
             }
+        } else if (bucket && static_cast<Bucket*>(bucket)->check(SYM_GUARD_LOC)) {
+            followerData.push_back({.bucket = *bucket,
+                                    .tile = renderTile,
+                                    .featureIndex = nullptr,
+                                    .sourceId = baseImpl->source,
+                                    .sortKeyRange = std::nullopt,
+                                    .textTranslate = textTranslate,
+                                    .iconTranslate = iconTranslate});
         }
     }
 }
@@ -259,6 +268,7 @@ constexpr auto posOffsetAttribName = "a_pos_offset";
 [[maybe_unused]] constexpr auto sortedInstanceUniformName = "sorted_instance";
 
 void updateTileAttributes(const SymbolBucket::Buffer& buffer,
+                          const std::string& layerID,
                           const bool isText,
                           const SymbolBucket::PaintProperties& paintProps,
                           const SymbolPaintProperties::PossiblyEvaluated& evaluated,
@@ -352,7 +362,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
 #endif
 
     if (const auto& attr = attribs.set(idSymbolProjectedPosAttribute)) {
-        attr->setSharedRawData(buffer.sharedDynamicAttributeData,
+        attr->setSharedRawData(buffer.dynamicAttributeDataFor(layerID),
                                offsetof(SymbolDynamicLayoutAttributes, a1),
                                /*vertexOffset=*/0,
                                sizeof(SymbolDynamicLayoutAttributes),
@@ -369,6 +379,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
 
 void updateTileDrawable(gfx::Drawable& drawable,
                         const SymbolBucket& bucket,
+                        const std::string& layerID,
                         const SymbolBucket::PaintProperties& paintProps,
                         const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     if (!drawable.getData()) {
@@ -386,7 +397,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
 
 #if MLN_USE_SYMBOL_INSTANCING
     if (auto& instanceAttribs = drawable.getInstanceAttributes()) {
-        updateTileAttributes(buffer, isText, paintProps, evaluated, *instanceAttribs, nullptr);
+        updateTileAttributes(buffer, layerID, isText, paintProps, evaluated, *instanceAttribs, nullptr);
     }
 #else
     const auto vertexCount = buffer.attributeData().elements();
@@ -396,7 +407,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // See `Placement::updateBucketDynamicAttributeData`
 
     if (auto& attribs = drawable.getVertexAttributes()) {
-        updateTileAttributes(buffer, isText, paintProps, evaluated, *attribs, nullptr);
+        updateTileAttributes(buffer, layerID, isText, paintProps, evaluated, *attribs, nullptr);
     }
 #endif
 }
@@ -630,7 +641,7 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
         const auto& staticVertices = buffer.attributeData();
-        const auto& dynamicVertices = buffer.dynamicAttributeData();
+        const auto& dynamicVertices = *buffer.dynamicAttributeDataFor(getID());
 
 #if MLN_USE_SYMBOL_INSTANCING
         // When instancing, each entry in the attribute vectors describes a whole quad,
@@ -1010,7 +1021,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             propertiesAsUniforms.first.clear();
             propertiesAsUniforms.second.clear();
 
-            updateTileDrawable(drawable, bucket, bucketPaintProperties, evaluated);
+            updateTileDrawable(drawable, bucket, getID(), bucketPaintProperties, evaluated);
             return true;
         };
         if (updateTile(passes, tileID, std::move(updateExisting))) {
@@ -1131,10 +1142,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto instanceAttribs = context.createVertexAttributeArray();
-        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *instanceAttribs, &propertiesAsUniforms);
+        updateTileAttributes(
+            buffer, getID(), isText, bucketPaintProperties, evaluated, *instanceAttribs, &propertiesAsUniforms);
 #else
         auto vertexAttribs = context.createVertexAttributeArray();
-        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *vertexAttribs, &propertiesAsUniforms);
+        updateTileAttributes(
+            buffer, getID(), isText, bucketPaintProperties, evaluated, *vertexAttribs, &propertiesAsUniforms);
 #endif
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&

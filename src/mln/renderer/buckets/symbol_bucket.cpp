@@ -369,4 +369,22 @@ void SymbolBucket::updateVertices(const Placement& placement,
     }
 }
 
+void SymbolBucket::updateLayerVertices(const Placement& placement,
+                                       const TransformState& state,
+                                       const BucketPlacementData& data,
+                                       const std::string& layerID) {
+    const bool laidOut = placement.updateBucketDynamicAttributeData(*this, state, data, &layerID);
+    for (Buffer* buffer : {&text, &icon, &sdfIcon}) {
+        const auto it = buffer->layerDynamicAttributeData.find(layerID);
+        if (it == buffer->layerDynamicAttributeData.end()) {
+            continue;
+        }
+        if (laidOut) {
+            it->second->updateModified();
+        } else {
+            buffer->layerDynamicAttributeData.erase(it);
+        }
+    }
+}
+
 } // namespace mln
