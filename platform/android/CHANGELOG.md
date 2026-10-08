@@ -1,5 +1,12 @@
 # Changelog MapLibre Native for Android
 
+## 13.5.3
+
+### 🐞 Bug fixes
+
+- android: Fix crashes from `MapRenderer` requests that race render thread detach or renderer reset by closing the renderer mailbox ([#4686](https://github.com/maplibre/maplibre-native/pull/4686)).
+- android, core: Stop `MapLibreSurfaceView` (Vulkan) from blocking the main thread on surface resize, and recover from lost Vulkan surfaces ([#4705](https://github.com/maplibre/maplibre-native/pull/4705)).
+
 ## 13.5.2
 
 ### 🐞 Bug fixes
