@@ -1,3 +1,4 @@
+#include <mln/storage/file_source_manager.hpp>
 #include <mln/storage/pmtiles_file_source.hpp>
 #include <mln/storage/resource.hpp>
 #include <mln/storage/resource_options.hpp>
@@ -201,33 +202,46 @@ TEST(PMTilesFileSource, UncompressedTile) {
     loop.run();
 }
 
-// Concurrent requests for one directory each fetch and store it - nothing coalesces them.
-// Storing used to append the directory's key to the LRU list every time, so N concurrent
-// misses left N copies of one key; once the list passed MAX_DIRECTORY_CACHE_ENTRIES (100),
-// evicting a duplicate at the front dropped the directory the storing request was about to
-// read, and that tile failed with "Error parsing PMTiles directory: map::at" (#4421). Every
-// request here names the root directory, so they all miss until the first store lands.
+// Concurrent misses for the same directory must not leave duplicate keys in the
+// directory LRU list: https://github.com/maplibre/maplibre-native/issues/4421
 TEST(PMTilesFileSource, ConcurrentRequestsShareOneDirectoryEntry) {
     util::RunLoop loop;
 
+    // The resource loader PMTilesFileSource reads the archive through.
+    auto loader = FileSourceManager::get()->getFileSource(
+        FileSourceType::ResourceLoader, ResourceOptions::Default(), ClientOptions());
+    ASSERT_TRUE(loader);
+
     PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+    const auto url = toAbsoluteURL("geography-class-png.pmtiles");
+
+    // Load the header, so every tile request below goes straight to the root directory.
+    std::unique_ptr<AsyncRequest> tileJSON = pmtiles.request({Resource::Unknown, url}, [&](Response res) {
+        EXPECT_EQ(nullptr, res.error);
+        loop.stop();
+    });
+    loop.run();
+    tileJSON.reset();
 
     constexpr int count = 130; // more than MAX_DIRECTORY_CACHE_ENTRIES
     std::vector<std::unique_ptr<AsyncRequest>> reqs;
     reqs.reserve(count);
     int done = 0;
 
+    // Hold the directory reads until every request has missed the cache.
+    loader->pause();
     for (int i = 0; i < count; i++) {
-        reqs.push_back(pmtiles.request(
-            Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
-            [&](Response res) {
-                EXPECT_EQ(nullptr, res.error) << (res.error ? res.error->message : "");
-                EXPECT_TRUE(res.data.get());
-                if (++done == count) {
-                    loop.stop();
-                }
-            }));
+        reqs.push_back(pmtiles.request(Resource::tile(url, 1.0, 0, 0, 0, Tileset::Scheme::XYZ), [&](Response res) {
+            EXPECT_EQ(nullptr, res.error) << (res.error ? res.error->message : "");
+            EXPECT_TRUE(res.data.get());
+            if (++done == count) {
+                loop.stop();
+            }
+        }));
     }
+    // Round trip to the PMTiles thread, which has then handled every request above.
+    pmtiles.getResourceOptions();
+    loader->resume();
 
     loop.run();
     reqs.clear();

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <sstream>
 #include <map>
 
@@ -484,14 +485,9 @@ private:
         auto& cache = directory_cache.at(url);
         auto& control = directory_cache_control.at(url);
 
-        // Concurrent requests for one directory each fetch it (nothing coalesces
-        // them), so the same key can be stored several times in a row. Pushing
-        // it onto the LRU list again on every store left duplicate keys there;
-        // once the list passed MAX_DIRECTORY_CACHE_ENTRIES, evicting a duplicate
-        // at the front removed a directory that later entries - including the
-        // one just stored - still named, and the caller's lookup of the key it
-        // had just stored threw. Keep one list entry per key: an already
-        // resident directory is only moved to the back.
+        // Concurrent requests for the same directory each fetch and store it. Keep
+        // a single LRU entry per key so eviction never drops a directory that is
+        // still listed, such as the one the caller is about to read.
         if (cache.contains(directory_cache_key)) {
             touchDirectory(control, directory_cache_key);
             return;
@@ -509,18 +505,10 @@ private:
     // Mark a resident directory as most recently used: move its key to the
     // back of the LRU list.
     static void touchDirectory(std::vector<std::string>& control, const std::string& directory_cache_key) {
-        if (control.back() == directory_cache_key) {
-            return;
+        auto it = std::ranges::find(control, directory_cache_key);
+        if (it != control.end()) {
+            std::ranges::rotate(it, it + 1, control.end());
         }
-
-        for (auto it = control.begin(); it != control.end(); ++it) {
-            if (*it == directory_cache_key) {
-                control.erase(it);
-                break;
-            }
-        }
-
-        control.emplace_back(directory_cache_key);
     }
 
     void getDirectory(const std::string& url,
