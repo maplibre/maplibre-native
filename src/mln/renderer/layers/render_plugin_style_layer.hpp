@@ -36,6 +36,7 @@ private:
                       UniqueChangeRequestVec&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override { return false; }
+    bool needsGlobeDepth() const override { return readWriteDepth; }
 
     std::map<std::string, style::PluginTransitioningPropertyValue> transitioningPaintProperties;
     style::PluginPropertyMap evaluatedPluginProperties;
@@ -43,6 +44,8 @@ private:
     std::map<std::string, gfx::ShaderGroupPtr> shaderGroups;
     /// True while the layer reports an active animation.
     bool animated = false;
+    /// True when the current tiles carry read/write depth drawables.
+    bool readWriteDepth = false;
 };
 
 } // namespace mln
