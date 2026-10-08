@@ -182,6 +182,9 @@ private:
                                          size_t uniformCount,
                                          const std::string& name);
 
+    void pollSurfaceUpdate();
+    void updateSurface(bool recreateSurface = false);
+
 private:
     RendererBackend& backend;
 
