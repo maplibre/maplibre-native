@@ -301,7 +301,8 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
     // If we have pre-tessellated geometry, multi-polygons are tessellated
     // together, so we need to add them to the fill segment all at once.
-    if (!geometry.getTriangles().empty()) {
+    // Those triangles are flat: the globe subdivides the polygon instead.
+    if (!geometry.getTriangles().empty() && subdivisionGranularity < 2) {
         const std::size_t startVertices = fillVertices.elements();
         std::size_t totalVertices = 0;
         for (const auto& polygon : geometry) {
