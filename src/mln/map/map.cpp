@@ -393,11 +393,64 @@ CameraOptions Map::cameraForGeometry(const Geometry<double>& geometry,
     return cameraForLatLngs(latLngs, padding, bearing, pitch);
 }
 
+namespace {
+/// GL JS's globe bounds: the farthest of eight edge points on each side of the center, where points off the planet
+/// fall on its horizon, widened to every longitude when a pole is on screen.
+LatLngBounds globeBounds(const Transform& transform) {
+    const auto width = static_cast<double>(transform.getState().getSize().width);
+    const auto height = static_cast<double>(transform.getState().getSize().height);
+    const LatLng center = transform.getLatLng();
+    double west = 0, east = 0, south = 0, north = 0;
+    for (const ScreenCoordinate& point : std::array<ScreenCoordinate, 8>{{{0, 0},
+                                                                          {width / 2, 0},
+                                                                          {width, 0},
+                                                                          {width, height / 2},
+                                                                          {width, height},
+                                                                          {width / 2, height},
+                                                                          {0, height},
+                                                                          {0, height / 2}}}) {
+        const LatLng latLng = transform.screenCoordinateToLatLng(point);
+        const double longitude = VerticalPerspectiveProjection::differenceOfAnglesDegrees(center.longitude(),
+                                                                                          latLng.longitude());
+        const double latitude = VerticalPerspectiveProjection::differenceOfAnglesDegrees(center.latitude(),
+                                                                                         latLng.latitude());
+        west = std::min(west, longitude);
+        east = std::max(east, longitude);
+        south = std::min(south, latitude);
+        north = std::max(north, latitude);
+    }
+    west += center.longitude();
+    east += center.longitude();
+    south += center.latitude();
+    north += center.latitude();
+
+    const auto onScreen = [&](const LatLng& pole) {
+        const ScreenCoordinate point = transform.latLngToScreenCoordinate(pole);
+        return !transform.getState().isLocationOccluded(pole) && point.x > 0 && point.x < width && point.y > 0 &&
+               point.y < height;
+    };
+    if (onScreen({90, 0})) {
+        north = 90;
+        west = -180;
+        east = 180;
+    }
+    if (onScreen({-90, 0})) {
+        south = -90;
+        west = -180;
+        east = 180;
+    }
+    return LatLngBounds::hull({south, west}, {north, east});
+}
+} // namespace
+
 LatLngBounds Map::latLngBoundsForCamera(const CameraOptions& camera) const {
     Transform shallow{impl->transform.getState()};
     Size size = shallow.getState().getSize();
 
     shallow.jumpTo(camera);
+    if (shallow.getState().isGlobeRendering()) {
+        return globeBounds(shallow);
+    }
     return LatLngBounds::hull(
         shallow.screenCoordinateToLatLng({}),
         shallow.screenCoordinateToLatLng({static_cast<double>(size.width), static_cast<double>(size.height)}));
@@ -408,6 +461,9 @@ LatLngBounds Map::latLngBoundsForCameraUnwrapped(const CameraOptions& camera) co
     Size size = shallow.getState().getSize();
 
     shallow.jumpTo(camera);
+    if (shallow.getState().isGlobeRendering()) {
+        return globeBounds(shallow);
+    }
     LatLng nw = shallow.screenCoordinateToLatLng({});
     LatLng se = shallow.screenCoordinateToLatLng({static_cast<double>(size.width), static_cast<double>(size.height)});
     LatLng ne = shallow.screenCoordinateToLatLng({static_cast<double>(size.width), 0.0});

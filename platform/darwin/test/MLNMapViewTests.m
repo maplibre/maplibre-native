@@ -52,6 +52,30 @@ static MLNMapView *mapView;
     }
 }
 
+- (void)testVisibleCoordinateBoundsOnTheGlobe {
+    // GL JS's VerticalPerspectiveTransform.getBounds at 512×512: the edges bulge past the corners, and a pole in view
+    // puts every longitude in view.
+    NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"globe" withExtension:@"json"];
+    mapView = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 512, 512) styleURL:styleURL];
+    mapView.delegate = self;
+    _styleLoadingExpectation = [self expectationWithDescription:@"Map view should finish loading style."];
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+
+    [mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:1 animated:NO];
+    MLNCoordinateBounds bounds = mapView.visibleCoordinateBounds;
+    XCTAssertEqualWithAccuracy(bounds.sw.latitude, -79.91796042106967, 1e-3);
+    XCTAssertEqualWithAccuracy(bounds.sw.longitude, -79.91796042106967, 1e-3);
+    XCTAssertEqualWithAccuracy(bounds.ne.latitude, 79.91796042106967, 1e-3);
+    XCTAssertEqualWithAccuracy(bounds.ne.longitude, 79.91796042106967, 1e-3);
+
+    [mapView setCenterCoordinate:CLLocationCoordinate2DMake(75, 0) zoomLevel:1 animated:NO];
+    bounds = mapView.visibleCoordinateBounds;
+    XCTAssertEqualWithAccuracy(bounds.sw.latitude, 32.70922481421371, 1e-3);
+    XCTAssertEqual(bounds.sw.longitude, -180);
+    XCTAssertEqual(bounds.ne.latitude, 90);
+    XCTAssertEqual(bounds.ne.longitude, 180);
+}
+
 - (void)testCoordinateBoundsConversion {
     [mapView setCenterCoordinate:CLLocationCoordinate2DMake(33, 179)];
 

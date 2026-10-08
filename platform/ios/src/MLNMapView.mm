@@ -4647,28 +4647,35 @@ static void *windowScreenContext = &windowScreenContext;
 /// bounding box.
 - (mln::LatLngBounds)convertRect:(CGRect)rect toLatLngBoundsFromView:(nullable UIView *)view {
   auto bounds = mln::LatLngBounds::empty();
-  auto topLeft = [self convertPoint:{CGRectGetMinX(rect), CGRectGetMinY(rect)}
-                   toLatLngFromView:view];
-  auto topRight = [self convertPoint:{CGRectGetMaxX(rect), CGRectGetMinY(rect)}
-                    toLatLngFromView:view];
-  auto bottomRight = [self convertPoint:{CGRectGetMaxX(rect), CGRectGetMaxY(rect)}
-                       toLatLngFromView:view];
-  auto bottomLeft = [self convertPoint:{CGRectGetMinX(rect), CGRectGetMaxY(rect)}
-                      toLatLngFromView:view];
 
   // If the bounds straddles the antimeridian, unwrap it so that one side
   // extends beyond ±180° longitude.
   auto center = [self convertPoint:{CGRectGetMidX(rect), CGRectGetMidY(rect)}
                   toLatLngFromView:view];
-  topLeft.unwrapForShortestPath(center);
-  topRight.unwrapForShortestPath(center);
-  bottomRight.unwrapForShortestPath(center);
-  bottomLeft.unwrapForShortestPath(center);
 
-  bounds.extend(topLeft);
-  bounds.extend(topRight);
-  bounds.extend(bottomRight);
-  bounds.extend(bottomLeft);
+  // The corners and the middles of the edges: on a globe the edges bulge past the corners.
+  for (const CGPoint point : {CGPointMake(CGRectGetMinX(rect), CGRectGetMinY(rect)),
+                              CGPointMake(CGRectGetMidX(rect), CGRectGetMinY(rect)),
+                              CGPointMake(CGRectGetMaxX(rect), CGRectGetMinY(rect)),
+                              CGPointMake(CGRectGetMaxX(rect), CGRectGetMidY(rect)),
+                              CGPointMake(CGRectGetMaxX(rect), CGRectGetMaxY(rect)),
+                              CGPointMake(CGRectGetMidX(rect), CGRectGetMaxY(rect)),
+                              CGPointMake(CGRectGetMinX(rect), CGRectGetMaxY(rect)),
+                              CGPointMake(CGRectGetMinX(rect), CGRectGetMidY(rect))}) {
+    auto latLng = [self convertPoint:point toLatLngFromView:view];
+    latLng.unwrapForShortestPath(center);
+    bounds.extend(latLng);
+  }
+
+  // A pole in view puts every longitude in view; Mercator never draws one.
+  for (const double latitude : {90.0, -90.0}) {
+    const CGPoint pole = [self convertLatLng:mln::LatLng(latitude, 0) toPointToView:view];
+    if (CGRectContainsPoint(rect, pole) &&
+        std::abs([self convertPoint:pole toLatLngFromView:view].latitude() - latitude) < 1e-3) {
+      bounds = mln::LatLngBounds::hull({latitude > 0 ? bounds.south() : latitude, -180},
+                                       {latitude > 0 ? latitude : bounds.north(), 180});
+    }
+  }
 
   return bounds;
 }
