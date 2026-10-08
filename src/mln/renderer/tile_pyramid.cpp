@@ -5,6 +5,7 @@
 #include <mln/renderer/query.hpp>
 #include <mln/map/transform.hpp>
 #include <mln/math/clamp.hpp>
+#include <mln/math/log2.hpp>
 #include <mln/actor/scheduler.hpp>
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/tile_range.hpp>
@@ -118,11 +119,14 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     std::vector<OverscaledTileID> idealTiles;
     std::vector<OverscaledTileID> panTiles;
 
-    util::TileCoverParameters tileCoverParameters = {.transformState = parameters.transformState,
-                                                     .tileLodMinRadius = parameters.tileLodMinRadius,
-                                                     .tileLodScale = parameters.tileLodScale,
-                                                     .tileLodPitchThreshold = parameters.tileLodPitchThreshold,
-                                                     .tileLodMode = parameters.tileLodMode};
+    util::TileCoverParameters tileCoverParameters = {
+        .transformState = parameters.transformState,
+        .tileLodMinRadius = parameters.tileLodMinRadius,
+        .tileLodScale = parameters.tileLodScale,
+        .tileLodPitchThreshold = parameters.tileLodPitchThreshold,
+        .tileLodMode = parameters.tileLodMode,
+        .requestedZoom = zoom + util::log2(util::tileSize_D / tileSize),
+        .roundZoom = type == SourceType::Raster || type == SourceType::RasterDEM || type == SourceType::Video};
 
     if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
