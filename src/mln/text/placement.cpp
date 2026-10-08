@@ -362,7 +362,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                           style::TextWritingModeType orientation) {
                 textBoxes.clear();
                 auto placedFeature = collisionIndex.placeFeature(collisionFeature,
-                                                                 {},
+                                                                 std::nullopt,
                                                                  ctx.textTranslation,
                                                                  tileProjector,
                                                                  ctx.textLabelPlane,
@@ -570,16 +570,17 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     }
 
     if (symbolInstance.getPlacedIconIndex()) {
-        if (!ctx.hasIconTextFit || !placeText || variableTextAnchors.empty()) {
-            shift = {0.0f, 0.0f};
-        }
+        // An icon fitted to text that took a variable anchor follows the text's shift; no other icon has one.
+        const std::optional<Point<float>> iconShift = ctx.hasIconTextFit && placeText && !variableTextAnchors.empty()
+                                                          ? std::optional<Point<float>>(shift)
+                                                          : std::nullopt;
 
         const auto& iconBuffer = symbolInstance.hasSdfIcon() ? bucket.sdfIcon : bucket.icon;
         const PlacedSymbol& placedSymbol = iconBuffer.placedSymbols.at(*symbolInstance.getPlacedIconIndex());
         const float fontSize = evaluateSizeForFeature(ctx.partiallyEvaluatedIconSize, placedSymbol);
         const auto& placeIconFeature = [&](const CollisionFeature& collisionFeature) {
             return collisionIndex.placeFeature(collisionFeature,
-                                               shift,
+                                               iconShift,
                                                ctx.iconTranslation,
                                                tileProjector,
                                                ctx.iconLabelPlane,

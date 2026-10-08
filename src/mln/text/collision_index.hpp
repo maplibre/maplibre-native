@@ -44,9 +44,10 @@ public:
                                         const mat4& posMatrix,
                                         float textPixelRatio,
                                         const CollisionBoundaries& tileEdges) const;
+    /// `shift` is a variable anchor's offset, unset when there is none.
     PlacedFeatureResult placeFeature(
         const CollisionFeature& feature,
-        Point<float> shift,
+        std::optional<Point<float>> shift,
         Point<float> translation,
         const TileProjector& tileProjector,
         const LabelPlaneProjector& labelPlane,
@@ -138,7 +139,7 @@ private:
                                      bool pitchWithMap,
                                      bool rotateWithMap,
                                      const ProjectedAnchor& projectedPoint,
-                                     Point<float> shift,
+                                     std::optional<Point<float>> shift,
                                      Point<float> translation) const;
 
     const TransformState transformState;
