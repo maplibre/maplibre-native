@@ -1423,22 +1423,29 @@ TEST(Transform, AnimationIntoTheGlobeTakesTheGlobesMinimumZoom) {
     const auto projectionForZoom = [](double zoom) {
         return ProjectionDefinition(zoom < 3 ? "vertical-perspective" : "mercator");
     };
-    for (const bool fly : {false, true}) {
-        Transform transform;
-        transform.resize({512, 512});
-        transform.setProjectionForZoom(projectionForZoom);
-        transform.setProjectionDefinition(projectionForZoom(5));
-        transform.jumpTo(CameraOptions().withCenter(LatLng{60, 0}).withZoom(5));
-        const auto camera = CameraOptions().withCenter(LatLng{60, 0}).withZoom(-0.5);
-        const AnimationOptions animation(Milliseconds(1000));
-        fly ? transform.flyTo(camera, animation) : transform.easeTo(camera, animation);
-        // As the map does each frame, the projection follows the zoom.
-        for (int frame = 1; frame <= 20; ++frame) {
-            transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
-            transform.setProjectionDefinition(projectionForZoom(transform.getZoom()));
+    // A viewport taller than the world raises Mercator's minimum zoom, which the globe does not have.
+    for (const Size size : {Size{512, 512}, Size{512, 1024}}) {
+        for (const auto& [center, zoom] : {std::pair{LatLng{60, 0}, -0.5}, std::pair{LatLng{0, 0}, 0.0}}) {
+            for (const bool fly : {false, true}) {
+                SCOPED_TRACE(std::string(fly ? "flyTo" : "easeTo") + " to zoom " + std::to_string(zoom) + " at " +
+                             std::to_string(center.latitude()) + " on " + std::to_string(size.height) + " px");
+                Transform transform;
+                transform.resize(size);
+                transform.setProjectionForZoom(projectionForZoom);
+                transform.setProjectionDefinition(projectionForZoom(5));
+                transform.jumpTo(CameraOptions().withCenter(center).withZoom(5));
+                const auto camera = CameraOptions().withCenter(center).withZoom(zoom);
+                const AnimationOptions animation(Milliseconds(1000));
+                fly ? transform.flyTo(camera, animation) : transform.easeTo(camera, animation);
+                // As the map does each frame, the projection follows the zoom.
+                for (int frame = 1; frame <= 20; ++frame) {
+                    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
+                    transform.setProjectionDefinition(projectionForZoom(transform.getZoom()));
+                }
+                EXPECT_TRUE(transform.getState().isGlobeRendering());
+                EXPECT_NEAR(zoom, transform.getZoom(), 1e-9);
+            }
         }
-        EXPECT_TRUE(transform.getState().isGlobeRendering()) << (fly ? "flyTo" : "easeTo");
-        EXPECT_NEAR(-0.5, transform.getZoom(), 1e-9) << (fly ? "flyTo" : "easeTo");
     }
 }
 

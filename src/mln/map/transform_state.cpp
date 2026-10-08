@@ -590,11 +590,11 @@ double TransformState::getMinZoomAtLatitude(double latitude) const {
 }
 
 double TransformState::getMinZoomAtLatitude(double latitude, bool globe) const {
-    const double minZoom = getMinZoom();
     if (!globe) {
-        return minZoom;
+        return getMinZoom();
     }
-    return minZoom + VerticalPerspectiveProjection::zoomAdjustment(0, latitude);
+    // The globe's constraint never raises the scale, whichever projection the map is in now.
+    return scaleZoom(min_scale) + VerticalPerspectiveProjection::zoomAdjustment(0, latitude);
 }
 
 LatLng TransformState::constrainedCenter(const LatLng& latLng) const {
