@@ -86,6 +86,7 @@ private:
 
     PlacedFeatureResult placeLineFeature(
         const CollisionFeature& feature,
+        Point<float> translation,
         const TileProjector& tileProjector,
         const LabelPlaneProjector& labelPlane,
         float textPixelRatio,

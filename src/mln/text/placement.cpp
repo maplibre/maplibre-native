@@ -134,11 +134,13 @@ public:
                                 getLayout().get<style::SymbolScreenSpace>()
                                     ? withoutHorizon(renderTile.get().projection)
                                     : renderTile.get().projection};
-    // Point labels collide where `*-translate` puts them; line labels keep their layout-time circles.
+    // Labels collide where `*-translate` puts them, line labels' circles included.
     Point<float> textTranslation;
     Point<float> iconTranslation;
-    LabelPlaneProjector textLabelPlane{tileProjector, pitchTextWithMap, rotateTextWithMap, pixelsToTileUnits};
-    LabelPlaneProjector iconLabelPlane{tileProjector, pitchIconWithMap, rotateIconWithMap, pixelsToTileUnits};
+    LabelPlaneProjector textLabelPlane{
+        tileProjector, pitchTextWithMap, rotateTextWithMap, pixelsToTileUnits, textTranslation};
+    LabelPlaneProjector iconLabelPlane{
+        tileProjector, pitchIconWithMap, rotateIconWithMap, pixelsToTileUnits, iconTranslation};
 
     CollisionGroups::CollisionGroup collisionGroup;
     ZoomEvaluatedSize partiallyEvaluatedTextSize;
