@@ -78,14 +78,21 @@ public:
         auto key = std::make_tuple(canonical.z, canonical.y == 0, canonical.y == (1u << canonical.z) - 1, mask);
         auto it = meshes.find(key);
         if (it == meshes.end()) {
+            // Tiles that are loading go through many masks; start over rather than keep every one of them. The
+            // drawables share the meshes' buffers, so they keep theirs.
+            if (meshes.size() >= maxMeshes) {
+                meshes.clear();
+            }
             it = meshes.emplace(std::move(key), GlobeTileMesh<Vertex, LayoutVertexFn>(canonical, mask, layoutVertex))
                      .first;
         }
         return it->second;
     }
     void clear() { meshes.clear(); }
+    std::size_t size() const { return meshes.size(); }
 
 private:
+    static constexpr std::size_t maxMeshes = 64;
     std::map<std::tuple<uint8_t, bool, bool, TileMask>, GlobeTileMesh<Vertex, LayoutVertexFn>> meshes;
 };
 
