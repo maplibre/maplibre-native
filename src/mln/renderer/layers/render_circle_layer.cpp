@@ -127,18 +127,24 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
                                                                                               transformState.getSize());
     auto transformedSize = alignWithMap ? size * pixelsToTileUnits : size;
 
+    // The shader hides a circle whose center the horizon covers where it draws it: translated, and through the
+    // projection as blended. The query finds none there either.
+    const auto drawnTranslation = RenderTile::tileUnitTranslation(projector.getTileID(),
+                                                                  evaluated.get<style::CircleTranslate>(),
+                                                                  evaluated.get<style::CircleTranslateAnchor>(),
+                                                                  transformState);
     const auto& geometry = feature.getGeometries();
     for (auto& ring : geometry) {
         for (auto& point : ring) {
+            if (transformState.isGlobeRendering() &&
+                projector.projectAsDrawn({point.x + drawnTranslation[0], point.y + drawnTranslation[1]}).occluded) {
+                continue;
+            }
             const GeometryCoordinate& transformedPoint = alignWithMap
                                                              ? point
                                                              : projectPoint(point, projector, transformState.getSize());
 
             const auto projected = projector.project({static_cast<double>(point.x), static_cast<double>(point.y)});
-            // The shader hides a circle whose center the horizon covers, so the query finds none there either.
-            if (projected.occluded) {
-                continue;
-            }
             float adjustedSize = transformedSize;
             const double w = projected.signedDistanceFromCamera;
             auto pitchScale = evaluated.evaluate<style::CirclePitchScale>(zoom, feature);
