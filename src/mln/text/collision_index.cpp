@@ -199,6 +199,7 @@ PlacedFeatureResult CollisionIndex::placeFeature(
         return {.placed = true, .offscreen = isOffscreen(collisionBoundaries), .occluded = false};
     } else {
         return placeLineFeature(feature,
+                                translation,
                                 tileProjector,
                                 labelPlane,
                                 textPixelRatio,
@@ -216,6 +217,7 @@ PlacedFeatureResult CollisionIndex::placeFeature(
 
 PlacedFeatureResult CollisionIndex::placeLineFeature(
     const CollisionFeature& feature,
+    const Point<float> translation,
     const TileProjector& tileProjector,
     const LabelPlaneProjector& labelPlane,
     const float textPixelRatio,
@@ -300,7 +302,7 @@ PlacedFeatureResult CollisionIndex::placeLineFeature(
             continue;
         }
 
-        const auto projectedPoint = projectPoint(tileProjector, circle.anchor);
+        const auto projectedPoint = projectPoint(tileProjector, circle.anchor + translation);
         const float tileUnitRadius = (circle.x2 - circle.x1) / 2;
         const float radius = tileUnitRadius * tileToViewport;
 

@@ -595,7 +595,7 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
         useVertical = false;
 
         const ProjectedTilePoint anchorPos = tileProjector.project(
-            {placedSymbol.anchorPoint.x + translation.x, placedSymbol.anchorPoint.y + translation.y});
+            {placedSymbol.anchorPoint.x, placedSymbol.anchorPoint.y});
 
         // Don't bother calculating the correct point for invisible labels.
         if (anchorPos.occluded || !isVisible(anchorPos.point, clippingBuffer)) {
