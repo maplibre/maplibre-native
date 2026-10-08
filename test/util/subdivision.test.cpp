@@ -489,3 +489,16 @@ TEST(TileMesh, GlobeMeshCacheStaysBounded) {
         ASSERT_LE(cache.size(), 64u) << i;
     }
 }
+
+// A frame draws most tiles whole while one loading tile goes through a new mask each time: the whole tile's mesh,
+// used every frame, outlasts the masks.
+TEST(TileMesh, GlobeMeshCacheKeepsTheMeshesInUse) {
+    GlobeTileMeshCache<GlobeTestVertex, decltype(&globeTestVertex)> cache;
+    const CanonicalTileID tile{3, 2, 2};
+    const TileMask whole{{0, 0, 0}};
+    const auto vertices = cache.get(tile, whole, &globeTestVertex).vertices;
+    for (uint32_t i = 0; i < 256; ++i) {
+        cache.get(tile, {{4, i % 16, i / 16}}, &globeTestVertex);
+        ASSERT_EQ(vertices.get(), cache.get(tile, whole, &globeTestVertex).vertices.get()) << i;
+    }
+}

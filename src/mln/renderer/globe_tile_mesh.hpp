@@ -78,22 +78,30 @@ public:
         auto key = std::make_tuple(canonical.z, canonical.y == 0, canonical.y == (1u << canonical.z) - 1, mask);
         auto it = meshes.find(key);
         if (it == meshes.end()) {
-            // Tiles that are loading go through many masks; start over rather than keep every one of them. The
-            // drawables share the meshes' buffers, so they keep theirs.
+            // Tiles that are loading go through many masks; the one used longest ago makes room, so the meshes every
+            // frame draws stay. The drawables share the meshes' buffers, so they keep theirs.
             if (meshes.size() >= maxMeshes) {
-                meshes.clear();
+                meshes.erase(std::min_element(meshes.begin(), meshes.end(), [](const auto& a, const auto& b) {
+                    return a.second.lastUse < b.second.lastUse;
+                }));
             }
-            it = meshes.emplace(std::move(key), GlobeTileMesh<Vertex, LayoutVertexFn>(canonical, mask, layoutVertex))
-                     .first;
+            GlobeTileMesh<Vertex, LayoutVertexFn> mesh(canonical, mask, layoutVertex);
+            it = meshes.emplace(std::move(key), Entry{std::move(mesh)}).first;
         }
-        return it->second;
+        it->second.lastUse = ++uses;
+        return it->second.mesh;
     }
     void clear() { meshes.clear(); }
     std::size_t size() const { return meshes.size(); }
 
 private:
+    struct Entry {
+        GlobeTileMesh<Vertex, LayoutVertexFn> mesh;
+        uint64_t lastUse = 0;
+    };
     static constexpr std::size_t maxMeshes = 64;
-    std::map<std::tuple<uint8_t, bool, bool, TileMask>, GlobeTileMesh<Vertex, LayoutVertexFn>> meshes;
+    uint64_t uses = 0;
+    std::map<std::tuple<uint8_t, bool, bool, TileMask>, Entry> meshes;
 };
 
 /// The same grid as raw `Short2` positions, for drawables built from raw vertex bytes.
