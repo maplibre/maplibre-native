@@ -185,6 +185,8 @@ public:
   MLNAnnotationObjectTagMap _annotationTagsByAnnotation;
   MLNAnnotationTag _selectedAnnotationTag;
   MLNAnnotationTag _lastSelectedAnnotationTag;
+  /// An annotation behind the globe, selected once the map has turned to it.
+  id<MLNAnnotation> _annotationAwaitingSelection;
   /// Size of the rectangle formed by unioning the maximum slop area around every annotation image.
   NSSize _unionedAnnotationImageSize;
   std::vector<MLNAnnotationTag> _annotationsNearbyLastClick;
@@ -2448,6 +2450,10 @@ public:
     NSAssert([annotation conformsToProtocol:@protocol(MLNAnnotation)],
              @"Annotation does not conform to MLNAnnotation");
 
+    if (annotation == _annotationAwaitingSelection) {
+      _annotationAwaitingSelection = nil;
+    }
+
     MLNAnnotationTag annotationTag = [self annotationTagForAnnotation:annotation];
     NSAssert(annotationTag != MLNAnnotationTagNotFound, @"No ID for annotation %@", annotation);
 
@@ -2708,19 +2714,27 @@ public:
     return;
   }
 
+  // A newer selection replaces one waiting for the map to turn.
+  _annotationAwaitingSelection = nil;
+
   // Behind the globe: an annotation that may move into view is centered first and selected there.
-  if ([self isCoordinateOccluded:annotation.coordinate]) {
+  if (annotation && [self isCoordinateOccluded:annotation.coordinate]) {
     if (!moveIntoView ||
         ![self isMovingAnnotationIntoViewSupportedForAnnotation:annotation
                                                        animated:animateSelection]) {
       return;
     }
+    _annotationAwaitingSelection = annotation;
     __weak __typeof__(self) weakSelf = self;
     [self setCenterCoordinate:annotation.coordinate
                      animated:animateSelection
             completionHandler:^{
               __typeof__(self) strongSelf = weakSelf;
-              if (strongSelf && ![strongSelf isCoordinateOccluded:annotation.coordinate]) {
+              if (!strongSelf || strongSelf->_annotationAwaitingSelection != annotation) {
+                return;
+              }
+              strongSelf->_annotationAwaitingSelection = nil;
+              if (![strongSelf isCoordinateOccluded:annotation.coordinate]) {
                 [strongSelf selectAnnotation:annotation
                                      atPoint:NSZeroPoint
                                 moveIntoView:NO
@@ -2990,6 +3004,9 @@ public:
 }
 
 - (void)deselectAnnotation:(id<MLNAnnotation>)annotation {
+  if (annotation && annotation == _annotationAwaitingSelection) {
+    _annotationAwaitingSelection = nil;
+  }
   if (!annotation || self.selectedAnnotation != annotation) {
     return;
   }
