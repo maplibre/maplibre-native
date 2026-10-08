@@ -34,7 +34,11 @@ jobs:
       - name: Build DocC documentation
         working-directory: .
         run: |
-          HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
+          aws s3 sync --no-sign-request "s3://maplibre-native/ios-documentation-resources" "platform/ios/MapLibre.docc/Resources"
+          bazel build --//:renderer=metal --platforms=@build_bazel_apple_support//platforms:ios_arm64 //platform/ios:MapLibre.doccarchive
+          mkdir -p build
+          cp -RL "$(bazel cquery --//:renderer=metal --platforms=@build_bazel_apple_support//platforms:ios_arm64 //platform/ios:MapLibre.doccarchive --output=files)" build/docs
+          chmod -R u+w build/docs
 
       # workaround since colons in filenames are not allowed in artifacts
       # https://github.com/actions/upload-artifact/issues/333

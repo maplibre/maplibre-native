@@ -10,11 +10,13 @@ You need to have [aws-cli](https://github.com/aws/aws-cli) installed to download
 aws s3 sync --no-sign-request "s3://maplibre-native/ios-documentation-resources" "platform/ios/MapLibre.docc/Resources"
 ```
 
-Then, to build the documentation locally, run the following command:
+Then, to preview the documentation locally, run the following command:
 
 ```
-platform/ios/scripts/docc.sh preview
+bazel run --//:renderer=metal --platforms=@build_bazel_apple_support//platforms:ios_arm64 //platform/ios:MapLibre.doccarchive
 ```
+
+To build the documentation (transformed for static hosting), use `bazel build` instead of `bazel run`. The output can be found in `bazel-bin/platform/ios/MapLibre.doccarchive`.
 
 Resources like images should not be checked in but should be uploaded to the [S3 Bucket](https://s3.eu-central-1.amazonaws.com/maplibre-native/index.html#ios-documentation-resources/). You can share a `.zip` with all files that should be added in the PR.
 

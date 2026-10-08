@@ -1,8 +1,10 @@
 load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load("@rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
+load("@rules_apple//apple:docc.bzl", "docc_archive")
 load("@rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@rules_apple//apple:resources.bzl", "apple_resource_bundle")
 load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
+load("@rules_cc//cc:defs.bzl", "objc_library")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
@@ -334,6 +336,30 @@ xcodeproj(
         "Debug": {"//command_line_option:compilation_mode": "dbg"},
         "Release": {"//command_line_option:compilation_mode": "opt"},
     },
+)
+
+# The DocC catalog is attached to a separate library so that it is not bundled
+# as a resource of the SDK.
+objc_library(
+    name = "ios-sdk-docc",
+    data = glob(["MapLibre.docc/**"]),
+    deps = ["//platform:ios-sdk"],
+)
+
+# DocC documentation. Build with
+# $ bazel build --//:renderer=metal --platforms=@build_bazel_apple_support//platforms:ios_arm64 //platform/ios:MapLibre.doccarchive
+# or start a local preview with
+# $ bazel run --//:renderer=metal --platforms=@build_bazel_apple_support//platforms:ios_arm64 //platform/ios:MapLibre.doccarchive
+# See docs/mdbook/src/platforms/ios/ios-documentation.md for downloading the resources.
+docc_archive(
+    name = "MapLibre.doccarchive",
+    dep = ":ios-sdk-docc",
+    fallback_bundle_identifier = "org.swift.MyProject",
+    fallback_bundle_version = "0.0.1",
+    fallback_display_name = "MapLibre Native for iOS",
+    hosting_base_path = "maplibre-native/ios/latest",
+    source_service = "github",
+    source_service_base_url = "https://github.com/maplibre/maplibre-native/blob/main",
 )
 
 sh_binary(
