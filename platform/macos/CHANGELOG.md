@@ -36,7 +36,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
   ```
 
   </details>
-- Export `MLNPluginStyleLayer` and `MLNBackendResource` from the dynamic framework.
+- Export `MLNPluginStyleLayer` and `MLNBackendResource` from the dynamic framework ([#4732](https://github.com/maplibre/maplibre-native/pull/4732)).
 
 ## 6.27.0
 
