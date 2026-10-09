@@ -14,8 +14,8 @@ namespace platform {
 std::string formatNumber(double number,
                          const std::string& localeId,
                          const std::string& currency,
-                         uint8_t minFractionDigits,
-                         uint8_t maxFractionDigits) {
+                         std::optional<uint8_t> minFractionDigits,
+                         std::optional<uint8_t> maxFractionDigits) {
     UErrorCode status = U_ZERO_ERROR;
     icu::UnicodeString ustr;
     std::string formatted;
@@ -31,7 +31,8 @@ std::string formatNumber(double number,
                    .toString(status);
     } else {
         ustr = icu::number::NumberFormatter::with()
-                   .precision(icu::number::Precision::minMaxFraction(minFractionDigits, maxFractionDigits))
+                   .precision(icu::number::Precision::minMaxFraction(minFractionDigits.value_or(0),
+                                                                     maxFractionDigits.value_or(3)))
                    .locale(locale)
                    .formatDouble(number, status)
                    .toString(status);
@@ -39,7 +40,8 @@ std::string formatNumber(double number,
     return ustr.toUTF8String(formatted);
 }
 #else
-std::string formatNumber(double number, const std::string&, const std::string&, uint8_t, uint8_t) {
+std::string formatNumber(
+    double number, const std::string&, const std::string&, std::optional<uint8_t>, std::optional<uint8_t>) {
     return std::to_string(number);
 }
 #endif
