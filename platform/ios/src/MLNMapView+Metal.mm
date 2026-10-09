@@ -73,8 +73,15 @@ public:
     id<CAMetalDrawable> currentDrawable = [mtlView currentDrawable];
     if (currentDrawable) {
       if (presentsWithTransaction) {
+        // Presenting inside the Core Animation transaction keeps the map in step with UIKit
+        // annotation views. That needs the frame on the GPU's queue before present, not finished:
+        // waitUntilCompleted serialised every frame - the CPU idle while the GPU drew, the GPU idle
+        // while the CPU encoded the next - and with view annotations on (any at all, see
+        // MLNPresentsWithTransactionAnnotationCount) a pitched terrain map ran at ~15 fps with the
+        // GPU 27 % busy and the main thread ~30 % (iPhone 16 Pro). Apple's guidance for
+        // presentsWithTransaction is waitUntilScheduled, then present.
         [commandBuffer commit];
-        [commandBuffer waitUntilCompleted];
+        [commandBuffer waitUntilScheduled];
         [currentDrawable present];
       } else {
         [commandBuffer presentDrawable:currentDrawable];
