@@ -2,6 +2,12 @@
 #include <mln/util/geo.hpp>
 #include <mln/map/transform.hpp>
 #include <mln/math/angles.hpp>
+#include <mln/util/projection.hpp>
+#include <mln/util/mat4.hpp>
+#include <mln/util/interpolate.hpp>
+#include <mln/util/mat4.hpp>
+
+#include <cmath>
 
 #include <algorithm>
 #include <cstdlib> /* srand, rand */
@@ -627,5 +633,89 @@ TEST(TileCover, DISABLED_FuzzLine) {
         util::TileCover tc(mls, 5);
         while (tc.next()) {
         };
+    }
+}
+
+namespace {
+
+// Every tile is a plateau `height` metres high, as the terrain DEM provider reports it.
+struct PlateauElevation : util::TileElevationProvider {
+    explicit PlateauElevation(double height_)
+        : height(height_) {}
+    std::optional<Range<double>> getTileElevationRange(const CanonicalTileID&) const override {
+        return Range<double>{height, height};
+    }
+    double height;
+};
+
+// Where the view ray through a screen point meets the plane `height` metres above sea level, with
+// the point given as TransformState's flipped (y-up) view coordinates. Unprojects the near and far
+// clip points through the inverse projection (world pixels, heights in metres - see
+// Camera::getWorldToCamera) and interpolates to the plane; the screen <-> clip mapping is
+// TransformState::getPixelMatrix's.
+LatLng groundAtHeight(const TransformState& state, const ScreenCoordinate& flipped, double height) {
+    const double ndcX = 2.0 * flipped.x / state.getSize().width - 1.0;
+    const double ndcY = 1.0 - 2.0 * flipped.y / state.getSize().height;
+    vec4 coord0;
+    vec4 coord1;
+    matrix::transformMat4(coord0, vec4{{ndcX, ndcY, -1.0, 1.0}}, state.getInvProjectionMatrix());
+    matrix::transformMat4(coord1, vec4{{ndcX, ndcY, 1.0, 1.0}}, state.getInvProjectionMatrix());
+    const Point<double> p0 = Point<double>(coord0[0], coord0[1]) / coord0[3];
+    const Point<double> p1 = Point<double>(coord1[0], coord1[1]) / coord1[3];
+    const double z0 = coord0[2] / coord0[3];
+    const double z1 = coord1[2] / coord1[3];
+    const double t = (height - z0) / (z1 - z0);
+    return Projection::unproject(util::interpolate(p0, p1, t), state.getScale());
+}
+
+// Ground points under the bottom third of the view (y-down view pixels) that no cover tile contains.
+int uncoveredBottomPoints(const TransformState& state, const std::vector<UnwrappedTileID>& cover, double height) {
+    int uncovered = 0;
+    for (double fy : {0.70, 0.80, 0.90}) {
+        for (double fx : {0.15, 0.50, 0.85}) {
+            const ScreenCoordinate flipped{fx * state.getSize().width, (1.0 - fy) * state.getSize().height};
+            const LatLng ground = groundAtHeight(state, flipped, height);
+            bool covered = false;
+            for (const auto& id : cover) {
+                const auto world = Projection::project(ground, id.canonical.z);
+                const double across = std::pow(2.0, id.canonical.z);
+                const double tx = world.x - (id.canonical.x + id.wrap * across);
+                const double ty = world.y - id.canonical.y;
+                covered = covered || (tx >= 0 && tx < 1 && ty >= 0 && ty < 1);
+            }
+            uncovered += covered ? 0 : 1;
+        }
+    }
+    return uncovered;
+}
+
+} // namespace
+
+// Steeply pitched over high ground with the centre anchored on it (as terrain gestures leave it),
+// the elevation-aware cover must still contain the ground at the bottom of the view; on an iPhone
+// it did not, and the near field drew the map background with skirts hanging into it.
+TEST(TileCover, ElevatedCentreCoversTheGroundAtTheBottomOfTheView) {
+    const double plateau = 2000.0;
+    PlateauElevation elevation(plateau);
+    for (const double zoom : {12.5, 13.0, 13.25, 13.5, 14.0}) {
+        for (const double centerAltitude : {0.0, plateau}) {
+            Transform transform;
+            transform.resize({393, 852});
+            transform.jumpTo(CameraOptions()
+                                 .withCenter(LatLng{-37.146, 146.447})
+                                 .withZoom(zoom)
+                                 .withBearing(20.0)
+                                 .withPitch(68.0)
+                                 .withCenterAltitude(centerAltitude));
+            util::TileCoverParameters params{transform.getState()};
+            params.elevationProvider = &elevation;
+            const auto z = static_cast<uint8_t>(util::coveringZoomLevel(zoom + 1.0, style::SourceType::RasterDEM, 512));
+            std::vector<UnwrappedTileID> cover;
+            for (const auto& id : util::tileCover(params, std::min<uint8_t>(z, 16), Range<uint8_t>{0, 16}, z)) {
+                cover.push_back(id.toUnwrapped());
+            }
+            EXPECT_EQ(0, uncoveredBottomPoints(transform.getState(), cover, plateau))
+                << "zoom " << zoom << " centre altitude " << centerAltitude << " cover " << cover.size() << " tiles";
+        }
     }
 }
