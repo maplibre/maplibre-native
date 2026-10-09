@@ -146,7 +146,7 @@ private:
     };
     gfx::ShaderProgramBasePtr globeClipMaskShader;
     std::optional<std::size_t> globeClipMaskPipelineHash;
-    std::map<std::tuple<uint8_t, bool, bool>, GlobeClipMesh> globeClipMeshes;
+    std::map<std::tuple<uint8_t, bool, bool, bool>, GlobeClipMesh> globeClipMeshes;
 };
 
 } // namespace webgpu

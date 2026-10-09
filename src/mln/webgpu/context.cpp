@@ -540,26 +540,7 @@ bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
 
     clipMaskActiveBindGroups.clear();
     clipMaskActiveBindGroups.reserve(masks.size());
-
     for (std::size_t i = 0; i < masks.size(); ++i) {
-        const auto& tile = masks[i].tile;
-        const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1);
-        auto it = globeClipMeshes.find(key);
-        if (it == globeClipMeshes.end()) {
-            const auto mesh = rawGlobeTileMesh(tile, false, SubdivisionGranularitySetting::globe().stencil);
-            auto vertices = createBuffer(
-                mesh.vertices.data(), mesh.vertices.size(), WGPUBufferUsage_Vertex, false, true);
-            auto indices = createBuffer(
-                mesh.indices.data(), mesh.indices.size() * sizeof(uint16_t), WGPUBufferUsage_Index, true, true);
-            it = globeClipMeshes
-                     .emplace(key,
-                              GlobeClipMesh{.vertices = std::move(vertices),
-                                            .indices = std::move(indices),
-                                            .indexCount = static_cast<uint32_t>(mesh.indices.size())})
-                     .first;
-        }
-        const auto& mesh = it->second;
-
         WGPUBindGroupEntry entry{};
         entry.binding = uniformBinding;
         entry.buffer = clipMaskUniformBuffers[i].getBuffer();
@@ -571,19 +552,45 @@ bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
         descriptor.entryCount = 1;
         descriptor.entries = &entry;
 
-        const auto bindGroup = wgpuDeviceCreateBindGroup(device, &descriptor);
-        if (!bindGroup) {
-            continue;
-        }
-        clipMaskActiveBindGroups.push_back(bindGroup);
+        clipMaskActiveBindGroups.push_back(wgpuDeviceCreateBindGroup(device, &descriptor));
+    }
 
-        wgpuRenderPassEncoderSetBindGroup(encoder, bindGroupIndex, bindGroup, 0, nullptr);
-        wgpuRenderPassEncoderSetStencilReference(encoder, masks[i].stencilRef);
-        wgpuRenderPassEncoderSetVertexBuffer(
-            encoder, /*slot=*/0, mesh.vertices.getBuffer(), /*offset=*/0, mesh.vertices.getSizeInBytes());
-        wgpuRenderPassEncoderSetIndexBuffer(
-            encoder, mesh.indices.getBuffer(), WGPUIndexFormat_Uint16, /*offset=*/0, mesh.indices.getSizeInBytes());
-        wgpuRenderPassEncoderDrawIndexed(encoder, mesh.indexCount, 1, 0, 0, 0);
+    // Each mask is drawn with a border first, then exactly, as GL JS does: where a tile meets finer ones, its
+    // coarser edge leaves a sliver between the masks that only a neighbor's border covers.
+    std::size_t drawCalls = 0;
+    for (const bool borders : {true, false}) {
+        for (std::size_t i = 0; i < masks.size(); ++i) {
+            const auto bindGroup = clipMaskActiveBindGroups[i];
+            if (!bindGroup) {
+                continue;
+            }
+            const auto& tile = masks[i].tile;
+            const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1, borders);
+            auto it = globeClipMeshes.find(key);
+            if (it == globeClipMeshes.end()) {
+                const auto mesh = rawGlobeTileMesh(tile, borders, SubdivisionGranularitySetting::globe().stencil);
+                auto vertices = createBuffer(
+                    mesh.vertices.data(), mesh.vertices.size(), WGPUBufferUsage_Vertex, false, true);
+                auto indices = createBuffer(
+                    mesh.indices.data(), mesh.indices.size() * sizeof(uint16_t), WGPUBufferUsage_Index, true, true);
+                it = globeClipMeshes
+                         .emplace(key,
+                                  GlobeClipMesh{.vertices = std::move(vertices),
+                                                .indices = std::move(indices),
+                                                .indexCount = static_cast<uint32_t>(mesh.indices.size())})
+                         .first;
+            }
+            const auto& mesh = it->second;
+
+            wgpuRenderPassEncoderSetBindGroup(encoder, bindGroupIndex, bindGroup, 0, nullptr);
+            wgpuRenderPassEncoderSetStencilReference(encoder, masks[i].stencilRef);
+            wgpuRenderPassEncoderSetVertexBuffer(
+                encoder, /*slot=*/0, mesh.vertices.getBuffer(), /*offset=*/0, mesh.vertices.getSizeInBytes());
+            wgpuRenderPassEncoderSetIndexBuffer(
+                encoder, mesh.indices.getBuffer(), WGPUIndexFormat_Uint16, /*offset=*/0, mesh.indices.getSizeInBytes());
+            wgpuRenderPassEncoderDrawIndexed(encoder, mesh.indexCount, 1, 0, 0, 0);
+            drawCalls++;
+        }
     }
 
     for (auto bindGroup : clipMaskActiveBindGroups) {
@@ -594,8 +601,8 @@ bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
     clipMaskActiveBindGroups.clear();
 
     auto& renderStats = renderingStats();
-    renderStats.numDrawCalls += masks.size();
-    renderStats.totalDrawCalls += masks.size();
+    renderStats.numDrawCalls += drawCalls;
+    renderStats.totalDrawCalls += drawCalls;
     return true;
 }
 

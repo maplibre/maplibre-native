@@ -524,40 +524,44 @@ bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
     mtlRenderPass.setFrontFacingWinding(MTL::WindingCounterClockwise);
     mtlRenderPass.setCullMode(MTL::CullModeBack);
 
-    for (std::size_t ii = 0; ii < masks.size(); ++ii) {
-        const auto& tile = masks[ii].tile;
-        const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1);
-        auto it = globeClipMeshes.find(key);
-        if (it == globeClipMeshes.end()) {
-            const auto mesh = rawGlobeTileMesh(tile, false, SubdivisionGranularitySetting::globe().stencil);
-            auto vertices = createBuffer(mesh.vertices.data(),
-                                         mesh.vertices.size(),
-                                         gfx::BufferUsageType::StaticDraw,
-                                         /*isIndexBuffer=*/false,
-                                         /*persistent=*/true);
-            auto indices = createBuffer(mesh.indices.data(),
-                                        mesh.indices.size() * sizeof(uint16_t),
-                                        gfx::BufferUsageType::StaticDraw,
-                                        /*isIndexBuffer=*/true,
-                                        /*persistent=*/true);
-            it = globeClipMeshes
-                     .emplace(key,
-                              GlobeClipMesh{.vertices = std::move(vertices),
-                                            .indices = std::move(indices),
-                                            .indexCount = mesh.indices.size()})
-                     .first;
-        }
-        const auto& mesh = it->second;
+    // Each mask is drawn with a border first, then exactly, as GL JS does: where a tile meets finer ones, its
+    // coarser edge leaves a sliver between the masks that only a neighbor's border covers.
+    for (const bool borders : {true, false}) {
+        for (std::size_t ii = 0; ii < masks.size(); ++ii) {
+            const auto& tile = masks[ii].tile;
+            const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1, borders);
+            auto it = globeClipMeshes.find(key);
+            if (it == globeClipMeshes.end()) {
+                const auto mesh = rawGlobeTileMesh(tile, borders, SubdivisionGranularitySetting::globe().stencil);
+                auto vertices = createBuffer(mesh.vertices.data(),
+                                             mesh.vertices.size(),
+                                             gfx::BufferUsageType::StaticDraw,
+                                             /*isIndexBuffer=*/false,
+                                             /*persistent=*/true);
+                auto indices = createBuffer(mesh.indices.data(),
+                                            mesh.indices.size() * sizeof(uint16_t),
+                                            gfx::BufferUsageType::StaticDraw,
+                                            /*isIndexBuffer=*/true,
+                                            /*persistent=*/true);
+                it = globeClipMeshes
+                         .emplace(key,
+                                  GlobeClipMesh{.vertices = std::move(vertices),
+                                                .indices = std::move(indices),
+                                                .indexCount = mesh.indices.size()})
+                         .first;
+            }
+            const auto& mesh = it->second;
 
-        encoder->setStencilReferenceValue(masks[ii].stencilRef);
-        mtlRenderPass.bindVertex(mesh.vertices, /*offset=*/0, ShaderClass::attributes[0].bufferIndex);
-        mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, shaders::idClippingMaskUBO, /*size=*/uboSize);
-        encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
-                                       static_cast<NS::UInteger>(mesh.indexCount),
-                                       MTL::IndexType::IndexTypeUInt16,
-                                       mesh.indices.getMetalBuffer().get(),
-                                       /*indexOffset=*/0,
-                                       /*instanceCount=*/1);
+            encoder->setStencilReferenceValue(masks[ii].stencilRef);
+            mtlRenderPass.bindVertex(mesh.vertices, /*offset=*/0, ShaderClass::attributes[0].bufferIndex);
+            mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, shaders::idClippingMaskUBO, /*size=*/uboSize);
+            encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
+                                           static_cast<NS::UInteger>(mesh.indexCount),
+                                           MTL::IndexType::IndexTypeUInt16,
+                                           mesh.indices.getMetalBuffer().get(),
+                                           /*indexOffset=*/0,
+                                           /*instanceCount=*/1);
+        }
     }
 
     stats.numDrawCalls++;

@@ -233,7 +233,7 @@ private:
     };
     struct {
         gfx::ShaderProgramBasePtr shader;
-        std::map<std::tuple<uint8_t, bool, bool>, GlobeClipMesh> meshes;
+        std::map<std::tuple<uint8_t, bool, bool, bool>, GlobeClipMesh> meshes;
         PipelineInfo pipelineInfo;
     } globeClipping;
 

@@ -941,35 +941,40 @@ bool Context::renderGlobeTileClippingMasks(PaintParameters& parameters,
 
     const auto uploadPass = parameters.encoder->createUploadPass("globe-clip-masks",
                                                                  parameters.backend.getDefaultRenderable());
-    for (const auto& mask : masks) {
-        const auto& tile = mask.tile;
-        const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1);
-        auto it = globeClipMaskDrawables.find(key);
-        if (it == globeClipMaskDrawables.end()) {
-            auto builder = createDrawableBuilder("globe-clip-mask");
-            builder->setShader(globeClipMaskShader);
-            builder->setRenderPass(mln::RenderPass::Opaque);
-            builder->setEnableColor(false);
-            builder->setEnableDepth(false);
-            builder->setEnableStencil(false);
-            // the far side of a limb tile projects inside the disc; cull it or it overwrites the tile in front
-            builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
-            builder->setVertexAttrId(shaders::idGlobeDepthPosVertexAttribute);
-            auto mesh = rawGlobeTileMesh(tile, false, SubdivisionGranularitySetting::globe().stencil);
-            builder->setRawVertices(std::move(mesh.vertices), mesh.vertexCount, gfx::AttributeDataType::Short2);
-            builder->setSegments(gfx::Triangles(), std::move(mesh.indices), mesh.segments.data(), mesh.segments.size());
-            builder->flush(*this);
-            auto drawables = builder->clearDrawables();
-            if (drawables.empty()) {
-                return false;
+    // Each mask is drawn with a border first, then exactly, as GL JS does: where a tile meets finer ones, its
+    // coarser edge leaves a sliver between the masks that only a neighbor's border covers.
+    for (const bool borders : {true, false}) {
+        for (const auto& mask : masks) {
+            const auto& tile = mask.tile;
+            const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1, borders);
+            auto it = globeClipMaskDrawables.find(key);
+            if (it == globeClipMaskDrawables.end()) {
+                auto builder = createDrawableBuilder("globe-clip-mask");
+                builder->setShader(globeClipMaskShader);
+                builder->setRenderPass(mln::RenderPass::Opaque);
+                builder->setEnableColor(false);
+                builder->setEnableDepth(false);
+                builder->setEnableStencil(false);
+                // the far side of a limb tile projects inside the disc; cull it or it overwrites the tile in front
+                builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                builder->setVertexAttrId(shaders::idGlobeDepthPosVertexAttribute);
+                auto mesh = rawGlobeTileMesh(tile, borders, SubdivisionGranularitySetting::globe().stencil);
+                builder->setRawVertices(std::move(mesh.vertices), mesh.vertexCount, gfx::AttributeDataType::Short2);
+                builder->setSegments(
+                    gfx::Triangles(), std::move(mesh.indices), mesh.segments.data(), mesh.segments.size());
+                builder->flush(*this);
+                auto drawables = builder->clearDrawables();
+                if (drawables.empty()) {
+                    return false;
+                }
+                it = globeClipMaskDrawables.emplace(key, std::move(drawables.front())).first;
             }
-            it = globeClipMaskDrawables.emplace(key, std::move(drawables.front())).first;
+            auto& drawable = static_cast<DrawableGL&>(*it->second);
+            drawable.setStencilWriteRef(static_cast<int32_t>(mask.stencilRef));
+            drawable.mutableUniformBuffers().createOrUpdate(shaders::idProjectionUBO, &mask.projection, *this);
+            drawable.upload(*uploadPass);
+            drawable.draw(parameters);
         }
-        auto& drawable = static_cast<DrawableGL&>(*it->second);
-        drawable.setStencilWriteRef(static_cast<int32_t>(mask.stencilRef));
-        drawable.mutableUniformBuffers().createOrUpdate(shaders::idProjectionUBO, &mask.projection, *this);
-        drawable.upload(*uploadPass);
-        drawable.draw(parameters);
     }
     stats.numDrawCalls++;
     stats.totalDrawCalls++;

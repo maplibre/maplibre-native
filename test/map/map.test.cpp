@@ -1376,6 +1376,75 @@ TEST(Map, GlobePrefetchRequestsCoarserTiles) {
     EXPECT_TRUE(zooms.contains(8));
 }
 
+TEST(Map, GlobeTileDrawnForItsChildrenMeetsFinerTilesWithoutAGap) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.frontend.setSize({512, 512});
+    test.map.setSize({512, 512});
+    test.map.getStyle().loadJSON(
+        R"STYLE({"version": 8, "projection": {"type": "vertical-perspective"},
+                 "sources": {"ocean": {"type": "vector", "tiles": ["a/{z}/{x}/{y}"]}},
+                 "layers": [{"id": "background", "type": "background", "paint": {"background-color": "red"}},
+                            {"id": "ocean", "type": "fill", "source": "ocean", "source-layer": "water",
+                             "paint": {"fill-color": "blue"}}]})STYLE");
+
+    const auto ocean = std::make_shared<std::string>(util::read_file("metrics/integration/tiles/ocean.mvt"));
+    std::mutex mutex;
+    bool holdChildren = false;
+    std::set<CanonicalTileID> served;
+    test.fileSource->tileResponse = [&](const Resource& resource) -> std::optional<Response> {
+        const auto& tile = *resource.tileData;
+        const std::lock_guard lock(mutex);
+        if (holdChildren && tile.z == 8 && tile.x / 2 == 20 && tile.y / 2 == 49) {
+            return std::nullopt;
+        }
+        served.insert({static_cast<uint8_t>(tile.z), static_cast<uint32_t>(tile.x), static_cast<uint32_t>(tile.y)});
+        Response response;
+        response.data = ocean;
+        return response;
+    };
+
+    // The view's center is the corner of tile 7/20/49. Its children never arrive, so it is drawn in their place
+    // beside tile 8/41/100, along an edge it draws as one chord and its finer neighbor as two.
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{36.6026, -120.9375}).withZoom(7.6));
+    test.observer.didFinishLoadingMapCallback = [&] {
+        test.runLoop.stop();
+    };
+    test.runLoop.run();
+    test.observer.didFinishLoadingMapCallback = nullptr;
+
+    {
+        const std::lock_guard lock(mutex);
+        holdChildren = true;
+        served.clear();
+    }
+    std::set<CanonicalTileID> parsed;
+    test.observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string&) {
+        if (op == TileOperation::EndParse) {
+            parsed.insert(id.canonical);
+        }
+    };
+    bool allParsed = false;
+    test.observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus) {
+        if (allParsed) {
+            test.runLoop.stop();
+            return;
+        }
+        const std::lock_guard lock(mutex);
+        allParsed = !served.empty() && std::includes(parsed.begin(), parsed.end(), served.begin(), served.end());
+    };
+    test.map.jumpTo(CameraOptions().withZoom(8.2));
+    test.runLoop.run();
+
+    const auto image = test.frontend.readStillImage();
+    std::size_t background = 0;
+    for (std::size_t i = 0; i < image.bytes(); i += 4) {
+        if (image.data[i] > 128 && image.data[i + 2] < 128) {
+            background++;
+        }
+    }
+    EXPECT_EQ(0u, background);
+}
+
 // Test that custom source's tile pyramid is reset
 // if there is a significant change.
 TEST(Map, PrefetchDeltaOverrideCustomSource) {
