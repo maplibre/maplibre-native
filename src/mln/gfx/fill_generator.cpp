@@ -147,6 +147,7 @@ void addSubdividedPolygon(const util::SubdivisionResult& subdivided,
                           SegmentVector& fillSegments,
                           gfx::IndexVector<gfx::Lines>& lineIndexes,
                           SegmentVector& lineSegments) {
+    const MeshLines lines{lineSegments, lineIndexes, subdivided.lineIndexLists};
     fillLargeMeshArrays(
         fillVertices,
         [](int16_t x, int16_t y) { return FillBucket::layoutVertex({x, y}); },
@@ -154,9 +155,7 @@ void addSubdividedPolygon(const util::SubdivisionResult& subdivided,
         fillIndexes,
         subdivided.vertices,
         subdivided.triangleIndices,
-        &lineSegments,
-        &lineIndexes,
-        &subdivided.lineIndexLists);
+        &lines);
 }
 
 } // namespace

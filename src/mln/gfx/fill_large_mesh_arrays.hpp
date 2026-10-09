@@ -79,6 +79,13 @@ void fillSegments(Vertices& vertices,
 
 } // namespace detail
 
+/// The outline lines drawn over a mesh's vertices, one list of vertex pairs per ring.
+struct MeshLines {
+    SegmentVector& segments;
+    IndexVector<Lines>& indexes;
+    const std::vector<std::vector<uint32_t>>& lists;
+};
+
 /// GL JS's `fillLargeMeshArrays`: appends a triangle mesh, and the outline lines over the same vertices when there
 /// are any, to the vertex buffer through `layoutVertex(x, y)`. A mesh that fits one segment goes in whole, its
 /// triangles and lines sharing its vertices; a larger one is spread over as many segments as it needs. Unlike GL JS,
@@ -91,15 +98,13 @@ void fillLargeMeshArrays(Vertices& vertices,
                          IndexVector<Triangles>& triangleIndexes,
                          std::span<const int16_t> flattened,
                          std::span<const uint32_t> triangleIndices,
-                         SegmentVector* lineSegments = nullptr,
-                         IndexVector<Lines>* lineIndexes = nullptr,
-                         const std::vector<std::vector<uint32_t>>* lineLists = nullptr,
+                         const MeshLines* lines = nullptr,
                          std::size_t maxVertices = maxSegmentVertices) {
     const std::size_t vertexCount = flattened.size() / 2;
     const bool hasTriangles = triangleIndices.size() >= 3;
-    const bool hasLines = lineSegments && lineIndexes && lineLists &&
-                          std::any_of(
-                              lineLists->begin(), lineLists->end(), [](const auto& line) { return line.size() >= 2; });
+    const bool hasLines = lines && std::any_of(lines->lists.begin(), lines->lists.end(), [](const auto& line) {
+                              return line.size() >= 2;
+                          });
     if (!hasTriangles && !hasLines) {
         return;
     }
@@ -114,7 +119,7 @@ void fillLargeMeshArrays(Vertices& vertices,
         const std::size_t triangleBase = triangleSegment ? triangleSegment->vertexLength : 0;
         SegmentBase* lineSegment =
             hasLines ? &detail::prepareSegment(
-                           *lineSegments, vertices.elements(), lineIndexes->elements(), vertexCount, maxVertices)
+                           lines->segments, vertices.elements(), lines->indexes.elements(), vertexCount, maxVertices)
                      : nullptr;
         const std::size_t lineBase = lineSegment ? lineSegment->vertexLength : 0;
 
@@ -131,10 +136,10 @@ void fillLargeMeshArrays(Vertices& vertices,
             triangleSegment->indexLength += triangleIndices.size();
         }
         if (lineSegment) {
-            for (const auto& line : *lineLists) {
+            for (const auto& line : lines->lists) {
                 for (std::size_t i = 0; i + 1 < line.size(); i += 2) {
-                    lineIndexes->emplace_back(static_cast<uint16_t>(lineBase + line[i]),
-                                              static_cast<uint16_t>(lineBase + line[i + 1]));
+                    lines->indexes.emplace_back(static_cast<uint16_t>(lineBase + line[i]),
+                                                static_cast<uint16_t>(lineBase + line[i + 1]));
                 }
                 lineSegment->indexLength += line.size();
             }
@@ -156,7 +161,7 @@ void fillLargeMeshArrays(Vertices& vertices,
     }
     if (hasLines) {
         detail::fillSegments<2>(
-            vertices, layoutVertex, *lineSegments, *lineIndexes, flattened, *lineLists, maxVertices);
+            vertices, layoutVertex, lines->segments, lines->indexes, flattened, lines->lists, maxVertices);
     }
 }
 

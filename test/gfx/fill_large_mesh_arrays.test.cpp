@@ -82,6 +82,7 @@ struct Buffers {
 
 void fill(Buffers& buffers, const Mesh& mesh, std::size_t maxVertices) {
     const std::vector<std::vector<uint32_t>> lineLists{mesh.lines};
+    const gfx::MeshLines lines{buffers.lineSegments, buffers.lines, lineLists};
     gfx::fillLargeMeshArrays(
         buffers.vertices,
         [](int16_t x, int16_t y) { return std::array<int16_t, 2>{x, y}; },
@@ -89,9 +90,7 @@ void fill(Buffers& buffers, const Mesh& mesh, std::size_t maxVertices) {
         buffers.triangles,
         mesh.vertices,
         mesh.triangles,
-        &buffers.lineSegments,
-        &buffers.lines,
-        &lineLists,
+        &lines,
         maxVertices);
 }
 
