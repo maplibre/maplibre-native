@@ -524,6 +524,10 @@ bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
     mtlRenderPass.setFrontFacingWinding(MTL::WindingCounterClockwise);
     mtlRenderPass.setCullMode(MTL::CullModeBack);
 
+    // A temporary uniform buffer can take the address of the previous call's, which the render pass's binding cache
+    // would take for the buffer still bound: drop the binding so the first mask's uniforms are bound again.
+    mtlRenderPass.unbindVertex(shaders::idClippingMaskUBO);
+
     // Each mask is drawn with a border first, then exactly, as GL JS does: where a tile meets finer ones, its
     // coarser edge leaves a sliver between the masks that only a neighbor's border covers.
     for (const bool borders : {true, false}) {
