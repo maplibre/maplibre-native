@@ -8,11 +8,13 @@
 #include <mln/util/mapbox.hpp>
 #include <mln/util/expected.hpp>
 
+#include <functional>
 #include <list>
 #include <map>
 #include <memory>
 #include <string>
 #include <optional>
+#include <utility>
 
 namespace mapbox {
 namespace sqlite {
@@ -43,6 +45,12 @@ public:
     ~OfflineDatabase();
 
     void changePath(const std::string&);
+    // Flush only LRU metadata; never keeps a transaction open across callbacks.
+    bool flushAccessed();
+    // Called on the database thread when a successful read queues LRU metadata.
+    void setAccessedCallback(std::function<void()> callback) { accessedCallback = std::move(callback); }
+    std::size_t pendingAccessedCount() const;
+
     std::exception_ptr resetDatabase();
 
     std::optional<Response> get(const Resource&);
@@ -102,6 +110,13 @@ public:
 
 private:
     class DatabaseSizeChangeStats;
+    static constexpr std::size_t maximumPendingAccessed = 4096;
+    void applyPendingAccessed();
+    std::function<void()> accessedCallback;
+    std::map<int64_t, Timestamp> pendingResourceAccessed;
+    std::map<int64_t, Timestamp> pendingTileAccessed;
+    bool pendingAppliedForEviction = false;
+    bool accessedFlushFailed = false;
 
     void initialize();
     void handleError(const mapbox::sqlite::Exception&, const char* action);
@@ -154,7 +169,7 @@ private:
 
     std::optional<uint64_t> offlineMapboxTileCount;
 
-    bool evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& stats);
+    bool evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& stats, bool applyAccessed = false);
 
     TileServerOptions tileServerOptions;
 

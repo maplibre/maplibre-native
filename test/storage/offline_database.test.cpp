@@ -154,7 +154,6 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     // will always get an empty result.
     for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_FALSE(bool(db.get(res)));
-        EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't update timestamp: unable to open database file")));
         EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't read resource: unable to open database file")));
         EXPECT_EQ(0u, log.uncheckedCount());
     }
@@ -173,14 +172,16 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
 
     // Next, set the file system to read only mode and try to read the data
     // again. While we can't write anymore, we should still be able to read, and
-    // the query that tries to update the last accessed timestamp may fail
-    // without crashing.
+    // flushing the queued accessed timestamps may fail without preventing reads.
     fs.allowFileCreate(false);
     fs.setWriteLimit(0);
     for (const auto& res : {fixture::resource, fixture::tile}) {
         auto result = db.get(res);
-        EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't update timestamp: unable to open database file")));
         EXPECT_EQ(0u, log.uncheckedCount());
+        EXPECT_FALSE(db.flushAccessed());
+        EXPECT_EQ(
+            1u,
+            log.count(warning(ResultCode::CantOpen, "Can't flush accessed timestamps: unable to open database file")));
 
         ASSERT_TRUE(result && result->data);
         EXPECT_EQ("first", *result->data);
@@ -189,12 +190,14 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
 
     // We're allowing SQLite to create a journal file, but restrict the number
     // of bytes it can write so that it can start writing the journal file, but
-    // eventually fails during the timestamp update.
+    // eventually fails while flushing the accessed timestamps.
     fs.allowFileCreate(true);
     fs.setWriteLimit(8192);
     for (const auto& res : {fixture::resource, fixture::tile}) {
         auto result = db.get(res);
-        EXPECT_EQ(1u, log.count(warning(ResultCode::Full, "Can't update timestamp: database or disk is full")));
+        EXPECT_FALSE(db.flushAccessed());
+        EXPECT_EQ(1u,
+                  log.count(warning(ResultCode::Full, "Can't flush accessed timestamps: database or disk is full")));
         EXPECT_EQ(0u, log.uncheckedCount());
         ASSERT_TRUE(result && result->data);
         EXPECT_EQ("first", *result->data);
@@ -207,7 +210,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     for (const auto& res : {fixture::resource, fixture::tile}) {
         // First, try reading.
         auto result = db.get(res);
-        EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update timestamp: authorization denied")));
+        EXPECT_FALSE(db.flushAccessed());
+        EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't flush accessed timestamps: authorization denied")));
         EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't read resource: authorization denied")));
         EXPECT_EQ(0u, log.uncheckedCount());
         EXPECT_FALSE(result);
@@ -1712,7 +1716,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DisallowedIO)) {
     fs.allowIO(false);
 
     EXPECT_EQ(std::nullopt, db.get(fixture::resource));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update timestamp: authorization denied")));
+    EXPECT_EQ(0u, db.pendingAccessedCount());
+    EXPECT_TRUE(db.flushAccessed());
     EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't read resource: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
@@ -1733,7 +1738,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DisallowedIO)) {
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_EQ(std::nullopt, db.getRegionResource(fixture::resource));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update timestamp: authorization denied")));
+    EXPECT_EQ(0u, db.pendingAccessedCount());
+    EXPECT_TRUE(db.flushAccessed());
     EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't read region resource: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
@@ -2106,5 +2112,222 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(UpdateDatabaseReadOnlyMode)) {
                          "Can't clear ambient cache: Cannot modify database in read-only "
                          "mode"}));
 
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+namespace {
+int64_t cachedAccessed(const char* table) {
+    auto sqlite = mapbox::sqlite::Database::open(filename, mapbox::sqlite::ReadOnly);
+    const auto sql = std::string("SELECT accessed FROM ") + table;
+    mapbox::sqlite::Statement statement{sqlite, sql.c_str()};
+    mapbox::sqlite::Query query{statement};
+    EXPECT_TRUE(query.run());
+    return query.get<int64_t>(0);
+}
+void cacheSQL(const char* sql) {
+    auto sqlite = mapbox::sqlite::Database::open(filename, mapbox::sqlite::ReadWriteCreate);
+    sqlite.exec(sql);
+}
+} // namespace
+
+TEST(OfflineDatabase, TEST_REQUIRES_WRITE(BatchedReadTouchesDeduplicateAndSkipMisses)) {
+    deleteDatabaseFiles();
+    OfflineDatabase database(filename, fixture::tileServerOptions);
+    database.put(fixture::resource, fixture::response);
+    database.put(fixture::tile, fixture::response);
+    cacheSQL("UPDATE resources SET accessed = 100; UPDATE tiles SET accessed = 100");
+    unsigned callbacks = 0;
+    database.setAccessedCallback([&] { ++callbacks; });
+    EXPECT_TRUE(database.get(fixture::resource));
+    EXPECT_TRUE(database.get(fixture::resource));
+    EXPECT_TRUE(database.get(fixture::tile));
+    EXPECT_TRUE(database.get(fixture::tile));
+    EXPECT_TRUE(database.getRegionResource(fixture::resource));
+    EXPECT_FALSE(database.get(Resource{Resource::Style, "not-cached"}));
+    EXPECT_EQ(5u, callbacks);
+    EXPECT_EQ(2u, database.pendingAccessedCount());
+    EXPECT_EQ(100, cachedAccessed("resources"));
+    EXPECT_EQ(100, cachedAccessed("tiles"));
+    EXPECT_TRUE(database.flushAccessed());
+    EXPECT_EQ(0u, database.pendingAccessedCount());
+    EXPECT_GT(cachedAccessed("resources"), 100);
+    EXPECT_GT(cachedAccessed("tiles"), 100);
+}
+
+TEST(OfflineDatabase, TEST_REQUIRES_WRITE(BatchedReadTouchesRollbackAndRetry)) {
+    FixtureLog log;
+    deleteDatabaseFiles();
+    OfflineDatabase database(filename, fixture::tileServerOptions);
+    database.put(fixture::resource, fixture::response);
+    database.put(fixture::tile, fixture::response);
+    cacheSQL(
+        "UPDATE resources SET accessed = 100; UPDATE tiles SET accessed = 100; "
+        "CREATE TRIGGER fail_touch BEFORE UPDATE OF accessed ON tiles "
+        "BEGIN SELECT RAISE(ABORT, 'injected flush failure'); END");
+    EXPECT_TRUE(database.get(fixture::resource));
+    EXPECT_TRUE(database.get(fixture::tile));
+    EXPECT_FALSE(database.flushAccessed());
+    EXPECT_EQ(1u,
+              log.count(warning(ResultCode::Constraint, "Can't flush accessed timestamps: injected flush failure")));
+    EXPECT_EQ(2u, database.pendingAccessedCount());
+    // Resource update ran first, but the entire transaction must have rolled back.
+    EXPECT_EQ(100, cachedAccessed("resources"));
+    EXPECT_EQ(100, cachedAccessed("tiles"));
+    cacheSQL("DROP TRIGGER fail_touch");
+    EXPECT_TRUE(database.flushAccessed());
+    EXPECT_EQ(0u, database.pendingAccessedCount());
+    EXPECT_GT(cachedAccessed("resources"), 100);
+    EXPECT_GT(cachedAccessed("tiles"), 100);
+}
+
+TEST(OfflineDatabase, TEST_REQUIRES_WRITE(BatchedReadTouchesPreserveNewerTimestampAndFlushReadOnly)) {
+    deleteDatabaseFiles();
+    OfflineDatabase database(filename, fixture::tileServerOptions);
+    database.put(fixture::resource, fixture::response);
+    EXPECT_TRUE(database.get(fixture::resource));
+    cacheSQL("UPDATE resources SET accessed = 4102444800");
+    EXPECT_TRUE(database.flushAccessed());
+    EXPECT_EQ(4102444800LL, cachedAccessed("resources"));
+    cacheSQL("UPDATE resources SET accessed = 100");
+    EXPECT_TRUE(database.get(fixture::resource));
+    database.reopenDatabaseReadOnly(true);
+    EXPECT_EQ(0u, database.pendingAccessedCount());
+    EXPECT_GT(cachedAccessed("resources"), 100);
+    EXPECT_TRUE(database.get(fixture::resource));
+    EXPECT_EQ(0u, database.pendingAccessedCount());
+}
+
+TEST(OfflineDatabase, TEST_REQUIRES_WRITE(BatchedReadTouchesDiscardAfterClear)) {
+    deleteDatabaseFiles();
+    OfflineDatabase database(filename, fixture::tileServerOptions);
+    database.put(fixture::resource, fixture::response);
+    EXPECT_TRUE(database.get(fixture::resource));
+    EXPECT_EQ(1u, database.pendingAccessedCount());
+    EXPECT_EQ(nullptr, database.clearAmbientCache());
+    EXPECT_EQ(0u, database.pendingAccessedCount());
+    EXPECT_FALSE(database.get(fixture::resource));
+    EXPECT_TRUE(database.flushAccessed());
+}
+
+TEST(OfflineDatabase, TEST_REQUIRES_WRITE(BatchedReadTouchesFlushOnPathChangeAndClose)) {
+    deleteDatabaseFiles();
+    {
+        OfflineDatabase database(filename, fixture::tileServerOptions);
+        database.put(fixture::resource, fixture::response);
+        cacheSQL("UPDATE resources SET accessed = 100");
+        EXPECT_TRUE(database.get(fixture::resource));
+        database.changePath(":memory:");
+        EXPECT_EQ(0u, database.pendingAccessedCount());
+        EXPECT_GT(cachedAccessed("resources"), 100);
+        EXPECT_FALSE(database.get(fixture::resource));
+    }
+    cacheSQL("UPDATE resources SET accessed = 100");
+    {
+        OfflineDatabase database(filename, fixture::tileServerOptions);
+        EXPECT_TRUE(database.get(fixture::resource));
+    }
+    EXPECT_GT(cachedAccessed("resources"), 100);
+}
+
+TEST(OfflineDatabase, TEST_REQUIRES_WRITE(BatchedReadTouchesBoundPersistentFailures)) {
+    FixtureLog log;
+    deleteDatabaseFiles();
+    OfflineDatabase database(filename, fixture::tileServerOptions);
+    cacheSQL(
+        "WITH RECURSIVE sequence(n) AS (VALUES(1) UNION ALL SELECT n+1 FROM sequence WHERE n<4100) "
+        "INSERT INTO resources(url,kind,accessed) SELECT 'key-'||n,2,100 FROM sequence; "
+        "CREATE TRIGGER fail_touch BEFORE UPDATE OF accessed ON resources "
+        "BEGIN SELECT RAISE(ABORT,'injected persistent failure'); END");
+    for (int i = 1; i <= 4100; ++i) {
+        EXPECT_TRUE(database.get(Resource{Resource::Source, "key-" + std::to_string(i)}));
+    }
+    EXPECT_EQ(4096u, database.pendingAccessedCount());
+    EXPECT_EQ(
+        1u, log.count(warning(ResultCode::Constraint, "Can't flush accessed timestamps: injected persistent failure")));
+    cacheSQL("DROP TRIGGER fail_touch");
+    EXPECT_TRUE(database.flushAccessed());
+    EXPECT_EQ(0u, database.pendingAccessedCount());
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+TEST(OfflineDatabase, TEST_REQUIRES_WRITE(BatchedReadTouchesParticipateInEvictionTransaction)) {
+    FixtureLog log;
+    deleteDatabaseFiles();
+    OfflineDatabase database(filename, fixture::tileServerOptions);
+    cacheSQL(
+        "WITH RECURSIVE sequence(n) AS (VALUES(1) UNION ALL SELECT n+1 FROM sequence WHERE n<60) "
+        "INSERT INTO resources(url,kind,accessed,data) SELECT 'evict-'||n,2,n,randomblob(1024) FROM sequence");
+    EXPECT_EQ(nullptr, database.setMaximumAmbientCacheSize(100000));
+    const Resource recent{Resource::Source, "evict-1"};
+    EXPECT_TRUE(database.get(recent));
+    EXPECT_EQ(1u, database.pendingAccessedCount());
+    Response response;
+    response.data = randomString(50000);
+    const Resource incoming{Resource::Source, "evict-incoming"};
+    cacheSQL(
+        "CREATE TRIGGER fail_insert BEFORE INSERT ON resources WHEN NEW.url='evict-incoming' "
+        "BEGIN SELECT RAISE(ABORT,'injected insertion failure'); END");
+    EXPECT_FALSE(database.put(incoming, response).first);
+    EXPECT_EQ(1u, log.count(warning(ResultCode::Constraint, "Can't write resource: injected insertion failure")));
+    EXPECT_EQ(1u, database.pendingAccessedCount());
+    EXPECT_EQ(1, cachedAccessed("resources"));
+    cacheSQL("DROP TRIGGER fail_insert");
+    EXPECT_TRUE(database.put(incoming, response).first);
+    EXPECT_EQ(0u, database.pendingAccessedCount());
+    EXPECT_TRUE(database.get(recent));
+    EXPECT_FALSE(database.get(Resource{Resource::Source, "evict-2"}));
+    const auto cached = database.get(incoming);
+    ASSERT_TRUE(cached && cached->data);
+    EXPECT_EQ(*response.data, *cached->data);
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+TEST(OfflineDatabase, TEST_REQUIRES_WRITE(BatchedReadTouchFailureDoesNotPreventCacheResize)) {
+    FixtureLog log;
+    deleteDatabaseFiles();
+    OfflineDatabase database(filename, fixture::tileServerOptions);
+    database.put(fixture::resource, fixture::response);
+    EXPECT_TRUE(database.get(fixture::resource));
+    cacheSQL(
+        "CREATE TRIGGER fail_touch BEFORE UPDATE OF accessed ON resources "
+        "BEGIN SELECT RAISE(ABORT,'injected resize touch failure'); END");
+    EXPECT_EQ(nullptr, database.setMaximumAmbientCacheSize(0));
+    EXPECT_EQ(
+        1u,
+        log.count(warning(ResultCode::Constraint, "Can't flush accessed timestamps: injected resize touch failure")));
+    EXPECT_FALSE(database.get(fixture::resource));
+    EXPECT_EQ(1u, database.pendingAccessedCount());
+    cacheSQL("DROP TRIGGER fail_touch");
+    EXPECT_TRUE(database.flushAccessed());
+    EXPECT_EQ(0u, database.pendingAccessedCount());
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+TEST(OfflineDatabase, TEST_REQUIRES_WRITE(BatchedReadTouchFailureDoesNotPreventRegionDeletion)) {
+    FixtureLog log;
+    deleteDatabaseFiles();
+    OfflineDatabase database(filename, fixture::tileServerOptions);
+    EXPECT_EQ(nullptr, database.setMaximumAmbientCacheSize(0));
+    OfflineTilePyramidRegionDefinition definition{
+        "maptiler://maps/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
+    auto region = database.createRegion(definition, {});
+    ASSERT_TRUE(region);
+    database.putRegionResource(region->getID(), fixture::tile, fixture::response);
+    EXPECT_TRUE(database.getRegionResource(fixture::tile));
+    cacheSQL(
+        "CREATE TRIGGER fail_touch BEFORE UPDATE OF accessed ON tiles "
+        "BEGIN SELECT RAISE(ABORT,'injected delete touch failure'); END");
+    EXPECT_EQ(nullptr, database.deleteRegion(std::move(*region)));
+    EXPECT_EQ(
+        1u,
+        log.count(warning(ResultCode::Constraint, "Can't flush accessed timestamps: injected delete touch failure")));
+    const auto regions = database.listRegions();
+    ASSERT_TRUE(regions);
+    EXPECT_TRUE(regions->empty());
+    EXPECT_FALSE(database.get(fixture::tile));
+    EXPECT_EQ(1u, database.pendingAccessedCount());
+    cacheSQL("DROP TRIGGER fail_touch");
+    EXPECT_TRUE(database.flushAccessed());
+    EXPECT_EQ(0u, database.pendingAccessedCount());
     EXPECT_EQ(0u, log.uncheckedCount());
 }
