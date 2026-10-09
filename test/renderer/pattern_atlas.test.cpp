@@ -37,9 +37,25 @@ TEST(PatternAtlas, Basic) {
     EXPECT_EQ(18, metro.displaySize()[0]);
     EXPECT_EQ(18, metro.displaySize()[1]);
     EXPECT_EQ(1.0f, metro.pixelRatio);
+    EXPECT_FALSE(metro.sdf);
     EXPECT_EQ(patternAtlas.getPixelSize(), patternAtlas.getAtlasImageForTests().size);
 
     test::checkImage("test/fixtures/image_manager/basic", patternAtlas.getAtlasImageForTests());
+}
+
+TEST(PatternAtlas, PreservesSDFMetadata) {
+    PatternAtlas patternAtlas;
+
+    auto sdfImage = makeMutable<style::Image::Impl>("sdf", PremultipliedImage({8, 8}), 1.0f, true);
+    auto rgbaImage = makeMutable<style::Image::Impl>("rgba", PremultipliedImage({8, 8}), 1.0f, false);
+
+    const auto sdfPosition = patternAtlas.addPattern(*sdfImage);
+    const auto rgbaPosition = patternAtlas.addPattern(*rgbaImage);
+
+    ASSERT_TRUE(sdfPosition);
+    ASSERT_TRUE(rgbaPosition);
+    EXPECT_TRUE(sdfPosition->sdf);
+    EXPECT_FALSE(rgbaPosition->sdf);
 }
 
 TEST(PatternAtlas, Updates) {

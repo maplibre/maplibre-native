@@ -64,7 +64,11 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
     assert(oldImage != images.end());
     if (oldImage == images.end()) return false;
 
-    auto sizeChanged = oldImage->second->image.size != image_->image.size;
+    const auto sizeChanged = oldImage->second->image.size != image_->image.size;
+    // A changed SDF flag requires a relayout so buckets pick up the new pattern type.
+    // Same-size updates still bump the version so existing layouts patch their pixels;
+    // the atlas allocates per image revision, so the relayout gets a freshly uploaded bin.
+    const auto sdfChanged = oldImage->second->sdf != image_->sdf;
 
     if (sizeChanged) {
         // Update cache size if requested image size has changed.
@@ -80,7 +84,7 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
 
     oldImage->second = std::move(image_);
 
-    return sizeChanged;
+    return sizeChanged || sdfChanged;
 }
 
 void ImageManager::removeImage(const std::string& id) {
