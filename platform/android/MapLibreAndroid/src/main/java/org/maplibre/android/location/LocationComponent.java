@@ -932,6 +932,48 @@ public final class LocationComponent {
   }
 
   /**
+   * The puck's current position, including an in-progress animation.
+   * <p>
+   * {@link #getLastKnownLocation()} is the latest sample, which the puck may still be moving
+   * toward. This is the position both the indicator and symbol renderers draw. It is {@code null}
+   * until the first location update. The returned point is a copy.
+   *
+   * @return the animated puck position, or {@code null} before the first update
+   */
+  @Nullable
+  public LatLng getUserLocation() {
+    checkActivationState();
+    return locationAnimatorCoordinator.getUserLocation();
+  }
+
+  /**
+   * Elapsed realtime, from {@link android.os.SystemClock#elapsedRealtime()}, when the latest
+   * user-location animation started.
+   * <p>
+   * Other graphics can share this clock with the puck. The value stays {@code 0} until the first
+   * location update.
+   *
+   * @return elapsed realtime in milliseconds, or {@code 0} before the first update
+   */
+  public long getUserLocationAnimationReferenceTime() {
+    checkActivationState();
+    return locationAnimatorCoordinator.getUserLocationAnimationReferenceTime();
+  }
+
+  /**
+   * Duration of the latest user-location animation.
+   * <p>
+   * This is the duration passed to the puck and tracking-camera animators, including the tracking
+   * duration multiplier and the maximum animation duration. It is {@code 0} when the update snaps.
+   *
+   * @return duration in milliseconds
+   */
+  public long getUserLocationAnimationDuration() {
+    checkActivationState();
+    return locationAnimatorCoordinator.getUserLocationAnimationDuration();
+  }
+
+  /**
    * Get the last know location of the location component.
    *
    * @return the last known location

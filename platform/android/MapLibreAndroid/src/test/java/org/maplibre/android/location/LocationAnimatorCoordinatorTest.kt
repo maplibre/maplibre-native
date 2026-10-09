@@ -3,6 +3,7 @@ package org.maplibre.android.location
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.location.Location
+import android.os.SystemClock
 import android.util.SparseArray
 import android.view.animation.LinearInterpolator
 import org.maplibre.android.camera.CameraPosition
@@ -18,6 +19,8 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.shadows.ShadowSystemClock
+import java.time.Duration
 import org.maplibre.android.BaseTest
 import org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_PADDING_ANIM_DURATION
 import org.mockito.Mockito
@@ -787,6 +790,44 @@ class LocationAnimatorCoordinatorTest : BaseTest() {
         locationAnimatorCoordinator.feedNewLocation(Location(""), cameraPosition, false)
         verify { animatorProvider.latLngAnimator(any(), any(), 5) }
         verify { animatorProvider.floatAnimator(any(), any(), 5) }
+    }
+
+    @Test
+    fun feedNewLocation_recordsAnimationClock() {
+        every { projection.getMetersPerPixelAtLatitude(any()) } answers { 10_000.0 }
+        locationAnimatorCoordinator.setTrackingAnimationDurationMultiplier(1f)
+        assertEquals(0L, locationAnimatorCoordinator.userLocationAnimationReferenceTime)
+        assertEquals(0L, locationAnimatorCoordinator.userLocationAnimationDuration)
+        assertNull(locationAnimatorCoordinator.userLocation)
+
+        ShadowSystemClock.advanceBy(Duration.ofSeconds(5))
+
+        val first = Location("")
+        first.latitude = 51.0
+        first.longitude = 17.0
+        locationAnimatorCoordinator.feedNewLocation(first, cameraPosition, false)
+
+        val started = locationAnimatorCoordinator.userLocationAnimationReferenceTime
+        assertTrue(started > 0L)
+        assertTrue(started <= SystemClock.elapsedRealtime())
+        val firstDuration = locationAnimatorCoordinator.userLocationAnimationDuration
+        assertTrue(firstDuration > 0L)
+        val firstPuck = locationAnimatorCoordinator.userLocation
+        assertNotNull(firstPuck)
+        assertEquals(first.latitude, firstPuck!!.latitude, 0.0)
+        assertEquals(first.longitude, firstPuck.longitude, 0.0)
+        firstPuck.latitude = 0.0
+        val reread = locationAnimatorCoordinator.userLocation
+        assertNotNull(reread)
+        assertEquals(first.latitude, reread!!.latitude, 0.0)
+
+        val second = Location("")
+        second.latitude = 51.1
+        second.longitude = 17.0
+        locationAnimatorCoordinator.feedNewLocation(second, cameraPosition, false)
+
+        assertTrue(locationAnimatorCoordinator.userLocationAnimationReferenceTime >= started)
+        assertTrue(locationAnimatorCoordinator.userLocationAnimationDuration <= LocationComponentConstants.MAX_ANIMATION_DURATION_MS)
     }
 
     @Test
