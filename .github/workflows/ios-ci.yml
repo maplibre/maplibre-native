@@ -132,15 +132,6 @@ jobs:
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
 
-      # xcodebuild starts a second Bazel server for the Xcode project output base.
-      # Stop it so it does not hold memory while the following steps build with the main server.
-      - name: Stop the Xcode project Bazel server
-        run: |
-          output_base="$(bazel info output_base)"
-          top -l 1 -n 0 | grep PhysMem
-          bazel --output_base="$output_base/rules_xcodeproj.noindex/build_output_base" shutdown
-          top -l 1 -n 0 | grep PhysMem
-
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
 
