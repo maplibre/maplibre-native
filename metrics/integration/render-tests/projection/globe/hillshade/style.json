@@ -5,7 +5,7 @@
       "height": 256,
       "width": 256,
       "allowed": 0.05,
-      "description": "GL JS's globe hillshade test at zoom 5 instead of 4.5: native loads raster-dem tiles at floor(zoom) where GL JS rounds, and the z5 tile is the one both have."
+      "description": "GL JS's globe hillshade test at zoom 5, the zoom of the raster-dem tile the render test cache holds."
     }
   },
   "center": [
