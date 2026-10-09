@@ -2649,7 +2649,9 @@ public:
 
     if (self.isQuickZoomReversed) distance = -distance;
 
-    CGFloat newZoom = MAX(log2f(self.scale) + (distance / 75), *self.mbglMap.getBounds().minZoom);
+    // Zoom limiting happens at the core level, where the globe's minimum zoom falls away from the
+    // equator.
+    CGFloat newZoom = log2f(self.scale) + (distance / 75);
 
     if ([self zoomLevel] == newZoom) return;
 
