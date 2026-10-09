@@ -1,79 +1,74 @@
+// Checks that every Objective-C class and constant declared in the public
+// headers of a built MapLibre XCFramework is marked MLN_EXPORT. Classes and
+// constants implemented in Objective-C++ are compiled with -fvisibility=hidden,
+// so without MLN_EXPORT they are missing from the dynamic framework.
+//
+// Usage: check-public-symbols.js <sourcekitten> <iOS|macOS> <xcframework.zip>
+
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import _ from "lodash";
 
-const keyword = /\bMLN_EXPORT\b/;
-
-let scanned = [];
-
-function hasMissingSymbols(os) {
-  let missing = false;
-  let sdk = os === 'iOS' ? 'iphonesimulator' : 'macosx';
-  let sysroot = execFileSync('xcrun', ['--show-sdk-path', '--sdk', sdk]).toString().trim();
-  let umbrellaPath = `platform/${os.toLowerCase()}/src/Mapbox.h`;
-  let docArgs = ['doc', '--objc', umbrellaPath, '--',
-                 '-x', 'objective-c', '-I', 'platform/darwin/src/', '-isysroot', sysroot];
-  let docStr = execFileSync('sourcekitten', docArgs, { maxBuffer: Infinity }).toString().trim();
-  let docJson = JSON.parse(docStr);
-  _.forEach(docJson, function (result) {
-    _.forEach(result, function (structure, path) {
-      // Prevent multiple scans of the same file.
-      if (scanned.indexOf(path) >= 0) return;
-      scanned.push(path);
-
-      const src = fs.readFileSync(path, 'utf8').split('\n');
-      _.forEach(structure['key.substructure'], function (substructure) {
-        switch (substructure['key.kind']) {
-          case 'sourcekitten.source.lang.objc.decl.class':
-            if (!keyword.test(src[substructure['key.doc.line'] - 1]) && !keyword.test(src[substructure['key.doc.line'] - 2]) && !keyword.test(src[substructure['key.doc.line'] - 3]) && !keyword.test(src[substructure['key.doc.line'] - 4])) {
-              console.warn(`- missing symbol export for class ${substructure['key.name']} in ${path}:${substructure['key.doc.line']}:${substructure['key.doc.column']}`);
-              missing = true;
-            }
-            break;
-          case 'sourcekitten.source.lang.objc.decl.constant':
-            if (!keyword.test(src[substructure['key.doc.line'] - 1]) && !keyword.test(src[substructure['key.doc.line'] - 2])) {
-              console.warn(`- missing symbol export for constant ${substructure['key.name']} in ${path}:${substructure['key.doc.line']}:${substructure['key.doc.column']}`);
-              missing = true;
-            }
-            break;
-        }
-      });
-    });
-  });
-
-  return missing;
+const [sourcekitten, platform, xcframeworkZip] = process.argv.slice(2);
+const platforms = {
+  iOS: { slice: /^ios-arm64$/, sdk: "iphoneos" },
+  macOS: { slice: /^macos-/, sdk: "macosx" },
+};
+if (!xcframeworkZip || !platforms[platform]) {
+  console.error("Usage: check-public-symbols.js <sourcekitten> <iOS|macOS> <xcframework.zip>");
+  process.exit(1);
 }
+const { slice, sdk } = platforms[platform];
 
-function ensureSourceKittenIsInstalled() {
-  try {
-    execFileSync('which', ['sourcekitten']);
-  } catch (e) {
-    console.log(`Installing SourceKitten via Homebrew…`);
-    execFileSync('brew', ['install', 'sourcekitten']);
+const tmp = fs.mkdtempSync(path.join(process.env.TEST_TMPDIR ?? os.tmpdir(), "xcframework-"));
+execFileSync("unzip", ["-q", xcframeworkZip, "-d", tmp]);
+const xcframework = path.join(tmp, "MapLibre.xcframework");
+const sliceName = fs.readdirSync(xcframework).find((name) => slice.test(name));
+if (!sliceName) {
+  console.error(`No ${platform} slice found in ${xcframeworkZip}`);
+  process.exit(1);
+}
+const frameworksDir = path.join(xcframework, sliceName);
+const umbrellaHeader = path.join(frameworksDir, "MapLibre.framework/Headers/MapLibre.h");
+const sysroot = execFileSync("xcrun", ["--show-sdk-path", "--sdk", sdk]).toString().trim();
+
+const docs = JSON.parse(execFileSync(sourcekitten, [
+  "doc", "--objc", umbrellaHeader, "--",
+  "-x", "objective-c", "-isysroot", sysroot, "-F", frameworksDir,
+], { maxBuffer: Infinity }).toString());
+
+// Number of lines, up to and including the declaration, that may hold MLN_EXPORT.
+const exportLookback = {
+  "sourcekitten.source.lang.objc.decl.class": 4,
+  "sourcekitten.source.lang.objc.decl.constant": 2,
+};
+
+let missing = 0;
+let scanned = 0;
+for (const result of docs) {
+  for (const [file, structure] of Object.entries(result)) {
+    const lines = fs.readFileSync(file, "utf8").split("\n");
+    scanned++;
+    for (const decl of structure["key.substructure"] ?? []) {
+      const lookback = exportLookback[decl["key.kind"]];
+      if (!lookback) continue;
+      const line = decl["key.doc.line"];
+      const preceding = lines.slice(Math.max(0, line - lookback), line);
+      if (!preceding.some((l) => /\bMLN_EXPORT\b/.test(l))) {
+        const kind = decl["key.kind"].split(".").pop();
+        console.error(`- missing MLN_EXPORT for ${kind} ${decl["key.name"]} in ${path.basename(file)}:${line}`);
+        missing++;
+      }
+    }
   }
 }
 
-if (process.argv.length < 3) {
-  console.warn(`Usage: ${path.relative(process.cwd(), process.argv[1])} [macOS|iOS] ...`);
+if (scanned === 0) {
+  console.error(`SourceKitten did not return any headers for ${umbrellaHeader}`);
   process.exit(1);
 }
-
-ensureSourceKittenIsInstalled();
-
-let missing = false;
-for (var i = 2; i < process.argv.length; i++) {
-  let os = process.argv[i];
-  if (os == 'iOS' || os == 'macOS') {
-    missing |= hasMissingSymbols(os);
-  } else {
-    console.warn(`Argument must be one of iOS or macOS`);
-    process.exit(1);
-  }
-}
-
-if (missing) {
+if (missing > 0) {
   process.exit(1);
-} else {
-  console.warn(`All symbols are correctly exported.`);
 }
+console.log(`All public ${platform} symbols in ${scanned} headers are exported.`);

@@ -1,4 +1,3 @@
-load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("@rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
 load("@rules_apple//apple:macos.bzl", "macos_command_line_application")
@@ -88,11 +87,12 @@ info_plist(
 
 genrule(
     name = "mln_defines",
-    outs = ["MLNDefines.h"],
+    outs = ["include/MLNDefines.h"],
     cmd = select({
         "//:metal_renderer": "echo '#define MLN_RENDER_BACKEND_METAL 1' > $@",
         "//conditions:default": "echo '' > $@",
     }),
+    visibility = ["//platform:__pkg__"],
 )
 
 public_hdrs = [
@@ -101,6 +101,17 @@ public_hdrs = [
     "//platform/darwin:darwin_objc_hdrs",
     "//platform/darwin:generated_style_public_hdrs",
 ]
+
+# MapLibre.h umbrella header. Shipped in the XCFrameworks and used by internal
+# targets such as the example apps and tests. MLNDefines.h comes first so that
+# the other headers see the renderer defines.
+genrule(
+    name = "umbrella_hdr",
+    srcs = public_hdrs,
+    outs = ["include/MapLibre.h"],
+    cmd = "for f in $(SRCS); do echo \"#import \\\"$$(basename $$f)\\\"\"; done > $@",
+    visibility = ["//platform:__pkg__"],
+)
 
 apple_bundle_version(
     name = "maplibre_macos_version",
@@ -136,6 +147,7 @@ apple_static_xcframework(
     ],
     minimum_os_versions = {"macos": "14.3"},
     public_hdrs = public_hdrs,
+    umbrella_header = ":umbrella_hdr",
     version = ":maplibre_macos_version",
     visibility = ["//visibility:public"],
     deps = ["//platform:macos-sdk"],
@@ -156,6 +168,7 @@ apple_xcframework(
     ],
     minimum_os_versions = {"macos": "14.3"},
     public_hdrs = public_hdrs,
+    umbrella_header = ":umbrella_hdr",
     version = ":maplibre_macos_version",
     visibility = ["//visibility:public"],
     deps = ["//platform:macos-sdk-dynamic"],
@@ -201,15 +214,4 @@ exports_files(
     MLN_MACOS_PUBLIC_HEADERS +
     MLN_MACOS_PUBLIC_OBJCPP_SOURCE +
     MLN_MACOS_PUBLIC_OBJC_SOURCE,
-)
-
-js_library(
-    name = "symbols-to-check",
-    srcs = [
-        ":macos_objc_srcs",
-        ":macos_objcpp_srcs",
-        ":macos_private_hdrs",
-        ":macos_public_hdrs",
-    ],
-    visibility = ["//platform:__pkg__"],
 )

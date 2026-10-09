@@ -2,6 +2,42 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-native/blob/main/CONTRIBUTING.md) to get started.
 
+## main
+
+- 💥 Breaking: Replace the `Mapbox.h` umbrella header with `MapLibre.h`. `MapLibre.xcframework` no longer ships `Mapbox.h` ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
+
+  <details>
+  <summary>Migration guide</summary>
+
+  **Swift:** no changes needed. Keep using `import MapLibre`.
+
+  **Objective-C:** include `MapLibre.h` instead of `Mapbox.h`:
+
+  ```objc
+  // Before
+  #include <Mapbox.h>
+
+  // After
+  #include <MapLibre.h>
+  ```
+
+  `#import <MapLibre/MapLibre.h>` and, with modules enabled, `@import MapLibre;` also work.
+
+  The `MapboxVersionNumber` and `MapboxVersionString` declarations from `Mapbox.h` were not carried over to `MapLibre.h`. These symbols were never defined in the binary, so referencing them caused a linker error. To get the SDK version at runtime, read it from the framework bundle:
+
+  ```objc
+  NSString *version = [NSBundle bundleForClass:[MLNMapView class]]
+                          .infoDictionary[@"CFBundleShortVersionString"];
+  ```
+
+  ```swift
+  let version = Bundle(for: MLNMapView.self)
+      .infoDictionary?["CFBundleShortVersionString"] as? String
+  ```
+
+  </details>
+- Export `MLNPluginStyleLayer` and `MLNBackendResource` from the dynamic framework ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
+
 ## 6.27.0
 
 - First automated native macOS XCFramework release ([#4088](https://github.com/maplibre/maplibre-native/issues/4088)).

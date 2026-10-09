@@ -1,4 +1,4 @@
-#import "Mapbox.h"
+#import "MapLibre.h"
 
 /**
  * Basic custom callout view to demonstrate how to
