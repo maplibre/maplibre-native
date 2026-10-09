@@ -11,6 +11,7 @@
 #include <mln/renderer/image_manager.hpp>
 #include <mln/renderer/layers/render_location_indicator_layer.hpp>
 #include <mln/map/tile_projector.hpp>
+#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/update_parameters.hpp>
@@ -672,14 +673,20 @@ protected:
     static vec2 verticalDirectionMercator(const Point<double>& posMerc, const Point<double>& posMercDy) {
         Point<double> verticalShiftMercator = posMercDy - posMerc;
         vec2 res(verticalShiftMercator);
-        return res.normalized();
+        return res.length() > 0 ? res.normalized() : vec2{0.0f, 0.0f};
     }
 
     static Point<double> hatShadowShiftVector(const LatLng& position,
                                               const mln::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         ScreenCoordinate posScreen = latLngToScreenCoordinate(position, s);
-        posScreen.y = params.height - 1; // moving it to bottom
+        // The bottom of the window can be past the globe's edge, where a point stands for the nearest point on the
+        // horizon: there the direction is taken at the puck.
+        const ScreenCoordinate bottom{posScreen.x, params.height - 1.0};
+        if (!drawsOnGlobe(s) ||
+            VerticalPerspectiveProjection::screenCoordinateHitsGlobe(s, {bottom.x, s.getSize().height - bottom.y})) {
+            posScreen = bottom;
+        }
         Point<double> posMerc = project(screenCoordinateToLatLng(posScreen, s), s);
         vec2 verticalShiftAtPos = verticalDirectionMercator(posScreen, posMerc, s);
         return {verticalShiftAtPos.x, verticalShiftAtPos.y};
