@@ -2,6 +2,7 @@
 #include <mln/map/map_impl.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source.hpp>
+#include <mln/style/projection_impl.hpp>
 #include <mln/style/style_impl.hpp>
 #include <mln/util/exception.hpp>
 #include <mln/util/logging.hpp>
@@ -60,6 +61,7 @@ Map::Impl::Impl(RendererFrontend& frontend_,
       style(std::make_unique<style::Style>(fileSource, pixelRatio, frontend_.getThreadPool())),
       annotationManager(*style) {
     transform.setNorthOrientation(mapOptions.northOrientation());
+    transform.setProjectionForZoom([this](double zoom) { return projectionAt(zoom); });
     style->impl->setObserver(this);
     rendererFrontend.setObserver(*this);
     transform.resize(mapOptions.size());
@@ -114,34 +116,39 @@ void Map::Impl::onUpdate() {
     TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
     transform.updateTransitions(timePoint);
+    transform.setProjectionDefinition(projectionAt(transform.getZoom()));
 
-    UpdateParameters params = {.styleLoaded = style->impl->isLoaded(),
-                               .mode = mode,
-                               .pixelRatio = pixelRatio,
-                               .debugOptions = debugOptions,
-                               .timePoint = timePoint,
-                               .transformState = transform.getState(),
-                               .glyphURL = style->impl->getGlyphURL(),
-                               .fontFaces = style->impl->getFontFaces(),
-                               .spriteLoaded = style->impl->areSpritesLoaded(),
-                               .transitionOptions = style->impl->getTransitionOptions(),
-                               .light = style->impl->getLight()->impl,
-                               .images = style->impl->getImageImpls(),
-                               .sources = style->impl->getSourceImpls(),
-                               .layers = style->impl->getLayerImpls(),
-                               .globalState = style->impl->getGlobalStateShared(),
-                               .annotationManager = annotationManager.makeWeakPtr(),
-                               .fileSource = fileSource,
-                               .prefetchZoomDelta = prefetchZoomDelta,
-                               .stillImageRequest = bool(stillImageRequest),
-                               .crossSourceCollisions = crossSourceCollisions,
-                               .fastPFOREnabled = fastPFOREnabled,
-                               .captureRenderedFeatures = captureRenderedFeatures,
-                               .tileLodMinRadius = tileLodMinRadius,
-                               .tileLodScale = tileLodScale,
-                               .tileLodPitchThreshold = tileLodPitchThreshold,
-                               .tileLodZoomShift = tileLodZoomShift,
-                               .tileLodMode = tileLodMode};
+    UpdateParameters params = {
+        .styleLoaded = style->impl->isLoaded(),
+        .mode = mode,
+        .pixelRatio = pixelRatio,
+        .debugOptions = debugOptions,
+        .timePoint = timePoint,
+        .transformState = transform.getState(),
+        .glyphURL = style->impl->getGlyphURL(),
+        .fontFaces = style->impl->getFontFaces(),
+        .spriteLoaded = style->impl->areSpritesLoaded(),
+        .transitionOptions = style->impl->getTransitionOptions(),
+        .light = style->impl->getLight()->impl,
+        .images = style->impl->getImageImpls(),
+        .sources = style->impl->getSourceImpls(),
+        .layers = style->impl->getLayerImpls(),
+        .globalState = style->impl->getGlobalStateShared(),
+        .annotationManager = annotationManager.makeWeakPtr(),
+        .fileSource = fileSource,
+        .prefetchZoomDelta = prefetchZoomDelta,
+        .stillImageRequest = bool(stillImageRequest),
+        .crossSourceCollisions = crossSourceCollisions,
+        .fastPFOREnabled = fastPFOREnabled,
+        .captureRenderedFeatures = captureRenderedFeatures,
+        .tileLodMinRadius = tileLodMinRadius,
+        .tileLodScale = tileLodScale,
+        .tileLodPitchThreshold = tileLodPitchThreshold,
+        .tileLodZoomShift = tileLodZoomShift,
+        .tileLodMode = tileLodMode,
+        .subdivisionGranularity = mode == MapMode::Tile
+                                      ? SubdivisionGranularitySetting::none()
+                                      : style->impl->getProjection()->impl->getSubdivisionGranularity()};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
 }
@@ -318,8 +325,17 @@ void Map::Impl::onDidFinishRenderingMap() {
 
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
+    // The style's projection decides how the camera is constrained, so it has to be in place first.
+    transform.setProjectionDefinition(projectionAt(camera.zoom.value_or(transform.getZoom())));
     transform.jumpTo(camera);
     onUpdate();
+}
+
+ProjectionDefinition Map::Impl::projectionAt(double zoom) const {
+    if (mode == MapMode::Tile) {
+        return ProjectionDefinition(ProjectionType::Mercator);
+    }
+    return style->impl->getProjection()->impl->evaluate(static_cast<float>(zoom));
 }
 
 bool Map::Impl::isRenderingStatsViewEnabled() const {

@@ -1,0 +1,46 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "Tests that a hillshade tile does not draw where its loaded children draw.",
+      "width": 512,
+      "height": 512,
+      "allowed": 0.0003
+    }
+  },
+  "center": [
+    80,
+    40
+  ],
+  "zoom": 2.5,
+  "projection": {
+    "type": "globe"
+  },
+  "sources": {
+    "source": {
+      "type": "raster-dem",
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.terrain.png"
+      ],
+      "maxzoom": 15,
+      "tileSize": 256
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "hillshade",
+      "type": "hillshade",
+      "source": "source",
+      "paint": {
+        "hillshade-exaggeration": 1
+      }
+    }
+  ]
+}

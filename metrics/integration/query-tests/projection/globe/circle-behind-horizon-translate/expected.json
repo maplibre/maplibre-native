@@ -1,0 +1,32 @@
+[
+  {
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        84.00146484375,
+        0
+      ]
+    },
+    "type": "Feature",
+    "properties": {
+      "name": "hidden"
+    },
+    "source": "geojson",
+    "state": {}
+  },
+  {
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        70.0048828125,
+        0
+      ]
+    },
+    "type": "Feature",
+    "properties": {
+      "name": "visible"
+    },
+    "source": "geojson",
+    "state": {}
+  }
+]

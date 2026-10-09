@@ -1,0 +1,54 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 512,
+      "height": 512,
+      "queryGeometry": [
+        364,
+        228
+      ]
+    }
+  },
+  "center": [
+    170,
+    0
+  ],
+  "zoom": 2,
+  "projection": {
+    "type": "globe"
+  },
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "east"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -170,
+                5
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "circle",
+      "type": "circle",
+      "source": "geojson",
+      "paint": {
+        "circle-radius": 10
+      }
+    }
+  ]
+}

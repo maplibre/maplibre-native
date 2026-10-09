@@ -33,14 +33,21 @@ struct DebugUBO {
     pad3: f32,
 };
 
-@group(0) @binding(0) var<uniform> debug: DebugUBO;
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
+@group(0) @binding(5) var<uniform> debug: DebugUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
     let scaled_pos = vec2<f32>(f32(in.position.x), f32(in.position.y)) * debug.overlay_scale;
-    out.position = debug.matrix * vec4<f32>(scaled_pos, 0.0, 1.0);
+    out.position = projectTile(scaled_pos, projectionVector[globalIndex.value]);
 
     // This vertex shader expects a EXTENT x EXTENT quad,
     // The UV coordinates for the overlay texture can be calculated using that knowledge
@@ -64,7 +71,7 @@ struct DebugUBO {
     pad3: f32,
 };
 
-@group(0) @binding(0) var<uniform> debug: DebugUBO;
+@group(0) @binding(5) var<uniform> debug: DebugUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var overlay_texture: texture_2d<f32>;
 

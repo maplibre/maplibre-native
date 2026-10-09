@@ -4,7 +4,9 @@
 #include <mln/renderer/tile_parameters.hpp>
 #include <mln/renderer/query.hpp>
 #include <mln/map/transform.hpp>
+#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/math/clamp.hpp>
+#include <mln/math/log2.hpp>
 #include <mln/actor/scheduler.hpp>
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/tile_range.hpp>
@@ -17,6 +19,10 @@
 
 #include <cmath>
 #include <algorithm>
+#include <array>
+#include <optional>
+#include <span>
+#include <unordered_map>
 
 namespace mln {
 
@@ -62,8 +68,12 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                          const Range<uint8_t> zoomRange,
                          std::optional<LatLngBounds> bounds,
                          std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile) {
+    const auto& subdivisionGranularity = parameters.subdivisionGranularity;
+    const bool relayout = needsRelayout || subdivisionGranularity != lastSubdivisionGranularity;
+    lastSubdivisionGranularity = subdivisionGranularity;
+
     // If we need a relayout, abandon any cached tiles; they're now stale.
-    if (needsRelayout) {
+    if (relayout) {
         cache.clear();
     }
 
@@ -71,7 +81,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // the cache (if they're not stale) or abandon them, and return.
     if (!needsRendering) {
         for (auto& entry : tiles) {
-            if (!needsRelayout) {
+            if (!relayout) {
                 // These tiles are invisible, we set optional necessity
                 // for them and thus suppress network requests on
                 // tiles expiration (see `OnlineFileRequest`).
@@ -110,11 +120,14 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     std::vector<OverscaledTileID> idealTiles;
     std::vector<OverscaledTileID> panTiles;
 
-    util::TileCoverParameters tileCoverParameters = {.transformState = parameters.transformState,
-                                                     .tileLodMinRadius = parameters.tileLodMinRadius,
-                                                     .tileLodScale = parameters.tileLodScale,
-                                                     .tileLodPitchThreshold = parameters.tileLodPitchThreshold,
-                                                     .tileLodMode = parameters.tileLodMode};
+    util::TileCoverParameters tileCoverParameters = {
+        .transformState = parameters.transformState,
+        .tileLodMinRadius = parameters.tileLodMinRadius,
+        .tileLodScale = parameters.tileLodScale,
+        .tileLodPitchThreshold = parameters.tileLodPitchThreshold,
+        .tileLodMode = parameters.tileLodMode,
+        .requestedZoom = zoom + util::log2(util::tileSize_D / tileSize),
+        .roundZoom = type == SourceType::Raster || type == SourceType::RasterDEM || type == SourceType::Video};
 
     if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
@@ -136,7 +149,11 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             }
 
             if (panZoom < idealZoom) {
-                panTiles = util::tileCover(tileCoverParameters, panZoom, zoomRange);
+                // The prefetch's level of detail falls off from its own, coarser zoom.
+                util::TileCoverParameters panParameters = tileCoverParameters;
+                panParameters.requestedZoom.reset();
+                panParameters.roundZoom = false;
+                panTiles = util::tileCover(panParameters, panZoom, zoomRange);
             }
         }
 
@@ -163,7 +180,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             tile.setNecessity(necessity);
         }
 
-        if (needsRelayout) {
+        if (relayout) {
+            tile.setSubdivisionGranularity(subdivisionGranularity);
             tile.setLayers(layers, parameters.globalState);
         }
     };
@@ -175,11 +193,13 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // The min and max zoom for TileRange are based on the updateRenderables
     // algorithm. Tiles are created at the ideal tile zoom or at lower zoom
     // levels. Child tiles are used from the cache, but not created.
+    // A cover that picks each tile's zoom by its distance from the camera asks for tiles finer than the nominal
+    // zoom, up to the source's maximum; the globe cover does, like `TileLodMode::Distance`.
     std::optional<util::TileRange> tileRange = std::nullopt;
     if (bounds) {
-        int32_t maxZoom = (parameters.tileLodMode == TileLodMode::Distance)
-                              ? zoomRange.max
-                              : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
+        const bool variableZoom = parameters.tileLodMode == TileLodMode::Distance ||
+                                  parameters.transformState.isGlobeRendering();
+        const int32_t maxZoom = variableZoom ? zoomRange.max : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
         tileRange = util::TileRange::fromLatLngBounds(*bounds, zoomRange.min, maxZoom);
     }
     auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
@@ -190,6 +210,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         if (!tile) {
             tile = createTile(tileID, observer);
             if (!tile) return nullptr;
+            tile->setSubdivisionGranularity(subdivisionGranularity);
             tile->setLayers(layers, parameters.globalState);
         }
 
@@ -260,7 +281,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                 // If it requires re-layout, discard it asynchronously, otherwise keep it in the cache
                 const auto key = tilesIt->first;
                 if (std::unique_ptr<Tile> tile = std::move(tiles.extract(tilesIt++).mapped())) {
-                    if (needsRelayout) {
+                    if (relayout) {
                         cache.deferredRelease(std::move(tile));
                     } else {
                         tile->setNecessity(TileNecessity::Optional);
@@ -352,17 +373,87 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         return result;
     }
 
-    LineString<double> queryGeometry;
-    queryGeometry.reserve(geometry.size());
+    const auto toWorld = [&](const ScreenCoordinate& p) {
+        return TileCoordinate::fromScreenCoordinate(transformState, 0, {p.x, transformState.getSize().height - p.y}).p;
+    };
+    const bool globe = transformState.isGlobeRendering();
+    const auto onPlanet = [&](const ScreenCoordinate& p) {
+        return VerticalPerspectiveProjection::screenCoordinateHitsGlobe(transformState,
+                                                                        {p.x, transformState.getSize().height - p.y});
+    };
 
-    for (const auto& p : geometry) {
-        queryGeometry.push_back(
-            TileCoordinate::fromScreenCoordinate(transformState, 0, {p.x, transformState.getSize().height - p.y}).p);
+    // Past the planet's edge a query meets the planet only at the horizon, and a point there stands for the nearest
+    // horizon point, so a query's corners alone would cut the planet's limb off; its edges are followed in steps.
+    ScreenLineString traced;
+    if (globe && geometry.size() > 1 && !std::ranges::all_of(geometry, onPlanet)) {
+        constexpr int steps = 32;
+        for (std::size_t i = 0; i + 1 < geometry.size(); ++i) {
+            for (int k = 0; k < steps; ++k) {
+                const double t = static_cast<double>(k) / steps;
+                traced.push_back({geometry[i].x + (geometry[i + 1].x - geometry[i].x) * t,
+                                  geometry[i].y + (geometry[i + 1].y - geometry[i].y) * t});
+            }
+        }
+        traced.push_back(geometry.back());
+    }
+    const ScreenLineString& screenGeometry = traced.empty() ? geometry : traced;
+    LineString<double> queryGeometry;
+    queryGeometry.reserve(screenGeometry.size());
+
+    for (const auto& p : screenGeometry) {
+        queryGeometry.push_back(toWorld(p));
+    }
+
+    if (globe) {
+        // GL JS's `transformBbox`: the globe has no world copies, so a box across the antimeridian lands on the rest
+        // of the world, which shows when its slightly shrunken corners fall outside it. It moves to the copy west of
+        // the main world.
+        auto screenBox = mapbox::geometry::envelope(geometry);
+        const double shrink = std::min(screenBox.max.x - screenBox.min.x, screenBox.max.y - screenBox.min.y) * 0.001;
+        screenBox.min.x += shrink;
+        screenBox.min.y += shrink;
+        screenBox.max.x -= shrink;
+        screenBox.max.y -= shrink;
+        const auto bounds = mapbox::geometry::envelope(queryGeometry);
+        // A corner past the planet stands for the nearest point on the horizon, which tells nothing about the
+        // antimeridian, so GL JS's check lost boxes that reach into space, such as the whole view of a small globe.
+        // Such corners are left out, and the box's center, when it is on the planet, decides by longitude for them.
+        bool covered = true;
+        bool reachesIntoSpace = false;
+        for (const ScreenCoordinate& corner : std::array<ScreenCoordinate, 4>{screenBox.min,
+                                                                              {screenBox.max.x, screenBox.min.y},
+                                                                              {screenBox.min.x, screenBox.max.y},
+                                                                              screenBox.max}) {
+            if (!onPlanet(corner)) {
+                reachesIntoSpace = true;
+                continue;
+            }
+            const auto c = toWorld(corner);
+            covered = covered && bounds.min.x <= c.x && c.x <= bounds.max.x && bounds.min.y <= c.y &&
+                      c.y <= bounds.max.y;
+        }
+        const ScreenCoordinate center{(screenBox.min.x + screenBox.max.x) / 2, (screenBox.min.y + screenBox.max.y) / 2};
+        if (reachesIntoSpace && onPlanet(center)) {
+            const auto c = toWorld(center);
+            covered = covered && bounds.min.x <= c.x && c.x <= bounds.max.x;
+        }
+        if (!covered) {
+            for (auto& c : queryGeometry) {
+                if (c.x > 0.5) {
+                    c.x -= 1.0;
+                }
+            }
+        }
     }
 
     mapbox::geometry::box<double> box = mapbox::geometry::envelope(queryGeometry);
 
-    auto cmp = [](const UnwrappedTileID& a, const UnwrappedTileID& b) {
+    // GL JS sorts the globe's query tiles by their copy on the main world, so there the wrap only breaks ties.
+    auto cmp = [globe](const UnwrappedTileID& a, const UnwrappedTileID& b) {
+        if (globe) {
+            return std::tie(a.canonical.z, a.canonical.y, a.canonical.x, a.wrap) <
+                   std::tie(b.canonical.z, b.canonical.y, b.canonical.x, b.wrap);
+        }
         return std::tie(a.canonical.z, a.canonical.y, a.wrap, a.canonical.x) <
                std::tie(b.canonical.z, b.canonical.y, b.wrap, b.canonical.x);
     };
@@ -371,6 +462,11 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         renderedTiles.begin(), renderedTiles.end(), cmp};
 
     auto maxPitchScaleFactor = transformState.maxPitchScaleFactor();
+
+    // The globe returns a feature once per tile, as GL JS does, though the tile is tested at three copies and can be
+    // rendered at two wraps: these are where this tile's features start in each layer's results.
+    std::optional<CanonicalTileID> canonicalTile;
+    std::unordered_map<std::string, std::size_t> canonicalTileStart;
 
     for (const auto& entry : sortedTiles) {
         const UnwrappedTileID& id = entry.first;
@@ -382,25 +478,66 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         auto queryPadding = maxPitchScaleFactor * tile.getQueryPadding(layers) * util::EXTENT / util::tileSize_D /
                             scale;
 
-        GeometryCoordinate tileSpaceBoundsMin = TileCoordinate::toGeometryCoordinate(id, box.min);
-        if (tileSpaceBoundsMin.x - queryPadding >= util::EXTENT ||
-            tileSpaceBoundsMin.y - queryPadding >= util::EXTENT) {
-            continue;
+        if (globe && canonicalTile != id.canonical) {
+            canonicalTile = id.canonical;
+            canonicalTileStart.clear();
+            for (const auto& [layerID, features] : result) {
+                canonicalTileStart.emplace(layerID, features.size());
+            }
         }
 
-        GeometryCoordinate tileSpaceBoundsMax = TileCoordinate::toGeometryCoordinate(id, box.max);
-        if (tileSpaceBoundsMax.x + queryPadding < 0 || tileSpaceBoundsMax.y + queryPadding < 0) {
-            continue;
-        }
+        // The query geometry lies on the main world or, across the antimeridian, west of it, and its padding reaches
+        // past either side of it: a globe tile is tested at its copies west of, on and east of the main world. GL JS
+        // leaves out the east copy and misses features just east of the antimeridian under a query just west of it.
+        const std::array<UnwrappedTileID, 3> globeCopies{
+            UnwrappedTileID(-1, id.canonical), UnwrappedTileID(0, id.canonical), UnwrappedTileID(1, id.canonical)};
+        for (const auto& copy :
+             globe ? std::span<const UnwrappedTileID>(globeCopies) : std::span<const UnwrappedTileID>(&id, 1)) {
+            GeometryCoordinate tileSpaceBoundsMin = TileCoordinate::toGeometryCoordinate(copy, box.min);
+            if (tileSpaceBoundsMin.x - queryPadding >= util::EXTENT ||
+                tileSpaceBoundsMin.y - queryPadding >= util::EXTENT) {
+                continue;
+            }
 
-        GeometryCoordinates tileSpaceQueryGeometry;
-        tileSpaceQueryGeometry.reserve(queryGeometry.size());
-        for (const auto& c : queryGeometry) {
-            tileSpaceQueryGeometry.push_back(TileCoordinate::toGeometryCoordinate(id, c));
-        }
+            GeometryCoordinate tileSpaceBoundsMax = TileCoordinate::toGeometryCoordinate(copy, box.max);
+            if (tileSpaceBoundsMax.x + queryPadding < 0 || tileSpaceBoundsMax.y + queryPadding < 0) {
+                continue;
+            }
 
-        tile.queryRenderedFeatures(
-            result, tileSpaceQueryGeometry, transformState, layers, options, globalState, projMatrix, featureState);
+            GeometryCoordinates tileSpaceQueryGeometry;
+            tileSpaceQueryGeometry.reserve(queryGeometry.size());
+            for (const auto& c : queryGeometry) {
+                tileSpaceQueryGeometry.push_back(TileCoordinate::toGeometryCoordinate(copy, c));
+            }
+
+            if (!globe) {
+                tile.queryRenderedFeatures(result,
+                                           tileSpaceQueryGeometry,
+                                           transformState,
+                                           layers,
+                                           options,
+                                           globalState,
+                                           projMatrix,
+                                           featureState);
+                continue;
+            }
+
+            std::unordered_map<std::string, std::vector<Feature>> found;
+            tile.queryRenderedFeatures(
+                found, tileSpaceQueryGeometry, transformState, layers, options, globalState, projMatrix, featureState);
+            for (auto& [layerID, features] : found) {
+                auto& layerResult = result[layerID];
+                const auto start = canonicalTileStart.contains(layerID) ? canonicalTileStart.at(layerID) : 0;
+                const auto end = layerResult.size();
+                for (auto& feature : features) {
+                    if (std::none_of(layerResult.begin() + start, layerResult.begin() + end, [&](const Feature& other) {
+                            return other == feature;
+                        })) {
+                        layerResult.push_back(std::move(feature));
+                    }
+                }
+            }
+        }
     }
 
     return result;

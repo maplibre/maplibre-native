@@ -94,7 +94,10 @@ public:
     double getRoll() const;
     double getFieldOfView() const;
 
-    // North Orientation
+    // Projection
+    void setProjectionDefinition(const ProjectionDefinition&);
+    /// The projection the style gives at a zoom, which constrains an animation's target as it constrains a jump.
+    void setProjectionForZoom(std::function<ProjectionDefinition(double zoom)>);
     void setNorthOrientation(NorthOrientation);
     NorthOrientation getNorthOrientation() const;
 
@@ -130,6 +133,7 @@ public:
     // Conversion and projection
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Wrapped) const;
+    bool isLocationOccluded(const LatLng& latLng) const { return state.isLocationOccluded(latLng); }
 
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);
@@ -154,6 +158,7 @@ private:
     Duration transitionDuration;
     std::function<bool(const TimePoint)> transitionFrameFn;
     std::function<void()> transitionFinishFn;
+    std::function<ProjectionDefinition(double)> projectionForZoom;
 };
 
 } // namespace mln

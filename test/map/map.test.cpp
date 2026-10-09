@@ -33,6 +33,7 @@
 #include <mln/style/layers/location_indicator_layer.hpp>
 #include <mln/style/layers/raster_layer.hpp>
 #include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/projection.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/sources/image_source.hpp>
@@ -50,6 +51,8 @@
 #include <mln/util/timer.hpp>
 
 #include <atomic>
+#include <mutex>
+#include <set>
 
 using namespace mln;
 using namespace mln::style;
@@ -672,6 +675,37 @@ TEST(Map, StyleExpiredWithRender) {
     EXPECT_EQ(1u, test.fileSource->requests.size());
 }
 
+TEST(Map, StyleExpiredWithProjection) {
+    // A projection set at runtime, whole or in place, keeps the next response from overwriting the style.
+
+    using namespace std::chrono_literals;
+
+    for (const bool inPlace : {false, true}) {
+        MapTest<FakeFileSource> test;
+
+        test.map.getStyle().loadURL("maptiler://maps/test");
+
+        Response response;
+        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/api/empty.json"));
+        response.expires = util::now() - 1h;
+        test.fileSource->respond(Resource::Style, response);
+
+        if (inPlace) {
+            test.map.getStyle().getProjection()->setType(ProjectionDefinition("globe"));
+        } else {
+            auto projection = std::make_unique<style::Projection>();
+            projection->setType(ProjectionDefinition("globe"));
+            test.map.getStyle().setProjection(std::move(projection));
+        }
+
+        test.fileSource->respond(Resource::Style, response);
+        const style::Style& style = test.map.getStyle();
+        const auto type = style.getProjection()->getType();
+        ASSERT_TRUE(type.isConstant()) << inPlace;
+        EXPECT_EQ(ProjectionType::Globe, type.asConstant().from) << inPlace;
+    }
+}
+
 TEST(Map, StyleEarlyMutation) {
     // An early mutation should not prevent the initial style load.
 
@@ -1029,6 +1063,23 @@ TEST(Map, Issue15216) {
     test.runLoop.runOnce();
 }
 
+TEST(Map, GlobeImageSourceBelowZoomZero) {
+    // An image source asked for its tile cover at zoom -1.5 on the globe; the zoom was cast to an unsigned tile zoom
+    // and the render never returned.
+    MapTest<> test;
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+    test.map.getStyle().getProjection()->setType(ProjectionDefinition("vertical-perspective"));
+    const std::array<LatLng, 4> coords{{{60.0, -10.0}, {60.0, 10.0}, {50.0, 10.0}, {50.0, -10.0}}};
+    auto source = std::make_unique<ImageSource>("image", coords);
+    source->setImage(decodeImage(util::read_file("test/fixtures/image/no_profile.png")));
+    test.map.getStyle().addSource(std::move(source));
+    test.map.getStyle().addLayer(std::make_unique<RasterLayer>("raster", "image"));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{80.0, 0.0}).withZoom(-1.5));
+    ASSERT_NEAR(-1.5, test.map.getCameraOptions().zoom.value(), 1e-9);
+    const auto image = test.frontend.render(test.map).image;
+    EXPECT_EQ(test.frontend.getSize().width, image.size.width);
+}
+
 // https://github.com/mapbox/mapbox-gl-native/issues/15342
 // Tests the fix for constant repaint caused by `RenderSource::hasFadingTiles()`
 // returning `true` all the time.
@@ -1293,6 +1344,108 @@ TEST(Map, PrefetchDeltaOverride) {
 
     // Each source requests 4 additional parent tiles.
     EXPECT_EQ(8, requestedTiles);
+}
+
+// On the globe, as on Mercator, the prefetch asks for tiles four zooms coarser than the view's.
+TEST(Map, GlobePrefetchRequestsCoarserTiles) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(
+        R"STYLE({"version": 8, "projection": {"type": "vertical-perspective"}, "sources": {},
+                 "layers": [{"id": "vector", "type": "fill", "source": "vector"}]})STYLE");
+    test.map.getStyle().addSource(std::make_unique<VectorSource>("vector", Tileset{{"a/{z}/{x}/{y}"}}));
+
+    std::mutex mutex;
+    std::set<int> zooms;
+    test.fileSource->tileResponse = [&](const Resource& resource) {
+        if (resource.tileData) {
+            const std::lock_guard lock(mutex);
+            zooms.insert(resource.tileData->z);
+        }
+        Response res;
+        res.noContent = true;
+        return res;
+    };
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{40.0, 10.0}).withZoom(8.0));
+    test.observer.didFinishLoadingMapCallback = [&] {
+        test.runLoop.stop();
+    };
+    test.runLoop.run();
+
+    const std::lock_guard lock(mutex);
+    EXPECT_TRUE(zooms.contains(4));
+    EXPECT_TRUE(zooms.contains(8));
+}
+
+TEST(Map, GlobeTileDrawnForItsChildrenMeetsFinerTilesWithoutAGap) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.frontend.setSize({512, 512});
+    test.map.setSize({512, 512});
+    test.map.getStyle().loadJSON(
+        R"STYLE({"version": 8, "projection": {"type": "vertical-perspective"},
+                 "sources": {"ocean": {"type": "vector", "tiles": ["a/{z}/{x}/{y}"]}},
+                 "layers": [{"id": "background", "type": "background", "paint": {"background-color": "red"}},
+                            {"id": "ocean", "type": "fill", "source": "ocean", "source-layer": "water",
+                             "paint": {"fill-color": "blue"}}]})STYLE");
+
+    const auto ocean = std::make_shared<std::string>(util::read_file("test/fixtures/map/globe_tile_masks/ocean.mvt"));
+    std::mutex mutex;
+    bool holdChildren = false;
+    std::set<CanonicalTileID> served;
+    test.fileSource->tileResponse = [&](const Resource& resource) -> std::optional<Response> {
+        const auto& tile = *resource.tileData;
+        const std::lock_guard lock(mutex);
+        if (holdChildren && tile.z == 8 && tile.x / 2 == 20 && tile.y / 2 == 49) {
+            return std::nullopt;
+        }
+        served.insert({static_cast<uint8_t>(tile.z), static_cast<uint32_t>(tile.x), static_cast<uint32_t>(tile.y)});
+        Response response;
+        response.data = ocean;
+        return response;
+    };
+
+    // The view's center is the corner of tile 7/20/49. Its children never arrive, so it is drawn in their place
+    // beside tile 8/41/100, along an edge it draws as one chord and its finer neighbor as two.
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{36.6026, -120.9375}).withZoom(7.6));
+    test.observer.didFinishLoadingMapCallback = [&] {
+        test.runLoop.stop();
+    };
+    test.runLoop.run();
+    test.observer.didFinishLoadingMapCallback = nullptr;
+
+    {
+        const std::lock_guard lock(mutex);
+        holdChildren = true;
+        served.clear();
+    }
+    std::set<CanonicalTileID> parsed;
+    test.observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string&) {
+        if (op == TileOperation::EndParse) {
+            parsed.insert(id.canonical);
+        }
+    };
+    bool allParsed = false;
+    test.observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus) {
+        if (allParsed) {
+            test.runLoop.stop();
+            return;
+        }
+        const std::lock_guard lock(mutex);
+        allParsed = !served.empty() && std::includes(parsed.begin(), parsed.end(), served.begin(), served.end());
+    };
+    test.map.jumpTo(CameraOptions().withZoom(8.2));
+    test.runLoop.run();
+
+    const auto image = [&] {
+        gfx::BackendScope scope{*test.frontend.getBackend()};
+        return test.frontend.readStillImage();
+    }();
+    std::size_t background = 0;
+    for (std::size_t i = 0; i < image.bytes(); i += 4) {
+        if (image.data[i] > 128 && image.data[i + 2] < 128) {
+            background++;
+        }
+    }
+    EXPECT_EQ(0u, background);
 }
 
 // Test that custom source's tile pyramid is reset
@@ -2063,6 +2216,168 @@ TEST(BackgroundLayer, StyleUpdateZoomDependency) {
                      test.frontend.render(test.map).image,
                      0.0006,
                      0.1);
+}
+
+TEST(Map, GlobeHandOffKeepsTiles) {
+    // Crossing the globe's Mercator hand-off must not re-parse the tiles already on screen.
+    util::RunLoop runLoop;
+    std::mutex tileMutex;
+    std::vector<OverscaledTileID> parsed;
+    StubMapObserver observer;
+    observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
+        if (sourceID != "mapbox" || op != TileOperation::StartParse) return;
+        std::scoped_lock lock(tileMutex);
+        parsed.push_back(id);
+    };
+
+    HeadlessFrontend frontend{{512, 512}, 1};
+    MapAdapter map(
+        frontend,
+        observer,
+        std::make_shared<MainResourceLoader>(
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"), ClientOptions()),
+        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+
+    map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
+    map.getStyle().getProjection()->setType(ProjectionDefinition("globe"));
+    const LatLng center{37.8, -122.5}; // the fixture has tile 10/163/395
+    map.jumpTo(CameraOptions().withCenter(center).withZoom(10.5));
+    (void)frontend.render(map);
+    ASSERT_TRUE(map.getTransformState().isGlobeRendering());
+    std::vector<OverscaledTileID> firstVisit;
+    {
+        std::scoped_lock lock(tileMutex);
+        firstVisit.swap(parsed);
+    }
+    ASSERT_FALSE(firstVisit.empty());
+
+    // Zoom 12.5 is Mercator. The zoom-10 tiles stay on screen while their children load; they must not be parsed
+    // again.
+    map.jumpTo(CameraOptions().withCenter(center).withZoom(12.5));
+    (void)frontend.render(map);
+    ASSERT_FALSE(map.getTransformState().isGlobeRendering());
+    std::scoped_lock lock(tileMutex);
+    std::vector<OverscaledTileID> reparsed;
+    for (const auto& id : parsed) {
+        if (std::find(firstVisit.begin(), firstVisit.end(), id) != firstVisit.end()) {
+            reparsed.push_back(id);
+        }
+    }
+    EXPECT_TRUE(reparsed.empty()) << reparsed.size() << " of " << firstVisit.size()
+                                  << " tiles were parsed again after the hand-off";
+}
+
+// On the globe the lowest zoom falls with latitude; setting the minimum again keeps a zoom the globe allows there.
+TEST(Map, GlobeSetBoundsKeepsAZoomTheGlobeAllows) {
+    MapTest<> test;
+    test.map.getStyle().loadJSON(
+        R"({"version":8,"projection":{"type":"vertical-perspective"},"sources":{},"layers":[]})");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{70, 0}).withZoom(-1.5));
+    ASSERT_NEAR(-1.5, *test.map.getCameraOptions().zoom, 1e-9);
+    test.map.setBounds(BoundOptions().withMinZoom(0));
+    EXPECT_NEAR(-1.5, *test.map.getCameraOptions().zoom, 1e-9);
+}
+
+// The globe's visible bounds are GL JS's VerticalPerspectiveTransform.getBounds at 512×512: the farthest of eight edge
+// points around the center, every longitude with a pole on screen but not with one behind the camera.
+TEST(Map, GlobeBoundsForCamera) {
+    MapTest<> test;
+    test.map.setSize({512, 512});
+    test.map.setBounds(BoundOptions().withMaxPitch(85));
+    test.map.getStyle().loadJSON(
+        R"({"version":8,"projection":{"type":"vertical-perspective"},"sources":{},"layers":[]})");
+    struct Case {
+        double lng, lat, zoom, bearing, pitch, west, south, east, north;
+    };
+    const std::array<Case, 9> cases{{
+        {0, 0, 1, 0, 0, -79.91796042106967, -79.91796042106967, 79.91796042106967, 79.91796042106967},
+        {30, 20, 1.5, 30, 30, -56.805975633856576, -56.895025199618885, 94.30772744796946, 73.43306521431964},
+        {0, 75, 1, 0, 0, -180, 32.70922481421371, 180, 90},
+        {0, 75, 2.5, 0, 0, -54.89062256787065, 64.72883925258952, 54.89062256787065, 83.47499358170649},
+        {10, 10, 3, 0, 0, -25.90264541368299, -19.587774363137328, 45.90264541369834, 36.43783991311318},
+        {170, -10, 2, 45, 40, 90.75153870575207, -71.2057256347772, 267.1780088196146, 42.32122600031687},
+        // Looking away from the north pole, which is behind the camera, with the top of the view in the sky.
+        {0, 80, 3, 180, 75, -27.136824618012838, 69.5727070878645, 27.136824618012724, 86.22734028617919},
+        {0, 84.5, 5, 180, 84, -9.769090999914397, 81.42454063588696, 9.769090999914397, 85.70848143480487},
+        {0, 85, 6, 180, 85, -7.12413211181115, 82.92590257945324, 7.12413211181115, 85.57800114051855},
+    }};
+    for (const Case& c : cases) {
+        const auto camera =
+            CameraOptions().withCenter(LatLng{c.lat, c.lng}).withZoom(c.zoom).withBearing(c.bearing).withPitch(c.pitch);
+        for (const LatLngBounds& bounds :
+             {test.map.latLngBoundsForCamera(camera), test.map.latLngBoundsForCameraUnwrapped(camera)}) {
+            EXPECT_NEAR(c.west, bounds.west(), 1e-5) << c.lat << ", " << c.lng << " z" << c.zoom;
+            EXPECT_NEAR(c.south, bounds.south(), 1e-5) << c.lat << ", " << c.lng << " z" << c.zoom;
+            EXPECT_NEAR(c.east, bounds.east(), 1e-5) << c.lat << ", " << c.lng << " z" << c.zoom;
+            EXPECT_NEAR(c.north, bounds.north(), 1e-5) << c.lat << ", " << c.lng << " z" << c.zoom;
+        }
+    }
+}
+
+// A pixel in the sky snaps to the horizon ahead, as in GL JS, not to the planet behind the camera.
+TEST(Map, GlobeSkyPixelSnapsToTheHorizonAhead) {
+    MapTest<> test;
+    test.map.setSize({512, 512});
+    test.map.setBounds(BoundOptions().withMaxPitch(85));
+    test.map.getStyle().loadJSON(
+        R"({"version":8,"projection":{"type":"vertical-perspective"},"sources":{},"layers":[]})");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{84.5, 0}).withZoom(5).withBearing(180).withPitch(84));
+    const LatLng top = test.map.latLngForPixel({256, 0});
+    EXPECT_NEAR(81.42454063588696, top.latitude(), 1e-6);
+    EXPECT_NEAR(0, top.longitude(), 1e-6);
+}
+
+// A minimum set above the current maximum still lifts the zoom to it, which setBounds always did on Mercator.
+TEST(Map, SetBoundsLiftsTheZoomToAMinimumAboveTheMaximum) {
+    MapTest<> test;
+    test.map.setBounds(BoundOptions().withMaxZoom(8));
+    test.map.jumpTo(CameraOptions().withZoom(6.0));
+    test.map.setBounds(BoundOptions().withMinZoom(10).withMaxZoom(16));
+    EXPECT_NEAR(10.0, *test.map.getCameraOptions().zoom, 1e-9);
+}
+
+TEST(Map, GlobeBoundedSourceLoadsFinerTiles) {
+    // Just below an integer zoom the globe cover asks for the next zoom's tiles nearest the camera; a source with
+    // bounds must create them.
+    util::RunLoop runLoop;
+    std::mutex tileMutex;
+    std::vector<OverscaledTileID> parsed;
+    StubMapObserver observer;
+    observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
+        if (sourceID != "bounded" || op != TileOperation::StartParse) return;
+        std::scoped_lock lock(tileMutex);
+        parsed.push_back(id);
+    };
+
+    HeadlessFrontend frontend{{512, 512}, 1};
+    MapAdapter map(
+        frontend,
+        observer,
+        std::make_shared<MainResourceLoader>(
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"), ClientOptions()),
+        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+
+    // The same tile answers every request, so the cover alone decides what loads.
+    map.getStyle().loadJSON(R"STYLE({
+        "version": 8,
+        "projection": {"type": "globe"},
+        "sources": {
+            "bounded": {
+                "type": "vector",
+                "maxzoom": 15,
+                "bounds": [-180, -85.0511, 180, 85.0511],
+                "tiles": ["asset://streets/10-163-395.vector.pbf"]
+            }
+        },
+        "layers": [{"id": "water", "type": "fill", "source": "bounded", "source-layer": "water"}]
+    })STYLE");
+    map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.95));
+    (void)frontend.render(map);
+    ASSERT_TRUE(map.getTransformState().isGlobeRendering());
+
+    std::scoped_lock lock(tileMutex);
+    EXPECT_TRUE(std::any_of(parsed.begin(), parsed.end(), [](const auto& id) { return id.canonical.z == 11; }))
+        << parsed.size() << " tiles parsed, none at zoom 11";
 }
 
 TEST(Map, LineLayerDepthDistribution) {

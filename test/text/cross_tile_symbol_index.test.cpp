@@ -1,10 +1,29 @@
+#include <mln/map/tile_projector.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/style/projection_definition.hpp>
 #include <mln/style/variable_anchor_offset_collection.hpp>
 #include <mln/test/util.hpp>
 #include <mln/text/cross_tile_symbol_index.hpp>
 
 using namespace mln;
+
+namespace {
+
+TransformState cameraAt(double lat, double lon, double zoom, bool globe = false) {
+    TransformState state;
+    state.setSize({512, 512});
+    if (globe) {
+        state.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    }
+    state.setLatLngZoom(LatLng(lat, lon), zoom);
+    return state;
+}
+
+// Only overscaled tiles check the viewport, so any camera does for the others.
+const TransformState anyCamera = cameraAt(0, 0, 0);
+
+} // namespace
 
 SymbolInstance makeSymbolInstance(float x, float y, std::u16string key) {
     GeometryCoordinates line;
@@ -86,7 +105,7 @@ TEST(CrossTileSymbolLayerIndex, addBucket) {
                             {},
                             false /*iconsInText*/};
     mainBucket.bucketInstanceId = ++maxBucketInstanceId;
-    index.addBucket(mainID, mat4{}, mainBucket);
+    index.addBucket(mainID, TileProjector(anyCamera, mainID.toUnwrapped()), mainBucket);
 
     // Assigned new IDs
     ASSERT_EQ(mainBucket.symbolInstances.at(0).getCrossTileID(), 1u);
@@ -114,7 +133,7 @@ TEST(CrossTileSymbolLayerIndex, addBucket) {
                              {},
                              false /*iconsInText*/};
     childBucket.bucketInstanceId = ++maxBucketInstanceId;
-    index.addBucket(childID, mat4{}, childBucket);
+    index.addBucket(childID, TileProjector(anyCamera, childID.toUnwrapped()), childBucket);
 
     // matched parent tile
     ASSERT_EQ(childBucket.symbolInstances.at(0).getCrossTileID(), 1u);
@@ -144,7 +163,7 @@ TEST(CrossTileSymbolLayerIndex, addBucket) {
                               {},
                               false /*iconsInText*/};
     parentBucket.bucketInstanceId = ++maxBucketInstanceId;
-    index.addBucket(parentID, mat4{}, parentBucket);
+    index.addBucket(parentID, TileProjector(anyCamera, parentID.toUnwrapped()), parentBucket);
 
     // matched child tile
     ASSERT_EQ(parentBucket.symbolInstances.at(0).getCrossTileID(), 1u);
@@ -174,7 +193,7 @@ TEST(CrossTileSymbolLayerIndex, addBucket) {
                                   {},
                                   false /*iconsInText*/};
     grandchildBucket.bucketInstanceId = ++maxBucketInstanceId;
-    index.addBucket(grandchildID, mat4{}, grandchildBucket);
+    index.addBucket(grandchildID, TileProjector(anyCamera, grandchildID.toUnwrapped()), grandchildBucket);
 
     // Matches the symbol in `mainBucket`
     ASSERT_EQ(grandchildBucket.symbolInstances.at(0).getCrossTileID(), 1u);
@@ -234,7 +253,7 @@ TEST(CrossTileSymbolLayerIndex, resetIDs) {
     childBucket.bucketInstanceId = ++maxBucketInstanceId;
 
     // assigns a new id
-    index.addBucket(mainID, mat4{}, mainBucket);
+    index.addBucket(mainID, TileProjector(anyCamera, mainID.toUnwrapped()), mainBucket);
     ASSERT_EQ(mainBucket.symbolInstances.at(0).getCrossTileID(), 1u);
 
     // removes the tile
@@ -242,11 +261,11 @@ TEST(CrossTileSymbolLayerIndex, resetIDs) {
     index.removeStaleBuckets(currentIDs);
 
     // assigns a new id
-    index.addBucket(childID, mat4{}, childBucket);
+    index.addBucket(childID, TileProjector(anyCamera, childID.toUnwrapped()), childBucket);
     ASSERT_EQ(childBucket.symbolInstances.at(0).getCrossTileID(), 2u);
 
     // overwrites the old id to match the already-added tile
-    index.addBucket(mainID, mat4{}, mainBucket);
+    index.addBucket(mainID, TileProjector(anyCamera, mainID.toUnwrapped()), mainBucket);
     ASSERT_EQ(mainBucket.symbolInstances.at(0).getCrossTileID(), 2u);
 }
 
@@ -305,12 +324,12 @@ TEST(CrossTileSymbolLayerIndex, noDuplicatesWithinZoomLevel) {
     childBucket.bucketInstanceId = ++maxBucketInstanceId;
 
     // assigns new ids
-    index.addBucket(mainID, mat4{}, mainBucket);
+    index.addBucket(mainID, TileProjector(anyCamera, mainID.toUnwrapped()), mainBucket);
     ASSERT_EQ(mainBucket.symbolInstances.at(0).getCrossTileID(), 1u);
     ASSERT_EQ(mainBucket.symbolInstances.at(1).getCrossTileID(), 2u);
 
     // copies parent ids without duplicate ids in this tile
-    index.addBucket(childID, mat4{}, childBucket);
+    index.addBucket(childID, TileProjector(anyCamera, childID.toUnwrapped()), childBucket);
     ASSERT_EQ(childBucket.symbolInstances.at(0).getCrossTileID(),
               1u); // A' copies from A
     ASSERT_EQ(childBucket.symbolInstances.at(1).getCrossTileID(),
@@ -373,12 +392,12 @@ TEST(CrossTileSymbolLayerIndex, bucketReplacement) {
     secondBucket.bucketInstanceId = ++maxBucketInstanceId;
 
     // assigns new ids
-    index.addBucket(tileID, mat4{}, firstBucket);
+    index.addBucket(tileID, TileProjector(anyCamera, tileID.toUnwrapped()), firstBucket);
     ASSERT_EQ(firstBucket.symbolInstances.at(0).getCrossTileID(), 1u);
     ASSERT_EQ(firstBucket.symbolInstances.at(1).getCrossTileID(), 2u);
 
     // copies parent ids without duplicate ids in this tile
-    index.addBucket(tileID, mat4{}, secondBucket);
+    index.addBucket(tileID, TileProjector(anyCamera, tileID.toUnwrapped()), secondBucket);
     ASSERT_EQ(secondBucket.symbolInstances.at(0).getCrossTileID(),
               1u); // A' copies from A
     ASSERT_EQ(secondBucket.symbolInstances.at(1).getCrossTileID(),
@@ -389,17 +408,7 @@ TEST(CrossTileSymbolLayerIndex, bucketReplacement) {
 
 namespace {
 
-void populatePosMatrix(mat4& posMatrix, const OverscaledTileID& tileId, double lat, double lon, double zoom) {
-    TransformState transformState;
-    transformState.setSize({512, 512});
-    transformState.setLatLngZoom(LatLng(lat, lon), zoom);
-    transformState.matrixFor(posMatrix, tileId.toUnwrapped());
-    matrix::multiply(posMatrix, transformState.getProjectionMatrix(), posMatrix);
-}
-
-} // namespace
-
-TEST(CrossTileSymbolLayerIndex, offscreenSymbols) {
+void expectOffscreenSymbolsSkipped(bool globe) {
     uint32_t maxCrossTileID = 0;
     CrossTileSymbolLayerIndex index(maxCrossTileID);
 
@@ -428,16 +437,26 @@ TEST(CrossTileSymbolLayerIndex, offscreenSymbols) {
                               false,
                               {},
                               false /*iconsInText*/};
-    mat4 posMatrix;
-    populatePosMatrix(posMatrix, tileId, 60.0, 25.0, 7.0);
-    index.addBucket(tileId, posMatrix, symbolBucket);
+    const auto away = cameraAt(60.0, 25.0, 7.0, globe);
+    index.addBucket(tileId, TileProjector(away, tileId.toUnwrapped()), symbolBucket);
 
     EXPECT_EQ(symbolBucket.symbolInstances.at(0).getCrossTileID(), SymbolInstance::invalidCrossTileID);
     EXPECT_EQ(symbolBucket.symbolInstances.at(1).getCrossTileID(), SymbolInstance::invalidCrossTileID);
 
-    populatePosMatrix(posMatrix, tileId, 39.0, -76.0, 7.0);
-    index.addBucket(tileId, posMatrix, symbolBucket);
+    const auto over = cameraAt(39.0, -76.0, 7.0, globe);
+    index.addBucket(tileId, TileProjector(over, tileId.toUnwrapped()), symbolBucket);
 
     EXPECT_EQ(symbolBucket.symbolInstances.at(0).getCrossTileID(), 1u);
     EXPECT_EQ(symbolBucket.symbolInstances.at(1).getCrossTileID(), 2u);
+}
+
+} // namespace
+
+TEST(CrossTileSymbolLayerIndex, offscreenSymbols) {
+    expectOffscreenSymbolsSkipped(false);
+}
+
+// On the globe the anchors go through the sphere, not the tile matrix.
+TEST(CrossTileSymbolLayerIndex, offscreenSymbolsOnTheGlobe) {
+    expectOffscreenSymbolsSkipped(true);
 }

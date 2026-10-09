@@ -12,6 +12,7 @@
 #include <mln/util/logging.hpp>
 
 #include <Metal/Metal.hpp>
+#include <unordered_map>
 
 namespace mln {
 namespace mtl {
@@ -47,24 +48,30 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     const auto& renderable = renderPass.getDescriptor().renderable;
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
-    // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
-    // drawables end up using the same mode value.
+    // drawables in this layer use 3D stencil mode with stencil tiles, we need to set it up here
+    // so that all the drawables end up using the same mode value; without stencil tiles each
+    // drawable gets its own.
     // 2D and 3D features in the same layer group is not supported.
     bool features3d = false;
     bool stencil3d = false;
     gfx::StencilMode stencilMode3d;
 
-    // If we're using stencil clipping, we need to handle 3D features separately
-    if (stencilTiles && !stencilTiles->empty()) {
-        visitDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
-                features3d = true;
-                if (drawable.getEnableStencil()) {
-                    stencil3d = true;
+    // 3D features take the group-wide depth state, and a stencil value shared across the group when it has stencil
+    // tiles or their own when it does not
+    const bool hasStencilTiles = stencilTiles && !stencilTiles->empty();
+    std::unordered_map<const gfx::Drawable*, gfx::StencilMode> ownStencilModes;
+    visitDrawables([&](const gfx::Drawable& drawable) {
+        if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+            features3d = true;
+            if (drawable.getEnableStencil()) {
+                stencil3d = true;
+                if (!hasStencilTiles) {
+                    ownStencilModes.emplace(&drawable, gfx::StencilMode{});
                 }
             }
-        });
-    }
+        }
+    });
+    const bool ownStencilModesTaken = parameters.stencilModesFor3D(ownStencilModes);
 
 #if !defined(NDEBUG)
     const auto debugGroupRender = parameters.encoder->createDebugGroup(getName() + "-render");
@@ -111,11 +118,11 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             }
         };
 
-        if (stencil3d) {
+        if (stencil3d && hasStencilTiles) {
             stencilMode3d = parameters.stencilModeFor3D();
             encoder->setStencilReferenceValue(stencilMode3d.ref);
         }
-    } else if (stencilTiles && !stencilTiles->empty()) {
+    } else if (hasStencilTiles) {
         parameters.renderTileClippingMasks(stencilTiles);
     }
 
@@ -138,6 +145,18 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // stencil mode for features with stencil enabled or disable stenciling.
         // 2D drawables will set their own stencil mode within `draw`.
         if (features3d) {
+            if (const auto own = ownStencilModes.find(&drawable); own != ownStencilModes.end()) {
+                if (!ownStencilModesTaken) {
+                    // A clear between two draws draws over the zoom 0 tile with buffers of its own.
+                    const auto clears = context.renderingStats().stencilClears;
+                    own->second = parameters.stencilModeFor3D();
+                    if (context.renderingStats().stencilClears != clears) {
+                        uniformBuffers.bindMtl(renderPass);
+                    }
+                }
+                stencilMode3d = own->second;
+                encoder->setStencilReferenceValue(stencilMode3d.ref);
+            }
             const auto& state = getDepthStencilState(drawable.getEnableDepth(), drawable.getEnableStencil());
             renderPass.setDepthStencilState(state);
         }

@@ -1,4 +1,6 @@
 #include <mln/renderer/render_layer.hpp>
+#include <mln/map/tile_projector.hpp>
+#include <mln/map/transform_state.hpp>
 
 #include <mln/gfx/context.hpp>
 #include <mln/renderer/layer_group.hpp>
@@ -10,7 +12,12 @@
 #include <mln/style/layer.hpp>
 #include <mln/style/types.hpp>
 #include <mln/tile/tile.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/interpolate.hpp>
 #include <mln/util/logging.hpp>
+
+#include <algorithm>
+#include <cmath>
 
 namespace mln {
 
@@ -53,7 +60,8 @@ bool RenderLayer::needsRendering() const {
 
 bool RenderLayer::supportsZoom(float zoom) const {
     // TODO: shall we use rounding or epsilon comparisons?
-    return baseImpl->minZoom <= zoom && baseImpl->maxZoom >= zoom;
+    // A minimum of 0 is "no minimum": the globe zooms below 0 toward the poles.
+    return baseImpl->minZoom <= std::max(zoom, 0.0f) && baseImpl->maxZoom >= zoom;
 }
 
 void RenderLayer::prepare(const LayerPrepareParameters& params) {
@@ -149,6 +157,16 @@ std::size_t RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileI
         return n;
     }
     return 0;
+}
+
+bool RenderLayer::updateProjectionVariant(const TransformState& state) {
+    const auto variant = state.isGlobeRendering() ? gfx::ProjectionVariant::Globe : gfx::ProjectionVariant::Mercator;
+    if (variant == projectionVariant) {
+        return false;
+    }
+    projectionVariant = variant;
+    removeAllDrawables();
+    return true;
 }
 
 std::size_t RenderLayer::removeAllDrawables() {
@@ -357,6 +375,102 @@ std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(
     if (ndcRangeX.first < ndcRangeX.second && ndcRangeY.first < ndcRangeY.second &&
         ndcRangeZ.first <= ndcRangeZ.second && -1.0 <= ndcRangeX.second && ndcRangeX.first <= 1.0 &&
         -1.0 <= ndcRangeY.second && ndcRangeY.first <= 1.0) {
+        return NDCBound{
+            .minX = ndcRangeX.first, .maxX = ndcRangeX.second, .minY = ndcRangeY.first, .maxY = ndcRangeY.second};
+    }
+    return std::nullopt;
+}
+
+std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(const std::size_t vertexCount,
+                                                                         const TileProjector& projector,
+                                                                         const std::array<float, 2>& translation,
+                                                                         const GetVertexFn& getVertex) {
+    constexpr auto initRange = std::make_pair(std::numeric_limits<double>::max(),
+                                              std::numeric_limits<double>::lowest());
+    auto rangeX = initRange;
+    auto rangeY = initRange;
+    auto rangeZ = initRange;
+    for (std::size_t i = 0; i < vertexCount; ++i) {
+        const auto& vertex = getVertex(i);
+        rangeX = minmax(rangeX, vertex[0]);
+        rangeY = minmax(rangeY, vertex[1]);
+        rangeZ = minmax(rangeZ, vertex[2]);
+    }
+
+    if (rangeX.second <= rangeX.first || rangeY.second <= rangeY.first || rangeZ.second < rangeZ.first) {
+        return std::nullopt;
+    }
+
+    // The box bends with the sphere and the horizon can cut through it, so its corners do not bound it:
+    // sample it every few degrees and keep what the horizon leaves visible.
+    constexpr double maxStepDegrees = 10.0;
+    constexpr double maxSteps = 32.0;
+    const double degreesPerTileUnit = 360.0 / util::EXTENT /
+                                      static_cast<double>(1ull << projector.getTileID().canonical.z);
+    const auto stepsFor = [&](const std::pair<double, double>& range) {
+        const double degrees = (range.second - range.first) * degreesPerTileUnit;
+        return static_cast<std::size_t>(std::clamp(std::ceil(degrees / maxStepDegrees), 1.0, maxSteps));
+    };
+    const auto stepsX = stepsFor(rangeX);
+    const auto stepsY = stepsFor(rangeY);
+    const std::size_t stepsZ = rangeZ.first < rangeZ.second ? 1 : 0;
+
+    auto ndcRangeX = initRange;
+    auto ndcRangeY = initRange;
+    const auto include = [&](const ProjectedTilePoint& projected) {
+        if (!projected.occluded && projected.signedDistanceFromCamera > 0) {
+            ndcRangeX = minmax(ndcRangeX, projected.point.x);
+            ndcRangeY = minmax(ndcRangeY, projected.point.y);
+        }
+    };
+    for (std::size_t iy = 0; iy <= stepsY; ++iy) {
+        const double y = util::interpolate(rangeY.first, rangeY.second, static_cast<double>(iy) / stepsY);
+        for (std::size_t ix = 0; ix <= stepsX; ++ix) {
+            const double x = util::interpolate(rangeX.first, rangeX.second, static_cast<double>(ix) / stepsX);
+            const Point<double> point{x + translation[0], y + translation[1]};
+            const auto base = projector.projectAsDrawn(point, rangeZ.first);
+            include(base);
+            if (stepsZ == 0) {
+                continue;
+            }
+            const auto top = projector.projectAsDrawn(point, rangeZ.second);
+            include(top);
+            if (base.occluded != top.occluded) {
+                // The wall comes into view part way up, where it is drawn at the limb: find that height.
+                double hidden = base.occluded ? rangeZ.first : rangeZ.second;
+                double shown = base.occluded ? rangeZ.second : rangeZ.first;
+                for (int i = 0; i < 16; ++i) {
+                    const double mid = (hidden + shown) / 2.0;
+                    (projector.projectAsDrawn(point, mid).occluded ? hidden : shown) = mid;
+                }
+                include(projector.projectAsDrawn(point, shown));
+            }
+        }
+    }
+    // Close up, the visible part of the planet can be smaller than the sampling grid: the surface under the screen's
+    // corners, edges and center is drawn wherever it falls inside the box.
+    const auto& state = projector.getTransformState();
+    const auto& tileID = projector.getTileID();
+    for (const double screenX : {0.0, 0.5, 1.0}) {
+        for (const double screenY : {0.0, 0.5, 1.0}) {
+            const auto tile = state
+                                  .screenCoordinateToTileCoordinate(
+                                      {screenX * state.getSize().width, screenY * state.getSize().height},
+                                      tileID.canonical.z)
+                                  .p;
+            // The globe draws a tile on the same part of the sphere at any wrap.
+            const Point<double> point{(tile.x - tileID.canonical.x) * util::EXTENT,
+                                      (tile.y - tileID.canonical.y) * util::EXTENT};
+            const double x = point.x - translation[0];
+            const double y = point.y - translation[1];
+            if (rangeX.first <= x && x <= rangeX.second && rangeY.first <= y && y <= rangeY.second) {
+                include(projector.projectAsDrawn(point, rangeZ.first));
+            }
+        }
+    }
+
+    if (ndcRangeX.first < ndcRangeX.second && ndcRangeY.first < ndcRangeY.second && -1.0 <= ndcRangeX.second &&
+        ndcRangeX.first <= 1.0 && -1.0 <= ndcRangeY.second && ndcRangeY.first <= 1.0) {
         return NDCBound{
             .minX = ndcRangeX.first, .maxX = ndcRangeX.second, .minY = ndcRangeY.first, .maxY = ndcRangeY.second};
     }

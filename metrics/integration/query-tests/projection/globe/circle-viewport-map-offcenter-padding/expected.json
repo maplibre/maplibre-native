@@ -1,0 +1,17 @@
+[
+  {
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        64.9951171875,
+        5.003394345022144
+      ]
+    },
+    "type": "Feature",
+    "properties": {
+      "name": "circle"
+    },
+    "source": "geojson",
+    "state": {}
+  }
+]

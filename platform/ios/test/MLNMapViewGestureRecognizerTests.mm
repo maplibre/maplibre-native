@@ -7,6 +7,8 @@
 
 #include <mln/map/camera.hpp>
 #include <mln/map/map.hpp>
+#include <mln/style/projection.hpp>
+#include <mln/style/style.hpp>
 
 @interface MLNMapView (MLNMapViewGestureRecognizerTests)
 
@@ -281,6 +283,28 @@
   cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(edgePadding, cameraPadding,
                  @"When a gesture recognizer is performed camera paddings must not be changed.");
+}
+
+// The globe's minimum zoom falls away from the equator so the planet keeps its size. A quick zoom
+// that has not moved yet leaves the zoom there instead of taking it up to the minimum zoom level.
+- (void)testQuickZoomKeepsTheGlobesMinimumZoomAwayFromTheEquator {
+  auto projection = std::make_unique<mln::style::Projection>();
+  projection->setType(mln::ProjectionDefinition("globe"));
+  self.mapView.mbglMap.getStyle().setProjection(std::move(projection));
+  self.mapView.minimumZoomLevel = 1;
+  self.mapView.mbglMap.jumpTo(mln::CameraOptions().withCenter(mln::LatLng{60, 0}).withZoom(0));
+  XCTAssertEqualWithAccuracy(self.mapView.zoomLevel, 0, 1e-6);
+
+  UILongPressGestureRecognizerMock *quickZoom =
+      [[UILongPressGestureRecognizerMock alloc] initWithTarget:nil action:nil];
+  quickZoom.mockTappedPoint =
+      CGPointMake(self.mapView.frame.size.width / 2, self.mapView.frame.size.height / 2);
+  quickZoom.state = UIGestureRecognizerStateBegan;
+  [self.mapView handleQuickZoomGesture:quickZoom];
+  quickZoom.state = UIGestureRecognizerStateChanged;
+  [self.mapView handleQuickZoomGesture:quickZoom];
+
+  XCTAssertEqualWithAccuracy(self.mapView.zoomLevel, 0, 1e-6);
 }
 
 - (void)testHandleTwoFingerDragGesture {

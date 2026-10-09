@@ -7,6 +7,7 @@
 #include <mln/gfx/drawable_builder.hpp>
 #include <mln/gfx/line_drawable_data.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/renderer/buckets/line_bucket.hpp>
 #include <mln/renderer/image_manager.hpp>
 #include <mln/renderer/layer_group.hpp>
@@ -192,6 +193,11 @@ void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
     const std::optional<mln::Point<double>> origin = std::nullopt;
     const auto zoomFraction = state.getZoomFraction();
     std::optional<mat4> tileMatrix;
+    // On the globe the tile's projection stands in for the tile matrix, and takes the translation in tile units.
+    const auto projector = state.isGlobeRendering() ? std::make_optional<TileProjector>(state, tileID.toUnwrapped())
+                                                    : std::nullopt;
+    const auto tileTranslation = RenderTile::tileUnitTranslation(
+        tileID.toUnwrapped(), translation, translationAnchor, state);
 
     const auto& features = bucket.getRetainedFeatures();
     stats.renderedFeatures.reserve(features.size());
@@ -218,7 +224,7 @@ void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
         }
 
         // Compute the tile matrix once
-        if (!tileMatrix.has_value()) {
+        if (!projector && !tileMatrix.has_value()) {
             tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
                                                      state,
                                                      transformParams,
@@ -240,7 +246,9 @@ void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
             return vec3{vertex[0] / 2.0, vertex[1] / 2.0, 0};
         };
 
-        if (const auto bound = computeFeatureNDCBound(featureEntry.vertexCount, *tileMatrix, getVertex)) {
+        if (const auto bound = projector ? computeFeatureNDCBound(
+                                               featureEntry.vertexCount, *projector, tileTranslation, getVertex)
+                                         : computeFeatureNDCBound(featureEntry.vertexCount, *tileMatrix, getVertex)) {
             stats.addRenderedFeature(featureID, *bound, {tileID});
         }
     }
@@ -251,7 +259,7 @@ bool RenderLineLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                              const float zoom,
                                              const TransformState& transformState,
                                              const float pixelsToTileUnits,
-                                             const mat4&,
+                                             const TileProjector&,
                                              const FeatureState& featureState) const {
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
     // Translate query geometry
@@ -325,6 +333,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              [[maybe_unused]] const PaintParameters& paintParameters,
                              const RenderTree& renderTree,
                              UniqueChangeRequestVec& changes) {
+    updateProjectionVariant(state);
     stats.renderedFeatures.clear();
 
     if (!renderTiles || renderTiles->empty()) {
@@ -485,7 +494,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
+            auto shader = lineSDFShaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -509,7 +519,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
+            auto shader = linePatternShaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -550,7 +561,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto shader = lineGradientShaderGroup->getOrCreateShader(
-                context, propertiesAsUniforms, posNormalAttribName);
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -589,7 +600,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
+            auto shader = lineShaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }

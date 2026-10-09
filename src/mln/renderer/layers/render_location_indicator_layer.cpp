@@ -10,6 +10,7 @@
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/image_manager.hpp>
 #include <mln/renderer/layers/render_location_indicator_layer.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/update_parameters.hpp>
@@ -17,6 +18,7 @@
 #include <mln/style/layers/location_indicator_layer_properties.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/tile_cover.hpp>
+#include <mln/util/interpolate.hpp>
 
 #if MLN_RENDER_BACKEND_OPENGL
 #include <mln/gl/context.hpp>
@@ -59,6 +61,18 @@ using namespace mln::platform;
 using namespace std::numbers;
 
 namespace mln {
+
+namespace {
+/// Whether the puck is drawn on the globe: the drawables follow the projection, OpenGL's own renderer draws with
+/// its Mercator matrix on either one.
+bool drawsOnGlobe([[maybe_unused]] const TransformState& state) {
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
+    return state.isGlobeRendering();
+#else
+    return false;
+#endif
+}
+} // namespace
 
 struct LocationIndicatorRenderParameters {
     LocationIndicatorRenderParameters() = default;
@@ -522,7 +536,7 @@ public:
 #endif
 
         projectionCircle = params.projectionMatrix;
-        const Point<double> positionMercator = project(params.puckPosition, *params.state);
+        positionMercator = project(params.puckPosition, *params.state);
         matrix::identity(translation);
         matrix::translate(translation, translation, positionMercator.x, positionMercator.y, 0.0);
         matrix::multiply(projectionCircle, projectionCircle, translation);
@@ -569,6 +583,7 @@ public:
 
     const auto& getProjectionCircle() const { return projectionCircle; }
     const auto& getProjectionPuck() const { return projectionPuck; }
+    const auto& getPositionMercator() const { return positionMercator; }
 
     auto getPuckGeometry() const {
 #ifdef MLN_DRAWABLE_LOCATION_INDICATOR
@@ -581,7 +596,7 @@ public:
 protected:
     static ScreenCoordinate latLngToScreenCoordinate(const LatLng& p, const TransformState& s) {
         LatLng unwrappedLatLng = p.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
+        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
         ScreenCoordinate point = s.latLngToScreenCoordinate(unwrappedLatLng);
         point.y = s.getSize().height - point.y;
         return point;
@@ -589,13 +604,13 @@ protected:
 
     static Point<double> project(const LatLng& c, const TransformState& s) {
         LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
+        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
         return Projection::project(unwrappedLatLng, s.getScale());
     }
 
     static Point<double> unproject(const LatLng& c, const TransformState& s) {
         LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
+        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
         return Projection::project(unwrappedLatLng, s.getScale());
     }
 
@@ -624,6 +639,13 @@ protected:
 
     // Size in "map pixels" for a screen pixel
     static float pixelSizeToWorldSizeH(const LatLng& pos, const TransformState& s) {
+        if (drawsOnGlobe(s)) {
+            // Toward the horizon a pixel covers more of the map because the sphere turns away, which is not
+            // perspective and would stretch the puck along the horizon: only the camera distance counts.
+            vec4 clip;
+            s.latLngToScreenCoordinate(pos, clip);
+            return static_cast<float>(clip[3] / s.getCameraToCenterDistance());
+        }
         ScreenCoordinate posScreen = latLngToScreenCoordinate(pos, s);
         ScreenCoordinate posScreenLeftPx = posScreen;
         posScreenLeftPx.x -= 1;
@@ -650,14 +672,18 @@ protected:
     static vec2 verticalDirectionMercator(const Point<double>& posMerc, const Point<double>& posMercDy) {
         Point<double> verticalShiftMercator = posMercDy - posMerc;
         vec2 res(verticalShiftMercator);
-        return res.normalized();
+        return res.length() > 0 ? res.normalized() : vec2{0.0f, 0.0f};
     }
 
     static Point<double> hatShadowShiftVector(const LatLng& position,
                                               const mln::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         ScreenCoordinate posScreen = latLngToScreenCoordinate(position, s);
-        posScreen.y = params.height - 1; // moving it to bottom
+        // Mercator turns the puck's column of the screen into a straight line, and the bottom of the window, nearest
+        // the camera, gives its direction. On the globe the direction turns down the column: it is taken at the puck.
+        if (!drawsOnGlobe(s)) {
+            posScreen.y = params.height - 1.0;
+        }
         Point<double> posMerc = project(screenCoordinateToLatLng(posScreen, s), s);
         vec2 verticalShiftAtPos = verticalDirectionMercator(posScreen, posMerc, s);
         return {verticalShiftAtPos.x, verticalShiftAtPos.y};
@@ -712,10 +738,21 @@ protected:
         // edge of the screen going toward the top.
 
         Point<double> verticalShift = hatShadowShiftVector(params.puckPosition, params);
+        // The puck is sized in Mercator pixels, which the sphere shrinks with the latitude: keep the size it has at
+        // the map's center, the way the globe keeps circles and pitched text.
+        const double puckLatitude = util::clamp(
+            params.puckPosition.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
+        const float latitudeScale = drawsOnGlobe(s) ? static_cast<float>(util::interpolate(
+                                                          1.0,
+                                                          std::cos(util::deg2rad(s.getLatLng().latitude())) /
+                                                              std::cos(util::deg2rad(puckLatitude)),
+                                                          s.getProjectionTransition()))
+                                                    : 1.0f;
         const float horizontalScaleFactor =
-            (1.0f - params.perspectiveCompensation) +
-            util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 10.1f) *
-                params.perspectiveCompensation; // Compensation factor for the perspective deformation
+            ((1.0f - params.perspectiveCompensation) +
+             util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 10.1f) *
+                 params.perspectiveCompensation) * // Compensation factor for the perspective deformation
+            latitudeScale;
         //     ^ clamping this to 0.8 to avoid growing the puck too much close to the camera.
 
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
@@ -878,6 +915,7 @@ protected:
     mln::mat4 translation{};
     mln::mat4 projectionCircle{};
     mln::mat4 projectionPuck{};
+    Point<double> positionMercator{};
 
     bool positionChanged = false;
     bool radiusChanged = false;
@@ -1031,7 +1069,7 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
     auto& glContext = static_cast<gl::Context&>(paintParameters.context);
 
     if (paintParameters.captureRenderedFeatures) {
-        captureRenderedFeatures();
+        captureRenderedFeatures(paintParameters.state);
     }
 
     // Reset GL state to a known state so the CustomLayer always has a clean slate.
@@ -1050,19 +1088,38 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
 }
 #endif
 
-void RenderLocationIndicatorLayer::captureRenderedFeatures() {
+void RenderLocationIndicatorLayer::captureRenderedFeatures(const TransformState& state) {
     using namespace vector;
+    constexpr auto locationID = "maplibre:LocationIndicator";
 
     // Only considering the puck for now, not the accuracy circle
     const auto& proj = renderImpl->getProjectionPuck();
     const auto& geom = renderImpl->getPuckGeometry();
+
+    // On the globe the puck's corners are world pixel offsets from its position, drawn through the projection blend.
+    if (drawsOnGlobe(state)) {
+        const auto& position = renderImpl->getPositionMercator();
+        const double worldSize = Projection::worldSize(state.getScale());
+        const TileProjector projector(state, UnwrappedTileID(0, 0, 0));
+        std::vector<vec3> visible;
+        for (const auto& corner : geom) {
+            const auto drawn = projector.projectAsDrawn({(position.x + corner.x) / worldSize * util::EXTENT,
+                                                         (position.y + corner.y) / worldSize * util::EXTENT});
+            if (!drawn.occluded && drawn.signedDistanceFromCamera > 0) {
+                visible.push_back({drawn.point.x, drawn.point.y, 0});
+            }
+        }
+        if (const auto bound = computeFeatureNDCBound(visible.size(), [&](std::size_t i) { return visible[i]; })) {
+            stats.addRenderedFeature(locationID, *bound, {/* no tile */});
+        }
+        return;
+    }
 
     const auto getVertex = [&](std::size_t i) {
         return vec3{geom[i].x, geom[i].y, 0};
     };
 
     if (const auto bound = computeFeatureNDCBound(geom.size(), proj, getVertex)) {
-        constexpr auto locationID = "maplibre:LocationIndicator";
         stats.addRenderedFeature(locationID, *bound, {/* no tile */});
     }
 }
@@ -1071,7 +1128,7 @@ void RenderLocationIndicatorLayer::captureRenderedFeatures() {
 
 void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                                           gfx::Context& context,
-                                          const TransformState&,
+                                          const TransformState& state,
                                           const std::shared_ptr<UpdateParameters>& updateParameters,
                                           [[maybe_unused]] const PaintParameters& paintParameters,
                                           const RenderTree&,
@@ -1086,8 +1143,17 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    if (updateProjectionVariant(state)) {
+        quadShader.reset();
+        circleShader.reset();
+        // the drawables were built with the other projection's shaders
+        if (layerGroup) {
+            static_cast<LayerGroup*>(layerGroup.get())->clearDrawables();
+        }
+    }
+
     if (!quadShader) {
-        quadShader = context.getGenericShader(shaders, "LocationIndicatorTexturedShader");
+        quadShader = context.getGenericShader(shaders, "LocationIndicatorTexturedShader", projectionVariant);
     }
 
     if (!quadShader) {
@@ -1096,7 +1162,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!circleShader) {
-        circleShader = context.getGenericShader(shaders, "LocationIndicatorShader");
+        circleShader = context.getGenericShader(shaders, "LocationIndicatorShader", projectionVariant);
     }
 
     if (!circleShader) {
@@ -1113,13 +1179,16 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!layerTweaker) {
-        layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(
-            getID(), evaluatedProperties, renderImpl->getProjectionCircle(), renderImpl->getProjectionPuck());
+        layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(getID(),
+                                                                       evaluatedProperties,
+                                                                       renderImpl->getProjectionCircle(),
+                                                                       renderImpl->getProjectionPuck(),
+                                                                       renderImpl->getPositionMercator());
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
     if (updateParameters->captureRenderedFeatures) {
-        captureRenderedFeatures();
+        captureRenderedFeatures(state);
     }
 
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
@@ -1176,6 +1245,8 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setShader(quadShader);
 
             createQuadGeometry(*drawable, drawableInfo.geometry);
+            drawableInfo.dirty = true;
+            drawableInfo.textureInfo.dirty = true;
 
             drawableInfo.drawable.emplace(*drawable);
 

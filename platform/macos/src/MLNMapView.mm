@@ -185,6 +185,12 @@ public:
   MLNAnnotationObjectTagMap _annotationTagsByAnnotation;
   MLNAnnotationTag _selectedAnnotationTag;
   MLNAnnotationTag _lastSelectedAnnotationTag;
+  /// An annotation behind the globe, selected once the camera settles with it in view.
+  id<MLNAnnotation> _annotationAwaitingSelection;
+  BOOL _annotationAwaitingSelectionAnimated;
+  /// From the start to the end of an animated camera change, one that only pitches or pads
+  /// included. Immediate changes, such as a resize, come and go during one.
+  BOOL _animatedCameraChangeInProgress;
   /// Size of the rectangle formed by unioning the maximum slop area around every annotation image.
   NSSize _unionedAnnotationImageSize;
   std::vector<MLNAnnotationTag> _annotationsNearbyLastClick;
@@ -949,6 +955,9 @@ public:
   if (!_mbglMap) {
     return;
   }
+  if (animated) {
+    _animatedCameraChangeInProgress = YES;
+  }
 
   if ([self.delegate respondsToSelector:@selector(mapView:cameraWillChangeAnimated:)]) {
     [self.delegate mapView:self cameraWillChangeAnimated:animated];
@@ -974,6 +983,9 @@ public:
   if (!_mbglMap) {
     return;
   }
+  if (animated) {
+    _animatedCameraChangeInProgress = NO;
+  }
 
   // Update all UI at the end of an animation or atomic change to the
   // viewport. More expensive updates can happen here, but care should
@@ -987,6 +999,14 @@ public:
 
   if ([self.delegate respondsToSelector:@selector(mapView:cameraDidChangeAnimated:)]) {
     [self.delegate mapView:self cameraDidChangeAnimated:animated];
+  }
+
+  if (_annotationAwaitingSelection) {
+    // A camera change that cut this one short starts right after it ends; settle once it has.
+    __weak __typeof__(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [weakSelf settleAnnotationAwaitingSelection];
+    });
   }
 }
 
@@ -1955,6 +1975,9 @@ public:
       [self selectAnnotation:annotation atPoint:gesturePoint];
     }
   } else {
+    // A click on the map drops a selection still waiting for the map to turn, as it drops the
+    // selected one.
+    _annotationAwaitingSelection = nil;
     [self deselectAnnotation:self.selectedAnnotation];
   }
 }
@@ -2448,6 +2471,10 @@ public:
     NSAssert([annotation conformsToProtocol:@protocol(MLNAnnotation)],
              @"Annotation does not conform to MLNAnnotation");
 
+    if (annotation == _annotationAwaitingSelection) {
+      _annotationAwaitingSelection = nil;
+    }
+
     MLNAnnotationTag annotationTag = [self annotationTagForAnnotation:annotation];
     NSAssert(annotationTag != MLNAnnotationTagNotFound, @"No ID for annotation %@", annotation);
 
@@ -2703,8 +2730,35 @@ public:
   MLNLogDebug(@"Selecting annotation: %@ atPoint: %@ moveIntoView: %@ animateSelection: %@",
               annotation, NSStringFromPoint(gesturePoint), MLNStringFromBOOL(moveIntoView),
               MLNStringFromBOOL(animateSelection));
+  // A newer selection, even of the selected annotation, replaces one waiting for the map to turn.
+  _annotationAwaitingSelection = nil;
+
   id<MLNAnnotation> selectedAnnotation = self.selectedAnnotation;
   if (annotation == selectedAnnotation) {
+    return;
+  }
+
+  // Behind the globe: an annotation that may move into view is centered first, and selected once
+  // the camera settles with it in view.
+  if (annotation && [self isCoordinateOccluded:annotation.coordinate]) {
+    if (!moveIntoView ||
+        ![self isMovingAnnotationIntoViewSupportedForAnnotation:annotation
+                                                       animated:animateSelection]) {
+      return;
+    }
+    // Added now, as a selection on Mercator adds it, so removing every annotation meanwhile removes
+    // it too.
+    if ([self annotationTagForAnnotation:annotation] == MLNAnnotationTagNotFound) {
+      [self addAnnotation:annotation];
+    }
+    _annotationAwaitingSelection = annotation;
+    _annotationAwaitingSelectionAnimated = animateSelection;
+    __weak __typeof__(self) weakSelf = self;
+    [self setCenterCoordinate:annotation.coordinate
+                     animated:animateSelection
+            completionHandler:^{
+              [weakSelf settleAnnotationAwaitingSelection];
+            }];
     return;
   }
 
@@ -2967,7 +3021,26 @@ public:
   return [self dequeueReusableAnnotationImageWithIdentifier:symbolName];
 }
 
+/// Once the camera has settled, selects the annotation waiting for it if it came into view, or
+/// drops it.
+- (void)settleAnnotationAwaitingSelection {
+  id<MLNAnnotation> annotation = _annotationAwaitingSelection;
+  if (!annotation || _animatedCameraChangeInProgress || _mbglMap->isGestureInProgress()) {
+    return;
+  }
+  _annotationAwaitingSelection = nil;
+  if (![self isCoordinateOccluded:annotation.coordinate]) {
+    [self selectAnnotation:annotation
+                   atPoint:NSZeroPoint
+              moveIntoView:NO
+          animateSelection:_annotationAwaitingSelectionAnimated];
+  }
+}
+
 - (void)deselectAnnotation:(id<MLNAnnotation>)annotation {
+  if (annotation && annotation == _annotationAwaitingSelection) {
+    _annotationAwaitingSelection = nil;
+  }
   if (!annotation || self.selectedAnnotation != annotation) {
     return;
   }
@@ -2984,6 +3057,11 @@ public:
 - (void)updateAnnotationCallouts {
   NSPopover *callout = self.calloutForSelectedAnnotation;
   if (callout) {
+    if ([self isCoordinateOccluded:self.selectedAnnotation.coordinate]) {
+      [self deselectAnnotation:self.selectedAnnotation];
+      return;
+    }
+
     NSRect rect = [self positioningRectForCalloutForAnnotationWithTag:_selectedAnnotationTag];
 
     NSAssert(!NSEqualRects(rect, NSZeroRect), @"Positioning rect should be non-zero");
@@ -3321,6 +3399,12 @@ public:
   return [self convertPoint:NSMakePoint(pixel.x, pixel.y) toView:view];
 }
 
+/// Whether the globe hides the coordinate from the camera.
+- (BOOL)isCoordinateOccluded:(CLLocationCoordinate2D)coordinate {
+  return CLLocationCoordinate2DIsValid(coordinate) &&
+         _mbglMap->isLocationOccluded(MLNLatLngFromLocationCoordinate2D(coordinate));
+}
+
 - (CLLocationCoordinate2D)convertPoint:(NSPoint)point toCoordinateFromView:(nullable NSView *)view {
   return MLNLocationCoordinate2DFromLatLng([self convertPoint:point toLatLngFromView:view]);
 }
@@ -3379,23 +3463,31 @@ public:
 /// bounding box.
 - (mln::LatLngBounds)convertRect:(NSRect)rect toLatLngBoundsFromView:(nullable NSView *)view {
   auto bounds = mln::LatLngBounds::empty();
-  auto bottomLeft = [self convertPoint:{NSMinX(rect), NSMinY(rect)} toLatLngFromView:view];
-  auto bottomRight = [self convertPoint:{NSMaxX(rect), NSMinY(rect)} toLatLngFromView:view];
-  auto topRight = [self convertPoint:{NSMaxX(rect), NSMaxY(rect)} toLatLngFromView:view];
-  auto topLeft = [self convertPoint:{NSMinX(rect), NSMaxY(rect)} toLatLngFromView:view];
 
   // If the bounds straddles the antimeridian, unwrap it so that one side
   // extends beyond ±180° longitude.
   auto center = [self convertPoint:{NSMidX(rect), NSMidY(rect)} toLatLngFromView:view];
-  bottomLeft.unwrapForShortestPath(center);
-  bottomRight.unwrapForShortestPath(center);
-  topRight.unwrapForShortestPath(center);
-  topLeft.unwrapForShortestPath(center);
 
-  bounds.extend(bottomLeft);
-  bounds.extend(bottomRight);
-  bounds.extend(topRight);
-  bounds.extend(topLeft);
+  // The corners and the middles of the edges: on a globe the edges bulge past the corners.
+  for (const NSPoint point :
+       {NSMakePoint(NSMinX(rect), NSMinY(rect)), NSMakePoint(NSMidX(rect), NSMinY(rect)),
+        NSMakePoint(NSMaxX(rect), NSMinY(rect)), NSMakePoint(NSMaxX(rect), NSMidY(rect)),
+        NSMakePoint(NSMaxX(rect), NSMaxY(rect)), NSMakePoint(NSMidX(rect), NSMaxY(rect)),
+        NSMakePoint(NSMinX(rect), NSMaxY(rect)), NSMakePoint(NSMinX(rect), NSMidY(rect))}) {
+    auto latLng = [self convertPoint:point toLatLngFromView:view];
+    latLng.unwrapForShortestPath(center);
+    bounds.extend(latLng);
+  }
+
+  // A pole in view puts every longitude in view; Mercator never draws one.
+  for (const double latitude : {90.0, -90.0}) {
+    const NSPoint pole = [self convertLatLng:mln::LatLng(latitude, 0) toPointToView:view];
+    if (NSPointInRect(pole, rect) &&
+        std::abs([self convertPoint:pole toLatLngFromView:view].latitude() - latitude) < 1e-3) {
+      bounds = mln::LatLngBounds::hull({latitude > 0 ? bounds.south() : latitude, -180},
+                                       {latitude > 0 ? latitude : bounds.north(), 180});
+    }
+  }
 
   return bounds;
 }

@@ -177,7 +177,8 @@ typedef enum mln_plugin_uniform_scope_v1 {
     MLN_PLUGIN_UNIFORM_DRAWABLE = 0,
     /*
      * Callback once per layer/shader per frame. All drawables share the result.
-     * The context has an identity tile_matrix and zero pixels_to_tile_units.
+     * The context has an identity tile_matrix and projection_matrix, and zero
+     * pixels_to_tile_units and tile_mercator_coords.
      * Only layer-wide values belong here, never tile-dependent interpolation.
      */
     MLN_PLUGIN_UNIFORM_LAYER = 1,
@@ -271,6 +272,25 @@ typedef struct mln_plugin_uniform_context_v1 {
     float pixels_to_tile_units;
     float camera_to_center_distance;
     float pixel_ratio;
+    /*
+     * The tile's projection, the fields MapLibre GL JS hands a custom layer.
+     * projection_transition is 0 on Mercator and 1 on the globe, in between
+     * while the two blend; tile_matrix is the Mercator side of that blend.
+     * tile_mercator_coords takes tile coordinates to the Mercator world in
+     * [0, 1]: xy + coordinates * zw. projection_matrix takes positions on the
+     * unit sphere (x towards 90 degrees east, y towards the north pole, z
+     * towards null island) to clip space; on Mercator it equals tile_matrix.
+     * A sphere position is behind the horizon when
+     * dot(position, clipping_plane.xyz) + clipping_plane.w < 0; the plane is
+     * zero on Mercator. pixels_to_sphere_radians is the angle one pixel spans
+     * on the unit sphere at the map's center, what pixels_to_tile_units is on
+     * the tile.
+     */
+    float projection_transition;
+    float tile_mercator_coords[4];
+    float projection_matrix[16];
+    float clipping_plane[4];
+    float pixels_to_sphere_radians;
 } mln_plugin_uniform_context_v1;
 
 /* output is host-owned writable storage of output_size bytes, borrowed only
@@ -341,7 +361,9 @@ typedef struct mln_plugin_drawable_descriptor_v1 {
     /* Indexed triangles in the translucent pass, premultiplied-alpha blending by
      * default. depth_mode, enable_stencil_overlap, and cull_back_faces select the
      * host depth/stencil/cull state for this drawable. blend_mode and reserved are
-     * unused; set them to zero. */
+     * unused; set them to zero. On the globe, read/write depth is tested against
+     * the planet, which hides what lies behind its near side, and read-only depth
+     * draws without a depth test, as the host's 2D layers do there. */
     uint32_t struct_size;
     uint64_t drawable_key;
     mln_plugin_string shader_id;
@@ -410,6 +432,16 @@ typedef struct mln_plugin_query_context_v1 {
     double tile_matrix[16];
     uint32_t viewport_width;
     uint32_t viewport_height;
+    /*
+     * The tile's projection, with the meaning mln_plugin_uniform_context_v1
+     * gives these fields, so a hit test can put a feature where the uniform
+     * callback's shader draws it; tile_matrix is the Mercator side of the blend.
+     */
+    double projection_transition;
+    double tile_mercator_coords[4];
+    double projection_matrix[16];
+    double clipping_plane[4];
+    double pixels_to_sphere_radians;
 } mln_plugin_query_context_v1;
 
 /* Optional exact hit test. Query and feature geometry use tile coordinates.

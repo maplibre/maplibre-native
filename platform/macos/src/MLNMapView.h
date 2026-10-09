@@ -958,6 +958,12 @@ around the returned camera object if it were set as the receiver’s camera.
  panned so that the annotation and its callout are brought just onscreen. The
  annotation is *not* centered within the viewport.
 
+ On a globe, an ``MLNPointAnnotation`` behind the planet is selected once the map
+ has centered on it and the camera settles with it in view, after any other
+ camera change made meanwhile. Deselecting or removing it, selecting another
+ annotation, or clicking the map before then cancels the selection. Other
+ annotations behind the planet are not selected.
+
  @param annotation The annotation object to select.
  */
 - (void)selectAnnotation:(id<MLNAnnotation>)annotation;

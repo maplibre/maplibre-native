@@ -2,6 +2,7 @@
 
 #include <mln/renderer/render_layer.hpp>
 #include <mln/renderer/buckets/hillshade_bucket.hpp>
+#include <mln/renderer/globe_tile_mesh.hpp>
 #include <mln/style/layers/color_relief_layer_impl.hpp>
 #include <mln/style/layers/color_relief_layer_properties.hpp>
 #include <mln/util/image.hpp>
@@ -42,7 +43,7 @@ private:
                                 float,
                                 const TransformState &,
                                 float,
-                                const mat4 &,
+                                const TileProjector &,
                                 const FeatureState &) const override;
     void updateColorRamp();
 
@@ -70,6 +71,7 @@ private:
     // Vertex data
     using ColorReliefVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<ColorReliefVertexVector> staticDataSharedVertices;
+    GlobeTileMeshCache<HillshadeLayoutVertex, decltype(&HillshadeBucket::layoutVertex)> globeMeshes;
 };
 
 } // namespace mln

@@ -4,6 +4,7 @@
 #include <mln/map/map.hpp>
 #include <mln/map/map_impl.hpp>
 #include <mln/map/transform.hpp>
+#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/math/log2.hpp>
 #include <mln/renderer/renderer_frontend.hpp>
@@ -13,6 +14,7 @@
 #include <mln/storage/resource.hpp>
 #include <mln/storage/response.hpp>
 #include <mln/style/observer.hpp>
+#include <mln/style/projection_definition.hpp>
 #include <mln/style/style_impl.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/exception.hpp>
@@ -22,6 +24,9 @@
 #include <mln/util/tile_coordinate.hpp>
 #include <mln/util/action_journal.hpp>
 
+#include <array>
+#include <limits>
+#include <optional>
 #include <utility>
 
 namespace mln {
@@ -200,12 +205,11 @@ CameraOptions Map::cameraForLatLngBounds(const LatLngBounds& bounds,
         pitch);
 }
 
-CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
-                               const Transform& transform,
-                               const EdgeInsets& padding) {
-    if (latLngs.empty()) {
-        return {};
-    }
+namespace {
+
+CameraOptions cameraForLatLngsOnScreen(const std::vector<LatLng>& latLngs,
+                                       const Transform& transform,
+                                       const EdgeInsets& padding) {
     Size size = transform.getState().getSize();
     // Calculate the bounds of the possibly rotated shape with respect to the viewport.
     ScreenCoordinate nePixel = {-INFINITY, -INFINITY};
@@ -251,6 +255,116 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
         .withZoom(zoom);
 }
 
+// GL JS `solveVectorScale`: how much to scale the globe for a surface point to land on `target` along one clip
+// axis, or nothing when the equation degenerates. Zooming out also moves the camera along `toCenter`, so the point
+// solved for is `vector * t + toCenter * (1 - t)`.
+std::optional<double> globeScaleForClipTarget(
+    const vec3& vector, const vec3& toCenter, const mat4& projection, bool xAxis, double target) {
+    const std::array<double, 4> column =
+        xAxis ? std::array<double, 4>{projection[0], projection[4], projection[8], projection[12]}
+              : std::array<double, 4>{projection[1], projection[5], projection[9], projection[13]};
+    const std::array<double, 4> columnZ = {projection[3], projection[7], projection[11], projection[15]};
+
+    const double vectorDot = vector[0] * column[0] + vector[1] * column[1] + vector[2] * column[2];
+    const double vectorDotZ = vector[0] * columnZ[0] + vector[1] * columnZ[1] + vector[2] * columnZ[2];
+    const double toCenterDot = toCenter[0] * column[0] + toCenter[1] * column[1] + toCenter[2] * column[2];
+    const double toCenterDotZ = toCenter[0] * columnZ[0] + toCenter[1] * columnZ[1] + toCenter[2] * columnZ[2];
+
+    if (toCenterDot + target * vectorDotZ == vectorDot + target * toCenterDotZ ||
+        columnZ[3] * (vectorDot - toCenterDot) + column[3] * (toCenterDotZ - vectorDotZ) + vectorDot * toCenterDotZ ==
+            toCenterDot * vectorDotZ) {
+        return std::nullopt;
+    }
+    return (toCenterDot + column[3] - target * toCenterDotZ - target * columnZ[3]) /
+           (toCenterDot - vectorDot - target * toCenterDotZ + target * vectorDotZ);
+}
+
+void keepSmallestScale(double& smallest, const std::optional<double>& candidate) {
+    if (candidate && *candidate >= 0 && *candidate < smallest) {
+        smallest = *candidate;
+    }
+}
+
+// GL JS `VerticalPerspectiveCameraHelper.cameraForBoxAndBearing`: fit the flat world first, then scale the globe
+// until every corner and edge midpoint of the bounds is inside the padded viewport, with no pitch.
+CameraOptions cameraForLatLngsOnGlobe(const std::vector<LatLng>& latLngs,
+                                      const Transform& transform,
+                                      const EdgeInsets& padding) {
+    Transform flat(transform.getState());
+    flat.setProjectionDefinition(ProjectionDefinition(ProjectionType::Mercator));
+    flat.jumpTo(CameraOptions().withPitch(0.0).withRoll(0.0));
+    CameraOptions fit = cameraForLatLngsOnScreen(latLngs, flat, padding);
+    if (!fit.center || !fit.zoom) {
+        return fit;
+    }
+
+    // Solve with the padding the returned camera is shown with.
+    Transform globe(transform.getState());
+    globe.jumpTo(
+        CameraOptions().withCenter(fit.center).withZoom(fit.zoom).withPadding(padding).withPitch(0.0).withRoll(0.0));
+    const TransformState& state = globe.getState();
+    const mat4& matrix = state.getGlobeViewProjectionMatrix();
+    const Size size = state.getSize();
+    const double left = padding.left() / size.width * 2.0 - 1.0;
+    const double right = (size.width - padding.right()) / size.width * 2.0 - 1.0;
+    const double top = padding.top() / size.height * -2.0 + 1.0;
+    const double bottom = (size.height - padding.bottom()) / size.height * -2.0 + 1.0;
+
+    LatLngBounds bounds = LatLngBounds::empty();
+    for (const LatLng& latLng : latLngs) {
+        bounds.extend(latLng);
+    }
+    const double west = bounds.west();
+    const double east = bounds.east();
+    const double north = bounds.north();
+    const double south = bounds.south();
+    const double midLongitude = west + VerticalPerspectiveProjection::differenceOfAnglesDegrees(west, east) * 0.5;
+    const double midLatitude = north + VerticalPerspectiveProjection::differenceOfAnglesDegrees(north, south) * 0.5;
+    const std::array<LatLng, 8> samples = {LatLng{north, west},
+                                           LatLng{north, east},
+                                           LatLng{south, west},
+                                           LatLng{south, east},
+                                           LatLng{midLatitude, east},
+                                           LatLng{midLatitude, west},
+                                           LatLng{north, midLongitude},
+                                           LatLng{south, midLongitude}};
+    const vec3 toCenter = VerticalPerspectiveProjection::surfaceVector(*fit.center);
+
+    double smallest = std::numeric_limits<double>::infinity();
+    for (const LatLng& sample : samples) {
+        const vec3 vector = VerticalPerspectiveProjection::surfaceVector(sample);
+        if (left < 0) {
+            keepSmallestScale(smallest, globeScaleForClipTarget(vector, toCenter, matrix, true, left));
+        }
+        if (right > 0) {
+            keepSmallestScale(smallest, globeScaleForClipTarget(vector, toCenter, matrix, true, right));
+        }
+        if (top > 0) {
+            keepSmallestScale(smallest, globeScaleForClipTarget(vector, toCenter, matrix, false, top));
+        }
+        if (bottom < 0) {
+            keepSmallestScale(smallest, globeScaleForClipTarget(vector, toCenter, matrix, false, bottom));
+        }
+    }
+    if (!std::isfinite(smallest) || smallest == 0) {
+        Log::Warning(Event::General, "Unable to fit the bounds on the globe; keeping the flat fit.");
+        return fit;
+    }
+    return fit.withZoom(std::min(globe.getZoom() + state.scaleZoom(smallest), state.getMaxZoom()));
+}
+
+} // namespace
+
+CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
+                               const Transform& transform,
+                               const EdgeInsets& padding) {
+    if (latLngs.empty()) {
+        return {};
+    }
+    return transform.getState().isGlobeRendering() ? cameraForLatLngsOnGlobe(latLngs, transform, padding)
+                                                   : cameraForLatLngsOnScreen(latLngs, transform, padding);
+}
+
 CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
                                     const EdgeInsets& padding,
                                     const std::optional<double>& bearing,
@@ -279,11 +393,70 @@ CameraOptions Map::cameraForGeometry(const Geometry<double>& geometry,
     return cameraForLatLngs(latLngs, padding, bearing, pitch);
 }
 
+namespace {
+/// GL JS's globe bounds: the farthest of eight edge points on each side of the center, where points off the planet
+/// fall on its horizon, widened to every longitude when a pole is on screen.
+LatLngBounds globeBounds(const Transform& transform) {
+    const auto width = static_cast<double>(transform.getState().getSize().width);
+    const auto height = static_cast<double>(transform.getState().getSize().height);
+    const LatLng center = transform.getLatLng();
+    double west = 0, east = 0, south = 0, north = 0;
+    for (const ScreenCoordinate& point : std::array<ScreenCoordinate, 8>{{{0, 0},
+                                                                          {width / 2, 0},
+                                                                          {width, 0},
+                                                                          {width, height / 2},
+                                                                          {width, height},
+                                                                          {width / 2, height},
+                                                                          {0, height},
+                                                                          {0, height / 2}}}) {
+        const LatLng latLng = transform.screenCoordinateToLatLng(point);
+        const double longitude = VerticalPerspectiveProjection::differenceOfAnglesDegrees(center.longitude(),
+                                                                                          latLng.longitude());
+        const double latitude = VerticalPerspectiveProjection::differenceOfAnglesDegrees(center.latitude(),
+                                                                                         latLng.latitude());
+        west = std::min(west, longitude);
+        east = std::max(east, longitude);
+        south = std::min(south, latitude);
+        north = std::max(north, latitude);
+    }
+    west += center.longitude();
+    east += center.longitude();
+    south += center.latitude();
+    north += center.latitude();
+
+    const auto onScreen = [&](const LatLng& pole) {
+        // In front of the camera and inside its depth range, as GL JS's isSurfacePointOnScreen asks.
+        vec4 clip;
+        VerticalPerspectiveProjection::latLngToScreenCoordinate(transform.getState(), pole, clip);
+        if (clip[3] <= 0 || std::abs(clip[2] / clip[3]) >= 1) {
+            return false;
+        }
+        const ScreenCoordinate point = transform.latLngToScreenCoordinate(pole);
+        return !transform.getState().isLocationOccluded(pole) && point.x > 0 && point.x < width && point.y > 0 &&
+               point.y < height;
+    };
+    if (onScreen({90, 0})) {
+        north = 90;
+        west = -180;
+        east = 180;
+    }
+    if (onScreen({-90, 0})) {
+        south = -90;
+        west = -180;
+        east = 180;
+    }
+    return LatLngBounds::hull({south, west}, {north, east});
+}
+} // namespace
+
 LatLngBounds Map::latLngBoundsForCamera(const CameraOptions& camera) const {
     Transform shallow{impl->transform.getState()};
     Size size = shallow.getState().getSize();
 
     shallow.jumpTo(camera);
+    if (shallow.getState().isGlobeRendering()) {
+        return globeBounds(shallow);
+    }
     return LatLngBounds::hull(
         shallow.screenCoordinateToLatLng({}),
         shallow.screenCoordinateToLatLng({static_cast<double>(size.width), static_cast<double>(size.height)}));
@@ -294,6 +467,9 @@ LatLngBounds Map::latLngBoundsForCameraUnwrapped(const CameraOptions& camera) co
     Size size = shallow.getState().getSize();
 
     shallow.jumpTo(camera);
+    if (shallow.getState().isGlobeRendering()) {
+        return globeBounds(shallow);
+    }
     LatLng nw = shallow.screenCoordinateToLatLng({});
     LatLng se = shallow.screenCoordinateToLatLng({static_cast<double>(size.width), static_cast<double>(size.height)});
     LatLng ne = shallow.screenCoordinateToLatLng({static_cast<double>(size.width), 0.0});
@@ -324,9 +500,13 @@ void Map::setBounds(const BoundOptions& options) {
 
     if (options.minZoom) {
         impl->transform.setMinZoom(*options.minZoom);
-        if (impl->transform.getZoom() < *options.minZoom) {
+        // On the globe the lowest zoom falls with latitude; on Mercator it is the minimum.
+        const TransformState& state = impl->transform.getState();
+        const double latitudeTerm = state.getMinZoomAtLatitude(state.getLatLng().latitude()) - state.getMinZoom();
+        const double minZoom = *options.minZoom + latitudeTerm;
+        if (impl->transform.getZoom() < minZoom) {
             changeCamera = true;
-            cameraOptions.withZoom(options.minZoom);
+            cameraOptions.withZoom(minZoom);
         }
     }
 
@@ -434,6 +614,10 @@ ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {
 
 LatLng Map::latLngForPixel(const ScreenCoordinate& pixel, LatLng::WrapMode wrapMode) const {
     return impl->transform.screenCoordinateToLatLng(pixel, wrapMode);
+}
+
+bool Map::isLocationOccluded(const LatLng& latLng) const {
+    return impl->transform.isLocationOccluded(latLng);
 }
 
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {

@@ -9,11 +9,13 @@
 #include <mln/gfx/shader_group.hpp>
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/gfx/vertex_attribute.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/plugin/plugin_shader.hpp>
 #include <mln/renderer/change_request.hpp>
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/layer_tweaker.hpp>
 #include <mln/renderer/layers/plugin_layer_tweaker.hpp>
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/render_tile.hpp>
@@ -23,6 +25,7 @@
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/plugin_property.hpp>
 
+#include <algorithm>
 #include <set>
 
 namespace mln {
@@ -152,6 +155,11 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                                     const RenderTree&,
                                     UniqueChangeRequestVec& changes) {
     const auto& registration = pluginImpl(baseImpl).registration;
+    // The globe skips the depth test for 2D drawables, so read/write depth drawables are built 3D there, to test
+    // against the planet's depth.
+    updateProjectionVariant(state);
+    const bool globe = projectionVariant == gfx::ProjectionVariant::Globe;
+    readWriteDepth = false;
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -207,6 +215,10 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             removeTile(renderPass, tileID);
         }
         setRenderTileBucketID(tileID, bucket.getID());
+        readWriteDepth = readWriteDepth || std::ranges::any_of(bucket.drawables, [&](const auto& definition) {
+                             return definition.depthMode == PluginDrawableDepthMode::ReadWrite &&
+                                    !definition.enableStencilOverlap && !registration->enableStencilOverlapDedup;
+                         });
         if (updateTile(renderPass, tileID, [&](gfx::Drawable& drawable) {
                 return drawable.getLayerTweaker() == layerTweaker;
             })) {
@@ -219,7 +231,8 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             auto* paintBinders = bucket.paintBinders(getID(), definition.key);
             auto attributes = context.createVertexAttributeArray();
             if (paintBinders) paintBinders->populateVertexAttributes(*attributes, propertiesAsUniforms);
-            const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, propertiesAsUniforms)
+            const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(
+                                                  context, propertiesAsUniforms, gfx::ProjectionVariant::Mercator)
                                             : gfx::ShaderPtr{};
             if (!shader || definition.segments.empty()) {
                 continue;
@@ -250,7 +263,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
                 builder->setEnableDepth(true);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setIs3D(false);
+                builder->setIs3D(globe);
                 builder->setEnableStencil(false);
                 if (definition.cullBackFaces) {
                     builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
@@ -292,7 +305,7 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
                                                     float zoom,
                                                     const TransformState& transformState,
                                                     float pixelsToTileUnits,
-                                                    const mat4& tileMatrix,
+                                                    const TileProjector& projector,
                                                     const FeatureState& featureState) const {
     const auto& registration = pluginImpl(baseImpl).registration;
     if (!registration->queryFeature) return false;
@@ -322,9 +335,20 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     queryContext.pixels_to_tile_units = pixelsToTileUnits;
     queryContext.camera_to_center_distance = transformState.getCameraToCenterDistance();
     queryContext.bearing = transformState.getBearing();
-    std::copy(tileMatrix.begin(), tileMatrix.end(), queryContext.tile_matrix);
+    // The projection as the uniform callback gets it: tile_matrix is its Mercator side, the same matrix on Mercator.
+    const auto& projection = projector.getProjectionData();
+    std::copy(projection.fallbackMatrix.begin(), projection.fallbackMatrix.end(), queryContext.tile_matrix);
     queryContext.viewport_width = transformState.getSize().width;
     queryContext.viewport_height = transformState.getSize().height;
+    queryContext.projection_transition = projection.projectionTransition;
+    std::copy(
+        projection.tileMercatorCoords.begin(), projection.tileMercatorCoords.end(), queryContext.tile_mercator_coords);
+    std::copy(projection.mainMatrix.begin(), projection.mainMatrix.end(), queryContext.projection_matrix);
+    std::copy(projection.clippingPlane.begin(), projection.clippingPlane.end(), queryContext.clipping_plane);
+    queryContext.pixels_to_sphere_radians = LayerTweaker::globeExtrudeScale(
+        UnwrappedTileID(0, 0, 0),
+        static_cast<float>(transformState.getZoom()),
+        transformState.getProjection().circleRadiusCorrection(transformState));
     return registration->queryFeature(
                &pluginFeature.value, query.data(), query.size(), &queryContext, properties.data(), properties.size()) !=
            0;
