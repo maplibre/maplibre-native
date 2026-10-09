@@ -26,7 +26,18 @@ public:
 
     void bind() override { offscreenTexture->getResource<RenderableResource>().bind(); }
 
-    void swap() override { offscreenTexture->getResource<RenderableResource>().swap(); }
+    void swap() override {
+        // The headless frame is the whole frame and nothing presents it, so it is paced here: wait
+        // for it as OffscreenTexture used to for every pass. Offscreen passes within a frame (drape
+        // targets, hillshade prepare) no longer wait; without this, a continuous-mode headless map
+        // committed frames faster than the GPU finished them until the queue stalled
+        // (Map.PrefetchTiles).
+        const MTLCommandBufferPtr frame = offscreenTexture->getResource<RenderableResource>().getCommandBuffer();
+        offscreenTexture->getResource<RenderableResource>().swap();
+        if (frame) {
+            frame->waitUntilCompleted();
+        }
+    }
 
     PremultipliedImage readStillImage() { return offscreenTexture->readStillImage(); }
 

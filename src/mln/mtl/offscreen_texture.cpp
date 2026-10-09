@@ -85,13 +85,22 @@ public:
 
     void swap() override {
         assert(commandBuffer);
+        // No wait here: the passes that sample this texture are encoded into later command buffers
+        // on the same queue, which run after this one, with Metal's hazard tracking ordering the
+        // texture writes before those reads. Waiting stopped the CPU once per offscreen pass - on
+        // a pitched terrain map every drape target re-rendered in a frame, ~20 a frame while
+        // rotating, which held the frame rate near 12 fps with the GPU busy 40 % of the time.
+        // Only a CPU read-back (readStillImage) needs the GPU to have finished.
         commandBuffer->commit();
-        commandBuffer->waitUntilCompleted();
+        lastCommitted = commandBuffer;
         commandBuffer.reset();
         renderPassDescriptor.reset();
     }
 
     PremultipliedImage readStillImage() {
+        if (lastCommitted) {
+            lastCommitted->waitUntilCompleted();
+        }
         assert(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
 
         auto data = std::make_unique<uint8_t[]>(colorTexture->getDataSize());
@@ -129,6 +138,8 @@ private:
     gfx::Texture2DPtr depthTexture;
     gfx::Texture2DPtr stencilTexture;
     MTLCommandBufferPtr commandBuffer;
+    /// The last pass's command buffer, kept so a CPU read-back can wait for it
+    MTLCommandBufferPtr lastCommitted;
     MTLRenderPassDescriptorPtr renderPassDescriptor;
 };
 
