@@ -103,6 +103,7 @@ void FillLayer::setFillAntialiasTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillAntialias>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillLayer::getFillAntialiasTransition() const {
@@ -130,6 +131,7 @@ void FillLayer::setFillColorTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillLayer::getFillColorTransition() const {
@@ -157,6 +159,7 @@ void FillLayer::setFillOpacityTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillLayer::getFillOpacityTransition() const {
@@ -184,6 +187,7 @@ void FillLayer::setFillOutlineColorTransition(const TransitionOptions& options) 
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillOutlineColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillLayer::getFillOutlineColorTransition() const {
@@ -211,6 +215,7 @@ void FillLayer::setFillPatternTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillPattern>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillLayer::getFillPatternTransition() const {
@@ -238,6 +243,7 @@ void FillLayer::setFillTranslateTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillTranslate>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillLayer::getFillTranslateTransition() const {
@@ -265,6 +271,7 @@ void FillLayer::setFillTranslateAnchorTransition(const TransitionOptions& option
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillTranslateAnchor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillLayer::getFillTranslateAnchorTransition() const {

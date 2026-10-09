@@ -163,6 +163,7 @@ void LineLayer::setLineBlurTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<LineBlur>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLineBlurTransition() const {
@@ -190,6 +191,7 @@ void LineLayer::setLineColorTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<LineColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLineColorTransition() const {
@@ -217,6 +219,7 @@ void LineLayer::setLineDasharrayTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<LineDasharray>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLineDasharrayTransition() const {
@@ -244,6 +247,7 @@ void LineLayer::setLineGapWidthTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<LineGapWidth>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLineGapWidthTransition() const {
@@ -271,6 +275,7 @@ void LineLayer::setLineGradientTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<LineGradient>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLineGradientTransition() const {
@@ -298,6 +303,7 @@ void LineLayer::setLineOffsetTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<LineOffset>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLineOffsetTransition() const {
@@ -325,6 +331,7 @@ void LineLayer::setLineOpacityTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<LineOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLineOpacityTransition() const {
@@ -352,6 +359,7 @@ void LineLayer::setLinePatternTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<LinePattern>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLinePatternTransition() const {
@@ -379,6 +387,7 @@ void LineLayer::setLineTranslateTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<LineTranslate>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLineTranslateTransition() const {
@@ -406,6 +415,7 @@ void LineLayer::setLineTranslateAnchorTransition(const TransitionOptions& option
     auto impl_ = mutableImpl();
     impl_->paint.template get<LineTranslateAnchor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLineTranslateAnchorTransition() const {
@@ -434,6 +444,7 @@ void LineLayer::setLineWidthTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<LineWidth>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LineLayer::getLineWidthTransition() const {
