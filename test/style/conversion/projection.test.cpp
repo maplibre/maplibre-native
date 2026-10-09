@@ -83,6 +83,15 @@ TEST(StyleConversion, Projection) {
     }
 
     {
+        // An end that is the globe preset counts with its share at the zoom, so above 12 it is Mercator.
+        auto projection = parseProjection(R"({"type":["interpolate",["linear"],["zoom"],0,"mercator",20,"globe"]})");
+        ASSERT_TRUE(projection);
+        EXPECT_NEAR(0.25, projection->impl->evaluate(5.f).transitionState(), 1e-6);
+        EXPECT_NEAR(0.575 * 0.5, projection->impl->evaluate(11.5f).transitionState(), 1e-6);
+        EXPECT_EQ(ProjectionDefinition("mercator"), projection->impl->evaluate(15.f));
+    }
+
+    {
         auto projection = parseProjection("{}");
         ASSERT_TRUE(projection);
         const mln::JSValue typeValue("globe");
