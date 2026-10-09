@@ -1,3 +1,5 @@
+#include <exception>
+
 #include <mln/style/expression/collator.hpp>
 #include <mln/style/expression/comparison.hpp>
 #include <mln/style/expression/dsl.hpp>
@@ -56,22 +58,22 @@ bool gteq(const Value& lhs, const Value& rhs) noexcept {
                      });
 }
 
-bool eqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+bool eqCollate(const std::string& a, const std::string& b, const Collator& c) {
     return c.compare(a, b) == 0;
 }
-bool neqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+bool neqCollate(const std::string& a, const std::string& b, const Collator& c) {
     return !eqCollate(a, b, c);
 }
-bool ltCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+bool ltCollate(const std::string& a, const std::string& b, const Collator& c) {
     return c.compare(a, b) < 0;
 }
-bool gtCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+bool gtCollate(const std::string& a, const std::string& b, const Collator& c) {
     return c.compare(a, b) > 0;
 }
-bool lteqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+bool lteqCollate(const std::string& a, const std::string& b, const Collator& c) {
     return c.compare(a, b) <= 0;
 }
-bool gteqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+bool gteqCollate(const std::string& a, const std::string& b, const Collator& c) {
     return c.compare(a, b) >= 0;
 }
 
@@ -178,7 +180,7 @@ CollatorComparison::CollatorComparison(std::string op_,
                             (lhs->getType() == type::Value || rhs->getType() == type::Value);
 }
 
-EvaluationResult CollatorComparison::evaluate(const EvaluationContext& params) const {
+EvaluationResult CollatorComparison::evaluate(const EvaluationContext& params) const try {
     EvaluationResult lhsResult = lhs->evaluate(params);
     if (!lhsResult) return lhsResult;
 
@@ -196,6 +198,8 @@ EvaluationResult CollatorComparison::evaluate(const EvaluationContext& params) c
 
     const Collator& c = collatorResult->get<Collator>();
     return compare(lhsResult->get<std::string>(), rhsResult->get<std::string>(), c);
+} catch (const std::exception& error) {
+    return EvaluationError{error.what()};
 }
 
 void CollatorComparison::eachChild(const std::function<void(const Expression&)>& visit) const {

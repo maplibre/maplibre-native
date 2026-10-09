@@ -1,3 +1,5 @@
+#include <exception>
+
 #include <mln/style/expression/collator.hpp>
 #include <mln/style/expression/collator_expression.hpp>
 #include <mln/style/expression/literal.hpp>
@@ -103,7 +105,7 @@ mln::Value CollatorExpression::serialize() const {
     return std::vector<mln::Value>{{std::string("collator"), options}};
 }
 
-EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) const {
+EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) const try {
     auto caseSensitiveResult = caseSensitive->evaluate(params);
     if (!caseSensitiveResult) {
         return caseSensitiveResult.error();
@@ -124,6 +126,8 @@ EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) c
     } else {
         return Collator(caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>());
     }
+} catch (const std::exception& error) {
+    return EvaluationError{error.what()};
 }
 
 } // namespace expression
