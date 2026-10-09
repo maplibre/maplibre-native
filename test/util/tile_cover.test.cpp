@@ -719,4 +719,3 @@ TEST(TileCover, ElevatedCentreCoversTheGroundAtTheBottomOfTheView) {
         }
     }
 }
-
