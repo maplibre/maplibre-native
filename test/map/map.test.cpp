@@ -1982,6 +1982,36 @@ TEST(Map, ObserveTileLifecycle) {
     }
 }
 
+TEST(Map, EmptyPlacementDoesNotRequestRepaint) {
+    MapTest<> test{1, MapMode::Continuous};
+    std::optional<MapObserver::RenderFrameStatus> status;
+    test.observer.didFinishRenderingFrameCallback = [&](auto value) {
+        status = value;
+    };
+    test.map.getStyle().loadJSON(R"({
+        "version": 8, "sources": {}, "transition": {"duration": 0},
+        "layers": [{"id": "background", "type": "background", "paint": {"background-color": "white"}}]
+    })");
+    test.runLoop.runOnce();
+
+    // Reuse the same update timestamp to stay within the placement interval.
+    for (int frame = 0; frame < 2; ++frame) {
+        status.reset();
+        test.frontend.renderFrame();
+        ASSERT_TRUE(status);
+        EXPECT_FALSE(status->needsRepaint);
+    }
+
+    auto& background = *static_cast<BackgroundLayer*>(test.map.getStyle().getLayer("background"));
+    test.map.getStyle().setTransitionOptions({Milliseconds(300)});
+    background.setBackgroundColor(Color::red());
+    test.runLoop.runOnce();
+    status.reset();
+    test.frontend.renderFrame();
+    ASSERT_TRUE(status);
+    EXPECT_TRUE(status->needsRepaint);
+}
+
 TEST(BackgroundLayer, ImmediateStyleReplacementRetainsColor) {
     MapTest<> test;
     for (int iteration = 0; iteration < 2; ++iteration) {
