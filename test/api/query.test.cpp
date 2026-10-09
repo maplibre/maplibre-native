@@ -179,6 +179,34 @@ TEST(Query, QueryFiltersUseGlobalState) {
     EXPECT_TRUE(test.frontend.getRenderer()->querySourceFeatures("source4", sourceOptions).empty());
 }
 
+TEST(Query, QueryRenderedFeaturesLineOffsetEndpoint) {
+    for (const double offset : {22.0, -22.0}) {
+        SCOPED_TRACE(offset);
+        QueryTest test;
+        test.map.getStyle().loadJSON(
+            R"({"version":8,"sources":{"source":{"type":"geojson","data":{
+                "type":"LineString","coordinates":[[1.0025,1],[1.0035,1]]
+            }}},"layers":[{"id":"layer","type":"line","source":"source","paint":{
+                "line-width":6,"line-offset":)" +
+            std::to_string(offset) + R"(}}]})");
+        test.map.jumpTo(CameraOptions().withCenter(LatLng{1, 1.003}).withZoom(16.5));
+        const auto rendered = test.frontend.render(test.map);
+        const auto endpoint = test.map.pixelForLatLng({1, 1.0035});
+        // Stay inside the butt cap, away from antialiased edges.
+        const ScreenCoordinate inside{endpoint.x - 5, endpoint.y + offset};
+        const ScreenCoordinate outside{endpoint.x - 5, endpoint.y};
+        const auto alphaAt = [&](const ScreenCoordinate& point) {
+            return rendered.image.data[4 * (static_cast<uint32_t>(point.y) * rendered.image.size.width +
+                                            static_cast<uint32_t>(point.x)) +
+                                       3];
+        };
+        EXPECT_GT(alphaAt(inside), 0);
+        EXPECT_EQ(alphaAt(outside), 0);
+        EXPECT_EQ(test.frontend.getRenderer()->queryRenderedFeatures(inside, {{{"layer"}}, {}}).size(), 1u);
+        EXPECT_TRUE(test.frontend.getRenderer()->queryRenderedFeatures(outside, {{{"layer"}}, {}}).empty());
+    }
+}
+
 TEST(Query, QuerySourceFeatures) {
     QueryTest test;
 
