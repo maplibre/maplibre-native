@@ -1241,6 +1241,8 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setShader(quadShader);
 
             createQuadGeometry(*drawable, drawableInfo.geometry);
+            drawableInfo.dirty = true;
+            drawableInfo.textureInfo.dirty = true;
 
             drawableInfo.drawable.emplace(*drawable);
 
