@@ -328,7 +328,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 #endif
             } break;
 
-            case LineType::SDF: {
+            case LineType::SDF:
+            case LineType::GradientSDF: {
                 if (const auto& data = drawable.getData()) {
                     const gfx::LineDrawableData& lineData = static_cast<const gfx::LineDrawableData&>(*data);
                     const auto& dashPatternTexture = parameters.lineAtlas.getDashPatternTexture(
@@ -336,12 +337,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         evaluated.get<LineDasharray>().to,
                         lineData.linePatternCap);
 
-                    // texture
-                    if (!drawable.getTexture(idLineImageTexture)) {
+                    // The gradient variant keeps its ramp in the image slot, so the dash atlas takes the second.
+                    const auto dashTextureId = static_cast<LineType>(drawable.getType()) == LineType::GradientSDF
+                                                   ? idLineDashTexture
+                                                   : idLineImageTexture;
+                    if (!drawable.getTexture(dashTextureId)) {
                         const auto& texture = dashPatternTexture.getTexture();
                         drawable.setEnabled(!!texture);
                         if (texture) {
-                            drawable.setTexture(texture, idLineImageTexture);
+                            drawable.setTexture(texture, dashTextureId);
                         }
                     }
 
