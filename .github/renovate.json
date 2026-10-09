@@ -4,6 +4,12 @@
     {
       "matchManagers": ["bazel", "bazel-module"],
       "groupName": "bazel"
+    },
+    {
+      "description": "Bazel 8.8 makes ios-ci fail on macos-26 runners (lost runners, filesystem I/O errors)",
+      "matchManagers": ["bazelisk"],
+      "matchDepNames": ["bazel"],
+      "allowedVersions": "<8.7.0"
     }
   ],
   "ignoreDeps": ["cxx.rs"],

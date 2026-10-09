@@ -52,10 +52,12 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
     }
     evaluatedPaintSnapshot = std::make_shared<const style::PluginPropertyMap>(evaluatedPluginProperties);
     passes = RenderPass::Translucent;
+    styleDependencies = layerImpl.getDependencies();
 }
 
 void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) {
     const auto& impl = pluginImpl(baseImpl);
+    styleDependencies = impl.getDependencies();
     const auto& definitions = impl.registration->properties;
     for (const auto& definition : definitions) {
         const auto property = impl.pluginProperties.find(definition.name);
