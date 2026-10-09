@@ -535,7 +535,7 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
                                       std::pow(2, transformState.getZoom() - id.overscaledZ),
                                       options,
                                       globalState,
-                                      id.toUnwrapped(),
+                                      id,
                                       layers,
                                       queryPadding * transformState.maxPitchScaleFactor(),
                                       featureState);
