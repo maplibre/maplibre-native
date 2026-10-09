@@ -19,6 +19,7 @@ namespace mln {
 class RendererObserver;
 class RenderStaticData;
 class RenderTree;
+class TerrainElevationIndex;
 
 namespace gfx {
 class RendererBackend;
@@ -108,6 +109,10 @@ private:
     /// Last terrain height reported under the map centre, so an unchanged surface does not
     /// post an observer message every frame.
     double lastReportedCenterElevation = 0.0;
+
+    /// The terrain height copy last handed to the observer (null: none, or terrain off), so it
+    /// is sent once per change rather than once per frame.
+    std::shared_ptr<const TerrainElevationIndex> reportedElevationIndex;
 
     enum class RenderState {
         Never,

@@ -797,49 +797,56 @@ std::optional<LatLng> RenderTerrain::pickLatLng(const TransformState& state, con
     if (!isEnabled()) {
         return std::nullopt;
     }
-    // TransformState unprojects y-up screen points; queries and the platform views hand us y-down
-    ScreenCoordinate flipped = pixel;
-    flipped.y = state.getSize().height - pixel.y;
-    const LatLng seaLevel = state.screenCoordinateToLatLng(flipped);
-    if (!getElevationAtLatLng(seaLevel)) {
-        return std::nullopt; // no DEM under the ray: nothing to pick against
+    return pickTerrainSurface(state, pixel, [this](const LatLng& latLng) { return getElevationAtLatLng(latLng); });
+}
+
+bool RenderTerrain::updateElevationIndex() {
+    if (!demSource || !isEnabled()) {
+        elevationGrids.clear();
+        const bool changed = elevationIndex != nullptr;
+        elevationIndex.reset();
+        return changed;
     }
-    const auto camera = state.getFreeCameraOptions().getLocation();
-    if (!camera || camera->altitude <= 0.0) {
-        return std::nullopt;
-    }
-    // Terrain height (exaggerated metres, the projection's z unit) where the ray crosses the
-    // horizontal plane at `planeHeight`
-    const auto surfaceHeightAt = [&](double planeHeight, LatLng& out) {
-        out = state.screenCoordinateToLatLng(flipped, planeHeight);
-        return getElevationAtLatLng(out).value_or(0.0);
-    };
-    constexpr int steps = 64;
-    const double top = camera->altitude * 0.999;
-    double above = top; // last plane height known to be above the surface
-    LatLng probe;
-    if (surfaceHeightAt(above, probe) >= above) {
-        return std::nullopt; // camera inside the terrain
-    }
-    for (int i = 1; i <= steps; ++i) {
-        const double h = top * (1.0 - static_cast<double>(i) / steps);
-        if (surfaceHeightAt(h, probe) < h) {
-            above = h;
-            continue;
-        }
-        // Crossed between `above` and `h`: bisect onto the surface
-        double below = h;
-        for (int j = 0; j < 8; ++j) {
-            const double mid = 0.5 * (above + below);
-            if (surfaceHeightAt(mid, probe) < mid) {
-                above = mid;
-            } else {
-                below = mid;
+    const auto loaded = loadedDEMTiles(demSource);
+    const float exaggeration = getExaggeration();
+    bool changed = !elevationIndex || elevationIndex->getExaggeration() != exaggeration ||
+                   loaded.size() != elevationGrids.size();
+    if (!changed) {
+        for (const auto& tile : loaded) {
+            const auto found = elevationGrids.find(tile.id);
+            if (found == elevationGrids.end() || found->second.source != tile.data) {
+                changed = true;
+                break;
             }
         }
-        return state.screenCoordinateToLatLng(flipped, 0.5 * (above + below), LatLng::Wrapped);
     }
-    return std::nullopt;
+    if (!changed) {
+        return false;
+    }
+    std::unordered_map<UnwrappedTileID, ElevationGridCopy> grids;
+    std::vector<TerrainElevationIndex::Tile> tiles;
+    tiles.reserve(loaded.size());
+    for (const auto& tile : loaded) {
+        ElevationGridCopy copy;
+        if (const auto found = elevationGrids.find(tile.id);
+            found != elevationGrids.end() && found->second.source == tile.data) {
+            copy = found->second;
+        } else {
+            copy = {tile.data, std::make_shared<const TerrainElevationIndex::Grid>(*tile.data)};
+        }
+        tiles.push_back({tile.id, copy.grid});
+        grids.emplace(tile.id, std::move(copy));
+    }
+    elevationGrids = std::move(grids);
+    if (tiles.empty()) {
+        // Terrain on with no DEM loaded yet: nothing to hand over, and nothing changed if the
+        // map already has none
+        const bool hadIndex = elevationIndex != nullptr;
+        elevationIndex.reset();
+        return hadIndex;
+    }
+    elevationIndex = std::make_shared<const TerrainElevationIndex>(std::move(tiles), exaggeration);
+    return true;
 }
 
 std::optional<double> RenderTerrain::getElevationAtLatLng(const LatLng& latLng) const {

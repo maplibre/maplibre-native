@@ -753,6 +753,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         }
     }
 
+    // Hand the map side a fresh copy of the terrain heights whenever the loaded DEM tiles change
+    // (RenderTerrain::updateElevationIndex), and null when terrain goes away.
+    {
+        std::shared_ptr<const TerrainElevationIndex> elevationIndex;
+        if (auto* terrain = orchestrator.getRenderTerrain()) {
+            terrain->updateElevationIndex();
+            elevationIndex = terrain->getElevationIndex();
+        }
+        if (elevationIndex != reportedElevationIndex) {
+            reportedElevationIndex = elevationIndex;
+            observer->onTerrainElevationIndexChanged(std::move(elevationIndex));
+        }
+    }
+
     auto stats = std::make_shared<gfx::RenderingStats>(context.threadSafeCopyRenderingStats());
 
     // Add the feature info from the render orchestrator
