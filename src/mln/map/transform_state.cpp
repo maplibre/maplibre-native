@@ -538,9 +538,11 @@ void TransformState::setViewportMode(ViewportMode val) {
 // MARK: - Camera options
 
 CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
-    // Bounds across the antimeridian keep the center in their range, past 180 degrees, where it has to stay.
+    // The globe keeps the center on the world copy nearest the previous one, which its coordinate conversions do not
+    // depend on, and reports it wrapped. Mercator's conversions use the copy the transform is on, and bounds across
+    // the antimeridian keep the center in their range, past 180 degrees: both report the center as it is.
     return CameraOptions()
-        .withCenter(getLatLng(bounds == LatLngBounds() ? LatLng::Wrapped : LatLng::Unwrapped))
+        .withCenter(getLatLng(isGlobeRendering() && bounds == LatLngBounds() ? LatLng::Wrapped : LatLng::Unwrapped))
         .withCenterAltitude(getCenterAltitude())
         .withPadding(padding ? padding : edgeInsets)
         .withZoom(getZoom())

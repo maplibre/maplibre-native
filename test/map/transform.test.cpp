@@ -2163,3 +2163,18 @@ TEST(Transform, GlobeCameraCenterIsWrapped) {
     ASSERT_NEAR(181, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
     EXPECT_NEAR(-179, transform.getCameraOptions(std::nullopt).center->longitude(), 1e-9);
 }
+
+// On Mercator a zoom around a point across the antimeridian leaves the center on the next world copy, as it does on
+// main: the camera reports that copy, which converts back to the middle of the view.
+TEST(Transform, MercatorCameraCenterIsOnTheTransformsWorldCopy) {
+    Transform transform;
+    transform.resize({800, 600});
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 179.9}).withZoom(5));
+    transform.jumpTo(CameraOptions().withZoom(6).withAnchor(ScreenCoordinate{700, 300}));
+    ASSERT_GT(transform.getLatLng(LatLng::Unwrapped).longitude(), 180.0);
+    const LatLng center = *transform.getCameraOptions(std::nullopt).center;
+    EXPECT_NEAR(transform.getLatLng(LatLng::Unwrapped).longitude(), center.longitude(), 1e-9);
+    const ScreenCoordinate point = transform.latLngToScreenCoordinate(center);
+    EXPECT_NEAR(400.0, point.x, 1e-6);
+    EXPECT_NEAR(300.0, point.y, 1e-6);
+}
