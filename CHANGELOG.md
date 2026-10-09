@@ -20,6 +20,7 @@
 
 ### ✨ Technical Improvements
 
+- [core] Batch cache-read LRU timestamp updates to reduce SQLite transactions while keeping tile data writes immediate.
 - *...Add new stuff here...*
 - Bump [maplibre-native-base](https://github.com/maplibre/maplibre-native-base) from 2.0.0 to 2.1.1 ([#397](https://github.com/maplibre/maplibre-native/pull/397), [#406](https://github.com/maplibre/maplibre-native/pull/406))
 - Bump [wagyu](https://github.com/mapbox/wagyu) from 0.4.3 to 0.5.0 [#398](https://github.com/maplibre/maplibre-native/pull/398)

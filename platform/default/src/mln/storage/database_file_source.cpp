@@ -11,6 +11,7 @@
 #include <mln/util/logging.hpp>
 #include <mln/util/platform.hpp>
 #include <mln/util/thread.hpp>
+#include <mln/util/timer.hpp>
 
 #include <map>
 #include <utility>
@@ -20,7 +21,10 @@ class DatabaseFileSourceThread {
 public:
     DatabaseFileSourceThread(std::shared_ptr<FileSource> onlineFileSource_, const std::string& cachePath)
         : db(std::make_unique<OfflineDatabase>(cachePath, onlineFileSource_->getResourceOptions().tileServerOptions())),
-          onlineFileSource(std::move(onlineFileSource_)) {}
+          onlineFileSource(std::move(onlineFileSource_)) {
+        // Offline downloads also read through this database and need deferred LRU maintenance.
+        db->setAccessedCallback([this] { scheduleCacheMaintenance(); });
+    }
 
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
         std::optional<Response> offlineResponse = (resource.storagePolicy != Resource::StoragePolicy::Volatile)
@@ -133,6 +137,17 @@ public:
     void reopenDatabaseReadOnly(bool readOnly) { db->reopenDatabaseReadOnly(readOnly); }
 
 private:
+    void scheduleCacheMaintenance() {
+        if (db->pendingAccessedCount() == 0) return;
+        if (cacheMaintenanceScheduled) return;
+        cacheMaintenanceScheduled = true;
+        cacheTimer.start(Milliseconds(250), Duration::zero(), [this] {
+            cacheMaintenanceScheduled = false;
+            db->flushAccessed();
+            // Failed touches stay queued; the next cached read schedules a retry.
+        });
+    }
+
     expected<OfflineDownload*, std::exception_ptr> getDownload(int64_t regionID) {
         if (!onlineFileSource) {
             return unexpected<std::exception_ptr>(
@@ -153,6 +168,8 @@ private:
     }
 
     std::unique_ptr<OfflineDatabase> db;
+    util::Timer cacheTimer;
+    bool cacheMaintenanceScheduled = false;
     std::map<int64_t, std::unique_ptr<OfflineDownload>> downloads;
     std::shared_ptr<FileSource> onlineFileSource;
 };

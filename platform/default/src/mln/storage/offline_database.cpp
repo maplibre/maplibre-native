@@ -95,12 +95,54 @@ void OfflineDatabase::changePath(const std::string& path_) {
 }
 
 void OfflineDatabase::cleanup() {
+    flushAccessed();
+    pendingResourceAccessed.clear();
+    pendingTileAccessed.clear();
+    accessedFlushFailed = false;
     // Deleting these SQLite objects may result in exceptions
     try {
         statements.clear();
         db.reset();
     } catch (...) {
         handleError("close database");
+    }
+}
+
+std::size_t OfflineDatabase::pendingAccessedCount() const {
+    return pendingResourceAccessed.size() + pendingTileAccessed.size();
+}
+
+void OfflineDatabase::applyPendingAccessed() {
+    for (const auto& [id, accessed] : pendingResourceAccessed) {
+        mapbox::sqlite::Query query{getStatement("UPDATE resources SET accessed = MAX(accessed, ?1) WHERE id = ?2")};
+        query.bind(1, accessed);
+        query.bind(2, id);
+        query.run();
+    }
+    for (const auto& [id, accessed] : pendingTileAccessed) {
+        mapbox::sqlite::Query query{getStatement("UPDATE tiles SET accessed = MAX(accessed, ?1) WHERE id = ?2")};
+        query.bind(1, accessed);
+        query.bind(2, id);
+        query.run();
+    }
+}
+
+bool OfflineDatabase::flushAccessed() {
+    if (pendingAccessedCount() == 0) return true;
+    if (readOnly || !db) return false;
+    try {
+        mapbox::sqlite::Transaction transaction(*db, mapbox::sqlite::Transaction::Immediate);
+        applyPendingAccessed();
+        transaction.commit();
+        pendingResourceAccessed.clear();
+        pendingTileAccessed.clear();
+        accessedFlushFailed = false;
+        return true;
+    } catch (...) {
+        // A failed transaction leaves every touch queued for a later retry.
+        accessedFlushFailed = true;
+        handleError("flush accessed timestamps");
+        return false;
     }
 }
 
@@ -161,6 +203,9 @@ void OfflineDatabase::handleError(const char* action) {
 void OfflineDatabase::removeExisting() {
     Log::Warning(Event::Database, "Removing existing incompatible offline database");
 
+    pendingResourceAccessed.clear();
+    pendingTileAccessed.clear();
+    accessedFlushFailed = false;
     const auto filename = db ? db->getFilename() : path;
     statements.clear();
     db.reset();
@@ -271,12 +316,16 @@ std::optional<Response> OfflineDatabase::get(const Resource& resource) try {
 }
 
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getInternal(const Resource& resource) {
+    std::optional<std::pair<Response, uint64_t>> result;
     if (resource.kind == Resource::Kind::Tile) {
         assert(resource.tileData);
-        return getTile(*resource.tileData);
+        result = getTile(*resource.tileData);
     } else {
-        return getResource(resource);
+        result = getResource(resource);
     }
+    if (pendingAccessedCount() >= maximumPendingAccessed && !accessedFlushFailed) flushAccessed();
+    if (result && pendingAccessedCount() && accessedCallback) accessedCallback();
+    return result;
 }
 
 std::optional<int64_t> OfflineDatabase::hasInternal(const Resource& resource) {
@@ -300,8 +349,14 @@ std::pair<bool, uint64_t> OfflineDatabase::put(const Resource& resource, const R
     }
 
     mapbox::sqlite::Transaction transaction(*db, mapbox::sqlite::Transaction::Immediate);
+    pendingAppliedForEviction = false;
     auto result = putInternal(resource, response, true);
     transaction.commit();
+    if (pendingAppliedForEviction) {
+        pendingResourceAccessed.clear();
+        pendingTileAccessed.clear();
+        accessedFlushFailed = false;
+    }
     return result;
 } catch (...) {
     handleError("write resource");
@@ -330,7 +385,7 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
     std::optional<DatabaseSizeChangeStats> stats;
     if (evict_) {
         stats = DatabaseSizeChangeStats(this);
-        if (!evict(size, *stats)) {
+        if (!evict(size, *stats, true)) {
             Log::Info(Event::Database, "Unable to make space for entry");
             return {false, 0};
         }
@@ -363,28 +418,10 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
 }
 
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const Resource& resource) {
-    // Update accessed timestamp used for LRU eviction.
-    if (!readOnly) {
-        try {
-            mapbox::sqlite::Query accessedQuery{getStatement("UPDATE resources SET accessed = ?1 WHERE url = ?2")};
-            accessedQuery.bind(1, util::now());
-            accessedQuery.bind(2, cacheKey(resource));
-            accessedQuery.run();
-        } catch (const mapbox::sqlite::Exception& ex) {
-            if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
-                throw;
-            }
-
-            // If we don't have any indication that the database is corrupt, continue as usual.
-            Log::Warning(
-                Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
-        }
-    }
-
     // clang-format off
     mapbox::sqlite::Query query{ getStatement(
         //        0      1            2            3       4      5
-        "SELECT etag, expires, must_revalidate, modified, data, compressed "
+        "SELECT etag, expires, must_revalidate, modified, data, compressed, id "
         "FROM resources "
         "WHERE url = ?") };
     // clang-format on
@@ -414,6 +451,16 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
         size = data->length();
     }
 
+    if (!readOnly) {
+        const auto id = query.get<int64_t>(6);
+        const auto existing = pendingResourceAccessed.find(id);
+        if (existing != pendingResourceAccessed.end()) {
+            existing->second = std::max(existing->second, util::now());
+        } else if (pendingAccessedCount() < maximumPendingAccessed) {
+            pendingResourceAccessed.emplace(id, util::now());
+        }
+        // LRU metadata is best effort: new IDs are skipped while the queue is full.
+    }
     return std::make_pair(response, size);
 }
 
@@ -515,42 +562,10 @@ bool OfflineDatabase::putResource(const Resource& resource,
 }
 
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Resource::TileData& tile) {
-    // Update accessed timestamp used for LRU eviction.
-    if (!readOnly) {
-        try {
-            // clang-format off
-            mapbox::sqlite::Query accessedQuery{ getStatement(
-                "UPDATE tiles "
-                "SET accessed       = ?1 "
-                "WHERE url_template = ?2 "
-                "  AND pixel_ratio  = ?3 "
-                "  AND x            = ?4 "
-                "  AND y            = ?5 "
-                "  AND z            = ?6 ") };
-            // clang-format on
-
-            accessedQuery.bind(1, util::now());
-            accessedQuery.bind(2, tile.urlTemplate);
-            accessedQuery.bind(3, tile.pixelRatio);
-            accessedQuery.bind(4, tile.x);
-            accessedQuery.bind(5, tile.y);
-            accessedQuery.bind(6, tile.z);
-            accessedQuery.run();
-        } catch (const mapbox::sqlite::Exception& ex) {
-            if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
-                throw;
-            }
-
-            // If we don't have any indication that the database is corrupt, continue as usual.
-            Log::Warning(
-                Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
-        }
-    }
-
     // clang-format off
     mapbox::sqlite::Query query{ getStatement(
         //        0      1           2,            3,      4,      5
-        "SELECT etag, expires, must_revalidate, modified, data, compressed "
+        "SELECT etag, expires, must_revalidate, modified, data, compressed, id "
         "FROM tiles "
         "WHERE url_template = ?1 "
         "  AND pixel_ratio  = ?2 "
@@ -588,6 +603,16 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
         size = data->length();
     }
 
+    if (!readOnly) {
+        const auto id = query.get<int64_t>(6);
+        const auto existing = pendingTileAccessed.find(id);
+        if (existing != pendingTileAccessed.end()) {
+            existing->second = std::max(existing->second, util::now());
+        } else if (pendingAccessedCount() < maximumPendingAccessed) {
+            pendingTileAccessed.emplace(id, util::now());
+        }
+        // LRU metadata is best effort: new IDs are skipped while the queue is full.
+    }
     return std::make_pair(response, size);
 }
 
@@ -756,6 +781,10 @@ std::exception_ptr OfflineDatabase::invalidateAmbientCache() try {
 
 std::exception_ptr OfflineDatabase::clearAmbientCache() try {
     checkFlags();
+    // Do not retouch deleted row IDs if they are later reused.
+    pendingResourceAccessed.clear();
+    pendingTileAccessed.clear();
+    accessedFlushFailed = false;
 
     // clang-format off
     mapbox::sqlite::Query tileQuery{ getStatement(
@@ -990,6 +1019,8 @@ expected<OfflineRegionMetadata, std::exception_ptr> OfflineDatabase::updateMetad
 
 std::exception_ptr OfflineDatabase::deleteRegion(OfflineRegion&& region) try {
     checkFlags();
+    // LRU timestamps are best effort; a failed flush must not prevent deletion.
+    flushAccessed();
 
     {
         mapbox::sqlite::Query query{getStatement("DELETE FROM regions WHERE id = ?")};
@@ -1260,12 +1291,17 @@ T OfflineDatabase::getPragma(const char* sql) {
 // and as it approaches to the hard limit (i.e. the actual file size) we
 // delete an arbitrary number of old cache entries. The free pages approach
 // saves us from calling VACUUM or keeping a running total, which can be costly.
-bool OfflineDatabase::evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& stats) {
+bool OfflineDatabase::evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& stats, bool applyAccessed) {
     checkFlags();
     uint64_t ambientCacheSize = (initAmbientCacheSize() == nullptr) ? *currentAmbientCacheSize
                                                                     : maximumAmbientCacheSize;
     uint64_t newAmbientCacheSize = ambientCacheSize + neededFreeSize + stats.pageSize();
 
+    // Only put() applies touches in its transaction and clears them after commit.
+    if (applyAccessed && newAmbientCacheSize > maximumAmbientCacheSize && pendingAccessedCount()) {
+        applyPendingAccessed();
+        pendingAppliedForEviction = true;
+    }
     while (newAmbientCacheSize > maximumAmbientCacheSize) {
         // clang-format off
         mapbox::sqlite::Query accessedQuery{ getStatement(
@@ -1391,6 +1427,8 @@ std::exception_ptr OfflineDatabase::initAmbientCacheSize() {
 }
 
 std::exception_ptr OfflineDatabase::setMaximumAmbientCacheSize(uint64_t size) {
+    // Eviction can use persisted recency if this best-effort flush fails.
+    flushAccessed();
     uint64_t previousMaximumAmbientCacheSize = maximumAmbientCacheSize;
 
     if (auto exception = initAmbientCacheSize()) {
