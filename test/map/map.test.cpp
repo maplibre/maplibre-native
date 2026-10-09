@@ -1387,7 +1387,7 @@ TEST(Map, GlobeTileDrawnForItsChildrenMeetsFinerTilesWithoutAGap) {
                             {"id": "ocean", "type": "fill", "source": "ocean", "source-layer": "water",
                              "paint": {"fill-color": "blue"}}]})STYLE");
 
-    const auto ocean = std::make_shared<std::string>(util::read_file("metrics/integration/tiles/ocean.mvt"));
+    const auto ocean = std::make_shared<std::string>(util::read_file("test/fixtures/map/globe_tile_masks/ocean.mvt"));
     std::mutex mutex;
     bool holdChildren = false;
     std::set<CanonicalTileID> served;
