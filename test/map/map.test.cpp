@@ -1435,7 +1435,10 @@ TEST(Map, GlobeTileDrawnForItsChildrenMeetsFinerTilesWithoutAGap) {
     test.map.jumpTo(CameraOptions().withZoom(8.2));
     test.runLoop.run();
 
-    const auto image = test.frontend.readStillImage();
+    const auto image = [&] {
+        gfx::BackendScope scope{*test.frontend.getBackend()};
+        return test.frontend.readStillImage();
+    }();
     std::size_t background = 0;
     for (std::size_t i = 0; i < image.bytes(); i += 4) {
         if (image.data[i] > 128 && image.data[i + 2] < 128) {
