@@ -1,0 +1,17 @@
+{
+  "version": 8,
+  "sources": {
+    "inline": {
+      "type": "raster",
+      "tileSize": 512,
+      "maxzoom": 15,
+      "minzoom": 0,
+      "tiles": [ "http://127.0.0.1:3000/{z}-{x}-{y}.png" ]
+    }
+  },
+  "layers": [{
+    "id": "raster",
+    "type": "raster",
+    "source": "inline"
+  }]
+}

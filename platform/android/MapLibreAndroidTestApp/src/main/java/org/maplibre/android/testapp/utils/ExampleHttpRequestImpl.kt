@@ -11,11 +11,13 @@ import org.maplibre.android.module.http.HttpRequestImpl
  */
 class ExampleHttpRequestImpl : HttpRequest {
     override fun executeRequest(httpRequest: HttpResponder, nativePtr: Long, resourceUrl: String,
-                                dataRange: String, etag: String, modified: String, offlineUsage: Boolean)
+                                dataRange: String, etag: String, modified: String, offlineUsage: Boolean, acceptHeader: String)
     {
         // Load all json documents and any pbf ending with a 0.
-        if (resourceUrl.endsWith(".json") || resourceUrl.endsWith("0.pbf")) {
-            impl.executeRequest(httpRequest, nativePtr, resourceUrl, dataRange, etag, modified, offlineUsage)
+        if (resourceUrl.endsWith(".json")) {
+            impl.executeRequest(httpRequest, nativePtr, resourceUrl, dataRange, etag, modified, offlineUsage, "application/json")
+        } else if (resourceUrl.endsWith("0.pbf")) {
+            impl.executeRequest(httpRequest, nativePtr, resourceUrl, dataRange, etag, modified, offlineUsage, "application/vnd.mapbox-vector-tile")
         } else {
             // All other requests get an instant 404!
             httpRequest.onResponse(

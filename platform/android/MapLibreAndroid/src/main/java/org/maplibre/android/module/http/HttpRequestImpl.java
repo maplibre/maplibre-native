@@ -58,7 +58,7 @@ public class HttpRequestImpl implements HttpRequest {
   @Override
   public void executeRequest(HttpResponder httpRequest, long nativePtr, @NonNull String resourceUrl,
                              @NonNull String dataRange, @NonNull String etag, @NonNull String modified,
-                             boolean offlineUsage) {
+                             boolean offlineUsage, @NonNull String acceptHeader) {
     OkHttpCallback callback = new OkHttpCallback(httpRequest);
     try {
       HttpUrl httpUrl = HttpUrl.parse(resourceUrl);
@@ -83,6 +83,10 @@ public class HttpRequestImpl implements HttpRequest {
         builder.addHeader("If-None-Match", etag);
       } else if (modified.length() > 0) {
         builder.addHeader("If-Modified-Since", modified);
+      }
+
+      if (acceptHeader.length() > 0) {
+        builder.addHeader("Accept", acceptHeader);
       }
 
       final Request request = builder.build();

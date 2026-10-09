@@ -267,6 +267,10 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource,
 
     [req addValue:impl->userAgent forHTTPHeaderField:@"User-Agent"];
 
+    if (!resource.acceptHeader.empty()) {
+      [req addValue:@(std::string(resource.acceptHeader).c_str()) forHTTPHeaderField:@"Accept"];
+    }
+
     const bool isTile = resource.kind == mln::Resource::Kind::Tile;
 
     if (isTile) {

@@ -24,6 +24,12 @@ std::string OfflineDatabase::cacheKey(const Resource& resource) {
            std::to_string(resource.dataRange->second);
 }
 
+std::string OfflineDatabase::cacheKey(const Resource::TileData& tile) {
+    if (tile.vectorEncoding != Tileset::VectorEncoding::MLT) return tile.urlTemplate;
+    const auto sep = tile.urlTemplate.find('?') == std::string::npos ? '?' : '&';
+    return tile.urlTemplate + sep + "_mlnEncoding=mlt";
+}
+
 OfflineDatabase::OfflineDatabase(std::string path_, const TileServerOptions& options)
     : path(std::move(path_)),
       tileServerOptions(options) {
@@ -515,6 +521,8 @@ bool OfflineDatabase::putResource(const Resource& resource,
 }
 
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Resource::TileData& tile) {
+    const auto key = cacheKey(tile);
+
     // Update accessed timestamp used for LRU eviction.
     if (!readOnly) {
         try {
@@ -530,7 +538,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
             // clang-format on
 
             accessedQuery.bind(1, util::now());
-            accessedQuery.bind(2, tile.urlTemplate);
+            accessedQuery.bind(2, key);
             accessedQuery.bind(3, tile.pixelRatio);
             accessedQuery.bind(4, tile.x);
             accessedQuery.bind(5, tile.y);
@@ -559,7 +567,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
         "  AND z            = ?5 ") };
     // clang-format on
 
-    query.bind(1, tile.urlTemplate);
+    query.bind(1, key);
     query.bind(2, tile.pixelRatio);
     query.bind(3, tile.x);
     query.bind(4, tile.y);
@@ -592,6 +600,8 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
 }
 
 std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) {
+    const auto key = cacheKey(tile);
+
     // clang-format off
     mapbox::sqlite::Query size{ getStatement(
         "SELECT length(data) "
@@ -603,7 +613,7 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
         "  AND z            = ?5 ") };
     // clang-format on
 
-    size.bind(1, tile.urlTemplate);
+    size.bind(1, key);
     size.bind(2, tile.pixelRatio);
     size.bind(3, tile.x);
     size.bind(4, tile.y);
@@ -622,6 +632,8 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
                               bool compressed) {
     checkFlags();
 
+    const auto key = cacheKey(tile);
+
     if (response.notModified) {
         // clang-format off
         mapbox::sqlite::Query notModifiedQuery{ getStatement(
@@ -639,7 +651,7 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
         notModifiedQuery.bind(1, util::now());
         notModifiedQuery.bind(2, response.expires);
         notModifiedQuery.bind(3, response.mustRevalidate);
-        notModifiedQuery.bind(4, tile.urlTemplate);
+        notModifiedQuery.bind(4, key);
         notModifiedQuery.bind(5, tile.pixelRatio);
         notModifiedQuery.bind(6, tile.x);
         notModifiedQuery.bind(7, tile.y);
@@ -672,7 +684,7 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
     updateQuery.bind(3, response.expires);
     updateQuery.bind(4, response.mustRevalidate);
     updateQuery.bind(5, util::now());
-    updateQuery.bind(8, tile.urlTemplate);
+    updateQuery.bind(8, key);
     updateQuery.bind(9, tile.pixelRatio);
     updateQuery.bind(10, tile.x);
     updateQuery.bind(11, tile.y);
@@ -697,7 +709,7 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
         "VALUES            (?1,           ?2,          ?3, ?4, ?5, ?6,       ?7,              ?8,   ?9,      ?10,       ?11,  ?12)") };
     // clang-format on
 
-    insertQuery.bind(1, tile.urlTemplate);
+    insertQuery.bind(1, key);
     insertQuery.bind(2, tile.pixelRatio);
     insertQuery.bind(3, tile.x);
     insertQuery.bind(4, tile.y);
@@ -1125,8 +1137,9 @@ bool OfflineDatabase::markUsed(int64_t regionID, const Resource& resource) {
         // clang-format on
 
         const Resource::TileData& tile = *resource.tileData;
+        const auto key = cacheKey(tile);
         insertQuery.bind(1, regionID);
-        insertQuery.bind(2, tile.urlTemplate);
+        insertQuery.bind(2, key);
         insertQuery.bind(3, tile.pixelRatio);
         insertQuery.bind(4, tile.x);
         insertQuery.bind(5, tile.y);
@@ -1150,7 +1163,7 @@ bool OfflineDatabase::markUsed(int64_t regionID, const Resource& resource) {
         // clang-format on
 
         selectQuery.bind(1, regionID);
-        selectQuery.bind(2, tile.urlTemplate);
+        selectQuery.bind(2, key);
         selectQuery.bind(3, tile.pixelRatio);
         selectQuery.bind(4, tile.x);
         selectQuery.bind(5, tile.y);
