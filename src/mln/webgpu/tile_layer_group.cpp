@@ -69,7 +69,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             }
         }
     });
-    parameters.stencilModesFor3D(ownStencilModes);
+    const bool ownStencilModesTaken = parameters.stencilModesFor3D(ownStencilModes);
 
 #if !defined(NDEBUG)
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
@@ -133,6 +133,14 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         if (features3d) {
             const auto depth = (drawable.getEnableDepth() && depthMode3d) ? *depthMode3d : gfx::DepthMode::disabled();
             const auto own = ownStencilModes.find(&drawable);
+            if (own != ownStencilModes.end() && !ownStencilModesTaken) {
+                // A clear between two draws draws over the zoom 0 tile with buffers of its own.
+                const auto clears = parameters.context.renderingStats().stencilClears;
+                own->second = parameters.stencilModeFor3D();
+                if (parameters.context.renderingStats().stencilClears != clears) {
+                    static_cast<webgpu::UniformBufferArray&>(uniformBuffers).bindWebgpu(renderPass);
+                }
+            }
             const auto stencil = !drawable.getEnableStencil()   ? gfx::StencilMode::disabled()
                                  : own != ownStencilModes.end() ? own->second
                                  : stencilMode3d                ? *stencilMode3d

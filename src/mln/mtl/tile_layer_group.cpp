@@ -71,7 +71,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             }
         }
     });
-    parameters.stencilModesFor3D(ownStencilModes);
+    const bool ownStencilModesTaken = parameters.stencilModesFor3D(ownStencilModes);
 
 #if !defined(NDEBUG)
     const auto debugGroupRender = parameters.encoder->createDebugGroup(getName() + "-render");
@@ -146,6 +146,14 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // 2D drawables will set their own stencil mode within `draw`.
         if (features3d) {
             if (const auto own = ownStencilModes.find(&drawable); own != ownStencilModes.end()) {
+                if (!ownStencilModesTaken) {
+                    // A clear between two draws draws over the zoom 0 tile with buffers of its own.
+                    const auto clears = context.renderingStats().stencilClears;
+                    own->second = parameters.stencilModeFor3D();
+                    if (context.renderingStats().stencilClears != clears) {
+                        uniformBuffers.bindMtl(renderPass);
+                    }
+                }
                 stencilMode3d = own->second;
                 encoder->setStencilReferenceValue(stencilMode3d.ref);
             }

@@ -129,7 +129,10 @@ public:
 
     /// @brief Give each drawable a 3D stencil mode of its own, clearing the stencil buffer first if they would not all
     ///        fit, so no value handed out before the clear is drawn after it.
-    void stencilModesFor3D(std::unordered_map<const gfx::Drawable*, gfx::StencilMode>& modes);
+    /// @return false, handing out none, when there are more drawables than the buffer holds values: the caller then
+    /// takes
+    ///         each one's value with `stencilModeFor3D` as it draws it, so a clear falls between two draws.
+    bool stencilModesFor3D(std::unordered_map<const gfx::Drawable*, gfx::StencilMode>& modes);
 
 private:
     template <typename TIter>

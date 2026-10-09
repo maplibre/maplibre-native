@@ -73,7 +73,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             }
         }
     });
-    parameters.stencilModesFor3D(ownStencilModes);
+    const bool ownStencilModesTaken = parameters.stencilModesFor3D(ownStencilModes);
 
 #if !defined(NDEBUG)
     const auto debugGroupRender = parameters.encoder->createDebugGroup(getName() + "-render");
@@ -114,6 +114,9 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             drawableImpl.setDepthModeFor3D(depth);
 
             const auto own = ownStencilModes.find(&drawable);
+            if (own != ownStencilModes.end() && !ownStencilModesTaken) {
+                own->second = parameters.stencilModeFor3D();
+            }
             const auto& stencil = !drawableImpl.getEnableStencil() ? gfx::StencilMode::disabled()
                                   : own != ownStencilModes.end()   ? own->second
                                   : stencilMode3d                  ? *stencilMode3d

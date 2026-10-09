@@ -67,6 +67,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     gfx::StencilMode stencilMode3d;
     const bool hasStencilTiles = stencilTiles && !stencilTiles->empty();
     std::unordered_map<const gfx::Drawable*, gfx::StencilMode> ownStencilModes;
+    bool ownStencilModesTaken = true;
 
     parameters.stencilClippingAvailable = parameters.renderTargetHasStencilBuffer;
 
@@ -92,7 +93,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
                 }
             }
         });
-        parameters.stencilModesFor3D(ownStencilModes);
+        ownStencilModesTaken = parameters.stencilModesFor3D(ownStencilModes);
 
         // If we're doing 3D stenciling and have any features
         // to draw, set up the single-value stencil mask.
@@ -146,6 +147,9 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         // 2D drawables will set their own stencil mode within `draw`.
         if (features3d) {
             const auto own = ownStencilModes.find(&drawable);
+            if (own != ownStencilModes.end() && !ownStencilModesTaken) {
+                own->second = parameters.stencilModeFor3D();
+            }
             context.setStencilMode(!drawable.getEnableStencil()   ? gfx::StencilMode::disabled()
                                    : own != ownStencilModes.end() ? own->second
                                                                   : stencilMode3d);
