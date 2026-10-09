@@ -8,6 +8,7 @@
 #include <mln/math/log2.hpp>
 #include <mln/renderer/renderer_frontend.hpp>
 #include <mln/renderer/renderer_observer.hpp>
+#include <mln/renderer/terrain_elevation_index.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source_manager.hpp>
 #include <mln/storage/resource.hpp>
@@ -460,6 +461,48 @@ std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& s
     ret.reserve(screenCoords.size());
     for (const auto& point : screenCoords) {
         ret.emplace_back(latLngForPixel(point));
+    }
+    return ret;
+}
+
+std::optional<double> Map::getTerrainElevation(const LatLng& latLng) const {
+    if (!impl->terrainElevationIndex) {
+        return std::nullopt;
+    }
+    return impl->terrainElevationIndex->getElevation(latLng);
+}
+
+ScreenCoordinate Map::pixelForLatLngOnTerrain(const LatLng& latLng) const {
+    if (const auto elevation = getTerrainElevation(latLng)) {
+        return pixelForLatLng(latLng, *elevation);
+    }
+    return pixelForLatLng(latLng);
+}
+
+LatLng Map::latLngForPixelOnTerrain(const ScreenCoordinate& pixel) const {
+    if (const auto& index = impl->terrainElevationIndex) {
+        if (const auto surface = pickTerrainSurface(
+                impl->transform.getState(), pixel, [&](const LatLng& latLng) { return index->getElevation(latLng); })) {
+            return *surface;
+        }
+    }
+    return latLngForPixel(pixel);
+}
+
+std::vector<ScreenCoordinate> Map::pixelsForLatLngsOnTerrain(const std::vector<LatLng>& latLngs) const {
+    std::vector<ScreenCoordinate> ret;
+    ret.reserve(latLngs.size());
+    for (const auto& latLng : latLngs) {
+        ret.emplace_back(pixelForLatLngOnTerrain(latLng));
+    }
+    return ret;
+}
+
+std::vector<LatLng> Map::latLngsForPixelsOnTerrain(const std::vector<ScreenCoordinate>& screenCoords) const {
+    std::vector<LatLng> ret;
+    ret.reserve(screenCoords.size());
+    for (const auto& point : screenCoords) {
+        ret.emplace_back(latLngForPixelOnTerrain(point));
     }
     return ret;
 }

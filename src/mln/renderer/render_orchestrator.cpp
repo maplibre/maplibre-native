@@ -695,13 +695,6 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
     }
 }
 
-std::optional<LatLng> RenderOrchestrator::pickTerrainLatLng(const ScreenCoordinate& pixel) const {
-    if (renderTerrain && renderTerrain->isEnabled()) {
-        return renderTerrain->pickLatLng(transformState, pixel);
-    }
-    return std::nullopt;
-}
-
 std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     const ScreenLineString& geometry,
     const RenderedQueryOptions& options,

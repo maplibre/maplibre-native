@@ -34,6 +34,10 @@ public:
 
     void onInvalidate() override { delegate.invoke(&RendererObserver::onInvalidate); }
 
+    void onTerrainElevationIndexChanged(std::shared_ptr<const TerrainElevationIndex> index) override {
+        delegate.invoke(&RendererObserver::onTerrainElevationIndexChanged, std::move(index));
+    }
+
     void onResourceError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onResourceError, err); }
 
     void onDidFinishRenderingFrame(RenderMode mode,

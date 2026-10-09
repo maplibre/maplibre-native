@@ -185,6 +185,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/tile_layer_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_terrain.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/terrain_elevation_index.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/dem_elevation_provider.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/texture_pool.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/background_layer_tweaker.cpp

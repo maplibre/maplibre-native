@@ -8,6 +8,7 @@
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/gfx/index_buffer.hpp>
 #include <mln/renderer/texture_pool.hpp>
+#include <mln/renderer/terrain_elevation_index.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/geometry.hpp>
@@ -180,6 +181,19 @@ public:
      * altitude, when the camera is inside the terrain, or when the ray never meets the surface.
      */
     std::optional<LatLng> pickLatLng(const TransformState& state, const ScreenCoordinate& pixel) const;
+
+    /**
+     * @brief Bring the map side's copy of the terrain heights (getElevationIndex) up to date.
+     * Cheap when nothing changed: it rebuilds only when the loaded DEM tiles or the exaggeration
+     * differ from the last call, copying just the tiles it has not copied before, and drops the
+     * copy while terrain is off. Render-thread only.
+     * @return true when getElevationIndex changed, so the map needs the new one
+     */
+    bool updateElevationIndex();
+
+    /// The map side's copy of the terrain heights, as of the last updateElevationIndex; null while
+    /// terrain is off or no DEM tile is loaded.
+    const std::shared_ptr<const TerrainElevationIndex>& getElevationIndex() const { return elevationIndex; }
 
     /// Zoom levels of DEM ancestors kept loaded above the cover (TileParameters::retainAncestorLevels).
     /// The cover follows the declared maxzoom (16 with overzoom), while layers can draw from tiles
@@ -425,6 +439,15 @@ private:
     // this, preventing unbounded growth while browsing (previously reached 2GB+)
     static constexpr size_t maxDEMTextures = 96;
     uint64_t demUpdateCounter = 0;
+
+    /// Per-tile height copies behind elevationIndex, kept across rebuilds so a new tile set
+    /// copies only its new tiles. `source` identifies the DEM the copy was taken from.
+    struct ElevationGridCopy {
+        const DEMData* source = nullptr;
+        std::shared_ptr<const TerrainElevationIndex::Grid> grid;
+    };
+    std::unordered_map<UnwrappedTileID, ElevationGridCopy> elevationGrids;
+    std::shared_ptr<const TerrainElevationIndex> elevationIndex;
 
 #if MLN_RENDER_BACKEND_OPENGL
     // OpenGL-only: the same DEM tiles packed into one GL_TEXTURE_2D_ARRAY so the

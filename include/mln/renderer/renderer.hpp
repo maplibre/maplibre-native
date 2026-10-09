@@ -61,14 +61,6 @@ public:
     std::vector<Feature> queryRenderedFeatures(const ScreenBox& box, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options = {}) const;
 
-    /// Exaggerated 3D-terrain height (metres) at a coordinate, from the DEM tiles currently
-    /// loaded, or nullopt without terrain. Feed it to `Map::pixelForLatLng(latLng, elevation)`
-    /// to place markers on the draped surface. Must be called on the render thread.
-    std::optional<double> queryTerrainElevation(const LatLng&) const;
-    /// Coordinate of the draped 3D-terrain surface under a screen pixel (view pixels, y-down),
-    /// or nullopt without terrain: the inverse of `pixelForLatLng(latLng, elevation)`, for taps
-    /// and picks. Must be called on the render thread.
-    std::optional<LatLng> queryTerrainPick(const ScreenCoordinate&) const;
     AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
     AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
     AnnotationIDs getAnnotationIDs(const std::vector<Feature>&) const;

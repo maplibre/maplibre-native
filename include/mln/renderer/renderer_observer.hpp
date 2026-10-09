@@ -12,9 +12,12 @@
 #include <cstdint>
 #include <exception>
 #include <functional>
+#include <memory>
 #include <string>
 
 namespace mln {
+
+class TerrainElevationIndex;
 
 namespace gfx {
 class ShaderRegistry;
@@ -67,6 +70,13 @@ public:
     /// it - the DEM lives there - so a map that wants its centre to ride the terrain
     /// (Map::setCenterClampedToGround) learns of it here, one frame behind.
     virtual void onTerrainCenterElevationChanged(double /*elevationMeters*/) {}
+
+    /// The renderer's set of loaded terrain heights changed: tiles loaded or evicted, the
+    /// exaggeration changed, or terrain went on or off (null). The map answers height questions
+    /// (Map::getTerrainElevation, the terrain pick, pixelForLatLng over terrain) from this copy
+    /// instead of asking the render side. Observers that forward to another thread must forward
+    /// this too, or the map there never gets terrain heights.
+    virtual void onTerrainElevationIndexChanged(std::shared_ptr<const TerrainElevationIndex> /*index*/) {}
 
     /// Style is missing an image
     using StyleImageMissingCallback = std::function<void()>;
