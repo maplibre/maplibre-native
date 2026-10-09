@@ -11,7 +11,6 @@
 #include <mln/renderer/image_manager.hpp>
 #include <mln/renderer/layers/render_location_indicator_layer.hpp>
 #include <mln/map/tile_projector.hpp>
-#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/update_parameters.hpp>
@@ -680,12 +679,10 @@ protected:
                                               const mln::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         ScreenCoordinate posScreen = latLngToScreenCoordinate(position, s);
-        // The bottom of the window can be past the globe's edge, where a point stands for the nearest point on the
-        // horizon: there the direction is taken at the puck.
-        const ScreenCoordinate bottom{posScreen.x, params.height - 1.0};
-        if (!drawsOnGlobe(s) ||
-            VerticalPerspectiveProjection::screenCoordinateHitsGlobe(s, {bottom.x, s.getSize().height - bottom.y})) {
-            posScreen = bottom;
+        // Mercator turns the puck's column of the screen into a straight line, and the bottom of the window, nearest
+        // the camera, gives its direction. On the globe the direction turns down the column: it is taken at the puck.
+        if (!drawsOnGlobe(s)) {
+            posScreen.y = params.height - 1.0;
         }
         Point<double> posMerc = project(screenCoordinateToLatLng(posScreen, s), s);
         vec2 verticalShiftAtPos = verticalDirectionMercator(posScreen, posMerc, s);

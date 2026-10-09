@@ -167,6 +167,84 @@ Puck renderPuck(const std::string& projection,
     return result;
 }
 
+enum class PuckPart {
+    Bearing,
+    Top,
+    Shadow
+};
+
+/// The center of one of the puck's images, drawn alone on the globe with a tilt displacement, in NDC.
+std::optional<Point<double>> globePuckPartCenter(PuckPart part, const CameraOptions& camera, const LatLng& location) {
+    util::RunLoop loop;
+
+    HeadlessFrontend frontend{1};
+    Map map(frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+            ResourceOptions().withCachePath(":memory:"));
+    map.getStyle().loadJSON(
+        R"({"version":8,"projection":{"type":"globe"},"sources":{},"layers":[{"id":"background","type":"background","paint":{"background-color":"white"}}]})");
+    map.jumpTo(camera);
+
+    PremultipliedImage black({16, 16});
+    for (std::size_t i = 0; i < black.bytes(); i += 4) {
+        black.data[i] = 0;
+        black.data[i + 1] = 0;
+        black.data[i + 2] = 0;
+        black.data[i + 3] = 255;
+    }
+    map.getStyle().addImage(std::make_unique<style::Image>("image", std::move(black), 1.0f));
+
+    auto puck = std::make_unique<LocationIndicatorLayer>("puck");
+    puck->setLocation(std::array<double, 3>{{location.latitude(), location.longitude(), 0.0}});
+    puck->setImageTiltDisplacement(30.0f);
+    switch (part) {
+        case PuckPart::Bearing:
+            puck->setBearingImage(expression::Image("image"));
+            puck->setBearingImageSize(1.0f);
+            break;
+        case PuckPart::Top:
+            puck->setTopImage(expression::Image("image"));
+            puck->setTopImageSize(1.0f);
+            break;
+        case PuckPart::Shadow:
+            puck->setShadowImage(expression::Image("image"));
+            puck->setShadowImageSize(1.0f);
+            break;
+    }
+    map.getStyle().addLayer(std::move(puck));
+
+    const auto drawn = blackBound(frontend.render(map).image);
+    if (!drawn) {
+        return std::nullopt;
+    }
+    return Point<double>{(drawn->minX + drawn->maxX) / 2.0, (drawn->minY + drawn->maxY) / 2.0};
+}
+
+/// Pitched, the hat and the shadow lean straight up and down the screen from the puck.
+void expectGlobeHatAndShadowUpAndDown(const CameraOptions& camera, const LatLng& location) {
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
+    GTEST_SKIP() << "OpenGL draws the location indicator with its own renderer, which has no globe path yet";
+#endif
+    const mln::JSValue emptyObject(rapidjson::kObjectType);
+    style::conversion::Error error;
+    if (!LayerManager::get()->createLayer("location-indicator", "probe", &emptyObject, error)) {
+        GTEST_SKIP() << "no location-indicator layer on this platform";
+    }
+
+    constexpr double pixel = 2.0 / 256.0;
+    const auto bearing = globePuckPartCenter(PuckPart::Bearing, camera, location);
+    const auto top = globePuckPartCenter(PuckPart::Top, camera, location);
+    const auto shadow = globePuckPartCenter(PuckPart::Shadow, camera, location);
+    ASSERT_TRUE(bearing);
+    ASSERT_TRUE(top);
+    ASSERT_TRUE(shadow);
+    EXPECT_NEAR(top->x, bearing->x, pixel);
+    EXPECT_NEAR(shadow->x, bearing->x, pixel);
+    EXPECT_GT(top->y, bearing->y + 2.0 * pixel);
+    EXPECT_LT(shadow->y, bearing->y - 2.0 * pixel);
+}
+
 } // namespace
 
 TEST(LocationIndicator, MercatorPuckAtItsLocation) {
@@ -328,80 +406,15 @@ TEST(LocationIndicator, PuckDrawnAfterTheProjectionChanges) {
 }
 
 // At zoom 0 the bottom of the window is past the globe's edge, where every point stands for a point on the horizon:
-// the hat and the shadow took the direction they lean in along the horizon there. Pitched, they lean straight up and
-// down the screen from the puck.
+// the hat and the shadow took the direction they lean in along the horizon there.
 TEST(LocationIndicator, GlobeHatAndShadowLeanUpAndDownTheScreenWithTheWindowBottomInSpace) {
-#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
-    GTEST_SKIP() << "OpenGL draws the location indicator with its own renderer, which has no globe path yet";
-#endif
-    const mln::JSValue emptyObject(rapidjson::kObjectType);
-    style::conversion::Error error;
-    if (!LayerManager::get()->createLayer("location-indicator", "probe", &emptyObject, error)) {
-        GTEST_SKIP() << "no location-indicator layer on this platform";
-    }
+    expectGlobeHatAndShadowUpAndDown(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(0.0).withPitch(20.0),
+                                     LatLng{0.0, 40.0});
+}
 
-    enum class Part {
-        Bearing,
-        Top,
-        Shadow
-    };
-    // The center of the part's image in the rendered image, in NDC.
-    const auto center = [](Part part) -> std::optional<Point<double>> {
-        util::RunLoop loop;
-
-        HeadlessFrontend frontend{1};
-        Map map(frontend,
-                MapObserver::nullObserver(),
-                MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
-                ResourceOptions().withCachePath(":memory:"));
-        map.getStyle().loadJSON(
-            R"({"version":8,"projection":{"type":"globe"},"sources":{},"layers":[{"id":"background","type":"background","paint":{"background-color":"white"}}]})");
-        map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(0.0).withPitch(20.0));
-
-        PremultipliedImage black({16, 16});
-        for (std::size_t i = 0; i < black.bytes(); i += 4) {
-            black.data[i] = 0;
-            black.data[i + 1] = 0;
-            black.data[i + 2] = 0;
-            black.data[i + 3] = 255;
-        }
-        map.getStyle().addImage(std::make_unique<style::Image>("image", std::move(black), 1.0f));
-
-        auto puck = std::make_unique<LocationIndicatorLayer>("puck");
-        puck->setLocation(std::array<double, 3>{{0.0, 40.0, 0.0}});
-        puck->setImageTiltDisplacement(30.0f);
-        switch (part) {
-            case Part::Bearing:
-                puck->setBearingImage(expression::Image("image"));
-                puck->setBearingImageSize(1.0f);
-                break;
-            case Part::Top:
-                puck->setTopImage(expression::Image("image"));
-                puck->setTopImageSize(1.0f);
-                break;
-            case Part::Shadow:
-                puck->setShadowImage(expression::Image("image"));
-                puck->setShadowImageSize(1.0f);
-                break;
-        }
-        map.getStyle().addLayer(std::move(puck));
-
-        const auto drawn = blackBound(frontend.render(map).image);
-        if (!drawn) {
-            return std::nullopt;
-        }
-        return Point<double>{(drawn->minX + drawn->maxX) / 2.0, (drawn->minY + drawn->maxY) / 2.0};
-    };
-
-    constexpr double pixel = 2.0 / 256.0;
-    const auto bearing = center(Part::Bearing);
-    const auto top = center(Part::Top);
-    const auto shadow = center(Part::Shadow);
-    ASSERT_TRUE(bearing);
-    ASSERT_TRUE(top);
-    ASSERT_TRUE(shadow);
-    EXPECT_NEAR(top->x, bearing->x, pixel);
-    EXPECT_NEAR(shadow->x, bearing->x, pixel);
-    EXPECT_GT(top->y, bearing->y + 2.0 * pixel);
-    EXPECT_LT(shadow->y, bearing->y - 2.0 * pixel);
+// Beside the center of the window, the direction up the screen turns on the way down to the bottom of the window,
+// where the hat and the shadow took it: they leaned to the side of the puck.
+TEST(LocationIndicator, GlobeHatAndShadowLeanUpAndDownTheScreenBesideTheCenter) {
+    expectGlobeHatAndShadowUpAndDown(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(2.0).withPitch(30.0),
+                                     LatLng{20.0, 20.0});
 }
