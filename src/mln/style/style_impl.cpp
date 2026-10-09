@@ -254,6 +254,7 @@ void Style::Impl::addSource(std::unique_ptr<Source> source) {
     if (fileSource) {
         item->loadDescription(*fileSource);
     }
+    observer->onUpdate();
 }
 
 std::unique_ptr<Source> Style::Impl::removeSource(const std::string& id) {
@@ -269,6 +270,7 @@ std::unique_ptr<Source> Style::Impl::removeSource(const std::string& id) {
 
     if (source) {
         source->setObserver(nullptr);
+        observer->onUpdate();
     }
 
     return source;
@@ -410,6 +412,7 @@ void Style::Impl::removeImage(const std::string& id) {
     }
     newImages->erase(found);
     images = std::move(newImages);
+    observer->onUpdate();
 }
 
 std::optional<Immutable<style::Image::Impl>> Style::Impl::getImage(const std::string& id) const {
