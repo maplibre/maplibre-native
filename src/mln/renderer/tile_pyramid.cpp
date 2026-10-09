@@ -4,6 +4,7 @@
 #include <mln/renderer/tile_parameters.hpp>
 #include <mln/renderer/query.hpp>
 #include <mln/map/transform.hpp>
+#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/math/clamp.hpp>
 #include <mln/math/log2.hpp>
 #include <mln/actor/scheduler.hpp>
@@ -375,14 +376,34 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
     const auto toWorld = [&](const ScreenCoordinate& p) {
         return TileCoordinate::fromScreenCoordinate(transformState, 0, {p.x, transformState.getSize().height - p.y}).p;
     };
-    LineString<double> queryGeometry;
-    queryGeometry.reserve(geometry.size());
+    const bool globe = transformState.isGlobeRendering();
+    const auto onPlanet = [&](const ScreenCoordinate& p) {
+        return VerticalPerspectiveProjection::screenCoordinateHitsGlobe(transformState,
+                                                                        {p.x, transformState.getSize().height - p.y});
+    };
 
-    for (const auto& p : geometry) {
+    // Past the planet's edge a query meets the planet only at the horizon, and a point there stands for the nearest
+    // horizon point, so a query's corners alone would cut the planet's limb off; its edges are followed in steps.
+    ScreenLineString traced;
+    if (globe && geometry.size() > 1 && !std::ranges::all_of(geometry, onPlanet)) {
+        constexpr int steps = 32;
+        for (std::size_t i = 0; i + 1 < geometry.size(); ++i) {
+            for (int k = 0; k < steps; ++k) {
+                const double t = static_cast<double>(k) / steps;
+                traced.push_back({geometry[i].x + (geometry[i + 1].x - geometry[i].x) * t,
+                                  geometry[i].y + (geometry[i + 1].y - geometry[i].y) * t});
+            }
+        }
+        traced.push_back(geometry.back());
+    }
+    const ScreenLineString& screenGeometry = traced.empty() ? geometry : traced;
+    LineString<double> queryGeometry;
+    queryGeometry.reserve(screenGeometry.size());
+
+    for (const auto& p : screenGeometry) {
         queryGeometry.push_back(toWorld(p));
     }
 
-    const bool globe = transformState.isGlobeRendering();
     if (globe) {
         // GL JS's `transformBbox`: the globe has no world copies, so a box across the antimeridian lands on the rest
         // of the world, which shows when its slightly shrunken corners fall outside it. It moves to the copy west of
@@ -394,13 +415,28 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         screenBox.max.x -= shrink;
         screenBox.max.y -= shrink;
         const auto bounds = mapbox::geometry::envelope(queryGeometry);
-        const bool covered = std::ranges::all_of(
-            std::array<ScreenCoordinate, 4>{
-                screenBox.min, {screenBox.max.x, screenBox.min.y}, {screenBox.min.x, screenBox.max.y}, screenBox.max},
-            [&](const ScreenCoordinate& corner) {
-                const auto c = toWorld(corner);
-                return bounds.min.x <= c.x && c.x <= bounds.max.x && bounds.min.y <= c.y && c.y <= bounds.max.y;
-            });
+        // A corner past the planet stands for the nearest point on the horizon, which tells nothing about the
+        // antimeridian, so GL JS's check lost boxes that reach into space, such as the whole view of a small globe.
+        // Such corners are left out, and the box's center, when it is on the planet, decides by longitude for them.
+        bool covered = true;
+        bool reachesIntoSpace = false;
+        for (const ScreenCoordinate& corner : std::array<ScreenCoordinate, 4>{screenBox.min,
+                                                                              {screenBox.max.x, screenBox.min.y},
+                                                                              {screenBox.min.x, screenBox.max.y},
+                                                                              screenBox.max}) {
+            if (!onPlanet(corner)) {
+                reachesIntoSpace = true;
+                continue;
+            }
+            const auto c = toWorld(corner);
+            covered = covered && bounds.min.x <= c.x && c.x <= bounds.max.x && bounds.min.y <= c.y &&
+                      c.y <= bounds.max.y;
+        }
+        const ScreenCoordinate center{(screenBox.min.x + screenBox.max.x) / 2, (screenBox.min.y + screenBox.max.y) / 2};
+        if (reachesIntoSpace && onPlanet(center)) {
+            const auto c = toWorld(center);
+            covered = covered && bounds.min.x <= c.x && c.x <= bounds.max.x;
+        }
         if (!covered) {
             for (auto& c : queryGeometry) {
                 if (c.x > 0.5) {

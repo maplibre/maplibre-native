@@ -55,6 +55,8 @@ public:
     /// Unit-sphere point under a screen pixel (y up, as `TransformState` takes it); pixels off the globe snap to
     /// the nearest point on the horizon.
     static vec3 screenCoordinateToSurface(const TransformState&, const ScreenCoordinate&);
+    /// Whether a screen pixel (y up) looks at the globe rather than past it.
+    static bool screenCoordinateHitsGlobe(const TransformState&, const ScreenCoordinate&);
     static LatLng screenCoordinateToLatLng(const TransformState&, const ScreenCoordinate&, LatLng::WrapMode);
     static ScreenCoordinate latLngToScreenCoordinate(const TransformState&, const LatLng&, vec4& clip);
 

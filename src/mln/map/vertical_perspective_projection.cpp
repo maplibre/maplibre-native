@@ -285,6 +285,12 @@ vec3 VerticalPerspectiveProjection::screenCoordinateToSurface(const TransformSta
     return add(horizonCenter, scaled(relative, horizonRadius / length(relative)));
 }
 
+bool VerticalPerspectiveProjection::screenCoordinateHitsGlobe(const TransformState& state,
+                                                              const ScreenCoordinate& point) {
+    const vec3 direction = rayDirectionFromPixel(state, point, state.getInverseGlobeViewProjectionMatrix());
+    return raySphereIntersection(state.getGlobeCameraPosition(), direction).has_value();
+}
+
 LatLng VerticalPerspectiveProjection::screenCoordinateToLatLng(const TransformState& state,
                                                                const ScreenCoordinate& point,
                                                                LatLng::WrapMode wrapMode) {
