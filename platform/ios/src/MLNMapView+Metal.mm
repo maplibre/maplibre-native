@@ -41,7 +41,13 @@ public:
 
   void bind() override {
     if (!commandQueue) {
-      commandQueue = [mtlView.device newCommandQueue];
+      // The renderer backend's queue, not a queue of the view's own: offscreen passes (drape
+      // targets, hillshade prepare) commit to the backend's queue, and only command buffers on
+      // one queue are guaranteed to run in commit order with the hazard tracking that orders a
+      // target's writes before the frame's reads. On a separate queue the frame could sample a
+      // drape target mid-render (white flashes over terrain) unless every offscreen pass waited
+      // for the GPU to finish.
+      commandQueue = (__bridge id<MTLCommandQueue>)backend.getCommandQueue().get();
     }
 
     if (!commandBuffer) {
