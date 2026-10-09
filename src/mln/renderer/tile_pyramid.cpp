@@ -463,7 +463,7 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
 
     auto maxPitchScaleFactor = transformState.maxPitchScaleFactor();
 
-    // The globe returns a feature once per tile, as GL JS does, though the tile is tested at two copies and can be
+    // The globe returns a feature once per tile, as GL JS does, though the tile is tested at three copies and can be
     // rendered at two wraps: these are where this tile's features start in each layer's results.
     std::optional<CanonicalTileID> canonicalTile;
     std::unordered_map<std::string, std::size_t> canonicalTileStart;
@@ -486,9 +486,11 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
             }
         }
 
-        // GL JS tests a globe tile at its copies on and west of the main world, where the query geometry lies.
-        const std::array<UnwrappedTileID, 2> globeCopies{UnwrappedTileID(-1, id.canonical),
-                                                         UnwrappedTileID(0, id.canonical)};
+        // The query geometry lies on the main world or, across the antimeridian, west of it, and its padding reaches
+        // past either side of it: a globe tile is tested at its copies west of, on and east of the main world. GL JS
+        // leaves out the east copy and misses features just east of the antimeridian under a query just west of it.
+        const std::array<UnwrappedTileID, 3> globeCopies{
+            UnwrappedTileID(-1, id.canonical), UnwrappedTileID(0, id.canonical), UnwrappedTileID(1, id.canonical)};
         for (const auto& copy :
              globe ? std::span<const UnwrappedTileID>(globeCopies) : std::span<const UnwrappedTileID>(&id, 1)) {
             GeometryCoordinate tileSpaceBoundsMin = TileCoordinate::toGeometryCoordinate(copy, box.min);
