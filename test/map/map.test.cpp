@@ -399,6 +399,26 @@ TEST(Map, LatLngForPixelUnwrapped) {
     EXPECT_NEAR(-135.0, projection.latLngForPixel({2048.0, 256.0}).longitude(), 1e-4);
 }
 
+// A zoom around a point keeps the place under it. Across the antimeridian the center comes back wrapped, as GL JS's
+// setLocationAtPoint leaves it, or pixelForLatLng puts every place a world away.
+TEST(Map, PixelForLatLngAfterZoomAroundAPointAcrossTheAntimeridian) {
+    MapTest<> test;
+    test.map.setSize({256, 256});
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 179.9}).withZoom(5.0));
+
+    const ScreenCoordinate anchor{230.0, 128.0};
+    const LatLng place = test.map.latLngForPixel(anchor);
+    test.map.jumpTo(CameraOptions().withZoom(6.0).withAnchor(anchor));
+
+    EXPECT_LE(std::abs(test.map.getCameraOptions().center->longitude()), 180.0);
+    const ScreenCoordinate point = test.map.pixelForLatLng(place);
+    EXPECT_NEAR(anchor.x, point.x, 1e-6);
+    EXPECT_NEAR(anchor.y, point.y, 1e-6);
+    const ScreenCoordinate projected = MapProjection(test.map).pixelForLatLng(place);
+    EXPECT_NEAR(anchor.x, projected.x, 1e-6);
+    EXPECT_NEAR(anchor.y, projected.y, 1e-6);
+}
+
 TEST(Map, Offline) {
     MapTest<MainResourceLoader> test{":memory:", "."};
 

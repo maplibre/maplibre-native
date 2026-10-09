@@ -465,6 +465,30 @@ TEST(Transform, Antimeridian) {
     ASSERT_NEAR(coordinateWaikiri.longitude(), coordinateFromPixel.longitude(), 1e-4);
 }
 
+// A zoom around a point across the antimeridian leaves the center wrapped, as GL JS's setLocationAtPoint does. Bounds
+// across the antimeridian keep it in their range, as easeTo does.
+TEST(Transform, ZoomAroundAPointAcrossTheAntimeridian) {
+    for (const bool bounded : {false, true}) {
+        SCOPED_TRACE(bounded ? "bounds from 170 to 190 degrees" : "no bounds");
+        Transform transform;
+        transform.resize({256, 256});
+        if (bounded) {
+            transform.setLatLngBounds(LatLngBounds::hull({-10.0, 170.0}, {10.0, 190.0}));
+        }
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 179.9}).withZoom(5.0));
+        transform.jumpTo(CameraOptions().withZoom(6.0).withAnchor(ScreenCoordinate{230.0, 128.0}));
+
+        const double longitude = transform.getLatLng(LatLng::Unwrapped).longitude();
+        if (bounded) {
+            EXPECT_GT(longitude, 180.0);
+            EXPECT_LT(longitude, 190.0);
+        } else {
+            EXPECT_GT(longitude, -180.0);
+            EXPECT_LT(longitude, -178.0);
+        }
+    }
+}
+
 TEST(Transform, Camera) {
     Transform transform;
     transform.resize({1000, 1000});
