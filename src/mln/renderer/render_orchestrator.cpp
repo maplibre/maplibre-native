@@ -402,6 +402,30 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     // Track which layers are flagged for rendering
     std::vector<bool> updateList(orderedLayers.size());
 
+    // Handle layers without source.
+    for (std::size_t index = 0; index < orderedLayers.size(); ++index) {
+        RenderLayer& layer = orderedLayers[index];
+        const auto* layerInfo = layer.baseImpl->getTypeInfo();
+        if (layerInfo->source != LayerTypeInfo::Source::NotRequired) {
+            continue;
+        }
+        renderTreeParameters->has3D |= (layerInfo->pass3d == LayerTypeInfo::Pass3D::Required);
+        const bool layerIsVisible = layer.baseImpl->visibility != style::VisibilityType::None;
+        if (!layerIsVisible || !layer.supportsZoom(zoomHistory.lastZoom)) {
+            continue;
+        }
+        if (backgroundLayerAsColor && layer.baseImpl == layerImpls->front()) {
+            if (const auto& solidBackground = layer.getSolidBackground()) {
+                renderTreeParameters->backgroundColor = *solidBackground;
+                continue; // This layer is shown with background color,
+                          // and it shall not be added to render items.
+            }
+        }
+        renderItemsEmplaceHint = layerRenderItems.emplace_hint(
+            renderItemsEmplaceHint, layer, nullptr, static_cast<uint32_t>(index));
+        updateList[index] = true;
+    }
+
     // Update all sources and initialize renderItems.
     for (const auto& sourceImpl : *sourceImpls) {
         MLN_TRACE_ZONE(update source);
@@ -418,72 +442,54 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             const bool zoomFitsLayer = layer.supportsZoom(zoomHistory.lastZoom);
             renderTreeParameters->has3D |= (layerInfo->pass3d == LayerTypeInfo::Pass3D::Required);
 
-            if (layerInfo->source != LayerTypeInfo::Source::NotRequired) {
-                if (layer.baseImpl->source == sourceImpl->id) {
-                    const std::string& layerId = layer.getID();
-                    // A global state change requires a relayout of this
-                    // layer's source if one of the changed state properties
-                    // is referenced by anything that is baked into the tile's
-                    // buckets: the filter, layout properties, or data-driven
-                    // paint properties (i.e. expressions retained in the
-                    // evaluated properties).
-                    const bool globalStateRequiresRelayout = [&] {
-                        if (!globalStateChanged || !((layer.baseImpl->getLayoutDependencies() |
-                                                      layer.evaluatedProperties->getEvaluatedDependencies()) &
-                                                     expression::Dependency::GlobalState)) {
-                            return false;
-                        }
-                        if (!changedGlobalStateKeys) {
-                            return true;
-                        }
-                        std::set<std::string> refs;
-                        layer.baseImpl->collectLayoutGlobalStateRefs(refs);
-                        layer.evaluatedProperties->collectEvaluatedGlobalStateRefs(refs);
-                        return expression::globalStateRefsIntersect(&refs, changedGlobalStateKeys.get());
-                    }();
-                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff ||
-                                           constantsMaskChanged.contains(layerId) ||
-                                           hasLayoutDifference(layerDiff, layerId) || globalStateRequiresRelayout);
-                    if (layerIsVisible) {
-                        filteredLayersForSource.push_back(layer.evaluatedProperties);
-                        if (zoomFitsLayer) {
-                            sourceNeedsRendering = true;
-                            renderItemsEmplaceHint = layerRenderItems.emplace_hint(
-                                renderItemsEmplaceHint, layer, source, static_cast<uint32_t>(index));
-                            updateList[index] = true;
-                        }
-                    }
-                }
+            if (layerInfo->source == LayerTypeInfo::Source::NotRequired || layer.baseImpl->source != sourceImpl->id) {
                 continue;
             }
-
-            // Handle layers without source.
-            if (layerIsVisible && zoomFitsLayer && sourceImpl.get() == sourceImpls->at(0).get()) {
-                if (backgroundLayerAsColor && layer.baseImpl == layerImpls->front()) {
-                    const auto& solidBackground = layer.getSolidBackground();
-                    if (solidBackground) {
-                        renderTreeParameters->backgroundColor = *solidBackground;
-                        continue; // This layer is shown with background color,
-                                  // and it shall not be added to render items.
-                    }
+            const std::string& layerId = layer.getID();
+            // A global state change requires a relayout of this
+            // layer's source if one of the changed state properties
+            // is referenced by anything that is baked into the tile's
+            // buckets: the filter, layout properties, or data-driven
+            // paint properties (i.e. expressions retained in the
+            // evaluated properties).
+            const bool globalStateRequiresRelayout = [&] {
+                if (!globalStateChanged || !((layer.baseImpl->getLayoutDependencies() |
+                                              layer.evaluatedProperties->getEvaluatedDependencies()) &
+                                             expression::Dependency::GlobalState)) {
+                    return false;
                 }
-                renderItemsEmplaceHint = layerRenderItems.emplace_hint(
-                    renderItemsEmplaceHint, layer, nullptr, static_cast<uint32_t>(index));
-                updateList[index] = true;
+                if (!changedGlobalStateKeys) {
+                    return true;
+                }
+                std::set<std::string> refs;
+                layer.baseImpl->collectLayoutGlobalStateRefs(refs);
+                layer.evaluatedProperties->collectEvaluatedGlobalStateRefs(refs);
+                return expression::globalStateRefsIntersect(&refs, changedGlobalStateKeys.get());
+            }();
+            sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff || constantsMaskChanged.contains(layerId) ||
+                                   hasLayoutDifference(layerDiff, layerId) || globalStateRequiresRelayout);
+            if (layerIsVisible) {
+                filteredLayersForSource.push_back(layer.evaluatedProperties);
+                if (zoomFitsLayer) {
+                    sourceNeedsRendering = true;
+                    renderItemsEmplaceHint = layerRenderItems.emplace_hint(
+                        renderItemsEmplaceHint, layer, source, static_cast<uint32_t>(index));
+                    updateList[index] = true;
+                }
             }
         }
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
-
-        // Update all layers with their new renderability status, if it changed.
-        for (size_t i = 0; i < updateList.size(); i++) {
-            if (orderedLayers[i].get().isLayerRenderable() != updateList[i]) {
-                orderedLayers[i].get().markLayerRenderable(updateList[i], changes);
-            }
-        }
-        addChanges(changes);
     }
+
+    // Update all layers with their new renderability status, if it changed.
+    for (size_t i = 0; i < updateList.size(); i++) {
+        if (orderedLayers[i].get().isLayerRenderable() != updateList[i]) {
+            orderedLayers[i].get().markLayerRenderable(updateList[i], changes);
+        }
+    }
+    addChanges(changes);
 
     renderTreeParameters->loaded = updateParameters->styleLoaded && isLoaded();
     if (!isMapModeContinuous && !renderTreeParameters->loaded) {
