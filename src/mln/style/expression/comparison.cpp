@@ -1,4 +1,5 @@
 #include <exception>
+#include <new>
 
 #include <mln/style/expression/collator.hpp>
 #include <mln/style/expression/comparison.hpp>
@@ -180,7 +181,7 @@ CollatorComparison::CollatorComparison(std::string op_,
                             (lhs->getType() == type::Value || rhs->getType() == type::Value);
 }
 
-EvaluationResult CollatorComparison::evaluate(const EvaluationContext& params) const try {
+EvaluationResult CollatorComparison::evaluate(const EvaluationContext& params) const {
     EvaluationResult lhsResult = lhs->evaluate(params);
     if (!lhsResult) return lhsResult;
 
@@ -197,9 +198,13 @@ EvaluationResult CollatorComparison::evaluate(const EvaluationContext& params) c
     if (!collatorResult) return collatorResult;
 
     const Collator& c = collatorResult->get<Collator>();
-    return compare(lhsResult->get<std::string>(), rhsResult->get<std::string>(), c);
-} catch (const std::exception& error) {
-    return EvaluationError{error.what()};
+    try {
+        return compare(lhsResult->get<std::string>(), rhsResult->get<std::string>(), c);
+    } catch (const std::bad_alloc&) {
+        throw;
+    } catch (const std::exception& error) {
+        return EvaluationError{error.what()};
+    }
 }
 
 void CollatorComparison::eachChild(const std::function<void(const Expression&)>& visit) const {

@@ -1,4 +1,5 @@
 #include <exception>
+#include <new>
 
 #include <mln/style/expression/collator.hpp>
 #include <mln/style/expression/collator_expression.hpp>
@@ -105,7 +106,7 @@ mln::Value CollatorExpression::serialize() const {
     return std::vector<mln::Value>{{std::string("collator"), options}};
 }
 
-EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) const try {
+EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) const {
     auto caseSensitiveResult = caseSensitive->evaluate(params);
     if (!caseSensitiveResult) {
         return caseSensitiveResult.error();
@@ -115,19 +116,22 @@ EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) c
         return diacriticSensitiveResult.error();
     }
 
+    std::optional<std::string> evaluatedLocale;
     if (locale && *locale) {
-        if (auto localeResult = (*locale)->evaluate(params)) {
-            return Collator(caseSensitiveResult->get<bool>(),
-                            diacriticSensitiveResult->get<bool>(),
-                            localeResult->get<std::string>());
-        } else {
+        auto localeResult = (*locale)->evaluate(params);
+        if (!localeResult) {
             return localeResult.error();
         }
-    } else {
-        return Collator(caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>());
+        evaluatedLocale = localeResult->get<std::string>();
     }
-} catch (const std::exception& error) {
-    return EvaluationError{error.what()};
+
+    try {
+        return Collator(caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>(), evaluatedLocale);
+    } catch (const std::bad_alloc&) {
+        throw;
+    } catch (const std::exception& error) {
+        return EvaluationError{error.what()};
+    }
 }
 
 } // namespace expression

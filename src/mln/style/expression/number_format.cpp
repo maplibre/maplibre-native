@@ -1,4 +1,5 @@
 #include <exception>
+#include <new>
 
 #include <mln/i18n/number_format.hpp>
 #include <mln/style/conversion_impl.hpp>
@@ -30,7 +31,7 @@ NumberFormat::NumberFormat(std::unique_ptr<Expression> number_,
 
 NumberFormat::~NumberFormat() = default;
 
-EvaluationResult NumberFormat::evaluate(const EvaluationContext& params) const try {
+EvaluationResult NumberFormat::evaluate(const EvaluationContext& params) const {
     auto numberResult = number->evaluate(params);
     if (!numberResult) {
         return numberResult.error();
@@ -73,12 +74,17 @@ EvaluationResult NumberFormat::evaluate(const EvaluationContext& params) const t
         evaluatedMaxFractionDigits = static_cast<uint8_t>(maxDigitsResult->get<double>());
     }
 
-    std::string output;
-    output = platform::formatNumber(
-        evaluatedNumber, evaluatedLocale, evaluatedCurrency, evaluatedMinFractionDigits, evaluatedMaxFractionDigits);
-    return output;
-} catch (const std::exception& error) {
-    return EvaluationError{error.what()};
+    try {
+        return platform::formatNumber(evaluatedNumber,
+                                      evaluatedLocale,
+                                      evaluatedCurrency,
+                                      evaluatedMinFractionDigits,
+                                      evaluatedMaxFractionDigits);
+    } catch (const std::bad_alloc&) {
+        throw;
+    } catch (const std::exception& error) {
+        return EvaluationError{error.what()};
+    }
 }
 
 void NumberFormat::eachChild(const std::function<void(const Expression&)>& visit) const {
