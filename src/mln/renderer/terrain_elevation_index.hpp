@@ -46,7 +46,7 @@ public:
     TerrainElevationIndex& operator=(const TerrainElevationIndex&) = delete;
 
     /// Exaggerated terrain height in metres at `latLng`, sampled from the deepest tile that
-    /// covers it, as RenderTerrain::getElevationAtLatLng. Nullopt where no DEM tile is loaded.
+    /// covers it, as RenderTerrain::getElevationForLatLng. Nullopt where no DEM tile is loaded.
     std::optional<double> getElevation(const LatLng& latLng) const;
 
     float getExaggeration() const { return exaggeration; }

@@ -154,23 +154,15 @@ public:
     float getElevationWithExaggeration(const UnwrappedTileID& tileID, float x, float y) const;
 
     /**
-     * @brief Exaggerated terrain height under a geographic position
-     *
-     * Samples at the depth of the finest DEM tile currently loaded. `getElevation` only
-     * matches a DEM tile that is the sample tile or an ancestor of it, so a fixed sample
-     * zoom silently reads 0 wherever the DEM is loaded deeper than that.
+     * @brief Exaggerated height (metres) of the rendered terrain surface at a geographic
+     * coordinate, sampled from the deepest loaded DEM tile that contains it: rendered tiles and
+     * the ancestors retained for elevation lookups alike, so a point outside the rendered cover
+     * still reads its height. Render-thread only.
      *
      * @param latLng the position to sample
-     * @return height in metres of the rendered surface, or 0 when no DEM covers it
+     * @return nullopt when terrain is off or no loaded DEM tile covers the point yet
      */
-    double getElevationForLatLng(const LatLng& latLng) const;
-
-    /**
-     * @brief Exaggerated terrain height (metres) at a geographic coordinate, sampled from the
-     * deepest loaded DEM tile covering it. Render-thread only. nullopt when terrain is off or
-     * no DEM tile covers the point yet.
-     */
-    std::optional<double> getElevationAtLatLng(const LatLng& latLng) const;
+    std::optional<double> getElevationForLatLng(const LatLng& latLng) const;
 
     /**
      * @brief Coordinate of the draped surface under a screen pixel (y-down view pixels, as

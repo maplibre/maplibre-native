@@ -745,7 +745,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // DEM, so this is the channel; whether the camera acts on it is the map's call
     // (Map::setCenterClampedToGround). Gated so a still map does not post a message a frame.
     if (auto* terrain = orchestrator.getRenderTerrain()) {
-        const double centerElevation = terrain->getElevationForLatLng(updateParameters->transformState.getLatLng());
+        const double centerElevation =
+            terrain->getElevationForLatLng(updateParameters->transformState.getLatLng()).value_or(0.0);
         if (std::abs(centerElevation - lastReportedCenterElevation) > 0.25) {
             lastReportedCenterElevation = centerElevation;
             observer->onTerrainCenterElevationChanged(centerElevation);
