@@ -152,6 +152,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/test/gl/gl_functions.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/object.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/resource_pool.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/gl/shader_program.test.cpp
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )
