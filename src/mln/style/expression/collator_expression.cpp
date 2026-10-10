@@ -3,6 +3,7 @@
 #include <mln/style/expression/literal.hpp>
 #include <mln/style/conversion_impl.hpp>
 #include <mln/util/string.hpp>
+#include <mln/util/exception.hpp>
 
 namespace mln {
 namespace style {
@@ -113,16 +114,19 @@ EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) c
         return diacriticSensitiveResult.error();
     }
 
+    std::optional<std::string> evaluatedLocale;
     if (locale && *locale) {
-        if (auto localeResult = (*locale)->evaluate(params)) {
-            return Collator(caseSensitiveResult->get<bool>(),
-                            diacriticSensitiveResult->get<bool>(),
-                            localeResult->get<std::string>());
-        } else {
+        auto localeResult = (*locale)->evaluate(params);
+        if (!localeResult) {
             return localeResult.error();
         }
-    } else {
-        return Collator(caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>());
+        evaluatedLocale = localeResult->get<std::string>();
+    }
+
+    try {
+        return Collator(caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>(), evaluatedLocale);
+    } catch (const util::LocaleException& error) {
+        return EvaluationError{error.what()};
     }
 }
 
