@@ -8,6 +8,7 @@
 #include <mln/math/log2.hpp>
 #include <mln/renderer/renderer_frontend.hpp>
 #include <mln/renderer/renderer_observer.hpp>
+#include <mln/renderer/terrain_elevation_index.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source_manager.hpp>
 #include <mln/storage/resource.hpp>
@@ -432,8 +433,18 @@ ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {
     return impl->transform.latLngToScreenCoordinate(unwrappedLatLng);
 }
 
+ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng, double elevationMeters) const {
+    LatLng unwrappedLatLng = latLng.wrapped();
+    unwrappedLatLng.unwrapForShortestPath(impl->transform.getLatLng());
+    return impl->transform.latLngToScreenCoordinate(unwrappedLatLng, elevationMeters);
+}
+
 LatLng Map::latLngForPixel(const ScreenCoordinate& pixel) const {
     return impl->transform.screenCoordinateToLatLng(pixel);
+}
+
+LatLng Map::latLngForPixel(const ScreenCoordinate& pixel, double elevationMeters) const {
+    return impl->transform.screenCoordinateToLatLng(pixel, elevationMeters);
 }
 
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {
@@ -450,6 +461,48 @@ std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& s
     ret.reserve(screenCoords.size());
     for (const auto& point : screenCoords) {
         ret.emplace_back(latLngForPixel(point));
+    }
+    return ret;
+}
+
+std::optional<double> Map::getTerrainElevation(const LatLng& latLng) const {
+    if (!impl->terrainElevationIndex) {
+        return std::nullopt;
+    }
+    return impl->terrainElevationIndex->getElevation(latLng);
+}
+
+ScreenCoordinate Map::pixelForLatLngOnTerrain(const LatLng& latLng) const {
+    if (const auto elevation = getTerrainElevation(latLng)) {
+        return pixelForLatLng(latLng, *elevation);
+    }
+    return pixelForLatLng(latLng);
+}
+
+LatLng Map::latLngForPixelOnTerrain(const ScreenCoordinate& pixel) const {
+    if (const auto& index = impl->terrainElevationIndex) {
+        if (const auto surface = pickTerrainSurface(
+                impl->transform.getState(), pixel, [&](const LatLng& latLng) { return index->getElevation(latLng); })) {
+            return *surface;
+        }
+    }
+    return latLngForPixel(pixel);
+}
+
+std::vector<ScreenCoordinate> Map::pixelsForLatLngsOnTerrain(const std::vector<LatLng>& latLngs) const {
+    std::vector<ScreenCoordinate> ret;
+    ret.reserve(latLngs.size());
+    for (const auto& latLng : latLngs) {
+        ret.emplace_back(pixelForLatLngOnTerrain(latLng));
+    }
+    return ret;
+}
+
+std::vector<LatLng> Map::latLngsForPixelsOnTerrain(const std::vector<ScreenCoordinate>& screenCoords) const {
+    std::vector<LatLng> ret;
+    ret.reserve(screenCoords.size());
+    for (const auto& point : screenCoords) {
+        ret.emplace_back(latLngForPixelOnTerrain(point));
     }
     return ret;
 }

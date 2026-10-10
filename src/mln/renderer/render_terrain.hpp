@@ -8,7 +8,10 @@
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/gfx/index_buffer.hpp>
 #include <mln/renderer/texture_pool.hpp>
+#include <mln/renderer/terrain_elevation_index.hpp>
 #include <mln/util/mat4.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/geometry.hpp>
 
 #include <array>
 #include <memory>
@@ -16,6 +19,7 @@
 #include <set>
 #include <string>
 #include <optional>
+#include <functional>
 #include <vector>
 #include <cstdint>
 #include <unordered_map>
@@ -150,16 +154,51 @@ public:
     float getElevationWithExaggeration(const UnwrappedTileID& tileID, float x, float y) const;
 
     /**
-     * @brief Exaggerated terrain height under a geographic position
-     *
-     * Samples at the depth of the finest DEM tile currently loaded. `getElevation` only
-     * matches a DEM tile that is the sample tile or an ancestor of it, so a fixed sample
-     * zoom silently reads 0 wherever the DEM is loaded deeper than that.
+     * @brief Exaggerated height (metres) of the rendered terrain surface at a geographic
+     * coordinate, sampled from the deepest loaded DEM tile that contains it: rendered tiles and
+     * the ancestors retained for elevation lookups alike, so a point outside the rendered cover
+     * still reads its height. Render-thread only.
      *
      * @param latLng the position to sample
-     * @return height in metres of the rendered surface, or 0 when no DEM covers it
+     * @return nullopt when terrain is off or no loaded DEM tile covers the point yet
      */
-    double getElevationForLatLng(const LatLng& latLng) const;
+    std::optional<double> getElevationForLatLng(const LatLng& latLng) const;
+
+    /**
+     * @brief Coordinate of the draped surface under a screen pixel (y-down view pixels, as
+     * rendered-feature queries use). The pixel's view ray is marched from just below the camera
+     * down to sea level, sampling the terrain height at each candidate plane, and the first
+     * crossing (the nearest surface, so a ridge in front wins) is bisected. Inverse of
+     * Map::pixelForLatLng(latLng, elevation). nullopt without terrain, without a camera
+     * altitude, when the camera is inside the terrain, or when the ray never meets the surface.
+     */
+    std::optional<LatLng> pickLatLng(const TransformState& state, const ScreenCoordinate& pixel) const;
+
+    /**
+     * @brief Bring the map side's copy of the terrain heights (getElevationIndex) up to date.
+     * Cheap when nothing changed: it rebuilds only when the loaded DEM tiles or the exaggeration
+     * differ from the last call, copying just the tiles it has not copied before, and drops the
+     * copy while terrain is off. Render-thread only.
+     * @return true when getElevationIndex changed, so the map needs the new one
+     */
+    bool updateElevationIndex();
+
+    /// The map side's copy of the terrain heights, as of the last updateElevationIndex; null while
+    /// terrain is off or no DEM tile is loaded.
+    const std::shared_ptr<const TerrainElevationIndex>& getElevationIndex() const { return elevationIndex; }
+
+    /// Zoom levels of DEM ancestors kept loaded above the cover (TileParameters::retainAncestorLevels).
+    /// The cover follows the declared maxzoom (16 with overzoom), while layers can draw from tiles
+    /// as shallow as ~z9 (far-field distance LOD, low-maxzoom sources), so reach eight levels up;
+    /// the tile count shrinks by 4x per level, so this is a handful of tiles.
+    static constexpr uint8_t demAncestorLevels = 8;
+
+    /**
+     * @brief Per-tile elevation sampler for CPU-side symbol projection (line-placed labels):
+     * tile-local point -> exaggerated metres, from the DEM tile covering `tileID` or its
+     * closest loaded ancestor. Valid for the current frame only. nullopt without DEM data.
+     */
+    std::optional<std::function<float(const Point<float>&)>> elevationSampler(const UnwrappedTileID& tileID) const;
 
     /**
      * @brief Get the terrain exaggeration multiplier
@@ -392,6 +431,15 @@ private:
     // this, preventing unbounded growth while browsing (previously reached 2GB+)
     static constexpr size_t maxDEMTextures = 96;
     uint64_t demUpdateCounter = 0;
+
+    /// Per-tile height copies behind elevationIndex, kept across rebuilds so a new tile set
+    /// copies only its new tiles. `source` identifies the DEM the copy was taken from.
+    struct ElevationGridCopy {
+        const DEMData* source = nullptr;
+        std::shared_ptr<const TerrainElevationIndex::Grid> grid;
+    };
+    std::unordered_map<UnwrappedTileID, ElevationGridCopy> elevationGrids;
+    std::shared_ptr<const TerrainElevationIndex> elevationIndex;
 
 #if MLN_RENDER_BACKEND_OPENGL
     // OpenGL-only: the same DEM tiles packed into one GL_TEXTURE_2D_ARRAY so the

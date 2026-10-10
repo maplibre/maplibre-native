@@ -4569,7 +4569,11 @@ static void *windowScreenContext = &windowScreenContext;
 /// Converts a point in the view’s coordinate system to a geographic coordinate.
 - (mln::LatLng)convertPoint:(CGPoint)point toLatLngFromView:(nullable UIView *)view {
   CGPoint convertedPoint = [self convertPoint:point fromView:view];
-  return self.mbglMap.latLngForPixel(mln::ScreenCoordinate(convertedPoint.x, convertedPoint.y))
+  // With 3D terrain, the pixel's view ray meets the draped surface before sea level, so the
+  // sea-level unprojection would land well past the spot under the finger. Inverse of
+  // convertLatLng:toPointToView:; sea level without terrain.
+  return self.mbglMap
+      .latLngForPixelOnTerrain(mln::ScreenCoordinate(convertedPoint.x, convertedPoint.y))
       .wrapped();
 }
 
@@ -4583,7 +4587,9 @@ static void *windowScreenContext = &windowScreenContext;
 
 /// Converts a geographic coordinate to a point in the view’s coordinate system.
 - (CGPoint)convertLatLng:(mln::LatLng)latLng toPointToView:(nullable UIView *)view {
-  mln::ScreenCoordinate pixel = self.mbglMap.pixelForLatLng(latLng);
+  // With 3D terrain, project onto the draped surface so annotation views, the user location
+  // view and callouts sit on the ground they mark instead of at sea level.
+  mln::ScreenCoordinate pixel = self.mbglMap.pixelForLatLngOnTerrain(latLng);
   return [self convertPoint:CGPointMake(pixel.x, pixel.y) toView:view];
 }
 

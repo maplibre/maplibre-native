@@ -117,9 +117,30 @@ public:
 
     // Projection
     ScreenCoordinate pixelForLatLng(const LatLng&) const;
+    /// Screen position of a point `elevationMeters` above sea level. With 3D terrain, pass the
+    /// (exaggerated) terrain height at that location - see `getTerrainElevation`, or use
+    /// `pixelForLatLngOnTerrain` - so annotations and markers land on the draped surface.
+    ScreenCoordinate pixelForLatLng(const LatLng&, double elevationMeters) const;
     LatLng latLngForPixel(const ScreenCoordinate&) const;
+    /// Geographic position of the point where the screen pixel's view ray crosses the plane
+    /// `elevationMeters` above sea level (exaggerated terrain units, as pixelForLatLng). A
+    /// terrain-aware pick marches this along the ray - see MLNMapView convertPoint:toLatLngFromView:.
+    LatLng latLngForPixel(const ScreenCoordinate&, double elevationMeters) const;
     std::vector<ScreenCoordinate> pixelsForLatLngs(const std::vector<LatLng>&) const;
     std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&) const;
+
+    // Projection onto 3D terrain. Answered from the map's copy of the renderer's terrain heights
+    // (RendererObserver::onTerrainElevationIndexChanged), so they never wait on the render side.
+    // Without terrain, or where no DEM is loaded yet, each falls back to its sea-level version.
+    /// Exaggerated terrain height in metres at a location; nullopt without terrain data there.
+    std::optional<double> getTerrainElevation(const LatLng&) const;
+    /// Screen position of the terrain surface at a location (pixelForLatLng at its height).
+    ScreenCoordinate pixelForLatLngOnTerrain(const LatLng&) const;
+    /// Location of the terrain surface under a screen pixel: the nearest surface along its view
+    /// ray, so a ridge in front wins.
+    LatLng latLngForPixelOnTerrain(const ScreenCoordinate&) const;
+    std::vector<ScreenCoordinate> pixelsForLatLngsOnTerrain(const std::vector<LatLng>&) const;
+    std::vector<LatLng> latLngsForPixelsOnTerrain(const std::vector<ScreenCoordinate>&) const;
 
     // Transform
     TransformState getTransfromState() const;

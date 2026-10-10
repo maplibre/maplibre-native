@@ -129,7 +129,13 @@ public:
 
     // Conversion and projection
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
+    /// As above, for a point `elevationMeters` above sea level (draped 3D terrain).
+    ScreenCoordinate latLngToScreenCoordinate(const LatLng&, double elevationMeters) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Wrapped) const;
+    /// As above, unprojecting onto the plane `elevationMeters` above sea level.
+    LatLng screenCoordinateToLatLng(const ScreenCoordinate&,
+                                    double elevationMeters,
+                                    LatLng::WrapMode = LatLng::Wrapped) const;
 
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);

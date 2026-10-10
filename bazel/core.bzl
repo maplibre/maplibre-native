@@ -279,6 +279,8 @@ MLN_CORE_SOURCE = [
     "src/mln/renderer/render_static_data.cpp",
     "src/mln/renderer/render_terrain.cpp",
     "src/mln/renderer/render_terrain.hpp",
+    "src/mln/renderer/terrain_elevation_index.cpp",
+    "src/mln/renderer/terrain_elevation_index.hpp",
     "src/mln/renderer/dem_elevation_provider.cpp",
     "src/mln/renderer/dem_elevation_provider.hpp",
     "src/mln/renderer/render_static_data.hpp",
