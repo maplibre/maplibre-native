@@ -3,6 +3,15 @@ module(name = "maplibre")
 bazel_dep(name = "bazel_skylib", version = "1.9.2")
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "rules_apple", version = "5.2.0")
+
+# Objective-C support for docc_archive.
+# TODO: Remove this override once https://github.com/bazelbuild/rules_apple/issues/2241 is released.
+git_override(
+    module_name = "rules_apple",
+    commit = "5f16986ae5570a9c7b04b7d1e01aa460710cef1c",
+    remote = "https://github.com/louwers/rules_apple.git",
+)
+
 bazel_dep(name = "rules_swift", version = "4.1.2")
 bazel_dep(name = "rules_xcodeproj", version = "4.1.0")
 bazel_dep(name = "aspect_rules_js", version = "3.5.0")
@@ -132,3 +141,6 @@ crate.from_cargo(
     manifests = ["//rustutils:Cargo.toml"],
 )
 use_repo(crate, "crates")
+
+# Used by //platform:check-public-symbols-{ios,macos}.
+bazel_dep(name = "sourcekitten", version = "0.38.0", dev_dependency = True)

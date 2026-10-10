@@ -8,7 +8,7 @@
 #import "MLNStyle+MBXAdditions.h"
 #import "MLNVectorTileSource_Private.h"
 
-#import <Mapbox.h>
+#import <MapLibre.h>
 
 static NSString * const MLNDroppedPinAnnotationImageIdentifier = @"dropped";
 

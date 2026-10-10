@@ -1,4 +1,4 @@
-#import "Mapbox.h"
+#import "MapLibre.h"
 
 #import "MBXBenchAppDelegate.h"
 #import "MBXBenchViewController.h"

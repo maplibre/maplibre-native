@@ -1,4 +1,4 @@
-#import <Mapbox.h>
+#import <MapLibre.h>
 #import <XCTest/XCTest.h>
 
 #if TARGET_OS_IPHONE

@@ -1,4 +1,4 @@
-#import <Mapbox.h>
+#import <MapLibre.h>
 #import <XCTest/XCTest.h>
 
 #import "../../darwin/src/MLNGeometry_Private.h"

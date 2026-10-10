@@ -135,8 +135,8 @@ jobs:
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
 
-      - name: Check debug symbols
-        run: bazel run //platform:check-public-symbols --//:renderer=metal
+      - name: Check public symbol exports
+        run: bazel test //platform:check-public-symbols-ios --test_output=errors --//:renderer=metal
 
       - name: Lint plist files
         run: bazel run //platform/ios:lint-plists --//:renderer=metal
@@ -249,7 +249,8 @@ jobs:
       - name: Build DocC documentation
         working-directory: .
         run: |
-          HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
+          aws s3 sync --no-sign-request "s3://maplibre-native/ios-documentation-resources" "platform/ios/MapLibre.docc/Resources"
+          bazel build --//:renderer=metal --platforms=@build_bazel_apple_support//platforms:ios_arm64 //platform/ios:MapLibre.doccarchive
 
       - name: Remove the Bazel output base before the cache save
         if: ${{ !cancelled() }}
