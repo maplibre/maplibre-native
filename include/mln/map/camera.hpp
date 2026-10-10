@@ -13,6 +13,10 @@ namespace mln {
 
 /** Various options for describing the viewpoint of a map. All fields are
     optional.
+    A partial command replaces animations of its specified fields. Omitted
+    fields keep their original animation timing. Flights couple center and zoom;
+    anchored commands couple center with their specified fields. Replacing any
+    member of a coupled group stops that group.
     Anchor and center points are mutually exclusive, with preference for the
     center point when both are set.
     */
@@ -122,8 +126,9 @@ struct AnimationOptions {
         the elapsed time as a percentage of the duration. */
     std::function<void(double)> transitionFrameFn;
 
-    /** A function that is called once on the last frame of the transition, just
-        before the corresponding screen update. */
+    /** Called once when all properties of the command have completed or been
+        superseded, including explicit cancellation. Other commands may still
+        be animating when this callback runs. */
     std::function<void()> transitionFinishFn;
 
     /** Creates an animation with no options specified. */
