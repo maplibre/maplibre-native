@@ -14,6 +14,10 @@ namespace android {
 
 extern JavaVM* theJVM;
 
+#if MLN_WEBGPU_IMPL_FFI
+extern "C" MBGL_EXPORT void mbgl_android_set_jvm(JavaVM* vm);
+#endif
+
 extern std::string cachePath;
 extern std::string dataPath;
 
