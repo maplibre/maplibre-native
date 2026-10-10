@@ -1,11 +1,9 @@
-#include <exception>
-#include <new>
-
 #include <mln/style/expression/collator.hpp>
 #include <mln/style/expression/collator_expression.hpp>
 #include <mln/style/expression/literal.hpp>
 #include <mln/style/conversion_impl.hpp>
 #include <mln/util/string.hpp>
+#include <mln/util/exception.hpp>
 
 namespace mln {
 namespace style {
@@ -127,9 +125,7 @@ EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) c
 
     try {
         return Collator(caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>(), evaluatedLocale);
-    } catch (const std::bad_alloc&) {
-        throw;
-    } catch (const std::exception& error) {
+    } catch (const util::LocaleException& error) {
         return EvaluationError{error.what()};
     }
 }

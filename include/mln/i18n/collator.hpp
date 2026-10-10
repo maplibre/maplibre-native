@@ -7,10 +7,10 @@
 namespace mln {
 namespace platform {
 
-// Implementations report failures in the constructor and compare(), such as
-// text they cannot convert, by throwing an exception derived from
-// std::exception. Style expressions evaluate such a failure as an expression
-// error. std::bad_alloc is not treated as an expression error.
+// Implementations report recoverable failures in the constructor and
+// compare(), such as text they cannot convert, by throwing
+// util::LocaleException. Style expressions evaluate such a failure as an
+// expression error. Other exceptions propagate.
 class Collator {
 public:
     explicit Collator(bool caseSensitive,

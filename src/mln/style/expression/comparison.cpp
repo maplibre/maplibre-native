@@ -1,10 +1,8 @@
-#include <exception>
-#include <new>
-
 #include <mln/style/expression/collator.hpp>
 #include <mln/style/expression/comparison.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/conversion_impl.hpp>
+#include <mln/util/exception.hpp>
 #include <utility>
 
 namespace mln {
@@ -200,9 +198,7 @@ EvaluationResult CollatorComparison::evaluate(const EvaluationContext& params) c
     const Collator& c = collatorResult->get<Collator>();
     try {
         return compare(lhsResult->get<std::string>(), rhsResult->get<std::string>(), c);
-    } catch (const std::bad_alloc&) {
-        throw;
-    } catch (const std::exception& error) {
+    } catch (const util::LocaleException& error) {
         return EvaluationError{error.what()};
     }
 }

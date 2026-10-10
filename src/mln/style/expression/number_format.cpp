@@ -1,9 +1,7 @@
-#include <exception>
-#include <new>
-
 #include <mln/i18n/number_format.hpp>
 #include <mln/style/conversion_impl.hpp>
 #include <mln/style/expression/number_format.hpp>
+#include <mln/util/exception.hpp>
 
 namespace mln {
 namespace style {
@@ -80,9 +78,7 @@ EvaluationResult NumberFormat::evaluate(const EvaluationContext& params) const {
                                       evaluatedCurrency,
                                       evaluatedMinFractionDigits,
                                       evaluatedMaxFractionDigits);
-    } catch (const std::bad_alloc&) {
-        throw;
-    } catch (const std::exception& error) {
+    } catch (const util::LocaleException& error) {
         return EvaluationError{error.what()};
     }
 }
