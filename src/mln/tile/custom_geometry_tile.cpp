@@ -72,8 +72,13 @@ void CustomGeometryTile::setNecessity(TileNecessity newNecessity) {
 void CustomGeometryTile::querySourceFeatures(std::vector<Feature>& result,
                                              const SourceQueryOptions& queryOptions,
                                              const GlobalStateMap* globalState) {
+    const auto* data = getData();
+    if (!data) {
+        return;
+    }
+
     // Ignore the sourceLayer, there is only one
-    auto layer = getData()->getLayer({});
+    auto layer = data->getLayer({});
 
     if (layer) {
         auto featureCount = layer->featureCount();

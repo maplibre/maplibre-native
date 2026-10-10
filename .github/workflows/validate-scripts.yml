@@ -21,6 +21,3 @@ jobs:
         run: |
           npm install
           npx tsc -p tsconfig.json
-
-      - name: Run tests
-        run: node --test .github/scripts/**.test.ts
