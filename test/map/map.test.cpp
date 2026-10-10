@@ -24,6 +24,7 @@
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/layer.hpp>
 #include <mln/style/expression/dsl.hpp>
+#include <mln/style/expression/formatted.hpp>
 #include <mln/style/image_impl.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/layers/background_layer.hpp>
@@ -50,6 +51,7 @@
 #include <mln/util/timer.hpp>
 
 #include <atomic>
+#include <tuple>
 
 using namespace mln;
 using namespace mln::style;
@@ -2297,3 +2299,76 @@ TEST(Map, LocationIndicatorWithoutImages) {
     // Neither the accuracy circle nor any image should produce a draw call.
     EXPECT_EQ(test.frontend.render(test.map).stats.numDrawCalls, 0);
 }
+
+class LateStyleImageTest : public testing::TestWithParam<std::tuple<bool, bool>> {};
+
+TEST_P(LateStyleImageTest, RendersImageAddedAfterLayout) {
+    const auto [synchronous, withText] = GetParam();
+    MapTest<> test;
+    test.frontend.setSize({512, 512});
+    test.map.setSize({512, 512});
+    test.fileSource->glyphsResponse = [](const Resource&) {
+        Response response;
+        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        return response;
+    };
+    test.map.getStyle().loadJSON(R"({
+        "version": 8,
+        "glyphs": "https://example.com/{fontstack}/{range}.pbf",
+        "sources": {},
+        "layers": [{"id": "background", "type": "background", "paint": {"background-color": "white"}}]
+    })");
+
+    GeoJSONOptions options;
+    options.synchronousUpdate = synchronous;
+    auto source = std::make_unique<GeoJSONSource>("point", makeMutable<GeoJSONOptions>(options));
+    source->setGeoJSON(Geometry<double>{Point<double>{0.0, 0.0}});
+    test.map.getStyle().addSource(std::move(source));
+
+    auto layer = std::make_unique<SymbolLayer>("symbol", "point");
+    layer->setIconImage({"marker"s});
+    layer->setIconAnchor(SymbolAnchorType::Bottom);
+    layer->setIconAllowOverlap(true);
+    layer->setIconIgnorePlacement(true);
+    layer->setTextField(expression::Formatted(withText ? "New place" : ""));
+    layer->setTextFont(FontStack{"Open Sans Regular"});
+    layer->setTextAnchor(SymbolAnchorType::Top);
+    layer->setTextAllowOverlap(true);
+    layer->setTextIgnorePlacement(true);
+    test.map.getStyle().addLayer(std::move(layer));
+
+    // Complete tile layout with the image missing, then add it without changing the camera or layers.
+    const Size iconSize{32, 32};
+    const auto before = test.frontend.render(test.map).image;
+    const auto x = before.size.width / 2;
+    const auto y = before.size.height / 2 - iconSize.height / 2;
+    const auto* beforePixel = before.data.get() + y * before.stride() + x * before.channels;
+    ASSERT_EQ(beforePixel[0], 255);
+    ASSERT_EQ(beforePixel[1], 255);
+    ASSERT_EQ(beforePixel[2], 255);
+
+    PremultipliedImage icon(iconSize);
+    for (size_t i = 0; i < icon.bytes(); i += 4) {
+        icon.data[i] = 255;
+        icon.data[i + 1] = 0;
+        icon.data[i + 2] = 0;
+        icon.data[i + 3] = 255;
+    }
+    test.map.getStyle().addImage(std::make_unique<style::Image>("marker", std::move(icon), 1.0f));
+    const auto after = test.frontend.render(test.map).image;
+    const auto* afterPixel = after.data.get() + y * after.stride() + x * after.channels;
+    EXPECT_EQ(afterPixel[0], 255);
+    EXPECT_EQ(afterPixel[1], 0);
+    EXPECT_EQ(afterPixel[2], 0);
+    EXPECT_EQ(afterPixel[3], 255);
+}
+
+INSTANTIATE_TEST_SUITE_P(GeoJSON,
+                         LateStyleImageTest,
+                         testing::Combine(testing::Bool(), testing::Bool()),
+                         [](const testing::TestParamInfo<std::tuple<bool, bool>>& paramInfo) {
+                             const bool synchronous = std::get<0>(paramInfo.param);
+                             const bool withText = std::get<1>(paramInfo.param);
+                             return std::string(synchronous ? "Synchronous" : "Asynchronous") +
+                                    (withText ? "WithText" : "IconOnly");
+                         });
