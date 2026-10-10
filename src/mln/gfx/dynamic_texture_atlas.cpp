@@ -17,6 +17,18 @@ Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
     return Rect<uint16_t>(
         rect.x + extraPadding, rect.y + extraPadding, rect.w - 2 * extraPadding, rect.h - 2 * extraPadding);
 }
+
+uint32_t imageVersion(const ImageVersionMap& versionMap, const std::string& id) {
+    const auto it = versionMap.find(id);
+    return it != versionMap.end() ? it->second : 0;
+}
+
+// Equal IDs share an atlas bin, so updated images need a distinct ID. Otherwise
+// a layout can reuse a bin that still holds the previous image's pixels.
+int32_t imageUniqueId(const style::Image::Impl& image, uint32_t version) {
+    const auto imageHash = version ? util::hash(image.id, version) : util::hash(image.id);
+    return static_cast<int32_t>(sqrt(imageHash) / 2 + image.image.size.area());
+}
 } // namespace
 
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
@@ -148,8 +160,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         for (const auto& iconEntry : icons) {
             const auto& icon = iconEntry.second;
 
-            auto imageHash = util::hash(icon->id);
-            int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2 + icon->image.size.area());
+            const int32_t uniqueId = imageUniqueId(*icon, imageVersion(versionMap, icon->id));
             const auto size = Size(icon->image.size.width + 2 * padding, icon->image.size.height + 2 * padding);
             const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
             if (!texHandle) {
@@ -162,8 +173,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
             for (const auto& patternEntry : patterns) {
                 const auto& pattern = patternEntry.second;
 
-                auto patternHash = util::hash(pattern->id);
-                int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2 + pattern->image.size.area());
+                const int32_t uniqueId = imageUniqueId(*pattern, imageVersion(versionMap, pattern->id));
                 const auto size = Size(pattern->image.size.width + 2 * padding,
                                        pattern->image.size.height + 2 * padding);
                 const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
@@ -203,9 +213,8 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
             imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
         }
         imageAtlas.textureHandles.emplace_back(texHandle);
-        const auto it = versionMap.find(icon->id);
-        const auto version = it != versionMap.end() ? it->second : 0;
-        imageAtlas.iconPositions.emplace(icon->id, ImagePosition{rectWithoutExtraPadding(rect), *icon, version});
+        imageAtlas.iconPositions.emplace(
+            icon->id, ImagePosition{rectWithoutExtraPadding(rect), *icon, imageVersion(versionMap, icon->id)});
     }
 
     imageAtlas.patternPositions.reserve(patterns.size());
@@ -231,10 +240,8 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
             imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
         }
         imageAtlas.textureHandles.emplace_back(texHandle);
-        const auto it = versionMap.find(pattern->id);
-        const auto version = it != versionMap.end() ? it->second : 0;
-        imageAtlas.patternPositions.emplace(pattern->id,
-                                            ImagePosition{rectWithoutExtraPadding(rect), *pattern, version});
+        imageAtlas.patternPositions.emplace(
+            pattern->id, ImagePosition{rectWithoutExtraPadding(rect), *pattern, imageVersion(versionMap, pattern->id)});
     }
 
     return imageAtlas;
