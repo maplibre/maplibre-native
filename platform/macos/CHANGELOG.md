@@ -2,6 +2,10 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-native/blob/main/CONTRIBUTING.md) to get started.
 
+## main
+
+- Preserve percent-encoded URLs and literal percent signs in network and core log messages.
+
 ## 6.27.0
 
 - First automated native macOS XCFramework release ([#4088](https://github.com/maplibre/maplibre-native/issues/4088)).
