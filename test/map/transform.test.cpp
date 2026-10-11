@@ -2164,6 +2164,65 @@ TEST(Transform, GlobeCameraCenterIsWrapped) {
     EXPECT_NEAR(-179, transform.getCameraOptions(std::nullopt).center->longitude(), 1e-9);
 }
 
+// The expected centers are GL JS's inertia (handlePanInertia) for the same transforms: a fling turns the planet by
+// degrees per pixel at the center's latitude, and the zoom follows the latitude to keep the planet's size.
+TEST(Transform, GlobeFlingEndsAtGLJSInertiaCenter) {
+    struct Pan {
+        LatLng center;
+        double zoom;
+        double bearing;
+        ScreenCoordinate offset;
+        LatLng expected;
+    };
+    for (const auto& pan : {Pan{{30, -20}, 4, 30, {120, -80}, {29.64674667013475, -26.3247433402695}},
+                            Pan{{-45, 170}, 8, -100, {-50, 25}, {-44.91280009391755, 169.90853166980656}},
+                            Pan{{70, 0}, 5, 0, {200, 0}, {70, -4.23757815424085}}}) {
+        SCOPED_TRACE("zoom " + std::to_string(pan.zoom));
+        Transform transform;
+        setUpGlobe(transform, pan.center, pan.zoom, pan.bearing);
+        transform.moveBy(pan.offset, linearSecond());
+        transform.updateTransitions(transform.getTransitionStart() + Milliseconds(1000));
+        EXPECT_NEAR(pan.expected.latitude(), transform.getLatLng().latitude(), 1e-9);
+        EXPECT_NEAR(pan.expected.longitude(), transform.getLatLng().longitude(), 1e-9);
+        EXPECT_NEAR(
+            pan.zoom + VerticalPerspectiveProjection::zoomAdjustment(pan.center.latitude(), pan.expected.latitude()),
+            transform.getZoom(),
+            1e-9);
+    }
+}
+
+// A fling toward a pole eases to the pole limit along its own meridian, as GL JS's inertia does. Moving the location
+// under the end of the fling to the center took it over the pole, and the planet spun as it bounced back.
+TEST(Transform, GlobeFlingTowardAPoleStaysOnItsMeridian) {
+    Transform transform;
+    setUpGlobe(transform, {60, 10}, 1.5);
+    transform.moveBy({0, 3000}, linearSecond());
+    double latitude = 60;
+    for (int frame = 1; frame <= 20; ++frame) {
+        transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
+        EXPECT_NEAR(10, transform.getLatLng().longitude(), 1e-9);
+        EXPECT_GE(transform.getLatLng().latitude(), latitude - 1e-9);
+        latitude = transform.getLatLng().latitude();
+    }
+    EXPECT_NEAR(util::LATITUDE_MAX, latitude, 1e-9);
+}
+
+// A fling worth more than half a turn stops at 179.5° the way it was going, like GL JS's inertia, rather than easing
+// the shorter way round, against the fling.
+TEST(Transform, GlobeFlingStopsShortOfHalfATurn) {
+    Transform transform;
+    setUpGlobe(transform, {0, 0}, 0.5);
+    transform.moveBy({-5000, 0}, linearSecond());
+    double longitude = 0;
+    for (int frame = 1; frame <= 20; ++frame) {
+        transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
+        EXPECT_GE(transform.getLatLng(LatLng::Unwrapped).longitude(), longitude - 1e-9);
+        longitude = transform.getLatLng(LatLng::Unwrapped).longitude();
+    }
+    EXPECT_NEAR(179.5, longitude, 1e-9);
+    EXPECT_NEAR(0, transform.getLatLng().latitude(), 1e-9);
+}
+
 // On Mercator a zoom around a point across the antimeridian leaves the center on the next world copy, as it does on
 // main: the camera reports that copy, which converts back to the middle of the view.
 TEST(Transform, MercatorCameraCenterIsOnTheTransformsWorldCopy) {

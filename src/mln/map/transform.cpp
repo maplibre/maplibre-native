@@ -508,6 +508,19 @@ void Transform::flyTo(const CameraOptions& inputCamera,
 // MARK: - Position
 
 void Transform::moveBy(const ScreenCoordinate& offset, const AnimationOptions& animation) {
+    if (state.isGlobeRendering() && animation.duration && *animation.duration > Duration::zero()) {
+        // An animated move, a fling, turns the globe as GL JS's inertia does: the location under the far end of a
+        // long one can be off the planet or over a pole. It stops short of half a turn, which the ease would take the
+        // other way round.
+        LatLng center = state.constrainedCenter(VerticalPerspectiveProjection::panCenter(state, offset));
+        const double longitude = getLatLng(LatLng::Unwrapped).longitude();
+        if (std::abs(center.longitude() - longitude) > 180.0) {
+            center = {center.latitude(), longitude + std::copysign(179.5, center.longitude() - longitude)};
+        }
+        easeTo(CameraOptions().withCenter(center), animation);
+        return;
+    }
+
     ScreenCoordinate centerOffset = {offset.x, offset.y};
 
     // Reduce the offset so that it never goes past the horizon. If it goes past

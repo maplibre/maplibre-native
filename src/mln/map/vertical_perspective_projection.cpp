@@ -436,6 +436,28 @@ double VerticalPerspectiveProjection::zoomAdjustment(double fromLatitude, double
     return std::log2(std::cos(util::deg2rad(toLatitude)) / std::cos(util::deg2rad(fromLatitude)));
 }
 
+LatLng VerticalPerspectiveProjection::panCenter(const TransformState& state, const ScreenCoordinate& offset) {
+    // GL JS turns the pan by its bearing, which is the state's with the sign flipped.
+    const double bearing = -state.getBearing();
+    const double x = offset.x * std::cos(bearing) - offset.y * std::sin(bearing);
+    const double y = offset.x * std::sin(bearing) + offset.y * std::cos(bearing);
+
+    const LatLng center = state.getLatLng(LatLng::Unwrapped);
+    const double latitude = center.latitude();
+    const auto inverseScale = [](double lat) {
+        return 1.0 / std::cos(util::deg2rad(std::min(std::abs(lat), util::LATITUDE_MAX)));
+    };
+    // Longitude speeds up towards the poles, where the planet is narrower, but as the globe zooms out from 7 to 3 the
+    // latitude it speeds up for is capped at 60°: GL JS's numbers.
+    const double zoomedOut = std::clamp((7.0 - (state.getZoom() + zoomAdjustment(latitude, 0))) / 4.0, 0.0, 1.0);
+    const double longitudeSpeed = util::interpolate(
+        inverseScale(latitude), inverseScale(std::min(std::abs(latitude), 60.0)), zoomedOut);
+    const double degreesPerPixel = 360.0 / (2.0 * std::numbers::pi *
+                                            globeRadiusPixels(Projection::worldSize(state.getScale()), latitude));
+    return {std::clamp(latitude + y * degreesPerPixel, -90.0, 90.0),
+            center.longitude() - x * degreesPerPixel * longitudeSpeed};
+}
+
 double VerticalPerspectiveProjection::differenceOfAnglesDegrees(double from, double to) {
     const double a = util::wrap(from, 0.0, 360.0);
     const double b = util::wrap(to, 0.0, 360.0);

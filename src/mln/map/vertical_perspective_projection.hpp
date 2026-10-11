@@ -68,6 +68,10 @@ public:
     /// Zoom change that keeps the globe the same apparent size when the center moves between latitudes.
     static double zoomAdjustment(double fromLatitude, double toLatitude);
 
+    /// GL JS `computeGlobePanCenter`: the center after a pan of `offset` pixels, turning the planet by degrees per
+    /// pixel at the center's latitude. The longitude is unwrapped and the latitude clamped to the poles.
+    static LatLng panCenter(const TransformState&, const ScreenCoordinate& offset);
+
     /// GL JS `handleMapControlsRollPitchBearingZoom`: after the zoom changed by `zoomDelta`, move the center so that
     /// `zoomLocation` stays under `anchor`, exactly where that is well posed and by a damped heuristic near the
     /// horizon, where a pixel is worth degrees of arc and the exact solution jumps or does not exist.
