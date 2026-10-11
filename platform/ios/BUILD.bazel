@@ -350,7 +350,7 @@ objc_library(
 # $ bazel build --//:renderer=metal --platforms=@build_bazel_apple_support//platforms:ios_arm64 //platform/ios:MapLibre.doccarchive
 # or start a local preview with
 # $ bazel run --//:renderer=metal --platforms=@build_bazel_apple_support//platforms:ios_arm64 //platform/ios:MapLibre.doccarchive
-# See docs/mdbook/src/platforms/ios/ios-documentation.md for downloading the resources.
+# Download the resources (images) first with platform/ios/scripts/download-docc-resources.sh.
 docc_archive(
     name = "MapLibre.doccarchive",
     dep = ":ios-sdk-docc",

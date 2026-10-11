@@ -7,7 +7,7 @@ We use [DocC](https://www.swift.org/documentation/docc) for the MapLibre iOS doc
 You need to have [aws-cli](https://github.com/aws/aws-cli) installed to download the resources from S3 (see below). Run the following command:
 
 ```
-aws s3 sync --no-sign-request "s3://maplibre-native/ios-documentation-resources" "platform/ios/MapLibre.docc/Resources"
+platform/ios/scripts/download-docc-resources.sh
 ```
 
 Then, to preview the documentation locally, run the following command:
