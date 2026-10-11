@@ -45,6 +45,10 @@ layout (std140) uniform LinePatternDrawableUBO {
     lowp float u_width_t;
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;
+    lowp float u_floorwidth_t;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+    lowp float drawable_pad3;
 };
 
 layout (std140) uniform LinePatternTilePropsUBO {
@@ -72,6 +76,7 @@ out vec2 v_normal;
 out vec2 v_width2;
 out float v_linesofar;
 out float v_gamma_scale;
+out float v_floorwidth;
 
 #ifndef HAS_UNIFORM_u_blur
 layout (location = 2) in lowp vec2 a_blur;
@@ -134,6 +139,12 @@ mediump vec4 pattern_from = u_pattern_from;
 pattern_to = a_pattern_to;
 #else
 mediump vec4 pattern_to = u_pattern_to;
+#endif
+
+#ifndef HAS_UNIFORM_u_width
+    v_floorwidth = unpack_mix_vec2(a_width, u_floorwidth_t);
+#else
+    v_floorwidth = u_floorwidth;
 #endif
 
     // the distance over which the line edge fades out.
@@ -213,6 +224,7 @@ in vec2 v_normal;
 in vec2 v_width2;
 in float v_linesofar;
 in float v_gamma_scale;
+in float v_floorwidth;
 
 #ifndef HAS_UNIFORM_u_pattern_from
 in lowp vec4 pattern_from;
@@ -258,6 +270,9 @@ lowp float opacity = u_opacity;
     vec2 pattern_size_a = vec2(display_size_a.x * fromScale / tileZoomRatio, display_size_a.y);
     vec2 pattern_size_b = vec2(display_size_b.x * toScale / tileZoomRatio, display_size_b.y);
 
+    float aspect_a = display_size_a.y / v_floorwidth;
+    float aspect_b = display_size_b.y / v_floorwidth;
+
     // Calculate the distance of the pixel from the line in pixels.
     float dist = length(v_normal) * v_width2.s;
 
@@ -267,18 +282,17 @@ lowp float opacity = u_opacity;
     float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * v_gamma_scale;
     float alpha = clamp(min(dist - (v_width2.t - blur2), v_width2.s - dist) / blur2, 0.0, 1.0);
 
-    float x_a = mod(v_linesofar / pattern_size_a.x, 1.0);
-    float x_b = mod(v_linesofar / pattern_size_b.x, 1.0);
+    float x_a = mod(v_linesofar / pattern_size_a.x * aspect_a, 1.0);
+    float x_b = mod(v_linesofar / pattern_size_b.x * aspect_b, 1.0);
 
-    // v_normal.y is 0 at the midpoint of the line, -1 at the lower edge, 1 at the upper edge
-    // we clamp the line width outset to be between 0 and half the pattern height plus padding (2.0)
-    // to ensure we don't sample outside the designated symbol on the sprite sheet.
-    // 0.5 is added to shift the component to be bounded between 0 and 1 for interpolation of
-    // the texture coordinate
-    float y_a = 0.5 + (v_normal.y * clamp(v_width2.s, 0.0, (pattern_size_a.y + 2.0) / 2.0) / pattern_size_a.y);
-    float y_b = 0.5 + (v_normal.y * clamp(v_width2.s, 0.0, (pattern_size_b.y + 2.0) / 2.0) / pattern_size_b.y);
-    vec2 pos_a = mix(pattern_tl_a / u_texsize, pattern_br_a / u_texsize, vec2(x_a, y_a));
-    vec2 pos_b = mix(pattern_tl_b / u_texsize, pattern_br_b / u_texsize, vec2(x_b, y_b));
+    float y = 0.5 * v_normal.y + 0.5;
+
+    vec2 texel_size = 1.0 / u_texsize;
+    vec2 half_texel = 0.5 * texel_size;
+    vec2 pos_a = mix(pattern_tl_a * texel_size - texel_size, pattern_br_a * texel_size + texel_size, vec2(x_a, y));
+    pos_a = clamp(pos_a, (pattern_tl_a - 1.0) * texel_size + half_texel, (pattern_br_a + 1.0) * texel_size - half_texel);
+    vec2 pos_b = mix(pattern_tl_b * texel_size - texel_size, pattern_br_b * texel_size + texel_size, vec2(x_b, y));
+    pos_b = clamp(pos_b, (pattern_tl_b - 1.0) * texel_size + half_texel, (pattern_br_b + 1.0) * texel_size - half_texel);
 
     vec4 color = mix(texture(u_image, pos_a), texture(u_image, pos_b), u_fade);
 
