@@ -6,6 +6,40 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 - Raise the minimum supported iOS version to 15.5, remove the filesystem polyfill, and clean up obsolete compatibility code.
 - Include device and simulator debug symbols in the dynamic XCFramework. The separate iOS debug-symbol ZIP is no longer published ([#4698](https://github.com/maplibre/maplibre-native/pull/4698)).
+- 💥 Breaking: Replace the `Mapbox.h` umbrella header with `MapLibre.h`. `MapLibre.xcframework` no longer ships `Mapbox.h` ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
+
+  <details>
+  <summary>Migration guide</summary>
+
+  **Swift:** no changes needed. Keep using `import MapLibre`.
+
+  **Objective-C:** include `MapLibre.h` instead of `Mapbox.h`:
+
+  ```objc
+  // Before
+  #include <Mapbox.h>
+
+  // After
+  #include <MapLibre.h>
+  ```
+
+  `#import <MapLibre/MapLibre.h>` and, with modules enabled, `@import MapLibre;` also work.
+
+  The `MapboxVersionNumber` and `MapboxVersionString` declarations from `Mapbox.h` were not carried over to `MapLibre.h`. These symbols were never defined in the binary, so referencing them caused a linker error. To get the SDK version at runtime, read it from the framework bundle:
+
+  ```objc
+  NSString *version = [NSBundle bundleForClass:[MLNMapView class]]
+                          .infoDictionary[@"CFBundleShortVersionString"];
+  ```
+
+  ```swift
+  let version = Bundle(for: MLNMapView.self)
+      .infoDictionary?["CFBundleShortVersionString"] as? String
+  ```
+
+  </details>
+- Export `MLNPluginStyleLayer` from the dynamic framework ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
+- Export `MLNBackendResource` from the dynamic framework when using the Metal renderer ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
 
 ## 6.31.0
 

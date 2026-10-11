@@ -1,6 +1,6 @@
 #import "StyleLayerIconTransformer.h"
 
-#import <Mapbox.h>
+#import <MapLibre.h>
 
 @implementation StyleLayerIconTransformer
 
