@@ -12,6 +12,8 @@
 
 @interface MLNMapView (MLNMapViewGestureRecognizerTests)
 
+@property (nonatomic, readonly, getter=isRotationAllowed) BOOL rotationAllowed;
+
 - (void)handlePinchGesture:(UIPinchGestureRecognizer *)pinch;
 - (void)handleRotateGesture:(UIRotationGestureRecognizer *)rotate;
 - (void)handleDoubleTapGesture:(UITapGestureRecognizer *)doubleTap;
@@ -305,6 +307,31 @@
   [self.mapView handleQuickZoomGesture:quickZoom];
 
   XCTAssertEqualWithAccuracy(self.mapView.zoomLevel, 0, 1e-6);
+}
+
+// Below the zoom that keeps a flat map of the world upright, Mercator holds a rotation within 30°
+// and turns back to north afterwards; the globe turns freely, as in GL JS.
+- (void)testRotationTurnsTheGlobeBelowTheMinimumRotationZoom {
+  for (NSString *projectionName in @[ @"mercator", @"globe" ]) {
+    BOOL globe = [projectionName isEqualToString:@"globe"];
+    auto projection = std::make_unique<mln::style::Projection>();
+    projection->setType(mln::ProjectionDefinition(projectionName.UTF8String));
+    self.mapView.mbglMap.getStyle().setProjection(std::move(projection));
+    self.mapView.mbglMap.jumpTo(
+        mln::CameraOptions().withCenter(mln::LatLng{0, 0}).withZoom(1).withBearing(0));
+    XCTAssertEqual(self.mapView.isRotationAllowed, globe, @"%@", projectionName);
+
+    UIRotationGestureRecognizerMock *rotate =
+        [[UIRotationGestureRecognizerMock alloc] initWithTarget:nil action:nil];
+    rotate.state = UIGestureRecognizerStateBegan;
+    [self.mapView handleRotateGesture:rotate];
+    rotate.state = UIGestureRecognizerStateChanged;
+    rotate.rotation = 1;
+    [self.mapView handleRotateGesture:rotate];
+
+    XCTAssertEqualWithAccuracy(self.mapView.direction, globe ? 360 - MLNDegreesFromRadians(1) : 330,
+                               1e-6, @"%@", projectionName);
+  }
 }
 
 - (void)testHandleTwoFingerDragGesture {

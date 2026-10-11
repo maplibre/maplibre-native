@@ -620,6 +620,10 @@ bool Map::isLocationOccluded(const LatLng& latLng) const {
     return impl->transform.isLocationOccluded(latLng);
 }
 
+bool Map::isGlobeRendering() const {
+    return impl->transform.getState().isGlobeRendering();
+}
+
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {
     std::vector<ScreenCoordinate> ret;
     ret.reserve(latLngs.size());

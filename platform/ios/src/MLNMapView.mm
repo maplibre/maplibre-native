@@ -6222,7 +6222,7 @@ static void *windowScreenContext = &windowScreenContext;
 
       self.showsUserLocation = YES;
 
-      if (self.zoomLevel < self.currentMinimumZoom) {
+      if (!self.isRotationAllowed) {
         [self setZoomLevel:self.currentMinimumZoom animated:YES];
       }
 
@@ -6848,7 +6848,8 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (BOOL)isRotationAllowed {
-  return (self.zoomLevel >= self.currentMinimumZoom);
+  // The minimum keeps a flat map of the world upright; a globe turns at any zoom, as in GL JS.
+  return (self.zoomLevel >= self.currentMinimumZoom) || self.mbglMap.isGlobeRendering();
 }
 
 - (void)unrotateIfNeededForGesture {
