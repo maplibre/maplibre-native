@@ -217,6 +217,33 @@ TransitionOptions FillLayer::getFillPatternTransition() const {
     return impl().paint.template get<FillPattern>().options;
 }
 
+PropertyValue<float> FillLayer::getDefaultFillRoundedCornerDistance() {
+    return {0.f};
+}
+
+const PropertyValue<float>& FillLayer::getFillRoundedCornerDistance() const {
+    return impl().paint.template get<FillRoundedCornerDistance>().value;
+}
+
+void FillLayer::setFillRoundedCornerDistance(const PropertyValue<float>& value) {
+    if (value == getFillRoundedCornerDistance())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillRoundedCornerDistance>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void FillLayer::setFillRoundedCornerDistanceTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillRoundedCornerDistance>().options = options;
+    baseImpl = std::move(impl_);
+}
+
+TransitionOptions FillLayer::getFillRoundedCornerDistanceTransition() const {
+    return impl().paint.template get<FillRoundedCornerDistance>().options;
+}
+
 PropertyValue<std::array<float, 2>> FillLayer::getDefaultFillTranslate() {
     return {{{0.f, 0.f}}};
 }
@@ -275,7 +302,7 @@ using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 14u;
+constexpr uint8_t kPaintPropertyCount = 16u;
 
 enum class Property : uint8_t {
     FillAntialias,
@@ -283,6 +310,7 @@ enum class Property : uint8_t {
     FillOpacity,
     FillOutlineColor,
     FillPattern,
+    FillRoundedCornerDistance,
     FillTranslate,
     FillTranslateAnchor,
     FillAntialiasTransition,
@@ -290,6 +318,7 @@ enum class Property : uint8_t {
     FillOpacityTransition,
     FillOutlineColorTransition,
     FillPatternTransition,
+    FillRoundedCornerDistanceTransition,
     FillTranslateTransition,
     FillTranslateAnchorTransition,
     FillSortKey = kPaintPropertyCount,
@@ -306,6 +335,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"fill-opacity", toUint8(Property::FillOpacity)},
      {"fill-outline-color", toUint8(Property::FillOutlineColor)},
      {"fill-pattern", toUint8(Property::FillPattern)},
+     {"fill-rounded-corner-distance", toUint8(Property::FillRoundedCornerDistance)},
      {"fill-translate", toUint8(Property::FillTranslate)},
      {"fill-translate-anchor", toUint8(Property::FillTranslateAnchor)},
      {"fill-antialias-transition", toUint8(Property::FillAntialiasTransition)},
@@ -313,6 +343,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"fill-opacity-transition", toUint8(Property::FillOpacityTransition)},
      {"fill-outline-color-transition", toUint8(Property::FillOutlineColorTransition)},
      {"fill-pattern-transition", toUint8(Property::FillPatternTransition)},
+     {"fill-rounded-corner-distance-transition", toUint8(Property::FillRoundedCornerDistanceTransition)},
      {"fill-translate-transition", toUint8(Property::FillTranslateTransition)},
      {"fill-translate-anchor-transition", toUint8(Property::FillTranslateAnchorTransition)},
      {"fill-sort-key", toUint8(Property::FillSortKey)}});
@@ -329,6 +360,8 @@ StyleProperty getLayerProperty(const FillLayer& layer, Property property) {
             return makeStyleProperty(layer.getFillOutlineColor());
         case Property::FillPattern:
             return makeStyleProperty(layer.getFillPattern());
+        case Property::FillRoundedCornerDistance:
+            return makeStyleProperty(layer.getFillRoundedCornerDistance());
         case Property::FillTranslate:
             return makeStyleProperty(layer.getFillTranslate());
         case Property::FillTranslateAnchor:
@@ -343,6 +376,8 @@ StyleProperty getLayerProperty(const FillLayer& layer, Property property) {
             return makeStyleProperty(layer.getFillOutlineColorTransition());
         case Property::FillPatternTransition:
             return makeStyleProperty(layer.getFillPatternTransition());
+        case Property::FillRoundedCornerDistanceTransition:
+            return makeStyleProperty(layer.getFillRoundedCornerDistanceTransition());
         case Property::FillTranslateTransition:
             return makeStyleProperty(layer.getFillTranslateTransition());
         case Property::FillTranslateAnchorTransition:
@@ -434,6 +469,16 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
         setFillPattern(*typedValue);
         return std::nullopt;
     }
+    if (property == Property::FillRoundedCornerDistance) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        setFillRoundedCornerDistance(*typedValue);
+        return std::nullopt;
+    }
     if (property == Property::FillTranslate) {
         Error error;
         const auto& typedValue = convert<PropertyValue<std::array<float, 2>>>(value, error, false, false);
@@ -483,6 +528,11 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
 
     if (property == Property::FillPatternTransition) {
         setFillPatternTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::FillRoundedCornerDistanceTransition) {
+        setFillRoundedCornerDistanceTransition(*transition);
         return std::nullopt;
     }
 

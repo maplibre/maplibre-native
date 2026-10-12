@@ -35,7 +35,7 @@ DebugBucket::DebugBucket(const OverscaledTileID& id,
                     Point<int16_t> p{int16_t(::round(left + glyph.data[j] * scale)),
                                      int16_t(::round(baseline - glyph.data[j + 1] * scale))};
 
-                    vertices.emplace_back(FillBucket::layoutVertex(p));
+                    vertices.emplace_back(FillBucket::layoutVertex(p, 0, 0));
 
                     if (prev) {
                         indices.emplace_back(static_cast<uint16_t>(vertices.elements() - 2),

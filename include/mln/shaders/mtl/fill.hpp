@@ -118,12 +118,16 @@ struct alignas(16) FillEvaluatedPropsUBO {
     /*  0 */ float4 color;
     /* 16 */ float4 outline_color;
     /* 32 */ float opacity;
-    /* 36 */ float fade;
-    /* 40 */ float from_scale;
-    /* 44 */ float to_scale;
-    /* 48 */
+    /* 36 */ float rounded_corner_distance;
+    /* 40 */ float fade;
+    /* 44 */ float from_scale;
+    /* 48 */ float to_scale;
+    /* 52 */ float pad1;
+    /* 56 */ float pad2;
+    /* 60 */ float pad3;
+    /* 64 */
 };
-static_assert(sizeof(FillEvaluatedPropsUBO) == 3 * 16, "wrong size");
+static_assert(sizeof(FillEvaluatedPropsUBO) == 4 * 16, "wrong size");
 
 union FillDrawableUnionUBO {
     FillDrawableUBO fillDrawableUBO;
@@ -138,6 +142,123 @@ union FillTilePropsUnionUBO {
     FillOutlinePatternTilePropsUBO fillOutlinePatternTilePropsUBO;
 };
 
+float sdCircle(float2 p, float r) {
+    return length(p) - r;
+}
+
+float sdPlane(float2 p, float2 n, float h)
+{
+    // n must be normalized
+    return dot(p,n) + h;
+}
+
+float dot2(float2 v) {
+    return dot(v,v);
+}
+
+float opUnion(float a, float b) {
+    return min(a, b);
+}
+
+float opSmoothUnion(float d1, float d2, float k) {
+    float h = clamp(0.5 + 0.5*(d2 - d1)/k, 0.0, 1.0);
+    return mix(d2, d1, h) - k*h*(1.0 - h);
+}
+
+float opIntersection(float a, float b) {
+    return max(a, b);
+}
+
+float opSubtraction(float a, float b) {
+    return max(a, -b);
+}
+
+float2 bisector(float2 v0, float2 v1, float2 v2) {
+    float2 v01 = normalize(v1 - v0);
+    float2 v02 = normalize(v2 - v0);
+    return normalize(v01 + v02);
+}
+
+float cotHalf(float cosTheta) {
+    float sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
+    return (1.0 + cosTheta) / sinTheta;
+}
+
+void fitCircle(float2 v0, float2 v1, float2 v2, float radius, thread float &angle, thread float &distance) {
+    float cosTheta = dot(normalize(v1 - v0), normalize(v2 - v0));
+    float sinHalf = sqrt((1.0 - cosTheta) * 0.5);
+
+    angle = sinHalf;
+    distance = radius / sinHalf;
+}
+
+float dRoundedTri(float2 p, thread float &dTri, float2 v0, float2 v1, float2 v2, float radius) {
+    // circle distance from vertex
+    float angle;
+    float distance;
+    fitCircle(v0, v1, v2, radius, angle, distance);
+
+    // circle used to round it
+    float2 bisect = bisector(v0, v1, v2);
+    float2 circlePos = v0 + bisect * distance;
+    float dCircle = sdCircle(p - circlePos, radius);
+
+    // plane to isolate the two halfs of the circle (make the circle cutout asymmetrical)
+    float dPlaneIn = sdPlane(p - circlePos, -bisect, -radius * angle);
+
+    // mask based on plane
+    dTri = opIntersection(dTri, dPlaneIn);
+
+    return dCircle;
+}
+
+float cross2(float2 a, float2 b) {
+    return a.x * b.y - a.y * b.x;
+}
+
+float computeRadius(float2 prevPoint, float2 cornerPoint, float2 nextPoint, float desiredCornerDistance) {
+    float maxEdgeLenPercent = 0.5;
+    float sinParallelTreshold = sin(5 * M_PI_F / 180);
+
+    float edge1Len = distance(prevPoint, cornerPoint);
+    float edge2Len = distance(nextPoint, cornerPoint);
+    if (edge1Len == 0.0 || edge2Len == 0.0) {
+        return 0;
+    }
+
+    // Compute the start and end points of the rounded corner
+    float2 edge1Vector = normalize(cornerPoint - prevPoint);
+    float2 edge2Vector = normalize(nextPoint - cornerPoint);
+
+    float edge1MaxCornerDistance = edge1Len * maxEdgeLenPercent;
+    float edge2MaxCornerDistance = edge2Len * maxEdgeLenPercent;
+    float cornerDistance = min3(desiredCornerDistance, edge1MaxCornerDistance, edge2MaxCornerDistance);
+
+    float2 startPoint = cornerPoint - edge1Vector * cornerDistance;
+    float2 endPoint = cornerPoint + edge2Vector * cornerDistance;
+
+    // Perpendicular directions
+    float2 perp1Vector = float2(-edge1Vector.y, edge1Vector.x);
+    float2 perp2Vector = float2(-edge2Vector.y, edge2Vector.x);
+
+    // Ensure perpendiculars point toward same side
+    if (cross2(edge1Vector, edge2Vector) < 0) {
+        perp1Vector *= -1.0;
+        perp2Vector *= -1.0;
+    }
+
+    // Center = intersection of perpendiculars
+    float perpCrossProduct = cross2(perp1Vector, perp2Vector);
+    if (abs(perpCrossProduct) < sinParallelTreshold) {
+        return 0;
+    }
+    float t = cross2(endPoint - startPoint, perp2Vector) / perpCrossProduct;
+    float2 centerPoint = startPoint + perp1Vector * t;
+
+    float radius = distance(startPoint, centerPoint);
+    return radius;
+}
+
 )";
 
 template <>
@@ -146,26 +267,61 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
 
-struct VertexStage {
-    short2 position [[attribute(0)]];
+struct PolygonVertex {
+    short2 position;
+    short2 prev_next;
+};
 
+struct TriangleIndex {
+    uint value;
+};
+
+struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(1)]];
+    float color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(2)]];
+    float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_outline_color)
+    float outline_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    ushort pattern_from[4];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    ushort pattern_to[4];
 #endif
 };
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+    float2 pos;
+
+    float2 v0 [[flat]];
+    float2 v1 [[flat]];
+    float2 v2 [[flat]];
+
+    float2 v0Prev [[flat]];
+    float2 v0Next [[flat]];
+    float v0Radius [[flat]];
+
+    float2 v1Prev [[flat]];
+    float2 v1Next [[flat]];
+    float v1Radius [[flat]];
+
+    float2 v2Prev [[flat]];
+    float2 v2Next [[flat]];
+    float v2Radius [[flat]];
+
+    float external [[flat]];
 
 #if !defined(HAS_UNIFORM_u_color)
     half4 color;
@@ -175,19 +331,99 @@ struct FragmentStage {
 #endif
 };
 
-FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
+FragmentStage vertex vertexMain(uint vertexID [[vertex_id]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
-                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]]) {
+                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
+                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
+                                device const PolygonVertex* polygon [[buffer(fillUBOCount + 0)]],
+                                device const TriangleIndex* indices [[buffer(fillUBOCount + 1)]],
+                                device const DataVertex* data [[buffer(fillUBOCount + 2)]],
+                                uint instanceID [[instance_id]]) {
 
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
 
+    uint index = indices[instanceID * 3 + vertexID].value >> 2;
+    float2 position = float2(polygon[index].position);
+
+    uint i0 = indices[instanceID * 3 + 0].value >> 2;
+    uint i1 = indices[instanceID * 3 + 1].value >> 2;
+    uint i2 = indices[instanceID * 3 + 2].value >> 2;
+
+    uint ignored0 = indices[instanceID * 3 + 0].value % 4 >> 1;
+    uint ignored1 = indices[instanceID * 3 + 1].value % 4 >> 1;
+    uint ignored2 = indices[instanceID * 3 + 2].value % 4 >> 1;
+
+    uint external0 = indices[instanceID * 3 + 0].value % 2;
+    uint external1 = indices[instanceID * 3 + 1].value % 2;
+    uint external2 = indices[instanceID * 3 + 2].value % 2;
+
+    float2 v0 = float2(polygon[i0].position);
+    float2 v1 = float2(polygon[i1].position);
+    float2 v2 = float2(polygon[i2].position);
+
+    float2 v0Prev = v0;
+    float2 v0Next = v0;
+    float v0Radius = 0;
+    if (ignored0 == 0 && props.rounded_corner_distance > 0) {
+        uint i0Prev = i0 + polygon[i0].prev_next[0];
+        uint i0Next = i0 + polygon[i0].prev_next[1];
+
+        v0Prev = float2(polygon[i0Prev].position);
+        v0Next = float2(polygon[i0Next].position);
+        v0Radius = computeRadius(v0Prev, v0, v0Next, props.rounded_corner_distance);
+    }
+
+    float2 v1Prev = v1;
+    float2 v1Next = v1;
+    float v1Radius = 0;
+    if (ignored1 == 0 && props.rounded_corner_distance > 0) {
+        uint i1Prev = i1 + polygon[i1].prev_next[0];
+        uint i1Next = i1 + polygon[i1].prev_next[1];
+
+        v1Prev = float2(polygon[i1Prev].position);
+        v1Next = float2(polygon[i1Next].position);
+        v1Radius = computeRadius(v1Prev, v1, v1Next, props.rounded_corner_distance);
+    }
+
+    float2 v2Prev = v2;
+    float2 v2Next = v2;
+    float v2Radius = 0;
+    if (ignored2 == 0 && props.rounded_corner_distance > 0) {
+        uint i2Prev = i2 + polygon[i2].prev_next[0];
+        uint i2Next = i2 + polygon[i2].prev_next[1];
+
+        v2Prev = float2(polygon[i2Prev].position);
+        v2Next = float2(polygon[i2Next].position);
+        v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
+    }
+
     return {
-        .position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f),
+        .position = drawable.matrix * float4(position, 0.0f, 1.0f),
+        .pos = position,
+
+        .v0 = v0,
+        .v1 = v1,
+        .v2 = v2,
+
+        .v0Prev = v0Prev,
+        .v0Next = v0Next,
+        .v0Radius = v0Radius,
+
+        .v1Prev = v1Prev,
+        .v1Next = v1Next,
+        .v1Radius = v1Radius,
+
+        .v2Prev = v2Prev,
+        .v2Next = v2Next,
+        .v2Radius = v2Radius,
+
+        .external = (external0 || external1 || external2) ? -1.0 : 1.0,
+
 #if !defined(HAS_UNIFORM_u_color)
-        .color    = half4(unpack_mix_color(vertx.color, drawable.color_t)),
+        .color    = half4(unpack_mix_color(data[index].color, drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity  = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
+        .opacity  = half(unpack_mix_float(data[index].opacity, drawable.opacity_t)),
 #endif
     };
 }
@@ -210,6 +446,36 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half opacity = in.opacity;
 #endif
 
+    float dTri = -1;
+
+    if (in.v0Radius > 0) {
+//        if (distance(in.pos, in.v0Prev) <= 1 || distance(in.pos, in.v0Next) <= 1) {
+//            return half4(1.0, 0.0, 0.0, 1.0);
+//        }
+        float d0 = dRoundedTri(in.pos, dTri, in.v0, in.v0Prev, in.v0Next, in.v0Radius);
+        dTri = opUnion(dTri, d0);
+    }
+
+    if (in.v1Radius > 0) {
+//        if (distance(in.pos, in.v1Prev) <= 1 || distance(in.pos, in.v1Next) <= 1) {
+//            return half4(1.0, 0.0, 0.0, 1.0);
+//        }
+        float d1 = dRoundedTri(in.pos, dTri, in.v1, in.v1Prev, in.v1Next, in.v1Radius);
+        dTri = opUnion(dTri, d1);
+    }
+
+    if (in.v2Radius > 0) {
+//        if (distance(in.pos, in.v2Prev) <= 1 || distance(in.pos, in.v2Next) <= 1) {
+//            return half4(1.0, 0.0, 0.0, 1.0);
+//        }
+        float d2 = dRoundedTri(in.pos, dTri, in.v2, in.v2Prev, in.v2Next, in.v2Radius);
+        dTri = opUnion(dTri, d2);
+    }
+
+    if (dTri * in.external > 0) {
+        discard_fragment();
+    }
+
     return half4(color * opacity);
 }
 )";
@@ -221,7 +487,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -230,8 +496,8 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-    float4 outline_color [[attribute(1)]];
-    float2 opacity [[attribute(2)]];
+    float4 outline_color [[attribute(3)]];
+    float2 opacity [[attribute(4)]];
 };
 
 struct FragmentStage {
@@ -300,24 +566,37 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
 
-struct VertexStage {
-    short2 position [[attribute(0)]];
+struct PolygonVertex {
+    short2 position;
+    short2 prev_next;
+};
 
-#if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(1)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(2)]];
+struct TriangleIndex {
+    uint value;
+};
+
+struct DataVertex {
+#if !defined(HAS_UNIFORM_u_color)
+    float color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
+    float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_outline_color)
+    float outline_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    ushort pattern_from[4];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    ushort pattern_to[4];
 #endif
 };
 
@@ -325,6 +604,25 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 v_pos_a;
     float2 v_pos_b;
+    float2 pos;
+
+    float2 v0 [[flat]];
+    float2 v1 [[flat]];
+    float2 v2 [[flat]];
+
+    float2 v0Prev [[flat]];
+    float2 v0Next [[flat]];
+    float v0Radius [[flat]];
+
+    float2 v1Prev [[flat]];
+    float2 v1Next [[flat]];
+    float v1Radius [[flat]];
+
+    float2 v2Prev [[flat]];
+    float2 v2Next [[flat]];
+    float v2Radius [[flat]];
+
+    float external [[flat]];
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
     half4 pattern_from;
@@ -337,26 +635,87 @@ struct FragmentStage {
 #endif
 };
 
-FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
+FragmentStage vertex vertexMain(uint vertexID [[vertex_id]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
                                 device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
-                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
+                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
+                                device const PolygonVertex* polygon [[buffer(fillUBOCount + 0)]],
+                                device const TriangleIndex* indices [[buffer(fillUBOCount + 1)]],
+                                device const DataVertex* data [[buffer(fillUBOCount + 2)]],
+                                uint instanceID [[instance_id]]) {
 
     device const FillPatternDrawableUBO& drawable = drawableVector[uboIndex].fillPatternDrawableUBO;
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
 
+    uint index = indices[instanceID * 3 + vertexID].value >> 2;
+    float2 position = float2(polygon[index].position);
+
+    uint i0 = indices[instanceID * 3 + 0].value >> 2;
+    uint i1 = indices[instanceID * 3 + 1].value >> 2;
+    uint i2 = indices[instanceID * 3 + 2].value >> 2;
+
+    uint ignored0 = indices[instanceID * 3 + 0].value % 4 >> 1;
+    uint ignored1 = indices[instanceID * 3 + 1].value % 4 >> 1;
+    uint ignored2 = indices[instanceID * 3 + 2].value % 4 >> 1;
+
+    uint external0 = indices[instanceID * 3 + 0].value % 2;
+    uint external1 = indices[instanceID * 3 + 1].value % 2;
+    uint external2 = indices[instanceID * 3 + 2].value % 2;
+
+    float2 v0 = float2(polygon[i0].position);
+    float2 v1 = float2(polygon[i1].position);
+    float2 v2 = float2(polygon[i2].position);
+
+    float2 v0Prev = v0;
+    float2 v0Next = v0;
+    float v0Radius = 0;
+    if (ignored0 == 0 && props.rounded_corner_distance > 0) {
+        uint i0Prev = i0 + polygon[i0].prev_next[0];
+        uint i0Next = i0 + polygon[i0].prev_next[1];
+
+        v0Prev = float2(polygon[i0Prev].position);
+        v0Next = float2(polygon[i0Next].position);
+        v0Radius = computeRadius(v0Prev, v0, v0Next, props.rounded_corner_distance);
+    }
+
+    float2 v1Prev = v1;
+    float2 v1Next = v1;
+    float v1Radius = 0;
+    if (ignored1 == 0 && props.rounded_corner_distance > 0) {
+        uint i1Prev = i1 + polygon[i1].prev_next[0];
+        uint i1Next = i1 + polygon[i1].prev_next[1];
+
+        v1Prev = float2(polygon[i1Prev].position);
+        v1Next = float2(polygon[i1Next].position);
+        v1Radius = computeRadius(v1Prev, v1, v1Next, props.rounded_corner_distance);
+    }
+
+    float2 v2Prev = v2;
+    float2 v2Next = v2;
+    float v2Radius = 0;
+    if (ignored2 == 0 && props.rounded_corner_distance > 0) {
+        uint i2Prev = i2 + polygon[i2].prev_next[0];
+        uint i2Next = i2 + polygon[i2].prev_next[1];
+
+        v2Prev = float2(polygon[i2Prev].position);
+        v2Next = float2(polygon[i2Next].position);
+        v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
+    }
+
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
 #else
-    const auto pattern_from = float4(vertx.pattern_from);
+    const auto pattern_from = float4(data[index].pattern_from[0], data[index].pattern_from[1],
+                                     data[index].pattern_from[2], data[index].pattern_from[3]);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = float4(tileProps.pattern_to);
 #else
-    const auto pattern_to   = float4(vertx.pattern_to);
+    const auto pattern_to   = float4(data[index].pattern_to[0], data[index].pattern_to[1],
+                                     data[index].pattern_to[2], data[index].pattern_to[3]);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -371,12 +730,32 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     const float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
-    const float2 postion = float2(vertx.position);
+    const float2 postion = float2(position);
 
     return {
         .position       = drawable.matrix * float4(postion, 0, 1),
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
+        .pos = position,
+
+        .v0 = v0,
+        .v1 = v1,
+        .v2 = v2,
+
+        .v0Prev = v0Prev,
+        .v0Next = v0Next,
+        .v0Radius = v0Radius,
+
+        .v1Prev = v1Prev,
+        .v1Next = v1Next,
+        .v1Radius = v1Radius,
+
+        .v2Prev = v2Prev,
+        .v2Next = v2Next,
+        .v2Radius = v2Radius,
+
+        .external = (external0 || external1 || external2) ? -1.0 : 1.0,
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),
 #endif
@@ -384,7 +763,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .pattern_to     = half4(pattern_to),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
+        .opacity        = half(unpack_mix_float(data[index].opacity, drawable.opacity_t)),
 #endif
     };
 }
@@ -419,6 +798,27 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto opacity        = in.opacity;
 #endif
 
+    float dTri = -1;
+
+    if (in.v0Radius > 0) {
+        float d0 = dRoundedTri(in.pos, dTri, in.v0, in.v0Prev, in.v0Next, in.v0Radius);
+        dTri = opUnion(dTri, d0);
+    }
+
+    if (in.v1Radius > 0) {
+        float d1 = dRoundedTri(in.pos, dTri, in.v1, in.v1Prev, in.v1Next, in.v1Radius);
+        dTri = opUnion(dTri, d1);
+    }
+
+    if (in.v2Radius > 0) {
+        float d2 = dRoundedTri(in.pos, dTri, in.v2, in.v2Prev, in.v2Next, in.v2Radius);
+        dTri = opUnion(dTri, d2);
+    }
+
+    if (dTri * in.external > 0) {
+        discard_fragment();
+    }
+
     const float2 pattern_tl_a = pattern_from.xy;
     const float2 pattern_br_a = pattern_from.zw;
     const float2 pattern_tl_b = pattern_to.xy;
@@ -443,7 +843,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -454,13 +854,13 @@ struct VertexStage {
     short2 position [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(1)]];
+    ushort4 pattern_from [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(2)]];
+    ushort4 pattern_to [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
+    float2 opacity [[attribute(5)]];
 #endif
 };
 

@@ -9,12 +9,15 @@ namespace shaders {
 
 using FillShaderSource = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>;
 
-const std::array<AttributeInfo, 3> FillShaderSource::attributes = {
+const std::array<AttributeInfo, 5> FillShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPrevNextVertexAttribute},
+
+    AttributeInfo{2, gfx::AttributeDataType::UInt, fillUBOCount + 1, idFillIndicesVertexAttribute},
 
     // Data driven
-    AttributeInfo{1, gfx::AttributeDataType::Float4, fillUBOCount + 1, idFillColorVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Float2, fillUBOCount + 1, idFillOpacityVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float4, fillUBOCount + 2, idFillColorVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, fillUBOCount + 2, idFillOpacityVertexAttribute},
 };
 const std::array<TextureInfo, 0> FillShaderSource::textures = {};
 
@@ -23,12 +26,15 @@ const std::array<TextureInfo, 0> FillShaderSource::textures = {};
 
 using FillOutlineShaderSource = ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>;
 
-const std::array<AttributeInfo, 3> FillOutlineShaderSource::attributes = {
+const std::array<AttributeInfo, 5> FillOutlineShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPrevNextVertexAttribute},
+
+    AttributeInfo{2, gfx::AttributeDataType::UInt, fillUBOCount + 1, idFillIndicesVertexAttribute},
 
     // Data driven
-    AttributeInfo{1, gfx::AttributeDataType::Float4, fillUBOCount + 1, idFillOutlineColorVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Float2, fillUBOCount + 1, idFillOpacityVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float4, fillUBOCount + 2, idFillOutlineColorVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, fillUBOCount + 2, idFillOpacityVertexAttribute},
 };
 const std::array<TextureInfo, 0> FillOutlineShaderSource::textures = {};
 
@@ -37,13 +43,16 @@ const std::array<TextureInfo, 0> FillOutlineShaderSource::textures = {};
 
 using FillPatternShaderSource = ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal>;
 
-const std::array<AttributeInfo, 4> FillPatternShaderSource::attributes = {
+const std::array<AttributeInfo, 6> FillPatternShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPrevNextVertexAttribute},
+
+    AttributeInfo{2, gfx::AttributeDataType::UInt, fillUBOCount + 1, idFillIndicesVertexAttribute},
 
     // Data driven
-    AttributeInfo{1, gfx::AttributeDataType::UShort4, fillUBOCount + 1, idFillPatternFromVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::UShort4, fillUBOCount + 1, idFillPatternToVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::Float2, fillUBOCount + 1, idFillOpacityVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::UShort4, fillUBOCount + 2, idFillPatternFromVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::UShort4, fillUBOCount + 2, idFillPatternToVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float2, fillUBOCount + 2, idFillOpacityVertexAttribute},
 };
 const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {
     TextureInfo{0, idFillImageTexture},
@@ -54,13 +63,16 @@ const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {
 
 using FillOutlinePatternShaderSource = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>;
 
-const std::array<AttributeInfo, 4> FillOutlinePatternShaderSource::attributes = {
+const std::array<AttributeInfo, 6> FillOutlinePatternShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPrevNextVertexAttribute},
+
+    AttributeInfo{2, gfx::AttributeDataType::UInt, fillUBOCount + 1, idFillIndicesVertexAttribute},
 
     // Data driven
-    AttributeInfo{1, gfx::AttributeDataType::UShort4, fillUBOCount + 1, idFillPatternFromVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::UShort4, fillUBOCount + 1, idFillPatternToVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::Float2, fillUBOCount + 1, idFillOpacityVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::UShort4, fillUBOCount + 2, idFillPatternFromVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::UShort4, fillUBOCount + 2, idFillPatternToVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float2, fillUBOCount + 2, idFillOpacityVertexAttribute},
 };
 const std::array<TextureInfo, 1> FillOutlinePatternShaderSource::textures = {
     TextureInfo{0, idFillImageTexture},

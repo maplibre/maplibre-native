@@ -42,10 +42,13 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .color = evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
             .outline_color = evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
             .opacity = evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+            .rounded_corner_distance = evaluated.get<FillRoundedCornerDistance>(),
             .fade = crossfade.t,
             .from_scale = crossfade.fromScale,
             .to_scale = crossfade.toScale,
-        };
+            .pad1 = 0,
+            .pad2 = 0,
+            .pad3 = 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
