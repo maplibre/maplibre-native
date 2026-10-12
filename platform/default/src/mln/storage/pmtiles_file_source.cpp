@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <sstream>
 #include <map>
 
@@ -481,12 +482,32 @@ private:
 
         std::string directory_cache_key = url + "|" + std::to_string(directoryOffset) + "|" +
                                           std::to_string(directoryLength);
-        directory_cache.at(url).emplace(directory_cache_key, pmtiles::deserialize_directory(directoryData));
-        directory_cache_control.at(url).emplace_back(directory_cache_key);
+        auto& cache = directory_cache.at(url);
+        auto& control = directory_cache_control.at(url);
 
-        if (directory_cache_control.at(url).size() > MAX_DIRECTORY_CACHE_ENTRIES) {
-            directory_cache.at(url).erase(directory_cache_control.at(url).front());
-            directory_cache_control.at(url).erase(directory_cache_control.at(url).begin());
+        // Concurrent requests for the same directory each fetch and store it. Keep
+        // a single LRU entry per key so eviction never drops a directory that is
+        // still listed, such as the one the caller is about to read.
+        if (cache.contains(directory_cache_key)) {
+            touchDirectory(control, directory_cache_key);
+            return;
+        }
+
+        cache.emplace(directory_cache_key, pmtiles::deserialize_directory(directoryData));
+        control.emplace_back(directory_cache_key);
+
+        if (control.size() > MAX_DIRECTORY_CACHE_ENTRIES) {
+            cache.erase(control.front());
+            control.erase(control.begin());
+        }
+    }
+
+    // Mark a resident directory as most recently used: move its key to the
+    // back of the LRU list.
+    static void touchDirectory(std::vector<std::string>& control, const std::string& directory_cache_key) {
+        auto it = std::ranges::find(control, directory_cache_key);
+        if (it != control.end()) {
+            std::ranges::rotate(it, it + 1, control.end());
         }
     }
 
@@ -499,17 +520,7 @@ private:
                                           std::to_string(directoryLength);
 
         if (directory_cache.contains(url) && directory_cache.at(url).contains(directory_cache_key)) {
-            if (directory_cache_control.at(url).back() != directory_cache_key) {
-                directory_cache_control.at(url).emplace_back(directory_cache_key);
-
-                for (auto it = directory_cache_control.at(url).begin(); it != directory_cache_control.at(url).end();
-                     ++it) {
-                    if (*it == directory_cache_key) {
-                        directory_cache_control.at(url).erase(it);
-                        break;
-                    }
-                }
-            }
+            touchDirectory(directory_cache_control.at(url), directory_cache_key);
 
             callback(std::unique_ptr<Response::Error>());
             return;
