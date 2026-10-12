@@ -2989,8 +2989,14 @@ static void *windowScreenContext = &windowScreenContext;
         if (annotationContext.annotationView) {
           // Redundantly move the associated annotation view outside the scope of the animation-less
           // transaction block in -updateAnnotationViews.
-          annotationContext.annotationView.center =
-              [self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self];
+          CGPoint center = [self convertCoordinate:annotationContext.annotation.coordinate
+                                     toPointToView:self];
+          // Behind the globe that point is on the near side of the planet; keep the view out of
+          // view, as -updateAnnotationViews does, rather than show it there until the next frame.
+          if ([self isCoordinateOccluded:annotationContext.annotation.coordinate]) {
+            center.x = -CGRectGetWidth(self.frame) * 10.0;
+          }
+          annotationContext.annotationView.center = center;
         }
 
         MLNAnnotationImage *annotationImage = [self imageOfAnnotationWithTag:annotationTag];

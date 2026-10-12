@@ -70,6 +70,7 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
 @property (nonatomic, weak) MLNAnnotationView *annotationView;
 @property (nonatomic) NSInteger annotationSelectedCount;
 @property (nonatomic) void (^prepareAnnotationView)(MLNAnnotationView*);
+@property (nonatomic) BOOL nonReusableAnnotationViews;
 @end
 
 @implementation MLNAnnotationViewTests
@@ -149,6 +150,32 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
     XCTAssertTrue(CGRectContainsPoint(_mapView.bounds, frontView.center), @"the annotation facing the camera is on screen");
     XCTAssertNil(backView.annotation, @"the annotation behind the globe is offscreen and its view recycled");
     XCTAssertFalse(CGRectIntersectsRect(_mapView.bounds, backView.frame));
+}
+
+- (void)testAnnotationViewBehindTheGlobeStaysOutOfViewAsItsCoordinateChanges
+{
+    // A view without a reuse identifier stays with its annotation behind the globe. Each change of the coordinate moved
+    // it to the coordinate's point, on the near side of the planet, until the next -updateAnnotationViews.
+    [self loadGlobeAtNullIsland];
+    self.nonReusableAnnotationViews = YES;
+
+    MLNTestAnnotation *annotation = [[MLNTestAnnotation alloc] init];
+    annotation.coordinate = CLLocationCoordinate2DMake(50, 50);
+    _expectation = [self expectationWithDescription:@"annotation view"];
+    [_mapView addAnnotation:annotation];
+    [self waitForExpectationsWithTimeout:5 handler:nil];
+    MLNAnnotationView *view = _annotationView;
+    XCTAssertNotNil(view);
+    [_mapView updateAnnotationViews];
+    XCTAssertTrue(CGRectContainsPoint(_mapView.bounds, view.center), @"the annotation facing the camera is on screen");
+
+    const CLLocationCoordinate2D farSide[] = {CLLocationCoordinate2DMake(10, 170), CLLocationCoordinate2DMake(20, 160)};
+    for (size_t i = 0; i < 2; i++) {
+        annotation.coordinate = farSide[i];
+        XCTAssertFalse(CGRectContainsPoint(_mapView.bounds, view.center), @"moved behind the globe, step %zu", i);
+        [_mapView updateAnnotationViews];
+        XCTAssertFalse(CGRectContainsPoint(_mapView.bounds, view.center), @"updated behind the globe, step %zu", i);
+    }
 }
 
 - (void)testCoordinateBehindTheGlobeIsOccluded
@@ -302,6 +329,12 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
 
 - (MLNAnnotationView *)mapView:(MLNMapView *)mapView viewForAnnotation:(id<MLNAnnotation>)annotation
 {
+    if (self.nonReusableAnnotationViews) {
+        MLNAnnotationView *annotationView = [[MLNAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+        _annotationView = annotationView;
+        return annotationView;
+    }
+
     MLNAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:MLNTestAnnotationReuseIdentifer];
 
     if (!annotationView)
