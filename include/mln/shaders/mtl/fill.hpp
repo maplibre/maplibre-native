@@ -293,6 +293,12 @@ struct DataVertex {
 #if !defined(HAS_UNIFORM_u_outline_color)
     float outline_color[4];
 #endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    ushort pattern_from[4];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    ushort pattern_to[4];
+#endif
 };
 
 struct FragmentStage {
@@ -481,7 +487,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -490,8 +496,8 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-    float4 outline_color [[attribute(1)]];
-    float2 opacity [[attribute(2)]];
+    float4 outline_color [[attribute(3)]];
+    float2 opacity [[attribute(4)]];
 };
 
 struct FragmentStage {
@@ -560,24 +566,37 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
 
-struct VertexStage {
-    short2 position [[attribute(0)]];
+struct PolygonVertex {
+    short2 position;
+    short2 prev_next;
+};
 
-#if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(1)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(2)]];
+struct TriangleIndex {
+    uint value;
+};
+
+struct DataVertex {
+#if !defined(HAS_UNIFORM_u_color)
+    float color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
+    float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_outline_color)
+    float outline_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    ushort pattern_from[4];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    ushort pattern_to[4];
 #endif
 };
 
@@ -585,6 +604,25 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 v_pos_a;
     float2 v_pos_b;
+    float2 pos;
+
+    float2 v0 [[flat]];
+    float2 v1 [[flat]];
+    float2 v2 [[flat]];
+
+    float2 v0Prev [[flat]];
+    float2 v0Next [[flat]];
+    float v0Radius [[flat]];
+
+    float2 v1Prev [[flat]];
+    float2 v1Next [[flat]];
+    float v1Radius [[flat]];
+
+    float2 v2Prev [[flat]];
+    float2 v2Next [[flat]];
+    float v2Radius [[flat]];
+
+    float external [[flat]];
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
     half4 pattern_from;
@@ -597,26 +635,87 @@ struct FragmentStage {
 #endif
 };
 
-FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
+FragmentStage vertex vertexMain(uint vertexID [[vertex_id]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
                                 device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
-                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
+                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
+                                device const PolygonVertex* polygon [[buffer(fillUBOCount + 0)]],
+                                device const TriangleIndex* indices [[buffer(fillUBOCount + 1)]],
+                                device const DataVertex* data [[buffer(fillUBOCount + 2)]],
+                                uint instanceID [[instance_id]]) {
 
     device const FillPatternDrawableUBO& drawable = drawableVector[uboIndex].fillPatternDrawableUBO;
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
 
+    uint index = indices[instanceID * 3 + vertexID].value >> 2;
+    float2 position = float2(polygon[index].position);
+
+    uint i0 = indices[instanceID * 3 + 0].value >> 2;
+    uint i1 = indices[instanceID * 3 + 1].value >> 2;
+    uint i2 = indices[instanceID * 3 + 2].value >> 2;
+
+    uint ignored0 = indices[instanceID * 3 + 0].value % 4 >> 1;
+    uint ignored1 = indices[instanceID * 3 + 1].value % 4 >> 1;
+    uint ignored2 = indices[instanceID * 3 + 2].value % 4 >> 1;
+
+    uint external0 = indices[instanceID * 3 + 0].value % 2;
+    uint external1 = indices[instanceID * 3 + 1].value % 2;
+    uint external2 = indices[instanceID * 3 + 2].value % 2;
+
+    float2 v0 = float2(polygon[i0].position);
+    float2 v1 = float2(polygon[i1].position);
+    float2 v2 = float2(polygon[i2].position);
+
+    float2 v0Prev = v0;
+    float2 v0Next = v0;
+    float v0Radius = 0;
+    if (ignored0 == 0 && props.rounded_corner_distance > 0) {
+        uint i0Prev = i0 + polygon[i0].prev_next[0];
+        uint i0Next = i0 + polygon[i0].prev_next[1];
+
+        v0Prev = float2(polygon[i0Prev].position);
+        v0Next = float2(polygon[i0Next].position);
+        v0Radius = computeRadius(v0Prev, v0, v0Next, props.rounded_corner_distance);
+    }
+
+    float2 v1Prev = v1;
+    float2 v1Next = v1;
+    float v1Radius = 0;
+    if (ignored1 == 0 && props.rounded_corner_distance > 0) {
+        uint i1Prev = i1 + polygon[i1].prev_next[0];
+        uint i1Next = i1 + polygon[i1].prev_next[1];
+
+        v1Prev = float2(polygon[i1Prev].position);
+        v1Next = float2(polygon[i1Next].position);
+        v1Radius = computeRadius(v1Prev, v1, v1Next, props.rounded_corner_distance);
+    }
+
+    float2 v2Prev = v2;
+    float2 v2Next = v2;
+    float v2Radius = 0;
+    if (ignored2 == 0 && props.rounded_corner_distance > 0) {
+        uint i2Prev = i2 + polygon[i2].prev_next[0];
+        uint i2Next = i2 + polygon[i2].prev_next[1];
+
+        v2Prev = float2(polygon[i2Prev].position);
+        v2Next = float2(polygon[i2Next].position);
+        v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
+    }
+
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
 #else
-    const auto pattern_from = float4(vertx.pattern_from);
+    const auto pattern_from = float4(data[index].pattern_from[0], data[index].pattern_from[1], 
+                                     data[index].pattern_from[2], data[index].pattern_from[3]);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = float4(tileProps.pattern_to);
 #else
-    const auto pattern_to   = float4(vertx.pattern_to);
+    const auto pattern_to   = float4(data[index].pattern_to[0], data[index].pattern_to[1], 
+                                     data[index].pattern_to[2], data[index].pattern_to[3]);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -631,12 +730,32 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     const float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
-    const float2 postion = float2(vertx.position);
+    const float2 postion = float2(position);
 
     return {
         .position       = drawable.matrix * float4(postion, 0, 1),
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
+        .pos = position,
+
+        .v0 = v0,
+        .v1 = v1,
+        .v2 = v2,
+
+        .v0Prev = v0Prev,
+        .v0Next = v0Next,
+        .v0Radius = v0Radius,
+
+        .v1Prev = v1Prev,
+        .v1Next = v1Next,
+        .v1Radius = v1Radius,
+
+        .v2Prev = v2Prev,
+        .v2Next = v2Next,
+        .v2Radius = v2Radius,
+
+        .external = (external0 || external1 || external2) ? -1.0 : 1.0,
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),
 #endif
@@ -644,7 +763,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .pattern_to     = half4(pattern_to),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
+        .opacity        = half(unpack_mix_float(data[index].opacity, drawable.opacity_t)),
 #endif
     };
 }
@@ -679,6 +798,27 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto opacity        = in.opacity;
 #endif
 
+    float dTri = -1;
+
+    if (in.v0Radius > 0) {
+        float d0 = dRoundedTri(in.pos, dTri, in.v0, in.v0Prev, in.v0Next, in.v0Radius);
+        dTri = opUnion(dTri, d0);
+    }
+
+    if (in.v1Radius > 0) {
+        float d1 = dRoundedTri(in.pos, dTri, in.v1, in.v1Prev, in.v1Next, in.v1Radius);
+        dTri = opUnion(dTri, d1);
+    }
+
+    if (in.v2Radius > 0) {
+        float d2 = dRoundedTri(in.pos, dTri, in.v2, in.v2Prev, in.v2Next, in.v2Radius);
+        dTri = opUnion(dTri, d2);
+    }
+
+    if (dTri * in.external > 0) {
+        discard_fragment();
+    }
+
     const float2 pattern_tl_a = pattern_from.xy;
     const float2 pattern_br_a = pattern_from.zw;
     const float2 pattern_tl_b = pattern_to.xy;
@@ -703,7 +843,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -714,13 +854,13 @@ struct VertexStage {
     short2 position [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(1)]];
+    ushort4 pattern_from [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(2)]];
+    ushort4 pattern_to [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
+    float2 opacity [[attribute(5)]];
 #endif
 };
 

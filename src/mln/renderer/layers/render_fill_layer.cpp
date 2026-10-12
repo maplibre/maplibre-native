@@ -478,7 +478,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.sharedLineIndexes,
                                          bucket.lineSegments.data(),
                                          bucket.lineSegments.size());
-                    // finish(*builder, FillVariant::FillOutlineTriangulated);
+                    finish(*builder, FillVariant::FillOutlineTriangulated);
                 }
             };
 #endif
