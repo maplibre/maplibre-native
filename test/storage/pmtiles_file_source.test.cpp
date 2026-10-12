@@ -1,9 +1,12 @@
+#include <mln/storage/file_source.hpp>
+#include <mln/storage/file_source_manager.hpp>
 #include <mln/storage/pmtiles_file_source.hpp>
 #include <mln/storage/resource.hpp>
 #include <mln/storage/resource_options.hpp>
 #include <mln/util/platform.hpp>
 #include <mln/util/run_loop.hpp>
 
+#include <atomic>
 #include <filesystem>
 
 #include <climits>
@@ -14,6 +17,84 @@ namespace {
 std::string toAbsoluteURL(const std::string &fileName) {
     auto path = std::filesystem::current_path() / "test/fixtures/storage/pmtiles" / fileName;
     return std::string(mln::util::PMTILES_PROTOCOL) + std::string(mln::util::FILE_PROTOCOL) + path.string();
+}
+
+struct RangeRequestCounter {
+    std::atomic<int> created{0};
+    std::atomic<int> alive{0};
+};
+
+class CountedRequest : public mln::AsyncRequest {
+public:
+    CountedRequest(RangeRequestCounter& counter_, std::unique_ptr<mln::AsyncRequest> request_)
+        : counter(counter_),
+          request(std::move(request_)) {
+        ++counter.created;
+        ++counter.alive;
+    }
+
+    ~CountedRequest() override { --counter.alive; }
+
+private:
+    RangeRequestCounter& counter;
+    std::unique_ptr<mln::AsyncRequest> request;
+};
+
+// Stands in for the resource loader PMTilesFileSource reads byte ranges through, to count the
+// range requests that are alive. Answers from `fileSource`, or never when there is none.
+class CountingFileSource : public mln::FileSource {
+public:
+    CountingFileSource(RangeRequestCounter& counter_, std::shared_ptr<mln::FileSource> fileSource_)
+        : counter(counter_),
+          fileSource(std::move(fileSource_)) {}
+
+    std::unique_ptr<mln::AsyncRequest> request(const mln::Resource& resource, Callback callback) override {
+        return std::make_unique<CountedRequest>(
+            counter, fileSource ? fileSource->request(resource, std::move(callback)) : nullptr);
+    }
+
+    bool canRequest(const mln::Resource&) const override { return true; }
+    void setResourceOptions(mln::ResourceOptions) override {}
+    mln::ResourceOptions getResourceOptions() override { return {}; }
+    void setClientOptions(mln::ClientOptions) override {}
+    mln::ClientOptions getClientOptions() override { return {}; }
+
+private:
+    RangeRequestCounter& counter;
+    std::shared_ptr<mln::FileSource> fileSource;
+};
+
+// Registers CountingFileSource as the resource loader, and puts the original back when destroyed
+class ScopedCountingResourceLoader {
+public:
+    ScopedCountingResourceLoader(RangeRequestCounter& counter, std::shared_ptr<mln::FileSource> fileSource)
+        : original(mln::FileSourceManager::get()->unRegisterFileSourceFactory(mln::FileSourceType::ResourceLoader)) {
+        mln::FileSourceManager::get()->registerFileSourceFactory(
+            mln::FileSourceType::ResourceLoader,
+            [&counter, fileSource](const mln::ResourceOptions&, const mln::ClientOptions&) {
+                return std::make_unique<CountingFileSource>(counter, fileSource);
+            });
+    }
+
+    ~ScopedCountingResourceLoader() {
+        mln::FileSourceManager::get()->registerFileSourceFactory(mln::FileSourceType::ResourceLoader,
+                                                                 std::move(original));
+    }
+
+private:
+    mln::FileSourceManager::FileSourceFactory original;
+};
+
+// FileSourceManager shares file sources between equal options, so use options no other test uses
+// to be sure the PMTilesFileSource under test creates its resource loader from the factory above
+mln::ResourceOptions rangeRequestTestOptions() {
+    return mln::ResourceOptions::Default().withApiKey("PMTilesFileSource range request tests").clone();
+}
+
+// The file source answers from its own thread, in the order it was asked, so once this returns
+// it has handled every request and cancellation sent before
+void waitForFileSourceThread(mln::PMTilesFileSource& pmtiles) {
+    pmtiles.getResourceOptions();
 }
 
 } // namespace
@@ -198,4 +279,60 @@ TEST(PMTilesFileSource, UncompressedTile) {
         });
 
     loop.run();
+}
+
+// The range request made for a tile must not outlive the tile request: the resource loader keeps
+// revalidating a request for as long as it exists.
+TEST(PMTilesFileSource, TileRequestReleasesRangeRequest) {
+    util::RunLoop loop;
+
+    RangeRequestCounter counter;
+    ScopedCountingResourceLoader resourceLoader(
+        counter, FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, ResourceOptions::Default()));
+
+    PMTilesFileSource pmtiles(rangeRequestTestOptions(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = pmtiles.request(
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response res) {
+            req.reset();
+            EXPECT_EQ(nullptr, res.error);
+            ASSERT_TRUE(res.data.get());
+            loop.stop();
+        });
+
+    loop.run();
+
+    waitForFileSourceThread(pmtiles);
+
+    // header, root directory and tile
+    EXPECT_EQ(3, counter.created);
+    EXPECT_EQ(0, counter.alive);
+}
+
+// Cancelling a tile request must cancel the range request it is waiting for
+TEST(PMTilesFileSource, CancelledTileRequestCancelsRangeRequest) {
+    util::RunLoop loop;
+
+    RangeRequestCounter counter;
+    ScopedCountingResourceLoader resourceLoader(counter, nullptr);
+
+    PMTilesFileSource pmtiles(rangeRequestTestOptions(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = pmtiles.request(
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response) { ADD_FAILURE() << "the range request is never answered"; });
+
+    waitForFileSourceThread(pmtiles);
+
+    // the header request, left unanswered
+    ASSERT_EQ(1, counter.created);
+    ASSERT_EQ(1, counter.alive);
+
+    req.reset();
+
+    waitForFileSourceThread(pmtiles);
+
+    EXPECT_EQ(1, counter.created);
+    EXPECT_EQ(0, counter.alive);
 }
