@@ -707,14 +707,14 @@ FragmentStage vertex vertexMain(uint vertexID [[vertex_id]],
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
 #else
-    const auto pattern_from = float4(data[index].pattern_from[0], data[index].pattern_from[1], 
+    const auto pattern_from = float4(data[index].pattern_from[0], data[index].pattern_from[1],
                                      data[index].pattern_from[2], data[index].pattern_from[3]);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = float4(tileProps.pattern_to);
 #else
-    const auto pattern_to   = float4(data[index].pattern_to[0], data[index].pattern_to[1], 
+    const auto pattern_to   = float4(data[index].pattern_to[0], data[index].pattern_to[1],
                                      data[index].pattern_to[2], data[index].pattern_to[3]);
 #endif
 

@@ -46,9 +46,9 @@ using FillPatternShaderSource = ShaderSource<BuiltIn::FillPatternShader, gfx::Ba
 const std::array<AttributeInfo, 6> FillPatternShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPrevNextVertexAttribute},
-    
+
     AttributeInfo{2, gfx::AttributeDataType::UInt, fillUBOCount + 1, idFillIndicesVertexAttribute},
-    
+
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::UShort4, fillUBOCount + 2, idFillPatternFromVertexAttribute},
     AttributeInfo{4, gfx::AttributeDataType::UShort4, fillUBOCount + 2, idFillPatternToVertexAttribute},
