@@ -1734,6 +1734,17 @@ of north, the map will automatically snap to exact north.
                toPointToView:(nullable UIView *)view;
 
 /**
+ Returns whether the globe hides a geographic coordinate from the camera, on the
+ far side of the planet. A view placed over the map with
+ `-convertCoordinate:toPointToView:` can be hidden while it does. A Mercator
+ map hides nothing.
+
+ @param coordinate The geographic coordinate to test.
+ @return `YES` if the globe hides the coordinate.
+ */
+- (BOOL)isCoordinateOccluded:(CLLocationCoordinate2D)coordinate;
+
+/**
  Converts a rectangle in the given view’s coordinate system to a geographic
  bounding box.
 

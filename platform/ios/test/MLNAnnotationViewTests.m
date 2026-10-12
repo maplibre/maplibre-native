@@ -151,6 +151,15 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
     XCTAssertFalse(CGRectIntersectsRect(_mapView.bounds, backView.frame));
 }
 
+- (void)testCoordinateBehindTheGlobeIsOccluded
+{
+    XCTAssertFalse([_mapView isCoordinateOccluded:CLLocationCoordinate2DMake(0, 180)], @"a Mercator map hides nothing");
+
+    [self loadGlobeAtNullIsland];
+    XCTAssertFalse([_mapView isCoordinateOccluded:CLLocationCoordinate2DMake(50, 50)]);
+    XCTAssertTrue([_mapView isCoordinateOccluded:CLLocationCoordinate2DMake(0, 180)]);
+}
+
 - (void)testCustomAnnotationView
 {
     MLNCustomAnnotationView *customAnnotationView = [[MLNCustomAnnotationView alloc] initWithReuseIdentifier:@"reuse-id"];
