@@ -89,11 +89,12 @@ jobs:
 
       - name: Install ctcache
         run: |
-          # pending open PR https://github.com/matus-chochlik/ctcache/pull/94
-          git clone https://github.com/louwers/ctcache.git
-          cd ctcache
-          cd ..
-          mv ctcache /usr/local/bin
+          git init ctcache
+          git -C ctcache remote add origin https://github.com/matus-chochlik/ctcache.git
+          git -C ctcache fetch --depth=1 origin 857b14271d3ded5511c2e6a60f2dc20c1e4b5680
+          git -C ctcache checkout --detach FETCH_HEAD
+          sudo apt-get install -y python3-requests
+          sudo mv ctcache /usr/local/bin
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
@@ -103,19 +104,18 @@ jobs:
       - name: Build MapLibre Native
         env:
           CI: 1
+          # Public cache address so forks can read it without repository variables.
+          CTCACHE_HOST: 32.194.98.193
+          CTCACHE_AUTH_KEY: ${{ secrets.CTCACHE_AUTH_KEY }}
         run: |
           cmake --version
 
           # ctcache configuration
-          export CTCACHE_HOST=34.229.50.221
           export CTCACHE_PORT=5000
           export CTCACHE_PROTO=http
 
-          if [ -n "${{ secrets.CTCACHE_AUTH_KEY }}" ]; then
-            echo "setting CTCACHE_AUTH_KEY"
-            export CTCACHE_AUTH_KEY=${{ secrets.CTCACHE_AUTH_KEY }}
-          else
-            # do not write to cache if CTCACHE_AUTH_KEY not set
+          if [ -z "$CTCACHE_AUTH_KEY" ]; then
+            # Fork pull requests can read the cache without a write key.
             export CTCACHE_HOST_READ_ONLY=1
           fi
 
