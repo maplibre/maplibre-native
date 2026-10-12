@@ -4,6 +4,7 @@ import android.graphics.PointF
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -74,6 +75,15 @@ class GlobeVisibleRegionTest : AppCenter() {
             assertEquals(90.0, bounds.latitudeNorth, 1e-9)
             assertEquals(-180.0, bounds.longitudeWest, 1e-9)
             assertEquals(180.0, bounds.longitudeEast, 1e-9)
+        }
+    }
+
+    @Test
+    fun theFarSideOfTheGlobeIsOccluded() {
+        rule.runOnUiThread {
+            maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 0.0), 1.0))
+            assertFalse(maplibreMap.projection.isLocationOccluded(LatLng(0.0, 0.0)))
+            assertTrue(maplibreMap.projection.isLocationOccluded(LatLng(0.0, 180.0)))
         }
     }
 

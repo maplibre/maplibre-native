@@ -232,6 +232,8 @@ interface NativeMap {
 
   void pixelsForLatLngs(@NonNull double[] input, @NonNull double[] output);
 
+  boolean isLocationOccluded(@NonNull LatLng latLng);
+
   void getVisibleCoordinateBounds(@NonNull double[] output);
 
   LatLng latLngForPixel(@NonNull PointF pixel);

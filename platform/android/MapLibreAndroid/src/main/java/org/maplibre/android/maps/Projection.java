@@ -113,6 +113,18 @@ public class Projection {
   }
 
   /**
+   * Returns whether the globe hides a geographic location from the camera, being on the far side of
+   * the planet. Views placed over the map at {@link #toScreenLocation(LatLng)} can be hidden while it
+   * returns true. A Mercator map hides nothing.
+   *
+   * @param latLng A geographic location.
+   * @return True if the globe hides the location.
+   */
+  public boolean isLocationOccluded(@NonNull LatLng latLng) {
+    return nativeMapView.isLocationOccluded(latLng);
+  }
+
+  /**
    * Gets a projection of the viewing frustum for converting between screen coordinates and
    * geo-latitude/longitude coordinates.
    * <p>

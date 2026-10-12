@@ -753,6 +753,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public boolean isLocationOccluded(@NonNull LatLng latLng) {
+    if (checkState("isLocationOccluded")) {
+      return false;
+    }
+    return nativeIsLocationOccluded(latLng.getLatitude(), latLng.getLongitude());
+  }
+
+  @Override
   public void latLngsForPixels(@NonNull double[] input, @NonNull double[] output) {
     if (!checkState("latLngsForPixels")) {
       nativeLatLngsForPixels(input, output, pixelRatio);
@@ -1657,6 +1665,8 @@ final class NativeMapView implements NativeMap {
   @NonNull
   @Keep
   private native PointF nativePixelForLatLng(double lat, double lon);
+
+  private native boolean nativeIsLocationOccluded(double lat, double lon);
 
   @Keep
   private native void nativePixelsForLatLngs(double[] input, double[] output, float pixelRatio);
