@@ -1,7 +1,9 @@
 #if MLN_RENDER_BACKEND_METAL
 
 #import <MetalKit/MetalKit.h>
+#import "MLNFoundation.h"
 
+MLN_EXPORT
 @interface MLNBackendResource : NSObject
 
 @property (nonatomic, strong) MTKView *mtkView;

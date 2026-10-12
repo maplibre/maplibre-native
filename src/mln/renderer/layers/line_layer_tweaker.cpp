@@ -297,7 +297,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
                     .pattern_from_t = std::get<0>(binders->get<LinePattern>()->interpolationFactor(zoom)),
-                    .pattern_to_t = std::get<1>(binders->get<LinePattern>()->interpolationFactor(zoom))
+                    .pattern_to_t = std::get<1>(binders->get<LinePattern>()->interpolationFactor(zoom)),
+                    .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
+                    .pad1 = 0,
+                    .pad2 = 0,
+                    .pad3 = 0
                 };
 
 #if MLN_UBO_CONSOLIDATION

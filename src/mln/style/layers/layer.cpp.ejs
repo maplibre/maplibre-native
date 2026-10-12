@@ -212,6 +212,7 @@ void <%- camelize(type) %>Layer::set<%- camelize(property.name) %>Transition(con
     auto impl_ = mutableImpl();
     impl_->paint.template get<<%- camelize(property.name) %>>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions <%- camelize(type) %>Layer::get<%- camelize(property.name) %>Transition() const {
