@@ -194,7 +194,7 @@ private:
                                          const std::string& name);
 
     void pollSurfaceUpdate();
-    void updateSurface(bool recreateSurface = false);
+    void updateSurface();
 
 private:
     RendererBackend& backend;
@@ -214,6 +214,8 @@ private:
     uint8_t frameResourceIndex = 0;
     std::vector<FrameResources> frameResources;
     bool surfaceUpdateRequested{false};
+    // The platform surface must be recreated before the swapchain is rebuilt.
+    bool surfaceLost{false};
     int32_t surfaceUpdateLatency{0};
     int32_t currentFrameCount{0};
 

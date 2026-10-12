@@ -10,6 +10,7 @@ espresso = "3.7.0"
 testRunner = "1.3.0"
 testRules = "1.7.0"
 fragment = "1.8.9"
+appcompat = "1.8.0"
 annotation = "1.8.2"
 androidxPrint = "1.1.0"
 leakCanary = "2.14"
@@ -51,6 +52,7 @@ testEspressoContrib = { group = "androidx.test.espresso", name = "espresso-contr
 testUiAutomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiAutomator" }
 supportAnnotations = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
 supportFragmentV4 = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
+supportAppcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 supportRecyclerView = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerView" }
 supportConstraintLayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintLayout" }
 interpolator = { group = "androidx.interpolator", name = "interpolator", version.ref = "interpolator" }

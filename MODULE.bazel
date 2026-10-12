@@ -132,3 +132,6 @@ crate.from_cargo(
     manifests = ["//rustutils:Cargo.toml"],
 )
 use_repo(crate, "crates")
+
+# Used by //platform:check-public-symbols-{ios,macos}.
+bazel_dep(name = "sourcekitten", version = "0.38.0", dev_dependency = True)

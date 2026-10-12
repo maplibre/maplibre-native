@@ -91,6 +91,9 @@ jobs:
       - name: Build AppKit app, GLFW app, cache tool, render tool for macOS
         run: bazel build //platform/macos/app:macos_app //platform/glfw:glfw_app //bin:cache_tool //bin:render_tool --//:renderer=metal
 
+      - name: Check public symbol exports
+        run: bazel test //platform:check-public-symbols-macos --test_output=errors --//:renderer=metal
+
       - name: Generate Xcode project for macOS
         run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
 
