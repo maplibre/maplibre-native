@@ -1080,6 +1080,23 @@ TEST(Map, GlobeImageSourceBelowZoomZero) {
     EXPECT_EQ(test.frontend.getSize().width, image.size.width);
 }
 
+// https://github.com/maplibre/maplibre-native/pull/4753
+// An image source wholly beyond the latitudes Web Mercator can show has an
+// empty tile cover, which used to crash RenderImageSource::update.
+TEST(Map, ImageSourceBeyondMercatorLatitudes) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    auto source = std::make_unique<ImageSource>("image",
+                                                std::array<LatLng, 4>{{{88, -10}, {88, 10}, {86, 10}, {86, -10}}});
+    source->setImage(PremultipliedImage({4, 4}));
+    test.map.getStyle().addSource(std::move(source));
+    test.map.getStyle().addLayer(std::make_unique<RasterLayer>("image", "image"));
+
+    // Passes, if rendering a frame doesn't crash.
+    test.frontend.renderFrame();
+}
+
 // https://github.com/mapbox/mapbox-gl-native/issues/15342
 // Tests the fix for constant repaint caused by `RenderSource::hasFadingTiles()`
 // returning `true` all the time.
