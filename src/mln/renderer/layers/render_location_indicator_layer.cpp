@@ -476,7 +476,7 @@ public:
     RenderLocationIndicatorImpl(std::string sourceLayer)
         : ruler(0, mapbox::cheap_ruler::CheapRuler::Meters),
           feature(std::make_shared<mln::Feature>()),
-          featureEnvelope(std::make_shared<mapbox::geometry::polygon<int64_t>>()) {
+          featureEnvelope(std::make_shared<mapbox::geometry::multi_polygon<int64_t>>()) {
         feature->sourceLayer = std::move(sourceLayer);
     }
 
@@ -547,24 +547,27 @@ public:
         if (!dirtyFeature) return;
         dirtyFeature = false;
         featureEnvelope->clear();
+        feature->geometry = mapbox::geometry::point<double>{oldParams.puckPosition.longitude(),
+                                                            oldParams.puckPosition.latitude()};
+        const auto addQuad = [&](const std::array<vec2, 4>& geometry) {
+            mapbox::geometry::linear_ring<int64_t> border;
+            for (const auto& v : geometry) {
+                vec4 p{{v.x, v.y, 0, 1}};
+                matrix::transformMat4(p, p, translation);
+                border.emplace_back(int64_t(p[0]), int64_t(p[1]));
+            }
+            border.push_back(border.front());
+            featureEnvelope->push_back({std::move(border)});
+        };
+
+        // Each image contributes an independent quad, never a hole or a combined bounding box.
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
-        if (!texPuck || !texPuck->isValid()) return;
+        if (texPuck && texPuck->isValid()) addQuad(puckGeometry);
+        if (texPuckHat && texPuckHat->isValid()) addQuad(hatGeometry);
 #else
-        if (!puckDrawableInfo.textureInfo.texture) return;
-
-        auto& puckGeometry = puckDrawableInfo.geometry;
+        if (puckDrawableInfo.textureInfo.texture) addQuad(puckDrawableInfo.geometry);
+        if (hatDrawableInfo.textureInfo.texture) addQuad(hatDrawableInfo.geometry);
 #endif
-
-        feature->geometry = mapbox::geometry::point<double>{oldParams.puckPosition.latitude(),
-                                                            oldParams.puckPosition.longitude()};
-        mapbox::geometry::linear_ring<int64_t> border;
-        for (const auto& v : puckGeometry) {
-            vec4 p{{v.x, v.y, 0, 1}};
-            matrix::transformMat4(p, p, translation);
-            border.push_back(Point<int64_t>{int64_t(p[0]), int64_t(p[1])});
-        }
-        border.push_back(border.front());
-        featureEnvelope->push_back(border);
     }
 
     const auto& getProjectionCircle() const { return projectionCircle; }
@@ -920,7 +923,7 @@ public:
 public:
     mln::LocationIndicatorRenderParameters parameters;
     std::shared_ptr<mln::Feature> feature;
-    std::shared_ptr<mapbox::geometry::polygon<int64_t>> featureEnvelope;
+    std::shared_ptr<mapbox::geometry::multi_polygon<int64_t>> featureEnvelope;
     static bool anisotropicFilteringAvailable;
 };
 
