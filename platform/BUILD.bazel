@@ -1,4 +1,4 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("@aspect_rules_js//js:defs.bzl", "js_test")
 load("@rules_cc//cc:defs.bzl", "objc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 
@@ -11,6 +11,8 @@ objc_library(
         "//platform/macos:macos_objcpp_srcs",
         "//platform/macos:macos_private_hdrs",
         "//platform/macos:macos_public_hdrs",
+        "//platform/macos:mln_defines",
+        "//platform/macos:umbrella_hdr",
     ],
     hdrs = [
         "//platform/darwin:include/mln/util/image+MLNAdditions.hpp",
@@ -56,6 +58,8 @@ objc_library(
         "//platform/macos:macos_objc_srcs",
         "//platform/macos:macos_private_hdrs",
         "//platform/macos:macos_public_hdrs",
+        "//platform/macos:mln_defines",
+        "//platform/macos:umbrella_hdr",
     ],
     copts = select({
         "@platforms//os:ios": WARNING_FLAGS["ios"],
@@ -67,6 +71,8 @@ objc_library(
     includes = [
         "darwin/include",
         "darwin/src",
+        "macos/include",
+        "macos/src",
     ],
     visibility = ["//visibility:public"],
     deps = [
@@ -85,8 +91,9 @@ objc_library(
         "//platform/darwin:generated_style_srcs",
         "//platform/ios:ios_objcpp_srcs",
         "//platform/ios:ios_private_hdrs",
-        "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
+        "//platform/ios:mln_defines",
+        "//platform/ios:umbrella_hdr",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
@@ -133,8 +140,9 @@ objc_library(
         "//platform/darwin:darwin_objc_srcs",
         "//platform/ios:ios_objc_srcs",
         "//platform/ios:ios_private_hdrs",
-        "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
+        "//platform/ios:mln_defines",
+        "//platform/ios:umbrella_hdr",
     ],
     hdrs = [
         "//platform/darwin:include/mln/util/image+MLNAdditions.hpp",
@@ -172,6 +180,7 @@ objc_library(
     name = "objc-headers",
     includes = [
         "darwin/src",
+        "ios/include",
         "ios/src",
     ],
     sdk_frameworks = [
@@ -192,6 +201,8 @@ objc_library(
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:generated_style_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
+        "//platform/ios:mln_defines",
+        "//platform/ios:umbrella_hdr",
     ] + select({
         "//:metal_renderer": [],
         "//conditions:default": [],
@@ -244,6 +255,8 @@ objc_library(
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:generated_style_public_hdrs",
         "//platform/macos:macos_public_hdrs",
+        "//platform/macos:mln_defines",
+        "//platform/macos:umbrella_hdr",
     ],
     data = ["//platform/macos:resources"],
     module_name = "MapLibre",
@@ -348,17 +361,25 @@ objc_library(
     ],
 )
 
-js_binary(
-    name = "check-public-symbols",
-    args = [
-        "macOS",
-        "iOS",
-    ],
-    data = [
-        "//:node_modules/lodash",
-        "//platform/darwin:symbols-to-check",
-        "//platform/ios:symbols-to-check",
-        "//platform/macos:symbols-to-check",
-    ],
-    entry_point = "scripts/check-public-symbols.js",
-)
+# Checks that the public classes and constants in the built XCFrameworks are
+# marked MLN_EXPORT.
+[
+    js_test(
+        name = "check-public-symbols-" + platform.lower(),
+        data = [
+            xcframework,
+            "@sourcekitten",
+        ],
+        entry_point = "scripts/check-public-symbols.js",
+        fixed_args = [
+            "$(rootpath @sourcekitten)",
+            platform,
+            "$(rootpath %s)" % xcframework,
+        ],
+        tags = ["manual"],
+    )
+    for platform, xcframework in [
+        ("iOS", "//platform/ios:MapLibre.dynamic"),
+        ("macOS", "//platform/macos:MapLibre.dynamic"),
+    ]
+]
