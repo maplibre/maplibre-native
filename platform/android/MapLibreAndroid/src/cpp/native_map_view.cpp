@@ -306,6 +306,10 @@ void NativeMapView::moveBy(jni::JNIEnv&, jni::jdouble dx, jni::jdouble dy, jni::
     map->moveBy({dx, dy}, animationOptions);
 }
 
+void NativeMapView::moveByAround(jni::JNIEnv&, jni::jdouble dx, jni::jdouble dy, jni::jdouble x, jni::jdouble y) {
+    map->moveBy({dx, dy}, mln::ScreenCoordinate{x, y});
+}
+
 void NativeMapView::jumpTo(jni::JNIEnv& env,
                            jni::jdouble bearing,
                            jni::jdouble latitude,
@@ -1396,6 +1400,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::cancelTransitions, "nativeCancelTransitions"),
         METHOD(&NativeMapView::setGestureInProgress, "nativeSetGestureInProgress"),
         METHOD(&NativeMapView::moveBy, "nativeMoveBy"),
+        METHOD(&NativeMapView::moveByAround, "nativeMoveByAround"),
         METHOD(&NativeMapView::jumpTo, "nativeJumpTo"),
         METHOD(&NativeMapView::easeTo, "nativeEaseTo"),
         METHOD(&NativeMapView::flyTo, "nativeFlyTo"),

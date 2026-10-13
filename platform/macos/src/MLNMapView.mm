@@ -1909,7 +1909,15 @@ public:
 
     if (gestureRecognizer.state == NSGestureRecognizerStateChanged) {
       delta.y *= -1;
-      [self offsetCenterCoordinateBy:delta animated:NO];
+      [self willChangeValueForKey:@"centerCoordinate"];
+      MLNMapCamera *oldCamera = self.camera;
+      _mbglMap->moveBy({delta.x, delta.y},
+                       mln::ScreenCoordinate{endPoint.x, self.bounds.size.height - endPoint.y});
+      if ([self.delegate respondsToSelector:@selector(mapView:shouldChangeFromCamera:toCamera:)] &&
+          ![self.delegate mapView:self shouldChangeFromCamera:oldCamera toCamera:self.camera]) {
+        self.camera = oldCamera;
+      }
+      [self didChangeValueForKey:@"centerCoordinate"];
       [gestureRecognizer setTranslation:NSZeroPoint inView:nil];
     }
   }

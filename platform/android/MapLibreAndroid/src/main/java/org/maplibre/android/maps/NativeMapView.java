@@ -266,6 +266,19 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void moveBy(double dx, double dy, @NonNull PointF focalPoint) {
+    if (checkState("moveBy")) {
+      return;
+    }
+
+    try {
+      nativeMoveByAround(dx / pixelRatio, dy / pixelRatio, focalPoint.x / pixelRatio, focalPoint.y / pixelRatio);
+    } catch (java.lang.Error error) {
+      Logger.d(TAG, "Error when executing NativeMapView#moveBy", error);
+    }
+  }
+
+  @Override
   public void setLatLng(@NonNull LatLng latLng, long duration) {
     if (checkState("setLatLng")) {
       return;
@@ -1516,6 +1529,9 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeMoveBy(double dx, double dy, long duration);
+
+  @Keep
+  private native void nativeMoveByAround(double dx, double dy, double x, double y);
 
   @Keep
   private native void nativeSetLatLng(double latitude, double longitude, double[] padding, long duration);

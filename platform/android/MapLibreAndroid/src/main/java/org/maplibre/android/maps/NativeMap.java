@@ -54,6 +54,8 @@ interface NativeMap {
 
   void moveBy(double deltaX, double deltaY, long duration);
 
+  void moveBy(double deltaX, double deltaY, @NonNull PointF focalPoint);
+
   @NonNull
   CameraPosition getCameraPosition();
 

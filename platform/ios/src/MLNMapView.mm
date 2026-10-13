@@ -2221,15 +2221,17 @@ public:
     MLNMapCamera *toCamera = [self cameraByPanningWithTranslation:delta panGesture:pan];
 
     if ([self _shouldChangeFromCamera:oldCamera toCamera:toCamera]) {
+      const CGPoint location = [pan locationInView:pan.view];
+      const mln::ScreenCoordinate anchor{location.x, location.y};
       switch (self.panScrollingMode) {
         case MLNPanScrollingModeVertical:
-          self.mbglMap.moveBy({0, delta.y});
+          self.mbglMap.moveBy({0, delta.y}, anchor);
           break;
         case MLNPanScrollingModeHorizontal:
-          self.mbglMap.moveBy({delta.x, 0});
+          self.mbglMap.moveBy({delta.x, 0}, anchor);
           break;
         default:
-          self.mbglMap.moveBy({delta.x, delta.y});
+          self.mbglMap.moveBy({delta.x, delta.y}, anchor);
       }
 
       [pan setTranslation:CGPointZero inView:pan.view];

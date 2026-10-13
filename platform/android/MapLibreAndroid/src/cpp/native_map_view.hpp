@@ -93,6 +93,8 @@ public:
 
     void moveBy(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jlong);
 
+    void moveByAround(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble);
+
     void jumpTo(jni::JNIEnv&,
                 jni::jdouble,
                 jni::jdouble,
