@@ -1067,6 +1067,21 @@ TEST(Transform, FreeCameraOptionsInvalidZ) {
     EXPECT_LE(transform.getFreeCameraOptions().position.value()[2], 1.0);
 }
 
+TEST(Transform, CameraFollowsJumpsBelowAFractionalMinimumZoom) {
+    const double mercatorY = 0.5 - std::log(std::tan(pi / 4 + util::deg2rad(10.0) / 2)) / (2 * pi);
+    for (const double minZoom : {1.525373023184723, 1.55, 3.1, 6.2}) {
+        Transform transform;
+        transform.resize({512, 512});
+        transform.setMinZoom(minZoom);
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(minZoom + 2.0));
+        transform.jumpTo(CameraOptions().withCenter(LatLng{10.0, 20.0}).withZoom(0.0));
+        EXPECT_TRUE(transform.getState().valid()) << minZoom;
+        const vec3 position = transform.getFreeCameraOptions().position.value();
+        EXPECT_NEAR(200.0 / 360.0, position[0], 1e-12) << minZoom;
+        EXPECT_NEAR(mercatorY, position[1], 1e-12) << minZoom;
+    }
+}
+
 TEST(Transform, FreeCameraOptionsHighPitch) {
     Transform transform;
     transform.resize({100, 100});
@@ -1757,6 +1772,19 @@ TEST(GlobeTransform, MinZoomFollowsLatitude) {
     EXPECT_DOUBLE_EQ(state.getMinZoom(), state.getMinZoomAtLatitude(80.0));
     transform.jumpTo(CameraOptions().withCenter(LatLng{80.0, 0.0}).withZoom(-2.0));
     EXPECT_GE(transform.getZoom(), 0.0);
+}
+
+TEST(GlobeTransform, CameraFollowsTheGlobeBelowTheMinimumScale) {
+    Transform transform;
+    setUpGlobe(transform, {80.0, 0.0}, 8.0);
+    transform.setMinZoom(6.0);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{80.0, 90.0}).withZoom(0.0));
+    EXPECT_NEAR(transform.getState().getMinZoomAtLatitude(80.0), transform.getZoom(), 1e-9);
+    EXPECT_LT(transform.getZoom(), 6.0);
+    EXPECT_TRUE(transform.getState().valid());
+    const vec3 position = transform.getFreeCameraOptions().position.value();
+    EXPECT_NEAR(0.75, position[0], 1e-12);
+    EXPECT_NEAR(0.5 - std::log(std::tan(pi / 4 + util::deg2rad(80.0) / 2)) / (2 * pi), position[1], 1e-12);
 }
 
 TEST(GlobeTransform, ZoomAdjustment) {

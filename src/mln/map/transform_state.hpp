@@ -268,7 +268,10 @@ public:
     double zoomScale(double zoom) const;
     double scaleZoom(double scale) const;
 
-    bool valid() const { return !size.isEmpty() && (scale >= min_scale && scale <= max_scale); }
+    // Toward the poles the globe goes below the minimum scale; setLatLngZoom holds it to the floor there.
+    bool valid() const {
+        return !size.isEmpty() && (isGlobeRendering() ? scale > 0 : scale >= min_scale) && scale <= max_scale;
+    }
 
     float getCameraToTileDistance(const UnwrappedTileID&) const;
     float maxPitchScaleFactor() const;
