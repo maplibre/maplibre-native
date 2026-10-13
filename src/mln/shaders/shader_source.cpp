@@ -25,7 +25,6 @@ MBGL_DEFINE_ENUM(BuiltIn,
                   {BuiltIn::FillExtrusionInstancedShader, "FillExtrusionInstancedShader"},
                   {BuiltIn::FillExtrusionPatternShader, "FillExtrusionPatternShader"},
                   {BuiltIn::FillExtrusionPatternInstancedShader, "FillExtrusionPatternInstancedShader"},
-                  {BuiltIn::GlobeDepthShader, "GlobeDepthShader"},
                   {BuiltIn::HeatmapShader, "HeatmapShader"},
                   {BuiltIn::HeatmapTextureShader, "HeatmapTextureShader"},
                   {BuiltIn::HillshadePrepareShader, "HillshadePrepareShader"},
@@ -41,6 +40,7 @@ MBGL_DEFINE_ENUM(BuiltIn,
                   {BuiltIn::SymbolIconShader, "SymbolIconShader"},
                   {BuiltIn::SymbolSDFShader, "SymbolSDFShader"},
                   {BuiltIn::SymbolTextAndIconShader, "SymbolTextAndIconShader"},
-                  {BuiltIn::WideVectorShader, "WideVectorShader"}});
+                  {BuiltIn::WideVectorShader, "WideVectorShader"},
+                  {BuiltIn::GlobeDepthShader, "GlobeDepthShader"}});
 
 } // namespace mln
