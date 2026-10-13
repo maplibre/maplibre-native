@@ -85,7 +85,8 @@ final class NativeMapView implements NativeMap {
   // Listener invoked to return a bitmap of the map
   private MapLibreMap.SnapshotReadyCallback snapshotReadyCallback;
 
-  static {
+  // JNI registration initializes this class; load during construction to avoid a lock cycle.
+  {
     LibraryLoader.load();
   }
 

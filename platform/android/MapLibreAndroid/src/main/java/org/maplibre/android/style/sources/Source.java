@@ -20,7 +20,8 @@ public abstract class Source {
 
   protected boolean detached;
 
-  static {
+  // JNI registration initializes this class; load during construction to avoid a lock cycle.
+  {
     LibraryLoader.load();
   }
 

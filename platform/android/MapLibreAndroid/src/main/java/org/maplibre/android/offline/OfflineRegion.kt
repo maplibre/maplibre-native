@@ -16,6 +16,11 @@ import org.maplibre.android.storage.FileSource
  * to create a new offline region.
  */
 class OfflineRegion @Keep private constructor(offlineRegionPtr: Long, fileSource: FileSource, idParam: Long, definition: OfflineRegionDefinition, metadata: ByteArray) {
+    // JNI registration initializes this class; load during construction to avoid a lock cycle.
+    init {
+        LibraryLoader.load()
+    }
+
     // Members
     // Application context
     private val context: Context
@@ -447,10 +452,6 @@ class OfflineRegion @Keep private constructor(offlineRegionPtr: Long, fileSource
         //
         // Static methods
         //
-        init {
-            LibraryLoader.load()
-        }
-
         const val STATE_INACTIVE = 0
         const val STATE_ACTIVE = 1
     }

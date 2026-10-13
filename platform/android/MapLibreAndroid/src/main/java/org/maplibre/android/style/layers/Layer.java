@@ -24,7 +24,8 @@ public abstract class Layer {
   private boolean invalidated;
   private boolean detached;
 
-  static {
+  // JNI registration initializes this class; load during construction to avoid a lock cycle.
+  {
     LibraryLoader.load();
   }
 

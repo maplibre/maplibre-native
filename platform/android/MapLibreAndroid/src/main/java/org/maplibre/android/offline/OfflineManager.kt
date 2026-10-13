@@ -25,6 +25,11 @@ import java.nio.channels.FileChannel
  */
 @UiThread
 class OfflineManager private constructor(context: Context) {
+    // JNI registration initializes this class; load during construction to avoid a lock cycle.
+    init {
+        LibraryLoader.load()
+    }
+
     // Native peer pointer
     @Keep
     private val nativePtr: Long = 0
@@ -632,10 +637,6 @@ class OfflineManager private constructor(context: Context) {
         //
         // Static methods
         //
-        init {
-            LibraryLoader.load()
-        }
-
         // This object is implemented as a singleton
         @SuppressLint("StaticFieldLeak")
         private var instance: OfflineManager? = null
