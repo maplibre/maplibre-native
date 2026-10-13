@@ -148,6 +148,17 @@ void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) 
     activatedRenderTargets.clear();
 }
 
+// A render target is only needed while its tile is rendered. Without this they pile up for every tile ever drawn and
+// the renderer runs a pass for each of them every frame (maplibre-native #4684).
+void RenderHillshadeLayer::removeUnusedRenderTargets(const std::unordered_set<const RenderTarget*>& inUse,
+                                                     UniqueChangeRequestVec& changes) {
+    std::erase_if(activatedRenderTargets, [&](const RenderTargetPtr& renderTarget) {
+        if (inUse.contains(renderTarget.get())) return false;
+        activateRenderTarget(renderTarget, false, changes);
+        return true;
+    });
+}
+
 static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
 static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
@@ -232,6 +243,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         return hillshadePrepareVertexAttrs;
     };
 
+    std::unordered_set<const RenderTarget*> renderTargetsInUse;
+
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -304,6 +317,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                 ++stats.drawablesAdded;
             }
         }
+        renderTargetsInUse.insert(bucket.renderTarget.get());
 
         // Set up tile drawable
         std::shared_ptr<HillshadeVertexVector> vertices;
@@ -387,6 +401,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             ++stats.drawablesAdded;
         }
     }
+
+    removeUnusedRenderTargets(renderTargetsInUse, changes);
 }
 
 } // namespace mln

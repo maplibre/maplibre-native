@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_set>
+
 #include <mln/renderer/render_layer.hpp>
 #include <mln/renderer/buckets/hillshade_bucket.hpp>
 #include <mln/style/layers/hillshade_layer_impl.hpp>
@@ -45,6 +47,7 @@ private:
 
     void addRenderTarget(const RenderTargetPtr&, UniqueChangeRequestVec&);
     void removeRenderTargets(UniqueChangeRequestVec&);
+    void removeUnusedRenderTargets(const std::unordered_set<const RenderTarget*>& inUse, UniqueChangeRequestVec&);
 
     // Paint properties
     style::HillshadePaintProperties::Unevaluated unevaluated;
