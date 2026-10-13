@@ -478,7 +478,13 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     if (!cameraPosition) {
         return {};
     }
-    const vec3& cameraCoord = *cameraPosition;
+    // Past the Mercator range there are no tiles, so as GL JS does, they are chosen around the center brought back to
+    // the edge of the range, and the camera moves with it.
+    vec3 cameraCoord = *cameraPosition;
+    const double latitude = transform.getLatLng().latitude();
+    if (std::abs(latitude) > util::LATITUDE_MAX) {
+        cameraCoord[1] += center.y - (0.5 - std::asinh(std::tan(util::deg2rad(latitude))) / util::M2PI);
+    }
     const double distanceToCenter2d = std::hypot(centerCoord[0] - cameraCoord[0], centerCoord[1] - cameraCoord[1]);
     const double distanceZ = std::abs(centerCoord[2] - cameraCoord[2]);
     const double distanceToCenter3d = std::hypot(distanceToCenter2d, distanceZ);
@@ -535,7 +541,8 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         }
     }
 
-    std::sort(
+    // GL JS's sort is stable: equally distant tiles, as around a pole, keep the order they were found in.
+    std::stable_sort(
         result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) { return a.sqrDist < b.sqrDist; });
     std::vector<OverscaledTileID> ids;
     ids.reserve(result.size());

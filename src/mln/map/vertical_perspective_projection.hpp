@@ -37,6 +37,15 @@ public:
     /// Globe radius in pixels at the given world size and center latitude, so zoom means the same on both projections.
     static double globeRadiusPixels(double worldSize, double centerLatitude);
 
+    /// GL JS `planetScaleAtLatitude`: the cosine of the center latitude the globe radius is divided by. Mercator ends
+    /// at the edge of its range, so past it the globe keeps its size there.
+    static double planetScale(double centerLatitude);
+
+    /// GL JS `_getMaxLatitude`: how close to a pole the center can be at the given zoom. Past the Mercator range there
+    /// are no tiles, so the center reaches the pole only while that area fits in the view, and eases back to the edge
+    /// of the range as the area outgrows the view.
+    static double maxLatitude(const TransformState&, double zoom);
+
     /// The unit-sphere position of a point in tile units.
     static vec3 tileCoordinatesToSphere(const Point<double>& tilePoint, const UnwrappedTileID&);
 
@@ -93,7 +102,8 @@ public:
     static double surfaceDistancePixels(double worldSize, double centerLatitude, const LatLng&, const LatLng&);
 
     /// The location `t` of the way from `start` to `start + delta`, the longitude paced at 1 / cos(latitude) so the
-    /// globe appears to turn at a steady rate.
+    /// globe appears to turn at a steady rate. The pace grows without bound towards the poles, so past the Mercator
+    /// range it keeps its value at the edge.
     static LatLng interpolateLatLng(const LatLng& start, double deltaLatitude, double deltaLongitude, double t);
 };
 

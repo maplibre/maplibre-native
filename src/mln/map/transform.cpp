@@ -100,6 +100,13 @@ CameraOptions Transform::getCameraOptions(const std::optional<EdgeInsets>& paddi
  * not included in `options`.
  */
 void Transform::jumpTo(const CameraOptions& camera) {
+    // On the globe the zoom decides how close to a pole the center can be. GL JS's jump bounds the center by the zoom
+    // it lands on, where its ease bounds it by the zoom it starts from unless given one, so the jump settles the zoom.
+    if (state.isGlobeRendering() && camera.center && !camera.zoom) {
+        easeTo(CameraOptions(camera).withZoom(getZoom() + VerticalPerspectiveProjection::zoomAdjustment(
+                                                              getLatLng().latitude(), camera.center->latitude())));
+        return;
+    }
     easeTo(camera);
 }
 
@@ -121,15 +128,18 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
 
     double zoom = camera.zoom.value_or(getZoom());
     if (!camera.zoom && camera.center && globe) {
-        zoom += VerticalPerspectiveProjection::zoomAdjustment(getLatLng().latitude(),
-                                                              state.constrainedCenter(*camera.center).latitude());
+        zoom += VerticalPerspectiveProjection::zoomAdjustment(getLatLng().latitude(), camera.center->latitude());
     }
     state.constrainCameraAndZoomToBounds(camera, zoom);
 
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     LatLng startLatLng = getLatLng(LatLng::Unwrapped);
     const LatLng& unwrappedLatLng = camera.center.value_or(startLatLng);
-    const LatLng& latLng = state.getLatLngBounds() != LatLngBounds() ? unwrappedLatLng : unwrappedLatLng.wrapped();
+    // On the globe the ease heads for the center the zoom it was given allows, or else the zoom it starts from, as GL
+    // JS's does; its last frame is bounded by the zoom it ends on.
+    const LatLng latLng = state.constrainedCenter(
+        state.getLatLngBounds() != LatLngBounds() ? unwrappedLatLng : unwrappedLatLng.wrapped(),
+        camera.zoom ? zoom : getZoom());
 
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
@@ -272,13 +282,14 @@ void Transform::flyTo(const CameraOptions& inputCamera,
 
     double zoom = camera.zoom.value_or(getZoom());
     if (!camera.zoom && camera.center && globe) {
-        zoom += VerticalPerspectiveProjection::zoomAdjustment(getLatLng().latitude(),
-                                                              state.constrainedCenter(*camera.center).latitude());
+        zoom += VerticalPerspectiveProjection::zoomAdjustment(getLatLng().latitude(), camera.center->latitude());
     }
     state.constrainCameraAndZoomToBounds(camera, zoom);
 
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
-    const LatLng& latLng = camera.center.value_or(getLatLng(LatLng::Unwrapped)).wrapped();
+    // As in easeTo, the globe's flight heads for the center the zoom it was given, or else starts from, allows.
+    const LatLng latLng = state.constrainedCenter(camera.center.value_or(getLatLng(LatLng::Unwrapped)).wrapped(),
+                                                  camera.zoom ? zoom : getZoom());
     const double centerAlt = camera.centerAltitude.value_or(state.getCenterAltitude());
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
@@ -518,7 +529,7 @@ void Transform::moveBy(const ScreenCoordinate& offset,
         // An animated move, a fling, turns the globe as GL JS's inertia does: the location under the far end of a
         // long one can be off the planet or over a pole. It stops short of half a turn, which the ease would take the
         // other way round.
-        LatLng center = state.constrainedCenter(VerticalPerspectiveProjection::panCenter(state, offset));
+        LatLng center = state.constrainedCenter(VerticalPerspectiveProjection::panCenter(state, offset), getZoom());
         const double longitude = getLatLng(LatLng::Unwrapped).longitude();
         if (std::abs(center.longitude() - longitude) > 180.0) {
             center = {center.latitude(), longitude + std::copysign(179.5, center.longitude() - longitude)};
@@ -539,7 +550,7 @@ void Transform::moveBy(const ScreenCoordinate& offset,
                                           : state.getEdgeInsets().getCenter(state.getSize().width,
                                                                             state.getSize().height);
         const LatLng center = state.constrainedCenter(
-            VerticalPerspectiveProjection::dragCenter(state, flipped(grab), {offset.x, -offset.y}));
+            VerticalPerspectiveProjection::dragCenter(state, flipped(grab), {offset.x, -offset.y}), getZoom());
         easeTo(CameraOptions().withCenter(center).withZoom(getZoom() + VerticalPerspectiveProjection::zoomAdjustment(
                                                                            getLatLng().latitude(), center.latitude())),
                animation);

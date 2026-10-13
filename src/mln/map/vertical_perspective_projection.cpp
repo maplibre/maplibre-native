@@ -158,7 +158,11 @@ void VerticalPerspectiveProjection::tileMatrix(mat4& matrix, const UnwrappedTile
 }
 
 double VerticalPerspectiveProjection::globeRadiusPixels(double worldSize, double centerLatitude) {
-    return worldSize / (2.0 * std::numbers::pi) / std::cos(util::deg2rad(centerLatitude));
+    return worldSize / (2.0 * std::numbers::pi) / planetScale(centerLatitude);
+}
+
+double VerticalPerspectiveProjection::planetScale(double centerLatitude) {
+    return std::cos(util::deg2rad(std::min(std::abs(centerLatitude), util::LATITUDE_MAX)));
 }
 
 vec3 VerticalPerspectiveProjection::tileCoordinatesToSphere(const Point<double>& tilePoint,
@@ -375,6 +379,9 @@ constexpr double INTERPOLATE_TO_HEURISTIC_END_HORIZON = 0.999;
 constexpr double SLOWING_RADIUS_START = 0.9;
 constexpr double SLOWING_RADIUS_STOP = 0.5;
 constexpr double SLOWING_RADIUS_SLOW_FACTOR = 0.25;
+// GL JS vertical_perspective_transform: how many times the view the area past the Mercator range has grown to when the
+// center is back on its edge.
+constexpr double POLE_AREA_FADE_SCALE = 4.0;
 
 double remapSaturate(double value, double oldMin, double oldMax, double newMin, double newMax) {
     const double t = std::clamp((value - oldMin) / (oldMax - oldMin), 0.0, 1.0);
@@ -416,7 +423,7 @@ void VerticalPerspectiveProjection::zoomAroundPoint(TransformState& state,
     const double slowingFactor = std::min(distanceFactor, 1.0 + (radiusFactor - 1.0) * interpolationFactorHorizon);
 
     const double factor = (1.0 - std::pow(2.0, -zoomDelta)) * slowingFactor;
-    const LatLng heuristicCenter{std::clamp(center.latitude() + dLat * factor, -util::LATITUDE_MAX, util::LATITUDE_MAX),
+    const LatLng heuristicCenter{std::clamp(center.latitude() + dLat * factor, -90.0, 90.0),
                                  center.longitude() + dLng * factor};
 
     const LatLng exactCenter = centerForLocationAtPoint(state, zoomLocation, anchor).value_or(center);
@@ -426,16 +433,29 @@ void VerticalPerspectiveProjection::zoomAroundPoint(TransformState& state,
     const double heuristicFactor = std::pow(std::max(interpolationFactorLongitude, interpolationFactorHorizon),
                                             INTERPOLATE_TO_HEURISTIC_EXPONENT);
     const LatLng target{
-        exactCenter.latitude() +
-            differenceOfAnglesDegrees(exactCenter.latitude(), heuristicCenter.latitude()) * heuristicFactor,
+        std::clamp(exactCenter.latitude() +
+                       differenceOfAnglesDegrees(exactCenter.latitude(), heuristicCenter.latitude()) * heuristicFactor,
+                   -90.0,
+                   90.0),
         exactCenter.longitude() +
             differenceOfAnglesDegrees(exactCenter.longitude(), heuristicCenter.longitude()) * heuristicFactor};
-    const LatLng constrained = state.constrainedCenter(target);
+    const LatLng constrained = state.constrainedCenter(target, state.getZoom());
     state.setLatLngZoom(constrained, state.getZoom() + zoomAdjustment(center.latitude(), constrained.latitude()));
 }
 
 double VerticalPerspectiveProjection::zoomAdjustment(double fromLatitude, double toLatitude) {
-    return std::log2(std::cos(util::deg2rad(toLatitude)) / std::cos(util::deg2rad(fromLatitude)));
+    return std::log2(planetScale(toLatitude) / planetScale(fromLatitude));
+}
+
+double VerticalPerspectiveProjection::maxLatitude(const TransformState& state, double zoom) {
+    const double areaRadians = util::deg2rad(90.0 - util::LATITUDE_MAX);
+    const double areaPixels = globeRadiusPixels(Projection::worldSize(std::pow(2.0, zoom)), util::LATITUDE_MAX) *
+                              areaRadians;
+    const Size size = state.getSize();
+    const double reachPixels = std::min(size.width, size.height) / 2.0;
+    const double centerPixels = std::min(areaPixels, reachPixels) *
+                                remapSaturate(areaPixels, reachPixels, reachPixels * POLE_AREA_FADE_SCALE, 1.0, 0.0);
+    return util::LATITUDE_MAX + util::rad2deg(areaRadians * centerPixels / areaPixels);
 }
 
 LatLng VerticalPerspectiveProjection::panCenter(const TransformState& state, const ScreenCoordinate& offset) {
@@ -447,7 +467,7 @@ LatLng VerticalPerspectiveProjection::panCenter(const TransformState& state, con
     const LatLng center = state.getLatLng(LatLng::Unwrapped);
     const double latitude = center.latitude();
     const auto inverseScale = [](double lat) {
-        return 1.0 / std::cos(util::deg2rad(std::min(std::abs(lat), util::LATITUDE_MAX)));
+        return 1.0 / planetScale(lat);
     };
     // Longitude speeds up towards the poles, where the planet is narrower, but as the globe zooms out from 7 to 3 the
     // latitude it speeds up for is capped at 60°: GL JS's numbers.
@@ -589,14 +609,15 @@ LatLng VerticalPerspectiveProjection::interpolateLatLng(const LatLng& start,
                                                         double deltaLatitude,
                                                         double deltaLongitude,
                                                         double t) {
-    const double latitude = start.latitude() + deltaLatitude * t;
-    if (std::abs(deltaLatitude) <= 1.0) {
+    const double latitude = std::clamp(start.latitude() + deltaLatitude * t, -90.0, 90.0);
+    const double startLatitude = std::clamp(start.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
+    const double endLatitude = std::clamp(start.latitude() + deltaLatitude, -util::LATITUDE_MAX, util::LATITUDE_MAX);
+    if (std::abs(endLatitude - startLatitude) <= 1.0) {
         return {latitude, start.longitude() + deltaLongitude * t};
     }
-    const double endLatitude = start.latitude() + deltaLatitude;
-    const bool onDifferentHemispheres = sign(endLatitude) != sign(start.latitude());
-    const double sampleStart = util::deg2rad(onDifferentHemispheres ? -std::abs(start.latitude())
-                                                                    : std::abs(start.latitude()));
+    const bool onDifferentHemispheres = sign(endLatitude) != sign(startLatitude);
+    const double sampleStart = util::deg2rad(onDifferentHemispheres ? -std::abs(startLatitude)
+                                                                    : std::abs(startLatitude));
     const double sampleEnd = util::deg2rad(std::abs(endLatitude));
     const double valueStart = integrateSecant(sampleStart);
     const double valueEnd = integrateSecant(sampleEnd);
@@ -664,13 +685,11 @@ ProjectedTilePoint VerticalPerspectiveProjection::drawnTilePoint(const Projectio
 }
 
 double VerticalPerspectiveProjection::circleRadiusCorrection(const TransformState& state) const {
-    return util::interpolate(
-        1.0, std::cos(util::deg2rad(state.getLatLng().latitude())), state.getProjectionTransition());
+    return util::interpolate(1.0, planetScale(state.getLatLng().latitude()), state.getProjectionTransition());
 }
 
 double VerticalPerspectiveProjection::pixelScale(const TransformState& state) const {
-    return util::interpolate(
-        1.0, 1.0 / std::cos(util::deg2rad(state.getLatLng().latitude())), state.getProjectionTransition());
+    return util::interpolate(1.0, 1.0 / planetScale(state.getLatLng().latitude()), state.getProjectionTransition());
 }
 
 double VerticalPerspectiveProjection::pitchedTextCorrection(const TransformState& state,
@@ -680,9 +699,8 @@ double VerticalPerspectiveProjection::pitchedTextCorrection(const TransformState
     const double mercatorY = tileAnchor.y / util::EXTENT * scale + tileID.canonical.y * scale;
     const double latitude = 2.0 * std::atan(std::exp(std::numbers::pi - (mercatorY * std::numbers::pi * 2.0))) -
                             std::numbers::pi * 0.5;
-    return util::interpolate(1.0,
-                             std::cos(util::deg2rad(state.getLatLng().latitude())) / std::cos(latitude),
-                             state.getProjectionTransition());
+    return util::interpolate(
+        1.0, planetScale(state.getLatLng().latitude()) / std::cos(latitude), state.getProjectionTransition());
 }
 
 } // namespace mln

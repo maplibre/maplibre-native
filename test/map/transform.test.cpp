@@ -1,6 +1,7 @@
 #include <mln/test/util.hpp>
 
 #include <gmock/gmock.h>
+#include <array>
 #include <cmath>
 #include <mln/map/map_impl.hpp>
 #include <mln/map/mercator_projection.hpp>
@@ -13,6 +14,7 @@
 #include <mln/util/quaternion.hpp>
 
 #include <numbers>
+#include <tuple>
 
 using namespace std::numbers;
 using namespace mln;
@@ -1707,13 +1709,16 @@ TEST(GlobeTransform, PolesAreReachableAndZoomFollowsLatitude) {
     transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}));
     EXPECT_NEAR(3.0 + VerticalPerspectiveProjection::zoomAdjustment(80.0, 0.0), transform.getZoom(), 1e-9);
 
-    // Past the Mercator limit the center clamps, and the zoom follows the clamped center: the planet keeps its size.
+    // Past the Mercator range the center goes as far toward the pole as the zoom it lands on allows, and the zoom
+    // follows the edge of the range: the planet keeps its size. A drag over the pole stops where the zoom lets the
+    // center go. GL JS: 89 at zoom 1.9907089805355933, then 89.50632407943635.
     const double radiusBefore = transform.getState().getGlobeRadiusPixels();
     transform.jumpTo(CameraOptions().withCenter(LatLng{89.0, 0.0}));
-    EXPECT_NEAR(util::LATITUDE_MAX, transform.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(89.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(1.9907089805355933, transform.getZoom(), 1e-6);
     EXPECT_NEAR(radiusBefore, transform.getState().getGlobeRadiusPixels(), 1e-6);
     transform.moveBy({0.0, 300.0});
-    EXPECT_NEAR(util::LATITUDE_MAX, transform.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(89.50632407943635, transform.getLatLng().latitude(), 1e-6);
     EXPECT_NEAR(radiusBefore, transform.getState().getGlobeRadiusPixels(), 1e-6);
 }
 
@@ -1791,6 +1796,8 @@ TEST(GlobeTransform, ZoomAdjustment) {
     EXPECT_DOUBLE_EQ(0.0, VerticalPerspectiveProjection::zoomAdjustment(20.0, 20.0));
     EXPECT_NEAR(-1.0, VerticalPerspectiveProjection::zoomAdjustment(0.0, 60.0), 1e-12);
     EXPECT_NEAR(1.0, VerticalPerspectiveProjection::zoomAdjustment(60.0, 0.0), 1e-12);
+    // Past the Mercator range the globe keeps its size at the edge of the range.
+    EXPECT_EQ(0.0, VerticalPerspectiveProjection::zoomAdjustment(util::LATITUDE_MAX, 90.0));
 }
 
 // The expected numbers below come from GL JS's own camera (`camera.test.ts`, "globe projection" suites, and its
@@ -2219,20 +2226,35 @@ TEST(Transform, GlobeFlingEndsAtGLJSInertiaCenter) {
     }
 }
 
-// A fling toward a pole eases to the pole limit along its own meridian, as GL JS's inertia does. Moving the location
-// under the end of the fling to the center took it over the pole, and the planet spun as it bounced back.
+// A fling toward a pole eases along its own meridian, as GL JS's inertia does, as far toward the pole as the zoom it
+// starts from lets the center go: onto the pole from zoom 1.5 on this 800 by 600 view, short of it from zoom 3.
+// Moving the location under the end of the fling to the center took it over the pole, and the planet spun as it
+// bounced back.
 TEST(Transform, GlobeFlingTowardAPoleStaysOnItsMeridian) {
-    Transform transform;
-    setUpGlobe(transform, {60, 10}, 1.5);
-    transform.moveBy({0, 3000}, linearSecond());
-    double latitude = 60;
-    for (int frame = 1; frame <= 20; ++frame) {
-        transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
-        EXPECT_NEAR(10, transform.getLatLng().longitude(), 1e-9);
-        EXPECT_GE(transform.getLatLng().latitude(), latitude - 1e-9);
-        latitude = transform.getLatLng().latitude();
+    struct Fling {
+        double zoom;
+        std::array<std::pair<double, double>, 2> halves; // GL JS's latitude and zoom halfway and at the end
+    };
+    for (const auto& fling :
+         {Fling{1.5, {{{75, 0.5500156865235035}, {90, -1.0350518437681169}}}},
+          Fling{3, {{{73.2171601091423, 2.2078682014999638}, {86.43432021828463, 0.4649481562318831}}}}}) {
+        SCOPED_TRACE("zoom " + std::to_string(fling.zoom));
+        Transform transform;
+        setUpGlobe(transform, {60, 10}, fling.zoom);
+        transform.moveBy({0, 3000}, linearSecond());
+        double latitude = 60;
+        for (int frame = 1; frame <= 20; ++frame) {
+            transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
+            EXPECT_NEAR(10, transform.getLatLng().longitude(), 1e-9);
+            EXPECT_GE(transform.getLatLng().latitude(), latitude - 1e-9);
+            latitude = transform.getLatLng().latitude();
+            if (frame % 10 == 0) {
+                const auto& [expectedLatitude, expectedZoom] = fling.halves[(frame / 10) - 1];
+                EXPECT_NEAR(expectedLatitude, latitude, 1e-6);
+                EXPECT_NEAR(expectedZoom, transform.getZoom(), 1e-6);
+            }
+        }
     }
-    EXPECT_NEAR(util::LATITUDE_MAX, latitude, 1e-9);
 }
 
 // A fling worth more than half a turn stops at 179.5° the way it was going, like GL JS's inertia, rather than easing
@@ -2252,9 +2274,10 @@ TEST(Transform, GlobeFlingStopsShortOfHalfATurn) {
 }
 
 // GL JS's drag (`versorSetLocationAtPoint` in globe_utils.ts at a6976b2d2) on a 640 by 480 vertical perspective
-// globe, one step at a time from the state GL JS had before it. The location under a pixel differs from GL JS's by a
-// few times 1e-8 degrees, which a step carries, and near the pole, where the swing is ill-conditioned, magnifies to
-// 3e-5. Steps from above the Mercator edge wait for the pole limit to reach the pole.
+// globe, one step at a time from the state GL JS had before it. GL JS builds the step's rotation with
+// `quat.fromValues`, a Float32Array, which near a pole moves its center by up to 2e-3 degrees a step; the expected
+// centers are GL JS's drag run in doubles. The location under a pixel differs from GL JS's by a few times 1e-8
+// degrees, which a step carries.
 TEST(GlobeTransform, DragCenterMatchesGLJS) {
     struct Step {
         const char* name;
@@ -2267,48 +2290,39 @@ TEST(GlobeTransform, DragCenterMatchesGLJS) {
         LatLng expected;
     };
     for (const auto& step : {
-             Step{"center-drag-east 0",
-                  {20, 10},
-                  1,
-                  0,
-                  0,
-                  {330, 240},
-                  {10, 0},
-                  {19.965282023984564, 6.4815289029572796}},
+             Step{"center-drag-east 0", {20, 10}, 1, 0, 0, {330, 240}, {10, 0}, {19.96528220871278, 6.48152888184427}},
              Step{"center-drag-east 2",
-                  {19.930629470600696, 2.9638309791221218},
-                  1.0006345622358692,
+                  {19.93062984381388, 2.96383097806563},
+                  1.0006345588283656,
                   0,
                   0,
                   {330, 240},
                   {10, 0},
-                  {19.896042196601286, -0.55309670350629858}},
+                  {19.89604275335306, -0.5530967909885476}},
              Step{"center-drag-east 4",
-                  {19.861520045685079, -4.0692573198545006},
-                  1.0012643566198773,
+                  {19.86152078591744, -4.06925749079096},
+                  1.0012643498868492,
                   0,
                   0,
                   {330, 240},
                   {10, 0},
-                  {19.827062862866029, -7.5846539692397528}},
-             Step{
-                 "off-center-drag 0", {20, 10}, 1, 0, 0, {400, 180}, {6, -4}, {18.035949768514822, 7.0912200435051318}},
+                  {19.8270637906032, -7.584654172731689}},
              Step{"off-center-drag 2",
-                  {16.074403221836153, 4.2128599184012501},
-                  1.0322018054718429,
+                  {16.074405186537916, 4.212860800653175},
+                  1.0322017912167816,
                   0,
                   0,
                   {400, 180},
                   {6, -4},
-                  {14.115308308470153, 1.3609485969949446}},
+                  {14.115311037321156, 1.3609496277557582}},
              Step{"off-center-drag 4",
-                  {12.158620253298484, -1.4683014243901198},
-                  1.0570085257097157,
+                  {12.158623543717447, -1.4683004008273883},
+                  1.057008507859097,
                   0,
                   0,
                   {400, 180},
                   {6, -4},
-                  {10.204300722829602, -4.2785224655883667}},
+                  {10.204304619531165, -4.278521558340458}},
              Step{"drag-north-into-pole 0",
                   {70, -100},
                   1,
@@ -2316,48 +2330,112 @@ TEST(GlobeTransform, DragCenterMatchesGLJS) {
                   0,
                   {320, 300},
                   {0, 6},
-                  {70.737292281570959, -100.00000532618219}},
+                  {70.73728720083854, -100.00000000000205}},
+             Step{"drag-north-into-pole 20",
+                  {84.74574401678998, -100.00000000000068},
+                  -0.9010463352914224,
+                  0,
+                  0,
+                  {320, 300},
+                  {0, 6},
+                  {85.48303121762915, -100.00000000000068}},
+             Step{"drag-north-into-pole 21",
+                  {85.48303121762915, -100.00000000000068},
+                  -0.9872050442266238,
+                  0,
+                  0,
+                  {320, 300},
+                  {0, 6},
+                  {86.22031841846909, -100.00000000000068}},
+             Step{"drag-north-into-pole 27",
+                  {89.90675442266692, -100.00000000000068},
+                  -0.9872050442266238,
+                  0,
+                  0,
+                  {320, 300},
+                  {0, 6},
+                  {90, -100.00000000000068}},
+             Step{"drag-north-into-pole 28",
+                  {90, -100.00000000000068},
+                  -0.9872050442266238,
+                  0,
+                  0,
+                  {320, 300},
+                  {0, 6},
+                  {90, -100.00000000000068}},
              Step{"side-drag-at-pole 0",
-                  {85.051128779806604, -100},
+                  {85.0511287798066, -100},
                   1,
                   0,
                   0,
                   {380, 240},
                   {6, 0},
-                  {85.04779126800193, -101.87137817590371}},
+                  {85.0477656113963, -101.87137817590371}},
              Step{"side-drag-at-pole 30",
-                  {84.951967983622339, -155.74101056417635},
-                  1.0285489149123164,
+                  {84.95121303919578, -155.737980622539},
+                  1.0287640984336475,
                   0,
                   0,
                   {380, 240},
                   {6, 0},
-                  {84.948696321724725, -157.5850062958317}},
+                  {84.94791671962916, -157.58177081818087}},
              Step{"side-drag-at-pole 59",
-                  {84.857939190172175, 151.13958753391546},
-                  1.0551043083999352,
+                  {84.85648183647973, 151.15114974424728},
+                  1.0555120380074723,
                   0,
                   0,
                   {380, 240},
                   {6, 0},
-                  {84.854727627221791, 149.3208585050229}},
-             Step{"drag-off-globe 0", {10, 5}, 1, 0, 0, {620, 240}, {20, 0}, {9.9822358414066574, 1.5494608337623959}},
+                  {84.85324650692623, 149.33280710271083}},
+             Step{"side-drag-centred-pole 0",
+                  {89, 0},
+                  0.5,
+                  0,
+                  0,
+                  {340, 200},
+                  {0, 8},
+                  {89.34438829057913, 13.508337366700857}},
+             Step{"side-drag-centred-pole 2",
+                  {89.68877639444831, 22.57677926378733},
+                  0.5,
+                  0,
+                  0,
+                  {340, 200},
+                  {0, 8},
+                  {90, 28.803865724291313}},
+             Step{"side-drag-centred-pole 15",
+                  {90, 83.80781405685116},
+                  0.5,
+                  0,
+                  0,
+                  {340, 200},
+                  {0, 8},
+                  {90, 88.39147641789782}},
+             Step{"side-drag-centred-pole 29",
+                  {90, 147.97908711150444},
+                  0.5,
+                  0,
+                  0,
+                  {340, 200},
+                  {0, 8},
+                  {90, 152.5627494725511}},
+             Step{"drag-off-globe 0", {10, 5}, 1, 0, 0, {620, 240}, {20, 0}, {9.982236219514714, 1.5494610302675937}},
              Step{"drag-off-globe 2",
-                  {9.9645038852827348, -1.900890135366808},
-                  1.0001573128409238,
+                  {9.964504640751409, -1.9008899375490955},
+                  1.0001573094988878,
                   0,
                   0,
                   {620, 240},
                   {20, 0},
-                  {9.9468040697940392, -5.3510536078645146}},
+                  {9.946805201839899, -5.3510535945838456}},
              Step{"drag-off-globe 4",
-                  {9.929136336184456, -8.8010302815180239},
-                  1.0003134881855476,
+                  {9.929137841049005, -8.801030629313573},
+                  1.0003134815524495,
                   0,
                   0,
                   {620, 240},
                   {20, 0},
-                  {9.9115006154341057, -12.250821072336748}},
+                  {9.911502496783827, -12.250821727578682}},
              Step{"drag-bearing-pitch 0",
                   {40, 30},
                   2.5,
@@ -2365,48 +2443,72 @@ TEST(GlobeTransform, DragCenterMatchesGLJS) {
                   40,
                   {300, 330},
                   {-7, 5},
-                  {40.100687358590221, 30.988489185412163}},
+                  {40.100686468998106, 30.988488451527928}},
              Step{"drag-bearing-pitch 4",
-                  {40.402659196545834, 33.962784161839863},
-                  2.4914315272933263,
+                  {40.40265566873954, 33.96278116325789},
+                  2.4914316029001595,
                   30,
                   40,
                   {300, 330},
                   {-7, 5},
-                  {40.503286269891916, 34.957182490484456}},
+                  {40.50328185738783, 34.95717865523261}},
              Step{"drag-bearing-pitch 7",
-                  {40.704494870571025, 36.950472939750398},
-                  2.4849280544413617,
+                  {40.70448865902955, 36.95046737255302},
+                  2.4849281889924244,
                   30,
                   40,
                   {300, 330},
                   {-7, 5},
-                  {40.805076301080582, 37.949379874107763}},
-             Step{"drag-across-antimeridian 0", {0, 175}, 1.5, 0, 0, {300, 240}, {-12, 0}, {0, 177.99462488602808}},
+                  {40.80506918481425, 37.94937335237137}},
+             Step{"drag-across-antimeridian 0", {0, 175}, 1.5, 0, 0, {300, 240}, {-12, 0}, {0, 177.9946248399193}},
              Step{"drag-across-antimeridian 5",
-                  {0, -170.02687397189936},
+                  {0, -170.02687580040782},
                   1.5,
                   0,
                   0,
                   {300, 240},
                   {-12, 0},
-                  {0, -167.0322482908831}},
+                  {0, -167.0322509604884}},
              Step{"drag-across-antimeridian 9",
-                  {0, -158.04837032693092},
+                  {0, -158.0483764407433},
                   1.5,
                   0,
                   0,
                   {300, 240},
                   {-12, 0},
-                  {0, -155.05374404103554}},
+                  {0, -155.0537516008231}},
              Step{"drag-south-pole 0",
                   {-80, 40},
-                  0.80000000000000004,
+                  0.8,
                   0,
                   0,
                   {320, 200},
                   {0, -7},
-                  {-80.493069449265391, 40.00000305847243}},
+                  {-80.49305711248556, 40.00000000000148}},
+             Step{"drag-south-pole 10",
+                  {-84.93057112485239, 40.00000000000193},
+                  -0.17465574390064653,
+                  0,
+                  0,
+                  {320, 200},
+                  {0, -7},
+                  {-85.42362823733717, 40.00000000000193}},
+             Step{"drag-south-pole 19",
+                  {-89.36808513722191, 40.00000000000193},
+                  -0.20929101946440645,
+                  0,
+                  0,
+                  {320, 200},
+                  {0, -7},
+                  {-89.86114224970903, 40.00000000000193}},
+             Step{"drag-south-pole 20",
+                  {-89.86114224970903, 40.00000000000193},
+                  -0.20929101946440645,
+                  0,
+                  0,
+                  {320, 200},
+                  {0, -7},
+                  {-90, 40.00000000000193}},
          }) {
         SCOPED_TRACE(step.name);
         Transform transform;
@@ -2419,7 +2521,7 @@ TEST(GlobeTransform, DragCenterMatchesGLJS) {
                              .withPitch(step.pitch));
         const LatLng center = VerticalPerspectiveProjection::dragCenter(
             transform.getState(), {step.point.x, 480 - step.point.y}, {step.panDelta.x, -step.panDelta.y});
-        EXPECT_NEAR(step.expected.latitude(), center.latitude(), 1e-4);
+        EXPECT_NEAR(step.expected.latitude(), center.latitude(), 1e-7);
         EXPECT_NEAR(
             0.0,
             VerticalPerspectiveProjection::differenceOfAnglesDegrees(step.expected.longitude(), center.longitude()),
@@ -2437,13 +2539,181 @@ TEST(GlobeTransform, DragAroundThePoleHoldsItsLatitude) {
     for (int step = 0; step < 60; ++step) {
         transform.moveBy({6, 0}, ScreenCoordinate{380, 240});
     }
-    // GL JS after the same 60 steps, each one carrying the small difference in the location under the cursor.
-    EXPECT_NEAR(84.85472762722179, transform.getLatLng().latitude(), 0.005);
+    // GL JS after the same 60 steps, run in doubles as in DragCenterMatchesGLJS.
+    EXPECT_NEAR(84.85324650692623, transform.getLatLng().latitude(), 1e-6);
     EXPECT_NEAR(
         0.0,
-        VerticalPerspectiveProjection::differenceOfAnglesDegrees(149.3208585050229, transform.getLatLng().longitude()),
-        0.02);
-    EXPECT_NEAR(1.056002666052632, transform.getZoom(), 0.001);
+        VerticalPerspectiveProjection::differenceOfAnglesDegrees(149.33280710271083, transform.getLatLng().longitude()),
+        1e-6);
+    EXPECT_NEAR(1.0564167839713543, transform.getZoom(), 1e-6);
+}
+
+// Dragging north over the pole stops on it, as GL JS's drag does, the zoom holding the planet's size from the edge of
+// the Mercator range on. GL JS after the same 40 steps, run in doubles: (90, -100) at zoom -0.9872050442266238.
+TEST(GlobeTransform, DragOverThePoleStopsOnIt) {
+    Transform transform;
+    transform.resize({640, 480});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{70.0, -100.0}).withZoom(1.0));
+    for (int step = 0; step < 40; ++step) {
+        transform.moveBy({0, 6}, ScreenCoordinate{320, 300});
+    }
+    EXPECT_EQ(90.0, transform.getLatLng().latitude());
+    EXPECT_NEAR(-100.0, transform.getLatLng().longitude(), 1e-6);
+    EXPECT_NEAR(-0.9872050442266238, transform.getZoom(), 1e-6);
+}
+
+// GL JS #8629, its camera at 512 by 512: the center reaches the pole while the area past the Mercator range fits in
+// the view, and comes back to the edge of the range as a zoom in grows that area past it.
+TEST(GlobeTransform, CenterReachesThePoleAtLowZoom) {
+    Transform transform;
+    setUpGlobeCamera(transform, {60.2, 0.0}, 8.0);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{90.0, 0.0}).withZoom(0.0));
+    EXPECT_EQ(90.0, transform.getLatLng().latitude());
+    EXPECT_NEAR(0.0, transform.getZoom(), 1e-9);
+
+    setUpGlobeCamera(transform, {0.0, 0.0}, 0.0);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{90.0, 0.0}).withZoom(2.0));
+    EXPECT_NEAR(88.57750940365021, transform.getLatLng().latitude(), 1e-6);
+
+    for (const auto& [zoom, latitude] : std::array<std::pair<double, double>, 6>{{{1.0, 90.0},
+                                                                                  {1.5, 90.0},
+                                                                                  {2.0, 88.57750940365021},
+                                                                                  {2.5, 87.06149291090357},
+                                                                                  {3.0, 85.98950736849177},
+                                                                                  {4.0, util::LATITUDE_MAX}}}) {
+        SCOPED_TRACE("zoom " + std::to_string(zoom));
+        setUpGlobeCamera(transform, {90.0, 0.0}, 0.5);
+        transform.jumpTo(CameraOptions().withZoom(zoom));
+        EXPECT_NEAR(latitude, transform.getLatLng().latitude(), 1e-6);
+        EXPECT_NEAR(zoom, transform.getZoom(), 1e-9);
+    }
+}
+
+// Without a zoom, GL JS's jump bounds a center past the Mercator range by the zoom it lands on, and its ease and
+// flight bound it by the zoom they start from (GL JS's camera at 512 by 512).
+TEST(GlobeTransform, JumpBoundsThePoleByTheZoomItLandsOn) {
+    const double landingZoom = -0.5129658685303338;
+    Transform jump;
+    setUpGlobeCamera(jump, {10.0, 0.0}, 3.0);
+    jump.jumpTo(CameraOptions().withCenter(LatLng{89.0, 30.0}));
+    EXPECT_NEAR(89.0, jump.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(30.0, jump.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(landingZoom, jump.getZoom(), 1e-6);
+
+    Transform ease;
+    setUpGlobeCamera(ease, {10.0, 0.0}, 3.0);
+    ease.easeTo(CameraOptions().withCenter(LatLng{89.0, 30.0}), linearSecond());
+    runTo(ease, 0.5);
+    EXPECT_NEAR(47.99475368424589, ease.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(7.785022180215378, ease.getLatLng().longitude(), 1e-6);
+    EXPECT_NEAR(2.442592415258865, ease.getZoom(), 1e-6);
+    runTo(ease, 1.0);
+    EXPECT_NEAR(85.98950736849177, ease.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(30.0, ease.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(landingZoom, ease.getZoom(), 1e-6);
+
+    Transform fly;
+    setUpGlobeCamera(fly, {10.0, 0.0}, 3.0);
+    fly.flyTo(CameraOptions().withCenter(LatLng{89.0, 30.0}), linearSecond());
+    runTo(fly, 1.0);
+    EXPECT_NEAR(85.98950736849132, fly.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(landingZoom, fly.getZoom(), 1e-6);
+}
+
+// Eases onto, off, and at the pole follow GL JS's camera at 512 by 512, halfway and at the end: a zoom in at the pole
+// eases the center back to the edge of the Mercator range.
+TEST(GlobeTransform, EasesOntoAndOffThePole) {
+    struct Frame {
+        double latitude;
+        double longitude;
+        double zoom;
+    };
+    struct Ease {
+        const char* name;
+        LatLng start;
+        double startZoom;
+        CameraOptions camera;
+        std::array<Frame, 2> halves;
+    };
+    for (const auto& ease :
+         {Ease{"onto the pole",
+               {60.0, 20.0},
+               2.0,
+               CameraOptions().withCenter(LatLng{90.0, 20.0}).withZoom(0.0),
+               {{{78.05612639366316, 20, 0.9949038280649232}, {90, 20, 0}}}},
+          Ease{"onto the pole without a zoom",
+               {60.0, 20.0},
+               1.0,
+               CameraOptions().withCenter(LatLng{89.5, 50.0}),
+               {{{74.75, 29.139640453666175, 0.07330592239273392}, {89.5, 50, -1.5350518437681169}}}},
+          Ease{"off the pole",
+               {90.0, 0.0},
+               0.0,
+               CameraOptions().withCenter(LatLng{30.0, 40.0}).withZoom(1.0),
+               {{{68.78679656440357, 24.852188049491588, 0.9047067439922991}, {30, 40, 1}}}},
+          Ease{"zooming in at the pole",
+               {90.0, 0.0},
+               0.5,
+               CameraOptions().withZoom(4.0),
+               {{{86.50061975668255, 0, 2.25}, {util::LATITUDE_MAX, 0, 4}}}}}) {
+        SCOPED_TRACE(ease.name);
+        Transform transform;
+        setUpGlobeCamera(transform, ease.start, ease.startZoom);
+        transform.easeTo(ease.camera, linearSecond());
+        for (int half = 1; half <= 2; ++half) {
+            runTo(transform, half / 2.0);
+            const Frame& expected = ease.halves[half - 1];
+            EXPECT_NEAR(expected.latitude, transform.getLatLng().latitude(), 1e-6);
+            EXPECT_NEAR(expected.longitude, transform.getLatLng().longitude(), 1e-6);
+            EXPECT_NEAR(expected.zoom, transform.getZoom(), 1e-6);
+        }
+    }
+}
+
+// Flights land on the pole as GL JS's do (its camera at 512 by 512). From zoom 2, GL JS's flight to the pole itself
+// stops at that zoom's limit, as its `setLocationAtPoint` has no solution for the pole at the center of the view; a
+// flight to any other latitude lands, as this one to 89.9 does, and GL JS's own test flies onto the pole from zoom 8.
+TEST(GlobeTransform, FliesOntoThePole) {
+    Transform transform;
+    setUpGlobeCamera(transform, {60.2, 0.0}, 8.0);
+    transform.flyTo(CameraOptions().withCenter(LatLng{90.0, 0.0}).withZoom(0.0), linearSecond());
+    runTo(transform, 1.0);
+    EXPECT_EQ(90.0, transform.getLatLng().latitude());
+    EXPECT_NEAR(0.0, transform.getZoom(), 1e-9);
+
+    setUpGlobeCamera(transform, {60.0, 20.0}, 2.0);
+    transform.flyTo(CameraOptions().withCenter(LatLng{89.9, 20.0}).withZoom(0.0), linearSecond());
+    for (const auto& [k, latitude, zoom] : std::array<std::tuple<double, double, double>, 2>{
+             {{0.5, 77.69090627898427, 0.6859841910974791}, {1.0, 89.9, 0.0}}}) {
+        SCOPED_TRACE("k " + std::to_string(k));
+        runTo(transform, k);
+        EXPECT_NEAR(latitude, transform.getLatLng().latitude(), 1e-6);
+        EXPECT_NEAR(20.0, transform.getLatLng().longitude(), 1e-9);
+        EXPECT_NEAR(zoom, transform.getZoom(), 1e-6);
+    }
+}
+
+// GL JS's zoom around a point near the pole on an 800 by 600 globe: the center goes past the Mercator range as far as
+// the new zoom lets it.
+TEST(GlobeTransform, ZoomAroundNearThePoleMatchesGLJS) {
+    struct Zoom {
+        LatLng center;
+        double zoom;
+        double zoomDelta;
+        ScreenCoordinate anchor;
+        LatLng expected;
+    };
+    for (const auto& zoom : {Zoom{{89.0, 0.0}, 1.0, 1.0, {450, 200}, {88.2247980153879, 39.898924941760924}},
+                             Zoom{{90.0, 0.0}, 0.5, 2.0, {400, 300}, {87.69055327579845, 0.0}}}) {
+        SCOPED_TRACE("zoom " + std::to_string(zoom.zoom));
+        Transform transform;
+        setUpGlobe(transform, zoom.center, zoom.zoom);
+        transform.jumpTo(CameraOptions().withZoom(zoom.zoom + zoom.zoomDelta).withAnchor(zoom.anchor));
+        EXPECT_NEAR(zoom.expected.latitude(), transform.getLatLng().latitude(), 1e-6);
+        EXPECT_NEAR(zoom.expected.longitude(), transform.getLatLng().longitude(), 1e-6);
+        EXPECT_NEAR(zoom.zoom + zoom.zoomDelta, transform.getZoom(), 1e-9);
+    }
 }
 
 // On Mercator a zoom around a point across the antimeridian leaves the center on the next world copy, as it does on

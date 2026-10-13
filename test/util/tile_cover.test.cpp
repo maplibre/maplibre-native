@@ -774,6 +774,24 @@ TEST(TileCover, GlobeSourceZoomsLikeGLJS) {
     }
 }
 
+// GL JS `globe_covering_tiles.test.ts` "covers the tiles around the south pole", the tiles in its order: past the
+// Mercator range there are no tiles, so they are chosen around the center brought back to the edge of the range.
+TEST(TileCover, GlobeAroundThePole) {
+    Transform transform;
+    setUpGlobe(transform, {512, 512}, {-90.0, 0.0}, 1.6);
+    EXPECT_EQ(-90.0, transform.getLatLng().latitude());
+    EXPECT_EQ(
+        (std::vector<OverscaledTileID>{
+            {5, 16, 31}, {5, 15, 31}, {5, 17, 31}, {5, 14, 31}, {5, 18, 31}, {5, 13, 31}, {5, 18, 30}, {5, 13, 30},
+            {5, 19, 31}, {5, 12, 31}, {5, 19, 30}, {5, 12, 30}, {5, 19, 29}, {5, 12, 29}, {5, 20, 31}, {5, 11, 31},
+            {5, 20, 30}, {5, 11, 30}, {5, 20, 29}, {5, 11, 29}, {5, 21, 31}, {5, 10, 31}, {5, 21, 30}, {5, 10, 30},
+            {5, 22, 31}, {5, 9, 31},  {5, 23, 31}, {5, 8, 31},  {5, 24, 31}, {5, 7, 31},  {5, 25, 31}, {5, 6, 31},
+            {5, 26, 31}, {5, 5, 31},  {5, 26, 30}, {5, 5, 30},  {5, 27, 31}, {5, 4, 31},  {5, 27, 30}, {5, 4, 30},
+            {5, 27, 29}, {5, 4, 29},  {5, 28, 31}, {5, 3, 31},  {5, 28, 30}, {5, 3, 30},  {5, 28, 29}, {5, 3, 29},
+            {5, 29, 31}, {5, 2, 31},  {5, 29, 30}, {5, 2, 30},  {5, 30, 31}, {5, 1, 31},  {5, 31, 31}, {5, 0, 31}}),
+        util::tileCover({transform.getState()}, 5, zoomRange));
+}
+
 TEST(TileCover, GlobeAntimeridian) {
     Transform east;
     setUpGlobe(east, {128, 128}, {-0.001, 179.99}, 5.0);

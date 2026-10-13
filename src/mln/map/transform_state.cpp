@@ -599,11 +599,13 @@ double TransformState::getMinZoomAtLatitude(double latitude, bool globe) const {
     return scaleZoom(min_scale) + VerticalPerspectiveProjection::zoomAdjustment(0, latitude);
 }
 
-LatLng TransformState::constrainedCenter(const LatLng& latLng) const {
+LatLng TransformState::constrainedCenter(const LatLng& latLng, double zoom) const {
     if (constrainMode == ConstrainMode::None || !isGlobeRendering()) {
         return latLng;
     }
-    return {util::clamp(latLng.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX), latLng.longitude()};
+    const double maxLatitude = VerticalPerspectiveProjection::maxLatitude(
+        *this, util::clamp(zoom, getMinZoomAtLatitude(latLng.latitude()), getMaxZoom()));
+    return {util::clamp(latLng.latitude(), -maxLatitude, maxLatitude), latLng.longitude()};
 }
 
 uint8_t TransformState::getIntegerZoom() const {
@@ -979,10 +981,13 @@ void TransformState::constrain(double& scale_, double& x_, double& y_) const {
         return;
     }
 
-    // The globe has no off-world area: the poles stay reachable and only the Mercator range bounds the center.
+    // The globe has no off-world area: the center goes past the Mercator range toward a pole as far as the zoom
+    // allows.
     if (isGlobeRendering()) {
-        const double halfWorld = scale_ * util::tileSize_D / 2;
-        y_ = std::max(-halfWorld, std::min(y_, halfWorld));
+        const double maxLatitude = VerticalPerspectiveProjection::maxLatitude(*this, scaleZoom(scale_));
+        const double maxY = Projection::worldSize(scale_) / util::M2PI *
+                            std::asinh(std::tan(util::deg2rad(maxLatitude)));
+        y_ = util::clamp(y_, -maxY, maxY);
         return;
     }
 
@@ -1133,7 +1138,7 @@ ScreenCoordinate TransformState::getCenterOffset() const {
 void TransformState::moveLatLng(const LatLng& latLng, const ScreenCoordinate& anchor) {
     if (isGlobeRendering()) {
         if (const auto center = VerticalPerspectiveProjection::centerForLocationAtPoint(*this, latLng, anchor)) {
-            const LatLng target = constrainedCenter(*center);
+            const LatLng target = constrainedCenter(*center, getZoom());
             const double zoom = getZoom() + VerticalPerspectiveProjection::zoomAdjustment(getLatLng().latitude(),
                                                                                           target.latitude());
             setLatLngZoom(target, zoom);
@@ -1172,12 +1177,14 @@ void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
     Bc = newWorldSize / util::DEGREES_MAX;
     Cc = newWorldSize / util::M2PI;
 
+    // The globe's center can be on a pole, which the clamped sine stops short of.
+    const double latitude = util::deg2rad(constrained.latitude());
     const double m = 1 - 1e-15;
-    const double f = util::clamp(std::sin(util::deg2rad(constrained.latitude())), -m, m);
+    const double f = util::clamp(std::sin(latitude), -m, m);
 
     ScreenCoordinate point = {
         -constrained.longitude() * Bc,
-        0.5 * Cc * std::log((1 + f) / (1 - f)),
+        isGlobeRendering() ? Cc * std::asinh(std::tan(latitude)) : 0.5 * Cc * std::log((1 + f) / (1 - f)),
     };
     setScalePoint(newScale, point);
 }

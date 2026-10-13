@@ -196,8 +196,9 @@ public:
     double getMinZoomAtLatitude(double latitude) const;
     /// The same for a camera on the globe or not, whatever the current projection.
     double getMinZoomAtLatitude(double latitude, bool globe) const;
-    /// The center `constrain` would settle on for this one, so a zoom adjustment can be computed against it.
-    LatLng constrainedCenter(const LatLng&) const;
+    /// The center `constrain` would settle on for this one at this zoom: on the globe the zoom decides how close to a
+    /// pole the center can be.
+    LatLng constrainedCenter(const LatLng&, double zoom) const;
     uint8_t getIntegerZoom() const;
     double getZoomFraction() const;
 
