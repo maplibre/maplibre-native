@@ -3225,6 +3225,14 @@ static void *windowScreenContext = &windowScreenContext;
   return NSEdgeInsetsFromMLNEdgeInsets(_mbglMap->getFrustumOffset());
 }
 
+- (void)setCenterClampedToGround:(BOOL)centerClampedToGround {
+  _mbglMap->setCenterClampedToGround(centerClampedToGround);
+}
+
+- (BOOL)isCenterClampedToGround {
+  return _mbglMap->getCenterClampedToGround();
+}
+
 // MARK: - Accessibility -
 
 - (NSString *)accessibilityValue {

@@ -542,6 +542,16 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) UIEdgeInsets frustumOffset;
 
+/**
+ Whether the map centre rides the 3D terrain surface rather than sea level.
+
+ Off by default, as in the core: the clamp is applied asynchronously and can run
+ away during a gesture. With it on, the centre altitude follows the rendered
+ terrain height under the centre, so pitching over tall ground keeps the camera
+ above it instead of sinking in. Inert when terrain is not enabled.
+ */
+@property (nonatomic, assign, getter=isCenterClampedToGround) BOOL centerClampedToGround;
+
 // MARK: Displaying the User’s Location
 
 /**
