@@ -1821,6 +1821,12 @@ TEST(Map, ObserveShaderRegistration) {
     EXPECT_EQ(observedRegistry, false);
 }
 
+// Apps see these ids in the shader compile callbacks, so the globe's shader follows the ones main numbers.
+TEST(Map, GlobeDepthShaderIdFollowsTheExistingShaders) {
+    EXPECT_EQ(static_cast<int>(shaders::BuiltIn::WideVectorShader) + 1,
+              static_cast<int>(shaders::BuiltIn::GlobeDepthShader));
+}
+
 TEST(Map, ResourceError) {
     MapTest<> test;
     test.fileSource->glyphsResponse = [&](const Resource&) {
