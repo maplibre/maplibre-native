@@ -207,6 +207,9 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             return nullptr;
         }
         std::unique_ptr<Tile> tile = cache.pop(tileID);
+        if (!tile && parameters.transformState.isGlobeRendering()) {
+            tile = cache.popAnyWrap(tileID);
+        }
         if (!tile) {
             tile = createTile(tileID, observer);
             if (!tile) return nullptr;
@@ -216,6 +219,10 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
         return tiles.emplace(tileID, std::move(tile)).first->second.get();
     };
+
+    if (parameters.transformState.isGlobeRendering()) {
+        moveTilesToWantedWraps(idealTiles, panTiles);
+    }
 
     auto previouslyRenderedTiles = std::move(renderedTiles);
 
@@ -318,6 +325,38 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     }
 
     cache.deferPendingReleases();
+}
+
+// On the globe every wrap of a tile is the same piece of the sphere, and the cover gives tiles the wraps of the world
+// copy the center has reached. A tile the cover now wants under another wrap moves there instead of loading again,
+// which would leave its part of the globe bare until it did: the whole globe at the zoom-0 tile, which changes wrap
+// whenever the center crosses the antimeridian.
+void TilePyramid::moveTilesToWantedWraps(const std::vector<OverscaledTileID>& idealTiles,
+                                         const std::vector<OverscaledTileID>& panTiles) {
+    std::set<OverscaledTileID> wanted(idealTiles.begin(), idealTiles.end());
+    wanted.insert(panTiles.begin(), panTiles.end());
+    for (const auto& id : wanted) {
+        if (tiles.contains(id)) {
+            continue;
+        }
+        const auto loaded = std::ranges::find_if(tiles, [&](const auto& entry) {
+            return entry.first.overscaledZ == id.overscaledZ && entry.first.canonical == id.canonical &&
+                   !wanted.contains(entry.first);
+        });
+        if (loaded == tiles.end()) {
+            continue;
+        }
+        const UnwrappedTileID renderedID = loaded->first.toUnwrapped();
+        auto node = tiles.extract(loaded);
+        node.key() = id;
+        node.mapped()->id = id;
+        tiles.insert(std::move(node));
+        if (auto rendered = renderedTiles.find(renderedID); rendered != renderedTiles.end()) {
+            auto renderedNode = renderedTiles.extract(rendered);
+            renderedNode.key() = id.toUnwrapped();
+            renderedTiles.insert(std::move(renderedNode));
+        }
+    }
 }
 
 void TilePyramid::handleWrapJump(float lng) {

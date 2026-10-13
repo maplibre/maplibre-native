@@ -201,6 +201,45 @@ TEST(CrossTileSymbolLayerIndex, addBucket) {
     ASSERT_EQ(grandchildBucket.symbolInstances.at(1).getCrossTileID(), 5u);
 }
 
+TEST(CrossTileSymbolLayerIndex, tileMovedToAnotherWrapKeepsItsSymbols) {
+    // The globe moves a loaded tile to another wrap instead of loading it again: its bucket keeps the IDs.
+    uint32_t maxCrossTileID = 0;
+    CrossTileSymbolLayerIndex index(maxCrossTileID);
+
+    Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout =
+        makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>();
+    std::vector<SymbolInstance> instances;
+    std::vector<SortKeyRange> ranges;
+    instances.push_back(makeSymbolInstance(1000, 1000, u"Detroit"));
+    instances.push_back(makeSymbolInstance(2000, 2000, u"Toronto"));
+    SymbolBucket bucket{layout,
+                        {},
+                        16.0f,
+                        1.0f,
+                        0,
+                        false,
+                        false,
+                        "test",
+                        std::move(instances),
+                        std::move(ranges),
+                        1.0f,
+                        false,
+                        {},
+                        false /*iconsInText*/};
+    bucket.bucketInstanceId = 1;
+
+    const OverscaledTileID id(0, 0, 0, 0, 0);
+    EXPECT_TRUE(index.addBucket(id, TileProjector(anyCamera, id.toUnwrapped()), bucket));
+    ASSERT_EQ(1u, bucket.symbolInstances.at(0).getCrossTileID());
+    ASSERT_EQ(2u, bucket.symbolInstances.at(1).getCrossTileID());
+
+    const OverscaledTileID moved = id.unwrapTo(1);
+    EXPECT_FALSE(index.addBucket(moved, TileProjector(anyCamera, moved.toUnwrapped()), bucket));
+    EXPECT_EQ(1u, bucket.symbolInstances.at(0).getCrossTileID());
+    EXPECT_EQ(2u, bucket.symbolInstances.at(1).getCrossTileID());
+    EXPECT_FALSE(index.removeStaleBuckets({1}));
+}
+
 TEST(CrossTileSymbolLayerIndex, resetIDs) {
     uint32_t maxCrossTileID = 0;
     uint32_t maxBucketInstanceId = 0;

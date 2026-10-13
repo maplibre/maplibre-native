@@ -2290,6 +2290,51 @@ TEST(Map, GlobeHandOffKeepsTiles) {
                                   << " tiles were parsed again after the hand-off";
 }
 
+TEST(Map, GlobeKeepsItsTilesAcrossTheAntimeridian) {
+    // The globe's zoom-0 tile takes the wrap of the world copy the center is in, so it changes wrap whenever the
+    // center crosses the antimeridian. It is the same piece of the sphere in either, and must not be parsed again.
+    MapTest<> test;
+    test.frontend.setSize({512, 512});
+    test.map.setSize({512, 512});
+    test.map.getStyle().loadJSON(
+        R"STYLE({"version": 8, "projection": {"type": "globe"},
+                 "sources": {"ocean": {"type": "vector", "tiles": ["a/{z}/{x}/{y}"]}},
+                 "layers": [{"id": "ocean", "type": "fill", "source": "ocean", "source-layer": "water",
+                             "paint": {"fill-color": "blue"}}]})STYLE");
+    const auto ocean = std::make_shared<std::string>(util::read_file("test/fixtures/map/globe_tile_masks/ocean.mvt"));
+    test.fileSource->tileResponse = [&](const Resource&) -> std::optional<Response> {
+        Response response;
+        response.data = ocean;
+        return response;
+    };
+    std::mutex mutex;
+    std::vector<OverscaledTileID> parsed;
+    test.observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string&) {
+        if (op == TileOperation::StartParse) {
+            const std::lock_guard lock(mutex);
+            parsed.push_back(id);
+        }
+    };
+
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 179}).withZoom(0));
+    (void)test.frontend.render(test.map);
+    ASSERT_TRUE(test.map.getTransformState().isGlobeRendering());
+    {
+        const std::lock_guard lock(mutex);
+        ASSERT_FALSE(parsed.empty());
+        for (const auto& id : parsed) {
+            ASSERT_EQ(OverscaledTileID(0, 0, 0, 0, 0), id);
+        }
+        parsed.clear();
+    }
+
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 181}));
+    (void)test.frontend.render(test.map);
+    EXPECT_NEAR(181.0, test.map.getTransformState().getLatLng().longitude(), 1e-9);
+    const std::lock_guard lock(mutex);
+    EXPECT_TRUE(parsed.empty()) << parsed.size() << " tiles parsed again, the first " << util::toString(parsed.front());
+}
+
 // On the globe the lowest zoom falls with latitude; setting the minimum again keeps a zoom the globe allows there.
 TEST(Map, GlobeSetBoundsKeepsAZoomTheGlobeAllows) {
     MapTest<> test;

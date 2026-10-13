@@ -7,6 +7,8 @@
 #include <mln/tile/tile.hpp>
 #include <mln/util/instrumentation.hpp>
 
+#include <algorithm>
+
 namespace mln {
 
 TileLayerIndex::TileLayerIndex(OverscaledTileID coord_,
@@ -125,6 +127,19 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
                                           SymbolBucket& bucket) {
     auto& thisZoomIndexes = indexes[tileID.overscaledZ];
     auto previousIndex = thisZoomIndexes.find(tileID);
+    if (previousIndex == thisZoomIndexes.end()) {
+        // The globe moves a loaded tile to another wrap instead of loading it again: same bucket, same symbols.
+        const auto moved = std::ranges::find_if(thisZoomIndexes, [&](const auto& entry) {
+            return entry.second.bucketInstanceId == bucket.bucketInstanceId &&
+                   entry.first.canonical == tileID.canonical;
+        });
+        if (moved != thisZoomIndexes.end()) {
+            auto node = thisZoomIndexes.extract(moved);
+            node.key() = tileID;
+            node.mapped().coord = tileID;
+            previousIndex = thisZoomIndexes.insert(std::move(node)).position;
+        }
+    }
     if (previousIndex != thisZoomIndexes.end()) {
         if (previousIndex->second.bucketInstanceId == bucket.bucketInstanceId && !bucket.hasUninitializedSymbols) {
             return false;
