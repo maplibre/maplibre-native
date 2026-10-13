@@ -12,6 +12,7 @@ import org.maplibre.android.WellKnownTileServer
 import org.maplibre.android.log.Logger
 import org.maplibre.android.testapp.utils.ApiKeyUtils
 import org.maplibre.android.testapp.utils.RenderingEnginePreference
+import org.maplibre.android.testapp.utils.SystemBarInsets
 import org.maplibre.android.testapp.utils.TileLoadingMeasurementUtils
 import org.maplibre.android.testapp.utils.TimberLogger
 import timber.log.Timber
@@ -30,6 +31,7 @@ open class MapLibreApplication : MultiDexApplication() {
         initializeLogger()
         initializeStrictMode()
         initializeMapbox()
+        registerActivityLifecycleCallbacks(SystemBarInsets)
     }
 
     private fun initializeLogger() {

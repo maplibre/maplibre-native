@@ -733,6 +733,7 @@ void SymbolLayer::setIconColorTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<IconColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getIconColorTransition() const {
@@ -760,6 +761,7 @@ void SymbolLayer::setIconHaloBlurTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<IconHaloBlur>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getIconHaloBlurTransition() const {
@@ -787,6 +789,7 @@ void SymbolLayer::setIconHaloColorTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<IconHaloColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getIconHaloColorTransition() const {
@@ -814,6 +817,7 @@ void SymbolLayer::setIconHaloWidthTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<IconHaloWidth>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getIconHaloWidthTransition() const {
@@ -841,6 +845,7 @@ void SymbolLayer::setIconOpacityTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<IconOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getIconOpacityTransition() const {
@@ -868,6 +873,7 @@ void SymbolLayer::setIconTranslateTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<IconTranslate>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getIconTranslateTransition() const {
@@ -895,6 +901,7 @@ void SymbolLayer::setIconTranslateAnchorTransition(const TransitionOptions& opti
     auto impl_ = mutableImpl();
     impl_->paint.template get<IconTranslateAnchor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getIconTranslateAnchorTransition() const {
@@ -922,6 +929,7 @@ void SymbolLayer::setTextColorTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<TextColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getTextColorTransition() const {
@@ -949,6 +957,7 @@ void SymbolLayer::setTextHaloBlurTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<TextHaloBlur>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getTextHaloBlurTransition() const {
@@ -976,6 +985,7 @@ void SymbolLayer::setTextHaloColorTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<TextHaloColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getTextHaloColorTransition() const {
@@ -1003,6 +1013,7 @@ void SymbolLayer::setTextHaloWidthTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<TextHaloWidth>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getTextHaloWidthTransition() const {
@@ -1030,6 +1041,7 @@ void SymbolLayer::setTextOpacityTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<TextOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getTextOpacityTransition() const {
@@ -1057,6 +1069,7 @@ void SymbolLayer::setTextTranslateTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<TextTranslate>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getTextTranslateTransition() const {
@@ -1084,6 +1097,7 @@ void SymbolLayer::setTextTranslateAnchorTransition(const TransitionOptions& opti
     auto impl_ = mutableImpl();
     impl_->paint.template get<TextTranslateAnchor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions SymbolLayer::getTextTranslateAnchorTransition() const {

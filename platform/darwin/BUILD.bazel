@@ -1,4 +1,4 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
+load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_run_binary")
 load("@rules_cc//cc:defs.bzl", "cc_library", "objc_library")
 load(
     "@rules_swift//swift:swift.bzl",
@@ -330,19 +330,4 @@ js_binary(
         "//:style-spec",
     ],
     entry_point = "scripts/generate-style-code.mjs",
-)
-
-js_library(
-    name = "symbols-to-check",
-    srcs = [
-        ":darwin_objc_hdrs",
-        ":darwin_objc_srcs",
-        ":darwin_objcpp_hdrs",
-        ":darwin_objcpp_srcs",
-        ":darwin_private_hdrs",
-        ":generated_code_production",
-        ":generated_style_hdrs",
-        ":generated_style_srcs",
-    ],
-    visibility = ["//platform:__pkg__"],
 )
