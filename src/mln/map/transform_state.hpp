@@ -294,6 +294,7 @@ public:
 
 private:
     bool rotatedNorth() const;
+    double constrainedMinScale() const;
 
     LatLngBounds bounds;
 

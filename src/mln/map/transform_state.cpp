@@ -634,12 +634,15 @@ void TransformState::setMinZoom(const double minZoom) {
 }
 
 double TransformState::getMinZoom() const {
+    return scaleZoom(constrainedMinScale());
+}
+
+double TransformState::constrainedMinScale() const {
     double test_scale = min_scale;
     double unused_x = x;
     double unused_y = y;
     constrain(test_scale, unused_x, unused_y);
-
-    return scaleZoom(test_scale);
+    return test_scale;
 }
 
 void TransformState::setMaxZoom(const double maxZoom) {
@@ -1162,14 +1165,8 @@ void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
         }
     }
 
-    double minScale = min_scale;
-    if (isGlobeRendering()) {
-        minScale = zoomScale(getMinZoomAtLatitude(constrained.latitude()));
-    } else {
-        double unusedX = x;
-        double unusedY = y;
-        constrain(minScale, unusedX, unusedY);
-    }
+    const double minScale = isGlobeRendering() ? zoomScale(getMinZoomAtLatitude(constrained.latitude()))
+                                               : constrainedMinScale();
     double newScale = util::clamp(zoomScale(zoom), minScale, max_scale);
     const double newWorldSize = newScale * util::tileSize_D;
     Bc = newWorldSize / util::DEGREES_MAX;

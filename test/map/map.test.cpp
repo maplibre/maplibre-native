@@ -1821,7 +1821,7 @@ TEST(Map, ObserveShaderRegistration) {
     EXPECT_EQ(observedRegistry, false);
 }
 
-// Apps see these ids in the shader compile callbacks, so the globe's shader follows the ones main numbers.
+// Apps see these ids in the shader compile callbacks, so a new shader goes after the existing ones.
 TEST(Map, GlobeDepthShaderIdFollowsTheExistingShaders) {
     EXPECT_EQ(static_cast<int>(shaders::BuiltIn::WideVectorShader) + 1,
               static_cast<int>(shaders::BuiltIn::GlobeDepthShader));
