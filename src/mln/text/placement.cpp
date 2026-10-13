@@ -70,7 +70,12 @@ namespace {
 /// A symbol layer's `*-translate` in the tile's units, as a point.
 Point<float> translationPoint(const UnwrappedTileID& tileID,
                               const SymbolTranslate& translate,
-                              const TransformState& state) {
+                              const TransformState& state,
+                              bool screenSpace) {
+    // A screen-space symbol takes its translate in the screen matrix.
+    if (screenSpace) {
+        return {};
+    }
     const auto translation = RenderTile::tileUnitTranslation(tileID, translate.offset, translate.anchor, state);
     return {translation[0], translation[1]};
 }
@@ -103,8 +108,10 @@ public:
           pixelsToTileUnits(renderTile_.id.pixelsToTileUnits(1, placementZoom)),
           scale(static_cast<float>(std::pow(2, placementZoom - getOverscaledID().overscaledZ))),
           pixelRatio(static_cast<float>(util::tileSize_D * getOverscaledID().overscaleFactor() / util::EXTENT)),
-          textTranslation(translationPoint(renderTile_.id, textTranslate, state_)),
-          iconTranslation(translationPoint(renderTile_.id, iconTranslate, state_)),
+          textTranslation(
+              translationPoint(renderTile_.id, textTranslate, state_, bucket_.layout->get<style::SymbolScreenSpace>())),
+          iconTranslation(
+              translationPoint(renderTile_.id, iconTranslate, state_, bucket_.layout->get<style::SymbolScreenSpace>())),
           collisionGroup(std::move(collisionGroup_)),
           partiallyEvaluatedTextSize(bucket_.textSizeBinder->evaluateForZoom(placementZoom)),
           partiallyEvaluatedIconSize(bucket_.iconSizeBinder->evaluateForZoom(placementZoom)),
@@ -842,8 +849,9 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                    (bucket.hasIconData() || bucket.hasSdfIconData());
     bool result = false;
     const TileProjector tileProjector(state, tile.id, tile.projection);
-    const Point<float> textTranslation = translationPoint(tile.id, data.textTranslate, state);
-    const Point<float> iconTranslation = translationPoint(tile.id, data.iconTranslate, state);
+    const bool screenSpace = layout.get<SymbolScreenSpace>();
+    const Point<float> textTranslation = translationPoint(tile.id, data.textTranslate, state, screenSpace);
+    const Point<float> iconTranslation = translationPoint(tile.id, data.iconTranslate, state, screenSpace);
     if (!layerID) {
         bucket.dynamicTextTranslation = textTranslation;
         bucket.dynamicIconTranslation = iconTranslation;
