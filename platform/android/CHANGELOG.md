@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Revalidate unusable cached resources when resuming an offline download ([#410](https://github.com/maplibre/maplibre-native/issues/410)).
+
 ## 13.7.1
 
 ### ✨ Features and improvements
