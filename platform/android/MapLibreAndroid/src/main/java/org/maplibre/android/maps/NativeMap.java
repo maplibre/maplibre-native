@@ -288,6 +288,10 @@ interface NativeMap {
 
   boolean getCenterClampedToGround();
 
+  void setCenterClampedToGround(boolean clamped);
+
+  boolean getCenterClampedToGround();
+
   void setTileLodPitchThreshold(double threshold);
 
   double getTileLodPitchThreshold();

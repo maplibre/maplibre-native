@@ -469,6 +469,27 @@ public final class MapLibreMap {
   }
 
   /**
+   * Sets whether the map centre rides the 3D terrain surface rather than sea level. Off by
+   * default: the clamp is applied asynchronously and can run away during a gesture. With it
+   * on, the centre altitude follows the rendered terrain height under the centre, so pitching
+   * over tall ground keeps the camera above it instead of sinking in. Has no effect when
+   * terrain is not enabled.
+   *
+   * @param clamped whether to clamp the centre to the ground
+   */
+  public void setCenterClampedToGround(boolean clamped) {
+    nativeMapView.setCenterClampedToGround(clamped);
+  }
+
+  /**
+   * @return whether the map centre is clamped to the ground
+   * @see MapLibreMap#setCenterClampedToGround(boolean)
+   */
+  public boolean getCenterClampedToGround() {
+    return nativeMapView.getCenterClampedToGround();
+  }
+
+  /**
    * Sets whether the map centre rides the 3D terrain surface rather than sea level. On by
    * default: the centre altitude follows the rendered terrain height under the centre, so
    * pitching over tall ground keeps the camera above it instead of sinking into it. Has no

@@ -1395,6 +1395,14 @@ jni::jboolean NativeMapView::getCenterClampedToGround(JNIEnv&) {
     return jni::jboolean(map->getCenterClampedToGround());
 }
 
+void NativeMapView::setCenterClampedToGround(JNIEnv&, jni::jboolean clamped) {
+    map->setCenterClampedToGround(clamped);
+}
+
+jni::jboolean NativeMapView::getCenterClampedToGround(JNIEnv&) {
+    return jni::jboolean(map->getCenterClampedToGround());
+}
+
 void NativeMapView::setDebugAboveGroundLog(JNIEnv&, jni::jboolean enabled) {
     map->setDebugAboveGroundLog(enabled);
 }
@@ -1569,6 +1577,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getTerrainLoadMode, "nativeGetTerrainLoadMode"),
         METHOD(&NativeMapView::setTerrainSkirtLength, "nativeSetTerrainSkirtLength"),
         METHOD(&NativeMapView::getTerrainSkirtLength, "nativeGetTerrainSkirtLength"),
+        METHOD(&NativeMapView::setCenterClampedToGround, "nativeSetCenterClampedToGround"),
+        METHOD(&NativeMapView::getCenterClampedToGround, "nativeGetCenterClampedToGround"),
         METHOD(&NativeMapView::setCenterClampedToGround, "nativeSetCenterClampedToGround"),
         METHOD(&NativeMapView::getCenterClampedToGround, "nativeGetCenterClampedToGround"),
         METHOD(&NativeMapView::setDebugAboveGroundLog, "nativeSetDebugAboveGroundLog"),
