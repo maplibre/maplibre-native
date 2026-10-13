@@ -24,7 +24,8 @@ import org.maplibre.android.maps.MapLibreMapOptions;
 @Keep
 public abstract class MapRenderer implements MapRendererScheduler {
 
-  static {
+  // JNI registration initializes this class; load during construction to avoid a lock cycle.
+  {
     LibraryLoader.load();
   }
 

@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Avoid startup deadlocks when JNI peer classes are initialized concurrently during native library loading ([#4697](https://github.com/maplibre/maplibre-native/issues/4697)).
+
 ## 13.6.1
 
 ### 🐞 Bug fixes

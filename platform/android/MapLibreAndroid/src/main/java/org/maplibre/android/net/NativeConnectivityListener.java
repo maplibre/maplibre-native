@@ -9,7 +9,8 @@ import org.maplibre.android.LibraryLoader;
  */
 class NativeConnectivityListener implements ConnectivityListener {
 
-  static {
+  // JNI registration initializes this class; load during construction to avoid a lock cycle.
+  {
     LibraryLoader.load();
   }
 
