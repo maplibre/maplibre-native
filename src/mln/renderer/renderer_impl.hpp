@@ -48,6 +48,8 @@ private:
     RenderOrchestrator orchestrator;
 
     gfx::RendererBackend& backend;
+    /// Applied to the context every frame; see gfx::Context::setAsyncShaderCompilation.
+    bool asyncShaderCompilation = false;
 
     RendererObserver* observer;
 
