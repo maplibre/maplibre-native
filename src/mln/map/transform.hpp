@@ -67,6 +67,10 @@ public:
         @param offset The distance to pan the map by, measured in pixels from
             top to bottom and from left to right. */
     void moveBy(const ScreenCoordinate& offset, const AnimationOptions& = {});
+    /// A drag on the globe turns the planet so that the location under `anchor` follows the cursor.
+    void moveBy(const ScreenCoordinate& offset,
+                const std::optional<ScreenCoordinate>& anchor,
+                const AnimationOptions& = {});
     LatLng getLatLng(LatLng::WrapMode = LatLng::Wrapped) const;
 
     // Bounds

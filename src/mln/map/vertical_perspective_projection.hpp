@@ -80,6 +80,12 @@ public:
                                 const LatLng& zoomLocation,
                                 double zoomDelta);
 
+    /// GL JS `versorSetLocationAtPoint` with the bearing held, as a drag uses it: the center after the one rotation
+    /// that brings the location under `point - panDelta` back under `point` (both y up). Within 12 degrees of the
+    /// pole's edge the cursor turns a dial around the pole, and a swing over a pole stops on it. The longitude stays
+    /// unwrapped around the current center, the latitude is not yet constrained.
+    static LatLng dragCenter(const TransformState&, const ScreenCoordinate& point, const ScreenCoordinate& panDelta);
+
     /// The shorter signed way around from one angle to the other, in degrees.
     static double differenceOfAnglesDegrees(double from, double to);
 

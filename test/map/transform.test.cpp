@@ -2251,6 +2251,201 @@ TEST(Transform, GlobeFlingStopsShortOfHalfATurn) {
     EXPECT_NEAR(0, transform.getLatLng().latitude(), 1e-9);
 }
 
+// GL JS's drag (`versorSetLocationAtPoint` in globe_utils.ts at a6976b2d2) on a 640 by 480 vertical perspective
+// globe, one step at a time from the state GL JS had before it. The location under a pixel differs from GL JS's by a
+// few times 1e-8 degrees, which a step carries, and near the pole, where the swing is ill-conditioned, magnifies to
+// 3e-5. Steps from above the Mercator edge wait for the pole limit to reach the pole.
+TEST(GlobeTransform, DragCenterMatchesGLJS) {
+    struct Step {
+        const char* name;
+        LatLng center;
+        double zoom;
+        double bearing;
+        double pitch;
+        ScreenCoordinate point;
+        ScreenCoordinate panDelta;
+        LatLng expected;
+    };
+    for (const auto& step : {
+             Step{"center-drag-east 0",
+                  {20, 10},
+                  1,
+                  0,
+                  0,
+                  {330, 240},
+                  {10, 0},
+                  {19.965282023984564, 6.4815289029572796}},
+             Step{"center-drag-east 2",
+                  {19.930629470600696, 2.9638309791221218},
+                  1.0006345622358692,
+                  0,
+                  0,
+                  {330, 240},
+                  {10, 0},
+                  {19.896042196601286, -0.55309670350629858}},
+             Step{"center-drag-east 4",
+                  {19.861520045685079, -4.0692573198545006},
+                  1.0012643566198773,
+                  0,
+                  0,
+                  {330, 240},
+                  {10, 0},
+                  {19.827062862866029, -7.5846539692397528}},
+             Step{
+                 "off-center-drag 0", {20, 10}, 1, 0, 0, {400, 180}, {6, -4}, {18.035949768514822, 7.0912200435051318}},
+             Step{"off-center-drag 2",
+                  {16.074403221836153, 4.2128599184012501},
+                  1.0322018054718429,
+                  0,
+                  0,
+                  {400, 180},
+                  {6, -4},
+                  {14.115308308470153, 1.3609485969949446}},
+             Step{"off-center-drag 4",
+                  {12.158620253298484, -1.4683014243901198},
+                  1.0570085257097157,
+                  0,
+                  0,
+                  {400, 180},
+                  {6, -4},
+                  {10.204300722829602, -4.2785224655883667}},
+             Step{"drag-north-into-pole 0",
+                  {70, -100},
+                  1,
+                  0,
+                  0,
+                  {320, 300},
+                  {0, 6},
+                  {70.737292281570959, -100.00000532618219}},
+             Step{"side-drag-at-pole 0",
+                  {85.051128779806604, -100},
+                  1,
+                  0,
+                  0,
+                  {380, 240},
+                  {6, 0},
+                  {85.04779126800193, -101.87137817590371}},
+             Step{"side-drag-at-pole 30",
+                  {84.951967983622339, -155.74101056417635},
+                  1.0285489149123164,
+                  0,
+                  0,
+                  {380, 240},
+                  {6, 0},
+                  {84.948696321724725, -157.5850062958317}},
+             Step{"side-drag-at-pole 59",
+                  {84.857939190172175, 151.13958753391546},
+                  1.0551043083999352,
+                  0,
+                  0,
+                  {380, 240},
+                  {6, 0},
+                  {84.854727627221791, 149.3208585050229}},
+             Step{"drag-off-globe 0", {10, 5}, 1, 0, 0, {620, 240}, {20, 0}, {9.9822358414066574, 1.5494608337623959}},
+             Step{"drag-off-globe 2",
+                  {9.9645038852827348, -1.900890135366808},
+                  1.0001573128409238,
+                  0,
+                  0,
+                  {620, 240},
+                  {20, 0},
+                  {9.9468040697940392, -5.3510536078645146}},
+             Step{"drag-off-globe 4",
+                  {9.929136336184456, -8.8010302815180239},
+                  1.0003134881855476,
+                  0,
+                  0,
+                  {620, 240},
+                  {20, 0},
+                  {9.9115006154341057, -12.250821072336748}},
+             Step{"drag-bearing-pitch 0",
+                  {40, 30},
+                  2.5,
+                  30,
+                  40,
+                  {300, 330},
+                  {-7, 5},
+                  {40.100687358590221, 30.988489185412163}},
+             Step{"drag-bearing-pitch 4",
+                  {40.402659196545834, 33.962784161839863},
+                  2.4914315272933263,
+                  30,
+                  40,
+                  {300, 330},
+                  {-7, 5},
+                  {40.503286269891916, 34.957182490484456}},
+             Step{"drag-bearing-pitch 7",
+                  {40.704494870571025, 36.950472939750398},
+                  2.4849280544413617,
+                  30,
+                  40,
+                  {300, 330},
+                  {-7, 5},
+                  {40.805076301080582, 37.949379874107763}},
+             Step{"drag-across-antimeridian 0", {0, 175}, 1.5, 0, 0, {300, 240}, {-12, 0}, {0, 177.99462488602808}},
+             Step{"drag-across-antimeridian 5",
+                  {0, -170.02687397189936},
+                  1.5,
+                  0,
+                  0,
+                  {300, 240},
+                  {-12, 0},
+                  {0, -167.0322482908831}},
+             Step{"drag-across-antimeridian 9",
+                  {0, -158.04837032693092},
+                  1.5,
+                  0,
+                  0,
+                  {300, 240},
+                  {-12, 0},
+                  {0, -155.05374404103554}},
+             Step{"drag-south-pole 0",
+                  {-80, 40},
+                  0.80000000000000004,
+                  0,
+                  0,
+                  {320, 200},
+                  {0, -7},
+                  {-80.493069449265391, 40.00000305847243}},
+         }) {
+        SCOPED_TRACE(step.name);
+        Transform transform;
+        transform.resize({640, 480});
+        transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+        transform.jumpTo(CameraOptions()
+                             .withCenter(step.center)
+                             .withZoom(step.zoom)
+                             .withBearing(step.bearing)
+                             .withPitch(step.pitch));
+        const LatLng center = VerticalPerspectiveProjection::dragCenter(
+            transform.getState(), {step.point.x, 480 - step.point.y}, {step.panDelta.x, -step.panDelta.y});
+        EXPECT_NEAR(step.expected.latitude(), center.latitude(), 1e-4);
+        EXPECT_NEAR(
+            0.0,
+            VerticalPerspectiveProjection::differenceOfAnglesDegrees(step.expected.longitude(), center.longitude()),
+            1e-4);
+    }
+}
+
+// Dragging sideways at the pole turns the globe around it with the latitude held, as GL JS's drag does. The center
+// used to come from the location beside it, so it slid away from the pole and the planet spun.
+TEST(GlobeTransform, DragAroundThePoleHoldsItsLatitude) {
+    Transform transform;
+    transform.resize({640, 480});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{util::LATITUDE_MAX, -100.0}).withZoom(1.0));
+    for (int step = 0; step < 60; ++step) {
+        transform.moveBy({6, 0}, ScreenCoordinate{380, 240});
+    }
+    // GL JS after the same 60 steps, each one carrying the small difference in the location under the cursor.
+    EXPECT_NEAR(84.85472762722179, transform.getLatLng().latitude(), 0.005);
+    EXPECT_NEAR(
+        0.0,
+        VerticalPerspectiveProjection::differenceOfAnglesDegrees(149.3208585050229, transform.getLatLng().longitude()),
+        0.02);
+    EXPECT_NEAR(1.056002666052632, transform.getZoom(), 0.001);
+}
+
 // On Mercator a zoom around a point across the antimeridian leaves the center on the next world copy, as it does on
 // main: the camera reports that copy, which converts back to the middle of the view.
 TEST(Transform, MercatorCameraCenterIsOnTheTransformsWorldCopy) {

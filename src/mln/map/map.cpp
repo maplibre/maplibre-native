@@ -174,6 +174,14 @@ void Map::moveBy(const ScreenCoordinate& point, const AnimationOptions& animatio
     impl->onUpdate();
 }
 
+void Map::moveBy(const ScreenCoordinate& offset,
+                 const std::optional<ScreenCoordinate>& anchor,
+                 const AnimationOptions& animation) {
+    impl->cameraMutated = true;
+    impl->transform.moveBy(offset, anchor, animation);
+    impl->onUpdate();
+}
+
 void Map::pitchBy(double pitch, const AnimationOptions& animation) {
     easeTo(CameraOptions().withPitch(util::rad2deg(impl->transform.getPitch()) - pitch), animation);
 }

@@ -1,4 +1,5 @@
 #include <mln/map/vertical_perspective_projection.hpp>
+
 #include <mln/map/transform_state.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/math/wrap.hpp>
@@ -6,6 +7,7 @@
 #include <mln/util/constants.hpp>
 #include <mln/util/interpolate.hpp>
 #include <mln/util/projection.hpp>
+#include <mln/util/quaternion.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -456,6 +458,115 @@ LatLng VerticalPerspectiveProjection::panCenter(const TransformState& state, con
                                             globeRadiusPixels(Projection::worldSize(state.getScale()), latitude));
     return {std::clamp(latitude + y * degreesPerPixel, -90.0, 90.0),
             center.longitude() - x * degreesPerPixel * longitudeSpeed};
+}
+
+namespace {
+// GL JS globe_utils drag constants.
+constexpr double PAN_FALLOFF_BAND = 0.1;
+constexpr double DIAL_MIN_RADIUS_PIXELS = 20.0;
+constexpr double DIAL_RAMP_DEGREES = 12.0;
+constexpr double PAN_MAX_ANGLE = std::numbers::pi * 0.98;
+
+vec3 cross(const vec3& a, const vec3& b) {
+    return {{a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]}};
+}
+
+// GL JS `orientationFromLngLatBearing`: gl-matrix's `quat.fromEuler(-lng, -lat, bearing)`, bearing in GL JS's sign.
+Quaternion orientationFromLatLngBearing(const LatLng& center, double bearingDegrees) {
+    return Quaternion::fromEulerAngles(
+        util::deg2rad(-center.longitude()), util::deg2rad(-center.latitude()), util::deg2rad(bearingDegrees));
+}
+
+struct Orientation {
+    double latitude;
+    double longitude;
+    double bearing;
+};
+
+// GL JS `lngLatBearingFromOrientation`.
+Orientation orientationToLatLngBearing(const Quaternion& q) {
+    return {.latitude = -util::rad2deg(std::asin(std::clamp(2 * (q.w * q.y - q.z * q.x), -1.0, 1.0))),
+            .longitude = -util::rad2deg(std::atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x * q.x + q.y * q.y))),
+            .bearing = util::rad2deg(std::atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z)))};
+}
+
+// GL JS `panSurfaceLocation`: the surface point a drag towards `point` aims at. Exact while the ray is well inside the
+// silhouette, then eased off along a hyperbola that matches it in value and slope and saturates short of the far
+// side, so the drag keeps going once the cursor leaves the planet.
+vec3 panSurfaceVector(const TransformState& state, const ScreenCoordinate& point) {
+    const vec3 origin = state.getGlobeCameraPosition();
+    const double distance = length(origin);
+    if (distance <= 1.0) {
+        return VerticalPerspectiveProjection::screenCoordinateToSurface(state, point);
+    }
+    const vec3 u = normalized(origin);
+    const vec3 direction = rayDirectionFromPixel(state, point, state.getInverseGlobeViewProjectionMatrix());
+    const double c = -dot(direction, u);
+    const vec3 lateral = add(direction, scaled(u, c));
+    const double s = length(lateral);
+    if (s < 1e-9) {
+        return VerticalPerspectiveProjection::screenCoordinateToSurface(state, point);
+    }
+    const double angle = std::atan2(s, c);
+    const double handoverAngle = std::asin(1.0 / distance) * (1.0 - PAN_FALLOFF_BAND);
+    if (angle < handoverAngle) {
+        return VerticalPerspectiveProjection::screenCoordinateToSurface(state, point);
+    }
+    const double sinHandover = distance * std::sin(handoverAngle);
+    const double targetAtHandover = std::asin(std::clamp(sinHandover, -1.0, 1.0)) - handoverAngle;
+    const double slopeAtHandover = distance * std::cos(handoverAngle) /
+                                       std::sqrt(std::max(1.0 - sinHandover * sinHandover, 1e-12)) -
+                                   1.0;
+    const double room = PAN_MAX_ANGLE - targetAtHandover;
+    const double excess = angle - handoverAngle;
+    const double target = std::clamp(
+        targetAtHandover + room * (slopeAtHandover * excess) / (room + slopeAtHandover * excess), 0.0, PAN_MAX_ANGLE);
+    return normalized(add(scaled(u, std::cos(target)), scaled(lateral, std::sin(target) / s)));
+}
+} // namespace
+
+LatLng VerticalPerspectiveProjection::dragCenter(const TransformState& state,
+                                                 const ScreenCoordinate& point,
+                                                 const ScreenCoordinate& panDelta) {
+    const vec3 vecToPixelCurrent = panSurfaceVector(state, point);
+    const vec3 vecToTarget = panSurfaceVector(state, {point.x - panDelta.x, point.y - panDelta.y});
+    const LatLng center = state.getLatLng(LatLng::Unwrapped);
+    // GL JS's bearing is the state's with the sign flipped.
+    const double bearing = -util::rad2deg(state.getBearing());
+
+    const vec3 w = cross(vecToTarget, vecToPixelCurrent);
+    const double l = length(w);
+    const double halfAngle = std::acos(std::clamp(dot(vecToTarget, vecToPixelCurrent), -1.0, 1.0)) / 2.0;
+    const double s = std::sin(halfAngle);
+    // The rotation's axis is in the surface-vector frame and the orientation in the Euler frame, hence the swizzle.
+    const Quaternion delta = l > 0.0 ? Quaternion{w[1] / l * s, -w[0] / l * s, w[2] / l * s, std::cos(halfAngle)}
+                                     : Quaternion::identity;
+    const Orientation swung = orientationToLatLngBearing(orientationFromLatLngBearing(center, bearing).multiply(delta));
+
+    // A swing over a pole turns the bearing around; with the bearing held, the center stops on that pole.
+    const double latitude = std::abs(differenceOfAnglesDegrees(bearing, swung.bearing)) <= 90.0
+                                ? swung.latitude
+                                : (swung.latitude > 0.0 ? 90.0 : -90.0);
+
+    // The swing's longitude is ill-conditioned near the pole, so within the last 12 degrees before the pole's edge the
+    // cursor turns a dial around the pole instead, blended in with a smoothstep and in full from the edge on. GL JS
+    // takes the sweep from the screen with y down.
+    const double poleLatitude = center.latitude() >= 0.0 ? 90.0 : -90.0;
+    vec4 clip;
+    const ScreenCoordinate pole = latLngToScreenCoordinate(state, {poleLatitude, 0.0}, clip);
+    const double rx = point.x - pole.x;
+    const double ry = pole.y - point.y;
+    const double ramp = std::clamp(
+        1.0 - (util::LATITUDE_MAX - std::abs(center.latitude())) / DIAL_RAMP_DEGREES, 0.0, 1.0);
+    const double dial = ramp * ramp * (3.0 - 2.0 * ramp);
+    const double dLngSwing = util::wrap(swung.longitude - center.longitude() + 180.0, 0.0, 360.0) - 180.0;
+    double dLngDial = 0.0;
+    if (dial > 0.0) {
+        const double radiusSquared = std::max(rx * rx + ry * ry, DIAL_MIN_RADIUS_PIXELS * DIAL_MIN_RADIUS_PIXELS);
+        const double dTheta = (rx * -panDelta.y - ry * panDelta.x) / radiusSquared;
+        dLngDial = (poleLatitude > 0.0 ? 1.0 : -1.0) * util::rad2deg(dTheta);
+    }
+    return {latitude, center.longitude() + (1.0 - dial) * dLngSwing + dial * dLngDial};
 }
 
 double VerticalPerspectiveProjection::differenceOfAnglesDegrees(double from, double to) {

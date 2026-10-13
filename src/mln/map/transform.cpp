@@ -508,6 +508,12 @@ void Transform::flyTo(const CameraOptions& inputCamera,
 // MARK: - Position
 
 void Transform::moveBy(const ScreenCoordinate& offset, const AnimationOptions& animation) {
+    moveBy(offset, std::nullopt, animation);
+}
+
+void Transform::moveBy(const ScreenCoordinate& offset,
+                       const std::optional<ScreenCoordinate>& anchor,
+                       const AnimationOptions& animation) {
     if (state.isGlobeRendering() && animation.duration && *animation.duration > Duration::zero()) {
         // An animated move, a fling, turns the globe as GL JS's inertia does: the location under the far end of a
         // long one can be off the planet or over a pole. It stops short of half a turn, which the ease would take the
@@ -518,6 +524,25 @@ void Transform::moveBy(const ScreenCoordinate& offset, const AnimationOptions& a
             center = {center.latitude(), longitude + std::copysign(179.5, center.longitude() - longitude)};
         }
         easeTo(CameraOptions().withCenter(center), animation);
+        return;
+    }
+
+    if (state.isGlobeRendering()) {
+        // A drag turns the globe as GL JS's does: one rotation that brings the location under the cursor back under
+        // it with the bearing held, around the cursor when it is on the planet and around the center otherwise.
+        const auto flipped = [&](const ScreenCoordinate& point) {
+            return ScreenCoordinate{point.x, state.getSize().height - point.y};
+        };
+        const ScreenCoordinate grab = anchor && VerticalPerspectiveProjection::screenCoordinateHitsGlobe(
+                                                    state, flipped(*anchor))
+                                          ? *anchor
+                                          : state.getEdgeInsets().getCenter(state.getSize().width,
+                                                                            state.getSize().height);
+        const LatLng center = state.constrainedCenter(
+            VerticalPerspectiveProjection::dragCenter(state, flipped(grab), {offset.x, -offset.y}));
+        easeTo(CameraOptions().withCenter(center).withZoom(getZoom() + VerticalPerspectiveProjection::zoomAdjustment(
+                                                                           getLatLng().latitude(), center.latitude())),
+               animation);
         return;
     }
 
