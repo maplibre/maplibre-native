@@ -14,11 +14,9 @@ else
   $(error BUILDTYPE must be Debug, Sanitize, Release or RelWithDebInfo)
 endif
 
-ifeq ($(RENDERER), opengl)
-else ifeq ($(RENDERER), vulkan)
-else ifeq ($(RENDERER), multiBackend)
-else
-  $(error RENDERER must be 'opengl' or 'vulkan' or 'multiBackend')
+# A product flavor: the renderer, optionally followed by WithPluginApi (e.g. openglWithPluginApi)
+ifeq ($(filter $(patsubst %WithPluginApi,%,$(RENDERER)),opengl vulkan multiBackend),)
+  $(error RENDERER must be 'opengl', 'vulkan' or 'multiBackend', optionally followed by 'WithPluginApi')
 endif
 
 buildtype := $(shell echo "$(BUILDTYPE)" | tr "[A-Z]" "[a-z]")
@@ -223,7 +221,7 @@ run-android-unit-test:
 run-android-unit-test-%:
 	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:test$(RENDERER)DebugUnitTest --info --tests "$*"
 
-DEBUG_TAR_FILE_NAME := $(if $(findstring opengl,$(RENDERER)),debug-symbols-opengl-$(MLN_ANDROID_APK_SUFFIX).tar.gz,debug-symbols-$(RENDERER)-$(MLN_ANDROID_APK_SUFFIX).tar.gz)
+DEBUG_TAR_FILE_NAME := debug-symbols-$(RENDERER)-$(MLN_ANDROID_APK_SUFFIX).tar.gz
 
 # Builds a release package and .tar.gz with debug symbols of the Android SDK
 .PHONY: apackage

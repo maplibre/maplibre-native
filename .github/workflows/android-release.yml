@@ -69,12 +69,19 @@ jobs:
     env:
       JOBS: 8
       IS_LOCAL_DEVELOPMENT: false
+      FLAVOR: ${{ matrix.FLAVOR }}
+      BUILDTYPE: ${{ matrix.BUILDTYPE }}
+      VERSION_TAG: ${{ needs.android-create-release.outputs.version_tag }}
     strategy:
       matrix:
-        RENDERER:
+        # Product flavors of MapLibreAndroid. maplibre.gradle-publish.gradle.kts defines their Maven artifact IDs.
+        FLAVOR:
           - vulkan
           - opengl
           - multiBackend
+          - vulkanWithPluginApi
+          - openglWithPluginApi
+          - multiBackendWithPluginApi
         BUILDTYPE:
           - Release
           - Debug
@@ -99,48 +106,27 @@ jobs:
         run: make run-android-nitpick
 
       - name: Build package
-        run: RENDERER=${{ matrix.RENDERER }} BUILDTYPE=${{ matrix.BUILDTYPE }} make apackage
+        run: RENDERER="$FLAVOR" make apackage
 
-      - name: Save buildtype to GITHUB_ENV
+      - name: Prepare release assets (include tag in filenames)
         run: |
-          buildtype=${{ matrix.BUILDTYPE }}
-          # lowercase
-          echo buildtype=${buildtype,,} > "$GITHUB_ENV"
+          buildtype="${BUILDTYPE,,}"
+          mkdir -p build/release-assets
+          mv "MapLibreAndroid/build/outputs/aar/MapLibreAndroid-$FLAVOR-$buildtype.aar" \
+             "build/release-assets/MapLibreAndroid-$FLAVOR-$buildtype-$VERSION_TAG.aar"
+          mv "build/debug-symbols-$FLAVOR-$buildtype.tar.gz" \
+             "build/release-assets/debug-symbols-maplibre-android-$FLAVOR-$buildtype-$VERSION_TAG.tar.gz"
 
-      - name: Prepare release asset filenames (include tag)
-        run: |
-          version_tag='${{ needs.android-create-release.outputs.version_tag }}'
-          # AAR
-          aar_dir='MapLibreAndroid/build/outputs/aar'
-          mv "$aar_dir/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}.aar" \
-             "$aar_dir/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-$version_tag.aar"
-          # Debug symbols
-          mv "build/debug-symbols-${{ matrix.RENDERER }}-${{ env.buildtype }}.tar.gz" \
-             "build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-$version_tag.tar.gz"
-
-      - name: Upload release assets (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
+      - name: Upload release assets (${{ matrix.FLAVOR }}, ${{ matrix.BUILDTYPE }})
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
-          tag_name: ${{ needs.android-create-release.outputs.version_tag }}
+          tag_name: ${{ env.VERSION_TAG }}
           fail_on_unmatched_files: true
           draft: true
-          files: |
-            platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.aar
-            platform/android/build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
+          files: platform/android/build/release-assets/*
 
-      - name: Publish to MavenCentral
-        run: |
-          renderer=${{ matrix.RENDERER }}
-          if [ "$renderer" = "opengl" ]; then
-            ./gradlew :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToMavenCentralRepository
-            ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToMavenCentralRepository
-          elif [ "$renderer" = "vulkan" ]; then
-            ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToMavenCentralRepository
-          elif [ "$renderer" = "multiBackend" ]; then
-            ./gradlew :MapLibreAndroid:publishMultibackend${{ env.buildtype }}PublicationToMavenCentralRepository
-          else
-            echo "::error ::Unknown renderer '$renderer'"; exit 1
-          fi
+      - name: Publish to Maven Central
+        run: ./gradlew ":MapLibreAndroid:publish${FLAVOR^}${BUILDTYPE}Publications"
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
