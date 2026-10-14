@@ -61,6 +61,37 @@ jobs:
           path: |
             ${{ matrix.asset }}
 
+      # Plugin packages compile against this XCFramework with <mln/plugin/plugin_api.h>.
+      # An XCFramework needs a library, so it also contains an empty static library.
+      - name: Create plugin API XCFramework
+        if: matrix.plugins
+        working-directory: .
+        run: |
+          work="$RUNNER_TEMP/plugin-api"
+          mkdir -p "$work/Headers/mln/plugin" "$work/device" "$work/simulator"
+          cp include/mln/plugin/plugin_api.h "$work/Headers/mln/plugin/"
+          echo '#include <mln/plugin/plugin_api.h>' > "$work/plugin_api.c"
+          for target in arm64-apple-ios15.5 arm64-apple-ios15.5-simulator x86_64-apple-ios15.5-simulator; do
+            if [[ $target == *-simulator ]]; then sdk=iphonesimulator; else sdk=iphoneos; fi
+            xcrun --sdk "$sdk" clang -target "$target" -I "$work/Headers" -c "$work/plugin_api.c" -o "$work/$target.o"
+          done
+          xcrun libtool -static -o "$work/device/libMapLibrePluginApi.a" "$work/arm64-apple-ios15.5.o"
+          lipo -create "$work"/*-simulator.o -output "$work/simulator.o"
+          xcrun libtool -static -o "$work/simulator/libMapLibrePluginApi.a" "$work/simulator.o"
+          xcodebuild -create-xcframework \
+            -library "$work/device/libMapLibrePluginApi.a" -headers "$work/Headers" \
+            -library "$work/simulator/libMapLibrePluginApi.a" -headers "$work/Headers" \
+            -output "$work/MapLibrePluginApi.xcframework"
+          (cd "$work" && zip -qr "$GITHUB_WORKSPACE/MapLibrePluginApi.xcframework.zip" MapLibrePluginApi.xcframework)
+          zip MapLibrePluginApi.xcframework.zip LICENSE.md  # add license to zip
+
+      - name: Upload plugin API artifact
+        if: matrix.plugins
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: xcframework-plugin-api
+          path: MapLibrePluginApi.xcframework.zip
+
   ios-build-static:
     runs-on: macos-15
     defaults:
@@ -164,6 +195,7 @@ jobs:
           files: |
             xcframework/MapLibre.dynamic.xcframework.zip
             xcframework-plugins/MapLibre.dynamic.plugins.xcframework.zip
+            xcframework-plugin-api/MapLibrePluginApi.xcframework.zip
             xcframework-static/MapLibre.static.xcframework.zip
           tag_name: ios-v${{ env.version }}
           prerelease: ${{ github.event.inputs.release == 'pre' || contains(env.version, '-pre') }}

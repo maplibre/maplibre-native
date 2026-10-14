@@ -7,7 +7,7 @@ Each release is published to two Swift package repositories. The `ios-release.ym
 | Repository | XCFramework |
 | --- | --- |
 | [maplibre/maplibre-gl-native-distribution](https://github.com/maplibre/maplibre-gl-native-distribution) | `MapLibre.dynamic.xcframework.zip` |
-| [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api) | `MapLibre.dynamic.plugins.xcframework.zip`, built with `--//:plugins=true` |
+| [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api) | `MapLibre.dynamic.plugins.xcframework.zip`, built with `--//:plugins=true`, and `MapLibrePluginApi.xcframework.zip` with `<mln/plugin/plugin_api.h>` for plugin packages |
 
 Also see the current [release policy](../../release-policy.md).
 
