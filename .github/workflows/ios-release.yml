@@ -16,21 +16,33 @@ on:
         description: Version (only for pre-releases)
 
 jobs:
-  ios-build-dynamic:
-    name: ios-build-dynamic (${{ matrix.asset }})
+  ios-build:
+    name: ios-build (${{ matrix.asset }})
     runs-on: macos-26
     strategy:
       matrix:
         include:
           - asset: MapLibre.dynamic.xcframework.zip
             artifact: xcframework
+            target: MapLibre.dynamic
+            plugins: false
+          - asset: MapLibre.static.xcframework.zip
+            artifact: xcframework-static
+            target: MapLibre.static
             plugins: false
           # Same framework and module name, with the plugin API enabled.
           - asset: MapLibre.dynamic.plugins.xcframework.zip
             artifact: xcframework-plugins
+            target: MapLibre.dynamic
+            plugins: true
+          - asset: MapLibre.static.plugins.xcframework.zip
+            artifact: xcframework-static-plugins
+            target: MapLibre.static
             plugins: true
     env:
       ASSET: ${{ matrix.asset }}
+      TARGET: ${{ matrix.target }}
+      PLUGINS: ${{ matrix.plugins }}
     defaults:
       run:
         working-directory: platform/ios
@@ -40,59 +52,21 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build XCFramework (Dynamic)
+      - name: Build XCFramework
         run: |
-          bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
-            --apple_generate_dsym --//:renderer=metal --//:plugins=${{ matrix.plugins }} //platform/ios:MapLibre.dynamic \
-            --embed_label=maplibre_ios_"$(cat VERSION)"
-          echo "xcframework=$(bazel info --compilation_mode=opt bazel-bin)/platform/ios/MapLibre.dynamic.xcframework.zip" >> "$GITHUB_ENV"
+          if [[ $TARGET == MapLibre.dynamic ]]; then
+            flags=("--features=dead_strip,thin_lto" --objc_enable_binary_stripping --apple_generate_dsym)
+          else
+            # Keep debug information in the object files for the application's dSYM.
+            flags=(--copt=-g --copt=-Oz --strip=never)
+          fi
+          bazel build --compilation_mode=opt --//:renderer=metal --//:plugins="$PLUGINS" "${flags[@]}" \
+            "//platform/ios:$TARGET" --embed_label=maplibre_ios_"$(cat VERSION)"
+          echo "xcframework=$(bazel info --compilation_mode=opt bazel-bin)/platform/ios/$TARGET.xcframework.zip" >> "$GITHUB_ENV"
 
       - name: Add license to XCFramework zip
         run: |
           cp "$xcframework" "$ASSET"
-          chmod +w "$ASSET"
-          zip "$ASSET" LICENSE.md  # add license to zip
-        working-directory: .
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: ${{ matrix.artifact }}
-          path: |
-            ${{ matrix.asset }}
-
-  ios-build-static:
-    name: ios-build-static (${{ matrix.asset }})
-    runs-on: macos-15
-    strategy:
-      matrix:
-        include:
-          - asset: MapLibre.static.xcframework.zip
-            artifact: xcframework-static
-            plugins: false
-          - asset: MapLibre.static.plugins.xcframework.zip
-            artifact: xcframework-static-plugins
-            plugins: true
-    env:
-      ASSET: ${{ matrix.asset }}
-    defaults:
-      run:
-        working-directory: platform/ios
-        shell: bash
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          submodules: recursive
-
-      - name: Build XCFramework (Static)
-        run: |
-          bazel build //platform/ios:MapLibre.static --//:renderer=metal --//:plugins=${{ matrix.plugins }} \
-            --compilation_mode="opt" --copt -g --copt="-Oz" --strip never
-          echo "xcframework_static=$(bazel info --compilation_mode=opt bazel-bin)/platform/ios/MapLibre.static.xcframework.zip" >> "$GITHUB_ENV"
-
-      - name: Add license to XCFramework zip
-        run: |
-          cp "$xcframework_static" "$ASSET"
           chmod +w "$ASSET"
           zip "$ASSET" LICENSE.md  # add license to zip
         working-directory: .
@@ -111,9 +85,7 @@ jobs:
       actions: write          # for triggering ios-release-cocoapods.yml
       issues: write           # for notify-release-on-prs.ts
     runs-on: ubuntu-latest
-    needs:
-      - ios-build-dynamic
-      - ios-build-static
+    needs: ios-build
     defaults:
       run:
         working-directory: platform/ios
