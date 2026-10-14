@@ -62,7 +62,19 @@ jobs:
             ${{ matrix.asset }}
 
   ios-build-static:
+    name: ios-build-static (${{ matrix.asset }})
     runs-on: macos-15
+    strategy:
+      matrix:
+        include:
+          - asset: MapLibre.static.xcframework.zip
+            artifact: xcframework-static
+            plugins: false
+          - asset: MapLibre.static.plugins.xcframework.zip
+            artifact: xcframework-static-plugins
+            plugins: true
+    env:
+      ASSET: ${{ matrix.asset }}
     defaults:
       run:
         working-directory: platform/ios
@@ -74,22 +86,23 @@ jobs:
 
       - name: Build XCFramework (Static)
         run: |
-          bazel build //platform/ios:MapLibre.static --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never
+          bazel build //platform/ios:MapLibre.static --//:renderer=metal --//:plugins=${{ matrix.plugins }} \
+            --compilation_mode="opt" --copt -g --copt="-Oz" --strip never
           echo "xcframework_static=$(bazel info --compilation_mode=opt bazel-bin)/platform/ios/MapLibre.static.xcframework.zip" >> "$GITHUB_ENV"
 
       - name: Add license to XCFramework zip
         run: |
-          cp "$xcframework_static" MapLibre.static.xcframework.zip
-          chmod +w MapLibre.static.xcframework.zip
-          zip MapLibre.static.xcframework.zip LICENSE.md  # add license to zip
+          cp "$xcframework_static" "$ASSET"
+          chmod +w "$ASSET"
+          zip "$ASSET" LICENSE.md  # add license to zip
         working-directory: .
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: xcframework-static
+          name: ${{ matrix.artifact }}
           path: |
-            MapLibre.static.xcframework.zip
+            ${{ matrix.asset }}
 
   ios-release:
     permissions:
@@ -165,6 +178,7 @@ jobs:
             xcframework/MapLibre.dynamic.xcframework.zip
             xcframework-plugins/MapLibre.dynamic.plugins.xcframework.zip
             xcframework-static/MapLibre.static.xcframework.zip
+            xcframework-static-plugins/MapLibre.static.plugins.xcframework.zip
           tag_name: ios-v${{ env.version }}
           prerelease: ${{ github.event.inputs.release == 'pre' || contains(env.version, '-pre') }}
           body_path: platform/ios/changelog_for_version.md
