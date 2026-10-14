@@ -118,8 +118,8 @@ android {
                 }
             }
         }
-        // Like the renderer flavor, but exporting the experimental C plugin API
-        // (include/mln/plugin/plugin_api.h). It supports OpenGL ES and Vulkan, but not WebGPU.
+        // The same as the flavor they are named after, but exporting the experimental C plugin API
+        // (include/mln/plugin/plugin_api.h). The plugin API supports OpenGL ES and Vulkan, but not WebGPU.
         listOf("opengl", "vulkan", "multiBackend").forEach { renderer ->
             val rendererCmake = getByName(renderer).externalNativeBuild.cmake
             create("${renderer}WithPluginApi") {
