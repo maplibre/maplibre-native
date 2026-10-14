@@ -47,6 +47,7 @@ struct FillDrawableUBO {
     float pad1;
     float pad2;
     vec4 pad3;
+    vec4 pad4;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillDrawableUBOVector {
@@ -154,6 +155,7 @@ struct FillOutlineDrawableUBO {
     float pad1;
     float pad2;
     vec4 pad3;
+    vec4 pad4;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillOutlineDrawableUBOVector {
@@ -245,7 +247,7 @@ template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillPatternShader";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -254,16 +256,20 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
 
 layout(location = 0) in ivec2 in_position;
 
+#if !defined(HAS_UNIFORM_u_color)
+layout(location = 1) in vec4 in_color;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 1) in mediump uvec4 in_pattern_from;
+layout(location = 2) in mediump uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 2) in mediump uvec4 in_pattern_to;
+layout(location = 3) in mediump uvec4 in_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 3) in vec2 in_opacity;
+layout(location = 4) in vec2 in_opacity;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -279,6 +285,10 @@ struct FillPatternDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float opacity_t;
+    float color_t;
+    float pad1;
+    float pad2;
+    float pad3;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillPatternDrawableUBOVector {
@@ -293,7 +303,7 @@ struct FillPatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
-    float pad1;
+    float sdf;
     float pad2;
 };
 
@@ -313,21 +323,29 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
 layout(location = 0) out vec2 frag_pos_a;
 layout(location = 1) out vec2 frag_pos_b;
 
+#if !defined(HAS_UNIFORM_u_color)
+layout(location = 2) out vec4 frag_color;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 2) out mediump vec4 frag_pattern_from;
+layout(location = 3) out mediump vec4 frag_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 3) out mediump vec4 frag_pattern_to;
+layout(location = 4) out mediump vec4 frag_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 4) out lowp float frag_opacity;
+layout(location = 5) out lowp float frag_opacity;
 #endif
 
 void main() {
     const FillPatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
     const FillPatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
+
+#if !defined(HAS_UNIFORM_u_color)
+    frag_color = unpack_mix_color(in_color, drawable.color_t);
+#endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 frag_pattern_from = tileProps.pattern_from;
@@ -371,16 +389,20 @@ void main() {
 layout(location = 0) in vec2 frag_pos_a;
 layout(location = 1) in vec2 frag_pos_b;
 
+#if !defined(HAS_UNIFORM_u_color)
+layout(location = 2) in vec4 frag_color;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 2) in vec4 frag_pattern_from;
+layout(location = 3) in vec4 frag_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 3) in vec4 frag_pattern_to;
+layout(location = 4) in vec4 frag_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 4) in lowp float frag_opacity;
+layout(location = 5) in lowp float frag_opacity;
 #endif
 
 layout(location = 0) out vec4 out_color;
@@ -393,7 +415,7 @@ struct FillPatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
-    float pad1;
+    float sdf;
     float pad2;
 };
 
@@ -439,6 +461,12 @@ void main() {
     const float opacity = frag_opacity;
 #endif
 
+#if defined(HAS_UNIFORM_u_color)
+    const vec4 color = props.color;
+#else
+    const vec4 color = frag_color;
+#endif
+
     const vec2 pattern_tl_a = pattern_from.xy;
     const vec2 pattern_br_a = pattern_from.zw;
     const vec2 pattern_tl_b = pattern_to.xy;
@@ -452,7 +480,16 @@ void main() {
     const vec2 pos2 = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
     const vec4 color2 = texture(image0_sampler, pos2);
 
-    out_color = mix(color1, color2, props.fade) * opacity;
+    if (tileProps.sdf > 0.5) {
+        const float sdf_edge = (256.0 - 64.0) / 256.0;
+        const float sdf_gamma_a = max(fwidth(color1.a) * 0.5, 1.0 / 255.0 / 16.0);
+        const float sdf_gamma_b = max(fwidth(color2.a) * 0.5, 1.0 / 255.0 / 16.0);
+        const float sdf_alpha_a = smoothstep(sdf_edge - sdf_gamma_a, sdf_edge + sdf_gamma_a, color1.a);
+        const float sdf_alpha_b = smoothstep(sdf_edge - sdf_gamma_b, sdf_edge + sdf_gamma_b, color2.a);
+        out_color = mix(color * sdf_alpha_a, color * sdf_alpha_b, props.fade) * opacity;
+    } else {
+        out_color = mix(color1, color2, props.fade) * opacity;
+    }
 }
 )";
 };
@@ -461,7 +498,7 @@ template <>
 struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillOutlinePatternShader";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -470,16 +507,20 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Vulka
 
 layout(location = 0) in ivec2 in_position;
 
+#if !defined(HAS_UNIFORM_u_color)
+layout(location = 1) in vec4 in_color;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 1) in mediump uvec4 in_pattern_from;
+layout(location = 2) in mediump uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 2) in mediump uvec4 in_pattern_to;
+layout(location = 3) in mediump uvec4 in_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 3) in vec2 in_opacity;
+layout(location = 4) in vec2 in_opacity;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -495,6 +536,10 @@ struct FillOutlinePatternDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float opacity_t;
+    float color_t;
+    float pad1;
+    float pad2;
+    float pad3;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillOutlinePatternDrawableUBOVector {
@@ -509,7 +554,7 @@ struct FillOutlinePatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
-    float pad1;
+    float sdf;
     float pad2;
 };
 
@@ -530,21 +575,29 @@ layout(location = 0) out vec2 frag_pos_a;
 layout(location = 1) out vec2 frag_pos_b;
 layout(location = 2) out vec2 frag_pos;
 
+#if !defined(HAS_UNIFORM_u_color)
+layout(location = 3) out vec4 frag_color;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 3) out mediump vec4 frag_pattern_from;
+layout(location = 4) out mediump vec4 frag_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 4) out mediump vec4 frag_pattern_to;
+layout(location = 5) out mediump vec4 frag_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 5) out lowp float frag_opacity;
+layout(location = 6) out lowp float frag_opacity;
 #endif
 
 void main() {
     const FillOutlinePatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
     const FillOutlinePatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
+
+#if !defined(HAS_UNIFORM_u_color)
+    frag_color = unpack_mix_color(in_color, drawable.color_t);
+#endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 frag_pattern_from = tileProps.pattern_from;
@@ -591,16 +644,20 @@ layout(location = 0) in vec2 frag_pos_a;
 layout(location = 1) in vec2 frag_pos_b;
 layout(location = 2) in vec2 frag_pos;
 
+#if !defined(HAS_UNIFORM_u_color)
+layout(location = 3) in vec4 frag_color;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 3) in vec4 frag_pattern_from;
+layout(location = 4) in vec4 frag_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 4) in vec4 frag_pattern_to;
+layout(location = 5) in vec4 frag_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 5) in lowp float frag_opacity;
+layout(location = 6) in lowp float frag_opacity;
 #endif
 
 layout(location = 0) out vec4 out_color;
@@ -613,7 +670,7 @@ struct FillOutlinePatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
-    float pad1;
+    float sdf;
     float pad2;
 };
 
@@ -659,6 +716,12 @@ void main() {
     const float opacity = frag_opacity;
 #endif
 
+#if defined(HAS_UNIFORM_u_color)
+    const vec4 color = props.color;
+#else
+    const vec4 color = frag_color;
+#endif
+
     const vec2 pattern_tl_a = pattern_from.xy;
     const vec2 pattern_br_a = pattern_from.zw;
     const vec2 pattern_tl_b = pattern_to.xy;
@@ -675,7 +738,16 @@ void main() {
     const float dist = length(frag_pos - gl_FragCoord.xy);
     const float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
-    out_color = mix(color1, color2, props.fade) * alpha * opacity;
+    if (tileProps.sdf > 0.5) {
+        const float sdf_edge = (256.0 - 64.0) / 256.0;
+        const float sdf_gamma_a = max(fwidth(color1.a) * 0.5, 1.0 / 255.0 / 16.0);
+        const float sdf_gamma_b = max(fwidth(color2.a) * 0.5, 1.0 / 255.0 / 16.0);
+        const float sdf_alpha_a = smoothstep(sdf_edge - sdf_gamma_a, sdf_edge + sdf_gamma_a, color1.a);
+        const float sdf_alpha_b = smoothstep(sdf_edge - sdf_gamma_b, sdf_edge + sdf_gamma_b, color2.a);
+        out_color = mix(color * sdf_alpha_a, color * sdf_alpha_b, props.fade) * alpha * opacity;
+    } else {
+        out_color = mix(color1, color2, props.fade) * alpha * opacity;
+    }
 }
 )";
 };
@@ -701,10 +773,11 @@ layout(push_constant) uniform Constants {
 struct FillOutlineTriangulatedDrawableUBO {
     mat4 matrix;
     float ratio;
-    float pad1,
-    float pad2
+    float pad1;
+    float pad2;
     float pad3;
-    vec4 pad1;
+    vec4 pad4;
+    vec4 pad5;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillOutlineTriangulatedDrawableUBOVector {
