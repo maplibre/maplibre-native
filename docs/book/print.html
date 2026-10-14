@@ -74,10 +74,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-b4cda41d.js";
+            window.path_to_searchindex_js = "searchindex-71d89127.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-24c1b73c.js"></script>
+        <script src="toc-743eb912.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -510,7 +510,7 @@ scripts/aws-device-farm/plot-android-benchmark-results.py
 <p>A file with the benchmark results will be added to the workflow summary, which you can compare with the previous results in the bucket.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="release-maplibre-android"><a class="header" href="#release-maplibre-android">Release MapLibre Android</a></h1>
-<p>We make MapLibre Android releases as a downloadable asset on <a href="https://github.com/maplibre/maplibre-native/releases?q=android&amp;expanded=true">GitHub</a> as well as to <a href="https://central.sonatype.com/artifact/org.maplibre.gl/android-sdk/versions">Maven Central</a>. Specifically we make use of a Sonatype OSSHR repository provided by Maven Central.</p>
+<p>We make MapLibre Android releases as a downloadable asset on <a href="https://github.com/maplibre/maplibre-native/releases?q=android&amp;expanded=true">GitHub</a> as well as to <a href="https://central.sonatype.com/artifact/org.maplibre.gl/android-sdk/versions">Maven Central</a>.</p>
 <p>Also see the current <a href="#release-policy">release policy</a>.</p>
 <h2 id="making-a-release"><a class="header" href="#making-a-release">Making a release</a></h2>
 <p>To make an Android release, do the following:</p>
@@ -532,29 +532,33 @@ scripts/aws-device-farm/plot-android-benchmark-results.py
 </ul>
 </li>
 <li>
-<p>Once the PR is merged, the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml"><code>android-release.yml</code></a> workflow will run automatically to make the release.</p>
+<p>Once the PR is merged, the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml"><code>android-release.yml</code></a> workflow will run automatically to make the release. It builds every published <a href="#build-flavors">build flavor</a> as a release and a debug build, and publishes each with the <code>publish&lt;Variant&gt;Publications</code> Gradle task (e.g. <code>publishOpenglWithPluginApiReleasePublications</code>).</p>
 </li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="rendering-backends-1"><a class="header" href="#rendering-backends-1">Rendering Backends</a></h1>
-<p>The rendering backend is selected at build time through Gradle product flavors.</p>
-<h2 id="available-backends"><a class="header" href="#available-backends">Available backends</a></h2>
+<h1 id="build-flavors"><a class="header" href="#build-flavors">Build Flavors</a></h1>
+<p>The rendering backend is selected at build time through Gradle product flavors. For OpenGL ES and Vulkan, there are also flavors that export the experimental C plugin API.</p>
+<h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
 <div class="table-wrapper">
 <table>
 <thead>
-<tr><th>Flavor</th><th>Backend</th><th>Status</th><th>Maven Central artifact</th><th>Notes</th></tr>
+<tr><th>Flavor</th><th>Rendering backend</th><th>Plugin API</th><th>Status</th><th>Maven Central artifact</th><th>Notes</th></tr>
 </thead>
 <tbody>
-<tr><td><code>opengl</code></td><td>OpenGL ES</td><td>Stable</td><td><code>org.maplibre.gl:android-sdk-opengl</code></td><td>Default, widest device compatibility</td></tr>
-<tr><td><code>vulkan</code></td><td>Vulkan</td><td>Stable</td><td><code>org.maplibre.gl:android-sdk-vulkan</code></td><td>Better performance on modern devices</td></tr>
-<tr><td><code>webgpuDawn</code></td><td>WebGPU (Dawn)</td><td>Experimental</td><td>not published</td><td>Uses Vulkan internally, see <a href="#webgpu-on-android">WebGPU</a></td></tr>
-<tr><td><code>webgpuWgpu</code></td><td>WebGPU (wgpu-native)</td><td>Experimental</td><td>not published</td><td>Uses Vulkan internally, arm64-v8a only, see <a href="#webgpu-on-android">WebGPU</a></td></tr>
-<tr><td><code>multiBackend</code></td><td>OpenGL ES + Vulkan</td><td>Experimental</td><td><code>org.maplibre.gl:android-sdk-vulkan-opengl</code></td><td>Both backends in one AAR, chosen at runtime</td></tr>
+<tr><td><code>opengl</code></td><td>OpenGL ES</td><td>No</td><td>Stable</td><td><code>org.maplibre.gl:android-sdk-opengl</code></td><td>Widest device compatibility</td></tr>
+<tr><td><code>vulkan</code></td><td>Vulkan</td><td>No</td><td>Stable</td><td><code>org.maplibre.gl:android-sdk-vulkan</code>, <code>org.maplibre.gl:android-sdk</code></td><td>Default, better performance on modern devices</td></tr>
+<tr><td><code>multiBackend</code></td><td>OpenGL ES + Vulkan</td><td>No</td><td>Experimental</td><td><code>org.maplibre.gl:android-sdk-vulkan-opengl</code></td><td>Both backends in one AAR, chosen at runtime</td></tr>
+<tr><td><code>openglWithPluginApi</code></td><td>OpenGL ES</td><td>Yes</td><td>Experimental</td><td><code>org.maplibre.gl:android-sdk-opengl-with-plugin-api</code></td><td></td></tr>
+<tr><td><code>vulkanWithPluginApi</code></td><td>Vulkan</td><td>Yes</td><td>Experimental</td><td><code>org.maplibre.gl:android-sdk-vulkan-with-plugin-api</code>, <code>org.maplibre.gl:android-sdk-with-plugin-api</code></td><td></td></tr>
+<tr><td><code>multiBackendWithPluginApi</code></td><td>OpenGL ES + Vulkan</td><td>Yes</td><td>Experimental</td><td><code>org.maplibre.gl:android-sdk-vulkan-opengl-with-plugin-api</code></td><td></td></tr>
+<tr><td><code>webgpuDawn</code></td><td>WebGPU (Dawn)</td><td>No</td><td>Experimental</td><td>not published</td><td>Uses Vulkan internally, see <a href="#webgpu-on-android">WebGPU</a></td></tr>
+<tr><td><code>webgpuWgpu</code></td><td>WebGPU (wgpu-native)</td><td>No</td><td>Experimental</td><td>not published</td><td>Uses Vulkan internally, arm64-v8a only, see <a href="#webgpu-on-android">WebGPU</a></td></tr>
 </tbody>
 </table>
 </div>
-<p><code>org.maplibre.gl:android-sdk</code> is also published and currently maps to the <code>vulkan</code> flavor’s release build. <code>-debug</code> suffixed artifact (e.g. <code>android-sdk-vulkan-debug</code>) is published for each flavor as well.</p>
-<h2 id="building-with-a-specific-backend"><a class="header" href="#building-with-a-specific-backend">Building with a specific backend</a></h2>
+<p>Each published flavor also has a debug artifact, with a <code>-debug</code> postfix (e.g. <code>android-sdk-vulkan-debug</code> or <code>android-sdk-opengl-with-plugin-api-debug</code>).</p>
+<p>The <code>*WithPluginApi</code> flavors are the same as the flavor they are named after, but their native library also exports the C plugin API (<a href="https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h"><code>include/mln/plugin/plugin_api.h</code></a>). The plugin API does not support WebGPU. The <a href="https://github.com/maplibre/maplibre-native/tree/main/plugins/android">n-gon layer demo app</a> in <code>plugins/android</code> uses these flavors.</p>
+<h2 id="building-a-flavor"><a class="header" href="#building-a-flavor">Building a flavor</a></h2>
 <p>The flavor name is part of the Gradle task. For the test app:</p>
 <pre><code class="language-bash">cd platform/android
 
@@ -573,11 +577,12 @@ scripts/aws-device-farm/plot-android-benchmark-results.py
 # Both OpenGL ES and Vulkan, backend chosen at runtime
 ./gradlew :MapLibreAndroidTestApp:installMultiBackendDebug
 </code></pre>
-<p>The same pattern applies to the library module (<code>MapLibreAndroid</code>):</p>
+<p>The same pattern applies to the library module (<code>MapLibreAndroid</code>). Unlike the test app, it also has the <code>*WithPluginApi</code> flavors:</p>
 <pre><code class="language-bash">./gradlew :MapLibreAndroid:assembleVulkanRelease
+./gradlew :MapLibreAndroid:assembleVulkanWithPluginApiRelease
 </code></pre>
 <h2 id="selecting-in-android-studio"><a class="header" href="#selecting-in-android-studio">Selecting in Android Studio</a></h2>
-<p>In Android Studio, use the <strong>Build Variants</strong> panel (View &gt; Tool Windows &gt; Build Variants) to pick the renderer flavor. Each module will show a dropdown combining the flavor and build type, e.g. <code>vulkanDebug</code> or <code>openglRelease</code>.</p>
+<p>In Android Studio, use the <strong>Build Variants</strong> panel (View &gt; Tool Windows &gt; Build Variants) to pick the flavor. Each module will show a dropdown combining the flavor and build type, e.g. <code>vulkanDebug</code> or <code>openglRelease</code>.</p>
 <h2 id="how-it-works"><a class="header" href="#how-it-works">How it works</a></h2>
 <p>Each flavor sets different CMake arguments:</p>
 <ul>
@@ -586,9 +591,10 @@ scripts/aws-device-farm/plot-android-benchmark-results.py
 <li><code>webgpuDawn</code>: <code>-DMLN_WITH_WEBGPU=ON</code>, <code>-DMLN_WEBGPU_IMPL_DAWN=ON</code></li>
 <li><code>webgpuWgpu</code>: <code>-DMLN_WITH_WEBGPU=ON</code>, <code>-DMLN_WEBGPU_IMPL_WGPU=ON</code></li>
 <li><code>multiBackend</code>: <code>-DMLN_ANDROID_MULTI_BACKEND=ON</code></li>
+<li><code>*WithPluginApi</code>: the arguments of the flavor they are named after, and <code>-DMLN_WITH_PLUGINS=ON</code></li>
 </ul>
-<p>For <code>opengl</code>, <code>vulkan</code>, and the WebGPU flavors, only one backend is compiled in and it’s fixed for the lifetime of the app. <code>multiBackend</code> is the exception - it ships both the OpenGL ES and Vulkan native libraries and picks one at runtime.</p>
-<p>Renderer-specific Java code is split between flavor-specific source sets (<code>src/opengl/</code>, <code>src/vulkan/</code>, <code>src/multiBackend/</code>) and shared per-backend code in <code>src/sharedRenderer/opengl/</code> and <code>src/sharedRenderer/vulkan/</code>.</p>
+<p>Most flavors compile in only one backend, which is fixed for the lifetime of the app. <code>multiBackend</code> and <code>multiBackendWithPluginApi</code> are the exception - they ship both the OpenGL ES and Vulkan native libraries and pick one at runtime.</p>
+<p>Renderer-specific Java code is split between flavor-specific source sets (<code>src/opengl/</code>, <code>src/vulkan/</code>, <code>src/multiBackend/</code>) and shared per-backend code in <code>src/sharedRenderer/opengl/</code> and <code>src/sharedRenderer/vulkan/</code>. The <code>*WithPluginApi</code> flavors use the source sets of the flavor they are named after.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="webgpu-on-android"><a class="header" href="#webgpu-on-android">WebGPU on Android</a></h1>
 <p>Two WebGPU implementations are supported: <strong>Dawn</strong> (Google, C++) and <strong>wgpu-native</strong> (Rust). Both use Vulkan internally on Android. The Gradle product flavors are <code>webgpuDawn</code> and <code>webgpuWgpu</code>, sharing the <code>src/vulkan/</code> and <code>src/sharedRenderer/vulkan/</code> Java source sets.</p>
@@ -783,9 +789,9 @@ The heading in the changelog must match <code>## &lt;VERSION&gt;</code> exactly,
 <pre><code>bazel run --//:renderer=metal //platform/ios/app-swift:MapLibreApp
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="rendering-backends-2"><a class="header" href="#rendering-backends-2">Rendering Backends</a></h1>
+<h1 id="rendering-backends-1"><a class="header" href="#rendering-backends-1">Rendering Backends</a></h1>
 <p>MapLibre Native for iOS supports multiple rendering backends. The backend is selected at build time through CMake presets.</p>
-<h2 id="available-backends-1"><a class="header" href="#available-backends-1">Available backends</a></h2>
+<h2 id="available-backends"><a class="header" href="#available-backends">Available backends</a></h2>
 <div class="table-wrapper">
 <table>
 <thead>
@@ -798,7 +804,7 @@ The heading in the changelog must match <code>## &lt;VERSION&gt;</code> exactly,
 </tbody>
 </table>
 </div>
-<h2 id="building-with-a-specific-backend-1"><a class="header" href="#building-with-a-specific-backend-1">Building with a specific backend</a></h2>
+<h2 id="building-with-a-specific-backend"><a class="header" href="#building-with-a-specific-backend">Building with a specific backend</a></h2>
 <p>Each preset generates an Xcode project in its own build directory:</p>
 <pre><code class="language-bash"># Metal (default)
 cmake --preset ios-metal -DDEVELOPMENT_TEAM_ID=YOUR_TEAM_ID
