@@ -14,6 +14,7 @@
 #include <mln/util/size.hpp>
 #include <mln/tile/tile_operation.hpp>
 
+#include <limits>
 #include <numbers>
 
 namespace mln {
@@ -123,6 +124,14 @@ public:
     /// pans. Opt in with Map::setCenterClampedToGround until it is applied during render
     /// setup instead, the way GL JS's recalculateZoomAndCenter is.
     bool centerClampedToGround = false;
+    /// Terrain height under the centre, as the renderer last reported it (NaN until then).
+    double terrainCenterElevation = std::numeric_limits<double>::quiet_NaN();
+    /// A height report arrived while a camera transition was running; the clamp applies it
+    /// once the transition ends instead of cutting the transition short.
+    bool centerAwaitingTerrainAnchor = false;
+    /// Moves the centre altitude to `elevationMeters` keeping lng/lat; false when the change
+    /// is under the sub-metre threshold.
+    bool clampCenterToTerrain(double elevationMeters);
     bool debugAboveGroundLog = false;
 };
 
