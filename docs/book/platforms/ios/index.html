@@ -73,7 +73,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-71d89127.js";
+            window.path_to_searchindex_js = "../../searchindex-6b00fdec.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-743eb912.js"></script>
@@ -264,6 +264,9 @@ xed build-ios/MapLibre\ Native.xcodeproj
   --apple_generate_dsym --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
 </code></pre>
 <p>The dynamic XCFramework includes device and simulator dSYMs in each slice’s <code>dSYMs</code> directory, referenced by <code>DebugSymbolsPath</code> in its root <code>Info.plist</code>. A separate debug-symbol ZIP is no longer published. The static XCFramework retains debug information in its object files for inclusion in the consuming application’s dSYM.</p>
+<h3 id="plugin-api"><a class="header" href="#plugin-api">Plugin API</a></h3>
+<p>A build of MapLibre iOS with the experimental C plugin API enabled is distributed separately as a Swift package at <a href="https://github.com/maplibre/maplibre-ios-with-plugin-api">maplibre/maplibre-ios-with-plugin-api</a>. Its <code>MapLibre</code> product is a drop-in replacement for the standard one: use <code>import MapLibre</code> as usual. The framework additionally exports <code>mln_plugin_register_v1</code>. Plugin packages should depend only on the header-only <code>MapLibrePluginApi</code> product from that package and include <code>&lt;mln/plugin/plugin_api.h&gt;</code>. Use only one MapLibre package per application, as both frameworks define the same module and Objective-C classes.</p>
+<p>To build the plugin-enabled XCFramework, add <code>--//:plugins=true</code> to the command above.</p>
 
                     </main>
 

@@ -73,7 +73,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-71d89127.js";
+            window.path_to_searchindex_js = "../../searchindex-6b00fdec.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-743eb912.js"></script>
@@ -214,6 +214,18 @@
                     <main>
                         <h1 id="release-maplibre-ios"><a class="header" href="#release-maplibre-ios">Release MapLibre iOS</a></h1>
 <p>We make iOS releases to GitHub (a downloadable XCFramework), the <a href="https://swiftpackageindex.com/maplibre/maplibre-gl-native-distribution">Swift Package Index</a> and <a href="https://cocoapods.org/">CocoaPods</a>. Everyone with write access to the repository is able to make releases using the instructions below.</p>
+<p>Each release is published to two Swift package repositories. The <code>ios-release.yml</code> workflow dispatches their <code>release.yml</code> workflows, which point the binary target at an XCFramework of the GitHub release:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Repository</th><th>XCFramework</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="https://github.com/maplibre/maplibre-gl-native-distribution">maplibre/maplibre-gl-native-distribution</a></td><td><code>MapLibre.dynamic.xcframework.zip</code></td></tr>
+<tr><td><a href="https://github.com/maplibre/maplibre-ios-with-plugin-api">maplibre/maplibre-ios-with-plugin-api</a></td><td><code>MapLibre.dynamic.plugins.xcframework.zip</code>, built with <code>--//:plugins=true</code></td></tr>
+</tbody>
+</table>
+</div>
 <p>Also see the current <a href="../../release-policy.html">release policy</a>.</p>
 <h2 id="making-a-release"><a class="header" href="#making-a-release">Making a release</a></h2>
 <ol>
