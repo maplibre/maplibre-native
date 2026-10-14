@@ -21,4 +21,4 @@ To make an Android release, do the following:
 
     - Update `android/VERSION` with the new version.
 
-2. Once the PR is merged, the [`android-release.yml`](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml) workflow will run automatically to make the release. It builds every published [build flavor](./android-build-flavors.md) as a release and a debug build, and publishes each with the `publish<Variant>Publications` Gradle task (e.g. `publishOpenglWithPluginApiReleasePublications`).
+2. Once the PR is merged, the [`android-release.yml`](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml) workflow will run automatically to make the release. It builds every published [build flavor](./android-build-flavors.md) as a release and a debug build, and signs the publications of each with the `publish<Variant>Publications` Gradle task (e.g. `publishOpenglWithPluginApiReleasePublications`). Once all of them are built, it uploads all publications to Maven Central as a single deployment, so Maven Central publishes either all of them or none of them.

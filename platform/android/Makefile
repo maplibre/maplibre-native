@@ -224,13 +224,14 @@ run-android-unit-test-%:
 DEBUG_TAR_FILE_NAME := debug-symbols-$(RENDERER)-$(MLN_ANDROID_APK_SUFFIX).tar.gz
 
 # Builds a release package and .tar.gz with debug symbols of the Android SDK
+# (the native libraries of the variant before they are stripped)
 .PHONY: apackage
 apackage:
 	echo "Building for $(RENDERER)"
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all assemble$(RENDERER)$(BUILDTYPE)
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all :MapLibreAndroid:assemble$(RENDERER)$(BUILDTYPE)
 	mkdir -p build
-	tar -czvf build/$(DEBUG_TAR_FILE_NAME) -C MapLibreAndroid/build/intermediates/library_jni/$(RENDERER)$(BUILDTYPE)/*JniLibsProjectOnly/jni .
+	tar -czvf build/$(DEBUG_TAR_FILE_NAME) -C MapLibreAndroid/build/intermediates/merged_native_libs/$(RENDERER)$(BUILDTYPE)/*/out/lib .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test

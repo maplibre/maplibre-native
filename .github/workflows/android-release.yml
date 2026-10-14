@@ -125,19 +125,48 @@ jobs:
           draft: true
           files: platform/android/build/release-assets/*
 
-      - name: Publish to Maven Central
-        run: ./gradlew ":MapLibreAndroid:publish${FLAVOR^}${BUILDTYPE}Publications"
+      # Only android-publish-maven-central publishes to Maven Central, once all variants are built
+      - name: Sign the Maven publications
+        run: ./gradlew ":MapLibreAndroid:publish${FLAVOR^}${BUILDTYPE}Publications" -PpublicationRepositoryUrl="file://$PWD/build/maven-repository"
         env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+
+      - name: Upload the Maven publications
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: maven-repository-${{ matrix.FLAVOR }}-${{ matrix.BUILDTYPE }}
+          path: platform/android/build/maven-repository
+          if-no-files-found: error
+          compression-level: 0
+
+  android-publish-maven-central:
+    needs:
+      - android-create-release
+      - android-build-and-upload-release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download the Maven publications
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: maven-repository-*
+          path: maven-repository
+          merge-multiple: true
+
+      - name: Publish to Maven Central
+        run: .github/scripts/publish-maven-central.sh maven-repository "$VERSION_TAG"
+        env:
+          VERSION_TAG: ${{ needs.android-create-release.outputs.version_tag }}
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
 
   finilize-release:
     runs-on: ubuntu-latest
     needs:
       - android-create-release
-      - android-build-and-upload-release
+      - android-publish-maven-central
     steps:
       - name: Publish release (remove draft)
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
