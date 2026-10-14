@@ -1,13 +1,19 @@
 # Rendering Engine (OpenGL ES / Vulkan)
 
-MapLibre Android is published as several artifacts on Maven Central, each built with a different rendering backend:
+MapLibre Android is published as several artifacts on Maven Central, each built with a different rendering backend, with or without the experimental [plugin API](../plugin-api.md):
 
-| Artifact | Backend |
-|---|---|
-| `org.maplibre.gl:android-sdk` | Vulkan (the current default) |
-| `org.maplibre.gl:android-sdk-opengl` | OpenGL ES |
-| `org.maplibre.gl:android-sdk-vulkan` | Vulkan |
-| `org.maplibre.gl:android-sdk-vulkan-opengl` | Both, selected at runtime |
+| Artifact | Backend | Plugin API |
+|---|---|---|
+| `org.maplibre.gl:android-sdk` | Vulkan (the current default) | No |
+| `org.maplibre.gl:android-sdk-opengl` | OpenGL ES | No |
+| `org.maplibre.gl:android-sdk-vulkan` | Vulkan | No |
+| `org.maplibre.gl:android-sdk-vulkan-opengl` | Both, selected at runtime | No |
+| `org.maplibre.gl:android-sdk-with-plugin-api` | Vulkan (the current default) | Yes |
+| `org.maplibre.gl:android-sdk-opengl-with-plugin-api` | OpenGL ES | Yes |
+| `org.maplibre.gl:android-sdk-vulkan-with-plugin-api` | Vulkan | Yes |
+| `org.maplibre.gl:android-sdk-vulkan-opengl-with-plugin-api` | Both, selected at runtime | Yes |
+
+Each artifact is also published as a debug build, with a `-debug` postfix, for example `org.maplibre.gl:android-sdk-vulkan-debug` or `org.maplibre.gl:android-sdk-opengl-with-plugin-api-debug`.
 
 Most apps should use the default configuration: `org.maplibre.gl:android-sdk`
 

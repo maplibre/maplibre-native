@@ -25,7 +25,8 @@ extern "C" JNIEXPORT void JNICALL Java_org_maplibre_plugins_ngon_NgonLayer_regis
     auto registerPlugin = reinterpret_cast<mln_plugin_register_function_v1>(dlsym(host, "mln_plugin_register_v1"));
     if (!registerPlugin) {
         dlclose(host);
-        throwRegistrationError(env, "The SDK does not expose plugins. Build with -Pmaplibre.with_plugins=true");
+        throwRegistrationError(env,
+                               "The SDK does not expose plugins. Use a MapLibre Android build with the plugin API");
         return;
     }
 
