@@ -74,7 +74,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-6b00fdec.js";
+            window.path_to_searchindex_js = "searchindex-fc84038b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-743eb912.js"></script>
@@ -532,7 +532,7 @@ scripts/aws-device-farm/plot-android-benchmark-results.py
 </ul>
 </li>
 <li>
-<p>Once the PR is merged, the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml"><code>android-release.yml</code></a> workflow will run automatically to make the release. It builds every published <a href="#build-flavors">build flavor</a> as a release and a debug build, and publishes each with the <code>publish&lt;Variant&gt;Publications</code> Gradle task (e.g. <code>publishOpenglWithPluginApiReleasePublications</code>).</p>
+<p>Once the PR is merged, the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml"><code>android-release.yml</code></a> workflow will run automatically to make the release. It builds every published <a href="#build-flavors">build flavor</a> as a release and a debug build, and signs the publications of each with the <code>publish&lt;Variant&gt;Publications</code> Gradle task (e.g. <code>publishOpenglWithPluginApiReleasePublications</code>). Each build uploads its publications to Maven Central as a deployment, which Maven Central validates but does not publish yet. Only when all builds have succeeded does the workflow publish all deployments. Deployments of a release that is abandoned after a failure can be dropped in the <a href="https://central.sonatype.com/publishing/deployments">Central Portal</a>.</p>
 </li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
