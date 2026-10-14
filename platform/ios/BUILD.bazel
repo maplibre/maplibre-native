@@ -88,6 +88,9 @@ genrule(
     cmd = select({
         "//:metal_renderer": "echo '#define MLN_RENDER_BACKEND_METAL 1' > $@",
         "//conditions:default": "echo '' > $@",
+    }) + select({
+        "//:plugins_enabled": " && echo '#define MLN_WITH_PLUGINS 1' >> $@",
+        "//conditions:default": "",
     }),
     visibility = ["//platform:__pkg__"],
 )
@@ -160,6 +163,12 @@ apple_xcframework(
         ],
         "device": ["arm64"],
     },
+    # With --//:plugins=true, plugins outside this binary call the C entry point.
+    # Pull its object file out of mbgl-core even when nothing in the SDK calls it.
+    linkopts = select({
+        "//:plugins_enabled": ["-u", "_mln_plugin_register_v1"],
+        "//conditions:default": [],
+    }),
     minimum_os_versions = {"ios": "15.5"},
     public_hdrs = public_hdrs,
     umbrella_header = ":umbrella_hdr",
