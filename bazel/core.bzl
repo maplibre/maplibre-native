@@ -547,6 +547,7 @@ MLN_CORE_SOURCE = [
     "src/mln/tile/vector_mvt_tile.hpp",
     "src/mln/tile/vector_mvt_tile_data.cpp",
     "src/mln/tile/vector_mvt_tile_data.hpp",
+    "src/mln/util/accept_header.hpp",
     "src/mln/util/action_journal.cpp",
     "src/mln/util/action_journal_impl.hpp",
     "src/mln/util/action_journal_impl.cpp",
