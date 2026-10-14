@@ -1432,6 +1432,33 @@ Value SymbolLayer::serialize() const {
 }
 
 std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+    // The style spec's `icon-overlap` / `text-overlap` (enum: never, always,
+    // cooperative) supersede the boolean `icon-allow-overlap` /
+    // `text-allow-overlap`. Map them onto the existing behaviour so styles that
+    // use the newer properties are not rejected. See
+    // https://github.com/maplibre/maplibre-native/issues/251
+    if (name == "icon-overlap" || name == "text-overlap") {
+        Error error;
+        bool allowOverlap = false;
+        if (auto stringValue = convert<std::string>(value, error)) {
+            if (*stringValue != "never" && *stringValue != "always" && *stringValue != "cooperative") {
+                return Error{"'" + name + "' must be 'never', 'always' or 'cooperative'"};
+            }
+            allowOverlap = (*stringValue != "never");
+        } else if (auto boolValue = convert<bool>(value, error)) {
+            allowOverlap = *boolValue;
+        } else {
+            return Error{"'" + name + "' must be 'never', 'always' or 'cooperative'"};
+        }
+
+        if (name == "icon-overlap") {
+            setIconAllowOverlap(PropertyValue<bool>(allowOverlap));
+        } else {
+            setTextAllowOverlap(PropertyValue<bool>(allowOverlap));
+        }
+        return std::nullopt;
+    }
+
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
