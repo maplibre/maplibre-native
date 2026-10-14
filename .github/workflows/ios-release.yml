@@ -26,6 +26,7 @@ jobs:
             artifact: xcframework
             target: MapLibre.dynamic
             plugins: false
+            swift_package: maplibre/maplibre-gl-native-distribution
           - asset: MapLibre.static.xcframework.zip
             artifact: xcframework-static
             target: MapLibre.static
@@ -35,6 +36,7 @@ jobs:
             artifact: xcframework-plugins
             target: MapLibre.dynamic
             plugins: true
+            swift_package: maplibre/maplibre-ios-with-plugin-api
           - asset: MapLibre.static.plugins.xcframework.zip
             artifact: xcframework-static-plugins
             target: MapLibre.static
@@ -43,6 +45,7 @@ jobs:
       ASSET: ${{ matrix.asset }}
       TARGET: ${{ matrix.target }}
       PLUGINS: ${{ matrix.plugins }}
+      SWIFT_PACKAGE: ${{ matrix.swift_package }}
     defaults:
       run:
         working-directory: platform/ios
@@ -69,6 +72,8 @@ jobs:
           cp "$xcframework" "$ASSET"
           chmod +w "$ASSET"
           zip "$ASSET" LICENSE.md  # add license to zip
+          # Tells the release job which Swift package repository distributes this XCFramework.
+          if [[ -n $SWIFT_PACKAGE ]]; then echo "$SWIFT_PACKAGE" > "$ASSET.swift-package"; fi
         working-directory: .
 
       - name: Upload artifact
@@ -76,7 +81,7 @@ jobs:
         with:
           name: ${{ matrix.artifact }}
           path: |
-            ${{ matrix.asset }}
+            ${{ matrix.asset }}*
 
   ios-release:
     permissions:
@@ -182,21 +187,21 @@ jobs:
           name: ios-v${{ env.version }}
           draft: false
 
-      # Each repository is a Swift package with a release.yml workflow that points
-      # its binary target at an XCFramework of this release. The plugin-enabled
-      # XCFramework is only distributed as a Swift package, not on CocoaPods.
+      # Each repository named by swift_package in the ios-build matrix is a Swift package with
+      # a release.yml workflow that points its binary target at an XCFramework of this release.
       - name: Release (Swift Package Index)
+        working-directory: .
         env:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
-          release_swift_package() {
-            gh workflow run release.yml --repo "maplibre/$1" --ref main \
+          shopt -s failglob
+          for file in xcframework*/*.swift-package; do
+            asset="$(basename "$file" .swift-package)"
+            gh workflow run release.yml --repo "$(< "$file")" --ref main \
               --field version="$version" \
               --field changelog_url="https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-$version.md" \
-              --field download_url="https://github.com/maplibre/maplibre-native/releases/download/ios-v$version/$2"
-          }
-          release_swift_package maplibre-gl-native-distribution MapLibre.dynamic.xcframework.zip
-          release_swift_package maplibre-ios-with-plugin-api MapLibre.dynamic.plugins.xcframework.zip
+              --field download_url="https://github.com/maplibre/maplibre-native/releases/download/ios-v$version/$asset"
+          done
 
       - name: Write release notifications
         if: github.repository_owner == 'maplibre'
