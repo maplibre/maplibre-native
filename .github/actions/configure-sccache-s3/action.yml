@@ -27,6 +27,8 @@ runs:
         aws-region: us-west-2
         role-to-assume: ${{ fromJSON(inputs.vars).OIDC_AWS_ROLE_TO_ASSUME }}
         role-session-name: ${{ github.run_id }}
+        # Builds can outlast the default 1 hour session; 4 hours is the role's maximum.
+        role-duration-seconds: 14400
 
     - name: Configure sccache
       shell: bash

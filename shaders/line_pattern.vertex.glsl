@@ -35,6 +35,10 @@ layout (std140) uniform LinePatternDrawableUBO {
     lowp float u_width_t;
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;
+    lowp float u_floorwidth_t;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+    lowp float drawable_pad3;
 };
 
 layout (std140) uniform LinePatternTilePropsUBO {
@@ -62,6 +66,7 @@ out vec2 v_normal;
 out vec2 v_width2;
 out float v_linesofar;
 out float v_gamma_scale;
+out float v_floorwidth;
 
 #pragma mapbox: define lowp float blur
 #pragma mapbox: define lowp float opacity
@@ -79,6 +84,12 @@ void main() {
     #pragma mapbox: initialize mediump float width
     #pragma mapbox: initialize mediump vec4 pattern_from
     #pragma mapbox: initialize mediump vec4 pattern_to
+
+#ifndef HAS_UNIFORM_u_width
+    v_floorwidth = unpack_mix_vec2(a_width, u_floorwidth_t);
+#else
+    v_floorwidth = u_floorwidth;
+#endif
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.

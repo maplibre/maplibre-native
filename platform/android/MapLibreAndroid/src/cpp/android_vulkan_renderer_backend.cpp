@@ -57,7 +57,11 @@ AndroidVulkanRendererBackend::~AndroidVulkanRendererBackend() = default;
 
 bool AndroidVulkanRendererBackend::createSurface(ANativeWindow* window_) {
     window = window_;
-    setResource(std::make_unique<AndroidVulkanRenderableResource>(*this));
+
+    auto& resource = getResource<AndroidVulkanRenderableResource>();
+    if (resource.getPlatformSurface()) {
+        resource.destroyResources();
+    }
 
     initSurface();
     initSwapchain();
@@ -67,7 +71,7 @@ bool AndroidVulkanRendererBackend::createSurface(ANativeWindow* window_) {
 
 void AndroidVulkanRendererBackend::destroySurface() {
     window = nullptr;
-    setResource(nullptr);
+    getResource<AndroidVulkanRenderableResource>().destroyResources();
 }
 
 std::vector<const char*> AndroidVulkanRendererBackend::getInstanceExtensions() {
@@ -96,7 +100,7 @@ void AndroidVulkanRendererBackend::enableFramebufferRead(bool) {
 PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
     MBGL_VERIFY_THREAD(tid);
 
-    if (!hasResource()) {
+    if (!hasResource() || !getResource<AndroidVulkanRenderableResource>().getPlatformSurface()) {
         return PremultipliedImage();
     }
 

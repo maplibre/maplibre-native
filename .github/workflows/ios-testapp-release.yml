@@ -49,7 +49,7 @@ jobs:
           test -f bazel-bin/platform/ios/app-swift/MapLibreApp.ipa
 
       - name: Upload app to TestFlight
-        uses: apple-actions/upload-testflight-build@1fc69ca369a60b813eaaa2d936eda22794b52e17 # v5.4.0
+        uses: apple-actions/upload-testflight-build@14df18fee5a4ff3b76971dd382f033494a0194e9 # v5.5.0
         with:
           app-path: bazel-bin/platform/ios/app-swift/MapLibreApp.ipa
           issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}

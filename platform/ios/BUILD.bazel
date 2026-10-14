@@ -1,4 +1,3 @@
-load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load("@rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
 load("@rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
@@ -13,7 +12,6 @@ load(
 load(
     "//platform/ios/bazel:files.bzl",
     "MLN_IOS_PRIVATE_HEADERS",
-    "MLN_IOS_PUBLIC_HEADERS",
     "MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE",
     "MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE",
     "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
@@ -30,12 +28,6 @@ configure_device_profiles()
 filegroup(
     name = "ios_sdk_hdrs",
     srcs = MLN_IOS_SDK_HEADERS,
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "ios_public_hdrs",
-    srcs = MLN_IOS_PUBLIC_HEADERS,
     visibility = ["//visibility:public"],
 )
 
@@ -92,7 +84,7 @@ info_plist(
 
 genrule(
     name = "mln_defines",
-    outs = ["MLNDefines.h"],
+    outs = ["include/MLNDefines.h"],
     cmd = select({
         "//:metal_renderer": "echo '#define MLN_RENDER_BACKEND_METAL 1' > $@",
         "//conditions:default": "echo '' > $@",
@@ -100,15 +92,26 @@ genrule(
         "//:plugins_enabled": " && echo '#define MLN_WITH_PLUGINS 1' >> $@",
         "//conditions:default": "",
     }),
+    visibility = ["//platform:__pkg__"],
 )
 
 public_hdrs = [
     ":mln_defines",
-    ":ios_public_hdrs",
     ":ios_sdk_hdrs",
     "//platform/darwin:darwin_objc_hdrs",
     "//platform/darwin:generated_style_public_hdrs",
 ]
+
+# MapLibre.h umbrella header. Shipped in the XCFrameworks and used by internal
+# targets such as the example apps and tests. MLNDefines.h comes first so that
+# the other headers see the renderer defines.
+genrule(
+    name = "umbrella_hdr",
+    srcs = public_hdrs,
+    outs = ["include/MapLibre.h"],
+    cmd = "for f in $(SRCS); do echo \"#import \\\"$$(basename $$f)\\\"\"; done > $@",
+    visibility = ["//platform:__pkg__"],
+)
 
 apple_static_xcframework(
     name = "MapLibre.static",
@@ -124,6 +127,7 @@ apple_static_xcframework(
     },
     minimum_os_versions = {"ios": "15.5"},
     public_hdrs = public_hdrs,
+    umbrella_header = ":umbrella_hdr",
     version = ":maplibre_ios_version",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
@@ -140,47 +144,38 @@ apple_bundle_version(
     short_version_string = "{version}",
 )
 
-[
-    apple_xcframework(
-        name = name,
-        bundle_id = bundle_id,
-        bundle_name = bundle_name,
-        data = glob([
-            "resources/*.lproj/**",
-            "resources/*.xcassets/**",
-        ]) + [
-            "PrivacyInfo.xcprivacy",
-            "resources/metal-cpp-ignores.txt",
+apple_xcframework(
+    name = "MapLibre.dynamic",
+    bundle_id = "com.maplibre.mapbox",
+    bundle_name = "MapLibre",
+    data = glob([
+        "resources/*.lproj/**",
+        "resources/*.xcassets/**",
+    ]) + [
+        "PrivacyInfo.xcprivacy",
+        "resources/metal-cpp-ignores.txt",
+    ],
+    infoplists = ["info_plist"],
+    ios = {
+        "simulator": [
+            "x86_64",
+            "arm64",
         ],
-        infoplists = ["info_plist"],
-        ios = {
-            "simulator": [
-                "x86_64",
-                "arm64",
-            ],
-            "device": ["arm64"],
-        },
-        # The C entry point is called by plugins outside this binary. Pull its
-        # object file out of mbgl-core even when nothing in the SDK calls it.
-        linkopts = select({
-            "//:plugins_enabled": ["-u", "_mln_plugin_register_v1"],
-            "//conditions:default": [],
-        }),
-        minimum_os_versions = {"ios": "15.5"},
-        public_hdrs = public_hdrs + select({
-            "//:plugins_enabled": ["//:include/mln/plugin/plugin_api.h"],
-            "//conditions:default": [],
-        }),
-        version = ":maplibre_ios_version",
-        visibility = ["//visibility:public"],
-        deps = ["//platform:ios-sdk-dynamic"],
-    )
-    for name, bundle_name, bundle_id in [
-        ("MapLibre.dynamic", "MapLibre", "com.maplibre.mapbox"),
-        # Same framework and module name, so apps keep `import MapLibre`.
-        ("MapLibre.dynamic.plugins", "MapLibre", "com.maplibre.mapbox"),
-    ]
-]
+        "device": ["arm64"],
+    },
+    # With --//:plugins=true, plugins outside this binary call the C entry point.
+    # Pull its object file out of mbgl-core even when nothing in the SDK calls it.
+    linkopts = select({
+        "//:plugins_enabled": ["-u", "_mln_plugin_register_v1"],
+        "//conditions:default": [],
+    }),
+    minimum_os_versions = {"ios": "15.5"},
+    public_hdrs = public_hdrs,
+    umbrella_header = ":umbrella_hdr",
+    version = ":maplibre_ios_version",
+    visibility = ["//visibility:public"],
+    deps = ["//platform:ios-sdk-dynamic"],
+)
 
 ios_framework(
     name = "MapLibre.link",
@@ -367,23 +362,10 @@ sh_binary(
 )
 
 exports_files(
-    MLN_IOS_PUBLIC_HEADERS +
     MLN_IOS_PRIVATE_HEADERS +
     MLN_IOS_PUBLIC_OBJCPP_SOURCE +
     MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE +
     MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE +
     MLN_IOS_PUBLIC_OBJC_SOURCE +
     MLN_PUBLIC_IOS_APP_SOURCE,
-)
-
-js_library(
-    name = "symbols-to-check",
-    srcs = [
-        ":ios_objc_srcs",
-        ":ios_objcpp_srcs",
-        ":ios_private_hdrs",
-        ":ios_public_hdrs",
-        ":ios_sdk_hdrs",
-    ],
-    visibility = ["//platform:__pkg__"],
 )

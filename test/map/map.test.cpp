@@ -10,6 +10,7 @@
 #include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/map/map_projection.hpp>
 #include <mln/math/log2.hpp>
@@ -20,6 +21,8 @@
 #include <mln/storage/network_status.hpp>
 #include <mln/storage/online_file_source.hpp>
 #include <mln/storage/resource_options.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/layer.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/image_impl.hpp>
 #include <mln/style/image.hpp>
@@ -27,6 +30,7 @@
 #include <mln/style/layers/background_layer.hpp>
 #include <mln/style/layers/fill_layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
 #include <mln/style/layers/raster_layer.hpp>
 #include <mln/style/layers/symbol_layer.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
@@ -43,6 +47,7 @@
 #include <mln/util/io.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/run_loop.hpp>
+#include <mln/util/timer.hpp>
 
 #include <atomic>
 
@@ -1022,6 +1027,23 @@ TEST(Map, Issue15216) {
     test.map.getStyle().addLayer(std::make_unique<RasterLayer>("RasterLayer", "ImageSource"));
     // Passes, if there is no assertion hit.
     test.runLoop.runOnce();
+}
+
+// https://github.com/maplibre/maplibre-native/pull/4753
+// An image source wholly beyond the latitudes Web Mercator can show has an
+// empty tile cover, which used to crash RenderImageSource::update.
+TEST(Map, ImageSourceBeyondMercatorLatitudes) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    auto source = std::make_unique<ImageSource>("image",
+                                                std::array<LatLng, 4>{{{88, -10}, {88, 10}, {86, 10}, {86, -10}}});
+    source->setImage(PremultipliedImage({4, 4}));
+    test.map.getStyle().addSource(std::move(source));
+    test.map.getStyle().addLayer(std::make_unique<RasterLayer>("image", "image"));
+
+    // Passes, if rendering a frame doesn't crash.
+    test.frontend.renderFrame();
 }
 
 // https://github.com/mapbox/mapbox-gl-native/issues/15342
@@ -2198,6 +2220,103 @@ TEST(Map, FeatureStateChangesRenderedStyle) {
         EXPECT_LT(centerChannel(result.image, 0), 40) << "red channel (removed)";
         EXPECT_GT(centerChannel(result.image, 2), 200) << "blue channel (removed)";
     }
+}
+
+static std::size_t countGreenPixels(const PremultipliedImage& image) {
+    std::size_t greenPixels = 0;
+    for (std::size_t i = 0; i < image.bytes(); i += image.channels) {
+        if (image.data[i] < 40 && image.data[i + 1] > 200 && image.data[i + 2] < 40) {
+            ++greenPixels;
+        }
+    }
+    return greenPixels;
+}
+
+TEST(Map, LocationIndicatorAccuracyColorsTransition) {
+    if (!LayerManager::get()->hasLayerType("location-indicator")) {
+        GTEST_SKIP() << "location-indicator layer is not registered on this platform";
+    }
+
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {},
+      "layers": [{
+        "id": "location",
+        "type": "location-indicator",
+        "paint": {
+          "location": [0, 0, 0],
+          "accuracy-radius": 100,
+          "accuracy-radius-color": "blue",
+          "accuracy-radius-border-color": "white"
+        }
+      }]
+    })STYLE");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(16));
+
+    const auto renderUntilIdle = [&] {
+        bool idle = false;
+        util::Timer timeout;
+        timeout.start(std::chrono::seconds(5), Duration::zero(), [&] { test.runLoop.stop(); });
+        test.observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus status) {
+            if (status.mode == MapObserver::RenderMode::Full && !status.needsRepaint) {
+                idle = true;
+                test.runLoop.stop();
+            }
+        };
+        test.runLoop.run();
+        test.observer.didFinishRenderingFrameCallback = {};
+        return idle;
+    };
+    const auto centerChannel = [](const PremultipliedImage& image, std::size_t channel) {
+        return image.data[(image.size.height / 2 * image.size.width + image.size.width / 2) * 4 + channel];
+    };
+
+    const auto readImage = [&] {
+        gfx::BackendScope scope{*test.frontend.getBackend()};
+        return test.frontend.readStillImage();
+    };
+
+    ASSERT_TRUE(renderUntilIdle());
+    const auto initial = readImage();
+    ASSERT_GT(centerChannel(initial, 2), 240);
+    ASSERT_LT(centerChannel(initial, 0), 10);
+
+    auto* layer = static_cast<LocationIndicatorLayer*>(test.map.getStyle().getLayer("location"));
+    ASSERT_NE(layer, nullptr);
+    TransitionOptions transition;
+    transition.duration = std::chrono::milliseconds(100);
+    layer->setAccuracyRadiusColorTransition(transition);
+    layer->setAccuracyRadiusBorderColorTransition(transition);
+    layer->setAccuracyRadiusColor(Color::red());
+    layer->setAccuracyRadiusBorderColor(Color{0, 1, 0, 1});
+
+    ASSERT_TRUE(renderUntilIdle());
+    const auto result = readImage();
+    EXPECT_GT(centerChannel(result, 0), 240);
+    EXPECT_LT(centerChannel(result, 2), 10);
+    EXPECT_GT(countGreenPixels(result), 0u) << "The accuracy border should finish transitioning to green";
+}
+
+TEST(Map, RenderingStatisticsTrackDrawsAcrossFrames) {
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version":8,"sources":{"points":{"type":"geojson","data":{
+        "type":"Point","coordinates":[0,0]}}},"layers":[{"id":"circle","type":"circle","source":"points"}]})");
+    const auto first = test.frontend.render(test.map).stats;
+    ASSERT_GT(first.numFrames, 0);
+    ASSERT_GT(first.numDrawCalls, 0);
+    EXPECT_GE(first.totalDrawCalls, first.numDrawCalls);
+
+    const auto second = test.frontend.render(test.map).stats;
+    EXPECT_EQ(first.numFrames + 1, second.numFrames);
+    EXPECT_GT(second.numDrawCalls, 0);
+    EXPECT_EQ(first.totalDrawCalls + second.numDrawCalls, second.totalDrawCalls);
+
+    test.map.getStyle().getLayer("circle")->setVisibility(VisibilityType::None);
+    const auto empty = test.frontend.render(test.map).stats;
+    EXPECT_EQ(second.numFrames + 1, empty.numFrames);
+    EXPECT_EQ(0, empty.numDrawCalls);
+    EXPECT_EQ(second.totalDrawCalls, empty.totalDrawCalls);
 }
 
 TEST(Map, LocationIndicatorWithoutImages) {

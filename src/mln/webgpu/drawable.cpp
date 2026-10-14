@@ -975,6 +975,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                                              baseInstance);                                // firstInstance
 
             context.renderingStats().numDrawCalls++;
+            context.renderingStats().totalDrawCalls++;
         }
     }
 }
