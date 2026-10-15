@@ -66,6 +66,27 @@ const CollisionGroups::CollisionGroup& CollisionGroups::get(const std::string& s
 
 using namespace style;
 
+namespace {
+Point<float> translationPoint(const UnwrappedTileID& tileID,
+                              const SymbolTranslate& translate,
+                              const TransformState& state,
+                              bool screenSpace) {
+    // A screen-space symbol takes its translate in the screen matrix.
+    if (screenSpace) {
+        return {};
+    }
+    const auto translation = RenderTile::tileUnitTranslation(tileID, translate.offset, translate.anchor, state);
+    return {translation[0], translation[1]};
+}
+
+/// `m` moved by a tile-unit translation, as `RenderTile::translatedMatrix` moves the matrix symbols are drawn with.
+mat4 translateMatrix(const mat4& m, const Point<float> translation) {
+    mat4 translated;
+    matrix::translate(translated, m, translation.x, translation.y, 0);
+    return translated;
+}
+} // namespace
+
 // PlacementContext implementation
 class PlacementContext {
     std::reference_wrapper<const SymbolBucket> bucket;
@@ -78,6 +99,8 @@ public:
                      const TransformState& state_,
                      float placementZoom,
                      CollisionGroups::CollisionGroup collisionGroup_,
+                     const SymbolTranslate& textTranslate,
+                     const SymbolTranslate& iconTranslate,
                      std::optional<CollisionBoundaries> avoidEdges_ = std::nullopt)
         : bucket(bucket_),
           renderTile(renderTile_),
@@ -85,6 +108,10 @@ public:
           pixelsToTileUnits(renderTile_.id.pixelsToTileUnits(1, placementZoom)),
           scale(static_cast<float>(std::pow(2, placementZoom - getOverscaledID().overscaledZ))),
           pixelRatio(static_cast<float>(util::tileSize_D * getOverscaledID().overscaleFactor() / util::EXTENT)),
+          textTranslation(
+              translationPoint(renderTile_.id, textTranslate, state_, bucket_.layout->get<style::SymbolScreenSpace>())),
+          iconTranslation(
+              translationPoint(renderTile_.id, iconTranslate, state_, bucket_.layout->get<style::SymbolScreenSpace>())),
           collisionGroup(std::move(collisionGroup_)),
           partiallyEvaluatedTextSize(bucket_.textSizeBinder->evaluateForZoom(placementZoom)),
           partiallyEvaluatedIconSize(bucket_.iconSizeBinder->evaluateForZoom(placementZoom)),
@@ -101,6 +128,9 @@ public:
     float pixelsToTileUnits;
     float scale;
     float pixelRatio;
+    // Labels collide where `*-translate` puts them, as GL JS passes `translation` to its collision index.
+    Point<float> textTranslation;
+    Point<float> iconTranslation;
 
     bool rotateTextWithMap = getLayout().get<TextRotationAlignment>() == AlignmentType::Map;
     bool pitchTextWithMap = getLayout().get<TextPitchAlignment>() == AlignmentType::Map;
@@ -108,13 +138,20 @@ public:
     bool pitchIconWithMap = getLayout().get<IconPitchAlignment>() == AlignmentType::Map;
     SymbolPlacementType placementType = getLayout().get<SymbolPlacement>();
 
-    mat4 textLabelPlaneMatrix = getLabelPlaneMatrix(
-        renderTile.get().matrix, pitchTextWithMap, rotateTextWithMap, state, pixelsToTileUnits);
-    mat4 iconLabelPlaneMatrix =
-        (rotateTextWithMap == rotateIconWithMap && pitchTextWithMap == pitchIconWithMap)
-            ? textLabelPlaneMatrix
-            : getLabelPlaneMatrix(
-                  renderTile.get().matrix, pitchIconWithMap, rotateIconWithMap, state, pixelsToTileUnits);
+    // Line labels are walked in the label plane of the tile matrix they are drawn with.
+    mat4 textLabelPlaneMatrix = getLabelPlaneMatrix(translateMatrix(renderTile.get().matrix, textTranslation),
+                                                    pitchTextWithMap,
+                                                    rotateTextWithMap,
+                                                    state,
+                                                    pixelsToTileUnits);
+    mat4 iconLabelPlaneMatrix = (rotateTextWithMap == rotateIconWithMap && pitchTextWithMap == pitchIconWithMap &&
+                                 textTranslation == iconTranslation)
+                                    ? textLabelPlaneMatrix
+                                    : getLabelPlaneMatrix(translateMatrix(renderTile.get().matrix, iconTranslation),
+                                                          pitchIconWithMap,
+                                                          rotateIconWithMap,
+                                                          state,
+                                                          pixelsToTileUnits);
 
     CollisionGroups::CollisionGroup collisionGroup;
     ZoomEvaluatedSize partiallyEvaluatedTextSize;
@@ -247,6 +284,8 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
                          collisionIndex.getTransformState(),
                          placementZoom,
                          collisionGroups.get(params.sourceId),
+                         params.textTranslate,
+                         params.iconTranslate,
                          getAvoidEdges(symbolBucket, renderTile.matrix)};
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
         if (!symbol.check(SYM_GUARD_LOC)) continue;
@@ -335,6 +374,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                 textBoxes.clear();
                 auto placedFeature = collisionIndex.placeFeature(collisionFeature,
                                                                  std::nullopt,
+                                                                 ctx.textTranslation,
                                                                  posMatrix,
                                                                  ctx.textLabelPlaneMatrix,
                                                                  ctx.pixelRatio,
@@ -432,6 +472,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
 
                     placedFeature = collisionIndex.placeFeature(textCollisionFeature,
                                                                 shift,
+                                                                ctx.textTranslation,
                                                                 posMatrix,
                                                                 mat4(),
                                                                 ctx.pixelRatio,
@@ -450,6 +491,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                         auto placedIconFeature = collisionIndex.placeFeature(
                             iconCollisionFeature,
                             shift,
+                            ctx.iconTranslation,
                             posMatrix,
                             ctx.iconLabelPlaneMatrix,
                             ctx.pixelRatio,
@@ -550,6 +592,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         const auto& placeIconFeature = [&](const CollisionFeature& collisionFeature) {
             return collisionIndex.placeFeature(collisionFeature,
                                                iconShift,
+                                               ctx.iconTranslation,
                                                posMatrix,
                                                ctx.iconLabelPlaneMatrix,
                                                ctx.pixelRatio,
@@ -765,8 +808,14 @@ void Placement::updateLayerBuckets(const RenderLayer& layer, const TransformStat
     std::set<uint32_t> seenCrossTileIDs;
     for (const auto& item : layer.getPlacementData()) {
         if (!item.sortKeyRange || item.sortKeyRange->isFirstRange()) {
-            item.bucket.get().updateVertices(*this, updateOpacities, state, item.tile, seenCrossTileIDs);
+            item.bucket.get().updateVertices(*this, updateOpacities, state, item, seenCrossTileIDs);
         }
+    }
+}
+
+void Placement::updateFollowerBuckets(const RenderLayer& layer, const TransformState& state) const {
+    for (const auto& item : layer.getFollowerData()) {
+        static_cast<SymbolBucket&>(item.bucket.get()).updateLayerVertices(*this, state, item, layer.getID());
     }
 }
 
@@ -785,10 +834,13 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
 }
 } // namespace
 
-bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
-                                                 const TransformState& state,
-                                                 const RenderTile& tile) const {
+bool Placement::updateBucketDynamicAttributeData(
+    SymbolBucket& bucket,
+    const TransformState& state,
+    const BucketPlacementData& data,
+    const std::optional<std::reference_wrapper<const std::string>> layerID) const {
     using namespace style;
+    const RenderTile& tile = data.tile;
     const auto& layout = *bucket.layout;
     const bool alongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point;
     const bool hasVariableAnchors = bucket.hasVariableTextAnchors() && bucket.hasTextData();
@@ -796,13 +848,35 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                    (bucket.allowVerticalPlacement || hasVariableAnchors) &&
                                    (bucket.hasIconData() || bucket.hasSdfIconData());
     bool result = false;
+    const bool screenSpace = layout.get<SymbolScreenSpace>();
+    const Point<float> textTranslation = translationPoint(tile.id, data.textTranslate, state, screenSpace);
+    const Point<float> iconTranslation = translationPoint(tile.id, data.iconTranslate, state, screenSpace);
+    if (!layerID) {
+        bucket.dynamicTextTranslation = textTranslation;
+        bucket.dynamicIconTranslation = iconTranslation;
+    } else if ((!alongLine && !hasVariableAnchors) ||
+               (!bucket.hasLayerDynamicAttributeData(layerID->get()) &&
+                textTranslation == bucket.dynamicTextTranslation && iconTranslation == bucket.dynamicIconTranslation)) {
+        return false;
+    }
+    // GL JS rewrites a shared bucket's positions for each layer it draws; one at another translation keeps its own.
+    const auto positions = [&](SymbolBucket::Buffer& buffer) -> SymbolBucket::DynamicAttributeVector& {
+        if (!layerID) {
+            return buffer.dynamicAttributeData();
+        }
+        auto& layerData = buffer.layerDynamicAttributeData[layerID->get()];
+        if (!layerData) {
+            layerData = std::make_shared<SymbolBucket::DynamicAttributeVector>();
+        }
+        return *layerData;
+    };
 
     if (alongLine) {
         if (layout.get<IconRotationAlignment>() == AlignmentType::Map) {
             const bool pitchWithMap = layout.get<style::IconPitchAlignment>() == style::AlignmentType::Map;
             const bool keepUpright = layout.get<style::IconKeepUpright>();
             if (bucket.hasSdfIconData()) {
-                reprojectLineLabels(bucket.sdfIcon.dynamicAttributeData(),
+                reprojectLineLabels(positions(bucket.sdfIcon),
                                     bucket.sdfIcon.placedSymbols,
                                     tile.matrix,
                                     pitchWithMap,
@@ -810,11 +884,12 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     keepUpright,
                                     tile,
                                     *bucket.iconSizeBinder,
-                                    state);
+                                    state,
+                                    iconTranslation);
                 result = true;
             }
             if (bucket.hasIconData()) {
-                reprojectLineLabels(bucket.icon.dynamicAttributeData(),
+                reprojectLineLabels(positions(bucket.icon),
                                     bucket.icon.placedSymbols,
                                     tile.matrix,
                                     pitchWithMap,
@@ -822,7 +897,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     keepUpright,
                                     tile,
                                     *bucket.iconSizeBinder,
-                                    state);
+                                    state,
+                                    iconTranslation);
                 result = true;
             }
         }
@@ -830,7 +906,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         if (bucket.hasTextData() && layout.get<TextRotationAlignment>() == AlignmentType::Map) {
             const bool pitchWithMap = layout.get<style::TextPitchAlignment>() == style::AlignmentType::Map;
             const bool keepUpright = layout.get<style::TextKeepUpright>();
-            reprojectLineLabels(bucket.text.dynamicAttributeData(),
+            reprojectLineLabels(positions(bucket.text),
                                 bucket.text.placedSymbols,
                                 tile.matrix,
                                 pitchWithMap,
@@ -838,12 +914,14 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                 keepUpright,
                                 tile,
                                 *bucket.textSizeBinder,
-                                state);
+                                state,
+                                textTranslation);
             result = true;
         }
     } else if (hasVariableAnchors) {
-        bucket.text.sharedDynamicAttributeData->clear();
-        bucket.hasVariablePlacement = false;
+        auto& textPositions = positions(bucket.text);
+        textPositions.clear();
+        bool hasVariablePlacement = false;
 
         const auto partiallyEvaluatedSize = bucket.textSizeBinder->evaluateForZoom(static_cast<float>(state.getZoom()));
         const auto tileScale = static_cast<float>(
@@ -851,8 +929,10 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         const bool rotateWithMap = layout.get<TextRotationAlignment>() == AlignmentType::Map;
         const bool pitchWithMap = layout.get<TextPitchAlignment>() == AlignmentType::Map;
         const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
+        // Laid out against the tile matrix the label is drawn with, so a label aligned with the viewport carries its
+        // translate; one pitched with the map takes it from the matrix it is drawn with.
         const auto labelPlaneMatrix = getLabelPlaneMatrix(
-            tile.matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+            translateMatrix(tile.matrix, textTranslation), pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         // The shift runs along the label's own axes, as its collision box does.
         Point<float> vecEast{1, 0};
         Point<float> vecSouth{0, 1};
@@ -872,7 +952,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
             if (!symbol.hidden && symbol.crossTileID != 0u && !skipOrientation) {
                 auto it = variableOffsets.find(symbol.crossTileID);
                 if (it != variableOffsets.end()) {
-                    bucket.hasVariablePlacement = true;
+                    hasVariablePlacement = true;
                     variableOffset = it->second;
                 }
             }
@@ -881,7 +961,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 // These symbols are from a justification that is not being
                 // used, or a label that wasn't placed so we don't need to do
                 // the extra math to figure out what incremental shift to apply.
-                hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicAttributeData());
+                hideGlyphs(symbol.glyphOffsets.size(), textPositions);
             } else {
                 const Point<float> tileAnchor = symbol.anchorPoint;
                 const auto projectedAnchor = project(tileAnchor, pitchWithMap ? tile.matrix : labelPlaneMatrix);
@@ -930,26 +1010,29 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 }
 
                 for (std::size_t j = 0; j < symbol.glyphOffsets.size(); ++j) {
-                    addDynamicAttributes(shiftedAnchor, symbol.angle, bucket.text.dynamicAttributeData());
+                    addDynamicAttributes(shiftedAnchor, symbol.angle, textPositions);
                 }
             }
         }
+        if (!layerID) {
+            bucket.hasVariablePlacement = hasVariablePlacement;
+        }
 
-        if (updateTextFitIcon && bucket.hasVariablePlacement) {
+        if (updateTextFitIcon && hasVariablePlacement) {
             auto updateIcon = [&](SymbolBucket::Buffer& iconBuffer) {
-                iconBuffer.sharedDynamicAttributeData->clear();
+                auto& iconPositions = positions(iconBuffer);
+                iconPositions.clear();
                 for (std::size_t i = 0; i < iconBuffer.placedSymbols.size(); ++i) {
                     const PlacedSymbol& placedIcon = iconBuffer.placedSymbols[i];
                     if (placedIcon.hidden || (!placedIcon.placedOrientation && bucket.allowVerticalPlacement)) {
-                        hideGlyphs(placedIcon.glyphOffsets.size(), iconBuffer.dynamicAttributeData());
+                        hideGlyphs(placedIcon.glyphOffsets.size(), iconPositions);
                     } else {
                         const auto& pair = placedTextShifts.find(i);
                         if (pair == placedTextShifts.end()) {
-                            hideGlyphs(placedIcon.glyphOffsets.size(), iconBuffer.dynamicAttributeData());
+                            hideGlyphs(placedIcon.glyphOffsets.size(), iconPositions);
                         } else {
                             for (std::size_t j = 0; j < placedIcon.glyphOffsets.size(); ++j) {
-                                addDynamicAttributes(
-                                    pair->second.second, placedIcon.angle, iconBuffer.dynamicAttributeData());
+                                addDynamicAttributes(pair->second.second, placedIcon.angle, iconPositions);
                             }
                         }
                     }
@@ -1519,6 +1602,8 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
                          collisionIndex.getTransformState(),
                          placementZoom,
                          collisionGroups.get(params.sourceId),
+                         params.textTranslate,
+                         params.iconTranslate,
                          getAvoidEdges(bucket, renderTile.matrix)};
 
     // In this case we first try to place symbols, which intersects the tile

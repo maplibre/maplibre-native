@@ -501,7 +501,8 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
                          bool keepUpright,
                          const RenderTile& tile,
                          const SymbolSizeBinder& sizeBinder,
-                         const TransformState& state) {
+                         const TransformState& state,
+                         const Point<float> translation) {
     const ZoomEvaluatedSize partiallyEvaluatedSize = sizeBinder.evaluateForZoom(static_cast<float>(state.getZoom()));
 
     const std::array<double, 2> clippingBuffer = {
@@ -509,9 +510,14 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
 
     const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
 
-    const mat4 labelPlaneMatrix = getLabelPlaneMatrix(posMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+    // Glyphs are laid out against the tile matrix the label is drawn with, `*-translate` included: a label aligned
+    // with the viewport carries it in its positions, one pitched with the map keeps upright where it is drawn.
+    mat4 drawnMatrix;
+    matrix::translate(drawnMatrix, posMatrix, translation.x, translation.y, 0);
+    const mat4 labelPlaneMatrix = getLabelPlaneMatrix(
+        drawnMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
-    const mat4 glCoordMatrix = getGlCoordMatrix(posMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+    const mat4 glCoordMatrix = getGlCoordMatrix(drawnMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
     dynamicVertexArray.clear();
 

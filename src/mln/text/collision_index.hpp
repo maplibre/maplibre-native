@@ -36,10 +36,12 @@ public:
                                         const mat4& posMatrix,
                                         float textPixelRatio,
                                         const CollisionBoundaries& tileEdges) const;
-    /// `shift` is a variable anchor's offset, unset when the label has none.
+    /// `shift` is a variable anchor's offset, unset when the label has none; `translation` is the layer's
+    /// `*-translate` in tile units.
     std::pair<bool, bool> placeFeature(
         const CollisionFeature& feature,
         std::optional<Point<float>> shift,
+        Point<float> translation,
         const mat4& posMatrix,
         const mat4& labelPlaneMatrix,
         float textPixelRatio,
@@ -77,6 +79,7 @@ private:
 
     std::pair<bool, bool> placeLineFeature(
         const CollisionFeature& feature,
+        Point<float> translation,
         const mat4& posMatrix,
         const mat4& labelPlaneMatrix,
         float textPixelRatio,

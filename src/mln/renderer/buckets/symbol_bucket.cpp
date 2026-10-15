@@ -346,7 +346,7 @@ void SymbolBucket::place(Placement& placement, const BucketPlacementData& data, 
 void SymbolBucket::updateVertices(const Placement& placement,
                                   bool updateOpacities,
                                   const TransformState& state,
-                                  const RenderTile& tile,
+                                  const BucketPlacementData& data,
                                   std::set<uint32_t>& seenIds) {
     if (updateOpacities) {
         placement.updateBucketOpacities(*this, state, seenIds);
@@ -354,7 +354,7 @@ void SymbolBucket::updateVertices(const Placement& placement,
         uploaded = false;
     }
 
-    if (placement.updateBucketDynamicAttributeData(*this, state, tile)) {
+    if (placement.updateBucketDynamicAttributeData(*this, state, data)) {
         dynamicUploaded = false;
         uploaded = false;
     }
@@ -363,6 +363,26 @@ void SymbolBucket::updateVertices(const Placement& placement,
         text.updateModified();
         icon.updateModified();
         sdfIcon.updateModified();
+    }
+}
+
+bool SymbolBucket::hasLayerDynamicAttributeData(const std::string& layerID) const {
+    return text.layerDynamicAttributeData.contains(layerID) || icon.layerDynamicAttributeData.contains(layerID) ||
+           sdfIcon.layerDynamicAttributeData.contains(layerID);
+}
+
+void SymbolBucket::updateLayerVertices(const Placement& placement,
+                                       const TransformState& state,
+                                       const BucketPlacementData& data,
+                                       const std::string& layerID) {
+    if (!placement.updateBucketDynamicAttributeData(*this, state, data, layerID)) {
+        return;
+    }
+    for (Buffer* buffer : {&text, &icon, &sdfIcon}) {
+        if (const auto it = buffer->layerDynamicAttributeData.find(layerID);
+            it != buffer->layerDynamicAttributeData.end()) {
+            it->second->updateModified();
+        }
     }
 }
 

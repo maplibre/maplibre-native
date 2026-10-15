@@ -6,6 +6,7 @@
 #include <mln/renderer/render_pass.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/style/layer_properties.hpp>
+#include <mln/style/types.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/tiny_unordered_map.hpp>
@@ -64,6 +65,12 @@ public:
     size_t end;
 };
 
+/// A symbol layer's `*-translate` in pixels, carried into placement the way GL JS passes `translation`.
+struct SymbolTranslate {
+    std::array<float, 2> offset{0, 0};
+    style::TranslateAnchorType anchor = style::TranslateAnchorType::Map;
+};
+
 class BucketPlacementData {
 public:
     std::reference_wrapper<Bucket> bucket;
@@ -71,6 +78,8 @@ public:
     std::shared_ptr<FeatureIndex> featureIndex;
     std::string sourceId;
     std::optional<SortKeyRange> sortKeyRange;
+    SymbolTranslate textTranslate;
+    SymbolTranslate iconTranslate;
 };
 
 using LayerPlacementData = std::list<BucketPlacementData>;
@@ -147,6 +156,8 @@ public:
     virtual void prepare(const LayerPrepareParameters&);
 
     const LayerPlacementData& getPlacementData() const { return placementData; }
+    /// Buckets that another layer places and this layer draws, at its own translation.
+    const LayerPlacementData& getFollowerData() const { return followerData; }
 
     /// Latest evaluated properties.
     Immutable<style::LayerProperties> evaluatedProperties;
@@ -318,6 +329,7 @@ protected:
     RenderPass passes = RenderPass::None;
 
     LayerPlacementData placementData;
+    LayerPlacementData followerData;
 
     // will need to be overridden to handle their activation.
     LayerGroupBasePtr layerGroup;

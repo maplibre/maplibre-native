@@ -220,6 +220,62 @@ TEST(FeatureTracking, NDCBoundSymbolOffset) {
     });
 }
 
+// A variable-anchor label lays out with its translation already applied; the capture follows it once.
+TEST(FeatureTracking, NDCBoundTranslatedVariableAnchor) {
+    for (const auto alignment : {AlignmentType::Map, AlignmentType::Viewport}) {
+        SCOPED_TRACE(alignment == AlignmentType::Map ? "text-pitch-alignment map" : "text-pitch-alignment viewport");
+        const auto captureAt = [&](const std::array<float, 2>& translate, double& height) {
+            FeatureTrackingTest test(CameraOptions().withZoom(10.0));
+            test.getSymbolLayer()->setVisibility(VisibilityType::Visible);
+            test.getSymbolLayer()->setIconImage({});
+            test.getSymbolLayer()->setTextVariableAnchor({{SymbolAnchorType::Center}});
+            test.getSymbolLayer()->setTextPitchAlignment(alignment);
+            test.getSymbolLayer()->setTextTranslate({translate});
+            test.run({});
+            height = test.frontend.getSize().height;
+            double maxY = 0;
+            EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt0"));
+            test.map.getRenderedFeatures("pt0", std::nullopt, std::nullopt, [&](const auto&, const auto& info) -> bool {
+                maxY = info.ndcBound.maxY;
+                return true;
+            });
+            return maxY;
+        };
+        double height = 0;
+        const double untranslated = captureAt({0, 0}, height);
+        const double translated = captureAt({0, -50}, height);
+        EXPECT_NEAR(2 * 50 / height, translated - untranslated, 1e-3);
+    }
+}
+
+// A layer drawn from a bucket that another layer places is captured at its own translation, where it is drawn.
+TEST(FeatureTracking, NDCBoundSharedBucketAtAnotherTranslation) {
+    for (const auto alignment : {AlignmentType::Map, AlignmentType::Viewport}) {
+        SCOPED_TRACE(alignment == AlignmentType::Map ? "text-pitch-alignment map" : "text-pitch-alignment viewport");
+        FeatureTrackingTest test(CameraOptions().withZoom(10.0));
+        auto* leader = test.getSymbolLayer();
+        leader->setVisibility(VisibilityType::Visible);
+        leader->setIconImage({});
+        leader->setTextVariableAnchor({{SymbolAnchorType::Center}});
+        leader->setTextPitchAlignment(alignment);
+        auto follower = leader->cloneRef("follower");
+        static_cast<SymbolLayer&>(*follower).setTextTranslate({{0, -50}});
+        test.map.getStyle().addLayer(std::move(follower));
+        test.run({});
+        const auto maxY = [&](const std::string& layerID) {
+            double y = 0;
+            EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt0", layerID));
+            test.map.getRenderedFeatures("pt0", layerID, std::nullopt, [&](const auto&, const auto& info) -> bool {
+                y = info.ndcBound.maxY;
+                return true;
+            });
+            return y;
+        };
+        EXPECT_NEAR(
+            2 * 50 / double(test.frontend.getSize().height), maxY("follower") - maxY(test.symbolLayerName), 1e-3);
+    }
+}
+
 TEST(FeatureTracking, NDCBoundCircle) {
     FeatureTrackingTest test(CameraOptions().withZoom(10.0));
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);

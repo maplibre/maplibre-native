@@ -152,6 +152,7 @@ IntersectStatus CollisionIndex::intersectsTileEdges(const CollisionBox& box,
 std::pair<bool, bool> CollisionIndex::placeFeature(
     const CollisionFeature& feature,
     std::optional<Point<float>> shift,
+    const Point<float> translation,
     const mat4& posMatrix,
     const mat4& labelPlaneMatrix,
     const float textPixelRatio,
@@ -167,7 +168,9 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
     std::vector<ProjectedCollisionBox>& projectedBoxes) {
     assert(projectedBoxes.empty());
     if (!feature.alongLine) {
-        const CollisionBox& box = feature.boxes.front();
+        // The box collides where `*-translate` draws the label, as GL JS's `placeCollisionBox` adds `translation`.
+        CollisionBox box = feature.boxes.front();
+        box.anchor += translation;
         // A label pitched or rotated with the map turns and foreshortens with it, so its box is projected.
         const auto collisionBoundaries =
             (pitchWithMap || rotateWithMap)
@@ -183,6 +186,7 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
         return {true, isOffscreen(collisionBoundaries)};
     } else {
         return placeLineFeature(feature,
+                                translation,
                                 posMatrix,
                                 labelPlaneMatrix,
                                 textPixelRatio,
@@ -200,6 +204,7 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
 
 std::pair<bool, bool> CollisionIndex::placeLineFeature(
     const CollisionFeature& feature,
+    const Point<float> translation,
     const mat4& posMatrix,
     const mat4& labelPlaneMatrix,
     const float textPixelRatio,
@@ -272,7 +277,8 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
             continue;
         }
 
-        const auto projectedPoint = projectPoint(posMatrix, circle.anchor);
+        // Circles sit where `*-translate` draws the label; its size still comes from the untranslated anchor above.
+        const auto projectedPoint = projectPoint(posMatrix, circle.anchor + translation);
         const float tileUnitRadius = (circle.x2 - circle.x1) / 2;
         const float radius = tileUnitRadius * tileToViewport;
 
