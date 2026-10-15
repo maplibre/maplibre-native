@@ -1,4 +1,5 @@
 #include <mln/gfx/headless_frontend.hpp>
+#include <mln/gfx/rendering_stats.hpp>
 #include <mln/map/map_observer.hpp>
 #include <mln/map/map.hpp>
 #include <mln/style/expression/dsl.hpp>
@@ -273,6 +274,36 @@ TEST(FeatureTracking, NDCBoundSharedBucketAtAnotherTranslation) {
         };
         EXPECT_NEAR(
             2 * 50 / double(test.frontend.getSize().height), maxY("follower") - maxY(test.symbolLayerName), 1e-3);
+    }
+}
+
+// An icon fitted to text on a variable anchor is drawn at the text's translate, so its bound moves with it.
+TEST(FeatureTracking, NDCBoundFittedIconFollowsTextTranslate) {
+    for (const auto alignment : {AlignmentType::Map, AlignmentType::Viewport}) {
+        SCOPED_TRACE(alignment == AlignmentType::Map ? "pitch-alignment map" : "pitch-alignment viewport");
+        const auto captureAt = [&](const std::array<float, 2>& translate, double& height) {
+            FeatureTrackingTest test(CameraOptions().withZoom(10.0));
+            test.getSymbolLayer()->setVisibility(VisibilityType::Visible);
+            test.getSymbolLayer()->setIconTextFit(IconTextFitType::Both);
+            test.getSymbolLayer()->setTextVariableAnchor({{SymbolAnchorType::Center}});
+            test.getSymbolLayer()->setTextPitchAlignment(alignment);
+            test.getSymbolLayer()->setIconPitchAlignment(alignment);
+            test.getSymbolLayer()->setTextTranslate({translate});
+            test.run({});
+            height = test.frontend.getSize().height;
+            gfx::RenderingStats::NDCBound bound{};
+            EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt0"));
+            test.map.getRenderedFeatures("pt0", std::nullopt, std::nullopt, [&](const auto&, const auto& info) -> bool {
+                bound = info.ndcBound;
+                return true;
+            });
+            return bound;
+        };
+        double height = 0;
+        const auto untranslated = captureAt({0, 0}, height);
+        const auto translated = captureAt({0, -50}, height);
+        EXPECT_NEAR(2 * 50 / height, translated.minY - untranslated.minY, 1e-3);
+        EXPECT_NEAR(2 * 50 / height, translated.maxY - untranslated.maxY, 1e-3);
     }
 }
 

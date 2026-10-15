@@ -124,6 +124,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
 
+        constexpr bool nearClipped = false;
+        constexpr bool inViewportPixelUnits = false;
         mat4 matrix;
 
         if (isScreenSpace) {
@@ -131,8 +133,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
             matrix::translate(matrix, matrix, translate[0], translate[1], 0);
         } else {
-            constexpr bool nearClipped = false;
-            constexpr bool inViewportPixelUnits = false;
             const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
                                        : evaluated.get<style::IconTranslateAnchor>();
             matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
@@ -151,7 +151,20 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                           ? matrix::identity4()
                                           : getLabelPlaneMatrix(
                                                 matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        mat4 coordTileMatrix = matrix;
+        if (!isText && hasVariablePlacement && pitchWithMap && !isScreenSpace) {
+            // An icon fitted to text on a variable anchor is laid out at the text's anchor, so a pitched one is drawn
+            // with the text's translate, as in GL JS.
+            coordTileMatrix = getTileMatrix(tileID,
+                                            parameters,
+                                            evaluated.get<style::TextTranslate>(),
+                                            evaluated.get<style::TextTranslateAnchor>(),
+                                            nearClipped,
+                                            inViewportPixelUnits,
+                                            drawable);
+        }
+        const mat4 glCoordMatrix = getGlCoordMatrix(
+            coordTileMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
         const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
                                       ? static_cast<float>(std::cos(state.getPitch())) * camDist

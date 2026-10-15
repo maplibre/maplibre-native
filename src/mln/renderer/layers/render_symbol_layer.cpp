@@ -617,8 +617,13 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
                 : getLabelPlaneMatrix(iconDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         const mat4 textGLCoordMatrix = getGlCoordMatrix(
             textDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 iconGLCoordMatrix = getGlCoordMatrix(
-            iconDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        // A pitched icon fitted to text on a variable anchor is drawn with the text's translate, as in the tweaker.
+        const bool iconAtTextAnchor = !isText && hasVariablePlacement && pitchWithMap && !isScreenSpace;
+        const mat4 iconGLCoordMatrix = getGlCoordMatrix(iconAtTextAnchor ? textDrawableMatrix : iconDrawableMatrix,
+                                                        pitchWithMap,
+                                                        rotateWithMap,
+                                                        state,
+                                                        pixelsToTileUnits);
 
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 

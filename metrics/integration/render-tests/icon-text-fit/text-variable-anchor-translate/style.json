@@ -1,0 +1,285 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 128,
+      "width": 512
+    }
+  },
+  "pitch": 40,
+  "sprite": "local://sprites/icon-text-fit",
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -120,
+                0.0
+              ]
+            },
+            "properties": {
+              "index": 0
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -40,
+                0.0
+              ]
+            },
+            "properties": {
+              "index": 1
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                40,
+                0.0
+              ]
+            },
+            "properties": {
+              "index": 2
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                120,
+                0.0
+              ]
+            },
+            "properties": {
+              "index": 3
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "circle-untranslated",
+      "type": "circle",
+      "source": "geojson",
+      "paint": {
+        "circle-radius": 4,
+        "circle-color": "blue"
+      }
+    },
+    {
+      "id": "circle-text-translate",
+      "type": "circle",
+      "source": "geojson",
+      "paint": {
+        "circle-radius": 4,
+        "circle-color": "red",
+        "circle-translate": [
+          10,
+          -20
+        ]
+      }
+    },
+    {
+      "id": "symbol_0",
+      "type": "symbol",
+      "source": "geojson",
+      "filter": [
+        "==",
+        "index",
+        0
+      ],
+      "layout": {
+        "text-field": "AAA",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 18,
+        "text-variable-anchor": [
+          "top",
+          "bottom"
+        ],
+        "text-pitch-alignment": "viewport",
+        "text-rotation-alignment": "viewport",
+        "icon-pitch-alignment": "viewport",
+        "icon-rotation-alignment": "viewport",
+        "icon-image": "label",
+        "icon-text-fit": "both",
+        "icon-text-fit-padding": [
+          2,
+          4,
+          2,
+          4
+        ]
+      },
+      "paint": {
+        "text-translate": [
+          10,
+          -20
+        ],
+        "icon-translate": [
+          -15,
+          15
+        ],
+        "icon-opacity": 0.6
+      }
+    },
+    {
+      "id": "symbol_1",
+      "type": "symbol",
+      "source": "geojson",
+      "filter": [
+        "==",
+        "index",
+        1
+      ],
+      "layout": {
+        "text-field": "AAA",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 18,
+        "text-variable-anchor": [
+          "top",
+          "bottom"
+        ],
+        "text-pitch-alignment": "map",
+        "text-rotation-alignment": "viewport",
+        "icon-pitch-alignment": "map",
+        "icon-rotation-alignment": "viewport",
+        "icon-image": "label",
+        "icon-text-fit": "both",
+        "icon-text-fit-padding": [
+          2,
+          4,
+          2,
+          4
+        ]
+      },
+      "paint": {
+        "text-translate": [
+          10,
+          -20
+        ],
+        "icon-translate": [
+          -15,
+          15
+        ],
+        "icon-opacity": 0.6
+      }
+    },
+    {
+      "id": "symbol_2",
+      "type": "symbol",
+      "source": "geojson",
+      "filter": [
+        "==",
+        "index",
+        2
+      ],
+      "layout": {
+        "text-field": "AAA",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 18,
+        "text-variable-anchor": [
+          "top",
+          "bottom"
+        ],
+        "text-pitch-alignment": "viewport",
+        "text-rotation-alignment": "map",
+        "icon-pitch-alignment": "viewport",
+        "icon-rotation-alignment": "map",
+        "icon-image": "label",
+        "icon-text-fit": "both",
+        "icon-text-fit-padding": [
+          2,
+          4,
+          2,
+          4
+        ]
+      },
+      "paint": {
+        "text-translate": [
+          10,
+          -20
+        ],
+        "icon-translate": [
+          -15,
+          15
+        ],
+        "icon-opacity": 0.6
+      }
+    },
+    {
+      "id": "symbol_3",
+      "type": "symbol",
+      "source": "geojson",
+      "filter": [
+        "==",
+        "index",
+        3
+      ],
+      "layout": {
+        "text-field": "AAA",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 18,
+        "text-variable-anchor": [
+          "top",
+          "bottom"
+        ],
+        "text-pitch-alignment": "map",
+        "text-rotation-alignment": "map",
+        "icon-pitch-alignment": "map",
+        "icon-rotation-alignment": "map",
+        "icon-image": "label",
+        "icon-text-fit": "both",
+        "icon-text-fit-padding": [
+          2,
+          4,
+          2,
+          4
+        ]
+      },
+      "paint": {
+        "text-translate": [
+          10,
+          -20
+        ],
+        "icon-translate": [
+          -15,
+          15
+        ],
+        "icon-opacity": 0.6
+      }
+    }
+  ]
+}
