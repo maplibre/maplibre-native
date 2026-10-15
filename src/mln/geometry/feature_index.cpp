@@ -1,6 +1,5 @@
 #include <mln/geometry/feature_index.hpp>
 #include <mln/math/minmax.hpp>
-#include <mln/math/wrap.hpp>
 #include <mln/renderer/layers/render_symbol_layer.hpp>
 #include <mln/renderer/query.hpp>
 #include <mln/renderer/render_layer.hpp>
@@ -26,12 +25,7 @@ mln::LatLng screenCoordinateToLatLng(mln::ScreenCoordinate point,
     return state.screenCoordinateToLatLng(point, wrapMode);
 }
 mln::Point<double> project(const mln::LatLng& coordinate, const mln::TransformState& state) {
-    const double centerLongitude = state.getLatLng().longitude();
-    const mln::LatLng nearestCopy{coordinate.latitude(),
-                                  centerLongitude + mln::util::wrap(coordinate.longitude() - centerLongitude,
-                                                                    -mln::util::LONGITUDE_MAX,
-                                                                    mln::util::LONGITUDE_MAX)};
-    return mln::Projection::project(nearestCopy, state.getScale());
+    return mln::Projection::project(state.latLngNearCenter(coordinate), state.getScale());
 }
 } // namespace
 

@@ -579,26 +579,18 @@ public:
     }
 
 protected:
-    // The copy of a location nearest the transform's center, which bounds can leave past the antimeridian.
-    static LatLng nearestCopy(const LatLng& p, const TransformState& s) {
-        const double centerLongitude = s.getLatLng().longitude();
-        return {
-            p.latitude(),
-            centerLongitude + util::wrap(p.longitude() - centerLongitude, -util::LONGITUDE_MAX, util::LONGITUDE_MAX)};
-    }
-
     static ScreenCoordinate latLngToScreenCoordinate(const LatLng& p, const TransformState& s) {
-        ScreenCoordinate point = s.latLngToScreenCoordinate(nearestCopy(p, s));
+        ScreenCoordinate point = s.latLngToScreenCoordinate(s.latLngNearCenter(p));
         point.y = s.getSize().height - point.y;
         return point;
     }
 
     static Point<double> project(const LatLng& c, const TransformState& s) {
-        return Projection::project(nearestCopy(c, s), s.getScale());
+        return Projection::project(s.latLngNearCenter(c), s.getScale());
     }
 
     static Point<double> unproject(const LatLng& c, const TransformState& s) {
-        return Projection::project(nearestCopy(c, s), s.getScale());
+        return Projection::project(s.latLngNearCenter(c), s.getScale());
     }
 
     void updateRadius(const mln::LocationIndicatorRenderParameters& params) {

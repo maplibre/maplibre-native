@@ -368,6 +368,22 @@ TEST(Map, CameraToLatLngBoundsUnwrappedCrossDateLine) {
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).crossesAntimeridian());
 }
 
+TEST(Map, PixelForLatLngWithTheCenterPastTheAntimeridian) {
+    MapTest<> test;
+    test.map.setSize({512, 512});
+    test.map.setBounds(BoundOptions().withLatLngBounds(LatLngBounds::hull({-10.0, 170.0}, {10.0, 190.0})));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 181.0}).withZoom(4.0));
+    ASSERT_NEAR(181.0, test.map.getCameraOptions().center->longitude(), 1e-9);
+
+    // A degree is 512 * 2^4 / 360 pixels at zoom 4.
+    const double degree = 512.0 * 16.0 / 360.0;
+    const MapProjection projection(test.map);
+    for (const auto& [longitude, x] : {std::pair{179.0, 256.0 - 2 * degree}, std::pair{-179.5, 256.0 - 0.5 * degree}}) {
+        EXPECT_NEAR(x, test.map.pixelForLatLng({0.0, longitude}).x, 1e-6) << longitude;
+        EXPECT_NEAR(x, projection.pixelForLatLng({0.0, longitude}).x, 1e-6) << longitude;
+    }
+}
+
 TEST(Map, LatLngForPixelUnwrapped) {
     MapTest<> test;
     test.map.setSize({2048, 512});
