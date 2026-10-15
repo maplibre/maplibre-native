@@ -179,7 +179,16 @@ void PaintParameters::clearStencil() {
 
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_WEBGPU
-    // WebGPU clears stencil through render pass descriptor
+    auto& webgpuContext = static_cast<webgpu::Context&>(context);
+
+    // WebGPU clears the stencil only when a render pass begins, so we clear it by drawing zero to (0:0,0), as on Metal
+#if !defined(NDEBUG)
+    const auto debugGroup = renderPass->createDebugGroup("tile-clip-mask-clear");
+#endif
+
+    const std::vector<shaders::ClipUBO> tileUBO = {shaders::ClipUBO{
+        .matrix = util::cast<float>(matrixForTile({0, 0, 0})), .stencil_ref = 0, .pad1 = 0, .pad2 = 0, .pad3 = 0}};
+    webgpuContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_OPENGL
     context.clearStencilBuffer(0b00000000);
