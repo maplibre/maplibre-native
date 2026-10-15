@@ -620,12 +620,7 @@ ProjectionMode Map::getProjectionMode() const {
 // MARK: - Projection
 
 ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {
-    // If the center and point longitudes are not in the same side of the
-    // antimeridian, we unwrap the point longitude so it would be seen if
-    // e.g. the next antimeridian side is visible.
-    LatLng unwrappedLatLng = latLng.wrapped();
-    unwrappedLatLng.unwrapForShortestPath(impl->transform.getLatLng());
-    return impl->transform.latLngToScreenCoordinate(unwrappedLatLng);
+    return impl->transform.latLngToScreenCoordinate(impl->transform.getState().latLngNearCenter(latLng));
 }
 
 LatLng Map::latLngForPixel(const ScreenCoordinate& pixel, LatLng::WrapMode wrapMode) const {

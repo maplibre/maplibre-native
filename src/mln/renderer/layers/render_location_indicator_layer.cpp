@@ -595,23 +595,17 @@ public:
 
 protected:
     static ScreenCoordinate latLngToScreenCoordinate(const LatLng& p, const TransformState& s) {
-        LatLng unwrappedLatLng = p.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
-        ScreenCoordinate point = s.latLngToScreenCoordinate(unwrappedLatLng);
+        ScreenCoordinate point = s.latLngToScreenCoordinate(s.latLngNearCenter(p));
         point.y = s.getSize().height - point.y;
         return point;
     }
 
     static Point<double> project(const LatLng& c, const TransformState& s) {
-        LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
-        return Projection::project(unwrappedLatLng, s.getScale());
+        return Projection::project(s.latLngNearCenter(c), s.getScale());
     }
 
     static Point<double> unproject(const LatLng& c, const TransformState& s) {
-        LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
-        return Projection::project(unwrappedLatLng, s.getScale());
+        return Projection::project(s.latLngNearCenter(c), s.getScale());
     }
 
     void updateRadius(const mln::LocationIndicatorRenderParameters& params) {

@@ -569,6 +569,14 @@ LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
     return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * pi), -x / Bc, wrapMode};
 }
 
+LatLng TransformState::latLngNearCenter(const LatLng& latLng) const {
+    const LatLng center = getLatLng();
+    const LatLng wrappedCenter = center.wrapped();
+    LatLng nearest = latLng.wrapped();
+    nearest.unwrapForShortestPath(wrappedCenter);
+    return {nearest.latitude(), nearest.longitude() + center.longitude() - wrappedCenter.longitude()};
+}
+
 double TransformState::getCenterAltitude() const {
     return z * Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
 }

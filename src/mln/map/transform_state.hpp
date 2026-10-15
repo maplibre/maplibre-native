@@ -185,6 +185,8 @@ public:
 
     // Position
     LatLng getLatLng(LatLng::WrapMode = LatLng::Unwrapped) const;
+    /// The world copy of a location nearest the center, which bounds can keep past the antimeridian.
+    LatLng latLngNearCenter(const LatLng&) const;
     double getCenterAltitude() const;
     double pixel_x() const;
     double pixel_y() const;
