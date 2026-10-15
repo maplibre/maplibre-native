@@ -316,12 +316,24 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return atlasTweaker;
         };
 
+        if (updateParameters->captureRenderedFeatures) {
+            const auto& params = renderTree.getParameters().transformParams;
+            captureRenderedFeatures(bucket, tile, binders, evaluated, state, params);
+        }
+
+        // Drawables' stored attributes point directly into the bucket's shared vectors;
+        // the backend upload guard fires automatically when those change.
+        auto updateExisting = [&](gfx::Drawable& drawable) {
+            return drawable.getLayerTweaker() == layerTweaker;
+        };
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
+            continue;
+        }
+
         propertiesAsUniforms.first.clear();
         propertiesAsUniforms.second.clear();
 
         // `Fill*Program` all use `style::FillPaintProperties`
-        // TODO: Only rebuild the vertex attributes when something has changed.
-        // TODO: Can we update them in-place instead of replacing?
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
@@ -334,11 +346,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const bool dataDrivenOutline = !evaluated.get<FillOutlineColor>().isConstant() ||
                                        !evaluated.get<FillOpacity>().isConstant();
 #endif
-
-        if (updateParameters->captureRenderedFeatures) {
-            const auto& params = renderTree.getParameters().transformParams;
-            captureRenderedFeatures(bucket, tile, binders, evaluated, state, params);
-        }
 
         const auto fillVertexCount = bucket.vertices.elements();
 
@@ -371,57 +378,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return attrs;
         };
 #endif
-
-        // If we already have drawables for this tile, update them.
-        auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-
-            switch (static_cast<FillVariant>(drawable.getType())) {
-                case FillVariant::Fill:
-                case FillVariant::FillPattern:
-                    drawable.updateVertexAttributes(vertexAttrs,
-                                                    fillVertexCount,
-                                                    gfx::Triangles(),
-                                                    bucket.sharedTriangles,
-                                                    bucket.triangleSegments.data(),
-                                                    bucket.triangleSegments.size());
-                    break;
-                case FillVariant::FillOutline:
-                case FillVariant::FillOutlinePattern:
-                    drawable.updateVertexAttributes(vertexAttrs,
-                                                    fillVertexCount,
-                                                    gfx::Lines(lineWidth),
-                                                    bucket.sharedBasicLineIndexes,
-                                                    bucket.basicLineSegments.data(),
-                                                    bucket.basicLineSegments.size());
-                    break;
-#if MLN_TRIANGULATE_FILL_OUTLINES
-                case FillVariant::FillOutlineTriangulated:
-                    if (const auto updated = drawable.getAttributeUpdateTime();
-                        !updated || bucket.lineVertices.getLastModified() > *updated) {
-                        drawable.updateVertexAttributes(getTriangulatedAttributes(),
-                                                        lineVertexCount,
-                                                        gfx::Triangles(),
-                                                        bucket.sharedLineIndexes,
-                                                        bucket.lineSegments.data(),
-                                                        bucket.lineSegments.size());
-                    }
-                    break;
-#endif
-                default:
-                    Log::Error(Event::General, "Invalid fill type " + util::toString(drawable.getType()));
-                    assert(false);
-                    return false;
-            }
-
-            return true;
-        };
-        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
-            continue;
-        }
 
         const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
             builder.flush(context);
