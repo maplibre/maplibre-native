@@ -5,8 +5,10 @@
 #include <mln/map/bound_options.hpp>
 #include <mln/map/map.hpp>
 #include <mln/map/map_options.hpp>
+#include <mln/renderer/renderer.hpp>
 #include <mln/storage/resource_options.hpp>
 #include <mln/style/conversion/json.hpp>
+#include <mln/style/image.hpp>
 #include <mln/style/layers/location_indicator_layer.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/style/style.hpp>
@@ -46,7 +48,7 @@ std::optional<ScreenCoordinate> redCentre(const PremultipliedImage& image) {
 
 } // namespace
 
-// Bounds keep the center unwrapped, here past the antimeridian at 181 degrees; the puck is drawn where it is.
+// Bounds keep the center unwrapped, here past the antimeridian at 181 degrees; the puck is drawn, and hit, where it is.
 TEST(LocationIndicator, PuckAtItsLocationWithTheCenterPastTheAntimeridian) {
     // The Darwin layer manager does not register the location indicator; the SDKs draw their own puck.
     const mln::JSValue emptyObject(rapidjson::kObjectType);
@@ -69,10 +71,21 @@ TEST(LocationIndicator, PuckAtItsLocationWithTheCenterPastTheAntimeridian) {
     map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 181.0}).withZoom(4.0));
     ASSERT_DOUBLE_EQ(181.0, map.getCameraOptions().center->longitude());
 
+    PremultipliedImage black({16, 16});
+    for (std::size_t i = 0; i < black.bytes(); i += 4) {
+        black.data[i] = 0;
+        black.data[i + 1] = 0;
+        black.data[i + 2] = 0;
+        black.data[i + 3] = 255;
+    }
+    map.getStyle().addImage(std::make_unique<style::Image>("puck", std::move(black), 1.0f));
+
     const LatLng location{0.0, 179.0};
     auto puck = std::make_unique<LocationIndicatorLayer>("puck");
     puck->setLocation(std::array<double, 3>{{location.latitude(), location.longitude(), 0.0}});
-    puck->setAccuracyRadius(50000.0f);
+    puck->setBearingImage(expression::Image("puck"));
+    puck->setBearingImageSize(1.0f);
+    puck->setAccuracyRadius(150000.0f);
     puck->setAccuracyRadiusColor(Color::red());
     puck->setAccuracyRadiusBorderColor(Color::red());
     map.getStyle().addLayer(std::move(puck));
@@ -82,6 +95,8 @@ TEST(LocationIndicator, PuckAtItsLocationWithTheCenterPastTheAntimeridian) {
 
     // 179 degrees is 2 degrees west of the center: 2 / 360 of the 512 * 2^4 pixel wide world at zoom 4.
     const double westOfCenter = 2.0 / 360.0 * util::tileSize_D * std::pow(2.0, 4.0);
-    EXPECT_NEAR(centre->x, frontend.getSize().width / 2.0 - westOfCenter, 3.0);
-    EXPECT_NEAR(centre->y, frontend.getSize().height / 2.0, 3.0);
+    const ScreenCoordinate expected{frontend.getSize().width / 2.0 - westOfCenter, frontend.getSize().height / 2.0};
+    EXPECT_NEAR(centre->x, expected.x, 3.0);
+    EXPECT_NEAR(centre->y, expected.y, 3.0);
+    EXPECT_EQ(1u, frontend.getRenderer()->queryRenderedFeatures(expected, {{{"puck"}}, {}}).size());
 }

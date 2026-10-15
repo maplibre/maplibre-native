@@ -579,24 +579,26 @@ public:
     }
 
 protected:
+    // The copy of a location nearest the transform's center, which bounds can leave past the antimeridian.
+    static LatLng nearestCopy(const LatLng& p, const TransformState& s) {
+        const double centerLongitude = s.getLatLng().longitude();
+        return {
+            p.latitude(),
+            centerLongitude + util::wrap(p.longitude() - centerLongitude, -util::LONGITUDE_MAX, util::LONGITUDE_MAX)};
+    }
+
     static ScreenCoordinate latLngToScreenCoordinate(const LatLng& p, const TransformState& s) {
-        LatLng unwrappedLatLng = p.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
-        ScreenCoordinate point = s.latLngToScreenCoordinate(unwrappedLatLng);
+        ScreenCoordinate point = s.latLngToScreenCoordinate(nearestCopy(p, s));
         point.y = s.getSize().height - point.y;
         return point;
     }
 
     static Point<double> project(const LatLng& c, const TransformState& s) {
-        LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
-        return Projection::project(unwrappedLatLng, s.getScale());
+        return Projection::project(nearestCopy(c, s), s.getScale());
     }
 
     static Point<double> unproject(const LatLng& c, const TransformState& s) {
-        LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
-        return Projection::project(unwrappedLatLng, s.getScale());
+        return Projection::project(nearestCopy(c, s), s.getScale());
     }
 
     void updateRadius(const mln::LocationIndicatorRenderParameters& params) {
