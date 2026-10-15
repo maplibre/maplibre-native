@@ -73,7 +73,8 @@ std::size_t hashPipelineState(const std::vector<WGPUVertexBufferLayout>& vertexL
                               const gfx::ColorMode& colorMode,
                               const gfx::DepthMode& depthMode,
                               const gfx::StencilMode& stencilMode,
-                              gfx::DrawModeType drawModeType) {
+                              gfx::DrawModeType drawModeType,
+                              const gfx::CullFaceMode& cullMode) {
     std::size_t hash = 0;
 
     // Hash vertex layouts
@@ -111,6 +112,9 @@ std::size_t hashPipelineState(const std::vector<WGPUVertexBufferLayout>& vertexL
 
     // Hash draw mode
     hash = util::hash(hash, static_cast<int>(drawModeType));
+
+    // Hash cull mode
+    hash = util::hash(hash, cullMode.enabled, static_cast<int>(cullMode.side), static_cast<int>(cullMode.winding));
 
     return hash;
 }
@@ -815,8 +819,9 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
 
         // Compute pipeline state hash for caching
+        const auto& cullMode = getCullFaceMode();
         const std::size_t pipelineHash = hashPipelineState(
-            vertexLayouts, colorMode, depthMode, stencilMode, drawModeType);
+            vertexLayouts, colorMode, depthMode, stencilMode, drawModeType, cullMode);
 
         impl->pipelineState = shaderWebGPU.getRenderPipeline(renderable,
                                                              vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
@@ -825,7 +830,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                                                              depthMode,
                                                              stencilMode,
                                                              drawModeType,
-                                                             pipelineHash);
+                                                             pipelineHash,
+                                                             cullMode);
         if (!impl->pipelineState) {
             Log::Warning(Event::Render,
                          "WebGPU: skipping pipeline creation for drawable '" + getName() + "' (shader='" +
