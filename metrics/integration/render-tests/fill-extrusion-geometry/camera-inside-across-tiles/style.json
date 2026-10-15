@@ -1,0 +1,124 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 128,
+      "height": 128,
+      "description": "The camera, 115 m up and 198 m south of the center, is inside the 400 m red extrusion, which the four tiles at the center each cut. Its walls point away from the camera and are culled; the edges the tiles cut it along get no walls, leaving the white background and the blue extrusion ahead."
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 16,
+  "pitch": 60,
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "around",
+              "height": 400
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -0.0022458,
+                    -0.0040424
+                  ],
+                  [
+                    0.0022458,
+                    -0.0040424
+                  ],
+                  [
+                    0.0022458,
+                    0.0013475
+                  ],
+                  [
+                    -0.0022458,
+                    0.0013475
+                  ],
+                  [
+                    -0.0022458,
+                    -0.0040424
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "ahead",
+              "height": 60
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -0.0003593,
+                    -0.0003593
+                  ],
+                  [
+                    0.0003593,
+                    -0.0003593
+                  ],
+                  [
+                    0.0003593,
+                    0.0003593
+                  ],
+                  [
+                    -0.0003593,
+                    0.0003593
+                  ],
+                  [
+                    -0.0003593,
+                    -0.0003593
+                  ]
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "extrusion",
+      "type": "fill-extrusion",
+      "source": "geojson",
+      "paint": {
+        "fill-extrusion-color": [
+          "match",
+          [
+            "get",
+            "name"
+          ],
+          "around",
+          "red",
+          "blue"
+        ],
+        "fill-extrusion-height": [
+          "get",
+          "height"
+        ]
+      }
+    }
+  ]
+}

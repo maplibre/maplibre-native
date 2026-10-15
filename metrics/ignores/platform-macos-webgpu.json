@@ -12,5 +12,6 @@
     "render-tests/fill-extrusion-pattern/global-state": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
     "render-tests/fill-extrusion-pattern/literal": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
     "render-tests/fill-extrusion-pattern/opacity": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
-    "render-tests/fill-extrusion-pattern/tile-buffer": "https://github.com/mapbox/mapbox-gl-js/issues/3327"
+    "render-tests/fill-extrusion-pattern/tile-buffer": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
+    "render-tests/fill-extrusion-geometry/camera-inside-across-tiles": "WebGPU draws back faces until https://github.com/maplibre/maplibre-native/pull/4775"
 }

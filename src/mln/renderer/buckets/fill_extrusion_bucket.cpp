@@ -53,6 +53,15 @@ using namespace style;
 
 struct GeometryTooLongException : std::exception {};
 
+namespace {
+
+// An axis-parallel edge outside the tile lies on a cut line, so it belongs to the cut rather than the feature.
+bool isBoundaryEdge(const Point<double>& p1, const Point<double>& p2) {
+    return (p1.x == p2.x && (p1.x < 0 || p1.x > util::EXTENT)) || (p1.y == p2.y && (p1.y < 0 || p1.y > util::EXTENT));
+}
+
+} // namespace
+
 FillExtrusionBucket::FillExtrusionBucket(
     const FillExtrusionBucket::PossiblyEvaluatedLayoutProperties& layout_,
     const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
@@ -121,7 +130,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         const auto processRingPoints =
             [&](const Point<double>& p1, const std::optional<Point<double>>& p2, std::size_t& edgeDistance) {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-                vertices.emplace_back(layoutVertex(p1, edgeDistance, !p2));
+                vertices.emplace_back(layoutVertex(p1, edgeDistance, !p2 || isBoundaryEdge(p1, *p2)));
                 flatIndices.emplace_back(triangleIndex);
                 triangleIndex++;
 
@@ -139,31 +148,35 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                 triangleIndex++;
 
                 if (p2) {
-                    const Point<double> perp = util::unit(util::perp(*p2 - p1));
-
                     const size_t dist = util::dist<uint16_t>(p1, *p2);
                     if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<uint16_t>::max())) {
                         edgeDistance = 0;
                     }
 
-                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(*p2, perp.x, perp.y, 0, edgeDistance));
-                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(*p2, perp.x, perp.y, 1, edgeDistance));
+                    // No wall along a tile cut, but the walls after it keep their pattern coordinates.
+                    if (!isBoundaryEdge(p1, *p2)) {
+                        const Point<double> perp = util::unit(util::perp(*p2 - p1));
+
+                        vertices.emplace_back(FillExtrusionBucket::layoutVertex(*p2, perp.x, perp.y, 0, edgeDistance));
+                        vertices.emplace_back(FillExtrusionBucket::layoutVertex(*p2, perp.x, perp.y, 1, edgeDistance));
+                        vertices.emplace_back(
+                            FillExtrusionBucket::layoutVertex(p1, perp.x, perp.y, 0, edgeDistance + dist));
+                        vertices.emplace_back(
+                            FillExtrusionBucket::layoutVertex(p1, perp.x, perp.y, 1, edgeDistance + dist));
+
+                        // ┌──────┐
+                        // │ 0  1 │ Counter-Clockwise winding order.
+                        // │      │ Triangle 1: 0 => 2 => 1
+                        // │ 2  3 │ Triangle 2: 1 => 2 => 3
+                        // └──────┘
+                        triangles.emplace_back(triangleIndex, triangleIndex + 2, triangleIndex + 1);
+                        triangles.emplace_back(triangleIndex + 1, triangleIndex + 2, triangleIndex + 3);
+                        triangleIndex += 4;
+                        triangleSegment.vertexLength += 4;
+                        triangleSegment.indexLength += 6;
+                    }
 
                     edgeDistance += dist;
-
-                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(p1, perp.x, perp.y, 0, edgeDistance));
-                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(p1, perp.x, perp.y, 1, edgeDistance));
-
-                    // ┌──────┐
-                    // │ 0  1 │ Counter-Clockwise winding order.
-                    // │      │ Triangle 1: 0 => 2 => 1
-                    // │ 2  3 │ Triangle 2: 1 => 2 => 3
-                    // └──────┘
-                    triangles.emplace_back(triangleIndex, triangleIndex + 2, triangleIndex + 1);
-                    triangles.emplace_back(triangleIndex + 1, triangleIndex + 2, triangleIndex + 3);
-                    triangleIndex += 4;
-                    triangleSegment.vertexLength += 4;
-                    triangleSegment.indexLength += 6;
                 }
 #endif
             };
