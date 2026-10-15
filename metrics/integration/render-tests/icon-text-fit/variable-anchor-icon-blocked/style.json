@@ -1,0 +1,144 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 64,
+      "width": 256
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 0,
+  "sprite": "local://sprites/icon-text-fit",
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0,
+                0.0
+              ]
+            },
+            "properties": {
+              "role": "label"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -64.6875,
+                0.0
+              ]
+            },
+            "properties": {
+              "role": "obstacle"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                64.6875,
+                0.0
+              ]
+            },
+            "properties": {
+              "role": "obstacle"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -18.984375,
+                0.0
+              ]
+            },
+            "properties": {
+              "role": "witness"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "witness",
+      "type": "symbol",
+      "source": "points",
+      "filter": [
+        "==",
+        "role",
+        "witness"
+      ],
+      "layout": {
+        "icon-image": "small-box"
+      }
+    },
+    {
+      "id": "label",
+      "type": "symbol",
+      "source": "points",
+      "filter": [
+        "==",
+        "role",
+        "label"
+      ],
+      "layout": {
+        "text-field": "AAAAA",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16,
+        "text-variable-anchor": [
+          "left",
+          "right"
+        ],
+        "icon-image": "label",
+        "icon-text-fit": "both",
+        "icon-text-fit-padding": [
+          0,
+          40,
+          0,
+          40
+        ],
+        "icon-optional": true
+      }
+    },
+    {
+      "id": "obstacles",
+      "type": "symbol",
+      "source": "points",
+      "filter": [
+        "==",
+        "role",
+        "obstacle"
+      ],
+      "layout": {
+        "icon-image": "small-box"
+      }
+    }
+  ]
+}

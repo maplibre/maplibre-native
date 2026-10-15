@@ -422,20 +422,20 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                         continue;
                     }
 
-                    placedFeature = collisionIndex.placeFeature(textCollisionFeature,
-                                                                shift,
-                                                                posMatrix,
-                                                                mat4(),
-                                                                ctx.pixelRatio,
-                                                                placedSymbol,
-                                                                ctx.scale,
-                                                                fontSize,
-                                                                allowOverlap,
-                                                                ctx.pitchTextWithMap,
-                                                                showCollisionBoxes,
-                                                                ctx.avoidEdges,
-                                                                collisionGroup.second,
-                                                                textBoxes);
+                    const auto placedText = collisionIndex.placeFeature(textCollisionFeature,
+                                                                        shift,
+                                                                        posMatrix,
+                                                                        mat4(),
+                                                                        ctx.pixelRatio,
+                                                                        placedSymbol,
+                                                                        ctx.scale,
+                                                                        fontSize,
+                                                                        allowOverlap,
+                                                                        ctx.pitchTextWithMap,
+                                                                        showCollisionBoxes,
+                                                                        ctx.avoidEdges,
+                                                                        collisionGroup.second,
+                                                                        textBoxes);
 
                     if (doVariableIconPlacement) {
                         auto placedIconFeature = collisionIndex.placeFeature(
@@ -457,6 +457,8 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                         if (!placedIconFeature.first) continue;
                     }
 
+                    // An anchor whose fitted icon is blocked places nothing, even when its text fits, as in GL JS.
+                    placedFeature = placedText;
                     if (placedFeature.first) {
                         assert(symbolInstance.getCrossTileID() != 0u);
                         std::optional<style::TextVariableAnchorType> prevAnchor;
