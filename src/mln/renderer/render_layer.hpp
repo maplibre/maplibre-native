@@ -1,5 +1,6 @@
 #pragma once
 #include <mln/gfx/drawable.hpp>
+#include <mln/gfx/projection_variant.hpp>
 #include <mln/layout/layout.hpp>
 #include <mln/renderer/change_request.hpp>
 #include <mln/renderer/layer_group.hpp>
@@ -321,6 +322,7 @@ protected:
 
     // will need to be overridden to handle their activation.
     LayerGroupBasePtr layerGroup;
+    gfx::ProjectionVariant projectionVariant = gfx::ProjectionVariant::Mercator;
 
     // An optional tweaker that will update drawables
     LayerTweakerPtr layerTweaker;

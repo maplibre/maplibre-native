@@ -176,7 +176,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
     // initialize debug builder
     constexpr auto DebugShaderName = "DebugShader";
-    gfx::ShaderProgramBasePtr debugShader = context.getGenericShader(shaders, std::string(DebugShaderName));
+    gfx::ShaderProgramBasePtr debugShader = context.getGenericShader(
+        shaders, std::string(DebugShaderName), gfx::ProjectionVariant::Mercator);
     if (!debugShader) {
         return;
     }
@@ -208,7 +209,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
              idLineGapWidthVertexAttribute,
              idLineOffsetVertexAttribute,
              idLineWidthVertexAttribute}};
-        return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        return shaderGroup->getOrCreateShader(context, propertiesAsUniforms, gfx::ProjectionVariant::Mercator);
     };
 
     std::unique_ptr<gfx::DrawableBuilder> polylineBuilder;

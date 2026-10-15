@@ -180,11 +180,12 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!hillshadePrepareShader) {
-        hillshadePrepareShader = context.getGenericShader(shaders, HillshadePrepareShaderGroupName);
+        hillshadePrepareShader = context.getGenericShader(
+            shaders, HillshadePrepareShaderGroupName, gfx::ProjectionVariant::Mercator);
     }
 
     if (!hillshadeShader) {
-        hillshadeShader = context.getGenericShader(shaders, HillshadeShaderGroupName);
+        hillshadeShader = context.getGenericShader(shaders, HillshadeShaderGroupName, projectionVariant);
     }
 
     if (!hillshadePrepareShader || !hillshadeShader) {

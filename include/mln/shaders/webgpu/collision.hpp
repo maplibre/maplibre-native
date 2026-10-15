@@ -53,7 +53,7 @@ struct GlobalPaintParamsUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<uniform> drawable: CollisionDrawableUBO;
-@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
+@group(0) @binding(5) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -155,7 +155,7 @@ struct CollisionTilePropsUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<uniform> drawable: CollisionDrawableUBO;
-@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
+@group(0) @binding(5) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -204,7 +204,7 @@ struct CollisionTilePropsUBO {
     pad1: f32,
 };
 
-@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
+@group(0) @binding(5) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {

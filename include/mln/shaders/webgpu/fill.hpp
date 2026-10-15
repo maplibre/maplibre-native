@@ -61,7 +61,8 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillDrawableUnionUBO>;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -69,7 +70,8 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Transform position using the matrix
     let drawable = drawableVector[globalIndex.value].fill;
-    let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    let clip = projectTile(pos, projectionVector[globalIndex.value]);
     out.position = clip;
 
     var color: vec4<f32>;
@@ -103,7 +105,7 @@ struct FillEvaluatedPropsUBO {
     to_scale: f32,
 };
 
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 
 struct FragmentInput {
     @location(0) color: vec4<f32>,
@@ -199,7 +201,8 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineDrawableUnionUBO>;
-@group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
+@group(0) @binding(6) var<uniform> props: FillOutlineEvaluatedPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -207,7 +210,8 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Transform position using the matrix
     let drawable = drawableVector[globalIndex.value].fill;
-    let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    let clip = projectTile(pos, projectionVector[globalIndex.value]);
     let invW = 1.0 / clip.w;
     let ndcXY = clip.xy * invW;
     out.position = clip;
@@ -244,7 +248,7 @@ struct FillOutlineEvaluatedPropsUBO {
     to_scale: f32,
 };
 
-@group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> props: FillOutlineEvaluatedPropsUBO;
 
 struct FragmentInput {
     @location(0) color: vec4<f32>,
@@ -365,8 +369,9 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillPatternDrawableUBO>;
-@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
+@group(0) @binding(5) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -410,7 +415,7 @@ fn main(in: VertexInput) -> VertexOutput {
     );
 
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = projectTile(pos, projectionVector[globalIndex.value]);
     out.position = clip;
     out.v_pos_a = get_pattern_pos(
         drawable.pixel_coord_upper,
@@ -483,8 +488,8 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
-@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(5) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
@@ -643,8 +648,9 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlinePatternDrawableUBO>;
-@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
+@group(0) @binding(5) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -688,7 +694,7 @@ fn main(in: VertexInput) -> VertexOutput {
     );
 
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = projectTile(pos, projectionVector[globalIndex.value]);
     let invW = 1.0 / clip.w;
     let ndcXY = clip.xy * invW;
 
@@ -768,8 +774,8 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
-@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(5) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
@@ -890,6 +896,7 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineTriangulatedDrawableUnionUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -918,7 +925,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let extrude_vec = dist / ratio;
 
     let projected_extrude = matrix * vec4<f32>(extrude_vec, 0.0, 0.0);
-    let base = matrix * vec4<f32>(pos, 0.0, 1.0);
+    let base = projectTile(pos, projectionVector[globalIndex.value]);
     let clip = base + projected_extrude;
     out.position = clip;
 
@@ -963,7 +970,7 @@ struct GlobalPaintParamsUBO {
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {

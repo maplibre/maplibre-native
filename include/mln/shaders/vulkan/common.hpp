@@ -95,13 +95,14 @@ vec2 unpack_uint(uint value) {
 #define DRAWABLE_IMAGE_SET_INDEX            3
 
 #define layerSSBOStartId                    0
-#define layerUBOStartId                     3
+#define layerUBOStartId                     4
 #define drawableSSBOStartId                 0
 #define drawableUBOStartId                  4
 
 #define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
 #define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
-#define drawableReservedUBOCount            idDrawableReservedFragmentOnlyUBO + 1
+#define idProjectionUBO                     idDrawableReservedFragmentOnlyUBO + 1
+#define drawableReservedUBOCount            idProjectionUBO + 1
 
 layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;
@@ -120,6 +121,20 @@ layout(set = GLOBAL_SET_INDEX, binding = 1) uniform GlobalPlatformParamsUBO {
     vec4 surfaceRotation;
 } platformParams;
 #endif
+
+struct ProjectionUBO {
+    mat4 matrix;
+    mat4 fallback_matrix;
+    vec4 tile_mercator_coords;
+    vec4 clipping_plane;
+    float projection_transition;
+    float depth_offset;
+    vec2 translate;
+};
+
+vec4 projectTile(vec2 pos, ProjectionUBO projection) {
+    return projection.matrix * vec4(pos, 0.0, 1.0);
+}
 
 void applySurfaceTransform() {
 #ifdef USE_SURFACE_TRANSFORM
@@ -146,13 +161,14 @@ void applySurfaceTransform() {
 #define DRAWABLE_IMAGE_SET_INDEX            3
 
 #define layerSSBOStartId                    0
-#define layerUBOStartId                     3
+#define layerUBOStartId                     4
 #define drawableSSBOStartId                 0
 #define drawableUBOStartId                  4
 
 #define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
 #define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
-#define drawableReservedUBOCount            idDrawableReservedFragmentOnlyUBO + 1
+#define idProjectionUBO                     idDrawableReservedFragmentOnlyUBO + 1
+#define drawableReservedUBOCount            idProjectionUBO + 1
 
 layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;

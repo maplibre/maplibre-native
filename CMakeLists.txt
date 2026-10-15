@@ -260,6 +260,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/fill_generator.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/gfx_types.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/polyline_generator.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/gfx/projection_variant.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/renderable.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/renderer_backend.hpp
@@ -567,6 +568,9 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/map/map_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/map_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/map_projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/mercator_projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/mercator_projection.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/projection_base.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform_state.cpp

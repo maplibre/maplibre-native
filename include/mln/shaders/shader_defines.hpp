@@ -18,6 +18,7 @@ static constexpr uint32_t layerSSBOStartId = globalUBOCount;
 enum {
     idDrawableReservedVertexOnlyUBO = layerSSBOStartId,
     idDrawableReservedFragmentOnlyUBO,
+    idProjectionUBO,
     drawableReservedUBOCount
 };
 

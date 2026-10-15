@@ -225,6 +225,22 @@ struct alignas(16) GlobalPaintParamsUBO {
 };
 static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16, "wrong size");
 
+struct alignas(16) ProjectionUBO {
+    /*   0 */ float4x4 matrix;
+    /*  64 */ float4x4 fallback_matrix;
+    /* 128 */ float4 tile_mercator_coords;
+    /* 144 */ float4 clipping_plane;
+    /* 160 */ float projection_transition;
+    /* 164 */ float depth_offset;
+    /* 168 */ float2 translate;
+    /* 176 */
+};
+static_assert(sizeof(ProjectionUBO) == 11 * 16, "wrong size");
+
+inline float4 projectTile(float2 pos, device const ProjectionUBO& projection) {
+    return projection.matrix * float4(pos, 0.0, 1.0);
+}
+
 enum {
     idGlobalPaintParamsUBO,
     idGlobalUBOIndex,
@@ -234,6 +250,7 @@ enum {
 enum {
     idDrawableReservedVertexOnlyUBO = globalUBOCount,
     idDrawableReservedFragmentOnlyUBO,
+    idProjectionUBO,
     drawableReservedUBOCount
 };
 

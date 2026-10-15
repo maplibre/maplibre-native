@@ -73,3 +73,17 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
     vec2 offset = mod(mod(mod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
+
+layout (std140) uniform ProjectionUBO {
+    highp mat4 u_projection_matrix;
+    highp mat4 u_projection_fallback_matrix;
+    highp vec4 u_projection_tile_mercator_coords;
+    highp vec4 u_projection_clipping_plane;
+    highp float u_projection_transition;
+    highp float u_projection_depth_offset;
+    highp vec2 u_projection_translate;
+};
+
+vec4 projectTile(vec2 pos) {
+    return u_projection_matrix * vec4(pos, 0.0, 1.0);
+}

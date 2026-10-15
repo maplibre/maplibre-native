@@ -234,7 +234,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!colorReliefShader) {
-        colorReliefShader = context.getGenericShader(shaders, ColorReliefShaderGroupName);
+        colorReliefShader = context.getGenericShader(shaders, ColorReliefShaderGroupName, projectionVariant);
     }
 
     if (!colorReliefShader) {

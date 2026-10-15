@@ -118,7 +118,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     constexpr auto renderPass = RenderPass::Translucent;
 
     if (!rasterShader) {
-        rasterShader = context.getGenericShader(shaders, "RasterShader");
+        rasterShader = context.getGenericShader(shaders, "RasterShader", projectionVariant);
         if (!rasterShader) {
             return;
         }

@@ -85,8 +85,9 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
         }
 
         // We assume that drawables don't change between pattern and non-pattern.
-        assert(hasPattern == (drawable.getShader() ==
-                              context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
+        assert(hasPattern == (drawable.getShader() == context.getGenericShader(parameters.shaders,
+                                                                               std::string(BackgroundPatternShaderName),
+                                                                               gfx::ProjectionVariant::Mercator)));
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = getTileMatrix(

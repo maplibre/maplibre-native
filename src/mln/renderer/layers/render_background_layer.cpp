@@ -173,10 +173,10 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!hasPattern && !plainShader) {
-        plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName));
+        plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName), projectionVariant);
     }
     if (hasPattern && !patternShader) {
-        patternShader = context.getGenericShader(shaders, std::string(BackgroundPatternShaderName));
+        patternShader = context.getGenericShader(shaders, std::string(BackgroundPatternShaderName), projectionVariant);
     }
 
     const auto& curShader = hasPattern ? patternShader : plainShader;

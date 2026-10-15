@@ -481,9 +481,11 @@ UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
         DescriptorSetType::Layer, shaders::globalUBOCount, shaders::maxSSBOCountPerLayer, shaders::maxUBOCountPerLayer);
 }
 
-gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
+gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders,
+                                                    const std::string& name,
+                                                    gfx::ProjectionVariant variant) {
     const auto shaderGroup = shaders.getShaderGroup(name);
-    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}) : gfx::ShaderProgramBasePtr{};
+    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}, variant) : gfx::ShaderProgramBasePtr{};
     return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
@@ -585,7 +587,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     if (!clipping.shader) {
         const auto group = staticData.shaders->getShaderGroup("ClippingMaskProgram");
         if (group) {
-            clipping.shader = std::static_pointer_cast<gfx::ShaderProgramBase>(group->getOrCreateShader(*this, {}));
+            clipping.shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                group->getOrCreateShader(*this, {}, gfx::ProjectionVariant::Mercator));
         }
     }
     if (!clipping.shader) {

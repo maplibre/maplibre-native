@@ -82,7 +82,7 @@ void main() {
     mediump vec2 dist = outset * a_extrude * scale;
 
     vec4 projected_extrude = u_matrix * vec4(dist / u_ratio, 0.0, 0.0);
-    gl_Position = u_matrix * vec4(pos, 0.0, 1.0) + projected_extrude;
+    gl_Position = projectTile(pos) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
