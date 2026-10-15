@@ -116,16 +116,18 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
 // MARK: - Projection
 
 void TransformState::setProjectionDefinition(const ProjectionDefinition& definition) {
-    const double transition = definition.transitionState();
+    const double transition = util::GLOBE_ENABLED ? definition.transitionState() : 0.0;
     if (transition == projectionTransition) {
         return;
     }
     const bool leavesGlobe = transition == 0 && projectionTransition > 0;
     if ((transition > 0) != (projectionTransition > 0)) {
-        if (transition > 0) {
-            projection = std::make_shared<VerticalPerspectiveProjection>();
-        } else {
-            projection = std::make_shared<MercatorProjection>();
+        if constexpr (util::GLOBE_ENABLED) {
+            if (transition > 0) {
+                projection = std::make_shared<VerticalPerspectiveProjection>();
+            } else {
+                projection = std::make_shared<MercatorProjection>();
+            }
         }
     }
     projectionTransition = transition;

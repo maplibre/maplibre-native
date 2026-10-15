@@ -103,7 +103,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         // many segments as it needs. Walls too long for a segment are drawn as on Mercator.
         const uint32_t granularity = subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z);
         std::optional<util::SubdivisionResult> roof;
-        if (granularity >= 2 && roundedCornerDistance <= 0) {
+        if (util::GLOBE_ENABLED && granularity >= 2 && roundedCornerDistance <= 0) {
             GeometryCollection subdividedRings;
             std::size_t ringVertices = 0;
             for (const auto& ring : polygon) {

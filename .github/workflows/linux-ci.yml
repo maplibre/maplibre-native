@@ -197,6 +197,39 @@ jobs:
       - name: Run expression test
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
+  linux-without-globe:
+    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: pre_job
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install dependencies
+        run: .github/scripts/install-linux-deps
+
+      - name: Configure sccache
+        uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
+
+      - name: Build MapLibre Native without the globe
+        run: |
+          cmake --preset linux-opengl \
+            -DMLN_WITH_GLOBE=OFF \
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+          cmake --build build-linux-opengl --target mbgl-test-runner mbgl-render-test-runner
+
+      - name: Run C++ tests
+        run: xvfb-run -a build-linux-opengl/mbgl-test-runner
+
+      - name: Run render test
+        run: xvfb-run -a build-linux-opengl/mbgl-render-test-runner --manifestPath=metrics/linux-opengl.json
+
   linux-coverage:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -251,6 +284,7 @@ jobs:
     needs:
       - pre_job
       - linux-build-and-test
+      - linux-without-globe
       - linux-coverage
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -259,5 +293,5 @@ jobs:
         uses: ./.github/actions/save-pr-number
 
       - name: Mark result as failed
-        if: needs.linux-build-and-test.result != 'success' || needs.linux-coverage.result != 'success'
+        if: needs.linux-build-and-test.result != 'success' || needs.linux-without-globe.result != 'success' || needs.linux-coverage.result != 'success'
         run: exit 1

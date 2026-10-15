@@ -1400,7 +1400,7 @@ TEST(TransformState, ProjectionDataMercatorFields) {
     }
 }
 
-TEST(Transform, ProjectionDefinition) {
+TEST(Transform, GlobeProjectionDefinition) {
     Transform transform;
     ASSERT_FALSE(transform.getState().isGlobeRendering());
     ASSERT_DOUBLE_EQ(0.0, transform.getState().getProjectionTransition());
@@ -1418,7 +1418,7 @@ TEST(Transform, ProjectionDefinition) {
 }
 
 // A transition past either end, from a literal or an overshooting curve, holds at that end's projection.
-TEST(Transform, ProjectionTransitionPastEitherEnd) {
+TEST(Transform, GlobeProjectionTransitionPastEitherEnd) {
     Transform transform;
     transform.resize({512, 512});
     transform.setProjectionDefinition(ProjectionDefinition("mercator", "vertical-perspective", 1.5));

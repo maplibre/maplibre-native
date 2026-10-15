@@ -323,7 +323,7 @@ TEST(LocationIndicator, GlobePuckCapturedWhereItIsDrawn) {
 }
 
 // Half way between Mercator and the globe the capture follows the blend the puck is drawn with.
-TEST(LocationIndicator, PuckCapturedWhereItIsDrawnMidTransition) {
+TEST(LocationIndicator, GlobePuckCapturedWhereItIsDrawnMidTransition) {
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
     GTEST_SKIP() << "OpenGL draws the location indicator with its own renderer, which has no globe path yet";
 #endif

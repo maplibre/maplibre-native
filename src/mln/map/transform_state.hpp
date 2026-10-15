@@ -136,7 +136,7 @@ public:
     // Projection
     void setProjectionDefinition(const ProjectionDefinition&);
     /// 0 is Mercator, 1 is the globe, in between is the transition.
-    double getProjectionTransition() const { return projectionTransition; }
+    double getProjectionTransition() const { return util::GLOBE_ENABLED ? projectionTransition : 0.0; }
 
     /// The globe's view state for the current camera, valid while `isGlobeRendering()`; cached with the matrices.
     double getGlobeRadiusPixels() const;
@@ -144,7 +144,7 @@ public:
     const mat4& getInverseGlobeViewProjectionMatrix() const;
     const vec4& getGlobeClippingPlane() const;
     const vec3& getGlobeCameraPosition() const;
-    bool isGlobeRendering() const { return projectionTransition > 0; }
+    bool isGlobeRendering() const { return util::GLOBE_ENABLED && projectionTransition > 0; }
 
     // Matrix
     void matrixFor(mat4&, const UnwrappedTileID&) const;

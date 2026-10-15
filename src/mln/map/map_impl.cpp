@@ -4,6 +4,7 @@
 #include <mln/storage/file_source.hpp>
 #include <mln/style/projection_impl.hpp>
 #include <mln/style/style_impl.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/exception.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/traits.hpp>
@@ -146,7 +147,7 @@ void Map::Impl::onUpdate() {
         .tileLodPitchThreshold = tileLodPitchThreshold,
         .tileLodZoomShift = tileLodZoomShift,
         .tileLodMode = tileLodMode,
-        .subdivisionGranularity = mode == MapMode::Tile
+        .subdivisionGranularity = mode == MapMode::Tile || !util::GLOBE_ENABLED
                                       ? SubdivisionGranularitySetting::none()
                                       : style->impl->getProjection()->impl->getSubdivisionGranularity()};
 
@@ -332,7 +333,7 @@ void Map::Impl::jumpTo(const CameraOptions& camera) {
 }
 
 ProjectionDefinition Map::Impl::projectionAt(double zoom) const {
-    if (mode == MapMode::Tile) {
+    if (mode == MapMode::Tile || !util::GLOBE_ENABLED) {
         return ProjectionDefinition(ProjectionType::Mercator);
     }
     return style->impl->getProjection()->impl->evaluate(static_cast<float>(zoom));

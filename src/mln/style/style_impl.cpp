@@ -22,6 +22,7 @@
 #include <mln/style/transition_options.hpp>
 #include <mln/util/async_request.hpp>
 #include <mln/util/exception.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/string.hpp>
 
@@ -344,6 +345,13 @@ Light* Style::Impl::getLight() const {
 void Style::Impl::setProjection(std::unique_ptr<Projection> projection_) {
     projection = std::move(projection_);
     projection->setObserver(this);
+    if constexpr (!util::GLOBE_ENABLED) {
+        const auto type = projection->getType();
+        if (!type.isUndefined() && !(type.isConstant() && type.asConstant().transitionState() == 0)) {
+            Log::Warning(Event::Style,
+                         "This build has no globe (MLN_WITH_GLOBE), so the style's projection draws as Mercator");
+        }
+    }
     onProjectionChanged(*projection);
 }
 

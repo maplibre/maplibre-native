@@ -3,6 +3,7 @@
 #include <mln/gfx/renderable.hpp>
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/shaders/shader_source.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/size.hpp>
 
@@ -104,7 +105,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
                   shaders::BuiltIn::FillOutlineTriangulatedShader,
                   shaders::BuiltIn::FillExtrusionShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
-                  shaders::BuiltIn::GlobeDepthShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,
@@ -121,6 +121,9 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(registry, parameters);
+    if constexpr (util::GLOBE_ENABLED) {
+        registerTypes<shaders::BuiltIn::GlobeDepthShader>(registry, parameters);
+    }
 }
 
 void RendererBackend::setSurface(void* nativeWindow) {

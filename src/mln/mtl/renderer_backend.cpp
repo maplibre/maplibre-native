@@ -8,6 +8,7 @@
 #include <mln/shaders/mtl/shader_group.hpp>
 #include <mln/shaders/mtl/shader_program.hpp>
 #include <mln/shaders/shader_manifest.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 
 // ... shader_manifest.hpp
@@ -101,7 +102,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillExtrusionInstancedShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
                   shaders::BuiltIn::FillExtrusionPatternInstancedShader,
-                  shaders::BuiltIn::GlobeDepthShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,
@@ -118,6 +118,9 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
+    if constexpr (util::GLOBE_ENABLED) {
+        registerTypes<shaders::BuiltIn::GlobeDepthShader>(shaders, programParameters);
+    }
 }
 
 } // namespace mtl

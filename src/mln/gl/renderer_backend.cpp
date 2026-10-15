@@ -4,6 +4,7 @@
 #include <mln/gl/context.hpp>
 #include <mln/gl/extension.hpp>
 #include <mln/shaders/shader_manifest.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/instrumentation.hpp>
 #include <mln/util/logging.hpp>
 
@@ -131,7 +132,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillOutlineTriangulatedShader,
                   shaders::BuiltIn::FillExtrusionShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
-                  shaders::BuiltIn::GlobeDepthShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadePrepareShader,
@@ -147,6 +147,9 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
+    if constexpr (util::GLOBE_ENABLED) {
+        registerTypes<shaders::BuiltIn::GlobeDepthShader>(shaders, programParameters);
+    }
 
     // Initialize legacy shader programs
     Programs programs(programParameters);

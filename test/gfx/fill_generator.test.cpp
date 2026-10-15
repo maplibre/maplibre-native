@@ -93,7 +93,7 @@ bool anyOutlineVertexOutsideTileX(const gfx::VertexVector<LineLayoutVertex>& ver
 
 } // namespace
 
-TEST(FillGenerator, ZoomZeroOutlineStaysInsideTheTile) {
+TEST(FillGenerator, GlobeZoomZeroOutlineStaysInsideTheTile) {
     const auto wide = square(-2000, 1000, util::EXTENT + 2000, 2000);
     for (const uint8_t zoom : {0, 1}) {
         gfx::VertexVector<FillLayoutVertex> fillVertices;
@@ -155,7 +155,7 @@ TEST(FillGenerator, GlobeSubdividesPretessellatedPolygons) {
     EXPECT_EQ(triangles.size(), indices);
 }
 
-TEST(FillGenerator, SubdividedPolygonBeyondTheIndexLimitKeepsItsGranularity) {
+TEST(FillGenerator, GlobeSubdividedPolygonBeyondTheIndexLimitKeepsItsGranularity) {
     // A comb of 400 teeth hanging from a thin bar: 800 vertical edges each crossing 127 cell rows need more vertices
     // than a 16-bit index space holds, so the fill spreads them over several segments, as GL JS does, rather than
     // coarsening them.

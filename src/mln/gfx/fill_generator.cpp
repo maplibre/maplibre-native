@@ -192,7 +192,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        if (subdivisionGranularity >= 2) {
+        if (util::GLOBE_ENABLED && subdivisionGranularity >= 2) {
             addSubdividedPolygon(util::subdividePolygon(polygon,
                                                         canonical,
                                                         subdivisionGranularity,
@@ -283,7 +283,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
     // If we have pre-tessellated geometry, multi-polygons are tessellated
     // together, so we need to add them to the fill segment all at once.
     // Those triangles are flat: the globe subdivides the polygon instead.
-    if (!geometry.getTriangles().empty() && subdivisionGranularity < 2) {
+    if (!geometry.getTriangles().empty() && (!util::GLOBE_ENABLED || subdivisionGranularity < 2)) {
         const std::size_t startVertices = fillVertices.elements();
         std::size_t totalVertices = 0;
         for (const auto& polygon : geometry) {
@@ -298,7 +298,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        if (subdivisionGranularity >= 2) {
+        if (util::GLOBE_ENABLED && subdivisionGranularity >= 2) {
             for (const auto& ring : polygon) {
                 generateOutline(lineGenerator,
                                 util::subdivideVertexLine(ring, subdivisionGranularity, /*isRing=*/true),
