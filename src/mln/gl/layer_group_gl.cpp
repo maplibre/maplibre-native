@@ -11,6 +11,9 @@
 #include <mln/util/convert.hpp>
 #include <mln/util/instrumentation.hpp>
 
+#include <optional>
+#include <unordered_map>
+
 namespace mln {
 namespace gl {
 
@@ -57,12 +60,15 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     auto& context = static_cast<gl::Context&>(parameters.context);
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
-    // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
-    // drawables end up using the same mode value.
+    // drawables in this layer use 3D stencil mode with stencil tiles, we need to set it up here
+    // so that all the drawables end up using the same mode value; without stencil tiles each
+    // drawable gets its own.
     // 2D and 3D features in the same layer group is not supported.
     bool features3d = false;
     bool stencil3d = false;
     gfx::StencilMode stencilMode3d;
+    const bool hasStencilTiles = stencilTiles && !stencilTiles->empty();
+    std::unordered_map<const gfx::Drawable*, std::optional<gfx::StencilMode>> ownStencilModes;
 
     parameters.stencilClippingAvailable = parameters.renderTargetHasStencilBuffer;
 
@@ -74,15 +80,22 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
 #endif
 
         // If we're using stencil clipping, we need to handle 3D features separately
-        if (stencilTiles && !stencilTiles->empty()) {
-            visitDrawables([&](const gfx::Drawable& drawable) {
-                if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
-                    features3d = true;
-                    if (drawable.getEnableStencil()) {
-                        stencil3d = true;
+        visitDrawables([&](const gfx::Drawable& drawable) {
+            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+                features3d = true;
+                if (drawable.getEnableStencil()) {
+                    stencil3d = true;
+                    if (!hasStencilTiles) {
+                        ownStencilModes.emplace(&drawable, std::nullopt);
                     }
                 }
-            });
+            }
+        });
+        if (const auto modes = parameters.stencilModesFor3D(ownStencilModes.size())) {
+            auto mode = modes->begin();
+            for (auto& own : ownStencilModes) {
+                own.second = *mode++;
+            }
         }
 
         // If we're doing 3D stenciling and have any features
@@ -90,8 +103,8 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         // If we're doing 2D stenciling and have any drawables with tile IDs,
         // render each tile into the stencil buffer with a different value.
         if (features3d) {
-            stencilMode3d = stencil3d ? parameters.stencilModeFor3D() : gfx::StencilMode::disabled();
-        } else if (stencilTiles && !stencilTiles->empty()) {
+            stencilMode3d = stencil3d && hasStencilTiles ? parameters.stencilModeFor3D() : gfx::StencilMode::disabled();
+        } else if (hasStencilTiles) {
             if (!parameters.renderTileClippingMasks(stencilTiles)) {
                 parameters.stencilClippingAvailable = false;
             }
@@ -136,7 +149,13 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         // stencil mode for features with stencil enabled or disable stenciling.
         // 2D drawables will set their own stencil mode within `draw`.
         if (features3d) {
-            context.setStencilMode(drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled());
+            const auto own = ownStencilModes.find(&drawable);
+            if (own != ownStencilModes.end() && !own->second) {
+                own->second = parameters.stencilModeFor3D();
+            }
+            context.setStencilMode(!drawable.getEnableStencil()   ? gfx::StencilMode::disabled()
+                                   : own != ownStencilModes.end() ? *own->second
+                                                                  : stencilMode3d);
         }
 
         drawable.draw(parameters);

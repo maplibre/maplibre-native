@@ -12,6 +12,7 @@
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/math/log2.hpp>
+#include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source_manager.hpp>
@@ -47,6 +48,7 @@
 #include <mln/plugin/plugin_layer_impl.hpp>
 
 #include <atomic>
+#include <set>
 
 using namespace mln;
 using namespace mln::style;
@@ -233,4 +235,48 @@ TEST(Plugin, PluginLayer) {
     ASSERT_TRUE(_initialPropertiesFound);
     ASSERT_TRUE(_layerRendered);
     ASSERT_TRUE(_paintPropertiesFound);
+}
+
+// A layer group's drawables take a stencil value each, distinct ones while they fit; when there are more of them than
+// the stencil holds, none are handed out up front, so no two get the same value, and each takes its own as it draws.
+TEST(Plugin, StencilModesFor3DNeverHandOutAValueTwice) {
+    bool rendered = false;
+    std::optional<std::vector<gfx::StencilMode>> whenTheyFit;
+    bool takenWhenTheyDoNotFit = true;
+
+    std::string layerType = "plugin-layer-stencil-values";
+    auto pluginLayerFactory = std::make_unique<PluginLayerFactory>(
+        layerType,
+        mln::style::LayerTypeInfo::Source::NotRequired,
+        mln::style::LayerTypeInfo::Pass3D::NotRequired,
+        mln::style::LayerTypeInfo::Layout::NotRequired,
+        mln::style::LayerTypeInfo::FadingTiles::NotRequired,
+        mln::style::LayerTypeInfo::CrossTileIndex::NotRequired,
+        mln::style::LayerTypeInfo::TileKind::NotRequired);
+    pluginLayerFactory->setOnLayerCreatedEvent([&](mln::style::PluginLayer* pluginLayer) {
+        auto pluginLayerImpl = (mln::style::PluginLayer::Impl*)pluginLayer->baseImpl.get();
+        pluginLayerImpl->setUpdatePropertiesFunction([](const std::string&) {});
+        pluginLayerImpl->setRenderFunction([&](PaintParameters& paintParameters) {
+            whenTheyFit = paintParameters.stencilModesFor3D(200);
+            takenWhenTheyDoNotFit = paintParameters.stencilModesFor3D(300).has_value();
+            rendered = true;
+        });
+    });
+    LayerManager::get()->addLayerTypeCoreOnly(std::move(pluginLayerFactory));
+
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(
+        R"STYLE({"version": 8, "layers": [{"id": "stencil-values", "type": "plugin-layer-stencil-values"}]})STYLE");
+    for (int i = 0; i < 10 && !rendered; i++) {
+        test.runLoop.runOnce();
+    }
+
+    ASSERT_TRUE(rendered);
+    ASSERT_TRUE(whenTheyFit);
+    std::set<int32_t> values;
+    for (const auto& mode : *whenTheyFit) {
+        values.insert(mode.ref);
+    }
+    EXPECT_EQ(200u, values.size());
+    EXPECT_FALSE(takenWhenTheyDoNotFit);
 }

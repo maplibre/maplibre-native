@@ -12,6 +12,9 @@
 #include <mln/util/convert.hpp>
 #include <mln/util/logging.hpp>
 
+#include <optional>
+#include <unordered_map>
+
 namespace mln {
 namespace vulkan {
 
@@ -48,25 +51,34 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     auto& encoder = renderPass.getEncoder();
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
-    // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
-    // drawables end up using the same mode value.
+    // drawables in this layer use 3D stencil mode with stencil tiles, we need to set it up here
+    // so that all the drawables end up using the same mode value; without stencil tiles each
+    // drawable gets its own.
     // 2D and 3D features in the same layer group is not supported.
     bool features3d = false;
     bool stencil3d = false;
     std::optional<gfx::DepthMode> depthMode3d;
     std::optional<gfx::StencilMode> stencilMode3d;
+    const bool hasStencilTiles = stencilTiles && !stencilTiles->empty();
+    std::unordered_map<const gfx::Drawable*, std::optional<gfx::StencilMode>> ownStencilModes;
 
     // If we're using stencil clipping, we need to handle 3D features separately
-    if (stencilTiles && !stencilTiles->empty()) {
-        // 2D and 3D features in the same layer group is not supported.
-        visitDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
-                features3d = true;
-                if (drawable.getEnableStencil()) {
-                    stencil3d = true;
+    visitDrawables([&](const gfx::Drawable& drawable) {
+        if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+            features3d = true;
+            if (drawable.getEnableStencil()) {
+                stencil3d = true;
+                if (!hasStencilTiles) {
+                    ownStencilModes.emplace(&drawable, std::nullopt);
                 }
             }
-        });
+        }
+    });
+    if (const auto modes = parameters.stencilModesFor3D(ownStencilModes.size())) {
+        auto mode = modes->begin();
+        for (auto& own : ownStencilModes) {
+            own.second = *mode++;
+        }
     }
 
 #if !defined(NDEBUG)
@@ -79,10 +91,10 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     if (features3d) {
         depthMode3d = parameters.depthModeFor3D();
 
-        if (stencil3d) {
+        if (stencil3d && hasStencilTiles) {
             stencilMode3d = parameters.stencilModeFor3D();
         }
-    } else if (stencilTiles && !stencilTiles->empty()) {
+    } else if (hasStencilTiles) {
         parameters.renderTileClippingMasks(stencilTiles);
     }
 
@@ -107,8 +119,13 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             const auto& depth = drawableImpl.getEnableDepth() ? depthMode3d.value() : gfx::DepthMode::disabled();
             drawableImpl.setDepthModeFor3D(depth);
 
-            const auto& stencil = drawableImpl.getEnableStencil() ? stencilMode3d.value()
-                                                                  : gfx::StencilMode::disabled();
+            const auto own = ownStencilModes.find(&drawable);
+            if (own != ownStencilModes.end() && !own->second) {
+                own->second = parameters.stencilModeFor3D();
+            }
+            const auto& stencil = !drawableImpl.getEnableStencil() ? gfx::StencilMode::disabled()
+                                  : own != ownStencilModes.end()   ? *own->second
+                                                                   : stencilMode3d.value();
             drawableImpl.setStencilModeFor3D(stencil);
         }
 

@@ -13,6 +13,8 @@
 
 #include <array>
 #include <map>
+#include <optional>
+#include <vector>
 
 namespace mln {
 
@@ -123,6 +125,13 @@ public:
     ///          cannot be used until `renderTileClippingMasks` is called again.
     /// @return The stencil mode, each value is unique.
     gfx::StencilMode stencilModeFor3D();
+
+    /// @brief Hand out a 3D stencil mode for each of `count` drawables, clearing the stencil buffer first if they would
+    ///        not all fit, so no value handed out before the clear is drawn after it.
+    /// @return The modes, each value unique, or none when there are more drawables than the buffer holds values: the
+    ///         caller then takes each one's mode with `stencilModeFor3D` as it draws it, so a clear falls between
+    ///         draws.
+    std::optional<std::vector<gfx::StencilMode>> stencilModesFor3D(std::size_t count);
 
 private:
     template <typename TIter>

@@ -396,6 +396,21 @@ gfx::StencilMode PaintParameters::stencilModeFor3D() {
                             .pass = gfx::StencilOpType::Replace};
 }
 
+std::optional<std::vector<gfx::StencilMode>> PaintParameters::stencilModesFor3D(const std::size_t count) {
+    if (count >= maxStencilValue) {
+        return std::nullopt;
+    }
+    if (nextStencilID + count > maxStencilValue) {
+        clearStencil();
+    }
+    std::vector<gfx::StencilMode> modes;
+    modes.reserve(count);
+    for (std::size_t i = 0; i < count; ++i) {
+        modes.push_back(stencilModeFor3D());
+    }
+    return modes;
+}
+
 gfx::ColorMode PaintParameters::colorModeForRenderPass() const {
     if (debugOptions & MapDebugOptions::Overdraw) {
         constexpr float overdraw = 1.0f / 8.0f;

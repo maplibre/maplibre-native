@@ -15,6 +15,7 @@
 #include <mln/util/logging.hpp>
 
 #include <optional>
+#include <unordered_map>
 
 namespace mln {
 namespace webgpu {
@@ -47,21 +48,31 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
 
     // `stencilModeFor3D` increments a shared mask value each call, so we cache the results
-    // when a layer contains 3D drawables to ensure consistent state across drawables.
+    // when a layer contains 3D drawables with stencil tiles to ensure consistent state across
+    // drawables; without stencil tiles each drawable gets its own.
     bool features3d = false;
     bool stencil3d = false;
     std::optional<gfx::DepthMode> depthMode3d;
     std::optional<gfx::StencilMode> stencilMode3d;
+    const bool hasStencilTiles = stencilTiles && !stencilTiles->empty();
+    std::unordered_map<const gfx::Drawable*, std::optional<gfx::StencilMode>> ownStencilModes;
 
-    if (stencilTiles && !stencilTiles->empty()) {
-        visitDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
-                features3d = true;
-                if (drawable.getEnableStencil()) {
-                    stencil3d = true;
+    visitDrawables([&](const gfx::Drawable& drawable) {
+        if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+            features3d = true;
+            if (drawable.getEnableStencil()) {
+                stencil3d = true;
+                if (!hasStencilTiles) {
+                    ownStencilModes.emplace(&drawable, std::nullopt);
                 }
             }
-        });
+        }
+    });
+    if (const auto modes = parameters.stencilModesFor3D(ownStencilModes.size())) {
+        auto mode = modes->begin();
+        for (auto& own : ownStencilModes) {
+            own.second = *mode++;
+        }
     }
 
 #if !defined(NDEBUG)
@@ -70,10 +81,10 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     if (features3d) {
         depthMode3d = parameters.depthModeFor3D();
-        if (stencil3d) {
+        if (stencil3d && hasStencilTiles) {
             stencilMode3d = parameters.stencilModeFor3D();
         }
-    } else if (stencilTiles && !stencilTiles->empty()) {
+    } else if (hasStencilTiles) {
         // Handle stencil tiles if present (2D stenciling)
         parameters.renderTileClippingMasks(stencilTiles);
     }
@@ -125,8 +136,19 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         if (features3d) {
             const auto depth = (drawable.getEnableDepth() && depthMode3d) ? *depthMode3d : gfx::DepthMode::disabled();
-            const auto stencil = (drawable.getEnableStencil() && stencilMode3d) ? *stencilMode3d
-                                                                                : gfx::StencilMode::disabled();
+            const auto own = ownStencilModes.find(&drawable);
+            if (own != ownStencilModes.end() && !own->second) {
+                // A clear between two draws draws over the zoom 0 tile with buffers of its own.
+                const auto clears = parameters.context.renderingStats().stencilClears;
+                own->second = parameters.stencilModeFor3D();
+                if (parameters.context.renderingStats().stencilClears != clears) {
+                    static_cast<webgpu::UniformBufferArray&>(uniformBuffers).bindWebgpu(renderPass);
+                }
+            }
+            const auto stencil = !drawable.getEnableStencil()   ? gfx::StencilMode::disabled()
+                                 : own != ownStencilModes.end() ? *own->second
+                                 : stencilMode3d                ? *stencilMode3d
+                                                                : gfx::StencilMode::disabled();
             drawableWebGPU.setDepthModeFor3D(depth);
             drawableWebGPU.setStencilModeFor3D(stencil);
         }
