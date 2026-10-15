@@ -3,6 +3,8 @@
 #include <mln/math/angles.hpp>
 #include <mln/math/log2.hpp>
 
+#include <cmath>
+
 namespace mln {
 
 CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
@@ -109,15 +111,18 @@ void CollisionFeature::initialize(const GeometryCoordinates& line,
             // Collision features require an "on-axis" geometry,
             // so take the envelope of the rotated geometry
             // (may be quite large for wide labels rotated 45 degrees)
-            const float xMin = std::min({tl.x, tr.x, bl.x, br.x});
-            const float xMax = std::max({tl.x, tr.x, bl.x, br.x});
-            const float yMin = std::min({tl.y, tr.y, bl.y, br.y});
-            const float yMax = std::max({tl.y, tr.y, bl.y, br.y});
-
-            boxes.emplace_back(anchor.point, xMin, yMin, xMax, yMax);
-        } else {
-            boxes.emplace_back(anchor.point, x1, y1, x2, y2);
+            x1 = std::min({tl.x, tr.x, bl.x, br.x});
+            x2 = std::max({tl.x, tr.x, bl.x, br.x});
+            y1 = std::min({tl.y, tr.y, bl.y, br.y});
+            y2 = std::max({tl.y, tr.y, bl.y, br.y});
         }
+
+        // GL JS stores point collision boxes as 16-bit integers, so they collide in whole tile units.
+        boxes.emplace_back(Point<float>(std::trunc(anchor.point.x), std::trunc(anchor.point.y)),
+                           std::trunc(x1),
+                           std::trunc(y1),
+                           std::trunc(x2),
+                           std::trunc(y2));
     }
 }
 

@@ -1,0 +1,95 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 64,
+      "width": 256
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 0,
+  "sprite": "local://sprites/dark",
+  "sources": {
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -26.71875,
+                0.0
+              ]
+            },
+            "properties": {
+              "pair": 0
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -15.4248046875,
+                0.0
+              ]
+            },
+            "properties": {
+              "pair": 0
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                15.46875,
+                0.0
+              ]
+            },
+            "properties": {
+              "pair": 1
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                26.71875,
+                0.0
+              ]
+            },
+            "properties": {
+              "pair": 1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "icons",
+      "type": "symbol",
+      "source": "points",
+      "layout": {
+        "icon-image": "marker",
+        "icon-padding": 2.04
+      }
+    }
+  ]
+}
