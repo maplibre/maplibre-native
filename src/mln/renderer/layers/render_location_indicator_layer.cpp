@@ -581,7 +581,7 @@ public:
 protected:
     static ScreenCoordinate latLngToScreenCoordinate(const LatLng& p, const TransformState& s) {
         LatLng unwrappedLatLng = p.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
+        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
         ScreenCoordinate point = s.latLngToScreenCoordinate(unwrappedLatLng);
         point.y = s.getSize().height - point.y;
         return point;
@@ -589,13 +589,13 @@ protected:
 
     static Point<double> project(const LatLng& c, const TransformState& s) {
         LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
+        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
         return Projection::project(unwrappedLatLng, s.getScale());
     }
 
     static Point<double> unproject(const LatLng& c, const TransformState& s) {
         LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
+        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
         return Projection::project(unwrappedLatLng, s.getScale());
     }
 
