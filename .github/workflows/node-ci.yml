@@ -134,7 +134,9 @@ jobs:
             ccache \
             ninja-build \
             pkg-config \
-            xvfb \
+            xwayland-run \
+            xwayland \
+            weston \
             libcurl4-openssl-dev \
             libglfw3-dev \
             libuv1-dev \
@@ -275,7 +277,7 @@ jobs:
       - name: Test (Linux)
         working-directory: platform/node
         if: runner.os == 'Linux'
-        run: xvfb-run --auto-servernum npm test
+        run: xwfb-run -c weston -- npm test
 
       - name: Test (MacOS)
         if: runner.os == 'macOS'
