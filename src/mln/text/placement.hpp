@@ -98,12 +98,15 @@ class PlacementController {
 public:
     PlacementController();
     void setPlacement(Immutable<Placement>);
+    // Returns whether a committed placement was discarded.
+    bool reset();
     const Immutable<Placement>& getPlacement() const { return placement; }
     void setPlacementStale() { stale = true; }
     bool placementIsRecent(TimePoint now, float zoom, std::optional<Duration> periodOverride = std::nullopt) const;
     bool hasTransitions(TimePoint now) const;
 
 private:
+    const Immutable<Placement> emptyPlacement;
     Immutable<Placement> placement;
     bool stale = false;
 };
