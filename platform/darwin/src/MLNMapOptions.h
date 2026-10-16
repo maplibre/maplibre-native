@@ -47,6 +47,19 @@ MLN_EXPORT
  */
 @property (nonatomic) bool featureInfoEnabled;
 
+/**
+ The number of device pixels the map renders per point. Defaults to `0`, which follows the
+ scale of the screen the map view is shown on.
+
+ Set it to render the map at a resolution independent of the screen, for example when the map
+ view is used offscreen to capture images or video frames of a fixed pixel size. Labels, line
+ widths and icons keep their size in points, so the result looks like the same map on a screen
+ of that scale. The ratio is fixed for the lifetime of the map view.
+
+ Only applies to ``MLNMapView`` on iOS.
+ */
+@property (nonatomic) CGFloat pixelRatio;
+
 @end
 
 NS_ASSUME_NONNULL_END
