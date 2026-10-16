@@ -1,6 +1,7 @@
 #import "MLNFoundation_Private.h"
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNMapView+OpenGL.h"
+#import "MLNMapView_Private.h"
 
 #include <mln/gl/renderable_resource.hpp>
 
@@ -29,7 +30,10 @@
 @end
 
 namespace {
-CGFloat contentScaleFactor() {
+CGFloat contentScaleFactor(MLNMapView* mapView) {
+  if (mapView.pixelRatioOverride > 0) {
+    return mapView.pixelRatioOverride;
+  }
   return [UIScreen instancesRespondToSelector:@selector(nativeScale)]
              ? [[UIScreen mainScreen] nativeScale]
              : [[UIScreen mainScreen] scale];
@@ -118,7 +122,7 @@ void MLNMapViewOpenGLImpl::createView() {
   resource.glView.delegate = resource.delegate;
   resource.glView.autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  resource.glView.contentScaleFactor = contentScaleFactor();
+  resource.glView.contentScaleFactor = contentScaleFactor(mapView);
   resource.glView.contentMode = UIViewContentModeCenter;
   resource.glView.drawableStencilFormat = GLKViewDrawableStencilFormat8;
   resource.glView.drawableDepthFormat = GLKViewDrawableDepthFormat16;
@@ -240,7 +244,7 @@ UIImage* MLNMapViewOpenGLImpl::snapshot() {
 }
 
 void MLNMapViewOpenGLImpl::layoutChanged() {
-  const auto scaleFactor = contentScaleFactor();
+  const auto scaleFactor = contentScaleFactor(mapView);
   setRenderableSize({static_cast<uint32_t>(mapView.bounds.size.width * scaleFactor),
                      static_cast<uint32_t>(mapView.bounds.size.height * scaleFactor)});
 }
