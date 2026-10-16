@@ -1,0 +1,73 @@
+<%
+  const properties = locals.properties;
+-%>
+// This file is generated.
+// Edit platform/darwin/scripts/generate-style-code.mjs, then run `make darwin-style-code`.
+
+#import "MLNSky.h"
+
+#import "MLNLoggingConfiguration_Private.h"
+#import "MLNStyleValue_Private.h"
+#import "MLNTypes.h"
+
+#import <mln/style/sky.hpp>
+#import <mln/style/types.hpp>
+
+@implementation MLNSky
+
+- (instancetype)init {
+    mln::style::Sky mbglSky;
+    return [self initWithMBGLSky:&mbglSky];
+}
+
+- (instancetype)initWithMBGLSky:(const mln::style::Sky *)mbglSky {
+    if (self = [super init]) {
+        MLNLogInfo(@"Initializing %@.", NSStringFromClass([self class]));
+<% for (const property of properties) { -%>
+        auto <%- camelizeWithLeadingLowercase(property.name) -%>Value = mbglSky->get<%- camelize(property.name) -%>();
+        if (<%- camelizeWithLeadingLowercase(property.name) -%>Value.isUndefined()) {
+            _<%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toExpression(mbglSky->getDefault<%- camelize(property.name) -%>());
+        } else {
+            _<%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toExpression(<%- camelizeWithLeadingLowercase(property.name) -%>Value);
+        }
+<% if (property.transition) { -%>
+        _<%- camelizeWithLeadingLowercase(property.name) -%>Transition = MLNTransitionFromOptions(mbglSky->get<%- camelize(property.name) -%>Transition());
+<% } -%>
+
+<% } -%>
+    }
+    return self;
+}
+
+- (mln::style::Sky)mbglSky {
+    mln::style::Sky mbglSky;
+<% for (const property of properties) { -%>
+    auto <%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mln::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(self.<%- camelizeWithLeadingLowercase(property.name) -%>, false);
+    mbglSky.set<%- camelize(property.name) -%>(<%- camelizeWithLeadingLowercase(property.name) -%>);
+<% if (property.transition) { -%>
+    mbglSky.set<%- camelize(property.name) -%>Transition(MLNOptionsFromTransition(self.<%- camelizeWithLeadingLowercase(property.name) -%>Transition));
+<% } -%>
+
+<% } -%>
+    return mbglSky;
+}
+
+<% for (const property of properties) { -%>
+- (void)set<%- camelize(property.name) %>:(NSExpression *)<%- camelizeWithLeadingLowercase(property.name) %> {
+    MLNLogDebug(@"Setting <%- camelizeWithLeadingLowercase(property.name) %>: %@", <%- camelizeWithLeadingLowercase(property.name) %>);
+    if (<%- camelizeWithLeadingLowercase(property.name) %>) {
+        _<%- camelizeWithLeadingLowercase(property.name) %> = <%- camelizeWithLeadingLowercase(property.name) %>;
+    } else {
+        _<%- camelizeWithLeadingLowercase(property.name) %> = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toExpression(mln::style::Sky::getDefault<%- camelize(property.name) -%>());
+    }
+}
+
+<% if (property.transition) { -%>
+- (void)set<%- camelize(property.name) %>Transition:(MLNTransition)transition {
+    MLNLogDebug(@"Setting <%- camelizeWithLeadingLowercase(property.name) %>Transition: %@", MLNStringFromMLNTransition(transition));
+    _<%- camelizeWithLeadingLowercase(property.name) %>Transition = transition;
+}
+
+<% } -%>
+<% } -%>
+@end

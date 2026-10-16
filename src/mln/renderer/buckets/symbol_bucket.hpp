@@ -278,10 +278,20 @@ public:
     void upload(gfx::UploadPass&) override;
     bool hasData() const override;
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
-    std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&, const RenderTile&) override;
+    std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&,
+                                                       const RenderTile&,
+                                                       const TransformState&) override;
     void place(Placement&, const BucketPlacementData&, std::set<uint32_t>&) override;
-    void updateVertices(
-        const Placement&, bool updateOpacities, const TransformState&, const RenderTile&, std::set<uint32_t>&) override;
+    void updateVertices(const Placement&,
+                        bool updateOpacities,
+                        const TransformState&,
+                        const BucketPlacementData&,
+                        std::set<uint32_t>&) override;
+    /// Lays out the positions a layer sharing this bucket draws at its own translation, from the leader's placement.
+    void updateLayerVertices(const Placement&,
+                             const TransformState&,
+                             const BucketPlacementData&,
+                             const std::string& layerID);
     bool hasTextData() const;
     bool hasIconData() const;
     bool hasSdfIconData() const;
@@ -291,6 +301,7 @@ public:
     bool hasTextCollisionCircleData() const;
     bool hasFormatSectionOverrides() const;
     bool hasVariableTextAnchors() const;
+    bool hasLayerDynamicAttributeData(const std::string& layerID) const;
 
     void sortFeatures(float angle);
     // Returns references to the `symbolInstances` items, sorted by viewport Y.
@@ -378,6 +389,9 @@ public:
 
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     const std::string bucketLeaderID;
+    /// The tile-unit translations the leader's dynamic positions carry, which layers sharing the bucket compare.
+    Point<float> dynamicTextTranslation;
+    Point<float> dynamicIconTranslation;
     float sortedAngle = std::numeric_limits<float>::max();
 
     // Flags
@@ -418,6 +432,9 @@ public:
         ~Buffer() {
             sharedAttributeData->release();
             sharedDynamicAttributeData->release();
+            for (const auto& [layerID, data] : layerDynamicAttributeData) {
+                data->release();
+            }
             sharedOpacityAttributeData->release();
 #if MLN_USE_SYMBOL_INSTANCING
             sharedSortedInstances->release();
@@ -448,6 +465,14 @@ public:
         std::shared_ptr<DynamicAttributeVector> sharedDynamicAttributeData = std::make_shared<DynamicAttributeVector>();
         DynamicAttributeVector& dynamicAttributeData() { return *sharedDynamicAttributeData; }
         const DynamicAttributeVector& dynamicAttributeData() const { return *sharedDynamicAttributeData; }
+
+        /// Positions for each layer that shares the bucket at another translation than its leader's. A layer keeps
+        /// them for the bucket's life: drawables moved back to the shared positions would keep bindings to these.
+        std::map<std::string, std::shared_ptr<DynamicAttributeVector>> layerDynamicAttributeData;
+        const std::shared_ptr<DynamicAttributeVector>& dynamicAttributeDataFor(const std::string& layerID) const {
+            const auto it = layerDynamicAttributeData.find(layerID);
+            return it == layerDynamicAttributeData.end() ? sharedDynamicAttributeData : it->second;
+        }
 
         std::shared_ptr<OpacityAttributeVector> sharedOpacityAttributeData = std::make_shared<OpacityAttributeVector>();
         OpacityAttributeVector& opacityAttributeData() { return *sharedOpacityAttributeData; }

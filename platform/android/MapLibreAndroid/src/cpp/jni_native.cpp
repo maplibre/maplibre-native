@@ -48,6 +48,7 @@
 #include "style/layers/layer_manager.hpp"
 #include "style/sources/source.hpp"
 #include "style/light.hpp"
+#include "style/sky.hpp"
 #include "style/formatted.hpp"
 #include "style/formatted_section.hpp"
 #ifndef MBGL_MODULE_SNAPSHOT_DISABLE
@@ -126,6 +127,7 @@ void registerNatives(JavaVM* vm) {
     LayerManagerAndroid::get()->registerNative(env);
     Source::registerNative(env);
     Light::registerNative(env);
+    Sky::registerNative(env);
     Position::registerNative(env);
     Formatted::registerNative(env);
     FormattedSection::registerNative(env);

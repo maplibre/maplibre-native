@@ -1,0 +1,60 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "Tests that a translucent color relief tile does not draw where its loaded children draw.",
+      "width": 512,
+      "height": 512
+    }
+  },
+  "center": [
+    0,
+    30
+  ],
+  "zoom": 1,
+  "projection": {
+    "type": "globe"
+  },
+  "sources": {
+    "source": {
+      "type": "raster-dem",
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.terrain.png"
+      ],
+      "maxzoom": 15,
+      "tileSize": 256
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "color-relief",
+      "type": "color-relief",
+      "source": "source",
+      "paint": {
+        "color-relief-opacity": 0.5,
+        "color-relief-color": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "elevation"
+          ],
+          0,
+          "#00F",
+          500,
+          "#0F0",
+          2000,
+          "#F00"
+        ]
+      }
+    }
+  ]
+}

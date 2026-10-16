@@ -85,6 +85,25 @@ class MLNCustomLayerHost;
 
 @end
 
+namespace {
+MLNStyleLayerDrawingContext MLNStyleLayerDrawingContextMake(
+    const mln::style::CustomLayerRenderParameters &parameters) {
+  const auto &plane = parameters.globeClippingPlane;
+  return {.size = CGSizeMake(parameters.width, parameters.height),
+          .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
+          .zoomLevel = parameters.zoom,
+          .direction = mln::util::wrap(parameters.bearing, 0., 360.),
+          .pitch = static_cast<CGFloat>(parameters.pitch),
+          .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
+          .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
+          .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix),
+          .globe = parameters.globe,
+          .projectionTransition = parameters.projectionTransition,
+          .globeProjectionMatrix = MLNMatrix4Make(parameters.globeProjectionMatrix),
+          .globeClippingPlane = {plane[0], plane[1], plane[2], plane[3]}};
+}
+}  // namespace
+
 class MLNCustomLayerHost : public mln::style::CustomLayerHost {
 public:
   MLNCustomLayerHost(MLNCustomStyleLayer *styleLayer) {
@@ -120,15 +139,7 @@ public:
 
 #endif
 
-    MLNStyleLayerDrawingContext drawingContext = {
-        .size = CGSizeMake(parameters.width, parameters.height),
-        .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
-        .zoomLevel = parameters.zoom,
-        .direction = mln::util::wrap(parameters.bearing, 0., 360.),
-        .pitch = static_cast<CGFloat>(parameters.pitch),
-        .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
-        .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
-        .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix)};
+    const MLNStyleLayerDrawingContext drawingContext = MLNStyleLayerDrawingContextMake(parameters);
 
     if (layer.mapView) {
       [layer preDrawInMapView:layer.mapView withContext:drawingContext];
@@ -150,15 +161,7 @@ public:
     layer.renderEncoder = encoder;
 #endif
 
-    MLNStyleLayerDrawingContext drawingContext = {
-        .size = CGSizeMake(parameters.width, parameters.height),
-        .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
-        .zoomLevel = parameters.zoom,
-        .direction = mln::util::wrap(parameters.bearing, 0., 360.),
-        .pitch = static_cast<CGFloat>(parameters.pitch),
-        .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
-        .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
-        .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix)};
+    const MLNStyleLayerDrawingContext drawingContext = MLNStyleLayerDrawingContextMake(parameters);
 
     if (layer.mapView) {
       [layer drawInMapView:layer.mapView withContext:drawingContext];

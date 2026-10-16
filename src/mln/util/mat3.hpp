@@ -62,6 +62,10 @@ constexpr vec3 vec3Sub(const vec3& a, const vec3& b) noexcept {
     return vec3{{a[0] - b[0], a[1] - b[1], a[2] - b[2]}};
 }
 
+constexpr vec3 vec3Add(const vec3& a, const vec3& b) noexcept {
+    return vec3{{a[0] + b[0], a[1] + b[1], a[2] + b[2]}};
+}
+
 namespace matrix {
 
 void identity(mat3& out) noexcept;

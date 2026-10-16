@@ -12,7 +12,7 @@ struct alignas(16) HeatmapDrawableUBO {
     // Interpolations
     /* 68 */ float weight_t;
     /* 72 */ float radius_t;
-    /* 76 */ float pad1;
+    /* 76 */ float globe_extrude_scale;
     /* 80 */
 };
 static_assert(sizeof(HeatmapDrawableUBO) == 5 * 16);

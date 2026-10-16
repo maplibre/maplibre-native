@@ -23,6 +23,7 @@ import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
+import org.maplibre.android.style.sky.Sky;
 import org.maplibre.android.style.sources.Source;
 
 import java.util.List;
@@ -53,6 +54,8 @@ interface NativeMap {
   void flyTo(@NonNull LatLng center, double zoom, double bearing, double pitch, double[] padding, long duration);
 
   void moveBy(double deltaX, double deltaY, long duration);
+
+  void moveBy(double deltaX, double deltaY, @NonNull PointF focalPoint);
 
   @NonNull
   CameraPosition getCameraPosition();
@@ -170,6 +173,11 @@ interface NativeMap {
 
   Light getLight();
 
+  @Nullable
+  Sky getSky();
+
+  void setSky(@Nullable Sky sky);
+
   //
   // Content padding API
   //
@@ -231,6 +239,8 @@ interface NativeMap {
   PointF pixelForLatLng(@NonNull LatLng latLng);
 
   void pixelsForLatLngs(@NonNull double[] input, @NonNull double[] output);
+
+  boolean isLocationOccluded(@NonNull LatLng latLng);
 
   void getVisibleCoordinateBounds(@NonNull double[] output);
 
