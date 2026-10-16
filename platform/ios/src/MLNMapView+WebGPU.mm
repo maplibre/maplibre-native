@@ -2,6 +2,7 @@
 #import "MLNFoundation_Private.h"
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNMapView+WebGPU.h"
+#import "MLNMapView_Private.h"
 
 #import <mln/util/logging.hpp>
 #import <mln/webgpu/renderable_resource.hpp>
@@ -278,7 +279,8 @@ void MLNMapViewWebGPUImpl::createView() {
     return;
   }
 
-  const auto scaleFactor = MLNEffectiveScaleFactorForView(mapView);
+  const auto scaleFactor = mapView.pixelRatioOverride > 0 ? mapView.pixelRatioOverride
+                                                          : MLNEffectiveScaleFactorForView(mapView);
 
   impl->webGPUView = [[MLNWebGPUView alloc] initWithFrame:mapView.bounds];
   impl->webGPUView.autoresizingMask =
@@ -605,7 +607,8 @@ void MLNMapViewWebGPUImpl::deleteView() {
 }
 
 void MLNMapViewWebGPUImpl::layoutChanged() {
-  const auto scaleFactor = MLNEffectiveScaleFactorForView(mapView);
+  const auto scaleFactor = mapView.pixelRatioOverride > 0 ? mapView.pixelRatioOverride
+                                                          : MLNEffectiveScaleFactorForView(mapView);
   const auto screenSize = mapView.bounds.size;
 
   impl->webGPUView.contentScaleFactor = scaleFactor;
