@@ -25,7 +25,8 @@ public:
         Simple,
         Gradient,
         Pattern,
-        SDF
+        SDF,
+        GradientSDF
     };
 
     LineLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
