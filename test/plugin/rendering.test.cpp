@@ -1,17 +1,25 @@
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/map_options.hpp>
+#include <mln/math/angles.hpp>
 #include <mln/plugin/plugin_api.h>
 #include <mln/plugin/plugin_shader.hpp>
+#include <mln/renderer/renderer.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/layer.hpp>
+#include <mln/style/projection.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/test/map_adapter.hpp>
 #include <mln/test/stub_file_source.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/run_loop.hpp>
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstring>
+#include <numbers>
+#include <vector>
 
 using namespace mln;
 
@@ -27,13 +35,17 @@ mln_plugin_string view(const std::string& text) {
 std::array<unsigned, 2> uniformCalls{};
 float sharedAlpha = 1;
 bool failSharedUniform = false;
+std::vector<mln_plugin_uniform_context_v1> tileContexts;
+std::vector<mln_plugin_query_context_v1> queryContexts;
 
 void registerTriangles(const std::string& pluginID,
                        bool packedColor = false,
                        bool withUniforms = false,
                        bool scopedUniforms = false,
                        bool stencilOverlapDedup = false,
-                       mln_plugin_should_animate_fn shouldAnimate = nullptr) {
+                       mln_plugin_should_animate_fn shouldAnimate = nullptr,
+                       bool stencilOverlap = false,
+                       bool readWriteDepth = false) {
     static const float vertices[] = {-1, -1, 1, -1, 0, 1};
     static const uint16_t indices[] = {0, 1, 2};
     static const mln_plugin_vertex_stream_v1 stream = {
@@ -42,6 +54,30 @@ void registerTriangles(const std::string& pluginID,
     static const mln_plugin_segment_v1 segment = {sizeof(segment), 0, 0, 3, 3};
     static const mln_plugin_drawable_descriptor_v1 drawable = {
         sizeof(drawable), 1, {"main", 4}, &binding, 1, &segment, 1, MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY, 0, 0, 0, 0};
+    static const mln_plugin_drawable_descriptor_v1 overlapDrawable = {sizeof(overlapDrawable),
+                                                                      1,
+                                                                      {"main", 4},
+                                                                      &binding,
+                                                                      1,
+                                                                      &segment,
+                                                                      1,
+                                                                      MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY,
+                                                                      1,
+                                                                      0,
+                                                                      0,
+                                                                      0};
+    static const mln_plugin_drawable_descriptor_v1 depthDrawable = {sizeof(depthDrawable),
+                                                                    1,
+                                                                    {"main", 4},
+                                                                    &binding,
+                                                                    1,
+                                                                    &segment,
+                                                                    1,
+                                                                    MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE,
+                                                                    0,
+                                                                    0,
+                                                                    0,
+                                                                    0};
     static const mln_plugin_feature_vertex_range_v1 range = {sizeof(range), 0, 1, 0, 3};
     const mln_plugin_shader_attribute_v1 attribute = {
         sizeof(attribute), 0, 0, {"a_pos", 5}, MLN_PLUGIN_VERTEX_FLOAT_X2};
@@ -86,15 +122,17 @@ void registerTriangles(const std::string& pluginID,
     for (std::size_t i = 0; i < layers.size(); ++i) {
         const std::string offset = i == 0 ? "-1.0" : "+1.0";
         const std::string color = i == 0 ? "1,0,0,1" : "0,1,0,1";
-        const std::string body = "void main(){gl_Position=vec4((a_pos.x" + offset + ")*0.5,a_pos.y,0,1);";
+        // With depth, the left triangle lies behind the near side of a planet filling the view, the right one in front.
+        const std::string depth = !readWriteDepth ? "0" : (i == 0 ? "0.9999" : "0.5");
+        const std::string body = "void main(){gl_Position=vec4((a_pos.x" + offset + ")*0.5,a_pos.y," + depth + ",1);";
         code[i] = {"in vec2 a_pos;" + body + "}",
                    "void main(){fragColor=vec4(" + color + ");}",
                    "layout(location=0) in vec2 a_pos;" + body + "applySurfaceTransform();}",
                    "layout(location=0) out vec4 fragColor;void main(){fragColor=vec4(" + color + ");}",
                    "struct Input{float2 a_pos [[attribute(0)]];};"
                    "vertex float4 triangleVertex(Input in [[stage_in]]) {return float4((in.a_pos.x" +
-                       offset + ")*0.5,in.a_pos.y,0,1);}fragment half4 triangleFragment(){return half4(" + color +
-                       ");}"};
+                       offset + ")*0.5,in.a_pos.y," + depth + ",1);}fragment half4 triangleFragment(){return half4(" +
+                       color + ");}"};
         if (packedColor) {
             code[i] = {"in vec2 a_pos;in vec4 a_color;out vec4 v_color;" + body + "v_color=a_color;}",
                        "in vec4 v_color;void main(){fragColor=v_color;}",
@@ -209,9 +247,14 @@ void registerTriangles(const std::string& pluginID,
                     EXPECT_EQ(16u, size);
                     ++uniformCalls.at(id);
                     if (failSharedUniform) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
+                    if (id == 0) tileContexts.push_back(*context);
                     if (id == 1) {
                         EXPECT_EQ(0, context->pixels_to_tile_units);
                         for (unsigned i = 0; i < 16; ++i) EXPECT_EQ(i % 5 == 0 ? 1 : 0, context->tile_matrix[i]);
+                        for (unsigned entry = 0; entry < 16; ++entry) {
+                            EXPECT_EQ(entry % 5 == 0 ? 1 : 0, context->projection_matrix[entry]);
+                        }
+                        for (const auto value : context->tile_mercator_coords) EXPECT_EQ(0, value);
                         std::memcpy(bytes, &sharedAlpha, sizeof(sharedAlpha));
                     }
                     return MLN_PLUGIN_STATUS_OK;
@@ -228,6 +271,18 @@ void registerTriangles(const std::string& pluginID,
             *output = {sizeof(*output), &stream, 1, indices, 3, &drawable, 1, 0, &range, 1};
             return MLN_PLUGIN_STATUS_OK;
         };
+        if (stencilOverlap) {
+            layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
+                *output = {sizeof(*output), &stream, 1, indices, 3, &overlapDrawable, 1, 0, &range, 1};
+                return MLN_PLUGIN_STATUS_OK;
+            };
+        }
+        if (readWriteDepth) {
+            layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
+                *output = {sizeof(*output), &stream, 1, indices, 3, &depthDrawable, 1, 0, &range, 1};
+                return MLN_PLUGIN_STATUS_OK;
+            };
+        }
         if (packedColor) {
             layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
                 *output = {sizeof(*output), colorStreams, 2, indices, 3, &colorDrawable, 1, 0, nullptr, 0};
@@ -237,6 +292,15 @@ void registerTriangles(const std::string& pluginID,
         layer.destroy_layout = [](void* instance) {
             delete static_cast<int*>(instance);
         };
+        layer.query_feature = [](const mln_plugin_feature_v1*,
+                                 const mln_plugin_tile_point_v1*,
+                                 size_t,
+                                 const mln_plugin_query_context_v1* context,
+                                 const mln_plugin_property_value_v1*,
+                                 size_t) -> uint8_t {
+            queryContexts.push_back(*context);
+            return 1;
+        };
     }
     const mln_plugin_descriptor_v1 descriptor = {
         sizeof(descriptor), MLN_PLUGIN_ABI_VERSION_1, view(pluginID), {"1", 1}, 1, 1, layers.data(), layers.size()};
@@ -244,10 +308,12 @@ void registerTriangles(const std::string& pluginID,
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, error, sizeof(error))) << error;
 }
 
-std::string triangleStyle(const std::string& pluginID) {
+std::string triangleStyle(const std::string& pluginID,
+                          const std::string& geometry = R"({"type":"Point","coordinates":[0,0]})") {
     return R"({"version":8,"sources":{"points":{"type":"geojson","data":{
         "type":"FeatureCollection","features":[{"type":"Feature","properties":{},
-        "geometry":{"type":"Point","coordinates":[0,0]}}]}}},"layers":[
+        "geometry":)" +
+           geometry + R"(}]}}},"layers":[
         {"id":"left","type":")" +
            pluginID + R"(.left","source":"points"},
         {"id":"right","type":")" +
@@ -328,6 +394,60 @@ TEST(PluginRendering, CameraPaintRefreshesAfterPropertyAndZoomChanges) {
     expectRadius(1, 0.5f);
 }
 
+TEST(PluginRendering, StencilOverlapWithoutDedupDraws) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.stencil-overlap",
+                                              /*packedColor=*/false,
+                                              /*withUniforms=*/false,
+                                              /*scopedUniforms=*/false,
+                                              /*stencilOverlapDedup=*/false,
+                                              /*shouldAnimate=*/nullptr,
+                                              /*stencilOverlap=*/true));
+    RenderTest test;
+    test.expectTriangles("test.stencil-overlap");
+}
+
+// The point sits on the corner of the four zoom 1 tiles, so each layer draws its triangle four times at half opacity.
+// Without dedup every drawable stencils against itself only and all four blend; with dedup the layer draws once.
+TEST(PluginRendering, StencilOverlapWithoutDedupStencilsEachDrawableOnItsOwn) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.overlap-per-drawable", false, false, true, false, nullptr, true));
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.overlap-per-layer", false, false, true, true, nullptr, false));
+    sharedAlpha = 0.5f;
+    const auto leftRed = [](const std::string& pluginID) {
+        RenderTest test;
+        test.map.getStyle().loadJSON(triangleStyle(pluginID));
+        test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(1));
+        const auto result = test.frontend.render(test.map);
+        return result.image.data[(32 * 64 + 16) * 4];
+    };
+    const auto perDrawable = leftRed("test.overlap-per-drawable");
+    const auto perLayer = leftRed("test.overlap-per-layer");
+    sharedAlpha = 1;
+    EXPECT_NEAR(239, perDrawable, 1);
+    EXPECT_NEAR(128, perLayer, 1);
+}
+
+// On the globe a read/write depth drawable is 3D geometry: the planet hides what lies behind its near side.
+TEST(PluginRendering, ReadWriteDepthDrawablesAreHiddenByThePlanet) {
+    ASSERT_NO_FATAL_FAILURE(
+        registerTriangles("test.read-write-depth", false, false, false, false, nullptr, false, true));
+    RenderTest test;
+    test.map.getStyle().loadJSON(triangleStyle("test.read-write-depth"));
+    const auto render = [&](const char* projectionType) {
+        SCOPED_TRACE(projectionType);
+        auto projection = std::make_unique<style::Projection>();
+        projection->setType(ProjectionDefinition(projectionType));
+        test.map.getStyle().setProjection(std::move(projection));
+        const auto result = test.frontend.render(test.map);
+        const auto* left = result.image.data.get() + (32 * 64 + 16) * 4;
+        const auto* right = result.image.data.get() + (32 * 64 + 48) * 4;
+        EXPECT_EQ(255, right[1]);
+        return left[3];
+    };
+    EXPECT_EQ(0, render("globe"));
+    EXPECT_EQ(255, render("mercator"));
+    EXPECT_EQ(0, render("globe"));
+}
+
 TEST(PluginRendering, UnchangedUniformUploadsAreSkippedButPaintChangesUpload) {
     ASSERT_NO_FATAL_FAILURE(registerTriangles("test.cached-uniforms", false, true));
     RenderTest test;
@@ -392,6 +512,166 @@ TEST(PluginRendering, SharedUniformsRunAtDeclaredScopeAndUpdateWithoutGeometryCh
     failSharedUniform = false;
     const auto recovered = test.frontend.render(test.map);
     EXPECT_EQ(warm.image, recovered.image);
+}
+
+// A place inside a drawable's tile, taken through the context the way a plugin's vertex shader would, lands where the
+// map puts it. Returns how many drawables held the place.
+unsigned expectPlaceWhereTheMapDrawsIt(RenderTest& test, const LatLng& place, bool globe) {
+    tileContexts.clear();
+    test.frontend.render(test.map);
+    const double placeX = (place.longitude() + 180.0) / 360.0;
+    const double placeY = 0.5 - std::log(std::tan(std::numbers::pi / 4.0 + util::deg2rad(place.latitude()) / 2.0)) /
+                                    (2.0 * std::numbers::pi);
+    const auto pixel = test.map.pixelForLatLng(place);
+    const auto size = test.frontend.getSize();
+    unsigned found = 0;
+    for (const auto& context : tileContexts) {
+        const auto& tile = context.tile_mercator_coords;
+        const double x = (placeX - tile[0]) / tile[2];
+        const double y = (placeY - tile[1]) / tile[3];
+        if (x < 0 || x > util::EXTENT || y < 0 || y > util::EXTENT) continue;
+        ++found;
+        std::array<double, 4> position = {x, y, 0, 1};
+        const float* matrix = context.tile_matrix;
+        // The aligned tile matrix snaps to the pixel grid.
+        double tolerance = 1.0 / size.width;
+        if (globe) {
+            EXPECT_EQ(1, context.projection_transition);
+            const double longitude = (tile[0] + x * tile[2]) * 2.0 * std::numbers::pi - std::numbers::pi;
+            const double latitude = 2.0 * std::atan(std::exp(std::numbers::pi -
+                                                             (tile[1] + y * tile[3]) * 2.0 * std::numbers::pi)) -
+                                    std::numbers::pi / 2.0;
+            position = {std::sin(longitude) * std::cos(latitude),
+                        std::sin(latitude),
+                        std::cos(longitude) * std::cos(latitude),
+                        1};
+            matrix = context.projection_matrix;
+            tolerance = 1e-3;
+            // The place faces the camera and its antipode does not.
+            const auto& plane = context.clipping_plane;
+            const double side = position[0] * plane[0] + position[1] * plane[1] + position[2] * plane[2];
+            EXPECT_GT(side + plane[3], 0);
+            EXPECT_LT(-side + plane[3], 0);
+            // Ten pixels' worth of angle east of the map's center is ten pixels on the screen.
+            const auto project = [&](const std::array<double, 3>& direction) {
+                std::array<double, 4> clip{};
+                for (unsigned row = 0; row < 4; ++row) {
+                    clip[row] = matrix[12 + row];
+                    for (unsigned column = 0; column < 3; ++column)
+                        clip[row] += matrix[column * 4 + row] * direction[column];
+                }
+                return std::array<double, 2>{clip[0] / clip[3] * size.width / 2.0,
+                                             clip[1] / clip[3] * size.height / 2.0};
+            };
+            const auto center = test.map.getCameraOptions().center.value();
+            const double centerLongitude = util::deg2rad(center.longitude());
+            const double centerLatitude = util::deg2rad(center.latitude());
+            const std::array<double, 3> direction = {std::sin(centerLongitude) * std::cos(centerLatitude),
+                                                     std::sin(centerLatitude),
+                                                     std::cos(centerLongitude) * std::cos(centerLatitude)};
+            const double right = std::hypot(direction[0], direction[2]);
+            const double step = std::tan(10.0 * context.pixels_to_sphere_radians);
+            std::array<double, 3> east = {
+                direction[0] + direction[2] / right * step, direction[1], direction[2] - direction[0] / right * step};
+            const double length = std::hypot(east[0], east[1], east[2]);
+            for (auto& value : east) value /= length;
+            const auto from = project(direction);
+            const auto to = project(east);
+            EXPECT_NEAR(10.0, std::hypot(to[0] - from[0], to[1] - from[1]), 0.2);
+        } else {
+            EXPECT_EQ(0, context.projection_transition);
+            for (const auto value : context.clipping_plane) EXPECT_EQ(0, value);
+            for (unsigned i = 0; i < 16; ++i) EXPECT_EQ(context.tile_matrix[i], context.projection_matrix[i]);
+        }
+        std::array<double, 4> clip{};
+        for (unsigned row = 0; row < 4; ++row) {
+            for (unsigned column = 0; column < 4; ++column) clip[row] += matrix[column * 4 + row] * position[column];
+        }
+        EXPECT_NEAR(pixel.x / size.width * 2.0 - 1.0, clip[0] / clip[3], tolerance);
+        EXPECT_NEAR(1.0 - pixel.y / size.height * 2.0, clip[1] / clip[3], tolerance);
+    }
+    return found;
+}
+
+TEST(PluginRendering, UniformContextCarriesTheProjection) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.projection", false, false, true));
+    RenderTest test;
+    test.map.getStyle().loadJSON(triangleStyle("test.projection"));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{20, 40}).withZoom(1));
+    const LatLng place{25, 48};
+    EXPECT_GT(expectPlaceWhereTheMapDrawsIt(test, place, false), 0u);
+
+    auto projection = std::make_unique<style::Projection>();
+    projection->setType(ProjectionDefinition("globe"));
+    test.map.getStyle().setProjection(std::move(projection));
+    EXPECT_GT(expectPlaceWhereTheMapDrawsIt(test, place, true), 0u);
+}
+
+// A plugin's hit test gets the projection its uniform callback gets, with the Mercator side as the tile matrix.
+TEST(PluginRendering, QueryContextCarriesTheProjection) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.query-projection", false, false, true));
+    RenderTest test;
+    test.map.getStyle().loadJSON(triangleStyle("test.query-projection", R"({"type":"Point","coordinates":[45,30]})"));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{20, 40}).withZoom(1));
+    const LatLng place{30, 45};
+    const double placeX = (place.longitude() + 180.0) / 360.0;
+    const double placeY = 0.5 - std::log(std::tan(std::numbers::pi / 4.0 + util::deg2rad(place.latitude()) / 2.0)) /
+                                    (2.0 * std::numbers::pi);
+    const double longitude = util::deg2rad(place.longitude());
+    const double latitude = util::deg2rad(place.latitude());
+    const std::array<double, 4> onSphere = {
+        std::sin(longitude) * std::cos(latitude), std::sin(latitude), std::cos(longitude) * std::cos(latitude), 1};
+    const auto ndc = [](const auto& matrix, const std::array<double, 4>& point) {
+        std::array<double, 4> result{};
+        for (unsigned row = 0; row < 4; ++row) {
+            for (unsigned column = 0; column < 4; ++column) {
+                result[row] += matrix[column * 4 + row] * point[column];
+            }
+        }
+        return std::array<double, 2>{result[0] / result[3], result[1] / result[3]};
+    };
+    // The uniform callback's tile matrix is aligned to the pixel grid; the hit test's is not.
+    const double tolerance = 1.0 / test.frontend.getSize().width;
+    for (const bool globe : {false, true}) {
+        SCOPED_TRACE(globe ? "globe" : "mercator");
+        if (globe) {
+            auto projection = std::make_unique<style::Projection>();
+            projection->setType(ProjectionDefinition("globe"));
+            test.map.getStyle().setProjection(std::move(projection));
+        }
+        tileContexts.clear();
+        test.frontend.render(test.map);
+        queryContexts.clear();
+        const auto pixel = test.map.pixelForLatLng(place);
+        test.frontend.getRenderer()->queryRenderedFeatures(
+            ScreenBox{{pixel.x - 1, pixel.y - 1}, {pixel.x + 1, pixel.y + 1}});
+        ASSERT_FALSE(queryContexts.empty());
+        const auto rendered = std::ranges::find_if(tileContexts, [&](const auto& context) {
+            const auto& tile = context.tile_mercator_coords;
+            const double x = (placeX - tile[0]) / tile[2];
+            const double y = (placeY - tile[1]) / tile[3];
+            return x >= 0 && x <= util::EXTENT && y >= 0 && y <= util::EXTENT;
+        });
+        ASSERT_NE(tileContexts.end(), rendered);
+        const auto& tile = rendered->tile_mercator_coords;
+        const std::array<double, 4> inTile = {(placeX - tile[0]) / tile[2], (placeY - tile[1]) / tile[3], 0, 1};
+        const auto& sphereInput = globe ? onSphere : inTile;
+        for (const auto& context : queryContexts) {
+            for (const auto& [drawn, hit] :
+                 {std::pair{ndc(rendered->tile_matrix, inTile), ndc(context.tile_matrix, inTile)},
+                  std::pair{ndc(rendered->projection_matrix, sphereInput),
+                            ndc(context.projection_matrix, sphereInput)}}) {
+                EXPECT_NEAR(drawn[0], hit[0], tolerance);
+                EXPECT_NEAR(drawn[1], hit[1], tolerance);
+            }
+            EXPECT_EQ(rendered->projection_transition, context.projection_transition);
+            EXPECT_FLOAT_EQ(rendered->pixels_to_sphere_radians, static_cast<float>(context.pixels_to_sphere_radians));
+            for (unsigned i = 0; i < 4; ++i) {
+                EXPECT_FLOAT_EQ(rendered->tile_mercator_coords[i], static_cast<float>(context.tile_mercator_coords[i]));
+                EXPECT_FLOAT_EQ(rendered->clipping_plane[i], static_cast<float>(context.clipping_plane[i]));
+            }
+        }
+    }
 }
 
 TEST(PluginRendering, RegistrationAfterRendererInitialization) {

@@ -54,6 +54,8 @@ interface NativeMap {
 
   void moveBy(double deltaX, double deltaY, long duration);
 
+  void moveBy(double deltaX, double deltaY, @NonNull PointF focalPoint);
+
   @NonNull
   CameraPosition getCameraPosition();
 
@@ -231,6 +233,8 @@ interface NativeMap {
   PointF pixelForLatLng(@NonNull LatLng latLng);
 
   void pixelsForLatLngs(@NonNull double[] input, @NonNull double[] output);
+
+  boolean isLocationOccluded(@NonNull LatLng latLng);
 
   void getVisibleCoordinateBounds(@NonNull double[] output);
 

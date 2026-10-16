@@ -4,6 +4,7 @@
 #include <mln/gfx/cull_face_mode.hpp>
 #include <mln/gfx/render_pass.hpp>
 #include <mln/map/transform_state.hpp>
+#include <mln/renderer/layer_tweaker.hpp>
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/renderer/render_tile.hpp>
@@ -113,14 +114,16 @@ void PaintParameters::updateStencilBufferAvailability() {
 #endif
 
 mat4 PaintParameters::matrixForTile(const UnwrappedTileID& tileID, bool aligned) const {
-    mat4 matrix;
-    state.matrixFor(matrix, tileID);
-    matrix::multiply(matrix, aligned ? transformParams.alignedProjMatrix : transformParams.projMatrix, matrix);
-    return matrix;
+    return projectionDataForTile(tileID, aligned).mainMatrix;
+}
+
+ProjectionData PaintParameters::projectionDataForTile(const UnwrappedTileID& tileID, bool aligned) const {
+    return state.getProjectionData(tileID, aligned ? transformParams.alignedProjMatrix : transformParams.projMatrix);
 }
 
 gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n, gfx::DepthMaskType mask) const {
-    if (currentLayer < opaquePassCutoff) {
+    // On the globe, 2D layers are ordered by draw order alone; their Z is the back-hemisphere clip.
+    if (currentLayer < opaquePassCutoff || state.isGlobeRendering()) {
         return gfx::DepthMode::disabled();
     }
 
@@ -169,9 +172,17 @@ void PaintParameters::clearStencil() {
     const auto debugGroup = renderPass->createDebugGroup("tile-clip-mask-clear");
 #endif
 
-    const std::vector<shaders::ClipUBO> tileUBO = {shaders::ClipUBO{
-        .matrix = util::cast<float>(matrixForTile({0, 0, 0})), .stencil_ref = 0, .pad1 = 0, .pad2 = 0, .pad3 = 0}};
-    mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
+    if (state.isGlobeRendering()) {
+        const std::vector<gfx::GlobeClipMask> masks = {
+            {.projection = LayerTweaker::toProjectionUBO(projectionDataForTile({0, 0, 0})),
+             .stencilRef = 0,
+             .tile = CanonicalTileID(0, 0, 0)}};
+        mtlContext.renderGlobeTileClippingMasks(*renderPass, staticData, masks);
+    } else {
+        const std::vector<shaders::ClipUBO> tileUBO = {shaders::ClipUBO{
+            .matrix = util::cast<float>(matrixForTile({0, 0, 0})), .stencil_ref = 0, .pad1 = 0, .pad2 = 0, .pad3 = 0}};
+        mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
+    }
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_VULKAN
     const auto& vulkanRenderPass = static_cast<vulkan::RenderPass&>(*renderPass);
@@ -179,7 +190,20 @@ void PaintParameters::clearStencil() {
 
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_WEBGPU
-    // WebGPU clears stencil through render pass descriptor
+    // The render pass clears the stencil only where it begins; within it, draw zero over the zoom 0 tile, as Metal
+    // does.
+    auto& webgpuContext = static_cast<webgpu::Context&>(context);
+    if (state.isGlobeRendering()) {
+        const std::vector<gfx::GlobeClipMask> masks = {
+            {.projection = LayerTweaker::toProjectionUBO(projectionDataForTile({0, 0, 0})),
+             .stencilRef = 0,
+             .tile = CanonicalTileID(0, 0, 0)}};
+        webgpuContext.renderGlobeTileClippingMasks(*renderPass, staticData, masks);
+    } else {
+        const std::vector<shaders::ClipUBO> tileUBO = {shaders::ClipUBO{
+            .matrix = util::cast<float>(matrixForTile({0, 0, 0})), .stencil_ref = 0, .pad1 = 0, .pad2 = 0, .pad3 = 0}};
+        webgpuContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
+    }
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_OPENGL
     context.clearStencilBuffer(0b00000000);
@@ -204,9 +228,14 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     if (nextStencilID + count > maxStencilValue) {
         clearStencil();
     }
+    if (!state.isGlobeRendering()) {
+        context.releaseGlobeClipMasks();
+    }
 
 #if MLN_RENDER_BACKEND_WEBGPU
+    const bool globe = state.isGlobeRendering();
     std::vector<shaders::ClipUBO> tileUBOs;
+    std::vector<gfx::GlobeClipMask> globeMasks;
     for (const auto& tileRef : *renderTiles) {
         const auto& tileID = tileRef.get().id;
 
@@ -215,6 +244,13 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         if (result.second) {
             nextStencilID++;
         } else {
+            continue;
+        }
+
+        if (globe) {
+            globeMasks.push_back({.projection = LayerTweaker::toProjectionUBO(projectionDataForTile(tileID)),
+                                  .stencilRef = static_cast<uint32_t>(stencilID),
+                                  .tile = tileID.canonical});
             continue;
         }
 
@@ -229,18 +265,24 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                                                /* .pad3 = */ 0});
     }
 
-    if (!tileUBOs.empty()) {
+    if (!tileUBOs.empty() || !globeMasks.empty()) {
 #if !defined(NDEBUG)
         const auto debugGroup = renderPass->createDebugGroup("tile-clip-masks");
 #endif
 
         auto& webgpuContext = static_cast<webgpu::Context&>(context);
-        webgpuContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        if (globe) {
+            webgpuContext.renderGlobeTileClippingMasks(*renderPass, staticData, globeMasks);
+        } else {
+            webgpuContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        }
         webgpuContext.renderingStats().stencilUpdates++;
     }
 #elif MLN_RENDER_BACKEND_METAL
     // Assign a stencil ID and build a UBO for each tile in the set
+    const bool globe = state.isGlobeRendering();
     std::vector<shaders::ClipUBO> tileUBOs;
+    std::vector<gfx::GlobeClipMask> globeMasks;
     for (const auto& tileRef : *renderTiles) {
         const auto& tileID = tileRef.get().id;
 
@@ -251,6 +293,13 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             nextStencilID++;
         } else {
             // already present
+            continue;
+        }
+
+        if (globe) {
+            globeMasks.push_back({.projection = LayerTweaker::toProjectionUBO(projectionDataForTile(tileID)),
+                                  .stencilRef = static_cast<uint32_t>(stencilID),
+                                  .tile = tileID.canonical});
             continue;
         }
 
@@ -265,20 +314,26 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                                                .pad3 = 0});
     }
 
-    if (!tileUBOs.empty()) {
+    if (!tileUBOs.empty() || !globeMasks.empty()) {
 #if !defined(NDEBUG)
         const auto debugGroup = renderPass->createDebugGroup("tile-clip-masks");
 #endif
 
         auto& mtlContext = static_cast<mtl::Context&>(context);
-        mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        if (globe) {
+            mtlContext.renderGlobeTileClippingMasks(*renderPass, staticData, globeMasks);
+        } else {
+            mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        }
 
         mtlContext.renderingStats().stencilUpdates++;
     }
 
 #elif MLN_RENDER_BACKEND_VULKAN
 
+    const bool globe = state.isGlobeRendering();
     std::vector<shaders::ClipUBO> tileUBOs;
+    std::vector<gfx::GlobeClipMask> globeMasks;
     for (const auto& tileRef : *renderTiles) {
         const auto& tileID = tileRef.get().id;
 
@@ -292,6 +347,13 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             continue;
         }
 
+        if (globe) {
+            globeMasks.push_back({.projection = LayerTweaker::toProjectionUBO(projectionDataForTile(tileID)),
+                                  .stencilRef = stencilID,
+                                  .tile = tileID.canonical});
+            continue;
+        }
+
         if (tileUBOs.empty()) {
             tileUBOs.reserve(count);
         }
@@ -299,17 +361,45 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         tileUBOs.emplace_back(shaders::ClipUBO{matrixForTile(tileID), stencilID});
     }
 
-    if (!tileUBOs.empty()) {
+    if (!tileUBOs.empty() || !globeMasks.empty()) {
 #if !defined(NDEBUG)
         const auto debugGroup = renderPass->createDebugGroup("tile-clip-masks");
 #endif
 
         auto& vulkanContext = static_cast<vulkan::Context&>(context);
-        vulkanContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        if (globe) {
+            vulkanContext.renderGlobeTileClippingMasks(*renderPass, staticData, globeMasks);
+        } else {
+            vulkanContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        }
         vulkanContext.renderingStats().stencilUpdates++;
     }
 
 #elif MLN_RENDER_BACKEND_OPENGL
+    if (state.isGlobeRendering()) {
+        std::vector<gfx::GlobeClipMask> globeMasks;
+        for (const auto& tileRef : *renderTiles) {
+            const auto& tileID = tileRef.get().id;
+            const int32_t stencilID = nextStencilID;
+            if (!tileClippingMaskIDs.insert(std::make_pair(tileID, stencilID)).second) {
+                continue;
+            }
+            nextStencilID++;
+            globeMasks.push_back({.projection = LayerTweaker::toProjectionUBO(projectionDataForTile(tileID)),
+                                  .stencilRef = static_cast<uint32_t>(stencilID),
+                                  .tile = tileID.canonical});
+        }
+        if (!globeMasks.empty()) {
+            auto& glContext = static_cast<gl::Context&>(context);
+            if (!glContext.renderGlobeTileClippingMasks(*this, staticData, globeMasks)) {
+                tileClippingMaskIDs.clear();
+                return false;
+            }
+            glContext.renderingStats().stencilUpdates++;
+        }
+        return true;
+    }
+
     auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
 
     if (!program) {
@@ -394,6 +484,19 @@ gfx::StencilMode PaintParameters::stencilModeFor3D() {
                             .fail = gfx::StencilOpType::Keep,
                             .depthFail = gfx::StencilOpType::Keep,
                             .pass = gfx::StencilOpType::Replace};
+}
+
+bool PaintParameters::stencilModesFor3D(std::unordered_map<const gfx::Drawable*, gfx::StencilMode>& modes) {
+    if (modes.size() >= maxStencilValue) {
+        return false;
+    }
+    if (nextStencilID + modes.size() > maxStencilValue) {
+        clearStencil();
+    }
+    for (auto& [drawable, mode] : modes) {
+        mode = stencilModeFor3D();
+    }
+    return true;
 }
 
 gfx::ColorMode PaintParameters::colorModeForRenderPass() const {
