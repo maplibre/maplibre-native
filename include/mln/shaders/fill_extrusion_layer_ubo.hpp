@@ -29,8 +29,10 @@ struct alignas(16) FillExtrusionTilePropsUBO {
     /*  0 */ std::array<float, 4> pattern_from;
     /* 16 */ std::array<float, 4> pattern_to;
     /* 32 */ std::array<float, 2> texsize;
-    /* 40 */ float pad1;
-    /* 44 */ float pad2;
+    // Heights of the first and last stop when fill-extrusion-color interpolates over ["elevation"] with
+    // feature data, so the two per-vertex colors are blended by height; equal (0) otherwise.
+    /* 40 */ float elevation_color_min;
+    /* 44 */ float elevation_color_max;
     /* 48 */
 };
 static_assert(sizeof(FillExtrusionTilePropsUBO) == 3 * 16);
@@ -39,7 +41,7 @@ static_assert(sizeof(FillExtrusionTilePropsUBO) == 3 * 16);
 struct alignas(16) FillExtrusionPropsUBO {
     /*  0 */ Color color;
     /* 16 */ std::array<float, 3> light_color;
-    /* 28 */ float pad1;
+    /* 28 */ float color_ramp_scale; // 1 / elevationColorRampMaxHeight if fill-extrusion-color uses elevation, else 0
     /* 32 */ std::array<float, 3> light_position;
     /* 44 */ float base;
     /* 48 */ float height;
@@ -49,10 +51,16 @@ struct alignas(16) FillExtrusionPropsUBO {
     /* 64 */ float fade;
     /* 68 */ float from_scale;
     /* 72 */ float to_scale;
-    /* 76 */ float pad2;
+    /* 76 */ float color_ramp_zoom_t; // blend between the color ramp's two zoom rows
     /* 80 */
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16);
+
+/// `fill-extrusion-color` over `["elevation"]` without feature data is sampled into a lookup texture
+/// covering [0, elevationColorRampMaxHeight] meters above the ground; heights above that clamp to the
+/// last texel. It has two rows, at two zoom levels, see `ElevationColorRampZoom`.
+constexpr float elevationColorRampMaxHeight = 512.0f;
+constexpr uint32_t elevationColorRampSize = 2048;
 
 } // namespace shaders
 } // namespace mln

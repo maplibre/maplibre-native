@@ -434,7 +434,7 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
     }
     if (property == Property::FillExtrusionColor) {
         Error error;
-        const auto& typedValue = convert<PropertyValue<Color>>(value, error, true, false);
+        const auto& typedValue = convert<PropertyValue<Color>>(value, error, true, false, true);
         if (!typedValue) {
             return error;
         }

@@ -3,16 +3,16 @@
 #include <mln/style/conversion/rotation.hpp>
 #include <mln/style/conversion_impl.hpp>
 #include <mln/style/conversion.hpp>
+#include <mln/style/expression/elevation_interpolation.hpp>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace style {
 namespace conversion {
 
 template <class T>
-std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Convertible& value,
-                                                                        Error& error,
-                                                                        bool allowDataExpressions,
-                                                                        bool convertTokens) const {
+std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(
+    const Convertible& value, Error& error, bool allowDataExpressions, bool convertTokens, bool allowElevation) const {
     using namespace mln::style::expression;
 
     if (isUndefined(value)) {
@@ -44,6 +44,28 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
     } else if (!allowDataExpressions && !(*expression).isFeatureConstant()) {
         error.message = "data expressions not supported";
         return std::nullopt;
+    } else if ((*expression).getExpression().has(Dependency::Elevation)) {
+        // Experimental: height above the ground along a fill-extrusion, sampled per pixel by the renderer
+        if (!allowElevation) {
+            error.message =
+                R"("elevation" expressions are only supported in color-relief-color and fill-extrusion-color)";
+            return std::nullopt;
+        }
+        if (!(*expression).isFeatureConstant()) {
+            // With feature data, the renderer evaluates each feature at two heights, like zoom
+            const auto& parsed = (*expression).getExpression();
+            if (!elevationInterpolationStops(parsed)) {
+                error.message =
+                    R"(With feature data, "elevation" may only be used as input to a top-level "interpolate" expression)";
+                return std::nullopt;
+            }
+            if (!isExactElevationInterpolation(parsed)) {
+                Log::Warning(Event::Style,
+                             "fill-extrusion-color: with feature data, only the first and last stop of an "
+                             "\"elevation\" interpolation are used, blended linearly");
+            }
+        }
+        return {std::move(*expression)};
     } else if (!(*expression).isFeatureConstant() || !(*expression).isZoomConstant() ||
                !(*expression).isRuntimeConstant()) {
         return {std::move(*expression)};
@@ -61,97 +83,75 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
     }
 }
 
-template std::optional<PropertyValue<bool>> Converter<PropertyValue<bool>>::operator()(conversion::Convertible const&,
-                                                                                       conversion::Error&,
-                                                                                       bool,
-                                                                                       bool) const;
-template std::optional<PropertyValue<float>> Converter<PropertyValue<float>>::operator()(conversion::Convertible const&,
-                                                                                         conversion::Error&,
-                                                                                         bool,
-                                                                                         bool) const;
+template std::optional<PropertyValue<bool>> Converter<PropertyValue<bool>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
+template std::optional<PropertyValue<float>> Converter<PropertyValue<float>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<std::array<float, 2>>> Converter<PropertyValue<std::array<float, 2>>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<std::array<float, 4>>> Converter<PropertyValue<std::array<float, 4>>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<std::vector<float>>> Converter<PropertyValue<std::vector<float>>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
-template std::optional<PropertyValue<Color>> Converter<PropertyValue<Color>>::operator()(conversion::Convertible const&,
-                                                                                         conversion::Error&,
-                                                                                         bool,
-                                                                                         bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
+template std::optional<PropertyValue<Color>> Converter<PropertyValue<Color>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<Padding>> Converter<PropertyValue<Padding>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<VariableAnchorOffsetCollection>>
-Converter<PropertyValue<VariableAnchorOffsetCollection>>::operator()(conversion::Convertible const&,
-                                                                     conversion::Error&,
-                                                                     bool,
-                                                                     bool) const;
+Converter<PropertyValue<VariableAnchorOffsetCollection>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<std::string>> Converter<PropertyValue<std::string>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<std::vector<std::string>>>
-Converter<PropertyValue<std::vector<std::string>>>::operator()(conversion::Convertible const&,
-                                                               conversion::Error&,
-                                                               bool,
-                                                               bool) const;
+Converter<PropertyValue<std::vector<std::string>>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<AlignmentType>> Converter<PropertyValue<AlignmentType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<CirclePitchScaleType>> Converter<PropertyValue<CirclePitchScaleType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<HillshadeIlluminationAnchorType>>
-Converter<PropertyValue<HillshadeIlluminationAnchorType>>::operator()(conversion::Convertible const&,
-                                                                      conversion::Error&,
-                                                                      bool,
-                                                                      bool) const;
+Converter<PropertyValue<HillshadeIlluminationAnchorType>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<IconTextFitType>> Converter<PropertyValue<IconTextFitType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<LightAnchorType>> Converter<PropertyValue<LightAnchorType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<LineCapType>> Converter<PropertyValue<LineCapType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<LineJoinType>> Converter<PropertyValue<LineJoinType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<Position>> Converter<PropertyValue<Position>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<RasterResamplingType>> Converter<PropertyValue<RasterResamplingType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<SymbolAnchorType>> Converter<PropertyValue<SymbolAnchorType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<std::vector<TextVariableAnchorType>>>
-Converter<PropertyValue<std::vector<TextVariableAnchorType>>>::operator()(conversion::Convertible const&,
-                                                                          conversion::Error&,
-                                                                          bool,
-                                                                          bool) const;
+Converter<PropertyValue<std::vector<TextVariableAnchorType>>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<SymbolPlacementType>> Converter<PropertyValue<SymbolPlacementType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<SymbolZOrderType>> Converter<PropertyValue<SymbolZOrderType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<TextJustifyType>> Converter<PropertyValue<TextJustifyType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<TextTransformType>> Converter<PropertyValue<TextTransformType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<TranslateAnchorType>> Converter<PropertyValue<TranslateAnchorType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<mln::style::expression::Formatted>>
-Converter<PropertyValue<mln::style::expression::Formatted>>::operator()(conversion::Convertible const&,
-                                                                        conversion::Error&,
-                                                                        bool,
-                                                                        bool) const;
+Converter<PropertyValue<mln::style::expression::Formatted>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<std::vector<TextWritingModeType>>>
-Converter<PropertyValue<std::vector<TextWritingModeType>>>::operator()(conversion::Convertible const&,
-                                                                       conversion::Error&,
-                                                                       bool,
-                                                                       bool) const;
+Converter<PropertyValue<std::vector<TextWritingModeType>>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<mln::style::expression::Image>>
-Converter<PropertyValue<mln::style::expression::Image>>::operator()(conversion::Convertible const&,
-                                                                    conversion::Error&,
-                                                                    bool,
-                                                                    bool) const;
+Converter<PropertyValue<mln::style::expression::Image>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 
 std::optional<PropertyValue<std::array<double, 3>>>
-mln::style::conversion::Converter<PropertyValue<std::array<double, 3>>, void>::operator()(const Convertible& value,
-                                                                                          Error& error,
-                                                                                          bool,
-                                                                                          bool) const {
+mln::style::conversion::Converter<PropertyValue<std::array<double, 3>>, void>::operator()(
+    const Convertible& value, Error& error, bool, bool, bool) const {
     std::optional<std::array<double, 3>> a = convert<std::array<double, 3>>(value, error);
 
     if (!a) {
@@ -167,13 +167,13 @@ mln::style::conversion::Converter<PropertyValue<std::array<double, 3>>, void>::o
 }
 
 template std::optional<PropertyValue<Rotation>> Converter<PropertyValue<Rotation>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 
 // Hillshade array and enum types
 template std::optional<PropertyValue<std::vector<Color>>> Converter<PropertyValue<std::vector<Color>>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 template std::optional<PropertyValue<HillshadeMethodType>> Converter<PropertyValue<HillshadeMethodType>>::operator()(
-    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+    conversion::Convertible const&, conversion::Error&, bool, bool, bool) const;
 
 } // namespace conversion
 } // namespace style

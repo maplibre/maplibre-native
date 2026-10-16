@@ -5,6 +5,7 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+- [core] Support the `["elevation"]` expression in `fill-extrusion-color`, coloring extrusions by height above the ground ([#4787](https://github.com/maplibre/maplibre-native/issues/4787), [maplibre-style-spec#1851](https://github.com/maplibre/maplibre-style-spec/pull/1851)).
 - [core] Locally rasterized CJK glyphs now render at 2x texture resolution, preserving fine strokes. Mirrors [maplibre-gl-js#3006](https://github.com/maplibre/maplibre-gl-js/pull/3006).
 - [core] Added new map observer events: onPreCompileShader, onPostCompileShader, onShaderCompileFailed, onGlyphsLoaded, onGlyphsError, onGlyphsRequested, onTileAction, onSpriteLoaded, onSpriteError, onSpriteRequested ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
 - [core] Add WebP image decoding support to default platform (Linux, Windows)

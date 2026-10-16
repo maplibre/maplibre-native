@@ -753,6 +753,7 @@ MLN_CORE_HEADERS = [
     "include/mln/style/expression/comparison.hpp",
     "include/mln/style/expression/compound_expression.hpp",
     "include/mln/style/expression/dsl.hpp",
+    "include/mln/style/expression/elevation_interpolation.hpp",
     "include/mln/style/expression/distance.hpp",
     "include/mln/style/expression/error.hpp",
     "include/mln/style/expression/expression.hpp",

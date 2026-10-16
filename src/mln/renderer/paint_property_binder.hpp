@@ -9,6 +9,7 @@
 #include <mln/renderer/cross_faded_property_evaluator.hpp>
 #include <mln/renderer/paint_property_statistics.hpp>
 #include <mln/renderer/possibly_evaluated_property_value.hpp>
+#include <mln/style/expression/elevation_interpolation.hpp>
 #include <mln/util/indexed_tuple.hpp>
 #include <mln/util/literal.hpp>
 #include <mln/util/type_list.hpp>
@@ -421,6 +422,16 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
+
+    /// Evaluates at two elevations instead of two zoom levels, see
+    /// `style::expression::elevationInterpolationStops`.
+    CompositeFunctionPaintPropertyBinder(style::PropertyExpression<T> expression_,
+                                         Range<float> elevationRange_,
+                                         T defaultValue_)
+        : expression(std::move(expression_)),
+          defaultValue(std::move(defaultValue_)),
+          zoomRange({0, 0}),
+          elevationRange(elevationRange_) {}
     ~CompositeFunctionPaintPropertyBinder() override {}
 
     void setPatternParameters(const std::optional<ImagePosition>&,
@@ -435,14 +446,12 @@ public:
                               const style::expression::Value& formattedSection) override {
         using style::expression::EvaluationContext;
         Range<T> range = {
-            expression.evaluate(EvaluationContext(zoomRange.min, &feature)
-                                    .withFormattedSection(&formattedSection)
-                                    .withCanonicalTileID(&canonical),
-                                defaultValue),
-            expression.evaluate(EvaluationContext(zoomRange.max, &feature)
-                                    .withFormattedSection(&formattedSection)
-                                    .withCanonicalTileID(&canonical),
-                                defaultValue),
+            expression.evaluate(
+                context(false, feature).withFormattedSection(&formattedSection).withCanonicalTileID(&canonical),
+                defaultValue),
+            expression.evaluate(
+                context(true, feature).withFormattedSection(&formattedSection).withCanonicalTileID(&canonical),
+                defaultValue),
         };
         this->statistics.add(range.min);
         this->statistics.add(range.max);
@@ -483,8 +492,8 @@ public:
                             const FeatureState& state) override {
         using style::expression::EvaluationContext;
         const Range<T> range = {
-            expression.evaluate(EvaluationContext(zoomRange.min, &feature, &state), defaultValue),
-            expression.evaluate(EvaluationContext(zoomRange.max, &feature, &state), defaultValue),
+            expression.evaluate(context(false, feature).withFeatureState(&state), defaultValue),
+            expression.evaluate(context(true, feature).withFeatureState(&state), defaultValue),
         };
         this->statistics.add(range.min);
         this->statistics.add(range.max);
@@ -498,6 +507,10 @@ public:
     }
 
     std::tuple<float> interpolationFactor(float currentZoom) const override {
+        if (elevationRange) {
+            // Blended by height in the shader instead
+            return std::tuple<float>{0.0f};
+        }
         const float possiblyRoundedZoom = expression.getUseIntegerZoom() ? std::floor(currentZoom) : currentZoom;
 
         return std::tuple<float>{
@@ -525,9 +538,19 @@ public:
     }
 
 private:
+    /// The context for the lower or upper end of the zoom or elevation range
+    style::expression::EvaluationContext context(bool upper, const GeometryTileFeature& feature) const {
+        if (elevationRange) {
+            return style::expression::EvaluationContext(
+                std::nullopt, &feature, static_cast<double>(upper ? elevationRange->max : elevationRange->min));
+        }
+        return style::expression::EvaluationContext(upper ? zoomRange.max : zoomRange.min, &feature);
+    }
+
     style::PropertyExpression<T> expression;
     T defaultValue;
     Range<float> zoomRange;
+    std::optional<Range<float>> elevationRange;
     FeatureVertexRangeMap featureMap;
 };
 
@@ -642,6 +665,15 @@ struct CreateBinder {
             },
             [&](const style::PropertyExpression<T>& expression)
                 -> std::unique_ptr<PaintPropertyBinder<T, T, PossiblyEvaluatedType, A>> {
+                if constexpr (std::is_same_v<T, Color>) {
+                    if (expression.isZoomConstant()) {
+                        if (const auto stops = style::expression::elevationInterpolationStops(
+                                expression.getExpression())) {
+                            return std::make_unique<CompositeFunctionPaintPropertyBinder<T, A>>(
+                                expression, *stops, defaultValue);
+                        }
+                    }
+                }
                 if (expression.isZoomConstant()) {
                     return std::make_unique<SourceFunctionPaintPropertyBinder<T, A>>(expression, defaultValue);
                 } else {

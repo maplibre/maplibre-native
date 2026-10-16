@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Support the `$elevation` variable (`NSExpression.elevationVariableExpression`) in `MLNFillExtrusionStyleLayer.fillExtrusionColor`, coloring extrusions by height above the ground ([#4787](https://github.com/maplibre/maplibre-native/issues/4787)).
 - Raise the minimum supported iOS version to 15.5, remove the filesystem polyfill, and clean up obsolete compatibility code.
 
 ## 6.31.0

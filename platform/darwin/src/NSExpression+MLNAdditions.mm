@@ -602,6 +602,10 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
   return [NSExpression expressionForVariable:@"lineProgress"];
 }
 
++ (NSExpression *)elevationVariableExpression {
+  return [NSExpression expressionForVariable:@"elevation"];
+}
+
 + (NSExpression *)featureAccumulatedVariableExpression {
   return [NSExpression expressionForVariable:@"featureAccumulated"];
 }
@@ -966,6 +970,8 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
       return NSExpression.heatmapDensityVariableExpression;
     } else if ([op isEqualToString:@"line-progress"]) {
       return NSExpression.lineProgressVariableExpression;
+    } else if ([op isEqualToString:@"elevation"]) {
+      return NSExpression.elevationVariableExpression;
     } else if ([op isEqualToString:@"accumulated"]) {
       return NSExpression.featureAccumulatedVariableExpression;
     } else if ([op isEqualToString:@"geometry-type"]) {
@@ -1098,6 +1104,9 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
       }
       if ([self.variable isEqualToString:@"lineProgress"]) {
         return @[ @"line-progress" ];
+      }
+      if ([self.variable isEqualToString:@"elevation"]) {
+        return @[ @"elevation" ];
       }
       if ([self.variable isEqualToString:@"zoomLevel"]) {
         return @[ @"zoom" ];

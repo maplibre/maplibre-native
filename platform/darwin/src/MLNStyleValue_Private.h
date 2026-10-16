@@ -83,7 +83,8 @@ public:
   template <typename MBGLValue>
   typename std::enable_if_t<!std::is_same<MBGLValue, mln::style::ColorRampPropertyValue>::value,
                             MBGLValue>
-  toPropertyValue(NSExpression *expression, bool allowDataExpressions) {
+  toPropertyValue(NSExpression *expression, bool allowDataExpressions,
+                  bool allowElevation = false) {
     if (!expression) {
       return {};
     }
@@ -104,7 +105,7 @@ public:
     mln::style::conversion::Error valueError;
     auto value = mln::style::conversion::convert<MBGLValue>(
         mln::style::conversion::makeConvertible(jsonExpression), valueError, allowDataExpressions,
-        false);
+        false, allowElevation);
     if (!value) {
       [NSException raise:NSInvalidArgumentException
                   format:@"Invalid property value: %@", @(valueError.message.c_str())];

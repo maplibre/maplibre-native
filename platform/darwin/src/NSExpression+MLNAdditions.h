@@ -81,6 +81,16 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode
 /**
  `NSExpression` variable that corresponds to the
  <a
+ href="https://maplibre.org/maplibre-style-spec/expressions/#elevation"><code>elevation</code></a>
+ expression operator in the MapLibre Style Spec: the elevation in meters, e.g. in
+ `MLNColorReliefStyleLayer.colorReliefColor`, or the height above the ground along a
+ fill-extrusion in `MLNFillExtrusionStyleLayer.fillExtrusionColor` (experimental).
+ */
+@property (class, nonatomic, readonly) NSExpression *elevationVariableExpression;
+
+/**
+ `NSExpression` variable that corresponds to the
+ <a
  href="https://maplibre.org/maplibre-style-spec/expressions/#geometry-type"><code>geometry-type</code></a>
  expression operator in the MapLibre Style Spec.
  */

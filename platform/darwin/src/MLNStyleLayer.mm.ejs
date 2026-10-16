@@ -190,7 +190,7 @@ namespace mln {
 <%     break
     case 'data-driven':
     case 'cross-faded-data-driven': -%>
-    auto mbglValue = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mln::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(<%- objCName(property) %>, true);
+    auto mbglValue = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mln::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(<%- objCName(property) %>, true<%- property.name === 'fill-extrusion-color' ? ', true' : '' %>);
 <%     break
     default: -%>
     auto mbglValue = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mln::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(<%- objCName(property) %>, false);

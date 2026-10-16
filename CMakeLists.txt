@@ -351,6 +351,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/expression/compound_expression.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/expression/distance.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/expression/dsl.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/expression/elevation_interpolation.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/expression/error.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/expression/expression.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/expression/find_zoom_curve.hpp

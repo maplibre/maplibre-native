@@ -93,7 +93,9 @@ public:
     }
 
     T evaluate(float zoom) const {
-        assert(!isZoomConstant());
+        // Expressions over `["elevation"]` (e.g. fill-extrusion-color) are kept as expressions even
+        // when zoom constant; evaluated here, they yield their value at elevation 0.
+        assert(!isZoomConstant() || expression->has(expression::Dependency::Elevation));
         assert(isFeatureConstant());
         return evaluate(expression::EvaluationContext(zoom));
     }

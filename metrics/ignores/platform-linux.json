@@ -36,5 +36,9 @@
     "location_indicator/change_image": "Would need a different baseline when ran on llvmpipe not supporting anisotropic filtering",
     "location_indicator/query_test": "Would need a different baseline when ran on llvmpipe not supporting anisotropic filtering",
     "location_indicator/query_test_no_image": "Would need a different baseline when ran on llvmpipe not supporting anisotropic filtering",
-    "location_indicator/query_test_miss": "Would need a different baseline when ran on llvmpipe not supporting anisotropic filtering"
+    "location_indicator/query_test_miss": "Would need a different baseline when ran on llvmpipe not supporting anisotropic filtering",
+    "render-tests/fill-extrusion-color/elevation-interpolate": "fill-extrusion-color with [\"elevation\"] is only implemented for Metal: https://github.com/maplibre/maplibre-native/issues/4787",
+    "render-tests/fill-extrusion-color/elevation-property-function": "fill-extrusion-color with [\"elevation\"] is only implemented for Metal: https://github.com/maplibre/maplibre-native/issues/4787",
+    "render-tests/fill-extrusion-color/elevation-step": "fill-extrusion-color with [\"elevation\"] is only implemented for Metal: https://github.com/maplibre/maplibre-native/issues/4787",
+    "render-tests/fill-extrusion-color/elevation-zoom-function": "fill-extrusion-color with [\"elevation\"] is only implemented for Metal: https://github.com/maplibre/maplibre-native/issues/4787"
 }

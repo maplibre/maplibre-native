@@ -12,6 +12,7 @@
 #include <mln/renderer/paint_property_binder.hpp>
 #include <mln/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mln/shaders/shader_program_base.hpp>
+#include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mln/style/layers/fill_extrusion_layer_properties.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
@@ -39,12 +40,30 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
+    // fill-extrusion-color over ["elevation"] without feature data: sampled from a lookup texture.
+    const auto& layerImpl = static_cast<const FillExtrusionLayer::Impl&>(*props.baseImpl);
+    const auto& color = layerImpl.paint.get<FillExtrusionColor>().value;
+    const bool hasColorRamp = usesElevationColorRamp(color);
+    const float colorRampZoomT =
+        hasColorRamp ? elevationColorRampZoom(color.asExpression(), static_cast<float>(state.getZoom())).t : 0.0f;
+
+    // fill-extrusion-color interpolating over ["elevation"] with feature data: the binder stored each
+    // feature's colors at these two heights, and the shader blends them by height.
+    Range<float> elevationColorStops{0.0f, 0.0f};
+    evaluated.get<FillExtrusionColor>().match(
+        [](const Color&) {},
+        [&](const style::PropertyExpression<Color>& color) {
+            if (const auto stops = style::expression::elevationInterpolationStops(color.getExpression())) {
+                elevationColorStops = *stops;
+            }
+        });
+
     // UBO depends on more than just evaluated properties, so we need to update every time,
     // but the resulting buffer can be shared across all the drawables from the layer.
     const FillExtrusionPropsUBO propsUBO = {
         .color = constOrDefault<FillExtrusionColor>(evaluated),
         .light_color = FillExtrusionBucket::lightColor(parameters.evaluatedLight),
-        .pad1 = 0,
+        .color_ramp_scale = hasColorRamp ? 1.0f / elevationColorRampMaxHeight : 0.0f,
         .light_position = FillExtrusionBucket::lightPosition(parameters.evaluatedLight, state),
         .base = constOrDefault<FillExtrusionBase>(evaluated),
         .height = constOrDefault<FillExtrusionHeight>(evaluated),
@@ -54,7 +73,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         .fade = crossfade.t,
         .from_scale = crossfade.fromScale,
         .to_scale = crossfade.toScale,
-        .pad2 = 0};
+        .color_ramp_zoom_t = colorRampZoomT};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context);
 
@@ -139,8 +158,8 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             .pattern_from = patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
             .pattern_to = patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
             .texsize = {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-            .pad1 = 0,
-            .pad2 = 0
+            .elevation_color_min = elevationColorStops.min,
+            .elevation_color_max = elevationColorStops.max
         };
 
 #if MLN_UBO_CONSOLIDATION

@@ -38,8 +38,8 @@ struct alignas(16) FillExtrusionTilePropsUBO {
     /*  0 */ float4 pattern_from;
     /* 16 */ float4 pattern_to;
     /* 32 */ float2 texsize;
-    /* 40 */ float pad1;
-    /* 44 */ float pad2;
+    /* 40 */ float elevation_color_min;
+    /* 44 */ float elevation_color_max;
     /* 48 */
 };
 static_assert(sizeof(FillExtrusionTilePropsUBO) == 3 * 16, "wrong size");
@@ -56,10 +56,40 @@ struct alignas(16) FillExtrusionPropsUBO {
     /* 64 */ float fade;
     /* 68 */ float from_scale;
     /* 72 */ float to_scale;
-    /* 76 */ float pad2;
+    /* 76 */ float color_ramp_zoom_t;
     /* 80 */
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "wrong size");
+
+// `light_color_pad.w` holds 1 / ramp height range when fill-extrusion-color is an expression over
+// ["elevation"], otherwise 0.
+
+/// Lookup into a height ramp: texel i holds the color at i / (width - 1) of the ramp's height range,
+/// and `scale` is 1 / that range in meters. Its two rows are the ramp at two zoom levels, blended by `t`.
+float4 sampleHeightRamp(texture2d<float, access::sample> ramp, sampler rampSampler, float z, float scale, float t) {
+    const float width = float(ramp.get_width());
+    const float u = (clamp(z * scale, 0.0, 1.0) * (width - 1.0) + 0.5) / width;
+    return mix(ramp.sample(rampSampler, float2(u, 0.25)), ramp.sample(rampSampler, float2(u, 0.75)), t);
+}
+
+/// fill-extrusion-color over ["elevation"] with feature data: the feature's colors at the first and
+/// last stop, blended linearly by height.
+float4 mixElevationColors(float4 low, float4 high, float z, device const FillExtrusionTilePropsUBO& tileProps) {
+    const float t = clamp((z - tileProps.elevation_color_min) /
+                          (tileProps.elevation_color_max - tileProps.elevation_color_min), 0.0, 1.0);
+    return mix(low, high, t);
+}
+
+/// The vertex shaders' lighting applied to a surface color, before the final clamp.
+float3 fillExtrusionLit(float4 color, float directionalFraction, float gradientFactor,
+                        device const FillExtrusionPropsUBO& props) {
+    const float luminance = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
+    color += min(float4(0.03, 0.03, 0.03, 1.0), float4(1.0));
+    const float directional = mix(1.0 - props.light_intensity,
+                                  max(1.0 - luminance + props.light_intensity, 1.0),
+                                  directionalFraction);
+    return color.rgb * directional * gradientFactor * props.light_color_pad.rgb;
+}
 
 )";
 
@@ -71,7 +101,7 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
 
     static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto source = R"(
@@ -94,6 +124,12 @@ struct VertexStage {
 struct FragmentStage {
     float4 position [[position, invariant]];
     half4 color;
+    // Inputs for fill-extrusion-color over ["elevation"]: height, lighting, and with feature data the
+    // feature's colors at the first and last elevation stop
+    float z;
+    float directionalFraction;
+    float4 colorLow;
+    float4 colorHigh;
 };
 
 struct FragmentOutput {
@@ -135,8 +171,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 #if defined(HAS_UNIFORM_u_color)
     auto color = props.color;
+    const float4 colorLow = color;
+    const float4 colorHigh = color;
 #else
     auto color = unpack_mix_color(vertx.color, drawable.color_t);
+    const float4 colorLow = decode_color(vertx.color.xy);
+    const float4 colorHigh = decode_color(vertx.color.zw);
 #endif
 
     // Relative luminance (how dark/bright is the surface color?)
@@ -175,12 +215,42 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     vcolor += float4(clamp(color.rgb * directional * light_color.rgb, minLight, 1.0), 0.0);
 
     return {
-        .position = position,
-        .color    = half4(vcolor * props.opacity),
+        .position            = position,
+        .color               = half4(vcolor * props.opacity),
+        .z                   = z,
+        .directionalFraction = directionalFraction,
+        .colorLow            = colorLow,
+        .colorHigh           = colorHigh,
     };
 }
 
-fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]]) {
+fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
+                                     device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                     device const FillExtrusionTilePropsUBO* tilePropsVector [[buffer(idFillExtrusionTilePropsUBO)]],
+                                     device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
+                                     texture2d<float, access::sample> color_ramp [[texture(0)]],
+                                     sampler color_ramp_sampler [[sampler(0)]]) {
+#if defined(OVERDRAW_INSPECTOR)
+    return { half4(1.0) };
+#endif
+
+    // fill-extrusion-color over ["elevation"] with feature data: blend this feature's colors by height
+    device const FillExtrusionTilePropsUBO& tileProps = tilePropsVector[uboIndex];
+    if (tileProps.elevation_color_max > tileProps.elevation_color_min) {
+        const float4 color = mixElevationColors(in.colorLow, in.colorHigh, in.z, tileProps);
+        const float3 minLight = mix(0.0, 0.3, 1.0 - props.light_color_pad.rgb);
+        const float3 rgb = clamp(fillExtrusionLit(color, in.directionalFraction, 1.0, props), minLight, 1.0);
+        return { half4(float4(rgb, 1.0) * props.opacity) };
+    }
+
+    // fill-extrusion-color over ["elevation"]: color the roof by its height
+    if (props.light_color_pad.w > 0.0) {
+        const float4 color = sampleHeightRamp(color_ramp, color_ramp_sampler, in.z, props.light_color_pad.w, props.color_ramp_zoom_t);
+        const float3 minLight = mix(0.0, 0.3, 1.0 - props.light_color_pad.rgb);
+        const float3 rgb = clamp(fillExtrusionLit(color, in.directionalFraction, 1.0, props), minLight, 1.0);
+        return { half4(float4(rgb, 1.0) * props.opacity) };
+    }
+
     return { in.color/*, in.position.z*/ };
 }
 )";
@@ -194,7 +264,7 @@ struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::M
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 5> instanceAttributes;
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto source = R"(
@@ -221,6 +291,14 @@ struct OutlineInstance {
 struct FragmentStage {
     float4 position [[position, invariant]];
     half4 color;
+    // Inputs for fill-extrusion-color over ["elevation"]: height above the ground in meters, and the
+    // parts of the lighting needed to relight a color chosen per pixel.
+    float z;
+    float directionalFraction;
+    float gradientFactor;
+    // With feature data, the feature's colors at the first and last ["elevation"] stop
+    float4 colorLow;
+    float4 colorHigh;
 };
 
 struct FragmentOutput {
@@ -275,8 +353,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 #if defined(HAS_UNIFORM_u_color)
     auto color = props.color;
+    const float4 colorLow = color;
+    const float4 colorHigh = color;
 #else
     auto color = unpack_mix_color(vertx.color, drawable.color_t);
+    const float4 colorLow = decode_color(vertx.color.xy);
+    const float4 colorHigh = decode_color(vertx.color.zw);
 #endif
 
     // Relative luminance (how dark/bright is the surface color?)
@@ -297,6 +379,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float directional = mix(minDirectional, maxDirectional, directionalFraction);
 
     // Add gradient along z axis of side surfaces
+    float gradientFactor = 1.0;
     if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no
         // vertical gradient, and otherwise calculates the gradient based on base + height
@@ -304,8 +387,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         //       the square root when height is a uniform.
         const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        gradientFactor = (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
     }
+    directional *= gradientFactor;
 
     // Assign final color based on surface + ambient light color, diffuse light directional,
     // and light color with lower bounds adjusted to hue of light so that shading is tinted
@@ -317,11 +401,39 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position = position,
         .color    = half4(vcolor * props.opacity),
+        .z        = z,
+        .directionalFraction = directionalFraction,
+        .gradientFactor      = gradientFactor,
+        .colorLow            = colorLow,
+        .colorHigh           = colorHigh,
     };
 }
 
-fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]]) {
-    return { in.color/*, in.position.z*/ };
+fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
+                                     device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                     device const FillExtrusionTilePropsUBO* tilePropsVector [[buffer(idFillExtrusionTilePropsUBO)]],
+                                     device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
+                                     texture2d<float, access::sample> color_ramp [[texture(0)]],
+                                     sampler color_ramp_sampler [[sampler(0)]]) {
+#if defined(OVERDRAW_INSPECTOR)
+    return { half4(1.0) };
+#endif
+
+    device const FillExtrusionTilePropsUBO& tileProps = tilePropsVector[uboIndex];
+    const bool hasColorRamp = props.light_color_pad.w > 0.0;
+    const bool hasElevationColors = tileProps.elevation_color_max > tileProps.elevation_color_min;
+    if (!hasColorRamp && !hasElevationColors) {
+        return { in.color/*, in.position.z*/ };
+    }
+
+    // fill-extrusion-color over ["elevation"]: the wall's color at this height, from the layer's ramp
+    // or, with feature data, blended from this feature's colors at the first and last stop. Then relit.
+    const float4 color = hasColorRamp
+        ? sampleHeightRamp(color_ramp, color_ramp_sampler, in.z, props.light_color_pad.w, props.color_ramp_zoom_t)
+        : mixElevationColors(in.colorLow, in.colorHigh, in.z, tileProps);
+    const float3 minLight = mix(0.0, 0.3, 1.0 - props.light_color_pad.rgb);
+    const float3 rgb = clamp(fillExtrusionLit(color, in.directionalFraction, in.gradientFactor, props), minLight, 1.0);
+    return { half4(float4(rgb, 1.0) * props.opacity) };
 }
 )";
 };

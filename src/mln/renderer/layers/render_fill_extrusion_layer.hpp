@@ -1,6 +1,9 @@
 #pragma once
 
 #include <mln/renderer/render_layer.hpp>
+#include <mln/renderer/layers/fill_extrusion_layer_tweaker.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/util/image.hpp>
 #include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mln/style/layers/fill_extrusion_layer_properties.hpp>
@@ -43,8 +46,19 @@ private:
                                  const TransformState &,
                                  const TransformParameters &);
 
+    /// Re-sample `fill-extrusion-color` into `colorRamp` if it changed and uses `["elevation"]`, or if it
+    /// also depends on zoom and the zoom moved to other stops.
+    void updateColorRamp(float zoom);
+
     // Paint properties
     style::FillExtrusionPaintProperties::Unevaluated unevaluated;
+
+    /// `fill-extrusion-color` sampled over height, when it is an expression over `["elevation"]`.
+    std::shared_ptr<PremultipliedImage> colorRamp;
+    std::optional<style::PropertyValue<Color>> colorRampValue;
+    ElevationColorRampZoom colorRampZoom;
+    gfx::Texture2DPtr colorRampTexture;
+    bool colorRampChanged = true;
 
     gfx::ShaderGroupPtr fillExtrusionGroup;
     gfx::ShaderGroupPtr fillExtrusionPatternGroup;

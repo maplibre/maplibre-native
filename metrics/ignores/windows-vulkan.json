@@ -3,5 +3,9 @@
     "render-tests/icon-text-fit/enlargen-both": "Needs investigation (Diff: 0.0059814453125)",
     "render-tests/icon-text-fit/textFit-grid-long": "Needs investigation (Diff: 0.00507716049382716)",
     "render-tests/regressions/mapbox-gl-js#5642": "Needs investigation (Diff: 0.01416015625)",
-    "render-tests/regressions/mapbox-gl-js#7066": "Needs investigation (Diff: 0.0002777777777777778)"
+    "render-tests/regressions/mapbox-gl-js#7066": "Needs investigation (Diff: 0.0002777777777777778)",
+    "render-tests/fill-extrusion-color/elevation-interpolate": "fill-extrusion-color with [\"elevation\"] is only implemented for Metal: https://github.com/maplibre/maplibre-native/issues/4787",
+    "render-tests/fill-extrusion-color/elevation-property-function": "fill-extrusion-color with [\"elevation\"] is only implemented for Metal: https://github.com/maplibre/maplibre-native/issues/4787",
+    "render-tests/fill-extrusion-color/elevation-step": "fill-extrusion-color with [\"elevation\"] is only implemented for Metal: https://github.com/maplibre/maplibre-native/issues/4787",
+    "render-tests/fill-extrusion-color/elevation-zoom-function": "fill-extrusion-color with [\"elevation\"] is only implemented for Metal: https://github.com/maplibre/maplibre-native/issues/4787"
 }

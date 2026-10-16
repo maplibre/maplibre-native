@@ -126,6 +126,8 @@ RenderFillExtrusionLayer::RenderFillExtrusionLayer(Immutable<style::FillExtrusio
     : RenderLayer(makeMutable<FillExtrusionLayerProperties>(std::move(_impl))),
       unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
+    colorRamp = std::make_shared<PremultipliedImage>(Size(elevationColorRampSize, 1));
+    colorRamp->fill(0);
 }
 
 RenderFillExtrusionLayer::~RenderFillExtrusionLayer() = default;
@@ -133,6 +135,46 @@ RenderFillExtrusionLayer::~RenderFillExtrusionLayer() = default;
 void RenderFillExtrusionLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     styleDependencies = unevaluated.getDependencies();
+}
+
+void RenderFillExtrusionLayer::updateColorRamp(float zoom) {
+    const auto& value = unevaluated.get<FillExtrusionColor>().getValue();
+    const bool usesRamp = usesElevationColorRamp(value);
+    const auto rampZoom = usesRamp ? elevationColorRampZoom(value.asExpression(), zoom) : ElevationColorRampZoom{};
+    if (colorRampValue && *colorRampValue == value && colorRampZoom.sameRows(rampZoom)) {
+        return;
+    }
+    colorRampValue = value;
+    colorRampZoom = rampZoom;
+
+    colorRamp = std::make_shared<PremultipliedImage>(Size(elevationColorRampSize, 2));
+    colorRamp->fill(0);
+    if (usesRamp) {
+        // Texel `i` holds the color at height `i / (size - 1) * maxHeight`, so both ends of the range
+        // land on texel centres. The shader applies the matching offset when sampling. Row 0 is at
+        // the lower zoom of `rampZoom.rows`, row 1 at the upper one.
+        const auto& expression = value.asExpression().getExpression();
+        const auto toByte = [](float channel) {
+            return static_cast<uint8_t>(std::round(std::clamp(channel, 0.0f, 1.0f) * 255.0f));
+        };
+        for (uint32_t row = 0; row < 2; ++row) {
+            const float rowZoom = row == 0 ? rampZoom.rows.min : rampZoom.rows.max;
+            for (uint32_t i = 0; i < elevationColorRampSize; ++i) {
+                const double height = static_cast<double>(i) / (elevationColorRampSize - 1) *
+                                      elevationColorRampMaxHeight;
+                const auto result = expression.evaluate(expression::EvaluationContext(rowZoom, nullptr, {height}));
+                const auto color = result ? expression::fromExpressionValue<Color>(*result) : std::nullopt;
+                if (color) {
+                    uint8_t* texel = colorRamp->data.get() + (row * elevationColorRampSize + i) * 4;
+                    texel[0] = toByte(color->r);
+                    texel[1] = toByte(color->g);
+                    texel[2] = toByte(color->b);
+                    texel[3] = toByte(color->a);
+                }
+            }
+        }
+    }
+    colorRampChanged = true;
 }
 
 void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& parameters) {
@@ -146,6 +188,7 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
                                                                             : RenderPass::None;
     properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+    updateColorRamp(static_cast<float>(parameters.z));
 
     if (layerTweaker) {
         layerTweaker->updateProperties(evaluatedProperties);
@@ -216,6 +259,21 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     }
     if (!fillExtrusionPatternGroup) {
         fillExtrusionPatternGroup = shaders.getShaderGroup("FillExtrusionPatternShader");
+    }
+
+    // One texture shared by every drawable of the layer, refilled in place when the ramp changes.
+    // Drawables created before a style change keep their old layer tweaker and are not revisited
+    // below, so swapping in a new texture object would not reach them.
+    if (!colorRampTexture) {
+        colorRampTexture = context.createTexture2D();
+        colorRampTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                   .wrapU = gfx::TextureWrapType::Clamp,
+                                                   .wrapV = gfx::TextureWrapType::Clamp});
+        colorRampChanged = true;
+    }
+    if (colorRampChanged) {
+        colorRampTexture->setImage(colorRamp);
+        colorRampChanged = false;
     }
 
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
@@ -475,6 +533,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             for (auto& drawable : builder.clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->setTexture(colorRampTexture, idFillExtrusionColorRampTexture);
                 drawable->setType(static_cast<std::size_t>(hasPattern));
                 drawable->setLayerTweaker(layerTweaker);
                 drawable->setBinders(renderData.bucket, &binders);
@@ -565,6 +624,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             for (auto& drawable : instancedBuilder.clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->setTexture(colorRampTexture, idFillExtrusionColorRampTexture);
                 drawable->setType(static_cast<std::size_t>(hasPattern));
                 drawable->setLayerTweaker(layerTweaker);
                 drawable->setBinders(renderData.bucket, &binders);

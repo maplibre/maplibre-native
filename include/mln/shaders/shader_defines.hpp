@@ -317,6 +317,7 @@ enum {
 
 enum {
     idFillExtrusionImageTexture,
+    idFillExtrusionColorRampTexture,
     fillExtrusionTextureCount
 };
 
