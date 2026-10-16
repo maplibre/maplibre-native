@@ -83,7 +83,8 @@ public:
     virtual void setShowCollisionBoxes(const bool) {}
     /// Takes effect with the next `setLayers`, so a relayout costs one parse.
     virtual void setSubdivisionGranularity(const SubdivisionGranularitySetting&) {}
-    virtual void setLayers(const std::vector<Immutable<style::LayerProperties>>&) {}
+    virtual void setLayers(const std::vector<Immutable<style::LayerProperties>>&,
+                           std::shared_ptr<const GlobalStateMap>) {}
     virtual void setMask(TileMask&&) {}
 
     virtual void queryRenderedFeatures(std::unordered_map<std::string, std::vector<Feature>>& result,
@@ -91,10 +92,13 @@ public:
                                        const TransformState&,
                                        const std::unordered_map<std::string, const RenderLayer*>&,
                                        const RenderedQueryOptions& options,
+                                       const GlobalStateMap* globalState,
                                        const mat4& projMatrix,
                                        const SourceFeatureState& featureState);
 
-    virtual void querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions&);
+    virtual void querySourceFeatures(std::vector<Feature>& result,
+                                     const SourceQueryOptions&,
+                                     const GlobalStateMap* globalState);
 
     virtual float getQueryPadding(const std::unordered_map<std::string, const RenderLayer*>&);
 

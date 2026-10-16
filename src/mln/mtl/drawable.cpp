@@ -321,6 +321,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             }
 
             context.renderingStats().numDrawCalls++;
+            context.renderingStats().totalDrawCalls++;
         }
     }
 

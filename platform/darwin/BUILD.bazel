@@ -1,4 +1,4 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
+load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_run_binary")
 load("@rules_cc//cc:defs.bzl", "cc_library", "objc_library")
 load(
     "@rules_swift//swift:swift.bzl",
@@ -104,7 +104,10 @@ js_run_binary(
     ],
     outs = MLN_GENERATED_DARWIN_STYLE_SOURCE +
            MLN_GENERATED_DARWIN_STYLE_HEADERS + MLN_GENERATED_DARWIN_TEST_CODE,
+    env = {"MLN_CODEGEN_ROOT": "."},
     tool = ":generate-style-code-script",
+    # Run the Node tool on the build host, including when cross-compiling for iOS.
+    use_execroot_entry_point = False,
     visibility = ["//visibility:public"],
 )
 
@@ -332,19 +335,4 @@ js_binary(
         "//:style-spec",
     ],
     entry_point = "scripts/generate-style-code.mjs",
-)
-
-js_library(
-    name = "symbols-to-check",
-    srcs = [
-        ":darwin_objc_hdrs",
-        ":darwin_objc_srcs",
-        ":darwin_objcpp_hdrs",
-        ":darwin_objcpp_srcs",
-        ":darwin_private_hdrs",
-        ":generated_code_production",
-        ":generated_style_hdrs",
-        ":generated_style_srcs",
-    ],
-    visibility = ["//platform:__pkg__"],
 )

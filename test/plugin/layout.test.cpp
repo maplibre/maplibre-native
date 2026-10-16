@@ -49,8 +49,18 @@ struct LayoutData {
         sizeof(stream), 0, reinterpret_cast<const uint8_t*>(vertices.data()), sizeof(vertices), 3, 2 * sizeof(int16_t)};
     mln_plugin_attribute_binding_v1 attribute = {sizeof(attribute), 0, 0, 0};
     mln_plugin_segment_v1 segment = {sizeof(segment), 0, 0, 3, 3};
-    mln_plugin_drawable_descriptor_v1 drawable = {
-        sizeof(drawable), 7, {shaderID.data(), shaderID.size()}, &attribute, 1, &segment, 1};
+    mln_plugin_drawable_descriptor_v1 drawable = {sizeof(drawable),
+                                                  7,
+                                                  {shaderID.data(), shaderID.size()},
+                                                  &attribute,
+                                                  1,
+                                                  &segment,
+                                                  1,
+                                                  MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY,
+                                                  0,
+                                                  0,
+                                                  0,
+                                                  0};
     mln_plugin_feature_vertex_range_v1 range = {sizeof(range), 0, 7, 0, 3};
     // An independently allocated prefix makes premature reads visible to ASan.
     std::unique_ptr<uint32_t> shortSize = std::make_unique<uint32_t>(sizeof(uint32_t));

@@ -3,6 +3,7 @@
 #include <mln/util/subdivision_granularity.hpp>
 #include <mln/map/mode.hpp>
 #include <mln/actor/scheduler.hpp>
+#include <mln/util/feature.hpp>
 
 #include <memory>
 #include <numbers>
@@ -41,6 +42,7 @@ public:
     TileLodMode tileLodMode = TileLodMode::Default;
     SubdivisionGranularitySetting subdivisionGranularity = SubdivisionGranularitySetting::none();
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+    std::shared_ptr<const GlobalStateMap> globalState = nullptr;
     bool isUpdateSynchronous = false;
     bool captureRenderedFeatures = false;
 };

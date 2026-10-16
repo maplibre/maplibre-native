@@ -161,6 +161,7 @@ void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
 }
 
 void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layers_,
+                                   std::shared_ptr<const GlobalStateMap> globalState_,
                                    Immutable<std::set<std::string>> availableImages_,
                                    const SubdivisionGranularitySetting& subdivisionGranularity_,
                                    uint64_t correlationID_) {
@@ -168,6 +169,7 @@ void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layer
 
     try {
         layers = std::move(layers_);
+        globalState = std::move(globalState_);
         correlationID = correlationID_;
         availableImages = std::move(availableImages_);
         subdivisionGranularity = subdivisionGranularity_;
@@ -462,6 +464,7 @@ void GeometryTileWorker::parse() {
                                     .mode = mode,
                                     .pixelRatio = pixelRatio,
                                     .layerType = leaderImpl.getTypeInfo(),
+                                    .globalState = globalState,
                                     .retainFeaturesById = captureRenderedFeatures,
                                     .subdivisionGranularity = subdivisionGranularity};
 
@@ -509,8 +512,9 @@ void GeometryTileWorker::parse() {
                 auto feature = geometryLayer->getFeature(i);
 
                 const auto effectiveZ = static_cast<float>(id.overscaledZ);
-                if (!filter(
-                        expression::EvaluationContext(effectiveZ, feature.get()).withCanonicalTileID(&id.canonical))) {
+                if (!filter(expression::EvaluationContext(effectiveZ, feature.get())
+                                .withCanonicalTileID(&id.canonical)
+                                .withGlobalState(globalState.get()))) {
                     continue;
                 }
 

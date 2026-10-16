@@ -67,11 +67,14 @@ private:
     void updateColorRamp();
 
     std::shared_ptr<PremultipliedImage> colorRamp;
+    // The global-state snapshot used to generate the cached color ramp and detect when it needs to be rebuilt.
+    std::shared_ptr<const GlobalStateMap> colorRampGlobalState;
     gfx::Texture2DPtr colorRampTexture2D;
 
     gfx::ShaderGroupPtr lineShaderGroup;
     gfx::ShaderGroupPtr lineGradientShaderGroup;
     gfx::ShaderGroupPtr lineSDFShaderGroup;
+    gfx::ShaderGroupPtr lineGradientSDFShaderGroup;
     gfx::ShaderGroupPtr linePatternShaderGroup;
 };
 

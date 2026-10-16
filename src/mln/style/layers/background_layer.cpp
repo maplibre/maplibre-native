@@ -87,6 +87,7 @@ void BackgroundLayer::setBackgroundColorTransition(const TransitionOptions& opti
     auto impl_ = mutableImpl();
     impl_->paint.template get<BackgroundColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions BackgroundLayer::getBackgroundColorTransition() const {
@@ -114,6 +115,7 @@ void BackgroundLayer::setBackgroundOpacityTransition(const TransitionOptions& op
     auto impl_ = mutableImpl();
     impl_->paint.template get<BackgroundOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions BackgroundLayer::getBackgroundOpacityTransition() const {
@@ -141,6 +143,7 @@ void BackgroundLayer::setBackgroundPatternTransition(const TransitionOptions& op
     auto impl_ = mutableImpl();
     impl_->paint.template get<BackgroundPattern>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions BackgroundLayer::getBackgroundPatternTransition() const {

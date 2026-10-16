@@ -900,7 +900,8 @@ const skyProperties = Object.keys(spec['sky']).reduce((memo, name) => {
 const skyDoc = spec['sky-cocoa-doc'];
 const skyType = 'sky';
 
-const root = path.dirname(path.dirname(path.dirname(import.meta.dirname)));
+// Bazel supplies templates in the target output tree; the tool itself runs from host runfiles.
+const root = process.env.MLN_CODEGEN_ROOT ? path.resolve(process.env.MLN_CODEGEN_ROOT) : path.dirname(path.dirname(path.dirname(import.meta.dirname)));
 const outLocation = args.values.out ? args.values.out : root;
 
 const layerH = readAndCompile('platform/darwin/src/MLNStyleLayer.h.ejs', root);

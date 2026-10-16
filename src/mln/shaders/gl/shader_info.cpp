@@ -190,6 +190,7 @@ const std::vector<UniformBlockInfo> FillPatternShaderInfo::uniformBlocks = {
 };
 const std::vector<AttributeInfo> FillPatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
+    AttributeInfo{"a_color", idFillColorVertexAttribute},
     AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
     AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
     AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
@@ -210,6 +211,7 @@ const std::vector<UniformBlockInfo> FillOutlinePatternShaderInfo::uniformBlocks 
 };
 const std::vector<AttributeInfo> FillOutlinePatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
+    AttributeInfo{"a_color", idFillColorVertexAttribute},
     AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
     AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
     AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
@@ -474,6 +476,30 @@ const std::vector<AttributeInfo> LineSDFShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> LineSDFShaderInfo::textures = {
     TextureInfo{"u_image", idLineImageTexture},
+};
+
+// Line gradient SDF
+using LineGradientSDFShaderInfo = ShaderInfo<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::OpenGL>;
+
+const std::vector<UniformBlockInfo> LineGradientSDFShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"LineSDFDrawableUBO", idLineDrawableUBO},
+    UniformBlockInfo{"LineSDFTilePropsUBO", idLineTilePropsUBO},
+    UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
+};
+const std::vector<AttributeInfo> LineGradientSDFShaderInfo::attributes = {
+    AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
+    AttributeInfo{"a_data", idLineDataVertexAttribute},
+    AttributeInfo{"a_blur", idLineBlurVertexAttribute},
+    AttributeInfo{"a_opacity", idLineOpacityVertexAttribute},
+    AttributeInfo{"a_gapwidth", idLineGapWidthVertexAttribute},
+    AttributeInfo{"a_offset", idLineOffsetVertexAttribute},
+    AttributeInfo{"a_width", idLineWidthVertexAttribute},
+    AttributeInfo{"a_floorwidth", idLineFloorWidthVertexAttribute},
+};
+const std::vector<TextureInfo> LineGradientSDFShaderInfo::textures = {
+    TextureInfo{"u_image", idLineImageTexture},
+    TextureInfo{"u_image_dash", idLineDashTexture},
 };
 
 // Raster
