@@ -13,6 +13,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/geometry/dem_data.test.cpp
     ${PROJECT_SOURCE_DIR}/test/geometry/line_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/gfx/fill_generator.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/gfx/fill_large_mesh_arrays.test.cpp
     ${PROJECT_SOURCE_DIR}/test/map/map.test.cpp
     ${PROJECT_SOURCE_DIR}/test/map/prefetch.test.cpp
     ${PROJECT_SOURCE_DIR}/test/map/transform.test.cpp

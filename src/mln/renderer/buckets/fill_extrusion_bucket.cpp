@@ -1,5 +1,6 @@
 #include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
 
+#include <mln/gfx/fill_large_mesh_arrays.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/renderer/bucket_parameters.hpp>
 #include <mln/renderer/layers/render_fill_extrusion_layer.hpp>
@@ -55,6 +56,13 @@ using namespace style;
 
 struct GeometryTooLongException : std::exception {};
 
+namespace {
+// Each ring vertex can add a wall quad beside itself.
+std::size_t wallVertexCount(std::size_t ringVertices) {
+    return ringVertices == 0 ? 0 : 5 * (ringVertices - 1) + 1;
+}
+} // namespace
+
 FillExtrusionBucket::FillExtrusionBucket(
     const FillExtrusionBucket::PossiblyEvaluatedLayoutProperties& layout_,
     const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
@@ -91,20 +99,24 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
             polyVariant = roundPolygonCorners(polygon, roundedCornerDistance);
         }
 
-        // On the globe the walls follow subdivided rings and the roof is a subdivided mesh of its own.
+        // On the globe the walls follow subdivided rings and the roof is a subdivided mesh of its own, spread over as
+        // many segments as it needs. Walls too long for a segment are drawn as on Mercator.
         const uint32_t granularity = subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z);
         std::optional<util::SubdivisionResult> roof;
-        if (granularity >= 2 && roundedCornerDistance <= 0) {
+        if (util::GLOBE_ENABLED && granularity >= 2 && roundedCornerDistance <= 0) {
             GeometryCollection subdividedRings;
+            std::size_t ringVertices = 0;
             for (const auto& ring : polygon) {
                 subdividedRings.push_back(util::subdivideVertexLine(ring, granularity, /*isRing=*/true));
+                ringVertices += subdividedRings.back().size();
             }
-            polyVariant = std::move(subdividedRings);
-            roof = util::subdividePolygonWithinLimit(
-                polygon, canonical, granularity, /*generateOutlineLines=*/false, maxSegmentVertices);
+            if (wallVertexCount(ringVertices) <= maxSegmentVertices) {
+                polyVariant = std::move(subdividedRings);
+                roof = util::subdividePolygon(polygon, canonical, granularity, /*generateOutlineLines=*/false);
+            }
         }
 
-        std::size_t totalVertices = roof ? roof->vertices.size() / 2 : 0;
+        std::size_t totalVertices = 0;
 
         std::visit(
             [&totalVertices](const auto& poly) {
@@ -117,21 +129,30 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         if (totalVertices == 0) continue;
 
+        const std::size_t wallVertices = wallVertexCount(totalVertices);
+
         std::vector<uint32_t> flatIndices;
         flatIndices.reserve(totalVertices);
 
         std::size_t startVertices = vertices.elements();
 
-        if (triangleSegments.empty() || triangleSegments.back().vertexLength + (5 * (totalVertices - 1) + 1) >
-                                            std::numeric_limits<uint16_t>::max()) {
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+        // Instanced walls are drawn from the vertices alone, so beside a roof of its own no triangle indexes them, and
+        // a segment holding only them would have nothing to draw.
+        const bool wallsTakeASegment = !roof;
+#else
+        const bool wallsTakeASegment = true;
+#endif
+        if (wallsTakeASegment && (triangleSegments.empty() || triangleSegments.back().vertexLength + wallVertices >
+                                                                  std::numeric_limits<uint16_t>::max())) {
             triangleSegments.emplace_back(startVertices, triangles.elements());
         }
 
-        auto& triangleSegment = triangleSegments.back();
-        assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-        auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
+        SegmentBase* triangleSegment = wallsTakeASegment ? &triangleSegments.back() : nullptr;
+        assert(!triangleSegment || triangleSegment->vertexLength <= std::numeric_limits<uint16_t>::max());
+        auto triangleIndex = static_cast<uint16_t>(triangleSegment ? triangleSegment->vertexLength : 0);
 
-        assert(triangleIndex + (5 * (totalVertices - 1) + 1) <= std::numeric_limits<uint16_t>::max());
+        assert(triangleIndex + wallVertices <= std::numeric_limits<uint16_t>::max());
 
         const auto processRingPoints =
             [&](const Point<double>& p1, const std::optional<Point<double>>& p2, std::size_t& edgeDistance) {
@@ -177,8 +198,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                     triangles.emplace_back(triangleIndex, triangleIndex + 2, triangleIndex + 1);
                     triangles.emplace_back(triangleIndex + 1, triangleIndex + 2, triangleIndex + 3);
                     triangleIndex += 4;
-                    triangleSegment.vertexLength += 4;
-                    triangleSegment.indexLength += 6;
+                    triangleSegment->vertexLength += 4;
+                    triangleSegment->indexLength += 6;
                 }
 #endif
             };
@@ -213,41 +234,37 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         std::size_t nIndices = indices.size();
         assert(nIndices % 3 == 0);
 
-        if (roof) {
-            const auto base = triangleIndex;
-            for (std::size_t i = 0; i + 1 < roof->vertices.size(); i += 2) {
-                const Point<double> p{static_cast<double>(roof->vertices[i]),
-                                      static_cast<double>(roof->vertices[i + 1])};
-#if MLN_USE_FILL_EXTRUSION_INSTANCING
-                vertices.emplace_back(layoutVertex(p, 0, true));
-#else
-                vertices.emplace_back(FillExtrusionBucket::layoutVertex(p, 0, 0, 1, 0));
-#endif
-                triangleIndex++;
-            }
-            nIndices = roof->triangleIndices.size();
-            assert(nIndices % 3 == 0);
-            for (std::size_t i = 0; i + 2 < nIndices; i += 3) {
-                triangles.emplace_back(static_cast<uint16_t>(base + roof->triangleIndices[i]),
-                                       static_cast<uint16_t>(base + roof->triangleIndices[i + 1]),
-                                       static_cast<uint16_t>(base + roof->triangleIndices[i + 2]));
-            }
-        } else {
-            for (std::size_t i = 0; i < nIndices; i += 3) {
-                // Counter-Clockwise winding order.
-                triangles.emplace_back(static_cast<uint16_t>(flatIndices[indices[i]]),
-                                       static_cast<uint16_t>(flatIndices[indices[i + 2]]),
-                                       static_cast<uint16_t>(flatIndices[indices[i + 1]]));
-            }
+        for (std::size_t i = 0; i < nIndices; i += 3) {
+            // Counter-Clockwise winding order.
+            triangles.emplace_back(static_cast<uint16_t>(flatIndices[indices[i]]),
+                                   static_cast<uint16_t>(flatIndices[indices[i + 2]]),
+                                   static_cast<uint16_t>(flatIndices[indices[i + 1]]));
         }
 
-        triangleSegment.vertexLength += totalVertices;
-        triangleSegment.indexLength += nIndices;
+        if (triangleSegment) {
+            triangleSegment->vertexLength += totalVertices;
+            triangleSegment->indexLength += nIndices;
+        }
+
+        // The roof's triangles index only its own vertices, so it continues the walls' segment or starts its own.
+        const std::size_t roofStart = vertices.elements();
+        if (roof) {
+            const auto roofVertex = [](int16_t x, int16_t y) {
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+                return FillExtrusionBucket::layoutVertex(Point<double>(x, y), 0, true);
+#else
+                return FillExtrusionBucket::layoutVertex(Point<double>(x, y), 0, 0, 1, 0);
+#endif
+            };
+            gfx::fillLargeMeshArrays(
+                vertices, roofVertex, triangleSegments, triangles, roof->vertices, roof->triangleIndices);
+        }
+        const std::size_t roofVertices = vertices.elements() - roofStart;
 
         if (instanceSegments.empty()) {
             instanceSegments.emplace_back(RenderStaticData::fillExtrusionSegment());
         }
-        instanceSegments.back().instanceCount += totalVertices;
+        instanceSegments.back().instanceCount += totalVertices + roofVertices;
     }
 
     for (auto& pair : paintPropertyBinders) {

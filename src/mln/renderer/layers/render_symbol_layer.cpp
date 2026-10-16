@@ -204,6 +204,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     addRenderPassesFromTiles();
 
     placementData.clear();
+    followerData.clear();
 
     const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
     const SymbolTranslate textTranslate{.offset = evaluated.get<style::TextTranslate>(),
@@ -249,6 +250,14 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
                     placementData.insert(sortPosition, std::move(layerData));
                 }
             }
+        } else if (bucket && static_cast<Bucket*>(bucket)->check(SYM_GUARD_LOC)) {
+            followerData.push_back({.bucket = *bucket,
+                                    .tile = renderTile,
+                                    .featureIndex = nullptr,
+                                    .sourceId = baseImpl->source,
+                                    .sortKeyRange = std::nullopt,
+                                    .textTranslate = textTranslate,
+                                    .iconTranslate = iconTranslate});
         }
     }
 }
@@ -259,6 +268,7 @@ constexpr auto posOffsetAttribName = "a_pos_offset";
 [[maybe_unused]] constexpr auto sortedInstanceUniformName = "sorted_instance";
 
 void updateTileAttributes(const SymbolBucket::Buffer& buffer,
+                          const std::string& layerID,
                           const bool isText,
                           const SymbolBucket::PaintProperties& paintProps,
                           const SymbolPaintProperties::PossiblyEvaluated& evaluated,
@@ -352,7 +362,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
 #endif
 
     if (const auto& attr = attribs.set(idSymbolProjectedPosAttribute)) {
-        attr->setSharedRawData(buffer.sharedDynamicAttributeData,
+        attr->setSharedRawData(buffer.dynamicAttributeDataFor(layerID),
                                offsetof(SymbolDynamicLayoutAttributes, a1),
                                /*vertexOffset=*/0,
                                sizeof(SymbolDynamicLayoutAttributes),
@@ -369,6 +379,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
 
 void updateTileDrawable(gfx::Drawable& drawable,
                         const SymbolBucket& bucket,
+                        const std::string& layerID,
                         const SymbolBucket::PaintProperties& paintProps,
                         const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     if (!drawable.getData()) {
@@ -386,7 +397,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
 
 #if MLN_USE_SYMBOL_INSTANCING
     if (auto& instanceAttribs = drawable.getInstanceAttributes()) {
-        updateTileAttributes(buffer, isText, paintProps, evaluated, *instanceAttribs, nullptr);
+        updateTileAttributes(buffer, layerID, isText, paintProps, evaluated, *instanceAttribs, nullptr);
     }
 #else
     const auto vertexCount = buffer.attributeData().elements();
@@ -396,7 +407,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // See `Placement::updateBucketDynamicAttributeData`
 
     if (auto& attribs = drawable.getVertexAttributes()) {
-        updateTileAttributes(buffer, isText, paintProps, evaluated, *attribs, nullptr);
+        updateTileAttributes(buffer, layerID, isText, paintProps, evaluated, *attribs, nullptr);
     }
 #endif
 }
@@ -577,19 +588,22 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
                                            inViewportPixelUnits,
                                            aligned);
     };
+    // As the tweaker draws them: the tile matrices leave the translation out, which the shader adds to point anchors
+    // and placement to the positions it lays out.
+    constexpr std::array<float, 2> untranslated{0.f, 0.f};
     const mat4 textDrawableMatrix = isScreenSpace ? getScreenMatrix(textTranslation)
-                                                  : getTileMatrix(textTranslation, textTranslationAnchor);
+                                                  : getTileMatrix(untranslated, textTranslationAnchor);
     const mat4 iconDrawableMatrix = isScreenSpace ? getScreenMatrix(iconTranslation)
-                                                  : getTileMatrix(iconTranslation, iconTranslationAnchor);
+                                                  : getTileMatrix(untranslated, iconTranslationAnchor);
 
-    // On the globe the tile's projection stands in for the tile matrix, and the shader adds the translation itself.
+    // On the globe the tile's projection stands in for the tile matrix.
     const auto projector = (state.isGlobeRendering() && !isScreenSpace)
                                ? std::make_optional<TileProjector>(state, tileID)
                                : std::nullopt;
     const auto tileTranslation = [&](const auto& translation, const auto& translationAnchor) {
-        const auto translate = projector
-                                   ? RenderTile::tileUnitTranslation(tileID, translation, translationAnchor, state)
-                                   : std::array<float, 2>{0.f, 0.f};
+        const auto translate = isScreenSpace
+                                   ? std::array<float, 2>{0.f, 0.f}
+                                   : RenderTile::tileUnitTranslation(tileID, translation, translationAnchor, state);
         return vec2{translate[0], translate[1]};
     };
     const vec2 textTileTranslation = tileTranslation(textTranslation, textTranslationAnchor);
@@ -617,7 +631,7 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         const auto& translation = isText ? textTileTranslation : iconTileTranslation;
         const auto projectTile = [&](const vec2& tilePoint) -> vec4 {
             if (projector) {
-                const auto projected = projector->project({tilePoint[0], tilePoint[1]});
+                const auto projected = projector->projectAsDrawn({tilePoint[0], tilePoint[1]});
                 const double w = projected.signedDistanceFromCamera;
                 return {projected.point.x * w, projected.point.y * w, 0, w};
             }
@@ -627,7 +641,7 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
         const auto& staticVertices = buffer.attributeData();
-        const auto& dynamicVertices = buffer.dynamicAttributeData();
+        const auto& dynamicVertices = *buffer.dynamicAttributeDataFor(getID());
 
 #if MLN_USE_SYMBOL_INSTANCING
         // When instancing, each entry in the attribute vectors describes a whole quad,
@@ -641,7 +655,8 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
             }
             // The shader hides what the horizon covers, whatever the placement made of it.
             if (projector &&
-                projector->project({symbol.anchorPoint.x + translation[0], symbol.anchorPoint.y + translation[1]})
+                projector
+                    ->projectAsDrawn({symbol.anchorPoint.x + translation[0], symbol.anchorPoint.y + translation[1]})
                     .occluded) {
                 continue;
             }
@@ -883,6 +898,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto& layout = impl_cast(baseImpl).layout;
     const bool sortFeaturesByKey = !layout.get<SymbolSortKey>().isUndefined();
+    // Screen-space symbols are drawn over the view, not projected onto the map.
+    const auto screenSpaceProp = layout.get<SymbolScreenSpace>();
+    const auto symbolProjectionVariant = (screenSpaceProp.isConstant() ? screenSpaceProp.asConstant()
+                                                                       : SymbolScreenSpace::defaultValue())
+                                             ? gfx::ProjectionVariant::Mercator
+                                             : projectionVariant;
     std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
     const bool isOffset = !layout.get<IconOffset>().isUndefined();
@@ -1000,7 +1021,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             propertiesAsUniforms.first.clear();
             propertiesAsUniforms.second.clear();
 
-            updateTileDrawable(drawable, bucket, bucketPaintProperties, evaluated);
+            updateTileDrawable(drawable, bucket, getID(), bucketPaintProperties, evaluated);
             return true;
         };
         if (updateTile(passes, tileID, std::move(updateExisting))) {
@@ -1121,10 +1142,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto instanceAttribs = context.createVertexAttributeArray();
-        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *instanceAttribs, &propertiesAsUniforms);
+        updateTileAttributes(
+            buffer, getID(), isText, bucketPaintProperties, evaluated, *instanceAttribs, &propertiesAsUniforms);
 #else
         auto vertexAttribs = context.createVertexAttributeArray();
-        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *vertexAttribs, &propertiesAsUniforms);
+        updateTileAttributes(
+            buffer, getID(), isText, bucketPaintProperties, evaluated, *vertexAttribs, &propertiesAsUniforms);
 #endif
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
@@ -1182,8 +1205,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                         : gfx::ColorMode::unblended());
             }
 
-            const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                shaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant, posOffsetAttribName));
+            const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, symbolProjectionVariant, posOffsetAttribName));
             if (!shader) {
                 return;
             }

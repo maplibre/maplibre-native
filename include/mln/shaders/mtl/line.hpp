@@ -1115,6 +1115,9 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+#if defined(PROJECTION_GLOBE)
+    float tile_x;
+#endif
     float2 width2;
     float2 normal;
     float2 tex_a;
@@ -1137,6 +1140,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]],
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                                 device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
@@ -1202,8 +1206,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float t = 1.0 - abs(u);
     const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
+#if defined(PROJECTION_GLOBE)
+    const float adjustedThickness = projectLineThickness(pos.y, projectionVector[uboIndex]);
+    const float4 projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector[uboIndex]);
+    const float2 extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    const float4 position = projectTile(extrudedPos, projectionVector[uboIndex]);
+    const float4 projected_extrude = position - projected_no_extrude;
+#else
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
     const float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -1211,6 +1223,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     return {
         .position     = position,
+#if defined(PROJECTION_GLOBE)
+        .tile_x       = antimeridianClipX(extrudedPos, projectionVector[uboIndex]),
+#endif
         .width2       = float2(outset, inset),
         .normal       = v_normal,
         .tex_a        = float2(linesofar * drawable.patternscale_a.x / floorwidth, v_normal.y * drawable.patternscale_a.y + drawable.tex_y_a),
@@ -1240,6 +1255,11 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             texture2d<float, access::sample> dashTexture [[texture(1)]],
                             sampler gradientSampler [[sampler(0)]],
                             sampler dashSampler [[sampler(1)]]) {
+#if defined(PROJECTION_GLOBE)
+    if (clippedAtAntimeridian(in.tile_x)) {
+        discard_fragment();
+    }
+#endif
 
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);

@@ -638,7 +638,7 @@ layout(location = 7) out mediump vec4 frag_pattern_to;
 layout(location = 8) out mediump float frag_floorwidth;
 
 #ifdef PROJECTION_GLOBE
-layout(location = 8) out float frag_tile_x;
+layout(location = 9) out float frag_tile_x;
 #endif
 
 void main() {
@@ -798,7 +798,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 #ifdef PROJECTION_GLOBE
-layout(location = 8) in float frag_tile_x;
+layout(location = 9) in float frag_tile_x;
 #endif
 
 void main() {
@@ -1280,6 +1280,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buff
     LineSDFDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
@@ -1309,6 +1313,10 @@ layout(location = 7) out lowp float frag_opacity;
 
 #if !defined(HAS_UNIFORM_u_floorwidth)
 layout(location = 8) out mediump float frag_floorwidth;
+#endif
+
+#ifdef PROJECTION_GLOBE
+layout(location = 9) out float frag_tile_x;
 #endif
 
 void main() {
@@ -1383,8 +1391,17 @@ void main() {
     mediump float t = 1.0 - abs(u);
     mediump vec2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * frag_normal.y * mat2(t, -u, u, t);
 
+#ifdef PROJECTION_GLOBE
+    const float adjustedThickness = projectLineThickness(pos.y, projectionVector.projection_ubo[constant.ubo_index]);
+    const vec4 projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector.projection_ubo[constant.ubo_index]);
+    const vec2 extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    gl_Position = projectTile(extrudedPos, projectionVector.projection_ubo[constant.ubo_index]);
+    frag_tile_x = antimeridianClipX(extrudedPos, projectionVector.projection_ubo[constant.ubo_index]);
+    vec4 projected_extrude = gl_Position - projected_no_extrude;
+#else
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+#endif
     applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
@@ -1418,6 +1435,10 @@ layout(location = 7) in lowp float frag_opacity;
 
 #if !defined(HAS_UNIFORM_u_floorwidth)
 layout(location = 8) in mediump float frag_floorwidth;
+#endif
+
+#ifdef PROJECTION_GLOBE
+layout(location = 9) in float frag_tile_x;
 #endif
 
 layout(location = 0) out vec4 out_color;
@@ -1456,6 +1477,11 @@ layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sam
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D image1_sampler;
 
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(frag_tile_x)) {
+        discard;
+    }
+#endif
 
 #ifdef OVERDRAW_INSPECTOR
     out_color = vec4(1.0);

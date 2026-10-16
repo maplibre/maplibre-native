@@ -58,6 +58,40 @@ TEST(StyleConversion, Projection) {
     }
 
     {
+        // Stops that are already part way to the globe keep their share of it between them.
+        auto projection = parseProjection(
+            R"({"type":["interpolate",["linear"],["zoom"],0,["literal",["mercator","vertical-perspective",0.25]],)"
+            R"(10,["literal",["mercator","vertical-perspective",0.25]]]})");
+        ASSERT_TRUE(projection);
+        ASSERT_TRUE(projection->getType().isExpression());
+        EXPECT_DOUBLE_EQ(0.25, projection->impl->evaluate(0.f).transitionState());
+        EXPECT_DOUBLE_EQ(0.25, projection->impl->evaluate(2.5f).transitionState());
+        EXPECT_DOUBLE_EQ(0.25, projection->impl->evaluate(5.f).transitionState());
+        EXPECT_DOUBLE_EQ(0.25, projection->impl->evaluate(10.f).transitionState());
+    }
+
+    {
+        // A reversed stop three quarters of the way to the globe blends into one a quarter of the way.
+        auto projection = parseProjection(
+            R"({"type":["interpolate",["linear"],["zoom"],0,["literal",["vertical-perspective","mercator",0.25]],)"
+            R"(10,["literal",["mercator","vertical-perspective",0.25]]]})");
+        ASSERT_TRUE(projection);
+        EXPECT_DOUBLE_EQ(0.75, projection->impl->evaluate(0.f).transitionState());
+        EXPECT_DOUBLE_EQ(0.625, projection->impl->evaluate(2.5f).transitionState());
+        EXPECT_DOUBLE_EQ(0.5, projection->impl->evaluate(5.f).transitionState());
+        EXPECT_DOUBLE_EQ(0.25, projection->impl->evaluate(10.f).transitionState());
+    }
+
+    {
+        // An end that is the globe preset counts with its share at the zoom, so above 12 it is Mercator.
+        auto projection = parseProjection(R"({"type":["interpolate",["linear"],["zoom"],0,"mercator",20,"globe"]})");
+        ASSERT_TRUE(projection);
+        EXPECT_NEAR(0.25, projection->impl->evaluate(5.f).transitionState(), 1e-6);
+        EXPECT_NEAR(0.575 * 0.5, projection->impl->evaluate(11.5f).transitionState(), 1e-6);
+        EXPECT_EQ(ProjectionDefinition("mercator"), projection->impl->evaluate(15.f));
+    }
+
+    {
         auto projection = parseProjection("{}");
         ASSERT_TRUE(projection);
         const mln::JSValue typeValue("globe");

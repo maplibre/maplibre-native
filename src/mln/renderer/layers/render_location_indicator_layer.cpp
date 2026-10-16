@@ -10,6 +10,7 @@
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/image_manager.hpp>
 #include <mln/renderer/layers/render_location_indicator_layer.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/update_parameters.hpp>
@@ -17,6 +18,7 @@
 #include <mln/style/layers/location_indicator_layer_properties.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/tile_cover.hpp>
+#include <mln/util/interpolate.hpp>
 
 #if MLN_RENDER_BACKEND_OPENGL
 #include <mln/gl/context.hpp>
@@ -594,7 +596,7 @@ public:
 protected:
     static ScreenCoordinate latLngToScreenCoordinate(const LatLng& p, const TransformState& s) {
         LatLng unwrappedLatLng = p.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
+        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
         ScreenCoordinate point = s.latLngToScreenCoordinate(unwrappedLatLng);
         point.y = s.getSize().height - point.y;
         return point;
@@ -602,13 +604,13 @@ protected:
 
     static Point<double> project(const LatLng& c, const TransformState& s) {
         LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
+        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
         return Projection::project(unwrappedLatLng, s.getScale());
     }
 
     static Point<double> unproject(const LatLng& c, const TransformState& s) {
         LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
+        unwrappedLatLng.unwrapForShortestPath(s.getLatLng());
         return Projection::project(unwrappedLatLng, s.getScale());
     }
 
@@ -670,14 +672,18 @@ protected:
     static vec2 verticalDirectionMercator(const Point<double>& posMerc, const Point<double>& posMercDy) {
         Point<double> verticalShiftMercator = posMercDy - posMerc;
         vec2 res(verticalShiftMercator);
-        return res.normalized();
+        return res.length() > 0 ? res.normalized() : vec2{0.0f, 0.0f};
     }
 
     static Point<double> hatShadowShiftVector(const LatLng& position,
                                               const mln::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         ScreenCoordinate posScreen = latLngToScreenCoordinate(position, s);
-        posScreen.y = params.height - 1; // moving it to bottom
+        // Mercator turns the puck's column of the screen into a straight line, and the bottom of the window, nearest
+        // the camera, gives its direction. On the globe the direction turns down the column: it is taken at the puck.
+        if (!drawsOnGlobe(s)) {
+            posScreen.y = params.height - 1.0;
+        }
         Point<double> posMerc = project(screenCoordinateToLatLng(posScreen, s), s);
         vec2 verticalShiftAtPos = verticalDirectionMercator(posScreen, posMerc, s);
         return {verticalShiftAtPos.x, verticalShiftAtPos.y};
@@ -736,8 +742,11 @@ protected:
         // the map's center, the way the globe keeps circles and pitched text.
         const double puckLatitude = util::clamp(
             params.puckPosition.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
-        const float latitudeScale = drawsOnGlobe(s) ? static_cast<float>(s.getProjection().circleRadiusCorrection(s) /
-                                                                         std::cos(util::deg2rad(puckLatitude)))
+        const float latitudeScale = drawsOnGlobe(s) ? static_cast<float>(util::interpolate(
+                                                          1.0,
+                                                          std::cos(util::deg2rad(s.getLatLng().latitude())) /
+                                                              std::cos(util::deg2rad(puckLatitude)),
+                                                          s.getProjectionTransition()))
                                                     : 1.0f;
         const float horizontalScaleFactor =
             ((1.0f - params.perspectiveCompensation) +
@@ -1087,16 +1096,17 @@ void RenderLocationIndicatorLayer::captureRenderedFeatures(const TransformState&
     const auto& proj = renderImpl->getProjectionPuck();
     const auto& geom = renderImpl->getPuckGeometry();
 
-    // On the globe the puck's corners are world pixel offsets from its position on the sphere.
+    // On the globe the puck's corners are world pixel offsets from its position, drawn through the projection blend.
     if (drawsOnGlobe(state)) {
         const auto& position = renderImpl->getPositionMercator();
+        const double worldSize = Projection::worldSize(state.getScale());
+        const TileProjector projector(state, UnwrappedTileID(0, 0, 0));
         std::vector<vec3> visible;
         for (const auto& corner : geom) {
-            const auto latLng = Projection::unproject({position.x + corner.x, position.y + corner.y}, state.getScale());
-            if (!state.isLocationOccluded(latLng)) {
-                vec4 clip;
-                state.latLngToScreenCoordinate(latLng, clip);
-                visible.push_back({clip[0] / clip[3], clip[1] / clip[3], 0});
+            const auto drawn = projector.projectAsDrawn({(position.x + corner.x) / worldSize * util::EXTENT,
+                                                         (position.y + corner.y) / worldSize * util::EXTENT});
+            if (!drawn.occluded && drawn.signedDistanceFromCamera > 0) {
+                visible.push_back({drawn.point.x, drawn.point.y, 0});
             }
         }
         if (const auto bound = computeFeatureNDCBound(visible.size(), [&](std::size_t i) { return visible[i]; })) {
@@ -1235,6 +1245,8 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setShader(quadShader);
 
             createQuadGeometry(*drawable, drawableInfo.geometry);
+            drawableInfo.dirty = true;
+            drawableInfo.textureInfo.dirty = true;
 
             drawableInfo.drawable.emplace(*drawable);
 

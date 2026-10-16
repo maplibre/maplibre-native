@@ -75,6 +75,10 @@ public:
     void easeTo(const CameraOptions&, const AnimationOptions&);
     void flyTo(const CameraOptions&, const AnimationOptions&);
     void moveBy(const ScreenCoordinate&, const AnimationOptions& = {});
+    /// Move by `offset` as a drag that holds `anchor`, the cursor: on the globe the location under it follows it.
+    void moveBy(const ScreenCoordinate& offset,
+                const std::optional<ScreenCoordinate>& anchor,
+                const AnimationOptions& animation = {});
     void scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, const AnimationOptions& animation = {});
     void pitchBy(double pitch, const AnimationOptions& animation = {});
     void rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& = {});
@@ -124,6 +128,8 @@ public:
                                          LatLng::WrapMode = LatLng::Wrapped) const;
     /// Whether the globe hides a location from the camera; a Mercator map hides nothing.
     bool isLocationOccluded(const LatLng&) const;
+    /// Whether the map is drawn as a globe, alone or blending into Mercator.
+    bool isGlobeRendering() const;
 
     // Transform
     TransformState getTransformState() const;

@@ -259,7 +259,7 @@ bool RenderLineLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                              const float zoom,
                                              const TransformState& transformState,
                                              const float pixelsToTileUnits,
-                                             const mat4&,
+                                             const TileProjector&,
                                              const FeatureState& featureState) const {
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
     // Translate query geometry

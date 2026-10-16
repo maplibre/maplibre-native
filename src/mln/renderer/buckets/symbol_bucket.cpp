@@ -1,3 +1,4 @@
+#include <mln/map/tile_projector.hpp>
 #include <mln/renderer/bucket_parameters.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/layers/render_symbol_layer.hpp>
@@ -334,8 +335,10 @@ bool SymbolBucket::hasVariableTextAnchors() const {
 }
 
 std::pair<uint32_t, bool> SymbolBucket::registerAtCrossTileIndex(CrossTileSymbolLayerIndex& index,
-                                                                 const RenderTile& renderTile) {
-    bool firstTimeAdded = index.addBucket(renderTile.getOverscaledTileID(), renderTile.matrix, *this);
+                                                                 const RenderTile& renderTile,
+                                                                 const TransformState& state) {
+    bool firstTimeAdded = index.addBucket(
+        renderTile.getOverscaledTileID(), TileProjector(state, renderTile.id, renderTile.projection), *this);
     return std::make_pair(bucketInstanceId, firstTimeAdded);
 }
 
@@ -363,6 +366,26 @@ void SymbolBucket::updateVertices(const Placement& placement,
         text.updateModified();
         icon.updateModified();
         sdfIcon.updateModified();
+    }
+}
+
+bool SymbolBucket::hasLayerDynamicAttributeData(const std::string& layerID) const {
+    return text.layerDynamicAttributeData.contains(layerID) || icon.layerDynamicAttributeData.contains(layerID) ||
+           sdfIcon.layerDynamicAttributeData.contains(layerID);
+}
+
+void SymbolBucket::updateLayerVertices(const Placement& placement,
+                                       const TransformState& state,
+                                       const BucketPlacementData& data,
+                                       const std::string& layerID) {
+    if (!placement.updateBucketDynamicAttributeData(*this, state, data, &layerID)) {
+        return;
+    }
+    for (Buffer* buffer : {&text, &icon, &sdfIcon}) {
+        if (const auto it = buffer->layerDynamicAttributeData.find(layerID);
+            it != buffer->layerDynamicAttributeData.end()) {
+            it->second->updateModified();
+        }
     }
 }
 

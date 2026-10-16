@@ -20,7 +20,6 @@
 #include <mln/renderer/query.hpp>
 #include <mln/renderer/image_manager.hpp>
 #include <mln/geometry/line_atlas.hpp>
-#include <mln/style/layers/custom_layer_impl.hpp>
 #include <mln/style/source_impl.hpp>
 #include <mln/style/transition_options.hpp>
 #include <mln/text/glyph_manager.hpp>
@@ -91,6 +90,7 @@ public:
                    LineAtlas& lineAtlas_,
                    PatternAtlas& patternAtlas_,
                    RenderLayerReferences layersNeedPlacement_,
+                   RenderLayerReferences layersFollowingPlacement_,
                    Immutable<Placement> placement_,
                    bool updateSymbolOpacities_,
                    double startTime_)
@@ -100,6 +100,7 @@ public:
           lineAtlas(lineAtlas_),
           patternAtlas(patternAtlas_),
           layersNeedPlacement(std::move(layersNeedPlacement_)),
+          layersFollowingPlacement(std::move(layersFollowingPlacement_)),
           placement(std::move(placement_)),
           updateSymbolOpacities(updateSymbolOpacities_) {}
 
@@ -108,6 +109,9 @@ public:
 
         for (auto it = layersNeedPlacement.rbegin(); it != layersNeedPlacement.rend(); ++it) {
             placement->updateLayerBuckets(*it, parameters->transformParams.state, updateSymbolOpacities);
+        }
+        for (const RenderLayer& layer : layersFollowingPlacement) {
+            placement->updateFollowerBuckets(layer, parameters->transformParams.state);
         }
     }
 
@@ -127,6 +131,7 @@ public:
     std::reference_wrapper<LineAtlas> lineAtlas;
     std::reference_wrapper<PatternAtlas> patternAtlas;
     RenderLayerReferences layersNeedPlacement;
+    RenderLayerReferences layersFollowingPlacement;
     Immutable<Placement> placement;
     bool updateSymbolOpacities;
 };
@@ -416,6 +421,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     std::set<LayerRenderItem> layerRenderItems;
     layersNeedPlacement.clear();
+    layersFollowingPlacement.clear();
     auto renderItemsEmplaceHint = layerRenderItems.begin();
 
     // Reserve size for filteredLayersForSource if there are sources.
@@ -541,6 +547,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (renderLayer.needsPlacement()) {
             layersNeedPlacement.emplace_back(renderLayer);
         }
+        if (!renderLayer.getFollowerData().empty()) {
+            layersFollowingPlacement.emplace_back(renderLayer);
+        }
         if (renderTreeParameters->opaquePassCutOff == 0) {
             --opaquePassCutOffEstimation;
             if (renderLayer.is3D()) {
@@ -558,7 +567,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (auto it = layersNeedPlacement.crbegin(); it != layersNeedPlacement.crend(); ++it) {
         MLN_TRACE_ZONE(placement layer);
         RenderLayer& layer = *it;
-        auto result = crossTileSymbolIndex.addLayer(layer, longitude);
+        auto result = crossTileSymbolIndex.addLayer(layer, longitude, updateParameters->transformState);
         if (isMapModeContinuous) {
             usedSymbolLayers.insert(layer.getID());
             symbolBucketsAdded = symbolBucketsAdded || (result & CrossTileSymbolIndex::AddLayerResult::BucketsAdded);
@@ -637,6 +646,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                             *lineAtlas,
                                             *patternAtlas,
                                             std::move(layersNeedPlacement),
+                                            std::move(layersFollowingPlacement),
                                             placementController.getPlacement(),
                                             symbolBucketsChanged,
                                             startTime);
@@ -1066,9 +1076,6 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
         const auto& layerId = renderLayer.getId();
-        // A custom layer may draw 3D geometry, and the planet's depth is what hides it behind the horizon.
-        has3D = has3D || renderLayer.is3D() ||
-                renderLayer.baseImpl->getTypeInfo() == style::CustomLayer::Impl::staticTypeInfo();
 #if MLN_RENDER_BACKEND_OPENGL
         // Android Emulator: Goldfish is *very* broken. This will prevent a crash
         // inside the GL translation layer at the cost of emulator performance.
@@ -1081,6 +1088,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         } catch (...) {
             observer->onRenderError(std::current_exception());
         }
+        has3D = has3D || renderLayer.needsGlobeDepth();
 
         // Accumulate rendered features from each render layer, leaving each one empty.
         if (!renderLayer.stats.renderedFeatures.empty()) {

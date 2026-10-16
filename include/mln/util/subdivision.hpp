@@ -29,14 +29,6 @@ SubdivisionResult subdividePolygon(const GeometryCollection& polygon,
                                    uint32_t granularity,
                                    bool generateOutlineLines = true);
 
-/// `subdividePolygon` at the finest granularity whose result fits in `maxVertices` (the 16-bit index space of a
-/// segment), halving from `granularity` down to 2. A polygon that cannot fit even unsubdivided comes back as is.
-SubdivisionResult subdividePolygonWithinLimit(const GeometryCollection& polygon,
-                                              const CanonicalTileID& canonical,
-                                              uint32_t granularity,
-                                              bool generateOutlineLines,
-                                              std::size_t maxVertices);
-
 /// Inserts a vertex wherever the line crosses a cell boundary; `isRing` closes the line first.
 GeometryCoordinates subdivideVertexLine(const GeometryCoordinates& line, uint32_t granularity, bool isRing = false);
 

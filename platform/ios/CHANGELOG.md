@@ -5,7 +5,9 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 ## main
 
 - Add nullable `MLNSky` runtime styling with zoom expressions, transitions, and removal.
+
 - feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
+- feat(ios): `-[MLNMapView isCoordinateOccluded:]` tells whether the globe hides a coordinate, for views placed over the map ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
 
 ## 7.0.0-pre2
 

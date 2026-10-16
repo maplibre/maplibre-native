@@ -97,6 +97,7 @@ void GlobeDepthPass::update(gfx::ShaderRegistry& shaders,
             builder->setEnableColor(false);
             builder->setEnableDepth(true);
             builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+            // The far hemisphere is clockwise on screen on every backend, Vulkan included, since its shaders flip Y.
             builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
             builder->setVertexAttrId(shaders::idGlobeDepthPosVertexAttribute);
 #if !MLN_UBO_CONSOLIDATION

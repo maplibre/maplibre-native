@@ -1,12 +1,18 @@
 #include <mln/test/util.hpp>
 
+#include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
+#include <mln/renderer/globe_tile_mesh.hpp>
+#include <mln/test/stub_geometry_tile_feature.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/subdivision.hpp>
 #include <mln/util/subdivision_granularity.hpp>
 #include <mln/util/tile_mesh.hpp>
 
+#include <limits>
 #include <map>
+#include <memory>
 #include <set>
+#include <stdexcept>
 
 using namespace mln;
 using namespace mln::util;
@@ -25,6 +31,17 @@ double signedArea(const std::vector<int16_t>& v, Index i0, Index i1, Index i2) {
     const double e1y = v[i2 * 2 + 1] - v[i0 * 2 + 1];
     return e0x * e1y - e0y * e1x;
 }
+
+struct GlobeTestVertex {
+    Point<int16_t> position;
+    Point<uint16_t> texture;
+};
+
+GlobeTestVertex globeTestVertex(Point<int16_t> position, Point<uint16_t> texture) {
+    return {position, texture};
+}
+
+using GlobeTestMesh = GlobeTileMesh<GlobeTestVertex, decltype(&globeTestVertex)>;
 
 double totalArea(const SubdivisionResult& r) {
     double area = 0;
@@ -130,6 +147,84 @@ void expectSoundMesh(const SubdivisionResult& r, bool clippedAtZoomZero = false)
     EXPECT_EQ(exposed, outline);
 }
 
+// Extrudes a polygon on a globe tile and checks that every segment has something to draw, stays within its 16-bit
+// indices and keeps to its own vertices.
+std::unique_ptr<FillExtrusionBucket> extrudeOnTheGlobe(const GeometryCollection& polygon, const CanonicalTileID& tile) {
+    auto bucket = std::make_unique<FillExtrusionBucket>(FillExtrusionBucket::PossiblyEvaluatedLayoutProperties{},
+                                                        std::map<std::string, Immutable<style::LayerProperties>>{},
+                                                        0.0f,
+                                                        1u);
+    bucket->setSubdivisionGranularity(SubdivisionGranularitySetting::globe());
+    bucket->addFeature(StubGeometryTileFeature{FeatureType::Polygon, polygon.clone()}, polygon, {}, {}, 0, tile);
+    std::size_t segmentsEnd = 0;
+    std::size_t indicesOutsideTheirSegment = 0;
+    for (const auto& segment : bucket->triangleSegments) {
+        EXPECT_LE(segment.vertexLength, maxSegmentVertices);
+        EXPECT_GT(segment.indexLength, 0u);
+        EXPECT_GE(segment.vertexOffset, segmentsEnd);
+        for (std::size_t i = segment.indexOffset; i < segment.indexOffset + segment.indexLength; ++i) {
+            indicesOutsideTheirSegment += bucket->triangles.at(i) >= segment.vertexLength ? 1 : 0;
+        }
+        segmentsEnd = segment.vertexOffset + segment.vertexLength;
+    }
+    EXPECT_EQ(0u, indicesOutsideTheirSegment);
+    EXPECT_LE(segmentsEnd, bucket->vertices.elements());
+    return bucket;
+}
+
+// A ring with a fine zigzag along two of its sides: about 9,600 vertices on a tile, whatever the granularity.
+GeometryCollection fineZigzag() {
+    GeometryCoordinates ring;
+    for (int16_t x = 0; x < EXTENT; ++x) {
+        ring.emplace_back(x, x % 2 == 0 ? 0 : 2);
+    }
+    for (int16_t y = 0; y < EXTENT; y += 6) {
+        ring.emplace_back(y % 12 == 0 ? EXTENT : EXTENT - 2, y);
+    }
+    ring.emplace_back(EXTENT, EXTENT);
+    ring.emplace_back(0, EXTENT);
+    ring.emplace_back(0, 0);
+    return {ring};
+}
+
+// The granularity the roof was subdivided at, found from the triangles drawn last; 0 when there is none.
+uint32_t roofGranularity(const FillExtrusionBucket& bucket,
+                         const GeometryCollection& polygon,
+                         const CanonicalTileID& tile) {
+    std::vector<std::array<int16_t, 6>> drawn;
+    for (const auto& segment : bucket.triangleSegments) {
+        for (std::size_t i = segment.indexOffset; i + 3 <= segment.indexOffset + segment.indexLength; i += 3) {
+            std::array<int16_t, 6> triangle{};
+            for (std::size_t k = 0; k < 3; ++k) {
+                const auto& position = bucket.vertices.at(segment.vertexOffset + bucket.triangles.at(i + k)).a1;
+                triangle[k * 2] = position[0];
+                triangle[k * 2 + 1] = position[1];
+            }
+            drawn.push_back(triangle);
+        }
+    }
+    for (uint32_t granularity = SubdivisionGranularitySetting::globe().fill.getGranularityForZoomLevel(tile.z);
+         granularity >= 1;
+         granularity /= 2) {
+        const auto roof = subdividePolygon(polygon, tile, granularity, false);
+        const std::size_t count = roof.triangleIndices.size() / 3;
+        if (count > drawn.size()) {
+            continue;
+        }
+        bool matches = true;
+        for (std::size_t i = 0; i < count * 3 && matches; ++i) {
+            const auto& triangle = drawn[drawn.size() - count + i / 3];
+            const uint32_t index = roof.triangleIndices[i];
+            matches = triangle[(i % 3) * 2] == roof.vertices[index * 2] &&
+                      triangle[(i % 3) * 2 + 1] == roof.vertices[index * 2 + 1];
+        }
+        if (matches) {
+            return granularity;
+        }
+    }
+    return 0;
+}
+
 } // namespace
 
 TEST(Subdivision, Granularity) {
@@ -207,6 +302,26 @@ TEST(Subdivision, PoleTilesGetPoleQuads) {
     expectSoundMesh(middle);
 }
 
+TEST(Subdivision, PoleCapsReachThePoleWhereTheInputTouchedIt) {
+    // The polygon's corner sits on the north pole row, so it is moved off it before the caps are built; the cap at
+    // that corner's x still needs a vertex on the pole itself.
+    const GeometryCollection polygon{
+        {{0, NORTH_POLE_Y}, {EXTENT, 0}, {EXTENT, EXTENT}, {0, EXTENT}, {0, NORTH_POLE_Y}}};
+    const auto result = subdividePolygon(polygon, CanonicalTileID(1, 0, 0), 64);
+    bool capReachesThePole = false;
+    for (std::size_t i = 0; i + 2 < result.triangleIndices.size(); i += 3) {
+        bool corner = false;
+        bool pole = false;
+        for (std::size_t k = 0; k < 3; ++k) {
+            const uint32_t index = result.triangleIndices[i + k];
+            corner = corner || (result.vertices[index * 2] == 0 && result.vertices[index * 2 + 1] == 0);
+            pole = pole || (result.vertices[index * 2] == 0 && result.vertices[index * 2 + 1] == NORTH_POLE_Y);
+        }
+        capReachesThePole = capReachesThePole || (corner && pole);
+    }
+    EXPECT_TRUE(capReachesThePole);
+}
+
 TEST(Subdivision, ZoomZeroDropsGeometryOutsideTheTile) {
     const auto wide = square(-2000, 1000, EXTENT + 2000, 2000);
     const auto result = subdividePolygon(wide, CanonicalTileID(0, 0, 0), 8);
@@ -254,43 +369,34 @@ TEST(Subdivision, WorldPolygonWithBufferIsSound) {
     }
 }
 
-TEST(Subdivision, PolygonBeyondTheIndexLimitCoarsens) {
-    // A comb of 400 teeth hanging from a thin bar: 800 vertical edges each crossing 127 cell rows need more vertices
-    // than a 16-bit index space holds; the fallback halves the granularity until the polygon fits rather than
-    // dropping it.
-    GeometryCoordinates ring;
-    constexpr int16_t teeth = 400;
-    constexpr int16_t step = EXTENT / (teeth * 2);
-    constexpr int16_t bar = EXTENT - step;
-    for (int16_t i = 0; i < teeth; ++i) {
-        const auto x0 = static_cast<int16_t>(i * 2 * step);
-        const auto x1 = static_cast<int16_t>(x0 + step);
-        ring.emplace_back(x0, bar);
-        ring.emplace_back(x0, 0);
-        ring.emplace_back(x1, 0);
-        ring.emplace_back(x1, bar);
-    }
-    ring.emplace_back(EXTENT, bar);
-    ring.emplace_back(EXTENT, EXTENT);
-    ring.emplace_back(0, EXTENT);
-    ring.emplace_back(0, bar);
-    const GeometryCollection polygon{ring};
-    const CanonicalTileID tile(3, 4, 4);
-    constexpr std::size_t limit = std::numeric_limits<uint16_t>::max();
+TEST(Subdivision, FillExtrusionRoofCountsItsVerticesOnce) {
+    // A tile-sized roof at zoom 0 has 16,899 vertices: too many to count five times over, few enough to fit once.
+    const CanonicalTileID tile(0, 0, 0);
+    const auto polygon = square(0, 0, EXTENT, EXTENT);
+    EXPECT_EQ(128u, roofGranularity(*extrudeOnTheGlobe(polygon, tile), polygon, tile));
+}
 
-    const auto full = subdividePolygon(polygon, tile, 128, false);
-    EXPECT_GT(full.vertices.size() / 2, limit);
+TEST(Subdivision, FillExtrusionRoofBesideLongWallsTakesItsOwnSegment) {
+    // The zigzag makes a ring of 9,644 vertices and a roof of 59,160 at the zoom's granularity, too many to share a
+    // segment with the walls but few enough for one of their own.
+    const GeometryCollection polygon = fineZigzag();
+    const CanonicalTileID tile(2, 1, 1);
+    const auto bucket = extrudeOnTheGlobe(polygon, tile);
+    const auto roof = subdividePolygon(polygon, tile, 32, false);
+    EXPECT_EQ(roof.vertices.size() / 2, bucket->triangleSegments.back().vertexLength);
+    EXPECT_EQ(roof.triangleIndices.size(), bucket->triangleSegments.back().indexLength);
+    EXPECT_EQ(32u, roofGranularity(*bucket, polygon, tile));
+}
 
-    // 800 edges crossing the cell rows: 128 and 64 both overflow, 32 is the first granularity that fits.
-    EXPECT_GT(subdividePolygon(polygon, tile, 64, false).vertices.size() / 2, limit);
-    const auto coarse = subdividePolygon(polygon, tile, 32, false);
-    EXPECT_LE(coarse.vertices.size() / 2, limit);
-
-    const auto fitted = subdividePolygonWithinLimit(polygon, tile, 128, false, limit);
-    EXPECT_EQ(coarse.vertices, fitted.vertices);
-    EXPECT_EQ(coarse.triangleIndices, fitted.triangleIndices);
-    EXPECT_EQ(coarse.lineIndexLists, fitted.lineIndexLists);
-    // The comb is about the vertex count; earcut's triangulation of it is not what is under test here.
+TEST(Subdivision, FillExtrusionRoofBeyondTheIndexLimitKeepsItsGranularity) {
+    // At zoom 1 the zigzag's roof needs more vertices than a 16-bit index space holds, so it is spread over several
+    // segments, as GL JS does, rather than coarsened.
+    const GeometryCollection polygon = fineZigzag();
+    const CanonicalTileID tile(1, 0, 0);
+    EXPECT_GT(subdividePolygon(polygon, tile, 64, false).vertices.size() / 2, maxSegmentVertices);
+    const auto bucket = extrudeOnTheGlobe(polygon, tile);
+    EXPECT_GE(bucket->triangleSegments.size(), 2u);
+    EXPECT_EQ(64u, roofGranularity(*bucket, polygon, tile));
 }
 
 TEST(TileMesh, QuadAndGrid) {
@@ -310,5 +416,94 @@ TEST(TileMesh, QuadAndGrid) {
     EXPECT_EQ(SOUTH_POLE_Y, polar.vertices[(3 * 5 - 1) * 2 + 1]);
     for (std::size_t i = 0; i + 2 < polar.indices.size(); i += 3) {
         EXPECT_LT(signedArea(polar.vertices, polar.indices[i], polar.indices[i + 1], polar.indices[i + 2]), 0.0);
+    }
+}
+
+TEST(TileMesh, GranularityPastTheIndexLimitThrows) {
+    EXPECT_NO_THROW(createTileMesh({.granularity = 255}));
+    EXPECT_THROW(createTileMesh({.granularity = 256}), std::invalid_argument);
+    EXPECT_NO_THROW(createTileMesh({.granularity = 253, .generateBorders = true}));
+    EXPECT_THROW(createTileMesh({.granularity = 254, .generateBorders = true}), std::invalid_argument);
+    EXPECT_THROW(createTileMesh({.granularity = 50000}), std::invalid_argument);
+    EXPECT_THROW(createTileMesh({.granularity = std::numeric_limits<uint32_t>::max()}), std::invalid_argument);
+}
+
+TEST(TileMesh, GlobeMaskKeepsTheUncoveredParts) {
+    const CanonicalTileID tile{1, 0, 0};
+    const GlobeTestMesh masked(tile, {{1, 1, 0}, {1, 0, 1}, {1, 1, 1}}, &globeTestVertex);
+    const GlobeTestMesh child({2, 0, 0}, {{0, 0, 0}}, &globeTestVertex);
+    const auto& vertices = masked.vertices->vector();
+    const auto& indices = masked.indices->vector();
+    ASSERT_EQ(1u, masked.segments.size());
+
+    for (std::size_t i = 0; i + 2 < indices.size(); i += 3) {
+        double x = 0, y = 0;
+        for (std::size_t k = 0; k < 3; k++) {
+            x += vertices[indices[i + k]].position.x / 3.0;
+            y += vertices[indices[i + k]].position.y / 3.0;
+        }
+        EXPECT_FALSE(x < EXTENT / 2 && y >= 0 && y < EXTENT / 2)
+            << "triangle in the covered quadrant at " << x << ", " << y;
+    }
+
+    std::set<int16_t> maskedEdge;
+    for (const auto& vertex : vertices) {
+        if (vertex.position.x == EXTENT / 2 && vertex.position.y >= 0 && vertex.position.y <= EXTENT / 2) {
+            maskedEdge.insert(vertex.position.y);
+        }
+    }
+    std::set<int16_t> childEdge;
+    for (const auto& vertex : child.vertices->vector()) {
+        if (vertex.position.x == EXTENT && vertex.position.y >= 0) {
+            childEdge.insert(static_cast<int16_t>(vertex.position.y / 2));
+        }
+    }
+    EXPECT_EQ(childEdge, maskedEdge);
+    EXPECT_EQ(33u, maskedEdge.size());
+
+    std::size_t northPole = 0;
+    for (const auto& vertex : vertices) {
+        if (vertex.position.y == NORTH_POLE_Y) {
+            EXPECT_GE(vertex.position.x, EXTENT / 2);
+            northPole++;
+        }
+    }
+    EXPECT_EQ(33u, northPole);
+
+    const GlobeTestMesh full(tile, {{0, 0, 0}}, &globeTestVertex);
+    const auto grid = createTileMesh(
+        {.granularity = SubdivisionGranularitySetting::globe().tile.getGranularityForZoomLevel(1),
+         .extendToNorthPole = true});
+    ASSERT_EQ(grid.vertices.size() / 2, full.vertices->elements());
+    for (std::size_t i = 0; i < full.vertices->elements(); i++) {
+        EXPECT_EQ(grid.vertices[i * 2], full.vertices->at(i).position.x);
+        EXPECT_EQ(grid.vertices[i * 2 + 1], full.vertices->at(i).position.y);
+    }
+    EXPECT_EQ(grid.indices, full.indices->vector());
+
+    EXPECT_EQ(0u, GlobeTestMesh(tile, {}, &globeTestVertex).vertices->elements());
+}
+
+// However many masks the tiles go through while they load, a layer's cache of globe meshes stays bounded.
+TEST(TileMesh, GlobeMeshCacheStaysBounded) {
+    GlobeTileMeshCache<GlobeTestVertex, decltype(&globeTestVertex)> cache;
+    const CanonicalTileID tile{3, 2, 2};
+    for (uint32_t i = 0; i < 1000; ++i) {
+        const uint32_t child = i % 256;
+        cache.get(tile, {{4, child % 16, child / 16}}, &globeTestVertex);
+        ASSERT_LE(cache.size(), 64u) << i;
+    }
+}
+
+// A frame draws most tiles whole while one loading tile goes through a new mask each time: the whole tile's mesh,
+// used every frame, outlasts the masks.
+TEST(TileMesh, GlobeMeshCacheKeepsTheMeshesInUse) {
+    GlobeTileMeshCache<GlobeTestVertex, decltype(&globeTestVertex)> cache;
+    const CanonicalTileID tile{3, 2, 2};
+    const TileMask whole{{0, 0, 0}};
+    const auto vertices = cache.get(tile, whole, &globeTestVertex).vertices;
+    for (uint32_t i = 0; i < 256; ++i) {
+        cache.get(tile, {{4, i % 16, i / 16}}, &globeTestVertex);
+        ASSERT_EQ(vertices.get(), cache.get(tile, whole, &globeTestVertex).vertices.get()) << i;
     }
 }

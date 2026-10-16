@@ -468,6 +468,13 @@ public:
   /// Tag of the selected annotation. If the user location annotation is selected, this ivar is set
   /// to ``MLNAnnotationTagNotFound``.
   MLNAnnotationTag _selectedAnnotationTag;
+  /// An annotation behind the globe, selected once the camera settles with it in view.
+  id<MLNAnnotation> _annotationAwaitingSelection;
+  void (^_annotationAwaitingSelectionCompletion)(void);
+  BOOL _annotationAwaitingSelectionAnimated;
+  /// From the start to the end of an animated camera change, one that only pitches or pads
+  /// included. Immediate changes, such as a resize, come and go during one.
+  BOOL _animatedCameraChangeInProgress;
 
   BOOL _userLocationAnnotationIsSelected;
   /// Size of the rectangle formed by unioning the maximum slop area around every annotation image
@@ -2214,15 +2221,17 @@ public:
     MLNMapCamera *toCamera = [self cameraByPanningWithTranslation:delta panGesture:pan];
 
     if ([self _shouldChangeFromCamera:oldCamera toCamera:toCamera]) {
+      const CGPoint location = [pan locationInView:pan.view];
+      const mln::ScreenCoordinate anchor{location.x, location.y};
       switch (self.panScrollingMode) {
         case MLNPanScrollingModeVertical:
-          self.mbglMap.moveBy({0, delta.y});
+          self.mbglMap.moveBy({0, delta.y}, anchor);
           break;
         case MLNPanScrollingModeHorizontal:
-          self.mbglMap.moveBy({delta.x, 0});
+          self.mbglMap.moveBy({delta.x, 0}, anchor);
           break;
         default:
-          self.mbglMap.moveBy({delta.x, delta.y});
+          self.mbglMap.moveBy({delta.x, delta.y}, anchor);
       }
 
       [pan setTranslation:CGPointZero inView:pan.view];
@@ -2500,8 +2509,13 @@ public:
               animateSelection:YES
         calloutPositioningRect:positionRect
              completionHandler:nil];
-  } else if (self.selectedAnnotation) {
-    [self deselectAnnotation:self.selectedAnnotation animated:YES];
+  } else {
+    // A tap on the map drops a selection still waiting for the map to turn, as it drops the
+    // selected one.
+    [self cancelAnnotationAwaitingSelection];
+    if (self.selectedAnnotation) {
+      [self deselectAnnotation:self.selectedAnnotation animated:YES];
+    }
   }
 }
 
@@ -2637,7 +2651,9 @@ public:
 
     if (self.isQuickZoomReversed) distance = -distance;
 
-    CGFloat newZoom = MAX(log2f(self.scale) + (distance / 75), *self.mbglMap.getBounds().minZoom);
+    // Zoom limiting happens at the core level, where the globe's minimum zoom falls away from the
+    // equator.
+    CGFloat newZoom = log2f(self.scale) + (distance / 75);
 
     if ([self zoomLevel] == newZoom) return;
 
@@ -2975,8 +2991,14 @@ static void *windowScreenContext = &windowScreenContext;
         if (annotationContext.annotationView) {
           // Redundantly move the associated annotation view outside the scope of the animation-less
           // transaction block in -updateAnnotationViews.
-          annotationContext.annotationView.center =
-              [self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self];
+          CGPoint center = [self convertCoordinate:annotationContext.annotation.coordinate
+                                     toPointToView:self];
+          // Behind the globe that point is on the near side of the planet; keep the view out of
+          // view, as -updateAnnotationViews does, rather than show it there until the next frame.
+          if ([self isCoordinateOccluded:annotationContext.annotation.coordinate]) {
+            center.x = -CGRectGetWidth(self.frame) * 10.0;
+          }
+          annotationContext.annotationView.center = center;
         }
 
         MLNAnnotationImage *annotationImage = [self imageOfAnnotationWithTag:annotationTag];
@@ -4645,28 +4667,35 @@ static void *windowScreenContext = &windowScreenContext;
 /// bounding box.
 - (mln::LatLngBounds)convertRect:(CGRect)rect toLatLngBoundsFromView:(nullable UIView *)view {
   auto bounds = mln::LatLngBounds::empty();
-  auto topLeft = [self convertPoint:{CGRectGetMinX(rect), CGRectGetMinY(rect)}
-                   toLatLngFromView:view];
-  auto topRight = [self convertPoint:{CGRectGetMaxX(rect), CGRectGetMinY(rect)}
-                    toLatLngFromView:view];
-  auto bottomRight = [self convertPoint:{CGRectGetMaxX(rect), CGRectGetMaxY(rect)}
-                       toLatLngFromView:view];
-  auto bottomLeft = [self convertPoint:{CGRectGetMinX(rect), CGRectGetMaxY(rect)}
-                      toLatLngFromView:view];
 
   // If the bounds straddles the antimeridian, unwrap it so that one side
   // extends beyond ±180° longitude.
   auto center = [self convertPoint:{CGRectGetMidX(rect), CGRectGetMidY(rect)}
                   toLatLngFromView:view];
-  topLeft.unwrapForShortestPath(center);
-  topRight.unwrapForShortestPath(center);
-  bottomRight.unwrapForShortestPath(center);
-  bottomLeft.unwrapForShortestPath(center);
 
-  bounds.extend(topLeft);
-  bounds.extend(topRight);
-  bounds.extend(bottomRight);
-  bounds.extend(bottomLeft);
+  // The corners and the middles of the edges: on a globe the edges bulge past the corners.
+  for (const CGPoint point : {CGPointMake(CGRectGetMinX(rect), CGRectGetMinY(rect)),
+                              CGPointMake(CGRectGetMidX(rect), CGRectGetMinY(rect)),
+                              CGPointMake(CGRectGetMaxX(rect), CGRectGetMinY(rect)),
+                              CGPointMake(CGRectGetMaxX(rect), CGRectGetMidY(rect)),
+                              CGPointMake(CGRectGetMaxX(rect), CGRectGetMaxY(rect)),
+                              CGPointMake(CGRectGetMidX(rect), CGRectGetMaxY(rect)),
+                              CGPointMake(CGRectGetMinX(rect), CGRectGetMaxY(rect)),
+                              CGPointMake(CGRectGetMinX(rect), CGRectGetMidY(rect))}) {
+    auto latLng = [self convertPoint:point toLatLngFromView:view];
+    latLng.unwrapForShortestPath(center);
+    bounds.extend(latLng);
+  }
+
+  // A pole in view puts every longitude in view; Mercator never draws one.
+  for (const double latitude : {90.0, -90.0}) {
+    const CGPoint pole = [self convertLatLng:mln::LatLng(latitude, 0) toPointToView:view];
+    if (CGRectContainsPoint(rect, pole) &&
+        std::abs([self convertPoint:pole toLatLngFromView:view].latitude() - latitude) < 1e-3) {
+      bounds = mln::LatLngBounds::hull({latitude > 0 ? bounds.south() : latitude, -180},
+                                       {latitude > 0 ? latitude : bounds.north(), 180});
+    }
+  }
 
   return bounds;
 }
@@ -5087,6 +5116,10 @@ static void *windowScreenContext = &windowScreenContext;
     MLNAssert([annotation conformsToProtocol:@protocol(MLNAnnotation)],
               @"annotation should conform to MLNAnnotation");
 
+    if (annotation == _annotationAwaitingSelection) {
+      [self cancelAnnotationAwaitingSelection];
+    }
+
     MLNAnnotationTag annotationTag = [self annotationTagForAnnotation:annotation];
     if (annotationTag == MLNAnnotationTagNotFound) {
       continue;
@@ -5461,9 +5494,39 @@ static void *windowScreenContext = &windowScreenContext;
          completionHandler:(nullable void (^)(void))completion {
   if (!annotation) return;
 
+  // A newer selection, even of the selected annotation, replaces one waiting for the map to turn.
+  [self cancelAnnotationAwaitingSelection];
+
   if (annotation == self.selectedAnnotation) return;
 
-  if ([self isCoordinateOccluded:annotation.coordinate]) return;
+  // Behind the globe: an annotation that may move into view is centered first, and selected once
+  // the camera settles with it in view.
+  if ([self isCoordinateOccluded:annotation.coordinate]) {
+    if (!moveIntoView ||
+        ![self isMovingAnnotationIntoViewSupportedForAnnotation:annotation
+                                                       animated:animateSelection]) {
+      if (completion) completion();
+      return;
+    }
+    // Added now, as a selection on Mercator adds it, so removing every annotation meanwhile removes
+    // it too.
+    if ([self annotationTagForAnnotation:annotation] == MLNAnnotationTagNotFound &&
+        annotation != self.userLocation) {
+      [self addAnnotation:annotation];
+    }
+    _annotationAwaitingSelection = annotation;
+    _annotationAwaitingSelectionCompletion = completion;
+    _annotationAwaitingSelectionAnimated = animateSelection;
+    __weak __typeof__(self) weakSelf = self;
+    [self setCenterCoordinate:annotation.coordinate
+                    zoomLevel:self.zoomLevel
+                    direction:self.direction
+                     animated:animateSelection
+            completionHandler:^{
+              [weakSelf settleAnnotationAwaitingSelection];
+            }];
+    return;
+  }
 
   [self deselectAnnotation:self.selectedAnnotation animated:NO];
 
@@ -5779,8 +5842,44 @@ static void *windowScreenContext = &windowScreenContext;
   return [self dequeueReusableAnnotationImageWithIdentifier:symbolName];
 }
 
+/// Drops the annotation waiting for the map to turn to it and runs its completion handler.
+- (void)cancelAnnotationAwaitingSelection {
+  if (!_annotationAwaitingSelection) return;
+  void (^completion)(void) = _annotationAwaitingSelectionCompletion;
+  _annotationAwaitingSelection = nil;
+  _annotationAwaitingSelectionCompletion = nil;
+  // Later, so a handler that selects again is not overwritten by the request that cancelled it.
+  if (completion) dispatch_async(dispatch_get_main_queue(), completion);
+}
+
+/// Once the camera has settled, selects the annotation waiting for it if it came into view, or
+/// drops it.
+- (void)settleAnnotationAwaitingSelection {
+  id<MLNAnnotation> annotation = _annotationAwaitingSelection;
+  if (!annotation || _animatedCameraChangeInProgress || self.mbglMap.isGestureInProgress()) {
+    return;
+  }
+  if ([self isCoordinateOccluded:annotation.coordinate]) {
+    [self cancelAnnotationAwaitingSelection];
+    return;
+  }
+  void (^completion)(void) = _annotationAwaitingSelectionCompletion;
+  _annotationAwaitingSelection = nil;
+  _annotationAwaitingSelectionCompletion = nil;
+  [self selectAnnotation:annotation
+                moveIntoView:NO
+            animateSelection:_annotationAwaitingSelectionAnimated
+      calloutPositioningRect:[self positioningRectForAnnotation:annotation
+                                            defaultCalloutPoint:CGPointZero]
+           completionHandler:completion];
+}
+
 - (void)deselectAnnotation:(id<MLNAnnotation>)annotation animated:(BOOL)animated {
   if (!annotation) return;
+
+  if (annotation == _annotationAwaitingSelection) {
+    [self cancelAnnotationAwaitingSelection];
+  }
 
   if (self.selectedAnnotation == annotation) {
     MLNLogDebug(@"Deselecting annotation: %@ animated: %@", annotation,
@@ -6131,7 +6230,7 @@ static void *windowScreenContext = &windowScreenContext;
 
       self.showsUserLocation = YES;
 
-      if (self.zoomLevel < self.currentMinimumZoom) {
+      if (!self.isRotationAllowed) {
         [self setZoomLevel:self.currentMinimumZoom animated:YES];
       }
 
@@ -6757,7 +6856,8 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (BOOL)isRotationAllowed {
-  return (self.zoomLevel >= self.currentMinimumZoom);
+  // The minimum keeps a flat map of the world upright; a globe turns at any zoom, as in GL JS.
+  return (self.zoomLevel >= self.currentMinimumZoom) || self.mbglMap.isGlobeRendering();
 }
 
 - (void)unrotateIfNeededForGesture {
@@ -6805,6 +6905,9 @@ static void *windowScreenContext = &windowScreenContext;
   if (!_mbglMap) {
     return;
   }
+  if (animated) {
+    _animatedCameraChangeInProgress = YES;
+  }
 
   if (!_userLocationAnnotationIsSelected || self.userTrackingMode == MLNUserTrackingModeNone ||
       self.userTrackingState != MLNUserTrackingStateChanged) {
@@ -6851,6 +6954,9 @@ static void *windowScreenContext = &windowScreenContext;
   if (!_mbglMap) {
     return;
   }
+  if (animated) {
+    _animatedCameraChangeInProgress = NO;
+  }
 
   [self updateCompass];
   [self updateScaleBar];
@@ -6883,6 +6989,14 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     [self resetCameraChangeReason];
+  }
+
+  if (_annotationAwaitingSelection) {
+    // A camera change that cut this one short starts right after it ends; settle once it has.
+    __weak __typeof__(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [weakSelf settleAnnotationAwaitingSelection];
+    });
   }
 }
 

@@ -3,3 +3,4 @@
 !**/render-tests/results/.gitkeep
 **/actual.png
 **/diff.png
+**/actual.json

@@ -115,41 +115,28 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
 
 // MARK: - Projection
 
-namespace {
-
-// GL JS `GlobeProjection.transitionState`.
-double transitionStateFor(const ProjectionDefinition& definition) {
-    const auto isGlobe = [](ProjectionType type) {
-        return type != ProjectionType::Mercator;
-    };
-    if (definition.from == definition.to) {
-        return isGlobe(definition.from) ? 1 : 0;
-    }
-    if (isGlobe(definition.from) && !isGlobe(definition.to)) {
-        return 1 - definition.transition;
-    }
-    if (!isGlobe(definition.from) && isGlobe(definition.to)) {
-        return definition.transition;
-    }
-    return 1;
-}
-
-} // namespace
-
 void TransformState::setProjectionDefinition(const ProjectionDefinition& definition) {
-    const double transition = transitionStateFor(definition);
+    const double transition = util::GLOBE_ENABLED ? definition.transitionState() : 0.0;
     if (transition == projectionTransition) {
         return;
     }
+    const bool leavesGlobe = transition == 0 && projectionTransition > 0;
     if ((transition > 0) != (projectionTransition > 0)) {
-        if (transition > 0) {
-            projection = std::make_shared<VerticalPerspectiveProjection>();
-        } else {
-            projection = std::make_shared<MercatorProjection>();
+        if constexpr (util::GLOBE_ENABLED) {
+            if (transition > 0) {
+                projection = std::make_shared<VerticalPerspectiveProjection>();
+            } else {
+                projection = std::make_shared<MercatorProjection>();
+            }
         }
     }
     projectionTransition = transition;
     requestMatricesUpdate = true;
+    // As GL JS's `migrateProjection` does: the globe allows lower zooms, latitudes past Mercator's and a center on
+    // another world copy, so Mercator's limits and its wrapped center apply again.
+    if (leavesGlobe && !size.isEmpty()) {
+        setLatLngZoom(getLatLng(bounds == LatLngBounds() ? LatLng::Wrapped : LatLng::Unwrapped), getZoom());
+    }
 }
 
 // MARK: - Matrix
@@ -553,8 +540,11 @@ void TransformState::setViewportMode(ViewportMode val) {
 // MARK: - Camera options
 
 CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
+    // The globe keeps the center on the world copy nearest the previous one, which its coordinate conversions do not
+    // depend on, and reports it wrapped. Mercator's conversions use the copy the transform is on, and bounds across
+    // the antimeridian keep the center in their range, past 180 degrees: both report the center as it is.
     return CameraOptions()
-        .withCenter(getLatLng())
+        .withCenter(getLatLng(isGlobeRendering() && bounds == LatLngBounds() ? LatLng::Wrapped : LatLng::Unwrapped))
         .withCenterAltitude(getCenterAltitude())
         .withPadding(padding ? padding : edgeInsets)
         .withZoom(getZoom())
@@ -600,18 +590,24 @@ double TransformState::getZoom() const {
 }
 
 double TransformState::getMinZoomAtLatitude(double latitude) const {
-    const double minZoom = getMinZoom();
-    if (!isGlobeRendering()) {
-        return minZoom;
-    }
-    return minZoom + VerticalPerspectiveProjection::zoomAdjustment(0, latitude);
+    return getMinZoomAtLatitude(latitude, isGlobeRendering());
 }
 
-LatLng TransformState::constrainedCenter(const LatLng& latLng) const {
+double TransformState::getMinZoomAtLatitude(double latitude, bool globe) const {
+    if (!globe) {
+        return getMinZoom();
+    }
+    // The globe's constraint never raises the scale, whichever projection the map is in now.
+    return scaleZoom(min_scale) + VerticalPerspectiveProjection::zoomAdjustment(0, latitude);
+}
+
+LatLng TransformState::constrainedCenter(const LatLng& latLng, double zoom) const {
     if (constrainMode == ConstrainMode::None || !isGlobeRendering()) {
         return latLng;
     }
-    return {util::clamp(latLng.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX), latLng.longitude()};
+    const double maxLatitude = VerticalPerspectiveProjection::maxLatitude(
+        *this, util::clamp(zoom, getMinZoomAtLatitude(latLng.latitude()), getMaxZoom()));
+    return {util::clamp(latLng.latitude(), -maxLatitude, maxLatitude), latLng.longitude()};
 }
 
 uint8_t TransformState::getIntegerZoom() const {
@@ -642,12 +638,15 @@ void TransformState::setMinZoom(const double minZoom) {
 }
 
 double TransformState::getMinZoom() const {
+    return scaleZoom(constrainedMinScale());
+}
+
+double TransformState::constrainedMinScale() const {
     double test_scale = min_scale;
     double unused_x = x;
     double unused_y = y;
     constrain(test_scale, unused_x, unused_y);
-
-    return scaleZoom(test_scale);
+    return test_scale;
 }
 
 void TransformState::setMaxZoom(const double maxZoom) {
@@ -892,13 +891,15 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
     }
 
     if (isGlobeRendering()) {
-        const Point<double> p = Projection::project(VerticalPerspectiveProjection::screenCoordinateToLatLng(
-                                                        *this, point, LatLng::Unwrapped),
-                                                    scale) /
-                                util::tileSize_D * static_cast<double>(1 << atZoom);
-        return {.p = {p.x, p.y}, .z = static_cast<double>(atZoom)};
+        return TileCoordinate::fromLatLng(
+            atZoom, VerticalPerspectiveProjection::screenCoordinateToLatLng(*this, point, LatLng::Unwrapped));
     }
 
+    return mercatorScreenCoordinateToTileCoordinate(point, atZoom);
+}
+
+TileCoordinate TransformState::mercatorScreenCoordinateToTileCoordinate(const ScreenCoordinate& point,
+                                                                        uint8_t atZoom) const {
     float targetZ = 0;
 
     double flippedY = size.height - point.y;
@@ -982,10 +983,13 @@ void TransformState::constrain(double& scale_, double& x_, double& y_) const {
         return;
     }
 
-    // The globe has no off-world area: the poles stay reachable and only the Mercator range bounds the center.
+    // The globe has no off-world area: the center goes past the Mercator range toward a pole as far as the zoom
+    // allows.
     if (isGlobeRendering()) {
-        const double halfWorld = scale_ * util::tileSize_D / 2;
-        y_ = std::max(-halfWorld, std::min(y_, halfWorld));
+        const double maxLatitude = VerticalPerspectiveProjection::maxLatitude(*this, scaleZoom(scale_));
+        const double maxY = Projection::worldSize(scale_) / util::M2PI *
+                            std::asinh(std::tan(util::deg2rad(maxLatitude)));
+        y_ = util::clamp(y_, -maxY, maxY);
         return;
     }
 
@@ -1136,7 +1140,7 @@ ScreenCoordinate TransformState::getCenterOffset() const {
 void TransformState::moveLatLng(const LatLng& latLng, const ScreenCoordinate& anchor) {
     if (isGlobeRendering()) {
         if (const auto center = VerticalPerspectiveProjection::centerForLocationAtPoint(*this, latLng, anchor)) {
-            const LatLng target = constrainedCenter(*center);
+            const LatLng target = constrainedCenter(*center, getZoom());
             const double zoom = getZoom() + VerticalPerspectiveProjection::zoomAdjustment(getLatLng().latitude(),
                                                                                           target.latitude());
             setLatLngZoom(target, zoom);
@@ -1150,7 +1154,14 @@ void TransformState::moveLatLng(const LatLng& latLng, const ScreenCoordinate& an
 }
 
 void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
-    LatLng constrained = bounds.constrain(latLng);
+    LatLng requested = latLng;
+    // Globe centers arrive wrapped, and bounds across the antimeridian reach past 180 degrees: take the copy of the
+    // longitude nearest the bounds before constraining it.
+    if (isGlobeRendering() && bounds != LatLngBounds()) {
+        const double turns = std::round((bounds.center().longitude() - latLng.longitude()) / util::DEGREES_MAX);
+        requested = {latLng.latitude(), latLng.longitude() + turns * util::DEGREES_MAX};
+    }
+    LatLng constrained = bounds.constrain(requested);
     // The globe's tile cover picks each tile's wrap from the center, so a center that jumped a whole world at the
     // antimeridian would re-key every tile; keep it on the copy nearest the current one.
     if (isGlobeRendering() && bounds == LatLngBounds()) {
@@ -1161,17 +1172,21 @@ void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
         }
     }
 
-    double newScale = util::clamp(zoomScale(zoom), zoomScale(getMinZoomAtLatitude(constrained.latitude())), max_scale);
+    const double minScale = isGlobeRendering() ? zoomScale(getMinZoomAtLatitude(constrained.latitude()))
+                                               : constrainedMinScale();
+    double newScale = util::clamp(zoomScale(zoom), minScale, max_scale);
     const double newWorldSize = newScale * util::tileSize_D;
     Bc = newWorldSize / util::DEGREES_MAX;
     Cc = newWorldSize / util::M2PI;
 
+    // The globe's center can be on a pole, which the clamped sine stops short of.
+    const double latitude = util::deg2rad(constrained.latitude());
     const double m = 1 - 1e-15;
-    const double f = util::clamp(std::sin(util::deg2rad(constrained.latitude())), -m, m);
+    const double f = util::clamp(std::sin(latitude), -m, m);
 
     ScreenCoordinate point = {
         -constrained.longitude() * Bc,
-        0.5 * Cc * std::log((1 + f) / (1 - f)),
+        isGlobeRendering() ? Cc * std::asinh(std::tan(latitude)) : 0.5 * Cc * std::log((1 + f) / (1 - f)),
     };
     setScalePoint(newScale, point);
 }
@@ -1208,9 +1223,11 @@ float TransformState::maxPitchScaleFactor() const {
     if (size.isEmpty()) {
         return {};
     }
-    auto latLng = screenCoordinateToLatLng({0, static_cast<float>(getSize().height)});
+    // The globe pads queries with the Mercator factor, as GL JS does, from the corner's unclamped Mercator position.
+    const auto corner = mercatorScreenCoordinateToTileCoordinate({0, static_cast<float>(getSize().height)}, 0);
+    const auto latLng = projection->unproject(corner.p, 1. / util::tileSize_D, LatLng::Unwrapped);
 
-    Point<double> pt = Projection::project(latLng, scale) / util::tileSize_D;
+    Point<double> pt = isGlobeRendering() ? corner.p * scale : Projection::project(latLng, scale) / util::tileSize_D;
     vec4 p = {{pt.x, pt.y, 0, 1}};
     vec4 topPoint;
     matrix::transformMat4(topPoint, p, getCoordMatrix());

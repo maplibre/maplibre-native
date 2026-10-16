@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mln/util/constants.hpp>
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -16,9 +18,10 @@ public:
         assert(minGranularity <= baseZoomGranularity || baseZoomGranularity == 0);
     }
 
-    /// The base granularity halves with every zoom level, down to the minimum and never below 1.
+    /// The base granularity halves with every zoom level, down to the minimum and never below 1. A build without the
+    /// globe never subdivides, which lets the linker drop the subdivision code.
     uint32_t getGranularityForZoomLevel(uint8_t zoom) const {
-        return std::max({zoom < 32 ? baseZoomGranularity >> zoom : 0u, minGranularity, 1u});
+        return util::GLOBE_ENABLED ? std::max({zoom < 32 ? baseZoomGranularity >> zoom : 0u, minGranularity, 1u}) : 1u;
     }
 
     bool operator==(const SubdivisionGranularityExpression&) const = default;

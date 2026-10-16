@@ -76,19 +76,18 @@ bool RenderCircleLayer::hasCrossfade() const {
     return false;
 }
 
-GeometryCoordinate projectPoint(const GeometryCoordinate& p, const mat4& posMatrix, const Size& size) {
-    vec4 pos = {{static_cast<double>(p.x), static_cast<double>(p.y), 0, 1}};
-    matrix::transformMat4(pos, pos, posMatrix);
-    return {static_cast<int16_t>((static_cast<float>(pos[0] / pos[3]) + 1) * size.width * 0.5),
-            static_cast<int16_t>((static_cast<float>(pos[1] / pos[3]) + 1) * size.height * 0.5)};
+GeometryCoordinate projectPoint(const GeometryCoordinate& p, const TileProjector& projector, const Size& size) {
+    const Point<double> pos = projector.project({static_cast<double>(p.x), static_cast<double>(p.y)}).point;
+    return {static_cast<int16_t>((static_cast<float>(pos.x) + 1) * size.width * 0.5),
+            static_cast<int16_t>((static_cast<float>(pos.y) + 1) * size.height * 0.5)};
 }
 
 GeometryCoordinates projectQueryGeometry(const GeometryCoordinates& queryGeometry,
-                                         const mat4& posMatrix,
+                                         const TileProjector& projector,
                                          const Size& size) {
     GeometryCoordinates projectedGeometry;
     for (auto& p : queryGeometry) {
-        projectedGeometry.push_back(projectPoint(p, posMatrix, size));
+        projectedGeometry.push_back(projectPoint(p, projector, size));
     }
     return projectedGeometry;
 }
@@ -98,7 +97,7 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
                                                const float zoom,
                                                const TransformState& transformState,
                                                const float pixelsToTileUnits,
-                                               const mat4& posMatrix,
+                                               const TileProjector& projector,
                                                const FeatureState& featureState) const {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
     // Translate query geometry
@@ -124,26 +123,36 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
     bool alignWithMap = evaluated.evaluate<style::CirclePitchAlignment>(zoom, feature) == AlignmentType::Map;
     const GeometryCoordinates& transformedQueryGeometry = alignWithMap ? translatedQueryGeometry
                                                                        : projectQueryGeometry(translatedQueryGeometry,
-                                                                                              posMatrix,
+                                                                                              projector,
                                                                                               transformState.getSize());
     auto transformedSize = alignWithMap ? size * pixelsToTileUnits : size;
 
+    // The shader hides a circle whose center the horizon covers where it draws it: translated, and through the
+    // projection as blended. The query finds none there either.
+    const auto drawnTranslation = RenderTile::tileUnitTranslation(projector.getTileID(),
+                                                                  evaluated.get<style::CircleTranslate>(),
+                                                                  evaluated.get<style::CircleTranslateAnchor>(),
+                                                                  transformState);
     const auto& geometry = feature.getGeometries();
     for (auto& ring : geometry) {
         for (auto& point : ring) {
+            if (transformState.isGlobeRendering() &&
+                projector.projectAsDrawn({point.x + drawnTranslation[0], point.y + drawnTranslation[1]}).occluded) {
+                continue;
+            }
             const GeometryCoordinate& transformedPoint = alignWithMap
                                                              ? point
-                                                             : projectPoint(point, posMatrix, transformState.getSize());
+                                                             : projectPoint(point, projector, transformState.getSize());
 
+            const auto projected = projector.project({static_cast<double>(point.x), static_cast<double>(point.y)});
             float adjustedSize = transformedSize;
-            vec4 center = {{static_cast<double>(point.x), static_cast<double>(point.y), 0, 1}};
-            matrix::transformMat4(center, center, posMatrix);
+            const double w = projected.signedDistanceFromCamera;
             auto pitchScale = evaluated.evaluate<style::CirclePitchScale>(zoom, feature);
             auto pitchAlignment = evaluated.evaluate<style::CirclePitchAlignment>(zoom, feature);
             if (pitchScale == CirclePitchScaleType::Viewport && pitchAlignment == AlignmentType::Map) {
-                adjustedSize *= static_cast<float>(center[3] / transformState.getCameraToCenterDistance());
+                adjustedSize *= static_cast<float>(w / transformState.getCameraToCenterDistance());
             } else if (pitchScale == CirclePitchScaleType::Map && pitchAlignment == AlignmentType::Viewport) {
-                adjustedSize *= static_cast<float>(transformState.getCameraToCenterDistance() / center[3]);
+                adjustedSize *= static_cast<float>(transformState.getCameraToCenterDistance() / w);
             }
 
             if (util::polygonIntersectsBufferedPoint(transformedQueryGeometry, transformedPoint, adjustedSize))
@@ -332,8 +341,8 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
             const auto& vertex = bucket.vertices.at(vertexOffset + vi).a1;
             const Point<double> center{std::trunc(vertex[0] / 2.0) + tileTranslation[0],
                                        std::trunc(vertex[1] / 2.0) + tileTranslation[1]};
-            const auto projected = projector->project(center);
-            if (projected.occluded) {
+            const auto projected = projector->projectAsDrawn(center);
+            if (projected.occluded || projected.signedDistanceFromCamera <= 0) {
                 // Not drawn; NaN stays out of the bound.
                 return {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), 0};
             }
@@ -343,8 +352,8 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
             if (pitchWithMap) {
                 const double tileRadius = pixels * pixelsToTileUnits * projector->pitchedTextCorrection(center) *
                                           (scaleWithMap ? 1.0 : w / cameraToCenterDistance);
-                const auto east = projector->project({center.x + tileRadius, center.y}).point - projected.point;
-                const auto north = projector->project({center.x, center.y + tileRadius}).point - projected.point;
+                const auto east = projector->projectAsDrawn({center.x + tileRadius, center.y}).point - projected.point;
+                const auto north = projector->projectAsDrawn({center.x, center.y + tileRadius}).point - projected.point;
                 halfExtent = {std::hypot(east.x, north.x), std::hypot(east.y, north.y)};
             } else {
                 const double clipScale = (scaleWithMap ? cameraToCenterDistance : w) / w;

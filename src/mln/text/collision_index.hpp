@@ -44,9 +44,10 @@ public:
                                         const mat4& posMatrix,
                                         float textPixelRatio,
                                         const CollisionBoundaries& tileEdges) const;
+    /// `shift` is a variable anchor's offset, unset when there is none.
     PlacedFeatureResult placeFeature(
         const CollisionFeature& feature,
-        Point<float> shift,
+        std::optional<Point<float>> shift,
         Point<float> translation,
         const TileProjector& tileProjector,
         const LabelPlaneProjector& labelPlane,
@@ -85,6 +86,7 @@ private:
 
     PlacedFeatureResult placeLineFeature(
         const CollisionFeature& feature,
+        Point<float> translation,
         const TileProjector& tileProjector,
         const LabelPlaneProjector& labelPlane,
         float textPixelRatio,
@@ -129,8 +131,8 @@ private:
         CollisionBoundaries boundaries;
         bool allPointsOccluded;
     };
-    /// Pitched or rotated boxes on the globe: the box outline is sampled at eight points and projected,
-    /// so it foreshortens toward the horizon the way the label does.
+    /// Pitched or map-rotated boxes: the box outline is sampled at eight points and projected,
+    /// so it turns and foreshortens the way the label does.
     ProjectedBox projectCollisionBox(const CollisionBox& box,
                                      float tileToViewport,
                                      float scale,
@@ -138,7 +140,7 @@ private:
                                      bool pitchWithMap,
                                      bool rotateWithMap,
                                      const ProjectedAnchor& projectedPoint,
-                                     Point<float> shift,
+                                     std::optional<Point<float>> shift,
                                      Point<float> translation) const;
 
     const TransformState transformState;

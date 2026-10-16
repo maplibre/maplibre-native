@@ -222,6 +222,55 @@ TEST(FeatureTracking, NDCBoundSymbolOffset) {
     });
 }
 
+// A variable-anchor label lays out with its translation already applied; the capture follows it once.
+TEST(FeatureTracking, NDCBoundTranslatedVariableAnchor) {
+    const auto captureAt = [](const std::array<float, 2>& translate, double& height) {
+        FeatureTrackingTest test(CameraOptions().withZoom(10.0));
+        test.getSymbolLayer()->setVisibility(VisibilityType::Visible);
+        test.getSymbolLayer()->setIconImage({});
+        test.getSymbolLayer()->setTextVariableAnchor({{SymbolAnchorType::Center}});
+        test.getSymbolLayer()->setTextPitchAlignment(AlignmentType::Map);
+        test.getSymbolLayer()->setTextTranslate({translate});
+        test.run({});
+        height = test.frontend.getSize().height;
+        double maxY = 0;
+        EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt0"));
+        test.map.getRenderedFeatures("pt0", std::nullopt, std::nullopt, [&](const auto&, const auto& info) -> bool {
+            maxY = info.ndcBound.maxY;
+            return true;
+        });
+        return maxY;
+    };
+    double height = 0;
+    const double untranslated = captureAt({0, 0}, height);
+    const double translated = captureAt({0, -50}, height);
+    EXPECT_NEAR(2 * 50 / height, translated - untranslated, 1e-3);
+}
+
+// A layer drawn from a bucket that another layer places is captured at its own translation, where it is drawn.
+TEST(FeatureTracking, NDCBoundSharedBucketAtAnotherTranslation) {
+    FeatureTrackingTest test(CameraOptions().withZoom(10.0));
+    auto* leader = test.getSymbolLayer();
+    leader->setVisibility(VisibilityType::Visible);
+    leader->setIconImage({});
+    leader->setTextVariableAnchor({{SymbolAnchorType::Center}});
+    leader->setTextPitchAlignment(AlignmentType::Map);
+    auto follower = leader->cloneRef("follower");
+    static_cast<SymbolLayer&>(*follower).setTextTranslate({{0, -50}});
+    test.map.getStyle().addLayer(std::move(follower));
+    test.run({});
+    const auto maxY = [&](const std::string& layerID) {
+        double y = 0;
+        EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt0", layerID));
+        test.map.getRenderedFeatures("pt0", layerID, std::nullopt, [&](const auto&, const auto& info) -> bool {
+            y = info.ndcBound.maxY;
+            return true;
+        });
+        return y;
+    };
+    EXPECT_NEAR(2 * 50 / double(test.frontend.getSize().height), maxY("follower") - maxY(test.symbolLayerName), 1e-3);
+}
+
 TEST(FeatureTracking, NDCBoundCircle) {
     FeatureTrackingTest test(CameraOptions().withZoom(10.0));
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);
@@ -450,6 +499,44 @@ struct GlobeFeatureTrackingTest : FeatureTrackingTest {
         EXPECT_GT(featureBound->minY, expected.y - slack);
         EXPECT_LT(featureBound->maxY, expected.y + slack);
     }
+
+    /// The NDC box of the green pixels of a rendered image.
+    static std::optional<gfx::RenderingStats::NDCBound> greenBound(const PremultipliedImage& image) {
+        std::optional<gfx::RenderingStats::NDCBound> result;
+        for (uint32_t y = 0; y < image.size.height; ++y) {
+            for (uint32_t x = 0; x < image.size.width; ++x) {
+                const auto* pixel = image.data.get() + (static_cast<std::size_t>(y) * image.size.width + x) * 4;
+                if (pixel[1] > 100 && pixel[1] > pixel[0] + 50 && pixel[1] > pixel[2] + 50) {
+                    const double ndcX = (x + 0.5) / image.size.width * 2.0 - 1.0;
+                    const double ndcY = 1.0 - (y + 0.5) / image.size.height * 2.0;
+                    if (!result) {
+                        result = gfx::RenderingStats::NDCBound{ndcX, ndcX, ndcY, ndcY};
+                    }
+                    result->minX = std::min(result->minX, ndcX);
+                    result->maxX = std::max(result->maxX, ndcX);
+                    result->minY = std::min(result->minY, ndcY);
+                    result->maxY = std::max(result->maxY, ndcY);
+                }
+            }
+        }
+        return result;
+    }
+
+    /// The capture is the box of the green pixels the feature was drawn with, to within a pixel on each side.
+    void expectCapturedAsDrawn(const std::string& featureID,
+                               const std::string& layerID,
+                               const PremultipliedImage& image) {
+        SCOPED_TRACE(featureID + " in " + layerID);
+        const auto rendered = greenBound(image);
+        ASSERT_TRUE(rendered);
+        const auto captured = bound(featureID, layerID);
+        ASSERT_TRUE(captured);
+        const double pixel = 2.0 / image.size.width;
+        EXPECT_NEAR(rendered->minX, captured->minX, pixel);
+        EXPECT_NEAR(rendered->maxX, captured->maxX, pixel);
+        EXPECT_NEAR(rendered->minY, captured->minY, pixel);
+        EXPECT_NEAR(rendered->maxY, captured->maxY, pixel);
+    }
 };
 
 } // namespace
@@ -499,7 +586,47 @@ TEST(FeatureTracking, GlobeNDCBoundFillExtrusion) {
     EXPECT_NEAR(extruded->minY, flat->minY, 1e-6);
     EXPECT_GT(extruded->maxX, flat->maxX + 0.01);
     EXPECT_GT(extruded->maxY, flat->maxY + 0.01);
-    EXPECT_EQ(0, test.map.getRenderedFeatureCount("farPolygon", "extrusion"));
+}
+
+// A roof that rises above the horizon is drawn at the limb, and is captured where it is drawn.
+TEST(FeatureTracking, GlobeFillExtrusionAboveHorizon) {
+    GlobeFeatureTrackingTest test;
+    auto extrusionLayer = std::make_unique<FillExtrusionLayer>("extrusion", test.sourceName);
+    extrusionLayer->setFillExtrusionHeight({500000.0f});
+    extrusionLayer->setFillExtrusionColor(Color{0, 1, 0, 1});
+    extrusionLayer->setFilter(Filter(dsl::eq(dsl::get("name"), dsl::literal("5"))));
+    test.map.getStyle().addLayer(std::move(extrusionLayer));
+    test.expectCapturedAsDrawn("farPolygon", "extrusion", test.run({}).image);
+}
+
+// While the projection hands over the shaders blend the sphere with Mercator and clip nothing in the first fifth.
+TEST(FeatureTracking, GlobeCaptureDuringTransition) {
+    GlobeFeatureTrackingTest test;
+    auto projection = std::make_unique<style::Projection>();
+    projection->setType(ProjectionDefinition("mercator", "vertical-perspective", 0.1));
+    test.map.getStyle().setProjection(std::move(projection));
+    test.getFillLayer()->setVisibility(VisibilityType::Visible);
+    test.getFillLayer()->setFillColor({{0, 1, 0, 1}});
+    for (const auto& [featureID, name] : {std::pair{"nearPolygon", "2"}, std::pair{"farPolygon", "5"}}) {
+        test.getFillLayer()->setFilter(Filter(dsl::eq(dsl::get("name"), dsl::literal(name))));
+        test.expectCapturedAsDrawn(featureID, test.fillLayerName, test.run({}).image);
+    }
+}
+
+// Close up the visible part of the planet is smaller than the sampling grid of a feature from a low zoom tile.
+TEST(FeatureTracking, GlobeCaptureCloseUp) {
+    GlobeFeatureTrackingTest test;
+    auto options = makeMutable<GeoJSONOptions>();
+    options->maxzoom = 0;
+    auto source = std::make_unique<GeoJSONSource>("lowZoom", std::move(options));
+    source->setGeoJSON(mapbox::geojson::feature{
+        Polygon<double>{{{-40, -40}, {40, -40}, {40, 40}, {-40, 40}, {-40, -40}}}, {}, "large"});
+    test.map.getStyle().addSource(std::move(source));
+    auto fillLayer = std::make_unique<FillLayer>("lowZoomFill", "lowZoom");
+    fillLayer->setFillColor({{0, 1, 0, 1}});
+    test.map.getStyle().addLayer(std::move(fillLayer));
+    test.map.jumpTo(CameraOptions().withZoom(11.0).withPitch(60.0));
+    test.expectCapturedAsDrawn("large", "lowZoomFill", test.run({}).image);
 }
 
 // What the horizon hides is not rendered, wherever Mercator would have put it.

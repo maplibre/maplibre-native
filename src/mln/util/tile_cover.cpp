@@ -459,20 +459,35 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const uint8_t minZoom = zoomRange.min;
     const uint8_t overscaledZoom = std::max(overscaledZ.value_or(z), maxZoom);
     const double numTiles = std::pow(2.0, z);
-    const bool allowVariableZoom = z > 4;
+    const auto& transformZoom = state.transformState.getZoom();
+    const double requestedCenterZoom = state.requestedZoom.value_or(transformZoom + (z - std::floor(transformZoom)));
+    const auto wholeZoom = [&](double zoom) {
+        return state.roundZoom ? std::round(zoom) : std::floor(zoom);
+    };
+    const bool allowVariableZoom = wholeZoom(requestedCenterZoom) > 4;
 
     const Point<double> center = Projection::project(transform.getLatLng(), 1.0 / util::tileSize_D);
     const vec3 centerCoord = {{center.x, center.y, 0.0}};
+    // The globe keeps its center on whichever world copy it has reached, where GL JS keeps it on the first. Wraps,
+    // sort keys and tile distances are taken against the center brought back to the first copy, as GL JS takes
+    // them, and the wraps moved into the center's copy.
+    const double centerWorld = std::floor(centerCoord[0]);
+    const double firstCopyCenterX = centerCoord[0] - centerWorld;
     const std::optional<vec3> cameraPosition = transform.getFreeCameraOptions().position;
     assert(cameraPosition);
     if (!cameraPosition) {
         return {};
     }
-    const vec3& cameraCoord = *cameraPosition;
+    // Past the Mercator range there are no tiles, so as GL JS does, they are chosen around the center brought back to
+    // the edge of the range, and the camera moves with it.
+    vec3 cameraCoord = *cameraPosition;
+    const double latitude = transform.getLatLng().latitude();
+    if (std::abs(latitude) > util::LATITUDE_MAX) {
+        cameraCoord[1] += center.y - (0.5 - std::asinh(std::tan(util::deg2rad(latitude))) / util::M2PI);
+    }
     const double distanceToCenter2d = std::hypot(centerCoord[0] - cameraCoord[0], centerCoord[1] - cameraCoord[1]);
     const double distanceZ = std::abs(centerCoord[2] - cameraCoord[2]);
     const double distanceToCenter3d = std::hypot(distanceToCenter2d, distanceZ);
-    const double requestedCenterZoom = transform.getZoom() + (z - std::floor(transform.getZoom()));
     const double fovDegrees = transform.getFieldOfView() * 180.0 / std::numbers::pi;
     const TileZoomFunction tileZoom(fovDegrees);
     const double cullingElevation = elevationForTileCulling(transform.getPitch() * 180.0 / std::numbers::pi,
@@ -498,8 +513,8 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
 
         double desiredZ = z;
         if (allowVariableZoom) {
-            const double distToTile2d = distanceToTile2d(cameraCoord[0], cameraCoord[1], tile);
-            desiredZ = std::floor(tileZoom(requestedCenterZoom, distToTile2d, distanceZ, distanceToCenter3d));
+            const double distToTile2d = distanceToTile2d(cameraCoord[0] - centerWorld, cameraCoord[1], tile);
+            desiredZ = wholeZoom(tileZoom(requestedCenterZoom, distToTile2d, distanceZ, distanceToCenter3d));
         }
         const auto targetZoom = static_cast<uint8_t>(std::clamp(desiredZ, 0.0, static_cast<double>(maxZoom)));
 
@@ -507,9 +522,9 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
             if (node.zoom < minZoom) {
                 continue;
             }
-            node.wrap = wrapFor(centerCoord[0], tile);
+            node.wrap = static_cast<int16_t>(wrapFor(firstCopyCenterX, tile) + centerWorld);
             // GL JS's sort key: the tile's own x/y against the center at the nominal zoom.
-            const double dx = numTiles * centerCoord[0] - 0.5 - node.x;
+            const double dx = numTiles * firstCopyCenterX - 0.5 - node.x;
             const double dy = numTiles * centerCoord[1] - 0.5 - node.y;
             result.push_back(
                 {OverscaledTileID(
@@ -526,7 +541,8 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         }
     }
 
-    std::sort(
+    // GL JS's sort is stable: equally distant tiles, as around a pole, keep the order they were found in.
+    std::stable_sort(
         result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) { return a.sqrDist < b.sqrDist; });
     std::vector<OverscaledTileID> ids;
     ids.reserve(result.size());

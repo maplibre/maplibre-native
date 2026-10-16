@@ -190,7 +190,20 @@ void PaintParameters::clearStencil() {
 
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_WEBGPU
-    // WebGPU clears stencil through render pass descriptor
+    // The render pass clears the stencil only where it begins; within it, draw zero over the zoom 0 tile, as Metal
+    // does.
+    auto& webgpuContext = static_cast<webgpu::Context&>(context);
+    if (state.isGlobeRendering()) {
+        const std::vector<gfx::GlobeClipMask> masks = {
+            {.projection = LayerTweaker::toProjectionUBO(projectionDataForTile({0, 0, 0})),
+             .stencilRef = 0,
+             .tile = CanonicalTileID(0, 0, 0)}};
+        webgpuContext.renderGlobeTileClippingMasks(*renderPass, staticData, masks);
+    } else {
+        const std::vector<shaders::ClipUBO> tileUBO = {shaders::ClipUBO{
+            .matrix = util::cast<float>(matrixForTile({0, 0, 0})), .stencil_ref = 0, .pad1 = 0, .pad2 = 0, .pad3 = 0}};
+        webgpuContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
+    }
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_OPENGL
     context.clearStencilBuffer(0b00000000);
@@ -471,6 +484,19 @@ gfx::StencilMode PaintParameters::stencilModeFor3D() {
                             .fail = gfx::StencilOpType::Keep,
                             .depthFail = gfx::StencilOpType::Keep,
                             .pass = gfx::StencilOpType::Replace};
+}
+
+bool PaintParameters::stencilModesFor3D(std::unordered_map<const gfx::Drawable*, gfx::StencilMode>& modes) {
+    if (modes.size() >= maxStencilValue) {
+        return false;
+    }
+    if (nextStencilID + modes.size() > maxStencilValue) {
+        clearStencil();
+    }
+    for (auto& [drawable, mode] : modes) {
+        mode = stencilModeFor3D();
+    }
+    return true;
 }
 
 gfx::ColorMode PaintParameters::colorModeForRenderPass() const {

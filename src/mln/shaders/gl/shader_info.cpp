@@ -482,6 +482,7 @@ const std::vector<TextureInfo> LineSDFShaderInfo::textures = {
 using LineGradientSDFShaderInfo = ShaderInfo<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> LineGradientSDFShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"ProjectionUBO", idProjectionUBO},
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"LineSDFDrawableUBO", idLineDrawableUBO},
     UniformBlockInfo{"LineSDFTilePropsUBO", idLineTilePropsUBO},

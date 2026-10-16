@@ -3,8 +3,8 @@
 #include <mln/map/mode.hpp>
 #include <mln/renderer/bucket.hpp>
 #include <mln/tile/tile_id.hpp>
-#include <mln/util/subdivision_granularity.hpp>
 #include <mln/util/feature.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 
 #include <memory>
 

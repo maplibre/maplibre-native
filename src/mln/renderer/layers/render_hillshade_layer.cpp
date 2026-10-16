@@ -319,7 +319,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         auto* segments = &staticDataSegments;
 
         if (projectionVariant == gfx::ProjectionVariant::Globe) {
-            const auto& globeMesh = globeMeshes.get(tileID.canonical, &HillshadeBucket::layoutVertex);
+            const auto& globeMesh = globeMeshes.get(tileID.canonical, bucket.mask, &HillshadeBucket::layoutVertex);
             vertices = globeMesh.vertices;
             indices = globeMesh.indices;
             segments = &globeMesh.segments;

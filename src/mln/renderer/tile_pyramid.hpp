@@ -76,6 +76,8 @@ public:
 
 private:
     void addRenderTile(const UnwrappedTileID& tileID, Tile& tile);
+    void moveTilesToWantedWraps(const std::vector<OverscaledTileID>& idealTiles,
+                                const std::vector<OverscaledTileID>& panTiles);
 
     std::map<OverscaledTileID, std::unique_ptr<Tile>> tiles;
     TileCache cache;

@@ -253,7 +253,7 @@ in lowp float opacity;
 #endif
 
 #ifdef PROJECTION_GLOBE
-in float v_tile_x;
+in highp float v_tile_x;
 #endif
 
 void main() {

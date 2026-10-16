@@ -1,4 +1,5 @@
 #include <mln/gfx/fill_generator.hpp>
+#include <mln/gfx/fill_large_mesh_arrays.hpp>
 #include <mln/gfx/polyline_generator.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/subdivision.hpp>
@@ -146,34 +147,15 @@ void addSubdividedPolygon(const util::SubdivisionResult& subdivided,
                           SegmentVector& fillSegments,
                           gfx::IndexVector<gfx::Lines>& lineIndexes,
                           SegmentVector& lineSegments) {
-    const std::size_t totalVertices = subdivided.vertices.size() / 2;
-    if (totalVertices > maxSegmentVertices) {
-        throw GeometryTooLongException();
-    }
-    const std::size_t startVertices = fillVertices.elements();
-    for (std::size_t i = 0; i < totalVertices; i++) {
-        fillVertices.emplace_back(
-            FillBucket::layoutVertex({subdivided.vertices[i * 2], subdivided.vertices[i * 2 + 1]}));
-    }
-    addFillIndices(fillSegments, fillIndexes, subdivided.triangleIndices, startVertices, totalVertices);
-
-    for (const auto& line : subdivided.lineIndexLists) {
-        if (line.empty()) {
-            continue;
-        }
-        if (lineSegments.empty() || lineSegments.back().vertexLength + totalVertices > maxSegmentVertices) {
-            lineSegments.emplace_back(startVertices, lineIndexes.elements());
-        }
-        auto& lineSegment = lineSegments.back();
-        const auto base = static_cast<uint16_t>(lineSegment.vertexLength);
-        for (std::size_t i = 0; i + 1 < line.size(); i += 2) {
-            lineIndexes.emplace_back(static_cast<uint16_t>(base + line[i]), static_cast<uint16_t>(base + line[i + 1]));
-        }
-        lineSegment.indexLength += line.size();
-    }
-    if (!lineSegments.empty()) {
-        lineSegments.back().vertexLength += totalVertices;
-    }
+    const MeshLines lines{lineSegments, lineIndexes, subdivided.lineIndexLists};
+    fillLargeMeshArrays(
+        fillVertices,
+        [](int16_t x, int16_t y) { return FillBucket::layoutVertex({x, y}); },
+        fillSegments,
+        fillIndexes,
+        subdivided.vertices,
+        subdivided.triangleIndices,
+        &lines);
 }
 
 } // namespace
@@ -210,12 +192,11 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        if (subdivisionGranularity >= 2) {
-            addSubdividedPolygon(util::subdividePolygonWithinLimit(polygon,
-                                                                   canonical,
-                                                                   subdivisionGranularity,
-                                                                   /*generateOutlineLines=*/true,
-                                                                   maxSegmentVertices),
+        if (util::GLOBE_ENABLED && subdivisionGranularity >= 2) {
+            addSubdividedPolygon(util::subdividePolygon(polygon,
+                                                        canonical,
+                                                        subdivisionGranularity,
+                                                        /*generateOutlineLines=*/true),
                                  vertices,
                                  fillIndexes,
                                  fillSegments,
@@ -301,7 +282,8 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
     // If we have pre-tessellated geometry, multi-polygons are tessellated
     // together, so we need to add them to the fill segment all at once.
-    if (!geometry.getTriangles().empty()) {
+    // Those triangles are flat: the globe subdivides the polygon instead.
+    if (!geometry.getTriangles().empty() && (!util::GLOBE_ENABLED || subdivisionGranularity < 2)) {
         const std::size_t startVertices = fillVertices.elements();
         std::size_t totalVertices = 0;
         for (const auto& polygon : geometry) {
@@ -316,18 +298,17 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        if (subdivisionGranularity >= 2) {
+        if (util::GLOBE_ENABLED && subdivisionGranularity >= 2) {
             for (const auto& ring : polygon) {
                 generateOutline(lineGenerator,
                                 util::subdivideVertexLine(ring, subdivisionGranularity, /*isRing=*/true),
                                 canonical,
                                 lineOptions);
             }
-            addSubdividedPolygon(util::subdividePolygonWithinLimit(polygon,
-                                                                   canonical,
-                                                                   subdivisionGranularity,
-                                                                   /*generateOutlineLines=*/true,
-                                                                   maxSegmentVertices),
+            addSubdividedPolygon(util::subdividePolygon(polygon,
+                                                        canonical,
+                                                        subdivisionGranularity,
+                                                        /*generateOutlineLines=*/true),
                                  fillVertices,
                                  fillIndexes,
                                  fillSegments,

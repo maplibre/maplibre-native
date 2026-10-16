@@ -267,6 +267,19 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void moveBy(double dx, double dy, @NonNull PointF focalPoint) {
+    if (checkState("moveBy")) {
+      return;
+    }
+
+    try {
+      nativeMoveByAround(dx / pixelRatio, dy / pixelRatio, focalPoint.x / pixelRatio, focalPoint.y / pixelRatio);
+    } catch (java.lang.Error error) {
+      Logger.d(TAG, "Error when executing NativeMapView#moveBy", error);
+    }
+  }
+
+  @Override
   public void setLatLng(@NonNull LatLng latLng, long duration) {
     if (checkState("setLatLng")) {
       return;
@@ -751,6 +764,14 @@ final class NativeMapView implements NativeMap {
       return new LatLng();
     }
     return nativeLatLngForPixel(pixel.x / pixelRatio, pixel.y / pixelRatio);
+  }
+
+  @Override
+  public boolean isLocationOccluded(@NonNull LatLng latLng) {
+    if (checkState("isLocationOccluded")) {
+      return false;
+    }
+    return nativeIsLocationOccluded(latLng.getLatitude(), latLng.getLongitude());
   }
 
   @Override
@@ -1528,6 +1549,9 @@ final class NativeMapView implements NativeMap {
   private native void nativeMoveBy(double dx, double dy, long duration);
 
   @Keep
+  private native void nativeMoveByAround(double dx, double dy, double x, double y);
+
+  @Keep
   private native void nativeSetLatLng(double latitude, double longitude, double[] padding, long duration);
 
   @NonNull
@@ -1675,6 +1699,8 @@ final class NativeMapView implements NativeMap {
   @NonNull
   @Keep
   private native PointF nativePixelForLatLng(double lat, double lon);
+
+  private native boolean nativeIsLocationOccluded(double lat, double lon);
 
   @Keep
   private native void nativePixelsForLatLngs(double[] input, double[] output, float pixelRatio);

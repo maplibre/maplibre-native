@@ -19,6 +19,8 @@ struct ProjectionData {
     double depthOffset = 0;
     /// The layer's translation in tile units, added on the sphere; the fallback matrix already carries it.
     vec2 translate{};
+    /// The camera on the unit sphere's scale, for the line of sight to points above the surface.
+    vec3 cameraPosition{};
 };
 
 /// A tile point in clip space, as the vertex shaders would place it.
@@ -54,13 +56,23 @@ public:
                                                 const Point<double>&,
                                                 double elevation) const = 0;
 
-    /// Scale that keeps map-aligned circles and pitched text the size they have on Mercator at the map center.
+    /// Where the vertex shaders draw a tile point: `projectTilePoint`, except while one projection hands over to
+    /// another.
+    virtual ProjectedTilePoint drawnTilePoint(const ProjectionData& data,
+                                              const UnwrappedTileID& tileID,
+                                              const Point<double>& point,
+                                              double elevation) const {
+        return projectTilePoint(data, tileID, point, elevation);
+    }
+
+    /// Scale that keeps map-aligned circles and pitched text the size they have on Mercator at the map center,
+    /// blended with Mercator's 1 through the projection transition as GL JS blends it.
     virtual double circleRadiusCorrection(const TransformState&) const { return 1.0; }
 
-    /// Ratio of a screen pixel at the map center to one at the same zoom on Mercator.
+    /// Ratio of a screen pixel at the map center to one at the same zoom on Mercator, blended the same way.
     virtual double pixelScale(const TransformState&) const { return 1.0; }
 
-    /// `circleRadiusCorrection` extended to a point away from the center, by its latitude.
+    /// `circleRadiusCorrection` extended to a point away from the center, by its latitude, blended the same way.
     virtual double pitchedTextCorrection(const TransformState&, const Point<double>&, const UnwrappedTileID&) const {
         return 1.0;
     }

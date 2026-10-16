@@ -210,7 +210,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices;
         const SegmentVector* segments = nullptr;
         if (globe) {
-            const auto& globeMesh = globeMeshes.get(tileID->canonical, &RasterBucket::layoutVertex);
+            const auto& globeMesh = globeMeshes.get(tileID->canonical, bucket.mask, &RasterBucket::layoutVertex);
             vertices = globeMesh.vertices;
             indices = globeMesh.indices;
             segments = &globeMesh.segments;

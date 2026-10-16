@@ -64,6 +64,7 @@ public:
     const Projection* getProjection() const;
 
     void setProjection(std::unique_ptr<Projection>);
+
     // Global state, used by the "global-state" expression.
     // Setting a null value resets the property to the default defined in the
     // style's root "state" property (or null if there is none).

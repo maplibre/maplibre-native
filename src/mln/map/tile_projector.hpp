@@ -17,8 +17,14 @@ public:
           tileID(tileID_),
           data(std::move(data_)) {}
 
+    /// GL JS's `projectTileCoordinates`, for queries and label placement.
     ProjectedTilePoint project(const Point<double>& point, double elevation = 0.0) const {
         return state->getProjection().projectTilePoint(data, tileID, point, elevation);
+    }
+
+    /// Where the renderer draws the point, for the rendered feature capture.
+    ProjectedTilePoint projectAsDrawn(const Point<double>& point, double elevation = 0.0) const {
+        return state->getProjection().drawnTilePoint(data, tileID, point, elevation);
     }
 
     double circleRadiusCorrection() const { return state->getProjection().circleRadiusCorrection(*state); }

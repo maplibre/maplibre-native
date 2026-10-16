@@ -110,10 +110,12 @@ const Sky* Style::getSky() const {
 }
 
 void Style::setProjection(std::unique_ptr<Projection> projection) {
+    impl->mutated = true;
     impl->setProjection(std::move(projection));
 }
 
 Projection* Style::getProjection() {
+    impl->mutated = true;
     return impl->getProjection();
 }
 

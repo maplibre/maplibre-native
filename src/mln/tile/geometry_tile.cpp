@@ -4,6 +4,7 @@
 #include <mln/geometry/feature_index.hpp>
 #include <mln/style/layers/custom_layer.hpp>
 #include <mln/renderer/layers/render_custom_layer.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/layers/render_background_layer.hpp>
@@ -530,12 +531,13 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
 
     const float queryPadding = getQueryPadding(layers);
 
-    const mat4 posMatrix = transformState.getProjectionData(id.toUnwrapped(), projMatrix).mainMatrix;
+    const TileProjector projector(
+        transformState, id.toUnwrapped(), transformState.getProjectionData(id.toUnwrapped(), projMatrix));
 
     layoutResult->featureIndex->query(result,
                                       queryGeometry,
                                       transformState,
-                                      posMatrix,
+                                      projector,
                                       util::tileSize_D * id.overscaleFactor(),
                                       std::pow(2, transformState.getZoom() - id.overscaledZ),
                                       options,

@@ -33,7 +33,7 @@ in float v_floorwidth;
 #pragma mapbox: define lowp float opacity
 
 #ifdef PROJECTION_GLOBE
-in float v_tile_x;
+in highp float v_tile_x;
 #endif
 
 void main() {

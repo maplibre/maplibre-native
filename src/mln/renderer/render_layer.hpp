@@ -123,6 +123,9 @@ public:
     /// Returns true if layer writes to depth buffer by drawing using PaintParameters::depthModeFor3D().
     virtual bool is3D() const { return false; }
 
+    /// Returns true if the layer may draw depth-tested 3D geometry, which the planet's depth hides behind the horizon.
+    virtual bool needsGlobeDepth() const { return is3D(); }
+
     /// Returns true is the layer is subject to placement.
     bool needsPlacement() const;
 
@@ -148,7 +151,7 @@ public:
                                         const float,
                                         const TransformState&,
                                         const float,
-                                        const mat4&,
+                                        const TileProjector&,
                                         const FeatureState&) const {
         return false;
     };
@@ -158,6 +161,8 @@ public:
     virtual void prepare(const LayerPrepareParameters&);
 
     const LayerPlacementData& getPlacementData() const { return placementData; }
+    /// Buckets that another layer places and this layer draws, at its own translation.
+    const LayerPlacementData& getFollowerData() const { return followerData; }
 
     /// Latest evaluated properties.
     Immutable<style::LayerProperties> evaluatedProperties;
@@ -329,6 +334,7 @@ protected:
     RenderPass passes = RenderPass::None;
 
     LayerPlacementData placementData;
+    LayerPlacementData followerData;
 
     // will need to be overridden to handle their activation.
     LayerGroupBasePtr layerGroup;

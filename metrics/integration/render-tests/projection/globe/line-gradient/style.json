@@ -2,17 +2,17 @@
   "version": 8,
   "metadata": {
     "test": {
-      "description": "GL JS's ramp uses interpolate-lab, which native's color ramps do not accept; the ramp interpolates in RGB here."
     }
+  },
+  "sky": {
+    "atmosphere-blend": 0.0
   },
   "center": [
     0.0,
     0.0
   ],
   "zoom": 1,
-  "projection": {
-    "type": "globe"
-  },
+  "projection": { "type": "globe" },
   "sources": {
     "fill": {
       "type": "geojson",
@@ -86,7 +86,7 @@
       "paint": {
         "line-width": 10,
         "line-gradient": [
-          "interpolate",
+          "interpolate-lab",
           [
             "linear"
           ],

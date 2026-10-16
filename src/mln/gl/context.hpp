@@ -196,7 +196,7 @@ private:
 
     gfx::ShaderProgramBasePtr globeClipMaskShader;
     /// One mesh per zoom and pole row; the projection block is uploaded per tile.
-    std::map<std::tuple<uint8_t, bool, bool>, std::unique_ptr<gfx::Drawable>> globeClipMaskDrawables;
+    std::map<std::tuple<uint8_t, bool, bool, bool>, std::unique_ptr<gfx::Drawable>> globeClipMaskDrawables;
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;

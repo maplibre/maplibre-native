@@ -732,7 +732,8 @@ bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
         globeClipping.pipelineInfo.stencilTest = true;
         globeClipping.pipelineInfo.stencilFunction = vk::CompareOp::eAlways;
         globeClipping.pipelineInfo.stencilPass = vk::StencilOp::eReplace;
-        // the far side of a limb tile projects inside the disc; cull it or it overwrites the tile in front
+        // the far side of a limb tile projects inside the disc; cull it or it overwrites the tile in front. The shader
+        // flips Y for Vulkan's downward framebuffer, so the far side is still clockwise on screen.
         globeClipping.pipelineInfo.setCullMode(gfx::CullFaceMode::backCCW());
         constexpr uint32_t allStencilBits = 0xFF;
         globeClipping.pipelineInfo.dynamicValues.stencilWriteMask = allStencilBits;
@@ -796,48 +797,54 @@ bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
     const auto instanceBuffer = createBuffer(
         instances.data(), instances.size() * sizeof(GlobeClipMaskInstance), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, false);
 
-    for (std::size_t i = 0; i < masks.size(); ++i) {
-        const auto& mask = masks[i];
-        const auto& tile = mask.tile;
-        const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1);
-        auto it = globeClipping.meshes.find(key);
-        if (it == globeClipping.meshes.end()) {
-            const auto mesh = rawGlobeTileMesh(tile, false, SubdivisionGranularitySetting::globe().stencil);
-            auto vertices = createBuffer(
-                mesh.vertices.data(), mesh.vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, false);
-            auto indices = createBuffer(
-                mesh.indices.data(), mesh.indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, false);
-            it = globeClipping.meshes
-                     .emplace(key,
-                              GlobeClipMesh{.vertices = std::move(vertices),
-                                            .indices = std::move(indices),
-                                            .indexCount = static_cast<uint32_t>(mesh.indices.size())})
-                     .first;
+    // Each mask is drawn with a border first, then exactly, as GL JS does: where a tile meets finer ones, its
+    // coarser edge leaves a sliver between the masks that only a neighbor's border covers.
+    for (const bool borders : {true, false}) {
+        for (std::size_t i = 0; i < masks.size(); ++i) {
+            const auto& mask = masks[i];
+            const auto& tile = mask.tile;
+            const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1, borders);
+            auto it = globeClipping.meshes.find(key);
+            if (it == globeClipping.meshes.end()) {
+                const auto mesh = rawGlobeTileMesh(tile, borders, SubdivisionGranularitySetting::globe().stencil);
+                auto vertices = createBuffer(
+                    mesh.vertices.data(), mesh.vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, false);
+                auto indices = createBuffer(mesh.indices.data(),
+                                            mesh.indices.size() * sizeof(uint16_t),
+                                            VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                                            false);
+                it = globeClipping.meshes
+                         .emplace(key,
+                                  GlobeClipMesh{.vertices = std::move(vertices),
+                                                .indices = std::move(indices),
+                                                .indexCount = static_cast<uint32_t>(mesh.indices.size())})
+                         .first;
+            }
+            const auto& mesh = it->second;
+
+            commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, mask.stencilRef, dispatcher);
+
+            const std::array<vk::Buffer, 2> vertexBuffers = {mesh.vertices.getVulkanBuffer(),
+                                                             instanceBuffer.getVulkanBuffer()};
+            const std::array<vk::DeviceSize, 2> offsets = {0, i * sizeof(GlobeClipMaskInstance)};
+            commandBuffer->bindVertexBuffers(0, vertexBuffers, offsets, dispatcher);
+            commandBuffer->bindIndexBuffer(mesh.indices.getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
+
+            mat4 matrix;
+            matrix::multiply(matrix, rotationMat, util::cast<double>(mask.projection.matrix));
+            mat4 fallbackMatrix;
+            matrix::multiply(fallbackMatrix, rotationMat, util::cast<double>(mask.projection.fallback_matrix));
+            const PushConstants constants = {.matrix = util::cast<float>(matrix),
+                                             .fallbackMatrix = util::cast<float>(fallbackMatrix)};
+            commandBuffer->pushConstants(
+                getPushConstantPipelineLayout().get(),
+                vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+                0,
+                sizeof(constants),
+                &constants,
+                dispatcher);
+            commandBuffer->drawIndexed(mesh.indexCount, 1, 0, 0, 0, dispatcher);
         }
-        const auto& mesh = it->second;
-
-        commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, mask.stencilRef, dispatcher);
-
-        const std::array<vk::Buffer, 2> vertexBuffers = {mesh.vertices.getVulkanBuffer(),
-                                                         instanceBuffer.getVulkanBuffer()};
-        const std::array<vk::DeviceSize, 2> offsets = {0, i * sizeof(GlobeClipMaskInstance)};
-        commandBuffer->bindVertexBuffers(0, vertexBuffers, offsets, dispatcher);
-        commandBuffer->bindIndexBuffer(mesh.indices.getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
-
-        mat4 matrix;
-        matrix::multiply(matrix, rotationMat, util::cast<double>(mask.projection.matrix));
-        mat4 fallbackMatrix;
-        matrix::multiply(fallbackMatrix, rotationMat, util::cast<double>(mask.projection.fallback_matrix));
-        const PushConstants constants = {.matrix = util::cast<float>(matrix),
-                                         .fallbackMatrix = util::cast<float>(fallbackMatrix)};
-        commandBuffer->pushConstants(
-            getPushConstantPipelineLayout().get(),
-            vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
-            0,
-            sizeof(constants),
-            &constants,
-            dispatcher);
-        commandBuffer->drawIndexed(mesh.indexCount, 1, 0, 0, 0, dispatcher);
     }
 
     stats.numDrawCalls++;

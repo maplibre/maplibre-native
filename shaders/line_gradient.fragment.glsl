@@ -21,7 +21,7 @@ in highp float v_lineprogress;
 #pragma mapbox: define lowp float opacity
 
 #ifdef PROJECTION_GLOBE
-in float v_tile_x;
+in highp float v_tile_x;
 #endif
 
 void main() {

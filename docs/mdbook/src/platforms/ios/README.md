@@ -98,3 +98,7 @@ The dynamic XCFramework includes device and simulator dSYMs in each slice's `dSY
 A build of MapLibre iOS with the experimental C plugin API enabled is distributed separately as a Swift package at [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api). Its `MapLibre` product is a drop-in replacement for the standard one: use `import MapLibre` as usual. The framework additionally exports `mln_plugin_register_v1`. Plugin packages should depend only on the header-only `MapLibrePluginApi` product from that package and include `<mln/plugin/plugin_api.h>`. Use only one MapLibre package per application, as both frameworks define the same module and Objective-C classes.
 
 To build the plugin-enabled XCFramework, add `--//:plugins=true` to the command above.
+
+### Globe
+
+The globe projection is built in by default. To build without it, add `--//:globe=false` to the command above (CMake: `-DMLN_WITH_GLOBE=OFF`). A style that sets a globe projection then draws as Mercator, and a release build leaves out the globe-only code.

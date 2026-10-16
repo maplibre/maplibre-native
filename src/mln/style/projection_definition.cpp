@@ -1,5 +1,6 @@
 #include <mln/style/projection_definition.hpp>
 
+#include <algorithm>
 #include <cassert>
 
 namespace mln {
@@ -52,6 +53,24 @@ ProjectionDefinition::ProjectionDefinition(std::string_view name)
 
 ProjectionDefinition::ProjectionDefinition(std::string_view from_, std::string_view to_, double transition_)
     : ProjectionDefinition(typeFromNameOrMercator(from_), typeFromNameOrMercator(to_), transition_) {}
+
+double ProjectionDefinition::transitionState() const {
+    const auto isGlobe = [](ProjectionType type) {
+        return type != ProjectionType::Mercator;
+    };
+    if (from == to) {
+        return isGlobe(from) ? 1 : 0;
+    }
+    // A transition past either end, from a literal or an overshooting curve, holds at that end's projection.
+    const double share = std::clamp(transition, 0.0, 1.0);
+    if (isGlobe(from) && !isGlobe(to)) {
+        return 1 - share;
+    }
+    if (!isGlobe(from) && isGlobe(to)) {
+        return share;
+    }
+    return 1;
+}
 
 mln::Value ProjectionDefinition::serialize() const {
     if (from == to && transition == 1) {

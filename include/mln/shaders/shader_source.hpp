@@ -28,7 +28,6 @@ enum class BuiltIn {
     FillExtrusionInstancedShader,
     FillExtrusionPatternShader,
     FillExtrusionPatternInstancedShader,
-    GlobeDepthShader,
     HeatmapShader,
     HeatmapTextureShader,
     HillshadePrepareShader,
@@ -45,7 +44,8 @@ enum class BuiltIn {
     SymbolIconShader,
     SymbolSDFShader,
     SymbolTextAndIconShader,
-    WideVectorShader
+    WideVectorShader,
+    GlobeDepthShader
 };
 
 /// @brief Select shader source based on a program type and a desired

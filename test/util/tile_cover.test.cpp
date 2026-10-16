@@ -692,6 +692,106 @@ TEST(TileCover, GlobePitchedAndRotated) {
               util::tileCover({transform.getState()}, 8, zoomRange));
 }
 
+// GL JS `coveringTiles` on the globe for sources whose zoom range or tile size moves the zoom they load at: the
+// level of detail falls off from the map's zoom and only then meets the source's maximum, and raster sources round.
+// GL JS builds its globe frustum from a float32 copy of the inverse matrix, which at these zooms drops the tile
+// at the far top edge of the view; the lists are GL JS's with the frustum built in double precision, as here.
+TEST(TileCover, GlobeSourceZoomsLikeGLJS) {
+    struct Case {
+        const char* name;
+        double zoom;
+        double pitch;
+        uint16_t tileSize;
+        uint8_t maxZoom;
+        style::SourceType type;
+        std::vector<CanonicalTileID> expected;
+    };
+    const std::vector<Case> cases = {
+        {"overzoomed", 10.5, 60.0, 512, 8, style::SourceType::Vector, {{8, 135, 113}, {8, 134, 113}, {8, 134, 112}}},
+        {"overzoomed to the horizon",
+         10.5,
+         75.0,
+         512,
+         8,
+         style::SourceType::Vector,
+         {{8, 135, 113}, {8, 134, 113}, {8, 135, 112}, {8, 134, 112}, {5, 16, 13}}},
+        {"low max zoom", 10.0, 60.0, 512, 4, style::SourceType::Vector, {{4, 8, 7}, {4, 8, 6}}},
+        {"raster rounding up",
+         5.6,
+         60.0,
+         256,
+         22,
+         style::SourceType::Raster,
+         {{7, 67, 56}, {7, 67, 57}, {7, 68, 56}, {7, 66, 56}, {7, 68, 57}, {7, 66, 57}, {7, 67, 58}, {7, 69, 56},
+          {7, 68, 58}, {7, 66, 58}, {7, 65, 56}, {6, 35, 26}, {6, 34, 27}, {6, 34, 26}, {6, 33, 27}, {6, 33, 26},
+          {6, 32, 27}, {6, 32, 26}, {5, 18, 12}, {5, 17, 12}, {5, 16, 12}, {5, 15, 12}}},
+        {"raster rounding down",
+         5.3,
+         60.0,
+         256,
+         22,
+         style::SourceType::Raster,
+         {{6, 33, 28},
+          {6, 34, 28},
+          {6, 33, 27},
+          {6, 34, 27},
+          {6, 32, 28},
+          {6, 32, 27},
+          {6, 33, 26},
+          {6, 35, 27},
+          {6, 34, 26},
+          {6, 32, 26},
+          {6, 35, 26},
+          {5, 18, 12},
+          {5, 17, 12},
+          {5, 16, 12},
+          {5, 15, 12},
+          {7, 66, 58},
+          {7, 67, 58},
+          {7, 68, 58}}},
+    };
+    for (const auto& c : cases) {
+        SCOPED_TRACE(c.name);
+        Transform transform;
+        setUpGlobe(transform, {512, 512}, {20.0, 10.0}, c.zoom, c.pitch);
+        // As TilePyramid asks for them.
+        const int32_t coveringZoom = util::coveringZoomLevel(c.zoom, c.type, c.tileSize);
+        const auto idealZoom = static_cast<uint8_t>(std::min<int32_t>(c.maxZoom, coveringZoom));
+        const bool raster = c.type == style::SourceType::Raster;
+        const util::TileCoverParameters parameters{.transformState = transform.getState(),
+                                                   .requestedZoom = c.zoom + std::log2(512.0 / c.tileSize),
+                                                   .roundZoom = raster};
+        const auto tiles = util::tileCover(parameters,
+                                           idealZoom,
+                                           Range<uint8_t>(0, c.maxZoom),
+                                           static_cast<uint8_t>(raster ? idealZoom : coveringZoom));
+        std::vector<CanonicalTileID> canonical;
+        for (const auto& tile : tiles) {
+            canonical.push_back(tile.canonical);
+            EXPECT_EQ(0, tile.wrap);
+        }
+        EXPECT_EQ(c.expected, canonical);
+    }
+}
+
+// GL JS `globe_covering_tiles.test.ts` "covers the tiles around the south pole", the tiles in its order: past the
+// Mercator range there are no tiles, so they are chosen around the center brought back to the edge of the range.
+TEST(TileCover, GlobeAroundThePole) {
+    Transform transform;
+    setUpGlobe(transform, {512, 512}, {-90.0, 0.0}, 1.6);
+    EXPECT_EQ(-90.0, transform.getLatLng().latitude());
+    EXPECT_EQ(
+        (std::vector<OverscaledTileID>{
+            {5, 16, 31}, {5, 15, 31}, {5, 17, 31}, {5, 14, 31}, {5, 18, 31}, {5, 13, 31}, {5, 18, 30}, {5, 13, 30},
+            {5, 19, 31}, {5, 12, 31}, {5, 19, 30}, {5, 12, 30}, {5, 19, 29}, {5, 12, 29}, {5, 20, 31}, {5, 11, 31},
+            {5, 20, 30}, {5, 11, 30}, {5, 20, 29}, {5, 11, 29}, {5, 21, 31}, {5, 10, 31}, {5, 21, 30}, {5, 10, 30},
+            {5, 22, 31}, {5, 9, 31},  {5, 23, 31}, {5, 8, 31},  {5, 24, 31}, {5, 7, 31},  {5, 25, 31}, {5, 6, 31},
+            {5, 26, 31}, {5, 5, 31},  {5, 26, 30}, {5, 5, 30},  {5, 27, 31}, {5, 4, 31},  {5, 27, 30}, {5, 4, 30},
+            {5, 27, 29}, {5, 4, 29},  {5, 28, 31}, {5, 3, 31},  {5, 28, 30}, {5, 3, 30},  {5, 28, 29}, {5, 3, 29},
+            {5, 29, 31}, {5, 2, 31},  {5, 29, 30}, {5, 2, 30},  {5, 30, 31}, {5, 1, 31},  {5, 31, 31}, {5, 0, 31}}),
+        util::tileCover({transform.getState()}, 5, zoomRange));
+}
+
 TEST(TileCover, GlobeAntimeridian) {
     Transform east;
     setUpGlobe(east, {128, 128}, {-0.001, 179.99}, 5.0);
@@ -756,4 +856,24 @@ TEST(TileCover, GlobeCoverSurvivesTheAntimeridian) {
     std::sort(after.begin(), after.end());
     EXPECT_EQ(before, after);
     EXPECT_EQ(4u, after.size());
+}
+
+// A center spun into another world copy covers the same tiles, in the same order, moved into that copy.
+TEST(TileCover, GlobeCoverFollowsTheCenterIntoOtherWorldCopies) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{10, 20}).withZoom(6.0).withPitch(50.0));
+    const auto home = util::tileCover({transform.getState()}, 6, Range<uint8_t>(0, 14));
+    for (int step = 1; step <= 6; ++step) {
+        transform.jumpTo(CameraOptions().withCenter(LatLng{10, 20.0 + 120.0 * step}));
+    }
+    ASSERT_NEAR(740, transform.getState().getLatLng().longitude(), 1e-9);
+    const auto spun = util::tileCover({transform.getState()}, 6, Range<uint8_t>(0, 14));
+    ASSERT_EQ(home.size(), spun.size());
+    for (std::size_t i = 0; i < home.size(); ++i) {
+        EXPECT_EQ(home[i].canonical, spun[i].canonical) << i;
+        EXPECT_EQ(home[i].wrap + 2, spun[i].wrap) << i;
+        EXPECT_EQ(home[i].overscaledZ, spun[i].overscaledZ) << i;
+    }
 }

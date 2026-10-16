@@ -4,6 +4,7 @@
 #include <mln/storage/file_source.hpp>
 #include <mln/style/projection_impl.hpp>
 #include <mln/style/style_impl.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/exception.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/traits.hpp>
@@ -61,6 +62,7 @@ Map::Impl::Impl(RendererFrontend& frontend_,
       style(std::make_unique<style::Style>(fileSource, pixelRatio, frontend_.getThreadPool())),
       annotationManager(*style) {
     transform.setNorthOrientation(mapOptions.northOrientation());
+    transform.setProjectionForZoom([this](double zoom) { return projectionAt(zoom); });
     style->impl->setObserver(this);
     rendererFrontend.setObserver(*this);
     transform.resize(mapOptions.size());
@@ -115,8 +117,7 @@ void Map::Impl::onUpdate() {
     TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
     transform.updateTransitions(timePoint);
-    transform.setProjectionDefinition(
-        style->impl->getProjection()->impl->evaluate(static_cast<float>(transform.getZoom())));
+    transform.setProjectionDefinition(projectionAt(transform.getZoom()));
 
     UpdateParameters params = {
         .styleLoaded = style->impl->isLoaded(),
@@ -147,7 +148,9 @@ void Map::Impl::onUpdate() {
         .tileLodPitchThreshold = tileLodPitchThreshold,
         .tileLodZoomShift = tileLodZoomShift,
         .tileLodMode = tileLodMode,
-        .subdivisionGranularity = style->impl->getProjection()->impl->getSubdivisionGranularity()};
+        .subdivisionGranularity = mode == MapMode::Tile || !util::GLOBE_ENABLED
+                                      ? SubdivisionGranularitySetting::none()
+                                      : style->impl->getProjection()->impl->getSubdivisionGranularity()};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
 }
@@ -325,10 +328,16 @@ void Map::Impl::onDidFinishRenderingMap() {
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
     // The style's projection decides how the camera is constrained, so it has to be in place first.
-    transform.setProjectionDefinition(
-        style->impl->getProjection()->impl->evaluate(static_cast<float>(camera.zoom.value_or(transform.getZoom()))));
+    transform.setProjectionDefinition(projectionAt(camera.zoom.value_or(transform.getZoom())));
     transform.jumpTo(camera);
     onUpdate();
+}
+
+ProjectionDefinition Map::Impl::projectionAt(double zoom) const {
+    if (mode == MapMode::Tile || !util::GLOBE_ENABLED) {
+        return ProjectionDefinition(ProjectionType::Mercator);
+    }
+    return style->impl->getProjection()->impl->evaluate(static_cast<float>(zoom));
 }
 
 bool Map::Impl::isRenderingStatsViewEnabled() const {

@@ -361,7 +361,9 @@ typedef struct mln_plugin_drawable_descriptor_v1 {
     /* Indexed triangles in the translucent pass, premultiplied-alpha blending by
      * default. depth_mode, enable_stencil_overlap, and cull_back_faces select the
      * host depth/stencil/cull state for this drawable. blend_mode and reserved are
-     * unused; set them to zero. */
+     * unused; set them to zero. On the globe, read/write depth is tested against
+     * the planet, which hides what lies behind its near side, and read-only depth
+     * draws without a depth test, as the host's 2D layers do there. */
     uint32_t struct_size;
     uint64_t drawable_key;
     mln_plugin_string shader_id;
@@ -430,6 +432,16 @@ typedef struct mln_plugin_query_context_v1 {
     double tile_matrix[16];
     uint32_t viewport_width;
     uint32_t viewport_height;
+    /*
+     * The tile's projection, with the meaning mln_plugin_uniform_context_v1
+     * gives these fields, so a hit test can put a feature where the uniform
+     * callback's shader draws it; tile_matrix is the Mercator side of the blend.
+     */
+    double projection_transition;
+    double tile_mercator_coords[4];
+    double projection_matrix[16];
+    double clipping_plane[4];
+    double pixels_to_sphere_radians;
 } mln_plugin_query_context_v1;
 
 /* Optional exact hit test. Query and feature geometry use tile coordinates.
