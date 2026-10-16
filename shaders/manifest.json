@@ -194,6 +194,13 @@
         "uses_ubos": true
     },
     {
+        "name": "LineGradientSDFShader",
+        "header": "line_gradient_sdf",
+        "glsl_vert": "line_gradient_sdf.vertex.glsl",
+        "glsl_frag": "line_gradient_sdf.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "RasterShader",
         "header": "raster",
         "glsl_vert": "raster.vertex.glsl",
