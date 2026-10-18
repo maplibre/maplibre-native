@@ -87,17 +87,30 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const auto& translation = evaluated.get<FillExtrusionTranslate>();
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-        constexpr bool nearClipped = true;
+        // On terrain, the extrusion depth-tests against the terrain mesh, so it has to be
+        // projected the way the mesh is (TerrainLayerTweaker): the default near plane rather
+        // than the near-clipped one, or every extrusion lands in front of the ground.
+        const bool onTerrain = parameters.terrain != nullptr;
+        const bool nearClipped = !onTerrain;
         // Fill extrusion is elevated, not draped
-        const auto matrix = getTileMatrix(tileID,
-                                          parameters,
-                                          translation,
-                                          anchor,
-                                          nearClipped,
-                                          inViewportPixelUnits,
-                                          drawable,
-                                          /*aligned=*/false,
-                                          /*renderToTerrain=*/false);
+        auto matrix = getTileMatrix(tileID,
+                                    parameters,
+                                    translation,
+                                    anchor,
+                                    nearClipped,
+                                    inViewportPixelUnits,
+                                    drawable,
+                                    /*aligned=*/false,
+                                    /*renderToTerrain=*/false);
+#if !MLN_RENDER_BACKEND_OPENGL
+        if (onTerrain) {
+            // The mesh's clip z is remapped from [-1, 1] to [0, 1] on these backends; match it.
+            matrix[2] = 0.5 * (matrix[2] + matrix[3]);
+            matrix[6] = 0.5 * (matrix[6] + matrix[7]);
+            matrix[10] = 0.5 * (matrix[10] + matrix[11]);
+            matrix[14] = 0.5 * (matrix[14] + matrix[15]);
+        }
+#endif
 
         const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
         const auto zoomScale = state.zoomScale(tileID.canonical.z);
