@@ -394,6 +394,8 @@ void GLFWView::setMap(mln::Map *map_) {
 
     map = map_;
     map->addAnnotationImage(makeImage("default_marker", 22, 22, 1));
+    // The window always rotates (right drag), so drags and zooms on the globe turn the bearing with the planet.
+    map->setGlobeFreeBearing(true);
 }
 
 void GLFWView::setRenderFrontend(GLFWRendererFrontend *rendererFrontend_) {

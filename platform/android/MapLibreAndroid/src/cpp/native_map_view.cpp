@@ -297,6 +297,10 @@ void NativeMapView::setGestureInProgress(jni::JNIEnv&, jni::jboolean inProgress)
     map->setGestureInProgress(inProgress);
 }
 
+void NativeMapView::setGlobeFreeBearing(jni::JNIEnv&, jni::jboolean freeBearing) {
+    map->setGlobeFreeBearing(freeBearing);
+}
+
 void NativeMapView::moveBy(jni::JNIEnv&, jni::jdouble dx, jni::jdouble dy, jni::jlong duration) {
     mln::AnimationOptions animationOptions;
     if (duration > 0) {
@@ -1399,6 +1403,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setStyleJson, "nativeSetStyleJson"),
         METHOD(&NativeMapView::cancelTransitions, "nativeCancelTransitions"),
         METHOD(&NativeMapView::setGestureInProgress, "nativeSetGestureInProgress"),
+        METHOD(&NativeMapView::setGlobeFreeBearing, "nativeSetGlobeFreeBearing"),
         METHOD(&NativeMapView::moveBy, "nativeMoveBy"),
         METHOD(&NativeMapView::moveByAround, "nativeMoveByAround"),
         METHOD(&NativeMapView::jumpTo, "nativeJumpTo"),

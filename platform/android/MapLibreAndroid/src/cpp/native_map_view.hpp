@@ -91,6 +91,8 @@ public:
 
     void setGestureInProgress(jni::JNIEnv&, jni::jboolean);
 
+    void setGlobeFreeBearing(jni::JNIEnv&, jni::jboolean);
+
     void moveBy(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jlong);
 
     void moveByAround(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble);

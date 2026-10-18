@@ -2563,6 +2563,292 @@ TEST(GlobeTransform, DragOverThePoleStopsOnIt) {
     EXPECT_NEAR(-0.9872050442266238, transform.getZoom(), 1e-6);
 }
 
+// GL JS's drag without the fixed bearing (`versorSetLocationAtPoint(tr, location, anchor, panDelta, false)` in
+// globe_utils.ts at 638b3f9ec) on a 640 by 480 globe with a 45 degree field of view, run in doubles: one step at a time
+// from the state GL JS had before it, the anchor the cursor while it is on the planet and the center otherwise. Steps
+// with the cursor off the planet go through the falloff, where native and GL JS differ by a few times 1e-7 degrees.
+TEST(GlobeTransform, FreeBearingDragMatchesGLJS) {
+    struct Step {
+        const char* name;
+        LatLng center;
+        double zoom;
+        double bearing;
+        double pitch;
+        ScreenCoordinate anchor;
+        ScreenCoordinate panDelta;
+        LatLng expected;
+        double expectedBearing;
+    };
+    for (const auto& step : {
+             Step{"mid-globe-east 0",
+                  {20.0, 10.0},
+                  1.0,
+                  0.0,
+                  0.0,
+                  {340.0, 240.0},
+                  {10.0, 0.0},
+                  {19.964831035703163, 6.458738472277901},
+                  -1.2105018410808273},
+             Step{"mid-globe-east 7",
+                  {18.019206354761504, -16.65450732839554},
+                  1.0171849312490204,
+                  -8.825955295711765,
+                  0.0,
+                  {410.0, 240.0},
+                  {10.0, 0.0},
+                  {17.29289010262656, -21.199373456415287},
+                  -10.205107464700406},
+             Step{"over-north-pole 13",
+                  {79.41551935272437, -99.99999999999989},
+                  0.10315332639360152,
+                  3.410605131648481e-13,
+                  0.0,
+                  {320.0, 284.0},
+                  {0.0, 6.0},
+                  {80.14639071459133, -99.99999999999807},
+                  2.0463630789890885e-12},
+             Step{"over-north-pole 25",
+                  {88.49295346569899, -99.99999999998397},
+                  -0.9872050442266241,
+                  1.671196514507756e-11,
+                  0.0,
+                  {320.0, 356.0},
+                  {0.0, 6.0},
+                  {89.29419866472097, -99.99999999996294},
+                  3.8198777474462986e-11},
+             Step{"over-north-pole 26",
+                  {89.29419866472097, -99.99999999996294},
+                  -0.9872050442266241,
+                  3.8198777474462986e-11,
+                  0.0,
+                  {320.0, 362.0},
+                  {0.0, 6.0},
+                  {89.89453036004743, 79.99999999974375},
+                  179.99999999974605},
+             Step{"over-north-pole 27",
+                  {89.89453036004743, 79.99999999974375},
+                  -0.9872050442266241,
+                  179.99999999974605,
+                  0.0,
+                  {320.0, 368.0},
+                  {0.0, 6.0},
+                  {89.07238060450973, 79.99999999996999},
+                  179.99999999997203},
+             Step{"over-north-pole 39",
+                  {78.96870340062405, 79.99999999999284},
+                  0.16209611242931793,
+                  179.999999999995,
+                  0.0,
+                  {320.0, 440.0},
+                  {0.0, 6.0},
+                  {77.9082916607387, 79.99999999999159},
+                  179.99999999999363},
+             Step{"across-pole-on-globe 19",
+                  {89.340072693097, -100.00000000001774},
+                  -0.009291019464406594,
+                  -1.6825651982799172e-11,
+                  0.0,
+                  {320.0, 320.0},
+                  {0.0, 8.0},
+                  {89.83806502107838, -100.00000000007714},
+                  -7.651124178664759e-11},
+             Step{"across-pole-on-globe 20",
+                  {89.83806502107838, -100.00000000007714},
+                  -0.009291019464406594,
+                  -7.651124178664759e-11,
+                  0.0,
+                  {320.0, 328.0},
+                  {0.0, 8.0},
+                  {89.6617557958742, 80.00000000003092},
+                  -179.99999999996658},
+             Step{"across-pole-on-globe 21",
+                  {89.6617557958742, 80.00000000003092},
+                  -0.009291019464406594,
+                  -179.99999999996658,
+                  0.0,
+                  {320.0, 336.0},
+                  {0.0, 8.0},
+                  {89.15914508699329, 80.00000000001307},
+                  -179.99999999998465},
+             Step{"beside-north-pole 0",
+                  {85.05, -100.0},
+                  1.0,
+                  0.0,
+                  0.0,
+                  {386.0, 240.0},
+                  {6.0, 0.0},
+                  {85.04662278483669, -102.12115815315576},
+                  -2.113243435839649},
+             Step{"beside-north-pole 29",
+                  {82.61847217815794, -148.0453022994218},
+                  1.5742929546363558,
+                  -47.80814125537427,
+                  0.0,
+                  {560.0, 240.0},
+                  {6.0, 0.0},
+                  {82.46976369277144, -149.0658211264905},
+                  -48.82003297275798},
+             Step{"off-globe-and-back 5",
+                  {59.63182334571161, 0.0},
+                  0.015938893735801596,
+                  0.0,
+                  0.0,
+                  {320.0, 240.0},
+                  {0.0, 25.0},
+                  {68.48553614142399, 0.0},
+                  0.0},
+             Step{"off-globe-and-back 9",
+                  {84.95332547144974, 180.0},
+                  -2.506889874048772,
+                  180.0,
+                  0.0,
+                  {320.0, 240.0},
+                  {0.0, 25.0},
+                  {76.09961267574481, 180.0},
+                  180.0},
+             Step{"off-globe-and-back 15",
+                  {84.95332547144743, 180.0},
+                  -2.5068898740481123,
+                  180.0,
+                  0.0,
+                  {320.0, 240.0},
+                  {0.0, -25.0},
+                  {86.19296173284701, 0.0},
+                  0.0},
+             Step{"off-globe-and-back 20",
+                  {33.13938452686452, 0.0},
+                  0.7438908494163972,
+                  0.0,
+                  0.0,
+                  {320.0, 315.0},
+                  {0.0, -25.0},
+                  {20.561601743914935, 0.0},
+                  0.0},
+             Step{"bearing-pitch 0",
+                  {40.0, 30.0},
+                  1.5,
+                  30.0,
+                  20.0,
+                  {308.0, 255.0},
+                  {8.0, -5.0},
+                  {39.90522931489954, 27.677367870127796},
+                  28.54888958514232},
+             Step{"bearing-pitch 9",
+                  {36.75658194038969, 8.665623636743362},
+                  1.5647074495325435,
+                  17.020204416245633,
+                  20.0,
+                  {380.0, 210.0},
+                  {8.0, -5.0},
+                  {36.00738235824049, 6.187079071036919},
+                  15.610527473047796},
+         }) {
+        SCOPED_TRACE(step.name);
+        Transform transform;
+        transform.resize({640, 480});
+        transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+        transform.jumpTo(CameraOptions()
+                             .withCenter(step.center)
+                             .withZoom(step.zoom)
+                             .withBearing(step.bearing)
+                             .withPitch(step.pitch)
+                             .withFov(45.0));
+        const auto drag = VerticalPerspectiveProjection::dragCamera(
+            transform.getState(), {step.anchor.x, 480 - step.anchor.y}, {step.panDelta.x, -step.panDelta.y});
+        EXPECT_NEAR(step.expected.latitude(), drag.center.latitude(), 1e-6);
+        EXPECT_NEAR(0.0,
+                    VerticalPerspectiveProjection::differenceOfAnglesDegrees(step.expected.longitude(),
+                                                                             drag.center.longitude()),
+                    1e-6);
+        EXPECT_NEAR(
+            0.0, VerticalPerspectiveProjection::differenceOfAnglesDegrees(step.expectedBearing, drag.bearing), 1e-6);
+    }
+}
+
+// With a free bearing the location under the cursor stays under it, over the pole too, where the bearing turns round;
+// with the bearing held the drag stops on the pole and the location stays behind.
+TEST(GlobeTransform, FreeBearingDragKeepsTheLocationUnderTheCursor) {
+    for (const bool freeBearing : {true, false}) {
+        SCOPED_TRACE(freeBearing ? "free bearing" : "bearing held");
+        Transform transform;
+        setUpGlobe(transform, {80, -100}, 1);
+        transform.setGlobeFreeBearing(freeBearing);
+        ScreenCoordinate cursor{400, 220};
+        double maxSlip = 0;
+        for (int step = 0; step < 40; ++step) {
+            const LatLng grabbed = transform.screenCoordinateToLatLng(cursor);
+            cursor.y += 8;
+            transform.moveBy({0, 8}, cursor);
+            const ScreenCoordinate point = transform.latLngToScreenCoordinate(grabbed);
+            maxSlip = std::max(maxSlip, std::hypot(point.x - cursor.x, point.y - cursor.y));
+        }
+        if (freeBearing) {
+            EXPECT_LT(maxSlip, 1e-6);
+            EXPECT_NEAR(80.0, transform.getLatLng().longitude(), 1e-6);
+            EXPECT_NEAR(180.0, std::abs(util::rad2deg(transform.getBearing())), 1e-6);
+        } else {
+            EXPECT_GT(maxSlip, 4.0);
+            EXPECT_EQ(90.0, transform.getLatLng().latitude());
+        }
+    }
+}
+
+// A zoom around a point beside the pole: with the bearing held the center's longitude swings towards the point's and
+// the planet turns about the pole, as GL JS's does; with a free bearing the planet only grows around the point.
+TEST(GlobeTransform, FreeBearingZoomAroundThePoleKeepsTheViewsOrientation) {
+    for (const bool freeBearing : {true, false}) {
+        SCOPED_TRACE(freeBearing ? "free bearing" : "bearing held");
+        Transform transform;
+        setUpGlobe(transform, {89, 0}, 1);
+        transform.setGlobeFreeBearing(freeBearing);
+        const ScreenCoordinate anchor{520, 220};
+        const LatLng location = transform.screenCoordinateToLatLng(anchor);
+        const LatLng beside = transform.screenCoordinateToLatLng({anchor.x + 20, anchor.y});
+        transform.jumpTo(CameraOptions().withZoom(1.6).withAnchor(anchor));
+        const ScreenCoordinate point = transform.latLngToScreenCoordinate(location);
+        const ScreenCoordinate besidePoint = transform.latLngToScreenCoordinate(beside);
+        const double turn = util::rad2deg(std::atan2(besidePoint.y - point.y, besidePoint.x - point.x));
+        if (freeBearing) {
+            EXPECT_NEAR(anchor.x, point.x, 1e-6);
+            EXPECT_NEAR(anchor.y, point.y, 1e-6);
+            EXPECT_NEAR(0.0, turn, 0.5);
+        } else {
+            EXPECT_GT(std::abs(turn), 10.0);
+        }
+    }
+}
+
+// A fling over the pole with the bearing free turns the planet on about one axis: the center moves away from where it
+// started at every frame, over the pole and down the far side, and the bearing turns round. With the bearing held,
+// GL JS's fling, it stops on the pole.
+TEST(GlobeTransform, FreeBearingFlingCarriesOnOverThePole) {
+    for (const bool freeBearing : {true, false}) {
+        SCOPED_TRACE(freeBearing ? "free bearing" : "bearing held");
+        Transform transform;
+        setUpGlobe(transform, {85, -100}, 1);
+        transform.setGlobeFreeBearing(freeBearing);
+        const vec3 start = VerticalPerspectiveProjection::surfaceVector(transform.getLatLng());
+        transform.moveBy({0, 400}, linearSecond());
+        double previous = 0;
+        for (int frame = 1; frame <= 20; ++frame) {
+            transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
+            const vec3 center = VerticalPerspectiveProjection::surfaceVector(transform.getLatLng());
+            const double distance = std::acos(
+                std::clamp(start[0] * center[0] + start[1] * center[1] + start[2] * center[2], -1.0, 1.0));
+            EXPECT_GE(distance, previous - 1e-9);
+            previous = distance;
+        }
+        if (freeBearing) {
+            EXPECT_LT(transform.getLatLng().latitude(), 85.0);
+            EXPECT_NEAR(80.0, transform.getLatLng().longitude(), 1e-6);
+            EXPECT_NEAR(180.0, std::abs(util::rad2deg(transform.getBearing())), 1e-6);
+        } else {
+            EXPECT_EQ(90.0, transform.getLatLng().latitude());
+            EXPECT_NEAR(0.0, util::rad2deg(transform.getBearing()), 1e-9);
+        }
+    }
+}
+
 // GL JS #8629, its camera at 512 by 512: the center reaches the pole while the area past the Mercator range fits in
 // the view, and comes back to the edge of the range as a zoom in grows that area past it.
 TEST(GlobeTransform, CenterReachesThePoleAtLowZoom) {

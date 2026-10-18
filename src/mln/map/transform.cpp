@@ -525,6 +525,33 @@ void Transform::moveBy(const ScreenCoordinate& offset, const AnimationOptions& a
 void Transform::moveBy(const ScreenCoordinate& offset,
                        const std::optional<ScreenCoordinate>& anchor,
                        const AnimationOptions& animation) {
+    const auto flipped = [&](const ScreenCoordinate& point) {
+        return ScreenCoordinate{point.x, state.getSize().height - point.y};
+    };
+    const ScreenCoordinate viewCenter = state.getEdgeInsets().getCenter(state.getSize().width, state.getSize().height);
+    if (state.isGlobeRendering() && animation.duration && *animation.duration > Duration::zero() && globeFreeBearing) {
+        // A fling with the bearing free turns the planet on about the axis the drag turned it about, so it carries on
+        // over a pole instead of spinning round it.
+        const VerticalPerspectiveProjection::CenterAndBearing start{.center = getLatLng(LatLng::Unwrapped),
+                                                                    .bearing = -util::rad2deg(getBearing())};
+        const auto end = VerticalPerspectiveProjection::flingCamera(state, flipped(viewCenter), {offset.x, -offset.y});
+        const double startZoom = getZoom();
+        state.setProperties(TransformStateProperties().withPanningInProgress(true).withRotatingInProgress(true));
+        startTransition(
+            CameraOptions(),
+            animation,
+            [=, this](double t) {
+                const auto camera = VerticalPerspectiveProjection::interpolateCamera(start, end, t);
+                const LatLng center = state.constrainedCenter(camera.center, getZoom());
+                state.setLatLngZoom(center,
+                                    startZoom + VerticalPerspectiveProjection::zoomAdjustment(start.center.latitude(),
+                                                                                              center.latitude()));
+                state.setBearing(-util::deg2rad(camera.bearing));
+            },
+            *animation.duration);
+        return;
+    }
+
     if (state.isGlobeRendering() && animation.duration && *animation.duration > Duration::zero()) {
         // An animated move, a fling, turns the globe as GL JS's inertia does: the location under the far end of a
         // long one can be off the planet or over a pole. It stops short of half a turn, which the ease would take the
@@ -540,19 +567,25 @@ void Transform::moveBy(const ScreenCoordinate& offset,
 
     if (state.isGlobeRendering()) {
         // A drag turns the globe as GL JS's does: one rotation that brings the location under the cursor back under
-        // it with the bearing held, around the cursor when it is on the planet and around the center otherwise.
-        const auto flipped = [&](const ScreenCoordinate& point) {
-            return ScreenCoordinate{point.x, state.getSize().height - point.y};
-        };
+        // it with the bearing held, around the cursor when it is on the planet and around the center otherwise. With
+        // a free bearing the rotation turns the bearing too, so the location stays under the cursor.
         const ScreenCoordinate grab = anchor && VerticalPerspectiveProjection::screenCoordinateHitsGlobe(
                                                     state, flipped(*anchor))
                                           ? *anchor
-                                          : state.getEdgeInsets().getCenter(state.getSize().width,
-                                                                            state.getSize().height);
-        const LatLng center = state.constrainedCenter(
-            VerticalPerspectiveProjection::dragCenter(state, flipped(grab), {offset.x, -offset.y}), getZoom());
-        easeTo(CameraOptions().withCenter(center).withZoom(getZoom() + VerticalPerspectiveProjection::zoomAdjustment(
-                                                                           getLatLng().latitude(), center.latitude())),
+                                          : viewCenter;
+        const ScreenCoordinate panDelta{offset.x, -offset.y};
+        CameraOptions camera;
+        LatLng center;
+        if (globeFreeBearing) {
+            const auto drag = VerticalPerspectiveProjection::dragCamera(state, flipped(grab), panDelta);
+            center = drag.center;
+            camera.withBearing(drag.bearing);
+        } else {
+            center = VerticalPerspectiveProjection::dragCenter(state, flipped(grab), panDelta);
+        }
+        center = state.constrainedCenter(center, getZoom());
+        easeTo(camera.withCenter(center).withZoom(getZoom() + VerticalPerspectiveProjection::zoomAdjustment(
+                                                                  getLatLng().latitude(), center.latitude())),
                animation);
         return;
     }
@@ -787,7 +820,7 @@ void Transform::startTransition(const CameraOptions& camera,
         if (anchor) {
             if (globeZoomAround && state.getZoom() != zoomBefore) {
                 VerticalPerspectiveProjection::zoomAroundPoint(
-                    state, *anchor, zoomLocation, state.getZoom() - zoomBefore);
+                    state, *anchor, zoomLocation, state.getZoom() - zoomBefore, globeFreeBearing);
             } else {
                 state.moveLatLng(anchorLatLng, *anchor);
             }

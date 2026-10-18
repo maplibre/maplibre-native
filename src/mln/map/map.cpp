@@ -146,6 +146,14 @@ bool Map::isPanning() const {
     return impl->transform.isPanning();
 }
 
+void Map::setGlobeFreeBearing(bool freeBearing) {
+    impl->transform.setGlobeFreeBearing(freeBearing);
+}
+
+bool Map::isGlobeFreeBearing() const {
+    return impl->transform.isGlobeFreeBearing();
+}
+
 // MARK: -
 
 CameraOptions Map::getCameraOptions(const std::optional<EdgeInsets>& padding) const {

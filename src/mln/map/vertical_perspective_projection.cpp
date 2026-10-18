@@ -387,12 +387,19 @@ double remapSaturate(double value, double oldMin, double oldMax, double newMin, 
     const double t = std::clamp((value - oldMin) / (oldMax - oldMin), 0.0, 1.0);
     return newMin + (newMax - newMin) * t;
 }
+
+void zoomTurningThePlanet(TransformState&,
+                          const ScreenCoordinate& anchor,
+                          const LatLng& zoomLocation,
+                          double factor,
+                          double interpolationFactorHorizon);
 } // namespace
 
 void VerticalPerspectiveProjection::zoomAroundPoint(TransformState& state,
                                                     const ScreenCoordinate& anchor,
                                                     const LatLng& zoomLocation,
-                                                    double zoomDelta) {
+                                                    double zoomDelta,
+                                                    bool freeBearing) {
     if (zoomDelta == 0.0) {
         return;
     }
@@ -423,6 +430,10 @@ void VerticalPerspectiveProjection::zoomAroundPoint(TransformState& state,
     const double slowingFactor = std::min(distanceFactor, 1.0 + (radiusFactor - 1.0) * interpolationFactorHorizon);
 
     const double factor = (1.0 - std::pow(2.0, -zoomDelta)) * slowingFactor;
+    if (freeBearing) {
+        zoomTurningThePlanet(state, anchor, zoomLocation, factor, interpolationFactorHorizon);
+        return;
+    }
     const LatLng heuristicCenter{std::clamp(center.latitude() + dLat * factor, -90.0, 90.0),
                                  center.longitude() + dLng * factor};
 
@@ -543,25 +554,135 @@ vec3 panSurfaceVector(const TransformState& state, const ScreenCoordinate& point
         targetAtHandover + room * (slopeAtHandover * excess) / (room + slopeAtHandover * excess), 0.0, PAN_MAX_ANGLE);
     return normalized(add(scaled(u, std::cos(target)), scaled(lateral, std::sin(target) / s)));
 }
+
+// The globe camera's orientation; GL JS's bearing is the state's with the sign flipped.
+Quaternion cameraOrientation(const TransformState& state) {
+    return orientationFromLatLngBearing(state.getLatLng(LatLng::Unwrapped), -util::rad2deg(state.getBearing()));
+}
+
+// The rotation about `axis` by `angle`, composed as GL JS's drag composes it: the axis is in the surface-vector frame
+// and the orientation in the Euler frame, hence the swizzle.
+Quaternion rotation(const vec3& axis, double angle) {
+    const double l = length(axis);
+    if (l == 0.0) {
+        return Quaternion::identity;
+    }
+    const double s = std::sin(angle / 2.0);
+    return {axis[1] / l * s, -axis[0] / l * s, axis[2] / l * s, std::cos(angle / 2.0)};
+}
+
+// The orientation after the rotation that brings the surface location `from` to where `to` is.
+Quaternion turned(const Quaternion& orientation, const vec3& from, const vec3& to) {
+    return orientation.multiply(rotation(cross(from, to), std::acos(std::clamp(dot(from, to), -1.0, 1.0))));
+}
+
+// gl-matrix's `quat.slerp`.
+Quaternion slerp(const Quaternion& a, Quaternion b, double t) {
+    double cosOmega = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+    if (cosOmega < 0.0) {
+        cosOmega = -cosOmega;
+        b = {-b.x, -b.y, -b.z, -b.w};
+    }
+    double scaleA = 1.0 - t;
+    double scaleB = t;
+    if (1.0 - cosOmega > 1e-6) {
+        const double omega = std::acos(cosOmega);
+        scaleA = std::sin((1.0 - t) * omega) / std::sin(omega);
+        scaleB = std::sin(t * omega) / std::sin(omega);
+    }
+    return {scaleA * a.x + scaleB * b.x,
+            scaleA * a.y + scaleB * b.y,
+            scaleA * a.z + scaleB * b.z,
+            scaleA * a.w + scaleB * b.w};
+}
+
+// The point `t` of the way from one unit vector to another along the great circle.
+vec3 slerp(const vec3& a, const vec3& b, double t) {
+    const double angle = std::acos(std::clamp(dot(a, b), -1.0, 1.0));
+    if (std::sin(angle) < 1e-9) {
+        return a;
+    }
+    return add(scaled(a, std::sin((1.0 - t) * angle) / std::sin(angle)),
+               scaled(b, std::sin(t * angle) / std::sin(angle)));
+}
+
+// The center and bearing of an orientation, the longitude unwrapped around `center`.
+VerticalPerspectiveProjection::CenterAndBearing centerAndBearing(const Quaternion& orientation, const LatLng& center) {
+    const Orientation o = orientationToLatLngBearing(orientation);
+    return {.center = {o.latitude,
+                       center.longitude() +
+                           VerticalPerspectiveProjection::differenceOfAnglesDegrees(center.longitude(), o.longitude)},
+            .bearing = o.bearing};
+}
+
+// zoomAroundPoint with the bearing free. The exact part is the rotation that brings the zoom location back under the
+// anchor; the heuristic part moves the center a `factor` of the way along the great circle towards it, the orientation
+// carried along. They blend by GL JS's horizon factor alone: GL JS also blends by how far the location's longitude is
+// from the center's, which the bearing-held solution needs near a pole and a rotation does not.
+void zoomTurningThePlanet(TransformState& state,
+                          const ScreenCoordinate& anchor,
+                          const LatLng& zoomLocation,
+                          double factor,
+                          double interpolationFactorHorizon) {
+    const LatLng center = state.getLatLng(LatLng::Unwrapped);
+    const Quaternion orientation = cameraOrientation(state);
+    const vec3 location = VerticalPerspectiveProjection::surfaceVector(zoomLocation);
+    const vec3 centerVector = VerticalPerspectiveProjection::surfaceVector(center);
+    const Quaternion exact = turned(orientation, location, panSurfaceVector(state, anchor));
+    const Quaternion heuristic = turned(orientation, slerp(centerVector, location, factor), centerVector);
+    const auto camera = centerAndBearing(
+        slerp(exact, heuristic, std::pow(interpolationFactorHorizon, INTERPOLATE_TO_HEURISTIC_EXPONENT)), center);
+    const LatLng constrained = state.constrainedCenter(camera.center, state.getZoom());
+    state.setLatLngZoom(
+        constrained,
+        state.getZoom() + VerticalPerspectiveProjection::zoomAdjustment(center.latitude(), constrained.latitude()));
+    state.setBearing(-util::deg2rad(camera.bearing));
+}
 } // namespace
+
+VerticalPerspectiveProjection::CenterAndBearing VerticalPerspectiveProjection::dragCamera(
+    const TransformState& state, const ScreenCoordinate& point, const ScreenCoordinate& panDelta) {
+    return centerAndBearing(turned(cameraOrientation(state),
+                                   panSurfaceVector(state, {point.x - panDelta.x, point.y - panDelta.y}),
+                                   panSurfaceVector(state, point)),
+                            state.getLatLng(LatLng::Unwrapped));
+}
+
+VerticalPerspectiveProjection::CenterAndBearing VerticalPerspectiveProjection::flingCamera(
+    const TransformState& state, const ScreenCoordinate& center, const ScreenCoordinate& offset) {
+    const LatLng latLng = state.getLatLng(LatLng::Unwrapped);
+    const double pixels = std::hypot(offset.x, offset.y);
+    if (pixels == 0.0) {
+        return {.center = latLng, .bearing = -util::rad2deg(state.getBearing())};
+    }
+    const vec3 axis = cross(panSurfaceVector(state, {center.x - offset.x / pixels, center.y - offset.y / pixels}),
+                            panSurfaceVector(state, center));
+    const double degreesPerPixel = 360.0 /
+                                   (2.0 * std::numbers::pi *
+                                    globeRadiusPixels(Projection::worldSize(state.getScale()), latLng.latitude()));
+    return centerAndBearing(
+        cameraOrientation(state).multiply(rotation(axis, util::deg2rad(std::min(pixels * degreesPerPixel, 179.5)))),
+        latLng);
+}
+
+VerticalPerspectiveProjection::CenterAndBearing VerticalPerspectiveProjection::interpolateCamera(
+    const CenterAndBearing& from, const CenterAndBearing& to, double t) {
+    return centerAndBearing(slerp(orientationFromLatLngBearing(from.center, from.bearing),
+                                  orientationFromLatLngBearing(to.center, to.bearing),
+                                  t),
+                            from.center);
+}
 
 LatLng VerticalPerspectiveProjection::dragCenter(const TransformState& state,
                                                  const ScreenCoordinate& point,
                                                  const ScreenCoordinate& panDelta) {
-    const vec3 vecToPixelCurrent = panSurfaceVector(state, point);
-    const vec3 vecToTarget = panSurfaceVector(state, {point.x - panDelta.x, point.y - panDelta.y});
     const LatLng center = state.getLatLng(LatLng::Unwrapped);
     // GL JS's bearing is the state's with the sign flipped.
     const double bearing = -util::rad2deg(state.getBearing());
-
-    const vec3 w = cross(vecToTarget, vecToPixelCurrent);
-    const double l = length(w);
-    const double halfAngle = std::acos(std::clamp(dot(vecToTarget, vecToPixelCurrent), -1.0, 1.0)) / 2.0;
-    const double s = std::sin(halfAngle);
-    // The rotation's axis is in the surface-vector frame and the orientation in the Euler frame, hence the swizzle.
-    const Quaternion delta = l > 0.0 ? Quaternion{w[1] / l * s, -w[0] / l * s, w[2] / l * s, std::cos(halfAngle)}
-                                     : Quaternion::identity;
-    const Orientation swung = orientationToLatLngBearing(orientationFromLatLngBearing(center, bearing).multiply(delta));
+    const Orientation swung = orientationToLatLngBearing(
+        turned(cameraOrientation(state),
+               panSurfaceVector(state, {point.x - panDelta.x, point.y - panDelta.y}),
+               panSurfaceVector(state, point)));
 
     // A swing over a pole turns the bearing around; with the bearing held, the center stops on that pole.
     const double latitude = std::abs(differenceOfAnglesDegrees(bearing, swung.bearing)) <= 90.0

@@ -502,6 +502,7 @@ public:
   _scrollEnabled = YES;
   _zoomEnabled = YES;
   _rotateEnabled = YES;
+  _mbglMap->setGlobeFreeBearing(true);
   _pitchEnabled = YES;
 
   _panGestureRecognizer =
@@ -2221,6 +2222,10 @@ public:
   _rotateEnabled = rotateEnabled;
   _compass.enabled = rotateEnabled;
   _compass.hidden = !rotateEnabled;
+  // Drags and zooms on the globe turn the bearing only while the map may rotate.
+  if (_mbglMap) {
+    _mbglMap->setGlobeFreeBearing(rotateEnabled);
+  }
 }
 
 // MARK: Ornaments

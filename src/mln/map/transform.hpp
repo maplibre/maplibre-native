@@ -127,6 +127,8 @@ public:
     // Gesture
     void setGestureInProgress(bool);
     bool isGestureInProgress() const { return state.isGestureInProgress(); }
+    void setGlobeFreeBearing(bool freeBearing) { globeFreeBearing = freeBearing; }
+    bool isGlobeFreeBearing() const { return globeFreeBearing; }
 
     // Transform state
     const TransformState& getState() const { return state; }
@@ -163,6 +165,7 @@ private:
     std::function<bool(const TimePoint)> transitionFrameFn;
     std::function<void()> transitionFinishFn;
     std::function<ProjectionDefinition(double)> projectionForZoom;
+    bool globeFreeBearing = false;
 };
 
 } // namespace mln

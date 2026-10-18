@@ -920,6 +920,7 @@ public:
   _rotate.delegate = self;
   [self addGestureRecognizer:_rotate];
   _rotateEnabled = YES;
+  self.mbglMap.setGlobeFreeBearing(true);
   _rotationThresholdWhileZooming = 3;
   _toleranceForSnappingToNorth = 7;
 
@@ -3155,6 +3156,10 @@ static void *windowScreenContext = &windowScreenContext;
   MLNLogDebug(@"Setting rotateEnabled: %@", MLNStringFromBOOL(rotateEnabled));
   _rotateEnabled = rotateEnabled;
   self.rotate.enabled = rotateEnabled;
+  // Drags and zooms on the globe turn the bearing only while the map may rotate.
+  if (_mbglMap) {
+    _mbglMap->setGlobeFreeBearing(rotateEnabled);
+  }
 }
 
 - (void)setPitchEnabled:(BOOL)pitchEnabled {

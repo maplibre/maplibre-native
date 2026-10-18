@@ -125,6 +125,14 @@ public class Projection {
   }
 
   /**
+   * Lets drags and zooms on the globe turn the bearing so the planet keeps its orientation, which
+   * the map does while its rotation gestures are enabled.
+   */
+  void setGlobeFreeBearing(boolean freeBearing) {
+    nativeMapView.setGlobeFreeBearing(freeBearing);
+  }
+
+  /**
    * Gets a projection of the viewing frustum for converting between screen coordinates and
    * geo-latitude/longitude coordinates.
    * <p>

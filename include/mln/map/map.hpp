@@ -68,6 +68,10 @@ public:
     bool isRotating() const;
     bool isScaling() const;
     bool isPanning() const;
+    /// On the globe, let drags and zooms around a point turn the bearing so the planet keeps its orientation, for maps
+    /// whose rotation gestures are enabled. Off, the default, they hold the bearing as GL JS does.
+    void setGlobeFreeBearing(bool);
+    bool isGlobeFreeBearing() const;
 
     // Camera
     CameraOptions getCameraOptions(const std::optional<EdgeInsets>& = std::nullopt) const;

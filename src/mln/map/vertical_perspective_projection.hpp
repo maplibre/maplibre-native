@@ -84,16 +84,44 @@ public:
     /// GL JS `handleMapControlsRollPitchBearingZoom`: after the zoom changed by `zoomDelta`, move the center so that
     /// `zoomLocation` stays under `anchor`, exactly where that is well posed and by a damped heuristic near the
     /// horizon, where a pixel is worth degrees of arc and the exact solution jumps or does not exist.
+    /// With `freeBearing` the planet turns as one body instead and the bearing follows it, so near a pole, where the
+    /// longitude of the center swings, the view does not spin: the exact part is the rotation that brings
+    /// `zoomLocation` back under `anchor`, the heuristic part moves the center along the great circle towards it.
     static void zoomAroundPoint(TransformState&,
                                 const ScreenCoordinate& anchor,
                                 const LatLng& zoomLocation,
-                                double zoomDelta);
+                                double zoomDelta,
+                                bool freeBearing = false);
 
     /// GL JS `versorSetLocationAtPoint` with the bearing held, as a drag uses it: the center after the one rotation
     /// that brings the location under `point - panDelta` back under `point` (both y up). Within 12 degrees of the
     /// pole's edge the cursor turns a dial around the pole, and a swing over a pole stops on it. The longitude stays
     /// unwrapped around the current center, the latitude is not yet constrained.
     static LatLng dragCenter(const TransformState&, const ScreenCoordinate& point, const ScreenCoordinate& panDelta);
+
+    struct CenterAndBearing {
+        LatLng center;
+        /// In degrees, with CameraOptions's sign.
+        double bearing;
+    };
+
+    /// GL JS `versorSetLocationAtPoint` without the fixed bearing: the whole rotation that brings the location under
+    /// `point - panDelta` under `point` (both y up), so the grabbed location tracks the cursor exactly and the bearing
+    /// turns with the planet, over the poles too. The longitude stays unwrapped around the current center, the
+    /// latitude is not yet constrained.
+    static CenterAndBearing dragCamera(const TransformState&,
+                                       const ScreenCoordinate& point,
+                                       const ScreenCoordinate& panDelta);
+
+    /// Where a fling of `offset` pixels (y up) ends with the bearing free: the planet turns about the axis a drag in
+    /// that direction at `center` (y up) turns it about, by GL JS's degrees per pixel at the center's latitude and
+    /// short of half a turn, the orientation carried along.
+    static CenterAndBearing flingCamera(const TransformState&,
+                                        const ScreenCoordinate& center,
+                                        const ScreenCoordinate& offset);
+
+    /// The camera `t` of the way from one camera to another, the planet turning about one axis.
+    static CenterAndBearing interpolateCamera(const CenterAndBearing& from, const CenterAndBearing& to, double t);
 
     /// The shorter signed way around from one angle to the other, in degrees.
     static double differenceOfAnglesDegrees(double from, double to);

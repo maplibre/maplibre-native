@@ -334,6 +334,14 @@
   }
 }
 
+- (void)testRotateEnabledLetsGlobeGesturesTurnTheBearing {
+  XCTAssertTrue(self.mapView.mbglMap.isGlobeFreeBearing());
+  self.mapView.rotateEnabled = NO;
+  XCTAssertFalse(self.mapView.mbglMap.isGlobeFreeBearing());
+  self.mapView.rotateEnabled = YES;
+  XCTAssertTrue(self.mapView.mbglMap.isGlobeFreeBearing());
+}
+
 - (void)testHandleTwoFingerDragGesture {
   UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
   self.mapView.contentInset = contentInset;
