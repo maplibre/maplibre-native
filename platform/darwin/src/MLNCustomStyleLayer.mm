@@ -24,6 +24,9 @@ class MLNCustomLayerHost;
 @property (nonatomic, readonly) mln::style::CustomLayer *rawLayer;
 @property (nonatomic, readonly, nullable) MLNMapView *mapView;
 @property (nonatomic, weak, readwrite) MLNStyle *style;
+#if MLN_RENDER_BACKEND_METAL
+@property (nonatomic, weak, readwrite, nullable) id<MTLTexture> terrainDepthTexture;
+#endif
 @end
 
 @implementation MLNCustomStyleLayer
@@ -128,7 +131,8 @@ public:
         .pitch = static_cast<CGFloat>(parameters.pitch),
         .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
         .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
-        .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix)};
+        .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix),
+        .terrainExaggeration = parameters.terrainExaggeration};
 
     if (layer.mapView) {
       [layer preDrawInMapView:layer.mapView withContext:drawingContext];
@@ -148,6 +152,10 @@ public:
         static_cast<const mln::style::mtl::CustomLayerRenderParameters &>(parameters).encoder.get();
     id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
     layer.renderEncoder = encoder;
+    MTL::Texture *depthPtr =
+        static_cast<const mln::style::mtl::CustomLayerRenderParameters &>(parameters)
+            .terrainDepthTexture;
+    layer.terrainDepthTexture = (__bridge id<MTLTexture>)depthPtr;
 #endif
 
     MLNStyleLayerDrawingContext drawingContext = {
@@ -158,7 +166,8 @@ public:
         .pitch = static_cast<CGFloat>(parameters.pitch),
         .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
         .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
-        .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix)};
+        .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix),
+        .terrainExaggeration = parameters.terrainExaggeration};
 
     if (layer.mapView) {
       [layer drawInMapView:layer.mapView withContext:drawingContext];

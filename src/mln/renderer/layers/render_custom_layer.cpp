@@ -111,8 +111,8 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     // create layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createLayerGroup(
-                layerIndex, /*initialCapacity=*/1, getID(), true)) { // TODO: make render to terrain optional?
+        // Drawn on screen after the terrain mesh, never into the drape (TERRAIN.md, "Custom layers")
+        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID(), false)) {
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }

@@ -34,6 +34,8 @@ typedef struct MLNStyleLayerDrawingContext {
   MLNMatrix4 projectionMatrix;
   /// A 4×4 matrix representing the map view’s current near clip projection state.
   MLNMatrix4 nearClippedProjectionMatrix;
+  /// The 3D terrain’s exaggeration, or 0 when terrain is off.
+  double terrainExaggeration;
 } MLNStyleLayerDrawingContext;
 
 /// A style layer that is rendered by Metal code that you provide.
@@ -100,6 +102,23 @@ MLN_EXPORT
 /// This property is only valid when using the Metal-based rendering backend.
 /// If the OpenGL backend is in use, this property will be `nil`.
 @property (nonatomic, weak) id<MTLRenderCommandEncoder> renderEncoder;
+
+/// The depth of the 3D terrain surface for the frame being drawn, for effects that
+/// test the ground itself, such as tinting the terrain inside a volume.
+///
+/// Each pixel holds the window depth, in [0, 1], of the terrain mesh at that pixel,
+/// packed into the four 8-bit channels with alpha as the most significant digit, as
+/// maplibre-gl-js packs its terrain depth. Read it with nearest sampling at the
+/// fragment’s position in the drawable and unpack it as
+/// `r / 256³ + g / 256² + b / 256 + a`, with each channel in [0, 1]. Pixels the terrain
+/// does not cover are white, which unpacks to the far plane. The texture has the
+/// drawable’s size in pixels and is rendered before the map’s main pass, so it is
+/// current for the frame being drawn.
+///
+/// This property is set before ``drawInMapView:withContext:`` is called and is `nil`
+/// when terrain is off or its depth has not been rendered yet. It is only valid when
+/// using the Metal-based rendering backend.
+@property (nonatomic, weak, readonly, nullable) id<MTLTexture> terrainDepthTexture;
 #endif
 
 /// Returns an ``MLNCustomStyleLayer`` style layer object initialized with the given identifier.
@@ -162,6 +181,15 @@ MLN_EXPORT
 /// Be sure to draw your fragments with a *z* value of 1 to take advantage of
 /// opaque fragment culling, in case the style contains any opaque layers above
 /// this layer.
+///
+/// With 3D terrain on, the layer is drawn on screen in the map’s main pass after
+/// the terrain mesh, not draped onto the terrain, and the attached depth buffer
+/// holds the mesh’s depth. To have the terrain hide your geometry, set a depth
+/// test of your own (for example less-or-equal, without depth writes). The
+/// context’s `projectionMatrix` is in OpenGL clip space, with *z* in [-*w*, *w*];
+/// with Metal, remap it as the mesh does, *z′* = (*z* + *w*) / 2, so your depth
+/// compares with the mesh’s. Multiply elevations in metres by the context’s
+/// `terrainExaggeration` to place them on the rendered surface.
 ///
 /// - Parameters:
 ///   - mapView: The map view to which the layer draws.
