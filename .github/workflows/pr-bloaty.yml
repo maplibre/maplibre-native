@@ -1,0 +1,141 @@
+name: pr-bloaty
+
+on:
+  workflow_run:
+    workflows: [ios-ci, linux-ci]
+    types: [completed]
+
+# Both completion events rebuild the combined report. Serialize updates for a PR.
+concurrency:
+  group: bloaty-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+  id-token: write
+
+env:
+  bloaty_sha: 8be8b448550b37c978e8defd9d421c0464c52cc7
+
+jobs:
+  report:
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      # workflow_run is privileged: only run scripts from the default branch.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - run: npm install
+
+      - name: Find the current pull request
+        id: pr
+        run: node .github/scripts/bloaty-report.ts find-pr
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Cache Bloaty
+        if: steps.pr.outputs.number
+        id: cache-bloaty
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: bloaty/build/bloaty
+          key: bloaty-${{ runner.os }}-${{ runner.arch }}-ubuntu-24.04-${{ env.bloaty_sha }}
+
+      - name: Compile Bloaty
+        if: steps.pr.outputs.number && steps.cache-bloaty.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/google/bloaty.git
+          git -C bloaty checkout "$bloaty_sha"
+          git -C bloaty submodule update --init --recursive
+          cmake -B bloaty/build -G Ninja -S bloaty -DCMAKE_BUILD_TYPE=Release
+          cmake --build bloaty/build --target bloaty --parallel 2
+
+      - name: Prepare combined iOS and Linux report
+        if: steps.pr.outputs.number
+        id: report
+        run: node .github/scripts/bloaty-report.ts prepare
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          REPORT_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Upload combined report
+        if: steps.pr.outputs.number
+        id: report-artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bloaty-report
+          path: bloaty-reports/*.txt
+          if-no-files-found: error
+
+      - name: Configure AWS credentials
+        if: steps.pr.outputs.number && vars.OIDC_AWS_ROLE_TO_ASSUME
+        id: aws
+        continue-on-error: true
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Publish combined report
+        if: steps.aws.outcome == 'success'
+        id: publish
+        continue-on-error: true
+        run: |
+          report_path="bloaty-results/pr-$PR_NUMBER/$HEAD_SHA/$GITHUB_RUN_ID"
+          aws s3 cp bloaty-reports/ "s3://maplibre-native/$report_path/" --recursive --content-type text/plain
+          echo "report-url=$REPORT_URL" >> "$GITHUB_OUTPUT"
+          for platform in ios linux; do
+            if test -f "bloaty-reports/$platform.txt"; then
+              echo "$platform-report-url=${REPORT_URL%/bloaty-report.txt}/$platform.txt" >> "$GITHUB_OUTPUT"
+            fi
+          done
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPORT_URL: https://maplibre-native.s3.eu-central-1.amazonaws.com/bloaty-results/pr-${{ steps.pr.outputs.number }}/${{ github.event.workflow_run.head_sha }}/${{ github.run_id }}/bloaty-report.txt
+
+      - name: Format Bloaty comment
+        if: steps.pr.outputs.number
+        run: node .github/scripts/bloaty-report.ts format
+        env:
+          REPORT_URL: ${{ steps.publish.outputs.report-url || steps.report-artifact.outputs.artifact-url }}
+          IOS_REPORT_URL: ${{ steps.publish.outputs.ios-report-url }}
+          LINUX_REPORT_URL: ${{ steps.publish.outputs.linux-report-url }}
+
+      - name: Check that the PR still has this revision
+        if: steps.pr.outputs.number
+        id: current
+        run: node .github/scripts/bloaty-report.ts check-current
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+
+      - name: Update Bloaty comment
+        if: steps.current.outputs.current == 'true'
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          number: ${{ steps.pr.outputs.number }}
+          header: bloaty
+          path: message.md
+
+      - name: Remove the separate iOS comment
+        if: steps.current.outputs.current == 'true'
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          number: ${{ steps.pr.outputs.number }}
+          header: bloaty-ios
+          delete: true
+
+      - name: Fail if an available binary could not be analyzed
+        if: steps.report.outputs.has-errors == 'true'
+        run: exit 1
