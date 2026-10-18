@@ -19,6 +19,10 @@ namespace mln {
 
 namespace {
 
+/// How far from the polar axis a unit-sphere point can be and still be on its pole, with no longitude of its own:
+/// GL JS `sphereSurfacePointToCoordinates` gives it longitude 0.
+constexpr double POLE_AXIS_DISTANCE = 1e-6;
+
 vec3 rotateX(const vec3& v, double rad) {
     const double c = std::cos(rad);
     const double s = std::sin(rad);
@@ -251,7 +255,7 @@ vec3 VerticalPerspectiveProjection::surfaceVector(const LatLng& latLng) {
 LatLng VerticalPerspectiveProjection::surfaceVectorToLatLng(const vec3& surface) {
     const double latitude = util::rad2deg(std::asin(std::clamp(surface[1], -1.0, 1.0)));
     const double lengthXZ = std::sqrt(surface[0] * surface[0] + surface[2] * surface[2]);
-    if (lengthXZ <= 1e-6) {
+    if (lengthXZ <= POLE_AXIS_DISTANCE) {
         return {latitude, 0.0};
     }
     const double acosZ = std::acos(std::clamp(surface[2] / lengthXZ, -1.0, 1.0));
@@ -404,7 +408,10 @@ void VerticalPerspectiveProjection::zoomAroundPoint(TransformState& state,
         return;
     }
     const LatLng center = state.getLatLng(LatLng::Unwrapped);
-    const double dLngRaw = differenceOfAnglesDegrees(center.longitude(), zoomLocation.longitude());
+    // A location on a pole has no longitude of its own, so the zoom keeps the center's meridian rather than turning
+    // the planet about the pole towards the longitude the location was given.
+    const bool onPole = std::cos(util::deg2rad(zoomLocation.latitude())) <= POLE_AXIS_DISTANCE;
+    const double dLngRaw = onPole ? 0.0 : differenceOfAnglesDegrees(center.longitude(), zoomLocation.longitude());
     const double dLng = dLngRaw / (std::abs(dLngRaw / 180.0) + 1.0);
     const double dLat = differenceOfAnglesDegrees(center.latitude(), zoomLocation.latitude());
 
@@ -437,7 +444,10 @@ void VerticalPerspectiveProjection::zoomAroundPoint(TransformState& state,
     const LatLng heuristicCenter{std::clamp(center.latitude() + dLat * factor, -90.0, 90.0),
                                  center.longitude() + dLng * factor};
 
-    const LatLng exactCenter = centerForLocationAtPoint(state, zoomLocation, anchor).value_or(center);
+    LatLng exactCenter = centerForLocationAtPoint(state, zoomLocation, anchor).value_or(center);
+    if (onPole) {
+        exactCenter = LatLng{exactCenter.latitude(), center.longitude(), LatLng::Unwrapped};
+    }
 
     const double interpolationFactorLongitude = remapSaturate(
         std::abs(dLngRaw), INTERPOLATE_TO_HEURISTIC_START_LNG, INTERPOLATE_TO_HEURISTIC_END_LNG, 0.0, 1.0);

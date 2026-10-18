@@ -2876,6 +2876,54 @@ TEST(GlobeTransform, CenterReachesThePoleAtLowZoom) {
     }
 }
 
+// iOS's quick zoom is anchored on the middle of the view, so with the center on the pole it zooms around the pole, a
+// location with no longitude of its own. The center keeps its meridian and comes down it once the zoom in brings the
+// pole's area past the view: GL JS's latitudes with its camera at 512 by 512, the center at 30°E. GL JS turns the
+// planet about the pole towards the prime meridian when the center is more than 45° from it; here it keeps the meridian
+// there too. A zoom around the pole from below it is GL JS's: the center stays put and the pole moves off the anchor.
+TEST(GlobeTransform, ZoomAroundThePoleKeepsTheCentersMeridian) {
+    const std::array<double, 19> gljsLatitudes{90.0,
+                                               90.0,
+                                               90.0,
+                                               90.0,
+                                               90.0,
+                                               90.0,
+                                               89.7739138279545,
+                                               89.34717269436429,
+                                               88.9490091378788,
+                                               88.57750940365021,
+                                               88.23088789526778,
+                                               87.90747859237072,
+                                               87.60572704299784,
+                                               87.3241828921856,
+                                               87.06149291090357,
+                                               86.81639449182124,
+                                               86.58770958064392,
+                                               86.37433901384881,
+                                               86.17525723560607};
+    for (const double longitude : {30.0, 120.0}) {
+        SCOPED_TRACE("longitude " + std::to_string(longitude));
+        Transform transform;
+        setUpGlobeCamera(transform, {90.0, longitude}, 1.0);
+        double zoom = 1.0;
+        for (const double latitude : gljsLatitudes) {
+            zoom += 0.1;
+            SCOPED_TRACE("zoom " + std::to_string(zoom));
+            transform.jumpTo(CameraOptions().withZoom(zoom).withAnchor(ScreenCoordinate{256, 256}));
+            EXPECT_NEAR(longitude, transform.getLatLng().longitude(), 1e-9);
+            EXPECT_NEAR(latitude, transform.getLatLng().latitude(), 1e-6);
+        }
+    }
+
+    Transform transform;
+    setUpGlobeCamera(transform, {88.0, 30.0}, 1.5);
+    const ScreenCoordinate pole = transform.latLngToScreenCoordinate(LatLng{90.0, 0.0});
+    transform.jumpTo(CameraOptions().withZoom(1.7).withAnchor(pole));
+    EXPECT_NEAR(88.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(30.0, transform.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(149.15333659991416, transform.latLngToScreenCoordinate(LatLng{90.0, 0.0}).y, 1e-4);
+}
+
 // Without a zoom, GL JS's jump bounds a center past the Mercator range by the zoom it lands on, and its ease and
 // flight bound it by the zoom they start from (GL JS's camera at 512 by 512).
 TEST(GlobeTransform, JumpBoundsThePoleByTheZoomItLandsOn) {
