@@ -8,7 +8,16 @@ layout (std140) uniform HeatmapDrawableUBO {
     lowp float u_weight_t;
     lowp float u_radius_t;
     lowp float drawable_pad1;
+    // 3D terrain elevation
+    highp vec4 u_dem_coords;
+    highp vec4 u_dem_unpack;
+    highp float u_dem_dim;
+    highp float u_dem_exaggeration;
+    lowp float u_dem_enabled;
+    lowp float drawable_pad2;
 };
+
+uniform sampler2D u_dem;
 
 layout (std140) uniform HeatmapEvaluatedPropsUBO {
     highp float u_weight;
@@ -57,7 +66,12 @@ void main(void) {
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
-    vec4 pos = vec4(floor(a_pos * 0.5) + extrude, 0, 1);
+    vec2 center = floor(a_pos * 0.5);
+
+    // With 3D terrain on, lift the kernel to the terrain height at its centre
+    float ele = get_elevation(center, u_dem, u_dem_coords, u_dem_unpack, u_dem_dim, u_dem_exaggeration, u_dem_enabled);
+
+    vec4 pos = vec4(center + extrude, ele, 1);
 
     gl_Position = u_matrix * pos;
 }
