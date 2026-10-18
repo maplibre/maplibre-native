@@ -47,9 +47,11 @@ Terrain rendering enables draping the map over 3D elevation data from Digital El
   decoded via the source's unpack vector like hillshade and color-relief
 - **Layer Draping**: background, fill, line, raster, hillshade, and color-relief
   layers render into per-tile render targets draped over the terrain mesh
-- **Elevated Layers**: symbol, circle, and fill-extrusion layers sample the DEM in
-  their vertex shaders and are displaced by the terrain elevation. **Caveat:
+- **Elevated Layers**: symbol, circle, heatmap, and fill-extrusion layers sample the
+  DEM in their vertex shaders and are displaced by the terrain elevation. **Caveat:
   fill-extrusion elevation is GL/WebGPU only** - see the backend parity section.
+  **Heatmap caveat:** kernels are elevated by their centre only, and the colour-ramp
+  composite is still a screen-space pass that draws over everything.
 - **Exaggeration**: styled vertical exaggeration multiplier (1.0 = true scale)
 - **Shared Elevation Function**: a `get_elevation()` helper in every backend's
   shader prelude
