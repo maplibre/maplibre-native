@@ -7,6 +7,7 @@
 #include <mln/util/constants.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/gfx/index_buffer.hpp>
+#include <mln/renderer/terrain_cache_policy.hpp>
 #include <mln/renderer/texture_pool.hpp>
 #include <mln/util/mat4.hpp>
 
@@ -333,13 +334,11 @@ private:
     // Terrain layer tweaker for UBO updates
     std::unique_ptr<TerrainLayerTweaker> tweaker;
 
-    // Track which tiles have terrain drawables; the value is true when the
-    // drawable samples the tile's own DEM texture, false when it is using an
-    // ancestor tile's DEM as a fallback while its own DEM is still loading
-    // Mesh drawables by tile, with the DEM quality tier they were built with
-    // (0 = placeholder/flat, 1 = ancestor fallback, 2 = own DEM); a drawable
-    // is replaced whenever a higher tier becomes available
-    std::unordered_map<OverscaledTileID, uint8_t> tilesWithDrawables;
+    // Mesh drawables by tile, with the DEM they were built on (tier: 0 = placeholder/flat,
+    // 1 = ancestor fallback, 2 = own DEM, plus that DEM's zoom); a drawable is replaced
+    // whenever terrain::shouldRebind says a better DEM can be bound - a higher tier, or a
+    // deeper ancestor within the fallback tier
+    std::unordered_map<OverscaledTileID, terrain::DEMBinding> tilesWithDrawables;
 
     // Per-drawable scale/offset into the bound DEM texture ({1,0,0,0} unless
     // an ancestor tile's DEM is bound); read by the terrain layer tweaker

@@ -1029,6 +1029,7 @@ MLN_DRAWABLES_HEADERS = [
     "include/mln/renderer/layer_group.hpp",
     "include/mln/renderer/layer_tweaker.hpp",
     "include/mln/renderer/render_target.hpp",
+    "include/mln/renderer/terrain_cache_policy.hpp",
     "include/mln/shaders/background_layer_ubo.hpp",
     "include/mln/shaders/circle_layer_ubo.hpp",
     "include/mln/shaders/collision_layer_ubo.hpp",
