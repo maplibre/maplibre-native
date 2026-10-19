@@ -956,6 +956,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/chrono.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/client_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/color$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
+    ${PROJECT_SOURCE_DIR}/src/mln/util/color_interpolate.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/constants.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/convert.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/error_sink.cpp
