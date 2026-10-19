@@ -685,10 +685,10 @@ layout(push_constant) uniform Constants {
 struct FillOutlineTriangulatedDrawableUBO {
     mat4 matrix;
     float ratio;
-    float pad1,
-    float pad2
+    float pad1;
+    float pad2;
     float pad3;
-    vec4 pad1;
+    vec4 pad4;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillOutlineTriangulatedDrawableUBOVector {
