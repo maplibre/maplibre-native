@@ -2,6 +2,10 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+- With 3D terrain, pinch, rotate and two-finger tilt gestures turn around the ground under the middle of the screen instead of a sea-level point beneath it, and a pan over high ground no longer jumps the map along the view. Removing the terrain brings the centre back to sea level without moving the camera ([#4711](https://github.com/maplibre/maplibre-native/pull/4711)).
+
 ## 6.29.0
 
 - fix(core): accept alpha in hsl colors ([#4435](https://github.com/maplibre/maplibre-native/pull/4435)).
