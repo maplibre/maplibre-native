@@ -52,7 +52,7 @@ jobs:
 
       - name: Create release (draft)
         id: create_release
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ steps.prepare_release.outputs.version_tag }}
           name: ${{ steps.prepare_release.outputs.version_tag }}
@@ -69,12 +69,19 @@ jobs:
     env:
       JOBS: 8
       IS_LOCAL_DEVELOPMENT: false
+      FLAVOR: ${{ matrix.FLAVOR }}
+      BUILDTYPE: ${{ matrix.BUILDTYPE }}
+      VERSION_TAG: ${{ needs.android-create-release.outputs.version_tag }}
     strategy:
       matrix:
-        RENDERER:
+        # Product flavors of MapLibreAndroid. maplibre.gradle-publish.gradle.kts defines their Maven artifact IDs.
+        FLAVOR:
           - vulkan
           - opengl
           - multiBackend
+          - vulkanWithPluginApi
+          - openglWithPluginApi
+          - multiBackendWithPluginApi
         BUILDTYPE:
           - Release
           - Debug
@@ -83,11 +90,11 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: ".nvmrc"
 
-      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: "temurin"
           java-version: "17"
@@ -99,62 +106,76 @@ jobs:
         run: make run-android-nitpick
 
       - name: Build package
-        run: RENDERER=${{ matrix.RENDERER }} BUILDTYPE=${{ matrix.BUILDTYPE }} make apackage
+        run: RENDERER="$FLAVOR" make apackage
 
-      - name: Save buildtype to GITHUB_ENV
+      - name: Prepare release assets (include tag in filenames)
         run: |
-          buildtype=${{ matrix.BUILDTYPE }}
-          # lowercase
-          echo buildtype=${buildtype,,} > "$GITHUB_ENV"
+          buildtype="${BUILDTYPE,,}"
+          mkdir -p build/release-assets
+          mv "MapLibreAndroid/build/outputs/aar/MapLibreAndroid-$FLAVOR-$buildtype.aar" \
+             "build/release-assets/MapLibreAndroid-$FLAVOR-$buildtype-$VERSION_TAG.aar"
+          mv "build/debug-symbols-$FLAVOR-$buildtype.tar.gz" \
+             "build/release-assets/debug-symbols-maplibre-android-$FLAVOR-$buildtype-$VERSION_TAG.tar.gz"
 
-      - name: Prepare release asset filenames (include tag)
-        run: |
-          version_tag='${{ needs.android-create-release.outputs.version_tag }}'
-          # AAR
-          aar_dir='MapLibreAndroid/build/outputs/aar'
-          mv "$aar_dir/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}.aar" \
-             "$aar_dir/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-$version_tag.aar"
-          # Debug symbols
-          mv "build/debug-symbols-${{ matrix.RENDERER }}-${{ env.buildtype }}.tar.gz" \
-             "build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-$version_tag.tar.gz"
-
-      - name: Upload release assets (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+      - name: Upload release assets (${{ matrix.FLAVOR }}, ${{ matrix.BUILDTYPE }})
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
-          tag_name: ${{ needs.android-create-release.outputs.version_tag }}
+          tag_name: ${{ env.VERSION_TAG }}
           fail_on_unmatched_files: true
           draft: true
-          files: |
-            platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.aar
-            platform/android/build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
+          files: platform/android/build/release-assets/*
 
-      - name: Publish to MavenCentral
-        run: |
-          renderer=${{ matrix.RENDERER }}
-          if [ "$renderer" = "opengl" ]; then
-            ./gradlew :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToMavenCentralRepository
-            ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToMavenCentralRepository
-          elif [ "$renderer" = "vulkan" ]; then
-            ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToMavenCentralRepository
-          elif [ "$renderer" = "multiBackend" ]; then
-            ./gradlew :MapLibreAndroid:publishMultibackend${{ env.buildtype }}PublicationToMavenCentralRepository
-          else
-            echo "::error ::Unknown renderer '$renderer'"; exit 1
-          fi
+      - name: Sign the Maven publications
+        run: ./gradlew ":MapLibreAndroid:publish${FLAVOR^}${BUILDTYPE}Publications" -PpublicationRepositoryUrl="file://$PWD/build/maven-repository"
         env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+
+      # Maven Central validates the deployment, but only android-publish-maven-central publishes it
+      - name: Upload the Maven publications to Maven Central
+        run: |
+          mkdir -p build/maven-central-deployments
+          "$GITHUB_WORKSPACE/.github/scripts/maven-central.sh" upload build/maven-repository \
+            "$VERSION_TAG $FLAVOR$BUILDTYPE" "build/maven-central-deployments/$FLAVOR$BUILDTYPE"
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+
+      - name: Save the Maven Central deployment ID
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: maven-central-deployment-${{ matrix.FLAVOR }}-${{ matrix.BUILDTYPE }}
+          path: platform/android/build/maven-central-deployments
+          if-no-files-found: error
+          overwrite: true
+
+  android-publish-maven-central:
+    needs: android-build-and-upload-release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download the Maven Central deployment IDs
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: maven-central-deployment-*
+          path: maven-central-deployments
+          merge-multiple: true
+
+      - name: Publish to Maven Central
+        run: cat maven-central-deployments/* | xargs .github/scripts/maven-central.sh publish
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
 
   finilize-release:
     runs-on: ubuntu-latest
     needs:
       - android-create-release
-      - android-build-and-upload-release
+      - android-publish-maven-central
     steps:
       - name: Publish release (remove draft)
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ needs.android-create-release.outputs.version_tag }}
           name: ${{ needs.android-create-release.outputs.version_tag }}
@@ -162,12 +183,12 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: "temurin"
           java-version: "17"
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: ".nvmrc"
 

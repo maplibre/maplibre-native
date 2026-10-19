@@ -1062,3 +1062,42 @@ TEST(Source, SetMaxParentOverscaleFactor) {
             {EventSeverity::Warning, Event::Style, -1, "Parent tile overscale factor will cap prefetch delta to 3"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
+
+TEST(Source, RasterDEMTileRoundsCoveringZoom) {
+    SourceTest test;
+    test.transform.jumpTo(CameraOptions().withCenter(LatLng()).withZoom(4.6));
+    test.transformState = test.transform.getState();
+
+    std::vector<uint8_t> requestedZooms;
+    test.fileSource->tileResponse = [&](const Resource& res) {
+        requestedZooms.push_back(res.tileData->z);
+        Response response;
+        response.noContent = true;
+        return response;
+    };
+
+    HillshadeLayer layer("id", "source");
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
+
+    Tileset tileset;
+    tileset.tiles = {"tiles"};
+
+    RasterDEMSource source("source", tileset, 512);
+    source.loadDescription(*test.fileSource);
+
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
+    renderSource->setObserver(&test.renderSourceObserver);
+    renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
+
+    test.renderSourceObserver.tileChanged = [&](RenderSource&, const OverscaledTileID&) {
+        test.end();
+    };
+    test.run();
+
+    ASSERT_FALSE(requestedZooms.empty());
+    for (const auto z : requestedZooms) {
+        EXPECT_EQ(5, z);
+    }
+}

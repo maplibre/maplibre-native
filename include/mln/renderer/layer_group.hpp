@@ -114,7 +114,7 @@ public:
     bool shouldRenderToTerrain() { return renderToTerrain; }
 
     /// Set observer
-    void setObserver(gfx::ContextObserver* observer_) { observer = observer_ ? observer_ : &gfx::nullObserver; }
+    void setObserver(gfx::ContextObserver*);
 
 protected:
     const Type type;

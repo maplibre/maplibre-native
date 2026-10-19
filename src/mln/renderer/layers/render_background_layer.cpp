@@ -164,6 +164,10 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!layerTweaker) {
+        // Background drawables have no source buckets to replace them after a
+        // style change. Rebuild them so the new tweaker populates the group's
+        // uniform buffers for every drawable.
+        removeAllDrawables();
         layerTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }

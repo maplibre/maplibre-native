@@ -79,20 +79,10 @@ using namespace std::string_literals;
   //  Objective-C sample of how to create a stepping expression with color.
   NSExpression *constantExpression = [NSExpression expressionWithFormat:@"%@", [MLNColor redColor]];
   NSExpression *stops = [NSExpression expressionForConstantValue:@{@18 : constantExpression}];
-  NSExpression *functionExpression;
-
-  if (@available(iOS 15, *)) {
-    // How to create expressions with iOS 15
-    functionExpression =
-        [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
-                                           fromExpression:constantExpression
-                                                    stops:stops];
-  } else {
-    // How to create expressions up to iOS 14
-    functionExpression =
-        [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)",
-                                           constantExpression, stops];
-  }
+  NSExpression *functionExpression =
+      [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+                                         fromExpression:constantExpression
+                                                  stops:stops];
   // #-end-example-code
 
   XCTAssertNotNil(functionExpression);
@@ -105,22 +95,11 @@ using namespace std::string_literals;
 
   NSDictionary *opacityStops = @{@5.0f : @0.0f, @14.0 : @0.7f, @20.0f : @1.0f};
   NSExpression *stops = [NSExpression expressionForConstantValue:opacityStops];
-  NSExpression *functionExpression;
-
-  if (@available(iOS 15, *)) {
-    // How to create expressions with iOS 15
-    functionExpression = [NSExpression
-        mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression
-                                   withCurveType:MLNExpressionInterpolationModeLinear
-                                      parameters:nil
-                                           stops:stops];
-  } else {
-    // How to create expressions up to iOS 14
-    functionExpression = [NSExpression
-        expressionWithFormat:
-            @"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)",
-            stops];
-  }
+  NSExpression *functionExpression = [NSExpression
+      mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression
+                                 withCurveType:MLNExpressionInterpolationModeLinear
+                                    parameters:nil
+                                         stops:stops];
   // #-end-example-code
 
   XCTAssertNotNil(functionExpression);
@@ -264,6 +243,37 @@ using namespace std::string_literals;
 }
 
 // MARK: - JSON expression object tests
+
+- (void)testSemiliteral {
+  NSArray *json = @[
+    @"semiliteral",
+    @[ @"top", @[ @"semiliteral", @[ @[ @"get", @"x" ], @2 ] ], @[ @"literal", @[ @1, @2 ] ] ]
+  ];
+  NSExpression *expression = [NSExpression expressionWithMLNJSONObject:json];
+  XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, json);
+  NSExpression *built = [NSExpression mgl_expressionForArray:@[
+    [NSExpression expressionForConstantValue:@"top"], [NSExpression mgl_expressionForArray:@[
+      [NSExpression expressionForKeyPath:@"x"], [NSExpression expressionForConstantValue:@2]
+    ]],
+    [NSExpression expressionForConstantValue:@[ @1, @2 ]]
+  ]];
+  XCTAssertEqualObjects(built.mgl_jsonExpressionObject, json);
+  XCTAssertEqualObjects([NSExpression mgl_expressionForArray:@[]].mgl_jsonExpressionObject,
+                        (@[ @"semiliteral", @[] ]));
+  XCTAssertEqualObjects(
+      [NSExpression expressionForAggregate:@[ [NSExpression expressionForConstantValue:@1] ]]
+          .mgl_jsonExpressionObject,
+      (@[ @"literal", @[ @1 ] ]));
+}
+
+- (void)testSemiliteralNonArrays {
+  NSDictionary *object = @{@"x" : @[ @"get", @"x" ]};
+  NSExpression *expression = [NSExpression expressionWithMLNJSONObject:@[ @"semiliteral", object ]];
+  XCTAssertEqualObjects(expression.constantValue, object);
+  XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, (@[ @"literal", object ]));
+  XCTAssertThrowsSpecificNamed([NSExpression expressionWithMLNJSONObject:@[ @"semiliteral" ]],
+                               NSException, NSInvalidArgumentException);
+}
 
 - (void)testVariableExpressionObject {
   {
@@ -919,6 +929,16 @@ using namespace std::string_literals;
     XCTAssertThrowsSpecificNamed([expression expressionValueWithObject:nil context:nil],
                                  NSException, NSInvalidArgumentException);
     XCTAssertEqualObjects([NSExpression expressionWithMLNJSONObject:jsonExpression], expression);
+  }
+}
+
+- (void)testGlobalStateExpressionObject {
+  {
+    NSArray *jsonExpression = @[ @"global-state", @"chargerType" ];
+    NSExpression *expression = [NSExpression expressionWithMLNJSONObject:jsonExpression];
+    XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
+    XCTAssertThrowsSpecificNamed([expression expressionValueWithObject:nil context:nil],
+                                 NSException, NSInvalidArgumentException);
   }
 }
 

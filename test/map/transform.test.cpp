@@ -166,6 +166,36 @@ TEST(TransformState, CenterAltitudeStaysInMetersAcrossZoomAndLatitude) {
     EXPECT_NEAR(1500.0, state.getCenterAltitude(), 1e-6);
 }
 
+// Constraining the view to the world's height can move the centre or raise the zoom; the centre's
+// altitude in metres comes through either. Its old size in pixels, put back afterwards, did not.
+TEST(Transform, ConstrainingKeepsTheCenterAltitudeInMeters) {
+    const auto elevated = CameraOptions().withCenter(LatLng{50.7, 15.0}).withZoom(1.0).withCenterAltitude(1500.0);
+
+    // A taller view at zoom 1 leaves no room to pan north or south: the centre moves to the equator.
+    Transform resized;
+    resized.resize({512, 512});
+    resized.jumpTo(elevated);
+    resized.resize({512, 1024});
+    ASSERT_NEAR(0.0, resized.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(1500.0, resized.getState().getCenterAltitude(), 1e-6);
+
+    // Constraining a view zoomed out past the world's height raises the zoom too.
+    Transform unconstrained(TransformObserver::nullObserver(), ConstrainMode::None);
+    unconstrained.resize({1024, 1024});
+    unconstrained.jumpTo(CameraOptions(elevated).withZoom(0.0));
+    unconstrained.setConstrainMode(ConstrainMode::HeightOnly);
+    ASSERT_NEAR(1.0, unconstrained.getZoom(), 1e-6);
+    EXPECT_NEAR(1500.0, unconstrained.getState().getCenterAltitude(), 1e-6);
+
+    // With north sideways, the view's width is what has to fit in the world's height.
+    Transform rotated;
+    rotated.resize({1024, 512});
+    rotated.jumpTo(elevated);
+    rotated.setNorthOrientation(NorthOrientation::Rightwards);
+    ASSERT_NEAR(0.0, rotated.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(1500.0, rotated.getState().getCenterAltitude(), 1e-6);
+}
+
 namespace {
 // A pitched camera whose centre sits 1500 m up, on terrain.
 void placeElevatedCamera(Transform& transform) {

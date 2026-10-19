@@ -128,6 +128,8 @@ test('Map', function(t) {
             'setFeatureState',
             'getFeatureState',
             'removeFeatureState',
+            'setGlobalStateProperty',
+            'getGlobalState',
             'dumpDebugLogs',
             'queryRenderedFeatures'
         ]);

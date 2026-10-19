@@ -10,8 +10,6 @@ on:
       - linux-*
 
   pull_request:
-    branches:
-      - '*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -65,6 +63,7 @@ jobs:
           - renderer: opengl
             rust: true
     runs-on: ubuntu-24.04
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -72,27 +71,28 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
+        uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
         with:
           languages: cpp
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@ba47c86ac325773530516bb756137ac718732518 # v2.86.5
+      - uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
         with:
           tool: armerge@2
 
       - if: matrix.variant.rust
-        run: cargo install cxxbridge-cmd --version 1.0.157 --locked
+        run: cargo install cxxbridge-cmd --version 1.0.202 --locked
 
       - name: Install ctcache
         run: |
-          # pending open PR https://github.com/matus-chochlik/ctcache/pull/94
-          git clone https://github.com/louwers/ctcache.git
-          cd ctcache
-          cd ..
-          mv ctcache /usr/local/bin
+          git init ctcache
+          git -C ctcache remote add origin https://github.com/matus-chochlik/ctcache.git
+          git -C ctcache fetch --depth=1 origin 857b14271d3ded5511c2e6a60f2dc20c1e4b5680
+          git -C ctcache checkout --detach FETCH_HEAD
+          sudo apt-get install -y python3-requests
+          sudo mv ctcache /usr/local/bin
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
@@ -102,19 +102,18 @@ jobs:
       - name: Build MapLibre Native
         env:
           CI: 1
+          # Public cache address so forks can read it without repository variables.
+          CTCACHE_HOST: 32.194.98.193
+          CTCACHE_AUTH_KEY: ${{ secrets.CTCACHE_AUTH_KEY }}
         run: |
           cmake --version
 
           # ctcache configuration
-          export CTCACHE_HOST=34.229.50.221
           export CTCACHE_PORT=5000
           export CTCACHE_PROTO=http
 
-          if [ -n "${{ secrets.CTCACHE_AUTH_KEY }}" ]; then
-            echo "setting CTCACHE_AUTH_KEY"
-            export CTCACHE_AUTH_KEY=${{ secrets.CTCACHE_AUTH_KEY }}
-          else
-            # do not write to cache if CTCACHE_AUTH_KEY not set
+          if [ -z "$CTCACHE_AUTH_KEY" ]; then
+            # Fork pull requests can read the cache without a write key.
             export CTCACHE_HOST_READ_ONLY=1
           fi
 
@@ -133,7 +132,7 @@ jobs:
 
       - name: Upload mbgl-render as artifact
         if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: mbgl-render
           path: |
@@ -141,7 +140,7 @@ jobs:
 
       - name: Upload mbgl-benchmark-runner as artifact
         if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: mbgl-benchmark-runner
           path: |
@@ -156,7 +155,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
+        uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
         with:
           category: "/language:cpp"
 
@@ -183,7 +182,7 @@ jobs:
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: render-test-result-${{ matrix.variant.renderer }}
           path: |
@@ -198,6 +197,7 @@ jobs:
 
   linux-coverage:
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -215,7 +215,7 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: '.nvmrc'
 
@@ -224,18 +224,20 @@ jobs:
           npm install
           node test/storage/server.js &
 
-      - name: Generate coverage report
+      - name: Run Bazel tests and generate coverage report
         run: |
+          # //test:core includes plugin API tests; //plugins/... tests the examples.
           xvfb-run -a \
-            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" \
+            bazel coverage --combined_report=lcov --instrumentation_filter="//:mbgl-core,//plugins" \
+            --//:plugins=true \
             --test_output=errors --local_test_jobs=1 \
             --repo_env=GCOV="$PWD/.github/scripts/gcov_wrapper" \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
-            //test:core //render-test:render-test //expression-test:test --//:renderer=drawable
+            //test:core //render-test:render-test //expression-test:test //plugins/... --//:renderer=drawable
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-report
           path: ${{ env.coverage_report }}

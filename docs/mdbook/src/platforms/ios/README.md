@@ -84,9 +84,17 @@ xed build-ios/MapLibre\ Native.xcodeproj
 
 ## Distribution
 
-MapLibre iOS is distributed as an XCFramework via the [maplibre/maplibre-gl-native-distribution](https://github.com/maplibre/maplibre-gl-native-distribution) repository. See [Release MapLibre iOS](./release.md) for the release process. Refer to the [`ios-ci.yml`](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-ci.yml) workflow for an up-to-date recipe for building an XCFramework. As of February 2025 we use:
+MapLibre iOS is distributed as an XCFramework via the [maplibre/maplibre-gl-native-distribution](https://github.com/maplibre/maplibre-gl-native-distribution) repository. See [Release MapLibre iOS](./release.md) for the release process. Refer to the [`ios-release.yml`](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-release.yml) workflow for an up-to-date recipe for building an XCFramework. From `platform/ios`, run:
 
 ```
 bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
-  --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
+  --apple_generate_dsym --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
 ```
+
+The dynamic XCFramework includes device and simulator dSYMs in each slice's `dSYMs` directory, referenced by `DebugSymbolsPath` in its root `Info.plist`. A separate debug-symbol ZIP is no longer published. The static XCFramework retains debug information in its object files for inclusion in the consuming application's dSYM.
+
+### Plugin API
+
+A build of MapLibre iOS with the experimental C plugin API enabled is distributed separately as a Swift package at [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api). Its `MapLibre` product is a drop-in replacement for the standard one: use `import MapLibre` as usual. The framework additionally exports `mln_plugin_register_v1`. Plugin packages should depend only on the header-only `MapLibrePluginApi` product from that package and include `<mln/plugin/plugin_api.h>`. Use only one MapLibre package per application, as both frameworks define the same module and Objective-C classes.
+
+To build the plugin-enabled XCFramework, add `--//:plugins=true` to the command above.

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <limits>
 #include <mln/annotation/annotation_manager.hpp>
 #include <mln/map/map.hpp>
 #include <mln/map/map_observer.hpp>
@@ -15,6 +14,7 @@
 #include <mln/util/size.hpp>
 #include <mln/tile/tile_operation.hpp>
 
+#include <limits>
 #include <numbers>
 
 namespace mln {
@@ -61,7 +61,7 @@ public:
     void onInvalidate() final;
     void onResourceError(std::exception_ptr) final;
     void onWillStartRenderingFrame() final;
-    void onDidFinishRenderingFrame(RenderMode, bool, bool, const gfx::RenderingStats&) final;
+    void onDidFinishRenderingFrame(RenderMode, bool, bool, std::shared_ptr<gfx::RenderingStats>) final;
     void onWillStartRenderingMap() final;
     void onDidFinishRenderingMap() final;
     void onTerrainCenterElevationChanged(double elevationMeters) final;
@@ -95,9 +95,11 @@ public:
     const float pixelRatio;
     const bool crossSourceCollisions;
     const bool fastPFOREnabled;
+    const bool captureRenderedFeatures;
 
     MapDebugOptions debugOptions{MapDebugOptions::NoDebug};
     std::unique_ptr<gfx::RenderingStatsView> renderingStatsView;
+    std::shared_ptr<gfx::RenderingStats> lastFrameStats;
 
     std::shared_ptr<FileSource> fileSource;
 
@@ -128,13 +130,28 @@ public:
     double terrainCenterElevation = std::numeric_limits<double>::quiet_NaN();
     void anchorCenterOnTerrain();
     /// Slides the centre along the line of sight to `altitudeMeters`, the zoom following, so the
-    /// camera stays where it is. False when there was nothing to move, or the plane at that
-    /// altitude is (nearly) at the camera.
+    /// camera stays where it is. False, changing nothing, when there was nothing to move, the line
+    /// of sight nearly grazes the plane at that altitude, the plane is (nearly) at the camera, or
+    /// the zoom limits, the bounds or the constrain mode would cut the move short.
     bool setCenterAltitudeKeepingView(double altitudeMeters);
-    /// Whether the style had terrain at the last update, and whether the centre has yet to come
-    /// back to sea level since it was removed (a transition was in flight).
+    /// Whether the style had terrain when last checked, and whether the centre has yet to come
+    /// back to sea level since it was removed (a transition was in flight, or a still map has
+    /// not rendered since).
     bool hadTerrain = false;
     bool centerAwaitingSeaLevel = false;
+    void noteTerrainRemoval();
+    /// Brings the centre down to sea level keeping the view or, where the limits refuse that,
+    /// keeping the centre and zoom.
+    void returnCenterToSeaLevel();
+    /// Runs a return still waiting before the app sets a camera, which every camera entry point
+    /// does first, so that the return does not move the app's camera afterwards.
+    void settleCenterAwaitingSeaLevel();
+    /// A height report arrived while a camera transition was running; the clamp applies it
+    /// once the transition ends instead of cutting the transition short.
+    bool centerAwaitingTerrainAnchor = false;
+    /// Moves the centre altitude to `elevationMeters` keeping lng/lat; false when the change
+    /// is under the sub-metre threshold.
+    bool clampCenterToTerrain(double elevationMeters);
     bool debugAboveGroundLog = false;
 };
 

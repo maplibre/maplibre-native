@@ -47,20 +47,6 @@
         "uses_ubos": true
     },
     {
-        "name": "CustomGeometryShader",
-        "header": "custom_geometry",
-        "glsl_vert": "custom_geometry.vertex.glsl",
-        "glsl_frag": "custom_geometry.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "CustomSymbolIconShader",
-        "header": "custom_symbol_icon",
-        "glsl_vert": "custom.symbol_icon.vertex.glsl",
-        "glsl_frag": "custom.symbol_icon.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
         "name": "DebugShader",
         "header": "debug",
         "glsl_vert": "debug.vertex.glsl",
@@ -205,6 +191,13 @@
         "header": "line_sdf",
         "glsl_vert": "line_sdf.vertex.glsl",
         "glsl_frag": "line_sdf.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "LineGradientSDFShader",
+        "header": "line_gradient_sdf",
+        "glsl_vert": "line_gradient_sdf.vertex.glsl",
+        "glsl_frag": "line_gradient_sdf.fragment.glsl",
         "uses_ubos": true
     },
     {

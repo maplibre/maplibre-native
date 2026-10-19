@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.24)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "14.3")
 
 # Override default CMake NATIVE_ARCH_ACTUAL
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20893
@@ -74,7 +73,7 @@ target_include_directories(
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 if(MLN_WITH_GLFW)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
 endif()
 if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)

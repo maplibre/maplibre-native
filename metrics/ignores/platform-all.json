@@ -1,7 +1,5 @@
 {
     "expression-tests/collator/accent-equals-de": "Locale-specific behavior changes based on platform.",
-    "expression-tests/interpolate-hcl/linear": "https://github.com/mapbox/mapbox-gl-native/issues/8720",
-    "expression-tests/interpolate-lab/linear": "https://github.com/mapbox/mapbox-gl-native/issues/8720",
     "expression-tests/is-supported-script/default": "This tests RTL text plugin behavior specific to GL JS",
     "expression-tests/legacy/categorical/array": "https://github.com/mapbox/mapbox-gl-native/issues/12747",
     "expression-tests/legacy/categorical/boolean": "https://github.com/mapbox/mapbox-gl-native/issues/12747",
@@ -124,5 +122,15 @@
     "render-tests/feature-state/promote-id-fill-extrusion": "https://github.com/mapbox/mapbox-gl-js/pull/9202",
     "render-tests/line-pattern/with-dasharray":"https://github.com/mapbox/mapbox-gl-js/pull/9189",
     "render-tests/symbol-sort-key/placement-tile-boundary-right-then-left": "https://github.com/mapbox/mapbox-gl-js/pull/9054",
-    "render-tests/tile-mode/streets-v11": "ignored due to flaky metrics results"
+    "render-tests/tile-mode/streets-v11": "ignored due to flaky metrics results",
+    "render-tests/terrain/default": "graded against maplibre-gl-js, which native 3D terrain does not match yet (https://github.com/maplibre/maplibre-native/commit/430ae6733711)",
+    "render-tests/terrain/fill-extrusion": "graded against maplibre-gl-js, which native 3D terrain does not match yet (https://github.com/maplibre/maplibre-native/commit/430ae6733711)",
+    "render-tests/terrain/occlusion-debug": "graded against maplibre-gl-js, which native 3D terrain does not match yet (https://github.com/maplibre/maplibre-native/commit/430ae6733711)",
+    "render-tests/terrain/pitched-world": "graded against maplibre-gl-js, which native 3D terrain does not match yet (https://github.com/maplibre/maplibre-native/commit/430ae6733711)",
+    "render-tests/terrain/skirts-auto": "graded against maplibre-gl-js; native requests tiles gl-js does not, which are not in the fixtures (https://github.com/maplibre/maplibre-native/commit/430ae6733711)",
+    "render-tests/terrain/skirts-none": "graded against maplibre-gl-js; native requests tiles gl-js does not, which are not in the fixtures (https://github.com/maplibre/maplibre-native/commit/430ae6733711)",
+    "render-tests/color-relief/low-zoom": "graded against maplibre-gl-js, which native shades 1-2.5/255 differently (https://github.com/maplibre/maplibre-native/commit/9a646762b49e)",
+    "render-tests/combinations/color-relief--hillshade--color-relief--hillshade": "graded against maplibre-gl-js, which native shades 1-2.5/255 differently (https://github.com/maplibre/maplibre-native/commit/9a646762b49e)",
+    "render-tests/combinations/color-relief--hillshade--vector-fill--color-relief--hillshade": "graded against maplibre-gl-js, which native shades 1-2.5/255 differently (https://github.com/maplibre/maplibre-native/commit/9a646762b49e)",
+    "render-tests/combinations/color-relief-translucent--hillshade-translucent-low-zoom": "graded against maplibre-gl-js, which native shades 1-2.5/255 differently (https://github.com/maplibre/maplibre-native/commit/9a646762b49e)"
 }

@@ -4,6 +4,7 @@
 #include <mln/map/camera.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/transition_options.hpp>
+#include <mln/util/feature.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/immutable.hpp>
 
@@ -33,6 +34,9 @@ public:
     std::string getJSON() const;
     std::string getURL() const;
 
+    /// False while a style passed to loadJSON/loadURL is still being fetched or parsed.
+    bool isLoaded() const;
+
     // Defaults
     std::string getName() const;
     CameraOptions getDefaultCamera() const;
@@ -52,6 +56,12 @@ public:
     const Terrain* getTerrain() const;
 
     void setTerrain(std::unique_ptr<Terrain>);
+    // Global state, used by the "global-state" expression.
+    // Setting a null value resets the property to the default defined in the
+    // style's root "state" property (or null if there is none).
+    GlobalStateMap getGlobalState() const;
+    /// Throws if the style has not finished loading.
+    void setGlobalStateProperty(const std::string& name, const Value& value);
 
     // Images
     std::optional<Image> getImage(const std::string&) const;

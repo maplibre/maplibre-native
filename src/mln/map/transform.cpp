@@ -63,7 +63,6 @@ void Transform::resize(const Size size) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
-    double z{state.getZ()};
 
     double lat;
     double lon;
@@ -82,7 +81,7 @@ void Transform::resize(const Size size) {
         return;
     }
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
 
     observer.onCameraDidChange(MapObserver::CameraChangeMode::Immediate);
 }
@@ -537,9 +536,8 @@ void Transform::setNorthOrientation(NorthOrientation orientation) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
-    double z{state.getZ()};
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
 }
 
 NorthOrientation Transform::getNorthOrientation() const {
@@ -553,9 +551,8 @@ void Transform::setConstrainMode(mln::ConstrainMode mode) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
-    double z{state.getZ()};
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
 }
 
 ConstrainMode Transform::getConstrainMode() const {

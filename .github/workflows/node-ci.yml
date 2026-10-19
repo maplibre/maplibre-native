@@ -11,6 +11,7 @@ on:
       - "node-*"
     paths:
       - CMakeLists.txt
+      - CMakePresets.json
       - "platform/linux/**"
       - "platform/default/**"
       - "platform/node/**"
@@ -35,10 +36,9 @@ on:
       - "package-lock.json"
 
   pull_request:
-    branches:
-      - "*"
     paths:
       - CMakeLists.txt
+      - CMakePresets.json
       - "platform/linux/**"
       - "platform/default/**"
       - "platform/node/**"
@@ -70,6 +70,7 @@ concurrency:
 jobs:
   test:
     runs-on: ${{ matrix.runs-on }}
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
@@ -141,7 +142,7 @@ jobs:
           /usr/sbin/update-ccache-symlinks
 
       - name: Use Node.js from nvmrc
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: 'platform/node/.nvmrc'
 
@@ -171,7 +172,7 @@ jobs:
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
-        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
           key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
@@ -182,7 +183,7 @@ jobs:
 
       - name: Set up ccache (Windows)
         if: runner.os == 'Windows'
-        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
           variant: "sccache"
           key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
@@ -259,7 +260,7 @@ jobs:
 
       - name: Upload render test artifacts (MacOS)
         if: runner.os == 'MacOS' && steps.render_tests.outcome == 'failure'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html

@@ -182,15 +182,16 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
             util::hash_combine(tileHash, unwrapped.canonical.y);
             coverage.contentHash += tileHash;
         });
-        if (haveExactOrDescendant || bestAncestor) {
-            coverage.groupsWithContent++;
-            // Only the coarsest standalone fallback counts as lost detail; when an
-            // exact or deeper tile is present the ancestor is clipped away by the
-            // tile masks and costs nothing.
-            if (!haveExactOrDescendant) {
-                coverage.zoomDeficit += drapeTileID->canonical.z - bestAncestor->canonical.z;
-            }
+        // Only the coarsest standalone fallback counts as lost detail; when an exact or
+        // deeper tile is present the ancestor is clipped away by the tile masks and costs
+        // nothing.
+        int16_t deficit = -1;
+        if (haveExactOrDescendant) {
+            deficit = 0;
+        } else if (bestAncestor) {
+            deficit = static_cast<int16_t>(drapeTileID->canonical.z - bestAncestor->canonical.z);
         }
+        coverage.groups.push_back({layerGroup.getLayerIndex(), deficit});
     });
     return coverage;
 }
