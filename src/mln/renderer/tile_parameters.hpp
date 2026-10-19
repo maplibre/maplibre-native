@@ -45,10 +45,10 @@ public:
     TileLodMode tileLodMode = TileLodMode::Default;
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     std::shared_ptr<const GlobalStateMap> globalState = nullptr;
-    bool isUpdateSynchronous = false;
     /// Terrain elevation for the tile cover; null when there is no terrain, which
     /// leaves the cover flat. See util::TileElevationProvider.
     const util::TileElevationProvider* elevationProvider = nullptr;
+    bool isUpdateSynchronous = false;
     bool captureRenderedFeatures = false;
 };
 
