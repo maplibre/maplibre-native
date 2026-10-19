@@ -99,10 +99,11 @@ struct TerrainCameraTest {
 
 } // namespace
 
-// The centre rides the terrain instead of sea level, so pitching over high ground does not
-// leave the camera inside the hillside.
+// With the clamp on (it is off by default), the centre rides the terrain instead of sea level,
+// so pitching over high ground does not leave the camera inside the hillside.
 TEST(TerrainCamera, CentreRidesTheTerrainSurface) {
     TerrainCameraTest test;
+    test.map.setCenterClampedToGround(true);
     EXPECT_TRUE(test.map.getCenterClampedToGround());
 
     const double settled = test.renderAndGetAltitude(8);
@@ -114,6 +115,7 @@ TEST(TerrainCamera, CentreRidesTheTerrainSurface) {
 // so it must settle - and the centre must not drift while it does.
 TEST(TerrainCamera, CentreElevationSettlesWithoutDrift) {
     TerrainCameraTest test;
+    test.map.setCenterClampedToGround(true);
 
     test.renderAndGetAltitude(8);
     const auto afterSettling = test.map.getCameraOptions({});
