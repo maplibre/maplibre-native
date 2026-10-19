@@ -13,10 +13,11 @@ class InterpolateImpl : public Interpolate {
 public:
     InterpolateImpl(const type::Type& type_,
                     const Interpolator& interpolator_,
+                    ColorSpace colorSpace_,
                     std::unique_ptr<Expression> input_,
                     // NOLINTNEXTLINE(performance-unnecessary-value-param)
                     std::map<double, std::unique_ptr<Expression>> stops_)
-        : Interpolate(type_, interpolator_, std::move(input_), std::move(stops_)) {
+        : Interpolate(type_, interpolator_, colorSpace_, std::move(input_), std::move(stops_)) {
         static_assert(util::Interpolatable<T>::value, "Interpolate expression requires an interpolatable value type.");
     }
 
@@ -68,7 +69,16 @@ public:
                 return EvaluationError{"Expected value to be of type " + toString(valueTypeToExpressionType<T>()) +
                                        ", but found " + toString(typeOf(*upper)) + " instead."};
             }
-            return util::interpolate(lower->get<T>(), upper->get<T>(), t);
+            return interpolateOutputs(lower->get<T>(), upper->get<T>(), t);
+        }
+    }
+
+private:
+    T interpolateOutputs(const T& lower, const T& upper, double t) const {
+        if constexpr (std::is_same_v<T, Color>) {
+            return Color::interpolate(lower, upper, t, colorSpace);
+        } else {
+            return util::interpolate(lower, upper, t);
         }
     }
 };
@@ -88,6 +98,11 @@ ParseResult parseInterpolate(const Convertible& value, ParsingContext& ctx) {
         ctx.error("Expected an interpolation type expression.");
         return ParseResult();
     }
+
+    const std::optional<std::string> op = toString(arrayMember(value, 0));
+    const ColorSpace colorSpace = op == "interpolate-lab"   ? ColorSpace::LAB
+                                  : op == "interpolate-hcl" ? ColorSpace::HCL
+                                                            : ColorSpace::RGB;
 
     std::optional<Interpolator> interpolator;
 
@@ -150,7 +165,9 @@ ParseResult parseInterpolate(const Convertible& value, ParsingContext& ctx) {
 
     std::map<double, std::unique_ptr<Expression>> stops;
     std::optional<type::Type> outputType;
-    if (ctx.getExpected() && *ctx.getExpected() != type::Value) {
+    if (colorSpace != ColorSpace::RGB) {
+        outputType = type::Color;
+    } else if (ctx.getExpected() && *ctx.getExpected() != type::Value) {
         outputType = ctx.getExpected();
     }
 
@@ -215,30 +232,32 @@ ParseResult parseInterpolate(const Convertible& value, ParsingContext& ctx) {
 
     assert(outputType);
 
-    return createInterpolate(*outputType, *interpolator, std::move(*input), std::move(stops), ctx);
+    return createInterpolate(*outputType, *interpolator, colorSpace, std::move(*input), std::move(stops), ctx);
 }
 
 ParseResult createInterpolate(type::Type type,
                               Interpolator interpolator,
+                              ColorSpace colorSpace,
                               std::unique_ptr<Expression> input,
                               std::map<double, std::unique_ptr<Expression>> stops,
                               ParsingContext& ctx) {
+    assert(colorSpace == ColorSpace::RGB || type == type::Color);
     return type.match(
         [&](const type::NumberType&) -> ParseResult {
-            return ParseResult(
-                std::make_unique<InterpolateImpl<double>>(type, interpolator, std::move(input), std::move(stops)));
+            return ParseResult(std::make_unique<InterpolateImpl<double>>(
+                type, interpolator, colorSpace, std::move(input), std::move(stops)));
         },
         [&](const type::ColorType&) -> ParseResult {
-            return ParseResult(
-                std::make_unique<InterpolateImpl<Color>>(type, interpolator, std::move(input), std::move(stops)));
+            return ParseResult(std::make_unique<InterpolateImpl<Color>>(
+                type, interpolator, colorSpace, std::move(input), std::move(stops)));
         },
         [&](const type::PaddingType&) -> ParseResult {
-            return ParseResult(
-                std::make_unique<InterpolateImpl<Padding>>(type, interpolator, std::move(input), std::move(stops)));
+            return ParseResult(std::make_unique<InterpolateImpl<Padding>>(
+                type, interpolator, colorSpace, std::move(input), std::move(stops)));
         },
         [&](const type::VariableAnchorOffsetCollectionType&) -> ParseResult {
             return ParseResult(std::make_unique<InterpolateImpl<VariableAnchorOffsetCollection>>(
-                type, interpolator, std::move(input), std::move(stops)));
+                type, interpolator, colorSpace, std::move(input), std::move(stops)));
         },
         [&](const type::Array& arrayType) -> ParseResult {
             if (arrayType.itemType != type::Number || !arrayType.N) {
@@ -246,7 +265,7 @@ ParseResult createInterpolate(type::Type type,
                 return ParseResult();
             }
             return ParseResult(std::make_unique<InterpolateImpl<std::vector<Value>>>(
-                type, interpolator, std::move(input), std::move(stops)));
+                type, interpolator, colorSpace, std::move(input), std::move(stops)));
         },
         [&](const auto&) {
             ctx.error("Type " + toString(type) + " is not interpolatable.");
@@ -256,13 +275,27 @@ ParseResult createInterpolate(type::Type type,
 
 Interpolate::Interpolate(const type::Type& type_,
                          Interpolator interpolator_,
+                         ColorSpace colorSpace_,
                          std::unique_ptr<Expression> input_,
                          std::map<double, std::unique_ptr<Expression>> stops_)
     : Expression(Kind::Interpolate, type_, depsOf(input_) | collectDependencies(stops_)),
       interpolator(std::move(interpolator_)),
+      colorSpace(colorSpace_),
       input(std::move(input_)),
       stops(std::move(stops_)) {
     assert(input->getType() == type::Number);
+}
+
+std::string Interpolate::getOperator() const {
+    switch (colorSpace) {
+        case ColorSpace::LAB:
+            return "interpolate-lab";
+        case ColorSpace::HCL:
+            return "interpolate-hcl";
+        case ColorSpace::RGB:
+            break;
+    }
+    return "interpolate";
 }
 
 std::vector<std::optional<Value>> Interpolate::possibleOutputs() const {

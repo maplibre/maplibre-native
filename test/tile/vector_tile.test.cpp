@@ -49,7 +49,7 @@ TEST(VectorTile, Issue8542) {
 
     // Query before data is set
     std::vector<Feature> result;
-    tile.querySourceFeatures(result, {{{"layer"}}, {}});
+    tile.querySourceFeatures(result, {{{"layer"}}, {}}, nullptr);
 }
 
 TEST(VectorTileData, ParseResults) {

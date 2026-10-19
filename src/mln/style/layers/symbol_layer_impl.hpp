@@ -17,20 +17,38 @@ struct FormatSectionOverrides;
 
 template <typename... PaintProperty>
 struct FormatSectionOverrides<TypeList<PaintProperty...>> {
-    template <typename Property, typename T, typename U>
-    static void setOverride(const T& overrides, U& overridable) {
+    template <typename Property, typename T, typename U, typename V>
+    static void setOverride(const T& overrides,
+                            U& overridable,
+                            const V& unevaluated,
+                            const std::shared_ptr<const GlobalStateMap>& globalState) {
         if (hasOverride<Property>(overrides.template get<TextField>())) {
+            auto& value = overridable.template get<Property>();
+            // Wrapping a folded constant would drop the GlobalState dependency
+            // from the wrapper and exempt the bucket from relayout tracking.
+            if (value.isConstant()) {
+                const auto& unevaluatedValue = unevaluated.template get<Property>().getValue();
+                if (unevaluatedValue.isExpression() &&
+                    (unevaluatedValue.getDependencies() & expression::Dependency::GlobalState)) {
+                    auto retained = unevaluatedValue.asExpression();
+                    retained.captureGlobalState(globalState);
+                    value = PossiblyEvaluatedPropertyValue<typename Property::Type>(std::move(retained));
+                }
+            }
             auto override = std::make_unique<expression::FormatSectionOverride<typename Property::Type>>(
-                Property::expressionType(), std::move(overridable.template get<Property>()), Property::name());
+                Property::expressionType(), std::move(value), Property::name());
             PropertyExpression<typename Property::Type> expr(std::move(override));
             overridable.template get<Property>() = PossiblyEvaluatedPropertyValue<typename Property::Type>(
                 std::move(expr));
         }
     }
 
-    template <typename T, typename U>
-    static void setOverrides(const T& overrides, U& overridable) {
-        util::ignore({(setOverride<PaintProperty>(overrides, overridable), 0)...});
+    template <typename T, typename U, typename V>
+    static void setOverrides(const T& overrides,
+                             U& overridable,
+                             const V& unevaluated,
+                             const std::shared_ptr<const GlobalStateMap>& globalState) {
+        util::ignore({(setOverride<PaintProperty>(overrides, overridable, unevaluated, globalState), 0)...});
     }
 
     template <typename Property, typename T, typename U>
@@ -128,6 +146,15 @@ public:
     bool hasLayoutDifference(const Layer::Impl&) const override;
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
     void populateFontStack(std::set<FontStack>& fontStack) const final;
+
+    expression::Dependency getLayoutDependencies() const noexcept override {
+        return layout.getDependencies() | Layer::Impl::getLayoutDependencies();
+    }
+
+    void collectLayoutGlobalStateRefs(std::set<std::string>& refs) const override {
+        layout.collectGlobalStateRefs(refs);
+        Layer::Impl::collectLayoutGlobalStateRefs(refs);
+    }
 
     SymbolLayoutProperties::Unevaluated layout;
     SymbolPaintProperties::Transitionable paint;

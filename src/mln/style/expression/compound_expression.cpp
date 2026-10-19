@@ -786,6 +786,23 @@ const auto& featureStateCompoundExpression() {
     return signature;
 }
 
+const auto& globalStateCompoundExpression() {
+    static auto signature = detail::makeSignature(
+        "global-state",
+        [](const EvaluationContext& params, const std::string& key) -> Result<Value> {
+            mln::Value state;
+            if (params.globalState != nullptr) {
+                auto it = params.globalState->find(key);
+                if (it != params.globalState->end()) {
+                    state = mln::Value(it->second);
+                }
+            }
+            return toExpressionValue(state);
+        },
+        Dependency::GlobalState);
+    return signature;
+}
+
 // Legacy Filters
 const auto& filterEqualsCompoundExpression() {
     static auto signature = detail::makeSignature(
@@ -1110,6 +1127,7 @@ constexpr const auto compoundExpressionRegistry =
         {"resolved-locale", resolvedLocaleCompoundExpression},
         {"error", errorCompoundExpression},
         {"feature-state", featureStateCompoundExpression},
+        {"global-state", globalStateCompoundExpression},
         // Legacy Filters
         {"filter-==", filterEqualsCompoundExpression},
         {"filter-id-==", filterIdEqualsCompoundExpression},
@@ -1249,6 +1267,13 @@ ParseResult parseCompoundExpression(const std::string& name, const Convertible& 
     }
 
     auto length = arrayLength(value);
+
+    // Per the style specification, the "global-state" property name must be a
+    // string literal, not the result of a sub-expression.
+    if (name == "global-state" && length == 2 && !toString(arrayMember(value, 1))) {
+        ctx.error("Global state property must be a string literal.", 1);
+        return ParseResult();
+    }
 
     for (auto it = definitions.first; it != definitions.second; ++it) {
         const auto& signature = it->second();

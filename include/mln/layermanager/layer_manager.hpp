@@ -45,8 +45,9 @@ public:
      * This is a C++ API for code built against the same core, not a DSO ABI.
      */
     bool registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>>, std::string& error);
-    bool hasLayerType(const std::string&) noexcept;
 #endif
+
+    bool hasLayerType(const std::string&) noexcept;
 
     /// Returns a new Layer instance on success call; returns `nullptr` otherwise.
     std::unique_ptr<style::Layer> createLayer(const std::string& type,

@@ -68,6 +68,7 @@ public:
     ImagePosition(const Rect<uint16_t>& rect, const style::Image::Impl& image)
         : paddedRect(rect),
           pixelRatio(image.pixelRatio),
+          sdf(image.sdf),
           stretchX(image.stretchX),
           stretchY(image.stretchY),
           content(image.content),
@@ -78,6 +79,7 @@ public:
 
     Rect<uint16_t> paddedRect;
     float pixelRatio;
+    bool sdf;
     style::ImageStretches stretchX;
     style::ImageStretches stretchY;
     std::optional<style::ImageContent> content;

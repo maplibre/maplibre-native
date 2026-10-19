@@ -148,6 +148,7 @@ mln_plugin_status finishLayout(void* instance, mln_plugin_bucket_v1* output) {
     drawable.attribute_count = layout.attributes.size();
     drawable.segments = layout.segments.data();
     drawable.segment_count = layout.segments.size();
+    drawable.depth_mode = MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY;
 
     output->vertex_streams = layout.vertices.empty() ? nullptr : layout.streams.data();
     output->vertex_stream_count = layout.vertices.empty() ? 0 : layout.streams.size();

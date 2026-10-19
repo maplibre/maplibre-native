@@ -17,6 +17,22 @@
 namespace mln {
 namespace android {
 
+namespace {
+
+// Check and log broken promises
+template <typename T>
+T getOrDefault(std::future<T> future, const char* function) {
+    try {
+        return future.get();
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android,
+                   std::string("AndroidRendererFrontend::") + function + " failed: " + exception.what());
+        return {};
+    }
+}
+
+} // namespace
+
 // Forwards RendererObserver signals to the given
 // Delegate RendererObserver on the given RunLoop
 class ForwardingRendererObserver : public RendererObserver {
@@ -157,85 +173,110 @@ const TaggedScheduler& AndroidRendererFrontend::getThreadPool() const {
 }
 
 void AndroidRendererFrontend::setTileCacheEnabled(bool enabled) {
-    mapRenderer.actor().invoke(&Renderer::setTileCacheEnabled, enabled);
+    if (const auto& actor = mapRenderer.actor()) {
+        actor->invoke(&Renderer::setTileCacheEnabled, enabled);
+    }
 }
 
 bool AndroidRendererFrontend::getTileCacheEnabled() const {
-    return mapRenderer.actor().ask(&Renderer::getTileCacheEnabled).get();
+    if (const auto& actor = mapRenderer.actor()) {
+        return getOrDefault(actor->ask(&Renderer::getTileCacheEnabled), __func__);
+    }
+
+    return false;
 }
 
 void AndroidRendererFrontend::reduceMemoryUse() {
-    mapRenderer.actor().invoke(&Renderer::reduceMemoryUse);
+    if (const auto& actor = mapRenderer.actor()) {
+        actor->invoke(&Renderer::reduceMemoryUse);
+    }
 }
 
 std::vector<Feature> AndroidRendererFrontend::querySourceFeatures(const std::string& sourceID,
                                                                   const SourceQueryOptions& options) const {
-    // Waits for the result from the orchestration thread and returns
-    return mapRenderer.actor().ask(&Renderer::querySourceFeatures, sourceID, options).get();
+    if (const auto& actor = mapRenderer.actor()) {
+        // Waits for the result from the orchestration thread and returns
+        return getOrDefault(actor->ask(&Renderer::querySourceFeatures, sourceID, options), __func__);
+    }
+
+    return {};
 }
 
 void AndroidRendererFrontend::setFeatureState(const std::string& sourceID,
                                               const std::optional<std::string>& sourceLayerID,
                                               const std::string& featureID,
                                               const FeatureState& state) const {
-    mapRenderer.actor().invoke(&Renderer::setFeatureState, sourceID, sourceLayerID, featureID, state);
+    if (const auto& actor = mapRenderer.actor()) {
+        actor->invoke(&Renderer::setFeatureState, sourceID, sourceLayerID, featureID, state);
+    }
 }
 
 FeatureState AndroidRendererFrontend::getFeatureState(const std::string& sourceID,
                                                       const std::optional<std::string>& sourceLayerID,
                                                       const std::string& featureID) const {
-    auto getFeatureState = static_cast<FeatureState (Renderer::*)(
-        const std::string&, const std::optional<std::string>&, const std::string&) const>(&Renderer::getFeatureState);
-    return mapRenderer.actor().ask(getFeatureState, sourceID, sourceLayerID, featureID).get();
+    if (const auto& actor = mapRenderer.actor()) {
+        auto getFeatureState = static_cast<FeatureState (Renderer::*)(
+            const std::string&, const std::optional<std::string>&, const std::string&) const>(
+            &Renderer::getFeatureState);
+        return getOrDefault(actor->ask(getFeatureState, sourceID, sourceLayerID, featureID), __func__);
+    }
+
+    return {};
 }
 
 void AndroidRendererFrontend::removeFeatureState(const std::string& sourceID,
                                                  const std::optional<std::string>& sourceLayerID,
                                                  const std::optional<std::string>& featureID,
                                                  const std::optional<std::string>& stateKey) const {
-    mapRenderer.actor().invoke(&Renderer::removeFeatureState, sourceID, sourceLayerID, featureID, stateKey);
+    if (const auto& actor = mapRenderer.actor()) {
+        actor->invoke(&Renderer::removeFeatureState, sourceID, sourceLayerID, featureID, stateKey);
+    }
 }
 
 std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const ScreenBox& box,
                                                                     const RenderedQueryOptions& options) const {
-    // Select the right overloaded method
-    std::vector<Feature> (Renderer::*fn)(const ScreenBox&, const RenderedQueryOptions&)
-        const = &Renderer::queryRenderedFeatures;
+    if (const auto& actor = mapRenderer.actor()) {
+        // Select the right overloaded method
+        std::vector<Feature> (Renderer::*fn)(const ScreenBox&, const RenderedQueryOptions&)
+            const = &Renderer::queryRenderedFeatures;
 
-    // Waits for the result from the orchestration thread and returns
-    return mapRenderer.actor().ask(fn, box, options).get();
+        // Waits for the result from the orchestration thread and returns
+        return getOrDefault(actor->ask(fn, box, options), __func__);
+    }
+
+    return {};
 }
 
 std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const ScreenCoordinate& point,
                                                                     const RenderedQueryOptions& options) const {
-    // Select the right overloaded method
-    std::vector<Feature> (Renderer::*fn)(const ScreenCoordinate&, const RenderedQueryOptions&)
-        const = &Renderer::queryRenderedFeatures;
+    if (const auto& actor = mapRenderer.actor()) {
+        // Select the right overloaded method
+        std::vector<Feature> (Renderer::*fn)(const ScreenCoordinate&, const RenderedQueryOptions&)
+            const = &Renderer::queryRenderedFeatures;
 
-    // Waits for the result from the orchestration thread and returns
-    return mapRenderer.actor().ask(fn, point, options).get();
-}
-
-AnnotationIDs AndroidRendererFrontend::queryPointAnnotations(const ScreenBox& box,
-                                                             const std::chrono::milliseconds& timeout) const {
-    // Waits for the result from the orchestration thread and returns
-    auto future = mapRenderer.actor().ask(&Renderer::queryPointAnnotations, box);
-    if (future.wait_for(timeout) != std::future_status::ready) {
-        return {};
+        // Waits for the result from the orchestration thread and returns
+        return getOrDefault(actor->ask(fn, point, options), __func__);
     }
 
-    return future.get();
+    return {};
 }
 
-AnnotationIDs AndroidRendererFrontend::queryShapeAnnotations(const ScreenBox& box,
-                                                             const std::chrono::milliseconds& timeout) const {
+AnnotationIDs AndroidRendererFrontend::queryPointAnnotations(const ScreenBox& box) const {
     // Waits for the result from the orchestration thread and returns
-    auto future = mapRenderer.actor().ask(&Renderer::queryShapeAnnotations, box);
-    if (future.wait_for(timeout) != std::future_status::ready) {
-        return {};
+    if (const auto& actor = mapRenderer.actor()) {
+        return getOrDefault(actor->ask(&Renderer::queryPointAnnotations, box), __func__);
     }
 
-    return future.get();
+    return {};
+}
+
+AnnotationIDs AndroidRendererFrontend::queryShapeAnnotations(const ScreenBox& box) const {
+    // Waits for the result from the orchestration thread and returns
+    if (const auto& actor = mapRenderer.actor()) {
+        return getOrDefault(actor->ask(&Renderer::queryShapeAnnotations, box), __func__);
+    }
+
+    return {};
 }
 
 FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(
@@ -244,9 +285,13 @@ FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(
     const std::string& extension,
     const std::string& extensionField,
     const std::optional<std::map<std::string, mln::Value>>& args) const {
-    return mapRenderer.actor()
-        .ask(&Renderer::queryFeatureExtensions, sourceID, feature, extension, extensionField, args)
-        .get();
+    if (const auto& actor = mapRenderer.actor()) {
+        return getOrDefault(
+            actor->ask(&Renderer::queryFeatureExtensions, sourceID, feature, extension, extensionField, args),
+            __func__);
+    }
+
+    return {};
 }
 
 } // namespace android
