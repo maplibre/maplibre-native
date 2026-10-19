@@ -3938,6 +3938,23 @@ static void *windowScreenContext = &windowScreenContext;
   [self setZoomLevel:zoomLevel animated:NO];
 }
 
+- (CLLocationDistance)centerAltitude {
+  return self.mbglMap.getCameraOptions().centerAltitude.value_or(0.0);
+}
+
+- (BOOL)setCenterAltitudeKeepingView:(CLLocationDistance)altitude {
+  MLNLogDebug(@"Setting centerAltitude keeping the view: %f", altitude);
+  // Set before the call, which reports the camera change; take it back if nothing moved, or it
+  // would show up in the reason of the next, unrelated change.
+  MLNCameraChangeReason previousReasons = self.cameraChangeReasonBitmask;
+  self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
+  BOOL moved = self.mbglMap.setCenterAltitudeKeepingView(altitude);
+  if (!moved) {
+    self.cameraChangeReasonBitmask = previousReasons;
+  }
+  return moved;
+}
+
 - (void)setZoomLevel:(double)zoomLevel animated:(BOOL)animated {
   MLNLogDebug(@"Setting zoomLevel: %f animated: %@", zoomLevel, MLNStringFromBOOL(animated));
   if (zoomLevel == self.zoomLevel) return;

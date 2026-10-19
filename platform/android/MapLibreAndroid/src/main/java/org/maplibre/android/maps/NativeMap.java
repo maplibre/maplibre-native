@@ -291,6 +291,12 @@ interface NativeMap {
 
   int getTerrainLoadMode();
 
+  void anchorCenterOnTerrain();
+
+  boolean setCenterAltitudeKeepingView(double altitude);
+
+  double getCenterAltitude();
+
   void setTerrainSkirtLength(int length);
 
   int getTerrainSkirtLength();
