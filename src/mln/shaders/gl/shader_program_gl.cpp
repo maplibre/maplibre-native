@@ -6,7 +6,9 @@
 #include <mln/platform/gl_functions.hpp>
 #include <mln/shaders/program_parameters.hpp>
 #include <mln/shaders/shader_manifest.hpp>
+#include <mln/util/logging.hpp>
 
+#include <algorithm>
 #include <cstring>
 #include <utility>
 
@@ -173,8 +175,18 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
                 continue;
             }
             const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, name.data()));
-            assert(attributesInfo[location].name == std::string_view(name.data()));
-            addAttr(attrs, attributesInfo[location].id, location, length, size, glType);
+            // Drivers assign attribute locations freely: match the attribute by name, not by its
+            // position in attributesInfo (which only coincides for some drivers and shaders).
+            const std::string_view attributeName(name.data());
+            const auto info = std::find_if(attributesInfo.begin(), attributesInfo.end(), [&](const auto& candidate) {
+                return candidate.name == attributeName;
+            });
+            if (info == attributesInfo.end()) {
+                Log::Warning(Event::Shader,
+                             "Active attribute not in the attribute list: " + std::string(attributeName));
+                continue;
+            }
+            addAttr(attrs, info->id, location, length, size, glType);
         }
 
         return std::make_shared<ShaderProgramGL>(std::move(program), std::move(attrs), std::move(samplerLocations));
