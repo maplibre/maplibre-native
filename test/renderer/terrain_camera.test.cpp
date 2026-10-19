@@ -3,6 +3,7 @@
 #include <mln/test/map_adapter.hpp>
 
 #include <mln/gfx/headless_frontend.hpp>
+#include <mln/map/bound_options.hpp>
 #include <mln/map/camera.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/math/angles.hpp>
@@ -22,6 +23,8 @@ constexpr uint32_t demTileSize = 64;
 // Terrain-RGB encodes elevation as -10000 + (R * 65536 + G * 256 + B) * 0.1, so a flat
 // 1000 m plateau is RGB(1, 173, 176): 65536 + 44288 + 176 = 110000.
 constexpr double plateauMeters = 1000.0;
+// One metre in the Mercator units of the camera position, at the fixture's latitude.
+const double mercatorMetre = 1.0 / (util::M2PI * util::EARTH_RADIUS_M * std::cos(util::deg2rad(47.2692)));
 
 std::string makeFlatDEMTile() {
     PremultipliedImage image({demTileSize, demTileSize});
@@ -81,6 +84,16 @@ struct TerrainCameraTest {
         }
         return altitude;
     }
+
+    vec3 eye() const { return *map.getFreeCameraOptions().position; }
+
+    // The camera is where it was, to within a metre.
+    void expectEyeAt(const vec3& expected) const {
+        const vec3 actual = eye();
+        for (int i = 0; i < 3; ++i) {
+            EXPECT_NEAR(actual[i], expected[i], mercatorMetre) << "axis " << i;
+        }
+    }
 };
 
 } // namespace
@@ -136,31 +149,40 @@ TEST(TerrainCamera, AnchoredCentreReturnsToSeaLevelWhenTerrainIsRemoved) {
     // Lets the renderer report the plateau under the centre.
     ASSERT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
 
-    const auto eye = [&] {
-        return *test.map.getFreeCameraOptions().position;
-    };
-    // One metre in the Mercator units of the camera position, at the centre's latitude.
-    const double metre = 1.0 / (util::M2PI * util::EARTH_RADIUS_M * std::cos(util::deg2rad(47.2692)));
-    const auto expectEyeAt = [&](const vec3& expected) {
-        const vec3 actual = eye();
-        for (int i = 0; i < 3; ++i) {
-            EXPECT_NEAR(actual[i], expected[i], 5 * metre) << "axis " << i;
-        }
-    };
-    const vec3 before = eye();
+    const vec3 before = test.eye();
     const double zoomBefore = *test.map.getCameraOptions({}).zoom;
 
     test.map.anchorCenterOnTerrain();
     EXPECT_NEAR(*test.map.getCameraOptions({}).centerAltitude, plateauMeters, 0.5);
     EXPECT_GT(*test.map.getCameraOptions({}).zoom, zoomBefore);
-    expectEyeAt(before);
+    test.expectEyeAt(before);
 
     test.map.getStyle().setTerrain(nullptr);
     EXPECT_NEAR(test.renderAndGetAltitude(1), 0.0, 0.001);
     EXPECT_NEAR(*test.map.getCameraOptions({}).zoom, zoomBefore, 1e-3);
-    expectEyeAt(before);
+    test.expectEyeAt(before);
 
     // Without terrain there is nothing to anchor on, whatever height was last reported.
     test.map.anchorCenterOnTerrain();
     EXPECT_NEAR(test.map.getCameraOptions({}).centerAltitude.value_or(0.0), 0.0, 0.001);
+}
+
+// Near grazing, the line of sight runs almost along the ground: keeping the view would slide the
+// centre off towards the horizon, and close to 90 degrees past a pole. The anchor leaves the
+// camera alone there instead.
+TEST(TerrainCamera, AnchoringAtAGrazingPitchLeavesTheCameraAlone) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(9.0));
+    // Lets the renderer report the plateau under the centre.
+    ASSERT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+    test.map.setBounds(BoundOptions().withMaxPitch(89.0));
+    test.map.jumpTo(CameraOptions().withPitch(89.0));
+    const vec3 before = test.eye();
+
+    test.map.anchorCenterOnTerrain();
+    const auto camera = test.map.getCameraOptions({});
+    EXPECT_NEAR(*camera.centerAltitude, 0.0, 0.001);
+    EXPECT_NEAR(*camera.zoom, 9.0, 1e-9);
+    test.expectEyeAt(before);
 }

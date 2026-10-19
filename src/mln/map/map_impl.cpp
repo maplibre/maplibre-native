@@ -360,23 +360,30 @@ bool Map::Impl::setCenterAltitudeKeepingView(double altitudeMeters) {
         return false;
     }
     const double pitch = util::deg2rad(camera.pitch.value_or(0.0));
+    // Near grazing, the line of sight runs almost along the plane: the centre would slide off
+    // towards the horizon, past a pole close to 90 degrees. gl-js stops at the same angle
+    // (_distanceToCenterFromAltElevationPitch).
+    if (std::cos(pitch) < 0.1) {
+        return false;
+    }
     const double bearing = util::deg2rad(camera.bearing.value_or(0.0));
-    const LatLng center = *camera.center;
-    // Camera-to-centre distance in metres, along the line of sight.
-    const double metresPerPixel = Projection::getMetersPerPixelAtLatitude(center.latitude(), *camera.zoom);
-    const double distance = state.getCameraToCenterDistance() * metresPerPixel;
-    // Up the line of sight by `rise` (down, for a negative one): that much closer to the camera,
-    // rise·tan(pitch) nearer it on the ground.
-    const double closer = rise / std::max(std::cos(pitch), 0.05);
-    const double remaining = distance - closer;
+    // In pixels at the current zoom, the unit of the camera-to-centre distance along the line
+    // of sight.
+    const double metresPerPixel = Projection::getMetersPerPixelAtLatitude(camera.center->latitude(), *camera.zoom);
+    const double risePixels = rise / metresPerPixel;
+    const double distance = state.getCameraToCenterDistance();
+    // Up the line of sight by `rise` (down, for a negative one): rise/cos(pitch) closer to the
+    // camera, rise·tan(pitch) nearer it on the ground.
+    const double remaining = distance - risePixels / std::cos(pitch);
     if (remaining < distance * 0.05) {
         return false; // the ground is (nearly) at the camera: leave it
     }
-    const double shift = rise * std::tan(pitch);
-    // Towards the camera, which sits opposite the bearing.
-    const double north = -shift * std::cos(bearing), east = -shift * std::sin(bearing);
-    const LatLng anchored{center.latitude() + north / 111195.0,
-                          center.longitude() + east / (111195.0 * std::cos(util::deg2rad(center.latitude())))};
+    const double shift = risePixels * std::tan(pitch);
+    // Towards the camera, which sits opposite the bearing; y grows southwards.
+    const double scale = state.getScale();
+    const Point<double> center = Projection::project(*camera.center, scale);
+    const LatLng anchored = Projection::unproject(
+        {center.x - shift * std::sin(bearing), center.y + shift * std::cos(bearing)}, scale);
     transform.jumpTo(CameraOptions()
                          .withCenter(anchored)
                          .withZoom(*camera.zoom + std::log2(distance / remaining))

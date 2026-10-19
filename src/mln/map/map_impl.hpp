@@ -128,8 +128,8 @@ public:
     double terrainCenterElevation = std::numeric_limits<double>::quiet_NaN();
     void anchorCenterOnTerrain();
     /// Slides the centre along the line of sight to `altitudeMeters`, the zoom following, so the
-    /// camera stays where it is. False when there was nothing to move, or the plane at that
-    /// altitude is (nearly) at the camera.
+    /// camera stays where it is. False when there was nothing to move, the line of sight nearly
+    /// grazes the plane at that altitude, or the plane is (nearly) at the camera.
     bool setCenterAltitudeKeepingView(double altitudeMeters);
     /// Whether the style had terrain at the last update, and whether the centre has yet to come
     /// back to sea level since it was removed (a transition was in flight).

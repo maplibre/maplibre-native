@@ -234,8 +234,9 @@ public:
     /// slides along the line of sight up to the ground and the zoom tightens by the distance saved,
     /// so nothing on screen shifts. Rotating and pitching then turn around the ground being
     /// looked at, not a sea-level point behind it. Inert while the style has no terrain, so a
-    /// gesture handler can call it unconditionally. Removing the terrain brings the centre back
-    /// down to sea level the same way.
+    /// gesture handler can call it unconditionally, and at a pitch so steep (over ~84 degrees)
+    /// that the line of sight nearly grazes the ground. Removing the terrain brings the centre
+    /// back down to sea level the same way.
     void anchorCenterOnTerrain();
 
     /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain
