@@ -1,6 +1,5 @@
 #pragma once
 
-#include <limits>
 #include <mln/annotation/annotation_manager.hpp>
 #include <mln/map/map.hpp>
 #include <mln/map/map_observer.hpp>
@@ -15,6 +14,7 @@
 #include <mln/util/size.hpp>
 #include <mln/tile/tile_operation.hpp>
 
+#include <limits>
 #include <numbers>
 
 namespace mln {

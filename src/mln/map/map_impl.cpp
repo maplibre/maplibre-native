@@ -1,6 +1,3 @@
-#include <mln/util/projection.hpp>
-#include <cmath>
-#include <limits>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_impl.hpp>
 #include <mln/renderer/update_parameters.hpp>
@@ -8,10 +5,13 @@
 #include <mln/style/style_impl.hpp>
 #include <mln/util/exception.hpp>
 #include <mln/util/logging.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/util/traits.hpp>
 #include <mln/util/action_journal.hpp>
 #include <mln/util/action_journal_impl.hpp>
 #include <mln/gfx/rendering_stats.hpp>
+
+#include <cmath>
 
 namespace mln {
 
