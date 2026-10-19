@@ -12,8 +12,6 @@ on:
   #     - windows-*
 
   # pull_request:
-  #   branches:
-  #     - '*'
 
 env:
   SCCACHE_GHA_ENABLED: "true"
