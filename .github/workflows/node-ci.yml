@@ -135,6 +135,7 @@ jobs:
             xvfb \
             libcurl4-openssl-dev \
             libglfw3-dev \
+            libopengl-dev \
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
