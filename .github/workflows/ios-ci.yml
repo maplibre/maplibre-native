@@ -10,8 +10,6 @@ on:
       - 'ios-*'
 
   pull_request:
-    branches:
-      - '*'
 
 concurrency:
   # cancel jobs on PRs only

@@ -36,8 +36,6 @@ on:
       - "package-lock.json"
 
   pull_request:
-    branches:
-      - "*"
     paths:
       - CMakeLists.txt
       - CMakePresets.json
