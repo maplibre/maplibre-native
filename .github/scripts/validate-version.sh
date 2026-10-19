@@ -2,8 +2,8 @@
 
 validate_version() {
   local version="$1"
-  if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-pre.*)?$ ]]; then
-    echo "::error::Invalid version '$version' in $(realpath "$version_file"). Expected: X.Y.Z or X.Y.Z-pre*"
+  if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+    echo "::error::Invalid version '$version' in $(realpath "$version_file"). Expected: X.Y.Z or X.Y.Z-<pre-release>"
     return 1
   fi
   return 0

@@ -1,6 +1,6 @@
 # Changelog MapLibre Native for Android
 
-## main
+## 2026.10.19-globe
 
 ### ✨ Features and improvements
 
