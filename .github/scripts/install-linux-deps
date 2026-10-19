@@ -9,6 +9,7 @@ packages=(
   libwebp-dev
   libegl-dev
   libgles-dev
+  libopengl-dev
   libopengl0
   mesa-vulkan-drivers
   llvm
