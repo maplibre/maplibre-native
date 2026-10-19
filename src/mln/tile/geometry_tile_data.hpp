@@ -45,6 +45,10 @@ public:
     GeometryCollection clone() const { return GeometryCollection(*this); }
 
     const auto& getTriangles() const { return triangles; }
+    /// `triangles_` may point into memory owned by the decoder (e.g. a decoded MLT tile).
+    /// `owner` keeps that memory alive for as long as this collection references it.
+    /// It is type-erased because the owner type depends on the decoder in use; the
+    /// shared_ptr still destroys it through the original type's deleter.
     void setTriangles(std::shared_ptr<const void> owner, std::span<const std::uint32_t> triangles_) {
         triangleOwner = std::move(owner);
         triangles = triangles_;
