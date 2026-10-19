@@ -100,9 +100,12 @@ struct PropertyVisitor {
     }
 };
 
+// Like MVT, a feature without a value for a property doesn't have that property.
 std::optional<Value> VectorMLTTileFeature::getValue(const std::string& key) const {
     if (auto prop = feature.getProperty(key, layer)) {
-        return std::visit(PropertyVisitor(), *prop);
+        if (auto value = std::visit(PropertyVisitor(), *prop); !value.is<NullValue>()) {
+            return value;
+        }
     }
     return std::nullopt;
 }
@@ -113,9 +116,11 @@ const PropertyMap& VectorMLTTileFeature::getProperties() const {
         properties.emplace();
         properties->reserve(layer.getProperties().size());
         for (const auto& [key, props] : layer.getProperties()) {
-            auto value = props.getProperty(feature.getIndex());
-            auto prop = value ? std::visit(visitor, std::move(*value)) : mapbox::feature::null_value;
-            properties->emplace(key, std::move(prop));
+            if (auto value = props.getProperty(feature.getIndex())) {
+                if (auto prop = std::visit(visitor, std::move(*value)); !prop.is<NullValue>()) {
+                    properties->emplace(key, std::move(prop));
+                }
+            }
         }
     }
     return *properties;
