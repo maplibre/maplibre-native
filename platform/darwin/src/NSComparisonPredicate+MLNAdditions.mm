@@ -24,12 +24,12 @@
   return nil;
 }
 
-- (mbgl::Value)mgl_constantValue {
+- (mln::Value)mgl_constantValue {
   NSExpression *leftExpression = self.leftExpression;
   NSExpression *rightExpression = self.rightExpression;
   NSExpressionType leftType = leftExpression.expressionType;
   NSExpressionType rightType = rightExpression.expressionType;
-  mbgl::Value value;
+  mln::Value value;
   if (leftType == NSKeyPathExpressionType && rightType == NSConstantValueExpressionType) {
     value = rightExpression.mgl_constantMBGLValue;
   } else if (leftType == NSConstantValueExpressionType && rightType == NSKeyPathExpressionType) {
@@ -42,12 +42,12 @@
   return value;
 }
 
-- (mbgl::FeatureType)mgl_featureType {
+- (mln::FeatureType)mgl_featureType {
   NSExpression *leftExpression = self.leftExpression;
   NSExpression *rightExpression = self.rightExpression;
   NSExpressionType leftType = leftExpression.expressionType;
   NSExpressionType rightType = rightExpression.expressionType;
-  mbgl::FeatureType type;
+  mln::FeatureType type;
   if (leftType == NSKeyPathExpressionType && rightType == NSConstantValueExpressionType) {
     type = rightExpression.mgl_featureType;
   } else if (leftType == NSConstantValueExpressionType && rightType == NSKeyPathExpressionType) {
@@ -60,12 +60,12 @@
   return type;
 }
 
-- (mbgl::FeatureIdentifier)mgl_featureIdentifier {
+- (mln::FeatureIdentifier)mgl_featureIdentifier {
   NSExpression *leftExpression = self.leftExpression;
   NSExpression *rightExpression = self.rightExpression;
   NSExpressionType leftType = leftExpression.expressionType;
   NSExpressionType rightType = rightExpression.expressionType;
-  mbgl::FeatureIdentifier identifier;
+  mln::FeatureIdentifier identifier;
   if (leftType == NSKeyPathExpressionType && rightType == NSConstantValueExpressionType) {
     identifier = rightExpression.mgl_featureIdentifier;
   } else if (leftType == NSConstantValueExpressionType && rightType == NSKeyPathExpressionType) {

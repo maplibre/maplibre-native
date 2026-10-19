@@ -1,0 +1,58 @@
+#pragma once
+
+#include <mln/gfx/types.hpp>
+#include <mln/gfx/vertex_attribute.hpp>
+
+namespace mln {
+namespace gfx {
+class VertexBufferResource;
+} // namespace gfx
+namespace vulkan {
+
+class VertexAttributeArray;
+class UploadPass;
+
+class VertexAttribute final : public gfx::VertexAttribute {
+public:
+    VertexAttribute(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
+        : gfx::VertexAttribute(index_, dataType_, count_) {}
+    VertexAttribute(VertexAttribute&& other)
+        : gfx::VertexAttribute(std::move(other)) {}
+    VertexAttribute(const VertexAttribute& other) = delete;
+    ~VertexAttribute() override = default;
+
+    void setUBO(int value) { ubo = value; }
+    int getUBO() const { return ubo; }
+
+    size_t getBufferUsage() const;
+
+    static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
+                                                            UploadPass&,
+                                                            size_t,
+                                                            bool forceUpdate);
+
+protected:
+    int ubo = -1;
+};
+
+/// Stores a collection of vertex attributes by name
+class VertexAttributeArray final : public gfx::VertexAttributeArray {
+public:
+    VertexAttributeArray() = default;
+    VertexAttributeArray(VertexAttributeArray&& other)
+        : gfx::VertexAttributeArray(std::move(other)) {}
+
+    VertexAttributeArray& operator=(VertexAttributeArray&& other) {
+        gfx::VertexAttributeArray::operator=(std::move(other));
+        return *this;
+    }
+    VertexAttributeArray& operator=(const VertexAttributeArray& other) = delete;
+
+private:
+    gfx::UniqueVertexAttribute create(int index, gfx::AttributeDataType dataType, std::size_t count) const override {
+        return std::make_unique<VertexAttribute>(index, dataType, count);
+    }
+};
+
+} // namespace vulkan
+} // namespace mln

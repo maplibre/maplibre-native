@@ -1,17 +1,17 @@
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/rapidjson_conversion.hpp>
-#include <mbgl/style/expression/dsl.hpp>
-#include <mbgl/style/expression/is_expression.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/rapidjson.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/rapidjson_conversion.hpp>
+#include <mln/style/expression/dsl.hpp>
+#include <mln/style/expression/is_expression.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/rapidjson.hpp>
 #include <rapidjson/document.h>
 #include <iostream>
 #include <filesystem>
 #include <fstream>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 TEST(Expression, IsExpression) {
     rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> spec;
@@ -27,16 +27,6 @@ TEST(Expression, IsExpression) {
         JSDocument document;
         document.Parse<0>(R"([")" + name + R"("])");
         const JSValue* expression = &document;
-
-        // TODO: "interpolate-hcl": https://github.com/mapbox/mapbox-gl-native/issues/8720
-        // TODO: "interpolate-lab": https://github.com/mapbox/mapbox-gl-native/issues/8720
-        if (name == "interpolate-hcl" || name == "interpolate-lab") {
-            if (expression::isExpression(conversion::Convertible(expression))) {
-                ASSERT_TRUE(false) << "Expression name" << name
-                                   << "is implemented - please update Expression.IsExpression test.";
-            }
-            continue;
-        }
 
         EXPECT_TRUE(expression::isExpression(conversion::Convertible(expression))) << name;
     }

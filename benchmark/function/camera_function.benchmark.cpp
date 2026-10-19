@@ -1,12 +1,12 @@
 #include <benchmark/benchmark.h>
 
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/function.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/function.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/style/conversion_impl.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 static std::string createFunctionJSON(size_t stopCount) {
     std::string stops = "[";

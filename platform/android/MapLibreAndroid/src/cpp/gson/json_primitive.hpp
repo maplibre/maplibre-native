@@ -4,7 +4,7 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace gson {
 
@@ -18,4 +18,4 @@ public:
 
 } // namespace gson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/geometry/line_atlas.hpp>
+#include <mln/geometry/line_atlas.hpp>
 
 #include <random>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(LineAtlas, Random) {
     std::mt19937 generator(42); // Use the same seed for reproducible tests.

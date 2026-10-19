@@ -4,7 +4,7 @@
 
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
@@ -47,4 +47,4 @@ static jni::Local<jni::Object<java::util::List>> asPointsListsList(JNIEnv& env, 
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

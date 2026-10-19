@@ -6,12 +6,12 @@
 #import "NSExpression+MLNPrivateAdditions.h"
 #import "NSPredicate+MLNPrivateAdditions.h"
 
-#include <mbgl/style/conversion/property_value.hpp>
+#include <mln/style/conversion/property_value.hpp>
 
 @implementation NSCompoundPredicate (MLNAdditions)
 
-- (std::vector<mbgl::style::Filter>)mgl_subfilters {
-  std::vector<mbgl::style::Filter> filters;
+- (std::vector<mln::style::Filter>)mgl_subfilters {
+  std::vector<mln::style::Filter> filters;
   for (NSPredicate *predicate in self.subpredicates) {
     filters.push_back(predicate.mgl_filter);
   }

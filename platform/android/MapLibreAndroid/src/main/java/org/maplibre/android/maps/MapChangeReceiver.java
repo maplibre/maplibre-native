@@ -60,6 +60,8 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnRenderErrorListener> onRenderErrorList
     = new CopyOnWriteArrayList<>();
+  private final List<MapView.OnSymbolErrorListener> onSymbolErrorList
+          = new CopyOnWriteArrayList<>();
 
   @Override
   public void onCameraWillChange(boolean animated) {
@@ -440,6 +442,17 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     }
   }
 
+  @Override
+  public void onSymbolError(String message) {
+    try {
+      for (MapView.OnSymbolErrorListener listener : onSymbolErrorList) {
+        listener.onSymbolError(message);
+      }
+    } catch (Throwable err) {
+      Logger.e(TAG, "Exception in onSymbolError", err);
+    }
+  }
+
   void addOnCameraWillChangeListener(MapView.OnCameraWillChangeListener listener) {
     onCameraWillChangeListenerList.add(listener);
   }
@@ -612,6 +625,10 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onRenderErrorList.add(callback);
   }
 
+  public void addOnSymbolErrorListener(MapView.OnSymbolErrorListener callback) {
+    onSymbolErrorList.add(callback);
+  }
+
   public void removeOnPreCompileShaderListener(MapView.OnPreCompileShaderListener callback) {
     onPreCompileShaderList.remove(callback);
   }
@@ -656,6 +673,10 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onRenderErrorList.remove(callback);
   }
 
+  public void removeOnSymbolErrorListener(MapView.OnSymbolErrorListener callback) {
+    onSymbolErrorList.remove(callback);
+  }
+
   void clear() {
     onCameraWillChangeListenerList.clear();
     onCameraIsChangingListenerList.clear();
@@ -683,5 +704,6 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onSpriteErrorList.clear();
     onSpriteRequestedList.clear();
     onRenderErrorList.clear();
+    onSymbolErrorList.clear();
   }
 }

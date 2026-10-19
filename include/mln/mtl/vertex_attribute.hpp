@@ -1,0 +1,67 @@
+#pragma once
+
+#include <mln/gfx/types.hpp>
+#include <mln/gfx/vertex_attribute.hpp>
+
+namespace mln {
+namespace gfx {
+class VertexBufferResource;
+} // namespace gfx
+namespace mtl {
+
+class UploadPass;
+
+class VertexAttribute final : public gfx::VertexAttribute {
+public:
+    VertexAttribute(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
+        : gfx::VertexAttribute(index_, dataType_, count_) {}
+    VertexAttribute(const VertexAttribute& other) = delete;
+    VertexAttribute(VertexAttribute&& other)
+        : gfx::VertexAttribute(std::move(other)),
+          bufferIndex(other.bufferIndex) {}
+    ~VertexAttribute() override = default;
+
+    /// @brief Get the bufer index of the vertex attribute
+    int getBufferIndex() const { return bufferIndex; }
+
+    /// @brief Set the buffer index of the vertex attribute
+    void setBufferIndex(int value) { bufferIndex = value; }
+
+    static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
+                                                            UploadPass&,
+                                                            const gfx::BufferUsageType,
+                                                            bool forceUpdate);
+
+protected:
+    int bufferIndex = 0;
+};
+
+/// Stores a collection of vertex attributes by name
+class VertexAttributeArray final : public gfx::VertexAttributeArray {
+public:
+    VertexAttributeArray() = default;
+    VertexAttributeArray(VertexAttributeArray&& other)
+        : gfx::VertexAttributeArray(std::move(other)) {}
+
+    VertexAttributeArray& operator=(VertexAttributeArray&& other) {
+        gfx::VertexAttributeArray::operator=(std::move(other));
+        return *this;
+    }
+    VertexAttributeArray& operator=(const VertexAttributeArray& other) = delete;
+
+    const std::unique_ptr<gfx::VertexAttribute>& set(const size_t id,
+                                                     int index,
+                                                     gfx::AttributeDataType type,
+                                                     int bufferIndex);
+
+    /// Indicates whether any values have changed
+    bool isModifiedAfter(std::chrono::duration<double> time) const;
+
+private:
+    gfx::UniqueVertexAttribute create(int index, gfx::AttributeDataType dataType, std::size_t count) const override {
+        return std::make_unique<VertexAttribute>(index, dataType, count);
+    }
+};
+
+} // namespace mtl
+} // namespace mln

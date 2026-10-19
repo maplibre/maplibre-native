@@ -1,7 +1,7 @@
-#include <mbgl/gl/headless_backend.hpp>
+#include <mln/gl/headless_backend.hpp>
 
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/logging.hpp>
 
 #include <EGL/egl.h>
 
@@ -9,7 +9,7 @@
 #include <memory>
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 // This class provides a singleton that contains information about the
@@ -34,8 +34,8 @@ public:
         }
 
         if (!eglBindAPI(EGL_OPENGL_ES_API)) {
-            mbgl::Log::Error(mbgl::Event::OpenGL,
-                             "eglBindAPI(EGL_OPENGL_ES_API) returned error " + std::to_string(eglGetError()));
+            mln::Log::Error(mln::Event::GraphicsBackend,
+                            "eglBindAPI(EGL_OPENGL_ES_API) returned error " + std::to_string(eglGetError()));
             throw std::runtime_error("eglBindAPI() failed");
         }
 
@@ -75,7 +75,7 @@ public:
         if (eglContext == EGL_NO_CONTEXT) {
             std::ostringstream logMsg;
             logMsg << "eglCreateContext() returned error 0x" << std::hex << eglGetError();
-            mbgl::Log::Error(mbgl::Event::OpenGL, logMsg.str());
+            mln::Log::Error(mln::Event::GraphicsBackend, logMsg.str());
 
             throw std::runtime_error("Error creating the EGL context object.\n");
         }
@@ -95,12 +95,12 @@ public:
     ~EGLBackendImpl() final {
         if (eglSurface != EGL_NO_SURFACE) {
             if (!eglDestroySurface(eglDisplay->display, eglSurface)) {
-                Log::Error(Event::OpenGL, "Failed to destroy EGL surface.");
+                Log::Error(Event::GraphicsBackend, "Failed to destroy EGL surface.");
             }
             eglSurface = EGL_NO_SURFACE;
         }
         if (!eglDestroyContext(eglDisplay->display, eglContext)) {
-            Log::Error(Event::OpenGL, "Failed to destroy EGL context.");
+            Log::Error(Event::GraphicsBackend, "Failed to destroy EGL context.");
         }
     }
 
@@ -130,4 +130,4 @@ void HeadlessBackend::createImpl() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

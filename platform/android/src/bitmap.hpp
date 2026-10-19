@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/util/image.hpp>
+#include <mln/util/image.hpp>
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class Bitmap {
@@ -44,4 +44,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 
-#include <mbgl/tile/vector_mlt_tile_data.hpp>
-#include <mbgl/util/io.hpp>
+#include <mln/tile/vector_mlt_tile_data.hpp>
+#include <mln/util/io.hpp>
 
 #include <memory>
 #include <string>
@@ -10,15 +10,15 @@ namespace {
 
 std::shared_ptr<const std::string> fixtureData(bool useFastPFOR) {
     static const auto data = std::make_shared<const std::string>(
-        mbgl::util::read_file("test/fixtures/map/issue12432/0-0-0.mlt"));
+        mln::util::read_file("test/fixtures/map/issue12432/0-0-0.mlt"));
     static const auto fastPFORData = std::make_shared<const std::string>(
-        mbgl::util::read_file("test/fixtures/map/issue12432/0-0-0-fastpfor.mlt"));
+        mln::util::read_file("test/fixtures/map/issue12432/0-0-0-fastpfor.mlt"));
 
     return useFastPFOR ? fastPFORData : data;
 }
 
 std::size_t visitTile(const std::shared_ptr<const std::string>& data, bool fastPFOREnabled) {
-    mbgl::VectorMLTTileData tile(data, fastPFOREnabled);
+    mln::VectorMLTTileData tile(data, fastPFOREnabled);
 
     std::size_t result = 0;
     for (const auto& name : tile.layerNames()) {
@@ -50,7 +50,7 @@ void Parse_MLTVectorTile(benchmark::State& state) {
     const auto data = fixtureData(state.range(0) != 0);
 
     for (auto _ : state) {
-        mbgl::VectorMLTTileData tile(data, true);
+        mln::VectorMLTTileData tile(data, true);
         auto layerNames = tile.layerNames();
         auto layerNameCount = layerNames.size();
         benchmark::DoNotOptimize(layerNameCount);

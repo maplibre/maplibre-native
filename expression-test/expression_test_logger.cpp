@@ -1,13 +1,13 @@
 #include "expression_test_logger.hpp"
 #include "expression_test_runner.hpp"
 
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/string.hpp>
 
 #include <sstream>
 #include <filesystem>
 
-using namespace mbgl;
+using namespace mln;
 using namespace std::literals;
 
 namespace {

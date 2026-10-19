@@ -4,12 +4,12 @@
 #undef GetObject
 #endif
 
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/variant.hpp>
-#include <mbgl/style/conversion/function.hpp>
-#include <mbgl/style/rapidjson_conversion.hpp>
-#include <mbgl/style/expression/parsing_context.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/variant.hpp>
+#include <mln/style/conversion/function.hpp>
+#include <mln/style/rapidjson_conversion.hpp>
+#include <mln/style/expression/parsing_context.hpp>
 
 #include <mapbox/geojson/rapidjson.hpp>
 #include <rapidjson/writer.h>
@@ -20,9 +20,9 @@
 
 #include <regex>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 using namespace std::literals;
 
 namespace {
@@ -407,7 +407,7 @@ std::optional<TestData> parseTestData(const std::filesystem::path& path) {
         TestData data;
         auto maybeJson = readJson(path.string());
         if (!maybeJson.is<JSDocument>()) { // NOLINT
-            mbgl::Log::Error(mbgl::Event::General, "Cannot parse test '" + path.string() + "'.");
+            mln::Log::Error(mln::Event::General, "Cannot parse test '" + path.string() + "'.");
             return std::nullopt;
         }
 

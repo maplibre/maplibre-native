@@ -1,12 +1,15 @@
-#include <mbgl/i18n/number_format.hpp>
-#include <mbgl/text/language_tag.hpp>
+#include <mln/i18n/number_format.hpp>
+#include <mln/text/language_tag.hpp>
+#include <mln/util/exception.hpp>
+
+#include <stdexcept>
 
 #include <jni/jni.hpp>
 
 #include "attach_env.hpp"
 #include "number_format_jni.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void NumberFormat::registerNative(jni::JNIEnv& env) {
@@ -51,6 +54,28 @@ void NumberFormat::setMaximumFractionDigits(jni::JNIEnv& env, const jni::Object<
 
 namespace platform {
 
+namespace {
+
+// jni.hpp throws std::range_error for text it cannot convert between UTF-8 and
+// UTF-16.
+jni::Local<jni::String> makeJavaString(jni::JNIEnv& env, const std::string& value) {
+    try {
+        return jni::Make<jni::String>(env, value);
+    } catch (const std::range_error& error) {
+        throw util::LocaleException(error.what());
+    }
+}
+
+std::string makeString(jni::JNIEnv& env, const jni::String& value) {
+    try {
+        return jni::Make<std::string>(env, value);
+    } catch (const std::range_error& error) {
+        throw util::LocaleException(error.what());
+    }
+}
+
+} // namespace
+
 std::string formatNumber(double number,
                          const std::string& localeId,
                          const std::string& currency,
@@ -63,12 +88,12 @@ std::string formatNumber(double number,
     if (!languageTag.language) {
         locale = jni::NewGlobal(*env, android::Locale::getDefault(*env));
     } else if (!languageTag.region) {
-        locale = jni::NewGlobal(*env, android::Locale::New(*env, jni::Make<jni::String>(*env, *languageTag.language)));
+        locale = jni::NewGlobal(*env, android::Locale::New(*env, makeJavaString(*env, *languageTag.language)));
     } else {
-        locale = jni::NewGlobal(*env,
-                                android::Locale::New(*env,
-                                                     jni::Make<jni::String>(*env, *languageTag.language),
-                                                     jni::Make<jni::String>(*env, *languageTag.region)));
+        locale = jni::NewGlobal(
+            *env,
+            android::Locale::New(
+                *env, makeJavaString(*env, *languageTag.language), makeJavaString(*env, *languageTag.region)));
     }
 
     jni::Global<jni::Object<android::NumberFormat>> formatter;
@@ -81,8 +106,8 @@ std::string formatNumber(double number,
     }
 
     auto result = android::NumberFormat::format(*env, formatter, static_cast<jni::jdouble>(number));
-    return jni::Make<std::string>(*env, result);
+    return makeString(*env, result);
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

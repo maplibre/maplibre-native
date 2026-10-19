@@ -1,25 +1,25 @@
 #if MLN_RENDER_BACKEND_OPENGL
 
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/style/layers/custom_layer.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/mat4.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/style/layers/custom_layer.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/map/map.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/style/layers/fill_layer.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/mat4.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <memory>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::platform;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::platform;
 
 // Note that custom layers need to draw geometry with a z value of 1 to take
 // advantage of depth-based fragment culling.
@@ -40,9 +40,9 @@ void main() {
 // in the layer implementation because it is intended to reflect how someone
 // using custom layers might actually write their own implementation.
 
-class TestLayer : public mbgl::style::CustomLayerHost {
+class TestLayer : public mln::style::CustomLayerHost {
 public:
-    void initialize(const mbgl::style::CustomLayerInitParameters&) override {
+    void initialize(const mln::style::CustomLayerInitParameters&) override {
         program = MBGL_CHECK_ERROR(glCreateProgram());
         vertexShader = MBGL_CHECK_ERROR(glCreateShader(GL_VERTEX_SHADER));
         fragmentShader = MBGL_CHECK_ERROR(glCreateShader(GL_FRAGMENT_SHADER));
@@ -62,7 +62,7 @@ public:
         MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(GLfloat), triangle, GL_STATIC_DRAW));
     }
 
-    void render(const mbgl::style::CustomLayerRenderParameters&) override {
+    void render(const mln::style::CustomLayerRenderParameters&) override {
         MBGL_CHECK_ERROR(glUseProgram(program));
         MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, buffer));
         MBGL_CHECK_ERROR(glEnableVertexAttribArray(a_pos));

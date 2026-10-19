@@ -1,10 +1,10 @@
-#include <mbgl/storage/offline.hpp>
-#include <mbgl/tile/tile_id.hpp>
+#include <mln/storage/offline.hpp>
+#include <mln/tile/tile_id.hpp>
 
 #include <gtest/gtest.h>
 
-using namespace mbgl;
-using SourceType = mbgl::style::SourceType;
+using namespace mln;
+using SourceType = mln::style::SourceType;
 
 TEST(OfflineTilePyramidRegionDefinition, EncodeDecode) {
     OfflineTilePyramidRegionDefinition region(

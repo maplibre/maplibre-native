@@ -1,11 +1,11 @@
-#include <mbgl/actor/actor.hpp>
+#include <mln/actor/actor.hpp>
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/test/util.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/test/util.hpp>
 
 #include <future>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(ActorRef, CanOutliveActor) {
     // An ActorRef can outlive its actor. Doing does not extend the actor's lifetime.

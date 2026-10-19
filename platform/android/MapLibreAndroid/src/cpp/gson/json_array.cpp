@@ -1,11 +1,11 @@
 #include "json_array.hpp"
 #include "json_element.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace gson {
 
-jni::Local<jni::Object<JsonArray>> JsonArray::New(jni::JNIEnv& env, const std::vector<mbgl::Value>& values) {
+jni::Local<jni::Object<JsonArray>> JsonArray::New(jni::JNIEnv& env, const std::vector<mln::Value>& values) {
     static auto& javaClass = jni::Class<JsonArray>::Singleton(env);
     static auto constructor = javaClass.GetConstructor(env);
     static auto addMethod = javaClass.GetMethod<void(jni::Object<JsonElement>)>(env, "add");
@@ -19,8 +19,8 @@ jni::Local<jni::Object<JsonArray>> JsonArray::New(jni::JNIEnv& env, const std::v
     return jsonArray;
 }
 
-std::vector<mbgl::Value> JsonArray::convert(jni::JNIEnv& env, const jni::Object<JsonArray>& jsonArray) {
-    std::vector<mbgl::Value> values;
+std::vector<mln::Value> JsonArray::convert(jni::JNIEnv& env, const jni::Object<JsonArray>& jsonArray) {
+    std::vector<mln::Value> values;
 
     if (jsonArray) {
         static auto& javaClass = jni::Class<JsonArray>::Singleton(env);
@@ -47,4 +47,4 @@ void JsonArray::registerNative(jni::JNIEnv& env) {
 
 } // namespace gson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1,0 +1,29 @@
+#include <mln/tile/raster_dem_tile_worker.hpp>
+#include <mln/tile/raster_dem_tile.hpp>
+#include <mln/renderer/buckets/hillshade_bucket.hpp>
+#include <mln/actor/actor.hpp>
+#include <mln/util/premultiply.hpp>
+
+namespace mln {
+
+RasterDEMTileWorker::RasterDEMTileWorker(const ActorRef<RasterDEMTileWorker>&, ActorRef<RasterDEMTile> parent_)
+    : parent(std::move(parent_)) {}
+
+void RasterDEMTileWorker::parse(const std::shared_ptr<const std::string>& data,
+                                uint64_t correlationID,
+                                Tileset::RasterEncoding encoding) {
+    if (!data) {
+        parent.invoke(&RasterDEMTile::onParsed, nullptr,
+                      correlationID); // No data; empty tile.
+        return;
+    }
+
+    try {
+        auto bucket = std::make_unique<HillshadeBucket>(decodeImage(*data), encoding);
+        parent.invoke(&RasterDEMTile::onParsed, std::move(bucket), correlationID);
+    } catch (...) {
+        parent.invoke(&RasterDEMTile::onError, std::current_exception(), correlationID);
+    }
+}
+
+} // namespace mln

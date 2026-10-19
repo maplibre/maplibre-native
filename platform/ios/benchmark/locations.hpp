@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace bench {
 
 struct Location {
@@ -17,4 +17,4 @@ struct Location {
 extern const std::vector<Location> locations;
 
 } // namespace bench
-} // namespace mbgl
+} // namespace mln

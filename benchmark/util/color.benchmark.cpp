@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <mbgl/util/color.hpp>
+#include <mln/util/color.hpp>
 
 static const std::vector<std::string> testStrings = {"#000000",
                                                      "#FFFFFF",
@@ -20,7 +20,7 @@ namespace {
 void ColorParse(benchmark::State& state) {
     for (auto _ : state) {
         for (const auto& str : testStrings) {
-            auto result = mbgl::Color::parse(str);
+            auto result = mln::Color::parse(str);
             benchmark::DoNotOptimize(result);
         }
     }

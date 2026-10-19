@@ -3,7 +3,7 @@
 #include "../conversion/conversion.hpp"
 #include "../conversion/constant.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void Formatted::registerNative(jni::JNIEnv& env) {
@@ -38,7 +38,7 @@ jni::Local<jni::Object<Formatted>> Formatted::New(jni::JNIEnv& env, const style:
         }
 
         if (section.textColor) {
-            using namespace mbgl::android::conversion;
+            using namespace mln::android::conversion;
             auto textColor = std::move(*convert<jni::Local<jni::Object<>>>(env, *section.textColor));
             static auto method = formattedSectionClass.GetMethod<void(jni::Object<>)>(env, "setTextColor");
             formattedSection.Call(env, method, textColor);
@@ -51,4 +51,4 @@ jni::Local<jni::Object<Formatted>> Formatted::New(jni::JNIEnv& env, const style:
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

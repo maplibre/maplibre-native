@@ -9,7 +9,7 @@ import java.lang.annotation.RetentionPolicy;
  * Resource provides access to resource types.
  */
 public final class Resource {
-  // Note: Keep this in sync with include/mbgl/storage/resource.hpp
+  // Note: Keep this in sync with include/mln/storage/resource.hpp
 
   /**
    * Resource type variants.

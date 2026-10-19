@@ -1,8 +1,8 @@
-#include <mbgl/util/platform.hpp>
+#include <mln/util/platform.hpp>
 #include "attach_env.hpp"
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 std::string uppercase(const std::string& str) {
@@ -22,4 +22,4 @@ std::string lowercase(const std::string& str) {
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

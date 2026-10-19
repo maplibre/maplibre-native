@@ -27,16 +27,17 @@
 
 #import "MLNAttributionInfo_Private.h"
 #import "MLNLoggingConfiguration_Private.h"
+#import "MLNStyleValue_Private.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/light.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/style/sources/image_source.hpp>
-#include <mbgl/style/sources/raster_dem_source.hpp>
-#include <mbgl/style/sources/raster_source.hpp>
-#include <mbgl/style/sources/vector_source.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/light.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/sources/image_source.hpp>
+#include <mln/style/sources/raster_dem_source.hpp>
+#include <mln/style/sources/raster_source.hpp>
+#include <mln/style/sources/vector_source.hpp>
+#include <mln/style/style.hpp>
 
 #import "NSDate+MLNAdditions.h"
 
@@ -82,7 +83,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
 @interface MLNStyle ()
 
 @property (nonatomic, readonly, weak) id<MLNStylable> stylable;
-@property (nonatomic, readonly) mbgl::style::Style *rawStyle;
+@property (nonatomic, readonly) mln::style::Style *rawStyle;
 @property (readonly, copy, nullable) NSURL *URL;
 @property (nonatomic, readwrite, strong)
     NSMutableDictionary<NSString *, MLNCustomStyleLayer *> *customLayers;
@@ -124,7 +125,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
 
 // MARK: -
 
-- (instancetype)initWithRawStyle:(mbgl::style::Style *)rawStyle stylable:(id<MLNStylable>)stylable {
+- (instancetype)initWithRawStyle:(mln::style::Style *)rawStyle stylable:(id<MLNStylable>)stylable {
   MLNLogInfo(@"Initializing %@ with stylable: %@", NSStringFromClass([self class]), stylable);
   if (self = [super init]) {
     _stylable = stylable;
@@ -192,7 +193,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
   return rawSource ? [self sourceFromMBGLSource:rawSource] : nil;
 }
 
-- (MLNSource *)sourceFromMBGLSource:(mbgl::style::Source *)rawSource {
+- (MLNSource *)sourceFromMBGLSource:(mln::style::Source *)rawSource {
   if (MLNSource *source =
           rawSource->peer.has_value() ? rawSource->peer.get<SourceWrapper>().source : nil) {
     return source;
@@ -200,15 +201,15 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
 
   // TODO: Fill in options specific to the respective source classes
   // https://github.com/mapbox/mapbox-gl-native/issues/6584
-  if (auto vectorSource = rawSource->as<mbgl::style::VectorSource>()) {
+  if (auto vectorSource = rawSource->as<mln::style::VectorSource>()) {
     return [[MLNVectorTileSource alloc] initWithRawSource:vectorSource stylable:self.stylable];
-  } else if (auto geoJSONSource = rawSource->as<mbgl::style::GeoJSONSource>()) {
+  } else if (auto geoJSONSource = rawSource->as<mln::style::GeoJSONSource>()) {
     return [[MLNShapeSource alloc] initWithRawSource:geoJSONSource stylable:self.stylable];
-  } else if (auto rasterSource = rawSource->as<mbgl::style::RasterSource>()) {
+  } else if (auto rasterSource = rawSource->as<mln::style::RasterSource>()) {
     return [[MLNRasterTileSource alloc] initWithRawSource:rasterSource stylable:self.stylable];
-  } else if (auto rasterDEMSource = rawSource->as<mbgl::style::RasterDEMSource>()) {
+  } else if (auto rasterDEMSource = rawSource->as<mln::style::RasterDEMSource>()) {
     return [[MLNRasterDEMSource alloc] initWithRawSource:rasterDEMSource stylable:self.stylable];
-  } else if (auto imageSource = rawSource->as<mbgl::style::ImageSource>()) {
+  } else if (auto imageSource = rawSource->as<mln::style::ImageSource>()) {
     return [[MLNImageSource alloc] initWithRawSource:imageSource stylable:self.stylable];
   } else {
     return [[MLNSource alloc] initWithRawSource:rawSource stylable:self.stylable];
@@ -373,7 +374,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
   [styleLayer removeFromStyle:self];
 }
 
-- (MLNStyleLayer *)layerFromMBGLLayer:(mbgl::style::Layer *)rawLayer {
+- (MLNStyleLayer *)layerFromMBGLLayer:(mln::style::Layer *)rawLayer {
   NSParameterAssert(rawLayer);
 
   if (MLNStyleLayer *layer =
@@ -381,7 +382,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
     return layer;
   }
 
-  return mbgl::LayerManagerDarwin::get()->createPeer(rawLayer);
+  return mln::LayerManagerDarwin::get()->createPeer(rawLayer);
 }
 
 - (MLNStyleLayer *)layerWithIdentifier:(NSString *)identifier {
@@ -533,6 +534,26 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
   return styleImage ? [[MLNImage alloc] initWithMLNStyleImage:*styleImage] : nil;
 }
 
+// MARK: Global state
+
+- (NSDictionary<NSString *, id> *)globalState {
+  const mln::GlobalStateMap state = self.rawStyle->getGlobalState();
+  NSMutableDictionary *globalState = [NSMutableDictionary dictionaryWithCapacity:state.size()];
+  for (const auto &property : state) {
+    globalState[@(property.first.c_str())] = MLNJSONObjectFromMBGLValue(property.second);
+  }
+  return [globalState copy];
+}
+
+- (void)setGlobalStateValue:(id)value forProperty:(NSString *)propertyName {
+  MLNLogDebug(@"Setting global state property: %@", propertyName);
+  try {
+    self.rawStyle->setGlobalStateProperty(propertyName.UTF8String, MLNValueFromJSONObject(value));
+  } catch (const std::runtime_error &err) {
+    [NSException raise:NSInternalInconsistencyException format:@"%s", err.what()];
+  }
+}
+
 // MARK: Style transitions
 
 - (void)setTransition:(MLNTransition)transition {
@@ -540,27 +561,27 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
 }
 
 - (MLNTransition)transition {
-  const mbgl::style::TransitionOptions transitionOptions = self.rawStyle->getTransitionOptions();
+  const mln::style::TransitionOptions transitionOptions = self.rawStyle->getTransitionOptions();
 
   return MLNTransitionFromOptions(transitionOptions);
 }
 
 - (void)setPerformsPlacementTransitions:(BOOL)performsPlacementTransitions {
-  mbgl::style::TransitionOptions transitionOptions = self.rawStyle->getTransitionOptions();
+  mln::style::TransitionOptions transitionOptions = self.rawStyle->getTransitionOptions();
   transitionOptions.enablePlacementTransitions = static_cast<bool>(performsPlacementTransitions);
   self.rawStyle->setTransitionOptions(transitionOptions);
 }
 
 - (BOOL)performsPlacementTransitions {
-  mbgl::style::TransitionOptions transitionOptions = self.rawStyle->getTransitionOptions();
+  mln::style::TransitionOptions transitionOptions = self.rawStyle->getTransitionOptions();
   return transitionOptions.enablePlacementTransitions;
 }
 
 // MARK: Style light
 
 - (void)setLight:(MLNLight *)light {
-  std::unique_ptr<mbgl::style::Light> mbglLight =
-      std::make_unique<mbgl::style::Light>([light mbglLight]);
+  std::unique_ptr<mln::style::Light> mbglLight =
+      std::make_unique<mln::style::Light>([light mbglLight]);
   self.rawStyle->setLight(std::move(mbglLight));
 }
 

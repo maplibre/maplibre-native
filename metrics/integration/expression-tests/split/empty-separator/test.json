@@ -1,0 +1,14 @@
+{
+  "expression": ["split", "string", ""],
+  "inputs": [[{}, {}]],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": true,
+      "isZoomConstant": true,
+      "type": "array<string>"
+    },
+    "outputs": [["s", "t", "r", "i", "n", "g"]],
+    "serialized": ["literal", ["s", "t", "r", "i", "n", "g"]]
+  }
+}

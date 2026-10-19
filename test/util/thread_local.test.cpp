@@ -1,18 +1,18 @@
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/thread.hpp>
-#include <mbgl/util/thread_local.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/thread.hpp>
+#include <mln/util/thread_local.hpp>
 
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
 #include <future>
 
-using namespace mbgl::util;
+using namespace mln::util;
 
 namespace {
 
 class TestThread {
 public:
-    TestThread(mbgl::ActorRef<TestThread>, int* number_) { number.set(number_); }
+    TestThread(mln::ActorRef<TestThread>, int* number_) { number.set(number_); }
 
     ~TestThread() { number.set(nullptr); }
 
@@ -67,7 +67,7 @@ namespace {
 
 class TestThreadDataOwnership {
 public:
-    TestThreadDataOwnership(mbgl::ActorRef<TestThreadDataOwnership>, int* data_) { data.set(data_); }
+    TestThreadDataOwnership(mln::ActorRef<TestThreadDataOwnership>, int* data_) { data.set(data_); }
 
     ~TestThreadDataOwnership() { data.set(nullptr); }
 

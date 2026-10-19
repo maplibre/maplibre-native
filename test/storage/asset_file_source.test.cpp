@@ -1,17 +1,17 @@
-#include <mbgl/actor/actor_ref.hpp>
-#include <mbgl/storage/asset_file_source.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/platform.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/thread.hpp>
+#include <mln/actor/actor_ref.hpp>
+#include <mln/storage/asset_file_source.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/thread.hpp>
 
 #include <gtest/gtest.h>
 #include <atomic>
 
-using namespace mbgl;
+using namespace mln;
 
 #if !ANDROID
 TEST(AssetFileSource, Load) {
@@ -29,13 +29,13 @@ TEST(AssetFileSource, Load) {
 
     class TestWorker {
     public:
-        TestWorker(ActorRef<TestWorker>, mbgl::AssetFileSource* fs_)
+        TestWorker(ActorRef<TestWorker>, mln::AssetFileSource* fs_)
             : fs(fs_) {}
 
         void run(std::function<void()> endCallback) {
             const std::string asset("asset://nonempty");
 
-            requestCallback = [this, asset, endCallback](mbgl::Response res) {
+            requestCallback = [this, asset, endCallback](mln::Response res) {
                 EXPECT_EQ(nullptr, res.error);
                 ASSERT_TRUE(res.data.get());
                 EXPECT_EQ("content is here\n", *res.data);
@@ -44,20 +44,20 @@ TEST(AssetFileSource, Load) {
                     endCallback();
                     request.reset();
                 } else {
-                    request = fs->request({mbgl::Resource::Unknown, asset}, requestCallback);
+                    request = fs->request({mln::Resource::Unknown, asset}, requestCallback);
                 }
             };
 
-            request = fs->request({mbgl::Resource::Unknown, asset}, requestCallback);
+            request = fs->request({mln::Resource::Unknown, asset}, requestCallback);
         }
 
     private:
         unsigned numRequests = 1000;
 
-        mbgl::AssetFileSource* fs;
-        std::unique_ptr<mbgl::AsyncRequest> request;
+        mln::AssetFileSource* fs;
+        std::unique_ptr<mln::AsyncRequest> request;
 
-        std::function<void(mbgl::Response)> requestCallback;
+        std::function<void(mln::Response)> requestCallback;
     };
 
     std::vector<std::unique_ptr<util::Thread<TestWorker>>> threads;

@@ -2,10 +2,10 @@
 #include "collection.hpp"
 #include "../style/formatted.hpp"
 
-#include <mbgl/style/conversion/stringify.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/style/conversion/stringify.hpp>
+#include <mln/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace conversion {
 
@@ -117,11 +117,11 @@ Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, style::ex
     return jni::Make<jni::String>(env, value.id());
 }
 
-Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, mbgl::style::Rotation>::operator()(
-    jni::JNIEnv& env, const mbgl::style::Rotation& value) const {
+Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, mln::style::Rotation>::operator()(
+    jni::JNIEnv& env, const mln::style::Rotation& value) const {
     return jni::Box(env, value.getAngle());
 }
 
 } // namespace conversion
 } // namespace android
-} // namespace mbgl
+} // namespace mln

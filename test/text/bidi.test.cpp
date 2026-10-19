@@ -1,9 +1,9 @@
 
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/text/bidi.hpp>
+#include <mln/text/bidi.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 /*
  These tests mirror the unit tests in mapbox-gl-rtl-text's arabic.test.js

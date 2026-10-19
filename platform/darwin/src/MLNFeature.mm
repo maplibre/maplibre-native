@@ -18,8 +18,8 @@
 #import "NSExpression+MLNPrivateAdditions.h"
 
 #import <mapbox/feature.hpp>
-#import <mbgl/style/conversion/geojson.hpp>
-#import <mbgl/util/geometry.hpp>
+#import <mln/style/conversion/geojson.hpp>
+#import <mln/util/geometry.hpp>
 
 // Cluster constants
 static NSString *const MLNClusterIdentifierKey = @"cluster_id";
@@ -48,12 +48,12 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
   return NSDictionaryFeatureForGeometry(@{@"type" : @"Empty"}, self.attributes, self.identifier);
 }
 
-- (mbgl::GeoJSON)geoJSONObject {
+- (mln::GeoJSON)geoJSONObject {
   return mbglFeature({[self geometryObject]}, identifier, self.attributes);
 }
 
-- (mbgl::Geometry<double>)geometryObject {
-  return mbgl::EmptyGeometry();
+- (mln::Geometry<double>)geometryObject {
+  return mln::EmptyGeometry();
 }
 
 - (NSString *)description {
@@ -90,7 +90,7 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
                                         self.identifier);
 }
 
-- (mbgl::GeoJSON)geoJSONObject {
+- (mln::GeoJSON)geoJSONObject {
   return mbglFeature({[self geometryObject]}, identifier, self.attributes);
 }
 
@@ -154,7 +154,7 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
                                         self.identifier);
 }
 
-- (mbgl::GeoJSON)geoJSONObject {
+- (mln::GeoJSON)geoJSONObject {
   return mbglFeature({[self geometryObject]}, identifier, self.attributes);
 }
 
@@ -194,7 +194,7 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
                                         self.identifier);
 }
 
-- (mbgl::GeoJSON)geoJSONObject {
+- (mln::GeoJSON)geoJSONObject {
   return mbglFeature({[self geometryObject]}, identifier, self.attributes);
 }
 
@@ -234,7 +234,7 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
                                         self.identifier);
 }
 
-- (mbgl::GeoJSON)geoJSONObject {
+- (mln::GeoJSON)geoJSONObject {
   return mbglFeature({[self geometryObject]}, identifier, self.attributes);
 }
 
@@ -263,7 +263,7 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
                                         self.identifier);
 }
 
-- (mbgl::GeoJSON)geoJSONObject {
+- (mln::GeoJSON)geoJSONObject {
   return mbglFeature({[self geometryObject]}, identifier, self.attributes);
 }
 
@@ -303,7 +303,7 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
                                         self.identifier);
 }
 
-- (mbgl::GeoJSON)geoJSONObject {
+- (mln::GeoJSON)geoJSONObject {
   return mbglFeature({[self geometryObject]}, identifier, self.attributes);
 }
 
@@ -348,14 +348,14 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
                                         self.identifier);
 }
 
-- (mbgl::GeoJSON)geoJSONObject {
-  mbgl::FeatureCollection featureCollection;
+- (mln::GeoJSON)geoJSONObject {
+  mln::FeatureCollection featureCollection;
   featureCollection.reserve(self.shapes.count);
   for (MLNShape<MLNFeature> *feature in self.shapes) {
     auto geoJSONObject = feature.geoJSONObject;
-    MLNAssert(geoJSONObject.is<mbgl::GeoJSONFeature>(),
+    MLNAssert(geoJSONObject.is<mln::GeoJSONFeature>(),
               @"Feature collection must only contain features.");
-    featureCollection.push_back(geoJSONObject.get<mbgl::GeoJSONFeature>());
+    featureCollection.push_back(geoJSONObject.get<mln::GeoJSONFeature>());
   }
   return featureCollection;
 }
@@ -363,24 +363,24 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
 @end
 
 /**
- Transforms an `mbgl::geometry::geometry` type into an instance of the
+ Transforms an `mln::geometry::geometry` type into an instance of the
  corresponding Objective-C geometry class.
  */
 template <typename T>
 class GeometryEvaluator {
 private:
-  const mbgl::PropertyMap *shared_properties;
+  const mln::PropertyMap *shared_properties;
   const bool is_in_feature;
 
 public:
-  GeometryEvaluator(const mbgl::PropertyMap *properties = nullptr, const bool isInFeature = false)
+  GeometryEvaluator(const mln::PropertyMap *properties = nullptr, const bool isInFeature = false)
       : shared_properties(properties), is_in_feature(isInFeature) {}
 
-  MLNShape *operator()(const mbgl::EmptyGeometry &) const {
+  MLNShape *operator()(const mln::EmptyGeometry &) const {
     return is_in_feature ? [[MLNEmptyFeature alloc] init] : [[MLNShape alloc] init];
   }
 
-  MLNShape *operator()(const mbgl::Point<T> &geometry) const {
+  MLNShape *operator()(const mln::Point<T> &geometry) const {
     Class shapeClass = is_in_feature ? [MLNPointFeature class] : [MLNPointAnnotation class];
 
     // If we're dealing with a cluster, we should change the class type.
@@ -403,24 +403,24 @@ public:
     return shape;
   }
 
-  MLNShape *operator()(const mbgl::LineString<T> &geometry) const {
+  MLNShape *operator()(const mln::LineString<T> &geometry) const {
     std::vector<CLLocationCoordinate2D> coordinates = toLocationCoordinates2D(geometry);
     Class shapeClass = is_in_feature ? [MLNPolylineFeature class] : [MLNPolyline class];
     return [shapeClass polylineWithCoordinates:&coordinates[0] count:coordinates.size()];
   }
 
-  MLNShape *operator()(const mbgl::Polygon<T> &geometry) const {
+  MLNShape *operator()(const mln::Polygon<T> &geometry) const {
     return toShape<MLNPolygon, MLNPolygonFeature>(geometry, is_in_feature);
   }
 
-  MLNShape *operator()(const mbgl::MultiPoint<T> &geometry) const {
+  MLNShape *operator()(const mln::MultiPoint<T> &geometry) const {
     std::vector<CLLocationCoordinate2D> coordinates = toLocationCoordinates2D(geometry);
     Class shapeClass =
         is_in_feature ? [MLNPointCollectionFeature class] : [MLNPointCollection class];
     return [[shapeClass alloc] initWithCoordinates:&coordinates[0] count:coordinates.size()];
   }
 
-  MLNShape *operator()(const mbgl::MultiLineString<T> &geometry) const {
+  MLNShape *operator()(const mln::MultiLineString<T> &geometry) const {
     NSMutableArray *polylines = [NSMutableArray arrayWithCapacity:geometry.size()];
     for (auto &lineString : geometry) {
       std::vector<CLLocationCoordinate2D> coordinates = toLocationCoordinates2D(lineString);
@@ -433,7 +433,7 @@ public:
     return [shapeClass multiPolylineWithPolylines:polylines];
   }
 
-  MLNShape *operator()(const mbgl::MultiPolygon<T> &geometry) const {
+  MLNShape *operator()(const mln::MultiPolygon<T> &geometry) const {
     NSMutableArray *polygons = [NSMutableArray arrayWithCapacity:geometry.size()];
     for (auto &polygon : geometry) {
       [polygons addObject:toShape(polygon, false)];
@@ -457,12 +457,12 @@ public:
   }
 
 private:
-  static CLLocationCoordinate2D toLocationCoordinate2D(const mbgl::Point<T> &point) {
+  static CLLocationCoordinate2D toLocationCoordinate2D(const mln::Point<T> &point) {
     return CLLocationCoordinate2DMake(point.y, point.x);
   }
 
   static std::vector<CLLocationCoordinate2D> toLocationCoordinates2D(
-      const std::vector<mbgl::Point<T>> &points) {
+      const std::vector<mln::Point<T>> &points) {
     std::vector<CLLocationCoordinate2D> coordinates;
     coordinates.reserve(points.size());
     std::transform(points.begin(), points.end(), std::back_inserter(coordinates),
@@ -471,7 +471,7 @@ private:
   }
 
   template <typename U = MLNPolygon, typename V = MLNPolygonFeature>
-  static U *toShape(const mbgl::Polygon<T> &geometry, const bool isInFeature) {
+  static U *toShape(const mln::Polygon<T> &geometry, const bool isInFeature) {
     auto &linearRing = geometry.front();
     std::vector<CLLocationCoordinate2D> coordinates = toLocationCoordinates2D(linearRing);
     NSMutableArray *innerPolygons;
@@ -496,18 +496,18 @@ private:
 template <typename T>
 class GeoJSONEvaluator {
 public:
-  MLNShape *operator()(const mbgl::Geometry<T> &geometry) const {
+  MLNShape *operator()(const mln::Geometry<T> &geometry) const {
     GeometryEvaluator<T> evaluator;
     MLNShape *shape = mapbox::geometry::geometry<T>::visit(geometry, evaluator);
     return shape;
   }
 
-  MLNShape<MLNFeature> *operator()(const mbgl::GeoJSONFeature &feature) const {
+  MLNShape<MLNFeature> *operator()(const mln::GeoJSONFeature &feature) const {
     MLNShape<MLNFeature> *shape = (MLNShape<MLNFeature> *)MLNFeatureFromMBGLFeature(feature);
     return shape;
   }
 
-  MLNShape<MLNFeature> *operator()(const mbgl::FeatureCollection &collection) const {
+  MLNShape<MLNFeature> *operator()(const mln::FeatureCollection &collection) const {
     NSMutableArray *shapes = [NSMutableArray arrayWithCapacity:collection.size()];
     for (const auto &feature : collection) {
       [shapes addObject:MLNFeatureFromMBGLFeature(feature)];
@@ -517,16 +517,16 @@ public:
 };
 
 NSArray<MLNShape<MLNFeature> *> *MLNFeaturesFromMBGLFeatures(
-    const std::vector<mbgl::Feature> &features) {
+    const std::vector<mln::Feature> &features) {
   NSMutableArray *shapes = [NSMutableArray arrayWithCapacity:features.size()];
   for (const auto &feature : features) {
-    [shapes addObject:MLNFeatureFromMBGLFeature(static_cast<mbgl::GeoJSONFeature>(feature))];
+    [shapes addObject:MLNFeatureFromMBGLFeature(static_cast<mln::GeoJSONFeature>(feature))];
   }
   return shapes;
 }
 
 NSArray<MLNShape<MLNFeature> *> *MLNFeaturesFromMBGLFeatures(
-    const std::vector<mbgl::GeoJSONFeature> &features) {
+    const std::vector<mln::GeoJSONFeature> &features) {
   NSMutableArray *shapes = [NSMutableArray arrayWithCapacity:features.size()];
   for (const auto &feature : features) {
     [shapes addObject:MLNFeatureFromMBGLFeature(feature)];
@@ -534,19 +534,19 @@ NSArray<MLNShape<MLNFeature> *> *MLNFeaturesFromMBGLFeatures(
   return shapes;
 }
 
-id<MLNFeature> MLNFeatureFromMBGLFeature(const mbgl::GeoJSONFeature &feature) {
+id<MLNFeature> MLNFeatureFromMBGLFeature(const mln::GeoJSONFeature &feature) {
   NSMutableDictionary *attributes =
       [NSMutableDictionary dictionaryWithCapacity:feature.properties.size()];
   for (auto &pair : feature.properties) {
     auto &value = pair.second;
     ValueEvaluator evaluator;
-    attributes[@(pair.first.c_str())] = mbgl::Value::visit(value, evaluator);
+    attributes[@(pair.first.c_str())] = mln::Value::visit(value, evaluator);
   }
   GeometryEvaluator<double> evaluator(&feature.properties, true);
   MLNShape<MLNFeature> *shape = (MLNShape<MLNFeature> *)mapbox::geometry::geometry<double>::visit(
       feature.geometry, evaluator);
   if (!feature.id.is<mapbox::feature::null_value_t>()) {
-    shape.identifier = mbgl::FeatureIdentifier::visit(feature.id, ValueEvaluator());
+    shape.identifier = mln::FeatureIdentifier::visit(feature.id, ValueEvaluator());
   }
   shape.attributes = attributes;
 
@@ -559,8 +559,8 @@ MLNShape *MLNShapeFromGeoJSON(const mapbox::geojson::geojson &geojson) {
   return shape;
 }
 
-mbgl::GeoJSONFeature mbglFeature(mbgl::GeoJSONFeature feature, id identifier,
-                                 NSDictionary *attributes) {
+mln::GeoJSONFeature mbglFeature(mln::GeoJSONFeature feature, id identifier,
+                                NSDictionary *attributes) {
   if (identifier) {
     NSExpression *identifierExpression = [NSExpression expressionForConstantValue:identifier];
     feature.id = [identifierExpression mgl_featureIdentifier];

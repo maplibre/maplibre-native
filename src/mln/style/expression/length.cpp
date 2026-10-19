@@ -1,0 +1,65 @@
+#include <mln/style/expression/length.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/expression/utf8_op_helpers.hpp>
+#include <mln/util/string.hpp>
+
+namespace mln {
+namespace style {
+namespace expression {
+
+Length::Length(std::unique_ptr<Expression> input_)
+    : Expression(Kind::Length, type::Number, depsOf(input_)),
+      input(std::move(input_)) {}
+
+EvaluationResult Length::evaluate(const EvaluationContext& params) const {
+    EvaluationResult value = input->evaluate(params);
+    if (!value) return value;
+    return value->match(
+        [](const std::string& s) { return EvaluationResult{static_cast<double>(unicodeLengthOnValidatedUtf8(s))}; },
+        [](const std::vector<Value>& v) { return EvaluationResult{static_cast<double>(v.size())}; },
+        [&](const auto&) -> EvaluationResult {
+            return EvaluationError{"Expected value to be of type string or array, but found " +
+                                   toString(typeOf(*value)) + " instead."};
+        });
+}
+
+void Length::eachChild(const std::function<void(const Expression&)>& visit) const {
+    visit(*input);
+}
+
+bool Length::operator==(const Expression& e) const noexcept {
+    if (e.getKind() == Kind::Length) {
+        auto eq = static_cast<const Length*>(&e);
+        return *eq->input == *input;
+    }
+    return false;
+}
+
+std::vector<std::optional<Value>> Length::possibleOutputs() const {
+    return {std::nullopt};
+}
+
+using namespace mln::style::conversion;
+ParseResult Length::parse(const Convertible& value, ParsingContext& ctx) {
+    std::size_t length = arrayLength(value);
+
+    if (length != 2) {
+        ctx.error("Expected one argument, but found " + util::toString(length) + " instead.");
+        return ParseResult();
+    }
+
+    ParseResult input = ctx.parse(arrayMember(value, 1), 1);
+    if (!input) return ParseResult();
+
+    type::Type type = (*input)->getType();
+    if (!type.is<type::Array>() && !type.is<type::StringType>() && !type.is<type::ValueType>()) {
+        ctx.error("Expected argument of type string or array, but found " + toString(type) + " instead.");
+        return ParseResult();
+    }
+
+    return ParseResult(std::make_unique<Length>(std::move(*input)));
+}
+
+} // namespace expression
+} // namespace style
+} // namespace mln

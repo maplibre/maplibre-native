@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/platform/gl_functions.hpp>
+#include <mln/platform/gl_functions.hpp>
 
 #ifndef _gl_functions_wgl_
 #define _gl_functions_wgl_ 1
@@ -578,7 +578,7 @@ void loadWGL() {
 }
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 /* OpenGL ES 2.0 */
@@ -1780,5 +1780,5 @@ const char* (*const wglGetExtensionsStringEXT)() = [](void) {
 };
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln
 #endif

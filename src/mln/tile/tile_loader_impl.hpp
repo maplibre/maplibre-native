@@ -1,0 +1,218 @@
+#pragma once
+
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/tile/tile_loader.hpp>
+#include <mln/util/async_request.hpp>
+#include <mln/util/tileset.hpp>
+
+#include <cassert>
+
+namespace mln {
+
+inline std::exception_ptr getCantLoadTileError() {
+    return std::make_exception_ptr(std::runtime_error("Can't load tile."));
+}
+
+template <typename T>
+TileLoader<T>::TileLoader(T& tile_,
+                          const OverscaledTileID& id,
+                          const TileParameters& parameters,
+                          const Tileset& tileset)
+    : tile(tile_),
+      necessity(TileNecessity::Optional),
+      resource(Resource::tile(tileset.tiles.at(0),
+                              parameters.pixelRatio,
+                              id.canonical.x,
+                              id.canonical.y,
+                              id.canonical.z,
+                              tileset.scheme,
+                              Resource::LoadingMethod::CacheOnly)),
+      fileSource(parameters.fileSource) {
+    assert(!request);
+
+    shared = std::make_shared<Shared>();
+
+    if (!fileSource) {
+        tile.setError(getCantLoadTileError());
+        return;
+    }
+
+    if (fileSource->supportsCacheOnlyRequests()) {
+        // When supported, the first request is always std::optional, even if
+        // the TileLoader is marked as required. That way, we can let the first
+        // std::optional request continue to load when the TileLoader is later
+        // changed from required to std::optional. If we started out with a
+        // required request, we'd have to cancel everything, including the
+        // initial std::optional part of the request.
+        loadFromCache();
+    } else if (necessity == TileNecessity::Required) {
+        // When the file source doesn't support cache-only requests, and we definitely
+        // need this data, we can start out with a network request immediately.
+        loadFromNetwork();
+    } else {
+        // When the FileSource doesn't support cache-only requests, we do
+        // nothing until the data is definitely required.
+    }
+}
+
+template <typename T>
+TileLoader<T>::~TileLoader() {
+    // Tasks may outlive this object, make sure that they are not
+    // currently running and do not run if they are still pending.
+    {
+        std::unique_lock<std::shared_mutex> lock(shared->requestLock);
+        shared->aborted = true;
+    }
+
+    // Don't touch `tile` here, we may be called from its destructor
+    // tile.cancel();
+
+    request.reset();
+    fileSource.reset();
+    shared.reset();
+}
+
+template <typename T>
+void TileLoader<T>::setNecessity(TileNecessity newNecessity) {
+    if (newNecessity != necessity) {
+        necessity = newNecessity;
+        if (necessity == TileNecessity::Required) {
+            makeRequired();
+        } else {
+            makeOptional();
+        }
+    }
+}
+
+template <typename T>
+void TileLoader<T>::setUpdateParameters(const TileUpdateParameters& params) {
+    if (updateParameters != params) {
+        updateParameters = params;
+        if (hasPendingNetworkRequest()) {
+            // Update the pending request.
+            request.reset();
+            loadFromNetwork();
+        }
+    }
+}
+
+template <typename T>
+void TileLoader<T>::loadFromCache() {
+    assert(!request);
+    if (!fileSource) {
+        tile.setError(getCantLoadTileError());
+        return;
+    }
+
+    tile.onTileAction(TileOperation::RequestedFromCache);
+
+    resource.loadingMethod = Resource::LoadingMethod::CacheOnly;
+    request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
+        do {
+            if (shared_->requestLock.try_lock_shared()) {
+                std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::adopt_lock);
+                if (shared_->aborted) return;
+
+                request.reset();
+                tile.setTriedCache();
+
+                if (res.error && res.error->reason == Response::Error::Reason::NotFound) {
+                    // When the cache-only request could not be satisfied, don't treat
+                    // it as an error. A cache lookup could still return data, _and_ an
+                    // error, in particular when we were able to find the data, but it
+                    // is expired and the Cache-Control headers indicated that we aren't
+                    // allowed to use expired responses. In this case, we still get the
+                    // data which we can use in our conditional network request.
+                    resource.priorModified = res.modified;
+                    resource.priorExpires = res.expires;
+                    resource.priorEtag = res.etag;
+                    resource.priorData = res.data;
+                } else {
+                    loadedData(res, Resource::LoadingMethod::CacheOnly);
+                }
+
+                if (necessity == TileNecessity::Required) {
+                    loadFromNetwork();
+                }
+                break;
+            }
+        } while (!shared_->aborted);
+    });
+}
+
+template <typename T>
+void TileLoader<T>::makeRequired() {
+    if (!request) {
+        loadFromNetwork();
+    }
+}
+
+template <typename T>
+void TileLoader<T>::makeOptional() {
+    if (hasPendingNetworkRequest()) {
+        // Abort the current request, but only when we know that we're
+        // specifically querying for a network resource only.
+        request.reset();
+    }
+}
+
+template <typename T>
+void TileLoader<T>::loadedData(const Response& res, Resource::LoadingMethod method) {
+    if (res.error && res.error->reason != Response::Error::Reason::NotFound) {
+        tile.setError(std::make_exception_ptr(std::runtime_error(res.error->message)));
+        tile.onTileAction(TileOperation::Error);
+        return;
+    }
+    if (method == Resource::LoadingMethod::NetworkOnly) {
+        tile.onTileAction(TileOperation::LoadFromNetwork);
+    } else if (method == Resource::LoadingMethod::CacheOnly) {
+        tile.onTileAction(TileOperation::LoadFromCache);
+    }
+
+    if (res.notModified) {
+        resource.priorExpires = res.expires;
+        // Do not notify the tile; when we get this message, it already has the
+        // current version of the data.
+        tile.setMetadata(res.modified, res.expires);
+    } else {
+        resource.priorModified = res.modified;
+        resource.priorExpires = res.expires;
+        resource.priorEtag = res.etag;
+        tile.setMetadata(res.modified, res.expires);
+        tile.setData(res.noContent ? nullptr : res.data);
+    }
+}
+
+template <typename T>
+void TileLoader<T>::loadFromNetwork() {
+    assert(!request);
+    if (!fileSource) {
+        tile.setError(getCantLoadTileError());
+        return;
+    }
+
+    tile.onTileAction(TileOperation::RequestedFromNetwork);
+
+    // Instead of using Resource::LoadingMethod::All, we're first doing a
+    // CacheOnly, and then a NetworkOnly request.
+    resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
+    resource.minimumUpdateInterval = updateParameters.minimumUpdateInterval;
+    resource.storagePolicy = updateParameters.isVolatile ? Resource::StoragePolicy::Volatile
+                                                         : Resource::StoragePolicy::Permanent;
+
+    request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
+        do {
+            if (shared_->requestLock.try_lock_shared()) {
+                std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::adopt_lock);
+                if (shared_->aborted) return;
+
+                request.reset();
+                loadedData(res, Resource::LoadingMethod::NetworkOnly);
+                break;
+            }
+        } while (!shared_->aborted);
+    });
+}
+
+} // namespace mln

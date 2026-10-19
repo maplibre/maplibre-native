@@ -1,18 +1,18 @@
 #import "MLNPluginStyleLayer.h"
-#import <mbgl/plugin/plugin_layer.hpp>
-#import <mbgl/plugin/plugin_layer_impl.hpp>
+#import <mln/plugin/plugin_layer.hpp>
+#import <mln/plugin/plugin_layer_impl.hpp>
 #import "MLNPluginLayer.h"
 #import "MLNPluginStyleLayer_Private.h"
 
 @implementation MLNPluginStyleLayer
 
 - (void)getStats {
-  mbgl::style::PluginLayer *l = (mbgl::style::PluginLayer *)self.rawLayer;
+  mln::style::PluginLayer *l = (mln::style::PluginLayer *)self.rawLayer;
   auto pl = l->impl();
 }
 
 - (MLNPluginLayer *)pluginLayer {
-  mbgl::style::PluginLayer *l = (mbgl::style::PluginLayer *)self.rawLayer;
+  mln::style::PluginLayer *l = (mln::style::PluginLayer *)self.rawLayer;
   if (l->_platformReference) {
     MLNPluginLayer *pl = (__bridge MLNPluginLayer *)l->_platformReference;
     return pl;
@@ -23,6 +23,6 @@
 
 @end
 
-MLNStyleLayer *mbgl::PluginLayerPeerFactory::createPeer(style::Layer *rawLayer) {
+MLNStyleLayer *mln::PluginLayerPeerFactory::createPeer(style::Layer *rawLayer) {
   return [[MLNPluginStyleLayer alloc] initWithRawLayer:rawLayer];
 }

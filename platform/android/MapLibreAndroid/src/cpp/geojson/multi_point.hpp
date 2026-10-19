@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/noncopyable.hpp>
 
 #include "geometry.hpp"
 #include "../java/util.hpp"
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
@@ -19,7 +19,7 @@ public:
     static constexpr auto Name() { return "org/maplibre/geojson/MultiPoint"; };
     static constexpr auto Type() { return "MultiPoint"; };
 
-    static jni::Local<jni::Object<MultiPoint>> New(jni::JNIEnv&, const mbgl::MultiPoint<double>&);
+    static jni::Local<jni::Object<MultiPoint>> New(jni::JNIEnv&, const mln::MultiPoint<double>&);
 
     static mapbox::geojson::multi_point convert(jni::JNIEnv&, const jni::Object<MultiPoint>&);
 
@@ -30,4 +30,4 @@ public:
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

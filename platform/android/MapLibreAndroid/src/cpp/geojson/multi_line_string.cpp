@@ -3,12 +3,12 @@
 #include "line_string.hpp"
 #include "util.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
 jni::Local<jni::Object<MultiLineString>> MultiLineString::New(jni::JNIEnv& env,
-                                                              const mbgl::MultiLineString<double>& multiLineString) {
+                                                              const mln::MultiLineString<double>& multiLineString) {
     static auto& javaClass = jni::Class<MultiLineString>::Singleton(env);
     static auto method = javaClass.GetStaticMethod<jni::Object<MultiLineString>(jni::Object<java::util::List>)>(
         env, "fromLngLats");
@@ -58,4 +58,4 @@ void MultiLineString::registerNative(jni::JNIEnv& env) {
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/map/mode.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/math/angles.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/math/angles.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class Settings_JSON {
 public:
@@ -21,8 +21,8 @@ public:
     double bearing = 0;
     double pitch = 0;
     double roll = 0;
-    double fov = util::rad2deg(mbgl::util::DEFAULT_FOV);
-    double maxPitch = util::rad2deg(mbgl::util::DEFAULT_PITCH_MAX);
+    double fov = util::rad2deg(mln::util::DEFAULT_FOV);
+    double maxPitch = util::rad2deg(mln::util::DEFAULT_PITCH_MAX);
     bool axonometric = false;
     double xSkew = 0.0;
     double ySkew = 1.0;
@@ -31,4 +31,4 @@ public:
     bool online = true;
 };
 
-} // namespace mbgl
+} // namespace mln

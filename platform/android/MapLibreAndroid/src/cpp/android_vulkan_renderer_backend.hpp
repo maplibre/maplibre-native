@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/vulkan/renderable_resource.hpp>
-#include <mbgl/vulkan/renderer_backend.hpp>
+#include <mln/vulkan/renderable_resource.hpp>
+#include <mln/vulkan/renderer_backend.hpp>
 #include "android_renderer_backend.hpp"
 #include <android/native_window.h>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class AndroidVulkanRendererBackend : public AndroidRendererBackend,
@@ -19,17 +19,15 @@ public:
     bool createSurface(ANativeWindow* window) override;
     void destroySurface() override;
 
-    mbgl::gfx::RendererBackend& getImpl() override { return *this; }
-
-    std::vector<const char*> getInstanceExtensions() override;
+    mln::gfx::RendererBackend& getImpl() override { return *this; }
 
     void resizeFramebuffer(int width, int height) override;
     void enableFramebufferRead(bool value) override;
     PremultipliedImage readFramebuffer() override;
 
-    // mbgl::gfx::RendererBackend implementation
+    // mln::gfx::RendererBackend implementation
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+    mln::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
 protected:
     void activate() override {
@@ -39,6 +37,8 @@ protected:
         // no-op
     }
 
+    std::vector<const char*> getInstanceExtensions() override;
+
 protected:
     ANativeWindow* window;
 
@@ -46,4 +46,4 @@ protected:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

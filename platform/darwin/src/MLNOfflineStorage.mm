@@ -13,15 +13,15 @@
 #import "NSDate+MLNAdditions.h"
 #import "NSValue+MLNAdditions.h"
 
-#include <mbgl/actor/actor.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/storage/resource_transform.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/actor/actor.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/storage/resource_transform.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
 
 #include <memory>
 
@@ -46,15 +46,15 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
 @interface MLNOfflineStorage ()
 
 @property (nonatomic, strong, readwrite) NSMutableArray<MLNOfflinePack *> *packs;
-@property (nonatomic) std::shared_ptr<mbgl::DatabaseFileSource> mbglDatabaseFileSource;
-@property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglOnlineFileSource;
-@property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglFileSource;
+@property (nonatomic) std::shared_ptr<mln::DatabaseFileSource> mbglDatabaseFileSource;
+@property (nonatomic) std::shared_ptr<mln::FileSource> mbglOnlineFileSource;
+@property (nonatomic) std::shared_ptr<mln::FileSource> mbglFileSource;
 @property (nonatomic, getter=isPaused) BOOL paused;
 @end
 
 @implementation MLNOfflineStorage {
   NSURL *_databaseURL;
-  std::unique_ptr<mbgl::Actor<mbgl::ResourceTransform::TransformCallback>> _mbglResourceTransform;
+  std::unique_ptr<mln::Actor<mln::ResourceTransform::TransformCallback>> _mbglResourceTransform;
 }
 
 + (instancetype)sharedOfflineStorage {
@@ -112,38 +112,38 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
   _delegate = newValue;
   if ([self.delegate respondsToSelector:@selector(offlineStorage:URLForResourceOfKind:withURL:)]) {
     _mbglResourceTransform =
-        std::make_unique<mbgl::Actor<mbgl::ResourceTransform::TransformCallback>>(
-            *mbgl::Scheduler::GetCurrent(),
+        std::make_unique<mln::Actor<mln::ResourceTransform::TransformCallback>>(
+            *mln::Scheduler::GetCurrent(),
             [offlineStorage = self](auto kind_, const std::string &url_,
-                                    mbgl::ResourceTransform::FinishedCallback cb) {
+                                    mln::ResourceTransform::FinishedCallback cb) {
               NSURL *url =
                   [NSURL URLWithString:[[NSString alloc] initWithBytes:url_.data()
                                                                 length:url_.length()
                                                               encoding:NSUTF8StringEncoding]];
               MLNResourceKind kind = MLNResourceKindUnknown;
               switch (kind_) {
-                case mbgl::Resource::Kind::Tile:
+                case mln::Resource::Kind::Tile:
                   kind = MLNResourceKindTile;
                   break;
-                case mbgl::Resource::Kind::Glyphs:
+                case mln::Resource::Kind::Glyphs:
                   kind = MLNResourceKindGlyphs;
                   break;
-                case mbgl::Resource::Kind::Style:
+                case mln::Resource::Kind::Style:
                   kind = MLNResourceKindStyle;
                   break;
-                case mbgl::Resource::Kind::Source:
+                case mln::Resource::Kind::Source:
                   kind = MLNResourceKindSource;
                   break;
-                case mbgl::Resource::Kind::SpriteImage:
+                case mln::Resource::Kind::SpriteImage:
                   kind = MLNResourceKindSpriteImage;
                   break;
-                case mbgl::Resource::Kind::SpriteJSON:
+                case mln::Resource::Kind::SpriteJSON:
                   kind = MLNResourceKindSpriteJSON;
                   break;
-                case mbgl::Resource::Kind::Image:
+                case mln::Resource::Kind::Image:
                   kind = MLNResourceKindImage;
                   break;
-                case mbgl::Resource::Kind::Unknown:
+                case mln::Resource::Kind::Unknown:
                   kind = MLNResourceKindUnknown;
                   break;
               }
@@ -154,9 +154,9 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
             });
 
     _mbglOnlineFileSource->setResourceTransform(
-        {[actorRef = _mbglResourceTransform->self()](
-             auto kind_, const std::string &url_, mbgl::ResourceTransform::FinishedCallback cb_) {
-          actorRef.invoke(&mbgl::ResourceTransform::TransformCallback::operator(), kind_, url_,
+        {[actorRef = _mbglResourceTransform->self()](auto kind_, const std::string &url_,
+                                                     mln::ResourceTransform::FinishedCallback cb_) {
+          actorRef.invoke(&mln::ResourceTransform::TransformCallback::operator(), kind_, url_,
                           std::move(cb_));
         }});
   } else {
@@ -174,20 +174,20 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
   MLNInitializeRunLoop();
 
   if (self = [super init]) {
-    mbgl::TileServerOptions *tileServerOptions =
+    mln::TileServerOptions *tileServerOptions =
         [[MLNSettings sharedSettings] tileServerOptionsInternal];
-    mbgl::ResourceOptions resourceOptions;
+    mln::ResourceOptions resourceOptions;
     resourceOptions.withCachePath(self.databasePath.UTF8String)
         .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String)
         .withTileServerOptions(*tileServerOptions);
-    mbgl::ClientOptions clientOptions;
-    _mbglFileSource = mbgl::FileSourceManager::get()->getFileSource(
-        mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
-    _mbglOnlineFileSource = mbgl::FileSourceManager::get()->getFileSource(
-        mbgl::FileSourceType::Network, resourceOptions, clientOptions);
-    _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(
-        std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(
-            mbgl::FileSourceType::Database, resourceOptions, clientOptions)));
+    mln::ClientOptions clientOptions;
+    _mbglFileSource = mln::FileSourceManager::get()->getFileSource(
+        mln::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
+    _mbglOnlineFileSource = mln::FileSourceManager::get()->getFileSource(
+        mln::FileSourceType::Network, resourceOptions, clientOptions);
+    _mbglDatabaseFileSource = std::static_pointer_cast<mln::DatabaseFileSource>(
+        std::shared_ptr<mln::FileSource>(mln::FileSourceManager::get()->getFileSource(
+            mln::FileSourceType::Database, resourceOptions, clientOptions)));
 
     // Observe for changes to the tile server options (and find out the current one).
     [[MLNSettings sharedSettings]
@@ -225,7 +225,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
   if ([keyPath isEqualToString:@"apiKey"] && object == [MLNSettings sharedSettings]) {
     NSString *apiKey = change[NSKeyValueChangeNewKey];
     if (![apiKey isKindOfClass:[NSNull class]]) {
-      _mbglOnlineFileSource->setProperty(mbgl::API_KEY_KEY, apiKey.UTF8String);
+      _mbglOnlineFileSource->setProperty(mln::API_KEY_KEY, apiKey.UTF8String);
     }
   } else if ([keyPath isEqualToString:@"tileServerOptionsChangeToken"] &&
              object == [MLNSettings sharedSettings]) {
@@ -428,7 +428,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
                                      NSError *_Nullable error))completion {
   _mbglDatabaseFileSource->mergeOfflineRegions(
       std::string(static_cast<const char *>([filePath UTF8String])),
-      [&, completion, filePath](mbgl::expected<mbgl::OfflineRegions, std::exception_ptr> result) {
+      [&, completion, filePath](mln::expected<mln::OfflineRegions, std::exception_ptr> result) {
         NSError *error;
         NSMutableArray *packs;
         if (!result) {
@@ -443,14 +443,14 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
                                   userInfo:@{
                                     NSLocalizedDescriptionKey : description,
                                     NSLocalizedFailureReasonErrorKey :
-                                        @(mbgl::util::toString(result.error()).c_str())
+                                        @(mln::util::toString(result.error()).c_str())
                                   }];
         } else {
           auto &regions = result.value();
           packs = [NSMutableArray arrayWithCapacity:regions.size()];
           for (auto &region : regions) {
             MLNOfflinePack *pack = [[MLNOfflinePack alloc]
-                initWithMBGLRegion:new mbgl::OfflineRegion(std::move(region))];
+                initWithMBGLRegion:new mln::OfflineRegion(std::move(region))];
             [packs addObject:pack];
           }
         }
@@ -490,16 +490,16 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
     return;
   }
 
-  const mbgl::OfflineRegionDefinition regionDefinition =
+  const mln::OfflineRegionDefinition regionDefinition =
       [(id<MLNOfflineRegion_Private>)region offlineRegionDefinition];
-  mbgl::OfflineRegionMetadata metadata(context.length);
+  mln::OfflineRegionMetadata metadata(context.length);
   [context getBytes:&metadata[0] length:metadata.size()];
   _mbglDatabaseFileSource->createOfflineRegion(
       regionDefinition, metadata,
-      [&, completion](mbgl::expected<mbgl::OfflineRegion, std::exception_ptr> mbglOfflineRegion) {
+      [&, completion](mln::expected<mln::OfflineRegion, std::exception_ptr> mbglOfflineRegion) {
         NSError *error;
         if (!mbglOfflineRegion) {
-          NSString *errorDescription = @(mbgl::util::toString(mbglOfflineRegion.error()).c_str());
+          NSString *errorDescription = @(mln::util::toString(mbglOfflineRegion.error()).c_str());
           error = [NSError errorWithDomain:MLNErrorDomain
                                       code:MLNErrorCodeModifyingOfflineStorageFailed
                                   userInfo:errorDescription ? @{
@@ -510,7 +510,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
         if (completion) {
           MLNOfflinePack *pack =
               mbglOfflineRegion
-                  ? [[MLNOfflinePack alloc] initWithMBGLRegion:new mbgl::OfflineRegion(std::move(
+                  ? [[MLNOfflinePack alloc] initWithMBGLRegion:new mln::OfflineRegion(std::move(
                                                                    mbglOfflineRegion.value()))]
                   : nil;
           dispatch_async(dispatch_get_main_queue(),
@@ -533,7 +533,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
 
 - (void)_removePack:(MLNOfflinePack *)pack
     withCompletionHandler:(MLNOfflinePackRemovalCompletionHandler)completion {
-  mbgl::OfflineRegion *mbglOfflineRegion = pack.mbglOfflineRegion;
+  mln::OfflineRegion *mbglOfflineRegion = pack.mbglOfflineRegion;
 
   [pack invalidate];
 
@@ -551,7 +551,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
               errorWithDomain:MLNErrorDomain
                          code:MLNErrorCodeModifyingOfflineStorageFailed
                      userInfo:@{
-                       NSLocalizedDescriptionKey : @(mbgl::util::toString(exception).c_str()),
+                       NSLocalizedDescriptionKey : @(mln::util::toString(exception).c_str()),
                      }];
         }
         if (completion) {
@@ -563,7 +563,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
 
 - (void)invalidatePack:(MLNOfflinePack *)pack
     withCompletionHandler:(void (^)(NSError *_Nullable))completion {
-  mbgl::OfflineRegion &region = *pack.mbglOfflineRegion;
+  mln::OfflineRegion &region = *pack.mbglOfflineRegion;
   NSError *error;
   if (!pack.mbglOfflineRegion) {
     completion(nil);
@@ -576,7 +576,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
           [NSError errorWithDomain:MLNErrorDomain
                               code:MLNErrorCodeModifyingOfflineStorageFailed
                           userInfo:@{
-                            NSLocalizedDescriptionKey : @(mbgl::util::toString(exception).c_str()),
+                            NSLocalizedDescriptionKey : @(mln::util::toString(exception).c_str()),
                           }];
     }
   });
@@ -599,7 +599,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
 - (void)getPacksWithCompletionHandler:(void (^)(NSArray<MLNOfflinePack *> *packs,
                                                 NSError *_Nullable error))completion {
   _mbglDatabaseFileSource->listOfflineRegions(
-      [&, completion](mbgl::expected<mbgl::OfflineRegions, std::exception_ptr> result) {
+      [&, completion](mln::expected<mln::OfflineRegions, std::exception_ptr> result) {
         NSError *error;
         NSMutableArray *packs;
         if (!result) {
@@ -607,14 +607,14 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
               errorWithDomain:MLNErrorDomain
                          code:MLNErrorCodeUnknown
                      userInfo:@{
-                       NSLocalizedDescriptionKey : @(mbgl::util::toString(result.error()).c_str()),
+                       NSLocalizedDescriptionKey : @(mln::util::toString(result.error()).c_str()),
                      }];
         } else {
           auto &regions = result.value();
           packs = [NSMutableArray arrayWithCapacity:regions.size()];
           for (auto &region : regions) {
             MLNOfflinePack *pack = [[MLNOfflinePack alloc]
-                initWithMBGLRegion:new mbgl::OfflineRegion(std::move(region))];
+                initWithMBGLRegion:new mln::OfflineRegion(std::move(region))];
             [packs addObject:pack];
           }
         }
@@ -643,7 +643,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
                 errorWithDomain:MLNErrorDomain
                            code:MLNErrorCodeModifyingOfflineStorageFailed
                        userInfo:@{
-                         NSLocalizedDescriptionKey : @(mbgl::util::toString(exception).c_str()),
+                         NSLocalizedDescriptionKey : @(mln::util::toString(exception).c_str()),
                        }];
           }
           dispatch_sync(dispatch_get_main_queue(), ^{
@@ -659,12 +659,12 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
     if (completion) {
       if (exception) {
         // Convert std::exception_ptr to an NSError.
-        error = [NSError
-            errorWithDomain:MLNErrorDomain
-                       code:MLNErrorCodeModifyingOfflineStorageFailed
-                   userInfo:@{
-                     NSLocalizedDescriptionKey : @(mbgl::util::toString(exception).c_str()),
-                   }];
+        error =
+            [NSError errorWithDomain:MLNErrorDomain
+                                code:MLNErrorCodeModifyingOfflineStorageFailed
+                            userInfo:@{
+                              NSLocalizedDescriptionKey : @(mln::util::toString(exception).c_str()),
+                            }];
       }
       dispatch_async(dispatch_get_main_queue(), ^{
         completion(error);
@@ -678,12 +678,12 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
     NSError *error;
     if (completion) {
       if (exception) {
-        error = [NSError
-            errorWithDomain:MLNErrorDomain
-                       code:MLNErrorCodeModifyingOfflineStorageFailed
-                   userInfo:@{
-                     NSLocalizedDescriptionKey : @(mbgl::util::toString(exception).c_str()),
-                   }];
+        error =
+            [NSError errorWithDomain:MLNErrorDomain
+                                code:MLNErrorCodeModifyingOfflineStorageFailed
+                            userInfo:@{
+                              NSLocalizedDescriptionKey : @(mln::util::toString(exception).c_str()),
+                            }];
       }
       dispatch_async(dispatch_get_main_queue(),
                      [&, completion, error](void) { completion(error); });
@@ -696,12 +696,12 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
     NSError *error;
     if (completion) {
       if (exception) {
-        error = [NSError
-            errorWithDomain:MLNErrorDomain
-                       code:MLNErrorCodeUnknown
-                   userInfo:@{
-                     NSLocalizedDescriptionKey : @(mbgl::util::toString(exception).c_str()),
-                   }];
+        error =
+            [NSError errorWithDomain:MLNErrorDomain
+                                code:MLNErrorCodeUnknown
+                            userInfo:@{
+                              NSLocalizedDescriptionKey : @(mln::util::toString(exception).c_str()),
+                            }];
       }
       dispatch_async(dispatch_get_main_queue(), ^{
         completion(error);
@@ -739,8 +739,8 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
                  eTag:(nullable NSString *)eTag
        mustRevalidate:(BOOL)mustRevalidate
     completionHandler:(nullable MLNOfflinePreloadDataCompletionHandler)completion {
-  mbgl::Resource resource(mbgl::Resource::Kind::Unknown, url.absoluteString.UTF8String);
-  mbgl::Response response;
+  mln::Resource resource(mln::Resource::Kind::Unknown, url.absoluteString.UTF8String);
+  mln::Response response;
   response.data = std::make_shared<std::string>(static_cast<const char *>(data.bytes), data.length);
   response.mustRevalidate = mustRevalidate;
 
@@ -750,14 +750,14 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
 
   if (modified) {
     response.modified =
-        mbgl::Timestamp() + std::chrono::duration_cast<mbgl::Seconds>(
-                                MLNDurationFromTimeInterval(modified.timeIntervalSince1970));
+        mln::Timestamp() + std::chrono::duration_cast<mln::Seconds>(
+                               MLNDurationFromTimeInterval(modified.timeIntervalSince1970));
   }
 
   if (expires) {
     response.expires =
-        mbgl::Timestamp() + std::chrono::duration_cast<mbgl::Seconds>(
-                                MLNDurationFromTimeInterval(expires.timeIntervalSince1970));
+        mln::Timestamp() + std::chrono::duration_cast<mln::Seconds>(
+                               MLNDurationFromTimeInterval(expires.timeIntervalSince1970));
   }
 
   std::function<void()> callback;

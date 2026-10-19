@@ -1,15 +1,15 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/layer.hpp>
-#include <mbgl/style/layers/background_layer_impl.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/layer.hpp>
+#include <mln/style/layers/background_layer_impl.hpp>
 
 #include <rapidjson/prettywriter.h>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 using namespace std::literals::chrono_literals;
 
 std::unique_ptr<Layer> parseLayer(const std::string& src) {

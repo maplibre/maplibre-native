@@ -1,20 +1,20 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/noncopyable.hpp>
 #include <jni/jni.hpp>
 
 #include <string>
 
 #include "../geometry/lat_lng.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class Marker : private mbgl::util::noncopyable {
+class Marker : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/annotations/Marker"; };
 
-    static mbgl::Point<double> getPosition(jni::JNIEnv&, const jni::Object<Marker>&);
+    static mln::Point<double> getPosition(jni::JNIEnv&, const jni::Object<Marker>&);
 
     static std::string getIconId(jni::JNIEnv&, const jni::Object<Marker>&);
 
@@ -22,4 +22,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

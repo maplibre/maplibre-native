@@ -488,7 +488,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     protected boolean requestPaused;
     protected boolean paused;
     protected boolean hasSurface;
-    protected boolean waitingForSurface;
+    protected boolean waitingForSurface = true;
     protected int width;
     protected int height;
     protected MapRenderer.RenderingRefreshMode renderMode;

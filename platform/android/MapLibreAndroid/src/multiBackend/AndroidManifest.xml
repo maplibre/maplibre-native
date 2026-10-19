@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Vulkan support is optional in the multiBackend flavor; the app falls back
+         to OpenGL when Vulkan is unavailable. -->
+    <uses-feature
+        android:name="android.hardware.vulkan.version"
+        android:version="0x400003"
+        android:required="false" />
+</manifest>

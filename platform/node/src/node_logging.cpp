@@ -1,16 +1,16 @@
 #include "node_logging.hpp"
 
-#include <mbgl/util/enum.hpp>
+#include <mln/util/enum.hpp>
 
 namespace node_mbgl {
 
 struct NodeLogObserver::LogMessage {
-    mbgl::EventSeverity severity;
-    mbgl::Event event;
+    mln::EventSeverity severity;
+    mln::Event event;
     int64_t code;
     std::string text;
 
-    LogMessage(mbgl::EventSeverity severity_, mbgl::Event event_, int64_t code_, std::string text_)
+    LogMessage(mln::EventSeverity severity_, mln::Event event_, int64_t code_, std::string text_)
         : severity(severity_),
           event(event_),
           code(code_),
@@ -25,11 +25,11 @@ NodeLogObserver::NodeLogObserver(v8::Local<v8::Object> target)
 
           Nan::Set(msg,
                    Nan::New("class").ToLocalChecked(),
-                   Nan::New(mbgl::Enum<mbgl::Event>::toString(message.event)).ToLocalChecked());
+                   Nan::New(mln::Enum<mln::Event>::toString(message.event)).ToLocalChecked());
 
           Nan::Set(msg,
                    Nan::New("severity").ToLocalChecked(),
-                   Nan::New(mbgl::Enum<mbgl::EventSeverity>::toString(message.severity)).ToLocalChecked());
+                   Nan::New(mln::Enum<mln::EventSeverity>::toString(message.severity)).ToLocalChecked());
 
           if (message.code != -1) {
               Nan::Set(msg, Nan::New("code").ToLocalChecked(), Nan::New<v8::Number>(message.code));
@@ -56,7 +56,7 @@ NodeLogObserver::~NodeLogObserver() {
     queue->stop();
 }
 
-bool NodeLogObserver::onRecord(mbgl::EventSeverity severity, mbgl::Event event, int64_t code, const std::string &text) {
+bool NodeLogObserver::onRecord(mln::EventSeverity severity, mln::Event event, int64_t code, const std::string &text) {
     queue->send({severity, event, code, text});
     return true;
 }

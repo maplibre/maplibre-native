@@ -1,11 +1,11 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/projection.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/projection.hpp>
 
 #include <limits>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(Projection, Boundaries) {
     LatLng sw{-90.0, -180.0};

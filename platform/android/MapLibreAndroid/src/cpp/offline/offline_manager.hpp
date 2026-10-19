@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/storage/offline.hpp>
+#include <mln/storage/offline.hpp>
 #include <jni/jni.hpp>
 
 #include "../file_source.hpp"
@@ -10,7 +10,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace android {
 
@@ -30,7 +30,7 @@ public:
         static void onList(jni::JNIEnv&,
                            const jni::Object<FileSource>&,
                            const jni::Object<OfflineManager::ListOfflineRegionsCallback>&,
-                           mbgl::OfflineRegions&);
+                           mln::OfflineRegions&);
     };
     class GetOfflineRegionCallback {
     public:
@@ -50,7 +50,7 @@ public:
         static void onRegion(jni::JNIEnv&,
                              const jni::Object<FileSource>&,
                              const jni::Object<OfflineManager::GetOfflineRegionCallback>&,
-                             mbgl::OfflineRegion&);
+                             mln::OfflineRegion&);
     };
 
     class CreateOfflineRegionCallback {
@@ -67,7 +67,7 @@ public:
         static void onCreate(jni::JNIEnv&,
                              const jni::Object<FileSource>&,
                              const jni::Object<OfflineManager::CreateOfflineRegionCallback>&,
-                             mbgl::OfflineRegion&);
+                             mln::OfflineRegion&);
     };
 
     class MergeOfflineRegionsCallback {
@@ -84,7 +84,7 @@ public:
         static void onMerge(jni::JNIEnv&,
                             const jni::Object<FileSource>&,
                             const jni::Object<MergeOfflineRegionsCallback>&,
-                            mbgl::OfflineRegions&);
+                            mln::OfflineRegions&);
     };
 
     struct FileSourceCallback {
@@ -150,8 +150,8 @@ public:
     void runPackDatabaseAutomatically(jni::JNIEnv&, jboolean autopack);
 
 private:
-    std::shared_ptr<mbgl::DatabaseFileSource> fileSource;
+    std::shared_ptr<mln::DatabaseFileSource> fileSource;
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1,0 +1,12 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "MapLibre Native HarmonyOS sample entry module.",
+  "license": "BSD-2-Clause",
+  "author": "MapLibre contributors",
+  "main": "",
+  "dependencies": {},
+  "devDependencies": {
+    "libmaplibre_native_ohos.so": "file:types/libmaplibre_native_ohos"
+  }
+}

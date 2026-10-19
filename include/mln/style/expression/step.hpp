@@ -1,0 +1,46 @@
+#pragma once
+
+#include <mln/style/expression/expression.hpp>
+#include <mln/style/expression/parsing_context.hpp>
+#include <mln/style/conversion.hpp>
+
+#include <mln/util/range.hpp>
+
+#include <memory>
+#include <map>
+#include <optional>
+
+namespace mln {
+namespace style {
+namespace expression {
+
+class Step : public Expression {
+public:
+    Step(type::Type type_, std::unique_ptr<Expression> input_, std::map<double, std::unique_ptr<Expression>> stops_);
+
+    EvaluationResult evaluate(const EvaluationContext& params) const override;
+    void eachChild(const std::function<void(const Expression&)>& visit) const override;
+
+    std::size_t getStopCount() const { return stops.size(); }
+    void eachStop(const std::function<void(double, const Expression&)>& visit) const;
+
+    const std::unique_ptr<Expression>& getInput() const noexcept { return input; }
+    Range<float> getCoveringStops(double lower, double upper) const noexcept;
+
+    bool operator==(const Expression& e) const noexcept override;
+
+    std::vector<std::optional<Value>> possibleOutputs() const override;
+
+    static ParseResult parse(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
+
+    mln::Value serialize() const override;
+    std::string getOperator() const override { return "step"; }
+
+private:
+    const std::unique_ptr<Expression> input;
+    const std::map<double, std::unique_ptr<Expression>> stops;
+};
+
+} // namespace expression
+} // namespace style
+} // namespace mln

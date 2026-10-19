@@ -27,8 +27,9 @@ import java.lang.reflect.Field
 import java.util.logging.Logger
 import kotlin.math.min
 import kotlin.random.Random
+import io.sentry.Sentry
 
-class UserMap : SupportMapFragment() {
+class UserMap : SupportMapFragment(), MapView.OnSymbolErrorListener {
     private lateinit var map: MapLibreMap
     private lateinit var mapView: MapView
     private lateinit var bitmapDrawables: List<Drawable>
@@ -140,6 +141,7 @@ class UserMap : SupportMapFragment() {
 
         this.map = maplibreMap
         this.mapView = view as MapView
+        this.mapView.addOnSymbolErrorListener(this)
 
         LOG.info("UserMap seed $RANDOM_SEED")
         run()
@@ -266,6 +268,11 @@ class UserMap : SupportMapFragment() {
                     .addAll(randomPolyPoints(bounds)),
             )
         }
+    }
+
+    override fun onSymbolError(message: String) {
+        Sentry.captureMessage("UserMap: $message")
+        //Bugsnag.notify(RuntimeException(message))
     }
 }
 

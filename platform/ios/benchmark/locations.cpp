@@ -1,6 +1,6 @@
 #include "locations.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace bench {
 
 const std::vector<Location> locations = {
@@ -23,4 +23,4 @@ const std::vector<Location> locations = {
 };
 
 }
-} // namespace mbgl
+} // namespace mln

@@ -9,4 +9,9 @@
     <string name="description_world_tour_benchmark">Writes out avg. fps and 1% fps after world tour with .flyTo()</string>
     <string name="search">Search</string>
     <string name="category_data">Data Sources</string>
+    <string name="rendering_engine_unsupported">%1$s is not supported by this build. Use the multiBackend flavor to switch backends at runtime.</string>
+    <string name="action_rendering_engine">Rendering Engine</string>
+    <string name="rendering_engine_dialog_title">Select Rendering Engine</string>
+    <string name="rendering_engine_current_label">%1$s (current)</string>
+    <string name="cancel">Cancel</string>
 </resources>

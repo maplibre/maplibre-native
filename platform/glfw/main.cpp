@@ -2,25 +2,26 @@
 #include "glfw_renderer_frontend.hpp"
 #include "settings_json.hpp"
 
-#include <mbgl/gfx/backend.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/storage/database_file_source.hpp>
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/action_journal.hpp>
-#include <mbgl/util/action_journal_options.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/platform.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/gfx/backend.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/storage/database_file_source.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/action_journal.hpp>
+#include <mln/util/action_journal_options.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/util/string.hpp>
 
 #include <args.hxx>
 
+#if MLN_GLFW_PLUGINS
+#include <ngon_layer.hpp>
+#endif
+
 #include <csignal>
-#include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include <cstdio>
-#include <array>
 
 namespace {
 
@@ -30,7 +31,7 @@ GLFWView* view = nullptr;
 
 void quit_handler(int) {
     if (view) {
-        mbgl::Log::Info(mbgl::Event::Setup, "waiting for quit...");
+        mln::Log::Info(mln::Event::Setup, "waiting for quit...");
         view->setShouldClose();
     } else {
         exit(0);
@@ -44,6 +45,8 @@ int main(int argc, char* argv[]) {
     args::Flag fullscreenFlag(argumentParser, "fullscreen", "Toggle fullscreen", {'f', "fullscreen"});
     args::Flag benchmarkFlag(argumentParser, "benchmark", "Toggle benchmark", {'b', "benchmark"});
     args::Flag offlineFlag(argumentParser, "offline", "Toggle offline", {'o', "offline"});
+    args::Flag showFeaturesFlag(
+        argumentParser, "showFeatures", "Enable rendered feature logging", {'F', "showFeatures"});
 
     args::ValueFlag<std::string> testDirValue(
         argumentParser, "directory", "Root directory for test generation", {"testDir"});
@@ -69,17 +72,26 @@ int main(int argc, char* argv[]) {
         std::cout << argumentParser;
         exit(0);
     } catch (const args::ParseError& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << "\n";
         std::cerr << argumentParser;
         exit(1);
     } catch (const args::ValidationError& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << "\n";
         std::cerr << argumentParser;
         exit(2);
     }
 
+#if MLN_GLFW_PLUGINS
+    char pluginError[512]{};
+    const auto pluginStatus = mln_ngon_layer_register(mln_plugin_register_v1, pluginError, sizeof(pluginError));
+    if (pluginStatus != MLN_PLUGIN_STATUS_OK && pluginStatus != MLN_PLUGIN_STATUS_ALREADY_REGISTERED) {
+        std::cerr << "Unable to register n-gon layer: " << pluginError << '\n';
+        return 1;
+    }
+#endif
+
     // Load settings
-    mbgl::Settings_JSON settings;
+    mln::Settings_JSON settings;
     settings.online = !offlineFlag;
     if (lonValue) settings.longitude = args::get(lonValue);
     if (latValue) settings.latitude = args::get(latValue);
@@ -108,54 +120,57 @@ int main(int argc, char* argv[]) {
 #endif
 
     if (benchmark) {
-        mbgl::Log::Info(mbgl::Event::General, "BENCHMARK MODE: Some optimizations are disabled.");
+        mln::Log::Info(mln::Event::General, "BENCHMARK MODE: Some optimizations are disabled.");
     }
 
     // Set access token if present
     const char* apikeyEnv = getenv("MLN_API_KEY");
     const std::string apikey = apikeyValue ? args::get(apikeyValue) : (apikeyEnv ? apikeyEnv : std::string());
 
-    auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();
-    mbgl::ResourceOptions resourceOptions;
+    auto mapTilerConfiguration = mln::TileServerOptions::MapTilerConfiguration();
+    mln::ResourceOptions resourceOptions;
     resourceOptions.withCachePath(cacheDB).withApiKey(apikey).withTileServerOptions(mapTilerConfiguration);
-    mbgl::ClientOptions clientOptions;
+    mln::ClientOptions clientOptions;
     auto orderedStyles = mapTilerConfiguration.defaultStyles();
 
     GLFWView backend(fullscreen, benchmark, resourceOptions, clientOptions);
     view = &backend;
 
-    std::shared_ptr<mbgl::FileSource> onlineFileSource = mbgl::FileSourceManager::get()->getFileSource(
-        mbgl::FileSourceType::Network, resourceOptions, clientOptions);
+    std::shared_ptr<mln::FileSource> onlineFileSource = mln::FileSourceManager::get()->getFileSource(
+        mln::FileSourceType::Network, resourceOptions, clientOptions);
     if (!settings.online) {
         if (onlineFileSource) {
             onlineFileSource->setProperty("online-status", false);
-            mbgl::Log::Warning(mbgl::Event::Setup, "Application is offline. Press `O` to toggle online status.");
+            mln::Log::Warning(mln::Event::Setup, "Application is offline. Press `O` to toggle online status.");
         } else {
-            mbgl::Log::Warning(mbgl::Event::Setup,
-                               "Network resource provider is not available, only local "
-                               "requests are supported.");
+            mln::Log::Warning(mln::Event::Setup,
+                              "Network resource provider is not available, only local "
+                              "requests are supported.");
         }
     }
 
     GLFWRendererFrontend rendererFrontend{
-        std::make_unique<mbgl::Renderer>(view->getRendererBackend(), view->getPixelRatio()), *view};
+        std::make_unique<mln::Renderer>(view->getRendererBackend(), view->getPixelRatio()), *view};
 
     // Configure action journal options if directory is specified
-    mbgl::util::ActionJournalOptions actionJournalOptions;
+    mln::util::ActionJournalOptions actionJournalOptions;
     if (actionJournalDirValue) {
         const std::string actionJournalDir = args::get(actionJournalDirValue);
         actionJournalOptions.enable(true).withPath(actionJournalDir);
-        mbgl::Log::Info(mbgl::Event::General, "Action journal enabled. Logs will be written to: " + actionJournalDir);
+        mln::Log::Info(mln::Event::General, "Action journal enabled. Logs will be written to: " + actionJournalDir);
     }
 
-    mbgl::Map map(rendererFrontend,
-                  *view,
-                  mbgl::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()),
-                  resourceOptions,
-                  clientOptions,
-                  actionJournalOptions);
+    mln::Map map(rendererFrontend,
+                 *view,
+                 mln::MapOptions()
+                     .withSize(view->getSize())
+                     .withPixelRatio(view->getPixelRatio())
+                     .withRenderedFeatureInfo(showFeaturesFlag),
+                 resourceOptions,
+                 clientOptions,
+                 actionJournalOptions);
 
-    map.setBounds(mbgl::BoundOptions().withMaxPitch(settings.maxPitch));
+    map.setBounds(mln::BoundOptions().withMaxPitch(settings.maxPitch));
 
     backend.setMap(&map);
 
@@ -163,30 +178,30 @@ int main(int argc, char* argv[]) {
         style = std::string("file://") + style;
     }
 
-    map.jumpTo(mbgl::CameraOptions()
-                   .withCenter(mbgl::LatLng{settings.latitude, settings.longitude})
+    map.jumpTo(mln::CameraOptions()
+                   .withCenter(mln::LatLng{settings.latitude, settings.longitude})
                    .withCenterAltitude(settings.altitude)
                    .withZoom(settings.zoom)
                    .withBearing(settings.bearing)
                    .withPitch(settings.pitch)
                    .withRoll(settings.roll)
                    .withFov(settings.fov));
-    map.setDebug(mbgl::MapDebugOptions(settings.debug));
+    map.setDebug(mln::MapDebugOptions(settings.debug));
 
     if (testDirValue) view->setTestDirectory(args::get(testDirValue));
 
     view->setOnlineStatusCallback([&settings, onlineFileSource]() {
         if (!onlineFileSource) {
-            mbgl::Log::Warning(mbgl::Event::Setup,
-                               "Cannot change online status. Network resource provider is not "
-                               "available.");
+            mln::Log::Warning(mln::Event::Setup,
+                              "Cannot change online status. Network resource provider is not "
+                              "available.");
             return;
         }
         settings.online = !settings.online;
         onlineFileSource->setProperty("online-status", settings.online);
-        mbgl::Log::Info(mbgl::Event::Setup,
-                        std::string("Application is ") + (settings.online ? "online" : "offline") +
-                            ". Press `O` to toggle online status.");
+        mln::Log::Info(mln::Event::Setup,
+                       std::string("Application is ") + (settings.online ? "online" : "offline") +
+                           ". Press `O` to toggle online status.");
     });
 
     view->setChangeStyleCallback([&map, &orderedStyles]() {
@@ -196,17 +211,17 @@ int main(int argc, char* argv[]) {
             currentStyleIndex = 0;
         }
 
-        mbgl::util::DefaultStyle newStyle = orderedStyles[currentStyleIndex];
+        const auto& newStyle = orderedStyles[currentStyleIndex];
         map.getStyle().loadURL(newStyle.getUrl());
         view->setWindowTitle(newStyle.getName());
 
-        mbgl::Log::Info(mbgl::Event::Setup, "Changed style to: " + newStyle.getName());
+        mln::Log::Info(mln::Event::Setup, "Changed style to: " + newStyle.getName());
     });
 
     // Resource loader controls top-level request processing and can resume /
     // pause all managed sources simultaneously.
-    std::shared_ptr<mbgl::FileSource> resourceLoader = mbgl::FileSourceManager::get()->getFileSource(
-        mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
+    std::shared_ptr<mln::FileSource> resourceLoader = mln::FileSourceManager::get()->getFileSource(
+        mln::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
     view->setPauseResumeCallback([resourceLoader]() {
         static bool isPaused = false;
 
@@ -220,12 +235,12 @@ int main(int argc, char* argv[]) {
     });
 
     // Database file source.
-    auto databaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(
-        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions, clientOptions)));
+    auto databaseFileSource = std::static_pointer_cast<mln::DatabaseFileSource>(std::shared_ptr<mln::FileSource>(
+        mln::FileSourceManager::get()->getFileSource(mln::FileSourceType::Database, resourceOptions, clientOptions)));
     view->setResetCacheCallback([databaseFileSource]() {
         databaseFileSource->resetDatabase([](const std::exception_ptr& ex) {
             if (ex) {
-                mbgl::Log::Error(mbgl::Event::Database, "Failed to reset cache: " + mbgl::util::toString(ex));
+                mln::Log::Error(mln::Event::Database, "Failed to reset cache: " + mln::util::toString(ex));
             }
         });
     });
@@ -247,7 +262,7 @@ int main(int argc, char* argv[]) {
     view->run();
 
     // Save settings
-    mbgl::CameraOptions camera = map.getCameraOptions();
+    mln::CameraOptions camera = map.getCameraOptions();
     settings.latitude = camera.center->latitude();
     settings.longitude = camera.center->longitude();
     settings.altitude = *camera.centerAltitude;
@@ -256,15 +271,15 @@ int main(int argc, char* argv[]) {
     settings.pitch = *camera.pitch;
     settings.roll = *camera.roll;
     settings.fov = *camera.fov;
-    settings.debug = mbgl::EnumType(map.getDebug());
+    settings.debug = mln::EnumType(map.getDebug());
     settings.save();
-    mbgl::Log::Info(mbgl::Event::General,
-                    "Exit location: --lat=\"" + std::to_string(settings.latitude) + "\" --lon=\"" +
-                        std::to_string(settings.longitude) + "\" --alt=\"" + std::to_string(settings.altitude) +
-                        "\" --zoom=\"" + std::to_string(settings.zoom) + "\" --bearing=\"" +
-                        std::to_string(settings.bearing) + "\" --roll=\"" + std::to_string(settings.roll) +
-                        "\" --fov=\"" + std::to_string(settings.fov) + "\" --maxPitch=\"" +
-                        std::to_string(settings.maxPitch) + "\"");
+    mln::Log::Info(mln::Event::General,
+                   "Exit location: --lat=\"" + std::to_string(settings.latitude) + "\" --lon=\"" +
+                       std::to_string(settings.longitude) + "\" --alt=\"" + std::to_string(settings.altitude) +
+                       "\" --zoom=\"" + std::to_string(settings.zoom) + "\" --bearing=\"" +
+                       std::to_string(settings.bearing) + "\" --roll=\"" + std::to_string(settings.roll) +
+                       "\" --fov=\"" + std::to_string(settings.fov) + "\" --maxPitch=\"" +
+                       std::to_string(settings.maxPitch) + "\"");
 
     view = nullptr;
 

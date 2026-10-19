@@ -2,6 +2,97 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+## 7.0.0-pre2
+
+- Distribute a build of MapLibre iOS with the experimental C plugin API enabled as a separate Swift package, [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api). Its `MapLibre` product replaces the standard one, so applications keep using `import MapLibre`. Plugin packages depend on its header-only `MapLibrePluginApi` product. Layers of plugin types appear as `MLNStyleLayer` in `MLNStyle.layers`. The GitHub release also includes a static XCFramework of this build, `MapLibre.static.plugins.xcframework.zip` ([#4769](https://github.com/maplibre/maplibre-native/pull/4769)).
+- Add the first version of the C plugin API for custom style layer types, with an ngon layer as example ([#4612](https://github.com/maplibre/maplibre-native/pull/4612)). Since then, the plugin API gained the `should_animate` callback ([#4654](https://github.com/maplibre/maplibre-native/pull/4654)), stencil overlap and near-clipped matrix options ([#4665](https://github.com/maplibre/maplibre-native/pull/4665)) and per-drawable depth, stencil and cull state ([#4692](https://github.com/maplibre/maplibre-native/pull/4692)). Plugin default colors are premultiplied ([#4663](https://github.com/maplibre/maplibre-native/pull/4663)) and camera-dependent plugin paint properties are reevaluated when the zoom changes ([#4721](https://github.com/maplibre/maplibre-native/pull/4721)).
+- 💥 Breaking: Raise the minimum supported iOS version to 15.5, remove the filesystem polyfill, and clean up obsolete compatibility code ([#4648](https://github.com/maplibre/maplibre-native/pull/4648), [#4656](https://github.com/maplibre/maplibre-native/pull/4656)).
+- Include device and simulator debug symbols in the dynamic XCFramework. The separate iOS debug-symbol ZIP is no longer published ([#4698](https://github.com/maplibre/maplibre-native/pull/4698)).
+- 💥 Breaking: Replace the `Mapbox.h` umbrella header with `MapLibre.h`. `MapLibre.xcframework` no longer ships `Mapbox.h` ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
+
+  <details>
+  <summary>Migration guide</summary>
+
+  **Swift:** no changes needed. Keep using `import MapLibre`.
+
+  **Objective-C:** include `MapLibre.h` instead of `Mapbox.h`:
+
+  ```objc
+  // Before
+  #include <Mapbox.h>
+
+  // After
+  #include <MapLibre.h>
+  ```
+
+  `#import <MapLibre/MapLibre.h>` and, with modules enabled, `@import MapLibre;` also work.
+
+  The `MapboxVersionNumber` and `MapboxVersionString` declarations from `Mapbox.h` were not carried over to `MapLibre.h`. These symbols were never defined in the binary, so referencing them caused a linker error. To get the SDK version at runtime, read it from the framework bundle:
+
+  ```objc
+  NSString *version = [NSBundle bundleForClass:[MLNMapView class]]
+                          .infoDictionary[@"CFBundleShortVersionString"];
+  ```
+
+  ```swift
+  let version = Bundle(for: MLNMapView.self)
+      .infoDictionary?["CFBundleShortVersionString"] as? String
+  ```
+
+  </details>
+- Export `MLNPluginStyleLayer` from the dynamic framework ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
+- Export `MLNBackendResource` from the dynamic framework when using the Metal renderer ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
+- Add `-[MLNStyle setGlobalStateValue:forProperty:]` and `MLNStyle.globalState` for the `global-state` expression and the root `state` property of the style ([#4516](https://github.com/maplibre/maplibre-native/pull/4516)).
+- Add the `interpolate-lab` and `interpolate-hcl` expressions ([#4668](https://github.com/maplibre/maplibre-native/pull/4668)).
+- Add rendered feature introspection. With `MLNMapOptions.featureInfoEnabled`, `MLNRenderingStats.frameRenderedFeatures` reports the features rendered by each layer and their bounds, and `-[MLNMapView renderedFeatureCountForFeatureID:LayerID:SourceID:]` counts them ([#4460](https://github.com/maplibre/maplibre-native/pull/4460)).
+- Size `line-pattern` images like MapLibre GL JS. They were drawn about 1.7× bigger and stretched along the line ([#4726](https://github.com/maplibre/maplibre-native/pull/4726)).
+- Load `raster-dem` tiles at the rounded zoom level, like raster sources and MapLibre GL JS ([#4650](https://github.com/maplibre/maplibre-native/pull/4650)).
+- Fix the lighting of fill-extrusion walls on rotated maps ([#4662](https://github.com/maplibre/maplibre-native/pull/4662)).
+- Fix the background layer disappearing after style changes ([#4616](https://github.com/maplibre/maplibre-native/pull/4616)).
+- Fix changes to layer transition options and the style's transition options not being applied ([#4677](https://github.com/maplibre/maplibre-native/pull/4677)).
+- Fix a crash when an image source lies wholly beyond the latitude limits of the map ([#4753](https://github.com/maplibre/maplibre-native/pull/4753)).
+- Fix a crash when querying a custom geometry source before its first tile data arrives ([#4718](https://github.com/maplibre/maplibre-native/pull/4718)).
+- Fix resetting an in-memory offline database deleting a file of the same name ([#4720](https://github.com/maplibre/maplibre-native/pull/4720)).
+- Fix the cumulative draw call count in Metal rendering statistics ([#4719](https://github.com/maplibre/maplibre-native/pull/4719)).
+- Use `@autoreleasepool` blocks on worker threads, so autoreleased objects such as Metal textures are released ([#4621](https://github.com/maplibre/maplibre-native/pull/4621)).
+- Make the set of available images copy-on-write, speeding up styles with many images and frequently updated sources ([#4651](https://github.com/maplibre/maplibre-native/pull/4651)).
+
+## 6.31.0
+
+- Remove CustomDrawableLayer API ([#4611](https://github.com/maplibre/maplibre-native/pull/4611)).
+- Add semiliteral expression to core and mobile SDKs ([#4604](https://github.com/maplibre/maplibre-native/pull/4604)).
+
+## 6.30.0
+
+- Update expected-lite to restore C++23 consumer compatibility for `database_file_source.hpp` ([#4474](https://github.com/maplibre/maplibre-native/pull/4474)).
+- Reduce symbol buffers memory by using instancing (Core optimization) ([#4383](https://github.com/maplibre/maplibre-native/pull/4383)).
+- Fix `ImageSource` not rendering across world copies ([#4508](https://github.com/maplibre/maplibre-native/pull/4508)).
+- core: refactor renderable size ownership ([#4512](https://github.com/maplibre/maplibre-native/pull/4512)).
+- fix(core): Fix missing symbols/glyphs ([#4554](https://github.com/maplibre/maplibre-native/pull/4554)).
+- fix(core): break a label before a left parenthesis, not after it ([#4553](https://github.com/maplibre/maplibre-native/pull/4553)).
+- fix(ios): use window scene interface orientation for heading compensation ([#4548](https://github.com/maplibre/maplibre-native/pull/4548)).
+- Rename OpenGL event to GraphicsBackend ([#4515](https://github.com/maplibre/maplibre-native/pull/4515)).
+- keep digits and short codes upright in CJK line labels ([#4566](https://github.com/maplibre/maplibre-native/pull/4566)).
+- fix(core): keep the padding-dependent pitch limit at or above the minimum pitch ([#4576](https://github.com/maplibre/maplibre-native/pull/4576)).
+- feat(ios): add feature state api ([#4420](https://github.com/maplibre/maplibre-native/pull/4420)).
+
+## 6.29.0
+
+- fix(core): accept alpha in hsl colors ([#4435](https://github.com/maplibre/maplibre-native/pull/4435)).
+- fix(core): repaint feature-state-driven symbol paint properties ([#4445](https://github.com/maplibre/maplibre-native/pull/4445)).
+- Make string expressions operate on unicode ([#4344](https://github.com/maplibre/maplibre-native/pull/4344)).
+- fix(core): Add action journal exception handling ([#4438](https://github.com/maplibre/maplibre-native/pull/4438)).
+- feat: specify layer/property that has a parse error when logging ([#4292](https://github.com/maplibre/maplibre-native/pull/4292)).
+- core: Add error reporting for corrupted symbols ([#4458](https://github.com/maplibre/maplibre-native/pull/4458)).
+- Changes to the custom Metal layer to allow more flexible rendering ([#4446](https://github.com/maplibre/maplibre-native/pull/4446)).
+- feat: implement split and join expressions ([#4463](https://github.com/maplibre/maplibre-native/pull/4463)).
+- core: rename `mbgl` namespace to `mln` ([#4487](https://github.com/maplibre/maplibre-native/pull/4487)).
+- core: rename `mbgl` directories to `mln` ([#4511]((https://github.com/maplibre/maplibre-native/pull/4511))).
+- Fix surface transform ([#4495](https://github.com/maplibre/maplibre-native/pull/4495)).
+- fix(core): Fix nullptr access during custom layer pre-render ([#4496](https://github.com/maplibre/maplibre-native/pull/4496)).
+
 ## 6.28.0
 
 - core: Fix dynamic texture resource management ([#4337](https://github.com/maplibre/maplibre-native/pull/4337)).
@@ -19,6 +110,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - core: Tolerate stencil clipping setup failures ([#4317](https://github.com/maplibre/maplibre-native/pull/4317)).
 - Enable FastPFOR encodings in MLT ([#4146](https://github.com/maplibre/maplibre-native/pull/4146)).
 - Add fill extrusion style property that enables rounded corners for extruded buildings (Core feature) ([#4343](https://github.com/maplibre/maplibre-native/pull/4343)).
+- core: check if edge length is zero for rounded corners  ([#4424](https://github.com/maplibre/maplibre-native/pull/4424)).
 
 ## 6.27.0
 
@@ -282,7 +374,7 @@ Note: this release has some changes to how icon offsets behave on pitched maps. 
   Some users reported synchronization issues when panning the map. The issue is only present on devices with ProMotion (120Hz) displays and can be fixed by updating the Info.plist for your app (see [Apple documentation](https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro?language=objc)).
 - Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
 - Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
-- Cleanup mbgl/actor/mailbox* implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
+- Cleanup mln/actor/mailbox* implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
 - Fix raster masking bug ([#2798](https://github.com/maplibre/maplibre-native/pull/2798)).
 - Ensure that all depth values are rendered before any color values ([#2811](https://github.com/maplibre/maplibre-native/pull/2811)).
 - Move UBO updates from render layers to tweakers ([#2703](https://github.com/maplibre/maplibre-native/pull/2703)).
