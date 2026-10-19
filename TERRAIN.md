@@ -1802,18 +1802,22 @@ With terrain on, gestures move the camera's centre up onto the terrain under it
 The view does not change, but the centre and zoom do: at Mt Buller (1,800 m) the
 centre moves ~2 km towards the camera and the zoom rises ~0.5. A saved centre and
 zoom put back at another centre altitude are a different camera, lower for a
-lower altitude. Save the centre altitude with the camera and restore it first:
+lower altitude. In core the camera options carry the altitude, so one jump
+restores all of it:
 
 ```cpp
 const auto saved = map.getCameraOptions(); // includes centerAltitude
 // ... later
-map.setCenterAltitudeKeepingView(saved.centerAltitude.value_or(0.0));
-map.jumpTo(CameraOptions().withCenter(saved.center).withZoom(saved.zoom).withBearing(saved.bearing).withPitch(saved.pitch));
+map.jumpTo(saved);
 ```
 
-On iOS, `MLNMapView.centerAltitude` and `-setCenterAltitudeKeepingView:`; on
-Android, `MapLibreMap.getCenterAltitude()` and `setCenterAltitudeKeepingView(double)`
-(`CameraPosition` does not carry the altitude).
+The iOS and Android camera types don't carry the altitude, so there it takes two
+steps: save `MLNMapView.centerAltitude` (`MapLibreMap.getCenterAltitude()`) with
+the camera, and restore it with `-setCenterAltitudeKeepingView:`
+(`setCenterAltitudeKeepingView(double)`) before setting the saved centre and
+zoom. That call returns false when the zoom limits or bounds, or a near-grazing
+pitch, would not let the centre move there; the saved centre and zoom then
+describe a different view.
 
 ### Style JSON API
 

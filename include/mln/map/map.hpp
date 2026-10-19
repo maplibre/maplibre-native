@@ -260,9 +260,11 @@ public:
     /// (exaggeration applied, as the terrain is drawn) without moving the camera: the centre and
     /// zoom change, nothing on screen does. anchorCenterOnTerrain() is this at the ground height;
     /// 0 puts the centre back at sea level. A centre and zoom describe the same view only at the
-    /// same centre altitude (CameraOptions::centerAltitude), so to restore a saved camera, set its
-    /// altitude with this first, then jump to its centre and zoom. Returns false when nothing
-    /// moved: the centre is already at that altitude, or that altitude is (nearly) at the camera.
+    /// same centre altitude (CameraOptions::centerAltitude); in core, jumpTo with a camera that
+    /// includes its centerAltitude restores it in one step. Returns false, changing nothing, when
+    /// the centre is already at that altitude, when the line of sight nearly grazes the plane at
+    /// that altitude (a pitch over ~84 degrees) or meets it (nearly) at the camera, or when the
+    /// zoom limits, the bounds or the constrain mode would cut the move short.
     bool setCenterAltitudeKeepingView(double altitudeMeters);
 
     /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain

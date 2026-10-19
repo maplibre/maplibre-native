@@ -1062,11 +1062,12 @@ of north, the map will automatically snap to exact north.
 /**
  The altitude of the map's center above sea level, in meters.
 
- It is 0 unless 3D terrain is on: a pan, pinch, rotate or tilt gesture then
- moves the center up onto the terrain under it, and removing the terrain brings
- it back down. Either way the view does not change, but `centerCoordinate` and
- `zoomLevel` do. A center coordinate and zoom level describe the same view only
- at the same center altitude, so save this with them, and restore it with
+ With 3D terrain on, a pan, pinch, rotate or tilt gesture moves the center up
+ onto the terrain under it, and removing the terrain brings it back down. The
+ style's root `centerAltitude` and `-setCenterAltitudeKeepingView:` set it too.
+ Moving the center this way does not change the view, but `centerCoordinate`
+ and `zoomLevel` do. A center coordinate and zoom level describe the same view
+ only at the same center altitude, so save this with them, and restore it with
  `-setCenterAltitudeKeepingView:` before setting them.
  */
 @property (nonatomic, readonly) CLLocationDistance centerAltitude;
@@ -1080,10 +1081,13 @@ of north, the map will automatically snap to exact north.
 
  @param altitude The new center altitude above sea level, in meters, with the
     terrain exaggeration applied.
- @return `NO` if nothing moved: the center is already at that altitude, or that
-    altitude is at (or nearly at) the camera.
+ @return `NO` if nothing moved: the center is already at that altitude, the line
+    of sight nearly grazes the ground at that altitude (a pitch over about 84
+    degrees) or meets it at (or nearly at) the camera, or the minimum or maximum
+    zoom level or the camera bounds would cut the move short.
  */
-- (BOOL)setCenterAltitudeKeepingView:(CLLocationDistance)altitude;
+- (BOOL)setCenterAltitudeKeepingView:(CLLocationDistance)altitude
+    NS_SWIFT_NAME(setCenterAltitudeKeepingView(_:));
 
 /**
  * The minimum zoom level at which the map can be shown.

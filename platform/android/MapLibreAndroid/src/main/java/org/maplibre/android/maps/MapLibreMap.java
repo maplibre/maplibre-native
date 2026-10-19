@@ -469,10 +469,10 @@ public final class MapLibreMap {
   }
 
   /**
-   * Sets whether the map centre rides the 3D terrain surface rather than sea level. On by
-   * default: the centre altitude follows the rendered terrain height under the centre, so
-   * pitching over tall ground keeps the camera above it instead of sinking into it. Has no
-   * effect when terrain is not enabled.
+   * Sets whether the map centre rides the 3D terrain surface rather than sea level. Off by
+   * default. When on, the centre altitude follows the rendered terrain height under the centre,
+   * so pitching over tall ground keeps the camera above it instead of sinking into it. Has no
+   * effect when terrain is not enabled. Experimental: this may change or go away.
    *
    * @param clamped whether to clamp the centre to the ground
    */
@@ -500,16 +500,19 @@ public final class MapLibreMap {
    * this method before moving the camera to the saved position.
    *
    * @param altitude the new centre altitude above sea level in metres, terrain exaggeration applied
-   * @return false if nothing moved: the centre is already at that altitude, or that altitude is at
-   * (or nearly at) the camera
+   * @return false if nothing moved: the centre is already at that altitude, the line of sight
+   * nearly grazes the ground at that altitude (a pitch over about 84 degrees) or meets it at (or
+   * nearly at) the camera, or the minimum or maximum zoom or the camera bounds would cut the move
+   * short
    */
   public boolean setCenterAltitudeKeepingView(double altitude) {
     return transform.setCenterAltitudeKeepingView(altitude);
   }
 
   /**
-   * @return the altitude of the camera's centre above sea level in metres: 0 unless 3D terrain
-   * gestures have raised it
+   * @return the altitude of the camera's centre above sea level in metres. With 3D terrain on,
+   * gestures raise it onto the terrain under the centre; the style's root centerAltitude and
+   * {@link #setCenterAltitudeKeepingView(double)} set it too
    * @see MapLibreMap#setCenterAltitudeKeepingView(double)
    */
   public double getCenterAltitude() {
