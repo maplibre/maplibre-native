@@ -1291,6 +1291,12 @@ projection primitives in `collision_index.cpp`. The word "elevation" appears now
        slides back down the line of sight and the zoom follows, so nothing on screen moves.
        Only where the zoom limits or the bounds refuse that move does it keep the centre and
        zoom, as gl-js does.
+     - **The app's own moves keep the gesture's altitude.** `easeTo`, `flyTo` and `jumpTo`
+       without `centerAltitude` keep the current one, so after a gesture over a ridge a fly to a
+       town in a valley puts the town rise · tan(pitch) towards the camera (about 3 km for
+       1,800 m at pitch 60). gl-js takes the terrain height at the target as it flies
+       (`_prepareElevation`); that needs a height lookup on the map thread (#4558). Until then
+       the app sets the altitude itself (#4712 exposes it on iOS and Android).
 3. **Elevated line labels** - thread the query through placement, then gl-js #7040's
    coordinate normalisation on top.
 
