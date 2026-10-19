@@ -54,11 +54,12 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
     if (properties.y) {
         setY(*properties.y);
     }
-    if (properties.z) {
-        setZ(*properties.z);
-    }
     if (properties.scale) {
         setScale(*properties.scale);
+    }
+    // After the scale: z is in pixels at the scale it comes with.
+    if (properties.z) {
+        setZ(*properties.z);
     }
     if (properties.bearing) {
         setBearing(*properties.bearing);
@@ -505,7 +506,7 @@ LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
 }
 
 double TransformState::getCenterAltitude() const {
-    return z * Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
+    return altitudeMeters;
 }
 
 double TransformState::pixel_x() const {
@@ -614,6 +615,7 @@ double TransformState::getScale() const {
 void TransformState::setScale(double val) {
     if (scale != val) {
         scale = val;
+        updateZ();
         requestMatricesUpdate = true;
     }
 }
@@ -638,6 +640,7 @@ double TransformState::getY() const {
 void TransformState::setY(double val) {
     if (y != val) {
         y = val;
+        updateZ();
         requestMatricesUpdate = true;
     }
 }
@@ -649,8 +652,15 @@ double TransformState::getZ() const {
 void TransformState::setZ(double val) {
     if (z != val) {
         z = val;
+        altitudeMeters = z * Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
         requestMatricesUpdate = true;
     }
+}
+
+void TransformState::updateZ() {
+    // The centre's altitude is a height in metres: a zoom or a move north keeps it, and only
+    // its size in pixels changes. Kept as pixels, a zoom would lift or sink it.
+    z = altitudeMeters / Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
 }
 
 // MARK: - Rotation
@@ -783,18 +793,18 @@ ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng, 
     return {p[0] / p[3], size.height - p[1] / p[3]};
 }
 
-TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoordinate& point, uint8_t atZoom) const {
+TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoordinate& point,
+                                                                uint8_t atZoom,
+                                                                double targetZ) const {
     if (size.isEmpty()) {
         return {.p = {}, .z = 0};
     }
-
-    float targetZ = 0;
 
     double flippedY = size.height - point.y;
 
     // since we don't know the correct projected z value for the point,
     // unproject two points to get a line and then find the point on that
-    // line with z=0
+    // line with z=targetZ
 
     vec4 coord0;
     vec4 coord1;
@@ -819,6 +829,13 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
 
 LatLng TransformState::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng::WrapMode wrapMode) const {
     auto coord = screenCoordinateToTileCoordinate(point, 0);
+    return Projection::unproject(coord.p, 1. / util::tileSize_D, wrapMode);
+}
+
+LatLng TransformState::screenCoordinateToLatLng(const ScreenCoordinate& point,
+                                                double elevationMeters,
+                                                LatLng::WrapMode wrapMode) const {
+    auto coord = screenCoordinateToTileCoordinate(point, 0, elevationMeters);
     return Projection::unproject(coord.p, 1. / util::tileSize_D, wrapMode);
 }
 
@@ -1015,7 +1032,9 @@ ScreenCoordinate TransformState::getCenterOffset() const {
 void TransformState::moveLatLng(const LatLng& latLng, const ScreenCoordinate& anchor) {
     auto centerCoord = Projection::project(getLatLng(LatLng::Unwrapped), scale);
     auto latLngCoord = Projection::project(latLng, scale);
-    auto anchorCoord = Projection::project(screenCoordinateToLatLng(anchor), scale);
+    // The anchor on the plane at the centre's altitude: the ground being looked at over
+    // terrain (sea level without it), the same plane the anchor's latLng was taken on.
+    auto anchorCoord = Projection::project(screenCoordinateToLatLng(anchor, getCenterAltitude()), scale);
     setLatLngZoom(Projection::unproject(centerCoord + latLngCoord - anchorCoord, scale), getZoom());
 }
 
@@ -1039,7 +1058,8 @@ void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
 }
 
 void TransformState::setCenterAltitude(double alt_m) {
-    z = alt_m / Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
+    altitudeMeters = alt_m;
+    updateZ();
     requestMatricesUpdate = true;
 }
 
@@ -1053,6 +1073,7 @@ void TransformState::setScalePoint(const double newScale, const ScreenCoordinate
     y = constrainedPoint.y;
     Bc = Projection::worldSize(scale) / util::DEGREES_MAX;
     Cc = Projection::worldSize(scale) / util::M2PI;
+    updateZ();
     requestMatricesUpdate = true;
 }
 

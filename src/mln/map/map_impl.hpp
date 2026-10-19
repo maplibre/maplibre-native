@@ -128,6 +128,24 @@ public:
     bool centerClampedToGround = false;
     /// Terrain height under the centre, as the renderer last reported it (NaN until then).
     double terrainCenterElevation = std::numeric_limits<double>::quiet_NaN();
+    void anchorCenterOnTerrain();
+    /// Slides the centre along the line of sight to `altitudeMeters`, the zoom following, so the
+    /// camera stays where it is. False, changing nothing, when there was nothing to move, the line
+    /// of sight nearly grazes the plane at that altitude, the plane is (nearly) at the camera, or
+    /// the zoom limits, the bounds or the constrain mode would cut the move short.
+    bool setCenterAltitudeKeepingView(double altitudeMeters);
+    /// Whether the style had terrain when last checked, and whether the centre has yet to come
+    /// back to sea level since it was removed (a transition was in flight, or a still map has
+    /// not rendered since).
+    bool hadTerrain = false;
+    bool centerAwaitingSeaLevel = false;
+    void noteTerrainRemoval();
+    /// Brings the centre down to sea level keeping the view or, where the limits refuse that,
+    /// keeping the centre and zoom.
+    void returnCenterToSeaLevel();
+    /// Runs a return still waiting before the app sets a camera, which every camera entry point
+    /// does first, so that the return does not move the app's camera afterwards.
+    void settleCenterAwaitingSeaLevel();
     /// A height report arrived while a camera transition was running; the clamp applies it
     /// once the transition ends instead of cutting the transition short.
     bool centerAwaitingTerrainAnchor = false;
