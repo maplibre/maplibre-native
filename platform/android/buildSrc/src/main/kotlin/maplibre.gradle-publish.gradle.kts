@@ -2,10 +2,12 @@ import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import org.gradle.api.Task
 import org.gradle.api.artifacts.repositories.PasswordCredentials
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.authentication.http.BasicAuthentication
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.get
+import org.gradle.plugins.signing.Sign
 import java.util.Locale
 
 plugins {
@@ -25,13 +27,38 @@ val publicationRepositoryUsername = providers.gradleProperty("publicationReposit
 val publicationRepositoryPassword = providers.gradleProperty("publicationRepositoryPassword")
     .orElse(providers.environmentVariable("MAVEN_REPOSITORY_PASSWORD"))
 
+/**
+ * A build variant published as `android-sdk<rendererArtifactIdPostfix><postfix>`,
+ * e.g. `android-sdk-opengl-with-plugin-api-debug`.
+ */
+class PublishedVariant(
+    val renderer: String,
+    val rendererArtifactIdPostfix: String,
+    val rendererTitle: String,
+    val withPluginApi: Boolean,
+    val buildType: String
+) {
+    val name = renderer + (if (withPluginApi) "WithPluginApi" else "") + buildType
+    val postfix = (if (withPluginApi) "-with-plugin-api" else "") + (if (buildType == "Debug") "-debug" else "")
+    val titleDetails = listOfNotNull("Plugin API".takeIf { withPluginApi }, "Debug".takeIf { buildType == "Debug" })
+}
+
+// The default renderer is also published without a renderer postfix, as `android-sdk`.
+val defaultRenderer = "vulkan"
+val publishedVariants = listOf(
+    Triple("vulkan", "-vulkan", "Vulkan"),
+    Triple("opengl", "-opengl", "OpenGL ES"),
+    Triple("multiBackend", "-vulkan-opengl", "Vulkan + OpenGL ES")
+).flatMap { (renderer, artifactIdPostfix, title) ->
+    listOf(false, true).flatMap { withPluginApi ->
+        listOf("Release", "Debug").map { buildType ->
+            PublishedVariant(renderer, artifactIdPostfix, title, withPluginApi, buildType)
+        }
+    }
+}
+
 androidLibrary.publishing {
-    singleVariant("vulkanRelease")
-    singleVariant("vulkanDebug")
-    singleVariant("openglRelease")
-    singleVariant("openglDebug")
-    singleVariant("multiBackendRelease")
-    singleVariant("multiBackendDebug")
+    publishedVariants.forEach { singleVariant(it.name) }
 }
 
 afterEvaluate {
@@ -65,21 +92,6 @@ afterEvaluate {
     if (configuredRepositoryUrl == null || providers.gradleProperty("signingInMemoryKey").isPresent) {
         mavenPublishing {
             signAllPublications()
-        }
-    }
-}
-
-// Configure task dependencies after all tasks are created
-gradle.projectsEvaluated {
-    // Explicitly configure publish tasks to depend on their corresponding signing tasks
-    // This fixes Gradle's implicit dependency validation warnings
-    // Since some publications may share components (e.g., defaultdebug and opengldebug both use openglDebug),
-    // we ensure all signing tasks complete before any publish task
-    tasks.filter {
-        it.name.startsWith("publish") && it.name.contains("PublicationTo") && it.name.endsWith("Repository")
-    }.forEach { publishTask ->
-        tasks.filter { it.name.startsWith("sign") && it.name.endsWith("Publication") }.forEach { signingTask ->
-            publishTask.dependsOn(signingTask)
         }
     }
 }
@@ -120,11 +132,10 @@ version = project.extra["versionName"] as String
 group = project.extra["mapLibreArtifactGroupId"] as String
 
 fun configureMavenPublication(
-    renderer: String,
+    componentName: String,
     publicationName: String,
     artifactIdPostfix: String,
-    descriptionPostfix: String,
-    buildType: String = "Release"
+    descriptionPostfix: String
 ) {
     publishing {
         publications {
@@ -133,7 +144,6 @@ fun configureMavenPublication(
                 artifactId = "${project.extra["mapLibreArtifactId"]}$artifactIdPostfix"
                 version = project.version.toString()
 
-                val componentName = "${renderer}${buildType}"
                 val component = components.findByName(componentName)
                     ?: components.find { it.name.equals(componentName, ignoreCase = true) }
                 if (component != null) {
@@ -174,17 +184,43 @@ fun configureMavenPublication(
 }
 
 afterEvaluate {
-    configureMavenPublication("vulkan", "defaultrelease", "", "")
-    configureMavenPublication("vulkan", "defaultdebug", "-debug", " (Debug)", "Debug")
-    configureMavenPublication("vulkan", "vulkanrelease", "-vulkan", "(Vulkan)")
-    configureMavenPublication("vulkan", "vulkandebug", "-vulkan-debug", "(Vulkan, Debug)", "Debug")
-    // Right now this is the same as the first, but in the future we might release a major version
-    // which defaults to Vulkan (or has support for multiple backends). We will keep using only
-    // OpenGL ES with this artifact ID if that happens.
-    configureMavenPublication("opengl", "openglrelease", "-opengl", " (OpenGL ES)")
-    configureMavenPublication("opengl", "opengldebug", "-opengl-debug", " (OpenGL ES, Debug)", "Debug")
-    configureMavenPublication("multiBackend", "multibackendrelease", "-vulkan-opengl", " (Vulkan + OpenGL ES)")
-    configureMavenPublication("multiBackend", "multibackenddebug", "-vulkan-opengl-debug", " (Vulkan + OpenGL ES, Debug)", "Debug")
+    publishedVariants.forEach { variant ->
+        val publicationNames = mutableListOf(variant.name)
+        val details = listOf(variant.rendererTitle) + variant.titleDetails
+        configureMavenPublication(
+            variant.name,
+            variant.name,
+            variant.rendererArtifactIdPostfix + variant.postfix,
+            " (${details.joinToString()})"
+        )
+        if (variant.renderer == defaultRenderer) {
+            val publicationName = variant.name.replaceFirst(variant.renderer, "default")
+            publicationNames += publicationName
+            configureMavenPublication(
+                variant.name,
+                publicationName,
+                variant.postfix,
+                if (variant.titleDetails.isEmpty()) "" else " (${variant.titleDetails.joinToString()})"
+            )
+        }
+
+        // Publications of the same variant share the artifact and its signature file, so each of
+        // their publish tasks has to wait for all of their signing tasks.
+        val taskNames = publicationNames.map { it.replaceFirstChar(Char::uppercaseChar) }
+        val signingTasks = tasks.withType<Sign>().matching { task ->
+            taskNames.any { task.name == "sign${it}Publication" }
+        }
+        val publishTasks = tasks.withType<PublishToMavenRepository>().matching { task ->
+            taskNames.any { task.name.startsWith("publish${it}PublicationTo") }
+        }
+        publishTasks.configureEach { dependsOn(signingTasks) }
+
+        tasks.register("publish${taskNames.first()}Publications") {
+            group = "publishing"
+            description = "Publishes ${publicationNames.joinToString(" and ")} to the configured Maven repository."
+            dependsOn(publishTasks)
+        }
+    }
 }
 
 // Wire per-variant compile classpaths into the Javadoc task.
