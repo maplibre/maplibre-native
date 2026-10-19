@@ -186,3 +186,89 @@ TEST(TerrainCamera, AnchoringAtAGrazingPitchLeavesTheCameraAlone) {
     EXPECT_NEAR(*camera.zoom, 9.0, 1e-9);
     test.expectEyeAt(before);
 }
+
+// Anchoring raises the zoom. Past the maximum zoom, jumpTo would clamp it and the view would step
+// back, so the anchor leaves the camera alone there.
+TEST(TerrainCamera, AnchoringPastMaxZoomLeavesTheCameraAlone) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+    // Lets the renderer report the plateau under the centre.
+    ASSERT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+    // Anchoring on the plateau raises the zoom by ~0.15.
+    test.map.setBounds(BoundOptions().withMaxZoom(10.05));
+    const vec3 before = test.eye();
+
+    test.map.anchorCenterOnTerrain();
+    const auto camera = test.map.getCameraOptions({});
+    EXPECT_NEAR(*camera.centerAltitude, 0.0, 0.001);
+    EXPECT_NEAR(*camera.zoom, 10.0, 1e-9);
+    test.expectEyeAt(before);
+
+    // With room to zoom in, the same anchor goes through.
+    test.map.setBounds(BoundOptions().withMaxZoom(util::DEFAULT_MAX_ZOOM));
+    test.map.anchorCenterOnTerrain();
+    EXPECT_NEAR(*test.map.getCameraOptions({}).centerAltitude, plateauMeters, 0.5);
+    test.expectEyeAt(before);
+}
+
+// The same for the bounds: they would hold the centre back from where the anchor moves it.
+TEST(TerrainCamera, AnchoringPastTheBoundsLeavesTheCameraAlone) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+    // Lets the renderer report the plateau under the centre.
+    ASSERT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+    // The anchor moves the centre ~1.7 km towards the camera, south here; the bounds end ~500 m
+    // south of it.
+    const LatLng center = *test.map.getCameraOptions({}).center;
+    test.map.setBounds(BoundOptions().withLatLngBounds(LatLngBounds::hull(
+        {center.latitude() - 0.0045, center.longitude() - 1.0}, {center.latitude() + 1.0, center.longitude() + 1.0})));
+    const vec3 before = test.eye();
+
+    test.map.anchorCenterOnTerrain();
+    const auto camera = test.map.getCameraOptions({});
+    EXPECT_NEAR(*camera.centerAltitude, 0.0, 0.001);
+    EXPECT_NEAR(*camera.zoom, 10.0, 1e-9);
+    EXPECT_NEAR(camera.center->latitude(), center.latitude(), 1e-9);
+    EXPECT_NEAR(camera.center->longitude(), center.longitude(), 1e-9);
+    test.expectEyeAt(before);
+}
+
+// A move across the antimeridian wraps the centre's longitude, which is no limit cutting it short.
+TEST(TerrainCamera, AnchoringAcrossTheAntimeridianGoesThrough) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    // Looking west from just west of the antimeridian: the camera, and the anchor's move towards
+    // it, are east of the centre.
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{47.2692, 179.99}).withZoom(10.0).withBearing(270.0));
+    // Lets the renderer report the plateau under the centre.
+    ASSERT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+
+    test.map.anchorCenterOnTerrain();
+    const auto camera = test.map.getCameraOptions({});
+    EXPECT_NEAR(*camera.centerAltitude, plateauMeters, 0.5);
+    EXPECT_LT(camera.center->longitude(), -179.9);
+}
+
+// Going back to sea level lowers the zoom. Past the minimum zoom the centre comes down where it is,
+// at its zoom, as in gl-js, rather than stay up in the air over the flat map.
+TEST(TerrainCamera, ReturnToSeaLevelAtMinZoomKeepsTheCentre) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+    // Lets the renderer report the plateau under the centre.
+    ASSERT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+    test.map.anchorCenterOnTerrain();
+    const auto anchored = test.map.getCameraOptions({});
+    ASSERT_NEAR(*anchored.centerAltitude, plateauMeters, 0.5);
+    // Keeping the view would take the zoom back to 10.
+    test.map.setBounds(BoundOptions().withMinZoom(10.05));
+
+    test.map.getStyle().setTerrain(nullptr);
+    EXPECT_NEAR(test.renderAndGetAltitude(1), 0.0, 0.001);
+    const auto camera = test.map.getCameraOptions({});
+    EXPECT_NEAR(*camera.zoom, *anchored.zoom, 1e-9);
+    EXPECT_NEAR(camera.center->latitude(), anchored.center->latitude(), 1e-9);
+    EXPECT_NEAR(camera.center->longitude(), anchored.center->longitude(), 1e-9);
+}

@@ -1,5 +1,6 @@
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_impl.hpp>
+#include <mln/math/wrap.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source.hpp>
 #include <mln/style/style_impl.hpp>
@@ -129,8 +130,7 @@ void Map::Impl::onUpdate() {
     }
     hadTerrain = hasTerrain;
     if (centerAwaitingSeaLevel && !transform.inTransition()) {
-        centerAwaitingSeaLevel = false;
-        setCenterAltitudeKeepingView(0.0);
+        returnCenterToSeaLevel();
     }
 
     std::optional<Immutable<style::Terrain::Impl>> terrainImpl;
@@ -384,11 +384,31 @@ bool Map::Impl::setCenterAltitudeKeepingView(double altitudeMeters) {
     const Point<double> center = Projection::project(*camera.center, scale);
     const LatLng anchored = Projection::unproject(
         {center.x - shift * std::sin(bearing), center.y + shift * std::cos(bearing)}, scale);
-    transform.jumpTo(CameraOptions()
-                         .withCenter(anchored)
-                         .withZoom(*camera.zoom + std::log2(distance / remaining))
-                         .withCenterAltitude(altitudeMeters));
+    const double zoom = *camera.zoom + std::log2(distance / remaining);
+    const auto keepingView = CameraOptions().withCenter(anchored).withZoom(zoom).withCenterAltitude(altitudeMeters);
+
+    // The zoom limits, the bounds and the constrain mode cut off whatever part of a move they
+    // don't allow, and a move cut short shifts the view (gl-js's moveCenterOntoTerrain undoes one
+    // that passes maxZoom). Try it on a copy, and leave the camera alone unless all of it goes
+    // through.
+    Transform trial(state);
+    trial.jumpTo(keepingView);
+    const LatLng reached = trial.getLatLng();
+    if (std::abs(trial.getZoom() - zoom) > 1e-9 || std::abs(reached.latitude() - anchored.latitude()) > 1e-9 ||
+        std::abs(util::wrap(reached.longitude() - anchored.longitude(), -180.0, 180.0)) > 1e-9) {
+        return false;
+    }
+    transform.jumpTo(keepingView);
     return true;
+}
+
+void Map::Impl::returnCenterToSeaLevel() {
+    centerAwaitingSeaLevel = false;
+    // Where the limits refuse the move that keeps the view, keep the centre and zoom instead, as
+    // gl-js does (applyTerrainChange), rather than leave the centre up in the air.
+    if (!setCenterAltitudeKeepingView(0.0) && transform.getState().getCenterAltitude() != 0.0) {
+        transform.jumpTo(CameraOptions().withCenterAltitude(0.0));
+    }
 }
 
 void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
