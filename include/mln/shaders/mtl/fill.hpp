@@ -592,11 +592,11 @@ struct DataVertex {
 #if !defined(HAS_UNIFORM_u_outline_color)
     float outline_color[4];
 #endif
-#if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort pattern_from[4];
-#endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     ushort pattern_to[4];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    ushort pattern_from[4];
 #endif
 };
 

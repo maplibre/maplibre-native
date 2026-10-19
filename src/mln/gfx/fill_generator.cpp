@@ -65,7 +65,7 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& vertices,
                             std::vector<bool>& ignoredVertices) {
     std::size_t startVertices = vertices.elements();
     uint countVertices = static_cast<uint>(ring.size() - 1);
-    if (!countVertices) {
+    if (countVertices < 3) {
         return 0;
     }
     for (uint i = 0; i < countVertices; i++) {
