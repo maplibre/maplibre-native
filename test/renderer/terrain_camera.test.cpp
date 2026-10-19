@@ -61,11 +61,12 @@ struct TerrainCameraTest {
     HeadlessFrontend frontend{{256, 256}, 1};
     MapAdapter map;
 
-    TerrainCameraTest()
+    // Continuous runs camera transitions on the clock, for tests that do not render.
+    explicit TerrainCameraTest(MapMode mode = MapMode::Static)
         : map(frontend,
               MapObserver::nullObserver(),
               fileSource,
-              MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())) {
+              MapOptions().withMapMode(mode).withSize(frontend.getSize())) {
         fileSource->tileResponse = [this](const Resource&) {
             Response res;
             res.data = std::make_shared<std::string>(tile);
@@ -271,4 +272,21 @@ TEST(TerrainCamera, ReturnToSeaLevelAtMinZoomKeepsTheCentre) {
     EXPECT_NEAR(*camera.zoom, *anchored.zoom, 1e-9);
     EXPECT_NEAR(camera.center->latitude(), anchored.center->latitude(), 1e-9);
     EXPECT_NEAR(camera.center->longitude(), anchored.center->longitude(), 1e-9);
+}
+
+// A running transition re-applies the altitude it started with on every frame, so the return to
+// sea level waits for it to end (here, to be cancelled), then keeps the view.
+TEST(TerrainCamera, RemovingTerrainMidTransitionReturnsAfterIt) {
+    TerrainCameraTest test{MapMode::Continuous};
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0).withCenterAltitude(plateauMeters));
+    test.map.easeTo(CameraOptions().withBearing(90.0), AnimationOptions(Seconds(10)));
+
+    test.map.getStyle().setTerrain(nullptr);
+    EXPECT_NEAR(*test.map.getCameraOptions({}).centerAltitude, plateauMeters, 0.001);
+
+    const vec3 before = test.eye();
+    test.map.cancelTransitions();
+    EXPECT_NEAR(*test.map.getCameraOptions({}).centerAltitude, 0.0, 0.001);
+    test.expectEyeAt(before);
 }
