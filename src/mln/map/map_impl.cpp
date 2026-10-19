@@ -117,10 +117,11 @@ void Map::Impl::onUpdate() {
     transform.updateTransitions(timePoint);
 
     // The clamp stood aside for a transition (onTerrainCenterElevationChanged); now that it
-    // is over, put the centre on the ground it arrived over.
+    // is over, put the centre on the ground it arrived over. The reported height outlives a
+    // terrain removed during the transition, so only apply it while there is still terrain.
     if (centerAwaitingTerrainAnchor && !transform.inTransition()) {
         centerAwaitingTerrainAnchor = false;
-        if (centerClampedToGround && !std::isnan(terrainCenterElevation)) {
+        if (centerClampedToGround && style->impl->getTerrain() && !std::isnan(terrainCenterElevation)) {
             clampCenterToTerrain(terrainCenterElevation);
         }
     }
