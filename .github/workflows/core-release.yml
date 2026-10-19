@@ -52,7 +52,7 @@ jobs:
 
       - run: brew install webp libuv llvm
 
-      - uses: taiki-e/install-action@ba47c86ac325773530516bb756137ac718732518 # v2.86.5
+      - uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
         with:
           tool: armerge@2
 
@@ -68,7 +68,7 @@ jobs:
 
       - name: Upload macOS artifacts
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macos-metal-build
           path: |
@@ -110,7 +110,7 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@ba47c86ac325773530516bb756137ac718732518 # v2.86.5
+      - uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
         with:
           tool: armerge@2
 
@@ -131,7 +131,7 @@ jobs:
 
       - name: Upload Linux artifacts
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}-build
           path: |
@@ -172,7 +172,7 @@ jobs:
 
       - name: Upload Windows artifact
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: windows-${{ matrix.renderer }}-build
           path: |

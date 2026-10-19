@@ -147,11 +147,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         bool hasSpace = true;
         for (const auto& iconEntry : icons) {
             const auto& icon = iconEntry.second;
-
-            auto imageHash = util::hash(icon->id);
-            int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2 + icon->image.size.area());
-            const auto size = Size(icon->image.size.width + 2 * padding, icon->image.size.height + 2 * padding);
-            const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
+            const auto& texHandle = reserveImage(imageAtlas.dynamicTexture, icon, ImageType::Icon);
             if (!texHandle) {
                 hasSpace = false;
                 break;
@@ -161,12 +157,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         if (hasSpace) {
             for (const auto& patternEntry : patterns) {
                 const auto& pattern = patternEntry.second;
-
-                auto patternHash = util::hash(pattern->id);
-                int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2 + pattern->image.size.area());
-                const auto size = Size(pattern->image.size.width + 2 * padding,
-                                       pattern->image.size.height + 2 * padding);
-                const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
+                const auto& texHandle = reserveImage(imageAtlas.dynamicTexture, pattern, ImageType::Pattern);
                 if (!texHandle) {
                     hasSpace = false;
                     break;
@@ -176,11 +167,11 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         }
         if (!hasSpace) {
             for (const auto& [texHandle, icon] : iconsToUpload) {
-                imageAtlas.dynamicTexture->removeTexture(texHandle);
+                releaseTexture(imageAtlas.dynamicTexture, texHandle);
             }
             iconsToUpload.clear();
             for (const auto& [texHandle, pattern] : patternsToUpload) {
-                imageAtlas.dynamicTexture->removeTexture(texHandle);
+                releaseTexture(imageAtlas.dynamicTexture, texHandle);
             }
             patternsToUpload.clear();
             imageAtlas.dynamicTexture = nullptr;
@@ -240,6 +231,35 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
     return imageAtlas;
 }
 
+std::optional<TextureHandle> DynamicTextureAtlas::reserveImage(const DynamicTexturePtr& dynamicTexture,
+                                                               const Immutable<style::Image::Impl>& image,
+                                                               ImageType type) {
+    const auto size = Size(image->image.size.width + 2 * padding, image->image.size.height + 2 * padding);
+    const ImageAllocationKey key{dynamicTexture.get(), image.get(), type};
+
+    // Reuse the bin of this exact revision; otherwise let the shelf pack assign a fresh id.
+    const auto it = imageAllocations.find(key);
+    auto texHandle = dynamicTexture->reserveSize(size, it != imageAllocations.end() ? it->second.binId : -1);
+    if (texHandle && it == imageAllocations.end()) {
+        imageAllocations.emplace(key, ImageAllocation{image, texHandle->getId()});
+        imageAllocationKeys.emplace(BinKey{dynamicTexture.get(), texHandle->getId()}, key);
+    }
+    return texHandle;
+}
+
+void DynamicTextureAtlas::releaseTexture(const DynamicTexturePtr& dynamicTexture, const TextureHandle& texHandle) {
+    if (!dynamicTexture->removeTexture(texHandle)) {
+        return;
+    }
+
+    // The last handle was released, so forget the revision; its bin may now be reused by other images.
+    const auto it = imageAllocationKeys.find(BinKey{dynamicTexture.get(), texHandle.getId()});
+    if (it != imageAllocationKeys.end()) {
+        imageAllocations.erase(it->second);
+        imageAllocationKeys.erase(it);
+    }
+}
+
 void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textureHandles,
                                          const DynamicTexturePtr& dynamicTexture) {
     if (!dynamicTexture) {
@@ -249,7 +269,7 @@ void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textu
     std::scoped_lock lock(mutex);
 
     for (const auto& texHandle : textureHandles) {
-        dynamicTexture->removeTexture(texHandle);
+        releaseTexture(dynamicTexture, texHandle);
     }
 }
 

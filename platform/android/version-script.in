@@ -1,0 +1,6 @@
+{
+  global:
+    JNI_OnLoad;
+@MLN_PLUGIN_EXPORTS@
+  local: *;
+};

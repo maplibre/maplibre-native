@@ -53,7 +53,20 @@ MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_)
     assert(scheduler);
 }
 
+void MapRenderer::MailboxData::reset() {
+    std::shared_ptr<Mailbox> old;
+    {
+        std::scoped_lock lock(mutex);
+        old = std::move(mailbox);
+    }
+
+    if (old) {
+        old->close();
+    }
+}
+
 std::shared_ptr<Mailbox> MapRenderer::MailboxData::getMailbox() const noexcept {
+    std::scoped_lock lock(mutex);
     if (!mailbox) {
         mailbox = std::make_shared<Mailbox>(*scheduler);
     }
@@ -67,21 +80,28 @@ void MapRenderer::reset() {
         destroyed = true;
 
         if (renderer) {
-            // Make sure to destroy the renderer on the GL Thread
-            auto self = ActorRef<MapRenderer>(*this, mailboxData.getMailbox());
-            self.ask(&MapRenderer::resetRenderer).wait();
+            // Make sure to destroy the renderer on the render Thread
+            if (GetCurrent(false) == this) {
+                resetRenderer();
+            } else {
+                auto self = ActorRef<MapRenderer>(*this, mailboxData.getMailbox());
+                self.ask(&MapRenderer::resetRenderer).wait();
+            }
         }
 
-        // Lock to make sure there is no concurrent initialisation on the gl thread
+        // Lock to make sure there is no concurrent initialisation on the render thread
         std::scoped_lock lock(initialisationMutex);
         rendererObserver.reset();
+        rendererRef.reset();
+        mailboxData.reset();
     } catch (const std::exception& exception) {
         Log::Error(Event::Android, std::string("MapRenderer::reset failed: ") + exception.what());
     }
 }
 
-ActorRef<Renderer> MapRenderer::actor() const {
-    return *rendererRef;
+std::optional<ActorRef<Renderer>> MapRenderer::actor() {
+    std::scoped_lock lock(initialisationMutex);
+    return rendererRef ? std::make_optional(*rendererRef) : std::nullopt;
 }
 
 void MapRenderer::schedule(std::function<void()>&& scheduled) {
@@ -192,17 +212,28 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
             }));
 }
 
-// Called on OpenGL thread //
+// Called on render thread //
 
 void MapRenderer::resetRenderer() {
-    renderer.reset();
-
-    if (!asyncRendererCleanup) {
-        backend.reset();
+    {
+        std::scoped_lock lock(updateMutex);
+        updateParameters.reset();
     }
 
-    window.reset();
-    swapBehaviorFlush = false;
+    {
+        std::scoped_lock lock(initialisationMutex);
+
+        rendererRef.reset();
+        mailboxData.reset();
+        renderer.reset();
+
+        if (!asyncRendererCleanup) {
+            backend.reset();
+        }
+
+        window.reset();
+        swapBehaviorFlush = false;
+    }
 }
 
 void MapRenderer::scheduleSnapshot(std::unique_ptr<SnapshotCallback> callback) {
@@ -281,6 +312,8 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     }
 
     // Reset in opposite order
+    rendererRef.reset();
+    mailboxData.reset();
     renderer.reset();
     backend.reset();
     window = std::move(window_);

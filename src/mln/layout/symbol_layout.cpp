@@ -1,26 +1,29 @@
-#include <algorithm>
 #include <mln/layout/symbol_layout.hpp>
-#include <mln/layout/merge_lines.hpp>
+
 #include <mln/layout/clip_lines.hpp>
+#include <mln/layout/merge_lines.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/renderer/bucket_parameters.hpp>
 #include <mln/renderer/layers/render_symbol_layer.hpp>
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/text/get_anchors.hpp>
-#include <mln/text/shaping.hpp>
 #include <mln/text/glyph_manager.hpp>
+#include <mln/text/shaping.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
 #include <mln/tile/tile.hpp>
-#include <mln/util/utf.hpp>
 #include <mln/util/constants.hpp>
-#include <mln/util/string.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/feature.hpp>
 #include <mln/util/i18n.hpp>
 #include <mln/util/platform.hpp>
-#include <mln/util/containers.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/utf.hpp>
 
 #include <mapbox/polylabel.hpp>
 
+#include <algorithm>
 #include <numbers>
+#include <optional>
 
 using namespace std::numbers;
 
@@ -55,9 +58,13 @@ inline const SymbolLayerProperties& toSymbolLayerProperties(const Immutable<Laye
 }
 
 inline Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> createLayout(
-    const SymbolLayoutProperties::Unevaluated& unevaluated, float zoom) {
+    const SymbolLayoutProperties::Unevaluated& unevaluated,
+    float zoom,
+    std::shared_ptr<const GlobalStateMap> globalState) {
+    PropertyEvaluationParameters evaluationParameters(zoom);
+    evaluationParameters.globalState = std::move(globalState);
     auto layout = makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>(
-        unevaluated.evaluate(PropertyEvaluationParameters(zoom)));
+        unevaluated.evaluate(evaluationParameters));
 
     if (layout->get<IconRotationAlignment>() == AlignmentType::Auto) {
         if (layout->get<SymbolPlacement>() != SymbolPlacementType::Point) {
@@ -128,13 +135,26 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
       pixelRatio(parameters.pixelRatio),
       tileSize(static_cast<uint32_t>(util::tileSize_D * overscaling)),
       tilePixelRatio(static_cast<float>(util::EXTENT) / tileSize),
-      layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom)) {
+      layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom, parameters.globalState)),
+      retainFeaturesById(parameters.retainFeaturesById) {
     const SymbolLayer::Impl& leader = toSymbolLayerProperties(layers.at(0)).layerImpl();
 
     textSize = leader.layout.get<TextSize>();
     iconSize = leader.layout.get<IconSize>();
     textRadialOffset = leader.layout.get<TextRadialOffset>();
     textVariableAnchorOffset = leader.layout.get<TextVariableAnchorOffset>();
+
+    // These property values are retained unevaluated; capture the global
+    // state so that later evaluations can resolve "global-state" expressions.
+    const auto captureGlobalState = [&](auto& propertyValue) {
+        if (propertyValue.isExpression()) {
+            propertyValue.asExpression().captureGlobalState(parameters.globalState);
+        }
+    };
+    captureGlobalState(textSize);
+    captureGlobalState(iconSize);
+    captureGlobalState(textRadialOffset);
+    captureGlobalState(textVariableAnchorOffset);
 
     const bool hasText = has<TextField>(*layout) && has<TextFont>(*layout);
     const bool hasIcon = has<IconImage>(*layout);
@@ -172,8 +192,10 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
     for (size_t i = 0; i < featureCount; ++i) {
         auto feature = sourceLayer->getFeature(i);
         if (!leader.filter(expression::EvaluationContext(this->zoom, feature.get())
-                               .withCanonicalTileID(&parameters.tileID.canonical)))
+                               .withCanonicalTileID(&parameters.tileID.canonical)
+                               .withGlobalState(parameters.globalState.get()))) {
             continue;
+        }
 
         SymbolFeature ft(std::move(feature));
 
@@ -860,7 +882,9 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
                 if (!sortKeyRanges.empty() && sortKeyRanges.back().sortKey == feature.sortKey) {
                     sortKeyRanges.back().end = symbolInstances.size();
                 } else {
-                    sortKeyRanges.push_back({feature.sortKey, symbolInstances.size() - 1, symbolInstances.size()});
+                    sortKeyRanges.push_back({.sortKey = feature.sortKey,
+                                             .start = symbolInstances.size() - 1,
+                                             .end = symbolInstances.size()});
                 }
             }
         }
@@ -1032,6 +1056,8 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                  std::move(placementModes),
                                                  iconsInText);
 
+    bucket->setRetainFeaturesById(retainFeaturesById);
+
     for (SymbolInstance& symbolInstance : bucket->symbolInstances) {
         if (!symbolInstance.check(SYM_GUARD_LOC)) {
             continue;
@@ -1042,6 +1068,8 @@ void SymbolLayout::createBucket(const ImagePositions&,
         const bool singleLine = symbolInstance.getSingleLine();
 
         const auto& feature = features.at(symbolInstance.getLayoutFeatureIndex());
+        const auto retainFeatureId = (retainFeaturesById && feature.feature) ? Bucket::getRetainFeatureID(feature)
+                                                                             : std::optional<std::string>{};
 
         // Insert final placement into collision tree and add glyphs/icons to buffers
 
@@ -1059,7 +1087,8 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                       symbolInstance.getIconOffset(),
                                                       writingMode,
                                                       symbolInstance.line(),
-                                                      std::vector<float>());
+                                                      std::vector<float>(),
+                                                      retainFeatureId);
                 index = iconBuffer.placedSymbols.size() - 1;
                 PlacedSymbol& iconSymbol = iconBuffer.placedSymbols.back();
                 iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
@@ -1190,6 +1219,9 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
     const bool hasFormatSectionOverrides = bucket.hasFormatSectionOverrides();
     const auto& placedIconIndex = writingMode == WritingModeType::Vertical ? symbolInstance.getPlacedVerticalIconIndex()
                                                                            : symbolInstance.getPlacedIconIndex();
+
+    const auto featureId = (retainFeaturesById && feature.feature) ? featureIDtoString(feature.getID()) : std::nullopt;
+
     bucket.text.placedSymbols.emplace_back(symbolInstance.getAnchor().point,
                                            symbolInstance.getAnchor().segment.value_or(0u),
                                            sizeData.min,
@@ -1198,6 +1230,7 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
                                            writingMode,
                                            symbolInstance.line(),
                                            calculateTileDistances(symbolInstance.line(), symbolInstance.getAnchor()),
+                                           featureId,
                                            placedIconIndex);
     placedIndex = bucket.text.placedSymbols.size() - 1;
     PlacedSymbol& placedSymbol = bucket.text.placedSymbols.back();

@@ -13,8 +13,6 @@
 #include <mln/shaders/vulkan/clipping_mask.hpp>
 #include <mln/shaders/vulkan/collision.hpp>
 #include <mln/shaders/vulkan/color_relief.hpp>
-#include <mln/shaders/vulkan/custom_geometry.hpp>
-#include <mln/shaders/vulkan/custom_symbol_icon.hpp>
 #include <mln/shaders/vulkan/debug.hpp>
 #include <mln/shaders/vulkan/fill.hpp>
 #include <mln/shaders/vulkan/fill_extrusion.hpp>
@@ -701,8 +699,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
                   shaders::BuiltIn::ColorReliefShader,
-                  shaders::BuiltIn::CustomGeometryShader,
-                  shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
@@ -720,6 +716,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LineSDFShader,
+                  shaders::BuiltIn::LineGradientSDFShader,
                   shaders::BuiltIn::LinePatternShader,
                   shaders::BuiltIn::LocationIndicatorShader,
                   shaders::BuiltIn::LocationIndicatorTexturedShader,

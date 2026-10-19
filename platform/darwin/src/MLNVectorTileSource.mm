@@ -98,6 +98,38 @@ const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSou
   return MLNFeaturesFromMBGLFeatures(features);
 }
 
+// MARK: - Managing Feature State
+
+- (BOOL)setFeatureStateForSourceLayerID:(NSString *)sourceLayerID
+                              featureID:(NSString *)featureID
+                                  state:(NSDictionary<NSString *, id> *)state {
+  return [self mgl_setFeatureStateForSourceLayerID:sourceLayerID featureID:featureID state:state];
+}
+
+- (nullable NSDictionary<NSString *, id> *)featureStateForSourceLayerID:(NSString *)sourceLayerID
+                                                              featureID:(NSString *)featureID {
+  return [self mgl_featureStateForSourceLayerID:sourceLayerID featureID:featureID];
+}
+
+- (BOOL)removeFeatureStateForSourceLayerID:(NSString *)sourceLayerID
+                                 featureID:(nullable NSString *)featureID
+                                  stateKey:(nullable NSString *)stateKey {
+  return [self mgl_removeFeatureStateForSourceLayerID:sourceLayerID
+                                            featureID:featureID
+                                             stateKey:stateKey];
+}
+
+- (BOOL)removeFeatureStateForSourceLayerID:(NSString *)sourceLayerID
+                                 featureID:(NSString *)featureID {
+  return [self mgl_removeFeatureStateForSourceLayerID:sourceLayerID
+                                            featureID:featureID
+                                             stateKey:nil];
+}
+
+- (BOOL)resetFeatureStatesForSourceLayerID:(NSString *)sourceLayerID {
+  return [self mgl_removeFeatureStateForSourceLayerID:sourceLayerID featureID:nil stateKey:nil];
+}
+
 @end
 
 @implementation MLNVectorTileSource (Private)
@@ -161,15 +193,8 @@ static NSArray *const MLNMapboxStreetsAlternativeLanguages = @[
                                                                      NSString *_Nullable language,
                                                                      NSDictionary<NSString *, id>
                                                                          *_Nullable bindings) {
-                          NSString *languageCode;
-
-                          if (@available(iOS 10.0, macOS 10.12.0, *)) {
-                            languageCode =
-                                [NSLocale localeWithLocaleIdentifier:language].languageCode;
-                          } else {
-                            languageCode = [[NSLocale localeWithLocaleIdentifier:language]
-                                objectForKey:NSLocaleLanguageCode];
-                          }
+                          NSString *languageCode =
+                              [NSLocale localeWithLocaleIdentifier:language].languageCode;
 
                           return [languageCode isEqualToString:@"en"];
                         }]]

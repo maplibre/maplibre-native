@@ -27,6 +27,7 @@
 #include <mln/style/expression/within.hpp>
 #include <mln/style/expression/index_of.hpp>
 #include <mln/style/expression/slice.hpp>
+#include <mln/style/expression/semiliteral.hpp>
 
 #include <mln/style/expression/find_zoom_curve.hpp>
 #include <mln/style/expression/dsl.hpp>
@@ -44,8 +45,8 @@ namespace style {
 namespace expression {
 
 namespace {
-const auto requiredProps = std::array<std::string_view, 5>{
-    "zoom", "heatmap-density", "line-progress", "accumulated", "elevation"};
+const auto requiredProps = std::array<std::string_view, 6>{
+    "zoom", "heatmap-density", "line-progress", "accumulated", "elevation", "global-state"};
 
 bool isConstant(const Expression& expression) {
     const auto kind = expression.getKind();
@@ -124,6 +125,8 @@ constexpr const auto expressionRegistry = mapbox::eternal::hash_map<mapbox::eter
      {"format", FormatExpression::parse},
      {"image", ImageExpression::parse},
      {"interpolate", parseInterpolate},
+     {"interpolate-hcl", parseInterpolate},
+     {"interpolate-lab", parseInterpolate},
      {"length", Length::parse},
      {"let", Let::parse},
      {"literal", Literal::parse},
@@ -141,7 +144,8 @@ constexpr const auto expressionRegistry = mapbox::eternal::hash_map<mapbox::eter
      {"var", Var::parse},
      {"within", Within::parse},
      {"index-of", IndexOf::parse},
-     {"slice", Slice::parse}});
+     {"slice", Slice::parse},
+     {"semiliteral", Semiliteral::parse}});
 
 bool isExpression(const std::string& name) noexcept {
     return expressionRegistry.contains(name.c_str());

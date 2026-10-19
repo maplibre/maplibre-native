@@ -1,5 +1,6 @@
 #include <mln/style/expression/collator_expression.hpp>
 #include <mln/style/expression/dsl.hpp>
+#include <mln/style/expression/semiliteral.hpp>
 #include <mln/style/expression/format_section_override.hpp>
 #include <mln/style/layers/custom_layer_impl.hpp>
 #include <mln/test/util.hpp>
@@ -86,4 +87,9 @@ TEST(ExpressionDependencies, Distance) {
 TEST(ExpressionDependencies, CustomLayer) {
     auto impl = makeMutable<CustomLayer::Impl>("", nullptr);
     EXPECT_EQ(Dependency::None, CustomLayerProperties{std::move(impl)}.getDependencies());
+}
+
+TEST(ExpressionDependencies, Semiliteral) {
+    const Semiliteral expression(vec(get("property"), zoom()));
+    EXPECT_EQ(Dependency::Feature | Dependency::Zoom, expression.dependencies);
 }

@@ -13,6 +13,6 @@ Pod::Spec.new do |s|
         :type => "zip"
     }
     s.social_media_url  = 'https://mastodon.social/@maplibre'
-    s.ios.deployment_target = '12.0'
+    s.ios.deployment_target = '15.5'
     s.ios.vendored_frameworks = "MapLibre.xcframework"
 end

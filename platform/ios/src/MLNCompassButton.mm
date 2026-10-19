@@ -69,12 +69,7 @@
   UIGraphicsBeginImageContextWithOptions(scaleImage.size, NO, UIScreen.mainScreen.scale);
   [scaleImage drawInRect:{CGPointZero, scaleImage.size}];
 
-  UIFont *northFont;
-  if (@available(iOS 13.0, *)) {
-    northFont = [UIFont systemFontOfSize:11 weight:UIFontWeightLight];
-  } else {
-    northFont = [UIFont systemFontOfSize:11 weight:UIFontWeightUltraLight];
-  }
+  UIFont *northFont = [UIFont systemFontOfSize:11 weight:UIFontWeightLight];
 
   NSAttributedString *north = [[NSAttributedString alloc]
       initWithString:NSLocalizedStringWithDefaultValue(@"COMPASS_NORTH", nil, nil, @"N",

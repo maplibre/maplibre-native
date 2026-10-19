@@ -19,6 +19,7 @@
 #include <mln/map/camera.hpp>
 
 #include <mln/util/noncopyable.hpp>
+#include <mln/util/feature.hpp>
 #include <mln/util/geo.hpp>
 
 #include <memory>
@@ -89,6 +90,15 @@ public:
 
     void setTerrain(std::unique_ptr<Terrain>);
     Terrain* getTerrain() const;
+    /// Set a global state property. A null value resets the property to the
+    /// default defined in the style's root "state" property (or null).
+    void setGlobalStateProperty(const std::string& property, const Value& value);
+    GlobalStateMap getGlobalState() const;
+    std::shared_ptr<const GlobalStateMap> getGlobalStateShared() const;
+
+    /// Re-evaluate the visibility expressions of all layers against the
+    /// current global state.
+    void reevaluateLayerVisibilities();
 
     std::optional<Immutable<style::Image::Impl>> getImage(const std::string&) const;
     void addImage(std::unique_ptr<style::Image>);
@@ -128,6 +138,12 @@ private:
     std::unique_ptr<Light> light;
     std::unique_ptr<Terrain> terrain;
     std::unordered_map<std::string, bool> spritesLoadingStatus;
+
+    // Global state for the "global-state" expression. The map itself is
+    // immutable and replaced wholesale on change so that it can be safely
+    // shared across threads.
+    std::shared_ptr<const GlobalStateMap> globalState = std::make_shared<const GlobalStateMap>();
+    GlobalStateMap globalStateDefaults;
 
     // Defaults
     std::string name;

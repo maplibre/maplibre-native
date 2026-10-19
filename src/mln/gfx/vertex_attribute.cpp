@@ -30,6 +30,7 @@ std::size_t VertexAttribute::getStrideOf(gfx::AttributeDataType type) {
         case gfx::AttributeDataType::UByte3:
             return 3;
         case gfx::AttributeDataType::UByte4:
+        case gfx::AttributeDataType::UByte4Normalized:
             return 4;
         case gfx::AttributeDataType::Short:
             return 2;

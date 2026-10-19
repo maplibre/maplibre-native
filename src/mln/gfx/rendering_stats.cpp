@@ -1,15 +1,17 @@
 #include <mln/gfx/rendering_stats.hpp>
-#include <mln/style/style.hpp>
-#include <mln/style/sources/custom_geometry_source.hpp>
-#include <mln/style/layers/symbol_layer.hpp>
+
+#include <mln/renderer/render_layer.hpp>
 #include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/style/style.hpp>
 #include <mln/util/monotonic_timer.hpp>
 #include <mln/util/logging.hpp>
 
 #include <algorithm>
 #include <initializer_list>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 namespace mln {
 namespace gfx {
@@ -67,6 +69,11 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     terrainUpdateTime += r.terrainUpdateTime;
     terrainTweakerTime += r.terrainTweakerTime;
     terrainDepthTime += r.terrainDepthTime;
+
+    for (const auto& [sourceLayerID, layerFeatures] : r.frameRenderedFeatures) {
+        RenderLayer::Stats::merge(frameRenderedFeatures[sourceLayerID], layerFeatures);
+    }
+
     return *this;
 }
 
