@@ -12,7 +12,7 @@ on:
 
 jobs:
   create-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -92,16 +92,16 @@ jobs:
       matrix:
         include:
           - renderer: opengl
-            runner: { os: ubuntu-latest, arch: x64 }
+            runner: { os: ubuntu-26.04, arch: x64 }
           - renderer: vulkan
-            runner: { os: ubuntu-latest, arch: x64 }
+            runner: { os: ubuntu-26.04, arch: x64 }
           - renderer: wgpu
             preset_renderer: webgpu-wgpu
-            runner: { os: ubuntu-latest, arch: x64 }
+            runner: { os: ubuntu-26.04, arch: x64 }
           - renderer: opengl
-            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+            runner: { os: ubuntu-26.04-arm, arch: arm64 }
           - renderer: vulkan
-            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+            runner: { os: ubuntu-26.04-arm, arch: arm64 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
