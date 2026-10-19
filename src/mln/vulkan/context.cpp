@@ -69,6 +69,7 @@ Context::~Context() noexcept {
     MBGL_VERIFY_THREAD(tid);
 
     destroyResources();
+    placeholderTexture2D.reset();
 
     {
         std::scoped_lock lock(glslangMutex);

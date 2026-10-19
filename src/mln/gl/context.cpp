@@ -112,6 +112,7 @@ Context::~Context() noexcept {
         // Delete all pooled resources while the context is still valid
         texturePool.reset();
         uboAllocator.reset();
+        placeholderTexture2D.reset();
 
 #if !defined(NDEBUG)
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
