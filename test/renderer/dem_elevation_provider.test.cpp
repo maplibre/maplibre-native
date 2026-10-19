@@ -69,6 +69,11 @@ bool overlaps(const CanonicalTileID& a, const CanonicalTileID& b) {
     return covers(a, b) || covers(b, a);
 }
 
+// The range spanning `low` and `high`, as DEMElevationProvider reports it.
+Range<double> span(const Range<int32_t>& low, const Range<int32_t>& high) {
+    return {static_cast<double>(low.min), static_cast<double>(high.max)};
+}
+
 // The same elevation range everywhere.
 class ConstantElevation : public util::TileElevationProvider {
 public:
@@ -115,6 +120,9 @@ public:
     };
     /// A DEM tile whose request is never answered, as if it were still on its way.
     std::optional<CanonicalTileID> withheldDEMTile;
+    /// When set, only DEM tiles of this zoom are answered, so that no tile of another zoom has a
+    /// range of its own.
+    std::optional<uint8_t> servedDEMZoom;
     /// Requests by tile URL template and tile.
     std::map<std::pair<std::string, CanonicalTileID>, int> requests;
 
@@ -131,7 +139,7 @@ public:
             const auto& tile = *resource.tileData;
             const CanonicalTileID id(tile.z, tile.x, tile.y);
             ++requests[{tile.urlTemplate, id}];
-            if (tile.urlTemplate != demURL || id == withheldDEMTile) {
+            if (tile.urlTemplate != demURL || id == withheldDEMTile || (servedDEMZoom && id.z != *servedDEMZoom)) {
                 return std::nullopt;
             }
             ++served;
@@ -161,6 +169,18 @@ public:
     void jumpTo(const CameraOptions& camera) {
         transform.jumpTo(camera);
         state = transform.getState();
+    }
+
+    /// Looks straight down at `tile`'s zoom, centred a quarter tile into it, so that the view
+    /// shows `tile` and its neighbours to the west, north and north-west, until their DEM has
+    /// loaded.
+    void loadAround(const CanonicalTileID& tile) {
+        jumpTo(CameraOptions()
+                   .withCenter(Projection::unproject(
+                       {(tile.x + 0.25) * util::tileSize_D, (tile.y + 0.25) * util::tileSize_D}, std::exp2(tile.z)))
+                   .withZoom(tile.z));
+        frame(false);
+        frame(false);
     }
 
     /// The elevation the next frame's covers will see.
@@ -369,4 +389,103 @@ TEST(DEMElevationProvider, ForgetsTheRangesOfAReplacedTileset) {
     test.demImpl = replacement.baseImpl;
     test.frame();
     EXPECT_EQ(std::nullopt, test.elevation(tile));
+}
+
+// A tile that no loaded DEM covers takes the range of the loaded ground nearest to it, not of all
+// the ground the source has loaded. After looking at high mountains, the camera moves on to low
+// ground far away; once some of the DEM there has loaded, the tile next to it is as low as that
+// ground. Taken as high as the mountains, it and the tiles beyond it would be requested by every
+// source's cover, only to drop out again, cancelled, as soon as their own DEM arrived.
+TEST(DEMElevationProvider, UnloadedTileTakesTheRangeOfTheGroundLoadedNearIt) {
+    TerrainSourcesTest test;
+    test.servedDEMZoom = 12;
+    // The Bernese Alps and, some 600 km away, the Netherlands: their nearest common ancestor is a
+    // tile of zoom 4.
+    const CanonicalTileID mountains(12, 2139, 1448);
+    const CanonicalTileID lowland(12, 2108, 1350);
+    const Range<int32_t> mountainRange{400, 3000};
+    const Range<int32_t> lowlandRange{0, 30};
+    test.elevationOf = [&](const CanonicalTileID& id) {
+        return covers(mountains.scaledTo(8), id) ? mountainRange : lowlandRange;
+    };
+
+    test.loadAround(mountains);
+    test.loadAround(lowland);
+    ASSERT_EQ(span(mountainRange, mountainRange), test.elevation(mountains));
+
+    // Just east of the loaded lowland, out of view: neither it nor any tile covering it loaded.
+    const CanonicalTileID next(12, lowland.x + 1, lowland.y);
+    ASSERT_EQ(0, (test.requests[{demURL, next}]));
+    EXPECT_EQ(span(lowlandRange, lowlandRange), test.elevation(next));
+}
+
+// A tile above the DEM's zoom levels, which the cover's traversal tests before it descends, has to
+// be at least as tall as every loaded tile inside it, or the traversal culls it while one of those
+// is in view. That is all it needs: ground loaded outside it does not raise it.
+TEST(DEMElevationProvider, LargeTileTakesTheRangeOfTheTilesLoadedInIt) {
+    TerrainSourcesTest test;
+    test.servedDEMZoom = 12;
+    // Two areas of different heights loaded inside one tile of zoom 8, and higher ground loaded
+    // outside it.
+    const CanonicalTileID large(8, 138, 88);
+    const CanonicalTileID west(12, (138 * 16) + 2, (88 * 16) + 2);
+    const CanonicalTileID east(12, (138 * 16) + 10, (88 * 16) + 10);
+    const CanonicalTileID elsewhere(12, 1000, 1000);
+    const Range<int32_t> westRange{100, 500};
+    const Range<int32_t> eastRange{1000, 2000};
+    test.elevationOf = [&](const CanonicalTileID& id) {
+        if (covers(west.scaledTo(10), id)) {
+            return westRange;
+        }
+        return covers(east.scaledTo(10), id) ? eastRange : Range<int32_t>{0, 4000};
+    };
+
+    test.loadAround(elsewhere);
+    test.loadAround(west);
+    test.loadAround(east);
+    ASSERT_EQ((Range<double>{0, 4000}), test.elevation(elsewhere));
+
+    EXPECT_EQ(span(westRange, eastRange), test.elevation(large));
+    // A tile with only one of the areas inside takes that one's range.
+    EXPECT_EQ(span(westRange, westRange), test.elevation(west.scaledTo(10)));
+
+    // Every tile above a loaded one, up to z0, contains its range.
+    for (const auto& tile : {west, east, elsewhere}) {
+        const auto inner = test.elevation(tile);
+        ASSERT_TRUE(inner);
+        for (int z = tile.z - 1; z >= 0; --z) {
+            const auto ancestor = tile.scaledTo(static_cast<uint8_t>(z));
+            const auto outer = test.elevation(ancestor);
+            ASSERT_TRUE(outer) << util::toString(ancestor);
+            EXPECT_LE(outer->min, inner->min) << util::toString(ancestor);
+            EXPECT_GE(outer->max, inner->max) << util::toString(ancestor);
+        }
+    }
+}
+
+// With nothing loaded inside a tile or near it, the tile takes the range of the deepest tile above
+// it that has loaded ground inside, and so of all the ground loaded only when it shares no closer
+// ancestor with any of it. Before anything has loaded, there is no answer.
+TEST(DEMElevationProvider, TileWithNothingLoadedNearItTakesTheRangeOfTheNearestLoadedArea) {
+    TerrainSourcesTest test;
+    test.servedDEMZoom = 12;
+    // Low ground in the north-west quarter of the world, high ground in the north-east one.
+    const CanonicalTileID low(12, 1000, 1000);
+    const CanonicalTileID high(12, 3000, 1000);
+    const Range<int32_t> lowRange{0, 100};
+    const Range<int32_t> highRange{0, 2000};
+    test.elevationOf = [&](const CanonicalTileID& id) {
+        return covers(CanonicalTileID(1, 0, 0), id) ? lowRange : highRange;
+    };
+    // Far from the low ground, in its quarter; and in a quarter of its own.
+    const CanonicalTileID inLowQuarter(12, 1500, 1900);
+    const CanonicalTileID inOwnQuarter(12, 1000, 3000);
+    EXPECT_EQ(std::nullopt, test.elevation(inLowQuarter));
+
+    test.loadAround(low);
+    test.loadAround(high);
+    ASSERT_EQ(span(highRange, highRange), test.elevation(high));
+
+    EXPECT_EQ(span(lowRange, lowRange), test.elevation(inLowQuarter));
+    EXPECT_EQ(span(lowRange, highRange), test.elevation(inOwnQuarter));
 }

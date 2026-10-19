@@ -16,10 +16,10 @@ std::optional<Range<double>> DEMElevationProvider::getTileElevationRange(const C
     }
 
     // The tile's own DEM, or failing that the deepest loaded ancestor's, or failing that the
-    // range of everything loaded (see the header).
+    // range of the loaded DEM nearest the tile (see the header).
     auto range = demSource->getElevationRange(id);
     if (!range) {
-        range = demSource->getOverallElevationRange();
+        range = demSource->getNearbyElevationRange(id);
     }
     if (!range) {
         return std::nullopt;

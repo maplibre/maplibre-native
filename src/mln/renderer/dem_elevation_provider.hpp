@@ -21,14 +21,18 @@ class RenderRasterDEMSource;
 /// not depend on which tiles are currently requested or drawn, because the cover decides that:
 /// see RenderRasterDEMSource::getElevationRange.
 ///
-/// For a tile with *no* loaded DEM covering it, it reports the range of all the terrain the
-/// source has loaded rather than "unknown". This is what lets the one-ring cover dilation in
-/// RenderTerrain::computeMeshCover re-test a not-yet-loaded frontier neighbour against the
-/// elevation-extended frustum: an unknown tile is assumed about as tall (or, for bathymetry, as
-/// deep) as the terrain around it, so the tile that belongs in view is kept and requested
-/// instead of assumed flat and dropped. It contains every loaded range, so it also never
-/// culls a large tile of the cover's traversal (above the DEM's zoom levels) whose loaded
-/// descendants are in view. nullopt only when nothing at all has loaded (cover stays flat,
+/// For a tile with *no* loaded DEM covering it, it reports the range of the loaded terrain
+/// nearest to it rather than "unknown": that of the loaded tiles inside it, or failing that of
+/// those inside its deepest ancestor that has any (see
+/// RenderRasterDEMSource::getNearbyElevationRange). This is what lets the one-ring cover
+/// dilation in RenderTerrain::computeMeshCover re-test a not-yet-loaded frontier neighbour
+/// against the elevation-extended frustum: an unknown tile is assumed about as tall (or, for
+/// bathymetry, as deep) as the terrain around it, so the tile that belongs in view is kept and
+/// requested instead of assumed flat and dropped. It contains the range of every loaded tile
+/// inside the tile, so it also never culls a large tile of the cover's traversal (above the
+/// DEM's zoom levels) whose loaded descendants are in view. And it stays local: terrain loaded
+/// far away, such as the mountains the camera came from, does not raise tiles next to low
+/// ground that has loaded. nullopt only when nothing at all has loaded (cover stays flat,
 /// exactly as before).
 class DEMElevationProvider final : public util::TileElevationProvider {
 public:
