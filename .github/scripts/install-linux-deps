@@ -15,6 +15,7 @@ packages=(
   llvm
   glslang-dev
   libbz2-dev
+  libicu-dev
   libxinerama-dev
   libxcursor-dev
   libxi-dev
