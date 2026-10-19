@@ -82,6 +82,13 @@ protected:
     // Returns tileset from the current impl.
     virtual const std::optional<Tileset>& getTileset() const = 0;
 
+    /// The tileset the tile pyramid's tiles come from.
+    const std::optional<Tileset>& getCachedTileset() const { return cachedTileset; }
+
+    /// Called when the tileset changes, once the tiles of the old one have been dropped, so that
+    /// anything kept from them can go too.
+    virtual void onTilesetChanged() {}
+
 private:
     uint8_t getMaxZoom() const final;
     void update(Immutable<style::Source::Impl>,

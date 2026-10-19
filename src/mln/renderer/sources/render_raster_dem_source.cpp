@@ -46,14 +46,6 @@ void RenderRasterDEMSource::updateInternal(const Tileset& tileset,
                                            const bool needsRendering,
                                            const bool needsRelayout,
                                            const TileParameters& parameters) {
-    // RenderTileSetSource::update drops every tile when the tileset changes, so the ranges
-    // decoded from them go too.
-    if (elevationRangesTileset != tileset) {
-        elevationRanges.clear();
-        descendantElevationRanges.clear();
-        elevationRangesTileset = tileset;
-    }
-
     tilePyramid.update(layers,
                        needsRendering,
                        needsRelayout,
@@ -68,12 +60,18 @@ void RenderRasterDEMSource::updateInternal(const Tileset& tileset,
     algorithm::updateTileMasks(tilePyramid.getRenderedTiles());
 }
 
+void RenderRasterDEMSource::onTilesetChanged() {
+    // The tiles the ranges were decoded from are gone, so the ranges go too.
+    elevationRanges.clear();
+    descendantElevationRanges.clear();
+}
+
 std::optional<Range<int32_t>> RenderRasterDEMSource::getElevationRange(const CanonicalTileID& id) const {
     if (elevationRanges.empty()) {
         return std::nullopt;
     }
     // Ranges are only ever kept for tiles of the tileset's zoom range.
-    const auto& zoomRange = elevationRangesTileset->zoomRange;
+    const auto& zoomRange = getCachedTileset()->zoomRange;
     for (int z = std::min(id.z, zoomRange.max); z >= zoomRange.min; --z) {
         const int dz = id.z - z;
         const auto it = elevationRanges.find(CanonicalTileID(static_cast<uint8_t>(z), id.x >> dz, id.y >> dz));
@@ -95,7 +93,7 @@ std::optional<Range<int32_t>> RenderRasterDEMSource::getNearbyElevationRange(con
         return std::nullopt;
     }
     // Only tiles of a zoom below the tileset's max have loaded descendants.
-    const int maxZoom = elevationRangesTileset->zoomRange.max;
+    const int maxZoom = getCachedTileset()->zoomRange.max;
     for (int z = std::min<int>(id.z, maxZoom - 1); z >= 0; --z) {
         const int dz = id.z - z;
         const auto it = descendantElevationRanges.find(

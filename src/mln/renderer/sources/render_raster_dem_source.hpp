@@ -48,6 +48,7 @@ private:
                         bool needsRelayout,
                         const TileParameters&) override;
     const std::optional<Tileset>& getTileset() const override;
+    void onTilesetChanged() override;
 
     const style::TileSource::Impl& impl() const;
 
@@ -63,8 +64,6 @@ private:
     /// descendants in there: what getNearbyElevationRange reads. They only ever widen, until the
     /// next drop below; the z0 entry spans every kept range of a tile below z0.
     std::unordered_map<CanonicalTileID, Range<int32_t>> descendantElevationRanges;
-    /// The tileset the ranges were decoded from.
-    std::optional<Tileset> elevationRangesTileset;
     /// Entries of the two maps together, some 60 bytes each, so about 0.5 MB at most. Past this
     /// many, the ranges of tiles the pyramid no longer holds are dropped, and the descendant
     /// ranges rebuilt from those it does. Far more than one view loads, ancestors included, so a
