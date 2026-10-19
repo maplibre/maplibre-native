@@ -43,7 +43,6 @@ const std::array<TextureInfo, 0> FillOutlineShaderSource::textures = {};
 
 using FillPatternShaderSource = ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal>;
 
-
 const std::array<AttributeInfo, 7> FillPatternShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPrevNextVertexAttribute},
