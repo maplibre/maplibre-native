@@ -109,6 +109,10 @@ void Map::Impl::onSourceChanged(style::Source& source) {
 }
 
 void Map::Impl::onUpdate() {
+    // Ahead of the still-mode return below: a camera the app sets before the next still render
+    // has to know that the terrain went (see settleCenterAwaitingSeaLevel).
+    noteTerrainRemoval();
+
     // Don't load/render anything in still mode until explicitly requested.
     if (mode != MapMode::Continuous && !stillImageRequest) {
         return;
@@ -122,13 +126,6 @@ void Map::Impl::onUpdate() {
     // up to kilometres above the now flat map, and pans, tile cover and label placement would
     // all work on that raised plane. Bring it back to sea level, keeping the view - once no
     // transition is running, since one in flight re-applies the altitude it started with.
-    const bool hasTerrain = style->impl->getTerrain() != nullptr;
-    if (hadTerrain && !hasTerrain) {
-        centerAwaitingSeaLevel = true;
-    } else if (hasTerrain) {
-        centerAwaitingSeaLevel = false;
-    }
-    hadTerrain = hasTerrain;
     if (centerAwaitingSeaLevel && !transform.inTransition()) {
         returnCenterToSeaLevel();
     }
@@ -411,6 +408,27 @@ void Map::Impl::returnCenterToSeaLevel() {
     }
 }
 
+void Map::Impl::noteTerrainRemoval() {
+    const bool hasTerrain = style->impl->getTerrain() != nullptr;
+    if (hadTerrain && !hasTerrain) {
+        centerAwaitingSeaLevel = true;
+    } else if (hasTerrain) {
+        centerAwaitingSeaLevel = false;
+    }
+    hadTerrain = hasTerrain;
+}
+
+void Map::Impl::settleCenterAwaitingSeaLevel() {
+    // A return still waiting, for a transition or for a still render, would move the camera the
+    // app is about to set instead of the one it replaces. The transition would give way to that
+    // camera anyway.
+    noteTerrainRemoval();
+    if (centerAwaitingSeaLevel) {
+        transform.cancelTransitions();
+        returnCenterToSeaLevel();
+    }
+}
+
 void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
     terrainCenterElevation = elevationMeters;
     if (!centerClampedToGround) {
@@ -430,6 +448,7 @@ void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
 
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
+    settleCenterAwaitingSeaLevel();
     transform.jumpTo(camera);
     onUpdate();
 }

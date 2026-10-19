@@ -132,13 +132,18 @@ public:
     /// of sight nearly grazes the plane at that altitude, the plane is (nearly) at the camera, or
     /// the zoom limits, the bounds or the constrain mode would cut the move short.
     bool setCenterAltitudeKeepingView(double altitudeMeters);
-    /// Whether the style had terrain at the last update, and whether the centre has yet to come
-    /// back to sea level since it was removed (a transition was in flight).
+    /// Whether the style had terrain when last checked, and whether the centre has yet to come
+    /// back to sea level since it was removed (a transition was in flight, or a still map has
+    /// not rendered since).
     bool hadTerrain = false;
     bool centerAwaitingSeaLevel = false;
+    void noteTerrainRemoval();
     /// Brings the centre down to sea level keeping the view or, where the limits refuse that,
     /// keeping the centre and zoom.
     void returnCenterToSeaLevel();
+    /// Runs a return still waiting before the app sets a camera, which every camera entry point
+    /// does first, so that the return does not move the app's camera afterwards.
+    void settleCenterAwaitingSeaLevel();
     bool debugAboveGroundLog = false;
 };
 

@@ -290,3 +290,41 @@ TEST(TerrainCamera, RemovingTerrainMidTransitionReturnsAfterIt) {
     EXPECT_NEAR(*test.map.getCameraOptions({}).centerAltitude, 0.0, 0.001);
     test.expectEyeAt(before);
 }
+
+// A camera the app sets while the return to sea level waits is the app's to keep: the return
+// comes first, from the camera being replaced, and must not move the new one afterwards.
+TEST(TerrainCamera, CameraSetWhileTheReturnWaitsIsKept) {
+    TerrainCameraTest test{MapMode::Continuous};
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0).withCenterAltitude(plateauMeters));
+    test.map.easeTo(CameraOptions().withBearing(90.0), AnimationOptions(Seconds(10)));
+    // The return waits for the ease.
+    test.map.getStyle().setTerrain(nullptr);
+
+    const LatLng target{47.3, 11.5};
+    test.map.jumpTo(CameraOptions().withCenter(target).withZoom(12.0));
+    const auto camera = test.map.getCameraOptions({});
+    EXPECT_NEAR(*camera.centerAltitude, 0.0, 0.001);
+    EXPECT_NEAR(*camera.zoom, 12.0, 1e-9);
+    EXPECT_NEAR(camera.center->latitude(), target.latitude(), 1e-9);
+    EXPECT_NEAR(camera.center->longitude(), target.longitude(), 1e-9);
+}
+
+// The same on a still map, where the return waits for the next render.
+TEST(TerrainCamera, CameraSetBeforeTheNextStillRenderIsKept) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+    // Lets the renderer report the plateau under the centre.
+    ASSERT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+    test.map.anchorCenterOnTerrain();
+    test.map.getStyle().setTerrain(nullptr);
+
+    const LatLng target{47.3, 11.5};
+    test.map.jumpTo(CameraOptions().withCenter(target).withZoom(12.0));
+    EXPECT_NEAR(test.renderAndGetAltitude(1), 0.0, 0.001);
+    const auto camera = test.map.getCameraOptions({});
+    EXPECT_NEAR(*camera.zoom, 12.0, 1e-9);
+    EXPECT_NEAR(camera.center->latitude(), target.latitude(), 1e-9);
+    EXPECT_NEAR(camera.center->longitude(), target.longitude(), 1e-9);
+}
