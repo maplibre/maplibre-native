@@ -67,6 +67,10 @@ cc_library(
         "//conditions:default": [],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    local_defines = select({
+        "//:rust": ["MLN_USE_RUST"],
+        "//conditions:default": [],
+    }),
     visibility = [
         "//platform/ios/test/core:__pkg__",
     ],

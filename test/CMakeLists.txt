@@ -203,7 +203,7 @@ endif()
 
 target_compile_definitions(
     mbgl-test
-    PRIVATE TEST_HAS_SERVER=${MLN_TEST_HAS_TEST_SERVER} CI_BUILD=${MLN_TEST_BUILD_ON_CI}
+    PRIVATE TEST_HAS_SERVER=${MLN_TEST_HAS_TEST_SERVER} CI_BUILD=${MLN_TEST_BUILD_ON_CI} $<$<BOOL:${MLN_USE_RUST}>:MLN_USE_RUST>
 )
 
 target_include_directories(

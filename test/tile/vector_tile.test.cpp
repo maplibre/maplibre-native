@@ -97,11 +97,14 @@ TEST(VectorTileData, MLTParseResults) {
 
         std::vector<std::string> layerNames = data.layerNames();
 
-        if (!testCase.fastPFOREnabled && testCase.useFastPFOR && layerNames.empty()) {
-            // The C++ decoder rejects FastPFOR when disabled; the Rust decoder safely accepts it.
+#ifndef MLN_USE_RUST
+        // If fast PFOR is not enabled, the fast PFOR tile should fail to parse.
+        // The Rust decoder always supports FastPFOR.
+        if (!testCase.fastPFOREnabled && testCase.useFastPFOR) {
             ASSERT_EQ(layerNames.size(), 0u);
             continue;
         }
+#endif
 
         // MLT layers are presented in the order they're encountered, not sorted alphabetically like MVT layers
         ASSERT_EQ(layerNames.size(), 2u);
@@ -124,5 +127,29 @@ TEST(VectorTileData, MLTParseResults) {
         ASSERT_EQ(properties.at("disputed"), *feature->getValue("disputed"));
 
         ASSERT_EQ(feature->getValue("invalid"), std::nullopt);
+    }
+}
+
+TEST(VectorTileData, MLTMatchesMVT) {
+    // The MVT and MLT versions of this fixture have the same "admin" layer. Their "water" layers
+    // differ (48 vs. 44 features), so that one isn't compared.
+    VectorMVTTileData mvt(std::make_shared<std::string>(util::read_file("test/fixtures/map/issue12432/0-0-0.mvt")));
+    VectorMLTTileData mlt(std::make_shared<std::string>(util::read_file("test/fixtures/map/issue12432/0-0-0.mlt")),
+                          true);
+
+    const auto mvtLayer = mvt.getLayer("admin");
+    const auto mltLayer = mlt.getLayer("admin");
+    ASSERT_TRUE(mvtLayer);
+    ASSERT_TRUE(mltLayer);
+    ASSERT_EQ(mvtLayer->featureCount(), mltLayer->featureCount());
+
+    for (std::size_t i = 0; i < mvtLayer->featureCount(); ++i) {
+        SCOPED_TRACE(i);
+        const auto mvtFeature = mvtLayer->getFeature(i);
+        const auto mltFeature = mltLayer->getFeature(i);
+        ASSERT_EQ(mvtFeature->getType(), mltFeature->getType());
+        ASSERT_EQ(mvtFeature->getID(), mltFeature->getID());
+        ASSERT_EQ(mvtFeature->getProperties(), mltFeature->getProperties());
+        ASSERT_EQ(mvtFeature->getGeometries(), mltFeature->getGeometries());
     }
 }
