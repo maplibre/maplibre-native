@@ -1255,8 +1255,10 @@ projection primitives in `collision_index.cpp`. The word "elevation" appears now
      drives every frame (`TerrainFlightActivity`), so it matters well before terrain is
      wired in. Pinned by `Map.FreeCameraPreservesCentreAltitude`, which fails on the old
      code on altitude, latitude and zoom.
-   - **(done 2026-09-06)** The feature: `Map::setCenterClampedToGround` (on by default, as
-     in gl-js). `RenderTerrain::getElevationForLatLng` samples the rendered surface under
+   - **(done 2026-09-06)** The feature: `Map::setCenterClampedToGround` (on by default then,
+     as in gl-js; off by default since 2026-09-10, because the jump it makes lands
+     asynchronously, part-way through gestures too, and browsing with it on ran away).
+     `RenderTerrain::getElevationForLatLng` samples the rendered surface under
      the centre; `Renderer::Impl` reports it through the new
      `RendererObserver::onTerrainCenterElevationChanged`, gated so a still map does not
      post a message per frame; `Map::Impl` applies it as a `centerAltitude` jump, ignoring
@@ -1273,6 +1275,22 @@ projection primitives in `collision_index.cpp`. The word "elevation" appears now
      And `Projection::project` is overloaded on the zoom argument's *type*: the `int32_t`
      overload returns tile units, the `double scale` one returns pixels. Taking the wrong
      one puts the sample in tile (0, 0) and reads 0 m with no error.
+   - **(#4711)** Gestures anchor the centre on the terrain once, when they start
+     (`Map::anchorCenterOnTerrain`, called by `MLNMapView`): the centre slides along the line
+     of sight onto the ground and the zoom follows, so the camera stays where it is. Removing
+     the terrain brings the centre back to sea level the same way. Two differences from gl-js,
+     both deliberate:
+     - **Not gated on the clamp.** gl-js anchors gestures (`putCenterBackOnTerrain`,
+       `moveCenterOntoTerrain`) and resets the elevation to 0 when terrain is removed
+       (`applyTerrainChange`) only with `centerClampedToGround` on, its default. Here the
+       clamp is off by default, and gating on it would bring back gestures that turn round a
+       sea-level point under the hills. The anchor is a one-off at a gesture's start that keeps
+       the view; the clamp is the continuous follow.
+     - **Removing terrain keeps the eye.** gl-js sets the elevation to 0 and keeps the centre
+       and zoom, so the camera drops by the centre's altitude. Here the centre
+       slides back down the line of sight and the zoom follows, so nothing on screen moves.
+       Only where the zoom limits or the bounds refuse that move does it keep the centre and
+       zoom, as gl-js does.
 3. **Elevated line labels** - thread the query through placement, then gl-js #7040's
    coordinate normalisation on top.
 

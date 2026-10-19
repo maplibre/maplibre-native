@@ -223,10 +223,16 @@ public:
     void setTerrainSkirtLength(TerrainSkirtLength length);
     TerrainSkirtLength getTerrainSkirtLength() const;
 
-    /// Whether the map centre rides the terrain surface rather than sea level. With it on
-    /// (the default, as in maplibre-gl-js) the centre altitude follows the rendered terrain
-    /// height under the centre, so pitching over tall ground keeps the camera above it
-    /// instead of sinking in. Inert when terrain is not enabled.
+    /// Whether the map centre rides the terrain surface rather than sea level. Off by
+    /// default (the clamp is applied asynchronously and can run away during a gesture);
+    /// with it on the centre altitude follows the rendered terrain height under the
+    /// centre, so pitching over tall ground keeps the camera above it instead of sinking
+    /// in, as in maplibre-gl-js. Inert when terrain is not enabled.
+    ///
+    /// Gestures anchor the centre on the terrain (anchorCenterOnTerrain), and removing the
+    /// terrain brings it back to sea level, whatever this is set to. maplibre-gl-js does both
+    /// only with its clamp on, which is its default; gated on a clamp that is off by default
+    /// here, gestures would go back to turning round a sea-level point under the terrain.
     void setCenterClampedToGround(bool clamped);
     bool getCenterClampedToGround() const;
 
@@ -238,6 +244,11 @@ public:
     /// degrees) that the line of sight nearly grazes the ground, and where the zoom limits or the
     /// bounds would cut the move short. Removing the terrain brings the centre back down to sea
     /// level the same way or, where the limits refuse that, keeping its centre and zoom.
+    ///
+    /// A one-off that keeps the view, for the start of a gesture, where setCenterClampedToGround
+    /// is the continuous follow; this runs whatever that is set to. Afterwards the camera reports
+    /// another centre and zoom for the same view, so save and restore a camera together with its
+    /// centerAltitude.
     void anchorCenterOnTerrain();
 
     /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain
