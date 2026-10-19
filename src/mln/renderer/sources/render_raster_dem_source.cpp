@@ -6,9 +6,20 @@
 #include <mln/renderer/buckets/hillshade_bucket.hpp>
 #include <mln/renderer/tile_parameters.hpp>
 
+#include <algorithm>
+
 namespace mln {
 
 using namespace style;
+
+namespace {
+
+Range<int32_t> elevationRangeOf(const HillshadeBucket& bucket) {
+    const auto& demData = bucket.getDEMData();
+    return {demData.getMinElevation(), demData.getMaxElevation()};
+}
+
+} // namespace
 
 RenderRasterDEMSource::RenderRasterDEMSource(Immutable<style::TileSource::Impl> impl_,
                                              const TaggedScheduler& threadPool_)
@@ -31,6 +42,14 @@ void RenderRasterDEMSource::updateInternal(const Tileset& tileset,
                                            const bool needsRendering,
                                            const bool needsRelayout,
                                            const TileParameters& parameters) {
+    // RenderTileSetSource::update drops every tile when the tileset changes, so the ranges
+    // decoded from them go too.
+    if (elevationRangesTileset != tileset) {
+        elevationRanges.clear();
+        overallElevationRange.reset();
+        elevationRangesTileset = tileset;
+    }
+
     tilePyramid.update(layers,
                        needsRendering,
                        needsRelayout,
@@ -43,6 +62,43 @@ void RenderRasterDEMSource::updateInternal(const Tileset& tileset,
                            return std::make_unique<RasterDEMTile>(tileID, baseImpl->id, parameters, tileset, observer_);
                        });
     algorithm::updateTileMasks(tilePyramid.getRenderedTiles());
+}
+
+std::optional<Range<int32_t>> RenderRasterDEMSource::getElevationRange(const CanonicalTileID& id) const {
+    if (elevationRanges.empty()) {
+        return std::nullopt;
+    }
+    // Ranges are only ever kept for tiles of the tileset's zoom range.
+    const auto& zoomRange = elevationRangesTileset->zoomRange;
+    for (int z = std::min(id.z, zoomRange.max); z >= zoomRange.min; --z) {
+        const int dz = id.z - z;
+        const auto it = elevationRanges.find(CanonicalTileID(static_cast<uint8_t>(z), id.x >> dz, id.y >> dz));
+        if (it != elevationRanges.end()) {
+            return it->second;
+        }
+    }
+    return std::nullopt;
+}
+
+void RenderRasterDEMSource::addElevationRange(const CanonicalTileID& id, const Range<int32_t> range) {
+    elevationRanges.insert_or_assign(id, range);
+    overallElevationRange = overallElevationRange ? Range<int32_t>{std::min(overallElevationRange->min, range.min),
+                                                                   std::max(overallElevationRange->max, range.max)}
+                                                  : range;
+}
+
+void RenderRasterDEMSource::keepElevationRangesOfHeldTiles() {
+    elevationRanges.clear();
+    overallElevationRange.reset();
+    const auto addHeld = [&](const std::map<OverscaledTileID, std::unique_ptr<Tile>>& tiles) {
+        for (const auto& [id, tile] : tiles) {
+            if (const auto* bucket = static_cast<const RasterDEMTile&>(*tile).getBucket()) {
+                addElevationRange(id.canonical, elevationRangeOf(*bucket));
+            }
+        }
+    };
+    addHeld(tilePyramid.getTiles());
+    addHeld(tilePyramid.getCache().getTiles());
 }
 
 void RenderRasterDEMSource::onTileChanged(Tile& tile) {
@@ -108,6 +164,14 @@ void RenderRasterDEMSource::onTileChanged(Tile& tile) {
                 }
             }
         }
+    }
+
+    // Keep the tile's elevation range for the tile covers (see getElevationRange).
+    if (const auto* bucket = demtile.getBucket()) {
+        if (elevationRanges.size() >= maxElevationRanges) {
+            keepElevationRangesOfHeldTiles();
+        }
+        addElevationRange(tile.id.canonical, elevationRangeOf(*bucket));
     }
     RenderTileSource::onTileChanged(tile);
 }
