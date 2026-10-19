@@ -4,6 +4,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Metal: 3D drawables get their depth state even when the layer has no stencil tiles (e.g. plugin layers) ([#4799](https://github.com/maplibre/maplibre-native/pull/4799)).
+
 ## 7.0.0-pre2
 
 - Distribute a build of MapLibre iOS with the experimental C plugin API enabled as a separate Swift package, [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api). Its `MapLibre` product replaces the standard one, so applications keep using `import MapLibre`. Plugin packages depend on its header-only `MapLibrePluginApi` product. Layers of plugin types appear as `MLNStyleLayer` in `MLNStyle.layers`. The GitHub release also includes a static XCFramework of this build, `MapLibre.static.plugins.xcframework.zip` ([#4769](https://github.com/maplibre/maplibre-native/pull/4769)).
