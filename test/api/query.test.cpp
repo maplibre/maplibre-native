@@ -11,6 +11,8 @@
 #include <mln/style/image.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion/json.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/gfx/headless_frontend.hpp>
@@ -40,6 +42,11 @@ public:
                    fileSource,
                    MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
 };
+
+Filter parseFilter(const std::string& expression) {
+    conversion::Error error;
+    return *conversion::convertJSON<Filter>(expression, error);
+}
 
 std::vector<Feature> getTopClusterFeature(QueryTest& test) {
     test.fileSource->sourceResponse = [&](const Resource& resource) {
@@ -132,6 +139,46 @@ TEST(Query, QueryRenderedFeaturesFilter) {
     EXPECT_EQ(features3.size(), 1u);
 }
 
+TEST(Query, GlobalStateChangeRelayoutsSourceFilter) {
+    QueryTest test;
+    Layer* layer = test.map.getStyle().getLayer("layer4");
+    ASSERT_NE(layer, nullptr);
+    layer->setFilter(parseFilter(R"(["==", ["get", "key1"], ["global-state", "filterValue"]])"));
+
+    const auto point = test.map.pixelForLatLng({0, 0});
+    const RenderedQueryOptions options{{{"layer4"}}, {}};
+
+    test.map.getStyle().setGlobalStateProperty("filterValue", "value1");
+    test.frontend.render(test.map);
+    EXPECT_EQ(1u, test.frontend.getRenderer()->queryRenderedFeatures(point, options).size());
+
+    test.map.getStyle().setGlobalStateProperty("filterValue", "other");
+    test.frontend.render(test.map);
+    EXPECT_TRUE(test.frontend.getRenderer()->queryRenderedFeatures(point, options).empty());
+
+    test.map.getStyle().setGlobalStateProperty("filterValue", "value1");
+    test.frontend.render(test.map);
+    EXPECT_EQ(1u, test.frontend.getRenderer()->queryRenderedFeatures(point, options).size());
+}
+
+TEST(Query, QueryFiltersUseGlobalState) {
+    QueryTest test;
+    const auto filter = parseFilter(R"(["==", ["get", "key1"], ["global-state", "queryValue"]])");
+    const auto point = test.map.pixelForLatLng({0, 0});
+    const RenderedQueryOptions renderedOptions{{{"layer4"}}, {filter}};
+    const SourceQueryOptions sourceOptions{{}, {filter}};
+
+    test.map.getStyle().setGlobalStateProperty("queryValue", "value1");
+    test.frontend.render(test.map);
+    EXPECT_EQ(1u, test.frontend.getRenderer()->queryRenderedFeatures(point, renderedOptions).size());
+    EXPECT_EQ(1u, test.frontend.getRenderer()->querySourceFeatures("source4", sourceOptions).size());
+
+    test.map.getStyle().setGlobalStateProperty("queryValue", "other");
+    test.frontend.render(test.map);
+    EXPECT_TRUE(test.frontend.getRenderer()->queryRenderedFeatures(point, renderedOptions).empty());
+    EXPECT_TRUE(test.frontend.getRenderer()->querySourceFeatures("source4", sourceOptions).empty());
+}
+
 TEST(Query, QuerySourceFeatures) {
     QueryTest test;
 
@@ -153,6 +200,44 @@ TEST(Query, QuerySourceFeatureStates) {
     ASSERT_EQ(states["hover"], true);
     ASSERT_EQ(states["radius"].get<uint64_t>(), 20u);
     ASSERT_EQ(newState, states);
+}
+
+TEST(Query, RemoveSourceFeatureState) {
+    QueryTest test;
+    auto* renderer = test.frontend.getRenderer();
+
+    // Set two state values on a feature. Updates are visible immediately,
+    // without waiting for a render pass.
+    FeatureState newState;
+    newState["hover"] = true;
+    newState["radius"].set<uint64_t>(20);
+    renderer->setFeatureState("source1", {}, "feature1", newState);
+
+    // Read back with the out-parameter overload.
+    FeatureState afterSet;
+    renderer->getFeatureState(afterSet, "source1", {}, "feature1");
+    ASSERT_EQ(afterSet, newState);
+
+    // Remove a single key. Unlike updates, removals are only reflected once a
+    // render pass has coalesced the pending changes into the source state, so
+    // render before reading back.
+    renderer->removeFeatureState("source1", {}, "feature1"s, "hover"s);
+    test.frontend.render(test.map);
+
+    // Read back with the return-value overload.
+    const FeatureState afterKeyRemoval = renderer->getFeatureState("source1", {}, "feature1");
+    ASSERT_EQ(afterKeyRemoval.size(), 1u);
+    ASSERT_EQ(afterKeyRemoval.count("hover"), 0u);
+    ASSERT_EQ(afterKeyRemoval.at("radius").get<uint64_t>(), 20u);
+
+    // Removing the whole feature (no state key) clears any remaining state.
+    renderer->removeFeatureState("source1", {}, "feature1"s, {});
+    test.frontend.render(test.map);
+
+    // Read back with the out-parameter overload again.
+    FeatureState afterFeatureRemoval;
+    renderer->getFeatureState(afterFeatureRemoval, "source1", {}, "feature1");
+    ASSERT_TRUE(afterFeatureRemoval.empty());
 }
 
 TEST(Query, QuerySourceFeaturesOptionValidation) {

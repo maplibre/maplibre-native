@@ -1,26 +1,27 @@
 #pragma once
 
-#include <mln/util/chrono.hpp>
+#include <mln/annotation/annotation.hpp>
 #include <mln/map/bound_options.hpp>
+#include <mln/map/camera.hpp>
 #include <mln/map/map_observer.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/map/mode.hpp>
-#include <mln/util/noncopyable.hpp>
-#include <mln/util/size.hpp>
-#include <mln/annotation/annotation.hpp>
-#include <mln/map/camera.hpp>
-#include <mln/util/geometry.hpp>
 #include <mln/map/projection_mode.hpp>
 #include <mln/storage/resource_options.hpp>
-#include <mln/util/client_options.hpp>
 #include <mln/util/action_journal_options.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/size.hpp>
 
+#include <cstddef>
 #include <cstdint>
-#include <string>
 #include <functional>
-#include <vector>
 #include <memory>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace mln {
 
@@ -117,12 +118,14 @@ public:
 
     // Projection
     ScreenCoordinate pixelForLatLng(const LatLng&) const;
-    LatLng latLngForPixel(const ScreenCoordinate&) const;
+    LatLng latLngForPixel(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Wrapped) const;
     std::vector<ScreenCoordinate> pixelsForLatLngs(const std::vector<LatLng>&) const;
-    std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&) const;
+    std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&,
+                                         LatLng::WrapMode = LatLng::Wrapped) const;
 
     // Transform
-    TransformState getTransfromState() const;
+    TransformState getTransformState() const;
+    [[deprecated("Use getTransformState()")]] TransformState getTransfromState() const;
 
     // Annotations
     void addAnnotationImage(std::unique_ptr<style::Image>);
@@ -223,12 +226,35 @@ public:
     void setTerrainSkirtLength(TerrainSkirtLength length);
     TerrainSkirtLength getTerrainSkirtLength() const;
 
-    /// Whether the map centre rides the terrain surface rather than sea level. With it on
-    /// (the default, as in maplibre-gl-js) the centre altitude follows the rendered terrain
-    /// height under the centre, so pitching over tall ground keeps the camera above it
-    /// instead of sinking in. Inert when terrain is not enabled.
+    /// Whether the map centre rides the terrain surface rather than sea level. Off by
+    /// default (the clamp is applied asynchronously and can run away during a gesture);
+    /// with it on the centre altitude follows the rendered terrain height under the
+    /// centre, so pitching over tall ground keeps the camera above it instead of sinking
+    /// in, as in maplibre-gl-js. Inert when terrain is not enabled.
+    ///
+    /// Gestures anchor the centre on the terrain (anchorCenterOnTerrain), and removing the
+    /// terrain brings it back to sea level, whatever this is set to. maplibre-gl-js does both
+    /// only with its clamp on, which is its default; gated on a clamp that is off by default
+    /// here, gestures would go back to turning round a sea-level point under the terrain.
     void setCenterClampedToGround(bool clamped);
     bool getCenterClampedToGround() const;
+
+    /// Moves the camera's centre onto the terrain under it without moving the camera: the centre
+    /// slides along the line of sight up to the ground and the zoom tightens by the distance saved,
+    /// so the camera does not move. The zoom does rise (about half a level over an 1,800 m
+    /// mountain at pitch 60), so zoom-dependent styling and the tile zoom can step when a gesture
+    /// starts, as in maplibre-gl-js. Rotating and pitching then turn around the ground being
+    /// looked at, not a sea-level point behind it. Inert while the style has no terrain, so a
+    /// gesture handler can call it unconditionally. Inert too at a pitch so steep (over ~84
+    /// degrees) that the line of sight nearly grazes the ground, and where the zoom limits or the
+    /// bounds would cut the move short. Removing the terrain brings the centre back down to sea
+    /// level the same way or, where the limits refuse that, keeping its centre and zoom.
+    ///
+    /// A one-off that keeps the view, for the start of a gesture, where setCenterClampedToGround
+    /// is the continuous follow; this runs whatever that is set to. Afterwards the camera reports
+    /// another centre and zoom for the same view, so save and restore a camera together with its
+    /// centerAltitude.
+    void anchorCenterOnTerrain();
 
     /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain
     /// ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the
@@ -239,6 +265,32 @@ public:
     ClientOptions getClientOptions() const;
 
     const std::unique_ptr<util::ActionJournal>& getActionJournal();
+
+    // If captureRenderedFeatures is true, these methods allow
+    // access to the results of the most recently completed frame.
+
+    using FeatureInfo = gfx::RenderingStats::FeatureInfo;
+    using FrameRenderedFeaturesMap = gfx::RenderingStats::FrameRenderedFeaturesMap;
+    const FrameRenderedFeaturesMap& getRenderedFeatures() const;
+
+    /// Call the provided function for each matching feature rendered in the last frame
+    void getRenderedFeatures(const std::optional<std::string>& featureId,
+                             const std::optional<std::string>& layerId,
+                             const std::optional<std::string>& sourceId,
+                             const std::function<bool(const std::string&, const FeatureInfo&)>&) const;
+
+    /// Returns the number of matching features rendered in the last frame.
+    std::size_t getRenderedFeatureCount(const std::optional<std::string>& featureId = std::nullopt,
+                                        const std::optional<std::string>& layerId = std::nullopt,
+                                        const std::optional<std::string>& sourceId = std::nullopt,
+                                        std::size_t limit = std::numeric_limits<std::size_t>::max()) const;
+
+    /// Returns true if any matching feature was rendered in the last frame
+    bool isFeatureRendered(const std::optional<std::string>& featureId = std::nullopt,
+                           const std::optional<std::string>& layerId = std::nullopt,
+                           const std::optional<std::string>& sourceId = std::nullopt) const {
+        return 0 < getRenderedFeatureCount(featureId, layerId, sourceId, 1);
+    }
 
 protected:
     class Impl;

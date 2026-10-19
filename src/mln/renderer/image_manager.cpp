@@ -53,7 +53,7 @@ void ImageManager::addImage(Immutable<style::Image::Impl> image_) {
         requestedImagesCacheSize += image_->image.bytes();
     }
 
-    availableImages.emplace(image_->id);
+    mutate(availableImages, [&](auto& ids) { ids.emplace(image_->id); });
     images.emplace(image_->id, std::move(image_));
 }
 
@@ -64,7 +64,11 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
     assert(oldImage != images.end());
     if (oldImage == images.end()) return false;
 
-    auto sizeChanged = oldImage->second->image.size != image_->image.size;
+    const auto sizeChanged = oldImage->second->image.size != image_->image.size;
+    // A changed SDF flag requires a relayout so buckets pick up the new pattern type.
+    // Same-size updates still bump the version so existing layouts patch their pixels;
+    // the atlas allocates per image revision, so the relayout gets a freshly uploaded bin.
+    const auto sdfChanged = oldImage->second->sdf != image_->sdf;
 
     if (sizeChanged) {
         // Update cache size if requested image size has changed.
@@ -80,7 +84,7 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
 
     oldImage->second = std::move(image_);
 
-    return sizeChanged;
+    return sizeChanged || sdfChanged;
 }
 
 void ImageManager::removeImage(const std::string& id) {
@@ -97,7 +101,7 @@ void ImageManager::removeImage(const std::string& id) {
     }
 
     images.erase(it);
-    availableImages.erase(id);
+    mutate(availableImages, [&](auto& ids) { ids.erase(id); });
     updatedImageVersions.erase(id);
 }
 
@@ -197,14 +201,10 @@ void ImageManager::reduceMemoryUseIfCacheSizeExceedsLimit() {
     }
 }
 
-std::set<std::string> ImageManager::getAvailableImages() const {
+Immutable<std::set<std::string>> ImageManager::getAvailableImages() const {
     MLN_TRACE_FUNC();
     std::scoped_lock readWriteLock(rwLock);
-
-    {
-        MLN_TRACE_ZONE(copy);
-        return availableImages;
-    }
+    return availableImages;
 }
 
 void ImageManager::clear() {
@@ -214,7 +214,7 @@ void ImageManager::clear() {
     assert(missingImageRequestors.empty());
 
     images.clear();
-    availableImages.clear();
+    availableImages = makeMutable<std::set<std::string>>();
     updatedImageVersions.clear();
     requestedImages.clear();
     loaded = false;

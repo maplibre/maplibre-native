@@ -22,7 +22,7 @@ jobs:
           persist-credentials: false
 
       - name: Use Node.js from nvmrc
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: 'platform/node/.nvmrc'
 
@@ -159,7 +159,7 @@ jobs:
           /usr/sbin/update-ccache-symlinks
 
       - name: Use Node.js from nvmrc
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: 'platform/node/.nvmrc'
 
@@ -189,7 +189,7 @@ jobs:
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
-        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
           key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
@@ -200,7 +200,7 @@ jobs:
 
       - name: Set up ccache (Windows)
         if: runner.os == 'Windows'
-        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
           variant: "sccache"
           key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
@@ -302,7 +302,7 @@ jobs:
           persist-credentials: false
 
       - name: Use Node.js from nvmrc
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: 'platform/node/.nvmrc'
           registry-url: 'https://registry.npmjs.org'

@@ -6,7 +6,10 @@
 namespace mln {
 
 MapProjection::MapProjection(const Map& map)
-    : transform(std::make_unique<Transform>(map.getTransfromState())) {}
+    : MapProjection(map.getTransformState()) {}
+
+MapProjection::MapProjection(const TransformState& state)
+    : transform(std::make_unique<Transform>(state)) {}
 
 MapProjection::~MapProjection() = default;
 
@@ -17,9 +20,9 @@ ScreenCoordinate MapProjection::pixelForLatLng(const LatLng& latLng) const {
     return transform->latLngToScreenCoordinate(unwrappedLatLng);
 }
 
-LatLng MapProjection::latLngForPixel(const ScreenCoordinate& pixel) const {
+LatLng MapProjection::latLngForPixel(const ScreenCoordinate& pixel, LatLng::WrapMode wrapMode) const {
     // The implementation is just a copy from map.cpp
-    return transform->screenCoordinateToLatLng(pixel);
+    return transform->screenCoordinateToLatLng(pixel, wrapMode);
 }
 
 void MapProjection::setCamera(const CameraOptions& camera) {

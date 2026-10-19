@@ -98,34 +98,6 @@ const std::vector<AttributeInfo> CollisionCircleShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> CollisionCircleShaderInfo::textures = {};
 
-// Custom Geometry
-using CustomGeometryInfo = ShaderInfo<BuiltIn::CustomGeometryShader, gfx::Backend::Type::OpenGL>;
-
-const std::vector<UniformBlockInfo> CustomGeometryInfo::uniformBlocks = {
-    UniformBlockInfo{"CustomGeometryDrawableUBO", idCustomGeometryDrawableUBO},
-};
-const std::vector<AttributeInfo> CustomGeometryInfo::attributes = {
-    AttributeInfo{"a_pos", idCustomGeometryPosVertexAttribute},
-    AttributeInfo{"a_uv", idCustomGeometryTexVertexAttribute},
-};
-const std::vector<TextureInfo> CustomGeometryInfo::textures = {
-    TextureInfo{"u_image", idCustomGeometryTexture},
-};
-
-// Custom Symbol Icon
-using CustomSymbolIconShaderInfo = ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>;
-
-const std::vector<UniformBlockInfo> CustomSymbolIconShaderInfo::uniformBlocks = {
-    UniformBlockInfo{"CustomSymbolIconDrawableUBO", idCustomSymbolDrawableUBO},
-};
-const std::vector<AttributeInfo> CustomSymbolIconShaderInfo::attributes = {
-    AttributeInfo{"a_pos", idCustomSymbolPosVertexAttribute},
-    AttributeInfo{"a_tex", idCustomSymbolTexVertexAttribute},
-};
-const std::vector<TextureInfo> CustomSymbolIconShaderInfo::textures = {
-    TextureInfo{"u_texture", idCustomSymbolImageTexture},
-};
-
 // Debug
 using DebugShaderInfo = ShaderInfo<BuiltIn::DebugShader, gfx::Backend::Type::OpenGL>;
 
@@ -180,6 +152,7 @@ const std::vector<UniformBlockInfo> FillPatternShaderInfo::uniformBlocks = {
 };
 const std::vector<AttributeInfo> FillPatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
+    AttributeInfo{"a_color", idFillColorVertexAttribute},
     AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
     AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
     AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
@@ -199,6 +172,7 @@ const std::vector<UniformBlockInfo> FillOutlinePatternShaderInfo::uniformBlocks 
 };
 const std::vector<AttributeInfo> FillOutlinePatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
+    AttributeInfo{"a_color", idFillColorVertexAttribute},
     AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
     AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
     AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
@@ -456,6 +430,30 @@ const std::vector<AttributeInfo> LineSDFShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> LineSDFShaderInfo::textures = {
     TextureInfo{"u_image", idLineImageTexture},
+};
+
+// Line gradient SDF
+using LineGradientSDFShaderInfo = ShaderInfo<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::OpenGL>;
+
+const std::vector<UniformBlockInfo> LineGradientSDFShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"LineSDFDrawableUBO", idLineDrawableUBO},
+    UniformBlockInfo{"LineSDFTilePropsUBO", idLineTilePropsUBO},
+    UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
+};
+const std::vector<AttributeInfo> LineGradientSDFShaderInfo::attributes = {
+    AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
+    AttributeInfo{"a_data", idLineDataVertexAttribute},
+    AttributeInfo{"a_blur", idLineBlurVertexAttribute},
+    AttributeInfo{"a_opacity", idLineOpacityVertexAttribute},
+    AttributeInfo{"a_gapwidth", idLineGapWidthVertexAttribute},
+    AttributeInfo{"a_offset", idLineOffsetVertexAttribute},
+    AttributeInfo{"a_width", idLineWidthVertexAttribute},
+    AttributeInfo{"a_floorwidth", idLineFloorWidthVertexAttribute},
+};
+const std::vector<TextureInfo> LineGradientSDFShaderInfo::textures = {
+    TextureInfo{"u_image", idLineImageTexture},
+    TextureInfo{"u_image_dash", idLineDashTexture},
 };
 
 // Raster

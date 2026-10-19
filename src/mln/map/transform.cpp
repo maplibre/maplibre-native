@@ -63,7 +63,6 @@ void Transform::resize(const Size size) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
-    double z{state.getZ()};
 
     double lat;
     double lon;
@@ -82,7 +81,7 @@ void Transform::resize(const Size size) {
         return;
     }
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
 
     observer.onCameraDidChange(MapObserver::CameraChangeMode::Immediate);
 }
@@ -424,8 +423,13 @@ void Transform::moveBy(const ScreenCoordinate& offset, const AnimationOptions& a
 
     ScreenCoordinate pointOnScreen = state.getEdgeInsets().getCenter(state.getSize().width, state.getSize().height) -
                                      centerOffset;
-    // Use unwrapped LatLng to carry information about moveBy direction.
-    easeTo(CameraOptions().withCenter(screenCoordinateToLatLng(pointOnScreen, LatLng::Unwrapped)), animation);
+    // Use unwrapped LatLng to carry information about moveBy direction. On the plane at the
+    // centre's altitude, not sea level: over terrain the centre sits on the ground, and a
+    // sea-level point under the screen centre lies altitude·tan(pitch) beyond it - every pan
+    // step would jump the map that far (kilometres) along the view.
+    easeTo(CameraOptions().withCenter(
+               screenCoordinateToLatLng(pointOnScreen, state.getCenterAltitude(), LatLng::Unwrapped)),
+           animation);
 }
 
 LatLng Transform::getLatLng(LatLng::WrapMode wrap) const {
@@ -532,9 +536,8 @@ void Transform::setNorthOrientation(NorthOrientation orientation) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
-    double z{state.getZ()};
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
 }
 
 NorthOrientation Transform::getNorthOrientation() const {
@@ -548,9 +551,8 @@ void Transform::setConstrainMode(mln::ConstrainMode mode) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
-    double z{state.getZ()};
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
 }
 
 ConstrainMode Transform::getConstrainMode() const {
@@ -604,7 +606,8 @@ void Transform::startTransition(const CameraOptions& camera,
     LatLng anchorLatLng;
     if (anchor) {
         anchor->y = state.getSize().height - anchor->y;
-        anchorLatLng = state.screenCoordinateToLatLng(*anchor);
+        // At the centre's altitude, as in moveBy and moveLatLng.
+        anchorLatLng = state.screenCoordinateToLatLng(*anchor, state.getCenterAltitude(), LatLng::Unwrapped);
     }
 
     transitionStart = Clock::now();
@@ -727,6 +730,14 @@ LatLng Transform::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng
     ScreenCoordinate flippedPoint = point;
     flippedPoint.y = state.getSize().height - flippedPoint.y;
     return state.screenCoordinateToLatLng(flippedPoint, wrapMode);
+}
+
+LatLng Transform::screenCoordinateToLatLng(const ScreenCoordinate& point,
+                                           double elevationMeters,
+                                           LatLng::WrapMode wrapMode) const {
+    ScreenCoordinate flippedPoint = point;
+    flippedPoint.y = state.getSize().height - flippedPoint.y;
+    return state.screenCoordinateToLatLng(flippedPoint, elevationMeters, wrapMode);
 }
 
 double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {

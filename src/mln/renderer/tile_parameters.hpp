@@ -2,6 +2,7 @@
 
 #include <mln/map/mode.hpp>
 #include <mln/actor/scheduler.hpp>
+#include <mln/util/feature.hpp>
 
 #include <memory>
 #include <numbers>
@@ -43,10 +44,12 @@ public:
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
-    bool isUpdateSynchronous = false;
+    std::shared_ptr<const GlobalStateMap> globalState = nullptr;
     /// Terrain elevation for the tile cover; null when there is no terrain, which
     /// leaves the cover flat. See util::TileElevationProvider.
     const util::TileElevationProvider* elevationProvider = nullptr;
+    bool isUpdateSynchronous = false;
+    bool captureRenderedFeatures = false;
 };
 
 } // namespace mln

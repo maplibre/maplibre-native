@@ -12,8 +12,6 @@ on:
       - "android-*"
 
   pull_request:
-    branches:
-      - "*"
 
 concurrency:
   # cancel jobs on PRs only
@@ -40,6 +38,7 @@ jobs:
 
   android-build:
     runs-on: ubuntu-24.04
+    timeout-minutes: 240
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
@@ -64,7 +63,7 @@ jobs:
 
       - uses: ./.github/actions/setup-android-ci
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: ".nvmrc"
 
@@ -152,7 +151,7 @@ jobs:
 
       - name: Create artifact for benchmark APKs
         if: matrix.renderer == 'opengl'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           if-no-files-found: error
           name: benchmarkAPKs
@@ -188,7 +187,7 @@ jobs:
         run: sentry-cli debug-files upload MapLibreAndroidTestApp
 
       - name: Upload android-ui-test-${{ matrix.renderer }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           if-no-files-found: error
           name: android-ui-test-${{ matrix.renderer }}
@@ -201,6 +200,7 @@ jobs:
 
   android-build-cpp-test:
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
 
     needs:
       - pre_job
@@ -234,7 +234,7 @@ jobs:
           cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk .
 
       - name: Store C++ Unit Tests .apk files
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: android-cpp-tests
           if-no-files-found: error
@@ -249,6 +249,7 @@ jobs:
         flavor: [opengl, vulkan]
 
     runs-on: ubuntu-24.04
+    timeout-minutes: 120
 
     needs:
       - pre_job
@@ -275,6 +276,7 @@ jobs:
 
   android-build-webgpu-dawn:
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
@@ -304,6 +306,7 @@ jobs:
 
   android-build-webgpu-wgpu:
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'

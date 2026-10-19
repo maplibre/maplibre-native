@@ -24,6 +24,8 @@ vk::Format PipelineInfo::vulkanFormat(const gfx::AttributeDataType& value) {
             return vk::Format::eR8G8B8Uint;
         case gfx::AttributeDataType::UByte4:
             return vk::Format::eR8G8B8A8Uint;
+        case gfx::AttributeDataType::UByte4Normalized:
+            return vk::Format::eR8G8B8A8Unorm;
         case gfx::AttributeDataType::Short:
             return vk::Format::eR16Sint;
         case gfx::AttributeDataType::Short2:

@@ -12,8 +12,6 @@
 #include <mln/shaders/webgpu/circle.hpp>
 #include <mln/shaders/webgpu/clipping_mask.hpp>
 #include <mln/shaders/webgpu/collision.hpp>
-#include <mln/shaders/webgpu/custom_geometry.hpp>
-#include <mln/shaders/webgpu/custom_symbol_icon.hpp>
 #include <mln/shaders/webgpu/debug.hpp>
 #include <mln/shaders/webgpu/fill.hpp>
 #include <mln/shaders/webgpu/fill_extrusion.hpp>
@@ -99,8 +97,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
-                  shaders::BuiltIn::CustomGeometryShader,
-                  shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
@@ -118,6 +114,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LinePatternShader,
                   shaders::BuiltIn::LineSDFShader,
+                  shaders::BuiltIn::LineGradientSDFShader,
                   shaders::BuiltIn::LocationIndicatorShader,
                   shaders::BuiltIn::LocationIndicatorTexturedShader,
                   shaders::BuiltIn::RasterShader,

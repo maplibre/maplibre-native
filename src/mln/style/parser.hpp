@@ -9,6 +9,7 @@
 #include <mln/text/glyph.hpp>
 
 #include <mln/util/constants.hpp>
+#include <mln/util/feature.hpp>
 #include <mln/util/rapidjson.hpp>
 #include <mln/util/font_stack.hpp>
 #include <mln/util/geo.hpp>
@@ -42,6 +43,10 @@ public:
     Light light;
     std::optional<Terrain> terrain;
 
+    // Default values of the root "state" property, keyed by state property
+    // name, used by the "global-state" expression.
+    GlobalStateMap globalStateDefaults;
+
     std::string name;
     LatLng latLng;
     double zoom = 0;
@@ -57,6 +62,7 @@ private:
     void parseTransition(const JSValue&);
     void parseLight(const JSValue&);
     void parseTerrain(const JSValue&);
+    void parseState(const JSValue&);
     void parseSources(const JSValue&);
     void parseSprites(const JSValue&);
     void parseLayers(const JSValue&);

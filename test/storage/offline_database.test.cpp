@@ -7,6 +7,7 @@
 #include <mln/storage/response.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/string.hpp>
+#include <mln/util/scoped.hpp>
 
 #include <mln/storage/sqlite3.hpp>
 #include <mln/util/variant.hpp>
@@ -2042,6 +2043,27 @@ TEST(OfflineDatabase, ResetDatabase) {
         log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
+
+#ifndef WIN32 // Windows filenames cannot contain a colon.
+TEST(OfflineDatabase, ResetInMemoryDatabase) {
+    for (const auto* path :
+         {":memory:", "file::memory:", "file::memory:?cache=shared", "file:reset-test?mode=memory"}) {
+        SCOPED_TRACE(path);
+        FixtureLog log;
+        const Scoped cleanup([path] { util::deleteFile(path); });
+        util::write_file(path, "unrelated file");
+
+        OfflineDatabase db(path, fixture::tileServerOptions);
+        EXPECT_FALSE(db.resetDatabase());
+        EXPECT_EQ("unrelated file", util::read_file(path));
+        EXPECT_EQ(
+            1u,
+            log.count(
+                {EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
+        EXPECT_EQ(0u, log.uncheckedCount());
+    }
+}
+#endif
 
 TEST(OfflineDatabase, PutResourceReadOnlyMode) {
     FixtureLog log;

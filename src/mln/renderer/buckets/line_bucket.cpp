@@ -36,8 +36,16 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
                             const PatternLayerMap& patternDependencies,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
+    const auto vertexOffset = vertices.elements();
+
     for (auto& line : geometryCollection) {
         addGeometry(line, feature, canonical);
+    }
+
+    if (retainFeaturesById) {
+        if (const auto vertexCount = vertices.elements() - vertexOffset; vertexCount > 0) {
+            retainFeature(feature, vertexOffset, vertexCount);
+        }
     }
 
     for (auto& pair : paintPropertyBinders) {
@@ -107,22 +115,26 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
     }
 
     const auto clip_start = feature.getValue("mapbox_clip_start");
-    const auto clip_end = feature.getValue("mapbox_clip_end");
-    if (clip_start && clip_end) {
-        double total_length = 0.0;
-        for (std::size_t i = first; i < len - 1; ++i) {
-            total_length += util::dist<double>(coordinates[i], coordinates[i + 1]);
-        }
+    if (clip_start) {
+        const auto clip_end = feature.getValue("mapbox_clip_end");
+        if (clip_end) {
+            const auto startValue = numericValue<double>(*clip_start);
+            const auto endValue = numericValue<double>(*clip_end);
+            if (startValue && endValue && *startValue < *endValue) {
+                double total_length = 0.0;
+                for (std::size_t i = first; i < len - 1; ++i) {
+                    total_length += util::dist<double>(coordinates[i], coordinates[i + 1]);
+                }
 
-        options.clipDistances = gfx::PolylineGeneratorDistances{
-            *numericValue<double>(*clip_start), *numericValue<double>(*clip_end), total_length};
+                options.clipDistances = gfx::PolylineGeneratorDistances{*startValue, *endValue, total_length};
+            }
+        }
     }
 
     options.joinType = layout.evaluate<LineJoin>(zoom, feature, canonical);
-    options.miterLimit = options.joinType == LineJoinType::Bevel ? 1.05f
-                                                                 : static_cast<float>(layout.get<LineMiterLimit>());
+    options.miterLimit = options.joinType == LineJoinType::Bevel ? 1.05f : layout.get<LineMiterLimit>();
     options.beginCap = layout.get<LineCap>();
-    options.endCap = options.type == FeatureType::Polygon ? LineCapType::Butt : LineCapType(layout.get<LineCap>());
+    options.endCap = options.type == FeatureType::Polygon ? LineCapType::Butt : layout.get<LineCap>();
     options.roundLimit = layout.get<LineRoundLimit>();
     options.overscaling = overscaling;
 

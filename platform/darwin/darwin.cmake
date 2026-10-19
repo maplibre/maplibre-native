@@ -44,7 +44,7 @@ target_sources(
         >
 
         $<$<NOT:$<BOOL:${MLN_DARWIN_USE_LIBUV}>>:
-            ${PROJECT_SOURCE_DIR}/platform/darwin/core/async_task.cpp
+            ${PROJECT_SOURCE_DIR}/platform/darwin/core/async_task.mm
             ${PROJECT_SOURCE_DIR}/platform/darwin/core/run_loop.cpp
             ${PROJECT_SOURCE_DIR}/platform/darwin/core/timer.cpp
         >
@@ -193,7 +193,6 @@ endfunction()
 # available for WebGPU builds.
 if(NOT MLN_WITH_WEBGPU)
     set(_custom_layer_sources
-        "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
         "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
         "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
     )

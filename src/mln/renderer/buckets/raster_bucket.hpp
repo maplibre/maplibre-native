@@ -2,16 +2,15 @@
 
 #include <mln/gfx/index_buffer.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
-#include <mln/shaders/segment.hpp>
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/paint_property_binder.hpp>
 #include <mln/renderer/tile_mask.hpp>
+#include <mln/shaders/segment.hpp>
 #include <mln/style/layers/raster_layer_properties.hpp>
 #include <mln/util/image.hpp>
 #include <mln/util/mat4.hpp>
 
 #include <memory>
-#include <optional>
 
 namespace mln {
 
@@ -37,7 +36,7 @@ public:
     void setMask(TileMask&&);
 
     static RasterLayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
-        return RasterLayoutVertex{{{p.x, p.y}}, {{t.x, t.y}}};
+        return RasterLayoutVertex{.a1 = {{p.x, p.y}}, .a2 = {{t.x, t.y}}};
     }
 
     std::shared_ptr<PremultipliedImage> image;
