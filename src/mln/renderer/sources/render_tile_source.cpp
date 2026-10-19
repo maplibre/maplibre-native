@@ -612,6 +612,7 @@ void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
         // TODO: this removes existing buckets, and will cause flickering.
         // Should instead refresh tile data in place.
         tilePyramid.clearAll();
+        onTilesetChanged();
     }
 
     if (!cachedTileset) return;

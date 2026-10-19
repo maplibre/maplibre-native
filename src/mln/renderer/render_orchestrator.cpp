@@ -286,8 +286,10 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     // the near edge of the view, at high zoom - is judged off-screen, leaving the mesh
     // there with an empty drape. Outlives the source update loop below.
     //
-    // The DEM tiles read here are the previous frame's, as in gl-js: the cover only has
-    // to be conservative, and a DEM that is still loading converges on the next frame.
+    // The elevation comes from every DEM tile the source has loaded, not from the ones it
+    // drew last frame: those depend on the cover, so the cover would feed back into itself
+    // and, with a still camera, alternate between two tile sets for good. This way it
+    // changes only when DEM data arrives, and the cover settles.
     const bool terrainEnabled = renderTerrain && renderTerrain->isEnabled();
     const DEMElevationProvider elevationProvider{
         terrainEnabled ? getRenderSource(renderTerrain->getSourceID()) : nullptr,
