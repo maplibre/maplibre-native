@@ -774,7 +774,6 @@ public:
                               const std::optional<ImagePosition>& posB,
                               const CrossfadeParameters& crossfade) {
         util::ignore({(binders.template get<Ps>()->setPatternParameters(posA, posB, crossfade), 0)...});
-        interleavedVertexBuffer.sharedVertexVector->updateModified(true);
     }
 
     template <class P>

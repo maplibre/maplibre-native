@@ -1029,6 +1029,23 @@ TEST(Map, Issue15216) {
     test.runLoop.runOnce();
 }
 
+// https://github.com/maplibre/maplibre-native/pull/4753
+// An image source wholly beyond the latitudes Web Mercator can show has an
+// empty tile cover, which used to crash RenderImageSource::update.
+TEST(Map, ImageSourceBeyondMercatorLatitudes) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    auto source = std::make_unique<ImageSource>("image",
+                                                std::array<LatLng, 4>{{{88, -10}, {88, 10}, {86, 10}, {86, -10}}});
+    source->setImage(PremultipliedImage({4, 4}));
+    test.map.getStyle().addSource(std::move(source));
+    test.map.getStyle().addLayer(std::make_unique<RasterLayer>("image", "image"));
+
+    // Passes, if rendering a frame doesn't crash.
+    test.frontend.renderFrame();
+}
+
 // https://github.com/mapbox/mapbox-gl-native/issues/15342
 // Tests the fix for constant repaint caused by `RenderSource::hasFadingTiles()`
 // returning `true` all the time.
@@ -2279,6 +2296,27 @@ TEST(Map, LocationIndicatorAccuracyColorsTransition) {
     EXPECT_GT(centerChannel(result, 0), 240);
     EXPECT_LT(centerChannel(result, 2), 10);
     EXPECT_GT(countGreenPixels(result), 0u) << "The accuracy border should finish transitioning to green";
+}
+
+TEST(Map, RenderingStatisticsTrackDrawsAcrossFrames) {
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version":8,"sources":{"points":{"type":"geojson","data":{
+        "type":"Point","coordinates":[0,0]}}},"layers":[{"id":"circle","type":"circle","source":"points"}]})");
+    const auto first = test.frontend.render(test.map).stats;
+    ASSERT_GT(first.numFrames, 0);
+    ASSERT_GT(first.numDrawCalls, 0);
+    EXPECT_GE(first.totalDrawCalls, first.numDrawCalls);
+
+    const auto second = test.frontend.render(test.map).stats;
+    EXPECT_EQ(first.numFrames + 1, second.numFrames);
+    EXPECT_GT(second.numDrawCalls, 0);
+    EXPECT_EQ(first.totalDrawCalls + second.numDrawCalls, second.totalDrawCalls);
+
+    test.map.getStyle().getLayer("circle")->setVisibility(VisibilityType::None);
+    const auto empty = test.frontend.render(test.map).stats;
+    EXPECT_EQ(second.numFrames + 1, empty.numFrames);
+    EXPECT_EQ(0, empty.numDrawCalls);
+    EXPECT_EQ(second.totalDrawCalls, empty.totalDrawCalls);
 }
 
 TEST(Map, LocationIndicatorWithoutImages) {

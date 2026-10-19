@@ -80,6 +80,9 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             return;
         }
 
+        const auto& bucket = drawable.getBucket();
+        const float sdfPattern = bucket && bucket->isSDFPattern(id) ? 1.0f : 0.0f;
+
         const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(
             Faded<expression::Image>{.from = "", .to = ""});
         const auto patternPosA = tile->getPattern(fillPatternValue.from.id());
@@ -161,7 +164,11 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     .pattern_from_t = std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
                     .pattern_to_t = std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
-                    .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom))
+                    .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
+                    .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
+                    .pad1 = 0,
+                    .pad2 = 0,
+                    .pad3 = 0
                 };
 
 #if MLN_UBO_CONSOLIDATION
@@ -174,7 +181,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_to = patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
 
                     .texsize = {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    .pad1 = 0, .pad2 = 0
+                    .sdf = sdfPattern, .pad2 = 0
                 };
 
 #if !MLN_UBO_CONSOLIDATION
@@ -197,7 +204,11 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     .pattern_from_t = std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
                     .pattern_to_t = std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
-                    .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom))
+                    .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
+                    .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
+                    .pad1 = 0,
+                    .pad2 = 0,
+                    .pad3 = 0
                 };
 
 #if MLN_UBO_CONSOLIDATION
@@ -210,7 +221,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_to = patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
 
                     .texsize = {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    .pad1 = 0, .pad2 = 0
+                    .sdf = sdfPattern, .pad2 = 0
                 };
 
 #if !MLN_UBO_CONSOLIDATION

@@ -447,7 +447,8 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
 }
 
 void SurfaceRenderableResource::recreateSwapchain(bool recreateSurface) {
-    if (!surface) return;
+    // without a surface there is no swapchain, unless the surface itself is being recreated
+    if (!surface && !recreateSurface) return;
 
     backend.getDevice()->waitIdle(backend.getDispatcher());
 

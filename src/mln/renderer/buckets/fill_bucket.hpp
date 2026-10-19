@@ -53,6 +53,9 @@ public:
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
+    void recordSDFPattern(const std::string&, bool) override;
+    bool isSDFPattern(const std::string&) const override;
+
     static FillLayoutVertex layoutVertex(Point<int16_t> p, int16_t prev, int16_t next) {
         return FillLayoutVertex{{{p.x, p.y}}, {prev, next}};
     }
@@ -101,6 +104,9 @@ private:
                          const PatternLayerMap&,
                          std::size_t featureIndex,
                          const CanonicalTileID&);
+
+    mln::unordered_map<std::string, bool> sdfPatterns;
+    mln::unordered_set<std::string> mixedSDFPatternLayers;
 };
 
 } // namespace mln

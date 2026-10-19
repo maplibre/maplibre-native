@@ -1,4 +1,4 @@
-#import <Mapbox/Mapbox.h>
+#import <MapLibre/MapLibre.h>
 #import <XCTest/XCTest.h>
 #import "MLNTestUtility.h"
 
