@@ -627,11 +627,15 @@ void Map::anchorCenterOnTerrain() {
 }
 
 bool Map::setCenterAltitudeKeepingView(double altitudeMeters) {
-    if (!impl->setCenterAltitudeKeepingView(altitudeMeters)) {
-        return false;
+    // Like every camera entry point, run a return to sea level that is still waiting first:
+    // run later, it would move the camera this sets.
+    impl->settleCenterAwaitingSeaLevel();
+    const bool moved = impl->setCenterAltitudeKeepingView(altitudeMeters);
+    if (moved) {
+        impl->cameraMutated = true;
     }
     impl->onUpdate();
-    return true;
+    return moved;
 }
 
 void Map::setCenterClampedToGround(bool clamped) {
