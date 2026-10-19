@@ -628,9 +628,9 @@ std::u16string verticalizePunctuation(const std::u16string& input) {
         char16_t prevCharCode = i ? input[i - 1] : 0;
 
         bool canReplacePunctuation = ((!nextCharCode || !hasRotatedVerticalOrientation(nextCharCode) ||
-                                       verticalPunctuation.count(input[i + 1])) &&
+                                       verticalPunctuation.contains(input[i + 1])) &&
                                       (!prevCharCode || !hasRotatedVerticalOrientation(prevCharCode) ||
-                                       verticalPunctuation.count(input[i - 1])));
+                                       verticalPunctuation.contains(input[i - 1])));
 
         if (char16_t repl = canReplacePunctuation ? verticalizePunctuation(input[i]) : 0) {
             output += repl;
@@ -643,7 +643,7 @@ std::u16string verticalizePunctuation(const std::u16string& input) {
 }
 
 char16_t verticalizePunctuation(char16_t chr) {
-    return verticalPunctuation.count(chr) ? verticalPunctuation.at(chr) : 0;
+    return verticalPunctuation.contains(chr) ? verticalPunctuation.at(chr) : 0;
 }
 
 bool charInSupportedScript(char16_t chr) {
