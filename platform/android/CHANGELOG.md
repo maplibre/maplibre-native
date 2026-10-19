@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Plugin layers with read-write depth now use the 3D depth range, so their faces sort by depth instead of draw order ([#4798](https://github.com/maplibre/maplibre-native/pull/4798)).
+
 ## 13.7.1
 
 ### ✨ Features and improvements

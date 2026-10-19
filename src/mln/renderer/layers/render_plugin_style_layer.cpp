@@ -250,7 +250,9 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
                 builder->setEnableDepth(true);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setIs3D(false);
+                // Real 3D geometry: use the 3D depth range like fill-extrusion. A 2D sublayer
+                // range collapses every fragment to one depth, so faces only sort by draw order.
+                builder->setIs3D(true);
                 builder->setEnableStencil(false);
                 if (definition.cullBackFaces) {
                     builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
