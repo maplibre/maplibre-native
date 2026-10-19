@@ -2,6 +2,10 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+- With 3D terrain on and the centre clamp enabled, the clamp no longer cancels a running camera animation; the camera is anchored to the ground once the animation ends ([#4768](https://github.com/maplibre/maplibre-native/pull/4768)).
+
 ## 6.29.0
 
 - fix(core): accept alpha in hsl colors ([#4435](https://github.com/maplibre/maplibre-native/pull/4435)).

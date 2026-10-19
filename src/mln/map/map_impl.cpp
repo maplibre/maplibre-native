@@ -10,6 +10,8 @@
 #include <mln/util/action_journal_impl.hpp>
 #include <mln/gfx/rendering_stats.hpp>
 
+#include <cmath>
+
 namespace mln {
 
 #if !defined(NDEBUG)
@@ -113,6 +115,16 @@ void Map::Impl::onUpdate() {
     TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
     transform.updateTransitions(timePoint);
+
+    // The clamp stood aside for a transition (onTerrainCenterElevationChanged); now that it
+    // is over, put the centre on the ground it arrived over. The reported height outlives a
+    // terrain removed during the transition, so only apply it while there is still terrain.
+    if (centerAwaitingTerrainAnchor && !transform.inTransition()) {
+        centerAwaitingTerrainAnchor = false;
+        if (centerClampedToGround && style->impl->getTerrain() && !std::isnan(terrainCenterElevation)) {
+            clampCenterToTerrain(terrainCenterElevation);
+        }
+    }
 
     std::optional<Immutable<style::Terrain::Impl>> terrainImpl;
     if (auto* terrain = style->impl->getTerrain()) {
@@ -321,19 +333,34 @@ void Map::Impl::onDidFinishRenderingMap() {
 };
 
 void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
+    terrainCenterElevation = elevationMeters;
     if (!centerClampedToGround) {
         return;
     }
+    // A running transition (an animated recenter, a fling) owns the camera: the jump below
+    // would cancel it, and across relief the height changes every frame, so the move stopped
+    // within a few kilometres of where it started. Let it finish; onUpdate applies the latest
+    // height once it has.
+    if (transform.inTransition()) {
+        centerAwaitingTerrainAnchor = true;
+        return;
+    }
+    if (clampCenterToTerrain(elevationMeters)) {
+        onUpdate();
+    }
+}
+
+bool Map::Impl::clampCenterToTerrain(double elevationMeters) {
     // Sub-metre differences are the terrain cover shifting under a camera that just moved,
     // not the ground actually changing height; acting on them would chase itself.
     constexpr double minimumChangeMeters = 0.5;
     if (std::abs(transform.getState().getCenterAltitude() - elevationMeters) < minimumChangeMeters) {
-        return;
+        return false;
     }
     // Raising the centre onto the terrain moves the orbit plane, not the centre's lng/lat,
     // so this settles rather than feeding back into the next frame's sample.
     transform.jumpTo(CameraOptions().withCenterAltitude(elevationMeters));
-    onUpdate();
+    return true;
 }
 
 void Map::Impl::jumpTo(const CameraOptions& camera) {
