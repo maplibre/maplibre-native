@@ -238,7 +238,9 @@ public:
 
     /// Moves the camera's centre onto the terrain under it without moving the camera: the centre
     /// slides along the line of sight up to the ground and the zoom tightens by the distance saved,
-    /// so nothing on screen shifts. Rotating and pitching then turn around the ground being
+    /// so the camera does not move. The zoom does rise (about half a level over an 1,800 m
+    /// mountain at pitch 60), so zoom-dependent styling and the tile zoom can step when a gesture
+    /// starts, as in maplibre-gl-js. Rotating and pitching then turn around the ground being
     /// looked at, not a sea-level point behind it. Inert while the style has no terrain, so a
     /// gesture handler can call it unconditionally. Inert too at a pitch so steep (over ~84
     /// degrees) that the line of sight nearly grazes the ground, and where the zoom limits or the

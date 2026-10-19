@@ -230,13 +230,13 @@ public:
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&, vec4&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Unwrapped) const;
-    /// Unprojects onto the plane `elevationMeters` above sea level (same units as
-    /// latLngToScreenCoordinate's elevation) instead of sea level.
+    /// Unprojects onto the plane `elevationMeters` above sea level (metres, terrain
+    /// exaggeration applied) instead of sea level.
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&,
                                     double elevationMeters,
                                     LatLng::WrapMode = LatLng::Unwrapped) const;
     // Implements mapbox-gl-js pointCoordinate() : MercatorCoordinate.
-    // `targetZ` is the world z (metres above sea level, see latLngToScreenCoordinate) of the
+    // `targetZ` is the world z (metres above sea level, terrain exaggeration applied) of the
     // plane the screen point is unprojected onto; 0 = sea level.
     TileCoordinate screenCoordinateToTileCoordinate(const ScreenCoordinate&,
                                                     uint8_t atZoom,

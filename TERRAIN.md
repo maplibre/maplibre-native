@@ -1288,7 +1288,7 @@ projection primitives in `collision_index.cpp`. The word "elevation" appears now
        the view; the clamp is the continuous follow.
      - **Removing terrain keeps the eye.** gl-js sets the elevation to 0 and keeps the centre
        and zoom, so the camera drops by the centre's altitude. Here the centre
-       slides back down the line of sight and the zoom follows, so nothing on screen moves.
+       slides back down the line of sight and the zoom follows, so the camera does not move.
        Only where the zoom limits or the bounds refuse that move does it keep the centre and
        zoom, as gl-js does.
      - **The app's own moves keep the gesture's altitude.** `easeTo`, `flyTo` and `jumpTo`
@@ -1297,6 +1297,9 @@ projection primitives in `collision_index.cpp`. The word "elevation" appears now
        1,800 m at pitch 60). gl-js takes the terrain height at the target as it flies
        (`_prepareElevation`); that needs a height lookup on the map thread (#4558). Until then
        the app sets the altitude itself (#4712 exposes it on iOS and Android).
+     - **Not every zoom gesture anchors on iOS yet.** `MLNMapView` anchors pan, pinch, rotate
+       and two-finger drag, but not the one-finger quick zoom, double tap or two-finger tap.
+       Android anchors quick zoom too (#4712, through `onScaleBegin`). A follow-up.
 3. **Elevated line labels** - thread the query through placement, then gl-js #7040's
    coordinate normalisation on top.
 
