@@ -244,10 +244,10 @@ int main() {
         feature.properties_json = {json, std::strlen(json)};
         return layer.layout_feature(instance, &feature);
     };
-    CHECK(layOutFeature(R"({"name":"a"})", 1) == MLN_PLUGIN_STATUS_OK);                           // no model: skipped
-    CHECK(layOutFeature(R"({"model-uri":"test://missing.glb"})", 2) == MLN_PLUGIN_STATUS_OK);       // unloadable: skipped
+    CHECK(layOutFeature(R"({"name":"a"})", 1) == MLN_PLUGIN_STATUS_OK);                       // no model: skipped
+    CHECK(layOutFeature(R"({"model-uri":"test://missing.glb"})", 2) == MLN_PLUGIN_STATUS_OK); // unloadable: skipped
     CHECK(layOutFeature(R"({"model-uri":"test://triangle.glb"})", 3) == MLN_PLUGIN_STATUS_OK);
-    CHECK(layOutFeature(R"({"model-uri":7})", 4) == MLN_PLUGIN_STATUS_OK);                          // not a string: skipped
+    CHECK(layOutFeature(R"({"model-uri":7})", 4) == MLN_PLUGIN_STATUS_OK); // not a string: skipped
     CHECK(layOutFeature("not json", 5) == MLN_PLUGIN_STATUS_OK);
     bucket = {};
     bucket.struct_size = sizeof(bucket);

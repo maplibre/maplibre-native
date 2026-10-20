@@ -150,9 +150,8 @@ double component(const tinygltf::Model& model,
     const auto& buffer = model.buffers[view.buffer];
     const size_t componentSize = tinygltf::GetComponentSizeInBytes(accessor.componentType);
     const int byteStride = accessor.ByteStride(view);
-    const size_t stride = byteStride > 0
-                              ? static_cast<size_t>(byteStride)
-                              : componentSize * tinygltf::GetNumComponentsInType(accessor.type);
+    const size_t stride = byteStride > 0 ? static_cast<size_t>(byteStride)
+                                         : componentSize * tinygltf::GetNumComponentsInType(accessor.type);
     const size_t offset = view.byteOffset + accessor.byteOffset + element * stride + componentIndex * componentSize;
     if (offset + componentSize > buffer.data.size()) return 0.0;
     const uint8_t* data = buffer.data.data() + offset;
@@ -346,9 +345,12 @@ std::shared_ptr<const Model> loadModel(const mln_plugin_host_api_v1* host, const
     }
     ModelResponse response;
     uint64_t requestID = 0;
-    const auto status = host->request_resource(host->context, {uri.data(), uri.size()}, modelLoaded, &response, &requestID);
+    const auto status = host->request_resource(
+        host->context, {uri.data(), uri.size()}, modelLoaded, &response, &requestID);
     if (status != MLN_PLUGIN_STATUS_OK || !response.model) {
-        log(host, 3, "gltf: failed to load '" + uri + "': " + (response.error.empty() ? "request rejected" : response.error));
+        log(host,
+            3,
+            "gltf: failed to load '" + uri + "': " + (response.error.empty() ? "request rejected" : response.error));
         return {};
     }
     std::lock_guard lock(modelCacheMutex);
@@ -407,7 +409,8 @@ mln_plugin_status createLayout(const mln_plugin_layout_context_v1* context, void
     }
     auto layout = std::unique_ptr<Layout>(new (std::nothrow) Layout());
     if (!layout) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
-    layout->host = context->struct_size >= offsetof(mln_plugin_layout_context_v1, host) + sizeof(void*) ? context->host : nullptr;
+    layout->host = context->struct_size >= offsetof(mln_plugin_layout_context_v1, host) + sizeof(void*) ? context->host
+                                                                                                        : nullptr;
     // The layer's `model-uri` wins; a layer without one draws the mesh set through mln_gltf_layer_set_model.
     // A uri that is given but cannot be loaded fails the layout rather than silently drawing another model.
     const auto uri = layoutString(*context, "model-uri");
@@ -680,8 +683,8 @@ constexpr mln_plugin_shader_property_binding_v1 binding(mln_plugin_string name,
     b.minimum_attribute_id = attribute;
     b.maximum_attribute_id = attribute;
     b.interpolation_uniform_id = 0;
-    b.interpolation_uniform_byte_offset =
-        static_cast<uint32_t>(offsetof(DrawableUBO, interpolation) + interpolationIndex * sizeof(float));
+    b.interpolation_uniform_byte_offset = static_cast<uint32_t>(offsetof(DrawableUBO, interpolation) +
+                                                                interpolationIndex * sizeof(float));
     return b;
 }
 
@@ -755,16 +758,16 @@ const mln_plugin_descriptor_v1 descriptor = {
 } // namespace
 
 extern "C" mln_plugin_status mln_gltf_layer_register(mln_plugin_register_function_v1 registerPlugin,
-                                                      char* error,
-                                                      size_t capacity) {
+                                                     char* error,
+                                                     size_t capacity) {
     if (!registerPlugin) return MLN_PLUGIN_STATUS_NOT_FOUND;
     return registerPlugin(&descriptor, error, capacity);
 }
 
 extern "C" mln_plugin_status mln_gltf_layer_set_model(const uint8_t* bytes,
-                                                       size_t size,
-                                                       char* error,
-                                                       size_t capacity) try {
+                                                      size_t size,
+                                                      char* error,
+                                                      size_t capacity) try {
     copyDiagnostic({}, error, capacity);
     if (!bytes || size == 0) {
         std::lock_guard lock(currentModelMutex);
