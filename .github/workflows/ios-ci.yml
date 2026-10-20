@@ -67,7 +67,7 @@ jobs:
         working-directory: .
 
       - name: Update submodules
-        run: git submodule update --init --recursive
+        run: git submodule update --init --recursive --jobs 8
         working-directory: .
 
       - name: Install Apple signing assets
