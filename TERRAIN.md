@@ -1077,8 +1077,8 @@ This known issue is closed.
     `FillExtrusionLayerTweaker` now projects extrusions the way the mesh is
     projected (default near plane, and the same clip z remap to [0, 1] off GL), so
     terrain in front of an extrusion hides it per fragment in the ordinary depth
-    test. A render test for it (a block behind a ridge) follows once a GL
-    runner is available to generate its baseline.
+    test. `terrain/fill-extrusion-occluded` (a block behind a ridge) covers it,
+    graded against a linux-opengl baseline.
 - The terrain mesh/drape cover is now a direct elevation-aware ideal cover
   (`RenderTerrain::computeMeshCover`, see the tile-cover item above), but only
   *visibility* is elevation-aware. Native's tile LOD system
