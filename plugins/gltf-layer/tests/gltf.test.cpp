@@ -154,13 +154,15 @@ int main() {
     }
     layer.destroy_layout(instance);
 
-    // The uniform block carries the camera and view; pixels-per-meter (view.z) stays 0, which the shader reads as 1.
+    // The host's pixels-per-meter reaches the shader through view.z; an older host leaves it at 0.
     mln_plugin_uniform_context_v1 uniformContext{};
     uniformContext.struct_size = sizeof(uniformContext);
-    uniformContext.pixel_ratio = 2.0f;
+    uniformContext.pixels_per_meter = 4.5f;
     std::vector<uint8_t> output(uniform.byte_size);
     CHECK(layer.update_uniform_block(&uniformContext, 0, output.data(), output.size()) == MLN_PLUGIN_STATUS_OK);
-    CHECK(reinterpret_cast<const float*>(output.data())[20 + 1] == 2.0f);
+    CHECK(reinterpret_cast<const float*>(output.data())[20 + 2] == 4.5f);
+    uniformContext.struct_size = offsetof(mln_plugin_uniform_context_v1, pixels_per_meter);
+    CHECK(layer.update_uniform_block(&uniformContext, 0, output.data(), output.size()) == MLN_PLUGIN_STATUS_OK);
     CHECK(reinterpret_cast<const float*>(output.data())[20 + 2] == 0.0f);
 
     // Clearing the mesh makes later tiles lay out to nothing again.

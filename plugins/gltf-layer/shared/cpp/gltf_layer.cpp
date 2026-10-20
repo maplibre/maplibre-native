@@ -483,7 +483,10 @@ mln_plugin_status updateUniform(const mln_plugin_uniform_context_v1* context,
     value.camera[3] = context->camera_to_center_distance;
     value.view[0] = static_cast<float>(context->bearing);
     value.view[1] = context->pixel_ratio;
-    // view[2] (pixels per meter) is left at 0, which the shader treats as 1: the v1 uniform context does not carry it.
+    // An older host without the field leaves it at 0, which the shader treats as 1.
+    if (context->struct_size >= offsetof(mln_plugin_uniform_context_v1, pixels_per_meter) + sizeof(float)) {
+        value.view[2] = context->pixels_per_meter;
+    }
     std::memcpy(output, &value, sizeof(value));
     return MLN_PLUGIN_STATUS_OK;
 }
