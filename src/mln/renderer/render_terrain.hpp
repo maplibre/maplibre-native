@@ -77,7 +77,7 @@ public:
                                                const std::shared_ptr<UpdateParameters>& updateParameters) const;
 
     /// The point the mesh-tile cap measures distance from, in normalized web-mercator [0, 1]:
-    /// the map centre.
+    /// the ground under the camera (the map centre when the map is not tilted).
     static std::array<double, 2> meshTileCapOrigin(const TransformState& state);
 
     /// The `maxTiles` tiles whose centres lie nearest `origin` (normalized web-mercator), or all

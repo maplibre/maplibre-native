@@ -165,8 +165,11 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
         out = util::frustumCull(coverParams, dilated);
     }
 
-    // Cap the tile count: keep those nearest the map centre, drop the farthest (the horizon
-    // tiles a high tilt pulls in). Per-mode cap (TerrainLoadBudget::maxMeshTiles): Quality keeps
+    // Cap the tile count: keep those nearest the camera, drop the farthest (the horizon tiles a
+    // high tilt pulls in). Nearest the camera, not the map centre: at a steep tilt the centre is
+    // far ahead, and the tiles right under the camera - the bottom corners of the screen, the
+    // biggest on it - would rank as far and be dropped, showing the skirts of the tiles behind
+    // them as streaks. Per-mode cap (TerrainLoadBudget::maxMeshTiles): Quality keeps
     // a generous cap so terrain render distance stays long; Balanced/Performance trade distance
     // for frame time. It caps the cover, not just the mesh: the drape-target pool allocates a
     // 1024 px target per cover tile, so a cap on the mesh alone still allocated one for every
@@ -180,10 +183,15 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
 }
 
 std::array<double, 2> RenderTerrain::meshTileCapOrigin(const TransformState& state) {
-    // Map center in normalized web-mercator [0,1] (standard projection)
+    // The ground under the camera in normalized web-mercator [0,1] (standard projection): the
+    // map centre, moved back along the view by the camera's horizontal distance from it.
     const LatLng center = state.getLatLng();
     const double latRad = util::deg2rad(center.latitude());
-    return {center.longitude() / 360.0 + 0.5, 0.5 - std::log(std::tan(M_PI / 4.0 + latRad / 2.0)) / (2.0 * M_PI)};
+    const double back = state.getCameraToCenterDistance() * std::sin(state.getPitch()) /
+                        Projection::worldSize(state.getScale());
+    const double compass = -state.getBearing(); // radians, clockwise from north
+    return {center.longitude() / 360.0 + 0.5 - back * std::sin(compass),
+            0.5 - std::log(std::tan(M_PI / 4.0 + latRad / 2.0)) / (2.0 * M_PI) + back * std::cos(compass)};
 }
 
 std::set<UnwrappedTileID> RenderTerrain::nearestMeshTiles(std::set<UnwrappedTileID> tiles,

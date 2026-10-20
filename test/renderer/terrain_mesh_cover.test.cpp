@@ -26,6 +26,24 @@ std::set<UnwrappedTileID> wholeZ2() {
 }
 
 constexpr std::array<double, 2> worldCentre{{0.5, 0.5}};
+
+// A 512 px map centred on the equator at 90°E (x = 0.75, y = 0.5 in normalized mercator).
+void look(Transform& transform, double pitch, double bearing) {
+    transform.resize({512, 512});
+    transform.jumpTo(
+        CameraOptions().withCenter(LatLng{0.0, 90.0}).withZoom(10.0).withPitch(pitch).withBearing(bearing));
+}
+
+// The camera's position from the free-camera API: where the ground under it is, worked out
+// independently of RenderTerrain.
+std::array<double, 2> cameraGround(const Transform& transform) {
+    const vec3 position = *transform.getFreeCameraOptions().position;
+    return {{position[0], position[1]}};
+}
+
+UnwrappedTileID z10At(double x, double y) {
+    return UnwrappedTileID(0, CanonicalTileID(10, static_cast<uint32_t>(x * 1024), static_cast<uint32_t>(y * 1024)));
+}
 } // namespace
 
 TEST(TerrainMeshCover, CapKeepsTheTilesNearestTheOrigin) {
@@ -54,4 +72,33 @@ TEST(TerrainMeshCover, CapOriginWithoutTiltIsTheMapCentre) {
     const auto origin = RenderTerrain::meshTileCapOrigin(transform.getState());
     EXPECT_NEAR(0.75, origin[0], 1e-9);
     EXPECT_NEAR(0.5, origin[1], 1e-9);
+}
+
+TEST(TerrainMeshCover, CapOriginIsTheGroundUnderATiltedCamera) {
+    for (const double bearing : {0.0, 90.0, 225.0}) {
+        Transform transform;
+        look(transform, 60.0, bearing);
+
+        const auto origin = RenderTerrain::meshTileCapOrigin(transform.getState());
+        const auto camera = cameraGround(transform);
+        // 1e-7 of the world is a few metres, well inside a z10 tile.
+        EXPECT_NEAR(camera[0], origin[0], 1e-7) << "bearing " << bearing;
+        EXPECT_NEAR(camera[1], origin[1], 1e-7) << "bearing " << bearing;
+    }
+}
+
+TEST(TerrainMeshCover, CapKeepsTheTileUnderATiltedCamera) {
+    // Facing north at a 60° tilt, the camera stands south of the centre. Of two tiles as far
+    // from the centre, one under the camera and one as far ahead of the centre, the cap keeps
+    // the one under the camera: the biggest on screen, where the other is near the horizon.
+    Transform transform;
+    look(transform, 60.0, 0.0);
+    const auto origin = RenderTerrain::meshTileCapOrigin(transform.getState());
+    const double behind = origin[1] - 0.5;
+    ASSERT_GT(behind, 1.0 / 1024) << "the camera should stand more than a z10 tile behind the centre";
+
+    const UnwrappedTileID underTheCamera = z10At(0.75, 0.5 + behind);
+    const UnwrappedTileID ahead = z10At(0.75, 0.5 - behind);
+    const std::set<UnwrappedTileID> kept = RenderTerrain::nearestMeshTiles({underTheCamera, ahead}, 1, origin);
+    EXPECT_EQ(std::set<UnwrappedTileID>{underTheCamera}, kept);
 }
