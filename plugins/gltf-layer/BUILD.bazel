@@ -1,0 +1,49 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//bazel:flags.bzl", "CPP_FLAGS")
+
+# Header-only parser plus the single translation unit that carries its implementation.
+cc_library(
+    name = "tinygltf",
+    srcs = ["vendor/tinygltf/tiny_gltf.cc"],
+    hdrs = [
+        "vendor/tinygltf/json.hpp",
+        "vendor/tinygltf/stb_image.h",
+        "vendor/tinygltf/stb_image_write.h",
+        "vendor/tinygltf/tiny_gltf.h",
+    ],
+    includes = ["vendor/tinygltf"],
+    target_compatible_with = select({
+        "//:plugins_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "gltf-layer",
+    srcs = ["shared/cpp/gltf_layer.cpp"],
+    hdrs = [
+        "shared/cpp/gltf_shader_metal.hpp",
+        "shared/include/gltf_layer.hpp",
+    ],
+    copts = CPP_FLAGS,
+    includes = [
+        "shared/cpp",
+        "shared/include",
+    ],
+    target_compatible_with = select({
+        "//:plugins_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":tinygltf",
+        "//:mln-plugin-api",
+    ],
+)
+
+cc_test(
+    name = "unit-tests",
+    srcs = ["tests/gltf.test.cpp"],
+    copts = CPP_FLAGS,
+    deps = [":gltf-layer"],
+)
