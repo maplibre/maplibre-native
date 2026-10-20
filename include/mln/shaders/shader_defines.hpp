@@ -419,8 +419,7 @@ enum {
 enum {
     idFillPosVertexAttribute,
     idFillPrevNextVertexAttribute,
-
-    idFillIndicesVertexAttribute,
+    idFillTriangleInstanceAttribute,
 
     // Data driven
     idFillColorVertexAttribute,

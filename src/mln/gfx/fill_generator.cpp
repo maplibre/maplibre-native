@@ -37,7 +37,7 @@ struct GeometryTooLongException : std::exception {};
 namespace {
 
 void addFillExternalIndices(SegmentVector& fillSegments,
-                            gfx::VertexVector<FillIndexVertex>& fillIndexes,
+                            gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                             const std::span<const uint32_t>& indices,
                             const std::size_t startVertices) {
     const std::size_t nIndices = indices.size();
@@ -50,16 +50,17 @@ void addFillExternalIndices(SegmentVector& fillSegments,
     auto& triangleSegment = fillSegments.back();
     triangleSegment.instanceCount += nIndices / 3;
 
-    for (std::size_t i = 0; i < nIndices; i++) {
-        bool ignored = (i != 1);
-        bool external = (i == 1);
-        fillIndexes.emplace_back(FillIndexVertex{
-            {{(static_cast<uint32_t>(startVertices) + indices[i]) * 4 + (ignored ? 1 : 0) * 2 + (external ? 1 : 0)}}});
+    for (std::size_t i = 0; i < nIndices; i += 3) {
+        fillTriangles.emplace_back(
+            FillBucket::triangleInstance(startVertices + indices[i], true, false,
+                                         startVertices + indices[i + 1], false, true,
+                                         startVertices + indices[i + 2], true, false)
+        );
     }
 }
 
 std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& vertices,
-                            gfx::VertexVector<FillIndexVertex>& fillIndexes,
+                            gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                             SegmentVector& fillSegments,
                             const GeometryCoordinates& ring,
                             std::vector<bool>& ignoredVertices) {
@@ -82,7 +83,7 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& vertices,
 
         if (cross > 0) {
             std::vector<uint32_t> indices = {prevIndex, i, nextIndex};
-            addFillExternalIndices(fillSegments, fillIndexes, indices, startVertices);
+            addFillExternalIndices(fillSegments, fillTriangles, indices, startVertices);
         }
 
         vertices.emplace_back(FillBucket::layoutVertex(point, prevIndex - i, nextIndex - i));
@@ -103,7 +104,7 @@ std::size_t totalVerticesCheck(const GeometryCollection& polygon) {
 }
 
 void addFillIndices(SegmentVector& fillSegments,
-                    gfx::VertexVector<FillIndexVertex>& fillIndexes,
+                    gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                     const std::span<const uint32_t>& indices,
                     const std::size_t startVertices,
                     std::vector<bool>& ignoredVertices) {
@@ -117,11 +118,12 @@ void addFillIndices(SegmentVector& fillSegments,
     auto& triangleSegment = fillSegments.back();
     triangleSegment.instanceCount += nIndices / 3;
 
-    for (std::size_t i = 0; i < nIndices; i++) {
-        bool ignored = ignoredVertices[indices[i]];
-        bool external = false;
-        fillIndexes.emplace_back(FillIndexVertex{
-            {{(static_cast<uint32_t>(startVertices) + indices[i]) * 4 + (ignored ? 1 : 0) * 2 + (external ? 1 : 0)}}});
+    for (std::size_t i = 0; i < nIndices; i += 3) {
+        fillTriangles.emplace_back(
+            FillBucket::triangleInstance(startVertices + indices[i], ignoredVertices[indices[i]], false,
+                                         startVertices + indices[i + 1], ignoredVertices[indices[i + 1]], false,
+                                         startVertices + indices[i + 2], ignoredVertices[indices[i + 2]], false)
+        );
     }
 }
 
@@ -152,7 +154,7 @@ void addOutlineIndices(const std::size_t base,
 
 void generateFillBuffers(const GeometryCollection& geometry,
                          gfx::VertexVector<FillLayoutVertex>& fillVertices,
-                         gfx::VertexVector<FillIndexVertex>& fillIndexes,
+                         gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                          SegmentVector& fillSegments) {
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tessellation.
@@ -163,17 +165,17 @@ void generateFillBuffers(const GeometryCollection& geometry,
         std::vector<bool> ignoredVertices;
 
         for (const auto& ring : polygon) {
-            addRingVertices(fillVertices, fillIndexes, fillSegments, ring, ignoredVertices);
+            addRingVertices(fillVertices, fillTriangles, fillSegments, ring, ignoredVertices);
         }
 
         std::vector<uint32_t> indices = mapbox::earcut(polygon);
-        addFillIndices(fillSegments, fillIndexes, indices, startVertices, ignoredVertices);
+        addFillIndices(fillSegments, fillTriangles, indices, startVertices, ignoredVertices);
     }
 }
 
 void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   gfx::VertexVector<FillLayoutVertex>& vertices,
-                                  gfx::VertexVector<FillIndexVertex>& fillIndexes,
+                                  gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                                   SegmentVector& fillSegments,
                                   gfx::IndexVector<gfx::Lines>& lineIndexes,
                                   SegmentVector& lineSegments) {
@@ -187,18 +189,18 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
         for (const auto& ring : polygon) {
             std::size_t base = vertices.elements();
-            std::size_t nVertices = addRingVertices(vertices, fillIndexes, fillSegments, ring, ignoredVertices);
+            std::size_t nVertices = addRingVertices(vertices, fillTriangles, fillSegments, ring, ignoredVertices);
             addOutlineIndices(base, nVertices, lineSegments, lineIndexes);
         }
 
         std::vector<uint32_t> indices = mapbox::earcut(polygon);
-        addFillIndices(fillSegments, fillIndexes, indices, startVertices, ignoredVertices);
+        addFillIndices(fillSegments, fillTriangles, indices, startVertices, ignoredVertices);
     }
 }
 
 void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   gfx::VertexVector<FillLayoutVertex>& fillVertices,
-                                  gfx::VertexVector<FillIndexVertex>& fillIndexes,
+                                  gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                                   SegmentVector& fillSegments,
                                   gfx::VertexVector<LineLayoutVertex>& lineVertices,
                                   gfx::IndexVector<gfx::Triangles>& lineIndexes,
@@ -225,18 +227,18 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         std::vector<bool> ignoredVertices;
 
         for (const auto& ring : polygon) {
-            addRingVertices(fillVertices, fillIndexes, fillSegments, ring, ignoredVertices);
+            addRingVertices(fillVertices, fillTriangles, fillSegments, ring, ignoredVertices);
             lineGenerator.generate(ring, lineOptions);
         }
 
         std::vector<uint32_t> indices = mapbox::earcut(polygon);
-        addFillIndices(fillSegments, fillIndexes, indices, startVertices, ignoredVertices);
+        addFillIndices(fillSegments, fillTriangles, indices, startVertices, ignoredVertices);
     }
 }
 
 void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   gfx::VertexVector<FillLayoutVertex>& fillVertices,
-                                  gfx::VertexVector<FillIndexVertex>& fillIndexes,
+                                  gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                                   SegmentVector& fillSegments,
                                   gfx::VertexVector<LineLayoutVertex>& lineVertices,
                                   gfx::IndexVector<gfx::Triangles>& lineIndexes,
@@ -262,9 +264,9 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         const std::size_t startVertices = fillVertices.elements();
         std::vector<bool> ignoredVertices;
         for (const auto& polygon : geometry) {
-            addRingVertices(fillVertices, fillIndexes, fillSegments, polygon, ignoredVertices);
+            addRingVertices(fillVertices, fillTriangles, fillSegments, polygon, ignoredVertices);
         }
-        addFillIndices(fillSegments, fillIndexes, geometry.getTriangles(), startVertices, ignoredVertices);
+        addFillIndices(fillSegments, fillTriangles, geometry.getTriangles(), startVertices, ignoredVertices);
         return;
     }
 
@@ -279,7 +281,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         for (const auto& ring : polygon) {
             const std::size_t base = fillVertices.elements();
             const std::size_t nVertices = addRingVertices(
-                fillVertices, fillIndexes, fillSegments, ring, ignoredVertices);
+                fillVertices, fillTriangles, fillSegments, ring, ignoredVertices);
             addOutlineIndices(base, nVertices, basicLineSegments, basicLineIndexes);
             lineGenerator.generate(ring, lineOptions);
         }
@@ -287,7 +289,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // tessellate, if no triangles are provided
         std::vector<uint32_t> indices = mapbox::earcut(polygon);
 
-        addFillIndices(fillSegments, fillIndexes, indices, startVertices, ignoredVertices);
+        addFillIndices(fillSegments, fillTriangles, indices, startVertices, ignoredVertices);
     }
 }
 

@@ -18,7 +18,7 @@ const std::array<AttributeInfo, 4> FillShaderSource::attributes = {
     AttributeInfo{4, gfx::AttributeDataType::Float2, fillUBOCount + 1, idFillOpacityVertexAttribute},
 };
 const std::array<AttributeInfo, 1> FillShaderSource::instanceAttributes = {
-    AttributeInfo{5, gfx::AttributeDataType::UInt3, fillUBOCount + 2, idFillIndicesVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::UInt3, fillUBOCount + 2, idFillTriangleInstanceAttribute},
 };
 const std::array<TextureInfo, 0> FillShaderSource::textures = {};
 
@@ -53,7 +53,7 @@ const std::array<AttributeInfo, 6> FillPatternShaderSource::attributes = {
     AttributeInfo{5, gfx::AttributeDataType::UShort4, fillUBOCount + 1, idFillPatternFromVertexAttribute},
 };
 const std::array<AttributeInfo, 1> FillPatternShaderSource::instanceAttributes = {
-    AttributeInfo{6, gfx::AttributeDataType::UInt3, fillUBOCount + 2, idFillIndicesVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::UInt3, fillUBOCount + 2, idFillTriangleInstanceAttribute},
 };
 const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {
     TextureInfo{0, idFillImageTexture},

@@ -365,11 +365,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto instanceAttrs = context.createVertexAttributeArray();
-        if (const auto& attr = instanceAttrs->set(idFillIndicesVertexAttribute)) {
-            attr->setSharedRawData(bucket.sharedIndices,
-                                   offsetof(FillIndexVertex, a1),
+        if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
+            attr->setSharedRawData(bucket.sharedTriangleInstances,
+                                   offsetof(FillTriangleInstance, a1),
                                    /*vertexOffset=*/0,
-                                   sizeof(FillIndexVertex) * 3,
+                                   sizeof(FillTriangleInstance),
                                    gfx::AttributeDataType::UInt3);
         }
 
