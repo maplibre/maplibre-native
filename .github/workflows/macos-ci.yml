@@ -92,6 +92,10 @@ jobs:
       - name: Check public symbol exports
         run: bazel test //platform:check-public-symbols-macos --test_output=errors --//:renderer=metal
 
+      - name: Build dynamic XCFramework for macOS
+        if: github.event_name != 'pull_request'
+        run: bazel build //platform/macos:MapLibre.dynamic --//:renderer=metal
+
       - name: Generate Xcode project for macOS
         run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
 
