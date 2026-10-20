@@ -83,6 +83,49 @@ mln_plugin_bucket_v1 layOut(const mln_plugin_layer_type_v1& layer,
     CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
     return bucket;
 }
+
+// A host that serves one url and fails every other.
+std::vector<uint8_t> servedGLB;
+int resourceRequests = 0;
+mln_plugin_status requestResource(void*,
+                                  mln_plugin_string url,
+                                  mln_plugin_resource_callback_fn callback,
+                                  void* callbackContext,
+                                  uint64_t* requestID) {
+    ++resourceRequests;
+    *requestID = 1;
+    mln_plugin_resource_response_v1 response{};
+    response.struct_size = sizeof(response);
+    static const char missing[] = "not found";
+    if (std::string_view(url.data, url.size) == "test://triangle.glb") {
+        response.data = servedGLB.data();
+        response.data_size = servedGLB.size();
+    } else {
+        response.error_message = {missing, sizeof(missing) - 1};
+    }
+    callback(callbackContext, &response);
+    return MLN_PLUGIN_STATUS_OK;
+}
+
+mln_plugin_status createWithModelURI(const mln_plugin_layer_type_v1& layer, const char* uri, void*& instance) {
+    mln_plugin_host_api_v1 host{};
+    host.struct_size = sizeof(host);
+    host.request_resource = requestResource;
+    mln_plugin_property_value_v1 property{};
+    property.struct_size = sizeof(property);
+    property.name = {"model-uri", 9};
+    property.value.struct_size = sizeof(property.value);
+    property.value.type = MLN_PLUGIN_VALUE_STRING;
+    property.value.data.string_value = {uri, std::strlen(uri)};
+    mln_plugin_layout_context_v1 context{};
+    context.struct_size = sizeof(context);
+    context.extent = 8192;
+    context.properties = &property;
+    context.property_count = 1;
+    context.host = &host;
+    instance = nullptr;
+    return layer.create_layout(&context, &instance);
+}
 } // namespace
 
 int main() {
@@ -95,7 +138,8 @@ int main() {
 
     // Every property is bound to the shader, and the binding offsets stay inside the uniform block.
     const auto& shader = layer.shaders[0];
-    CHECK(shader.property_binding_count == layer.property_count);
+    // `model-uri` is a layout property: read at layout time, not bound.
+    CHECK(shader.property_binding_count + 1 == layer.property_count);
     CHECK(shader.attribute_count <= MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES);
     std::set<uint32_t> locations;
     for (size_t i = 0; i < shader.attribute_count; ++i) {
@@ -165,7 +209,33 @@ int main() {
     CHECK(layer.update_uniform_block(&uniformContext, 0, output.data(), output.size()) == MLN_PLUGIN_STATUS_OK);
     CHECK(reinterpret_cast<const float*>(output.data())[20 + 2] == 0.0f);
 
+    // A layer's `model-uri` is loaded through the host and cached per uri.
+    CHECK(mln_gltf_layer_set_model(nullptr, 0, nullptr, 0) == MLN_PLUGIN_STATUS_OK);
+    servedGLB = glb;
+    CHECK(createWithModelURI(layer, "test://triangle.glb", instance) == MLN_PLUGIN_STATUS_OK);
+    mln_plugin_feature_v1 uriFeature{};
+    const mln_plugin_tile_point_v1 uriPoint{5, 5};
+    uriFeature.struct_size = sizeof(uriFeature);
+    uriFeature.geometry_type = MLN_PLUGIN_GEOMETRY_POINT;
+    uriFeature.points = &uriPoint;
+    uriFeature.point_count = 1;
+    CHECK(layer.layout_feature(instance, &uriFeature) == MLN_PLUGIN_STATUS_OK);
+    bucket = {};
+    bucket.struct_size = sizeof(bucket);
+    CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
+    CHECK(bucket.drawable_count == 1 && bucket.index_count == 3);
+    layer.destroy_layout(instance);
+    CHECK(resourceRequests == 1);
+    CHECK(createWithModelURI(layer, "test://triangle.glb", instance) == MLN_PLUGIN_STATUS_OK);
+    layer.destroy_layout(instance);
+    CHECK(resourceRequests == 1);
+
+    // A uri that cannot be loaded fails the layout instead of drawing another model.
+    CHECK(createWithModelURI(layer, "test://missing.glb", instance) == MLN_PLUGIN_STATUS_CALLBACK_ERROR);
+    if (instance) layer.destroy_layout(instance);
+
     // Clearing the mesh makes later tiles lay out to nothing again.
+    CHECK(mln_gltf_layer_set_model(glb.data(), glb.size(), nullptr, 0) == MLN_PLUGIN_STATUS_OK);
     CHECK(mln_gltf_layer_set_model(nullptr, 0, nullptr, 0) == MLN_PLUGIN_STATUS_OK);
     bucket = layOut(layer, {{1, 1}}, instance);
     CHECK(bucket.drawable_count == 0);

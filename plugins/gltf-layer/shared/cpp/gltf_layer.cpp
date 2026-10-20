@@ -66,6 +66,9 @@ static_assert(offsetof(Vertex, model) == 4 && offsetof(Vertex, normal) == 16 && 
 static_assert(sizeof(Vertex) == 44);
 
 struct Layout {
+    const mln_plugin_host_api_v1* host = nullptr;
+    // The layer's model: its `model-uri`, or else the mesh set through mln_gltf_layer_set_model. Null when
+    // neither is given; a layer whose features all name their own model needs none.
     std::shared_ptr<const Model> model;
     uint32_t extent = 8192;
     std::vector<Vertex> vertices;
@@ -300,6 +303,66 @@ void copyDiagnostic(const std::string& message, char* output, size_t capacity) {
     output[length] = '\0';
 }
 
+void log(const mln_plugin_host_api_v1* host, int32_t severity, const std::string& message) {
+    if (host && host->struct_size >= offsetof(mln_plugin_host_api_v1, context) && host->log) {
+        host->log(severity, {message.data(), message.size()});
+    }
+}
+
+struct ModelResponse {
+    std::shared_ptr<const Model> model;
+    std::string error;
+};
+
+void modelLoaded(void* context, const mln_plugin_resource_response_v1* response) {
+    auto& result = *static_cast<ModelResponse*>(context);
+    if (!response || !response->data || response->data_size == 0) {
+        result.error = response && response->error_message.data
+                           ? std::string(response->error_message.data, response->error_message.size)
+                           : "empty response";
+        return;
+    }
+    result.model = parseGLB(response->data, response->data_size, result.error);
+}
+
+// Tiles share one parsed model per uri. Failures are not cached, so a later tile retries.
+std::mutex modelCacheMutex;
+std::unordered_map<std::string, std::shared_ptr<const Model>> modelCache;
+
+std::shared_ptr<const Model> loadModel(const mln_plugin_host_api_v1* host, const std::string& uri) {
+    {
+        std::lock_guard lock(modelCacheMutex);
+        const auto found = modelCache.find(uri);
+        if (found != modelCache.end()) return found->second;
+    }
+    if (!host || host->struct_size < sizeof(*host) || !host->request_resource) {
+        log(host, 3, "gltf: the host cannot load resources");
+        return {};
+    }
+    ModelResponse response;
+    uint64_t requestID = 0;
+    const auto status = host->request_resource(host->context, {uri.data(), uri.size()}, modelLoaded, &response, &requestID);
+    if (status != MLN_PLUGIN_STATUS_OK || !response.model) {
+        log(host, 3, "gltf: failed to load '" + uri + "': " + (response.error.empty() ? "request rejected" : response.error));
+        return {};
+    }
+    std::lock_guard lock(modelCacheMutex);
+    return modelCache.emplace(uri, std::move(response.model)).first->second;
+}
+
+// A string layout property by name; empty when absent or when the host predates layout properties.
+std::string layoutString(const mln_plugin_layout_context_v1& context, std::string_view name) {
+    constexpr size_t required = offsetof(mln_plugin_layout_context_v1, host) + sizeof(void*);
+    if (context.struct_size < required) return {};
+    for (size_t i = 0; i < context.property_count; ++i) {
+        const auto& property = context.properties[i];
+        if (std::string_view(property.name.data, property.name.size) != name) continue;
+        if (property.value.type != MLN_PLUGIN_VALUE_STRING || !property.value.data.string_value.data) return {};
+        return std::string(property.value.data.string_value.data, property.value.data.string_value.size);
+    }
+    return {};
+}
+
 void startSegment(Layout& layout) {
     mln_plugin_segment_v1 segment{};
     segment.struct_size = sizeof(segment);
@@ -314,7 +377,14 @@ mln_plugin_status createLayout(const mln_plugin_layout_context_v1* context, void
     }
     auto layout = std::unique_ptr<Layout>(new (std::nothrow) Layout());
     if (!layout) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
-    {
+    layout->host = context->struct_size >= offsetof(mln_plugin_layout_context_v1, host) + sizeof(void*) ? context->host : nullptr;
+    // The layer's `model-uri` wins; a layer without one draws the mesh set through mln_gltf_layer_set_model.
+    // A uri that is given but cannot be loaded fails the layout rather than silently drawing another model.
+    const auto uri = layoutString(*context, "model-uri");
+    if (!uri.empty()) {
+        layout->model = loadModel(layout->host, uri);
+        if (!layout->model) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
+    } else {
         std::lock_guard lock(currentModelMutex);
         layout->model = currentModel;
     }
@@ -499,6 +569,25 @@ constexpr mln_plugin_value number(float n) {
     return v;
 }
 
+constexpr mln_plugin_value text(mln_plugin_string t) {
+    mln_plugin_value v{};
+    v.struct_size = sizeof(v);
+    v.type = MLN_PLUGIN_VALUE_STRING;
+    v.data.string_value = t;
+    return v;
+}
+
+// A layout property is read once per tile by create_layout; it takes no expressions or transitions.
+constexpr mln_plugin_property_descriptor_v1 layoutProperty(mln_plugin_string name, mln_plugin_value value) {
+    mln_plugin_property_descriptor_v1 p{};
+    p.struct_size = sizeof(p);
+    p.name = name;
+    p.type = value.type;
+    p.default_value = value;
+    p.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
+    return p;
+}
+
 constexpr mln_plugin_property_descriptor_v1 property(mln_plugin_string name,
                                                      mln_plugin_value value,
                                                      float minimum = -std::numeric_limits<float>::infinity(),
@@ -519,6 +608,9 @@ constexpr mln_plugin_property_descriptor_v1 property(mln_plugin_string name,
 }
 
 const mln_plugin_property_descriptor_v1 properties[] = {
+    // A .glb with embedded buffers, loaded through the host's file source: an asset://, file:// or https:// url.
+    // Optional: without it the layer draws the mesh set through mln_gltf_layer_set_model.
+    layoutProperty(str("model-uri"), text(str(""))),
     // Degrees clockwise from north, applied on top of the mesh's own forward direction.
     property(str("model-heading"), number(0)),
     // Meters per mesh unit.
