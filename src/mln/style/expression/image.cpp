@@ -41,7 +41,7 @@ bool Image::empty() const {
 } // namespace expression
 
 namespace conversion {
-using namespace mln::style::expression;
+using expression::Image;
 std::optional<Image> Converter<Image>::operator()(const Convertible& value, Error& error) const {
     if (isArray(value)) {
         Convertible imageParameters = arrayMember(value, 0);
