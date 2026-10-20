@@ -31,6 +31,8 @@ public:
 
         int32_t dim;
         std::vector<int16_t> heights;
+        /// Highest of `heights`, unexaggerated
+        int16_t maxHeight = 0;
 
         float get(int32_t x, int32_t y) const { return heights[static_cast<size_t>(y) * (dim + 1) + x]; }
     };
@@ -50,6 +52,9 @@ public:
     std::optional<double> getElevation(const LatLng& latLng) const;
 
     float getExaggeration() const { return exaggeration; }
+    /// Exaggerated height in metres of the highest point in any of the tiles; where the terrain
+    /// pick can start its march (pickTerrainSurface).
+    double getMaxElevation() const { return maxElevation; }
     const std::vector<Tile>& getTiles() const { return tiles; }
 
 private:
@@ -67,17 +72,22 @@ private:
     /// Deepest zoom first, so the first hit is the finest data
     std::vector<Level> levels;
     float exaggeration;
+    double maxElevation = 0.0;
 };
 
 /// Coordinate of the terrain surface under a screen pixel (y-down view pixels, as rendered-feature
-/// queries use), given the terrain height at a coordinate. The pixel's view ray is marched from just
-/// below the camera down to sea level, sampling the height at each candidate plane, and the first
-/// crossing (the nearest surface, so a ridge in front wins) is bisected. Inverse of
-/// Map::pixelForLatLng(latLng, elevation). nullopt without a camera altitude, when the camera is
-/// inside the terrain, or when the ray never meets the surface. Shared by RenderTerrain::pickLatLng
-/// and the map side's TerrainElevationIndex.
+/// queries use), given the terrain height at a coordinate. The pixel's view ray is marched down from
+/// just above `maxElevation` (or from just below the camera, if that is lower) to sea level, sampling
+/// the height at each candidate plane, and the first crossing (the nearest surface, so a ridge in
+/// front wins) is bisected; a coordinate without a height counts as sea level. Starting at the
+/// highest terrain spreads the march's steps over the heights the surface can be at, so a thin ridge
+/// is not stepped over at a grazing angle. Inverse of Map::pixelForLatLng(latLng, elevation).
+/// nullopt without a camera altitude, when the camera is inside the terrain, or when the ray never
+/// meets the surface above sea level. Shared by RenderTerrain::pickLatLng and the map side's
+/// TerrainElevationIndex.
 std::optional<LatLng> pickTerrainSurface(const TransformState& state,
                                          const ScreenCoordinate& pixel,
-                                         const std::function<std::optional<double>(const LatLng&)>& elevationAt);
+                                         const std::function<std::optional<double>(const LatLng&)>& elevationAt,
+                                         double maxElevation);
 
 } // namespace mln

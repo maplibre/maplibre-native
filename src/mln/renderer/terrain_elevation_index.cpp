@@ -21,6 +21,7 @@ TerrainElevationIndex::Grid::Grid(const DEMData& dem)
                                           static_cast<int32_t>(std::numeric_limits<int16_t>::min()),
                                           static_cast<int32_t>(std::numeric_limits<int16_t>::max()));
             heights[static_cast<size_t>(y) * side + x] = static_cast<int16_t>(h);
+            maxHeight = std::max(maxHeight, static_cast<int16_t>(h));
         }
     }
 }
@@ -38,6 +39,7 @@ TerrainElevationIndex::TerrainElevationIndex(std::vector<Tile> tiles_, float exa
         const int64_t across = int64_t{1} << z;
         const int64_t x = static_cast<int64_t>(tile.id.wrap) * across + tile.id.canonical.x;
         level->tiles.emplace(key(x, tile.id.canonical.y), &tile);
+        maxElevation = std::max(maxElevation, static_cast<double>(tile.grid->maxHeight) * exaggeration);
     }
     std::sort(levels.begin(), levels.end(), [](const Level& a, const Level& b) { return a.z > b.z; });
 }
@@ -74,14 +76,11 @@ std::optional<double> TerrainElevationIndex::getElevation(const LatLng& latLng) 
 
 std::optional<LatLng> pickTerrainSurface(const TransformState& state,
                                          const ScreenCoordinate& pixel,
-                                         const std::function<std::optional<double>(const LatLng&)>& elevationAt) {
+                                         const std::function<std::optional<double>(const LatLng&)>& elevationAt,
+                                         double maxElevation) {
     // TransformState unprojects y-up screen points; queries and the platform views hand us y-down
     ScreenCoordinate flipped = pixel;
     flipped.y = state.getSize().height - pixel.y;
-    const LatLng seaLevel = state.screenCoordinateToLatLng(flipped);
-    if (!elevationAt(seaLevel)) {
-        return std::nullopt; // no DEM under the ray: nothing to pick against
-    }
     const auto camera = state.getFreeCameraOptions().getLocation();
     if (!camera || camera->altitude <= 0.0) {
         return std::nullopt;
@@ -93,7 +92,11 @@ std::optional<LatLng> pickTerrainSurface(const TransformState& state,
         return elevationAt(out).value_or(0.0);
     };
     constexpr int steps = 64;
-    const double top = camera->altitude * 0.999;
+    // Nothing is higher than the highest terrain, so start just above it, unless the camera is lower
+    const double top = std::min(camera->altitude * 0.999, maxElevation + 1.0);
+    if (top <= 0.0) {
+        return std::nullopt; // no terrain above sea level
+    }
     double above = top; // last plane height known to be above the surface
     LatLng probe;
     if (surfaceHeightAt(above, probe) >= above) {
