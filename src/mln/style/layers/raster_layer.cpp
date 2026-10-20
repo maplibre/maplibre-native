@@ -290,9 +290,9 @@ TransitionOptions RasterLayer::getRasterSaturationTransition() const {
     return impl().paint.template get<RasterSaturation>().options;
 }
 
-using namespace conversion;
+namespace raster_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 16u;
 
@@ -384,9 +384,10 @@ StyleProperty getLayerProperty(const RasterLayer& layer, const std::string& name
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace raster_layer_properties
 
 Value RasterLayer::serialize() const {
+    using namespace raster_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -397,7 +398,8 @@ Value RasterLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> RasterLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> RasterLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace raster_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -509,7 +511,7 @@ std::optional<Error> RasterLayer::setPropertyInternal(const std::string& name, c
 }
 
 StyleProperty RasterLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return raster_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> RasterLayer::mutableBaseImpl() const {

@@ -34,10 +34,9 @@ std::unique_ptr<Layer> CustomLayer::cloneRef(const std::string&) const {
     return nullptr;
 }
 
-using namespace conversion;
-
-std::optional<Error> CustomLayer::setPropertyInternal(const std::string& name, const Convertible&) {
-    return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
+std::optional<conversion::Error> CustomLayer::setPropertyInternal(const std::string& name,
+                                                                  const conversion::Convertible&) {
+    return conversion::Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 }
 
 StyleProperty CustomLayer::getProperty(const std::string&) const {

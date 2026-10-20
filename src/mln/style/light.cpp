@@ -18,12 +18,12 @@ namespace mln {
 namespace style {
 
 namespace {
-LightObserver nullObserver;
+LightObserver nullLightObserver;
 } // namespace
 
 Light::Light(Immutable<Light::Impl> impl_)
     : impl(std::move(impl_)),
-      observer(&nullObserver) {}
+      observer(&nullLightObserver) {}
 
 Light::Light()
     : Light(makeMutable<Impl>()) {}
@@ -31,16 +31,16 @@ Light::Light()
 Light::~Light() = default;
 
 void Light::setObserver(LightObserver* observer_) {
-    observer = observer_ ? observer_ : &nullObserver;
+    observer = observer_ ? observer_ : &nullLightObserver;
 }
 
 Mutable<Light::Impl> Light::mutableImpl() const {
     return makeMutable<Impl>(*impl);
 }
 
-using namespace conversion;
+namespace light_properties {
 
-namespace {
+using namespace conversion;
 
 enum class Property : uint8_t {
     Anchor,
@@ -68,9 +68,10 @@ constexpr const auto properties = mapbox::eternal::hash_map<mapbox::eternal::str
      {"intensity-transition", toUint8(Property::IntensityTransition)},
      {"position-transition", toUint8(Property::PositionTransition)}});
 
-} // namespace
+} // namespace light_properties
 
-std::optional<Error> Light::setProperty(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> Light::setProperty(const std::string& name, const conversion::Convertible& value) {
+    using namespace light_properties;
     const auto it = properties.find(name.c_str());
     if (it == properties.end()) {
         return Error{"light doesn't support this property"};
@@ -154,6 +155,7 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
 }
 
 StyleProperty Light::getProperty(const std::string& name) const {
+    using namespace light_properties;
     const auto it = properties.find(name.c_str());
     if (it == properties.end()) {
         return {};

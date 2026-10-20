@@ -3,6 +3,8 @@
   const layoutProperties = locals.layoutProperties;
   const paintProperties = locals.paintProperties;
   const allProperties = paintProperties.concat(layoutProperties);
+  // Per-layer namespace for the property helpers, so that layer files do not collide in a unity build
+  const ns = `${type.replace(/-/g, '_')}_layer_properties`;
 
   // Define the mapping from capability keys to struct member names
   const memberMap = {
@@ -220,9 +222,9 @@ TransitionOptions <%- camelize(type) %>Layer::get<%- camelize(property.name) %>T
 }
 <% } -%>
 
-using namespace conversion;
+namespace <%- ns %> {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = <%- paintProperties.length * 2 -%>u;
 
@@ -282,9 +284,10 @@ StyleProperty getLayerProperty(const <%- camelize(type) -%>Layer& layer, const s
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace <%- ns %>
 
 Value <%- camelize(type) %>Layer::serialize() const {
+    using namespace <%- ns %>;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -295,7 +298,8 @@ Value <%- camelize(type) %>Layer::serialize() const {
     return result;
 }
 
-std::optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace <%- ns %>;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -354,7 +358,7 @@ std::optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::
 }
 
 StyleProperty <%- camelize(type) %>Layer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return <%- ns %>::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> <%- camelize(type) %>Layer::mutableBaseImpl() const {
