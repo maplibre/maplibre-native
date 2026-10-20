@@ -292,7 +292,7 @@ Implemented:
   `Frustum::intersectsElevated`), and the terrain mesh is frustum-culled so a
   sparse DEM's low-zoom ancestor tiles are not meshed off-screen.
 - Elevation for the non-draped layers: symbol (icon/SDF/text-and-icon), circle,
-  and fill-extrusion on all four backends, via the shared `get_elevation()`
+  heatmap, and fill-extrusion on all four backends, via the shared `get_elevation()`
   prelude helper and per-drawable DEM bindings
 - Style parsing of the `terrain` root property (`source`, `exaggeration`) per the
   style spec, with exaggeration applied as styled (1.0 = true scale)
@@ -1330,7 +1330,9 @@ terrain during placement sees the previous frame's state - the same first-frame 
   render_terrain.cpp are one-time warning/error logs; terrain_layer_tweaker.cpp
   has no per-frame logging.
 - Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
-- Decide whether heatmap should be draped (gl-js does not drape it)
+- **(done)** Heatmap is elevated, not draped, as in gl-js (which does not drape it): each
+  kernel is lifted to the DEM height at its centre in the kernel vertex shader, and the
+  colour-ramp composite stays a screen-space pass.
 - Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing
