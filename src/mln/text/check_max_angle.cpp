@@ -5,8 +5,6 @@
 #include <numbers>
 #include <queue>
 
-using namespace std::numbers;
-
 namespace mln {
 
 struct Corner {
@@ -22,6 +20,8 @@ bool checkMaxAngle(const GeometryCoordinates& line,
                    const float labelLength,
                    const float windowSize,
                    const float maxAngle) {
+    using std::numbers::pi;
+
     // horizontal labels always pass
     if (!anchor.segment) return true;
 

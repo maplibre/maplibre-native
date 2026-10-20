@@ -63,8 +63,6 @@ const CollisionGroups::CollisionGroup& CollisionGroups::get(const std::string& s
     }
 }
 
-using namespace style;
-
 // PlacementContext implementation
 class PlacementContext {
     std::reference_wrapper<const SymbolBucket> bucket;
@@ -101,11 +99,11 @@ public:
     float scale;
     float pixelRatio;
 
-    bool rotateTextWithMap = getLayout().get<TextRotationAlignment>() == AlignmentType::Map;
-    bool pitchTextWithMap = getLayout().get<TextPitchAlignment>() == AlignmentType::Map;
-    bool rotateIconWithMap = getLayout().get<IconRotationAlignment>() == AlignmentType::Map;
-    bool pitchIconWithMap = getLayout().get<IconPitchAlignment>() == AlignmentType::Map;
-    SymbolPlacementType placementType = getLayout().get<SymbolPlacement>();
+    bool rotateTextWithMap = getLayout().get<style::TextRotationAlignment>() == style::AlignmentType::Map;
+    bool pitchTextWithMap = getLayout().get<style::TextPitchAlignment>() == style::AlignmentType::Map;
+    bool rotateIconWithMap = getLayout().get<style::IconRotationAlignment>() == style::AlignmentType::Map;
+    bool pitchIconWithMap = getLayout().get<style::IconPitchAlignment>() == style::AlignmentType::Map;
+    style::SymbolPlacementType placementType = getLayout().get<style::SymbolPlacement>();
 
     mat4 textLabelPlaneMatrix = getLabelPlaneMatrix(
         renderTile.get().matrix, pitchTextWithMap, rotateTextWithMap, state, pixelsToTileUnits);
@@ -142,7 +140,7 @@ public:
     bool alwaysShowIcon = iconAllowOverlap &&
                           (textAllowOverlap || !getBucket().hasTextData() || getLayout().get<style::TextOptional>());
 
-    bool hasIconTextFit = getLayout().get<IconTextFit>() != IconTextFitType::None;
+    bool hasIconTextFit = getLayout().get<style::IconTextFit>() != style::IconTextFitType::None;
 
     std::optional<CollisionBoundaries> avoidEdges;
 };
@@ -308,7 +306,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
             if (bucket.allowVerticalPlacement && symbolInstance.getWritingModes() & WritingModeType::Vertical) {
                 assert(!bucket.placementModes.empty());
                 for (auto& placementMode : bucket.placementModes) {
-                    if (placementMode == TextWritingModeType::Vertical) {
+                    if (placementMode == style::TextWritingModeType::Vertical) {
                         placedVerticalText = placed = placeVerticalFn();
                     } else {
                         placed = placeHorizontalFn();
@@ -563,8 +561,8 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         offscreen &= placedIcon.second;
     }
 
-    const bool iconWithoutText = !symbolInstance.hasText() || ctx.getLayout().get<TextOptional>();
-    const bool textWithoutIcon = !symbolInstance.hasIcon() || ctx.getLayout().get<IconOptional>();
+    const bool iconWithoutText = !symbolInstance.hasText() || ctx.getLayout().get<style::TextOptional>();
+    const bool textWithoutIcon = !symbolInstance.hasIcon() || ctx.getLayout().get<style::IconOptional>();
 
     // combine placements for icon and text
     if (!iconWithoutText && !textWithoutIcon) {
@@ -579,13 +577,13 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         if (placedVerticalText.first && symbolInstance.getVerticalTextCollisionFeature()) {
             collisionIndex.insertFeature(*symbolInstance.getVerticalTextCollisionFeature(),
                                          textBoxes,
-                                         ctx.getLayout().get<TextIgnorePlacement>(),
+                                         ctx.getLayout().get<style::TextIgnorePlacement>(),
                                          bucket.bucketInstanceId,
                                          collisionGroup.first);
         } else {
             collisionIndex.insertFeature(symbolInstance.getTextCollisionFeature(),
                                          textBoxes,
-                                         ctx.getLayout().get<TextIgnorePlacement>(),
+                                         ctx.getLayout().get<style::TextIgnorePlacement>(),
                                          bucket.bucketInstanceId,
                                          collisionGroup.first);
         }
@@ -595,13 +593,13 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         if (placedVerticalIcon.first && symbolInstance.getVerticalIconCollisionFeature()) {
             collisionIndex.insertFeature(*symbolInstance.getVerticalIconCollisionFeature(),
                                          iconBoxes,
-                                         ctx.getLayout().get<IconIgnorePlacement>(),
+                                         ctx.getLayout().get<style::IconIgnorePlacement>(),
                                          bucket.bucketInstanceId,
                                          collisionGroup.first);
         } else {
             collisionIndex.insertFeature(symbolInstance.getIconCollisionFeature(),
                                          iconBoxes,
-                                         ctx.getLayout().get<IconIgnorePlacement>(),
+                                         ctx.getLayout().get<style::IconIgnorePlacement>(),
                                          bucket.bucketInstanceId,
                                          collisionGroup.first);
         }
@@ -1388,7 +1386,7 @@ private:
 
     std::optional<CollisionBoundaries> getAvoidEdges(const SymbolBucket&, const mat4&) override;
     bool canPlaceAtVariableAnchor(const CollisionBox& box,
-                                  TextVariableAnchorType anchor,
+                                  style::TextVariableAnchorType anchor,
                                   Point<float> shift,
                                   std::vector<style::TextVariableAnchorType>& anchors,
                                   const mat4& posMatrix,
@@ -1481,7 +1479,8 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
         Placement::placeSymbolBucket(params, seen);
         return;
     }
-    if (layout.get<SymbolPlacement>() != SymbolPlacementType::Point || layout.get<SymbolAvoidEdges>()) {
+    if (layout.get<style::SymbolPlacement>() != style::SymbolPlacementType::Point ||
+        layout.get<style::SymbolAvoidEdges>()) {
         // Collect intersection only for point placement.
         return;
     }
@@ -1616,7 +1615,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
 }
 
 bool TilePlacement::canPlaceAtVariableAnchor(const CollisionBox& box,
-                                             TextVariableAnchorType anchor,
+                                             style::TextVariableAnchorType anchor,
                                              Point<float> shift,
                                              std::vector<style::TextVariableAnchorType>& anchors,
                                              const mat4& posMatrix,

@@ -12,15 +12,11 @@
 #include <cassert>
 #include <numbers>
 
-using namespace std::numbers;
-
 namespace mln {
-
-using namespace style;
 
 constexpr const auto border = ImagePosition::padding;
 
-float computeStretchSum(const ImageStretches& stretches) {
+float computeStretchSum(const style::ImageStretches& stretches) {
     float sum = 0;
     for (auto& stretch : stretches) {
         sum += stretch.second - stretch.first;
@@ -28,7 +24,7 @@ float computeStretchSum(const ImageStretches& stretches) {
     return sum;
 }
 
-float sumWithinRange(const ImageStretches& stretches, const float min, const float max) {
+float sumWithinRange(const style::ImageStretches& stretches, const float min, const float max) {
     float sum = 0;
     for (auto& stretch : stretches) {
         sum += util::max(min, util::min(max, stretch.second)) - util::max(min, util::min(max, stretch.first));
@@ -51,7 +47,7 @@ struct Cut {
 
 using Cuts = std::vector<Cut>;
 
-Cuts stretchZonesToCuts(const ImageStretches& stretchZones, const float fixedSize, const float stretchSize) {
+Cuts stretchZonesToCuts(const style::ImageStretches& stretchZones, const float fixedSize, const float stretchSize) {
     Cuts cuts{{-border, 0}};
 
     for (auto& zone : stretchZones) {
@@ -76,10 +72,10 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     const uint16_t imageWidth = image.paddedRect.w - 2 * border;
     const uint16_t imageHeight = image.paddedRect.h - 2 * border;
 
-    const ImageStretches stretchXFull{{0.0f, imageWidth}};
-    const ImageStretches stretchYFull{{0.0f, imageHeight}};
-    const ImageStretches& stretchX = !image.stretchX.empty() ? image.stretchX : stretchXFull;
-    const ImageStretches& stretchY = !image.stretchY.empty() ? image.stretchY : stretchYFull;
+    const style::ImageStretches stretchXFull{{0.0f, imageWidth}};
+    const style::ImageStretches stretchYFull{{0.0f, imageHeight}};
+    const style::ImageStretches& stretchX = !image.stretchX.empty() ? image.stretchX : stretchXFull;
+    const style::ImageStretches& stretchY = !image.stretchY.empty() ? image.stretchY : stretchYFull;
 
     const float stretchWidth = computeStretchSum(stretchX);
     const float stretchHeight = computeStretchSum(stretchY);
@@ -208,13 +204,13 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
 
 SymbolQuads getGlyphQuads(const Shaping& shapedText,
                           const std::array<float, 2> textOffset,
-                          const SymbolLayoutProperties::Evaluated& layout,
+                          const style::SymbolLayoutProperties::Evaluated& layout,
                           const style::SymbolPlacementType placement,
                           const ImageMap& imageMap,
                           bool allowVerticalPlacement) {
-    const float textRotate = util::deg2radf(layout.get<TextRotate>());
-    const bool alongLine = layout.get<TextRotationAlignment>() == AlignmentType::Map &&
-                           placement != SymbolPlacementType::Point;
+    const float textRotate = util::deg2radf(layout.get<style::TextRotate>());
+    const bool alongLine = layout.get<style::TextRotationAlignment>() == style::AlignmentType::Map &&
+                           placement != style::SymbolPlacementType::Point;
 
     SymbolQuads quads;
 
@@ -296,7 +292,7 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                 // and translated.
 
                 const Point<float> center{-halfAdvance, halfAdvance - Shaping::yOffset};
-                const float verticalRotation = -pi_v<float> / 2;
+                const float verticalRotation = -std::numbers::pi_v<float> / 2;
 
                 // xHalfWidhtOffsetcorrection is a difference between full-width
                 // and half-width advance, should be 0 for full-width glyphs and
