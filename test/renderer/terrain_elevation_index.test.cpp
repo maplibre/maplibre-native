@@ -6,6 +6,7 @@
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/camera.hpp>
 #include <mln/map/map_options.hpp>
+#include <mln/map/transform.hpp>
 #include <mln/renderer/terrain_elevation_index.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/terrain.hpp>
@@ -14,6 +15,7 @@
 #include <mln/util/run_loop.hpp>
 
 #include <cmath>
+#include <limits>
 
 using namespace mln;
 
@@ -224,4 +226,76 @@ TEST(TerrainElevationIndex, CameraCodeUnprojectsOnTheCentresPlane) {
         EXPECT_NEAR(landed.x, centre.x, 0.1) << centerAltitude;
         EXPECT_NEAR(landed.y, centre.y, 0.1) << centerAltitude;
     }
+}
+
+// The highest point of the copied tiles, exaggerated, is where the pick starts its march.
+TEST(TerrainElevationIndex, KnowsItsHighestPoint) {
+    const auto world = Projection::project(innsbruck, 4);
+    const UnwrappedTileID child(4, static_cast<uint32_t>(world.x), static_cast<uint32_t>(world.y));
+    TerrainElevationIndex index({{UnwrappedTileID(2, 2, 1), makeGrid(500.0)}, {child, makeGrid(900.0)}}, 1.5f);
+    EXPECT_NEAR(index.getMaxElevation(), 900.0 * 1.5, 0.01);
+}
+
+namespace {
+
+// North-up and steeply pitched, so a point farther up the screen ray is farther north.
+TransformState pitchedNorthUp(double zoom, double pitch) {
+    Transform transform;
+    transform.resize({256, 256});
+    transform.jumpTo(CameraOptions().withCenter(innsbruck).withZoom(zoom).withBearing(0.0).withPitch(pitch));
+    return transform.getState();
+}
+
+// Latitude where the ray through a y-down view pixel crosses the plane `height` metres up.
+double latitudeAt(const TransformState& state, const ScreenCoordinate& pixel, double height) {
+    return state.screenCoordinateToLatLng({pixel.x, state.getSize().height - pixel.y}, height).latitude();
+}
+
+} // namespace
+
+// Heights that stop before the ray's sea-level point (a pixel high on a pitched screen, past the
+// loaded tiles) still catch the ray on the ground in front of it.
+TEST(TerrainElevationIndex, PickFindsTheGroundWhenSeaLevelIsPastTheHeights) {
+    const TransformState state = pitchedNorthUp(10.0, 70.0);
+    const ScreenCoordinate pixel{128.0, 40.0};
+    const double plateau = 1000.0;
+    // Heights stop halfway between where the ray reaches the plateau and where it reaches sea level
+    const double edge = 0.5 * (latitudeAt(state, pixel, plateau) + latitudeAt(state, pixel, 0.0));
+    const auto elevationAt = [&](const LatLng& latLng) -> std::optional<double> {
+        return latLng.latitude() <= edge ? std::optional<double>(plateau) : std::nullopt;
+    };
+    const auto picked = pickTerrainSurface(state, pixel, elevationAt, plateau);
+    ASSERT_TRUE(picked);
+    EXPECT_NEAR(picked->latitude(), latitudeAt(state, pixel, plateau), 1e-4);
+}
+
+// A ridge the ray passes through only within one of the march's steps is found when the march
+// starts at the highest terrain. Started from just below the camera, ~10 km up, the 64 steps are
+// ~160 m apart: one lands in front of the ridge and the next behind it, and the pick lands on the
+// sea-level ground beyond.
+TEST(TerrainElevationIndex, PickDoesNotStepOverAThinRidge) {
+    const TransformState state = pitchedNorthUp(9.0, 75.0);
+    const ScreenCoordinate pixel{128.0, 60.0};
+    // The heights the march from the camera samples are top * (1 - i / 64); put the ray's stretch
+    // inside the ridge between two of them, around 1000 m up
+    const double top = state.getFreeCameraOptions().getLocation()->altitude * 0.999;
+    const double step = top / 64.0;
+    const double above = std::ceil(1000.0 / step) * step;
+    const double windowTop = above - 0.25 * step;
+    const double windowBottom = above - 0.75 * step;
+    const double ridge = windowTop + 10.0;
+    const double nearEdge = latitudeAt(state, pixel, windowTop);
+    const double farEdge = latitudeAt(state, pixel, windowBottom);
+    ASSERT_LT(nearEdge, farEdge);
+    const auto elevationAt = [&](const LatLng& latLng) -> std::optional<double> {
+        return latLng.latitude() >= nearEdge && latLng.latitude() <= farEdge ? ridge : 0.0;
+    };
+
+    const auto picked = pickTerrainSurface(state, pixel, elevationAt, ridge);
+    ASSERT_TRUE(picked);
+    EXPECT_NEAR(picked->latitude(), nearEdge, 0.25 * (farEdge - nearEdge));
+
+    const auto fromTheCamera = pickTerrainSurface(state, pixel, elevationAt, std::numeric_limits<double>::infinity());
+    ASSERT_TRUE(fromTheCamera);
+    EXPECT_GT(fromTheCamera->latitude(), farEdge);
 }

@@ -492,7 +492,10 @@ ScreenCoordinate Map::pixelForLatLngOnTerrain(const LatLng& latLng) const {
 LatLng Map::latLngForPixelOnTerrain(const ScreenCoordinate& pixel) const {
     if (const auto& index = impl->terrainElevationIndex) {
         if (const auto surface = pickTerrainSurface(
-                impl->transform.getState(), pixel, [&](const LatLng& latLng) { return index->getElevation(latLng); })) {
+                impl->transform.getState(),
+                pixel,
+                [&](const LatLng& latLng) { return index->getElevation(latLng); },
+                index->getMaxElevation())) {
             return *surface;
         }
     }

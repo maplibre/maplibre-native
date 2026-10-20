@@ -764,7 +764,8 @@ std::optional<LatLng> RenderTerrain::pickLatLng(const TransformState& state, con
     if (!index) {
         return std::nullopt;
     }
-    return pickTerrainSurface(state, pixel, [&index](const LatLng& latLng) { return index->getElevation(latLng); });
+    return pickTerrainSurface(
+        state, pixel, [&index](const LatLng& latLng) { return index->getElevation(latLng); }, index->getMaxElevation());
 }
 
 bool RenderTerrain::updateElevationIndex() {
