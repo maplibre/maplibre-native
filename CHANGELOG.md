@@ -34,6 +34,7 @@
 
 ### 🐞 Bug fixes
 
+- [core] Stop custom geometry tile callbacks before cancelled tiles are released on a worker thread.
 - *...Add new stuff here...*
 - [core] Fix plugin layer filters ignoring the style's global state.
 - [core] Fix a crash in `RenderImageSource::update` when an image source's coordinates give an empty tile cover, such as an image wholly beyond the latitudes Web Mercator can show.
