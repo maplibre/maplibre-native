@@ -363,8 +363,6 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
             error = "plugin property descriptor is malformed";
             return false;
         }
-        // Like built-in layout properties, plugin layout values are evaluated once per
-        // layout, so they cannot follow feature state or transitions.
         if (property.is_layout > 1 ||
             (property.is_layout && (property.supports_transitions ||
                                     (property.expression_capabilities & MLN_PLUGIN_EXPRESSION_FEATURE_STATE)))) {
@@ -578,7 +576,6 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         for (const auto& property : copiedLayerType.properties) {
             const auto dataDependencies = MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_COMPOSITE |
                                           MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
-            // Data-driven layout values reach layout_feature, not shader bindings.
             if (property.isLayout || (property.expressionCapabilities & dataDependencies) == 0) continue;
             const bool bound = std::any_of(
                 copiedLayerType.shaders.begin(), copiedLayerType.shaders.end(), [&](const auto& shader) {

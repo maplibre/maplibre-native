@@ -138,10 +138,8 @@ typedef struct mln_plugin_property_descriptor_v1 {
     /* Optional allowed string values. */
     const mln_plugin_string* enum_values;
     size_t enum_value_count;
-    /* 0 = paint, 1 = layout. Layout values may use camera, feature and composite
-     * expressions, never feature-state, and never transition. They are evaluated
-     * at tile zoom: without a feature before create_layout, and per feature for
-     * layout_feature. */
+    /* 0 = paint, 1 = layout. Layout values are evaluated at tile zoom, never
+     * transition, and cannot use feature-state. */
     uint8_t is_layout;
 } mln_plugin_property_descriptor_v1;
 
@@ -331,15 +329,13 @@ typedef struct mln_plugin_feature_v1 {
     /* path_offsets has path_count + 1 entries and ends at point_count. */
     const uint32_t* path_offsets;
     size_t path_count;
-    /* layout_feature: every layout property, evaluated for this feature at tile
-     * zoom. query_feature: empty; its properties argument has all values. */
+    /* Layout properties evaluated for this feature. Empty in query_feature. */
     const mln_plugin_property_value_v1* layout_properties;
     size_t layout_property_count;
 } mln_plugin_feature_v1;
 
-/* Worker-thread input. Paint evaluation is owned by the host binders. Layout
- * properties are evaluated without a feature, so data-driven values here are
- * fallbacks; use the per-feature values in mln_plugin_feature_v1. */
+/* Worker-thread input. Paint evaluation is owned by the host binders.
+ * Data-driven layout values here are defaults; see mln_plugin_feature_v1. */
 typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;

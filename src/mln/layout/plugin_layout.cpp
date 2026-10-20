@@ -78,24 +78,26 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
     context.struct_size = sizeof(context);
     context.zoom = zoom;
     context.extent = util::EXTENT;
-    std::vector<mln_plugin_property_value_v1> layoutProperties;
-    std::vector<style::PluginPropertyValue::EvaluationStorage> storage(registration->properties.size());
-    struct DataDrivenLayoutProperty {
-        std::size_t index; // Into layoutProperties.
-        const plugin::PropertyDefinition* definition;
+    // Parallel to layoutProperties, and reserved so the strings they point into never move.
+    struct LayoutProperty {
+        const plugin::PropertyDefinition& definition;
         style::PluginPropertyValue value;
+        style::PluginPropertyValue::EvaluationStorage storage;
     };
-    std::vector<DataDrivenLayoutProperty> dataDrivenProperties;
-    for (size_t i = 0; i < registration->properties.size(); ++i) {
-        const auto& definition = registration->properties[i];
+    std::vector<LayoutProperty> sources;
+    sources.reserve(registration->properties.size());
+    std::vector<mln_plugin_property_value_v1> layoutProperties;
+    for (const auto& definition : registration->properties) {
         if (!definition.isLayout) continue;
         const auto it = leader.pluginProperties.find(definition.name);
-        const auto value = it == leader.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                               : it->second;
-        if (value.isDataDriven()) dataDrivenProperties.push_back({layoutProperties.size(), &definition, value});
+        sources.push_back(
+            {definition,
+             it == leader.pluginProperties.end() ? style::defaultPluginPropertyValue(definition) : it->second,
+             {}});
+        auto& source = sources.back();
         layoutProperties.push_back({sizeof(mln_plugin_property_value_v1),
                                     {definition.name.data(), definition.name.size()},
-                                    value.evaluate(zoom, definition, storage[i]),
+                                    source.value.evaluate(zoom, definition, source.storage),
                                     static_cast<uint8_t>(it != leader.pluginProperties.end())});
     }
     context.properties = layoutProperties.data();
@@ -110,9 +112,6 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
         return;
     }
 
-    // Constant values stay shared with the context; data-driven ones are replaced per feature.
-    auto featureProperties = layoutProperties;
-    std::vector<style::PluginPropertyValue::EvaluationStorage> featureStorage(dataDrivenProperties.size());
     for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
         auto feature = sourceLayer->getFeature(i);
         if (!feature) continue;
@@ -122,14 +121,15 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
             continue;
         }
 
-        for (std::size_t p = 0; p < dataDrivenProperties.size(); ++p) {
-            const auto& property = dataDrivenProperties[p];
-            featureProperties[property.index].value = property.value.evaluate(
-                zoom, *feature, {}, *property.definition, featureStorage[p], nullptr, &canonical);
+        for (std::size_t p = 0; p < sources.size(); ++p) {
+            auto& source = sources[p];
+            if (!source.value.isDataDriven()) continue;
+            layoutProperties[p].value = source.value.evaluate(
+                zoom, *feature, {}, source.definition, source.storage, nullptr, &canonical);
         }
         plugin::FeatureView pluginFeature(*feature, i);
-        pluginFeature.value.layout_properties = featureProperties.data();
-        pluginFeature.value.layout_property_count = featureProperties.size();
+        pluginFeature.value.layout_properties = layoutProperties.data();
+        pluginFeature.value.layout_property_count = layoutProperties.size();
         if (registration->layoutFeature(layoutInstance, &pluginFeature.value) != MLN_PLUGIN_STATUS_OK) {
             Log::Error(Event::Style, "Plugin layer '" + leader.id + "' failed while laying out a feature");
             return;
