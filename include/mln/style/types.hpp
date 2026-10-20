@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mln/util/enum.hpp>
+
 #include <cstdint>
 
 namespace mln {
@@ -135,4 +137,25 @@ enum class LightAnchorType : bool {
 };
 
 } // namespace style
+
+MLN_DECLARE_ENUM(style::SourceType);
+MLN_DECLARE_ENUM(style::VisibilityType);
+MLN_DECLARE_ENUM(style::TranslateAnchorType);
+MLN_DECLARE_ENUM(style::RasterResamplingType);
+MLN_DECLARE_ENUM(style::HillshadeIlluminationAnchorType);
+MLN_DECLARE_ENUM(style::HillshadeMethodType);
+MLN_DECLARE_ENUM(style::RotateAnchorType);
+MLN_DECLARE_ENUM(style::CirclePitchScaleType);
+MLN_DECLARE_ENUM(style::LineCapType);
+MLN_DECLARE_ENUM(style::LineJoinType);
+MLN_DECLARE_ENUM(style::SymbolPlacementType);
+MLN_DECLARE_ENUM(style::SymbolAnchorType);
+MLN_DECLARE_ENUM(style::SymbolZOrderType);
+MLN_DECLARE_ENUM(style::TextJustifyType);
+MLN_DECLARE_ENUM(style::TextTransformType);
+MLN_DECLARE_ENUM(style::TextWritingModeType);
+MLN_DECLARE_ENUM(style::AlignmentType);
+MLN_DECLARE_ENUM(style::IconTextFitType);
+MLN_DECLARE_ENUM(style::LightAnchorType);
+
 } // namespace mln
