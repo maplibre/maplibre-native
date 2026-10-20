@@ -99,6 +99,20 @@ public class Projection {
     return nativeMapView.latLngForPixel(point);
   }
 
+  /**
+   * Returns the geographic location under a screen location on the plane the camera's centre sits
+   * on: sea level, unless a gesture over 3D terrain has lifted the centre onto the ground. For code
+   * that turns a screen location into a camera target. With 3D terrain, {@link #fromScreenLocation}
+   * answers on the terrain surface in front of that plane, and a target taken from it moves the view.
+   *
+   * @param point A Point on the screen in screen pixels.
+   * @return The LatLng on the camera centre's plane under the point on the screen.
+   */
+  @NonNull
+  public LatLng fromScreenLocationAtCenterAltitude(@NonNull PointF point) {
+    return nativeMapView.latLngForPixelAtCenterAltitude(point);
+  }
+
 
   /**
    * Returns the geographic locations that corresponds to screen locations.

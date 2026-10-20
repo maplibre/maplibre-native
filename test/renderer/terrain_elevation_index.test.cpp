@@ -192,3 +192,36 @@ TEST(TerrainElevationIndex, WithoutTerrainProjectionIsSeaLevel) {
     const LatLng picked = test.map.latLngForPixelOnTerrain(onSurface);
     EXPECT_NEAR(picked.latitude(), target.latitude(), 1e-6);
 }
+
+// Camera code that turns a screen point into a camera centre (iOS panning and moveIntoView, Android
+// zoomBy around a point) unprojects on the plane the centre sits on: the centre pixel maps back to
+// the centre, and a camera moved to a point unprojected this way puts that point where it was asked.
+// The terrain pick answers on the plateau in front of that plane, so a centre taken from it moves
+// the view.
+TEST(TerrainElevationIndex, CameraCodeUnprojectsOnTheCentresPlane) {
+    for (const double centerAltitude : {0.0, 400.0}) {
+        TerrainProjectionTest test;
+        test.map.jumpTo(CameraOptions().withZoom(10.0).withCenterAltitude(centerAltitude));
+        test.render(4);
+        ASSERT_TRUE(test.map.getTerrainElevation(innsbruck));
+
+        const ScreenCoordinate centre{128.0, 128.0};
+        const auto camera = test.map.getCameraOptions({});
+        ASSERT_NEAR(*camera.centerAltitude, centerAltitude, 1e-6);
+        const LatLng onPlane = test.map.latLngForPixelAtCenterAltitude(centre);
+        // To within a tenth of a pixel (~5 m at z10); the pick below is off by over 100 m
+        EXPECT_NEAR(onPlane.latitude(), camera.center->latitude(), 1e-4) << centerAltitude;
+        EXPECT_NEAR(onPlane.longitude(), camera.center->longitude(), 1e-4) << centerAltitude;
+
+        // The plateau is above the centre's plane, so the pick lands well short of the centre
+        const LatLng picked = test.map.latLngForPixelOnTerrain(centre);
+        EXPECT_GT(std::abs(picked.latitude() - camera.center->latitude()), 1e-3) << centerAltitude;
+
+        // A pan: the point 40 px below the centre becomes the centre
+        const LatLng target = test.map.latLngForPixelAtCenterAltitude({128.0, 168.0});
+        test.map.jumpTo(CameraOptions().withCenter(target));
+        const ScreenCoordinate landed = test.map.pixelForLatLng(target, centerAltitude);
+        EXPECT_NEAR(landed.x, centre.x, 0.1) << centerAltitude;
+        EXPECT_NEAR(landed.y, centre.y, 0.1) << centerAltitude;
+    }
+}
