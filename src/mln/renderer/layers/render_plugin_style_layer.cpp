@@ -44,6 +44,7 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
     const auto& definitions = registration->properties;
     const auto& layerImpl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
+        if (definition.layout) continue;
         const auto property = layerImpl.pluginProperties.find(definition.name);
         auto value = property == layerImpl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
                                                                   : property->second;
@@ -60,6 +61,7 @@ void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) 
     styleDependencies = impl.getDependencies();
     const auto& definitions = impl.registration->properties;
     for (const auto& definition : definitions) {
+        if (definition.layout) continue;
         const auto property = impl.pluginProperties.find(definition.name);
         auto value = property == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
                                                              : property->second;
@@ -86,6 +88,7 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     const auto& definitions = registration->properties;
     const auto& impl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
+        if (definition.layout) continue;
         const auto transition = transitioningPaintProperties.find(definition.name);
         if (transition != transitioningPaintProperties.end()) {
             evaluatedPluginProperties.emplace(definition.name,

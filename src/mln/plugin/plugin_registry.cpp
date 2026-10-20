@@ -332,6 +332,16 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
             error = "plugin property descriptor is malformed";
             return false;
         }
+        if (property.scope != 0 && property.scope != MLN_PLUGIN_PROPERTY_PAINT &&
+            property.scope != MLN_PLUGIN_PROPERTY_LAYOUT) {
+            error = "plugin property descriptor has an unknown scope";
+            return false;
+        }
+        const bool layoutScope = property.scope == MLN_PLUGIN_PROPERTY_LAYOUT;
+        if (layoutScope && (property.supports_transitions || property.expression_capabilities != 0)) {
+            error = "plugin layout properties are constants and cannot use expressions or transitions";
+            return false;
+        }
         const bool transitionableType = property.type == MLN_PLUGIN_VALUE_FLOAT ||
                                         property.type == MLN_PLUGIN_VALUE_FLOAT2 ||
                                         property.type == MLN_PLUGIN_VALUE_COLOR;
@@ -397,7 +407,8 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
                                property.supports_transitions != 0,
                                property.has_minimum ? std::optional<float>{property.minimum} : std::nullopt,
                                property.has_maximum ? std::optional<float>{property.maximum} : std::nullopt,
-                               std::move(enumValues)});
+                               std::move(enumValues),
+                               layoutScope});
     }
     return true;
 }
@@ -494,7 +505,7 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
                                               (property->type == MLN_PLUGIN_VALUE_STRING &&
                                                !property->enumValues.empty() &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT));
-                if (property == nullptr || !encodingMatches) {
+                if (property == nullptr || property->layout || !encodingMatches) {
                     error = "plugin shader property binding references an incompatible paint property";
                     return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
                 }

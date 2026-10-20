@@ -129,7 +129,28 @@ void PluginLayout::createBucket(const ImagePositions&,
     context.zoom = zoom;
     context.extent = util::EXTENT;
 
+    // Layout-scope properties are constants; expressions are not evaluated here.
     LayoutResourceHost resourceHost(fileSource);
+    std::vector<style::PluginPropertyValue> layoutValues;
+    std::vector<style::PluginPropertyValue::EvaluationStorage> layoutStorage(registration->properties.size());
+    std::vector<mln_plugin_property_value_v1> layoutProperties;
+    layoutValues.reserve(registration->properties.size());
+    layoutProperties.reserve(registration->properties.size());
+    for (std::size_t i = 0; i < registration->properties.size(); ++i) {
+        const auto& definition = registration->properties[i];
+        if (!definition.layout) continue;
+        const auto stored = leader.pluginProperties.find(definition.name);
+        layoutValues.push_back(stored == leader.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
+                                                                       : stored->second);
+        mln_plugin_property_value_v1 property{};
+        property.struct_size = sizeof(property);
+        property.name = {definition.name.data(), definition.name.size()};
+        property.value = layoutValues.back().evaluate(zoom, definition, layoutStorage[i]);
+        property.explicitly_set = stored != leader.pluginProperties.end();
+        layoutProperties.push_back(property);
+    }
+    context.properties = layoutProperties.data();
+    context.property_count = layoutProperties.size();
     context.host = resourceHost.getAPI();
 
     void* layoutInstance = nullptr;

@@ -117,6 +117,12 @@ typedef struct mln_plugin_value {
     mln_plugin_value_data data;
 } mln_plugin_value;
 
+/* Zero (a zero-initialized descriptor) means paint. */
+typedef enum mln_plugin_property_scope {
+    MLN_PLUGIN_PROPERTY_PAINT = 1,
+    MLN_PLUGIN_PROPERTY_LAYOUT = 2
+} mln_plugin_property_scope;
+
 typedef struct mln_plugin_property_descriptor_v1 {
     uint32_t struct_size;
     mln_plugin_string name;
@@ -133,6 +139,10 @@ typedef struct mln_plugin_property_descriptor_v1 {
     /* Optional allowed string values. */
     const mln_plugin_string* enum_values;
     size_t enum_value_count;
+    /* Layout properties are read once per tile by create_layout (see
+     * mln_plugin_layout_context_v1::properties); changing one relays out the
+     * tiles. They are constants: no expressions, no transitions, no binders. */
+    mln_plugin_property_scope scope;
 } mln_plugin_property_descriptor_v1;
 
 typedef struct mln_plugin_property_value_v1 {
@@ -339,6 +349,9 @@ typedef struct mln_plugin_layout_context_v1 {
     float zoom;
     uint32_t extent;
     /* Appended after the original v1 fields: check struct_size before reading. */
+    /* Constant values of the layout-scope properties, in registration order. */
+    const mln_plugin_property_value_v1* properties;
+    size_t property_count;
     /* Resource requests use MapLibre's configured file source and cache. */
     const mln_plugin_host_api_v1* host;
 } mln_plugin_layout_context_v1;
