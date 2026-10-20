@@ -158,7 +158,7 @@ void generateFillBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        //std::size_t totalVertices = totalVerticesCheck(polygon);
+        // std::size_t totalVertices = totalVerticesCheck(polygon);
         std::size_t startVertices = fillVertices.elements();
         std::vector<bool> ignoredVertices;
 
@@ -181,7 +181,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        //std::size_t totalVertices = totalVerticesCheck(polygon);
+        // std::size_t totalVertices = totalVerticesCheck(polygon);
         std::size_t startVertices = vertices.elements();
         std::vector<bool> ignoredVertices;
 
@@ -220,7 +220,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        //std::size_t totalVertices = totalVerticesCheck(polygon);
+        // std::size_t totalVertices = totalVerticesCheck(polygon);
         std::size_t startVertices = fillVertices.elements();
         std::vector<bool> ignoredVertices;
 
@@ -272,7 +272,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        //const std::size_t totalVertices = totalVerticesCheck(polygon);
+        // const std::size_t totalVertices = totalVerticesCheck(polygon);
         const std::size_t startVertices = fillVertices.elements();
         std::vector<bool> ignoredVertices;
 
