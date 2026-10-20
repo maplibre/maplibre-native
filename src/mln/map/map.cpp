@@ -86,6 +86,7 @@ void Map::renderStill(StillImageCallback callback) {
 void Map::renderStill(const CameraOptions& camera, MapDebugOptions debugOptions, StillImageCallback callback) {
     impl->cameraMutated = true;
     impl->debugOptions = debugOptions;
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.jumpTo(camera);
     renderStill(std::move(callback));
 }
@@ -153,18 +154,21 @@ void Map::jumpTo(const CameraOptions& camera) {
 
 void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.easeTo(camera, animation);
     impl->onUpdate();
 }
 
 void Map::flyTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.flyTo(camera, animation);
     impl->onUpdate();
 }
 
 void Map::moveBy(const ScreenCoordinate& point, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.moveBy(point, animation);
     impl->onUpdate();
 }
@@ -180,6 +184,7 @@ void Map::scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, c
 
 void Map::rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.rotateBy(first, second, animation);
     impl->onUpdate();
 }
@@ -551,6 +556,7 @@ void Map::dumpDebugLogs() const {
 }
 
 void Map::setFreeCameraOptions(const FreeCameraOptions& camera) {
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.setFreeCameraOptions(camera);
     impl->cameraMutated = true;
     impl->onUpdate();
@@ -598,6 +604,42 @@ void Map::setTileLodMode(TileLodMode mode) {
 
 TileLodMode Map::getTileLodMode() const {
     return impl->tileLodMode;
+}
+
+void Map::setTerrainLoadMode(TerrainLoadMode mode) {
+    impl->terrainLoadMode = mode;
+}
+
+TerrainLoadMode Map::getTerrainLoadMode() const {
+    return impl->terrainLoadMode;
+}
+
+void Map::setTerrainSkirtLength(TerrainSkirtLength length) {
+    impl->terrainSkirtLength = length;
+}
+
+TerrainSkirtLength Map::getTerrainSkirtLength() const {
+    return impl->terrainSkirtLength;
+}
+
+void Map::anchorCenterOnTerrain() {
+    impl->anchorCenterOnTerrain();
+}
+
+void Map::setCenterClampedToGround(bool clamped) {
+    impl->centerClampedToGround = clamped;
+}
+
+bool Map::getCenterClampedToGround() const {
+    return impl->centerClampedToGround;
+}
+
+void Map::setDebugAboveGroundLog(bool enabled) {
+    impl->debugAboveGroundLog = enabled;
+}
+
+bool Map::getDebugAboveGroundLog() const {
+    return impl->debugAboveGroundLog;
 }
 
 ClientOptions Map::getClientOptions() const {

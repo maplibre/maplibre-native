@@ -197,6 +197,10 @@ public:
     /// screen. The distance based algorithm observes `TileLodScale` and
     /// `TileLodPitchThreshold` and ignores `TileLodMinRadius` and
     /// `TileLodZoomShift`.
+    /// When "adaptive" is selected, the zoom is chosen per tile from the field of
+    /// view and a tile-count budget - maplibre-gl-js's tile zoom function - at every
+    /// pitch rather than past a threshold. It observes none of the four settings
+    /// above.
     void setTileLodMinRadius(double radius);
     double getTileLodMinRadius() const;
     void setTileLodScale(double scale);
@@ -207,6 +211,56 @@ public:
     double getTileLodZoomShift() const;
     void setTileLodMode(TileLodMode mode);
     TileLodMode getTileLodMode() const;
+
+    /// Selects the 3D-terrain progressive-loading budget (see TerrainLoadMode). Default
+    /// is Quality (no budget). Balanced/Performance spread new-tile builds and drape
+    /// re-renders across frames for smoother interaction on weaker GPUs, at the cost of a
+    /// brief progressive fill-in. No effect when terrain is not enabled.
+    void setTerrainLoadMode(TerrainLoadMode mode);
+    TerrainLoadMode getTerrainLoadMode() const;
+
+    /// Selects whether terrain tiles are skirted (see TerrainSkirtLength). Default is Auto.
+    /// None suits a map drawn over a transparent background, where the skirts would show as
+    /// vertical artifacts. Changing it rebuilds the terrain mesh and every tile drawable.
+    /// No effect when terrain is not enabled.
+    void setTerrainSkirtLength(TerrainSkirtLength length);
+    TerrainSkirtLength getTerrainSkirtLength() const;
+
+    /// Whether the map centre rides the terrain surface rather than sea level. Off by
+    /// default (the clamp is applied asynchronously and can run away during a gesture);
+    /// with it on the centre altitude follows the rendered terrain height under the
+    /// centre, so pitching over tall ground keeps the camera above it instead of sinking
+    /// in, as in maplibre-gl-js. Inert when terrain is not enabled.
+    ///
+    /// Gestures anchor the centre on the terrain (anchorCenterOnTerrain), and removing the
+    /// terrain brings it back to sea level, whatever this is set to. maplibre-gl-js does both
+    /// only with its clamp on, which is its default; gated on a clamp that is off by default
+    /// here, gestures would go back to turning round a sea-level point under the terrain.
+    void setCenterClampedToGround(bool clamped);
+    bool getCenterClampedToGround() const;
+
+    /// Moves the camera's centre onto the terrain under it without moving the camera: the centre
+    /// slides along the line of sight up to the ground and the zoom tightens by the distance saved,
+    /// so the camera does not move. The zoom does rise (about half a level over an 1,800 m
+    /// mountain at pitch 60), so zoom-dependent styling and the tile zoom can step when a gesture
+    /// starts, as in maplibre-gl-js. Rotating and pitching then turn around the ground being
+    /// looked at, not a sea-level point behind it. Inert while the style has no terrain, so a
+    /// gesture handler can call it unconditionally. Inert too at a pitch so steep (over ~84
+    /// degrees) that the line of sight nearly grazes the ground, and where the zoom limits or the
+    /// bounds would cut the move short. Removing the terrain brings the centre back down to sea
+    /// level the same way or, where the limits refuse that, keeping its centre and zoom.
+    ///
+    /// A one-off that keeps the view, for the start of a gesture, where setCenterClampedToGround
+    /// is the continuous follow; this runs whatever that is set to. Afterwards the camera reports
+    /// another centre and zoom for the same view, so save and restore a camera together with its
+    /// centerAltitude.
+    void anchorCenterOnTerrain();
+
+    /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain
+    /// ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the
+    /// per-frame elevation sampling is skipped entirely when off, so it has no cost otherwise.
+    void setDebugAboveGroundLog(bool enabled);
+    bool getDebugAboveGroundLog() const;
 
     ClientOptions getClientOptions() const;
 

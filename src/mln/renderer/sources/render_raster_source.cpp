@@ -29,7 +29,7 @@ void RenderRasterSource::updateInternal(const Tileset& tileset,
                        needsRelayout,
                        parameters,
                        *baseImpl,
-                       impl().getTileSize(),
+                       resolveTileSize(impl().getTileSize()),
                        tileset.zoomRange,
                        tileset.bounds,
                        [&](const OverscaledTileID& tileID, TileObserver* observer_) {

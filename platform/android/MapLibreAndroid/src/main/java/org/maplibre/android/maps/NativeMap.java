@@ -23,6 +23,7 @@ import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
+import org.maplibre.android.style.terrain.Terrain;
 import org.maplibre.android.style.sources.Source;
 
 import java.util.List;
@@ -170,6 +171,11 @@ interface NativeMap {
 
   Light getLight();
 
+  void setTerrain(@Nullable Terrain terrain);
+
+  @Nullable
+  Terrain getTerrain();
+
   //
   // Content padding API
   //
@@ -278,6 +284,20 @@ interface NativeMap {
   void setTileLodScale(double scale);
 
   double getTileLodScale();
+
+  void setTerrainLoadMode(int mode);
+
+  void setDebugAboveGroundLog(boolean enabled);
+
+  int getTerrainLoadMode();
+
+  void setTerrainSkirtLength(int length);
+
+  int getTerrainSkirtLength();
+
+  void setCenterClampedToGround(boolean clamped);
+
+  boolean getCenterClampedToGround();
 
   void setTileLodPitchThreshold(double threshold);
 

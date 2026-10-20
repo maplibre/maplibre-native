@@ -67,17 +67,19 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const ColorReliefDrawableUBO* drawableVector [[buffer(idColorReliefDrawableUBO)]],
                                 device const ColorReliefTilePropsUBO* tilePropsVector [[buffer(idColorReliefTilePropsUBO)]]) {
 
     device const ColorReliefDrawableUBO& drawable = drawableVector[uboIndex];
     device const ColorReliefTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
-    const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
+    float4 rawPosition = drawable.matrix * float4(float2(vertx.pos), 0, 1);
+    const float4 position = apply_drape_transform(rawPosition, drawable.matrix, paintParams.drape_tile);
 
     // Calculate texture coordinate
-    float2 epsilon = 1.0 / tileProps.dimension;
-    float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
+    float2 epsilon = 2.0 / tileProps.dimension;
+    float scale = (tileProps.dimension.x - 4.0) / tileProps.dimension.x;
     float2 pos = (float2(vertx.pos) / 8192.0) * scale + epsilon;
 
     // Handle poles (use vertx.pos, not texture_pos, to match GLSL a_pos)
@@ -99,15 +101,15 @@ float getElevation(float2 coord, texture2d<float, access::sample> image, sampler
 
 // Function to get the elevation value at a specific color ramp stop
 float getElevationStop(int stop, int color_ramp_size, texture2d<float, access::sample> elevationStops, sampler elevation_sampler) {
-    // Elevation stops are plain float values, stored in the R channel
-    float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return elevationStops.sample(elevation_sampler, float2(x, 0.5)).r;
+    // Elevation stops are plain float values, stored in the R channel. One texel per stop
+    // in a single row, and this shader interpolates between stops itself, so read() the
+    // exact index rather than sampling.
+    return elevationStops.read(uint2(stop, 0)).r;
 }
 
 // Function to get the color value at a specific color ramp stop
 float4 getColorStop(int stop, int color_ramp_size, texture2d<float, access::sample> colorStops, sampler color_sampler) {
-    float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return colorStops.sample(color_sampler, float2(x, 0.5));
+    return colorStops.read(uint2(stop, 0));
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],

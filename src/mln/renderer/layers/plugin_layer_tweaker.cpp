@@ -58,7 +58,8 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                            registration->enableNearClippedMatrix,
                                            false,
                                            drawable,
-                                           !registration->enableNearClippedMatrix);
+                                           !registration->enableNearClippedMatrix,
+                                           /*renderToTerrain=*/false);
             }
             mln_plugin_uniform_context_v1 callbackContext{};
             callbackContext.struct_size = sizeof(callbackContext);

@@ -1,3 +1,4 @@
+#include <mln/math/angles.hpp>
 #include <mln/math/log2.hpp>
 #include <mln/util/bounding_volumes.hpp>
 #include <mln/util/constants.hpp>
@@ -5,6 +6,7 @@
 #include <mln/util/tile_coordinate.hpp>
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/tile_cover_impl.hpp>
+#include <mln/util/tile_lod.hpp>
 
 #include <functional>
 #include <list>
@@ -190,9 +192,13 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const auto& transform = state.transformState;
     const double numTiles = std::pow(2.0, z);
     const double worldSize = Projection::worldSize(transform.getScale());
-    const bool allowVariableZoom = transform.getPitch() > state.tileLodPitchThreshold;
+    const bool adaptiveLod = state.tileLodMode == TileLodMode::Adaptive;
+    // GL JS puts the Mercator cover on the variable-zoom function whenever terrain is
+    // present, not only past a pitch threshold, so selecting Adaptive is itself the opt-in.
+    const bool allowVariableZoom = adaptiveLod || transform.getPitch() > state.tileLodPitchThreshold;
     const uint8_t minZoom = allowVariableZoom ? zoomRange.min : z;
-    const uint8_t maxZoom = ((state.tileLodMode == TileLodMode::Distance) && allowVariableZoom) ? zoomRange.max : z;
+    const bool variableZoomMode = state.tileLodMode == TileLodMode::Distance || adaptiveLod;
+    const uint8_t maxZoom = (variableZoomMode && allowVariableZoom) ? zoomRange.max : z;
     const uint8_t overscaledZoom = std::max(overscaledZ.value_or(z), maxZoom);
     const bool flippedY = transform.getViewportMode() == ViewportMode::FlippedY;
 
@@ -209,6 +215,59 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const double cameraToCenterDistanceMercator = vec3Length(vec3Sub(cameraCoord, centerCoord)) / worldSize;
 
     const Frustum frustum = Frustum::fromInvProjMatrix(transform.getInvProjectionMatrix(), worldSize, z, flippedY);
+
+    // GL JS's tile zoom function takes its distances in Mercator units at zoom 0, so the
+    // tile-unit coordinates above are divided back down by numTiles. The terms that depend
+    // only on the camera are computed once for the whole cover.
+    // GL JS measures this to the terrain surface under the map center, not to z = 0:
+    // centerCoord is fromLngLat(center, transform.elevation). Metres to normalized Mercator
+    // is 1 / (cos(lat) * 2pi * R), the same factor metersToTileUnits below uses.
+    const double centerAltitudeMercator = state.transformState.getCenterAltitude() /
+                                          (std::cos(util::deg2rad(transform.getLatLng().latitude())) * util::M2PI *
+                                           util::EARTH_RADIUS_M);
+    const double distanceToCenterZ = std::abs(centerAltitudeMercator - cameraCoord[2] / numTiles);
+    const double distanceToCenter2d = std::hypot(centerCoord[0] - cameraCoord[0], centerCoord[1] - cameraCoord[1]) /
+                                      numTiles;
+    const double distanceToCenter3d = std::hypot(distanceToCenter2d, distanceToCenterZ);
+    // The zoom the view asks for, before any source max-zoom clamp: GL JS passes
+    // `transform.zoom + log2(transform.tileSize / source.tileSize)` and clamps the function's
+    // *result* to maxZoom. `z` arrives already clamped, so using it here would shift every
+    // tile down by the amount of the clamp.
+    const auto unclampedZ = static_cast<double>(overscaledZ.value_or(z));
+    const double requestedCenterZoom = transform.getZoom() + (unclampedZ - std::floor(transform.getZoom()));
+    const util::TileZoomFunction tileZoom(util::rad2deg(transform.getFieldOfView()));
+
+    // Elevation has to reach the frustum in the aabb's units (tiles at zoom z).
+    // Renderable heights are in meters and Camera::getWorldToCamera scales them by
+    // pixelsPerMeter = worldSize / (cos(lat) * 2pi * R); pixels are then tiles at
+    // zoom z scaled by numTiles / worldSize, so worldSize cancels out.
+    const double metersToTileUnits = numTiles / (std::cos(util::deg2rad(transform.getLatLng().latitude())) *
+                                                 util::M2PI * util::EARTH_RADIUS_M);
+
+    // The tile's bounds including its terrain: the flat footprint given the height of
+    // the DEM covering it. Relief rising towards the camera takes up screen space that
+    // the flat footprint does not, so a tile can be in view when its footprint is not;
+    // testing the flat box is what leaves the terrain mesh with tiles no source ever
+    // requested, and nothing to drape onto them.
+    //
+    // Only the frustum tests use this. The LOD heuristics below keep using the flat
+    // box, matching gl-js, whose distanceToTile2d takes only x and y: elevation should
+    // decide what is visible, not how finely it is subdivided. It also keeps this
+    // change from perturbing tile selection on maps that have no terrain-shaped reason
+    // to change.
+    const auto elevatedAABB = [&](const Node& node) -> AABB {
+        if (!state.elevationProvider) {
+            return node.aabb;
+        }
+        const auto range = state.elevationProvider->getTileElevationRange(CanonicalTileID(node.zoom, node.x, node.y));
+        if (!range) {
+            return node.aabb; // no DEM loaded here yet: flat, as before
+        }
+        AABB elevated = node.aabb;
+        elevated.min[2] = range->min * metersToTileUnits;
+        elevated.max[2] = range->max * metersToTileUnits;
+        return elevated;
+    };
 
     // There should always be a certain number of maximum zoom level tiles
     // surrounding the center location
@@ -243,7 +302,13 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
 
         // Use cached visibility information of ancestor nodes
         if (!node.fullyVisible) {
-            const IntersectionResult intersection = frustum.intersects(node.aabb);
+            // The flat fast path (frustum.intersects) asserts a zero-elevation box, so
+            // an elevated node has to take the 3D path. Nodes stay flat, and keep the
+            // cheaper test, until a DEM gives them height via elevatedAABB.
+            const AABB testAABB = elevatedAABB(node);
+            const bool elevated = testAABB.min[2] != 0.0 || testAABB.max[2] != 0.0;
+            const IntersectionResult intersection = elevated ? frustum.intersectsElevated(testAABB)
+                                                             : frustum.intersects(testAABB);
 
             if (intersection == IntersectionResult::Separate) continue;
 
@@ -251,7 +316,17 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         }
 
         bool shouldSplitTile;
-        if (state.tileLodMode == TileLodMode::Distance) {
+        if (adaptiveLod) {
+            // gl-js distanceToTile2d takes only x and y - elevation decides what is visible,
+            // not how finely it is subdivided - so this reads the flat box, like the branches
+            // below, rather than elevatedAABB.
+            const vec3 camToTile = node.aabb.distanceXYZ(cameraCoord);
+            const double distanceToTile2d = std::hypot(camToTile[0], camToTile[1]) / numTiles;
+            const double rawZoom = tileZoom(
+                requestedCenterZoom, distanceToTile2d, distanceToCenterZ, distanceToCenter3d);
+            const double desiredZoom = state.roundZoom ? std::round(rawZoom) : std::floor(rawZoom);
+            shouldSplitTile = node.zoom < std::clamp(desiredZoom, 0.0, static_cast<double>(maxZoom));
+        } else if (state.tileLodMode == TileLodMode::Distance) {
             const vec3 camToTileMercator = vec3Scale(node.aabb.distanceXYZ(cameraCoord), 1.0 / worldSize);
             const double distanceToTileMercator = vec3Length(camToTileMercator);
             const double cosPitchToTile = std::max(0.0, camToTileMercator[2] / distanceToTileMercator);
@@ -283,7 +358,15 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         if (node.zoom == maxZoom || (!shouldSplitTile && node.zoom >= minZoom)) {
             // Perform precise intersection test between the frustum and aabb.
             // This will cull < 1% false positives missed by the original test
-            if (node.fullyVisible || frustum.intersectsPrecise(node.aabb, true) != IntersectionResult::Separate) {
+            const AABB preciseAABB = elevatedAABB(node);
+            const bool preciseElevated = preciseAABB.min[2] != 0.0 || preciseAABB.max[2] != 0.0;
+            // intersectsPrecise also flattens to z = 0; the 3D method already covers the
+            // elevated case precisely, so reuse it rather than run the flat edge tests.
+            const bool visible = node.fullyVisible ||
+                                 (preciseElevated
+                                      ? frustum.intersectsElevated(preciseAABB) != IntersectionResult::Separate
+                                      : frustum.intersectsPrecise(preciseAABB, true) != IntersectionResult::Separate);
+            if (visible) {
                 const OverscaledTileID id = {
                     node.zoom == maxZoom ? overscaledZoom : node.zoom, node.wrap, node.zoom, node.x, node.y};
                 vec3 coordToLoadFirst = (state.tileLodMode == TileLodMode::Distance) ? cameraCoord : centerCoord;
@@ -310,6 +393,50 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     }
 
     return ids;
+}
+
+std::set<UnwrappedTileID> frustumCull(const TileCoverParameters& state, const std::set<UnwrappedTileID>& tiles) {
+    if (tiles.empty()) {
+        return {};
+    }
+    const auto& transform = state.transformState;
+    const bool flippedY = transform.getViewportMode() == ViewportMode::FlippedY;
+
+    // Express every tile in the units of the deepest one, so its aabb is that tile's
+    // footprint scaled up (never down) - the same tile-units-at-a-zoom space the
+    // frustum is built in.
+    uint8_t refZ = 0;
+    for (const auto& id : tiles) {
+        refZ = std::max(refZ, id.canonical.z);
+    }
+    const double numTiles = std::exp2(static_cast<double>(refZ));
+    const double worldSize = Projection::worldSize(transform.getScale());
+    const Frustum frustum = Frustum::fromInvProjMatrix(transform.getInvProjectionMatrix(), worldSize, refZ, flippedY);
+    // Meters to tile-units at refZ; see the same conversion in tileCover.
+    const double metersToTileUnits = numTiles / (std::cos(util::deg2rad(transform.getLatLng().latitude())) *
+                                                 util::M2PI * util::EARTH_RADIUS_M);
+
+    std::set<UnwrappedTileID> result;
+    for (const auto& id : tiles) {
+        const double span = std::exp2(static_cast<double>(refZ - id.canonical.z));
+        const double x0 = (id.canonical.x + id.wrap * std::exp2(static_cast<double>(id.canonical.z))) * span;
+        const double y0 = id.canonical.y * span;
+        AABB aabb({{x0, y0, 0.0}}, {{x0 + span, y0 + span, 0.0}});
+
+        if (state.elevationProvider) {
+            if (const auto range = state.elevationProvider->getTileElevationRange(id.canonical)) {
+                aabb.min[2] = range->min * metersToTileUnits;
+                aabb.max[2] = range->max * metersToTileUnits;
+            }
+        }
+
+        const bool elevated = aabb.min[2] != 0.0 || aabb.max[2] != 0.0;
+        const IntersectionResult intersection = elevated ? frustum.intersectsElevated(aabb) : frustum.intersects(aabb);
+        if (intersection != IntersectionResult::Separate) {
+            result.insert(id);
+        }
+    }
+    return result;
 }
 
 std::vector<UnwrappedTileID> tileCover(const LatLngBounds& bounds_, uint8_t z) {

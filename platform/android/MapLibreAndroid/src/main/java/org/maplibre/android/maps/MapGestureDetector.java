@@ -861,10 +861,11 @@ final class MapGestureDetector {
       // dispatching camera start event only when the movement actually occurred
       cameraChangeDispatcher.onCameraMoveStarted(CameraChangeDispatcher.REASON_API_GESTURE);
 
-      // Get tilt value (scale and clamp)
+      // Get tilt value (scale and clamp to the map's pitch bounds, so a raised
+      // maxPitchPreference — e.g. for 3D terrain — is reachable by gesture)
       double pitch = transform.getTilt();
       pitch -= MapLibreConstants.SHOVE_PIXEL_CHANGE_FACTOR * deltaPixelsSinceLast;
-      pitch = MathUtils.clamp(pitch, MapLibreConstants.MINIMUM_TILT, MapLibreConstants.MAXIMUM_TILT);
+      pitch = MathUtils.clamp(pitch, transform.getMinPitch(), transform.getMaxPitch());
 
       // Tilt the map
       transform.setTilt(pitch);

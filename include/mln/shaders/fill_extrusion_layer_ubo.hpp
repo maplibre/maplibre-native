@@ -21,9 +21,17 @@ struct alignas(16) FillExtrusionDrawableUBO {
     /* 100 */ float pattern_from_t;
     /* 104 */ float pattern_to_t;
     /* 108 */ float pad1;
-    /* 112 */
+
+    // 3D terrain elevation; see RenderTerrain::getTerrainData
+    /* 112 */ std::array<float, 4> dem_coords; // scale, x offset, y offset into the DEM tile, unused
+    /* 128 */ std::array<float, 4> dem_unpack; // DEM unpack vector for the source's encoding
+    /* 144 */ float dem_dim;
+    /* 148 */ float dem_exaggeration;
+    /* 152 */ float dem_enabled;
+    /* 156 */ float pad2;
+    /* 160 */
 };
-static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16);
+static_assert(sizeof(FillExtrusionDrawableUBO) == 10 * 16);
 
 struct alignas(16) FillExtrusionTilePropsUBO {
     /*  0 */ std::array<float, 4> pattern_from;

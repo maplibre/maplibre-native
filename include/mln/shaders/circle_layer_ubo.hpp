@@ -20,9 +20,17 @@ struct alignas(16) CircleDrawableUBO {
     /* 100 */ float pad1;
     /* 104 */ float pad2;
     /* 108 */ float pad3;
-    /* 112 */
+
+    // 3D terrain elevation; see RenderTerrain::getTerrainData
+    /* 112 */ std::array<float, 4> dem_coords; // scale, x offset, y offset into the DEM tile, unused
+    /* 128 */ std::array<float, 4> dem_unpack; // DEM unpack vector for the source's encoding
+    /* 144 */ float dem_dim;
+    /* 148 */ float dem_exaggeration;
+    /* 152 */ float dem_enabled;
+    /* 156 */ float pad4;
+    /* 160 */
 };
-static_assert(sizeof(CircleDrawableUBO) == 7 * 16);
+static_assert(sizeof(CircleDrawableUBO) == 10 * 16);
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) CircleEvaluatedPropsUBO {
