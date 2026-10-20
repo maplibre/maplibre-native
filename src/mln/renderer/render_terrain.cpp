@@ -733,23 +733,16 @@ std::optional<std::function<float(const Point<float>&)>> RenderTerrain::elevatio
     const DEMData* demData = best->data;
     const auto off = demSubTileOffset(tileID.canonical, best->id.canonical);
     const float exaggeration = getExaggeration();
-    const float dim = static_cast<float>(demData->dim);
-    return [demData, off, exaggeration, dim](const Point<float>& p) -> float {
+    return [this, tileID, demData, off, exaggeration](const Point<float>& p) -> float {
+        // Line-label anchors and collision circles reach past the tile edge (the symbol buffer).
+        // Inside the DEM tile, sample it; past it, find the neighbouring tile's height
+        // (getElevation normalises the point into it) rather than clamp to this tile's edge.
         const float xInDem = (off.dx * util::EXTENT + p.x) / off.scale;
         const float yInDem = (off.dy * util::EXTENT + p.y) / off.scale;
-        const float px = util::clamp(xInDem / util::EXTENT * dim, 0.0f, dim - 1.0f);
-        const float py = util::clamp(yInDem / util::EXTENT * dim, 0.0f, dim - 1.0f);
-        const auto x0 = static_cast<int32_t>(std::floor(px));
-        const auto y0 = static_cast<int32_t>(std::floor(py));
-        const float fx = px - static_cast<float>(x0);
-        const float fy = py - static_cast<float>(y0);
-        const float tl = static_cast<float>(demData->get(x0, y0));
-        const float tr = static_cast<float>(demData->get(x0 + 1, y0));
-        const float bl = static_cast<float>(demData->get(x0, y0 + 1));
-        const float br = static_cast<float>(demData->get(x0 + 1, y0 + 1));
-        const float top = tl + (tr - tl) * fx;
-        const float bottom = bl + (br - bl) * fx;
-        return (top + (bottom - top) * fy) * exaggeration;
+        if (xInDem < 0.0f || xInDem >= util::EXTENT || yInDem < 0.0f || yInDem >= util::EXTENT) {
+            return getElevationWithExaggeration(tileID, p.x, p.y);
+        }
+        return sampleDEM(*demData, off, p.x, p.y) * exaggeration;
     };
 }
 
