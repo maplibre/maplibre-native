@@ -363,7 +363,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        
+
         auto instanceAttrs = context.createVertexAttributeArray();
         if (const auto& attr = instanceAttrs->set(idFillIndicesVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedIndices,
