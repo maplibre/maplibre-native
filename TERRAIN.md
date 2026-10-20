@@ -1806,6 +1806,17 @@ style.setTerrain(null)           // disable terrain
 }
 ```
 
+### Custom layers
+
+Custom layers are not draped: `RenderCustomLayer` creates its layer group with render-to-terrain
+off, so the layer draws on screen in the main pass, after the terrain mesh (`TERRAIN_LAYER_INDEX`),
+with the mesh's depth in the attached depth buffer. A layer that sets its own depth test is hidden by
+the terrain in front of it. Its `projectionMatrix` is GL clip space; off GL the layer applies the
+mesh's remap, z' = (z + w) / 2, itself. `CustomLayerRenderParameters` carries the terrain
+exaggeration (0 with terrain off), and on Metal the packed depth texture `RenderTerrain::renderDepth`
+draws before the main pass (null until it has drawn); iOS hands them over as
+`MLNStyleLayerDrawingContext.terrainExaggeration` and `MLNCustomStyleLayer.terrainDepthTexture`.
+
 ## References
 
 - [MapLibre GL JS Terrain](https://maplibre.org/maplibre-gl-js/docs/examples/3d-terrain/)

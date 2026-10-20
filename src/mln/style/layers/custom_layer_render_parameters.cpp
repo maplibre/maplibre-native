@@ -1,5 +1,6 @@
 #include <mln/style/layers/custom_layer_render_parameters.hpp>
 #include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_terrain.hpp>
 #include <mln/util/mat4.hpp>
 
 namespace mln {
@@ -19,6 +20,9 @@ CustomLayerRenderParameters::CustomLayerRenderParameters(const mln::PaintParamet
     state.getProjMatrix(projMatrix);
     projectionMatrix = projMatrix;
     nearClippedProjectionMatrix = paintParameters.transformParams.nearClippedProjMatrix;
+    if (paintParameters.terrain) {
+        terrainExaggeration = paintParameters.terrain->getExaggeration();
+    }
 }
 
 } // namespace style
