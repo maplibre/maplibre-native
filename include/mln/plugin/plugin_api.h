@@ -271,6 +271,11 @@ typedef struct mln_plugin_uniform_context_v1 {
     float pixels_to_tile_units;
     float camera_to_center_distance;
     float pixel_ratio;
+    /* Appended after the original v1 fields: check struct_size before reading. World pixels
+     * (the xy unit of tile_matrix) per meter at the map center's latitude. The projection takes a
+     * vertex z in meters and scales it by this, so geometry that must keep its proportions across
+     * zoom levels divides its height in pixels by it. */
+    float pixels_per_meter;
 } mln_plugin_uniform_context_v1;
 
 /* output is host-owned writable storage of output_size bytes, borrowed only
