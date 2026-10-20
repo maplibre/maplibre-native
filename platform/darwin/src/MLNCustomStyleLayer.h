@@ -106,14 +106,14 @@ MLN_EXPORT
 /// The depth of the 3D terrain surface for the frame being drawn, for effects that
 /// test the ground itself, such as tinting the terrain inside a volume.
 ///
-/// Each pixel holds the window depth, in [0, 1], of the terrain mesh at that pixel,
-/// packed into the four 8-bit channels with alpha as the most significant digit, as
-/// maplibre-gl-js packs its terrain depth. Read it with nearest sampling at the
-/// fragment’s position in the drawable and unpack it as
-/// `r / 256³ + g / 256² + b / 256 + a`, with each channel in [0, 1]. Pixels the terrain
-/// does not cover are white, which unpacks to the far plane. The texture has the
-/// drawable’s size in pixels and is rendered before the map’s main pass, so it is
-/// current for the frame being drawn.
+/// The texture is RGBA8 and has the drawable’s size in pixels. Each pixel holds the
+/// normalized device depth, in [0, 1], of the terrain mesh at that pixel, as four
+/// base-256 digits: red is the most significant digit and alpha the least, and each
+/// digit *k* (0 to 255) is stored as *k* / 255. Decode a sample *c* as
+/// `dot(round(c * 255), float4(1.0 / 256, 1.0 / 65536, 1.0 / 16777216, 1.0 / 4294967296))`.
+/// Pixels the terrain does not cover are white, which decodes to the far plane (1).
+/// Read the texture with nearest sampling at the fragment’s position in the drawable.
+/// It is rendered before the map’s main pass, so it is current for the frame being drawn.
 ///
 /// This property is set before ``drawInMapView:withContext:`` is called and is `nil`
 /// when terrain is off or its depth has not been rendered yet. It is only valid when
