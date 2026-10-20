@@ -46,7 +46,7 @@ constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 constexpr auto FillOutlineTriangulatedShaderName = "FillOutlineTriangulatedShader";
 #endif
 
-inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
+inline const FillLayer::Impl& fillImplCast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == FillLayer::Impl::staticTypeInfo());
     return static_cast<const FillLayer::Impl&>(*impl);
 }
@@ -55,14 +55,14 @@ inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& imp
 
 RenderFillLayer::RenderFillLayer(Immutable<style::FillLayer::Impl> _impl)
     : RenderLayer(makeMutable<FillLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+      unevaluated(fillImplCast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
 }
 
 RenderFillLayer::~RenderFillLayer() = default;
 
 void RenderFillLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    unevaluated = fillImplCast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     styleDependencies = unevaluated.getDependencies();
 }
 

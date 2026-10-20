@@ -18,7 +18,7 @@
 namespace mln {
 
 namespace {
-SpriteLoaderObserver nullObserver;
+SpriteLoaderObserver nullSpriteLoaderObserver;
 }
 
 struct SpriteLoader::Data {
@@ -30,7 +30,7 @@ struct SpriteLoader::Data {
 
 SpriteLoader::SpriteLoader(float pixelRatio_, const TaggedScheduler& threadPool_)
     : pixelRatio(pixelRatio_),
-      observer(&nullObserver),
+      observer(&nullSpriteLoaderObserver),
       threadPool(threadPool_) {}
 
 SpriteLoader::~SpriteLoader() = default;

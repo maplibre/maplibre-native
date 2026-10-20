@@ -44,7 +44,7 @@ using namespace style;
 
 namespace {
 
-RendererObserver& nullObserver() {
+RendererObserver& nullRendererImplObserver() {
     static RendererObserver observer;
     return observer;
 }
@@ -56,7 +56,7 @@ Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      const std::optional<std::string>& localFontFamily_)
     : orchestrator(!backend_.contextIsShared(), backend_.getThreadPool(), localFontFamily_),
       backend(backend_),
-      observer(&nullObserver()),
+      observer(&nullRendererImplObserver()),
       pixelRatio(pixelRatio_) {}
 
 Renderer::Impl::~Impl() {
@@ -86,7 +86,7 @@ void Renderer::Impl::onRenderError(std::exception_ptr error) {
 }
 
 void Renderer::Impl::setObserver(RendererObserver* observer_) {
-    observer = observer_ ? observer_ : &nullObserver();
+    observer = observer_ ? observer_ : &nullRendererImplObserver();
 }
 
 void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<UpdateParameters>& updateParameters) {

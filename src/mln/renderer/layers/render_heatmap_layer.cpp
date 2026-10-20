@@ -29,7 +29,7 @@ using namespace style;
 
 namespace {
 
-inline const HeatmapLayer::Impl& impl_cast(const Immutable<Layer::Impl>& impl) {
+inline const HeatmapLayer::Impl& heatmapImplCast(const Immutable<Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == HeatmapLayer::Impl::staticTypeInfo());
     return static_cast<const HeatmapLayer::Impl&>(*impl);
 }
@@ -38,7 +38,7 @@ inline const HeatmapLayer::Impl& impl_cast(const Immutable<Layer::Impl>& impl) {
 
 RenderHeatmapLayer::RenderHeatmapLayer(Immutable<HeatmapLayer::Impl> _impl)
     : RenderLayer(makeMutable<HeatmapLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+      unevaluated(heatmapImplCast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
     colorRamp = std::make_shared<PremultipliedImage>(Size(256, 1));
 }
@@ -46,7 +46,7 @@ RenderHeatmapLayer::RenderHeatmapLayer(Immutable<HeatmapLayer::Impl> _impl)
 RenderHeatmapLayer::~RenderHeatmapLayer() = default;
 
 void RenderHeatmapLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    unevaluated = heatmapImplCast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     styleDependencies = unevaluated.getDependencies();
     updateColorRamp();
 }
@@ -122,7 +122,7 @@ bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& query
 }
 
 namespace {
-void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
+void activateHeatmapRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
     if (renderTarget_) {
         if (activate) {
             // The RenderTree has determined this render target should be included in the renderable set for a frame
@@ -137,7 +137,7 @@ void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, U
 
 void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
-    activateRenderTarget(renderTarget, willRender, changes);
+    activateHeatmapRenderTarget(renderTarget, willRender, changes);
 }
 
 std::size_t RenderHeatmapLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
@@ -190,7 +190,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         if (!renderTarget) {
             return;
         }
-        activateRenderTarget(renderTarget, isRenderable, changes);
+        activateHeatmapRenderTarget(renderTarget, isRenderable, changes);
 
         // Set up tile layer group
         auto tileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/64, getID());

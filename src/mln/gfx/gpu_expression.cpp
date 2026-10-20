@@ -11,19 +11,18 @@
 namespace mln {
 namespace gfx {
 
-using namespace style::expression;
-
 namespace {
 
-inline GPUOutputType getOutputType(const Expression& expression) {
-    if (expression.getType().is<type::NumberType>()) {
+inline GPUOutputType getOutputType(const style::expression::Expression& expression) {
+    if (expression.getType().is<style::expression::type::NumberType>()) {
         return GPUOutputType::Float;
     } else {
         return GPUOutputType::Color;
     }
 }
 
-inline GPUInterpType getInterpType(const Interpolator& interp) {
+inline GPUInterpType getInterpType(const style::expression::Interpolator& interp) {
+    using namespace style::expression;
     return interp.match(
         [&](const ExponentialInterpolator& exp) {
             return (exp.base == 1.0f) ? GPUInterpType::Linear : GPUInterpType::Exponential;
@@ -31,16 +30,17 @@ inline GPUInterpType getInterpType(const Interpolator& interp) {
         [&](const CubicBezierInterpolator&) { return GPUInterpType::Bezier; });
 }
 
-inline float getInterpBase(const Interpolator& interp) {
+inline float getInterpBase(const style::expression::Interpolator& interp) {
+    using namespace style::expression;
     return interp.match([&](const ExponentialInterpolator& exp) { return static_cast<float>(exp.base); },
                         [&](const CubicBezierInterpolator&) { return 0.0f; });
 }
 
 // Produce a function for `eachStop` that extracts a single stop into the target expression
 auto addStop(UniqueGPUExpression& expr, GPUOutputType outType, std::size_t& index) {
-    return [&, outType](double input, const Expression& output) {
+    return [&, outType](double input, const style::expression::Expression& output) {
         if (expr) {
-            if (const auto result = output.evaluate(EvaluationContext{/*zoom=*/0.0f})) {
+            if (const auto result = output.evaluate(style::expression::EvaluationContext{/*zoom=*/0.0f})) {
                 const style::expression::Value& value = *result;
                 expr->inputs[index] = static_cast<float>(input);
                 if (outType == GPUOutputType::Float) {
@@ -77,7 +77,10 @@ UniqueGPUExpression GPUExpression::create(GPUOutputType type, std::uint16_t coun
     return {};
 }
 
-UniqueGPUExpression GPUExpression::create(const Expression& expression, const ZoomCurvePtr& zoomCurve, bool intZoom) {
+UniqueGPUExpression GPUExpression::create(const style::expression::Expression& expression,
+                                          const style::ZoomCurvePtr& zoomCurve,
+                                          bool intZoom) {
+    using namespace style::expression;
     std::size_t index = 0;
     const auto outType = getOutputType(expression);
     const auto options = (intZoom ? GPUOptions::IntegerZoom : GPUOptions::None);
@@ -125,7 +128,7 @@ float GPUExpression::evaluateFloat(const float zoom) const {
             [[fallthrough]];
         case GPUInterpType::Exponential: {
             const Range<double> range{inputs[index - 1], inputs[index]};
-            const ExponentialInterpolator interpolator{interpOptions.exponential.base};
+            const style::expression::ExponentialInterpolator interpolator{interpOptions.exponential.base};
             const auto t = interpolator.interpolationFactor(range, zoom);
             return util::Interpolator<float>()(stops.floats[index - 1], stops.floats[index], t);
         }
@@ -172,7 +175,7 @@ Color GPUExpression::evaluateColor(const float zoom) const {
             [[fallthrough]];
         case GPUInterpType::Exponential: {
             const Range<double> range{inputs[index - 1], inputs[index]};
-            const ExponentialInterpolator interpolator{interpOptions.exponential.base};
+            const style::expression::ExponentialInterpolator interpolator{interpOptions.exponential.base};
             const auto t = interpolator.interpolationFactor(range, zoom);
             return util::Interpolator<Color>()(getColor(index - 1), getColor(index), t);
             break;

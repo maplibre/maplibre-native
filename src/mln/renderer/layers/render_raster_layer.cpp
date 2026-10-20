@@ -26,7 +26,7 @@ using namespace shaders;
 
 namespace {
 
-inline const RasterLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
+inline const RasterLayer::Impl& rasterImplCast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == RasterLayer::Impl::staticTypeInfo());
     return static_cast<const RasterLayer::Impl&>(*impl);
 }
@@ -35,14 +35,14 @@ inline const RasterLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& i
 
 RenderRasterLayer::RenderRasterLayer(Immutable<style::RasterLayer::Impl> _impl)
     : RenderLayer(makeMutable<RasterLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+      unevaluated(rasterImplCast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
 }
 
 RenderRasterLayer::~RenderRasterLayer() = default;
 
 void RenderRasterLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    unevaluated = rasterImplCast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     styleDependencies = unevaluated.getDependencies();
 }
 
