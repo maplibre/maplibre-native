@@ -385,6 +385,9 @@ template struct ValueConverter<AlignmentType>;
 template type::Type valueTypeToExpressionType<CirclePitchScaleType>();
 template struct ValueConverter<CirclePitchScaleType>;
 
+template type::Type valueTypeToExpressionType<IconOverlapType>();
+template struct ValueConverter<IconOverlapType>;
+
 template type::Type valueTypeToExpressionType<IconTextFitType>();
 template struct ValueConverter<IconTextFitType>;
 
