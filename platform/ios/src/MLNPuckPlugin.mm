@@ -12,14 +12,16 @@ static NSString *const MLNPuckPluginErrorDomain = @"MLNPuckPluginErrorDomain";
   const RegisterFunction registerFunctions[] = {&mln_gltf_layer_register};
   for (RegisterFunction registerLayer : registerFunctions) {
     char message[512] = {};
-    const mln_plugin_status status = registerLayer(mln_plugin_register_v1, message, sizeof(message));
+    const mln_plugin_status status =
+        registerLayer(mln_plugin_register_v1, message, sizeof(message));
     if (status == MLN_PLUGIN_STATUS_OK || status == MLN_PLUGIN_STATUS_ALREADY_REGISTERED) {
       continue;
     }
     if (error) {
-      *error = [NSError errorWithDomain:MLNPuckPluginErrorDomain
-                                   code:status
-                               userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithUTF8String:message]}];
+      *error = [NSError
+          errorWithDomain:MLNPuckPluginErrorDomain
+                     code:status
+                 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithUTF8String:message]}];
     }
     return NO;
   }

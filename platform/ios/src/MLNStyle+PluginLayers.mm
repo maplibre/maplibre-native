@@ -38,7 +38,8 @@ static BOOL MLNFail(NSError **error, NSString *message) {
   if (siblingIdentifier) {
     sibling = std::string(siblingIdentifier.UTF8String);
     if (!self.rawStyle->getLayer(*sibling)) {
-      return MLNFail(error, [NSString stringWithFormat:@"No layer named %@ to insert below", siblingIdentifier]);
+      return MLNFail(error, [NSString stringWithFormat:@"No layer named %@ to insert below",
+                                                       siblingIdentifier]);
     }
   }
 
@@ -51,7 +52,7 @@ static BOOL MLNFail(NSError **error, NSString *message) {
 }
 
 - (BOOL)setProperty:(NSString *)name
-                   value:(id)value
+                     value:(id)value
     forLayerWithIdentifier:(NSString *)layerIdentifier
                      error:(NSError **)error {
   auto *layer = self.rawStyle->getLayer(layerIdentifier.UTF8String);
@@ -59,7 +60,8 @@ static BOOL MLNFail(NSError **error, NSString *message) {
     return MLNFail(error, [NSString stringWithFormat:@"No layer named %@", layerIdentifier]);
   }
 
-  auto failure = layer->setProperty(name.UTF8String, mln::style::conversion::makeConvertible(value));
+  auto failure =
+      layer->setProperty(name.UTF8String, mln::style::conversion::makeConvertible(value));
   if (failure) {
     return MLNFail(error, @(failure->message.c_str()));
   }
