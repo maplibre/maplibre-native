@@ -302,11 +302,45 @@ typedef struct mln_plugin_feature_v1 {
     size_t path_count;
 } mln_plugin_feature_v1;
 
+typedef struct mln_plugin_resource_response_v1 {
+    uint32_t struct_size;
+    uint64_t request_id;
+    const uint8_t* data;
+    size_t data_size;
+    mln_plugin_string error_message;
+} mln_plugin_resource_response_v1;
+
+/* Response bytes and strings are borrowed and valid only during the callback. */
+typedef void (*mln_plugin_resource_callback_fn)(void* callback_context,
+                                                const mln_plugin_resource_response_v1* response);
+
+/* Services the host offers to layout callbacks. Borrowed for the duration of the
+ * callback that receives it. */
+typedef struct mln_plugin_host_api_v1 {
+    uint32_t struct_size;
+    uint32_t abi_version;
+    /* severity: 1 info, 2 warning, 3 error. */
+    void (*log)(int32_t severity, mln_plugin_string message);
+    void* context;
+    /* Loads url through MapLibre's configured file source (network policy, URL
+     * transformation, cache, asset:// and file://). The request completes before
+     * this function returns: callback runs on the calling thread, inside the call. */
+    mln_plugin_status (*request_resource)(void* context,
+                                          mln_plugin_string url,
+                                          mln_plugin_resource_callback_fn callback,
+                                          void* callback_context,
+                                          uint64_t* request_id);
+    void (*cancel_resource_request)(void* context, uint64_t request_id);
+} mln_plugin_host_api_v1;
+
 /* Worker-thread input. Paint evaluation is owned by the host binders. */
 typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
+    /* Appended after the original v1 fields: check struct_size before reading. */
+    /* Resource requests use MapLibre's configured file source and cache. */
+    const mln_plugin_host_api_v1* host;
 } mln_plugin_layout_context_v1;
 
 /* Returned bytes remain valid until destroy_layout. The host copies them after

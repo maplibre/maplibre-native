@@ -8,6 +8,7 @@
 #include <memory>
 
 namespace mln {
+class FileSource;
 namespace style {
 struct LayerTypeInfo;
 } // namespace style
@@ -21,6 +22,8 @@ public:
     // The style's global state, used by "global-state" expressions.
     std::shared_ptr<const GlobalStateMap> globalState = nullptr;
     const bool retainFeaturesById = false;
+    // Used by plugin layouts to request resources; null when the tile has no file source.
+    std::shared_ptr<FileSource> fileSource = nullptr;
 };
 
 } // namespace mln

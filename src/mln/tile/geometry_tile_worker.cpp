@@ -41,6 +41,7 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
                                        gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
                                        std::shared_ptr<FontFaces> fontFaces_,
                                        bool captureRenderedFeatures_,
+                                       std::shared_ptr<FileSource> fileSource_,
                                        TileObserver* observer_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
@@ -51,6 +52,7 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
       mode(mode_),
       pixelRatio(pixelRatio_),
       captureRenderedFeatures(captureRenderedFeatures_),
+      fileSource(std::move(fileSource_)),
       showCollisionBoxes(showCollisionBoxes_),
       dynamicTextureAtlas(dynamicTextureAtlas_),
       fontFaces(fontFaces_),
@@ -463,7 +465,8 @@ void GeometryTileWorker::parse() {
                                     .pixelRatio = pixelRatio,
                                     .layerType = leaderImpl.getTypeInfo(),
                                     .globalState = globalState,
-                                    .retainFeaturesById = captureRenderedFeatures};
+                                    .retainFeaturesById = captureRenderedFeatures,
+                                    .fileSource = fileSource};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {

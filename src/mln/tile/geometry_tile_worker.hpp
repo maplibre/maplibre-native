@@ -20,6 +20,7 @@
 
 namespace mln {
 
+class FileSource;
 class GeometryTile;
 class GeometryTileData;
 class Layout;
@@ -47,6 +48,7 @@ public:
                        gfx::DynamicTextureAtlasPtr,
                        std::shared_ptr<FontFaces> fontFaces,
                        bool captureRenderedFeatures,
+                       std::shared_ptr<FileSource> fileSource,
                        TileObserver*);
     ~GeometryTileWorker();
 
@@ -95,6 +97,8 @@ private:
     const MapMode mode;
     const float pixelRatio;
     const bool captureRenderedFeatures;
+    // Lets layouts (plugins) request resources through the style's file source.
+    std::shared_ptr<FileSource> fileSource;
 
     std::unique_ptr<FeatureIndex> featureIndex;
     mln::unordered_map<std::string, LayerRenderData> renderData;
