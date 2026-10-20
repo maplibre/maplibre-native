@@ -121,9 +121,9 @@ public:
     ZoomEvaluatedSize partiallyEvaluatedIconSize;
 
     OverlapMode textOverlapMode = getOverlapMode(getLayout().get<style::TextOverlap>(),
-                                                  getLayout().get<style::TextAllowOverlap>());
+                                                 getLayout().get<style::TextAllowOverlap>());
     OverlapMode iconOverlapMode = getOverlapMode(getLayout().get<style::IconOverlap>(),
-                                                  getLayout().get<style::IconAllowOverlap>());
+                                                 getLayout().get<style::IconAllowOverlap>());
     const bool textAlwaysOverlap = textOverlapMode == OverlapMode::Always;
     const bool iconAlwaysOverlap = iconOverlapMode == OverlapMode::Always;
     // This logic is similar to the "defaultOpacityState" logic below in
@@ -394,8 +394,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                 }
             }
 
-            const bool doVariableIconPlacement = ctx.hasIconTextFit &&
-                                                 ctx.iconOverlapMode == OverlapMode::Never &&
+            const bool doVariableIconPlacement = ctx.hasIconTextFit && ctx.iconOverlapMode == OverlapMode::Never &&
                                                  symbolInstance.getPlacedIconIndex();
             const auto placeFeatureForVariableAnchors = [&](const CollisionFeature& textCollisionFeature,
                                                             style::TextWritingModeType orientation,

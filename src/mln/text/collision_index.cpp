@@ -53,10 +53,9 @@ CollisionIndex::CollisionIndex(const TransformState& transformState_, MapMode ma
       pitchFactor(
           static_cast<float>(std::cos(transformState.getPitch()) * transformState.getCameraToCenterDistance())) {}
 
-bool CollisionIndex::collides(
-    const OverlapMode mode,
-    const CollisionGrid::BBox& box,
-    const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& predicate) const {
+bool CollisionIndex::collides(const OverlapMode mode,
+                              const CollisionGrid::BBox& box,
+                              const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& predicate) const {
     switch (mode) {
         case OverlapMode::Always:
             return false;
@@ -68,10 +67,9 @@ bool CollisionIndex::collides(
     return collisionGrid.hitTest(box, predicate);
 }
 
-bool CollisionIndex::collides(
-    const OverlapMode mode,
-    const CollisionGrid::BCircle& circle,
-    const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& predicate) const {
+bool CollisionIndex::collides(const OverlapMode mode,
+                              const CollisionGrid::BCircle& circle,
+                              const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& predicate) const {
     switch (mode) {
         case OverlapMode::Always:
             return false;
