@@ -61,7 +61,7 @@ enum class TerrainLoadMode : uint8_t {
                  ///< weak GPUs, most progressive fill-in.
 };
 
-/// Per-frame budgets for a TerrainLoadMode. A value <= 0 means unlimited.
+/// Budgets for a TerrainLoadMode. A per-frame value <= 0 means unlimited.
 struct TerrainLoadBudget {
     int newTileBuildsPerFrame;  ///< max NEW tiles that build their drawables per frame
     int drapeRerendersPerFrame; ///< max terrain drape targets that re-render per frame
@@ -72,17 +72,23 @@ struct TerrainLoadBudget {
     /// it costs terrain render *distance*, which is why Quality keeps a generous cap rather
     /// than the aggressive one Performance uses.
     size_t maxMeshTiles;
+    /// The zoom the terrain mesh reaches over a coarser DEM (RenderTerrain::meshMaxZoom). Each
+    /// mesh tile drapes into its own 1024 px target, so how sharp draped content stays in a
+    /// close-up follows the zoom of the mesh tiles, not of the DEM; each level deeper also adds
+    /// tiles to the near field, and drape memory with them. A DEM at or past this zoom meshes
+    /// at its own maxzoom.
+    uint8_t meshTargetZoom;
 };
 
 constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
     switch (mode) {
         case TerrainLoadMode::Balanced:
-            return {32, 16, 48};
+            return {32, 16, 48, 15};
         case TerrainLoadMode::Performance:
-            return {8, 4, 24};
+            return {8, 4, 24, 14};
         case TerrainLoadMode::Quality:
         default:
-            return {0, 0, 64}; // no per-frame budget, generous tile cap
+            return {0, 0, 64, 16}; // no per-frame budget, generous tile cap, deepest mesh
     }
 }
 
