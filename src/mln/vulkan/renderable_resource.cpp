@@ -53,6 +53,7 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
 }
 
 void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
+    using vk::operator&; // not mln's generic bitmask operators, which are ambiguous with these
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
@@ -171,6 +172,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
 }
 
 void SurfaceRenderableResource::initDepthStencil() {
+    using vk::operator|; // not mln's generic bitmask operators, which are ambiguous with these
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
@@ -242,6 +244,7 @@ void SurfaceRenderableResource::initDepthStencil() {
 }
 
 void SurfaceRenderableResource::initRenderPass() {
+    using vk::operator|; // not mln's generic bitmask operators, which are ambiguous with these
     // The current render pass should be invalidated if:
     // - color/depth format changes (use setColorFormat/setDepthFormat)
     // - renderable resource type changes
