@@ -210,7 +210,8 @@ public:
     /**
      * @brief Per-tile elevation sampler for CPU-side symbol projection (line-placed labels):
      * tile-local point -> exaggerated metres, from the DEM tile covering `tileID` or its
-     * closest loaded ancestor. Valid for the current frame only. nullopt without DEM data.
+     * closest loaded ancestor, and for points past that DEM tile's edge from the neighbouring one
+     * (getElevation). Valid for the current frame only. nullopt without DEM data.
      */
     std::optional<std::function<float(const Point<float>&)>> elevationSampler(const UnwrappedTileID& tileID) const;
 
