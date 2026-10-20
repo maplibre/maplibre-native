@@ -275,20 +275,20 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 1> instanceAttributes;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
 
+struct VertexStage {
+    uint3 triangle [[attribute(5)]];
+};
+
 struct PolygonVertex {
     short2 position;
     short2 prev_next;
-};
-
-struct TriangleIndex {
-    uint value;
 };
 
 struct DataVertex {
@@ -339,31 +339,30 @@ struct FragmentStage {
 #endif
 };
 
-FragmentStage vertex vertexMain(uint vertexID [[vertex_id]],
+FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
                                 device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
                                 device const PolygonVertex* polygon [[buffer(fillUBOCount + 0)]],
-                                device const TriangleIndex* indices [[buffer(fillUBOCount + 1)]],
-                                device const DataVertex* data [[buffer(fillUBOCount + 2)]],
-                                uint instanceID [[instance_id]]) {
+                                device const DataVertex* data [[buffer(fillUBOCount + 1)]],
+                                uint vertexID [[vertex_id]]) {
 
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
 
-    uint index = indices[instanceID * 3 + vertexID].value >> 2;
+    uint index = vertx.triangle[vertexID] >> 2;
     float2 position = float2(polygon[index].position);
 
-    uint i0 = indices[instanceID * 3 + 0].value >> 2;
-    uint i1 = indices[instanceID * 3 + 1].value >> 2;
-    uint i2 = indices[instanceID * 3 + 2].value >> 2;
+    uint i0 = vertx.triangle[0] >> 2;
+    uint i1 = vertx.triangle[1] >> 2;
+    uint i2 = vertx.triangle[2] >> 2;
 
-    uint ignored0 = indices[instanceID * 3 + 0].value % 4 >> 1;
-    uint ignored1 = indices[instanceID * 3 + 1].value % 4 >> 1;
-    uint ignored2 = indices[instanceID * 3 + 2].value % 4 >> 1;
+    uint ignored0 = vertx.triangle[0] % 4 >> 1;
+    uint ignored1 = vertx.triangle[1] % 4 >> 1;
+    uint ignored2 = vertx.triangle[2] % 4 >> 1;
 
-    uint external0 = indices[instanceID * 3 + 0].value % 2;
-    uint external1 = indices[instanceID * 3 + 1].value % 2;
-    uint external2 = indices[instanceID * 3 + 2].value % 2;
+    uint external0 = vertx.triangle[0] % 2;
+    uint external1 = vertx.triangle[1] % 2;
+    uint external2 = vertx.triangle[2] % 2;
 
     float2 v0 = float2(polygon[i0].position);
     float2 v1 = float2(polygon[i1].position);
@@ -457,25 +456,16 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float dTri = -1;
 
     if (in.v0Radius > 0) {
-//        if (distance(in.pos, in.v0Prev) <= 1 || distance(in.pos, in.v0Next) <= 1) {
-//            return half4(1.0, 0.0, 0.0, 1.0);
-//        }
         float d0 = dRoundedTri(in.pos, dTri, in.v0, in.v0Prev, in.v0Next, in.v0Radius);
         dTri = opUnion(dTri, d0);
     }
 
     if (in.v1Radius > 0) {
-//        if (distance(in.pos, in.v1Prev) <= 1 || distance(in.pos, in.v1Next) <= 1) {
-//            return half4(1.0, 0.0, 0.0, 1.0);
-//        }
         float d1 = dRoundedTri(in.pos, dTri, in.v1, in.v1Prev, in.v1Next, in.v1Radius);
         dTri = opUnion(dTri, d1);
     }
 
     if (in.v2Radius > 0) {
-//        if (distance(in.pos, in.v2Prev) <= 1 || distance(in.pos, in.v2Next) <= 1) {
-//            return half4(1.0, 0.0, 0.0, 1.0);
-//        }
         float d2 = dRoundedTri(in.pos, dTri, in.v2, in.v2Prev, in.v2Next, in.v2Radius);
         dTri = opUnion(dTri, d2);
     }
@@ -495,7 +485,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -504,8 +494,8 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-    float4 outline_color [[attribute(3)]];
-    float2 opacity [[attribute(4)]];
+    float4 outline_color [[attribute(2)]];
+    float2 opacity [[attribute(3)]];
 };
 
 struct FragmentStage {
@@ -574,12 +564,16 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 7> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 1> instanceAttributes;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
+
+struct VertexStage {
+    uint3 triangle [[attribute(6)]];
+};
 
 struct PolygonVertex {
     short2 position;
@@ -646,34 +640,33 @@ struct FragmentStage {
 #endif
 };
 
-FragmentStage vertex vertexMain(uint vertexID [[vertex_id]],
+FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
                                 device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
                                 device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
                                 device const PolygonVertex* polygon [[buffer(fillUBOCount + 0)]],
-                                device const TriangleIndex* indices [[buffer(fillUBOCount + 1)]],
-                                device const DataVertex* data [[buffer(fillUBOCount + 2)]],
-                                uint instanceID [[instance_id]]) {
+                                device const DataVertex* data [[buffer(fillUBOCount + 1)]],
+                                uint vertexID [[vertex_id]]) {
 
     device const FillPatternDrawableUBO& drawable = drawableVector[uboIndex].fillPatternDrawableUBO;
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
 
-    uint index = indices[instanceID * 3 + vertexID].value >> 2;
+    uint index = vertx.triangle[vertexID] >> 2;
     float2 position = float2(polygon[index].position);
 
-    uint i0 = indices[instanceID * 3 + 0].value >> 2;
-    uint i1 = indices[instanceID * 3 + 1].value >> 2;
-    uint i2 = indices[instanceID * 3 + 2].value >> 2;
+    uint i0 = vertx.triangle[0] >> 2;
+    uint i1 = vertx.triangle[1] >> 2;
+    uint i2 = vertx.triangle[2] >> 2;
 
-    uint ignored0 = indices[instanceID * 3 + 0].value % 4 >> 1;
-    uint ignored1 = indices[instanceID * 3 + 1].value % 4 >> 1;
-    uint ignored2 = indices[instanceID * 3 + 2].value % 4 >> 1;
+    uint ignored0 = vertx.triangle[0] % 4 >> 1;
+    uint ignored1 = vertx.triangle[1] % 4 >> 1;
+    uint ignored2 = vertx.triangle[2] % 4 >> 1;
 
-    uint external0 = indices[instanceID * 3 + 0].value % 2;
-    uint external1 = indices[instanceID * 3 + 1].value % 2;
-    uint external2 = indices[instanceID * 3 + 2].value % 2;
+    uint external0 = vertx.triangle[0] % 2;
+    uint external1 = vertx.triangle[1] % 2;
+    uint external2 = vertx.triangle[2] % 2;
 
     float2 v0 = float2(polygon[i0].position);
     float2 v1 = float2(polygon[i1].position);
@@ -871,7 +864,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -882,16 +875,16 @@ struct VertexStage {
     short2 position [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(3)]];
+    float4 color [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(4)]];
+    float2 opacity [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(5)]];
+    ushort4 pattern_to [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(6)]];
+    ushort4 pattern_from [[attribute(5)]];
 #endif
 };
 
