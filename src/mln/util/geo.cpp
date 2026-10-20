@@ -8,14 +8,12 @@
 #include <cmath>
 #include <numbers>
 
-using namespace std::numbers;
-
 namespace mln {
 
 namespace {
 
 double lat_(const uint8_t z, const int64_t y) noexcept {
-    const double n = pi - 2.0 * pi * y / std::pow(2.0, z);
+    const double n = std::numbers::pi - 2.0 * std::numbers::pi * y / std::pow(2.0, z);
     return util::rad2deg(std::atan(0.5 * (std::exp(n) - std::exp(-n))));
 }
 

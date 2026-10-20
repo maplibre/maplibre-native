@@ -10,8 +10,6 @@
 #include <memory>
 #include <numbers>
 
-using namespace std::numbers;
-
 namespace mln {
 namespace gfx {
 
@@ -27,7 +25,7 @@ namespace {
  *
  * The newly created vertices are placed SHARP_CORNER_OFFSET pixels from the corner.
  */
-const float COS_HALF_SHARP_CORNER = std::cos(75.0f / 2.0f * (pi_v<float> / 180.0f));
+const float COS_HALF_SHARP_CORNER = std::cos(75.0f / 2.0f * (std::numbers::pi_v<float> / 180.0f));
 constexpr float SHARP_CORNER_OFFSET = 15.0f;
 
 // Angle per triangle for approximating round line joins.
@@ -360,7 +358,8 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
 
                 // Pick the number of triangles for approximating round join by
                 // based on the angle between normals.
-                const auto n = static_cast<unsigned>(::round((approxAngle * 180 / pi) / DEG_PER_TRIANGLE));
+                const auto n = static_cast<unsigned>(
+                    ::round((approxAngle * 180 / std::numbers::pi) / DEG_PER_TRIANGLE));
 
                 for (unsigned m = 1; m < n; ++m) {
                     double t = static_cast<double>(m) / n;

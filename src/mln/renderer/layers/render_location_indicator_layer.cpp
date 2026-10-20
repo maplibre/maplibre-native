@@ -55,10 +55,9 @@
 #include <array>
 #include <numbers>
 
-using namespace mln::platform;
-using namespace std::numbers;
-
 namespace mln {
+
+using namespace platform;
 
 struct LocationIndicatorRenderParameters {
     LocationIndicatorRenderParameters() = default;
@@ -130,8 +129,8 @@ public:
             const vec2 norm = normalized();
 
             // From theta to bearing
-            return util::rad2degf(
-                util::wrap<float>((pi_v<float> / 2) - std::atan2(-norm.y, norm.x), 0.0f, pi_v<float> * 2));
+            return util::rad2degf(util::wrap<float>(
+                (std::numbers::pi_v<float> / 2) - std::atan2(-norm.y, norm.x), 0.0f, std::numbers::pi_v<float> * 2));
         }
         Point<double> toPoint() const { return {x, y}; }
 

@@ -15,8 +15,6 @@
 
 #include <numbers>
 
-using namespace std::numbers;
-
 namespace mln {
 namespace {
 
@@ -25,7 +23,8 @@ Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mln::Can
 
     const auto x = (point.x + util::LONGITUDE_MAX) * size / util::DEGREES_MAX;
     const auto y = (util::LONGITUDE_MAX -
-                    util::rad2deg(std::log(std::tan(point.y * pi / util::DEGREES_MAX + pi / 4)))) *
+                    util::rad2deg(
+                        std::log(std::tan(point.y * std::numbers::pi / util::DEGREES_MAX + std::numbers::pi / 4)))) *
                    size / util::DEGREES_MAX;
 
     Point<int64_t> p;

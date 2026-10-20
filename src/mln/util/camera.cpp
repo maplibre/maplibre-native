@@ -10,8 +10,6 @@
 
 #include <numbers>
 
-using namespace std::numbers;
-
 namespace mln {
 
 namespace util {
@@ -22,11 +20,13 @@ double mercatorXfromLng(double lng) noexcept {
 }
 
 double mercatorYfromLat(double lat) noexcept {
-    return (180.0 - (180.0 / pi * std::log(std::tan((pi / 4) + lat * pi / 360.0)))) / 360.0;
+    return (180.0 -
+            (180.0 / std::numbers::pi * std::log(std::tan((std::numbers::pi / 4) + lat * std::numbers::pi / 360.0)))) /
+           360.0;
 }
 
 double latFromMercatorY(double y) noexcept {
-    return util::rad2deg(2.0 * std::atan(std::exp(pi - y * util::M2PI)) - (pi / 2));
+    return util::rad2deg(2.0 * std::atan(std::exp(std::numbers::pi - y * util::M2PI)) - (std::numbers::pi / 2));
 }
 
 double lngFromMercatorX(double x) noexcept {
