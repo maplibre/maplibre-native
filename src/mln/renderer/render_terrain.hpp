@@ -76,6 +76,17 @@ public:
     std::set<UnwrappedTileID> computeMeshCover(const TransformState& state,
                                                const std::shared_ptr<UpdateParameters>& updateParameters) const;
 
+    /// The point the mesh-tile cap measures distance from, in normalized web-mercator [0, 1]:
+    /// the ground under the camera (the map centre when the map is not tilted).
+    static std::array<double, 2> meshTileCapOrigin(const TransformState& state);
+
+    /// The `maxTiles` tiles whose centres lie nearest `origin` (normalized web-mercator), or all
+    /// of them when there are no more than that or `maxTiles` is 0. The mesh-tile cap
+    /// (TerrainLoadBudget::maxMeshTiles) that computeMeshCover applies.
+    static std::set<UnwrappedTileID> nearestMeshTiles(std::set<UnwrappedTileID> tiles,
+                                                      size_t maxTiles,
+                                                      const std::array<double, 2>& origin);
+
     /// Resolve the DEM render source from the orchestrator if not yet bound.
     /// Renderer::Impl::render calls this before building the frame's drape-target
     /// pool from computeMeshCover: the source is otherwise first bound inside
