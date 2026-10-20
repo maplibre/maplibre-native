@@ -755,6 +755,11 @@ jni::Local<jni::Object<LatLng>> NativeMapView::latLngForPixel(JNIEnv& env, jfloa
     return LatLng::New(env, map->latLngForPixelOnTerrain(mln::ScreenCoordinate(x, y)));
 }
 
+jni::Local<jni::Object<LatLng>> NativeMapView::latLngForPixelAtCenterAltitude(JNIEnv& env, jfloat x, jfloat y) {
+    // For the SDK's camera code: a camera centre lies on the centre's own plane, not on the terrain
+    return LatLng::New(env, map->latLngForPixelAtCenterAltitude(mln::ScreenCoordinate(x, y)));
+}
+
 void NativeMapView::latLngsForPixels(JNIEnv& env,
                                      const jni::Array<jdouble>& input,
                                      jni::Array<jdouble>& output,
@@ -1493,6 +1498,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getVisibleCoordinateBounds, "nativeGetVisibleCoordinateBounds"),
         METHOD(&NativeMapView::latLngForProjectedMeters, "nativeLatLngForProjectedMeters"),
         METHOD(&NativeMapView::latLngForPixel, "nativeLatLngForPixel"),
+        METHOD(&NativeMapView::latLngForPixelAtCenterAltitude, "nativeLatLngForPixelAtCenterAltitude"),
         METHOD(&NativeMapView::latLngsForPixels, "nativeLatLngsForPixels"),
         METHOD(&NativeMapView::addPolylines, "nativeAddPolylines"),
         METHOD(&NativeMapView::addPolygons, "nativeAddPolygons"),

@@ -127,6 +127,12 @@ public:
     /// `elevationMeters` above sea level (exaggerated terrain units, as pixelForLatLng). A
     /// terrain-aware pick marches this along the ray - see MLNMapView convertPoint:toLatLngFromView:.
     LatLng latLngForPixel(const ScreenCoordinate&, double elevationMeters) const;
+    /// Geographic position under a screen pixel on the plane the camera's centre sits on
+    /// (CameraOptions::centerAltitude: sea level until a terrain gesture lifts it). For camera code
+    /// that turns a screen point into a camera centre: with 3D terrain, latLngForPixelOnTerrain
+    /// answers on the surface in front of that plane, and a centre taken from it moves the view by
+    /// about (terrain height - centre altitude) * tan(pitch).
+    LatLng latLngForPixelAtCenterAltitude(const ScreenCoordinate&) const;
     std::vector<ScreenCoordinate> pixelsForLatLngs(const std::vector<LatLng>&) const;
     std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&,
                                          LatLng::WrapMode = LatLng::Wrapped) const;

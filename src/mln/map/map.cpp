@@ -452,6 +452,10 @@ LatLng Map::latLngForPixel(const ScreenCoordinate& pixel, double elevationMeters
     return impl->transform.screenCoordinateToLatLng(pixel, elevationMeters);
 }
 
+LatLng Map::latLngForPixelAtCenterAltitude(const ScreenCoordinate& pixel) const {
+    return latLngForPixel(pixel, impl->transform.getState().getCenterAltitude());
+}
+
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {
     std::vector<ScreenCoordinate> ret;
     ret.reserve(latLngs.size());
