@@ -162,6 +162,20 @@ std::size_t RenderLayer::removeAllDrawables() {
 }
 
 void RenderLayer::updateRenderTileIDs() {
+    // A draped layer tells the terrain drape which tiles it covers, drawn on or not
+    // (see TileLayerGroup::setCoverTileIDs).
+    if (layerGroup && layerGroup->getType() == LayerGroupBase::Type::TileLayerGroup &&
+        layerGroup->shouldRenderToTerrain()) {
+        std::vector<UnwrappedTileID> coverTileIDs;
+        if (renderTiles) {
+            coverTileIDs.reserve(renderTiles->size());
+            for (const RenderTile& tile : *renderTiles) {
+                coverTileIDs.push_back(tile.getOverscaledTileID().toUnwrapped());
+            }
+        }
+        static_cast<TileLayerGroup&>(*layerGroup).setCoverTileIDs(std::move(coverTileIDs));
+    }
+
     if (!renderTiles || renderTiles->empty()) {
         renderTileIDs.clear();
         return;
