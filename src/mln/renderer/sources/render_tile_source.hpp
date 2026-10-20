@@ -28,6 +28,8 @@ public:
     RenderTiles getRenderTilesSortedByYPosition() const override;
     const Tile* getRenderedTile(const UnwrappedTileID&) const override;
     Immutable<std::vector<RenderTile>> getRawRenderTiles() const override { return renderTiles; }
+    /// Every tile the pyramid currently holds, rendered or merely retained (e.g. DEM ancestors).
+    const TilePyramid& getTilePyramid() const { return tilePyramid; }
 
     std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,

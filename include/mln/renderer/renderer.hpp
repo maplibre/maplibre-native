@@ -6,6 +6,7 @@
 #include <mln/util/geojson.hpp>
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -58,6 +59,7 @@ public:
                                                const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox& box, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options = {}) const;
+
     AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
     AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
     AnnotationIDs getAnnotationIDs(const std::vector<Feature>&) const;

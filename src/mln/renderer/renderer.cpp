@@ -6,6 +6,7 @@
 #include <mln/gfx/renderer_backend.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/renderer/renderer_impl.hpp>
+#include <mln/renderer/render_terrain.hpp>
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/update_parameters.hpp>
