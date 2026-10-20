@@ -393,19 +393,25 @@ TEST(PluginApi, LayoutPropertiesValidateScopeSerializeAndInvalidateGeometry) {
     input.property.supports_transitions = 1;
     input.expectRejected();
     input.property.supports_transitions = 0;
-    input.property.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE;
-    input.expectRejected();
-    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    input.property.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
+    input.expectRejected(); // Layout is not re-evaluated when feature state changes.
+    // Data-driven layout values reach layout_feature, so they need no shader binding.
+    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
+                                             MLN_PLUGIN_EXPRESSION_COMPOSITE;
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
     style::conversion::Error error;
-    auto parse = [&](const std::string& section, int value) {
+    auto parse = [&](const std::string& section, const std::string& value) {
         return style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
             "{\"id\":\"test\",\"source\":\"s\",\"type\":\"" + input.type + "\",\"" + section +
-                "\":{\"test-anchor\":" + std::to_string(value) + "}}",
+                "\":{\"test-anchor\":" + value + "}}",
             error);
     };
-    EXPECT_FALSE(parse("paint", 2));
-    auto a = parse("layout", 2), b = parse("layout", 4);
+    EXPECT_FALSE(parse("paint", "2"));
+    EXPECT_TRUE(parse("layout", R"(["to-number", ["get", "n"]])")) << error.message;
+    EXPECT_TRUE(parse("layout", R"(["interpolate", ["linear"], ["zoom"], 0, ["to-number", ["get", "n"]], 10, 1])"))
+        << error.message;
+    EXPECT_FALSE(parse("layout", R"(["to-number", ["feature-state", "n"]])"));
+    auto a = parse("layout", "2"), b = parse("layout", "4");
     ASSERT_TRUE(a) << error.message;
     ASSERT_TRUE(b) << error.message;
     const auto& ai = static_cast<style::PluginStyleLayer&>(**a).impl();

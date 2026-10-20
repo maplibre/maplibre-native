@@ -248,8 +248,11 @@ mln_plugin_value PluginPropertyValue::evaluate(float zoom,
                                                const FeatureState& state,
                                                const plugin::PropertyDefinition& definition,
                                                EvaluationStorage& storage,
-                                               const std::set<std::string>* availableImages) const {
-    return evaluate(expression::EvaluationContext(zoom, &feature, &state).withAvailableImages(availableImages),
+                                               const std::set<std::string>* availableImages,
+                                               const CanonicalTileID* canonical) const {
+    return evaluate(expression::EvaluationContext(zoom, &feature, &state)
+                        .withAvailableImages(availableImages)
+                        .withCanonicalTileID(canonical),
                     definition,
                     storage);
 }

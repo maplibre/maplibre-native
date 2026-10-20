@@ -60,8 +60,9 @@ Boolean properties use `MLN_PLUGIN_VALUE_BOOLEAN` (0 or 1) and the
 serialize, evaluate expressions, and validate independently of numeric values.
 Layout descriptors set `is_layout = 1`; the host validates their scope, serializes
 them in `layout`, includes them in bucket grouping/invalidation, and supplies
-tile-zoom values to `create_layout`. Layout properties cannot transition or use
-feature expressions.
+tile-zoom values to `create_layout`. Layout properties may use feature and
+composite expressions, evaluated per feature into `layout_properties` of the
+`layout_feature` input, but cannot transition or use `feature-state`.
 
 `MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8` stores feature/composite color samples
 in normalized byte attributes, using the native 8-bit component truncation.

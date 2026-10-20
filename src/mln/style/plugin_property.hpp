@@ -16,6 +16,7 @@
 #include <variant>
 
 namespace mln {
+class CanonicalTileID;
 class GeometryTileFeature;
 namespace plugin {
 struct PropertyDefinition;
@@ -56,7 +57,8 @@ public:
                               const FeatureState&,
                               const plugin::PropertyDefinition&,
                               EvaluationStorage&,
-                              const std::set<std::string>* availableImages = nullptr) const;
+                              const std::set<std::string>* availableImages = nullptr,
+                              const CanonicalTileID* canonical = nullptr) const;
     mln_plugin_value evaluate(float zoom,
                               const plugin::PropertyDefinition&,
                               EvaluationStorage&,

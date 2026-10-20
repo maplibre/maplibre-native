@@ -3,12 +3,15 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
+#include <mln/style/rapidjson_conversion.hpp>
 #include <mln/tile/geojson_tile_data.hpp>
 #include <gtest/gtest.h>
 
 #include <array>
 #include <cstring>
 #include <limits>
+#include <optional>
+#include <string_view>
 
 using namespace mln;
 
@@ -64,14 +67,32 @@ struct State {
     bool instanced = false, duplicateDrawable = false, differentFeature = false;
     uint32_t elementOffset = 0, firstInstance = 0, instanceCount = 0;
     unsigned creates = 0, features = 0, finishes = 0, destroys = 0;
+    // Value of the "test-sides" layout property, plus the "sides" of each extra feature.
+    const char* sidesExpression = nullptr;
+    std::vector<std::optional<double>> extraSides;
+    std::optional<float> contextSides, contextScale;
+    std::vector<std::optional<float>> featureSides, featureScales;
     // Fallback cleanup also keeps the pre-fix failure test from leaking.
     std::unique_ptr<LayoutData> instance;
 };
 State* active = nullptr;
 
-mln_plugin_status create(const mln_plugin_layout_context_v1*, void** instance) {
+std::optional<float> floatProperty(const mln_plugin_property_value_v1* properties,
+                                   size_t count,
+                                   std::string_view name) {
+    for (size_t i = 0; i < count; ++i) {
+        if (std::string_view(properties[i].name.data, properties[i].name.size) != name) continue;
+        EXPECT_EQ(MLN_PLUGIN_VALUE_FLOAT, properties[i].value.type);
+        return properties[i].value.data.float_value;
+    }
+    return std::nullopt;
+}
+
+mln_plugin_status create(const mln_plugin_layout_context_v1* context, void** instance) {
     ++active->creates;
     EXPECT_EQ(nullptr, *instance);
+    active->contextSides = floatProperty(context->properties, context->property_count, "test-sides");
+    active->contextScale = floatProperty(context->properties, context->property_count, "test-scale");
     if (active->output == Output::CreateErrorWithoutHandle) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
     if (active->output == Output::CreateSuccessWithoutHandle) return MLN_PLUGIN_STATUS_OK;
     active->instance = std::make_unique<LayoutData>();
@@ -88,6 +109,10 @@ mln_plugin_status feature(void* instance, const mln_plugin_feature_v1* input) {
     EXPECT_EQ(20, input->points[0].y);
     EXPECT_EQ(0u, input->path_offsets[0]);
     EXPECT_EQ(1u, input->path_offsets[1]);
+    EXPECT_GE(input->struct_size, sizeof(*input));
+    active->featureSides.push_back(floatProperty(input->layout_properties, input->layout_property_count, "test-sides"));
+    active->featureScales.push_back(
+        floatProperty(input->layout_properties, input->layout_property_count, "test-scale"));
     return active->output == Output::FeatureError ? MLN_PLUGIN_STATUS_CALLBACK_ERROR : MLN_PLUGIN_STATUS_OK;
 }
 
@@ -222,6 +247,20 @@ std::shared_ptr<PluginBucket> build(State& state) {
     }
     shader.attributes.push_back({0, 0, "a_pos", MLN_PLUGIN_VERTEX_INT16_X2});
     registration.shaders.push_back(shader);
+    if (state.sidesExpression) {
+        plugin::PropertyDefinition sides;
+        sides.name = "test-sides";
+        sides.defaultValue = 3.0;
+        sides.expressionCapabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
+                                       MLN_PLUGIN_EXPRESSION_COMPOSITE;
+        sides.isLayout = true;
+        registration.properties.push_back(sides);
+        plugin::PropertyDefinition scale;
+        scale.name = "test-scale";
+        scale.defaultValue = 2.0;
+        scale.isLayout = true;
+        registration.properties.push_back(scale);
+    }
     if (state.duplicateDrawable) {
         shader.id = "wall-shader";
         shader.instanced = true;
@@ -229,11 +268,27 @@ std::shared_ptr<PluginBucket> build(State& state) {
     }
     const auto shared = std::make_shared<const plugin::RegisteredLayer>(std::move(registration));
     auto impl = makeMutable<style::PluginStyleLayer::Impl>("test-layer", "points", shared);
+    if (state.sidesExpression) {
+        JSDocument document;
+        document.Parse(state.sidesExpression);
+        const JSValue* json = &document;
+        style::conversion::Error error;
+        auto value = style::convertPluginPropertyValue(
+            *shared->findProperty("test-sides"), style::conversion::Convertible(json), error);
+        EXPECT_TRUE(value) << error.message;
+        if (value) impl->pluginProperties.emplace("test-sides", std::move(*value));
+    }
     std::vector<Immutable<style::LayerProperties>> layers = {
         makeMutable<style::PluginStyleLayerProperties>(std::move(impl))};
     auto features = std::make_shared<mapbox::feature::feature_collection<int16_t>>();
     features->emplace_back(mapbox::geometry::point<int16_t>{10, 20});
     if (state.differentFeature) features->emplace_back(mapbox::geometry::point<int16_t>{10, 20});
+    if (state.sidesExpression) features->front().properties["sides"] = 5.0;
+    for (const auto& sides : state.extraSides) {
+        mapbox::feature::feature<int16_t> feature{mapbox::geometry::point<int16_t>{10, 20}};
+        if (sides) feature.properties["sides"] = *sides;
+        features->push_back(std::move(feature));
+    }
     auto featureIndex = std::make_unique<FeatureIndex>(std::make_unique<GeoJSONTileData>(*features));
     const BucketParameters parameters{OverscaledTileID{0, 0, {0, 0, 0}}, MapMode::Static, 1, &shared->info};
     PluginLayout layout(parameters, std::move(layers), std::make_unique<GeoJSONTileLayer>(features), shared);
@@ -340,6 +395,27 @@ TEST(PluginLayout, ValidatesInstancingAndShiftedRecordBounds) {
         EXPECT_FALSE(build(invalid));
         EXPECT_EQ(1u, invalid.destroys);
     }
+}
+
+TEST(PluginLayout, EvaluatesDataDrivenLayoutPropertiesPerFeature) {
+    State state;
+    state.sidesExpression = R"(["get", "sides"])";
+    state.extraSides = {6.0, std::nullopt};
+    ASSERT_TRUE(build(state));
+    // Feature-less evaluation falls back to the default; constants are unchanged per feature.
+    EXPECT_EQ(std::optional<float>(3.0f), state.contextSides);
+    EXPECT_EQ(std::optional<float>(2.0f), state.contextScale);
+    const std::vector<std::optional<float>> sides = {5.0f, 6.0f, 3.0f};
+    EXPECT_EQ(sides, state.featureSides);
+    const std::vector<std::optional<float>> scales = {2.0f, 2.0f, 2.0f};
+    EXPECT_EQ(scales, state.featureScales);
+}
+
+TEST(PluginLayout, EvaluatesCompositeLayoutPropertiesPerFeature) {
+    State state;
+    state.sidesExpression = R"(["interpolate", ["linear"], ["zoom"], 0, ["get", "sides"], 10, 100])";
+    ASSERT_TRUE(build(state));
+    EXPECT_EQ(std::vector<std::optional<float>>{5.0f}, state.featureSides);
 }
 
 TEST(PluginLayout, SharesPaintOnlyForIdenticalFeatureRecordsAcrossInputRates) {
