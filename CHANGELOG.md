@@ -34,8 +34,8 @@
 
 ### 🐞 Bug fixes
 
-- [core] Stop custom geometry tile callbacks before cancelled tiles are released on a worker thread.
 - *...Add new stuff here...*
+- [core] Stop custom geometry tile callbacks before cancelled tiles are released on a worker thread.
 - [core] Fix plugin layer filters ignoring the style's global state.
 - [core] Fix a crash in `RenderImageSource::update` when an image source's coordinates give an empty tile cover, such as an image wholly beyond the latitudes Web Mercator can show.
 - [OpenGL] Fix invisible raster layers on Adreno 3xx by avoiding an in-place alpha assignment in the fragment shader.
