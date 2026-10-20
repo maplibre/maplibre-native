@@ -1,5 +1,6 @@
 #include "gltf_layer.hpp"
 
+#include <json.hpp>
 #include <tiny_gltf.h>
 
 #include <algorithm>
@@ -68,8 +69,12 @@ static_assert(sizeof(Vertex) == 44);
 struct Layout {
     const mln_plugin_host_api_v1* host = nullptr;
     // The layer's model: its `model-uri`, or else the mesh set through mln_gltf_layer_set_model. Null when
-    // neither is given; a layer whose features all name their own model needs none.
+    // neither is given; a layer whose features all name their own model needs none. A feature's own
+    // `model-uri` attribute overrides it.
     std::shared_ptr<const Model> model;
+    // Models named by features, kept by uri so each is resolved once per tile and a failed one is not retried
+    // for every feature. A null entry is a model that could not be loaded.
+    std::unordered_map<std::string, std::shared_ptr<const Model>> featureModels;
     uint32_t extent = 8192;
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
@@ -371,6 +376,31 @@ void startSegment(Layout& layout) {
     layout.segments.push_back(segment);
 }
 
+// The `model-uri` property of a feature, or empty when it has none or the host predates feature properties.
+// Only the layout can read feature properties, which is why the model, unlike heading or size, can differ per
+// feature but not per frame.
+std::string featureModelURI(const mln_plugin_feature_v1& feature) {
+    constexpr size_t required = offsetof(mln_plugin_feature_v1, properties_json) + sizeof(mln_plugin_string);
+    if (feature.struct_size < required || !feature.properties_json.data || feature.properties_json.size == 0) return {};
+    const auto properties = nlohmann::json::parse(
+        feature.properties_json.data, feature.properties_json.data + feature.properties_json.size, nullptr, false);
+    if (!properties.is_object()) return {};
+    const auto found = properties.find("model-uri");
+    return found != properties.end() && found->is_string() ? found->get<std::string>() : std::string{};
+}
+
+// The model a feature is drawn as: the one it names, else the layer's. Null when neither is usable, in which
+// case the feature is skipped rather than failing every other feature in the tile.
+std::shared_ptr<const Model> modelForFeature(Layout& layout, const mln_plugin_feature_v1& feature) {
+    const auto uri = featureModelURI(feature);
+    if (uri.empty()) return layout.model;
+    const auto cached = layout.featureModels.find(uri);
+    if (cached != layout.featureModels.end()) return cached->second;
+    auto model = loadModel(layout.host, uri);
+    layout.featureModels.emplace(uri, model);
+    return model;
+}
+
 mln_plugin_status createLayout(const mln_plugin_layout_context_v1* context, void** instance) try {
     if (!context || context->struct_size < sizeof(*context) || !instance) {
         return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
@@ -402,9 +432,10 @@ mln_plugin_status layoutFeature(void* instance, const mln_plugin_feature_v1* fea
         return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
     }
     auto& layout = *static_cast<Layout*>(instance);
-    // No mesh set yet: draw nothing rather than fail the tile.
-    if (!layout.model) return MLN_PLUGIN_STATUS_OK;
-    const auto& model = *layout.model;
+    // No usable model: draw nothing rather than fail the tile.
+    const auto modelPointer = modelForFeature(layout, *feature);
+    if (!modelPointer) return MLN_PLUGIN_STATUS_OK;
+    const auto& model = *modelPointer;
     const auto firstVertex = static_cast<uint32_t>(layout.vertices.size());
 
     for (size_t pointIndex = 0; pointIndex < feature->point_count; ++pointIndex) {

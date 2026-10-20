@@ -230,6 +230,32 @@ int main() {
     layer.destroy_layout(instance);
     CHECK(resourceRequests == 1);
 
+    // A feature can name its own model through a `model-uri` attribute; it overrides the layer's, and a layer
+    // with no model of its own still draws the features that name one. A feature naming a model that cannot be
+    // loaded is skipped without failing the tile.
+    CHECK(createWithModelURI(layer, "", instance) == MLN_PLUGIN_STATUS_OK);
+    const auto layOutFeature = [&](const char* json, uint64_t index) {
+        mln_plugin_feature_v1 feature{};
+        feature.struct_size = sizeof(feature);
+        feature.geometry_type = MLN_PLUGIN_GEOMETRY_POINT;
+        feature.feature_index = index;
+        feature.points = &uriPoint;
+        feature.point_count = 1;
+        feature.properties_json = {json, std::strlen(json)};
+        return layer.layout_feature(instance, &feature);
+    };
+    CHECK(layOutFeature(R"({"name":"a"})", 1) == MLN_PLUGIN_STATUS_OK);                           // no model: skipped
+    CHECK(layOutFeature(R"({"model-uri":"test://missing.glb"})", 2) == MLN_PLUGIN_STATUS_OK);       // unloadable: skipped
+    CHECK(layOutFeature(R"({"model-uri":"test://triangle.glb"})", 3) == MLN_PLUGIN_STATUS_OK);
+    CHECK(layOutFeature(R"({"model-uri":7})", 4) == MLN_PLUGIN_STATUS_OK);                          // not a string: skipped
+    CHECK(layOutFeature("not json", 5) == MLN_PLUGIN_STATUS_OK);
+    bucket = {};
+    bucket.struct_size = sizeof(bucket);
+    CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
+    CHECK(bucket.feature_vertex_range_count == 1 && bucket.feature_vertex_ranges[0].feature_index == 3);
+    CHECK(bucket.index_count == 3);
+    layer.destroy_layout(instance);
+
     // A uri that cannot be loaded fails the layout instead of drawing another model.
     CHECK(createWithModelURI(layer, "test://missing.glb", instance) == MLN_PLUGIN_STATUS_CALLBACK_ERROR);
     if (instance) layer.destroy_layout(instance);
