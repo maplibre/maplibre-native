@@ -469,10 +469,12 @@ public final class MapLibreMap {
   }
 
   /**
-   * Sets whether the map centre rides the 3D terrain surface rather than sea level. On by
-   * default: the centre altitude follows the rendered terrain height under the centre, so
-   * pitching over tall ground keeps the camera above it instead of sinking into it. Has no
-   * effect when terrain is not enabled.
+   * Sets whether the map centre rides the 3D terrain surface rather than sea level. Off by
+   * default. When on, the centre altitude follows the rendered terrain height under the
+   * centre, so pitching over tall ground keeps the camera above it instead of sinking into
+   * it. Has no effect when terrain is not enabled.
+   *
+   * <p>This method is experimental and subject to change.
    *
    * @param clamped whether to clamp the centre to the ground
    */
