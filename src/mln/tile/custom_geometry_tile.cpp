@@ -33,8 +33,8 @@ CustomGeometryTile::~CustomGeometryTile() {
 }
 
 void CustomGeometryTile::cancel() {
-    // TileCache can destroy cancelled tiles on a worker thread. Stop loader callbacks
-    // before that handoff; GeometryTile::cancel() only abandons the worker mailbox.
+    // GeometryTile has a separate mailbox. Close the loader mailbox before
+    // TileCache releases this tile on a worker thread.
     mailbox->close();
     GeometryTile::cancel();
 }
