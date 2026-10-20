@@ -108,7 +108,8 @@ mln_plugin_status requestResource(void*,
 }
 
 mln_plugin_status createWithModelURI(const mln_plugin_layer_type_v1& layer, const char* uri, void*& instance) {
-    mln_plugin_host_api_v1 host{};
+    // The layout keeps the host pointer after create_layout returns, so it has to outlive this call.
+    static mln_plugin_host_api_v1 host{};
     host.struct_size = sizeof(host);
     host.request_resource = requestResource;
     mln_plugin_property_value_v1 property{};
@@ -198,16 +199,13 @@ int main() {
     }
     layer.destroy_layout(instance);
 
-    // The host's pixels-per-meter reaches the shader through view.z; an older host leaves it at 0.
+    // The host's pixels-per-meter reaches the shader through view.z.
     mln_plugin_uniform_context_v1 uniformContext{};
     uniformContext.struct_size = sizeof(uniformContext);
     uniformContext.pixels_per_meter = 4.5f;
     std::vector<uint8_t> output(uniform.byte_size);
     CHECK(layer.update_uniform_block(&uniformContext, 0, output.data(), output.size()) == MLN_PLUGIN_STATUS_OK);
     CHECK(reinterpret_cast<const float*>(output.data())[20 + 2] == 4.5f);
-    uniformContext.struct_size = offsetof(mln_plugin_uniform_context_v1, pixels_per_meter);
-    CHECK(layer.update_uniform_block(&uniformContext, 0, output.data(), output.size()) == MLN_PLUGIN_STATUS_OK);
-    CHECK(reinterpret_cast<const float*>(output.data())[20 + 2] == 0.0f);
 
     // A layer's `model-uri` is loaded through the host and cached per uri.
     CHECK(mln_gltf_layer_set_model(nullptr, 0, nullptr, 0) == MLN_PLUGIN_STATUS_OK);

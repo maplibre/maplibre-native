@@ -308,7 +308,7 @@ void copyDiagnostic(const std::string& message, char* output, size_t capacity) {
 }
 
 void log(const mln_plugin_host_api_v1* host, int32_t severity, const std::string& message) {
-    if (host && host->struct_size >= offsetof(mln_plugin_host_api_v1, context) && host->log) {
+    if (host && host->log) {
         host->log(severity, {message.data(), message.size()});
     }
 }
@@ -357,10 +357,8 @@ std::shared_ptr<const Model> loadModel(const mln_plugin_host_api_v1* host, const
     return modelCache.emplace(uri, std::move(response.model)).first->second;
 }
 
-// A string layout property by name; empty when absent or when the host predates layout properties.
+// A string layout property by name; empty when absent.
 std::string layoutString(const mln_plugin_layout_context_v1& context, std::string_view name) {
-    constexpr size_t required = offsetof(mln_plugin_layout_context_v1, host) + sizeof(void*);
-    if (context.struct_size < required) return {};
     for (size_t i = 0; i < context.property_count; ++i) {
         const auto& property = context.properties[i];
         if (std::string_view(property.name.data, property.name.size) != name) continue;
@@ -378,12 +376,11 @@ void startSegment(Layout& layout) {
     layout.segments.push_back(segment);
 }
 
-// The `model-uri` property of a feature, or empty when it has none or the host predates feature properties.
+// The `model-uri` property of a feature, or empty when it has none.
 // Only the layout can read feature properties, which is why the model, unlike heading or size, can differ per
 // feature but not per frame.
 std::string featureModelURI(const mln_plugin_feature_v1& feature) {
-    constexpr size_t required = offsetof(mln_plugin_feature_v1, properties_json) + sizeof(mln_plugin_string);
-    if (feature.struct_size < required || !feature.properties_json.data || feature.properties_json.size == 0) return {};
+    if (!feature.properties_json.data || feature.properties_json.size == 0) return {};
     const auto properties = nlohmann::json::parse(
         feature.properties_json.data, feature.properties_json.data + feature.properties_json.size, nullptr, false);
     if (!properties.is_object()) return {};
@@ -409,8 +406,7 @@ mln_plugin_status createLayout(const mln_plugin_layout_context_v1* context, void
     }
     auto layout = std::unique_ptr<Layout>(new (std::nothrow) Layout());
     if (!layout) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
-    layout->host = context->struct_size >= offsetof(mln_plugin_layout_context_v1, host) + sizeof(void*) ? context->host
-                                                                                                        : nullptr;
+    layout->host = context->host;
     // The layer's `model-uri` wins; a layer without one draws the mesh set through mln_gltf_layer_set_model.
     // A uri that is given but cannot be loaded fails the layout rather than silently drawing another model.
     const auto uri = layoutString(*context, "model-uri");
@@ -587,10 +583,7 @@ mln_plugin_status updateUniform(const mln_plugin_uniform_context_v1* context,
     value.camera[3] = context->camera_to_center_distance;
     value.view[0] = static_cast<float>(context->bearing);
     value.view[1] = context->pixel_ratio;
-    // An older host without the field leaves it at 0, which the shader treats as 1.
-    if (context->struct_size >= offsetof(mln_plugin_uniform_context_v1, pixels_per_meter) + sizeof(float)) {
-        value.view[2] = context->pixels_per_meter;
-    }
+    value.view[2] = context->pixels_per_meter;
     std::memcpy(output, &value, sizeof(value));
     return MLN_PLUGIN_STATUS_OK;
 }

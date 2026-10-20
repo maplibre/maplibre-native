@@ -281,8 +281,7 @@ typedef struct mln_plugin_uniform_context_v1 {
     float pixels_to_tile_units;
     float camera_to_center_distance;
     float pixel_ratio;
-    /* Appended after the original v1 fields: check struct_size before reading. World pixels
-     * (the xy unit of tile_matrix) per meter at the map center's latitude. The projection takes a
+    /* World pixels (the xy unit of tile_matrix) per meter at the map center's latitude. The projection takes a
      * vertex z in meters and scales it by this, so geometry that must keep its proportions across
      * zoom levels divides its height in pixels by it. */
     float pixels_per_meter;
@@ -310,8 +309,7 @@ typedef struct mln_plugin_feature_v1 {
     /* path_offsets has path_count + 1 entries and ends at point_count. */
     const uint32_t* path_offsets;
     size_t path_count;
-    /* Appended after the original v1 fields: check struct_size before reading.
-     * The feature's attributes as a UTF-8 JSON object. Populated for
+    /* The feature's attributes as a UTF-8 JSON object. Populated for
      * layout_feature only, empty otherwise. Borrowed and valid only during the
      * callback. */
     mln_plugin_string properties_json;
@@ -353,7 +351,6 @@ typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
-    /* Appended after the original v1 fields: check struct_size before reading. */
     /* Constant values of the layout-scope properties, in registration order. */
     const mln_plugin_property_value_v1* properties;
     size_t property_count;

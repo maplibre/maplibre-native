@@ -74,9 +74,8 @@ vertex GltfVaryings gltfVertex(GltfVertex in [[stage_in]],
 #endif
 
     float2 center = float2(in.a_position);
-    // The projection reads z as meters and scales it by pixels-per-meter. An older host without the
-    // field leaves it at 0, which is treated as 1.
-    float pixelsPerMeter = u.view.z > 0.0 ? u.view.z : 1.0;
+    // The projection reads z as meters and scales it by pixels-per-meter.
+    float pixelsPerMeter = u.view.z;
 
     float tileUnitsPerMeshUnit;
     float metersPerMeshUnit;
