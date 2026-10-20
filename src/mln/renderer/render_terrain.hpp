@@ -170,8 +170,10 @@ public:
      * rendered-feature queries use). The pixel's view ray is marched from just below the camera
      * down to sea level, sampling the terrain height at each candidate plane, and the first
      * crossing (the nearest surface, so a ridge in front wins) is bisected. Inverse of
-     * Map::pixelForLatLng(latLng, elevation). nullopt without terrain, without a camera
-     * altitude, when the camera is inside the terrain, or when the ray never meets the surface.
+     * Map::pixelForLatLng(latLng, elevation). Samples the height copy (getElevationIndex), so it
+     * answers as Map::latLngForPixelOnTerrain does. nullopt without terrain or loaded heights,
+     * without a camera altitude, when the camera is inside the terrain, or when the ray never meets
+     * the surface.
      */
     std::optional<LatLng> pickLatLng(const TransformState& state, const ScreenCoordinate& pixel) const;
 

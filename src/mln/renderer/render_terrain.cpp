@@ -757,7 +757,14 @@ std::optional<LatLng> RenderTerrain::pickLatLng(const TransformState& state, con
     if (!isEnabled()) {
         return std::nullopt;
     }
-    return pickTerrainSurface(state, pixel, [this](const LatLng& latLng) { return getElevationForLatLng(latLng); });
+    // Sample the map side's height copy, kept current every frame (updateElevationIndex): one hash
+    // lookup per zoom level for each of the march's samples, and the same answer the map's pick
+    // (Map::latLngForPixelOnTerrain) gives for the same pixel
+    const auto& index = elevationIndex;
+    if (!index) {
+        return std::nullopt;
+    }
+    return pickTerrainSurface(state, pixel, [&index](const LatLng& latLng) { return index->getElevation(latLng); });
 }
 
 bool RenderTerrain::updateElevationIndex() {

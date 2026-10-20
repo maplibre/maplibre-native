@@ -777,9 +777,14 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     // 3D terrain a tapped pixel's ray meets the draped surface first, so substitute, for each
     // point, the sea-level projection of the surface coordinate under it: the sea-level
     // unprojection downstream then yields that surface coordinate. Symbols keep the original
-    // screen geometry - their collision boxes already sit at the terrain elevation.
+    // screen geometry - their collision boxes already sit at the terrain elevation - so a
+    // symbol-only query (queryPointAnnotations, which iOS runs every frame with annotation views)
+    // skips the picks.
+    const bool queriesBesidesSymbols = std::ranges::any_of(filteredLayers, [](const auto& pair) {
+        return pair.second->baseImpl->getTypeInfo()->crossTileIndex != style::LayerTypeInfo::CrossTileIndex::Required;
+    });
     ScreenLineString surfaceGeometry = geometry;
-    if (renderTerrain && renderTerrain->isEnabled()) {
+    if (renderTerrain && renderTerrain->isEnabled() && queriesBesidesSymbols) {
         for (auto& point : surfaceGeometry) {
             if (const auto surface = renderTerrain->pickLatLng(transformState, point)) {
                 ScreenCoordinate projected = transformState.latLngToScreenCoordinate(*surface);
