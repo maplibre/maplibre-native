@@ -542,6 +542,19 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) UIEdgeInsets frustumOffset;
 
+/**
+ Whether the map centre rides the 3D terrain surface rather than sea level.
+
+ When this is `YES`, the altitude of the map centre follows the rendered terrain
+ height under it, so pitching over tall ground keeps the camera above the ground
+ instead of sinking into it. Has no effect when terrain is not enabled.
+
+ The default value of this property is `NO`.
+
+ This property is experimental and subject to change.
+ */
+@property (nonatomic, assign, getter=isCenterClampedToGround) BOOL centerClampedToGround;
+
 // MARK: Displaying the User’s Location
 
 /**
