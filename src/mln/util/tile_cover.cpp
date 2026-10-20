@@ -246,7 +246,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     // numTiles / (cos(lat) * 2pi * R)) shrank every elevated box by pixelsPerMeter (~0.13 at z13
     // over Victoria): a 2000 m plateau tested as ~260 m, and with the camera high and steeply
     // pitched the near field was judged off-screen and left out of the cover.
-    const double metersToTileUnits = numTiles / worldSize;
+    const double metersToFrustumZ = numTiles / worldSize;
 
     // The tile's bounds including its terrain: the flat footprint given the height of
     // the DEM covering it. Relief rising towards the camera takes up screen space that
@@ -268,8 +268,8 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
             return node.aabb; // no DEM loaded here yet: flat, as before
         }
         AABB elevated = node.aabb;
-        elevated.min[2] = range->min * metersToTileUnits;
-        elevated.max[2] = range->max * metersToTileUnits;
+        elevated.min[2] = range->min * metersToFrustumZ;
+        elevated.max[2] = range->max * metersToFrustumZ;
         return elevated;
     };
 
@@ -417,7 +417,7 @@ std::set<UnwrappedTileID> frustumCull(const TileCoverParameters& state, const st
     const double worldSize = Projection::worldSize(transform.getScale());
     const Frustum frustum = Frustum::fromInvProjMatrix(transform.getInvProjectionMatrix(), worldSize, refZ, flippedY);
     // Meters to the frustum's z units at refZ; see the same conversion in tileCover.
-    const double metersToTileUnits = numTiles / worldSize;
+    const double metersToFrustumZ = numTiles / worldSize;
 
     std::set<UnwrappedTileID> result;
     for (const auto& id : tiles) {
@@ -428,8 +428,8 @@ std::set<UnwrappedTileID> frustumCull(const TileCoverParameters& state, const st
 
         if (state.elevationProvider) {
             if (const auto range = state.elevationProvider->getTileElevationRange(id.canonical)) {
-                aabb.min[2] = range->min * metersToTileUnits;
-                aabb.max[2] = range->max * metersToTileUnits;
+                aabb.min[2] = range->min * metersToFrustumZ;
+                aabb.max[2] = range->max * metersToFrustumZ;
             }
         }
 

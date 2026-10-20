@@ -5,7 +5,6 @@
 #include <mln/util/projection.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/interpolate.hpp>
-#include <mln/util/mat4.hpp>
 
 #include <cmath>
 
