@@ -2,6 +2,7 @@
 
 #include <mln/layout/symbol_layout.hpp>
 #include <mln/renderer/bucket.hpp>
+#include <mln/text/overlap_mode.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/renderer/render_tile.hpp>
@@ -119,8 +120,12 @@ public:
     ZoomEvaluatedSize partiallyEvaluatedTextSize;
     ZoomEvaluatedSize partiallyEvaluatedIconSize;
 
-    bool textAllowOverlap = getLayout().get<style::TextAllowOverlap>();
-    bool iconAllowOverlap = getLayout().get<style::IconAllowOverlap>();
+    OverlapMode textOverlapMode = getOverlapMode(getLayout().get<style::TextOverlap>(),
+                                                  getLayout().get<style::TextAllowOverlap>());
+    OverlapMode iconOverlapMode = getOverlapMode(getLayout().get<style::IconOverlap>(),
+                                                  getLayout().get<style::IconAllowOverlap>());
+    const bool textAlwaysOverlap = textOverlapMode == OverlapMode::Always;
+    const bool iconAlwaysOverlap = iconOverlapMode == OverlapMode::Always;
     // This logic is similar to the "defaultOpacityState" logic below in
     // updateBucketOpacities If we know a symbol is always supposed to show,
     // force it to be marked visible even if it wasn't placed into the collision
@@ -136,11 +141,11 @@ public:
     //  in on pan", but should look like any other collision and hopefully not
     //  be too noticeable.
     // See https://github.com/mapbox/mapbox-gl-native/issues/12683
-    bool alwaysShowText = textAllowOverlap &&
-                          (iconAllowOverlap || !(getBucket().hasIconData() || getBucket().hasSdfIconData()) ||
+    bool alwaysShowText = textAlwaysOverlap &&
+                          (iconAlwaysOverlap || !(getBucket().hasIconData() || getBucket().hasSdfIconData()) ||
                            getLayout().get<style::IconOptional>());
-    bool alwaysShowIcon = iconAllowOverlap &&
-                          (textAllowOverlap || !getBucket().hasTextData() || getLayout().get<style::TextOptional>());
+    bool alwaysShowIcon = iconAlwaysOverlap &&
+                          (textAlwaysOverlap || !getBucket().hasTextData() || getLayout().get<style::TextOptional>());
 
     bool hasIconTextFit = getLayout().get<IconTextFit>() != IconTextFitType::None;
 
@@ -336,7 +341,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                                  placedSymbol,
                                                                  ctx.scale,
                                                                  fontSize,
-                                                                 ctx.textAllowOverlap,
+                                                                 ctx.textOverlapMode,
                                                                  ctx.pitchTextWithMap,
                                                                  showCollisionBoxes,
                                                                  ctx.avoidEdges,
@@ -389,7 +394,8 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                 }
             }
 
-            const bool doVariableIconPlacement = ctx.hasIconTextFit && !ctx.iconAllowOverlap &&
+            const bool doVariableIconPlacement = ctx.hasIconTextFit &&
+                                                 ctx.iconOverlapMode == OverlapMode::Never &&
                                                  symbolInstance.getPlacedIconIndex();
             const auto placeFeatureForVariableAnchors = [&](const CollisionFeature& textCollisionFeature,
                                                             style::TextWritingModeType orientation,
@@ -400,14 +406,16 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                 const float textBoxScale = symbolInstance.getTextBoxScale();
                 std::pair<bool, bool> placedFeature = {false, false};
                 const size_t anchorsSize = variableTextAnchors.size();
-                const size_t placementAttempts = ctx.textAllowOverlap ? anchorsSize * 2 : anchorsSize;
+                // A second pass may overlap (textOverlapMode); the first pass never overlaps.
+                const size_t placementPasses = ctx.textOverlapMode == OverlapMode::Never ? 1 : 2;
+                const size_t placementAttempts = anchorsSize * placementPasses;
                 for (size_t i = 0u; i < placementAttempts; ++i) {
                     // when anchorsSize is 0, placementAttempts is also 0,
                     // so this code would not be reached
                     // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
                     auto anchor = variableTextAnchors[i % anchorsSize];
                     auto variableTextOffset = symbolInstance.getTextVariableAnchorOffset()->getOffsetByAnchor(anchor);
-                    const bool allowOverlap = (i >= anchorsSize);
+                    const OverlapMode overlapMode = (i >= anchorsSize) ? ctx.textOverlapMode : OverlapMode::Never;
                     shift = calculateVariableLayoutOffset(anchor,
                                                           width,
                                                           height,
@@ -430,7 +438,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                                 placedSymbol,
                                                                 ctx.scale,
                                                                 fontSize,
-                                                                allowOverlap,
+                                                                overlapMode,
                                                                 ctx.pitchTextWithMap,
                                                                 showCollisionBoxes,
                                                                 ctx.avoidEdges,
@@ -447,7 +455,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                             placedSymbol,
                             ctx.scale,
                             fontSize,
-                            ctx.iconAllowOverlap,
+                            ctx.iconOverlapMode,
                             ctx.pitchTextWithMap, // TODO: shall it be pitchIconWithMap?
                             showCollisionBoxes,
                             ctx.avoidEdges,
@@ -545,7 +553,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                placedSymbol,
                                                ctx.scale,
                                                fontSize,
-                                               ctx.iconAllowOverlap,
+                                               ctx.iconOverlapMode,
                                                ctx.pitchTextWithMap,
                                                showCollisionBoxes,
                                                ctx.avoidEdges,
@@ -579,12 +587,14 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         if (placedVerticalText.first && symbolInstance.getVerticalTextCollisionFeature()) {
             collisionIndex.insertFeature(*symbolInstance.getVerticalTextCollisionFeature(),
                                          textBoxes,
+                                         ctx.textOverlapMode,
                                          ctx.getLayout().get<TextIgnorePlacement>(),
                                          bucket.bucketInstanceId,
                                          collisionGroup.first);
         } else {
             collisionIndex.insertFeature(symbolInstance.getTextCollisionFeature(),
                                          textBoxes,
+                                         ctx.textOverlapMode,
                                          ctx.getLayout().get<TextIgnorePlacement>(),
                                          bucket.bucketInstanceId,
                                          collisionGroup.first);
@@ -595,12 +605,14 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         if (placedVerticalIcon.first && symbolInstance.getVerticalIconCollisionFeature()) {
             collisionIndex.insertFeature(*symbolInstance.getVerticalIconCollisionFeature(),
                                          iconBoxes,
+                                         ctx.iconOverlapMode,
                                          ctx.getLayout().get<IconIgnorePlacement>(),
                                          bucket.bucketInstanceId,
                                          collisionGroup.first);
         } else {
             collisionIndex.insertFeature(symbolInstance.getIconCollisionFeature(),
                                          iconBoxes,
+                                         ctx.iconOverlapMode,
                                          ctx.getLayout().get<IconIgnorePlacement>(),
                                          bucket.bucketInstanceId,
                                          collisionGroup.first);
@@ -972,8 +984,12 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
 
     const JointOpacityState duplicateOpacityState(false, false, true);
 
-    const bool textAllowOverlap = bucket.layout->get<style::TextAllowOverlap>();
-    const bool iconAllowOverlap = bucket.layout->get<style::IconAllowOverlap>();
+    const OverlapMode textOverlapMode = getOverlapMode(bucket.layout->get<style::TextOverlap>(),
+                                                       bucket.layout->get<style::TextAllowOverlap>());
+    const OverlapMode iconOverlapMode = getOverlapMode(bucket.layout->get<style::IconOverlap>(),
+                                                       bucket.layout->get<style::IconAllowOverlap>());
+    const bool textAlwaysOverlap = textOverlapMode == OverlapMode::Always;
+    const bool iconAlwaysOverlap = iconOverlapMode == OverlapMode::Always;
     const bool variablePlacement = bucket.hasVariableTextAnchors();
     const bool rotateWithMap = bucket.layout->get<style::TextRotationAlignment>() == style::AlignmentType::Map;
     const bool pitchWithMap = bucket.layout->get<style::TextPitchAlignment>() == style::AlignmentType::Map;
@@ -986,11 +1002,11 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
     // See https://github.com/mapbox/mapbox-gl-native/issues/12483
     // Prevent a flickering issue when showing a symbol allowing overlap.
     const JointOpacityState defaultOpacityState(
-        (screenSpace || bucket.justReloaded) && textAllowOverlap &&
-            (iconAllowOverlap || !(bucket.hasIconData() || bucket.hasSdfIconData()) ||
+        (screenSpace || bucket.justReloaded) && textAlwaysOverlap &&
+            (iconAlwaysOverlap || !(bucket.hasIconData() || bucket.hasSdfIconData()) ||
              bucket.layout->get<style::IconOptional>()),
-        (screenSpace || bucket.justReloaded) && iconAllowOverlap &&
-            (textAllowOverlap || !bucket.hasTextData() || bucket.layout->get<style::TextOptional>()),
+        (screenSpace || bucket.justReloaded) && iconAlwaysOverlap &&
+            (textAlwaysOverlap || !bucket.hasTextData() || bucket.layout->get<style::TextOptional>()),
         true);
 
     for (SymbolInstance& symbolInstance : bucket.symbolInstances) {
@@ -1543,7 +1559,8 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
     auto symbolIntersectsTileEdges = [&collisionBoxIntersectsTileEdges,
                                       pitchTextWithMap = ctx.pitchTextWithMap,
                                       rotateTextWithMap = ctx.rotateTextWithMap,
-                                      variableIconPlacement = ctx.hasIconTextFit && !ctx.iconAllowOverlap,
+                                      variableIconPlacement = ctx.hasIconTextFit &&
+                                                              ctx.iconOverlapMode == OverlapMode::Never,
                                       bearing = static_cast<float>(ctx.getTransformState().getBearing())](
                                          const SymbolInstance& symbol) noexcept -> IntersectStatus {
         IntersectStatus result;

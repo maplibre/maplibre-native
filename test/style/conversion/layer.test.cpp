@@ -4,6 +4,7 @@
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/layer.hpp>
 #include <mln/style/layers/background_layer_impl.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
 
 #include <rapidjson/prettywriter.h>
 
@@ -128,6 +129,57 @@ TEST(StyleConversion, OverrideDefaults) {
     EXPECT_EQ(9u, roundTrippedObject.size());
     EXPECT_EQ(4u, roundTrippedObject.at("layout").getObject()->size());
     EXPECT_EQ(2u, roundTrippedObject.at("paint").getObject()->size());
+}
+
+TEST(StyleConversion, SymbolOverlap) {
+    auto layer = parseLayer(R"JSON({
+        "type": "symbol",
+        "id": "symbol",
+        "source": "composite",
+        "source-layer": "landmarks",
+        "layout": {
+            "icon-image": "marker-15",
+            "icon-overlap": "always",
+            "text-field": "hello",
+            "text-overlap": "cooperative"
+        }
+    })JSON");
+
+    ASSERT_NE(nullptr, layer);
+    auto* symbolLayer = static_cast<SymbolLayer*>(layer.get());
+    ASSERT_TRUE(symbolLayer->getIconOverlap().isConstant());
+    EXPECT_EQ(IconOverlapType::Always, symbolLayer->getIconOverlap().asConstant());
+    ASSERT_TRUE(symbolLayer->getTextOverlap().isConstant());
+    EXPECT_EQ(IconOverlapType::Cooperative, symbolLayer->getTextOverlap().asConstant());
+
+    auto value = layer->serialize();
+    ASSERT_NE(nullptr, value.getObject());
+    const auto& layout = *value.getObject()->at("layout").getObject();
+    ASSERT_TRUE(layout.at("icon-overlap").getString());
+    EXPECT_EQ("always", *layout.at("icon-overlap").getString());
+    ASSERT_TRUE(layout.at("text-overlap").getString());
+    EXPECT_EQ("cooperative", *layout.at("text-overlap").getString());
+
+    auto roundTripped = parseLayer(stringifyLayer(value));
+    ASSERT_NE(nullptr, roundTripped);
+    auto* roundTrippedLayer = static_cast<SymbolLayer*>(roundTripped.get());
+    EXPECT_EQ(symbolLayer->getIconOverlap(), roundTrippedLayer->getIconOverlap());
+    EXPECT_EQ(symbolLayer->getTextOverlap(), roundTrippedLayer->getTextOverlap());
+}
+
+TEST(StyleConversion, SymbolOverlapRejectsInvalidValue) {
+    auto layer = parseLayer(R"JSON({
+        "type": "symbol",
+        "id": "symbol",
+        "source": "composite",
+        "source-layer": "landmarks",
+        "layout": {
+            "icon-image": "marker-15",
+            "icon-overlap": "sometimes"
+        }
+    })JSON");
+
+    EXPECT_EQ(nullptr, layer);
 }
 
 TEST(StyleConversion, SetGenericProperties) {

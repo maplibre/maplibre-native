@@ -169,6 +169,21 @@ void SymbolLayer::setIconOptional(const PropertyValue<bool>& value) {
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
+PropertyValue<IconOverlapType> SymbolLayer::getDefaultIconOverlap() {
+    return IconOverlap::defaultValue();
+}
+
+const PropertyValue<IconOverlapType>& SymbolLayer::getIconOverlap() const {
+    return impl().layout.get<IconOverlap>();
+}
+
+void SymbolLayer::setIconOverlap(const PropertyValue<IconOverlapType>& value) {
+    if (value == getIconOverlap()) return;
+    auto impl_ = mutableImpl();
+    impl_->layout.get<IconOverlap>() = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
 PropertyValue<Padding> SymbolLayer::getDefaultIconPadding() {
     return IconPadding::defaultValue();
 }
@@ -556,6 +571,21 @@ void SymbolLayer::setTextOptional(const PropertyValue<bool>& value) {
     if (value == getTextOptional()) return;
     auto impl_ = mutableImpl();
     impl_->layout.get<TextOptional>() = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+PropertyValue<TextOverlapType> SymbolLayer::getDefaultTextOverlap() {
+    return TextOverlap::defaultValue();
+}
+
+const PropertyValue<TextOverlapType>& SymbolLayer::getTextOverlap() const {
+    return impl().layout.get<TextOverlap>();
+}
+
+void SymbolLayer::setTextOverlap(const PropertyValue<TextOverlapType>& value) {
+    if (value == getTextOverlap()) return;
+    auto impl_ = mutableImpl();
+    impl_->layout.get<TextOverlap>() = value;
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
@@ -1146,6 +1176,7 @@ enum class Property : uint8_t {
     IconKeepUpright,
     IconOffset,
     IconOptional,
+    IconOverlap,
     IconPadding,
     IconPitchAlignment,
     IconRotate,
@@ -1172,6 +1203,7 @@ enum class Property : uint8_t {
     TextMaxWidth,
     TextOffset,
     TextOptional,
+    TextOverlap,
     TextPadding,
     TextPitchAlignment,
     TextRadialOffset,
@@ -1225,6 +1257,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"icon-keep-upright", toUint8(Property::IconKeepUpright)},
      {"icon-offset", toUint8(Property::IconOffset)},
      {"icon-optional", toUint8(Property::IconOptional)},
+     {"icon-overlap", toUint8(Property::IconOverlap)},
      {"icon-padding", toUint8(Property::IconPadding)},
      {"icon-pitch-alignment", toUint8(Property::IconPitchAlignment)},
      {"icon-rotate", toUint8(Property::IconRotate)},
@@ -1251,6 +1284,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"text-max-width", toUint8(Property::TextMaxWidth)},
      {"text-offset", toUint8(Property::TextOffset)},
      {"text-optional", toUint8(Property::TextOptional)},
+     {"text-overlap", toUint8(Property::TextOverlap)},
      {"text-padding", toUint8(Property::TextPadding)},
      {"text-pitch-alignment", toUint8(Property::TextPitchAlignment)},
      {"text-radial-offset", toUint8(Property::TextRadialOffset)},
@@ -1334,6 +1368,8 @@ StyleProperty getLayerProperty(const SymbolLayer& layer, Property property) {
             return makeStyleProperty(layer.getIconOffset());
         case Property::IconOptional:
             return makeStyleProperty(layer.getIconOptional());
+        case Property::IconOverlap:
+            return makeStyleProperty(layer.getIconOverlap());
         case Property::IconPadding:
             return makeStyleProperty(layer.getIconPadding());
         case Property::IconPitchAlignment:
@@ -1386,6 +1422,8 @@ StyleProperty getLayerProperty(const SymbolLayer& layer, Property property) {
             return makeStyleProperty(layer.getTextOffset());
         case Property::TextOptional:
             return makeStyleProperty(layer.getTextOptional());
+        case Property::TextOverlap:
+            return makeStyleProperty(layer.getTextOverlap());
         case Property::TextPadding:
             return makeStyleProperty(layer.getTextPadding());
         case Property::TextPitchAlignment:
@@ -1686,6 +1724,16 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
             return std::nullopt;
         }
     }
+    if (property == Property::IconOverlap) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<IconOverlapType>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        setIconOverlap(*typedValue);
+        return std::nullopt;
+    }
     if (property == Property::IconPadding) {
         Error error;
         const auto& typedValue = convert<PropertyValue<Padding>>(value, error, true, false);
@@ -1820,6 +1868,16 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         }
 
         setTextJustify(*typedValue);
+        return std::nullopt;
+    }
+    if (property == Property::TextOverlap) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<TextOverlapType>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        setTextOverlap(*typedValue);
         return std::nullopt;
     }
     if (property == Property::TextTransform) {

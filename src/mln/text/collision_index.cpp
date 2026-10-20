@@ -43,12 +43,45 @@ CollisionIndex::CollisionIndex(const TransformState& transformState_, MapMode ma
       ignoredGrid(transformState.getSize().width + 2 * viewportPadding,
                   transformState.getSize().height + 2 * viewportPadding,
                   25),
+      neverGrid(transformState.getSize().width + 2 * viewportPadding,
+                transformState.getSize().height + 2 * viewportPadding,
+                25),
       screenRightBoundary(transformState.getSize().width + viewportPadding),
       screenBottomBoundary(transformState.getSize().height + viewportPadding),
       gridRightBoundary(transformState.getSize().width + 2 * viewportPadding),
       gridBottomBoundary(transformState.getSize().height + 2 * viewportPadding),
       pitchFactor(
           static_cast<float>(std::cos(transformState.getPitch()) * transformState.getCameraToCenterDistance())) {}
+
+bool CollisionIndex::collides(
+    const OverlapMode mode,
+    const CollisionGrid::BBox& box,
+    const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& predicate) const {
+    switch (mode) {
+        case OverlapMode::Always:
+            return false;
+        case OverlapMode::Cooperative:
+            return neverGrid.hitTest(box, predicate);
+        case OverlapMode::Never:
+            break;
+    }
+    return collisionGrid.hitTest(box, predicate);
+}
+
+bool CollisionIndex::collides(
+    const OverlapMode mode,
+    const CollisionGrid::BCircle& circle,
+    const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& predicate) const {
+    switch (mode) {
+        case OverlapMode::Always:
+            return false;
+        case OverlapMode::Cooperative:
+            return neverGrid.hitTest(circle, predicate);
+        case OverlapMode::Never:
+            break;
+    }
+    return collisionGrid.hitTest(circle, predicate);
+}
 
 float CollisionIndex::approximateTileDistance(const TileDistance& tileDistance,
                                               const float lastSegmentAngle,
@@ -155,7 +188,7 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
     const PlacedSymbol& symbol,
     const float scale,
     const float fontSize,
-    const bool allowOverlap,
+    const OverlapMode overlapMode,
     const bool pitchWithMap,
     const bool collisionDebug,
     const std::optional<CollisionBoundaries>& avoidEdges,
@@ -168,7 +201,7 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
         projectedBoxes.emplace_back(
             collisionBoundaries[0], collisionBoundaries[1], collisionBoundaries[2], collisionBoundaries[3]);
         if ((avoidEdges && !isInsideTile(collisionBoundaries, *avoidEdges)) || !isInsideGrid(collisionBoundaries) ||
-            (!allowOverlap && collisionGrid.hitTest(projectedBoxes.back().box(), collisionGroupPredicate))) {
+            collides(overlapMode, projectedBoxes.back().box(), collisionGroupPredicate)) {
             return {false, false};
         }
 
@@ -181,7 +214,7 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
                                 symbol,
                                 scale,
                                 fontSize,
-                                allowOverlap,
+                                overlapMode,
                                 pitchWithMap,
                                 collisionDebug,
                                 avoidEdges,
@@ -198,7 +231,7 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
     const PlacedSymbol& symbol,
     const float scale,
     const float fontSize,
-    const bool allowOverlap,
+    const OverlapMode overlapMode,
     const bool pitchWithMap,
     const bool collisionDebug,
     const std::optional<CollisionBoundaries>& avoidEdges,
@@ -314,7 +347,7 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
         inGrid |= isInsideGrid(collisionBoundaries);
 
         if ((avoidEdges && !isInsideTile(collisionBoundaries, *avoidEdges)) ||
-            (!allowOverlap && collisionGrid.hitTest(projectedBoxes[i].circle(), collisionGroupPredicate))) {
+            collides(overlapMode, projectedBoxes[i].circle(), collisionGroupPredicate)) {
             if (!collisionDebug) {
                 return {false, false};
             } else {
@@ -330,34 +363,36 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
 
 void CollisionIndex::insertFeature(const CollisionFeature& feature,
                                    const std::vector<ProjectedCollisionBox>& projectedBoxes,
+                                   const OverlapMode overlapMode,
                                    bool ignorePlacement,
                                    uint32_t bucketInstanceId,
                                    uint16_t collisionGroupId) {
+    const auto insert = [&](const auto& geometry) {
+        if (ignorePlacement) {
+            ignoredGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId}, geometry);
+            return;
+        }
+
+        collisionGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId}, geometry);
+        // Cooperative placement must still see the symbols that cannot be overlapped.
+        if (overlapMode == OverlapMode::Never) {
+            neverGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId}, geometry);
+        }
+    };
+
     if (feature.alongLine) {
         for (auto& circle : projectedBoxes) {
             if (!circle.isCircle()) {
                 continue;
             }
 
-            if (ignorePlacement) {
-                ignoredGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId},
-                                   circle.circle());
-            } else {
-                collisionGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId},
-                                     circle.circle());
-            }
+            insert(circle.circle());
         }
     } else if (!projectedBoxes.empty()) {
         assert(projectedBoxes.size() == 1);
         auto& box = projectedBoxes[0];
         assert(box.isBox());
-        if (ignorePlacement) {
-            ignoredGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId},
-                               box.box());
-        } else {
-            collisionGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId},
-                                 box.box());
-        }
+        insert(box.box());
     }
 }
 
