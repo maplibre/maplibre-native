@@ -2,6 +2,7 @@
 #import "MLNFoundation_Private.h"
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNMapView+Metal.h"
+#import "MLNMapView_Private.h"
 
 #import <mln/mtl/renderable_resource.hpp>
 
@@ -158,7 +159,8 @@ void MLNMapViewMetalImpl::createView() {
   }
 
   id<MTLDevice> device = (__bridge id<MTLDevice>)resource.getBackend().getDevice().get();
-  const auto scaleFactor = MLNEffectiveScaleFactorForView(mapView);
+  const auto scaleFactor = mapView.pixelRatioOverride > 0 ? mapView.pixelRatioOverride
+                                                          : MLNEffectiveScaleFactorForView(mapView);
 
   resource.mtlView = [[MTKView alloc] initWithFrame:mapView.bounds device:device];
   resource.mtlView.delegate = resource.delegate;
@@ -220,7 +222,8 @@ void MLNMapViewMetalImpl::layoutChanged() {
     return;
   }
 
-  const auto scaleFactor = MLNEffectiveScaleFactorForView(mapView);
+  const auto scaleFactor = mapView.pixelRatioOverride > 0 ? mapView.pixelRatioOverride
+                                                          : MLNEffectiveScaleFactorForView(mapView);
   const CGSize target = CGSizeMake(std::round(viewSize.width * scaleFactor),
                                    std::round(viewSize.height * scaleFactor));
 

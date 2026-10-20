@@ -15,6 +15,7 @@
     _actionJournalOptions = [[MLNActionJournalOptions alloc] init];
     _fastPFOREnabled = NO;
     _featureInfoEnabled = NO;
+    _pixelRatio = 0;
   }
 
   return self;

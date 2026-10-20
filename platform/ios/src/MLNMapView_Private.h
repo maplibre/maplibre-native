@@ -27,6 +27,9 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 
 @interface MLNMapView (Private)
 
+/// Pixel ratio set with ``MLNMapOptions/pixelRatio``, or `0` to follow the screen scale.
+@property (nonatomic, readonly) CGFloat pixelRatioOverride;
+
 /// The map view’s OpenGL rendering context.
 @property (nonatomic, readonly, nullable) EAGLContext *context;
 
