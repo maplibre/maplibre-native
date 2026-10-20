@@ -31,9 +31,12 @@ static NSString *const MLNPuckPluginErrorDomain = @"MLNPuckPluginErrorDomain";
   return YES;
 #else
   if (error) {
-    *error = [NSError errorWithDomain:MLNPuckPluginErrorDomain
-                                 code:-1
-                             userInfo:@{NSLocalizedDescriptionKey : @"MapLibre was built without plugin support"}];
+    *error =
+        [NSError errorWithDomain:MLNPuckPluginErrorDomain
+                            code:-1
+                        userInfo:@{
+                          NSLocalizedDescriptionKey : @"MapLibre was built without plugin support"
+                        }];
   }
   return NO;
 #endif
