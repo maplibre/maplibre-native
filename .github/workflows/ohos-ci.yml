@@ -26,8 +26,6 @@ on:
       - "!**/*.md"
 
   pull_request:
-    branches:
-      - "*"
     paths:
       - CMakeLists.txt
       - CMakePresets.json

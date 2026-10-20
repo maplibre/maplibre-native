@@ -28,8 +28,6 @@ on:
       - "!**/*.md"
 
   pull_request:
-    branches:
-      - "*"
     paths:
       - CMakeLists.txt
       - ".github/actions/qt5-build/**"

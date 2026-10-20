@@ -29,8 +29,6 @@ on:
       - 'cmake/**'
 
   pull_request:
-    branches:
-      - main
     paths:
       - 'platform/macos/**'
       - 'platform/darwin/**'
