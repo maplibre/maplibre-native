@@ -5,6 +5,7 @@
 #include <mln/gfx/offscreen_texture.hpp>
 #include <mln/gfx/render_pass.hpp>
 #include <mln/gfx/uniform_buffer.hpp>
+#include <mln/renderer/bucket.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/layer_tweaker.hpp>
 #include <mln/renderer/paint_parameters.hpp>
@@ -141,6 +142,19 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
             const UnwrappedTileID unwrapped = drawable.getTileID()->toUnwrapped();
             const bool overlaps = unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID) ||
                                   drapeTileID->isChildOf(unwrapped);
+            // The source bucket's identity, folded in as in the drape signature (see
+            // RendererImpl): new data under the same covering tiles - a GeoJSON source
+            // updated with setGeoJson, or a tile's own bucket replacing an over-zoomed
+            // ancestor's - is new content and must re-render the drape. Keying on the tiles
+            // alone judged it the same and kept the stale bake until the next zoom level.
+            // Bucket ids are stable across fades and paint changes, so this does not churn;
+            // hillshade is excluded as in the signature.
+            std::size_t bucketHash = 0;
+            if (drawable.getName() != "hillshade") {
+                if (const auto& bucket = drawable.getBucket()) {
+                    util::hash_combine(bucketHash, bucket->getID().id());
+                }
+            }
             if (overlaps) {
                 // Key on the COVERING TILE id, NOT the drawable-instance id. A tile's
                 // drawables are rebuilt with fresh ids on every bucket update, fade
@@ -157,6 +171,7 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
                 util::hash_combine(tileHash, unwrapped.canonical.z);
                 util::hash_combine(tileHash, unwrapped.canonical.x);
                 util::hash_combine(tileHash, unwrapped.canonical.y);
+                util::hash_combine(tileHash, bucketHash);
                 coverage.contentHash += tileHash;
             }
             if (unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID)) {
@@ -180,6 +195,7 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
             util::hash_combine(tileHash, unwrapped.canonical.z);
             util::hash_combine(tileHash, unwrapped.canonical.x);
             util::hash_combine(tileHash, unwrapped.canonical.y);
+            util::hash_combine(tileHash, bucketHash);
             coverage.contentHash += tileHash;
         });
         // Only the coarsest standalone fallback counts as lost detail; when an exact or
