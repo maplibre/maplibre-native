@@ -59,14 +59,18 @@ public:
     static FillLayoutVertex layoutVertex(Point<int16_t> p, int16_t prev, int16_t next) {
         return FillLayoutVertex{{{p.x, p.y}}, {prev, next}};
     }
-    static FillTriangleInstance triangleInstance(uint32_t index0, bool ignored0, bool external0,
-                                                 uint32_t index1, bool ignored1, bool external1,
-                                                 uint32_t index2, bool ignored2, bool external2) {
-        return FillTriangleInstance{{
-            index0 * 4 + (ignored0 ? 1 : 0) * 2 + (external0 ? 1 : 0),
-            index1 * 4 + (ignored1 ? 1 : 0) * 2 + (external1 ? 1 : 0),
-            index2 * 4 + (ignored2 ? 1 : 0) * 2 + (external2 ? 1 : 0)
-        }};
+    static FillTriangleInstance triangleInstance(uint32_t index0,
+                                                 bool ignored0,
+                                                 bool external0,
+                                                 uint32_t index1,
+                                                 bool ignored1,
+                                                 bool external1,
+                                                 uint32_t index2,
+                                                 bool ignored2,
+                                                 bool external2) {
+        return FillTriangleInstance{{index0 * 4 + (ignored0 ? 1 : 0) * 2 + (external0 ? 1 : 0),
+                                     index1 * 4 + (ignored1 ? 1 : 0) * 2 + (external1 ? 1 : 0),
+                                     index2 * 4 + (ignored2 ? 1 : 0) * 2 + (external2 ? 1 : 0)}};
     }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES

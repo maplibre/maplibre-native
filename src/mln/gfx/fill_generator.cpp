@@ -51,11 +51,15 @@ void addFillExternalIndices(SegmentVector& fillSegments,
     triangleSegment.instanceCount += nIndices / 3;
 
     for (std::size_t i = 0; i < nIndices; i += 3) {
-        fillTriangles.emplace_back(
-            FillBucket::triangleInstance(startVertices + indices[i], true, false,
-                                         startVertices + indices[i + 1], false, true,
-                                         startVertices + indices[i + 2], true, false)
-        );
+        fillTriangles.emplace_back(FillBucket::triangleInstance(startVertices + indices[i],
+                                                                true,
+                                                                false,
+                                                                startVertices + indices[i + 1],
+                                                                false,
+                                                                true,
+                                                                startVertices + indices[i + 2],
+                                                                true,
+                                                                false));
     }
 }
 
@@ -119,11 +123,15 @@ void addFillIndices(SegmentVector& fillSegments,
     triangleSegment.instanceCount += nIndices / 3;
 
     for (std::size_t i = 0; i < nIndices; i += 3) {
-        fillTriangles.emplace_back(
-            FillBucket::triangleInstance(startVertices + indices[i], ignoredVertices[indices[i]], false,
-                                         startVertices + indices[i + 1], ignoredVertices[indices[i + 1]], false,
-                                         startVertices + indices[i + 2], ignoredVertices[indices[i + 2]], false)
-        );
+        fillTriangles.emplace_back(FillBucket::triangleInstance(startVertices + indices[i],
+                                                                ignoredVertices[indices[i]],
+                                                                false,
+                                                                startVertices + indices[i + 1],
+                                                                ignoredVertices[indices[i + 1]],
+                                                                false,
+                                                                startVertices + indices[i + 2],
+                                                                ignoredVertices[indices[i + 2]],
+                                                                false));
     }
 }
 
