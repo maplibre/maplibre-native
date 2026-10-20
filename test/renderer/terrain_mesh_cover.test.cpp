@@ -102,3 +102,39 @@ TEST(TerrainMeshCover, CapKeepsTheTileUnderATiltedCamera) {
     const std::set<UnwrappedTileID> kept = RenderTerrain::nearestMeshTiles({underTheCamera, ahead}, 1, origin);
     EXPECT_EQ(std::set<UnwrappedTileID>{underTheCamera}, kept);
 }
+
+namespace {
+int meshMaxZoom(TerrainLoadMode mode, uint8_t demMaxZoom) {
+    return RenderTerrain::meshMaxZoom(mode, demMaxZoom);
+}
+
+constexpr TerrainLoadMode allModes[] = {
+    TerrainLoadMode::Quality, TerrainLoadMode::Balanced, TerrainLoadMode::Performance};
+} // namespace
+
+TEST(TerrainMeshCover, MeshGoesPastACoarseDEMAsFarAsTheModeAffords) {
+    // A z12 DEM: Performance meshes to z14 and Balanced to z15. Quality's z16 would be four
+    // levels past the DEM, one more than the limit.
+    EXPECT_EQ(14, meshMaxZoom(TerrainLoadMode::Performance, 12));
+    EXPECT_EQ(15, meshMaxZoom(TerrainLoadMode::Balanced, 12));
+    EXPECT_EQ(15, meshMaxZoom(TerrainLoadMode::Quality, 12));
+}
+
+TEST(TerrainMeshCover, ADeepDEMGetsFewOrNoExtraLevels) {
+    // A z15 DEM (lidar) is already as deep as Performance and Balanced go; Quality adds one.
+    EXPECT_EQ(15, meshMaxZoom(TerrainLoadMode::Performance, 15));
+    EXPECT_EQ(15, meshMaxZoom(TerrainLoadMode::Balanced, 15));
+    EXPECT_EQ(16, meshMaxZoom(TerrainLoadMode::Quality, 15));
+}
+
+TEST(TerrainMeshCover, MeshIsNeverShallowerThanTheDEM) {
+    for (const auto mode : allModes) {
+        EXPECT_EQ(18, meshMaxZoom(mode, 18));
+    }
+}
+
+TEST(TerrainMeshCover, MeshGoesAtMostThreeLevelsPastTheDEM) {
+    for (const auto mode : allModes) {
+        EXPECT_EQ(9, meshMaxZoom(mode, 6));
+    }
+}

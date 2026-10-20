@@ -11,6 +11,7 @@
 #include <mln/renderer/texture_pool.hpp>
 #include <mln/util/mat4.hpp>
 
+#include <algorithm>
 #include <array>
 #include <memory>
 #include <map>
@@ -75,6 +76,19 @@ public:
     /// source, so it is a member (not static). Returns {} when there is none.
     std::set<UnwrappedTileID> computeMeshCover(const TransformState& state,
                                                const std::shared_ptr<UpdateParameters>& updateParameters) const;
+
+    /// Zoom levels the terrain mesh goes past the DEM source's maxzoom at most.
+    static constexpr uint8_t maxMeshOverzoomLevels = 3;
+
+    /// The deepest zoom of the terrain mesh over a DEM whose maxzoom is `demMaxZoom`: the load
+    /// mode's TerrainLoadBudget::meshTargetZoom, at most maxMeshOverzoomLevels past the DEM and
+    /// never shallower than it. A mesh tile past the DEM samples its DEM ancestor through a
+    /// sub-tile offset.
+    static constexpr uint8_t meshMaxZoom(TerrainLoadMode mode, uint8_t demMaxZoom) {
+        const int levels = std::clamp(
+            terrainLoadBudget(mode).meshTargetZoom - demMaxZoom, 0, static_cast<int>(maxMeshOverzoomLevels));
+        return static_cast<uint8_t>(demMaxZoom + levels);
+    }
 
     /// The point the mesh-tile cap measures distance from, in normalized web-mercator [0, 1]:
     /// the ground under the camera (the map centre when the map is not tilted).

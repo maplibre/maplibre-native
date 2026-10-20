@@ -102,7 +102,13 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // undersamples the DEM, aliasing the relief into waves on the fixed 128x128 mesh. Still the
     // elevation-aware ideal cover from the view, not the DEM's loaded tile set.
     const uint16_t terrainCoverTileSize = demSource->getTileSize();
-    const Range<uint8_t> zoomRange{0, demSource->getMaxZoom()};
+    // Deeper than the DEM goes, as maplibre-gl-js does: a tile past its maxzoom samples its DEM
+    // ancestor through a sub-tile offset (the ancestor fallback in update()), and its 1024 px
+    // drape target covers a smaller area. Capped at the DEM's maxzoom, a close-up at z16 over a
+    // z12 DEM stretched each target 8x (dotted roads, blocky imagery). How deep depends on the
+    // load mode (meshMaxZoom): each level deeper adds tiles, and drape memory with them.
+    const TerrainLoadMode loadMode = updateParameters ? updateParameters->terrainLoadMode : TerrainLoadMode::Quality;
+    const Range<uint8_t> zoomRange{0, meshMaxZoom(loadMode, demSource->getMaxZoom())};
 
     // LOD parameters from the frame drive the same near-high/far-low zoom
     // selection every other source uses, so the near field drapes at a higher
