@@ -310,6 +310,11 @@ typedef struct mln_plugin_feature_v1 {
     /* path_offsets has path_count + 1 entries and ends at point_count. */
     const uint32_t* path_offsets;
     size_t path_count;
+    /* Appended after the original v1 fields: check struct_size before reading.
+     * The feature's attributes as a UTF-8 JSON object. Populated for
+     * layout_feature only, empty otherwise. Borrowed and valid only during the
+     * callback. */
+    mln_plugin_string properties_json;
 } mln_plugin_feature_v1;
 
 typedef struct mln_plugin_resource_response_v1 {

@@ -171,7 +171,7 @@ void PluginLayout::createBucket(const ImagePositions&,
             continue;
         }
 
-        const plugin::FeatureView pluginFeature(*feature, i);
+        const plugin::FeatureView pluginFeature(*feature, i, /*withProperties=*/true);
         if (registration->layoutFeature(layoutInstance, &pluginFeature.value) != MLN_PLUGIN_STATUS_OK) {
             Log::Error(Event::Style, "Plugin layer '" + leader.id + "' failed while laying out a feature");
             return;
