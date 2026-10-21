@@ -78,9 +78,9 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                                      std::size_t index,
                                      const CanonicalTileID& canonical) {
     double roundedCornerDistance = layout.get<FillExtrusionRoundedCornerDistance>();
-    
+
     const auto vertexOffset = vertices.elements();
-    
+
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
