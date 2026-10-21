@@ -36,8 +36,6 @@ on:
       - "package-lock.json"
 
   pull_request:
-    branches:
-      - "*"
     paths:
       - CMakeLists.txt
       - CMakePresets.json
@@ -144,7 +142,7 @@ jobs:
           /usr/sbin/update-ccache-symlinks
 
       - name: Use Node.js from nvmrc
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: 'platform/node/.nvmrc'
 
@@ -219,12 +217,12 @@ jobs:
           $vcpkg_commit_id = ($(git submodule status .\platform\windows\vendor\vcpkg).Trim() -split ' ')[0]
           Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
 
-      - name: Restore vcpkg binary cache
+      - name: Cache vcpkg binaries
         if: runner.os == 'Windows'
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
-          key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
+          key: vcpkg-${{ matrix.arch }}-${{ env.VCPKG_COMMIT_ID }}
 
       - name: Configure maplibre-native (Windows x64)
         if: runner.os == 'Windows' && matrix.arch == 'x86_64'
@@ -262,7 +260,7 @@ jobs:
 
       - name: Upload render test artifacts (MacOS)
         if: runner.os == 'MacOS' && steps.render_tests.outcome == 'failure'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html

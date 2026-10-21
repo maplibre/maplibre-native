@@ -8,6 +8,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 - feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
 - feat(ios): `-[MLNMapView isCoordinateOccluded:]` tells whether the globe hides a coordinate, for views placed over the map ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
+- Call offline-pack invalidation completion after the database operation finishes and propagate its errors.
 
 ## 7.0.0-pre2
 
