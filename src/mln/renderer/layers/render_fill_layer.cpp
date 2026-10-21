@@ -356,7 +356,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        
+
         if (const auto& attr = vertexAttrs->set(idFillPrevNextVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedNeighbors,
                                    offsetof(FillNeighborVertex, a1),
@@ -373,7 +373,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillTriangleInstance),
                                    gfx::AttributeDataType::UInt3);
         }
-        
+
         if (!bucket.isRoundedCornerEnabled()) {
             propertiesAsUniforms.first.emplace("triangle_instance");
             propertiesAsUniforms.second.emplace(idFillTriangleInstanceAttribute);

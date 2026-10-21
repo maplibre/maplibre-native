@@ -19,7 +19,7 @@ FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
 
         const auto& roundedCornerProperty = fillProps.layerImpl().paint.get<FillRoundedCornerDistance>().value;
         roundedCornerEnabled |= !roundedCornerProperty.isUndefined();
-        
+
         paintPropertyBinders.emplace(std::piecewise_construct,
                                      std::forward_as_tuple(pair.first),
                                      std::forward_as_tuple(fillProps.evaluated, zoom));
