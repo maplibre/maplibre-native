@@ -43,6 +43,7 @@ void FillBucket::generateBuffers(const GeometryCollection& geometry) {
 #if MLN_TRIANGULATE_FILL_OUTLINES
     gfx::generateFillAndOutineBuffers(geometry,
                                       vertices,
+                                      neighbors,
                                       triangleInstances,
                                       triangleSegments,
                                       lineVertices,
@@ -51,7 +52,7 @@ void FillBucket::generateBuffers(const GeometryCollection& geometry) {
                                       basicLines,
                                       basicLineSegments);
 #else
-    gfx::generateFillAndOutineBuffers(geometry, vertices, indices, triangleSegments, basicLines, basicLineSegments);
+    gfx::generateFillAndOutineBuffers(geometry, vertices, neighbors, triangleInstances, triangleSegments, basicLines, basicLineSegments);
 #endif
 
     if (triangles.empty()) {

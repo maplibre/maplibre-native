@@ -25,7 +25,8 @@ class BucketParameters;
 class RenderFillLayer;
 
 using FillBinders = PaintPropertyBinders<style::FillPaintProperties::DataDrivenProperties>;
-using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::prev_next>>;
+using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
+using FillNeighborVertex = gfx::Vertex<TypeList<attributes::prev_next_offset>>;
 using FillTriangleInstance = gfx::Vertex<TypeList<attributes::triangle_indices>>;
 
 class FillBucket final : public Bucket {
@@ -56,8 +57,11 @@ public:
     void recordSDFPattern(const std::string&, bool) override;
     bool isSDFPattern(const std::string&) const override;
 
-    static FillLayoutVertex layoutVertex(Point<int16_t> p, int16_t prev, int16_t next) {
-        return FillLayoutVertex{{{p.x, p.y}}, {prev, next}};
+    static FillLayoutVertex layoutVertex(Point<int16_t> p) {
+        return FillLayoutVertex{{p.x, p.y}};
+    }
+    static FillNeighborVertex neighborVertex(int16_t prev_offset, int16_t next_offset) {
+        return FillLayoutVertex{{prev_offset, next_offset}};
     }
     static FillTriangleInstance triangleInstance(uint32_t index0,
                                                  bool ignored0,
@@ -94,6 +98,10 @@ public:
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
+    
+    using NeighborVector = gfx::VertexVector<FillNeighborVertex>;
+    const std::shared_ptr<NeighborVector> sharedNeighbors = std::make_shared<NeighborVector>();
+    NeighborVector& neighbors = *sharedNeighbors;
 
     using TriangleInstanceVector = gfx::VertexVector<FillTriangleInstance>;
     const std::shared_ptr<TriangleInstanceVector> sharedTriangleInstances = std::make_shared<TriangleInstanceVector>();

@@ -283,12 +283,16 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    uint3 triangle [[attribute(5)]];
+    uint3 triangle_indices [[attribute(5)]];
 };
 
 struct PolygonVertex {
     short2 position;
-    short2 prev_next;
+};
+
+struct NeighborVertex {
+    short prev_offset;
+    short next_offset;
 };
 
 struct DataVertex {
@@ -344,25 +348,26 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
                                 device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
                                 device const PolygonVertex* polygon [[buffer(fillUBOCount + 0)]],
-                                device const DataVertex* data [[buffer(fillUBOCount + 1)]],
+                                device const NeighborVertex* neighbor [[buffer(fillUBOCount + 1)]],
+                                device const DataVertex* data [[buffer(fillUBOCount + 2)]],
                                 uint vertexID [[vertex_id]]) {
 
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
 
-    uint index = vertx.triangle[vertexID] >> 2;
+    uint index = vertx.triangle_indices[vertexID] >> 2;
     float2 position = float2(polygon[index].position);
 
-    uint i0 = vertx.triangle[0] >> 2;
-    uint i1 = vertx.triangle[1] >> 2;
-    uint i2 = vertx.triangle[2] >> 2;
+    uint i0 = vertx.triangle_indices[0] >> 2;
+    uint i1 = vertx.triangle_indices[1] >> 2;
+    uint i2 = vertx.triangle_indices[2] >> 2;
 
-    uint ignored0 = vertx.triangle[0] % 4 >> 1;
-    uint ignored1 = vertx.triangle[1] % 4 >> 1;
-    uint ignored2 = vertx.triangle[2] % 4 >> 1;
+    uint ignored0 = vertx.triangle_indices[0] % 4 >> 1;
+    uint ignored1 = vertx.triangle_indices[1] % 4 >> 1;
+    uint ignored2 = vertx.triangle_indices[2] % 4 >> 1;
 
-    uint external0 = vertx.triangle[0] % 2;
-    uint external1 = vertx.triangle[1] % 2;
-    uint external2 = vertx.triangle[2] % 2;
+    uint external0 = vertx.triangle_indices[0] % 2;
+    uint external1 = vertx.triangle_indices[1] % 2;
+    uint external2 = vertx.triangle_indices[2] % 2;
 
     float2 v0 = float2(polygon[i0].position);
     float2 v1 = float2(polygon[i1].position);
@@ -372,8 +377,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float2 v0Next = v0;
     float v0Radius = 0;
     if (ignored0 == 0 && props.rounded_corner_distance > 0) {
-        uint i0Prev = i0 + polygon[i0].prev_next[0];
-        uint i0Next = i0 + polygon[i0].prev_next[1];
+        uint i0Prev = i0 + neighbor[i0].prev_offset;
+        uint i0Next = i0 + neighbor[i0].next_offset;
 
         v0Prev = float2(polygon[i0Prev].position);
         v0Next = float2(polygon[i0Next].position);
@@ -384,8 +389,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float2 v1Next = v1;
     float v1Radius = 0;
     if (ignored1 == 0 && props.rounded_corner_distance > 0) {
-        uint i1Prev = i1 + polygon[i1].prev_next[0];
-        uint i1Next = i1 + polygon[i1].prev_next[1];
+        uint i1Prev = i1 + neighbor[i1].prev_offset;
+        uint i1Next = i1 + neighbor[i1].next_offset;
 
         v1Prev = float2(polygon[i1Prev].position);
         v1Next = float2(polygon[i1Next].position);
@@ -396,8 +401,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float2 v2Next = v2;
     float v2Radius = 0;
     if (ignored2 == 0 && props.rounded_corner_distance > 0) {
-        uint i2Prev = i2 + polygon[i2].prev_next[0];
-        uint i2Next = i2 + polygon[i2].prev_next[1];
+        uint i2Prev = i2 + neighbor[i2].prev_offset;
+        uint i2Next = i2 + neighbor[i2].next_offset;
 
         v2Prev = float2(polygon[i2Prev].position);
         v2Next = float2(polygon[i2Next].position);
@@ -572,16 +577,16 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    uint3 triangle [[attribute(6)]];
+    uint3 triangle_indices [[attribute(6)]];
 };
 
 struct PolygonVertex {
     short2 position;
-    short2 prev_next;
 };
 
-struct TriangleIndex {
-    uint value;
+struct NeighborVertex {
+    short prev_offset;
+    short next_offset;
 };
 
 struct DataVertex {
@@ -647,26 +652,27 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
                                 device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
                                 device const PolygonVertex* polygon [[buffer(fillUBOCount + 0)]],
-                                device const DataVertex* data [[buffer(fillUBOCount + 1)]],
+                                device const NeighborVertex* neighbor [[buffer(fillUBOCount + 1)]],
+                                device const DataVertex* data [[buffer(fillUBOCount + 2)]],
                                 uint vertexID [[vertex_id]]) {
 
     device const FillPatternDrawableUBO& drawable = drawableVector[uboIndex].fillPatternDrawableUBO;
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
 
-    uint index = vertx.triangle[vertexID] >> 2;
+    uint index = vertx.triangle_indices[vertexID] >> 2;
     float2 position = float2(polygon[index].position);
 
-    uint i0 = vertx.triangle[0] >> 2;
-    uint i1 = vertx.triangle[1] >> 2;
-    uint i2 = vertx.triangle[2] >> 2;
+    uint i0 = vertx.triangle_indices[0] >> 2;
+    uint i1 = vertx.triangle_indices[1] >> 2;
+    uint i2 = vertx.triangle_indices[2] >> 2;
 
-    uint ignored0 = vertx.triangle[0] % 4 >> 1;
-    uint ignored1 = vertx.triangle[1] % 4 >> 1;
-    uint ignored2 = vertx.triangle[2] % 4 >> 1;
+    uint ignored0 = vertx.triangle_indices[0] % 4 >> 1;
+    uint ignored1 = vertx.triangle_indices[1] % 4 >> 1;
+    uint ignored2 = vertx.triangle_indices[2] % 4 >> 1;
 
-    uint external0 = vertx.triangle[0] % 2;
-    uint external1 = vertx.triangle[1] % 2;
-    uint external2 = vertx.triangle[2] % 2;
+    uint external0 = vertx.triangle_indices[0] % 2;
+    uint external1 = vertx.triangle_indices[1] % 2;
+    uint external2 = vertx.triangle_indices[2] % 2;
 
     float2 v0 = float2(polygon[i0].position);
     float2 v1 = float2(polygon[i1].position);
@@ -676,8 +682,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float2 v0Next = v0;
     float v0Radius = 0;
     if (ignored0 == 0 && props.rounded_corner_distance > 0) {
-        uint i0Prev = i0 + polygon[i0].prev_next[0];
-        uint i0Next = i0 + polygon[i0].prev_next[1];
+        uint i0Prev = i0 + neighbor[i0].prev_offset;
+        uint i0Next = i0 + neighbor[i0].next_offset;
 
         v0Prev = float2(polygon[i0Prev].position);
         v0Next = float2(polygon[i0Next].position);
@@ -688,8 +694,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float2 v1Next = v1;
     float v1Radius = 0;
     if (ignored1 == 0 && props.rounded_corner_distance > 0) {
-        uint i1Prev = i1 + polygon[i1].prev_next[0];
-        uint i1Next = i1 + polygon[i1].prev_next[1];
+        uint i1Prev = i1 + neighbor[i1].prev_offset;
+        uint i1Next = i1 + neighbor[i1].next_offset;
 
         v1Prev = float2(polygon[i1Prev].position);
         v1Next = float2(polygon[i1Next].position);
@@ -700,8 +706,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float2 v2Next = v2;
     float v2Radius = 0;
     if (ignored2 == 0 && props.rounded_corner_distance > 0) {
-        uint i2Prev = i2 + polygon[i2].prev_next[0];
-        uint i2Next = i2 + polygon[i2].prev_next[1];
+        uint i2Prev = i2 + neighbor[i2].prev_offset;
+        uint i2Next = i2 + neighbor[i2].next_offset;
 
         v2Prev = float2(polygon[i2Prev].position);
         v2Next = float2(polygon[i2Next].position);

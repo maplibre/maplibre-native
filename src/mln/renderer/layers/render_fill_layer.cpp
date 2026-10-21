@@ -357,10 +357,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::AttributeDataType::Short2);
         }
         if (const auto& attr = vertexAttrs->set(idFillPrevNextVertexAttribute)) {
-            attr->setSharedRawData(bucket.sharedVertices,
-                                   offsetof(FillLayoutVertex, a2),
+            attr->setSharedRawData(bucket.sharedNeighbors,
+                                   offsetof(FillNeighborVertex, a1),
                                    /*vertexOffset=*/0,
-                                   sizeof(FillLayoutVertex),
+                                   sizeof(FillNeighborVertex),
                                    gfx::AttributeDataType::Short2);
         }
 
