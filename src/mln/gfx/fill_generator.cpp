@@ -202,7 +202,8 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
         for (const auto& ring : polygon) {
             std::size_t base = fillVertices.elements();
-            std::size_t nVertices = addRingVertices(fillVertices, fillNeighbors, fillTriangles, fillSegments, ring, ignoredVertices);
+            std::size_t nVertices = addRingVertices(
+                fillVertices, fillNeighbors, fillTriangles, fillSegments, ring, ignoredVertices);
             addOutlineIndices(base, nVertices, lineSegments, lineIndexes);
         }
 

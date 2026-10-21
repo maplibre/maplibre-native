@@ -57,9 +57,7 @@ public:
     void recordSDFPattern(const std::string&, bool) override;
     bool isSDFPattern(const std::string&) const override;
 
-    static FillLayoutVertex layoutVertex(Point<int16_t> p) {
-        return FillLayoutVertex{{p.x, p.y}};
-    }
+    static FillLayoutVertex layoutVertex(Point<int16_t> p) { return FillLayoutVertex{{p.x, p.y}}; }
     static FillNeighborVertex neighborVertex(int16_t prev_offset, int16_t next_offset) {
         return FillLayoutVertex{{prev_offset, next_offset}};
     }
@@ -98,7 +96,7 @@ public:
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
-    
+
     using NeighborVector = gfx::VertexVector<FillNeighborVertex>;
     const std::shared_ptr<NeighborVector> sharedNeighbors = std::make_shared<NeighborVector>();
     NeighborVector& neighbors = *sharedNeighbors;

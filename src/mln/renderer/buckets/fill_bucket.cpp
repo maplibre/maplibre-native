@@ -52,7 +52,8 @@ void FillBucket::generateBuffers(const GeometryCollection& geometry) {
                                       basicLines,
                                       basicLineSegments);
 #else
-    gfx::generateFillAndOutineBuffers(geometry, vertices, neighbors, triangleInstances, triangleSegments, basicLines, basicLineSegments);
+    gfx::generateFillAndOutineBuffers(
+        geometry, vertices, neighbors, triangleInstances, triangleSegments, basicLines, basicLineSegments);
 #endif
 
     if (triangles.empty()) {
