@@ -5,6 +5,7 @@
 #include <mln/gfx/offscreen_texture.hpp>
 #include <mln/gfx/render_pass.hpp>
 #include <mln/gfx/uniform_buffer.hpp>
+#include <mln/renderer/bucket.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/layer_tweaker.hpp>
 #include <mln/renderer/paint_parameters.hpp>
@@ -15,6 +16,7 @@
 #include <mln/util/string.hpp>
 
 #include <cmath>
+#include <set>
 
 namespace mln {
 
@@ -134,13 +136,31 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
         coverage.totalGroups++;
         bool haveExactOrDescendant = false;
         std::optional<UnwrappedTileID> bestAncestor;
-        static_cast<TileLayerGroup&>(layerGroup).visitDrawables([&](const gfx::Drawable& drawable) {
+        std::set<UnwrappedTileID> drawnTiles;
+        auto& tileGroup = static_cast<TileLayerGroup&>(layerGroup);
+        tileGroup.visitDrawables([&](const gfx::Drawable& drawable) {
             if (!drawable.getEnabled() || !drawable.getTileID()) {
                 return;
             }
             const UnwrappedTileID unwrapped = drawable.getTileID()->toUnwrapped();
             const bool overlaps = unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID) ||
                                   drapeTileID->isChildOf(unwrapped);
+            if (overlaps) {
+                drawnTiles.insert(unwrapped);
+            }
+            // The source bucket's identity, folded in as in the drape signature (see
+            // RendererImpl): new data under the same covering tiles - a GeoJSON source
+            // updated with setGeoJson, or a tile's own bucket replacing an over-zoomed
+            // ancestor's - is new content and must re-render the drape. Keying on the tiles
+            // alone judged it the same and kept the stale bake until the next zoom level.
+            // Bucket ids are stable across fades and paint changes, so this does not churn;
+            // hillshade is excluded as in the signature.
+            std::size_t bucketHash = 0;
+            if (drawable.getName() != "hillshade") {
+                if (const auto& bucket = drawable.getBucket()) {
+                    util::hash_combine(bucketHash, bucket->getID().id());
+                }
+            }
             if (overlaps) {
                 // Key on the COVERING TILE id, NOT the drawable-instance id. A tile's
                 // drawables are rebuilt with fresh ids on every bucket update, fade
@@ -157,6 +177,7 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
                 util::hash_combine(tileHash, unwrapped.canonical.z);
                 util::hash_combine(tileHash, unwrapped.canonical.x);
                 util::hash_combine(tileHash, unwrapped.canonical.y);
+                util::hash_combine(tileHash, bucketHash);
                 coverage.contentHash += tileHash;
             }
             if (unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID)) {
@@ -180,8 +201,31 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
             util::hash_combine(tileHash, unwrapped.canonical.z);
             util::hash_combine(tileHash, unwrapped.canonical.x);
             util::hash_combine(tileHash, unwrapped.canonical.y);
+            util::hash_combine(tileHash, bucketHash);
             coverage.contentHash += tileHash;
         });
+        // A tile the layer covers but draws nothing on - its data emptied, e.g. a GeoJSON source
+        // updated to have no features there - is content too, empty content: the drape must lose
+        // what it showed there. A tile that left the cover (unloaded, or still loading) is not, so
+        // meanwhile the drape keeps its bake (see worseThan).
+        for (const auto& tile : tileGroup.getCoverTileIDs()) {
+            const bool overlaps = tile == *drapeTileID || tile.isChildOf(*drapeTileID) || drapeTileID->isChildOf(tile);
+            if (!overlaps || drawnTiles.contains(tile)) {
+                continue;
+            }
+            std::size_t tileHash = 0;
+            util::hash_combine(tileHash, tile.wrap);
+            util::hash_combine(tileHash, tile.canonical.z);
+            util::hash_combine(tileHash, tile.canonical.x);
+            util::hash_combine(tileHash, tile.canonical.y);
+            util::hash_combine(tileHash, std::size_t{0xE3}); // no drawables: empty content
+            coverage.contentHash += tileHash;
+            if (tile == *drapeTileID || tile.isChildOf(*drapeTileID)) {
+                haveExactOrDescendant = true;
+            } else if (!bestAncestor || tile.canonical.z > bestAncestor->canonical.z) {
+                bestAncestor = tile;
+            }
+        }
         // Only the coarsest standalone fallback counts as lost detail; when an exact or
         // deeper tile is present the ancestor is clipped away by the tile masks and costs
         // nothing.
