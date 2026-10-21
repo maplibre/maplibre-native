@@ -56,6 +56,7 @@ public:
 
     void recordSDFPattern(const std::string&, bool) override;
     bool isSDFPattern(const std::string&) const override;
+    bool isRoundedCornerEnabled() const { return roundedCornerEnabled; }
 
     static FillLayoutVertex layoutVertex(Point<int16_t> p) { return FillLayoutVertex{{p.x, p.y}}; }
     static FillNeighborVertex neighborVertex(int16_t prev_offset, int16_t next_offset) {
@@ -123,6 +124,7 @@ private:
 
     mln::unordered_map<std::string, bool> sdfPatterns;
     mln::unordered_set<std::string> mixedSDFPatternLayers;
+    bool roundedCornerEnabled = true;
 };
 
 } // namespace mln

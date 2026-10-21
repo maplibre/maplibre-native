@@ -356,21 +356,24 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        if (const auto& attr = vertexAttrs->set(idFillPrevNextVertexAttribute)) {
-            attr->setSharedRawData(bucket.sharedNeighbors,
-                                   offsetof(FillNeighborVertex, a1),
-                                   /*vertexOffset=*/0,
-                                   sizeof(FillNeighborVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-
+        
         auto instanceAttrs = context.createVertexAttributeArray();
-        if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
-            attr->setSharedRawData(bucket.sharedTriangleInstances,
-                                   offsetof(FillTriangleInstance, a1),
-                                   /*vertexOffset=*/0,
-                                   sizeof(FillTriangleInstance),
-                                   gfx::AttributeDataType::UInt3);
+        if (bucket.isRoundedCornerEnabled()) {
+            if (const auto& attr = vertexAttrs->set(idFillPrevNextVertexAttribute)) {
+                attr->setSharedRawData(bucket.sharedNeighbors,
+                                       offsetof(FillNeighborVertex, a1),
+                                       /*vertexOffset=*/0,
+                                       sizeof(FillNeighborVertex),
+                                       gfx::AttributeDataType::Short2);
+            }
+            
+            if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
+                attr->setSharedRawData(bucket.sharedTriangleInstances,
+                                       offsetof(FillTriangleInstance, a1),
+                                       /*vertexOffset=*/0,
+                                       sizeof(FillTriangleInstance),
+                                       gfx::AttributeDataType::UInt3);
+            }
         }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES

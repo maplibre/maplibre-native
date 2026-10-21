@@ -45,7 +45,9 @@ void FillBucket::generateBuffers(const GeometryCollection& geometry) {
                                       vertices,
                                       neighbors,
                                       triangleInstances,
+                                      triangles,
                                       triangleSegments,
+                                      roundedCornerEnabled,
                                       lineVertices,
                                       lineIndexes,
                                       lineSegments,
@@ -53,10 +55,10 @@ void FillBucket::generateBuffers(const GeometryCollection& geometry) {
                                       basicLineSegments);
 #else
     gfx::generateFillAndOutineBuffers(
-        geometry, vertices, neighbors, triangleInstances, triangleSegments, basicLines, basicLineSegments);
+        geometry, vertices, neighbors, triangleInstances, triangles, triangleSegments, roundedCornerEnabled, basicLines, basicLineSegments);
 #endif
 
-    if (triangles.empty()) {
+    if (roundedCornerEnabled && triangles.empty()) {
         triangles.emplace_back(0, 1, 2);
     }
 }
