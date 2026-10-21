@@ -105,10 +105,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
 #if !MLN_RENDER_BACKEND_OPENGL
         if (onTerrain) {
             // The mesh's clip z is remapped from [-1, 1] to [0, 1] on these backends; match it.
-            matrix[2] = 0.5 * (matrix[2] + matrix[3]);
-            matrix[6] = 0.5 * (matrix[6] + matrix[7]);
-            matrix[10] = 0.5 * (matrix[10] + matrix[11]);
-            matrix[14] = 0.5 * (matrix[14] + matrix[15]);
+            matrix::remapClipZToUnitRange(matrix);
         }
 #endif
 
