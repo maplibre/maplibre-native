@@ -64,6 +64,7 @@ protected:
 #if MLN_UBO_CONSOLIDATION
     gfx::UniformBufferPtr drawableUniformBuffer;
     gfx::UniformBufferPtr tilePropsUniformBuffer;
+    gfx::UniformBufferPtr featureUniformBuffer;
 #endif
 
 #if MLN_RENDER_BACKEND_METAL

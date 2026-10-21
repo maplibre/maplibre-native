@@ -4,6 +4,7 @@
 #include <mln/gfx/context.hpp>
 #include <mln/gfx/uniform.hpp>
 #include <mln/gfx/upload_pass.hpp>
+#include <mln/gfx/vertex_vector.hpp>
 #include <mln/layout/pattern_layout.hpp>
 #include <mln/shaders/attributes.hpp>
 #include <mln/renderer/cross_faded_property_evaluator.hpp>
@@ -207,6 +208,24 @@ public:
     }
     virtual void setInterleavedBuffer(InterleavedVertexBuffer&) {}
 
+#if MLN_UBO_CONSOLIDATION
+    /// Keep one evaluated value per feature. `indices` is shared by every property on the binders.
+    virtual void enableFeatureTable(const gfx::VertexVectorPtr<uint32_t>& indices) {
+        featureTable = true;
+        if (!featureIndexVector) {
+            featureIndexVector = indices ? indices : std::make_shared<gfx::VertexVector<uint32_t>>();
+            featureIndexVectorBase = featureIndexVector;
+        }
+    }
+    virtual bool usesFeatureTable() const { return featureTable; }
+    virtual const std::vector<std::array<float, 4>>& featureValues() const { return featureValueTable; }
+    /// Pattern rect stored with the primary feature value.
+    virtual const std::vector<std::array<float, 4>>& featurePatterns() const { return featurePatternTable; }
+    virtual const gfx::VertexVectorBasePtr& featureIndexData() const { return featureIndexVectorBase; }
+    /// True for a non-constant property that stores one value per feature.
+    virtual bool contributesFeatureIndex() const { return false; }
+#endif
+
     template <typename VertexFormat>
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) {
         interleavedVertexBuffer = &buffer;
@@ -222,6 +241,33 @@ public:
     PaintPropertyStatistics<T> statistics;
     InterleavedVertexBuffer* interleavedVertexBuffer = nullptr;
     std::size_t vertexOffset = std::numeric_limits<size_t>::max();
+
+#if MLN_UBO_CONSOLIDATION
+protected:
+    void storeFeatureValue(std::size_t featureIndex, const std::array<float, 4>& value) {
+        if (featureValueTable.size() <= featureIndex) {
+            featureValueTable.resize(featureIndex + 1);
+        }
+        featureValueTable[featureIndex] = value;
+    }
+
+    void storeFeatureValue(std::size_t featureIndex, const std::array<float, 2>& value) {
+        storeFeatureValue(featureIndex, std::array<float, 4>{value[0], value[1], 0.f, 0.f});
+    }
+
+    void storeFeaturePattern(std::size_t featureIndex, const std::array<float, 4>& value) {
+        if (featurePatternTable.size() <= featureIndex) {
+            featurePatternTable.resize(featureIndex + 1);
+        }
+        featurePatternTable[featureIndex] = value;
+    }
+
+    bool featureTable = false;
+    std::vector<std::array<float, 4>> featureValueTable;
+    std::vector<std::array<float, 4>> featurePatternTable;
+    gfx::VertexVectorPtr<uint32_t> featureIndexVector;
+    gfx::VertexVectorBasePtr featureIndexVectorBase;
+#endif
 };
 
 namespace detail {
@@ -320,6 +366,10 @@ public:
           defaultValue(std::move(defaultValue_)) {}
     ~SourceFunctionPaintPropertyBinder() override {}
 
+#if MLN_UBO_CONSOLIDATION
+    bool contributesFeatureIndex() const override { return this->featureTable; }
+#endif
+
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
                               const CrossfadeParameters&) override {}
@@ -335,6 +385,24 @@ public:
             EvaluationContext(&feature).withFormattedSection(&formattedSection).withCanonicalTileID(&canonical),
             defaultValue);
         this->statistics.add(evaluated);
+
+#if MLN_UBO_CONSOLIDATION
+        if (this->featureTable) {
+            if constexpr (std::is_same_v<T, Color>) {
+                const auto packed = attributeValue(evaluated);
+                this->storeFeatureValue(index, std::array<float, 4>{packed[0], packed[1], packed[0], packed[1]});
+            } else if constexpr (std::is_same_v<T, float>) {
+                const auto packed = attributeValue(evaluated);
+                this->storeFeatureValue(index, std::array<float, 2>{packed[0], packed[0]});
+            }
+            if (const auto idStr = featureIDtoString(feature.getID())) {
+                featureMap[*idStr].emplace_back(
+                    FeatureVertexRange{.featureIndex = index, .start = this->getVertexCount(), .end = length});
+            }
+            return;
+        }
+#endif
+
         auto value = attributeValue(evaluated);
 
         const std::size_t elements = this->getVertexCount();
@@ -360,9 +428,28 @@ public:
 
             for (const auto& pos : positions->second) {
                 std::unique_ptr<GeometryTileFeature> feature = layer.getFeature(pos.featureIndex);
-                if (feature) {
-                    updateVertexVector(pos.start, pos.end, *feature, it.second);
+                if (!feature) {
+                    continue;
                 }
+#if MLN_UBO_CONSOLIDATION
+                if (this->featureTable) {
+                    if constexpr (std::is_same_v<T, Color> || std::is_same_v<T, float>) {
+                        using style::expression::EvaluationContext;
+                        const auto evaluated = expression.evaluate(
+                            EvaluationContext(feature.get()).withFeatureState(&it.second), defaultValue);
+                        this->statistics.add(evaluated);
+                        const auto packed = attributeValue(evaluated);
+                        if constexpr (std::is_same_v<T, Color>) {
+                            this->storeFeatureValue(pos.featureIndex,
+                                                    std::array<float, 4>{packed[0], packed[1], packed[0], packed[1]});
+                        } else {
+                            this->storeFeatureValue(pos.featureIndex, std::array<float, 2>{packed[0], packed[0]});
+                        }
+                    }
+                    continue;
+                }
+#endif
+                updateVertexVector(pos.start, pos.end, *feature, it.second);
             }
         }
     }
@@ -400,6 +487,12 @@ public:
 
     using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+#if MLN_UBO_CONSOLIDATION
+        if (this->featureTable) {
+            this->interleavedVertexBuffer = &buffer;
+            return;
+        }
+#endif
         this->template setInterleavedBuffer<ZoomInterpolatedVertexType<A>>(buffer);
     }
 
@@ -422,6 +515,10 @@ public:
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
     ~CompositeFunctionPaintPropertyBinder() override {}
+
+#if MLN_UBO_CONSOLIDATION
+    bool contributesFeatureIndex() const override { return this->featureTable; }
+#endif
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -448,6 +545,22 @@ public:
         this->statistics.add(range.max);
         const AttributeValue value = zoomInterpolatedAttributeValue(attributeValue(range.min),
                                                                     attributeValue(range.max));
+
+#if MLN_UBO_CONSOLIDATION
+        if (this->featureTable) {
+            if constexpr (std::is_same_v<T, Color>) {
+                this->storeFeatureValue(index, value);
+            } else if constexpr (std::is_same_v<T, float>) {
+                this->storeFeatureValue(index, value);
+            }
+            if (const auto idStr = featureIDtoString(feature.getID())) {
+                featureMap[*idStr].emplace_back(
+                    FeatureVertexRange{.featureIndex = index, .start = this->getVertexCount(), .end = length});
+            }
+            return;
+        }
+#endif
+
         const std::size_t elements = this->getVertexCount();
 
         for (std::size_t i = elements; i < length; ++i) {
@@ -470,9 +583,29 @@ public:
 
             for (const auto& pos : positions->second) {
                 std::unique_ptr<GeometryTileFeature> feature = layer.getFeature(pos.featureIndex);
-                if (feature) {
-                    updateVertexVector(pos.start, pos.end, *feature, it.second);
+                if (!feature) {
+                    continue;
                 }
+#if MLN_UBO_CONSOLIDATION
+                if (this->featureTable) {
+                    if constexpr (std::is_same_v<T, Color> || std::is_same_v<T, float>) {
+                        using style::expression::EvaluationContext;
+                        const Range<T> range = {
+                            expression.evaluate(EvaluationContext(zoomRange.min, feature.get(), &it.second),
+                                                defaultValue),
+                            expression.evaluate(EvaluationContext(zoomRange.max, feature.get(), &it.second),
+                                                defaultValue),
+                        };
+                        this->statistics.add(range.min);
+                        this->statistics.add(range.max);
+                        this->storeFeatureValue(
+                            pos.featureIndex,
+                            zoomInterpolatedAttributeValue(attributeValue(range.min), attributeValue(range.max)));
+                    }
+                    continue;
+                }
+#endif
+                updateVertexVector(pos.start, pos.end, *feature, it.second);
             }
         }
     }
@@ -517,6 +650,12 @@ public:
 
     using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+#if MLN_UBO_CONSOLIDATION
+        if (this->featureTable) {
+            this->interleavedVertexBuffer = &buffer;
+            return;
+        }
+#endif
         this->template setInterleavedBuffer<ZoomInterpolatedVertexType<A>>(buffer);
     }
 
@@ -547,19 +686,54 @@ public:
           zoomRange({zoom, zoom + 1}) {}
     ~CompositeCrossFadedPaintPropertyBinder() override {}
 
+#if MLN_UBO_CONSOLIDATION
+    bool contributesFeatureIndex() const override { return this->featureTable; }
+#endif
+
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
                               const CrossfadeParameters& crossfade_) override {
         crossfade = crossfade_;
+#if MLN_UBO_CONSOLIDATION
+        if (this->featureTable) {
+            for (std::size_t featureIndex = 0; featureIndex < patternRects.size(); ++featureIndex) {
+                publishPattern(featureIndex);
+            }
+        }
+#endif
     };
 
     void populateVertexVector(const GeometryTileFeature&,
                               std::size_t length,
-                              std::size_t /* index */,
+                              std::size_t index,
                               const ImagePositions& patternPositions,
                               const std::optional<PatternDependency>& patternDependencies,
                               const CanonicalTileID&,
                               const style::expression::Value&) override {
+#if MLN_UBO_CONSOLIDATION
+        if (this->featureTable) {
+            std::array<uint16_t, 4> minRect{};
+            std::array<uint16_t, 4> midRect{};
+            std::array<uint16_t, 4> maxRect{};
+            if (patternDependencies && !patternDependencies->mid.empty() && !patternPositions.empty()) {
+                const auto min = patternPositions.find(patternDependencies->min);
+                const auto mid = patternPositions.find(patternDependencies->mid);
+                const auto max = patternPositions.find(patternDependencies->max);
+                const auto end = patternPositions.end();
+                if (min != end && mid != end && max != end) {
+                    minRect = min->second.tlbr();
+                    midRect = mid->second.tlbr();
+                    maxRect = max->second.tlbr();
+                }
+            }
+            if (patternRects.size() <= index) {
+                patternRects.resize(index + 1);
+            }
+            patternRects[index] = {minRect, midRect, maxRect};
+            publishPattern(index);
+            return;
+        }
+#endif
         if (!patternDependencies || patternDependencies->mid.empty()) {
             // Unlike other properties with expressions that evaluate to null,
             // the default value for `*-pattern` properties is an empty string
@@ -617,10 +791,42 @@ public:
     using PaintPropertyBinder<T, std::array<uint16_t, 4>, PossiblyEvaluatedPropertyValue<Faded<T>>, A1, A2>::
         setInterleavedBuffer;
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+#if MLN_UBO_CONSOLIDATION
+        if (this->featureTable) {
+            this->interleavedVertexBuffer = &buffer;
+            return;
+        }
+#endif
         this->template setInterleavedBuffer<ZoomInterpolatedVertexType<A1>>(buffer);
     }
 
 private:
+#if MLN_UBO_CONSOLIDATION
+    struct PatternRects {
+        std::array<uint16_t, 4> min{};
+        std::array<uint16_t, 4> mid{};
+        std::array<uint16_t, 4> max{};
+    };
+
+    static std::array<float, 4> rectToFloat(const std::array<uint16_t, 4>& rect) {
+        return {static_cast<float>(rect[0]),
+                static_cast<float>(rect[1]),
+                static_cast<float>(rect[2]),
+                static_cast<float>(rect[3])};
+    }
+
+    void publishPattern(std::size_t featureIndex) {
+        const auto& rects = patternRects[featureIndex];
+        // `pattern_to` is the mid-zoom image, `pattern_from` follows the crossfade's direction, matching
+        // `getVertexValue`.
+        this->storeFeatureValue(featureIndex, rectToFloat(rects.mid));
+        const auto& from = crossfade.fromScale == 2 ? rects.min : rects.max;
+        this->storeFeaturePattern(featureIndex, rectToFloat(from));
+    }
+
+    std::vector<PatternRects> patternRects;
+#endif
+
     style::PropertyExpression<T> expression;
     T defaultValue;
     Range<float> zoomRange;
@@ -628,7 +834,7 @@ private:
     gfx::VertexVector<Vertex2> zoomInVertexVector;
     gfx::VertexVector<Vertex2> zoomOutVertexVector;
 
-    CrossfadeParameters crossfade;
+    CrossfadeParameters crossfade{};
 };
 
 template <class T, class PossiblyEvaluatedType>
@@ -691,6 +897,39 @@ struct InterpolationUniform {
     static constexpr auto name() { return concat_literals<&Attr::name, &string_literal<'_', 't'>::value>::value(); }
 };
 
+#if MLN_UBO_CONSOLIDATION
+namespace style {
+struct LineBlur;
+struct LineColor;
+struct LineFloorWidth;
+struct LineGapWidth;
+struct LineOffset;
+struct LineOpacity;
+struct LinePattern;
+struct LineWidth;
+} // namespace style
+
+template <class P>
+inline constexpr bool isFeatureTableProperty = false;
+
+template <>
+inline constexpr bool isFeatureTableProperty<style::LineBlur> = true;
+template <>
+inline constexpr bool isFeatureTableProperty<style::LineColor> = true;
+template <>
+inline constexpr bool isFeatureTableProperty<style::LineFloorWidth> = true;
+template <>
+inline constexpr bool isFeatureTableProperty<style::LineGapWidth> = true;
+template <>
+inline constexpr bool isFeatureTableProperty<style::LineOffset> = true;
+template <>
+inline constexpr bool isFeatureTableProperty<style::LineOpacity> = true;
+template <>
+inline constexpr bool isFeatureTableProperty<style::LinePattern> = true;
+template <>
+inline constexpr bool isFeatureTableProperty<style::LineWidth> = true;
+#endif
+
 class PaintPropertyBindersBase {};
 
 template <class Ps>
@@ -726,7 +965,21 @@ public:
         : binders(Binder<Ps>::create(properties.template get<Ps>(), z, Ps::defaultValue())...) {
         (void)z; // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56958
 
+#if MLN_UBO_CONSOLIDATION
+        if constexpr ((isFeatureTableProperty<Ps> || ...)) {
+            featureIndexVector = std::make_shared<gfx::VertexVector<uint32_t>>();
+        }
+#endif
+
         (([&] {
+#if MLN_UBO_CONSOLIDATION
+             if constexpr (isFeatureTableProperty<Ps>) {
+                 binders.template get<Ps>()->enableFeatureTable(featureIndexVector);
+                 if (binders.template get<Ps>()->contributesFeatureIndex()) {
+                     featureIndexRequired = true;
+                 }
+             }
+#endif
              binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
          }()),
          ...);
@@ -735,6 +988,10 @@ public:
     PaintPropertyBinders(PaintPropertyBinders&& other) noexcept {
         binders = std::move(other.binders);
         interleavedVertexBuffer = std::move(other.interleavedVertexBuffer);
+#if MLN_UBO_CONSOLIDATION
+        featureIndexVector = std::move(other.featureIndexVector);
+        featureIndexRequired = other.featureIndexRequired;
+#endif
 
         (([&] {
              binders.template get<Ps>()->interleavedVertexBuffer = &interleavedVertexBuffer;
@@ -758,6 +1015,16 @@ public:
         util::ignore({(binders.template get<Ps>()->populateVertexVector(
                            feature, length, index, patternPositions, patternDependencies, canonical, formattedSection),
                        0)...});
+
+#if MLN_UBO_CONSOLIDATION
+        if (featureIndexRequired && featureIndexVector) {
+            const auto start = featureIndexVector->elements();
+            if (length > start) {
+                featureIndexVector->extend(length - start, static_cast<uint32_t>(index));
+                featureIndexVector->updateModified(true);
+            }
+        }
+#endif
 
         interleavedVertexBuffer.vertexCount += length - interleavedVertexBuffer.vertexCount;
         interleavedVertexBuffer.sharedVertexVector->updateModified(true);
@@ -817,6 +1084,10 @@ public:
 
 private:
     Binders binders;
+#if MLN_UBO_CONSOLIDATION
+    gfx::VertexVectorPtr<uint32_t> featureIndexVector;
+    bool featureIndexRequired = false;
+#endif
 };
 
 } // namespace mln

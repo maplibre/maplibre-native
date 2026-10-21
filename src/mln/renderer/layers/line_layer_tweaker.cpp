@@ -14,6 +14,8 @@
 #include <mln/util/logging.hpp>
 #include <mln/util/math.hpp>
 
+#include <unordered_map>
+
 #if MLN_RENDER_BACKEND_METAL
 #include <mln/shaders/mtl/line.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
@@ -199,6 +201,73 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     int i = 0;
     std::vector<LineDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<LineTilePropsUnionUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<LineFeatureUBO> featureRecords;
+    std::unordered_map<const void*, uint32_t> featureBaseByBinders;
+    const auto featureBase = [&](const LineBinders& binders) -> uint32_t {
+        const auto table = [](const auto& binder) -> const std::vector<std::array<float, 4>>* {
+            return binder ? &binder->featureValues() : nullptr;
+        };
+        const auto* colorValues = table(binders.get<LineColor>());
+        const auto* blurValues = table(binders.get<LineBlur>());
+        const auto* opacityValues = table(binders.get<LineOpacity>());
+        const auto* gapWidthValues = table(binders.get<LineGapWidth>());
+        const auto* offsetValues = table(binders.get<LineOffset>());
+        const auto* widthValues = table(binders.get<LineWidth>());
+        const auto* floorWidthValues = table(binders.get<LineFloorWidth>());
+        const auto& patternBinder = binders.get<LinePattern>();
+        const auto* patternToValues = table(patternBinder);
+        const auto* patternFromValues = patternBinder ? &patternBinder->featurePatterns() : nullptr;
+        const std::array tables{colorValues,
+                                blurValues,
+                                opacityValues,
+                                gapWidthValues,
+                                offsetValues,
+                                widthValues,
+                                floorWidthValues,
+                                patternToValues,
+                                patternFromValues};
+        std::size_t count = 0;
+        for (const auto* values : tables) {
+            if (values && !values->empty()) {
+                count = std::max(count, values->size());
+            }
+        }
+        if (count == 0) {
+            return 0;
+        }
+        const void* key = &binders;
+        if (const auto found = featureBaseByBinders.find(key); found != featureBaseByBinders.end()) {
+            return found->second;
+        }
+        const auto base = static_cast<uint32_t>(featureRecords.size());
+        featureRecords.resize(base + count);
+        const auto assignFloat2 =
+            [](std::array<float, 2>& dst, const std::vector<std::array<float, 4>>* values, std::size_t featureIndex) {
+                if (values && featureIndex < values->size()) {
+                    dst = {(*values)[featureIndex][0], (*values)[featureIndex][1]};
+                }
+            };
+        const auto assignFloat4 =
+            [](std::array<float, 4>& dst, const std::vector<std::array<float, 4>>* values, std::size_t featureIndex) {
+                if (values && featureIndex < values->size()) {
+                    dst = (*values)[featureIndex];
+                }
+            };
+        for (std::size_t featureIndex = 0; featureIndex < count; ++featureIndex) {
+            auto& record = featureRecords[base + featureIndex];
+            assignFloat4(record.color, colorValues, featureIndex);
+            assignFloat2(record.blur, blurValues, featureIndex);
+            assignFloat2(record.opacity, opacityValues, featureIndex);
+            assignFloat2(record.gapwidth, gapWidthValues, featureIndex);
+            assignFloat2(record.offset, offsetValues, featureIndex);
+            assignFloat2(record.width, widthValues, featureIndex);
+            assignFloat2(record.floorwidth, floorWidthValues, featureIndex);
+            assignFloat4(record.pattern_from, patternFromValues, featureIndex);
+            assignFloat4(record.pattern_to, patternToValues, featureIndex);
+        }
+        featureBaseByBinders.emplace(key, base);
+        return base;
+    };
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -246,7 +315,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                    .feature_base = featureBase(*binders)
+#else
                     .pad1 = 0
+#endif
                 };
 
 #if !MLN_UBO_CONSOLIDATION
@@ -269,7 +342,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                    .feature_base = featureBase(*binders),
+#else
                     .pad1 = 0,
+#endif
                     .pad2 = 0
                 };
 
@@ -299,7 +376,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_from_t = std::get<0>(binders->get<LinePattern>()->interpolationFactor(zoom)),
                     .pattern_to_t = std::get<1>(binders->get<LinePattern>()->interpolationFactor(zoom)),
                     .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                    .feature_base = featureBase(*binders),
+#else
                     .pad1 = 0,
+#endif
                     .pad2 = 0,
                     .pad3 = 0
                 };
@@ -373,7 +454,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                         .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
                         .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                        .feature_base = featureBase(*binders),
+#else
                         .pad1 = 0,
+#endif
                         .pad2 = 0
                     };
 
@@ -424,6 +509,18 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     layerUniforms.set(idLineDrawableUBO, drawableUniformBuffer);
     layerUniforms.set(idLineTilePropsUBO, tilePropsUniformBuffer);
+
+    LineFeatureUBO dummyFeature{};
+    const void* featureData = featureRecords.empty() ? static_cast<const void*>(&dummyFeature)
+                                                     : static_cast<const void*>(featureRecords.data());
+    const size_t featureBytes = featureRecords.empty() ? sizeof(dummyFeature)
+                                                       : sizeof(LineFeatureUBO) * featureRecords.size();
+    if (!featureUniformBuffer || featureUniformBuffer->getSize() < featureBytes) {
+        featureUniformBuffer = context.createUniformBuffer(featureData, featureBytes, false, true);
+    } else {
+        featureUniformBuffer->update(featureData, featureBytes);
+    }
+    layerUniforms.set(idLineFeatureUBO, featureUniformBuffer);
 #endif
 }
 

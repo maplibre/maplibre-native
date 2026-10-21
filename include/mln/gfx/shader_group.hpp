@@ -4,14 +4,25 @@
 #include <mln/util/containers.hpp>
 #include <mln/util/hash.hpp>
 
+#include <functional>
 #include <memory>
 #include <shared_mutex>
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 namespace mln {
 
 using StringIDSetsPair = std::pair<unordered_set<std::string_view>, unordered_set<size_t>>;
+
+/// Define MLN_FEATURE_INDEX in the shader when the shared per-vertex index occupies `indexAttributeId`.
+/// That id is removed from the uniform id set when any feature-table property varies.
+template <typename Defines>
+void defineFeatureIndex(std::size_t indexAttributeId, const StringIDSetsPair& propertiesAsUniforms, Defines& defines) {
+    if (!propertiesAsUniforms.second.contains(indexAttributeId)) {
+        defines.insert(std::make_pair(std::string("MLN_FEATURE_INDEX"), std::string()));
+    }
+}
 
 namespace gfx {
 
@@ -170,7 +181,14 @@ protected:
     PropertyHashType propertyHash(const StringIDSetsPair& propertiesAsUniforms) {
         const auto beg = propertiesAsUniforms.second.cbegin();
         const auto end = propertiesAsUniforms.second.cend();
-        return util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
+        auto hash = util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
+
+        // We need to include dynamic properties that use feature tables, since
+        // they are not in the property set but do require a separate shader.
+        for (const auto& name : propertiesAsUniforms.first) {
+            hash ^= static_cast<PropertyHashType>(std::hash<std::remove_cvref_t<decltype(name)>>{}(name));
+        }
+        return hash;
     }
 
 private:

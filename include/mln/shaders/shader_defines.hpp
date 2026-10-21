@@ -63,7 +63,10 @@ enum {
 enum {
     idLineDrawableUBO = idDrawableReservedVertexOnlyUBO,    // SSBO
     idLineTilePropsUBO = idDrawableReservedFragmentOnlyUBO, // SSBO
-    lineLayerSSBOCount = drawableReservedUBOCount
+#if MLN_UBO_CONSOLIDATION
+    idLineFeatureUBO, // SSBO of per-feature line paint values
+#endif
+    lineLayerSSBOCount
 };
 
 enum {

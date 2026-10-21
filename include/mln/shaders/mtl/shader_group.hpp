@@ -4,6 +4,7 @@
 #include <mln/shaders/mtl/common.hpp>
 #include <mln/shaders/mtl/shader_program.hpp>
 #include <mln/shaders/program_parameters.hpp>
+#include <mln/shaders/shader_defines.hpp>
 #include <mln/shaders/shader_source.hpp>
 #include <mln/util/hash.hpp>
 #include <mln/util/containers.hpp>
@@ -62,6 +63,13 @@ public:
         if (!shader) {
             DefinesMap additionalDefines;
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
+            if constexpr (ShaderID == shaders::BuiltIn::LineShader ||
+                          ShaderID == shaders::BuiltIn::LineGradientShader ||
+                          ShaderID == shaders::BuiltIn::LinePatternShader ||
+                          ShaderID == shaders::BuiltIn::LineSDFShader ||
+                          ShaderID == shaders::BuiltIn::LineGradientSDFShader) {
+                defineFeatureIndex(shaders::idLineColorVertexAttribute, propertiesAsUniforms, additionalDefines);
+            }
 
             auto& context = static_cast<Context&>(gfxContext);
             const auto shaderSource = std::string(shaders::prelude) + prelude + source;

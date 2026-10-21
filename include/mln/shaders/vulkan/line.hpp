@@ -10,7 +10,20 @@ constexpr auto lineShadePrelude = R"(
 
 #define idLineDrawableUBO           idDrawableReservedVertexOnlyUBO
 #define idLineTilePropsUBO          idDrawableReservedFragmentOnlyUBO
+#define idLineFeatureUBO            (idLineTilePropsUBO + 1)
 #define idLineEvaluatedPropsUBO     layerUBOStartId
+
+struct LineFeature {
+    vec4 color;
+    vec2 blur;
+    vec2 opacity;
+    vec2 gapwidth;
+    vec2 offset;
+    vec2 width;
+    vec2 floorwidth;
+    vec4 pattern_from;
+    vec4 pattern_to;
+};
 
 )";
 
@@ -18,7 +31,7 @@ template <>
 struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineShader";
 
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -28,28 +41,8 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Vulkan> {
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
 
-#if !defined(HAS_UNIFORM_u_color)
-layout(location = 2) in vec4 in_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_blur)
-layout(location = 3) in vec2 in_blur;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 4) in vec2 in_opacity;
-#endif
-
-#if !defined(HAS_UNIFORM_u_gapwidth)
-layout(location = 5) in vec2 in_gapwidth;
-#endif
-
-#if !defined(HAS_UNIFORM_u_offset)
-layout(location = 6) in vec2 in_offset;
-#endif
-
-#if !defined(HAS_UNIFORM_u_width)
-layout(location = 7) in vec2 in_width;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 2) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -66,7 +59,7 @@ struct LineDrawableUBO {
     float gapwidth_t;
     float offset_t;
     float width_t;
-    float pad1;
+    uint feature_base;
     vec4 pad2;
     vec4 pad3;
 };
@@ -74,6 +67,12 @@ struct LineDrawableUBO {
 layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LineDrawableUBOVector {
     LineDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std140, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
+    LineFeature features[];
+} featureData;
+#endif
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -105,33 +104,36 @@ layout(location = 5) out lowp float frag_opacity;
 
 void main() {
     const LineDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+#ifdef MLN_FEATURE_INDEX
+    const LineFeature featureValues = featureData.features[drawable.feature_base + in_feature_index];
+#endif
 
 #ifndef HAS_UNIFORM_u_color
-    frag_color = unpack_mix_color(in_color, drawable.color_t);
+    frag_color = unpack_mix_color(featureValues.color, drawable.color_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
+    frag_blur = unpack_mix_float(featureValues.blur, drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureValues.opacity, drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(in_gapwidth, drawable.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const lowp float offset = unpack_mix_float(in_offset, drawable.offset_t) * -1.0;
+    const lowp float offset = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    mediump float width = unpack_mix_float(in_width, drawable.width_t);
+    mediump float width = unpack_mix_float(featureValues.width, drawable.width_t);
 #else
     mediump float width = props.width;
 #endif
@@ -172,6 +174,10 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     applySurfaceTransform();
+#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_color) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width)
+    // Keep the feature binding live when this variant's sampled fields are all uniforms.
+    gl_Position.x += featureValues.color.x * 0.0;
+#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -257,7 +263,7 @@ template <>
 struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineGradientShader";
 
-    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -267,24 +273,8 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Vulkan> {
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
 
-#if !defined(HAS_UNIFORM_u_blur)
-layout(location = 2) in vec2 in_blur;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 3) in vec2 in_opacity;
-#endif
-
-#if !defined(HAS_UNIFORM_u_gapwidth)
-layout(location = 4) in vec2 in_gapwidth;
-#endif
-
-#if !defined(HAS_UNIFORM_u_offset)
-layout(location = 5) in vec2 in_offset;
-#endif
-
-#if !defined(HAS_UNIFORM_u_width)
-layout(location = 6) in vec2 in_width;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 2) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -300,7 +290,7 @@ struct LineGradientDrawableUBO {
     float gapwidth_t;
     float offset_t;
     float width_t;
-    float pad1;
+    uint feature_base;
     float pad2;
     vec4 pad3;
     vec4 pad4;
@@ -309,6 +299,12 @@ struct LineGradientDrawableUBO {
 layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LineGradientDrawableUBOVector {
     LineGradientDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std140, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
+    LineFeature features[];
+} featureData;
+#endif
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -337,29 +333,32 @@ layout(location = 5) out lowp float frag_opacity;
 
 void main() {
     const LineGradientDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+#ifdef MLN_FEATURE_INDEX
+    const LineFeature featureValues = featureData.features[drawable.feature_base + in_feature_index];
+#endif
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
+    frag_blur = unpack_mix_float(featureValues.blur, drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureValues.opacity, drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    mediump float gapwidth = unpack_mix_float(in_gapwidth, drawable.gapwidth_t) / 2.0;
+    mediump float gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
 #else
     mediump float gapwidth = props.gapwidth / 2.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const lowp float offset = unpack_mix_float(in_offset, drawable.offset_t) * -1.0;
+    const lowp float offset = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    mediump float width = unpack_mix_float(in_width, drawable.width_t);
+    mediump float width = unpack_mix_float(featureValues.width, drawable.width_t);
 #else
     mediump float width = props.width;
 #endif
@@ -401,6 +400,10 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     applySurfaceTransform();
+#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width)
+    // Keep the feature binding live when this variant's sampled fields are all uniforms.
+    gl_Position.x += featureValues.color.x * 0.0;
+#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -483,7 +486,7 @@ template <>
 struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LinePatternShader";
 
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -493,32 +496,8 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Vulkan> {
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
 
-#if !defined(HAS_UNIFORM_u_blur)
-layout(location = 2) in vec2 in_blur;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 3) in vec2 in_opacity;
-#endif
-
-#if !defined(HAS_UNIFORM_u_gapwidth)
-layout(location = 4) in vec2 in_gapwidth;
-#endif
-
-#if !defined(HAS_UNIFORM_u_offset)
-layout(location = 5) in vec2 in_offset;
-#endif
-
-#if !defined(HAS_UNIFORM_u_width)
-layout(location = 6) in vec2 in_width;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 7) in uvec4 in_pattern_from;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 8) in uvec4 in_pattern_to;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 2) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -537,7 +516,7 @@ struct LinePatternDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float floorwidth_t;
-    float pad1;
+    uint feature_base;
     float pad2;
     float pad3;
     vec4 pad4;
@@ -546,6 +525,12 @@ struct LinePatternDrawableUBO {
 layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LinePatternDrawableUBOVector {
     LinePatternDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std140, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
+    LineFeature features[];
+} featureData;
+#endif
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -583,42 +568,45 @@ layout(location = 8) out mediump float frag_floorwidth;
 
 void main() {
     const LinePatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+#ifdef MLN_FEATURE_INDEX
+    const LineFeature featureValues = featureData.features[drawable.feature_base + in_feature_index];
+#endif
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
+    frag_blur = unpack_mix_float(featureValues.blur, drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureValues.opacity, drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(in_gapwidth, drawable.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const lowp float offset = unpack_mix_float(in_offset, drawable.offset_t) * -1.0;
+    const lowp float offset = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    mediump float width = unpack_mix_float(in_width, drawable.width_t);
+    mediump float width = unpack_mix_float(featureValues.width, drawable.width_t);
 #else
     mediump float width = props.width;
 #endif
 
 #ifndef HAS_UNIFORM_u_pattern_from
-    frag_pattern_from = in_pattern_from;
+    frag_pattern_from = featureValues.pattern_from;
 #endif
 
 #ifndef HAS_UNIFORM_u_pattern_to
-    frag_pattern_to = in_pattern_to;
+    frag_pattern_to = featureValues.pattern_to;
 #endif
-#ifndef HAS_UNIFORM_u_width
-    frag_floorwidth = unpack_mix_float(in_width, drawable.floorwidth_t);
+#ifndef HAS_UNIFORM_u_floorwidth
+    frag_floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
 #else
     frag_floorwidth = props.floorwidth;
 #endif
@@ -660,6 +648,10 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     applySurfaceTransform();
+#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width) && defined(HAS_UNIFORM_u_floorwidth) && defined(HAS_UNIFORM_u_pattern_from) && defined(HAS_UNIFORM_u_pattern_to)
+    // Keep the feature binding live when this variant's sampled fields are all uniforms.
+    gl_Position.x += featureValues.color.x * 0.0;
+#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -812,7 +804,7 @@ template <>
 struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineSDFShader";
 
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -822,32 +814,8 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Vulkan> {
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
 
-#if !defined(HAS_UNIFORM_u_color)
-layout(location = 2) in vec4 in_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_blur)
-layout(location = 3) in vec2 in_blur;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 4) in vec2 in_opacity;
-#endif
-
-#if !defined(HAS_UNIFORM_u_gapwidth)
-layout(location = 5) in vec2 in_gapwidth;
-#endif
-
-#if !defined(HAS_UNIFORM_u_offset)
-layout(location = 6) in vec2 in_offset;
-#endif
-
-#if !defined(HAS_UNIFORM_u_width)
-layout(location = 7) in vec2 in_width;
-#endif
-
-#if !defined(HAS_UNIFORM_u_floorwidth)
-layout(location = 8) in vec2 in_floorwidth;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 2) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -869,13 +837,19 @@ struct LineSDFDrawableUBO {
     float offset_t;
     float width_t;
     float floorwidth_t;
-    float pad1;
+    uint feature_base;
     float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LineSDFDrawableUBOVector {
     LineSDFDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std140, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
+    LineFeature features[];
+} featureData;
+#endif
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -913,40 +887,43 @@ layout(location = 8) out mediump float frag_floorwidth;
 
 void main() {
     const LineSDFDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+#ifdef MLN_FEATURE_INDEX
+    const LineFeature featureValues = featureData.features[drawable.feature_base + in_feature_index];
+#endif
 
 #ifndef HAS_UNIFORM_u_color
-    frag_color = unpack_mix_color(in_color, drawable.color_t);
+    frag_color = unpack_mix_color(featureValues.color, drawable.color_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
+    frag_blur = unpack_mix_float(featureValues.blur, drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureValues.opacity, drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_floorwidth
-    const float floorwidth = unpack_mix_float(in_floorwidth, drawable.floorwidth_t);
+    const float floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
     frag_floorwidth = floorwidth;
 #else
     const float floorwidth = props.floorwidth;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const mediump float offset = unpack_mix_float(in_offset, drawable.offset_t) * -1.0;
+    const mediump float offset = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
 #else
     const mediump float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    const mediump float width = unpack_mix_float(in_width, drawable.width_t);
+    const mediump float width = unpack_mix_float(featureValues.width, drawable.width_t);
 #else
     const mediump float width = props.width;
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(in_gapwidth, drawable.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif
@@ -989,6 +966,10 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     applySurfaceTransform();
+#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_color) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width) && defined(HAS_UNIFORM_u_floorwidth)
+    // Keep the feature binding live when this variant's sampled fields are all uniforms.
+    gl_Position.x += featureValues.color.x * 0.0;
+#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -1115,7 +1096,7 @@ template <>
 struct ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineGradientSDFShader";
 
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
@@ -1125,28 +1106,8 @@ struct ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::Vulkan> 
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
 
-#if !defined(HAS_UNIFORM_u_blur)
-layout(location = 2) in vec2 in_blur;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 3) in vec2 in_opacity;
-#endif
-
-#if !defined(HAS_UNIFORM_u_gapwidth)
-layout(location = 4) in vec2 in_gapwidth;
-#endif
-
-#if !defined(HAS_UNIFORM_u_offset)
-layout(location = 5) in vec2 in_offset;
-#endif
-
-#if !defined(HAS_UNIFORM_u_width)
-layout(location = 6) in vec2 in_width;
-#endif
-
-#if !defined(HAS_UNIFORM_u_floorwidth)
-layout(location = 7) in vec2 in_floorwidth;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 2) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -1168,13 +1129,19 @@ struct LineSDFDrawableUBO {
     float offset_t;
     float width_t;
     float floorwidth_t;
-    float pad1;
+    uint feature_base;
     float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LineSDFDrawableUBOVector {
     LineSDFDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std140, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
+    LineFeature features[];
+} featureData;
+#endif
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -1209,36 +1176,39 @@ layout(location = 8) out mediump float frag_floorwidth;
 
 void main() {
     const LineSDFDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+#ifdef MLN_FEATURE_INDEX
+    const LineFeature featureValues = featureData.features[drawable.feature_base + in_feature_index];
+#endif
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
+    frag_blur = unpack_mix_float(featureValues.blur, drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureValues.opacity, drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_floorwidth
-    const float floorwidth = unpack_mix_float(in_floorwidth, drawable.floorwidth_t);
+    const float floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
     frag_floorwidth = floorwidth;
 #else
     const float floorwidth = props.floorwidth;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const mediump float offset = unpack_mix_float(in_offset, drawable.offset_t) * -1.0;
+    const mediump float offset = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
 #else
     const mediump float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    const mediump float width = unpack_mix_float(in_width, drawable.width_t);
+    const mediump float width = unpack_mix_float(featureValues.width, drawable.width_t);
 #else
     const mediump float width = props.width;
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(in_gapwidth, drawable.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif
@@ -1282,6 +1252,10 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     applySurfaceTransform();
+#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width) && defined(HAS_UNIFORM_u_floorwidth)
+    // Keep the feature binding live when this variant's sampled fields are all uniforms.
+    gl_Position.x += featureValues.color.x * 0.0;
+#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);

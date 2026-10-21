@@ -3,6 +3,7 @@
 #include <mln/gfx/shader_group.hpp>
 #include <mln/shaders/vulkan/shader_program.hpp>
 #include <mln/shaders/program_parameters.hpp>
+#include <mln/shaders/shader_defines.hpp>
 #include <mln/shaders/shader_source.hpp>
 #include <mln/util/hash.hpp>
 #include <mln/util/containers.hpp>
@@ -60,6 +61,13 @@ public:
         if (!shader) {
             DefinesMap additionalDefines;
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
+            if constexpr (ShaderID == shaders::BuiltIn::LineShader ||
+                          ShaderID == shaders::BuiltIn::LineGradientShader ||
+                          ShaderID == shaders::BuiltIn::LinePatternShader ||
+                          ShaderID == shaders::BuiltIn::LineSDFShader ||
+                          ShaderID == shaders::BuiltIn::LineGradientSDFShader) {
+                defineFeatureIndex(shaders::idLineColorVertexAttribute, propertiesAsUniforms, additionalDefines);
+            }
 
             const std::string preludeSource(prelude);
             const std::string vertexSource = preludeSource + vert;
