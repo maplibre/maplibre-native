@@ -169,10 +169,7 @@ mat4 PaintParameters::clipMatrixForTile(const UnwrappedTileID& tileID) const {
     // basemap draped on terrain renders blank; color-relief/hillshade, which don't
     // stencil-test, were unaffected). The affine above only touches x/y, so remapping
     // the final matrix's z is equivalent to remapping the ortho.
-    matrix[2] = 0.5 * (matrix[2] + matrix[3]);
-    matrix[6] = 0.5 * (matrix[6] + matrix[7]);
-    matrix[10] = 0.5 * (matrix[10] + matrix[11]);
-    matrix[14] = 0.5 * (matrix[14] + matrix[15]);
+    matrix::remapClipZToUnitRange(matrix);
 #endif
 
     return matrix;

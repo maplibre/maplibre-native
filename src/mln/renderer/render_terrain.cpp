@@ -1272,10 +1272,7 @@ void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
         const auto& inst = depthInstances[i];
         mat4 m = parameters.matrixForTile(inst.tileID.toUnwrapped());
 #if !MLN_RENDER_BACKEND_OPENGL
-        m[2] = 0.5 * (m[2] + m[3]);
-        m[6] = 0.5 * (m[6] + m[7]);
-        m[10] = 0.5 * (m[10] + m[11]);
-        m[14] = 0.5 * (m[14] + m[15]);
+        matrix::remapClipZToUnitRange(m);
 #endif
         arr[i].matrix = util::cast<float>(m);
         arr[i].dem_coords = inst.demCoords;
