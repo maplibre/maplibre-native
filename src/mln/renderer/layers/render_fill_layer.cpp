@@ -356,24 +356,27 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
+        
+        if (const auto& attr = vertexAttrs->set(idFillPrevNextVertexAttribute)) {
+            attr->setSharedRawData(bucket.sharedNeighbors,
+                                   offsetof(FillNeighborVertex, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(FillNeighborVertex),
+                                   gfx::AttributeDataType::Short2);
+        }
 
         auto instanceAttrs = context.createVertexAttributeArray();
-        if (bucket.isRoundedCornerEnabled()) {
-            if (const auto& attr = vertexAttrs->set(idFillPrevNextVertexAttribute)) {
-                attr->setSharedRawData(bucket.sharedNeighbors,
-                                       offsetof(FillNeighborVertex, a1),
-                                       /*vertexOffset=*/0,
-                                       sizeof(FillNeighborVertex),
-                                       gfx::AttributeDataType::Short2);
-            }
-
-            if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
-                attr->setSharedRawData(bucket.sharedTriangleInstances,
-                                       offsetof(FillTriangleInstance, a1),
-                                       /*vertexOffset=*/0,
-                                       sizeof(FillTriangleInstance),
-                                       gfx::AttributeDataType::UInt3);
-            }
+        if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
+            attr->setSharedRawData(bucket.sharedTriangleInstances,
+                                   offsetof(FillTriangleInstance, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(FillTriangleInstance),
+                                   gfx::AttributeDataType::UInt3);
+        }
+        
+        if (!bucket.isRoundedCornerEnabled()) {
+            propertiesAsUniforms.first.emplace("triangle_instance");
+            propertiesAsUniforms.second.emplace(idFillTriangleInstanceAttribute);
         }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES

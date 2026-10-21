@@ -150,6 +150,7 @@ union FillTilePropsUnionUBO {
     FillOutlinePatternTilePropsUBO fillOutlinePatternTilePropsUBO;
 };
 
+#if !defined(HAS_UNIFORM_u_triangle_instance)
 float sdCircle(float2 p, float r) {
     return length(p) - r;
 }
@@ -266,6 +267,7 @@ float computeRadius(float2 prevPoint, float2 cornerPoint, float2 nextPoint, floa
     float radius = distance(startPoint, centerPoint);
     return radius;
 }
+#endif
 
 )";
 
@@ -283,7 +285,9 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
+#if !defined(HAS_UNIFORM_u_triangle_instance)
     uint3 triangle_indices [[attribute(5)]];
+#endif
 };
 
 struct PolygonVertex {
@@ -291,8 +295,10 @@ struct PolygonVertex {
 };
 
 struct NeighborVertex {
+#if !defined(HAS_UNIFORM_u_triangle_instance)
     short prev_offset;
     short next_offset;
+#endif
 };
 
 struct DataVertex {
@@ -315,6 +321,8 @@ struct DataVertex {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+
+#if !defined(HAS_UNIFORM_u_triangle_instance)
     float2 pos;
 
     float2 v0 [[flat]];
@@ -334,6 +342,7 @@ struct FragmentStage {
     float v2Radius [[flat]];
 
     float external [[flat]];
+#endif
 
 #if !defined(HAS_UNIFORM_u_color)
     half4 color;
@@ -354,6 +363,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
 
+#if defined(HAS_UNIFORM_u_triangle_instance)
+    uint index = vertexID;
+    float2 position = float2(polygon[index].position);
+#else
     uint index = vertx.triangle_indices[vertexID] >> 2;
     float2 position = float2(polygon[index].position);
 
@@ -408,9 +421,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         v2Next = float2(polygon[i2Next].position);
         v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
     }
+#endif
 
     return {
         .position = drawable.matrix * float4(position, 0.0f, 1.0f),
+
+#if !defined(HAS_UNIFORM_u_triangle_instance)
         .pos = position,
 
         .v0 = v0,
@@ -430,6 +446,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v2Radius = v2Radius,
 
         .external = (external0 || external1 || external2) ? -1.0 : 1.0,
+#endif
 
 #if !defined(HAS_UNIFORM_u_color)
         .color    = half4(unpack_mix_color(data[index].color, drawable.color_t)),
@@ -458,6 +475,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half opacity = in.opacity;
 #endif
 
+#if !defined(HAS_UNIFORM_u_triangle_instance)
     float dTri = -1;
 
     if (in.v0Radius > 0) {
@@ -478,6 +496,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     if (dTri * in.external > 0) {
         discard_fragment();
     }
+#endif
 
     return half4(color * opacity);
 }

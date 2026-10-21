@@ -124,7 +124,7 @@ private:
 
     mln::unordered_map<std::string, bool> sdfPatterns;
     mln::unordered_set<std::string> mixedSDFPatternLayers;
-    bool roundedCornerEnabled = true;
+    bool roundedCornerEnabled = false;
 };
 
 } // namespace mln

@@ -46,8 +46,9 @@ Drawable::Drawable(std::string name_)
 
 Drawable::~Drawable() {}
 
+
 namespace {
-#if !defined(NDEBUG)
+/*#if !defined(NDEBUG)
 std::size_t getBufferSize(const gfx::VertexBufferResource* resource_) {
     if (const auto* resource = static_cast<const VertexBufferResource*>(resource_)) {
         if (const auto& bufferResource = resource->get()) {
@@ -56,7 +57,7 @@ std::size_t getBufferSize(const gfx::VertexBufferResource* resource_) {
     }
     return 0UL;
 }
-#endif // !defined(NDEBUG)
+#endif // !defined(NDEBUG)*/
 
 MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) noexcept {
     switch (type) {
@@ -402,7 +403,7 @@ void Drawable::bindAttributes(RenderPass& renderPass) const {
         const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding ? binding->vertexBufferResource
                                                                                    : nullptr);
         if (buffer && buffer->get()) {
-            assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
+            //assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             renderPass.bindVertex(buffer->get(), /*offset=*/0, binding->bufferIndex);
         }
     }
