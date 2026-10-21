@@ -705,7 +705,7 @@ public:
 
     void populateVertexVector(const GeometryTileFeature&,
                               std::size_t length,
-                              std::size_t index,
+                              [[maybe_unused]] std::size_t index,
                               const ImagePositions& patternPositions,
                               const std::optional<PatternDependency>& patternDependencies,
                               const CanonicalTileID&,

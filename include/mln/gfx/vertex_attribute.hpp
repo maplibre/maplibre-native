@@ -460,7 +460,7 @@ protected:
                                      const bool isConstant,
                                      StringIDSetsPair* propertiesAsUniforms,
                                      size_t& dataDrivenAttrId,
-                                     FeatureTableBind& featureTableBind) {
+                                     [[maybe_unused]] FeatureTableBind& featureTableBind) {
         if (!binder) {
             return;
         }
