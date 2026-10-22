@@ -101,6 +101,12 @@ struct RenderingStats {
     /// on a static scene; if it stays high, the short-circuit is not engaging
     int numDrapeCoverageScans = 0;
 
+    /// Tile clipping masks drawn inside terrain drape targets, and masks skipped because the
+    /// tile does not overlap the target. Drawn masks scale with the tiles overlapping a target,
+    /// not with the tiles of the source
+    int numDrapeMasksDrawn = 0;
+    int numDrapeMasksSkipped = 0;
+
     /// Per-phase CPU time of the terrain path this frame (seconds), for profiling
     /// where the terrain overhead goes when nothing re-renders
     double terrainUpdateTime = 0.0;  ///< RenderTerrain::update (tile/DEM/drawable management)

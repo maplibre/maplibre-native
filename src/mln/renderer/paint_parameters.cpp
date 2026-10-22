@@ -245,9 +245,30 @@ void PaintParameters::clearStencil() {
 #endif
 }
 
-bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
+const RenderTiles& PaintParameters::overlappingDrapeTiles(const RenderTiles& tiles) {
+    if (tiles != drapeMaskSource) {
+        std::vector<std::reference_wrapper<const RenderTile>> overlapping;
+        for (const auto& tile : *tiles) {
+            if (tilesOverlap(tile.get().id, *currentDrapeTileID)) {
+                overlapping.push_back(tile);
+            }
+        }
+        context.renderingStats().numDrapeMasksSkipped += static_cast<int>(tiles->size() - overlapping.size());
+        drapeMaskSource = tiles;
+        drapeMaskTiles = std::make_shared<const std::vector<std::reference_wrapper<const RenderTile>>>(
+            std::move(overlapping));
+    }
+    return drapeMaskTiles;
+}
+
+bool PaintParameters::renderTileClippingMasks(const RenderTiles& sourceTiles) {
+    // A drape target is only drawn into by the tiles that overlap it; the masks of the rest
+    // would land outside the target.
+    const bool drape = currentDrapeTileID && sourceTiles;
+    const RenderTiles& renderTiles = drape ? overlappingDrapeTiles(sourceTiles) : sourceTiles;
+
     // We can avoid updating the mask if it already contains the same set of tiles.
-    if (!renderTiles || tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
+    if (!renderTiles || renderTiles->empty() || tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
         return true;
     }
 
@@ -422,6 +443,9 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     static_cast<gl::Context&>(context).renderingStats().stencilUpdates++;
 #endif // MLN_RENDER_BACKEND_OPENGL
 
+    if (currentDrapeTileID) {
+        context.renderingStats().numDrapeMasksDrawn += static_cast<int>(tileClippingMaskIDs.size());
+    }
     return true;
 }
 

@@ -13,7 +13,9 @@
 #include <mln/util/image.hpp>
 #include <mln/util/run_loop.hpp>
 
+#include <chrono>
 #include <cmath>
+#include <thread>
 
 using namespace mln;
 
@@ -96,6 +98,74 @@ struct TerrainCameraTest {
         }
     }
 };
+
+// A fill layer over a geojson source that covers far more tiles than the terrain mesh has,
+// beside the DEM that gives the mesh.
+const char* drapedFillStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 6,
+      "tileSize": 64
+    },
+    "area": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {"type": "Polygon", "coordinates": [[[-60, 10], [80, 10], [80, 75], [-60, 75], [-60, 10]]]}
+      }
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": [{"id": "area", "type": "fill", "source": "area", "paint": {"fill-color": "#c33"}}]
+})STYLE";
+
+struct DrapeMaskCounts {
+    int targets = 0; // drape targets re-rendered
+    int drawn = 0;   // masks drawn inside them
+    int skipped = 0; // masks left out because the tile does not overlap the target
+};
+
+// Renders until the geojson tiles have arrived and drawn into the drape targets, then a few
+// frames more, summing the counters the target passes add (RenderingStats accumulate across
+// frames).
+DrapeMaskCounts drapeMasksOverFrames(int maxFrames) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string tile = makeFlatDEMTile();
+    fileSource->tileResponse = [&](const Resource&) {
+        Response res;
+        res.data = std::make_shared<std::string>(tile);
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.getStyle().loadJSON(drapedFillStyle);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.2692, 11.4041}).withZoom(5.0).withPitch(75.0));
+
+    gfx::RenderingStats before;
+    DrapeMaskCounts counts;
+    int settling = 0;
+    for (int i = 0; i < maxFrames && settling < 4; ++i) {
+        loop.runOnce();
+        const auto stats = frontend.render(map).stats;
+        counts.targets += stats.numDrapeTargetsRendered - before.numDrapeTargetsRendered;
+        counts.drawn += stats.numDrapeMasksDrawn - before.numDrapeMasksDrawn;
+        counts.skipped += stats.numDrapeMasksSkipped - before.numDrapeMasksSkipped;
+        before = stats;
+        if (counts.drawn > 0) ++settling;
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    return counts;
+}
 
 } // namespace
 
@@ -456,4 +526,17 @@ TEST(TerrainCamera, ClampDoesNotApplyAfterTerrainRemoval) {
     ASSERT_TRUE(removedMidTransition);
 
     EXPECT_NEAR(test.altitude(), 0.0, 0.001);
+}
+
+// A drape target is drawn into only by the source tiles that overlap its own tile, so the
+// masks it draws follow those tiles and not every tile the source covers.
+TEST(TerrainDrape, MasksAreDrawnOnlyForTilesOverlappingTheTarget) {
+    const auto counts = drapeMasksOverFrames(60);
+    ASSERT_GT(counts.targets, 0);
+    EXPECT_GT(counts.drawn, 0);
+    EXPECT_GT(counts.skipped, 0);
+    // The source's tiles are coarser than the mesh or the same size, so a target overlaps a
+    // handful of them at most.
+    EXPECT_LE(counts.drawn, 4 * counts.targets)
+        << counts.drawn << " masks over " << counts.targets << " targets, " << counts.skipped << " skipped";
 }
