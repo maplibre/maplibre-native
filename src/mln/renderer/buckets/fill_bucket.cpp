@@ -16,10 +16,10 @@ FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
     using namespace style;
     for (const auto& pair : layerPaintProperties) {
         const auto& fillProps = static_cast<const FillLayerProperties&>(*pair.second);
-
+#if MLN_USE_FILL_ROUNDED_CORNER
         const auto& roundedCornerProperty = fillProps.layerImpl().paint.get<FillRoundedCornerDistance>().value;
         roundedCornerEnabled |= !roundedCornerProperty.isUndefined();
-
+#endif
         paintPropertyBinders.emplace(std::piecewise_construct,
                                      std::forward_as_tuple(pair.first),
                                      std::forward_as_tuple(fillProps.evaluated, zoom));
