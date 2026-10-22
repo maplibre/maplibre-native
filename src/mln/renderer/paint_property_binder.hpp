@@ -34,6 +34,19 @@ struct VariantContains : std::false_type {};
 template <typename T, typename... Ts>
 struct VariantContains<T, std::variant<Ts...>> : std::bool_constant<(std::is_same_v<T, Ts> || ...)> {};
 
+template <class T, class List>
+struct TypeListContains : std::false_type {};
+
+template <class T, class... Ts>
+struct TypeListContains<T, TypeList<Ts...>> : std::bool_constant<(std::is_same_v<T, Ts> || ...)> {};
+
+// True when every type in `Subset` is also in `Set`. An empty subset is a subset.
+template <class Subset, class Set>
+struct TypeListSubset : std::false_type {};
+
+template <class... Ts, class Set>
+struct TypeListSubset<TypeList<Ts...>, Set> : std::bool_constant<(TypeListContains<Ts, Set>::value && ...)> {};
+
 } // namespace detail
 
 /// Maps a vertex range to a feature.
@@ -407,6 +420,9 @@ public:
             } else if constexpr (std::is_same_v<T, float>) {
                 const auto packed = attributeValue(evaluated);
                 this->storeFeatureValue(tableIndex, std::array<float, 2>{packed[0], packed[0]});
+            } else {
+                static_assert(std::is_same_v<T, Color> || std::is_same_v<T, float>,
+                              "feature table only supports Color and float");
             }
             if (const auto idStr = featureIDtoString(feature.getID())) {
                 featureMap[*idStr].emplace_back(FeatureVertexRange{
@@ -458,6 +474,9 @@ public:
                         } else {
                             this->storeFeatureValue(pos.tableIndex, std::array<float, 2>{packed[0], packed[0]});
                         }
+                    } else {
+                        static_assert(std::is_same_v<T, Color> || std::is_same_v<T, float>,
+                                      "feature table only supports Color and float");
                     }
                     continue;
                 }
@@ -566,6 +585,9 @@ public:
                 this->storeFeatureValue(tableIndex, value);
             } else if constexpr (std::is_same_v<T, float>) {
                 this->storeFeatureValue(tableIndex, value);
+            } else {
+                static_assert(std::is_same_v<T, Color> || std::is_same_v<T, float>,
+                              "feature table only supports Color and float");
             }
             if (const auto idStr = featureIDtoString(feature.getID())) {
                 featureMap[*idStr].emplace_back(FeatureVertexRange{
@@ -615,6 +637,9 @@ public:
                         this->storeFeatureValue(
                             pos.tableIndex,
                             zoomInterpolatedAttributeValue(attributeValue(range.min), attributeValue(range.max)));
+                    } else {
+                        static_assert(std::is_same_v<T, Color> || std::is_same_v<T, float>,
+                                      "feature table only supports Color and float");
                     }
                     continue;
                 }
@@ -916,47 +941,23 @@ struct InterpolationUniform {
     static constexpr auto name() { return concat_literals<&Attr::name, &string_literal<'_', 't'>::value>::value(); }
 };
 
-#if MLN_UBO_CONSOLIDATION
-namespace style {
-struct LineBlur;
-struct LineColor;
-struct LineFloorWidth;
-struct LineGapWidth;
-struct LineOffset;
-struct LineOpacity;
-struct LinePattern;
-struct LineWidth;
-} // namespace style
-
-template <class P>
-inline constexpr bool isFeatureTableProperty = false;
-
-template <>
-inline constexpr bool isFeatureTableProperty<style::LineBlur> = true;
-template <>
-inline constexpr bool isFeatureTableProperty<style::LineColor> = true;
-template <>
-inline constexpr bool isFeatureTableProperty<style::LineFloorWidth> = true;
-template <>
-inline constexpr bool isFeatureTableProperty<style::LineGapWidth> = true;
-template <>
-inline constexpr bool isFeatureTableProperty<style::LineOffset> = true;
-template <>
-inline constexpr bool isFeatureTableProperty<style::LineOpacity> = true;
-template <>
-inline constexpr bool isFeatureTableProperty<style::LinePattern> = true;
-template <>
-inline constexpr bool isFeatureTableProperty<style::LineWidth> = true;
-#endif
-
 class PaintPropertyBindersBase {};
 
-template <class Ps>
+// `FeatureTablePs` names the properties stored once per feature. The default is none.
+template <class Ps, class FeatureTablePs = TypeList<>>
 class PaintPropertyBinders;
 
-template <class... Ps>
-class PaintPropertyBinders<TypeList<Ps...>> : public PaintPropertyBindersBase {
+template <class... Ps, class FeatureTablePs>
+class PaintPropertyBinders<TypeList<Ps...>, FeatureTablePs> : public PaintPropertyBindersBase {
 private:
+    static_assert(detail::TypeListSubset<FeatureTablePs, TypeList<Ps...>>::value,
+                  "FeatureTablePs must be a subset of the binder properties");
+
+#if MLN_UBO_CONSOLIDATION
+    template <class P>
+    static constexpr bool isFeatureTableProperty = detail::TypeListContains<P, FeatureTablePs>::value;
+#endif
+
     template <class T, class PossiblyEvaluatedType, class... As>
     struct Detail;
 
