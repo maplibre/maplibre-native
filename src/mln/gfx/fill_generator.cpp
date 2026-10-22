@@ -52,13 +52,13 @@ void addFillIndices(SegmentVector& fillSegments,
     triangleSegment.instanceCount += nInstances;
 
     for (std::size_t i = 0; i < nInstances; i++) {
-        fillTriangles.emplace_back(FillBucket::triangleInstance(startVertices + indices[i * 3],
+        fillTriangles.emplace_back(FillBucket::triangleInstance(static_cast<uint32_t>(startVertices) + indices[i * 3],
                                                                 ignoredVertices[indices[i * 3]],
                                                                 false,
-                                                                startVertices + indices[i * 3 + 1],
+                                                                static_cast<uint32_t>(startVertices) + indices[i * 3 + 1],
                                                                 ignoredVertices[indices[i * 3 + 1]],
                                                                 false,
-                                                                startVertices + indices[i * 3 + 2],
+                                                                static_cast<uint32_t>(startVertices) + indices[i * 3 + 2],
                                                                 ignoredVertices[indices[i * 3 + 2]],
                                                                 false));
     }
@@ -79,13 +79,13 @@ void addFillExternalIndices(SegmentVector& fillSegments,
     triangleSegment.instanceCount += nInstances;
 
     for (std::size_t i = 0; i < nInstances; i++) {
-        fillTriangles.emplace_back(FillBucket::triangleInstance(startVertices + indices[i * 3],
+        fillTriangles.emplace_back(FillBucket::triangleInstance(static_cast<uint32_t>(startVertices) + indices[i * 3],
                                                                 true,
                                                                 false,
-                                                                startVertices + indices[i * 3 + 1],
+                                                                static_cast<uint32_t>(startVertices) + indices[i * 3 + 1],
                                                                 false,
                                                                 true,
-                                                                startVertices + indices[i * 3 + 2],
+                                                                static_cast<uint32_t>(startVertices) + indices[i * 3 + 2],
                                                                 true,
                                                                 false));
     }
@@ -287,7 +287,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        [[maybe_unused]] std::size_t totalVertices = totalVerticesCheck(polygon);
+        std::size_t totalVertices = totalVerticesCheck(polygon);
         std::size_t startVertices = fillVertices.elements();
         std::vector<bool> ignoredVertices;
 
@@ -342,7 +342,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        [[maybe_unused]] std::size_t totalVertices = totalVerticesCheck(polygon);
+        std::size_t totalVertices = totalVerticesCheck(polygon);
         std::size_t startVertices = fillVertices.elements();
         std::vector<bool> ignoredVertices;
 
@@ -425,7 +425,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        [[maybe_unused]] const std::size_t totalVertices = totalVerticesCheck(polygon);
+        const std::size_t totalVertices = totalVerticesCheck(polygon);
         const std::size_t startVertices = fillVertices.elements();
         std::vector<bool> ignoredVertices;
 
