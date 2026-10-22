@@ -32,11 +32,16 @@ struct VariantContains<T, std::variant<Ts...>> : std::bool_constant<(std::is_sam
 
 } // namespace detail
 
-// Maps vertex range to feature index
+/// Maps a vertex range to a feature.
+// `featureIndex` is the source-layer index used by `GeometryTileLayer::getFeature`.
+// `tableIndex` is the dense slot in the feature-value tables, when enabled.
 struct FeatureVertexRange {
     std::size_t featureIndex;
     std::size_t start;
     std::size_t end;
+#if MLN_UBO_CONSOLIDATION
+    std::size_t tableIndex = 0;
+#endif
 };
 
 using FeatureVertexRangeMap = std::map<std::string, std::vector<FeatureVertexRange>>;
@@ -163,7 +168,8 @@ public:
                                       const ImagePositions&,
                                       const std::optional<PatternDependency>&,
                                       const CanonicalTileID& canonical,
-                                      const style::expression::Value&) = 0;
+                                      const style::expression::Value&,
+                                      std::size_t tableIndex) = 0;
 
     virtual void updateVertexVectors(const FeatureStates&, const GeometryTileLayer&, const ImagePositions&) {}
 
@@ -286,7 +292,8 @@ public:
                               const ImagePositions&,
                               const std::optional<PatternDependency>&,
                               const CanonicalTileID&,
-                              const style::expression::Value&) override {}
+                              const style::expression::Value&,
+                              std::size_t) override {}
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
 
     void setPatternParameters(const std::optional<ImagePosition>&,
@@ -325,7 +332,8 @@ public:
                               const ImagePositions&,
                               const std::optional<PatternDependency>&,
                               const CanonicalTileID&,
-                              const style::expression::Value&) override {}
+                              const style::expression::Value&,
+                              std::size_t) override {}
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
 
     void setPatternParameters(const std::optional<ImagePosition>& posA,
@@ -379,7 +387,8 @@ public:
                               const ImagePositions&,
                               const std::optional<PatternDependency>&,
                               const CanonicalTileID& canonical,
-                              const style::expression::Value& formattedSection) override {
+                              const style::expression::Value& formattedSection,
+                              [[maybe_unused]] std::size_t tableIndex) override {
         using style::expression::EvaluationContext;
         auto evaluated = expression.evaluate(
             EvaluationContext(&feature).withFormattedSection(&formattedSection).withCanonicalTileID(&canonical),
@@ -390,14 +399,14 @@ public:
         if (this->featureTable) {
             if constexpr (std::is_same_v<T, Color>) {
                 const auto packed = attributeValue(evaluated);
-                this->storeFeatureValue(index, std::array<float, 4>{packed[0], packed[1], packed[0], packed[1]});
+                this->storeFeatureValue(tableIndex, std::array<float, 4>{packed[0], packed[1], packed[0], packed[1]});
             } else if constexpr (std::is_same_v<T, float>) {
                 const auto packed = attributeValue(evaluated);
-                this->storeFeatureValue(index, std::array<float, 2>{packed[0], packed[0]});
+                this->storeFeatureValue(tableIndex, std::array<float, 2>{packed[0], packed[0]});
             }
             if (const auto idStr = featureIDtoString(feature.getID())) {
-                featureMap[*idStr].emplace_back(
-                    FeatureVertexRange{.featureIndex = index, .start = this->getVertexCount(), .end = length});
+                featureMap[*idStr].emplace_back(FeatureVertexRange{
+                    .featureIndex = index, .start = this->getVertexCount(), .end = length, .tableIndex = tableIndex});
             }
             return;
         }
@@ -440,10 +449,10 @@ public:
                         this->statistics.add(evaluated);
                         const auto packed = attributeValue(evaluated);
                         if constexpr (std::is_same_v<T, Color>) {
-                            this->storeFeatureValue(pos.featureIndex,
+                            this->storeFeatureValue(pos.tableIndex,
                                                     std::array<float, 4>{packed[0], packed[1], packed[0], packed[1]});
                         } else {
-                            this->storeFeatureValue(pos.featureIndex, std::array<float, 2>{packed[0], packed[0]});
+                            this->storeFeatureValue(pos.tableIndex, std::array<float, 2>{packed[0], packed[0]});
                         }
                     }
                     continue;
@@ -529,7 +538,8 @@ public:
                               const ImagePositions&,
                               const std::optional<PatternDependency>&,
                               const CanonicalTileID& canonical,
-                              const style::expression::Value& formattedSection) override {
+                              const style::expression::Value& formattedSection,
+                              [[maybe_unused]] std::size_t tableIndex) override {
         using style::expression::EvaluationContext;
         Range<T> range = {
             expression.evaluate(EvaluationContext(zoomRange.min, &feature)
@@ -549,13 +559,13 @@ public:
 #if MLN_UBO_CONSOLIDATION
         if (this->featureTable) {
             if constexpr (std::is_same_v<T, Color>) {
-                this->storeFeatureValue(index, value);
+                this->storeFeatureValue(tableIndex, value);
             } else if constexpr (std::is_same_v<T, float>) {
-                this->storeFeatureValue(index, value);
+                this->storeFeatureValue(tableIndex, value);
             }
             if (const auto idStr = featureIDtoString(feature.getID())) {
-                featureMap[*idStr].emplace_back(
-                    FeatureVertexRange{.featureIndex = index, .start = this->getVertexCount(), .end = length});
+                featureMap[*idStr].emplace_back(FeatureVertexRange{
+                    .featureIndex = index, .start = this->getVertexCount(), .end = length, .tableIndex = tableIndex});
             }
             return;
         }
@@ -599,7 +609,7 @@ public:
                         this->statistics.add(range.min);
                         this->statistics.add(range.max);
                         this->storeFeatureValue(
-                            pos.featureIndex,
+                            pos.tableIndex,
                             zoomInterpolatedAttributeValue(attributeValue(range.min), attributeValue(range.max)));
                     }
                     continue;
@@ -709,7 +719,8 @@ public:
                               const ImagePositions& patternPositions,
                               const std::optional<PatternDependency>& patternDependencies,
                               const CanonicalTileID&,
-                              const style::expression::Value&) override {
+                              const style::expression::Value&,
+                              [[maybe_unused]] std::size_t tableIndex) override {
 #if MLN_UBO_CONSOLIDATION
         if (this->featureTable) {
             std::array<uint16_t, 4> minRect{};
@@ -726,11 +737,11 @@ public:
                     maxRect = max->second.tlbr();
                 }
             }
-            if (patternRects.size() <= index) {
-                patternRects.resize(index + 1);
+            if (patternRects.size() <= tableIndex) {
+                patternRects.resize(tableIndex + 1);
             }
-            patternRects[index] = {minRect, midRect, maxRect};
-            publishPattern(index);
+            patternRects[tableIndex] = {minRect, midRect, maxRect};
+            publishPattern(tableIndex);
             return;
         }
 #endif
@@ -991,6 +1002,7 @@ public:
 #if MLN_UBO_CONSOLIDATION
         featureIndexVector = std::move(other.featureIndexVector);
         featureIndexRequired = other.featureIndexRequired;
+        featureSlot = other.featureSlot;
 #endif
 
         (([&] {
@@ -1012,15 +1024,25 @@ public:
         interleavedVertexBuffer.sharedVertexVector->extend(
             (length - interleavedVertexBuffer.vertexCount) * interleavedVertexBuffer.stride, {});
 
-        util::ignore({(binders.template get<Ps>()->populateVertexVector(
-                           feature, length, index, patternPositions, patternDependencies, canonical, formattedSection),
-                       0)...});
+        const std::size_t tableIndex =
+#if MLN_UBO_CONSOLIDATION
+            // Dense slot index for this feature.
+            // The source-layer `index` stays in `featureMap` so feature-state updates can call `layer.getFeature`.
+            featureIndexRequired ? featureSlot++ : index;
+#else
+            index;
+#endif
+
+        util::ignore({(
+            binders.template get<Ps>()->populateVertexVector(
+                feature, length, index, patternPositions, patternDependencies, canonical, formattedSection, tableIndex),
+            0)...});
 
 #if MLN_UBO_CONSOLIDATION
         if (featureIndexRequired && featureIndexVector) {
             const auto start = featureIndexVector->elements();
             if (length > start) {
-                featureIndexVector->extend(length - start, static_cast<uint32_t>(index));
+                featureIndexVector->extend(length - start, static_cast<uint32_t>(tableIndex));
                 featureIndexVector->updateModified(true);
             }
         }
@@ -1087,6 +1109,7 @@ private:
 #if MLN_UBO_CONSOLIDATION
     gfx::VertexVectorPtr<uint32_t> featureIndexVector;
     bool featureIndexRequired = false;
+    std::size_t featureSlot = 0;
 #endif
 };
 
