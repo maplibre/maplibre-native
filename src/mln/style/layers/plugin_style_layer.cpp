@@ -18,6 +18,12 @@ std::optional<std::string> pluginTransitionPropertyName(const plugin::LayerType&
     return definition && definition->supportsTransitions ? std::optional<std::string>{std::move(propertyName)}
                                                          : std::nullopt;
 }
+
+Value resourcesValue(const std::map<std::string, std::string>& urls) {
+    mapbox::base::ValueObject object;
+    for (const auto& [name, url] : urls) object.emplace(name, url);
+    return object;
+}
 } // namespace
 
 PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, plugin::RegisteredLayerPtr registration_)
@@ -36,7 +42,7 @@ bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const
         const bool theirsSet = theirs != otherProperties.end();
         if (mineSet != theirsSet || (mineSet && !(mine->second == theirs->second))) return true;
     }
-    return false;
+    return pluginResources != static_cast<const Impl&>(other).pluginResources;
 }
 
 void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
@@ -82,12 +88,46 @@ StyleProperty PluginStyleLayer::getProperty(const std::string& name) const {
                    ? StyleProperty{TransitionOptions{}.serialize(), StyleProperty::Kind::Transition}
                    : StyleProperty{transition->second.serialize(), StyleProperty::Kind::Transition};
     }
+    if (const auto resources = impl().pluginResources.find(name); resources != impl().pluginResources.end()) {
+        return {resourcesValue(resources->second), StyleProperty::Kind::Constant};
+    }
     const auto value = impl().pluginProperties.find(name);
     if (value != impl().pluginProperties.end()) {
         return value->second.toStyleProperty();
     }
     const auto definition = impl().registration->findProperty(name);
+    if (definition && definition->type == MLN_PLUGIN_VALUE_RESOURCES) return {};
     return definition ? defaultPluginPropertyValue(*definition).toStyleProperty() : StyleProperty{};
+}
+
+std::optional<conversion::Error> PluginStyleLayer::setPluginResources(const std::string& name,
+                                                                      const conversion::Convertible& value) {
+    using namespace conversion;
+    auto impl_ = mutableImpl();
+    if (isUndefined(value)) {
+        if (impl_->pluginResources.erase(name) != 0) {
+            baseImpl = std::move(impl_);
+            observer->onLayerChanged(*this);
+        }
+        return std::nullopt;
+    }
+    if (!isObject(value)) return Error{"plugin property '" + name + "' must be an object of names to URLs"};
+    std::map<std::string, std::string> urls;
+    const auto error = eachMember(value,
+                                  [&](const std::string& key, const Convertible& member) -> std::optional<Error> {
+                                      auto url = toString(member);
+                                      if (!url || url->empty())
+                                          return Error{"plugin property '" + name + "' maps '" + key + "' to no URL"};
+                                      urls.emplace(key, std::move(*url));
+                                      return std::nullopt;
+                                  });
+    if (error) return error;
+    const auto existing = impl_->pluginResources.find(name);
+    if (existing != impl_->pluginResources.end() && existing->second == urls) return std::nullopt;
+    impl_->pluginResources.insert_or_assign(name, std::move(urls));
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+    return std::nullopt;
 }
 
 std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::string& name,
@@ -102,6 +142,8 @@ std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::
             return Error{"plugin property '" + name + "' is in the wrong style section"};
         }
     }
+
+    if (definition->type == MLN_PLUGIN_VALUE_RESOURCES) return setPluginResources(name, value);
 
     auto impl_ = mutableImpl();
     if (isUndefined(value)) {
@@ -167,6 +209,11 @@ Value PluginStyleLayer::serialize() const {
         if (property.getKind() != StyleProperty::Kind::Undefined) {
             object.getObject()->insert_or_assign(name, property.getValue());
         }
+    }
+    for (const auto& [name, urls] : impl().pluginResources) {
+        auto& layout = result["layout"];
+        if (!layout.getObject()) layout = mapbox::base::ValueObject{};
+        layout.getObject()->insert_or_assign(name, resourcesValue(urls));
     }
     for (const auto& [name, transition] : impl().pluginPropertyTransitions) {
         auto& paint = result["paint"];

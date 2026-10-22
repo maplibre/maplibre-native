@@ -11,6 +11,7 @@
 #include <mln/geometry/feature_index.hpp>
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
+#include <mln/tile/layout_resource_manager.hpp>
 #include <mln/tile/tile.hpp>
 #include <mln/util/containers.hpp>
 
@@ -20,7 +21,6 @@
 
 namespace mln {
 
-class FileSource;
 class GeometryTile;
 class GeometryTileData;
 class Layout;
@@ -48,7 +48,6 @@ public:
                        gfx::DynamicTextureAtlasPtr,
                        std::shared_ptr<FontFaces> fontFaces,
                        bool captureRenderedFeatures,
-                       std::shared_ptr<FileSource> fileSource,
                        TileObserver*);
     ~GeometryTileWorker();
 
@@ -71,6 +70,8 @@ public:
                            ImageVersionMap versionMap,
                            uint64_t imageCorrelationID);
 
+    void onLayoutResourcesAvailable(LayoutResourceMap);
+
 private:
     void coalesced();
     void parse();
@@ -80,6 +81,7 @@ private:
 
     void requestNewGlyphs(const GlyphDependencies&);
     void requestNewImages(const ImageDependencies&);
+    void requestNewResources(const LayoutResourceDependencies&);
 
     void symbolDependenciesChanged();
     bool hasPendingDependencies() const;
@@ -97,8 +99,6 @@ private:
     const MapMode mode;
     const float pixelRatio;
     const bool captureRenderedFeatures;
-    // Lets layouts (plugins) request resources through the style's file source.
-    std::shared_ptr<FileSource> fileSource;
 
     std::unique_ptr<FeatureIndex> featureIndex;
     mln::unordered_map<std::string, LayerRenderData> renderData;
@@ -125,10 +125,13 @@ private:
 
     GlyphDependencies pendingGlyphDependencies;
     ImageDependencies pendingImageDependencies;
+    LayoutResourceDependencies pendingResourceDependencies;
     GlyphMap glyphMap;
     ImageMap iconMap;
     ImageMap patternMap;
     ImageVersionMap versionMap;
+    // Every layout resource this tile has received, kept across parses like the glyphs.
+    LayoutResourceMap resourceMap;
     Immutable<std::set<std::string>> availableImages = makeMutable<std::set<std::string>>();
 
     bool showCollisionBoxes;

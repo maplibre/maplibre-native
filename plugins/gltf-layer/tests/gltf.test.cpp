@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <map>
 #include <set>
 #include <string>
 #include <string_view>
@@ -66,73 +65,51 @@ std::vector<uint8_t> triangleGLB(const std::string& baseColor = "1,0.5,0.25,1") 
     return glb;
 }
 
+mln_plugin_property_value_v1 modelID(void* model) {
+    mln_plugin_property_value_v1 property{};
+    property.struct_size = sizeof(property);
+    property.name = {"model-id", 8};
+    property.value.struct_size = sizeof(property.value);
+    property.value.type = MLN_PLUGIN_VALUE_RESOURCE;
+    property.value.data.resource_value = {{"model", 5}, model};
+    return property;
+}
+
+// Lays out one feature per entry of `models`, all at `points`, with feature indices from `firstIndex`.
 mln_plugin_bucket_v1 layOut(const mln_plugin_layer_type_v1& layer,
                             const std::vector<mln_plugin_tile_point_v1>& points,
-                            void*& instance) {
+                            const std::vector<void*>& models,
+                            void*& instance,
+                            uint64_t firstIndex = 3) {
     mln_plugin_layout_context_v1 context{};
     context.struct_size = sizeof(context);
     context.extent = 8192;
     instance = nullptr;
     CHECK(layer.create_layout(&context, &instance) == MLN_PLUGIN_STATUS_OK);
-    mln_plugin_feature_v1 feature{};
-    feature.struct_size = sizeof(feature);
-    feature.geometry_type = MLN_PLUGIN_GEOMETRY_POINT;
-    feature.feature_index = 3;
-    feature.points = points.data();
-    feature.point_count = points.size();
-    CHECK(layer.layout_feature(instance, &feature) == MLN_PLUGIN_STATUS_OK);
+    for (size_t i = 0; i < models.size(); ++i) {
+        const auto property = modelID(models[i]);
+        mln_plugin_feature_v1 feature{};
+        feature.struct_size = sizeof(feature);
+        feature.geometry_type = MLN_PLUGIN_GEOMETRY_POINT;
+        feature.feature_index = firstIndex + i;
+        feature.points = points.data();
+        feature.point_count = points.size();
+        feature.layout_properties = &property;
+        feature.layout_property_count = 1;
+        CHECK(layer.layout_feature(instance, &feature) == MLN_PLUGIN_STATUS_OK);
+    }
     mln_plugin_bucket_v1 bucket{};
     bucket.struct_size = sizeof(bucket);
     CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
     return bucket;
 }
 
-// A host that serves test://triangle.glb and the urls in otherGLBs, and fails every other.
-std::vector<uint8_t> servedGLB;
-std::map<std::string, std::vector<uint8_t>> otherGLBs;
-int resourceRequests = 0;
-mln_plugin_status requestResource(void*,
-                                  mln_plugin_string url,
-                                  mln_plugin_resource_callback_fn callback,
-                                  void* callbackContext,
-                                  uint64_t* requestID) {
-    ++resourceRequests;
-    *requestID = 1;
-    mln_plugin_resource_response_v1 response{};
-    response.struct_size = sizeof(response);
-    static const char missing[] = "not found";
-    if (std::string_view(url.data, url.size) == "test://triangle.glb") {
-        response.data = servedGLB.data();
-        response.data_size = servedGLB.size();
-    } else if (const auto other = otherGLBs.find(std::string(url.data, url.size)); other != otherGLBs.end()) {
-        response.data = other->second.data();
-        response.data_size = other->second.size();
-    } else {
-        response.error_message = {missing, sizeof(missing) - 1};
-    }
-    callback(callbackContext, &response);
-    return MLN_PLUGIN_STATUS_OK;
-}
-
-mln_plugin_status createWithModelURI(const mln_plugin_layer_type_v1& layer, const char* uri, void*& instance) {
-    // The layout keeps the host pointer after create_layout returns, so it has to outlive this call.
-    static mln_plugin_host_api_v1 host{};
-    host.struct_size = sizeof(host);
-    host.request_resource = requestResource;
-    mln_plugin_property_value_v1 property{};
-    property.struct_size = sizeof(property);
-    property.name = {"model-uri", 9};
-    property.value.struct_size = sizeof(property.value);
-    property.value.type = MLN_PLUGIN_VALUE_STRING;
-    property.value.data.string_value = {uri, std::strlen(uri)};
-    mln_plugin_layout_context_v1 context{};
-    context.struct_size = sizeof(context);
-    context.extent = 8192;
-    context.properties = &property;
-    context.property_count = 1;
-    context.host = &host;
-    instance = nullptr;
-    return layer.create_layout(&context, &instance);
+void* createModel(const mln_plugin_layer_type_v1& layer, const std::vector<uint8_t>& glb) {
+    void* handle = nullptr;
+    CHECK(layer.create_resource(nullptr, {"test://model.glb", 16}, glb.data(), glb.size(), &handle) ==
+          MLN_PLUGIN_STATUS_OK);
+    CHECK(handle);
+    return handle;
 }
 } // namespace
 
@@ -143,11 +120,18 @@ int main() {
     const auto& layer = registered->layer_types[0];
     CHECK(std::string_view(layer.layer_type.data, layer.layer_type.size) == "gltf");
     CHECK(layer.backend_mask == MLN_PLUGIN_BACKEND_METAL && layer.enable_near_clipped_matrix);
+    CHECK(layer.create_resource && layer.destroy_resource);
 
-    // Every property is bound to the shader, and the binding offsets stay inside the uniform block.
+    // `models` maps names to .glb files and `model-id` names one of them; both are layout properties.
+    CHECK(layer.properties[0].type == MLN_PLUGIN_VALUE_RESOURCES &&
+          layer.properties[0].scope == MLN_PLUGIN_PROPERTY_LAYOUT);
+    CHECK(layer.properties[1].type == MLN_PLUGIN_VALUE_RESOURCE &&
+          layer.properties[1].scope == MLN_PLUGIN_PROPERTY_LAYOUT);
+    CHECK(std::string_view(layer.properties[1].resources.data, layer.properties[1].resources.size) == "models");
+
+    // Every paint property is bound to the shader, and the binding offsets stay inside the uniform block.
     const auto& shader = layer.shaders[0];
-    // `model-uri` is a layout property: read at layout time, not bound.
-    CHECK(shader.property_binding_count + 1 == layer.property_count);
+    CHECK(shader.property_binding_count + 2 == layer.property_count);
     CHECK(shader.attribute_count <= MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES);
     std::set<uint32_t> locations;
     for (size_t i = 0; i < shader.attribute_count; ++i) {
@@ -165,25 +149,27 @@ int main() {
         CHECK((binding.interpolation_uniform_byte_offset - 128) / sizeof(float) == i);
     }
 
-    // Without a mesh a tile lays out to nothing instead of failing.
+    // A malformed or empty asset is rejected and yields no handle.
+    const uint8_t garbage[] = {1, 2, 3, 4, 5, 6, 7, 8};
+    void* handle = &handle;
+    CHECK(layer.create_resource(nullptr, {"test://bad.glb", 14}, garbage, sizeof(garbage), &handle) ==
+          MLN_PLUGIN_STATUS_CALLBACK_ERROR);
+    CHECK(handle == nullptr);
+    CHECK(layer.create_resource(nullptr, {"test://empty.glb", 16}, nullptr, 0, &handle) ==
+          MLN_PLUGIN_STATUS_CALLBACK_ERROR);
+    CHECK(handle == nullptr);
+
+    // A feature without a model (its name is not in `models`, or the model failed to load) is skipped.
     void* instance = nullptr;
-    auto bucket = layOut(layer, {{10, 10}}, instance);
+    auto bucket = layOut(layer, {{10, 10}}, {nullptr}, instance);
     CHECK(bucket.drawable_count == 0 && bucket.index_count == 0);
     layer.destroy_layout(instance);
 
-    // A malformed asset is rejected with a diagnostic and leaves the mesh unset.
-    char message[256] = {};
-    const uint8_t garbage[] = {1, 2, 3, 4, 5, 6, 7, 8};
-    CHECK(mln_gltf_layer_set_model(garbage, sizeof(garbage), message, sizeof(message)) ==
-          MLN_PLUGIN_STATUS_INVALID_ARGUMENT);
-    CHECK(message[0] != '\0');
-
     const auto glb = triangleGLB();
-    CHECK(mln_gltf_layer_set_model(glb.data(), glb.size(), message, sizeof(message)) == MLN_PLUGIN_STATUS_OK);
-    CHECK(message[0] == '\0');
+    void* triangle = createModel(layer, glb);
 
     // Two in-tile points; the out-of-tile pair belongs to the neighbouring tiles.
-    bucket = layOut(layer, {{0, 0}, {8191, 8191}, {8192, 0}, {-1, 0}}, instance);
+    bucket = layOut(layer, {{0, 0}, {8191, 8191}, {8192, 0}, {-1, 0}}, {triangle}, instance);
     CHECK(bucket.vertex_stream_count == 1 && bucket.vertex_streams[0].vertex_count == 6);
     CHECK(bucket.vertex_streams[0].stride == 44);
     CHECK(bucket.index_count == 6 && bucket.drawable_count == 1);
@@ -199,7 +185,7 @@ int main() {
     // Enough points to overflow one 16-bit segment: the layout must split rather than wrap.
     std::vector<mln_plugin_tile_point_v1> many(40000);
     for (size_t i = 0; i < many.size(); ++i) many[i] = {static_cast<int16_t>(i % 8000), static_cast<int16_t>(i / 8000)};
-    bucket = layOut(layer, many, instance);
+    bucket = layOut(layer, many, {triangle}, instance);
     CHECK(bucket.drawables[0].segment_count >= 2);
     for (size_t i = 0; i < bucket.drawables[0].segment_count; ++i) {
         CHECK(bucket.drawables[0].segments[i].vertex_length <= 65535);
@@ -214,79 +200,17 @@ int main() {
     CHECK(layer.update_uniform_block(&uniformContext, 0, output.data(), output.size()) == MLN_PLUGIN_STATUS_OK);
     CHECK(reinterpret_cast<const float*>(output.data())[20 + 2] == 4.5f);
 
-    // A layer's `model-uri` is loaded through the host and cached per uri.
-    CHECK(mln_gltf_layer_set_model(nullptr, 0, nullptr, 0) == MLN_PLUGIN_STATUS_OK);
-    servedGLB = glb;
-    CHECK(createWithModelURI(layer, "test://triangle.glb", instance) == MLN_PLUGIN_STATUS_OK);
-    mln_plugin_feature_v1 uriFeature{};
-    const mln_plugin_tile_point_v1 uriPoint{5, 5};
-    uriFeature.struct_size = sizeof(uriFeature);
-    uriFeature.geometry_type = MLN_PLUGIN_GEOMETRY_POINT;
-    uriFeature.points = &uriPoint;
-    uriFeature.point_count = 1;
-    CHECK(layer.layout_feature(instance, &uriFeature) == MLN_PLUGIN_STATUS_OK);
-    bucket = {};
-    bucket.struct_size = sizeof(bucket);
-    CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
-    CHECK(bucket.drawable_count == 1 && bucket.index_count == 3);
-    layer.destroy_layout(instance);
-    CHECK(resourceRequests == 1);
-    CHECK(createWithModelURI(layer, "test://triangle.glb", instance) == MLN_PLUGIN_STATUS_OK);
-    layer.destroy_layout(instance);
-    CHECK(resourceRequests == 1);
-
-    // `model-uri` can be a feature expression: each feature then gets its own evaluated value, and a layer with
-    // no model of its own still draws the features that name one. A feature naming a model that cannot be
-    // loaded is skipped without failing the tile.
-    CHECK(createWithModelURI(layer, "", instance) == MLN_PLUGIN_STATUS_OK);
-    const auto layOutFeature = [&](const char* uri, uint64_t index) {
-        mln_plugin_property_value_v1 property{};
-        property.struct_size = sizeof(property);
-        property.name = {"model-uri", 9};
-        property.value.struct_size = sizeof(property.value);
-        property.value.type = MLN_PLUGIN_VALUE_STRING;
-        property.value.data.string_value = {uri, std::strlen(uri)};
-        mln_plugin_feature_v1 feature{};
-        feature.struct_size = sizeof(feature);
-        feature.geometry_type = MLN_PLUGIN_GEOMETRY_POINT;
-        feature.feature_index = index;
-        feature.points = &uriPoint;
-        feature.point_count = 1;
-        feature.layout_properties = &property;
-        feature.layout_property_count = 1;
-        return layer.layout_feature(instance, &feature);
-    };
-    CHECK(layOutFeature("", 1) == MLN_PLUGIN_STATUS_OK);                   // no model: skipped
-    CHECK(layOutFeature("test://missing.glb", 2) == MLN_PLUGIN_STATUS_OK); // unloadable: skipped
-    CHECK(layOutFeature("test://triangle.glb", 3) == MLN_PLUGIN_STATUS_OK);
-    bucket = {};
-    bucket.struct_size = sizeof(bucket);
-    CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
-    CHECK(bucket.feature_vertex_range_count == 1 && bucket.feature_vertex_ranges[0].feature_index == 3);
-    CHECK(bucket.index_count == 3);
-    layer.destroy_layout(instance);
-
-    // One layer, one tile, many models: every feature draws the model its `model-uri` evaluates to, each model
-    // is requested once, and each feature's vertices carry its own model's material.
+    // One layer, one tile, many models: every feature draws the model its `model-id` resolved to, and each
+    // feature's vertices carry its own model's material.
     constexpr int modelCount = 100;
-    for (int i = 0; i < modelCount; ++i) {
-        otherGLBs["test://model-" + std::to_string(i) + ".glb"] = triangleGLB(std::to_string(i / 100.0) + ",0,0,1");
-    }
-    const int requestsBefore = resourceRequests;
-    CHECK(createWithModelURI(layer, "", instance) == MLN_PLUGIN_STATUS_OK);
-    std::vector<std::string> featureURIs;
-    for (int i = 0; i < 2 * modelCount; ++i) { // every model twice, so the second use comes from the cache
-        featureURIs.push_back("test://model-" + std::to_string(i % modelCount) + ".glb");
-    }
-    for (size_t i = 0; i < featureURIs.size(); ++i) {
-        CHECK(layOutFeature(featureURIs[i].c_str(), 100 + i) == MLN_PLUGIN_STATUS_OK);
-    }
-    bucket = {};
-    bucket.struct_size = sizeof(bucket);
-    CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
-    CHECK(resourceRequests - requestsBefore == modelCount);
-    CHECK(bucket.drawable_count == 1 && bucket.feature_vertex_range_count == featureURIs.size());
-    CHECK(bucket.index_count == 3 * featureURIs.size());
+    std::vector<void*> models;
+    for (int i = 0; i < modelCount; ++i)
+        models.push_back(createModel(layer, triangleGLB(std::to_string(i / 100.0) + ",0,0,1")));
+    std::vector<void*> featureModels;
+    for (int i = 0; i < 2 * modelCount; ++i) featureModels.push_back(models[i % modelCount]);
+    bucket = layOut(layer, {{5, 5}}, featureModels, instance, 100);
+    CHECK(bucket.drawable_count == 1 && bucket.feature_vertex_range_count == featureModels.size());
+    CHECK(bucket.index_count == 3 * featureModels.size());
     for (size_t i = 0; i < bucket.feature_vertex_range_count; ++i) {
         const auto& range = bucket.feature_vertex_ranges[i];
         CHECK(range.feature_index == 100 + i && range.vertex_count == 3);
@@ -296,16 +220,8 @@ int main() {
     }
     layer.destroy_layout(instance);
 
-    // A uri that cannot be loaded fails the layout instead of drawing another model.
-    CHECK(createWithModelURI(layer, "test://missing.glb", instance) == MLN_PLUGIN_STATUS_CALLBACK_ERROR);
-    if (instance) layer.destroy_layout(instance);
-
-    // Clearing the mesh makes later tiles lay out to nothing again.
-    CHECK(mln_gltf_layer_set_model(glb.data(), glb.size(), nullptr, 0) == MLN_PLUGIN_STATUS_OK);
-    CHECK(mln_gltf_layer_set_model(nullptr, 0, nullptr, 0) == MLN_PLUGIN_STATUS_OK);
-    bucket = layOut(layer, {{1, 1}}, instance);
-    CHECK(bucket.drawable_count == 0);
-    layer.destroy_layout(instance);
+    for (void* model : models) layer.destroy_resource(model);
+    layer.destroy_resource(triangle);
 
     std::cout << "gltf descriptor, parser and layout tests passed\n";
 }
