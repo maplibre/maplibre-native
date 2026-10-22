@@ -52,15 +52,16 @@ void addFillIndices(SegmentVector& fillSegments,
     triangleSegment.instanceCount += nInstances;
 
     for (std::size_t i = 0; i < nInstances; i++) {
-        fillTriangles.emplace_back(FillBucket::triangleInstance(static_cast<uint32_t>(startVertices) + indices[i * 3],
-                                                                ignoredVertices[indices[i * 3]],
-                                                                false,
-                                                                static_cast<uint32_t>(startVertices) + indices[i * 3 + 1],
-                                                                ignoredVertices[indices[i * 3 + 1]],
-                                                                false,
-                                                                static_cast<uint32_t>(startVertices) + indices[i * 3 + 2],
-                                                                ignoredVertices[indices[i * 3 + 2]],
-                                                                false));
+        fillTriangles.emplace_back(
+            FillBucket::triangleInstance(static_cast<uint32_t>(startVertices) + indices[i * 3],
+                                         ignoredVertices[indices[i * 3]],
+                                         false,
+                                         static_cast<uint32_t>(startVertices) + indices[i * 3 + 1],
+                                         ignoredVertices[indices[i * 3 + 1]],
+                                         false,
+                                         static_cast<uint32_t>(startVertices) + indices[i * 3 + 2],
+                                         ignoredVertices[indices[i * 3 + 2]],
+                                         false));
     }
 }
 
@@ -79,15 +80,16 @@ void addFillExternalIndices(SegmentVector& fillSegments,
     triangleSegment.instanceCount += nInstances;
 
     for (std::size_t i = 0; i < nInstances; i++) {
-        fillTriangles.emplace_back(FillBucket::triangleInstance(static_cast<uint32_t>(startVertices) + indices[i * 3],
-                                                                true,
-                                                                false,
-                                                                static_cast<uint32_t>(startVertices) + indices[i * 3 + 1],
-                                                                false,
-                                                                true,
-                                                                static_cast<uint32_t>(startVertices) + indices[i * 3 + 2],
-                                                                true,
-                                                                false));
+        fillTriangles.emplace_back(
+            FillBucket::triangleInstance(static_cast<uint32_t>(startVertices) + indices[i * 3],
+                                         true,
+                                         false,
+                                         static_cast<uint32_t>(startVertices) + indices[i * 3 + 1],
+                                         false,
+                                         true,
+                                         static_cast<uint32_t>(startVertices) + indices[i * 3 + 2],
+                                         true,
+                                         false));
     }
 }
 
