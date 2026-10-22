@@ -65,6 +65,11 @@ void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) 
         const auto property = impl.pluginProperties.find(definition.name);
         auto value = property == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
                                                              : property->second;
+        if (!definition.supportsTransitions) {
+            transitioningPaintProperties.insert_or_assign(definition.name,
+                                                          style::PluginTransitioningPropertyValue{std::move(value)});
+            continue;
+        }
         auto prior = transitioningPaintProperties.find(definition.name);
         auto priorValue = prior == transitioningPaintProperties.end()
                               ? style::PluginTransitioningPropertyValue{style::defaultPluginPropertyValue(definition)}

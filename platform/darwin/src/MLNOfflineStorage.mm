@@ -563,14 +563,17 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
 
 - (void)invalidatePack:(MLNOfflinePack *)pack
     withCompletionHandler:(void (^)(NSError *_Nullable))completion {
-  mln::OfflineRegion &region = *pack.mbglOfflineRegion;
-  NSError *error;
-  if (!pack.mbglOfflineRegion) {
-    completion(nil);
+  mln::OfflineRegion *region = pack.mbglOfflineRegion;
+  if (!region) {
+    if (completion) {
+      dispatch_async(dispatch_get_main_queue(), [completion](void) { completion(nil); });
+    }
     return;
   }
 
-  _mbglDatabaseFileSource->invalidateOfflineRegion(region, [&](std::exception_ptr exception) {
+  _mbglDatabaseFileSource->invalidateOfflineRegion(*region, [completion](
+                                                                std::exception_ptr exception) {
+    NSError *error = nil;
     if (exception) {
       error =
           [NSError errorWithDomain:MLNErrorDomain
@@ -579,10 +582,10 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
                             NSLocalizedDescriptionKey : @(mln::util::toString(exception).c_str()),
                           }];
     }
+    if (completion) {
+      dispatch_async(dispatch_get_main_queue(), [completion, error](void) { completion(error); });
+    }
   });
-  if (completion) {
-    dispatch_async(dispatch_get_main_queue(), [&, completion, error](void) { completion(error); });
-  }
 }
 
 - (void)reloadPacks {

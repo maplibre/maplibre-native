@@ -45,10 +45,13 @@ bool laysOut(const plugin::RegisteredLayer& registration,
              const style::PluginStyleLayer::Impl& leader,
              const GeometryTileFeature& feature,
              float zoom,
-             const CanonicalTileID& canonical) {
+             const CanonicalTileID& canonical,
+             const GlobalStateMap* globalState) {
     const auto type = plugin::geometryType(feature.getType());
     return type != 0 && (registration.geometryTypeMask & type) != 0 &&
-           leader.filter(style::expression::EvaluationContext(zoom, &feature).withCanonicalTileID(&canonical));
+           leader.filter(style::expression::EvaluationContext(zoom, &feature)
+                             .withCanonicalTileID(&canonical)
+                             .withGlobalState(globalState));
 }
 
 // The URL that a RESOURCE value names in the layer's RESOURCES property, or null.
@@ -120,6 +123,7 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                            plugin::RegisteredLayerPtr registration_,
                            LayoutResourceDependencies* resourceDependencies)
     : zoom(parameters.tileID.overscaledZ),
+      globalState(parameters.globalState),
       layers(std::move(layers_)),
       sourceLayer(std::move(sourceLayer_)),
       registration(std::move(registration_)) {
@@ -130,7 +134,9 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
     LayoutPropertyValues properties(*registration, leader, zoom);
     for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
         const auto feature = sourceLayer->getFeature(i);
-        if (!feature || !laysOut(*registration, leader, *feature, zoom, parameters.tileID.canonical)) continue;
+        if (!feature || !laysOut(*registration, leader, *feature, zoom, parameters.tileID.canonical, globalState.get())) {
+            continue;
+        }
         properties.evaluate(*feature);
         for (std::size_t p = 0; p < properties.definitions.size(); ++p) {
             if (properties.definitions[p]->type != MLN_PLUGIN_VALUE_RESOURCE) continue;
@@ -202,7 +208,7 @@ void PluginLayout::createBucket(const ImagePositions&,
     std::map<std::string, void*> handles;
     for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
         auto feature = sourceLayer->getFeature(i);
-        if (!feature || !laysOut(*registration, leader, *feature, zoom, canonical)) continue;
+        if (!feature || !laysOut(*registration, leader, *feature, zoom, canonical, globalState.get())) continue;
 
         properties.evaluate(*feature);
         for (std::size_t p = 0; p < properties.definitions.size(); ++p) {

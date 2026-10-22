@@ -1,41 +1,30 @@
 // Checks that every Objective-C class and constant declared in the public
-// headers of a built MapLibre XCFramework is marked MLN_EXPORT. Classes and
-// constants implemented in Objective-C++ are compiled with -fvisibility=hidden,
-// so without MLN_EXPORT they are missing from the dynamic framework.
+// headers of MapLibre is marked MLN_EXPORT. Classes and constants implemented in
+// Objective-C++ are compiled with -fvisibility=hidden, so without MLN_EXPORT they
+// are missing from the dynamic framework.
 //
-// Usage: check-public-symbols.js <sourcekitten> <iOS|macOS> <xcframework.zip>
+// Usage: check-public-symbols.js <sourcekitten> <iOS|macOS> <headers.zip>
 
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 
-const [sourcekitten, platform, xcframeworkZip] = process.argv.slice(2);
-const platforms = {
-  iOS: { slice: /^ios-arm64$/, sdk: "iphoneos" },
-  macOS: { slice: /^macos-/, sdk: "macosx" },
-};
-if (!xcframeworkZip || !platforms[platform]) {
-  console.error("Usage: check-public-symbols.js <sourcekitten> <iOS|macOS> <xcframework.zip>");
+const [sourcekitten, platform, headersZip] = process.argv.slice(2);
+const sdk = { iOS: "iphoneos", macOS: "macosx" }[platform];
+if (!headersZip || !sdk) {
+  console.error("Usage: check-public-symbols.js <sourcekitten> <iOS|macOS> <headers.zip>");
   process.exit(1);
 }
-const { slice, sdk } = platforms[platform];
 
-const tmp = fs.mkdtempSync(path.join(process.env.TEST_TMPDIR ?? os.tmpdir(), "xcframework-"));
-execFileSync("unzip", ["-q", xcframeworkZip, "-d", tmp]);
-const xcframework = path.join(tmp, "MapLibre.xcframework");
-const sliceName = fs.readdirSync(xcframework).find((name) => slice.test(name));
-if (!sliceName) {
-  console.error(`No ${platform} slice found in ${xcframeworkZip}`);
-  process.exit(1);
-}
-const frameworksDir = path.join(xcframework, sliceName);
-const umbrellaHeader = path.join(frameworksDir, "MapLibre.framework/Headers/MapLibre.h");
+const headersDir = fs.mkdtempSync(path.join(process.env.TEST_TMPDIR ?? os.tmpdir(), "headers-"));
+execFileSync("unzip", ["-q", headersZip, "-d", headersDir]);
+const umbrellaHeader = path.join(headersDir, "MapLibre.h");
 const sysroot = execFileSync("xcrun", ["--show-sdk-path", "--sdk", sdk]).toString().trim();
 
 const docs = JSON.parse(execFileSync(sourcekitten, [
   "doc", "--objc", umbrellaHeader, "--",
-  "-x", "objective-c", "-isysroot", sysroot, "-F", frameworksDir,
+  "-x", "objective-c", "-isysroot", sysroot, "-I", headersDir,
 ], { maxBuffer: Infinity }).toString());
 
 // Number of lines, up to and including the declaration, that may hold MLN_EXPORT.
