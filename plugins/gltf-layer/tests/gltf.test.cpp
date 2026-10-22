@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <map>
 #include <set>
 #include <string>
 #include <string_view>
@@ -29,11 +30,11 @@ void append32(std::vector<uint8_t>& out, uint32_t value) {
 }
 
 // A binary glTF holding one triangle with a base color factor, built by hand so the test needs no asset.
-std::vector<uint8_t> triangleGLB() {
+std::vector<uint8_t> triangleGLB(const std::string& baseColor = "1,0.5,0.25,1") {
     std::string json =
         R"({"asset":{"version":"2.0"},"scene":0,"scenes":[{"nodes":[0]}],"nodes":[{"mesh":0}],)"
         R"("meshes":[{"primitives":[{"attributes":{"POSITION":0},"indices":1,"material":0}]}],)"
-        R"("materials":[{"pbrMetallicRoughness":{"baseColorFactor":[1,0.5,0.25,1]}}],)"
+        R"("materials":[{"pbrMetallicRoughness":{"baseColorFactor":[)" + baseColor + R"(]}}],)"
         R"("buffers":[{"byteLength":44}],)"
         R"("bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":36},{"buffer":0,"byteOffset":36,"byteLength":6}],)"
         R"("accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[1,1,0]},)"
@@ -84,8 +85,9 @@ mln_plugin_bucket_v1 layOut(const mln_plugin_layer_type_v1& layer,
     return bucket;
 }
 
-// A host that serves one url and fails every other.
+// A host that serves test://triangle.glb and the urls in otherGLBs, and fails every other.
 std::vector<uint8_t> servedGLB;
+std::map<std::string, std::vector<uint8_t>> otherGLBs;
 int resourceRequests = 0;
 mln_plugin_status requestResource(void*,
                                   mln_plugin_string url,
@@ -100,6 +102,9 @@ mln_plugin_status requestResource(void*,
     if (std::string_view(url.data, url.size) == "test://triangle.glb") {
         response.data = servedGLB.data();
         response.data_size = servedGLB.size();
+    } else if (const auto other = otherGLBs.find(std::string(url.data, url.size)); other != otherGLBs.end()) {
+        response.data = other->second.data();
+        response.data_size = other->second.size();
     } else {
         response.error_message = {missing, sizeof(missing) - 1};
     }
@@ -252,6 +257,36 @@ int main() {
     CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
     CHECK(bucket.feature_vertex_range_count == 1 && bucket.feature_vertex_ranges[0].feature_index == 3);
     CHECK(bucket.index_count == 3);
+    layer.destroy_layout(instance);
+
+    // One layer, one tile, many models: every feature draws the model it names, each model is requested once,
+    // and each feature's vertices carry its own model's material.
+    constexpr int modelCount = 100;
+    for (int i = 0; i < modelCount; ++i) {
+        otherGLBs["test://model-" + std::to_string(i) + ".glb"] = triangleGLB(std::to_string(i / 100.0) + ",0,0,1");
+    }
+    const int requestsBefore = resourceRequests;
+    CHECK(createWithModelURI(layer, "", instance) == MLN_PLUGIN_STATUS_OK);
+    std::vector<std::string> featureJSON;
+    for (int i = 0; i < 2 * modelCount; ++i) { // every model twice, so the second use comes from the cache
+        featureJSON.push_back(R"({"model-uri":"test://model-)" + std::to_string(i % modelCount) + R"(.glb"})");
+    }
+    for (size_t i = 0; i < featureJSON.size(); ++i) {
+        CHECK(layOutFeature(featureJSON[i].c_str(), 100 + i) == MLN_PLUGIN_STATUS_OK);
+    }
+    bucket = {};
+    bucket.struct_size = sizeof(bucket);
+    CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
+    CHECK(resourceRequests - requestsBefore == modelCount);
+    CHECK(bucket.drawable_count == 1 && bucket.feature_vertex_range_count == featureJSON.size());
+    CHECK(bucket.index_count == 3 * featureJSON.size());
+    for (size_t i = 0; i < bucket.feature_vertex_range_count; ++i) {
+        const auto& range = bucket.feature_vertex_ranges[i];
+        CHECK(range.feature_index == 100 + i && range.vertex_count == 3);
+        const float* color = reinterpret_cast<const float*>(bucket.vertex_streams[0].data +
+                                                            range.first_vertex * 44 + 28);
+        CHECK(color[0] == static_cast<float>((i % modelCount) / 100.0));
+    }
     layer.destroy_layout(instance);
 
     // A uri that cannot be loaded fails the layout instead of drawing another model.
