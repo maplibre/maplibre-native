@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Stop the location component from keeping the map rendering at full frame rate while nothing changes. Location updates with an unchanged position, unchanged accuracy, and compass heading changes below 0.1° no longer restart the puck and camera animations ([#4821](https://github.com/maplibre/maplibre-native/issues/4821)).
+
 ## 13.7.1
 
 ### ✨ Features and improvements
