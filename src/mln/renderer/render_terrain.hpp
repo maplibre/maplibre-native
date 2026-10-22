@@ -76,6 +76,13 @@ public:
     std::set<UnwrappedTileID> computeMeshCover(const TransformState& state,
                                                const std::shared_ptr<UpdateParameters>& updateParameters) const;
 
+    /// The point the mesh-tile cap measures distance from, in normalized web-mercator [0, 1]:
+    /// the map centre.
+    static std::array<double, 2> meshTileCapOrigin(const TransformState& state);
+
+    /// Tiles a source may cover per tile of the mesh-tile cap (TileParameters::coverTileLimit).
+    static constexpr size_t sourceTilesPerMeshTile = 4;
+
     /// Resolve the DEM render source from the orchestrator if not yet bound.
     /// Renderer::Impl::render calls this before building the frame's drape-target
     /// pool from computeMeshCover: the source is otherwise first bound inside
