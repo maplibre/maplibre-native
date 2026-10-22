@@ -61,6 +61,8 @@ public:
 
     void bind() override {
         assert(context.getBackend().getCommandQueue());
+        // Work queued by the previous pass is ordered ahead of this one on the queue.
+        pendingCommandBuffer.reset();
         commandBuffer = NS::RetainPtr(context.getBackend().getCommandQueue()->commandBuffer());
         colorTexture->create();
 
@@ -99,14 +101,22 @@ public:
 
     void swap() override {
         assert(commandBuffer);
+        // Commit without blocking: the passes that sample this texture are later command
+        // buffers on the same queue (the view's frame buffer comes from the backend's queue
+        // too), which Metal runs in commit order. Only a CPU read of the texture
+        // (readStillImage) has to wait, and it waits there.
         commandBuffer->commit();
-        commandBuffer->waitUntilCompleted();
+        pendingCommandBuffer = std::move(commandBuffer);
         commandBuffer.reset();
         renderPassDescriptor.reset();
     }
 
     PremultipliedImage readStillImage() {
         assert(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
+        if (pendingCommandBuffer) {
+            pendingCommandBuffer->waitUntilCompleted();
+            pendingCommandBuffer.reset();
+        }
 
         auto data = std::make_unique<uint8_t[]>(colorTexture->getDataSize());
         MTL::Region region = MTL::Region::Make2D(0, 0, size.width, size.height);
@@ -143,6 +153,7 @@ private:
     gfx::Texture2DPtr depthTexture;
     gfx::Texture2DPtr stencilTexture;
     MTLCommandBufferPtr commandBuffer;
+    MTLCommandBufferPtr pendingCommandBuffer;
     MTLRenderPassDescriptorPtr renderPassDescriptor;
 };
 

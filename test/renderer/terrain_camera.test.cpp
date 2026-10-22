@@ -457,3 +457,22 @@ TEST(TerrainCamera, ClampDoesNotApplyAfterTerrainRemoval) {
 
     EXPECT_NEAR(test.altitude(), 0.0, 0.001);
 }
+
+// The depth pass (the symbol-occlusion depth texture) is a function of the camera and the mesh
+// set. With both unchanged the previous texture still holds, so a still frame runs no pass.
+// RenderingStats counters accumulate across frames, so the test reads differences.
+TEST(TerrainDepthPass, StillCameraSkipsThePass) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.renderAndGetAltitude(8);
+    const int settled = test.frontend.render(test.map).stats.numDepthPasses;
+
+    test.loop.runOnce();
+    const int still = test.frontend.render(test.map).stats.numDepthPasses;
+    EXPECT_EQ(still - settled, 0);
+
+    test.map.jumpTo(CameraOptions().withPitch(61.0));
+    test.loop.runOnce();
+    const int moved = test.frontend.render(test.map).stats.numDepthPasses;
+    EXPECT_EQ(moved - still, 1);
+}

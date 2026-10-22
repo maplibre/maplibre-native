@@ -41,7 +41,10 @@ public:
 
   void bind() override {
     if (!commandQueue) {
-      commandQueue = [mtlView.device newCommandQueue];
+      // The backend's queue, not one of our own: the offscreen passes (drape, depth, heatmap)
+      // commit to the backend's queue without waiting, and Metal orders command buffers
+      // only within one queue.
+      commandQueue = (__bridge id<MTLCommandQueue>)backend.getCommandQueue().get();
     }
 
     if (!commandBuffer) {
