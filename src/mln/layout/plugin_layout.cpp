@@ -134,7 +134,8 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
     LayoutPropertyValues properties(*registration, leader, zoom);
     for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
         const auto feature = sourceLayer->getFeature(i);
-        if (!feature || !laysOut(*registration, leader, *feature, zoom, parameters.tileID.canonical, globalState.get())) {
+        if (!feature ||
+            !laysOut(*registration, leader, *feature, zoom, parameters.tileID.canonical, globalState.get())) {
             continue;
         }
         properties.evaluate(*feature);
