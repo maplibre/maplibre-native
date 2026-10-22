@@ -253,9 +253,12 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setIs3D(true);
                 builder->setEnableStencil(true);
             } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
+                // Drawn like fill-extrusion: the per-layer depth mode is disabled above the opaque-pass
+                // cutoff, so a 2D drawable would not depth test against itself or the extrusions.
+                hasDepthDrawables = true;
                 builder->setEnableDepth(true);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setIs3D(false);
+                builder->setIs3D(true);
                 builder->setEnableStencil(false);
                 if (definition.cullBackFaces) {
                     builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
@@ -289,6 +292,11 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 ++stats.drawablesAdded;
             }
         }
+    }
+    if (hasDepthDrawables) {
+        // The group only applies the 3D depth mode to is3D drawables when it has stencil tiles; read-write
+        // drawables disable stencil, so no clipping masks are drawn for them.
+        tileLayerGroup->setStencilTiles(renderTiles);
     }
 }
 
