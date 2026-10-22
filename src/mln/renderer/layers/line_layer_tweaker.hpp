@@ -8,6 +8,9 @@
 #endif // MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU
 
 #include <string>
+#if MLN_UBO_CONSOLIDATION
+#include <vector>
+#endif
 
 namespace mln {
 
@@ -65,6 +68,8 @@ protected:
     gfx::UniformBufferPtr drawableUniformBuffer;
     gfx::UniformBufferPtr tilePropsUniformBuffer;
     gfx::UniformBufferPtr featureUniformBuffer;
+    // Ordered binders from the previous frame. `feature_base` is an offset into that concatenation.
+    std::vector<const void*> featureBinderOrder;
 #endif
 
 #if MLN_RENDER_BACKEND_METAL

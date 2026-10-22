@@ -6,15 +6,19 @@
 #include <mln/gfx/upload_pass.hpp>
 #include <mln/gfx/vertex_vector.hpp>
 #include <mln/layout/pattern_layout.hpp>
-#include <mln/shaders/attributes.hpp>
 #include <mln/renderer/cross_faded_property_evaluator.hpp>
 #include <mln/renderer/paint_property_statistics.hpp>
 #include <mln/renderer/possibly_evaluated_property_value.hpp>
+#include <mln/shaders/attributes.hpp>
 #include <mln/util/indexed_tuple.hpp>
 #include <mln/util/literal.hpp>
 #include <mln/util/type_list.hpp>
 #include <mln/util/variant.hpp>
 #include <mln/util/vectors.hpp>
+
+#if MLN_UBO_CONSOLIDATION
+#include <mln/shaders/line_layer_ubo.hpp>
+#endif
 
 #include <cstring>
 #include <type_traits>
@@ -703,9 +707,13 @@ public:
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
                               const CrossfadeParameters& crossfade_) override {
+#if MLN_UBO_CONSOLIDATION
+        // `pattern_from` follows zoom-in vs zoom-out. The fade itself lives in the tile-props UBO.
+        const bool directionChanged = (crossfade_.fromScale == 2.f) != (crossfade.fromScale == 2.f);
+#endif
         crossfade = crossfade_;
 #if MLN_UBO_CONSOLIDATION
-        if (this->featureTable) {
+        if (this->featureTable && directionChanged) {
             for (std::size_t featureIndex = 0; featureIndex < patternRects.size(); ++featureIndex) {
                 publishPattern(featureIndex);
             }
@@ -1003,6 +1011,11 @@ public:
         featureIndexVector = std::move(other.featureIndexVector);
         featureIndexRequired = other.featureIndexRequired;
         featureSlot = other.featureSlot;
+        featureRecords = std::move(other.featureRecords);
+        featureBase = other.featureBase;
+        featureRecordsDirty = other.featureRecordsDirty;
+        patternZoomingIn = other.patternZoomingIn;
+        other.featureRecordsDirty = true;
 #endif
 
         (([&] {
@@ -1057,13 +1070,36 @@ public:
                              const ImagePositions& imagePositions) {
         util::ignore({(binders.template get<Ps>()->updateVertexVectors(states, layer, imagePositions), 0)...});
         interleavedVertexBuffer.sharedVertexVector->updateModified(true);
+#if MLN_UBO_CONSOLIDATION
+        if (featureIndexRequired) {
+            featureRecordsDirty = true;
+        }
+#endif
     }
 
     void setPatternParameters(const std::optional<ImagePosition>& posA,
                               const std::optional<ImagePosition>& posB,
                               const CrossfadeParameters& crossfade) {
+#if MLN_UBO_CONSOLIDATION
+        if (featureIndexRequired) {
+            const bool zoomingIn = crossfade.fromScale == 2.f;
+            if (zoomingIn != patternZoomingIn) {
+                featureRecordsDirty = true;
+                patternZoomingIn = zoomingIn;
+            }
+        }
+#endif
         util::ignore({(binders.template get<Ps>()->setPatternParameters(posA, posB, crossfade), 0)...});
     }
+
+#if MLN_UBO_CONSOLIDATION
+    bool geFeatureRecordsDirty() const { return featureRecordsDirty; }
+    void clearFeatureRecordsDirty() { featureRecordsDirty = false; }
+    std::vector<shaders::LineFeatureUBO>& getFeatureRecords() { return featureRecords; }
+    const std::vector<shaders::LineFeatureUBO>& getFeatureRecords() const { return featureRecords; }
+    uint32_t getFeatureBase() const { return featureBase; }
+    void setFeatureBase(uint32_t base) { featureBase = base; }
+#endif
 
     template <class P>
     using ZoomInterpolatedAttributeList = typename Property<P>::ZoomInterpolatedAttributeList;
@@ -1110,6 +1146,14 @@ private:
     gfx::VertexVectorPtr<uint32_t> featureIndexVector;
     bool featureIndexRequired = false;
     std::size_t featureSlot = 0;
+    // Packed per-feature records
+    std::vector<shaders::LineFeatureUBO> featureRecords;
+    // Index of the feature's values within the buffer
+    uint32_t featureBase = 0;
+    // Feature state or pattern crossfade direction changed
+    bool featureRecordsDirty = true;
+    // Matches the default crossfade (`fromScale == 0`), which publishes `pattern_from` from `rects.max`.
+    bool patternZoomingIn = false;
 #endif
 };
 
