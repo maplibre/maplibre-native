@@ -124,6 +124,9 @@ public:
                                                          uint8_t minZoom,
                                                          const std::array<double, 2>& origin);
 
+    /// Tiles a source may cover per tile of the mesh-tile cap (TileParameters::coverTileLimit).
+    static constexpr size_t sourceTilesPerMeshTile = 4;
+
     /// Resolve the DEM render source from the orchestrator if not yet bound.
     /// Renderer::Impl::render calls this before building the frame's drape-target
     /// pool from computeMeshCover: the source is otherwise first bound inside
