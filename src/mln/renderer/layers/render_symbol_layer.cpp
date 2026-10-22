@@ -199,6 +199,7 @@ bool RenderSymbolLayer::hasCrossfade() const {
 
 void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTilesSortedByYPosition();
+    dropTilesBelowMinZoom(params);
 
     updateRenderTileIDs();
     addRenderPassesFromTiles();
