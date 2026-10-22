@@ -338,8 +338,9 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
             return false;
         }
         const bool layoutScope = property.scope == MLN_PLUGIN_PROPERTY_LAYOUT;
-        if (layoutScope && (property.supports_transitions || property.expression_capabilities != 0)) {
-            error = "plugin layout properties are constants and cannot use expressions or transitions";
+        if (layoutScope && (property.supports_transitions ||
+                            (property.expression_capabilities & MLN_PLUGIN_EXPRESSION_FEATURE_STATE) != 0)) {
+            error = "plugin layout properties cannot use feature state or transitions";
             return false;
         }
         const bool transitionableType = property.type == MLN_PLUGIN_VALUE_FLOAT ||
@@ -514,7 +515,8 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         for (const auto& property : copiedLayerType.properties) {
             const auto dataDependencies = MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_COMPOSITE |
                                           MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
-            if ((property.expressionCapabilities & dataDependencies) == 0) continue;
+            // Layout properties are evaluated per feature at layout time, not through binders.
+            if (property.layout || (property.expressionCapabilities & dataDependencies) == 0) continue;
             const bool bound = std::any_of(
                 copiedLayerType.shaders.begin(), copiedLayerType.shaders.end(), [&](const auto& shader) {
                     return std::any_of(shader.propertyBindings.begin(),

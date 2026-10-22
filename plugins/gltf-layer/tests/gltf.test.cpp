@@ -34,7 +34,9 @@ std::vector<uint8_t> triangleGLB(const std::string& baseColor = "1,0.5,0.25,1") 
     std::string json =
         R"({"asset":{"version":"2.0"},"scene":0,"scenes":[{"nodes":[0]}],"nodes":[{"mesh":0}],)"
         R"("meshes":[{"primitives":[{"attributes":{"POSITION":0},"indices":1,"material":0}]}],)"
-        R"("materials":[{"pbrMetallicRoughness":{"baseColorFactor":[)" + baseColor + R"(]}}],)"
+        R"("materials":[{"pbrMetallicRoughness":{"baseColorFactor":[)" +
+        baseColor +
+        R"(]}}],)"
         R"("buffers":[{"byteLength":44}],)"
         R"("bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":36},{"buffer":0,"byteOffset":36,"byteLength":6}],)"
         R"("accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[1,1,0]},)"
@@ -233,25 +235,30 @@ int main() {
     layer.destroy_layout(instance);
     CHECK(resourceRequests == 1);
 
-    // A feature can name its own model through a `model-uri` attribute; it overrides the layer's, and a layer
-    // with no model of its own still draws the features that name one. A feature naming a model that cannot be
+    // `model-uri` can be a feature expression: each feature then gets its own evaluated value, and a layer with
+    // no model of its own still draws the features that name one. A feature naming a model that cannot be
     // loaded is skipped without failing the tile.
     CHECK(createWithModelURI(layer, "", instance) == MLN_PLUGIN_STATUS_OK);
-    const auto layOutFeature = [&](const char* json, uint64_t index) {
+    const auto layOutFeature = [&](const char* uri, uint64_t index) {
+        mln_plugin_property_value_v1 property{};
+        property.struct_size = sizeof(property);
+        property.name = {"model-uri", 9};
+        property.value.struct_size = sizeof(property.value);
+        property.value.type = MLN_PLUGIN_VALUE_STRING;
+        property.value.data.string_value = {uri, std::strlen(uri)};
         mln_plugin_feature_v1 feature{};
         feature.struct_size = sizeof(feature);
         feature.geometry_type = MLN_PLUGIN_GEOMETRY_POINT;
         feature.feature_index = index;
         feature.points = &uriPoint;
         feature.point_count = 1;
-        feature.properties_json = {json, std::strlen(json)};
+        feature.layout_properties = &property;
+        feature.layout_property_count = 1;
         return layer.layout_feature(instance, &feature);
     };
-    CHECK(layOutFeature(R"({"name":"a"})", 1) == MLN_PLUGIN_STATUS_OK);                       // no model: skipped
-    CHECK(layOutFeature(R"({"model-uri":"test://missing.glb"})", 2) == MLN_PLUGIN_STATUS_OK); // unloadable: skipped
-    CHECK(layOutFeature(R"({"model-uri":"test://triangle.glb"})", 3) == MLN_PLUGIN_STATUS_OK);
-    CHECK(layOutFeature(R"({"model-uri":7})", 4) == MLN_PLUGIN_STATUS_OK); // not a string: skipped
-    CHECK(layOutFeature("not json", 5) == MLN_PLUGIN_STATUS_OK);
+    CHECK(layOutFeature("", 1) == MLN_PLUGIN_STATUS_OK);                   // no model: skipped
+    CHECK(layOutFeature("test://missing.glb", 2) == MLN_PLUGIN_STATUS_OK); // unloadable: skipped
+    CHECK(layOutFeature("test://triangle.glb", 3) == MLN_PLUGIN_STATUS_OK);
     bucket = {};
     bucket.struct_size = sizeof(bucket);
     CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
@@ -259,32 +266,32 @@ int main() {
     CHECK(bucket.index_count == 3);
     layer.destroy_layout(instance);
 
-    // One layer, one tile, many models: every feature draws the model it names, each model is requested once,
-    // and each feature's vertices carry its own model's material.
+    // One layer, one tile, many models: every feature draws the model its `model-uri` evaluates to, each model
+    // is requested once, and each feature's vertices carry its own model's material.
     constexpr int modelCount = 100;
     for (int i = 0; i < modelCount; ++i) {
         otherGLBs["test://model-" + std::to_string(i) + ".glb"] = triangleGLB(std::to_string(i / 100.0) + ",0,0,1");
     }
     const int requestsBefore = resourceRequests;
     CHECK(createWithModelURI(layer, "", instance) == MLN_PLUGIN_STATUS_OK);
-    std::vector<std::string> featureJSON;
+    std::vector<std::string> featureURIs;
     for (int i = 0; i < 2 * modelCount; ++i) { // every model twice, so the second use comes from the cache
-        featureJSON.push_back(R"({"model-uri":"test://model-)" + std::to_string(i % modelCount) + R"(.glb"})");
+        featureURIs.push_back("test://model-" + std::to_string(i % modelCount) + ".glb");
     }
-    for (size_t i = 0; i < featureJSON.size(); ++i) {
-        CHECK(layOutFeature(featureJSON[i].c_str(), 100 + i) == MLN_PLUGIN_STATUS_OK);
+    for (size_t i = 0; i < featureURIs.size(); ++i) {
+        CHECK(layOutFeature(featureURIs[i].c_str(), 100 + i) == MLN_PLUGIN_STATUS_OK);
     }
     bucket = {};
     bucket.struct_size = sizeof(bucket);
     CHECK(layer.finish_layout(instance, &bucket) == MLN_PLUGIN_STATUS_OK);
     CHECK(resourceRequests - requestsBefore == modelCount);
-    CHECK(bucket.drawable_count == 1 && bucket.feature_vertex_range_count == featureJSON.size());
-    CHECK(bucket.index_count == 3 * featureJSON.size());
+    CHECK(bucket.drawable_count == 1 && bucket.feature_vertex_range_count == featureURIs.size());
+    CHECK(bucket.index_count == 3 * featureURIs.size());
     for (size_t i = 0; i < bucket.feature_vertex_range_count; ++i) {
         const auto& range = bucket.feature_vertex_ranges[i];
         CHECK(range.feature_index == 100 + i && range.vertex_count == 3);
-        const float* color = reinterpret_cast<const float*>(bucket.vertex_streams[0].data +
-                                                            range.first_vertex * 44 + 28);
+        const float* color = reinterpret_cast<const float*>(bucket.vertex_streams[0].data + range.first_vertex * 44 +
+                                                            28);
         CHECK(color[0] == static_cast<float>((i % modelCount) / 100.0));
     }
     layer.destroy_layout(instance);

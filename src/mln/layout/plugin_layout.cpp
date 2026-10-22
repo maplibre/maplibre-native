@@ -129,26 +129,34 @@ void PluginLayout::createBucket(const ImagePositions&,
     context.zoom = zoom;
     context.extent = util::EXTENT;
 
-    // Layout-scope properties are constants; expressions are not evaluated here.
+    // Layout-scope properties, evaluated for the tile here and again for each feature below.
     LayoutResourceHost resourceHost(fileSource);
+    std::vector<const plugin::PropertyDefinition*> layoutDefinitions;
     std::vector<style::PluginPropertyValue> layoutValues;
-    std::vector<style::PluginPropertyValue::EvaluationStorage> layoutStorage(registration->properties.size());
     std::vector<mln_plugin_property_value_v1> layoutProperties;
+    layoutDefinitions.reserve(registration->properties.size());
     layoutValues.reserve(registration->properties.size());
     layoutProperties.reserve(registration->properties.size());
-    for (std::size_t i = 0; i < registration->properties.size(); ++i) {
-        const auto& definition = registration->properties[i];
+    for (const auto& definition : registration->properties) {
         if (!definition.layout) continue;
         const auto stored = leader.pluginProperties.find(definition.name);
+        layoutDefinitions.push_back(&definition);
         layoutValues.push_back(stored == leader.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
                                                                        : stored->second);
         mln_plugin_property_value_v1 property{};
         property.struct_size = sizeof(property);
         property.name = {definition.name.data(), definition.name.size()};
-        property.value = layoutValues.back().evaluate(zoom, definition, layoutStorage[i]);
         property.explicitly_set = stored != leader.pluginProperties.end();
         layoutProperties.push_back(property);
     }
+    std::vector<style::PluginPropertyValue::EvaluationStorage> layoutStorage(layoutValues.size());
+    for (std::size_t i = 0; i < layoutValues.size(); ++i) {
+        layoutProperties[i].value = layoutValues[i].evaluate(zoom, *layoutDefinitions[i], layoutStorage[i]);
+    }
+    // Per-feature copies; only data-driven values are evaluated again.
+    std::vector<mln_plugin_property_value_v1> featureProperties = layoutProperties;
+    std::vector<style::PluginPropertyValue::EvaluationStorage> featureStorage(layoutValues.size());
+    const FeatureState noFeatureState;
     context.properties = layoutProperties.data();
     context.property_count = layoutProperties.size();
     context.host = resourceHost.getAPI();
@@ -171,7 +179,14 @@ void PluginLayout::createBucket(const ImagePositions&,
             continue;
         }
 
-        const plugin::FeatureView pluginFeature(*feature, i, /*withProperties=*/true);
+        for (std::size_t p = 0; p < layoutValues.size(); ++p) {
+            if (!layoutValues[p].isDataDriven()) continue;
+            featureProperties[p].value = layoutValues[p].evaluate(
+                zoom, *feature, noFeatureState, *layoutDefinitions[p], featureStorage[p]);
+        }
+        plugin::FeatureView pluginFeature(*feature, i);
+        pluginFeature.value.layout_properties = featureProperties.data();
+        pluginFeature.value.layout_property_count = featureProperties.size();
         if (registration->layoutFeature(layoutInstance, &pluginFeature.value) != MLN_PLUGIN_STATUS_OK) {
             Log::Error(Event::Style, "Plugin layer '" + leader.id + "' failed while laying out a feature");
             return;

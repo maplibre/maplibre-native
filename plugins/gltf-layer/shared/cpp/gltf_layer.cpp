@@ -1,6 +1,5 @@
 #include "gltf_layer.hpp"
 
-#include <json.hpp>
 #include <tiny_gltf.h>
 
 #include <algorithm>
@@ -68,9 +67,9 @@ static_assert(sizeof(Vertex) == 44);
 
 struct Layout {
     const mln_plugin_host_api_v1* host = nullptr;
-    // The layer's model: its `model-uri`, or else the mesh set through mln_gltf_layer_set_model. Null when
-    // neither is given; a layer whose features all name their own model needs none. A feature's own
-    // `model-uri` attribute overrides it.
+    // The layer's model: its tile-wide `model-uri`, or else the mesh set through mln_gltf_layer_set_model.
+    // Null when neither is given; a layer whose `model-uri` is a feature expression needs none.
+    std::string uri;
     std::shared_ptr<const Model> model;
     // Models named by features, kept by uri so each is resolved once per tile and a failed one is not retried
     // for every feature. A null entry is a model that could not be loaded.
@@ -358,9 +357,9 @@ std::shared_ptr<const Model> loadModel(const mln_plugin_host_api_v1* host, const
 }
 
 // A string layout property by name; empty when absent.
-std::string layoutString(const mln_plugin_layout_context_v1& context, std::string_view name) {
-    for (size_t i = 0; i < context.property_count; ++i) {
-        const auto& property = context.properties[i];
+std::string layoutString(const mln_plugin_property_value_v1* properties, size_t count, std::string_view name) {
+    for (size_t i = 0; i < count; ++i) {
+        const auto& property = properties[i];
         if (std::string_view(property.name.data, property.name.size) != name) continue;
         if (property.value.type != MLN_PLUGIN_VALUE_STRING || !property.value.data.string_value.data) return {};
         return std::string(property.value.data.string_value.data, property.value.data.string_value.size);
@@ -376,23 +375,12 @@ void startSegment(Layout& layout) {
     layout.segments.push_back(segment);
 }
 
-// The `model-uri` property of a feature, or empty when it has none.
-// Only the layout can read feature properties, which is why the model, unlike heading or size, can differ per
-// feature but not per frame.
-std::string featureModelURI(const mln_plugin_feature_v1& feature) {
-    if (!feature.properties_json.data || feature.properties_json.size == 0) return {};
-    const auto properties = nlohmann::json::parse(
-        feature.properties_json.data, feature.properties_json.data + feature.properties_json.size, nullptr, false);
-    if (!properties.is_object()) return {};
-    const auto found = properties.find("model-uri");
-    return found != properties.end() && found->is_string() ? found->get<std::string>() : std::string{};
-}
-
-// The model a feature is drawn as: the one it names, else the layer's. Null when neither is usable, in which
-// case the feature is skipped rather than failing every other feature in the tile.
+// The model a feature is drawn as: its `model-uri`, which may be a feature expression, else the layer's.
+// Null when neither is usable, in which case the feature is skipped rather than failing every other feature
+// in the tile. The model is chosen at layout time, which is why it can differ per feature but not per frame.
 std::shared_ptr<const Model> modelForFeature(Layout& layout, const mln_plugin_feature_v1& feature) {
-    const auto uri = featureModelURI(feature);
-    if (uri.empty()) return layout.model;
+    const auto uri = layoutString(feature.layout_properties, feature.layout_property_count, "model-uri");
+    if (uri.empty() || uri == layout.uri) return layout.model;
     const auto cached = layout.featureModels.find(uri);
     if (cached != layout.featureModels.end()) return cached->second;
     auto model = loadModel(layout.host, uri);
@@ -408,10 +396,11 @@ mln_plugin_status createLayout(const mln_plugin_layout_context_v1* context, void
     if (!layout) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
     layout->host = context->host;
     // The layer's `model-uri` wins; a layer without one draws the mesh set through mln_gltf_layer_set_model.
-    // A uri that is given but cannot be loaded fails the layout rather than silently drawing another model.
-    const auto uri = layoutString(*context, "model-uri");
-    if (!uri.empty()) {
-        layout->model = loadModel(layout->host, uri);
+    // A constant uri that is given but cannot be loaded fails the layout rather than silently drawing another
+    // model. A feature expression evaluates to its default here, and each feature loads its own model.
+    layout->uri = layoutString(context->properties, context->property_count, "model-uri");
+    if (!layout->uri.empty()) {
+        layout->model = loadModel(layout->host, layout->uri);
         if (!layout->model) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
     } else {
         std::lock_guard lock(currentModelMutex);
@@ -604,13 +593,16 @@ constexpr mln_plugin_value text(mln_plugin_string t) {
     return v;
 }
 
-// A layout property is read once per tile by create_layout; it takes no expressions or transitions.
+// A layout property is evaluated when a tile is laid out, for the tile and for each feature; it takes camera
+// and feature expressions, but no feature state or transitions.
 constexpr mln_plugin_property_descriptor_v1 layoutProperty(mln_plugin_string name, mln_plugin_value value) {
     mln_plugin_property_descriptor_v1 p{};
     p.struct_size = sizeof(p);
     p.name = name;
     p.type = value.type;
     p.default_value = value;
+    p.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
+                                MLN_PLUGIN_EXPRESSION_COMPOSITE;
     p.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
     return p;
 }
@@ -636,6 +628,7 @@ constexpr mln_plugin_property_descriptor_v1 property(mln_plugin_string name,
 
 const mln_plugin_property_descriptor_v1 properties[] = {
     // A .glb with embedded buffers, loaded through the host's file source: an asset://, file:// or https:// url.
+    // May be a feature expression, e.g. ["get", "model"], so each feature draws its own model.
     // Optional: without it the layer draws the mesh set through mln_gltf_layer_set_model.
     layoutProperty(str("model-uri"), text(str(""))),
     // Degrees clockwise from north, applied on top of the mesh's own forward direction.

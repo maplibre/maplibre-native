@@ -139,9 +139,10 @@ typedef struct mln_plugin_property_descriptor_v1 {
     /* Optional allowed string values. */
     const mln_plugin_string* enum_values;
     size_t enum_value_count;
-    /* Layout properties are read once per tile by create_layout (see
-     * mln_plugin_layout_context_v1::properties); changing one relays out the
-     * tiles. They are constants: no expressions, no transitions, no binders. */
+    /* Layout properties are evaluated at layout time, once per tile and once per
+     * feature (see mln_plugin_feature_v1::layout_properties); changing one lays the
+     * tiles out again. They may use camera and feature expressions, but not
+     * feature state or transitions, and they have no binders. */
     mln_plugin_property_scope scope;
 } mln_plugin_property_descriptor_v1;
 
@@ -309,10 +310,11 @@ typedef struct mln_plugin_feature_v1 {
     /* path_offsets has path_count + 1 entries and ends at point_count. */
     const uint32_t* path_offsets;
     size_t path_count;
-    /* The feature's attributes as a UTF-8 JSON object. Populated for
-     * layout_feature only, empty otherwise. Borrowed and valid only during the
-     * callback. */
-    mln_plugin_string properties_json;
+    /* The layout-scope properties evaluated for this feature, in registration
+     * order. Populated for layout_feature only, empty otherwise. Borrowed and
+     * valid only during the callback. */
+    const mln_plugin_property_value_v1* layout_properties;
+    size_t layout_property_count;
 } mln_plugin_feature_v1;
 
 typedef struct mln_plugin_resource_response_v1 {
@@ -351,7 +353,8 @@ typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
-    /* Constant values of the layout-scope properties, in registration order. */
+    /* The layout-scope properties evaluated at the tile's zoom without a feature,
+     * in registration order. A feature expression yields its default here. */
     const mln_plugin_property_value_v1* properties;
     size_t property_count;
     /* Resource requests use MapLibre's configured file source and cache. */

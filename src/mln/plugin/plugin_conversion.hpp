@@ -4,12 +4,7 @@
 #include <mln/plugin/plugin_api.h>
 #include <mln/tile/geometry_tile_data.hpp>
 
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
-
-#include <cmath>
 #include <iterator>
-#include <string>
 #include <vector>
 
 namespace mln::plugin {
@@ -44,45 +39,10 @@ inline mln_plugin_geometry_type geometryType(FeatureType type) {
     return static_cast<mln_plugin_geometry_type>(0);
 }
 
-inline void writePropertyJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& value) {
-    value.match([&](const NullValue&) { writer.Null(); },
-                [&](bool v) { writer.Bool(v); },
-                [&](uint64_t v) { writer.Uint64(v); },
-                [&](int64_t v) { writer.Int64(v); },
-                [&](double v) { std::isfinite(v) ? writer.Double(v) : writer.Null(); },
-                [&](const std::string& v) { writer.String(v.data(), static_cast<rapidjson::SizeType>(v.size())); },
-                [&](const std::vector<Value>& array) {
-                    writer.StartArray();
-                    for (const auto& item : array) writePropertyJSON(writer, item);
-                    writer.EndArray();
-                },
-                [&](const PropertyMap& object) {
-                    writer.StartObject();
-                    for (const auto& [key, item] : object) {
-                        writer.Key(key.data(), static_cast<rapidjson::SizeType>(key.size()));
-                        writePropertyJSON(writer, item);
-                    }
-                    writer.EndObject();
-                });
-}
-
-// A feature's attributes as a JSON object, for layout callbacks.
-inline std::string propertiesJSON(const PropertyMap& properties) {
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    writer.StartObject();
-    for (const auto& [key, item] : properties) {
-        writer.Key(key.data(), static_cast<rapidjson::SizeType>(key.size()));
-        writePropertyJSON(writer, item);
-    }
-    writer.EndObject();
-    return std::string(buffer.GetString(), buffer.GetSize());
-}
-
 // Owns the flattened storage borrowed by a layout or query callback. Do not move
 // or copy it: the C view points into these vectors.
 struct FeatureView {
-    explicit FeatureView(const GeometryTileFeature& feature, uint64_t index = 0, bool withProperties = false) {
+    explicit FeatureView(const GeometryTileFeature& feature, uint64_t index = 0) {
         const auto& geometry = feature.getGeometries();
         offsets.reserve(geometry.size() + 1);
         offsets.push_back(0);
@@ -97,18 +57,14 @@ struct FeatureView {
                  points.size(),
                  offsets.data(),
                  geometry.size(),
-                 {}};
-        if (withProperties) {
-            propertiesStorage = propertiesJSON(feature.getProperties());
-            value.properties_json = {propertiesStorage.data(), propertiesStorage.size()};
-        }
+                 nullptr,
+                 0};
     }
     FeatureView(const FeatureView&) = delete;
     FeatureView& operator=(const FeatureView&) = delete;
 
     std::vector<mln_plugin_tile_point_v1> points;
     std::vector<uint32_t> offsets;
-    std::string propertiesStorage;
     mln_plugin_feature_v1 value{};
 };
 

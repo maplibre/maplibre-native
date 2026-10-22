@@ -23,7 +23,7 @@ struct PropertyDefinition {
     std::optional<float> minimum;
     std::optional<float> maximum;
     std::vector<std::string> enumValues;
-    // Layout properties are constants read by create_layout; they have no paint evaluation.
+    // Layout properties are evaluated at layout time, per tile and per feature; they have no paint evaluation.
     bool layout = false;
     bool operator==(const PropertyDefinition&) const = default;
 };
