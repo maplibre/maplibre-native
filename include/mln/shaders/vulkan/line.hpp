@@ -558,11 +558,12 @@ layout(location = 5) out lowp float frag_opacity;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 6) out mediump vec4 frag_pattern_from;
+// Atlas pixel rect. Flat highp: mediump interpolation drifts along a line.
+layout(location = 6) flat out highp vec4 frag_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 7) out mediump vec4 frag_pattern_to;
+layout(location = 7) flat out highp vec4 frag_pattern_to;
 #endif
 layout(location = 8) out mediump float frag_floorwidth;
 
@@ -679,11 +680,11 @@ layout(location = 5) in lowp float frag_opacity;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 6) in mediump vec4 frag_pattern_from;
+layout(location = 6) flat in highp vec4 frag_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 7) in mediump vec4 frag_pattern_to;
+layout(location = 7) flat in highp vec4 frag_pattern_to;
 #endif
 layout(location = 8) in mediump float frag_floorwidth;
 
@@ -742,15 +743,15 @@ void main() {
 #endif
 
 #ifdef HAS_UNIFORM_u_pattern_from
-    const lowp vec4 pattern_from = tileProps.pattern_from;
+    const highp vec4 pattern_from = tileProps.pattern_from;
 #else
-    const lowp vec4 pattern_from = frag_pattern_from;
+    const highp vec4 pattern_from = frag_pattern_from;
 #endif
 
 #ifdef HAS_UNIFORM_u_pattern_to
-    const lowp vec4 pattern_to = tileProps.pattern_to;
+    const highp vec4 pattern_to = tileProps.pattern_to;
 #else
-    const lowp vec4 pattern_to = frag_pattern_to;
+    const highp vec4 pattern_to = frag_pattern_to;
 #endif
 
     const vec2 pattern_tl_a = pattern_from.xy;

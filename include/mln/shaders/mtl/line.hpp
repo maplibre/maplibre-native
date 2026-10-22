@@ -575,10 +575,12 @@ struct FragmentStage {
     half opacity;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    half4 pattern_from;
+    // Atlas pixel rect. Flat full precision: half interpolation drifts along a
+    // line and the pattern phase error grows with distance.
+    float4 pattern_from [[flat]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    half4 pattern_to;
+    float4 pattern_to [[flat]];
 #endif
     float floorwidth;
 };
@@ -687,10 +689,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .opacity      = half(unpack_mix_float(featureValues.opacity, drawable.opacity_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_from = half4(featureValues.pattern_from),
+        .pattern_from = featureValues.pattern_from,
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-        .pattern_to   = half4(featureValues.pattern_to),
+        .pattern_to   = featureValues.pattern_to,
 #endif
         .floorwidth   = floorwidth,
     };

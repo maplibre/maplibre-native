@@ -504,8 +504,8 @@ struct VertexOutput {
     @location(3) v_linesofar: f32,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
-    @location(6) v_pattern_from: vec4<f32>,
-    @location(7) v_pattern_to: vec4<f32>,
+    @location(6) @interpolate(flat) v_pattern_from: vec4<f32>,
+    @location(7) @interpolate(flat) v_pattern_to: vec4<f32>,
     @location(8) v_floorwidth: f32,
 };
 
@@ -715,8 +715,8 @@ struct FragmentInput {
     @location(3) v_linesofar: f32,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
-    @location(6) v_pattern_from: vec4<f32>,
-    @location(7) v_pattern_to: vec4<f32>,
+    @location(6) @interpolate(flat) v_pattern_from: vec4<f32>,
+    @location(7) @interpolate(flat) v_pattern_to: vec4<f32>,
     @location(8) v_floorwidth: f32,
 };
 
