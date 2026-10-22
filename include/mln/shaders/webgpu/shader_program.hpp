@@ -82,7 +82,10 @@ public:
                   WGPUShaderModule vertexModule,
                   WGPUShaderModule fragmentModule);
 
-    ShaderProgram(Context& context, const std::string& vertexSource, const std::string& fragmentSource);
+    ShaderProgram(Context& context,
+                  const std::string& vertexSource,
+                  const std::string& fragmentSource,
+                  std::string name = "ContextShader");
 
     template <size_t N, size_t M>
     ShaderProgram(Context& context,

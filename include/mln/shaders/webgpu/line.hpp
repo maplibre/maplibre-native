@@ -188,22 +188,6 @@ fn main(in: VertexInput) -> VertexOutput {
     out.v_blur = blur;
     out.v_opacity = opacity;
 
-#ifdef MLN_FEATURE_INDEX
-#ifdef HAS_UNIFORM_u_color
-#ifdef HAS_UNIFORM_u_blur
-#ifdef HAS_UNIFORM_u_opacity
-#ifdef HAS_UNIFORM_u_gapwidth
-#ifdef HAS_UNIFORM_u_offset
-#ifdef HAS_UNIFORM_u_width
-    // Keep the feature binding live when this variant's sampled fields are all uniforms.
-    out.position.x += featureValues.color.x * 0.0;
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
     return out;
 }
 )";
@@ -419,19 +403,6 @@ fn main(in: VertexInput) -> VertexOutput {
     out.v_blur = blur;
     out.v_opacity = opacity;
 
-#ifdef MLN_FEATURE_INDEX
-#ifdef HAS_UNIFORM_u_blur
-#ifdef HAS_UNIFORM_u_opacity
-#ifdef HAS_UNIFORM_u_gapwidth
-#ifdef HAS_UNIFORM_u_offset
-#ifdef HAS_UNIFORM_u_width
-    out.position.x += featureValues.color.x * 0.0;
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
     return out;
 }
 )";
@@ -684,25 +655,6 @@ fn main(in: VertexInput) -> VertexOutput {
     out.v_pattern_to = pattern_to;
     out.v_floorwidth = floorwidth;
 
-#ifdef MLN_FEATURE_INDEX
-#ifdef HAS_UNIFORM_u_blur
-#ifdef HAS_UNIFORM_u_opacity
-#ifdef HAS_UNIFORM_u_gapwidth
-#ifdef HAS_UNIFORM_u_offset
-#ifdef HAS_UNIFORM_u_width
-#ifdef HAS_UNIFORM_u_floorwidth
-#ifdef HAS_UNIFORM_u_pattern_from
-#ifdef HAS_UNIFORM_u_pattern_to
-    out.position.x += featureValues.color.x * 0.0;
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
     return out;
 }
 )";
@@ -1042,23 +994,6 @@ fn main(in: VertexInput) -> VertexOutput {
     out.v_opacity = opacity;
     out.v_floorwidth = floorwidth;
 
-#ifdef MLN_FEATURE_INDEX
-#ifdef HAS_UNIFORM_u_color
-#ifdef HAS_UNIFORM_u_blur
-#ifdef HAS_UNIFORM_u_opacity
-#ifdef HAS_UNIFORM_u_gapwidth
-#ifdef HAS_UNIFORM_u_offset
-#ifdef HAS_UNIFORM_u_width
-#ifdef HAS_UNIFORM_u_floorwidth
-    out.position.x += featureValues.color.x * 0.0;
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
     return out;
 }
 )";
@@ -1338,21 +1273,6 @@ fn main(in: VertexInput) -> VertexOutput {
     out.v_floorwidth = floorwidth;
     out.v_lineprogress = v_lineprogress;
 
-#ifdef MLN_FEATURE_INDEX
-#ifdef HAS_UNIFORM_u_blur
-#ifdef HAS_UNIFORM_u_opacity
-#ifdef HAS_UNIFORM_u_gapwidth
-#ifdef HAS_UNIFORM_u_offset
-#ifdef HAS_UNIFORM_u_width
-#ifdef HAS_UNIFORM_u_floorwidth
-    out.position.x += featureValues.color.x * 0.0;
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
     return out;
 }
 )";

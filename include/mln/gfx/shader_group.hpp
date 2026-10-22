@@ -4,7 +4,6 @@
 #include <mln/util/containers.hpp>
 #include <mln/util/hash.hpp>
 
-#include <functional>
 #include <memory>
 #include <shared_mutex>
 #include <sstream>
@@ -15,13 +14,22 @@ namespace mln {
 
 using StringIDSetsPair = std::pair<unordered_set<std::string_view>, unordered_set<size_t>>;
 
-/// Define MLN_FEATURE_INDEX in the shader when the shared per-vertex index occupies `indexAttributeId`.
-/// That id is removed from the uniform id set when any feature-table property varies.
-template <typename Defines>
-void defineFeatureIndex(std::size_t indexAttributeId, const StringIDSetsPair& propertiesAsUniforms, Defines& defines) {
-    if (!propertiesAsUniforms.second.contains(indexAttributeId)) {
-        defines.insert(std::make_pair(std::string("MLN_FEATURE_INDEX"), std::string()));
+/// Define MLN_FEATURE_INDEX when any attribute in `attributeIds` is data-driven.
+/// Pass the paint attributes this shader samples. A constant property's id stays
+/// in the uniform set, including the id shared with the per-vertex feature index,
+/// so a variant declares the feature binding only when it reads that table.
+/// @return True if the define was added.
+template <typename AttributeIds, typename Defines>
+bool defineFeatureIndex(const AttributeIds& attributeIds,
+                        const StringIDSetsPair& propertiesAsUniforms,
+                        Defines& defines) {
+    for (const auto id : attributeIds) {
+        if (!propertiesAsUniforms.second.contains(static_cast<std::size_t>(id))) {
+            defines.insert(std::make_pair(std::string("MLN_FEATURE_INDEX"), std::string()));
+            return true;
+        }
     }
+    return false;
 }
 
 namespace gfx {

@@ -380,7 +380,7 @@ public:
                                                               featureTableBind),
          ...);
 #if MLN_UBO_CONSOLIDATION
-        finishFeatureTableBind(propertiesAsUniforms, firstDataDrivenAttrId, featureTableBind);
+        finishFeatureTableBind(firstDataDrivenAttrId, featureTableBind);
 #endif
     }
 
@@ -408,7 +408,7 @@ public:
                                                               featureTableBind),
          ...);
 #if MLN_UBO_CONSOLIDATION
-        finishFeatureTableBind(&propertiesAsUniforms, firstDataDrivenAttrId, featureTableBind);
+        finishFeatureTableBind(firstDataDrivenAttrId, featureTableBind);
 #endif
     }
 
@@ -439,17 +439,13 @@ protected:
     }
 
 #if MLN_UBO_CONSOLIDATION
-    void finishFeatureTableBind(StringIDSetsPair* propertiesAsUniforms,
-                                size_t indexAttributeId,
-                                FeatureTableBinding& featureTableBind) {
+    void finishFeatureTableBind(size_t indexAttributeId, FeatureTableBinding& featureTableBind) {
         if (!featureTableBind.needsIndex) {
             return;
         }
-        // The index replaces the first data-driven attribute even when that property
-        // itself is constant and a later property is the one that varies.
-        if (propertiesAsUniforms) {
-            propertiesAsUniforms->second.erase(indexAttributeId);
-        }
+        // The index occupies the pack's first attribute id on the drawable.
+        // Leave that id in the uniform set when the property itself is constant,
+        // so each shader can tell which of its own attributes are data-driven.
         bindFeatureIndex(indexAttributeId, featureTableBind.indexData);
     }
 #endif

@@ -298,14 +298,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
     float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
 
-#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_color) && defined(HAS_UNIFORM_u_blur) && \
-    defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && \
-    defined(HAS_UNIFORM_u_width)
-    // This shader only uses fields that are uniforms, but the feature table is in use for other fields.
-    // Keep the feature binding from being optimized away and breaking the binding indexes.
-    position.x += featureValues.color.x * 0.0;
-#endif
-
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
     const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
@@ -475,13 +467,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
     float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-
-#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && \
-    defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width)
-    // This shader only uses fields that are uniforms, but the feature table is in use for other fields.
-    // Keep the feature binding from being optimized away and breaking the binding indexes.
-    position.x += featureValues.color.x * 0.0;
-#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -662,14 +647,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
     float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-
-#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && \
-    defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width) && \
-    defined(HAS_UNIFORM_u_floorwidth) && defined(HAS_UNIFORM_u_pattern_from) && defined(HAS_UNIFORM_u_pattern_to)
-    // This shader only uses fields that are uniforms, but the feature table is in use for other fields.
-    // Keep the feature binding from being optimized away and breaking the binding indexes.
-    position.x += featureValues.color.x * 0.0;
-#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -908,14 +885,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
     float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
 
-#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_color) && defined(HAS_UNIFORM_u_blur) && \
-    defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && \
-    defined(HAS_UNIFORM_u_width) && defined(HAS_UNIFORM_u_floorwidth)
-    // This shader only uses fields that are uniforms, but the feature table is in use for other fields.
-    // Keep the feature binding from being optimized away and breaking the binding indexes.
-    position.x += featureValues.color.x * 0.0;
-#endif
-
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
     const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
@@ -1124,14 +1093,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
     float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-
-#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && \
-    defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width) && \
-    defined(HAS_UNIFORM_u_floorwidth)
-    // This shader only uses fields that are uniforms, but the feature table is in use for other fields.
-    // Keep the feature binding from being optimized away and breaking the binding indexes.
-    position.x += featureValues.color.x * 0.0;
-#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);

@@ -2,6 +2,7 @@
 
 #include <mln/gfx/shader_group.hpp>
 #include <mln/mtl/context.hpp>
+#include <mln/shaders/feature_index.hpp>
 #include <mln/shaders/mtl/common.hpp>
 #include <mln/shaders/mtl/shader_program.hpp>
 #include <mln/shaders/program_parameters.hpp>
@@ -61,12 +62,11 @@ public:
         if (!shader) {
             DefinesMap additionalDefines;
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
-            if constexpr (ShaderID == shaders::BuiltIn::LineShader ||
-                          ShaderID == shaders::BuiltIn::LineGradientShader ||
-                          ShaderID == shaders::BuiltIn::LinePatternShader ||
-                          ShaderID == shaders::BuiltIn::LineSDFShader ||
-                          ShaderID == shaders::BuiltIn::LineGradientSDFShader) {
-                defineFeatureIndex(shaders::idLineColorVertexAttribute, propertiesAsUniforms, additionalDefines);
+            constexpr auto featureIndexSlot = shaders::featureIndexAttributeId<ShaderID>();
+            [[maybe_unused]] bool useFeatureIndex = false;
+            if constexpr (featureIndexSlot.has_value()) {
+                useFeatureIndex = defineFeatureIndex(
+                    shaders::featureAttributeIds<ShaderID>(), propertiesAsUniforms, additionalDefines);
             }
 
             auto& context = static_cast<Context&>(gfxContext);
@@ -82,7 +82,18 @@ public:
 
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
             for (const auto& attrib : ShaderClass::attributes) {
-                if (!propertiesAsUniforms.second.count(attrib.id)) {
+                // The feature-index slot reuses a paint attribute id. Membership of that
+                // id in the uniform set means the property is constant, not that the slot
+                // is absent. Bind the slot only when this variant reads the feature table.
+                if constexpr (featureIndexSlot.has_value()) {
+                    if (attrib.id == *featureIndexSlot) {
+                        if (useFeatureIndex) {
+                            shader->initVertexAttribute(attrib);
+                        }
+                        continue;
+                    }
+                }
+                if (!propertiesAsUniforms.second.contains(attrib.id)) {
                     shader->initVertexAttribute(attrib);
                 }
             }

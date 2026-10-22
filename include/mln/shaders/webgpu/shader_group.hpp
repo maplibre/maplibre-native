@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/gfx/shader_group.hpp>
+#include <mln/shaders/feature_index.hpp>
 #include <mln/shaders/webgpu/shader_program.hpp>
 #include <mln/shaders/webgpu/common.hpp>
 #include <mln/shaders/webgpu/wgsl_preprocessor.hpp>
@@ -63,12 +64,11 @@ public:
         if (!shader) {
             DefinesMap additionalDefines;
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
-            if constexpr (ShaderID == shaders::BuiltIn::LineShader ||
-                          ShaderID == shaders::BuiltIn::LineGradientShader ||
-                          ShaderID == shaders::BuiltIn::LinePatternShader ||
-                          ShaderID == shaders::BuiltIn::LineSDFShader ||
-                          ShaderID == shaders::BuiltIn::LineGradientSDFShader) {
-                defineFeatureIndex(shaders::idLineColorVertexAttribute, propertiesAsUniforms, additionalDefines);
+            constexpr auto featureIndexSlot = shaders::featureIndexAttributeId<ShaderID>();
+            [[maybe_unused]] bool useFeatureIndex = false;
+            if constexpr (featureIndexSlot.has_value()) {
+                useFeatureIndex = defineFeatureIndex(
+                    shaders::featureAttributeIds<ShaderID>(), propertiesAsUniforms, additionalDefines);
             }
 
             std::string vertexSource;
@@ -95,12 +95,30 @@ public:
             fragmentSource = detail::preprocessWGSL(fragmentSource, defineSet);
 
             auto& context = static_cast<Context&>(gfxContext);
-            shader = std::make_shared<ShaderProgram>(context,
-                                                     vertexSource,
-                                                     fragmentSource,
-                                                     ShaderSource::attributes,
-                                                     ShaderSource::textures,
-                                                     std::string(name));
+            if constexpr (featureIndexSlot.has_value()) {
+                shader = std::make_shared<ShaderProgram>(context, vertexSource, fragmentSource, std::string(name));
+                for (const auto& attrib : ShaderSource::attributes) {
+                    // The feature-index slot reuses a paint attribute id. Bind it only
+                    // when this variant reads the table.
+                    if (attrib.id == *featureIndexSlot) {
+                        if (useFeatureIndex) {
+                            shader->initAttribute(attrib);
+                        }
+                        continue;
+                    }
+                    shader->initAttribute(attrib);
+                }
+                for (const auto& texture : ShaderSource::textures) {
+                    shader->initTexture(texture);
+                }
+            } else {
+                shader = std::make_shared<ShaderProgram>(context,
+                                                         vertexSource,
+                                                         fragmentSource,
+                                                         ShaderSource::attributes,
+                                                         ShaderSource::textures,
+                                                         std::string(name));
+            }
 
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {

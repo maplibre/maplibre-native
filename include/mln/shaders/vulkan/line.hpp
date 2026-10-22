@@ -174,10 +174,6 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     applySurfaceTransform();
-#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_color) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width)
-    // Keep the feature binding live when this variant's sampled fields are all uniforms.
-    gl_Position.x += featureValues.color.x * 0.0;
-#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -400,10 +396,6 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     applySurfaceTransform();
-#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width)
-    // Keep the feature binding live when this variant's sampled fields are all uniforms.
-    gl_Position.x += featureValues.color.x * 0.0;
-#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -649,10 +641,6 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     applySurfaceTransform();
-#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width) && defined(HAS_UNIFORM_u_floorwidth) && defined(HAS_UNIFORM_u_pattern_from) && defined(HAS_UNIFORM_u_pattern_to)
-    // Keep the feature binding live when this variant's sampled fields are all uniforms.
-    gl_Position.x += featureValues.color.x * 0.0;
-#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -967,10 +955,6 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     applySurfaceTransform();
-#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_color) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width) && defined(HAS_UNIFORM_u_floorwidth)
-    // Keep the feature binding live when this variant's sampled fields are all uniforms.
-    gl_Position.x += featureValues.color.x * 0.0;
-#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -1253,10 +1237,6 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     applySurfaceTransform();
-#if defined(MLN_FEATURE_INDEX) && defined(HAS_UNIFORM_u_blur) && defined(HAS_UNIFORM_u_opacity) && defined(HAS_UNIFORM_u_gapwidth) && defined(HAS_UNIFORM_u_offset) && defined(HAS_UNIFORM_u_width) && defined(HAS_UNIFORM_u_floorwidth)
-    // Keep the feature binding live when this variant's sampled fields are all uniforms.
-    gl_Position.x += featureValues.color.x * 0.0;
-#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
