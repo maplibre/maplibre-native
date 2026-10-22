@@ -237,14 +237,14 @@ public:
         featureTable = true;
         if (!featureIndexVector) {
             featureIndexVector = indices ? indices : std::make_shared<gfx::VertexVector<uint32_t>>();
-            featureIndexVectorBase = featureIndexVector;
         }
     }
     virtual bool usesFeatureTable() const { return featureTable; }
     virtual const std::vector<std::array<float, 4>>& featureValues() const { return featureValueTable; }
     /// Pattern rect stored with the primary feature value.
     virtual const std::vector<std::array<float, 4>>& featurePatterns() const { return featurePatternTable; }
-    virtual const gfx::VertexVectorBasePtr& featureIndexData() const { return featureIndexVectorBase; }
+    /// Per-vertex feature index, upcast for attribute binding.
+    virtual gfx::VertexVectorBasePtr featureIndexData() const { return featureIndexVector; }
     /// True for a non-constant property that stores one value per feature.
     virtual bool contributesFeatureIndex() const { return false; }
 #endif
@@ -289,13 +289,8 @@ protected:
     std::vector<std::array<float, 4>> featureValueTable;
     std::vector<std::array<float, 4>> featurePatternTable;
     gfx::VertexVectorPtr<uint32_t> featureIndexVector;
-    gfx::VertexVectorBasePtr featureIndexVectorBase;
 #endif
 };
-
-namespace detail {
-const gfx::VertexVectorBasePtr noVector;
-}
 
 template <class T, class A>
 class ConstantPaintPropertyBinder : public PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A> {
