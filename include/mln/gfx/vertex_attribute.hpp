@@ -372,7 +372,7 @@ public:
             propertiesAsUniforms->second.reserve(sizeof...(DataDrivenPaintProperty));
         }
         size_t dataDrivenAttrId = firstDataDrivenAttrId;
-        FeatureTableBind featureTableBind;
+        FeatureTableBinding featureTableBind;
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
                                                               isConstant<DataDrivenPaintProperty>(evaluated),
                                                               propertiesAsUniforms,
@@ -400,7 +400,7 @@ public:
         propertiesAsUniforms.second.reserve(sizeof...(DataDrivenPaintProperty));
 
         size_t dataDrivenAttrId = firstDataDrivenAttrId;
-        FeatureTableBind featureTableBind;
+        FeatureTableBinding featureTableBind;
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
                                                               isConstant<DataDrivenPaintProperty>(evaluated),
                                                               &propertiesAsUniforms,
@@ -422,9 +422,9 @@ protected:
         return evaluated.template get<DataDrivenPaintProperty>().isConstant();
     }
 
-    /// One shared per-vertex index for every feature-table property in a pack.
+    /// @brief One index per vertex for every feature-table property in a type pack.
     /// The index occupies `firstDataDrivenAttrId`, the id the caller passes in.
-    struct FeatureTableBind {
+    struct FeatureTableBinding {
         bool needsIndex = false;
         VertexVectorBasePtr indexData;
     };
@@ -441,7 +441,7 @@ protected:
 #if MLN_UBO_CONSOLIDATION
     void finishFeatureTableBind(StringIDSetsPair* propertiesAsUniforms,
                                 size_t indexAttributeId,
-                                FeatureTableBind& featureTableBind) {
+                                FeatureTableBinding& featureTableBind) {
         if (!featureTableBind.needsIndex) {
             return;
         }
@@ -460,7 +460,7 @@ protected:
                                      const bool isConstant,
                                      StringIDSetsPair* propertiesAsUniforms,
                                      size_t& dataDrivenAttrId,
-                                     [[maybe_unused]] FeatureTableBind& featureTableBind) {
+                                     [[maybe_unused]] FeatureTableBinding& featureTableBind) {
         if (!binder) {
             return;
         }

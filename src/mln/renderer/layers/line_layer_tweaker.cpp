@@ -14,13 +14,41 @@
 #include <mln/util/logging.hpp>
 #include <mln/util/math.hpp>
 
+#include <algorithm>
+#include <array>
 #include <unordered_map>
+#include <vector>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mln/shaders/mtl/line.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 namespace mln {
+
+#if MLN_UBO_CONSOLIDATION
+namespace {
+
+template <typename Binder>
+const std::vector<std::array<float, 4>>* featureValueTable(const Binder& binder) {
+    return binder ? &binder->featureValues() : nullptr;
+}
+
+std::size_t featureTableSize(const std::vector<std::array<float, 4>>* values) {
+    return values ? values->size() : 0;
+}
+
+template <std::size_t N>
+void assignFloats(std::array<float, N>& dst,
+                  const std::vector<std::array<float, 4>>* values,
+                  std::size_t featureIndex) {
+    static_assert(N > 0 && N <= 4);
+    if (values && featureIndex < values->size()) {
+        std::copy_n((*values)[featureIndex].begin(), N, dst.begin());
+    }
+}
+
+} // namespace
+#endif
 
 using namespace style;
 using namespace shaders;
@@ -203,19 +231,17 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     std::vector<LineTilePropsUnionUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
     std::vector<LineFeatureUBO> featureRecords;
     std::unordered_map<const void*, uint32_t> featureBaseByBinders;
-    const auto featureBase = [&](const LineBinders& binders) -> uint32_t {
-        const auto table = [](const auto& binder) -> const std::vector<std::array<float, 4>>* {
-            return binder ? &binder->featureValues() : nullptr;
-        };
-        const auto* colorValues = table(binders.get<LineColor>());
-        const auto* blurValues = table(binders.get<LineBlur>());
-        const auto* opacityValues = table(binders.get<LineOpacity>());
-        const auto* gapWidthValues = table(binders.get<LineGapWidth>());
-        const auto* offsetValues = table(binders.get<LineOffset>());
-        const auto* widthValues = table(binders.get<LineWidth>());
-        const auto* floorWidthValues = table(binders.get<LineFloorWidth>());
+    const auto getFeatureTable = [&](const LineBinders& binders) -> uint32_t {
+        // Collect references to the packed, evaluated, per-feature property values from the binders.
+        const auto* colorValues = featureValueTable(binders.get<LineColor>());
+        const auto* blurValues = featureValueTable(binders.get<LineBlur>());
+        const auto* opacityValues = featureValueTable(binders.get<LineOpacity>());
+        const auto* gapWidthValues = featureValueTable(binders.get<LineGapWidth>());
+        const auto* offsetValues = featureValueTable(binders.get<LineOffset>());
+        const auto* widthValues = featureValueTable(binders.get<LineWidth>());
+        const auto* floorWidthValues = featureValueTable(binders.get<LineFloorWidth>());
         const auto& patternBinder = binders.get<LinePattern>();
-        const auto* patternToValues = table(patternBinder);
+        const auto* patternToValues = featureValueTable(patternBinder);
         const auto* patternFromValues = patternBinder ? &patternBinder->featurePatterns() : nullptr;
         const std::array tables{colorValues,
                                 blurValues,
@@ -226,12 +252,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                                 floorWidthValues,
                                 patternToValues,
                                 patternFromValues};
-        std::size_t count = 0;
-        for (const auto* values : tables) {
-            if (values && !values->empty()) {
-                count = std::max(count, values->size());
-            }
-        }
+        const auto count = featureTableSize(std::ranges::max(tables, {}, featureTableSize));
         if (count == 0) {
             return 0;
         }
@@ -241,29 +262,17 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         }
         const auto base = static_cast<uint32_t>(featureRecords.size());
         featureRecords.resize(base + count);
-        const auto assignFloat2 =
-            [](std::array<float, 2>& dst, const std::vector<std::array<float, 4>>* values, std::size_t featureIndex) {
-                if (values && featureIndex < values->size()) {
-                    dst = {(*values)[featureIndex][0], (*values)[featureIndex][1]};
-                }
-            };
-        const auto assignFloat4 =
-            [](std::array<float, 4>& dst, const std::vector<std::array<float, 4>>* values, std::size_t featureIndex) {
-                if (values && featureIndex < values->size()) {
-                    dst = (*values)[featureIndex];
-                }
-            };
         for (std::size_t featureIndex = 0; featureIndex < count; ++featureIndex) {
             auto& record = featureRecords[base + featureIndex];
-            assignFloat4(record.color, colorValues, featureIndex);
-            assignFloat2(record.blur, blurValues, featureIndex);
-            assignFloat2(record.opacity, opacityValues, featureIndex);
-            assignFloat2(record.gapwidth, gapWidthValues, featureIndex);
-            assignFloat2(record.offset, offsetValues, featureIndex);
-            assignFloat2(record.width, widthValues, featureIndex);
-            assignFloat2(record.floorwidth, floorWidthValues, featureIndex);
-            assignFloat4(record.pattern_from, patternFromValues, featureIndex);
-            assignFloat4(record.pattern_to, patternToValues, featureIndex);
+            assignFloats(record.color, colorValues, featureIndex);
+            assignFloats(record.blur, blurValues, featureIndex);
+            assignFloats(record.opacity, opacityValues, featureIndex);
+            assignFloats(record.gapwidth, gapWidthValues, featureIndex);
+            assignFloats(record.offset, offsetValues, featureIndex);
+            assignFloats(record.width, widthValues, featureIndex);
+            assignFloats(record.floorwidth, floorWidthValues, featureIndex);
+            assignFloats(record.pattern_from, patternFromValues, featureIndex);
+            assignFloats(record.pattern_to, patternToValues, featureIndex);
         }
         featureBaseByBinders.emplace(key, base);
         return base;
@@ -316,7 +325,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
 #if MLN_UBO_CONSOLIDATION
-                    .feature_base = featureBase(*binders)
+                    .feature_base = getFeatureTable(*binders)
 #else
                     .pad1 = 0
 #endif
@@ -343,7 +352,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
 #if MLN_UBO_CONSOLIDATION
-                    .feature_base = featureBase(*binders),
+                    .feature_base = getFeatureTable(*binders),
 #else
                     .pad1 = 0,
 #endif
@@ -377,7 +386,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_to_t = std::get<1>(binders->get<LinePattern>()->interpolationFactor(zoom)),
                     .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
 #if MLN_UBO_CONSOLIDATION
-                    .feature_base = featureBase(*binders),
+                    .feature_base = getFeatureTable(*binders),
 #else
                     .pad1 = 0,
 #endif
@@ -455,7 +464,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
                         .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
 #if MLN_UBO_CONSOLIDATION
-                        .feature_base = featureBase(*binders),
+                        .feature_base = getFeatureTable(*binders),
 #else
                         .pad1 = 0,
 #endif

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/gfx/shader_group.hpp>
+#include <mln/mtl/context.hpp>
 #include <mln/shaders/mtl/common.hpp>
 #include <mln/shaders/mtl/shader_program.hpp>
 #include <mln/shaders/program_parameters.hpp>
@@ -9,12 +10,9 @@
 #include <mln/util/hash.hpp>
 #include <mln/util/containers.hpp>
 
-#include <numeric>
 #include <string>
-#include <type_traits>
 
-namespace mln {
-namespace mtl {
+namespace mln::mtl {
 
 class ShaderGroupBase : public gfx::ShaderGroup {
 protected:
@@ -101,5 +99,4 @@ public:
     }
 };
 
-} // namespace mtl
-} // namespace mln
+} // namespace mln::mtl

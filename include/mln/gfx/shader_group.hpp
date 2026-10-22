@@ -183,11 +183,12 @@ protected:
         const auto end = propertiesAsUniforms.second.cend();
         auto hash = util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
 
-        // We need to include dynamic properties that use feature tables, since
-        // they are not in the property set but do require a separate shader.
+#if MLN_UBO_CONSOLIDATION
+        // Include the names, since feature tables change the meaning of the IDs.
         for (const auto& name : propertiesAsUniforms.first) {
             hash ^= static_cast<PropertyHashType>(std::hash<std::remove_cvref_t<decltype(name)>>{}(name));
         }
+#endif
         return hash;
     }
 

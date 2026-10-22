@@ -171,6 +171,7 @@ static_assert(sizeof(LineEvaluatedPropsUBO) == 3 * 16);
 
 #if MLN_UBO_CONSOLIDATION
 
+// Per-feature paint property values for lines, referenced per-vertex by the feature index.
 struct alignas(16) LineFeatureUBO {
     /*  0 */ std::array<float, 4> color;
     /* 16 */ std::array<float, 2> blur;
