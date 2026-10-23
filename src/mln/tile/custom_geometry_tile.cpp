@@ -28,7 +28,15 @@ CustomGeometryTile::CustomGeometryTile(const OverscaledTileID& overscaledTileID,
       actorRef(*this, mailbox) {}
 
 CustomGeometryTile::~CustomGeometryTile() {
+    cancel();
     loader.invoke(&style::CustomTileLoader::removeTile, id);
+}
+
+void CustomGeometryTile::cancel() {
+    // GeometryTile has a separate mailbox. Close the loader mailbox before
+    // TileCache releases this tile on a worker thread.
+    mailbox->close();
+    GeometryTile::cancel();
 }
 
 void CustomGeometryTile::setTileData(const GeoJSON& geoJSON) {
