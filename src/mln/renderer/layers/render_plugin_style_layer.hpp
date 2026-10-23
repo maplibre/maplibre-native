@@ -43,6 +43,8 @@ private:
     std::map<std::string, gfx::ShaderGroupPtr> shaderGroups;
     /// True while the layer reports an active animation.
     bool animated = false;
+    /// True once a drawable with MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE has been built.
+    bool hasDepthDrawables = false;
 };
 
 } // namespace mln
