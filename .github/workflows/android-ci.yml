@@ -231,9 +231,9 @@ jobs:
 
       - name: Build C++ Unit Tests App
         run: |
-          ./gradlew assembleDebug assembleAndroidTest -Pmaplibre.abis=arm64-v8a
-          cp app/build/outputs/apk/debug/app-debug.apk .
-          cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk .
+          ./gradlew assembleOpenglDebug assembleOpenglAndroidTest -Pmaplibre.abis=arm64-v8a
+          cp app/build/outputs/apk/opengl/debug/app-opengl-debug.apk app-debug.apk
+          cp app/build/outputs/apk/androidTest/opengl/release/app-opengl-release-androidTest.apk app-release-androidTest.apk
 
       - name: Store C++ Unit Tests .apk files
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
