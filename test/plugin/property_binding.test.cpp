@@ -1,4 +1,6 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
+#include <mln/renderer/layers/render_plugin_style_layer.hpp>
+#include <mln/renderer/transition_parameters.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/tile/geojson_tile_data.hpp>
 #include <mln/tile/vector_mvt_tile_data.hpp>
@@ -160,6 +162,34 @@ TEST(PluginProperties, NativeTransitionsHandleDelayInterruptionAndCompletion) {
     style::PluginTransitioningPropertyValue immediate(expression(definition, "70"), transition, options, middle);
     EXPECT_FLOAT_EQ(70, evaluate(immediate, middle));
     EXPECT_FALSE(immediate.hasTransition());
+}
+
+TEST(PluginProperties, NonTransitionablePaintUpdatesImmediately) {
+    auto definition = numberDefinition();
+    definition.supportsTransitions = false;
+    plugin::LayerType registration;
+    registration.type = "test-transitions";
+    registration.properties.push_back(definition);
+    Immutable<style::PluginStyleLayer::Impl> impl = makeMutable<style::PluginStyleLayer::Impl>(
+        "layer", "points", std::make_shared<const plugin::RegisteredLayer>(std::move(registration)));
+    RenderPluginStyleLayer renderLayer(impl);
+    RenderLayer& layer = renderLayer;
+
+    auto changed = makeMutable<style::PluginStyleLayer::Impl>(*impl);
+    changed->pluginProperties.emplace(definition.name, expression(definition, "30"));
+    style::TransitionOptions options;
+    options.duration = std::chrono::milliseconds(100);
+    options.delay = std::chrono::milliseconds(100);
+    layer.transition({TimePoint{}, options}, std::move(changed));
+    PropertyEvaluationParameters parameters(0);
+    parameters.now = TimePoint{};
+    layer.evaluate(parameters);
+
+    const auto properties = staticImmutableCast<style::PluginStyleLayerProperties>(layer.evaluatedProperties);
+    style::PluginPropertyValue::EvaluationStorage storage;
+    const auto value = properties->evaluatedPaintProperties.at(definition.name).evaluate(0, definition, storage);
+    EXPECT_FLOAT_EQ(30, value.data.float_value);
+    EXPECT_FALSE(layer.hasTransition());
 }
 
 TEST(PluginProperties, NativeTransitionsPreserveFeatureExpressionsAndEvaluateCameraExpressions) {
