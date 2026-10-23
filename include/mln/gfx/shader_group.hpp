@@ -8,7 +8,6 @@
 #include <shared_mutex>
 #include <sstream>
 #include <string>
-#include <type_traits>
 
 namespace mln {
 
@@ -189,15 +188,16 @@ protected:
     PropertyHashType propertyHash(const StringIDSetsPair& propertiesAsUniforms) {
         const auto beg = propertiesAsUniforms.second.cbegin();
         const auto end = propertiesAsUniforms.second.cend();
-        auto hash = util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
+        const auto hash = util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
 
 #if MLN_UBO_CONSOLIDATION
         // Include the names, since feature tables change the meaning of the IDs.
-        for (const auto& name : propertiesAsUniforms.first) {
-            hash ^= static_cast<PropertyHashType>(std::hash<std::remove_cvref_t<decltype(name)>>{}(name));
-        }
-#endif
+        const auto nameBeg = propertiesAsUniforms.first.cbegin();
+        const auto nameEnd = propertiesAsUniforms.first.cend();
+        return hash ^ util::order_independent_hash<decltype(nameBeg), PropertyHashType>(nameBeg, nameEnd);
+#else
         return hash;
+#endif
     }
 
 private:

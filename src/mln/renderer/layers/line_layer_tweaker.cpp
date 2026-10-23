@@ -324,7 +324,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         const auto alreadySeen = std::find_if(
             liveBinders.begin(), liveBinders.end(), [&](const LiveBinder& live) { return live.bucketId == bucketId; });
         if (alreadySeen == liveBinders.end()) {
-            liveBinders.push_back({bucketId, binders});
+            liveBinders.push_back({.bucketId = bucketId, .binders = binders});
         }
     });
 
