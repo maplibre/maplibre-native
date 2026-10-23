@@ -13,6 +13,24 @@ namespace mln {
 
 using StringIDSetsPair = std::pair<unordered_set<std::string_view>, unordered_set<size_t>>;
 
+/// Define MLN_FEATURE_INDEX when any attribute in `attributeIds` is data-driven.
+/// Pass the paint attributes this shader samples. A constant property's id stays
+/// in the uniform set, including the id shared with the per-vertex feature index,
+/// so a variant declares the feature binding only when it reads that table.
+/// @return True if the define was added.
+template <typename AttributeIds, typename Defines>
+bool defineFeatureIndex(const AttributeIds& attributeIds,
+                        const StringIDSetsPair& propertiesAsUniforms,
+                        Defines& defines) {
+    for (const auto id : attributeIds) {
+        if (!propertiesAsUniforms.second.contains(static_cast<std::size_t>(id))) {
+            defines.insert(std::make_pair(std::string("MLN_FEATURE_INDEX"), std::string()));
+            return true;
+        }
+    }
+    return false;
+}
+
 namespace gfx {
 
 class Context;
@@ -170,7 +188,16 @@ protected:
     PropertyHashType propertyHash(const StringIDSetsPair& propertiesAsUniforms) {
         const auto beg = propertiesAsUniforms.second.cbegin();
         const auto end = propertiesAsUniforms.second.cend();
-        return util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
+        const auto hash = util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
+
+#if MLN_UBO_CONSOLIDATION
+        // Include the names, since feature tables change the meaning of the IDs.
+        const auto nameBeg = propertiesAsUniforms.first.cbegin();
+        const auto nameEnd = propertiesAsUniforms.first.cend();
+        return hash ^ util::order_independent_hash<decltype(nameBeg), PropertyHashType>(nameBeg, nameEnd);
+#else
+        return hash;
+#endif
     }
 
 private:

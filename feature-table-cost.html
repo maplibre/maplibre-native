@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feature table cost</title>
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --paper: #fff;
+    --ink: #1c1b19;
+    --muted: #5c5852;
+    --faint: #8a847a;
+    --line: #e4e0d8;
+    --main: #8d887e;
+    --branch: #2f6f9f;
+    --warn: #a15c12;
+    --bad: #9b2c2c;
+    --good: #1f6b45;
+    --good-bg: #e7f3ec;
+    --bad-bg: #f8e8e6;
+    --warn-bg: #f8f0e4;
+    --neutral-bg: #f3f1ec;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+  }
+  main {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  h1, h2, h3 {
+    font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  h1 { font-size: 32px; margin: 0 0 12px; }
+  h2 { font-size: 22px; margin: 40px 0 8px; }
+  h3 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 0 0 12px; }
+  .lede { font-size: 18px; }
+  .note, caption, figcaption {
+    color: var(--muted);
+    font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .note { margin: 8px 0 0; }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 24px 0 8px;
+  }
+  .stat {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+  }
+  .stat b {
+    display: block;
+    font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 28px;
+    letter-spacing: -0.03em;
+  }
+  .stat span {
+    color: var(--muted);
+    font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+  }
+  .stat.good b { color: var(--good); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--paper);
+    font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  caption {
+    caption-side: bottom;
+    text-align: left;
+    padding: 8px 0 0;
+  }
+  th, td {
+    padding: 7px 8px;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+    white-space: nowrap;
+  }
+  th:first-child, td:first-child { text-align: left; white-space: normal; }
+  th {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  tr.good td { background: var(--good-bg); }
+  tr.bad td { background: var(--bad-bg); }
+  tr.warn td { background: var(--warn-bg); }
+  tr.neutral td { background: var(--neutral-bg); }
+  .wrap { overflow-x: auto; border: 1px solid var(--line); background: var(--paper); }
+  .wrap table { border: 0; }
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-top: 12px;
+  }
+  .chart {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 14px 16px 12px;
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin: 0 0 10px;
+    font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .legend i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    vertical-align: -1px;
+  }
+  .legend .main { background: var(--main); }
+  .legend .branch { background: var(--branch); }
+  .legend .warn { background: var(--warn); }
+  .bars { display: grid; gap: 10px; }
+  .group { display: grid; grid-template-columns: 92px 1fr; gap: 8px; align-items: center; }
+  .group .label {
+    font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .pair { display: grid; gap: 3px; }
+  .bar-row { display: grid; grid-template-columns: 1fr 52px; gap: 6px; align-items: center; }
+  .track { height: 8px; background: var(--neutral-bg); }
+  .fill { height: 8px; }
+  .fill.main { background: var(--main); }
+  .fill.branch { background: var(--branch); }
+  .fill.warn { background: var(--warn); }
+  .val {
+    font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .hbar .group { grid-template-columns: 168px 1fr; }
+  .record { margin-top: 8px; }
+  .record-bar { display: flex; height: 22px; width: 100%; }
+  .record-bar span { display: block; height: 100%; }
+  .seg-simple { width: 58.333%; background: var(--branch); }
+  .seg-floor { width: 8.333%; background: var(--warn); }
+  .seg-pattern { width: 33.333%; background: #c8c2b8; }
+  .record-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+  }
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 16px 18px;
+  }
+  .card h3 { margin-bottom: 8px; }
+  .card p:last-child { margin-bottom: 0; }
+  .callout {
+    margin-top: 28px;
+    border-left: 3px solid var(--branch);
+    background: var(--paper);
+    padding: 14px 16px;
+  }
+  .callout strong {
+    font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  code {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.92em;
+  }
+  @media (max-width: 800px) {
+    .stats, .charts, .columns { grid-template-columns: 1fr; }
+    main { padding: 28px 16px 48px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Feature table cost</h1>
+  <p class="lede">Data-driven line paint moves from a per-vertex attribute into a 96-byte record shared by every vertex of the feature. Constant properties stay uniforms. The record is a win once enough vertices share it, and a tax on short features and on any frame that changes the set of loaded tiles.</p>
+  <p class="note">Static model from struct sizes and the miter polyline generator on <code>feature-tables</code> versus <code>main</code>. Metal, Vulkan, and WebGPU only. OpenGL still writes per-vertex attributes. One float property is 8 bytes on main; color alone is 16; all six simple-line properties are 56. A miter join emits 2 vertices per input coordinate, so a two-point line is 4 vertices. Branch GPU bytes per feature are <code>4·V + 96</code>, assuming the record is fetched once per feature per frame.</p>
+
+  <div class="stats">
+    <div class="stat"><b>24</b><span>Vertices to break even on one float</span></div>
+    <div class="stat good"><b>2</b><span>Vertices to break even on all six properties</span></div>
+    <div class="stat"><b>96 B</b><span>Fixed record per feature, every line layer</span></div>
+  </div>
+
+  <h2>Style filtering</h2>
+  <p>A layer filter runs once per source feature, on main and on this branch, and rejected features are not stored. Zoom-only and constant paint collapse to uniforms, so a class split with a fixed width never builds a feature table. A feature expression still stores one 96-byte record per kept feature, including features that evaluate to the same value. Different filters are separate buckets, so exclusive class layers each tessellate and upload their own subset, and overlapping data-driven layers pay twice.</p>
+  <p>Filtering scales both sides with the features that survive. The ratio stays put while vertices per kept feature stay put. Keeping 10% of an unchanged mix is the same 0.80 ratio as keeping everything. Keeping long lines improves it. Keeping short lines with one varying float is the loss.</p>
+
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Filter</th>
+          <th>Kept</th>
+          <th>Verts</th>
+          <th>Layers</th>
+          <th>Main GPU</th>
+          <th>Branch GPU</th>
+          <th>Branch / main</th>
+          <th>Upload, 1 new tile</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="good"><td>None, 1 float</td><td>2,000</td><td>40</td><td>1</td><td>625 KiB</td><td>500 KiB</td><td>0.80</td><td>4.70 vs 0.61 MiB</td></tr>
+        <tr class="good"><td>None, 6 properties</td><td>2,000</td><td>40</td><td>1</td><td>4,375 KiB</td><td>500 KiB</td><td>0.11</td><td>4.70 vs 4.27 MiB</td></tr>
+        <tr class="good"><td>Keep 10%, same shape, 1 float</td><td>200</td><td>40</td><td>1</td><td>62 KiB</td><td>50 KiB</td><td>0.80</td><td>0.47 vs 0.06 MiB</td></tr>
+        <tr class="good"><td>Keep 5%, long lines, 1 float</td><td>100</td><td>200</td><td>1</td><td>156 KiB</td><td>88 KiB</td><td>0.56</td><td>0.30 vs 0.15 MiB</td></tr>
+        <tr class="good"><td>Keep 5%, long lines, 6 props</td><td>100</td><td>200</td><td>1</td><td>1,094 KiB</td><td>88 KiB</td><td>0.08</td><td>0.30 vs 1.07 MiB</td></tr>
+        <tr class="bad"><td>Keep 50%, short lines, 1 float</td><td>1,000</td><td>6</td><td>1</td><td>47 KiB</td><td>117 KiB</td><td>2.50</td><td>2.22 vs 0.05 MiB</td></tr>
+        <tr class="good"><td>Keep 50%, short lines, 6 props</td><td>1,000</td><td>6</td><td>1</td><td>328 KiB</td><td>117 KiB</td><td>0.36</td><td>2.22 vs 0.32 MiB</td></tr>
+        <tr class="neutral"><td>8 class layers, constant paint</td><td>250 each</td><td>40</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0 vs 0</td></tr>
+        <tr class="good"><td>8 class layers, data-driven width</td><td>250 each</td><td>40</td><td>8</td><td>625 KiB</td><td>500 KiB</td><td>0.80</td><td>4.70 vs 0.61 MiB</td></tr>
+        <tr class="warn"><td>Casing + stroke, both data-driven</td><td>2,000 twice</td><td>40</td><td>2</td><td>1,250 KiB</td><td>1,000 KiB</td><td>0.80</td><td>9.40 vs 1.22 MiB</td></tr>
+      </tbody>
+      <caption>One source tile holds 2,000 line features. GPU columns are paint bytes for that tile. The upload column is the branch’s whole-layer feature buffer plus the new tile’s index, against main’s new-tile paint only, for 24 resident tiles. Filter evaluations are 2,000 per layer group on both sides (16,000 for eight class layers, 4,000 for casing plus stroke) and produce no vertex or record traffic for features they reject.</caption>
+    </table>
+  </div>
+
+  <h2>GPU bytes per vertex</h2>
+  <p>Main’s cost is flat: the same paint payload is fetched for every vertex. The branch adds 4 bytes of index per vertex and spreads 96 bytes across the feature, so long lines get cheaper and a two-point line with one varying property gets more expensive. The record size does not grow with the number of properties.</p>
+  <div class="charts">
+    <figure class="chart">
+      <h3>One data-driven float</h3>
+      <div class="legend"><span><i class="main"></i>main</span><span><i class="branch"></i>feature-tables</span></div>
+      <div class="bars" data-max="64">
+        <div class="group"><div class="label">4 vertices</div><div class="pair">
+          <div class="bar-row"><div class="track"><div class="fill main" style="width:12.5%"></div></div><div class="val">8 B</div></div>
+          <div class="bar-row"><div class="track"><div class="fill branch" style="width:43.75%"></div></div><div class="val">28 B</div></div>
+        </div></div>
+        <div class="group"><div class="label">40 vertices</div><div class="pair">
+          <div class="bar-row"><div class="track"><div class="fill main" style="width:12.5%"></div></div><div class="val">8 B</div></div>
+          <div class="bar-row"><div class="track"><div class="fill branch" style="width:10%"></div></div><div class="val">6.4 B</div></div>
+        </div></div>
+        <div class="group"><div class="label">400 vertices</div><div class="pair">
+          <div class="bar-row"><div class="track"><div class="fill main" style="width:12.5%"></div></div><div class="val">8 B</div></div>
+          <div class="bar-row"><div class="track"><div class="fill branch" style="width:6.56%"></div></div><div class="val">4.2 B</div></div>
+        </div></div>
+      </div>
+      <figcaption>Scale 0–64 bytes per vertex. 4 vertices is a two-point miter line; 40 is about 20 coordinates; 400 is a long road or a route.</figcaption>
+    </figure>
+    <figure class="chart">
+      <h3>Six data-driven properties</h3>
+      <div class="legend"><span><i class="main"></i>main</span><span><i class="branch"></i>feature-tables</span></div>
+      <div class="bars">
+        <div class="group"><div class="label">4 vertices</div><div class="pair">
+          <div class="bar-row"><div class="track"><div class="fill main" style="width:87.5%"></div></div><div class="val">56 B</div></div>
+          <div class="bar-row"><div class="track"><div class="fill branch" style="width:43.75%"></div></div><div class="val">28 B</div></div>
+        </div></div>
+        <div class="group"><div class="label">40 vertices</div><div class="pair">
+          <div class="bar-row"><div class="track"><div class="fill main" style="width:87.5%"></div></div><div class="val">56 B</div></div>
+          <div class="bar-row"><div class="track"><div class="fill branch" style="width:10%"></div></div><div class="val">6.4 B</div></div>
+        </div></div>
+        <div class="group"><div class="label">400 vertices</div><div class="pair">
+          <div class="bar-row"><div class="track"><div class="fill main" style="width:87.5%"></div></div><div class="val">56 B</div></div>
+          <div class="bar-row"><div class="track"><div class="fill branch" style="width:6.56%"></div></div><div class="val">4.2 B</div></div>
+        </div></div>
+      </div>
+      <figcaption>Same 0–64 scale and the same branch series. Six properties on main are 56 bytes at every length.</figcaption>
+    </figure>
+  </div>
+
+  <h2>Bytes per feature</h2>
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Main GPU</th>
+          <th>Branch GPU</th>
+          <th>Main resident</th>
+          <th>Branch resident</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="bad"><td>4 verts, 1 float</td><td>32 B</td><td>112 B</td><td>64 B</td><td>240 B</td></tr>
+        <tr class="good"><td>40 verts, 1 float</td><td>320 B</td><td>256 B</td><td>640 B</td><td>528 B</td></tr>
+        <tr class="good"><td>400 verts, 1 float</td><td>3,200 B</td><td>1,696 B</td><td>6,400 B</td><td>3,408 B</td></tr>
+        <tr class="good"><td>4 verts, 6 props</td><td>224 B</td><td>112 B</td><td>448 B</td><td>320 B</td></tr>
+        <tr class="good"><td>40 verts, 6 props</td><td>2,240 B</td><td>256 B</td><td>4,480 B</td><td>608 B</td></tr>
+        <tr class="good"><td>400 verts, 6 props</td><td>22,400 B</td><td>1,696 B</td><td>44,800 B</td><td>3,488 B</td></tr>
+      </tbody>
+      <caption>Resident counts the CPU source plus the GPU copy. Branch resident also keeps a 16-byte float4 slot per data-driven property and a packed 96-byte record on the CPU. After a zoom-in peak the GPU buffer can sit near twice the live size until the live bytes fall below half of (capacity − 256).</caption>
+    </table>
+  </div>
+
+  <h2>What the 96 bytes contain</h2>
+  <p>Every data-driven line layer allocates the full record as soon as one property varies. A simple line reads 56 bytes of it. Floor width and both pattern rects ride along as zeros.</p>
+  <div class="record">
+    <div class="record-meta"><span>LineFeatureUBO</span><span>56 B read by a simple line</span></div>
+    <div class="record-bar" role="img" aria-label="96 byte record: 56 bytes simple line fields, 8 bytes floor width, 32 bytes pattern rects">
+      <span class="seg-simple"></span>
+      <span class="seg-floor"></span>
+      <span class="seg-pattern"></span>
+    </div>
+    <div class="legend" style="margin-top:8px">
+      <span><i class="branch"></i>56 B color, blur, opacity, gap width, offset, width</span>
+      <span><i class="warn"></i>8 B floor width</span>
+      <span><i class="main"></i>32 B pattern-from and pattern-to</span>
+    </div>
+    <p class="note">The vertex shader loads the fields it uses. The allocation and the upload move all 96.</p>
+  </div>
+
+  <h2>Navigation versus zooming</h2>
+  <p>Screen model: one data-driven line layer, 24 tiles, 1,000 features per tile, 40 vertices per feature. Multiply by the number of data-driven line layers. A casing layer and a stroke layer each keep their own index and their own record, because each layer has its own tweaker.</p>
+  <div class="columns">
+    <section class="card">
+      <h3>Navigation — stable tiles</h3>
+      <p>The feature buffer is built when the tile set settles, then left alone. Pan and a slow zoom that does not load or drop tiles do not repack or reupload it. Zoom still updates the per-drawable interpolation uniforms, which main already did.</p>
+      <p>Per frame the GPU reads the index plus each feature’s record. For this screen that is 5.9 MiB either way the properties are counted, against 7.3 MiB for one float and 51 MiB for six properties on main.</p>
+      <p class="note">CPU added per frame is a walk of the layer’s drawables to confirm the bucket order. A feature-state change rewrites one slot, then the next frame uploads the whole layer buffer.</p>
+    </section>
+    <section class="card">
+      <h3>Zooming — tiles arriving steadily</h3>
+      <p>Any change to the set or order of buckets concatenates every visible tile’s records and uploads them. Records for tiles that did not change are copied from the cache, so expressions are not evaluated again. The upload is the whole layer.</p>
+      <p>The buffer is allocated to the exact byte count. Each time zooming in adds features, that is a new GPU allocation plus the full copy. Zooming out updates in place until the live size drops below half, then allocates a smaller buffer.</p>
+      <p class="note">Replacing one of the 24 tiles uploads 2.35 MiB. Main uploads only the new tile: 0.31 MiB for one float, 2.14 MiB for six properties. Loading all 24 at once is 5.9 MiB on the branch versus 7.3 MiB or 51 MiB on main.</p>
+    </section>
+  </div>
+
+  <h3 style="margin-top:24px">Upload when one new tile joins 23 settled tiles</h3>
+  <figure class="chart hbar">
+    <div class="legend"><span><i class="main"></i>main, new tile only</span><span><i class="warn"></i>feature-tables, whole layer</span></div>
+    <div class="bars">
+      <div class="group"><div class="label">1 data-driven float</div><div class="pair">
+        <div class="bar-row"><div class="track"><div class="fill main" style="width:13.2%"></div></div><div class="val">0.31 MiB</div></div>
+        <div class="bar-row"><div class="track"><div class="fill warn" style="width:100%"></div></div><div class="val">2.35 MiB</div></div>
+      </div></div>
+      <div class="group"><div class="label">6 data-driven properties</div><div class="pair">
+        <div class="bar-row"><div class="track"><div class="fill main" style="width:91.1%"></div></div><div class="val">2.14 MiB</div></div>
+        <div class="bar-row"><div class="track"><div class="fill warn" style="width:100%"></div></div><div class="val">2.35 MiB</div></div>
+      </div></div>
+    </div>
+    <figcaption>MiB uploaded that frame. The branch bar includes the new tile’s index (0.15 MiB) and the 2.20 MiB feature buffer for all 24,000 features. 40 vertices per feature. Axis runs to 2.35 MiB.</figcaption>
+  </figure>
+
+  <h2>CPU at tile build</h2>
+  <p>Expression evaluation is unchanged: once per feature for a zoom-constant property, twice for a zoom composite. The vertex loops go away. Main copies the paint value onto every vertex. The branch writes one float4 per property and fills the index with a single value.</p>
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>One tile, 1,000 features, 40 verts</th>
+          <th>Main stores</th>
+          <th>Branch stores</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1 data-driven float</td><td>320 KB, one loop over vertices</td><td>176 KB, one index fill</td></tr>
+        <tr><td>6 data-driven properties</td><td>2.24 MB, six vertex loops</td><td>256 KB, one index fill</td></tr>
+      </tbody>
+      <caption>Pattern layers also drop the per-vertex zoom-in and zoom-out rect vectors (16 bytes per vertex on main). Pattern direction changes republish one rect per feature, then take the same full-layer upload.</caption>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>Where this lands.</strong> A navigation view with road lines of a few dozen vertices, or a route of hundreds, reads less GPU memory every frame and builds tiles with less CPU traffic. The cost shows up on short features that vary a single property, and on a zoom that keeps swapping tiles: the feature buffer is layer-global, exact-fit, and reuploaded in full whenever the tile set changes.</p>
+    <p>Filtering helps the branch when the survivors are long, and it hurts when a single varying property is left on short lines. Splitting classes into constant-paint layers turns the feature table off. Splitting them into data-driven layers keeps the same total bytes and multiplies the buffers that a zoom reuploads. A style whose line properties are all constants does not allocate the index or the record.</p>
+  </div>
+</main>
+</body>
+</html>

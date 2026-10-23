@@ -1,8 +1,10 @@
 #pragma once
 
 #include <mln/gfx/shader_group.hpp>
+#include <mln/shaders/feature_index.hpp>
 #include <mln/shaders/vulkan/shader_program.hpp>
 #include <mln/shaders/program_parameters.hpp>
+#include <mln/shaders/shader_defines.hpp>
 #include <mln/shaders/shader_source.hpp>
 #include <mln/util/hash.hpp>
 #include <mln/util/containers.hpp>
@@ -60,6 +62,12 @@ public:
         if (!shader) {
             DefinesMap additionalDefines;
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
+            constexpr auto featureIndexSlot = shaders::featureIndexAttributeId<ShaderID>();
+            [[maybe_unused]] bool useFeatureIndex = false;
+            if constexpr (featureIndexSlot.has_value()) {
+                useFeatureIndex = defineFeatureIndex(
+                    shaders::featureAttributeIds<ShaderID>(), propertiesAsUniforms, additionalDefines);
+            }
 
             const std::string preludeSource(prelude);
             const std::string vertexSource = preludeSource + vert;
@@ -76,6 +84,17 @@ public:
 
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Vulkan>;
             for (const auto& attrib : ShaderClass::attributes) {
+                // The feature-index slot reuses a paint attribute id. Membership of that
+                // id in the uniform set means the property is constant, not that the slot
+                // is absent. Bind the slot only when this variant reads the table.
+                if constexpr (featureIndexSlot.has_value()) {
+                    if (attrib.id == *featureIndexSlot) {
+                        if (useFeatureIndex) {
+                            shader->initVertexAttribute(attrib);
+                        }
+                        continue;
+                    }
+                }
                 if (!propertiesAsUniforms.second.contains(attrib.id)) {
                     shader->initVertexAttribute(attrib);
                 }

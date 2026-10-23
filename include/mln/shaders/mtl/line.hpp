@@ -12,10 +12,24 @@ constexpr auto lineShadePrelude = R"(
 enum {
     idLineDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idLineTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
-    idLineEvaluatedPropsUBO = drawableReservedUBOCount,
+    idLineFeatureUBO,
+    idLineEvaluatedPropsUBO,
     idLineExpressionUBO,
     lineUBOCount
 };
+
+struct LineFeature {
+    float4 color;
+    float2 blur;
+    float2 opacity;
+    float2 gapwidth;
+    float2 offset;
+    float2 width;
+    float2 floorwidth;
+    float4 pattern_from;
+    float4 pattern_to;
+};
+static_assert(sizeof(LineFeature) == 96, "LineFeature layout must match LineFeatureUBO");
 
 //
 // Line
@@ -31,7 +45,7 @@ struct alignas(16) LineDrawableUBO {
     /* 80 */ float gapwidth_t;
     /* 84 */ float offset_t;
     /* 88 */ float width_t;
-    /* 92 */ float pad1;
+    /* 92 */ uint feature_base;
     /* 96 */
 };
 static_assert(sizeof(LineDrawableUBO) == 6 * 16, "wrong size");
@@ -49,7 +63,7 @@ struct alignas(16) LineGradientDrawableUBO {
     /* 76 */ float gapwidth_t;
     /* 80 */ float offset_t;
     /* 84 */ float width_t;
-    /* 88 */ float pad1;
+    /* 88 */ uint feature_base;
     /* 92 */ float pad2;
     /* 96 */
 };
@@ -71,7 +85,7 @@ struct alignas(16) LinePatternDrawableUBO {
     /* 88 */ float pattern_from_t;
     /* 92 */ float pattern_to_t;
     /* 96 */ float floorwidth_t;
-    /* 100 */ float pad1;
+    /* 100 */ uint feature_base;
     /* 104 */ float pad2;
     /* 108 */ float pad3;
     /* 112 */
@@ -108,7 +122,7 @@ struct alignas(16) LineSDFDrawableUBO {
     /* 108 */ float offset_t;
     /* 112 */ float width_t;
     /* 116 */ float floorwidth_t;
-    /* 120 */ float pad1;
+    /* 120 */ uint feature_base;
     /* 124 */ float pad2;
     /* 128 */
 };
@@ -182,7 +196,7 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -193,23 +207,8 @@ struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
 
-#if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(2)]];
-#endif
-#if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(4)]];
-#endif
-#if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(5)]];
-#endif
-#if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(6)]];
-#endif
-#if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(7)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(2)]];
 #endif
 };
 
@@ -234,30 +233,37 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const LineFeature* features [[buffer(idLineFeatureUBO)]],
+#endif
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                                 device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
     device const LineDrawableUBO& drawable = drawableVector[uboIndex].lineDrawableUBO;
 
+#ifdef MLN_FEATURE_INDEX
+    const device auto& featureValues = features[drawable.feature_base + vertx.feature_index];
+#endif
+
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
     const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2;
 #else
-    const auto gapwidth = unpack_mix_float(vertx.gapwidth, drawable.gapwidth_t) / 2;
+    const auto gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2;
 #endif
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
     const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1;
 #else
-    const auto offset   = unpack_mix_float(vertx.offset, drawable.offset_t) * -1;
+    const auto offset   = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1;
 #endif
 
 #if defined(HAS_UNIFORM_u_width)
     const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
     const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
 #else
-    const auto width    = unpack_mix_float(vertx.width, drawable.width_t);
+    const auto width    = unpack_mix_float(featureValues.width, drawable.width_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -290,7 +296,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
-    const float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -303,13 +309,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .gamma_scale = half(extrude_length_without_perspective / extrude_length_with_perspective),
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color       = unpack_mix_color(vertx.color,   drawable.color_t),
+        .color       = unpack_mix_color(featureValues.color, drawable.color_t),
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur        = unpack_mix_float(vertx.blur,    drawable.blur_t),
+        .blur        = unpack_mix_float(featureValues.blur, drawable.blur_t),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity     = unpack_mix_float(vertx.opacity, drawable.opacity_t),
+        .opacity     = unpack_mix_float(featureValues.opacity, drawable.opacity_t),
 #endif
     };
 }
@@ -362,7 +368,7 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -372,20 +378,8 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
-#if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(2)]];
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(4)]];
-#endif
-#if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(5)]];
-#endif
-#if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(6)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(2)]];
 #endif
 };
 
@@ -408,30 +402,37 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const LineFeature* features [[buffer(idLineFeatureUBO)]],
+#endif
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]]) {
 
     device const LineGradientDrawableUBO& drawable = drawableVector[uboIndex].lineGradientDrawableUBO;
 
+#ifdef MLN_FEATURE_INDEX
+    const device auto& featureValues = features[drawable.feature_base + vertx.feature_index];
+#endif
+
 #if !defined(HAS_UNIFORM_u_blur)
-    const auto blur     = unpack_mix_float(vertx.blur,     drawable.blur_t);
+    const auto blur     = unpack_mix_float(featureValues.blur, drawable.blur_t);
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    const auto opacity  = unpack_mix_float(vertx.opacity,  drawable.opacity_t);
+    const auto opacity  = unpack_mix_float(featureValues.opacity,  drawable.opacity_t);
 #endif
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
 #else
-    const auto gapwidth = unpack_mix_float(vertx.gapwidth, drawable.gapwidth_t) / 2;
+    const auto gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2;
 #endif
 #if defined(HAS_UNIFORM_u_offset)
     const auto offset   = props.offset * -1;
 #else
-    const auto offset   = unpack_mix_float(vertx.offset,   drawable.offset_t) * -1;
+    const auto offset   = unpack_mix_float(featureValues.offset,   drawable.offset_t) * -1;
 #endif
 #if defined(HAS_UNIFORM_u_width)
     const auto width    = props.width;
 #else
-    const auto width    = unpack_mix_float(vertx.width,    drawable.width_t);
+    const auto width    = unpack_mix_float(featureValues.width,    drawable.width_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -465,7 +466,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
-    const float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -529,7 +530,7 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -540,26 +541,8 @@ struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
 
-#if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(2)]];
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(4)]];
-#endif
-#if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(5)]];
-#endif
-#if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(6)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(7)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(8)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(2)]];
 #endif
 };
 
@@ -577,10 +560,12 @@ struct FragmentStage {
     half opacity;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    half4 pattern_from;
+    // Atlas pixel rect. Flat full precision: half interpolation drifts along a
+    // line and the pattern phase error grows with distance.
+    float4 pattern_from [[flat]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    half4 pattern_to;
+    float4 pattern_to [[flat]];
 #endif
     float floorwidth;
 };
@@ -589,37 +574,44 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const LineFeature* features [[buffer(idLineFeatureUBO)]],
+#endif
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                                 device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
     device const LinePatternDrawableUBO& drawable = drawableVector[uboIndex].linePatternDrawableUBO;
 
+#ifdef MLN_FEATURE_INDEX
+    const device auto& featureValues = features[drawable.feature_base + vertx.feature_index];
+#endif
+
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
     const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2;
 #else
-    const auto gapwidth = unpack_mix_float(vertx.gapwidth, drawable.gapwidth_t) / 2;
+    const auto gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2;
 #endif
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
     const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1;
 #else
-    const auto offset   = unpack_mix_float(vertx.offset, drawable.offset_t) * -1;
+    const auto offset   = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1;
 #endif
 
 #if defined(HAS_UNIFORM_u_width)
     const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
     const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
 #else
-    const auto width    = unpack_mix_float(vertx.width, drawable.width_t);
+    const auto width    = unpack_mix_float(featureValues.width, drawable.width_t);
 #endif
 
-#if defined(HAS_UNIFORM_u_width)
+#if defined(HAS_UNIFORM_u_floorwidth)
     const auto exprFloorWidth = (props.expressionMask & LineExpressionMask::FloorWidth);
     const auto floorwidth = exprFloorWidth ? expr.floorwidth.eval(paintParams.map_zoom) : props.floorwidth;
 #else
-    const auto floorwidth = unpack_mix_float(vertx.width, drawable.floorwidth_t);
+    const auto floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -654,7 +646,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
-    const float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -668,16 +660,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .linesofar    = linesofar,
 
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur         = half(unpack_mix_float(vertx.blur, drawable.blur_t)),
+        .blur         = half(unpack_mix_float(featureValues.blur, drawable.blur_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
+        .opacity      = half(unpack_mix_float(featureValues.opacity, drawable.opacity_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_from = half4(vertx.pattern_from),
+        .pattern_from = featureValues.pattern_from,
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-        .pattern_to   = half4(vertx.pattern_to),
+        .pattern_to   = featureValues.pattern_to,
 #endif
         .floorwidth   = floorwidth,
     };
@@ -777,7 +769,7 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -788,26 +780,8 @@ struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
 
-#if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(2)]];
-#endif
-#if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(4)]];
-#endif
-#if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(5)]];
-#endif
-#if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(6)]];
-#endif
-#if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(7)]];
-#endif
-#if !defined(HAS_UNIFORM_u_floorwidth)
-    float2 floorwidth [[attribute(8)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(2)]];
 #endif
 };
 
@@ -837,37 +811,44 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const LineFeature* features [[buffer(idLineFeatureUBO)]],
+#endif
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                                 device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
     device const LineSDFDrawableUBO& drawable = drawableVector[uboIndex].lineSDFDrawableUBO;
 
+#ifdef MLN_FEATURE_INDEX
+    const device auto& featureValues = features[drawable.feature_base + vertx.feature_index];
+#endif
+
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
     const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2.0;
 #else
-    const auto gapwidth = unpack_mix_float(vertx.gapwidth, drawable.gapwidth_t) / 2.0;
+    const auto gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
 #endif
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
     const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1.0;
 #else
-    const auto offset   = unpack_mix_float(vertx.offset, drawable.offset_t) * -1.0;
+    const auto offset   = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
 #endif
 
 #if defined(HAS_UNIFORM_u_width)
     const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
     const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
 #else
-    const auto width    = unpack_mix_float(vertx.width, drawable.width_t);
+    const auto width    = unpack_mix_float(featureValues.width, drawable.width_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_floorwidth)
     const auto exprFloorWidth = (props.expressionMask & LineExpressionMask::FloorWidth);
     const auto floorwidth = exprFloorWidth ? expr.floorwidth.eval(paintParams.map_zoom) : props.floorwidth;
 #else
-    const auto floorwidth = unpack_mix_float(vertx.floorwidth, drawable.floorwidth_t);
+    const auto floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -902,7 +883,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
-    const float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -917,13 +898,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex_b        = float2(linesofar * drawable.patternscale_b.x / floorwidth, v_normal.y * drawable.patternscale_b.y + drawable.tex_y_b),
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color        = unpack_mix_color(vertx.color, drawable.color_t),
+        .color        = unpack_mix_color(featureValues.color, drawable.color_t),
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur         = unpack_mix_float(vertx.blur, drawable.blur_t),
+        .blur         = unpack_mix_float(featureValues.blur, drawable.blur_t),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = unpack_mix_float(vertx.opacity, drawable.opacity_t),
+        .opacity      = unpack_mix_float(featureValues.opacity, drawable.opacity_t),
 #endif
 #if !defined(HAS_UNIFORM_u_floorwidth)
         .floorwidth   = floorwidth,
@@ -998,7 +979,7 @@ struct ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
@@ -1009,23 +990,8 @@ struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
 
-#if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(2)]];
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(4)]];
-#endif
-#if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(5)]];
-#endif
-#if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(6)]];
-#endif
-#if !defined(HAS_UNIFORM_u_floorwidth)
-    float2 floorwidth [[attribute(7)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(2)]];
 #endif
 };
 
@@ -1053,37 +1019,44 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const LineFeature* features [[buffer(idLineFeatureUBO)]],
+#endif
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                                 device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
     device const LineSDFDrawableUBO& drawable = drawableVector[uboIndex].lineSDFDrawableUBO;
 
+#ifdef MLN_FEATURE_INDEX
+    const device auto& featureValues = features[drawable.feature_base + vertx.feature_index];
+#endif
+
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
     const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2.0;
 #else
-    const auto gapwidth = unpack_mix_float(vertx.gapwidth, drawable.gapwidth_t) / 2.0;
+    const auto gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
 #endif
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
     const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1.0;
 #else
-    const auto offset   = unpack_mix_float(vertx.offset, drawable.offset_t) * -1.0;
+    const auto offset   = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
 #endif
 
 #if defined(HAS_UNIFORM_u_width)
     const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
     const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
 #else
-    const auto width    = unpack_mix_float(vertx.width, drawable.width_t);
+    const auto width    = unpack_mix_float(featureValues.width, drawable.width_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_floorwidth)
     const auto exprFloorWidth = (props.expressionMask & LineExpressionMask::FloorWidth);
     const auto floorwidth = exprFloorWidth ? expr.floorwidth.eval(paintParams.map_zoom) : props.floorwidth;
 #else
-    const auto floorwidth = unpack_mix_float(vertx.floorwidth, drawable.floorwidth_t);
+    const auto floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -1119,7 +1092,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
-    const float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -1135,10 +1108,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .lineprogress = v_lineprogress,
 
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur         = unpack_mix_float(vertx.blur, drawable.blur_t),
+        .blur         = unpack_mix_float(featureValues.blur, drawable.blur_t),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = unpack_mix_float(vertx.opacity, drawable.opacity_t),
+        .opacity      = unpack_mix_float(featureValues.opacity, drawable.opacity_t),
 #endif
 #if !defined(HAS_UNIFORM_u_floorwidth)
         .floorwidth   = floorwidth,

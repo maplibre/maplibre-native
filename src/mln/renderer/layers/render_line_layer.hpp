@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mln/layout/pattern_layout.hpp>
-#include <mln/renderer/paint_property_binder.hpp>
+#include <mln/renderer/buckets/line_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/shaders/uniforms.hpp>
 #include <mln/style/image_impl.hpp>
@@ -19,9 +19,7 @@ using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
 
-class LineBucket;
 class LineLayerTweaker;
-using LineBinders = PaintPropertyBinders<style::LinePaintProperties::DataDrivenProperties>;
 using LineLayerTweakerPtr = std::shared_ptr<LineLayerTweaker>;
 
 class RenderLineLayer final : public RenderLayer {
