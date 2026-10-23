@@ -101,6 +101,10 @@ struct RenderingStats {
     /// on a static scene; if it stays high, the short-circuit is not engaging
     int numDrapeCoverageScans = 0;
 
+    /// Terrain depth passes (the symbol-occlusion depth texture) rendered; one per frame in
+    /// which the camera or the mesh set changed, none for a still frame
+    int numDepthPasses = 0;
+
     /// Per-phase CPU time of the terrain path this frame (seconds), for profiling
     /// where the terrain overhead goes when nothing re-renders
     double terrainUpdateTime = 0.0;  ///< RenderTerrain::update (tile/DEM/drawable management)

@@ -803,6 +803,7 @@ void RenderTerrain::renderDepth(RenderOrchestrator& orchestrator,
     // bindTextures), so no manual bind here.
 #endif
     depthRenderTarget->render(orchestrator, renderTree, parameters);
+    parameters.context.renderingStats().numDepthPasses++;
     lastDepthProjMatrix = proj;
     depthDirty = false;
 }
@@ -820,19 +821,24 @@ void RenderTerrain::prepareDepthTarget(PaintParameters& parameters) {
         // render target here would hand the symbol tweaker a broken texture
         return;
     }
+    bool fresh = false;
     if (!depthRenderTarget || !depthRenderTarget->getTexture() || depthRenderTarget->getTexture()->getSize() != size) {
         depthRenderTarget = parameters.context.createRenderTarget(
             size, gfx::TextureChannelDataType::UnsignedByte, /*stencil=*/false);
+        depthLayerGroupAttached = nullptr;
         if (!depthRenderTarget) {
             return;
         }
+        fresh = true;
         // Far plane everywhere the terrain does not cover (unpack_depth(1,1,1,1) ~ 1.0)
         depthRenderTarget->setClearColor(Color::white());
     }
-    // (Re)attach the depth layer group; it may not have existed yet when the
-    // target was first created on an early frame
-    if (depthLayerGroup) {
+    // Attach the depth layer group once per target; it may not have existed yet when the
+    // target was first created on an early frame. Attaching on every call marked the pass
+    // dirty on every frame, so the skip in renderDepth never fired.
+    if (depthLayerGroup && (fresh || depthLayerGroupAttached != depthLayerGroup.get())) {
         depthRenderTarget->addLayerGroup(depthLayerGroup, /*replace=*/true);
+        depthLayerGroupAttached = depthLayerGroup.get();
         depthDirty = true; // fresh target must be drawn
     }
 }
