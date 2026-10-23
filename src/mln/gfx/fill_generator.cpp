@@ -100,13 +100,13 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& fillVertices,
                             const GeometryCoordinates& ring,
                             std::vector<bool>& ignoredVertices) {
     std::size_t startVertices = fillVertices.elements();
-    uint countVertices = static_cast<uint>(ring.size() - 1);
+    uint32_t countVertices = static_cast<uint32_t>(ring.size() - 1);
     if (countVertices < 3) {
         return 0;
     }
-    for (uint i = 0; i < countVertices; i++) {
-        uint prevIndex = (i + countVertices - 1) % countVertices;
-        uint nextIndex = (i + 1) % countVertices;
+    for (uint32_t i = 0; i < countVertices; i++) {
+        uint32_t prevIndex = (i + countVertices - 1) % countVertices;
+        uint32_t nextIndex = (i + 1) % countVertices;
 
         auto& prev = ring[prevIndex];
         auto& point = ring[i];
