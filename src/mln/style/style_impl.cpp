@@ -4,6 +4,8 @@
 #include <mln/storage/resource.hpp>
 #include <mln/storage/response.hpp>
 #include <mln/style/image_impl.hpp>
+#include <mln/style/projection.hpp>
+#include <mln/style/sky.hpp>
 #include <mln/style/layer_impl.hpp>
 #include <mln/style/layers/background_layer.hpp>
 #include <mln/style/layers/circle_layer.hpp>
@@ -21,6 +23,7 @@
 #include <mln/style/transition_options.hpp>
 #include <mln/util/async_request.hpp>
 #include <mln/util/exception.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/string.hpp>
 
@@ -34,9 +37,11 @@ Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio, con
     : fileSource(std::move(fileSource_)),
       spriteLoader(std::make_unique<SpriteLoader>(pixelRatio, threadPool_)),
       light(std::make_unique<Light>()),
+      projection(std::make_unique<Projection>()),
       observer(&nullObserver) {
     spriteLoader->setObserver(this);
     light->setObserver(this);
+    projection->setObserver(this);
 }
 
 Style::Impl::~Impl() = default;
@@ -127,6 +132,8 @@ void Style::Impl::parse(const std::string& json_) {
     defaultCamera.roll = parser.roll;
 
     setLight(std::make_unique<Light>(parser.light));
+    setSky(parser.sky ? std::make_unique<Sky>(std::move(*parser.sky)) : nullptr);
+    setProjection(std::make_unique<Projection>(parser.projection));
 
     if (fileSource) {
         if (parser.sprites.empty()) {
@@ -337,6 +344,39 @@ Light* Style::Impl::getLight() const {
     return light.get();
 }
 
+void Style::Impl::setSky(std::unique_ptr<Sky> sky_) {
+    if (sky) {
+        sky->setObserver(nullptr);
+    }
+
+    sky = std::move(sky_);
+    if (sky) {
+        sky->setObserver(this);
+    }
+    observer->onUpdate();
+}
+
+Sky* Style::Impl::getSky() const {
+    return sky.get();
+}
+
+void Style::Impl::setProjection(std::unique_ptr<Projection> projection_) {
+    projection = std::move(projection_);
+    projection->setObserver(this);
+    if constexpr (!util::GLOBE_ENABLED) {
+        const auto type = projection->getType();
+        if (!type.isUndefined() && !(type.isConstant() && type.asConstant().transitionState() == 0)) {
+            Log::Warning(Event::Style,
+                         "This build has no globe (MLN_WITH_GLOBE), so the style's projection draws as Mercator");
+        }
+    }
+    onProjectionChanged(*projection);
+}
+
+Projection* Style::Impl::getProjection() const {
+    return projection.get();
+}
+
 std::string Style::Impl::getName() const {
     return name;
 }
@@ -508,6 +548,14 @@ void Style::Impl::onLayerChanged(Layer& layer) {
 }
 
 void Style::Impl::onLightChanged(const Light&) {
+    observer->onUpdate();
+}
+
+void Style::Impl::onSkyChanged(const Sky&) {
+    observer->onUpdate();
+}
+
+void Style::Impl::onProjectionChanged(const Projection&) {
     observer->onUpdate();
 }
 

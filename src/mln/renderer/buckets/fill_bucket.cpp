@@ -38,7 +38,7 @@ bool FillBucket::isSDFPattern(const std::string& layerID) const {
     return it != sdfPatterns.end() && it->second;
 }
 
-void FillBucket::generateBuffers(const GeometryCollection& geometry) {
+void FillBucket::generateBuffers(const GeometryCollection& geometry, const CanonicalTileID& canonical) {
 // MLN_TRIANGULATE_FILL_OUTLINES is defined in fill_bucket.hpp
 #if MLN_TRIANGULATE_FILL_OUTLINES
     gfx::generateFillAndOutineBuffers(geometry,
@@ -49,9 +49,18 @@ void FillBucket::generateBuffers(const GeometryCollection& geometry) {
                                       lineIndexes,
                                       lineSegments,
                                       basicLines,
-                                      basicLineSegments);
+                                      basicLineSegments,
+                                      canonical,
+                                      subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z));
 #else
-    gfx::generateFillAndOutineBuffers(geometry, vertices, triangles, triangleSegments, basicLines, basicLineSegments);
+    gfx::generateFillAndOutineBuffers(geometry,
+                                      vertices,
+                                      triangles,
+                                      triangleSegments,
+                                      basicLines,
+                                      basicLineSegments,
+                                      canonical,
+                                      subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z));
 #endif
 }
 
@@ -79,7 +88,7 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                             const CanonicalTileID& canonical) {
     const auto vertexOffset = vertices.elements();
 
-    generateBuffers(geometry);
+    generateBuffers(geometry, canonical);
     populateBinders(feature, patternPositions, patternDependencies, index, canonical);
 
     if (retainFeaturesById) {

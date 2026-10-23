@@ -7,8 +7,12 @@
 
 #include <mln/map/camera.hpp>
 #include <mln/map/map.hpp>
+#include <mln/style/projection.hpp>
+#include <mln/style/style.hpp>
 
 @interface MLNMapView (MLNMapViewGestureRecognizerTests)
+
+@property (nonatomic, readonly, getter=isRotationAllowed) BOOL rotationAllowed;
 
 - (void)handlePinchGesture:(UIPinchGestureRecognizer *)pinch;
 - (void)handleRotateGesture:(UIRotationGestureRecognizer *)rotate;
@@ -281,6 +285,53 @@
   cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(edgePadding, cameraPadding,
                  @"When a gesture recognizer is performed camera paddings must not be changed.");
+}
+
+// The globe's minimum zoom falls away from the equator so the planet keeps its size. A quick zoom
+// that has not moved yet leaves the zoom there instead of taking it up to the minimum zoom level.
+- (void)testQuickZoomKeepsTheGlobesMinimumZoomAwayFromTheEquator {
+  auto projection = std::make_unique<mln::style::Projection>();
+  projection->setType(mln::ProjectionDefinition("globe"));
+  self.mapView.mbglMap.getStyle().setProjection(std::move(projection));
+  self.mapView.minimumZoomLevel = 1;
+  self.mapView.mbglMap.jumpTo(mln::CameraOptions().withCenter(mln::LatLng{60, 0}).withZoom(0));
+  XCTAssertEqualWithAccuracy(self.mapView.zoomLevel, 0, 1e-6);
+
+  UILongPressGestureRecognizerMock *quickZoom =
+      [[UILongPressGestureRecognizerMock alloc] initWithTarget:nil action:nil];
+  quickZoom.mockTappedPoint =
+      CGPointMake(self.mapView.frame.size.width / 2, self.mapView.frame.size.height / 2);
+  quickZoom.state = UIGestureRecognizerStateBegan;
+  [self.mapView handleQuickZoomGesture:quickZoom];
+  quickZoom.state = UIGestureRecognizerStateChanged;
+  [self.mapView handleQuickZoomGesture:quickZoom];
+
+  XCTAssertEqualWithAccuracy(self.mapView.zoomLevel, 0, 1e-6);
+}
+
+// Below the zoom that keeps a flat map of the world upright, Mercator holds a rotation within 30°
+// and turns back to north afterwards; the globe turns freely, as in GL JS.
+- (void)testRotationTurnsTheGlobeBelowTheMinimumRotationZoom {
+  for (NSString *projectionName in @[ @"mercator", @"globe" ]) {
+    BOOL globe = [projectionName isEqualToString:@"globe"];
+    auto projection = std::make_unique<mln::style::Projection>();
+    projection->setType(mln::ProjectionDefinition(projectionName.UTF8String));
+    self.mapView.mbglMap.getStyle().setProjection(std::move(projection));
+    self.mapView.mbglMap.jumpTo(
+        mln::CameraOptions().withCenter(mln::LatLng{0, 0}).withZoom(1).withBearing(0));
+    XCTAssertEqual(self.mapView.isRotationAllowed, globe, @"%@", projectionName);
+
+    UIRotationGestureRecognizerMock *rotate =
+        [[UIRotationGestureRecognizerMock alloc] initWithTarget:nil action:nil];
+    rotate.state = UIGestureRecognizerStateBegan;
+    [self.mapView handleRotateGesture:rotate];
+    rotate.state = UIGestureRecognizerStateChanged;
+    rotate.rotation = 1;
+    [self.mapView handleRotateGesture:rotate];
+
+    XCTAssertEqualWithAccuracy(self.mapView.direction, globe ? 360 - MLNDegreesFromRadians(1) : 330,
+                               1e-6, @"%@", projectionName);
+  }
 }
 
 - (void)testHandleTwoFingerDragGesture {

@@ -90,6 +90,7 @@ public:
                    LineAtlas& lineAtlas_,
                    PatternAtlas& patternAtlas_,
                    RenderLayerReferences layersNeedPlacement_,
+                   RenderLayerReferences layersFollowingPlacement_,
                    Immutable<Placement> placement_,
                    bool updateSymbolOpacities_,
                    double startTime_)
@@ -99,6 +100,7 @@ public:
           lineAtlas(lineAtlas_),
           patternAtlas(patternAtlas_),
           layersNeedPlacement(std::move(layersNeedPlacement_)),
+          layersFollowingPlacement(std::move(layersFollowingPlacement_)),
           placement(std::move(placement_)),
           updateSymbolOpacities(updateSymbolOpacities_) {}
 
@@ -107,6 +109,9 @@ public:
 
         for (auto it = layersNeedPlacement.rbegin(); it != layersNeedPlacement.rend(); ++it) {
             placement->updateLayerBuckets(*it, parameters->transformParams.state, updateSymbolOpacities);
+        }
+        for (const RenderLayer& layer : layersFollowingPlacement) {
+            placement->updateFollowerBuckets(layer, parameters->transformParams.state);
         }
     }
 
@@ -126,6 +131,7 @@ public:
     std::reference_wrapper<LineAtlas> lineAtlas;
     std::reference_wrapper<PatternAtlas> patternAtlas;
     RenderLayerReferences layersNeedPlacement;
+    RenderLayerReferences layersFollowingPlacement;
     Immutable<Placement> placement;
     bool updateSymbolOpacities;
 };
@@ -232,6 +238,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
                                   .tileLodZoomShift = updateParameters->tileLodZoomShift,
                                   .tileLodMode = updateParameters->tileLodMode,
+                                  .subdivisionGranularity = updateParameters->subdivisionGranularity,
                                   .dynamicTextureAtlas = dynamicTextureAtlas,
                                   .globalState = globalState,
                                   .captureRenderedFeatures = updateParameters->captureRenderedFeatures};
@@ -249,6 +256,26 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     if (lightChanged || zoomChanged || globalStateChanged || renderLight.hasTransition()) {
         renderLight.evaluate(evaluationParameters);
+    }
+
+    // Update sky while preserving transitions between successive configurations.
+    bool skyChanged = false;
+    if (updateParameters->sky) {
+        if (!renderSky) {
+            renderSky.emplace(*updateParameters->sky);
+            skyChanged = true;
+        } else if (renderSky->impl != *updateParameters->sky) {
+            renderSky->impl = *updateParameters->sky;
+            renderSky->transition(transitionParameters);
+            skyChanged = true;
+        }
+    } else if (renderSky) {
+        renderSky.reset();
+        skyChanged = true;
+    }
+
+    if (renderSky && (skyChanged || zoomChanged || renderSky->hasTransition())) {
+        renderSky->evaluate(evaluationParameters);
     }
 
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
@@ -384,14 +411,17 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const bool tiltedView = transformState.getPitch() != 0.0f;
 
     // Create parameters for the render tree.
-    auto renderTreeParameters = std::make_unique<RenderTreeParameters>(updateParameters->transformState,
-                                                                       updateParameters->mode,
-                                                                       updateParameters->debugOptions,
-                                                                       updateParameters->timePoint,
-                                                                       renderLight.getEvaluated());
+    auto renderTreeParameters = std::make_unique<RenderTreeParameters>(
+        updateParameters->transformState,
+        updateParameters->mode,
+        updateParameters->debugOptions,
+        updateParameters->timePoint,
+        renderLight.getEvaluated(),
+        renderSky ? std::optional{renderSky->getEvaluated()} : std::nullopt);
 
     std::set<LayerRenderItem> layerRenderItems;
     layersNeedPlacement.clear();
+    layersFollowingPlacement.clear();
     auto renderItemsEmplaceHint = layerRenderItems.begin();
 
     // Reserve size for filteredLayersForSource if there are sources.
@@ -459,7 +489,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
             // Handle layers without source.
             if (layerIsVisible && zoomFitsLayer && sourceImpl.get() == sourceImpls->at(0).get()) {
-                if (backgroundLayerAsColor && layer.baseImpl == layerImpls->front()) {
+                // On the globe the background is a sphere mesh, not the backdrop, so it stays a layer.
+                if (backgroundLayerAsColor && !renderTreeParameters->sky &&
+                    !updateParameters->transformState.isGlobeRendering() && layer.baseImpl == layerImpls->front()) {
                     const auto& solidBackground = layer.getSolidBackground();
                     if (solidBackground) {
                         renderTreeParameters->backgroundColor = *solidBackground;
@@ -515,6 +547,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (renderLayer.needsPlacement()) {
             layersNeedPlacement.emplace_back(renderLayer);
         }
+        if (!renderLayer.getFollowerData().empty()) {
+            layersFollowingPlacement.emplace_back(renderLayer);
+        }
         if (renderTreeParameters->opaquePassCutOff == 0) {
             --opaquePassCutOffEstimation;
             if (renderLayer.is3D()) {
@@ -532,7 +567,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (auto it = layersNeedPlacement.crbegin(); it != layersNeedPlacement.crend(); ++it) {
         MLN_TRACE_ZONE(placement layer);
         RenderLayer& layer = *it;
-        auto result = crossTileSymbolIndex.addLayer(layer, longitude);
+        auto result = crossTileSymbolIndex.addLayer(layer, longitude, updateParameters->transformState);
         if (isMapModeContinuous) {
             usedSymbolLayers.insert(layer.getID());
             symbolBucketsAdded = symbolBucketsAdded || (result & CrossTileSymbolIndex::AddLayerResult::BucketsAdded);
@@ -611,6 +646,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                             *lineAtlas,
                                             *patternAtlas,
                                             std::move(layersNeedPlacement),
+                                            std::move(layersFollowingPlacement),
                                             placementController.getPlacement(),
                                             symbolBucketsChanged,
                                             startTime);
@@ -876,6 +912,10 @@ bool RenderOrchestrator::hasTransitions(TimePoint timePoint) const {
         return true;
     }
 
+    if (renderSky && renderSky->hasTransition()) {
+        return true;
+    }
+
     for (const auto& entry : renderLayers) {
         if (entry.second->hasTransition()) {
             return true;
@@ -1029,6 +1069,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
+    bool has3D = false;
     gfx::RenderingStats::FrameRenderedFeaturesMap allFeatures;
     allFeatures.reserve(items.size());
 
@@ -1047,6 +1088,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         } catch (...) {
             observer->onRenderError(std::current_exception());
         }
+        has3D = has3D || renderLayer.needsGlobeDepth();
 
         // Accumulate rendered features from each render layer, leaving each one empty.
         if (!renderLayer.stats.renderedFeatures.empty()) {
@@ -1064,6 +1106,15 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     }
     addChanges(changes);
 
+    const auto& treeParameters = renderTree.getParameters();
+    skyPass.update(shaders,
+                   context,
+                   state,
+                   paintParameters.renderableSize,
+                   paintParameters.pixelRatio,
+                   treeParameters.sky,
+                   treeParameters.light);
+    globeDepthPass.update(shaders, context, state, *updateParameters, has3D || skyPass.hasAtmosphere());
     std::swap(frameRenderedFeatures, allFeatures);
 }
 

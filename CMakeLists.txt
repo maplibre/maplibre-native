@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
 option(MLN_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MLN_WITH_PLUGINS "Build source-bound native plugin layers" OFF)
+option(MLN_WITH_GLOBE "Build the globe projection; without it a style's globe draws Mercator" ON)
 option(MLN_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
 option(MLN_WITH_COVERAGE "Enable code coverage collection" OFF)
 option(MLN_WITH_QT "Build MapLibre Native Qt bindings" OFF)
@@ -156,6 +157,10 @@ endif()
 
 include(cmake/plugins.cmake)
 
+if(MLN_WITH_GLOBE)
+    target_compile_definitions(mbgl-core PUBLIC MLN_WITH_GLOBE=1)
+endif()
+
 # Override visibility for mbgl-core when building amalgamation
 if(MLN_CREATE_AMALGAMATION)
     target_compile_options(mbgl-core PRIVATE
@@ -198,7 +203,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/gpu_expression.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/hillshade_prepare_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/color_relief_drawable_data.hpp
-    ${PROJECT_SOURCE_DIR}/src/mln/gfx/image_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/line_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/symbol_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/collision_drawable_data.hpp
@@ -259,7 +263,9 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/draw_scope.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/fill_generator.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/gfx_types.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/gfx/globe_clip_mask.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/polyline_generator.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/gfx/projection_variant.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/renderable.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/renderer_backend.hpp
@@ -306,6 +312,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/renderer/renderer_state.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/renderer/renderer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/shaders/program_parameters.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/shaders/sky_ubo.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/shaders/shader_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/storage/database_file_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/storage/file_source_manager.hpp
@@ -331,7 +338,9 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/get_json_type.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/light.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/sky.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/position.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/property_value.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/source.hpp
@@ -397,7 +406,10 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/layers/raster_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/layers/symbol_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/light.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/sky.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/position.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/projection.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/projection_definition.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/property_expression.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/property_value.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/rotation.hpp
@@ -467,8 +479,11 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/util/size.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/string_indexer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/string.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/util/subdivision.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/util/subdivision_granularity.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/symbol_error_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/thread.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/util/tile_mesh.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/tile_server_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/timer.hpp
@@ -520,6 +535,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/offscreen_texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/polyline_generator.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/fill_generator.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/gfx/fill_large_mesh_arrays.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/render_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/renderer_backend.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/rendering_stats.cpp
@@ -567,10 +583,16 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/map/map_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/map_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/map_projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/mercator_projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/mercator_projection.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/projection_base.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/tile_projector.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform_state.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform_state.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/vertical_perspective_projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/vertical_perspective_projection.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/zoom_history.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/math/log2.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/platform/settings.cpp
@@ -600,6 +622,9 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/cross_faded_property_evaluator.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/cross_faded_property_evaluator.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/data_driven_property_evaluator.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/globe_depth_pass.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/globe_depth_pass.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/globe_tile_mesh.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/group_by_layout.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/group_by_layout.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/image_manager.cpp
@@ -640,6 +665,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_light.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_light.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_sky.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_sky.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/sky_pass.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/sky_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_orchestrator.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_orchestrator.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_pass.hpp
@@ -719,7 +748,9 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/json.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/light.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/sky.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/position.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/projection.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/property_value.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/hillshade_conversions.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/rotation.cpp
@@ -837,10 +868,18 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/light_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/light_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/light_observer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/sky.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/sky_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/sky_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/sky_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/paint_property.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/parser.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/parser.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection_definition.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/properties.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/property_expression.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/rapidjson_conversion.hpp
@@ -1004,6 +1043,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/stopwatch.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/string.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/string_indexer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/subdivision.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/thread.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/thread_local.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/thread_pool.cpp
@@ -1013,6 +1053,9 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/tile_cover.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/tile_cover_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/tile_cover_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/tile_lod.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/tile_lod.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/tile_mesh.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/tile_range.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/default_style.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/tile_server_options.cpp
