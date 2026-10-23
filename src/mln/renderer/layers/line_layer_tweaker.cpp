@@ -295,14 +295,20 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     std::vector<LineTilePropsUnionUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
 
     // Pattern parameters can flip `pattern_from` before records are packed. Drawable UBOs then read the cached base.
-    std::vector<const void*> binderOrder;
+    // Pointers stay in this frame's list. The cache keeps bucket ids, which outlive the binders.
+    struct LiveBinder {
+        util::SimpleIdentity bucketId;
+        LineBinders* binders = nullptr;
+    };
+    std::vector<LiveBinder> liveBinders;
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getShader() || !checkTweakDrawable(drawable)) {
             return;
         }
         auto* binders = static_cast<LineBinders*>(drawable.getBinders());
         const auto* tile = drawable.getRenderTile();
-        if (!binders || !tile) {
+        const auto& bucket = drawable.getBucket();
+        if (!binders || !tile || !bucket) {
             return;
         }
         const auto patternPosA = tile->getPattern(linePatternValue.from.id());
@@ -314,17 +320,24 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             binders->setFeatureBase(0);
             return;
         }
-        const void* key = binders;
-        if (std::find(binderOrder.begin(), binderOrder.end(), key) == binderOrder.end()) {
-            binderOrder.push_back(key);
+        const auto bucketId = bucket->getID();
+        const auto alreadySeen = std::find_if(
+            liveBinders.begin(), liveBinders.end(), [&](const LiveBinder& live) { return live.bucketId == bucketId; });
+        if (alreadySeen == liveBinders.end()) {
+            liveBinders.push_back({bucketId, binders});
         }
     });
 
-    const bool orderChanged = binderOrder != featureBinderOrder;
+    const bool orderChanged = liveBinders.size() != featureBinderOrder.size() ||
+                              !std::equal(
+                                  liveBinders.begin(),
+                                  liveBinders.end(),
+                                  featureBinderOrder.begin(),
+                                  [](const LiveBinder& live, util::SimpleIdentity id) { return live.bucketId == id; });
     bool anyDirty = false;
     if (!orderChanged) {
-        for (const void* key : binderOrder) {
-            if (static_cast<const LineBinders*>(key)->geFeatureRecordsDirty()) {
+        for (const LiveBinder& live : liveBinders) {
+            if (live.binders->geFeatureRecordsDirty()) {
                 anyDirty = true;
                 break;
             }
@@ -332,9 +345,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     }
     if (orderChanged || anyDirty || !featureUniformBuffer) {
         std::vector<LineFeatureUBO> records;
+        std::vector<util::SimpleIdentity> binderOrder;
+        binderOrder.reserve(liveBinders.size());
         uint32_t base = 0;
-        for (const void* key : binderOrder) {
-            auto* binders = static_cast<LineBinders*>(const_cast<void*>(key));
+        for (const LiveBinder& live : liveBinders) {
+            auto* binders = live.binders;
             if (binders->geFeatureRecordsDirty() || binders->getFeatureRecords().empty()) {
                 packFeatureRecords(*binders, lineFeatureSources(*binders));
             }
@@ -342,6 +357,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             const auto& packed = binders->getFeatureRecords();
             records.insert(records.end(), packed.begin(), packed.end());
             base += static_cast<uint32_t>(packed.size());
+            binderOrder.push_back(live.bucketId);
         }
         featureBinderOrder = std::move(binderOrder);
 

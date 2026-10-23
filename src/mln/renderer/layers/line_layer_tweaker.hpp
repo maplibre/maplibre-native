@@ -7,10 +7,14 @@
 #include <mln/shaders/line_layer_ubo.hpp>
 #endif // MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU
 
+#if MLN_UBO_CONSOLIDATION
+#include <mln/util/identity.hpp>
+#endif // MLN_UBO_CONSOLIDATION
+
 #include <string>
 #if MLN_UBO_CONSOLIDATION
 #include <vector>
-#endif
+#endif // MLN_UBO_CONSOLIDATION
 
 namespace mln {
 
@@ -68,8 +72,8 @@ protected:
     gfx::UniformBufferPtr drawableUniformBuffer;
     gfx::UniformBufferPtr tilePropsUniformBuffer;
     gfx::UniformBufferPtr featureUniformBuffer;
-    // Ordered binders from the previous frame. `feature_base` is an offset into that concatenation.
-    std::vector<const void*> featureBinderOrder;
+    // Ordered bucket ids from the previous frame. `feature_base` is an offset into that concatenation.
+    std::vector<util::SimpleIdentity> featureBinderOrder;
 #endif
 
 #if MLN_RENDER_BACKEND_METAL
