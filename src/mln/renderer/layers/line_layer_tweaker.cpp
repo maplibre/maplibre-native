@@ -84,6 +84,14 @@ LineFeatureSources lineFeatureSources(const LineBinders& binders) {
     return sources;
 }
 
+// `update` cannot shrink. Recreate when the live set does not fit, or once it drops to
+// half the allocation, so a dense view does not pin the high-water mark. Spare of 256
+// bytes is alignment padding (WebGPU rounds storage allocations up to that).
+bool needNewBuffer(std::size_t capacity, std::size_t bytes) {
+    constexpr std::size_t alignmentSlack = 256;
+    return (capacity < bytes) || (capacity > alignmentSlack && (capacity - alignmentSlack) / 2 > bytes);
+}
+
 void packFeatureRecords(LineBinders& binders, const LineFeatureSources& sources) {
     auto& records = binders.getFeatureRecords();
     records.resize(sources.count);
@@ -341,7 +349,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         const void* featureData = records.empty() ? static_cast<const void*>(&dummyFeature)
                                                   : static_cast<const void*>(records.data());
         const size_t featureBytes = records.empty() ? sizeof(dummyFeature) : sizeof(LineFeatureUBO) * records.size();
-        if (!featureUniformBuffer || featureUniformBuffer->getSize() < featureBytes) {
+        if (!featureUniformBuffer || needNewBuffer(featureUniformBuffer->getSize(), featureBytes)) {
             featureUniformBuffer = context.createUniformBuffer(featureData, featureBytes, false, true);
         } else {
             featureUniformBuffer->update(featureData, featureBytes);
