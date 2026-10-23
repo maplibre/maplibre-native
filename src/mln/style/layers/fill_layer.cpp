@@ -243,6 +243,7 @@ void FillLayer::setFillRoundedCornerDistanceTransition(const TransitionOptions& 
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillRoundedCornerDistance>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillLayer::getFillRoundedCornerDistanceTransition() const {
