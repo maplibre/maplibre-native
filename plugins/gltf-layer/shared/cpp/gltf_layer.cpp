@@ -66,6 +66,8 @@ static_assert(sizeof(Vertex) == 44);
 
 struct Layout {
     uint32_t extent = 8192;
+    // Whether the map's geometry can hide the mesh. When false it is drawn over everything, whatever the layer order.
+    bool occluded = true;
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
     std::vector<mln_plugin_segment_v1> segments;
@@ -345,6 +347,12 @@ mln_plugin_status createLayout(const mln_plugin_layout_context_v1* context, void
     auto layout = std::unique_ptr<Layout>(new (std::nothrow) Layout());
     if (!layout) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
     layout->extent = context->extent;
+    // A missing or malformed value keeps the default: occluded.
+    for (size_t i = 0; context->properties && i < context->property_count; ++i) {
+        const auto& property = context->properties[i];
+        if (std::string_view(property.name.data, property.name.size) != "model-occlusion") continue;
+        if (property.value.type == MLN_PLUGIN_VALUE_FLOAT) layout->occluded = property.value.data.float_value != 0.0f;
+    }
     startSegment(*layout);
     *instance = layout.release();
     return MLN_PLUGIN_STATUS_OK;
@@ -458,8 +466,10 @@ mln_plugin_status finishLayout(void* instance, mln_plugin_bucket_v1* output) {
         drawable.segments = layout.segments.data();
         drawable.segment_count = layout.segments.size();
         // Real depth, so the mesh orders against itself and against the map's extrusions. glTF materials
-        // may be double sided, and the plugin does not read that flag, so nothing is culled.
-        drawable.depth_mode = MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE;
+        // may be double sided, and the plugin does not read that flag, so nothing is culled. Without
+        // `model-occlusion` there is no depth at all, so the mesh is drawn as is, over everything below it.
+        drawable.depth_mode = layout.occluded ? MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE
+                                              : MLN_PLUGIN_DRAWABLE_DEPTH_DISABLED;
         drawable.enable_stencil_overlap = 0;
         drawable.cull_back_faces = 0;
     }
@@ -552,6 +562,25 @@ constexpr mln_plugin_property_descriptor_v1 resourceProperty(mln_plugin_string n
     return p;
 }
 
+// A number for the whole layer, evaluated when a tile is laid out; it takes camera expressions only.
+constexpr mln_plugin_property_descriptor_v1 layoutProperty(mln_plugin_string name,
+                                                           mln_plugin_value value,
+                                                           float minimum,
+                                                           float maximum) {
+    mln_plugin_property_descriptor_v1 p{};
+    p.struct_size = sizeof(p);
+    p.name = name;
+    p.type = value.type;
+    p.default_value = value;
+    p.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    p.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
+    p.has_minimum = true;
+    p.minimum = minimum;
+    p.has_maximum = true;
+    p.maximum = maximum;
+    return p;
+}
+
 constexpr mln_plugin_property_descriptor_v1 property(mln_plugin_string name,
                                                      mln_plugin_value value,
                                                      float minimum = -std::numeric_limits<float>::infinity(),
@@ -578,6 +607,9 @@ const mln_plugin_property_descriptor_v1 properties[] = {
     // The name in `models` a feature is drawn as; usually a feature expression such as ["get", "kind"], so
     // one layer draws several models. A feature whose name is not in `models` is not drawn.
     resourceProperty(str("model-id"), str("models")),
+    // 1 draws the mesh depth tested against the map, so extrusions can hide it. 0 draws it above everything
+    // beneath it in the layer order.
+    layoutProperty(str("model-occlusion"), number(1), 0, 1),
     // Degrees clockwise from north, applied on top of the mesh's own forward direction.
     property(str("model-heading"), number(0)),
     // Meters per mesh unit.

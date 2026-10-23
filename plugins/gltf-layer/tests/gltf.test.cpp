@@ -80,10 +80,13 @@ mln_plugin_bucket_v1 layOut(const mln_plugin_layer_type_v1& layer,
                             const std::vector<mln_plugin_tile_point_v1>& points,
                             const std::vector<void*>& models,
                             void*& instance,
-                            uint64_t firstIndex = 3) {
+                            uint64_t firstIndex = 3,
+                            const mln_plugin_property_value_v1* occlusion = nullptr) {
     mln_plugin_layout_context_v1 context{};
     context.struct_size = sizeof(context);
     context.extent = 8192;
+    context.properties = occlusion;
+    context.property_count = occlusion ? 1 : 0;
     instance = nullptr;
     CHECK(layer.create_layout(&context, &instance) == MLN_PLUGIN_STATUS_OK);
     for (size_t i = 0; i < models.size(); ++i) {
@@ -128,10 +131,12 @@ int main() {
     CHECK(layer.properties[1].type == MLN_PLUGIN_VALUE_RESOURCE &&
           layer.properties[1].scope == MLN_PLUGIN_PROPERTY_LAYOUT);
     CHECK(std::string_view(layer.properties[1].resources.data, layer.properties[1].resources.size) == "models");
+    CHECK(std::string_view(layer.properties[2].name.data, layer.properties[2].name.size) == "model-occlusion" &&
+          layer.properties[2].type == MLN_PLUGIN_VALUE_FLOAT && layer.properties[2].scope == MLN_PLUGIN_PROPERTY_LAYOUT);
 
     // Every paint property is bound to the shader, and the binding offsets stay inside the uniform block.
     const auto& shader = layer.shaders[0];
-    CHECK(shader.property_binding_count + 2 == layer.property_count);
+    CHECK(shader.property_binding_count + 3 == layer.property_count);
     CHECK(shader.attribute_count <= MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES);
     std::set<uint32_t> locations;
     for (size_t i = 0; i < shader.attribute_count; ++i) {
@@ -180,6 +185,21 @@ int main() {
     // The material's base color factor reaches the vertex stream.
     const float* firstVertex = reinterpret_cast<const float*>(bucket.vertex_streams[0].data + 28);
     CHECK(firstVertex[0] == 1.0f && firstVertex[1] == 0.5f && firstVertex[2] == 0.25f && firstVertex[3] == 1.0f);
+    layer.destroy_layout(instance);
+
+    // `model-occlusion` is a layout property: 0 turns the depth test off, anything else keeps it.
+    mln_plugin_property_value_v1 occlusion{};
+    occlusion.struct_size = sizeof(occlusion);
+    occlusion.name = {"model-occlusion", 15};
+    occlusion.value.struct_size = sizeof(occlusion.value);
+    occlusion.value.type = MLN_PLUGIN_VALUE_FLOAT;
+    occlusion.value.data.float_value = 0.0f;
+    bucket = layOut(layer, {{0, 0}}, {triangle}, instance, 3, &occlusion);
+    CHECK(bucket.drawable_count == 1 && bucket.drawables[0].depth_mode == MLN_PLUGIN_DRAWABLE_DEPTH_DISABLED);
+    layer.destroy_layout(instance);
+    occlusion.value.data.float_value = 1.0f;
+    bucket = layOut(layer, {{0, 0}}, {triangle}, instance, 3, &occlusion);
+    CHECK(bucket.drawables[0].depth_mode == MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE);
     layer.destroy_layout(instance);
 
     // Enough points to overflow one 16-bit segment: the layout must split rather than wrap.
