@@ -82,7 +82,16 @@ public:
     PatternAtlas& patternAtlas;
     LineAtlas& lineAtlas;
     const TransformState& state;
+    // Terrain is on: the tile cover coarsens distant tiles.
+    bool terrain = false;
 };
+
+/// Whether a tile of this zoom builds a layer whose minzoom is `layerMinZoom`. A layer's
+/// minzoom is the camera zoom the layer starts at, and with terrain on the cover also
+/// holds tiles coarser than the camera's (distance level of detail); gl-js builds no
+/// bucket for such a tile (WorkerTile: `zoom < Math.floor(layer.minzoom)`), and this
+/// is the same test.
+bool tileZoomReachesLayerMinZoom(uint8_t tileOverscaledZoom, float layerMinZoom);
 
 class RenderLayer {
 protected:
@@ -201,6 +210,10 @@ protected:
     void checkRenderability(const PaintParameters&, uint32_t activeBindingCount);
 
     void addRenderPassesFromTiles();
+
+    /// With terrain on, drops the render tiles coarser than the layer's minzoom, so the
+    /// far field the level of detail coarsened neither draws nor places this layer.
+    void dropTilesBelowMinZoom(const LayerPrepareParameters&);
 
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
 
