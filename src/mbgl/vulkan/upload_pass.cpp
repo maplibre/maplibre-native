@@ -118,10 +118,10 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         bindings.resize(std::max(bindings.size(), index + 1));
 
-        if (!override_) {
-            // No attribute was provided, this value will be used from a uniform, but we have to set
-            // up a valid binding or the validation will complain when the shader code references the
-            // attribute at compile time, regardless of whether it's ever used at runtime.
+        // No attribute was provided, this value will be used from a uniform, but we have to set
+        // up a valid binding or the validation will complain when the shader code references the
+        // attribute at compile time, regardless of whether it's ever used at runtime.
+        const auto setEmptyBinding = [&]() {
             bindings[index] = {
                 /*.attribute = */ {defaultAttr.getDataType(), /*offset=*/0},
                 /*.vertexStride = */ static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
@@ -129,6 +129,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                 /*.vertexOffset = */ 0,
                 /*.bufferIndex = */ 0,
             };
+        };
+
+        if (!override_) {
+            // No attribute was provided, this value will be used from a uniform
+            setEmptyBinding();
             return;
         }
 
@@ -148,6 +153,12 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
+        if (effectiveAttr.getSharedRawData()) {
+            // shared data exists but is empty
+            setEmptyBinding();
+            return;
+        }
+
         assert(effectiveAttr.getStride() > 0);
 
         // Otherwise, turn the data managed by the attribute into a buffer.
@@ -163,7 +174,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
-        assert(false);
+        setEmptyBinding();
     };
     // This version is called when the attribute is available, but isn't being used by the shader
     const auto missingAttr = [&](const size_t, auto& attr_) -> void {
