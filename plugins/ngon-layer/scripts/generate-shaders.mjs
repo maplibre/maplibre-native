@@ -34,6 +34,10 @@ const uniformFields = `
     vec4 interpolation1;
     vec4 interpolation2;
     vec4 interpolation3;
+    mat4 projection;
+    vec4 tile_mercator;
+    vec4 clipping_plane;
+    vec4 globe;
 `;
 const varyings = [['vec2', 'local'], ['vec4', 'shape'], ['vec4', 'paint'], ['vec4', 'color'], ['vec4', 'stroke_color']];
 const macro = name => `MLN_PLUGIN_PROPERTY_NGON_${name.toUpperCase()}_IS_UNIFORM`;
@@ -69,6 +73,34 @@ function evaluate(backend) {
   return result;
 }
 
+// The globe, as the host's own shaders project it. `globe` is the transition
+// and the angle of a pixel on the sphere.
+const sphere = `
+vec3 ngon_sphere(vec2 tile_position, vec4 tile_mercator) {
+    vec2 mercator = tile_mercator.xy + tile_mercator.zw * tile_position;
+    float x = mercator.x * 6.283185307179586 + 3.141592653589793;
+    float t = exp(3.141592653589793 - mercator.y * 6.283185307179586);
+    return vec3(sin(x) * 2.0 * t, t * t - 1.0, cos(x) * 2.0 * t) / (t * t + 1.0);
+}
+
+vec3 ngon_rotate(vec3 direction, vec2 angles) {
+    vec3 right = vec3(direction.z, 0.0, -direction.x);
+    vec3 up = normalize(cross(right, direction));
+    vec2 t = tan(angles);
+    return normalize(direction + normalize(right) * t.x + up * t.y);
+}
+
+vec4 ngon_project(vec2 tile_position, vec3 direction, mat4 tile_matrix, mat4 projection, vec4 plane, vec4 globe) {
+    vec4 result = projection * vec4(direction, 1.0);
+    result.z = (1.0 - (dot(direction, plane.xyz) + plane.w)) * result.w;
+    if (globe.x > 0.999) return result;
+    vec4 flat_position = tile_matrix * vec4(tile_position, 0.0, 1.0);
+    result.z = mix(0.0, result.z, clamp((globe.x - 0.2) / 0.8, 0.0, 1.0));
+    result.xyw = mix(flat_position.xyw, result.xyw, globe.x);
+    return result;
+}
+`;
+
 // Pixel coordinates have positive y downwards. Corner zero points up; rotation
 // is clockwise. A constant quad allows even corner count to be feature-driven.
 const projection = `
@@ -84,7 +116,10 @@ const projection = `
         translate = vec2(c * translate.x - s * translate.y, s * translate.x + c * translate.y);
     }
     center += translate * u.camera.z;
+    bool on_globe = u.globe.x > 0.0;
+    vec3 center_vector = ngon_sphere(center, u.tile_mercator);
     vec4 projected = u.matrix * vec4(center, 0.0, 1.0);
+    if (on_globe) projected = ngon_project(center, center_vector, u.matrix, u.projection, u.clipping_plane, u.globe);
     float outer_radius = radius + stroke_width / cos(3.141592653589793 / corners);
     float extent = outer_radius + 2.0 / max(u.view.y, 1.0);
     vec2 local = corner * extent;
@@ -93,9 +128,16 @@ const projection = `
         vec2 offset = local * u.camera.z;
         if (pitch_scale > 0.5) offset *= projected.w / u.camera.w;
         position = u.matrix * vec4(center + offset, 0.0, 1.0);
+        if (on_globe) {
+            vec2 angles = offset * (u.globe.y / u.camera.z);
+            position = ngon_project(center + offset, ngon_rotate(center_vector, angles), u.matrix, u.projection,
+                                    u.clipping_plane, u.globe);
+        }
     } else {
         float scale = pitch_scale < 0.5 ? u.camera.w : projected.w;
         position = projected + vec4(local * u.camera.xy * scale, 0.0, 0.0);
+        // Behind the horizon.
+        if (on_globe && projected.z > projected.w) position.xy = vec2(10000.0);
     }
     OUT_local = local;
     OUT_shape = vec4(radius, stroke_width, corners, rotate * 0.017453292519943295);
@@ -131,6 +173,7 @@ struct NgonVaryings {
     float4 position [[position]];
 ${varyings.map(([t, n]) => `    ${metal(t)} ${n};`).join('\n')}
 };
+${metal(sphere)}
 vertex NgonVaryings ngonVertex(NgonVertex in [[stage_in]],
     constant NgonDrawableUBO& u [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]]) {
     NgonVaryings out;
@@ -147,7 +190,7 @@ ${metal(coverage.replaceAll('IN_', 'in.'))}    return half4(result);
     const layout = backend === 'vulkan'
       ? 'layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = MLN_PLUGIN_UNIFORM_0_BINDING)'
       : 'layout(std140)';
-    emit(backend + 'Vertex', `${attributes(backend)}\n${layout} uniform NgonDrawableUBO {${uniformFields}} u;\n${io('out')}
+    emit(backend + 'Vertex', `${attributes(backend)}\n${layout} uniform NgonDrawableUBO {${uniformFields}} u;\n${io('out')}${sphere}
 void main() {
 ${vertexBody}    gl_Position = position;
 ${backend === 'vulkan' ? '    applySurfaceTransform();\n' : ''}}

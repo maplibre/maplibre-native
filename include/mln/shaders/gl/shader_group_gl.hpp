@@ -19,6 +19,7 @@ public:
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
                                      const StringIDSetsPair& propertiesAsUniforms,
+                                     gfx::ProjectionVariant variant,
                                      std::string_view firstAttribName) override {
         constexpr auto& name = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::name;
         constexpr auto& vert = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::vertex;
@@ -29,6 +30,7 @@ public:
         std::size_t seed = 0;
         mln::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
         mln::util::hash_combine(seed, programParameters.getDefinesHash());
+        mln::util::hash_combine(seed, static_cast<uint8_t>(variant));
         const std::string shaderName = getShaderName(name, seed);
 
         auto shader = get<gl::ShaderProgramGL>(shaderName);
@@ -48,6 +50,11 @@ public:
 
             additionalDefines += "#define HAS_UNIFORM_u_";
             additionalDefines += prefix;
+            additionalDefines += "\n";
+        }
+        if (variant == gfx::ProjectionVariant::Globe) {
+            additionalDefines += "#define ";
+            additionalDefines += globeDefine;
             additionalDefines += "\n";
         }
 

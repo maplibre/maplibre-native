@@ -31,6 +31,9 @@ public:
     void add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile);
 
     std::unique_ptr<Tile> pop(const OverscaledTileID& key);
+    /// Pop the tile cached under any wrap of `key` and give it `key`'s wrap. On the globe every wrap of a tile is the
+    /// same piece of the sphere.
+    std::unique_ptr<Tile> popAnyWrap(const OverscaledTileID& key);
     Tile* get(const OverscaledTileID& key);
     bool has(const OverscaledTileID& key);
     void clear();

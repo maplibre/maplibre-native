@@ -8,6 +8,7 @@
 #include <mln/shaders/mtl/shader_group.hpp>
 #include <mln/shaders/mtl/shader_program.hpp>
 #include <mln/shaders/shader_manifest.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 
 // ... shader_manifest.hpp
@@ -19,6 +20,7 @@
 #include <mln/shaders/mtl/debug.hpp>
 #include <mln/shaders/mtl/fill.hpp>
 #include <mln/shaders/mtl/fill_extrusion.hpp>
+#include <mln/shaders/mtl/globe_depth.hpp>
 #include <mln/shaders/mtl/heatmap.hpp>
 #include <mln/shaders/mtl/heatmap_texture.hpp>
 #include <mln/shaders/mtl/hillshade.hpp>
@@ -117,6 +119,9 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
+    if constexpr (util::GLOBE_ENABLED) {
+        registerTypes<shaders::BuiltIn::GlobeDepthShader>(shaders, programParameters);
+    }
 }
 
 } // namespace mtl

@@ -270,6 +270,14 @@ class UiSettingsTest : BaseTest() {
     }
 
     @Test
+    fun testRotateGesturesTurnTheGlobeBearing() {
+        uiSettings!!.isRotateGesturesEnabled = false
+        Mockito.verify(projection).setGlobeFreeBearing(false)
+        uiSettings!!.isRotateGesturesEnabled = true
+        Mockito.verify(projection).setGlobeFreeBearing(true)
+    }
+
+    @Test
     fun testRotateGestureChangeAllowed() {
         uiSettings!!.isRotateGesturesEnabled = false
         Assert.assertEquals(

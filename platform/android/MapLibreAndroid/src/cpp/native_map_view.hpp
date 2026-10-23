@@ -91,7 +91,11 @@ public:
 
     void setGestureInProgress(jni::JNIEnv&, jni::jboolean);
 
+    void setGlobeFreeBearing(jni::JNIEnv&, jni::jboolean);
+
     void moveBy(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jlong);
+
+    void moveByAround(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble);
 
     void jumpTo(jni::JNIEnv&,
                 jni::jdouble,
@@ -222,6 +226,8 @@ public:
     jni::Local<jni::Object<LatLng>> latLngForPixel(JNIEnv&, jfloat, jfloat);
 
     void latLngsForPixels(JNIEnv&, const jni::Array<jdouble>&, jni::Array<jdouble>&, jfloat);
+
+    jboolean isLocationOccluded(JNIEnv&, jdouble, jdouble);
 
     jni::Local<jni::Array<jlong>> addPolylines(JNIEnv&, const jni::Array<jni::Object<Polyline>>&);
 
