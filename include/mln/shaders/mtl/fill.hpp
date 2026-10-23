@@ -311,11 +311,11 @@ struct DataVertex {
 #if !defined(HAS_UNIFORM_u_outline_color)
     float outline_color[4];
 #endif
-#if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort pattern_from[4];
-#endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     ushort pattern_to[4];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    ushort pattern_from[4];
 #endif
 };
 
@@ -509,7 +509,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -518,8 +518,8 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-    float4 outline_color [[attribute(2)]];
-    float2 opacity [[attribute(3)]];
+    float4 outline_color [[attribute(1)]];
+    float2 opacity [[attribute(2)]];
 };
 
 struct FragmentStage {
@@ -906,7 +906,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -917,16 +917,16 @@ struct VertexStage {
     short2 position [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(2)]];
+    float4 color [[attribute(1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
+    float2 opacity [[attribute(2)]];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    ushort4 pattern_from [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     ushort4 pattern_to [[attribute(4)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(5)]];
 #endif
 };
 
