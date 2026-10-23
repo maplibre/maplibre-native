@@ -6,12 +6,6 @@ let modifiedReferenceSpec = referenceSpec;
 // https://github.com/maplibre/maplibre-native/issues/250
 delete modifiedReferenceSpec['layout_symbol']['text-rotation-alignment']["values"]['viewport-glyph']
 
-// https://github.com/maplibre/maplibre-native/issues/251
-delete modifiedReferenceSpec['layout_symbol']['icon-overlap'];
-delete modifiedReferenceSpec['layout_symbol']['text-overlap'];
-modifiedReferenceSpec["layout_symbol"]["text-allow-overlap"]["requires"] = referenceSpec["layout_symbol"]["text-allow-overlap"]["requires"].filter(val => JSON.stringify(val) !== '{"!":"text-overlap"}');
-modifiedReferenceSpec["layout_symbol"]["text-allow-overlap"]["requires"] = referenceSpec["layout_symbol"]["icon-allow-overlap"]["requires"].filter(val => JSON.stringify(val) !== '{"!":"icon-overlap"}');
-
 modifiedReferenceSpec.layer.type.values["location-indicator"] = {};
 modifiedReferenceSpec["layout_location-indicator"] = {
   "top-image": {

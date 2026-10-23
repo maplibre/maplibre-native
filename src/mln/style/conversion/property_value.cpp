@@ -102,6 +102,8 @@ Converter<PropertyValue<HillshadeIlluminationAnchorType>>::operator()(conversion
                                                                       conversion::Error&,
                                                                       bool,
                                                                       bool) const;
+template std::optional<PropertyValue<IconOverlapType>> Converter<PropertyValue<IconOverlapType>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool) const;
 template std::optional<PropertyValue<IconTextFitType>> Converter<PropertyValue<IconTextFitType>>::operator()(
     conversion::Convertible const&, conversion::Error&, bool, bool) const;
 template std::optional<PropertyValue<LightAnchorType>> Converter<PropertyValue<LightAnchorType>>::operator()(

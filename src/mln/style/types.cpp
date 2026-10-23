@@ -122,6 +122,14 @@ MBGL_DEFINE_ENUM(IconTextFitType,
                      {IconTextFitType::Height, "height"},
                  });
 
+MBGL_DEFINE_ENUM(IconOverlapType,
+                 {
+                     {IconOverlapType::Undefined, "undefined"},
+                     {IconOverlapType::Never, "never"},
+                     {IconOverlapType::Always, "always"},
+                     {IconOverlapType::Cooperative, "cooperative"},
+                 });
+
 MBGL_DEFINE_ENUM(LightAnchorType, {{LightAnchorType::Map, "map"}, {LightAnchorType::Viewport, "viewport"}});
 
 } // namespace mln
