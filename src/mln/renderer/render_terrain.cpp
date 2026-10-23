@@ -84,6 +84,13 @@ RenderTerrain::RenderTerrain(Immutable<style::Terrain::Impl> impl_)
 
 RenderTerrain::~RenderTerrain() = default;
 
+std::array<double, 2> RenderTerrain::meshTileCapOrigin(const TransformState& state) {
+    // Map centre in normalized web-mercator [0,1] (standard projection)
+    const LatLng center = state.getLatLng();
+    const double latRad = util::deg2rad(center.latitude());
+    return {center.longitude() / 360.0 + 0.5, 0.5 - std::log(std::tan(M_PI / 4.0 + latRad / 2.0)) / (2.0 * M_PI)};
+}
+
 std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     const TransformState& state, const std::shared_ptr<UpdateParameters>& updateParameters) const {
     std::set<UnwrappedTileID> out;
@@ -292,11 +299,9 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     const size_t maxMeshTiles = updateParameters ? terrainLoadBudget(updateParameters->terrainLoadMode).maxMeshTiles
                                                  : 0;
     if (maxMeshTiles > 0 && meshTiles.size() > maxMeshTiles) {
-        // Map center in normalized web-mercator [0,1] (standard projection)
-        const LatLng center = state.getLatLng();
-        const double cx = center.longitude() / 360.0 + 0.5;
-        const double latRad = util::deg2rad(center.latitude());
-        const double cy = 0.5 - std::log(std::tan(M_PI / 4.0 + latRad / 2.0)) / (2.0 * M_PI);
+        const std::array<double, 2> origin = meshTileCapOrigin(state);
+        const double cx = origin[0];
+        const double cy = origin[1];
 
         const auto tileDist2 = [&](const UnwrappedTileID& id) {
             const double scale = static_cast<double>(1u << id.canonical.z);
