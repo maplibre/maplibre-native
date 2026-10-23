@@ -14,6 +14,7 @@
 
 #include <array>
 #include <map>
+#include <optional>
 
 namespace mln {
 
@@ -89,6 +90,14 @@ public:
     /// rebinding (Vulkan push constants) deliver it to apply_drape_transform
     /// from here at draw-record time
     std::array<float, 4> currentDrapeTile{{0, 0, 0, 0}};
+    /// The same drape target tile as an id; unset outside a drape pass. Clipping masks are
+    /// only built for the tiles that overlap it.
+    std::optional<UnwrappedTileID> currentDrapeTileID;
+
+    /// Whether two tiles cover common ground: the same tile, or one an ancestor of the other.
+    static bool tilesOverlap(const UnwrappedTileID& a, const UnwrappedTileID& b) noexcept {
+        return a == b || a.isChildOf(b) || b.isChildOf(a);
+    }
 
     /// Frame-global signature of everything a terrain drape's baked content can
     /// depend on (the set of draped drawable ids, the draped group count, zoom,
@@ -153,7 +162,11 @@ public:
     /// The cache is keyed only on the tile set, so it has to be dropped whenever the
     /// same tiles would now be placed differently - entering or leaving a drape
     /// target, or moving between drape targets (see clipMatrixForTile).
-    void invalidateTileClippingMasks() { tileClippingMaskIDs.clear(); }
+    void invalidateTileClippingMasks() {
+        tileClippingMaskIDs.clear();
+        drapeMaskSource.reset();
+        drapeMaskTiles.reset();
+    }
 
     /// @brief Get a stencil mode for rendering constrined to the specified tile ID.
     /// The tile ID must have been present in the set previously passed to `renderTileClippingMasks`
@@ -170,6 +183,11 @@ private:
     using GetTileIDFunc = const UnwrappedTileID& (*)(const typename TIter::value_type&);
     template <typename TIter>
     void renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter> unwrap);
+
+    /// The tiles of `tiles` that overlap the current drape target, in the same order.
+    /// Cached for the last source, which consecutive layer groups of one source share.
+    const RenderTiles& overlappingDrapeTiles(const RenderTiles& tiles);
+    RenderTiles drapeMaskSource, drapeMaskTiles;
 
     // This needs to be an ordered map so that we have the same order as the renderTiles.
     std::map<UnwrappedTileID, int32_t> tileClippingMaskIDs;
