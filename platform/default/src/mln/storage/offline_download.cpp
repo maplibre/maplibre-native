@@ -479,33 +479,18 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
     assert(resource.usage == Resource::Usage::Offline);
 
     auto workRequestsIt = requests.insert(requests.begin(), nullptr);
-    *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=, this]() {
+    *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=, this]() mutable {
         requests.erase(workRequestsIt);
         const auto resourceKind = resource.kind;
-        auto getResourceSizeInDatabase = [&]() -> std::optional<int64_t> {
-            std::optional<int64_t> result;
-            if (!callback) {
-                result = offlineDatabase.hasRegionResource(resource);
-            } else {
-                std::optional<std::pair<Response, uint64_t>> response = offlineDatabase.getRegionResource(resource);
-                if (response) {
-                    callback(response->first);
-                    result = response->second;
-                }
-            }
-
-            if (result) resourcesToBeMarkedAsUsed.emplace_back(resource);
-            return result;
-        };
-
-        std::optional<int64_t> offlineResponse = getResourceSizeInDatabase();
-        if (offlineResponse) {
-            assert(!resourcesToBeMarkedAsUsed.empty());
+        auto offlineResponse = offlineDatabase.getRegionResource(resource);
+        if (offlineResponse && offlineResponse->first.isUsable()) {
+            if (callback) callback(offlineResponse->first);
+            resourcesToBeMarkedAsUsed.emplace_back(resource);
             status.completedResourceCount++;
-            status.completedResourceSize += *offlineResponse;
+            status.completedResourceSize += offlineResponse->second;
             if (resourceKind == Resource::Kind::Tile) {
                 status.completedTileCount += 1;
-                status.completedTileSize += *offlineResponse;
+                status.completedTileSize += offlineResponse->second;
             }
 
             observer->statusChanged(status);
@@ -513,7 +498,14 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
             return;
         }
 
-        if (offlineDatabase.exceedsOfflineMapboxTileCountLimit(resource)) {
+        if (offlineResponse) {
+            resource.priorData = offlineResponse->first.data;
+            resource.priorEtag = offlineResponse->first.etag;
+            resource.priorModified = offlineResponse->first.modified;
+            resource.priorExpires = offlineResponse->first.expires;
+        }
+
+        if (!offlineResponse && offlineDatabase.exceedsOfflineMapboxTileCountLimit(resource)) {
             onMapboxTileCountLimitExceeded();
             return;
         }
@@ -547,7 +539,7 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
             // TODO: Simplify the tile count limit check code path!
             if ((buffer.size() == kResourcesBatchSize || resourcesRemaining.empty()) && !flushResourcesBuffer()) return;
 
-            if (offlineDatabase.exceedsOfflineMapboxTileCountLimit(resource)) {
+            if (!offlineResponse && offlineDatabase.exceedsOfflineMapboxTileCountLimit(resource)) {
                 onMapboxTileCountLimitExceeded();
                 return;
             }
