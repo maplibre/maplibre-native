@@ -20,6 +20,10 @@ DescriptorSet::DescriptorSet(Context& context_, DescriptorSetType type_)
       type(type_) {}
 
 DescriptorSet::~DescriptorSet() {
+    if (descriptorPoolIndex < 0 || descriptorSets.empty()) {
+        return;
+    }
+
     context.enqueueDeletion(
         [type_ = type, poolIndex = descriptorPoolIndex, sets = std::move(descriptorSets)](auto& context_) mutable {
             auto& poolInfo = context_.getDescriptorPool(type_).pools[poolIndex];
@@ -106,8 +110,6 @@ void DescriptorSet::allocate() {
         }
     }
 
-    descriptorPoolIndex = growablePool.currentPoolIndex;
-
 #ifdef USE_DESCRIPTOR_POOL_RESET
     if (!growablePool.current().unusedSets.empty()) {
         descriptorSets = growablePool.current().unusedSets.front();
@@ -121,6 +123,7 @@ void DescriptorSet::allocate() {
         growablePool.current().remainingSets -= descriptorSets.size();
     }
 
+    descriptorPoolIndex = growablePool.currentPoolIndex;
     dirty = std::vector(descriptorSets.size(), true);
 }
 
