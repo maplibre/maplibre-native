@@ -596,7 +596,9 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
+#if !defined(HAS_UNIFORM_u_triangle_instance)
     uint3 triangle_indices [[attribute(6)]];
+#endif
 };
 
 struct PolygonVertex {
@@ -604,8 +606,10 @@ struct PolygonVertex {
 };
 
 struct NeighborVertex {
+#if !defined(HAS_UNIFORM_u_triangle_instance)
     short prev_offset;
     short next_offset;
+#endif
 };
 
 struct DataVertex {
@@ -630,6 +634,8 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 v_pos_a;
     float2 v_pos_b;
+
+#if !defined(HAS_UNIFORM_u_triangle_instance)
     float2 pos;
 
     float2 v0 [[flat]];
@@ -649,6 +655,7 @@ struct FragmentStage {
     float v2Radius [[flat]];
 
     float external [[flat]];
+#endif
 
 #if !defined(HAS_UNIFORM_u_color)
     half4 color;
@@ -678,6 +685,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillPatternDrawableUBO& drawable = drawableVector[uboIndex].fillPatternDrawableUBO;
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
 
+#if defined(HAS_UNIFORM_u_triangle_instance)
+    uint index = vertexID;
+    float2 position = float2(polygon[index].position);
+#else
     uint index = vertx.triangle_indices[vertexID] >> 2;
     float2 position = float2(polygon[index].position);
 
@@ -732,6 +743,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         v2Next = float2(polygon[i2Next].position);
         v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
     }
+#endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
@@ -765,6 +777,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position       = drawable.matrix * float4(postion, 0, 1),
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
+        
+#if !defined(HAS_UNIFORM_u_triangle_instance)
         .pos = position,
 
         .v0 = v0,
@@ -784,6 +798,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v2Radius = v2Radius,
 
         .external = (external0 || external1 || external2) ? -1.0 : 1.0,
+#endif
 
 #if !defined(HAS_UNIFORM_u_color)
         .color          = half4(unpack_mix_color(data[index].color, drawable.color_t)),
@@ -830,6 +845,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto opacity        = in.opacity;
 #endif
 
+#if !defined(HAS_UNIFORM_u_triangle_instance)
     float dTri = -1;
 
     if (in.v0Radius > 0) {
@@ -850,6 +866,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     if (dTri * in.external > 0) {
         discard_fragment();
     }
+#endif
 
 #if defined(HAS_UNIFORM_u_color)
     const auto color          = half4(props.color);
