@@ -320,3 +320,22 @@ TEST(TerrainElevationIndex, DEMAncestorsAreNotRequested) {
     ASSERT_TRUE(test.map.getTerrainElevation(innsbruck));
     EXPECT_EQ(std::set<uint8_t>{2}, requested);
 }
+
+// Across the antimeridian a point is projected unwrapped for the shortest path to the centre, so its
+// height has to come from the DEM tiles drawn there, the next world's (wrap 1), not the wrapped
+// longitude's tile in this world, which is not loaded.
+TEST(TerrainElevationIndex, ProjectionOnTerrainAcrossTheAntimeridian) {
+    TerrainProjectionTest test;
+    const LatLng centre{-16.5, 179.95};
+    test.map.jumpTo(CameraOptions().withCenter(centre).withZoom(10.0));
+    test.render(4);
+    ASSERT_TRUE(test.map.getTerrainElevation(centre));
+
+    const LatLng east{-16.5, -179.95}; // just across the line, as a wrapped longitude
+    LatLng unwrapped = east;
+    unwrapped.unwrapForShortestPath(centre);
+    const ScreenCoordinate onSurface = test.map.pixelForLatLngOnTerrain(east);
+    const ScreenCoordinate atHeight = test.map.pixelForLatLng(unwrapped, plateauMeters);
+    EXPECT_NEAR(onSurface.x, atHeight.x, 0.5);
+    EXPECT_NEAR(onSurface.y, atHeight.y, 0.5);
+}

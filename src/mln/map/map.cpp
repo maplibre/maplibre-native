@@ -483,8 +483,13 @@ std::optional<double> Map::getTerrainElevation(const LatLng& latLng) const {
 }
 
 ScreenCoordinate Map::pixelForLatLngOnTerrain(const LatLng& latLng) const {
-    if (const auto elevation = getTerrainElevation(latLng)) {
-        return pixelForLatLng(latLng, *elevation);
+    // Look the height up at the longitude pixelForLatLng projects, unwrapped for the shortest path
+    // to the centre: near the antimeridian the drawn DEM tiles have wrap != 0, and the index keys
+    // them by unwrapped x
+    LatLng unwrapped = latLng.wrapped();
+    unwrapped.unwrapForShortestPath(impl->transform.getLatLng());
+    if (const auto elevation = getTerrainElevation(unwrapped)) {
+        return pixelForLatLng(unwrapped, *elevation);
     }
     return pixelForLatLng(latLng);
 }
