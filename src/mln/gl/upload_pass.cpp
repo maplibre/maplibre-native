@@ -35,8 +35,8 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
     // NOLINTNEXTLINE(performance-move-const-arg)
     UniqueBuffer result{std::move(id), {commandEncoder.context}};
     commandEncoder.context.vertexBuffer = result;
-    MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
-    if (glGetError()) {
+    glBufferData(GL_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage));
+    if (hadOutOfMemoryError()) {
         throw std::bad_alloc();
     }
     return std::make_unique<gl::VertexBufferResource>(std::move(result), static_cast<int>(size));
@@ -63,8 +63,8 @@ std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
     UniqueBuffer result{std::move(id), {commandEncoder.context}};
     commandEncoder.context.bindVertexArray = 0;
     commandEncoder.context.globalVertexArrayState.indexBuffer = result;
-    MBGL_CHECK_ERROR(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
-    if (glGetError()) {
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage));
+    if (hadOutOfMemoryError()) {
         throw std::bad_alloc();
     }
     return std::make_unique<gl::IndexBufferResource>(std::move(result), static_cast<int>(size));
