@@ -367,3 +367,45 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
     EXPECT_EQ(offsetLeaves3[1].properties["name"].get<std::string>(), "Cape Sable"s);
     EXPECT_EQ(offsetLeaves3[2].properties["name"].get<std::string>(), "Cape Cod"s);
 }
+
+TEST(Query, QueryRenderedFeaturesLayerOrder) {
+    QueryTest test;
+    std::string features;
+    std::string layers;
+    for (int i = 0; i < 10; ++i) {
+        const std::string separator = i ? "," : "";
+        const std::string id = "layer-" + std::to_string(i);
+        features +=
+            separator + R"({"type":"Feature","properties":{"layer":")" + id +
+            R"("},"geometry":{"type":"Polygon","coordinates":[[[0.99,0.99],[1.01,0.99],[1.01,1.01],[0.99,1.01],[0.99,0.99]]]}})";
+        layers += separator + R"({"id":")" + id +
+                  R"(","type":"fill","source":"source","filter":["==",["get","layer"],")" + id + R"("]})";
+    }
+    test.map.getStyle().loadJSON(
+        R"({"version":8,"sources":{"source":{"type":"geojson","data":{"type":"FeatureCollection","features":[)" +
+        features + R"(]}}},"layers":[)" + layers + "]}");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{1, 1}).withZoom(10));
+    test.frontend.render(test.map);
+    const auto point = test.map.pixelForLatLng({1, 1});
+
+    const auto layersOf = [&](const RenderedQueryOptions& options) {
+        std::vector<std::string> result;
+        for (const auto& feature : test.frontend.getRenderer()->queryRenderedFeatures(point, options)) {
+            result.push_back(feature.properties.at("layer").get<std::string>());
+        }
+        return result;
+    };
+    EXPECT_EQ(layersOf({}),
+              (std::vector<std::string>{"layer-9",
+                                        "layer-8",
+                                        "layer-7",
+                                        "layer-6",
+                                        "layer-5",
+                                        "layer-4",
+                                        "layer-3",
+                                        "layer-2",
+                                        "layer-1",
+                                        "layer-0"}));
+    EXPECT_EQ(layersOf({{{"layer-2", "layer-8", "layer-5"}}, {}}),
+              (std::vector<std::string>{"layer-8", "layer-5", "layer-2"}));
+}
