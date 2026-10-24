@@ -1,0 +1,1 @@
+This is an ffi platform. So some functions are not implemented in this platform but must be provided from another binary / library which links maplibre-native. This is for example used in the rust interface [maplibre-native-rs](https://github.com/maplibre/maplibre-native-rs) for android because only the ndk and not the sdk is used
