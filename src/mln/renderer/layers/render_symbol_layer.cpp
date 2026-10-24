@@ -135,7 +135,7 @@ struct SegmentGroup {
     bool operator<(const SegmentGroup& other) const { return renderable < other.renderable; }
 };
 
-inline const SymbolLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
+inline const SymbolLayer::Impl& symbolImplCast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == SymbolLayer::Impl::staticTypeInfo());
     return static_cast<const SymbolLayer::Impl&>(*impl);
 }
@@ -144,16 +144,16 @@ inline const SymbolLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& i
 
 RenderSymbolLayer::RenderSymbolLayer(Immutable<style::SymbolLayer::Impl> _impl)
     : RenderLayer(makeMutable<SymbolLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+      unevaluated(symbolImplCast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
 }
 
 RenderSymbolLayer::~RenderSymbolLayer() = default;
 
 void RenderSymbolLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    unevaluated = symbolImplCast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     hasFormatSectionOverrides = SymbolLayerPaintPropertyOverrides::hasOverrides(
-        impl_cast(baseImpl).layout.get<TextField>());
+        symbolImplCast(baseImpl).layout.get<TextField>());
     styleDependencies = unevaluated.getDependencies();
 }
 
@@ -164,7 +164,7 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
     auto& evaluated = properties->evaluated;
-    const auto& layout = impl_cast(baseImpl).layout;
+    const auto& layout = symbolImplCast(baseImpl).layout;
 
     if (hasFormatSectionOverrides) {
         SymbolLayerPaintPropertyOverrides::setOverrides(layout, evaluated, unevaluated, parameters.globalState);
@@ -840,7 +840,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         });
     }
 
-    const auto& layout = impl_cast(baseImpl).layout;
+    const auto& layout = symbolImplCast(baseImpl).layout;
     const bool sortFeaturesByKey = !layout.get<SymbolSortKey>().isUndefined();
     std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;

@@ -112,10 +112,10 @@ void DrawableBuilder::resetDrawPriority(DrawPriority value) {
     }
 }
 
-static const gfx::Texture2DPtr noTexture;
+static const gfx::Texture2DPtr noBuilderTexture;
 
 const gfx::Texture2DPtr& DrawableBuilder::getTexture(size_t id) const {
-    return (id < textures.size()) ? textures[id] : noTexture;
+    return (id < textures.size()) ? textures[id] : noBuilderTexture;
 }
 
 void DrawableBuilder::setTexture(const std::shared_ptr<gfx::Texture2D>& texture, size_t id) {

@@ -17,6 +17,14 @@ public:
     static std::optional<T> toEnum(const std::string&);
 };
 
+// Declares the specializations of toString and toEnum that a source defines, so that nothing can instantiate them
+// first.
+#define MLN_DECLARE_ENUM(T)           \
+    template <>                       \
+    const char* Enum<T>::toString(T); \
+    template <>                       \
+    std::optional<T> Enum<T>::toEnum(const std::string&)
+
 #define MBGL_DEFINE_ENUM(T, ...)                                                                       \
                                                                                                        \
     static const constexpr std::pair<const T, const char*> T##_names[] = __VA_ARGS__;                  \

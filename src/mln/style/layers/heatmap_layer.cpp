@@ -208,9 +208,9 @@ TransitionOptions HeatmapLayer::getHeatmapWeightTransition() const {
     return impl().paint.template get<HeatmapWeight>().options;
 }
 
-using namespace conversion;
+namespace heatmap_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 10u;
 
@@ -278,9 +278,10 @@ StyleProperty getLayerProperty(const HeatmapLayer& layer, const std::string& nam
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace heatmap_layer_properties
 
 Value HeatmapLayer::serialize() const {
+    using namespace heatmap_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -291,7 +292,8 @@ Value HeatmapLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> HeatmapLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> HeatmapLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace heatmap_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -377,7 +379,7 @@ std::optional<Error> HeatmapLayer::setPropertyInternal(const std::string& name, 
 }
 
 StyleProperty HeatmapLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return heatmap_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> HeatmapLayer::mutableBaseImpl() const {

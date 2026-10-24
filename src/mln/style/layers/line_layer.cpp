@@ -451,9 +451,9 @@ TransitionOptions LineLayer::getLineWidthTransition() const {
     return impl().paint.template get<LineWidth>().options;
 }
 
-using namespace conversion;
+namespace line_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 22u;
 
@@ -589,9 +589,10 @@ StyleProperty getLayerProperty(const LineLayer& layer, const std::string& name) 
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace line_layer_properties
 
 Value LineLayer::serialize() const {
+    using namespace line_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -602,7 +603,8 @@ Value LineLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> LineLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> LineLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace line_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -809,7 +811,7 @@ std::optional<Error> LineLayer::setPropertyInternal(const std::string& name, con
 }
 
 StyleProperty LineLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return line_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> LineLayer::mutableBaseImpl() const {

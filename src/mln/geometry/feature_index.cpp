@@ -24,7 +24,7 @@ mln::LatLng screenCoordinateToLatLng(mln::ScreenCoordinate point,
     point.y = state.getSize().height - point.y;
     return state.screenCoordinateToLatLng(point, wrapMode);
 }
-mln::Point<double> project(const mln::LatLng& coordinate, const mln::TransformState& state) {
+mln::Point<double> projectToWorld(const mln::LatLng& coordinate, const mln::TransformState& state) {
     mln::LatLng unwrappedLatLng = coordinate.wrapped();
     unwrappedLatLng.unwrapForShortestPath(state.getLatLng(mln::LatLng::Wrapped));
     return mln::Projection::project(unwrappedLatLng, state.getScale());
@@ -349,7 +349,7 @@ void DynamicFeatureIndex::query(std::unordered_map<std::string, std::vector<Feat
     mln::GeometryBBox<int64_t> queryBox = DefaultWithinBBox;
     for (const auto& p : queryGeometry) {
         const LatLng c = screenCoordinateToLatLng(p, state);
-        const Point<double> pm = project(c, state);
+        const Point<double> pm = projectToWorld(c, state);
         const Point<int64_t> coord = {int64_t(pm.x), int64_t(pm.y)};
         mln::updateBBox(queryBox, coord);
     }

@@ -18,8 +18,6 @@
 
 #include <numbers>
 
-using namespace std::numbers;
-
 namespace mln {
 namespace {
 
@@ -135,7 +133,8 @@ Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFe
 
     auto tileCoordinatesToLatLng = [&](const Point<int16_t>& p) {
         double y2 = 180 - (p.y + y0) * 360 / size;
-        return Point<double>((p.x + x0) * 360 / size - 180, std::atan(std::exp(y2 * pi / 180)) * 360.0 / pi - 90.0);
+        return Point<double>((p.x + x0) * 360 / size - 180,
+                             std::atan(std::exp(y2 * std::numbers::pi / 180)) * 360.0 / std::numbers::pi - 90.0);
     };
 
     const GeometryCollection& geometries = geometryTileFeature.getGeometries();
@@ -213,7 +212,9 @@ GeometryCollection convertGeometry(const Feature::geometry_type& geometryTileFea
         p.x = int16_t(util::clamp<int64_t>(
             static_cast<int16_t>(x), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
 
-        auto y = (180 - (std::log(std::tan((c.y + 90) * pi / 360.0)) * 180 / pi)) * size / 360 - y0;
+        auto y = (180 - (std::log(std::tan((c.y + 90) * std::numbers::pi / 360.0)) * 180 / std::numbers::pi)) * size /
+                     360 -
+                 y0;
         p.y = int16_t(util::clamp<int64_t>(
             static_cast<int16_t>(y), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
 

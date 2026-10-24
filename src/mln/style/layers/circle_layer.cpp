@@ -390,9 +390,9 @@ TransitionOptions CircleLayer::getCircleTranslateAnchorTransition() const {
     return impl().paint.template get<CircleTranslateAnchor>().options;
 }
 
-using namespace conversion;
+namespace circle_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 22u;
 
@@ -512,9 +512,10 @@ StyleProperty getLayerProperty(const CircleLayer& layer, const std::string& name
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace circle_layer_properties
 
 Value CircleLayer::serialize() const {
+    using namespace circle_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -525,7 +526,8 @@ Value CircleLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> CircleLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace circle_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -693,7 +695,7 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
 }
 
 StyleProperty CircleLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return circle_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> CircleLayer::mutableBaseImpl() const {

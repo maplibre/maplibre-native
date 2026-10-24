@@ -12,6 +12,7 @@ namespace mln {
 namespace style {
 namespace conversion {
 
+namespace legacy_filter {
 using namespace mln::style::expression;
 
 namespace {
@@ -19,8 +20,10 @@ bool isExpression(const Convertible& filter);
 }
 ParseResult convertLegacyFilter(const Convertible& values, Error& error);
 std::optional<mln::Value> serializeLegacyFilter(const Convertible& values);
+} // namespace legacy_filter
 
 std::optional<Filter> Converter<Filter>::operator()(const Convertible& value, Error& error) const {
+    using namespace legacy_filter;
     if (isExpression(value)) {
         ParsingContext parsingContext(type::Boolean);
         ParseResult parseResult = parsingContext.parseExpression(value);
@@ -42,6 +45,7 @@ std::optional<Filter> Converter<Filter>::operator()(const Convertible& value, Er
 
 // This is a port from
 // https://github.com/mapbox/mapbox-gl-js/blob/master/src/style-spec/feature_filter/index.js
+namespace legacy_filter {
 namespace {
 bool isExpression(const Convertible& filter) {
     if (!isArray(filter) || arrayLength(filter) == 0) {
@@ -263,6 +267,7 @@ std::optional<mln::Value> serializeLegacyFilter(const Convertible& values) {
     return toValue(values);
 }
 
+} // namespace legacy_filter
 } // namespace conversion
 } // namespace style
 } // namespace mln

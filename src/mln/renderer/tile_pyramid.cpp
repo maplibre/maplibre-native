@@ -23,13 +23,13 @@ namespace mln {
 using namespace style;
 
 namespace {
-TileObserver nullObserver;
+TileObserver nullTilePyramidObserver;
 const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
 } // namespace
 
 TilePyramid::TilePyramid(const TaggedScheduler& threadPool_)
     : cache(threadPool_),
-      observer(&nullObserver) {}
+      observer(&nullTilePyramidObserver) {}
 
 TilePyramid::~TilePyramid() = default;
 

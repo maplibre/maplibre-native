@@ -7,8 +7,6 @@
 
 #include <numbers>
 
-using namespace std::numbers;
-
 namespace mln {
 
 /*
@@ -249,10 +247,10 @@ std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX,
         // The label needs to be flipped to keep text upright.
         // Iterate in the reverse direction.
         dir *= -1;
-        angle = pi_v<float>;
+        angle = std::numbers::pi_v<float>;
     }
 
-    if (dir < 0) angle += pi_v<float>;
+    if (dir < 0) angle += std::numbers::pi_v<float>;
 
     int32_t currentIndex = dir > 0 ? anchorSegment : anchorSegment + 1;
 

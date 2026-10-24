@@ -278,9 +278,9 @@ TransitionOptions FillLayer::getFillTranslateAnchorTransition() const {
     return impl().paint.template get<FillTranslateAnchor>().options;
 }
 
-using namespace conversion;
+namespace fill_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 14u;
 
@@ -368,9 +368,10 @@ StyleProperty getLayerProperty(const FillLayer& layer, const std::string& name) 
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace fill_layer_properties
 
 Value FillLayer::serialize() const {
+    using namespace fill_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -381,7 +382,8 @@ Value FillLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> FillLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace fill_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -507,7 +509,7 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
 }
 
 StyleProperty FillLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return fill_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> FillLayer::mutableBaseImpl() const {

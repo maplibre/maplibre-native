@@ -9,8 +9,6 @@
 #include <functional>
 #include <list>
 
-using namespace std::numbers;
-
 namespace mln {
 
 namespace {

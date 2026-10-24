@@ -1104,9 +1104,9 @@ TransitionOptions SymbolLayer::getTextTranslateAnchorTransition() const {
     return impl().paint.template get<TextTranslateAnchor>().options;
 }
 
-using namespace conversion;
+namespace symbol_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 28u;
 
@@ -1418,9 +1418,10 @@ StyleProperty getLayerProperty(const SymbolLayer& layer, const std::string& name
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace symbol_layer_properties
 
 Value SymbolLayer::serialize() const {
+    using namespace symbol_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -1431,7 +1432,8 @@ Value SymbolLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> SymbolLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace symbol_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -1944,7 +1946,7 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
 }
 
 StyleProperty SymbolLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return symbol_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> SymbolLayer::mutableBaseImpl() const {

@@ -117,7 +117,7 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
                     return std::nullopt;
                 }
 
-                sections.emplace_back(Image(*imageArg));
+                sections.emplace_back(expression::Image(*imageArg));
                 continue;
             }
 

@@ -8,11 +8,8 @@
 
 namespace mln {
 
-using namespace std;
-using namespace style;
-using namespace style::expression;
-
-std::array<float, 2> VariableAnchorOffsetCollection::getOffsetByAnchor(const SymbolAnchorType& anchorType) const {
+std::array<float, 2> VariableAnchorOffsetCollection::getOffsetByAnchor(
+    const style::SymbolAnchorType& anchorType) const {
     for (const auto& entry : anchorOffsets) {
         if (anchorType == entry.anchorType) {
             return entry.offset;
@@ -27,7 +24,7 @@ std::string VariableAnchorOffsetCollection::toString() const {
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     writer.StartArray();
     for (const auto& entry : anchorOffsets) {
-        writer.String(Enum<SymbolAnchorType>::toString(entry.anchorType));
+        writer.String(Enum<style::SymbolAnchorType>::toString(entry.anchorType));
         writer.StartArray();
         writer.Double(entry.offset[0]);
         writer.Double(entry.offset[1]);
@@ -35,14 +32,14 @@ std::string VariableAnchorOffsetCollection::toString() const {
     }
 
     writer.EndArray();
-    string stringValue = buffer.GetString();
+    std::string stringValue = buffer.GetString();
     return stringValue;
 }
 
 mln::Value VariableAnchorOffsetCollection::serialize() const {
     std::vector<mln::Value> serialized;
     for (const auto& entry : anchorOffsets) {
-        serialized.emplace_back(Enum<SymbolAnchorType>::toString(entry.anchorType));
+        serialized.emplace_back(Enum<style::SymbolAnchorType>::toString(entry.anchorType));
         std::vector<mln::Value> offset{entry.offset[0], entry.offset[1]};
         serialized.emplace_back(offset);
     }

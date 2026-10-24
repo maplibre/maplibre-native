@@ -15,11 +15,11 @@
 namespace mln {
 
 namespace {
-GlyphManagerObserver nullObserver;
+GlyphManagerObserver nullGlyphManagerObserver;
 }
 
 GlyphManager::GlyphManager(std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer_)
-    : observer(&nullObserver),
+    : observer(&nullGlyphManagerObserver),
       localGlyphRasterizer(std::move(localGlyphRasterizer_)) {}
 
 GlyphManager::~GlyphManager() {
@@ -165,7 +165,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
 }
 
 void GlyphManager::setObserver(GlyphManagerObserver* observer_) {
-    observer = observer_ ? observer_ : &nullObserver;
+    observer = observer_ ? observer_ : &nullGlyphManagerObserver;
 }
 
 void GlyphManager::notify(GlyphRequestor& requestor, const GlyphDependencies& glyphDependencies) {

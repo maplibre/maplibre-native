@@ -19,8 +19,6 @@
 #include <glslang/Public/ResourceLimits.h>
 #include <SPIRV/GlslangToSpv.h>
 
-using namespace std::string_literals;
-
 namespace mln {
 
 namespace vulkan {

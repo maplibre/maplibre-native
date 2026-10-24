@@ -278,7 +278,7 @@ struct BuildBoundsMap {
         return et;
     }
 
-    BoundsMap operator()(const mapbox::geometry::geometry_collection<double>&) const { return {}; }
+    BoundsMap operator()(const ::mapbox::geometry::geometry_collection<double>&) const { return {}; }
 };
 
 TileCover::Impl::Impl(int32_t z, const Geometry<double>& geom, bool project)

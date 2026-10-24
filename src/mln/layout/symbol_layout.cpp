@@ -25,11 +25,7 @@
 #include <numbers>
 #include <optional>
 
-using namespace std::numbers;
-
 namespace mln {
-
-using namespace style;
 
 namespace {
 
@@ -40,27 +36,29 @@ bool has(const style::SymbolLayoutProperties::PossiblyEvaluated& layout) {
 }
 } // namespace
 
-expression::Value sectionOptionsToValue(const SectionOptions& options) {
-    std::unordered_map<std::string, expression::Value> result;
+style::expression::Value sectionOptionsToValue(const SectionOptions& options) {
+    std::unordered_map<std::string, style::expression::Value> result;
     // TODO: Data driven properties that can be overridden on per section basis.
     // TextOpacity
     // TextHaloColor
     // TextHaloWidth
     // TextHaloBlur
     if (options.textColor) {
-        result.emplace(expression::kFormattedSectionTextColor, *options.textColor);
+        result.emplace(style::expression::kFormattedSectionTextColor, *options.textColor);
     }
     return result;
 }
 
-inline const SymbolLayerProperties& toSymbolLayerProperties(const Immutable<LayerProperties>& layer) {
-    return static_cast<const SymbolLayerProperties&>(*layer);
+inline const style::SymbolLayerProperties& toSymbolLayerProperties(const Immutable<style::LayerProperties>& layer) {
+    return static_cast<const style::SymbolLayerProperties&>(*layer);
 }
 
 inline Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> createLayout(
-    const SymbolLayoutProperties::Unevaluated& unevaluated,
+    const style::SymbolLayoutProperties::Unevaluated& unevaluated,
     float zoom,
     std::shared_ptr<const GlobalStateMap> globalState) {
+    using namespace style;
+
     PropertyEvaluationParameters evaluationParameters(zoom);
     evaluationParameters.globalState = std::move(globalState);
     auto layout = makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>(
@@ -137,6 +135,8 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
       tilePixelRatio(static_cast<float>(util::EXTENT) / tileSize),
       layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom, parameters.globalState)),
       retainFeaturesById(parameters.retainFeaturesById) {
+    using namespace style;
+
     const SymbolLayer::Impl& leader = toSymbolLayerProperties(layers.at(0)).layerImpl();
 
     textSize = leader.layout.get<TextSize>();
@@ -448,6 +448,8 @@ Shaping& shapingForTextJustifyType(ShapedTextOrientations& shapedTextOrientation
 }
 
 std::array<float, 2> evaluateRadialOffset(style::SymbolAnchorType anchor, float radialOffset) {
+    using namespace style;
+
     std::array<float, 2> result{{0.0f, 0.0f}};
     radialOffset = std::max(radialOffset, 0.0f); // Ignore negative offset.
     // solve for r where r^2 + r^2 = radialOffset^2
@@ -498,6 +500,8 @@ std::array<float, 2> evaluateRadialOffset(style::SymbolAnchorType anchor, float 
 
 // static
 std::array<float, 2> SymbolLayout::evaluateVariableOffset(style::SymbolAnchorType anchor, std::array<float, 2> offset) {
+    using namespace style;
+
     if (offset[1] == INVALID_OFFSET_VALUE) {
         return evaluateRadialOffset(anchor, offset[0]);
     }
@@ -543,6 +547,8 @@ std::array<float, 2> SymbolLayout::evaluateVariableOffset(style::SymbolAnchorTyp
 }
 
 std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAnchorOffset(const SymbolFeature& feature) {
+    using namespace style;
+
     std::optional<VariableAnchorOffsetCollection> result;
 
     // If style specifies text-variable-anchor-offset, just return it
@@ -609,6 +615,8 @@ void SymbolLayout::prepareSymbols(const GlyphMap& glyphMap,
                                   const GlyphPositions& glyphPositions,
                                   const ImageMap& imageMap,
                                   const ImagePositions& imagePositions) {
+    using namespace style;
+
     const bool isPointPlacement = layout->get<SymbolPlacement>() == SymbolPlacementType::Point;
     const bool textAlongLine = layout->get<TextRotationAlignment>() == AlignmentType::Map && !isPointPlacement;
 
@@ -795,6 +803,8 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
                               float layoutTextSize,
                               float layoutIconSize,
                               const SymbolContent iconType) {
+    using namespace style;
+
     const float minScale = 0.5f;
     const float glyphSize = 24.0f;
 
@@ -1092,7 +1102,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                 index = iconBuffer.placedSymbols.size() - 1;
                 PlacedSymbol& iconSymbol = iconBuffer.placedSymbols.back();
                 iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
-                                       ? pi_v<float> / 2
+                                       ? std::numbers::pi_v<float> / 2
                                        : 0.0f;
                 iconSymbol.startIndex = addSymbols(
                     iconBuffer, sizeData, iconQuads, symbolInstance.getAnchor(), iconSymbol, feature.sortKey);
@@ -1234,7 +1244,9 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
                                            placedIconIndex);
     placedIndex = bucket.text.placedSymbols.size() - 1;
     PlacedSymbol& placedSymbol = bucket.text.placedSymbols.back();
-    placedSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical) ? pi_v<float> / 2 : 0.0f;
+    placedSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
+                             ? std::numbers::pi_v<float> / 2
+                             : 0.0f;
 
     bool firstSymbol = true;
     for (const auto& symbolQuad : glyphQuads) {

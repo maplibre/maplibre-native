@@ -58,7 +58,7 @@ void LayerRenderItem::updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&
 
 namespace {
 
-RendererObserver& nullObserver() {
+RendererObserver& nullRenderOrchestratorObserver() {
     static RendererObserver observer;
     return observer;
 }
@@ -135,7 +135,7 @@ public:
 RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_,
                                        TaggedScheduler& threadPool_,
                                        const std::optional<std::string>& localFontFamily_)
-    : observer(&nullObserver()),
+    : observer(&nullRenderOrchestratorObserver()),
       glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_))),
       imageManager(ImageManager::create()),
       lineAtlas(std::make_unique<LineAtlas>()),
@@ -171,7 +171,7 @@ RenderOrchestrator::~RenderOrchestrator() {
 }
 
 void RenderOrchestrator::setObserver(RendererObserver* observer_) {
-    observer = observer_ ? observer_ : &nullObserver();
+    observer = observer_ ? observer_ : &nullRenderOrchestratorObserver();
 }
 
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(

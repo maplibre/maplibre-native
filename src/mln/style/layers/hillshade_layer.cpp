@@ -290,9 +290,9 @@ TransitionOptions HillshadeLayer::getHillshadeShadowColorTransition() const {
     return impl().paint.template get<HillshadeShadowColor>().options;
 }
 
-using namespace conversion;
+namespace hillshade_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 16u;
 
@@ -384,9 +384,10 @@ StyleProperty getLayerProperty(const HillshadeLayer& layer, const std::string& n
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace hillshade_layer_properties
 
 Value HillshadeLayer::serialize() const {
+    using namespace hillshade_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -397,7 +398,8 @@ Value HillshadeLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> HillshadeLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace hillshade_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -528,7 +530,7 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
 }
 
 StyleProperty HillshadeLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return hillshade_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> HillshadeLayer::mutableBaseImpl() const {

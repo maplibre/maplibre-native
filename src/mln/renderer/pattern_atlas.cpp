@@ -11,7 +11,7 @@ namespace {
 // side. Pattern images are padded with a copy of the image data wrapped from
 // the opposite side. This ensures the correct behavior of GL_LINEAR texture
 // sampling mode.
-const uint16_t padding = 1;
+const uint16_t atlasPadding = 1;
 
 mapbox::ShelfPack::ShelfPackOptions shelfPackOptions() {
     mapbox::ShelfPack::ShelfPackOptions options;
@@ -38,8 +38,8 @@ std::optional<ImagePosition> PatternAtlas::addPattern(const style::Image::Impl& 
     if (patterns.contains(image.id)) {
         return std::nullopt;
     }
-    const uint16_t width = image.image.size.width + padding * 2;
-    const uint16_t height = image.image.size.height + padding * 2;
+    const uint16_t width = image.image.size.width + atlasPadding * 2;
+    const uint16_t height = image.image.size.height + atlasPadding * 2;
 
     mapbox::Bin* bin = shelfPack.packOne(-1, width, height);
     if (!bin) {
@@ -50,8 +50,8 @@ std::optional<ImagePosition> PatternAtlas::addPattern(const style::Image::Impl& 
 
     const PremultipliedImage& src = image.image;
 
-    const uint32_t x = bin->x + padding;
-    const uint32_t y = bin->y + padding;
+    const uint32_t x = bin->x + atlasPadding;
+    const uint32_t y = bin->y + atlasPadding;
     const uint32_t w = src.size.width;
     const uint32_t h = src.size.height;
 

@@ -13,7 +13,7 @@
 #include <mln/gfx/renderer_backend.hpp>
 #include <mln/style/properties.hpp>
 
-using namespace mln;
+using namespace mln; // NOLINT(google-global-names-in-headers): this file defines global-namespace classes
 
 namespace mln {
 namespace gfx {
