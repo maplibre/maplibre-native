@@ -4,7 +4,7 @@
 
 ### 🐞 Bug fixes
 
-- Apply the feature state changes and removals of `GeoJsonSource` and `VectorSource` in call order. Previously, when several were made before the map rendered, a change could be lost, or a removal could undo a later change.
+- Apply the feature state changes and removals of `GeoJsonSource` and `VectorSource` in call order. Previously, when several were made before the map rendered, a change could be lost, or a removal could undo a later change ([#4835](https://github.com/maplibre/maplibre-native/pull/4835)).
 
 ## 13.7.1
 
