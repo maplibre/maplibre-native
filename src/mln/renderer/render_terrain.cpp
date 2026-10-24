@@ -362,8 +362,15 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // Decode and cache the DEM textures of loaded DEM tiles - rendered ones and the
     // retained ancestors alike, so shallower layer tiles can bind an ancestor DEM.
     ++demUpdateCounter;
+#if MLN_RENDER_BACKEND_OPENGL
+    // This frame's DEM data by tile, for packing a tile into the GL array once a mesh tile binds it
+    std::unordered_map<UnwrappedTileID, const DEMData*> frameDEMData;
+#endif
     for (const auto& loaded : loadedDEMTiles(demSource)) {
         const DEMData* demData = loaded.data;
+#if MLN_RENDER_BACKEND_OPENGL
+        frameDEMData.emplace(loaded.id, demData);
+#endif
         {
             // All tiles come from the same raster-dem source, so they share one
             // encoding and DEM dimension
@@ -374,11 +381,6 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             } else if (auto texture = createDEMTexture(context, *demData)) {
                 // Keep the texture available for elevation sampling by non-draped layers
                 demTextures[loaded.id] = {texture, demData->dim, demUpdateCounter};
-#if MLN_RENDER_BACKEND_OPENGL
-                // Also pack this tile's DEM into the array for the (upcoming) instanced
-                // depth pass. Additive: the per-tile texture above is still the fallback.
-                packDEMArrayLayer(context, loaded.id, *demData);
-#endif
             }
         }
     }
@@ -558,6 +560,15 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         {
             float layer = -1.0f;
             if (demTileUsed) {
+                // Pack the DEM into the array for the instanced depth pass only once a mesh tile
+                // binds it: packing every loaded DEM tile let the retained ancestors fill the 64
+                // layers, and mesh tiles left without one drop out of the depth pass (no occlusion
+                // over them). A texture is bound the frame it is made, while its DEM is loaded.
+                if (!demArrayLayer.contains(*demTileUsed)) {
+                    if (const auto data = frameDEMData.find(*demTileUsed); data != frameDEMData.end()) {
+                        packDEMArrayLayer(context, *demTileUsed, *data->second);
+                    }
+                }
                 if (const auto la = demArrayLayer.find(*demTileUsed); la != demArrayLayer.end()) {
                     layer = static_cast<float>(la->second);
                 }
