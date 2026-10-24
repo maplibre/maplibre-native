@@ -6,9 +6,24 @@
 #include <mln/renderer/buckets/hillshade_bucket.hpp>
 #include <mln/renderer/tile_parameters.hpp>
 
+#include <algorithm>
+
 namespace mln {
 
 using namespace style;
+
+namespace {
+
+Range<int32_t> elevationRangeOf(const HillshadeBucket& bucket) {
+    const auto& demData = bucket.getDEMData();
+    return {demData.getMinElevation(), demData.getMaxElevation()};
+}
+
+bool contains(const Range<int32_t>& outer, const Range<int32_t>& inner) {
+    return outer.min <= inner.min && inner.max <= outer.max;
+}
+
+} // namespace
 
 RenderRasterDEMSource::RenderRasterDEMSource(Immutable<style::TileSource::Impl> impl_,
                                              const TaggedScheduler& threadPool_)
@@ -43,6 +58,84 @@ void RenderRasterDEMSource::updateInternal(const Tileset& tileset,
                            return std::make_unique<RasterDEMTile>(tileID, baseImpl->id, parameters, tileset, observer_);
                        });
     algorithm::updateTileMasks(tilePyramid.getRenderedTiles());
+}
+
+void RenderRasterDEMSource::onTilesetChanged() {
+    // The tiles the ranges were decoded from are gone, so the ranges go too.
+    elevationRanges.clear();
+    descendantElevationRanges.clear();
+}
+
+std::optional<Range<int32_t>> RenderRasterDEMSource::getElevationRange(const CanonicalTileID& id) const {
+    if (elevationRanges.empty()) {
+        return std::nullopt;
+    }
+    // Ranges are only ever kept for tiles of the tileset's zoom range.
+    const auto& zoomRange = getCachedTileset()->zoomRange;
+    for (int z = std::min(id.z, zoomRange.max); z >= zoomRange.min; --z) {
+        const int dz = id.z - z;
+        const auto it = elevationRanges.find(CanonicalTileID(static_cast<uint8_t>(z), id.x >> dz, id.y >> dz));
+        if (it != elevationRanges.end()) {
+            return it->second;
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<Range<int32_t>> RenderRasterDEMSource::getNearbyElevationRange(const CanonicalTileID& id) const {
+    // The tile's own entry wins over its ancestors': it already contains every loaded tile
+    // inside the tile, which is what a large tile of the cover's traversal needs so that it is
+    // not culled while one of those is in view, and an ancestor's would only add ground from
+    // outside the tile. Only when nothing inside the tile has loaded does an ancestor answer, and
+    // the deepest one that has loaded descendants holds the loaded ground nearest the tile. The
+    // z0 entry, everything loaded, answers only when nothing nearer has loaded.
+    if (descendantElevationRanges.empty()) {
+        return std::nullopt;
+    }
+    // Only tiles of a zoom below the tileset's max have loaded descendants.
+    const int maxZoom = getCachedTileset()->zoomRange.max;
+    for (int z = std::min<int>(id.z, maxZoom - 1); z >= 0; --z) {
+        const int dz = id.z - z;
+        const auto it = descendantElevationRanges.find(
+            CanonicalTileID(static_cast<uint8_t>(z), id.x >> dz, id.y >> dz));
+        if (it != descendantElevationRanges.end()) {
+            return it->second;
+        }
+    }
+    return std::nullopt;
+}
+
+void RenderRasterDEMSource::addElevationRange(const CanonicalTileID& id, const Range<int32_t> range) {
+    elevationRanges.insert_or_assign(id, range);
+
+    // Widen the descendant range of each ancestor, from the parent up: O(z) per arrival. Every
+    // range that went into a tile's entry also went into its parent's, so a parent's entry
+    // contains its child's: once one already contains the range, so do all above it.
+    for (int z = id.z - 1; z >= 0; --z) {
+        const int dz = id.z - z;
+        const auto [it, inserted] = descendantElevationRanges.try_emplace(
+            CanonicalTileID(static_cast<uint8_t>(z), id.x >> dz, id.y >> dz), range);
+        if (!inserted) {
+            if (contains(it->second, range)) {
+                break;
+            }
+            it->second = {std::min(it->second.min, range.min), std::max(it->second.max, range.max)};
+        }
+    }
+}
+
+void RenderRasterDEMSource::keepElevationRangesOfHeldTiles() {
+    elevationRanges.clear();
+    descendantElevationRanges.clear();
+    const auto addHeld = [&](const std::map<OverscaledTileID, std::unique_ptr<Tile>>& tiles) {
+        for (const auto& [id, tile] : tiles) {
+            if (const auto* bucket = static_cast<const RasterDEMTile&>(*tile).getBucket()) {
+                addElevationRange(id.canonical, elevationRangeOf(*bucket));
+            }
+        }
+    };
+    addHeld(tilePyramid.getTiles());
+    addHeld(tilePyramid.getCache().getTiles());
 }
 
 void RenderRasterDEMSource::onTileChanged(Tile& tile) {
@@ -108,6 +201,14 @@ void RenderRasterDEMSource::onTileChanged(Tile& tile) {
                 }
             }
         }
+    }
+
+    // Keep the tile's elevation range for the tile covers (see getElevationRange).
+    if (const auto* bucket = demtile.getBucket()) {
+        if (elevationRanges.size() + descendantElevationRanges.size() >= maxElevationRangeEntries) {
+            keepElevationRangesOfHeldTiles();
+        }
+        addElevationRange(tile.id.canonical, elevationRangeOf(*bucket));
     }
     RenderTileSource::onTileChanged(tile);
 }
