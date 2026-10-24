@@ -751,7 +751,21 @@ std::optional<std::function<float(const Point<float>&)>> RenderTerrain::elevatio
         }
     }
     if (!best) {
-        return std::nullopt;
+        // No DEM tile covers the whole tile, as for a tile shallower than the DEM cover when no
+        // ancestor has loaded: read the deepest loaded tile under each point from the height copy
+        // (one frame old here, and it owns its data)
+        const auto index = elevationIndex;
+        if (!index) {
+            return std::nullopt;
+        }
+        return [index, tileID](const Point<float>& p) -> float {
+            const double tiles = static_cast<double>(1u << tileID.canonical.z);
+            const double worldX = static_cast<double>(tileID.canonical.x) + tileID.wrap * tiles + p.x / util::EXTENT;
+            const double worldY = static_cast<double>(tileID.canonical.y) + p.y / util::EXTENT;
+            const LatLng latLng = Projection::unproject(
+                {worldX / tiles * util::tileSize_D, worldY / tiles * util::tileSize_D}, 1.0, LatLng::Unwrapped);
+            return static_cast<float>(index->getElevation(latLng).value_or(0.0));
+        };
     }
     const DEMData* demData = best->data;
     const auto off = demSubTileOffset(tileID.canonical, best->id.canonical);

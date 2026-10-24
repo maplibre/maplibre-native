@@ -16,6 +16,7 @@
 
 #include <cmath>
 #include <limits>
+#include <set>
 
 using namespace mln;
 
@@ -298,4 +299,24 @@ TEST(TerrainElevationIndex, PickDoesNotStepOverAThinRidge) {
     const auto fromTheCamera = pickTerrainSurface(state, pixel, elevationAt, std::numeric_limits<double>::infinity());
     ASSERT_TRUE(fromTheCamera);
     EXPECT_GT(fromTheCamera->latitude(), farEdge);
+}
+
+// The DEM source keeps the coarser ancestors of its cover that have already loaded, for layers that
+// draw from shallower tiles, but never requests them: that fetched up to eight extra levels and made
+// still renders wait for them. Over a source with maxzoom 2, only z2 tiles are asked for.
+TEST(TerrainElevationIndex, DEMAncestorsAreNotRequested) {
+    TerrainProjectionTest test;
+    std::set<uint8_t> requested;
+    test.fileSource->tileResponse = [&](const Resource& resource) {
+        if (resource.tileData) {
+            requested.insert(resource.tileData->z);
+        }
+        Response res;
+        res.data = std::make_shared<std::string>(test.tile);
+        return res;
+    };
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+    test.render(4);
+    ASSERT_TRUE(test.map.getTerrainElevation(innsbruck));
+    EXPECT_EQ(std::set<uint8_t>{2}, requested);
 }

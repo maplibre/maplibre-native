@@ -299,9 +299,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         terrainEnabled ? renderTerrain->getExaggeration() : 1.0};
     tileParameters.elevationProvider = terrainEnabled ? &elevationProvider : nullptr;
 
-    // The DEM source additionally keeps coarser ancestors of its cover loaded so that every
-    // tile another layer draws from - shallower far-field LOD tiles, overzoomed sources with
-    // a low maxzoom - has a DEM ancestor to bind for elevation (see TileParameters).
+    // The DEM source additionally keeps the coarser ancestors of its cover that are already
+    // loaded, so that a tile another layer draws from - shallower far-field LOD tiles, overzoomed
+    // sources with a low maxzoom - can bind a DEM ancestor for elevation (see TileParameters).
     TileParameters demTileParameters = tileParameters;
     demTileParameters.retainAncestorLevels = terrainEnabled ? RenderTerrain::demAncestorLevels : 0;
 

@@ -50,10 +50,11 @@ public:
     const util::TileElevationProvider* elevationProvider = nullptr;
     bool isUpdateSynchronous = false;
     bool captureRenderedFeatures = false;
-    /// Keep this many zoom levels of ancestors of the ideal cover loaded (Required, never
-    /// rendered). Used for the 3D-terrain DEM source so layers drawn from shallower tiles
-    /// (overzoomed low-maxzoom sources, far-field distance LOD) still find a DEM tile that
-    /// covers them; without it those symbols and circles fall back to sea level.
+    /// Keep ancestors of the ideal cover, up to this many zoom levels, that are already loaded
+    /// (in use or in the cache), never rendered and never requested. Used for the 3D-terrain DEM
+    /// source so layers drawn from shallower tiles (overzoomed low-maxzoom sources, far-field
+    /// distance LOD) can bind a DEM tile that covers them whole; where none has loaded,
+    /// RenderTerrain::elevationSampler reads the deeper tiles point by point.
     uint8_t retainAncestorLevels = 0;
 };
 

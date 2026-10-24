@@ -201,17 +201,19 @@ public:
     /// terrain is off or no DEM tile is loaded.
     const std::shared_ptr<const TerrainElevationIndex>& getElevationIndex() const { return elevationIndex; }
 
-    /// Zoom levels of DEM ancestors kept loaded above the cover (TileParameters::retainAncestorLevels).
-    /// The cover follows the declared maxzoom (16 with overzoom), while layers can draw from tiles
-    /// as shallow as ~z9 (far-field distance LOD, low-maxzoom sources), so reach eight levels up;
-    /// the tile count shrinks by 4x per level, so this is a handful of tiles.
+    /// Zoom levels of already-loaded DEM ancestors kept above the cover
+    /// (TileParameters::retainAncestorLevels). The cover follows the declared maxzoom (16 with
+    /// overzoom), while layers can draw from tiles as shallow as ~z9 (far-field distance LOD,
+    /// low-maxzoom sources), so reach eight levels up; none is requested for it.
     static constexpr uint8_t demAncestorLevels = 8;
 
     /**
      * @brief Per-tile elevation sampler for CPU-side symbol projection (line-placed labels):
      * tile-local point -> exaggerated metres, from the DEM tile covering `tileID` or its
      * closest loaded ancestor, and for points past that DEM tile's edge from the neighbouring one
-     * (getElevation). Valid for the current frame only. nullopt without DEM data.
+     * (getElevation). Where neither has loaded (a tile shallower than the DEM cover), from the
+     * deepest loaded tile under each point, through the height copy. Valid for the current frame
+     * only. nullopt without DEM data.
      */
     std::optional<std::function<float(const Point<float>&)>> elevationSampler(const UnwrappedTileID& tileID) const;
 
