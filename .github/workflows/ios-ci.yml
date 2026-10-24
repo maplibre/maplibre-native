@@ -246,7 +246,8 @@ jobs:
       - name: Build DocC documentation
         working-directory: .
         run: |
-          HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
+          platform/ios/scripts/download-docc-resources.sh
+          bazel build --//:renderer=metal --platforms=@build_bazel_apple_support//platforms:ios_arm64 //platform/ios:MapLibre.doccarchive
 
       - name: Remove the Bazel output base before the cache save
         if: ${{ !cancelled() }}
