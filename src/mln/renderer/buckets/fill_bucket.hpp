@@ -26,6 +26,8 @@ class RenderFillLayer;
 
 using FillBinders = PaintPropertyBinders<style::FillPaintProperties::DataDrivenProperties>;
 using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
+using FillNeighborVertex = gfx::Vertex<TypeList<attributes::prev_next_offset>>;
+using FillTriangleInstance = gfx::Vertex<TypeList<attributes::triangle_indices>>;
 
 class FillBucket final : public Bucket {
 public:
@@ -54,8 +56,25 @@ public:
 
     void recordSDFPattern(const std::string&, bool) override;
     bool isSDFPattern(const std::string&) const override;
+    bool isRoundedCornerEnabled() const { return roundedCornerEnabled; }
 
-    static FillLayoutVertex layoutVertex(Point<int16_t> p) { return FillLayoutVertex{{{p.x, p.y}}}; }
+    static FillLayoutVertex layoutVertex(Point<int16_t> p) { return FillLayoutVertex{{p.x, p.y}}; }
+    static FillNeighborVertex neighborVertex(int16_t prev_offset, int16_t next_offset) {
+        return FillLayoutVertex{{prev_offset, next_offset}};
+    }
+    static FillTriangleInstance triangleInstance(uint32_t index0,
+                                                 bool ignored0,
+                                                 bool external0,
+                                                 uint32_t index1,
+                                                 bool ignored1,
+                                                 bool external1,
+                                                 uint32_t index2,
+                                                 bool ignored2,
+                                                 bool external2) {
+        return FillTriangleInstance{{index0 * 4 + (ignored0 ? 1 : 0) * 2 + (external0 ? 1 : 0),
+                                     index1 * 4 + (ignored1 ? 1 : 0) * 2 + (external1 ? 1 : 0),
+                                     index2 * 4 + (ignored2 ? 1 : 0) * 2 + (external2 ? 1 : 0)}};
+    }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
     using LineVertexVector = gfx::VertexVector<LineLayoutVertex>;
@@ -79,6 +98,14 @@ public:
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
 
+    using NeighborVector = gfx::VertexVector<FillNeighborVertex>;
+    const std::shared_ptr<NeighborVector> sharedNeighbors = std::make_shared<NeighborVector>();
+    NeighborVector& neighbors = *sharedNeighbors;
+
+    using TriangleInstanceVector = gfx::VertexVector<FillTriangleInstance>;
+    const std::shared_ptr<TriangleInstanceVector> sharedTriangleInstances = std::make_shared<TriangleInstanceVector>();
+    TriangleInstanceVector& triangleInstances = *sharedTriangleInstances;
+
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
@@ -97,6 +124,7 @@ private:
 
     mln::unordered_map<std::string, bool> sdfPatterns;
     mln::unordered_set<std::string> mixedSDFPatternLayers;
+    bool roundedCornerEnabled = false;
 };
 
 } // namespace mln

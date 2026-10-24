@@ -94,9 +94,13 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     vec4 color;
     vec4 outline_color;
     float opacity;
+    float rounded_corner_distance;
     float fade;
     float from_scale;
     float to_scale;
+    float pad1;
+    float pad2;
+    float pad3;
 } props;
 
 void main() {
@@ -204,9 +208,13 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     vec4 color;
     vec4 outline_color;
     float opacity;
+    float rounded_corner_distance;
     float fade;
     float from_scale;
     float to_scale;
+    float pad1;
+    float pad2;
+    float pad3;
 } props;
 
 void main() {
@@ -303,9 +311,13 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     vec4 color;
     vec4 outline_color;
     float opacity;
+    float rounded_corner_distance;
     float fade;
     float from_scale;
     float to_scale;
+    float pad1;
+    float pad2;
+    float pad3;
 } props;
 
 layout(location = 0) out vec2 frag_pos_a;
@@ -415,9 +427,13 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     vec4 color;
     vec4 outline_color;
     float opacity;
+    float rounded_corner_distance;
     float fade;
     float from_scale;
     float to_scale;
+    float pad1;
+    float pad2;
+    float pad3;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
@@ -550,9 +566,13 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     vec4 color;
     vec4 outline_color;
     float opacity;
+    float rounded_corner_distance;
     float fade;
     float from_scale;
     float to_scale;
+    float pad1;
+    float pad2;
+    float pad3;
 } props;
 
 layout(location = 0) out vec2 frag_pos_a;
@@ -666,9 +686,13 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     vec4 color;
     vec4 outline_color;
     float opacity;
+    float rounded_corner_distance;
     float fade;
     float from_scale;
     float to_scale;
+    float pad1;
+    float pad2;
+    float pad3;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;

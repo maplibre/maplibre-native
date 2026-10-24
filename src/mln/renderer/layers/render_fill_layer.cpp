@@ -357,6 +357,28 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::AttributeDataType::Short2);
         }
 
+        if (const auto& attr = vertexAttrs->set(idFillPrevNextVertexAttribute)) {
+            attr->setSharedRawData(bucket.sharedNeighbors,
+                                   offsetof(FillNeighborVertex, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(FillNeighborVertex),
+                                   gfx::AttributeDataType::Short2);
+        }
+
+        auto instanceAttrs = context.createVertexAttributeArray();
+        if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
+            attr->setSharedRawData(bucket.sharedTriangleInstances,
+                                   offsetof(FillTriangleInstance, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(FillTriangleInstance),
+                                   gfx::AttributeDataType::UInt3);
+        }
+
+        if (!bucket.isRoundedCornerEnabled()) {
+            propertiesAsUniforms.first.emplace("triangle_instance");
+            propertiesAsUniforms.second.emplace(idFillTriangleInstanceAttribute);
+        }
+
 #if MLN_TRIANGULATE_FILL_OUTLINES
         const auto lineVertexCount = bucket.lineVertices.elements();
         const auto getTriangulatedAttributes = [&]() {
@@ -467,6 +489,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
 #endif
                 fillBuilder->setVertexAttributes(std::move(vertexAttrs));
+                fillBuilder->setInstanceAttributes(std::move(instanceAttrs));
 
                 fillBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
                 fillBuilder->setSegments(gfx::Triangles(),
@@ -565,6 +588,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlinePatternBuilder->setVertexAttributes(vertexAttrs);
                 }
                 patternBuilder->setVertexAttributes(std::move(vertexAttrs));
+                patternBuilder->setInstanceAttributes(std::move(instanceAttrs));
                 patternBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
                 patternBuilder->setSegments(gfx::Triangles(),
                                             bucket.sharedTriangles,

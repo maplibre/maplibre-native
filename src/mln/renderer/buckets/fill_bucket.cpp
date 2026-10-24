@@ -15,9 +15,14 @@ FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
                        const uint32_t /* overscaling */) {
     using namespace style;
     for (const auto& pair : layerPaintProperties) {
+        const auto& fillProps = static_cast<const FillLayerProperties&>(*pair.second);
+#if MLN_USE_FILL_ROUNDED_CORNER
+        const auto& roundedCornerProperty = fillProps.layerImpl().paint.get<FillRoundedCornerDistance>().value;
+        roundedCornerEnabled |= !roundedCornerProperty.isUndefined();
+#endif
         paintPropertyBinders.emplace(std::piecewise_construct,
                                      std::forward_as_tuple(pair.first),
-                                     std::forward_as_tuple(getEvaluated<FillLayerProperties>(pair.second), zoom));
+                                     std::forward_as_tuple(fillProps.evaluated, zoom));
     }
 }
 
@@ -43,16 +48,37 @@ void FillBucket::generateBuffers(const GeometryCollection& geometry) {
 #if MLN_TRIANGULATE_FILL_OUTLINES
     gfx::generateFillAndOutineBuffers(geometry,
                                       vertices,
+                                      neighbors,
+                                      triangleInstances,
                                       triangles,
                                       triangleSegments,
+                                      roundedCornerEnabled,
                                       lineVertices,
                                       lineIndexes,
                                       lineSegments,
                                       basicLines,
                                       basicLineSegments);
 #else
-    gfx::generateFillAndOutineBuffers(geometry, vertices, triangles, triangleSegments, basicLines, basicLineSegments);
+    gfx::generateFillAndOutineBuffers(geometry,
+                                      vertices,
+                                      neighbors,
+                                      triangleInstances,
+                                      triangles,
+                                      triangleSegments,
+                                      roundedCornerEnabled,
+                                      basicLines,
+                                      basicLineSegments);
 #endif
+
+    if (roundedCornerEnabled && triangles.empty()) {
+        triangles.emplace_back(0, 1, 2);
+    }
+    if (!roundedCornerEnabled && neighbors.empty()) {
+        neighbors.emplace_back(FillBucket::neighborVertex(0, 0));
+    }
+    if (!roundedCornerEnabled && triangleInstances.empty()) {
+        triangleInstances.emplace_back(FillBucket::triangleInstance(0, false, false, 0, false, false, 0, false, false));
+    }
 }
 
 void FillBucket::populateBinders(const GeometryTileFeature& feature,
