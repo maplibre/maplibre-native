@@ -93,12 +93,12 @@ public:
                const mln::ScreenLineString& queryGeometry,
                const TransformState& state) const;
 
-    void insert(std::shared_ptr<Feature> feature, std::shared_ptr<mapbox::geometry::polygon<int64_t>> envelope);
+    void insert(std::shared_ptr<Feature> feature, std::shared_ptr<mapbox::geometry::multi_polygon<int64_t>> envelope);
 
 protected:
     struct FeatureRecord {
         std::shared_ptr<Feature> feature;
-        std::shared_ptr<mapbox::geometry::polygon<int64_t>> envelope;
+        std::shared_ptr<mapbox::geometry::multi_polygon<int64_t>> envelope;
     };
 
     std::vector<FeatureRecord> features;
