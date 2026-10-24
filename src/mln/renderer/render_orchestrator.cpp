@@ -299,12 +299,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         terrainEnabled ? renderTerrain->getExaggeration() : 1.0};
     tileParameters.elevationProvider = terrainEnabled ? &elevationProvider : nullptr;
 
-    // The DEM source additionally keeps the coarser ancestors of its cover that are already
-    // loaded, so that a tile another layer draws from - shallower far-field LOD tiles, overzoomed
-    // sources with a low maxzoom - can bind a DEM ancestor for elevation (see TileParameters).
-    TileParameters demTileParameters = tileParameters;
-    demTileParameters.retainAncestorLevels = terrainEnabled ? RenderTerrain::demAncestorLevels : 0;
-
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;
 
@@ -532,12 +526,13 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
+        // The DEM source additionally keeps the coarser ancestors of its cover that are already
+        // loaded, so that a tile another layer draws from - shallower far-field LOD tiles,
+        // overzoomed sources with a low maxzoom - can bind a DEM ancestor for elevation (see
+        // TileParameters).
         const bool isDEMSource = terrainEnabled && sourceImpl->id == renderTerrain->getSourceID();
-        source->update(sourceImpl,
-                       filteredLayersForSource,
-                       sourceNeedsRendering,
-                       sourceNeedsRelayout,
-                       isDEMSource ? demTileParameters : tileParameters);
+        tileParameters.retainAncestorLevels = isDEMSource ? RenderTerrain::demAncestorLevels : 0;
+        source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
 
         // Update all layers with their new renderability status, if it changed.
@@ -636,6 +631,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             Mutable<Placement> placement = Placement::create(updateParameters, placementController.getPlacement());
             placement->setTerrain(terrainEnabled ? renderTerrain.get() : nullptr);
             placement->placeLayers(layersNeedPlacement);
+            placement->setTerrain(nullptr); // so the kept Placement holds no pointer to it
             placementController.setPlacement(std::move(placement));
             crossTileSymbolIndex.pruneUnusedLayers(usedSymbolLayers);
             for (const auto& entry : renderSources) {
@@ -656,6 +652,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             placement->collectPlacedSymbolData(placedSymbolDataCollected);
             placement->setTerrain(terrainEnabled ? renderTerrain.get() : nullptr);
             placement->placeLayers(layersNeedPlacement);
+            placement->setTerrain(nullptr); // so the kept Placement holds no pointer to it
             placementController.setPlacement(std::move(placement));
         }
         crossTileSymbolIndex.reset();
@@ -685,7 +682,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                             std::move(layersNeedPlacement),
                                             placementController.getPlacement(),
                                             symbolBucketsChanged,
-                                            renderTerrain.get(),
+                                            terrainEnabled ? renderTerrain.get() : nullptr,
                                             startTime);
 }
 
