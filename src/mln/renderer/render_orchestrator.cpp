@@ -678,6 +678,13 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
                                                                           queryData.featureSortOrder);
 
         for (auto layer : bucketSymbols) {
+            for (Feature& feature : layer.second) {
+                const RenderSource* renderSource = getRenderSource(feature.source);
+                const auto featureID = featureIDtoString(feature.id);
+                if (renderSource && featureID) {
+                    renderSource->getFeatureState(feature.state, feature.sourceLayer, *featureID);
+                }
+            }
             auto& resultFeatures = resultsByLayer[layer.first];
             std::ranges::move(layer.second, std::inserter(resultFeatures, resultFeatures.end()));
         }
