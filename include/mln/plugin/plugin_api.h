@@ -65,6 +65,15 @@ typedef enum mln_plugin_value_type {
     MLN_PLUGIN_VALUE_FLOAT2 = 2,
     MLN_PLUGIN_VALUE_COLOR = 3,
     MLN_PLUGIN_VALUE_STRING = 4,
+    /* Layout only, no expressions. In the style, an object mapping names to the
+     * URLs of resources the layer may use, e.g. {"car": "asset://car.glb"}. The
+     * host loads the ones that RESOURCE properties name; plugins never receive
+     * this value itself. */
+    MLN_PLUGIN_VALUE_RESOURCES = 5,
+    /* Layout only. A name in the RESOURCES property that the descriptor's
+     * `resources` field names; may be a feature expression. layout_feature
+     * receives the resource already loaded (see mln_plugin_resource_value). */
+    MLN_PLUGIN_VALUE_RESOURCE = 6,
 } mln_plugin_value_type;
 
 /* Expression dependencies accepted by a plugin property. */
@@ -104,11 +113,21 @@ typedef struct mln_plugin_color {
     float a;
 } mln_plugin_color;
 
+/* A RESOURCE value. name comes first, so it shares its layout with string_value. */
+typedef struct mln_plugin_resource_value {
+    mln_plugin_string name;
+    /* What create_resource returned for the resource the name maps to. Null when
+     * the name is not in the layer's resources, the resource failed to load or to
+     * be created, or outside layout_feature. */
+    void* handle;
+} mln_plugin_resource_value;
+
 typedef union mln_plugin_value_data {
     float float_value;
     mln_plugin_float2 float2_value;
     mln_plugin_color color_value;
     mln_plugin_string string_value;
+    mln_plugin_resource_value resource_value;
 } mln_plugin_value_data;
 
 typedef struct mln_plugin_value {
@@ -116,6 +135,12 @@ typedef struct mln_plugin_value {
     mln_plugin_value_type type;
     mln_plugin_value_data data;
 } mln_plugin_value;
+
+/* Zero (a zero-initialized descriptor) means paint. */
+typedef enum mln_plugin_property_scope {
+    MLN_PLUGIN_PROPERTY_PAINT = 1,
+    MLN_PLUGIN_PROPERTY_LAYOUT = 2
+} mln_plugin_property_scope;
 
 typedef struct mln_plugin_property_descriptor_v1 {
     uint32_t struct_size;
@@ -133,6 +158,14 @@ typedef struct mln_plugin_property_descriptor_v1 {
     /* Optional allowed string values. */
     const mln_plugin_string* enum_values;
     size_t enum_value_count;
+    /* Layout properties are evaluated at layout time, once per tile and once per
+     * feature (see mln_plugin_feature_v1::layout_properties); changing one lays the
+     * tiles out again. They may use camera and feature expressions, but not
+     * feature state or transitions, and they have no binders. */
+    mln_plugin_property_scope scope;
+    /* For a RESOURCE property: the name of the layer type's RESOURCES property
+     * that its values are looked up in. Empty otherwise. */
+    mln_plugin_string resources;
 } mln_plugin_property_descriptor_v1;
 
 typedef struct mln_plugin_property_value_v1 {
@@ -271,6 +304,10 @@ typedef struct mln_plugin_uniform_context_v1 {
     float pixels_to_tile_units;
     float camera_to_center_distance;
     float pixel_ratio;
+    /* World pixels (the xy unit of tile_matrix) per meter at the map center's latitude. The projection takes a
+     * vertex z in meters and scales it by this, so geometry that must keep its proportions across
+     * zoom levels divides its height in pixels by it. */
+    float pixels_per_meter;
 } mln_plugin_uniform_context_v1;
 
 /* output is host-owned writable storage of output_size bytes, borrowed only
@@ -295,13 +332,34 @@ typedef struct mln_plugin_feature_v1 {
     /* path_offsets has path_count + 1 entries and ends at point_count. */
     const uint32_t* path_offsets;
     size_t path_count;
+    /* The layout-scope properties evaluated for this feature, in registration
+     * order, RESOURCES properties left out. RESOURCE values carry their loaded
+     * handle. Populated for layout_feature only, empty otherwise. Borrowed and
+     * valid only during the callback. */
+    const mln_plugin_property_value_v1* layout_properties;
+    size_t layout_property_count;
 } mln_plugin_feature_v1;
+
+/* Services the host offers to plugin callbacks. Borrowed for the duration of
+ * the callback that receives it. */
+typedef struct mln_plugin_host_api_v1 {
+    uint32_t struct_size;
+    uint32_t abi_version;
+    /* severity: 1 info, 2 warning, 3 error. */
+    void (*log)(int32_t severity, mln_plugin_string message);
+} mln_plugin_host_api_v1;
 
 /* Worker-thread input. Paint evaluation is owned by the host binders. */
 typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
+    /* The layout-scope properties evaluated at the tile's zoom without a feature,
+     * in registration order, RESOURCES properties left out. A feature expression
+     * yields its default here, and a RESOURCE value has a null handle. */
+    const mln_plugin_property_value_v1* properties;
+    size_t property_count;
+    const mln_plugin_host_api_v1* host;
 } mln_plugin_layout_context_v1;
 
 /* Returned bytes remain valid until destroy_layout. The host copies them after
@@ -448,6 +506,21 @@ typedef float (*mln_plugin_query_radius_fn)(const mln_plugin_property_statistics
  * maps. */
 typedef uint8_t (*mln_plugin_should_animate_fn)(const mln_plugin_property_value_v1* properties, size_t property_count);
 
+/*
+ * Resources named by RESOURCE properties. The host loads each URL once per map
+ * through its file source (cache, URL transformation, asset://, file://) and
+ * lays out a tile only after the resources its features name have arrived. It
+ * then calls create_resource once per loaded resource and layer type, on a tile
+ * worker; url, data and host are borrowed for the call. The returned handle
+ * reaches layout_feature through RESOURCE values, possibly on several workers at
+ * once, so what it points to must not change. destroy_resource runs exactly once
+ * per non-null handle, on any thread, when no tile uses the resource any more.
+ * A failed creation must leave *handle null; it is not retried for that load.
+ */
+typedef mln_plugin_status (*mln_plugin_create_resource_fn)(
+    const mln_plugin_host_api_v1* host, mln_plugin_string url, const uint8_t* data, size_t data_size, void** handle);
+typedef void (*mln_plugin_destroy_resource_fn)(void* handle);
+
 typedef struct mln_plugin_layer_type_v1 {
     uint32_t struct_size;
     mln_plugin_string layer_type;
@@ -483,6 +556,9 @@ typedef struct mln_plugin_layer_type_v1 {
      */
     uint8_t enable_near_clipped_matrix;
     mln_plugin_should_animate_fn should_animate;
+    /* Required when a property is a RESOURCE. */
+    mln_plugin_create_resource_fn create_resource;
+    mln_plugin_destroy_resource_fn destroy_resource;
 } mln_plugin_layer_type_v1;
 
 typedef struct mln_plugin_descriptor_v1 {

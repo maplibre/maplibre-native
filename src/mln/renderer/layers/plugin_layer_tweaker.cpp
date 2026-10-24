@@ -13,6 +13,7 @@
 #include <mln/util/convert.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/logging.hpp>
+#include <mln/util/projection.hpp>
 
 #include <algorithm>
 #include <cstring>
@@ -72,6 +73,12 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             const auto viewportSize = parameters.state.getSize();
             callbackContext.viewport_width = viewportSize.width;
             callbackContext.viewport_height = viewportSize.height;
+            {
+                // Same scale Camera::getWorldToCamera applies to z, which the projection reads as meters.
+                const auto metersPerPixel = Projection::getMetersPerPixelAtLatitude(
+                    parameters.state.getLatLng().latitude(), parameters.state.getZoom());
+                callbackContext.pixels_per_meter = metersPerPixel > 0 ? static_cast<float>(1.0 / metersPerPixel) : 0.0f;
+            }
             callbackContext.pixels_to_tile_units = hasTile ? tileID->pixelsToTileUnits(
                                                                  1.0f, static_cast<float>(parameters.state.getZoom()))
                                                            : 0.0f;

@@ -23,6 +23,10 @@ struct PropertyDefinition {
     std::optional<float> minimum;
     std::optional<float> maximum;
     std::vector<std::string> enumValues;
+    // Layout properties are evaluated at layout time, per tile and per feature; they have no paint evaluation.
+    bool layout = false;
+    // For a RESOURCE property, the RESOURCES property its names are looked up in.
+    std::string resources;
     bool operator==(const PropertyDefinition&) const = default;
 };
 
@@ -92,6 +96,8 @@ struct LayerType {
     bool enableStencilOverlapDedup = false;
     bool enableNearClippedMatrix = false;
     mln_plugin_should_animate_fn shouldAnimate = nullptr;
+    mln_plugin_create_resource_fn createResource = nullptr;
+    mln_plugin_destroy_resource_fn destroyResource = nullptr;
     bool operator==(const LayerType&) const = default;
 
     const PropertyDefinition* findProperty(const std::string& name) const;
