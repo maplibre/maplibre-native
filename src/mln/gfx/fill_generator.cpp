@@ -1,5 +1,6 @@
 #include <mln/gfx/fill_generator.hpp>
 #include <mln/gfx/polyline_generator.hpp>
+#include <mln/util/math.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -112,18 +113,15 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& fillVertices,
         auto& point = ring[i];
         auto& next = ring[nextIndex];
 
-        auto a = prev - point;
-        auto b = next - point;
-        float cross = a.x * b.y - a.y * b.x;
-
-        if (cross > 0) {
+        bool isReflexAngle = util::crossProduct(prev - point, next - point) > 0;
+        if (isReflexAngle) {
             std::vector<uint32_t> indices = {prevIndex, i, nextIndex};
             addFillExternalIndices(fillSegments, fillTriangles, indices, startVertices);
         }
 
         fillVertices.emplace_back(FillBucket::layoutVertex(point));
         fillNeighbors.emplace_back(FillBucket::neighborVertex(prevIndex - i, nextIndex - i));
-        ignoredVertices.emplace_back(cross > 0);
+        ignoredVertices.emplace_back(isReflexAngle);
     }
     fillVertices.emplace_back(FillBucket::layoutVertex(ring[countVertices]));
     fillNeighbors.emplace_back(FillBucket::neighborVertex(-1, -countVertices + 1));
