@@ -45,7 +45,7 @@ TEST(Transform, InvalidZoom) {
     transform.flyTo(CameraOptions()
                         .withCenter(LatLng{util::LATITUDE_MAX, util::LONGITUDE_MAX})
                         .withZoom(transform.getState().getMaxZoom()));
-    transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    transform.updateTransitions(transform.getLatestTransitionStart() + transform.getLatestTransitionDuration());
     ASSERT_DOUBLE_EQ(transform.getZoom(), transform.getState().getMaxZoom());
 
     // Executing flyTo with maximum zoom level to the same zoom level causes
@@ -54,7 +54,7 @@ TEST(Transform, InvalidZoom) {
     transform.flyTo(CameraOptions()
                         .withCenter(LatLng{util::LATITUDE_MAX, util::LONGITUDE_MAX})
                         .withZoom(transform.getState().getMaxZoom()));
-    transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    transform.updateTransitions(transform.getLatestTransitionStart() + transform.getLatestTransitionDuration());
 
     ASSERT_TRUE(transform.getState().valid());
     ASSERT_DOUBLE_EQ(transform.getState().getMaxZoom(), transform.getZoom());
@@ -497,10 +497,10 @@ TEST(Transform, Camera) {
 
     transform.easeTo(cameraOptions1, easeOptions);
     ASSERT_TRUE(transform.inTransition());
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(250));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(500));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(750));
-    transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(250));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(500));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(750));
+    transform.updateTransitions(transform.getLatestTransitionStart() + transform.getLatestTransitionDuration());
     ASSERT_FALSE(transform.inTransition());
 
     AnimationOptions flyOptions(Seconds(1));
@@ -519,10 +519,10 @@ TEST(Transform, Camera) {
 
     transform.flyTo(cameraOptions2, flyOptions);
     ASSERT_TRUE(transform.inTransition());
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(250));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(500));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(750));
-    transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(250));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(500));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(750));
+    transform.updateTransitions(transform.getLatestTransitionStart() + transform.getLatestTransitionDuration());
     ASSERT_FALSE(transform.inTransition());
 
     // Anchor and center points are mutually exclusive.
@@ -531,10 +531,10 @@ TEST(Transform, Camera) {
     camera.anchor = ScreenCoordinate{0, 0}; // top-left
     camera.zoom = transform.getState().getMaxZoom();
     transform.easeTo(camera, AnimationOptions(Seconds(1)));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(250));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(500));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(750));
-    transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(250));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(500));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(750));
+    transform.updateTransitions(transform.getLatestTransitionStart() + transform.getLatestTransitionDuration());
     ASSERT_DOUBLE_EQ(transform.getLatLng().latitude(), 0);
     ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), 0);
 }
@@ -560,10 +560,10 @@ TEST(Transform, IsPanning) {
 
     transform.resize({1000, 1000});
     transform.easeTo(CameraOptions().withCenter(LatLng(0, 360.0)), easeOptions);
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(250));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(500));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(750));
-    transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(250));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(500));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(750));
+    transform.updateTransitions(transform.getLatestTransitionStart() + transform.getLatestTransitionDuration());
 }
 
 TEST(Transform, DefaultTransform) {
@@ -647,7 +647,7 @@ TEST(Transform, DefaultTransform) {
     AnimationOptions easeOptions(Seconds(1));
     transform.easeTo(CameraOptions().withCenter(LatLng{56, 11}).withZoom(1), easeOptions);
     ASSERT_TRUE(transform.inTransition());
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(250));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(250));
 
     // Rotate the screen during a transition (resize it)
     transform.resize({500, 1000});
@@ -776,11 +776,11 @@ TEST(Transform, LatLngBounds) {
     };
     transform.moveBy(ScreenCoordinate{-500, -500}, easeOptions);
 
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(0));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(250));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(500));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(750));
-    transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(0));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(250));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(500));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(750));
+    transform.updateTransitions(transform.getLatestTransitionStart() + transform.getLatestTransitionDuration());
 
     // Constrain to the right edge.
     transform.jumpTo(CameraOptions().withCenter(LatLng{inside.latitude(), 241.0}));
@@ -795,11 +795,11 @@ TEST(Transform, LatLngBounds) {
     };
     transform.moveBy(ScreenCoordinate{500, 500}, easeOptions);
 
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(0));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(250));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(500));
-    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(750));
-    transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(0));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(250));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(500));
+    transform.updateTransitions(transform.getLatestTransitionStart() + Milliseconds(750));
+    transform.updateTransitions(transform.getLatestTransitionStart() + transform.getLatestTransitionDuration());
 
     //    -1   |   0   |  +1
     // ┌───┬───┰───┬───┰───┬───┐
@@ -1267,4 +1267,251 @@ TEST(Camera, SetOrientationWithRollNoPitch) {
     EXPECT_NEAR(bearing - roll, bearing_, 1.0e-9);
     EXPECT_NEAR(pitch, pitch_, 1.0e-9);
     EXPECT_NEAR(0.0, roll_, 1.0e-9);
+}
+
+TEST(Transform, IndependentCameraTracks) {
+    Transform transform;
+    transform.resize({1000, 1000});
+    transform.jumpTo(CameraOptions().withZoom(8).withCenterAltitude(120));
+    unsigned zoomFinished = 0;
+    unsigned centerFinished = 0;
+    AnimationOptions zoom(Seconds(2));
+    zoom.easing.emplace(1.0 / 3, 1.0 / 3, 2.0 / 3, 2.0 / 3);
+    zoom.transitionFinishFn = [&] {
+        ++zoomFinished;
+    };
+    transform.easeTo(CameraOptions().withZoom(12), zoom);
+    const auto zoomStart = transform.getLatestTransitionStart();
+    transform.updateTransitions(zoomStart + Milliseconds(500));
+    EXPECT_NEAR(transform.getZoom(), 9, 1e-5);
+
+    AnimationOptions center(Seconds(8));
+    center.easing.emplace(1.0 / 3, 1.0 / 3, 2.0 / 3, 2.0 / 3);
+    center.transitionFinishFn = [&] {
+        ++centerFinished;
+    };
+    transform.easeTo(CameraOptions().withCenter(LatLng{20, 30}), center);
+    const auto centerStart = transform.getLatestTransitionStart();
+    EXPECT_EQ(zoomFinished, 0u);
+    transform.updateTransitions(zoomStart + Seconds(2));
+    EXPECT_NEAR(transform.getZoom(), 12, 1e-5);
+    EXPECT_GT(transform.getLatLng().longitude(), 0);
+    EXPECT_LT(transform.getLatLng().longitude(), 30);
+    EXPECT_NEAR(transform.getState().getCenterAltitude(), 120, 1e-5);
+    EXPECT_EQ(zoomFinished, 1u);
+    EXPECT_EQ(centerFinished, 0u);
+    EXPECT_TRUE(transform.isPanning());
+    EXPECT_FALSE(transform.isScaling());
+    EXPECT_TRUE(transform.inTransition());
+    transform.updateTransitions(centerStart + Seconds(8));
+    EXPECT_NEAR(transform.getLatLng().latitude(), 20, 1e-5);
+    EXPECT_NEAR(transform.getLatLng().longitude(), 30, 1e-5);
+    EXPECT_NEAR(transform.getZoom(), 12, 1e-5);
+    EXPECT_EQ(centerFinished, 1u);
+    EXPECT_FALSE(transform.inTransition());
+}
+
+TEST(Transform, PartialReplacementKeepsCommandAndTiming) {
+    Transform transform;
+    transform.resize({1000, 1000});
+    transform.jumpTo(CameraOptions().withZoom(8));
+    unsigned finished = 0;
+    AnimationOptions animation(Seconds(4));
+    animation.easing.emplace(1.0 / 3, 1.0 / 3, 2.0 / 3, 2.0 / 3);
+    animation.transitionFinishFn = [&] {
+        ++finished;
+    };
+    transform.easeTo(CameraOptions().withZoom(12).withBearing(80), animation);
+    const auto start = transform.getLatestTransitionStart();
+    transform.updateTransitions(start + Seconds(1));
+    EXPECT_NEAR(transform.getZoom(), 9, 1e-5);
+    EXPECT_NEAR(util::rad2deg(-transform.getBearing()), 20, 1e-5);
+    transform.jumpTo(CameraOptions().withZoom(10));
+    EXPECT_EQ(finished, 0u);
+    EXPECT_TRUE(transform.isRotating());
+    EXPECT_FALSE(transform.isScaling());
+    transform.updateTransitions(start + Seconds(2));
+    EXPECT_NEAR(transform.getZoom(), 10, 1e-5);
+    EXPECT_NEAR(util::rad2deg(-transform.getBearing()), 40, 1e-5);
+    transform.updateTransitions(start + Seconds(4));
+    EXPECT_EQ(finished, 1u);
+    EXPECT_NEAR(util::rad2deg(-transform.getBearing()), 80, 1e-5);
+    transform.cancelTransitions();
+    EXPECT_EQ(finished, 1u);
+}
+
+TEST(Transform, FlightAndAnchorCoupleCenterWithTheirProperties) {
+    Transform transform;
+    transform.resize({1000, 1000});
+    transform.jumpTo(CameraOptions().withZoom(8));
+    unsigned flightFinished = 0;
+    AnimationOptions flight(Seconds(4));
+    flight.easing.emplace(1.0 / 3, 1.0 / 3, 2.0 / 3, 2.0 / 3);
+    flight.transitionFinishFn = [&] {
+        ++flightFinished;
+    };
+    transform.flyTo(CameraOptions().withCenter(LatLng{20, 30}).withZoom(12).withRoll(20), flight);
+    const auto start = transform.getLatestTransitionStart();
+    transform.updateTransitions(start + Seconds(1));
+    EXPECT_NEAR(util::rad2deg(transform.getRoll()), 5, 1e-5);
+    const auto center = transform.getLatLng();
+    transform.jumpTo(CameraOptions().withZoom(10));
+    EXPECT_EQ(flightFinished, 0u); // Roll remains after the coupled flight ends.
+    transform.updateTransitions(start + Seconds(4));
+    EXPECT_NEAR(transform.getLatLng().latitude(), center.latitude(), 1e-5);
+    EXPECT_NEAR(transform.getLatLng().longitude(), center.longitude(), 1e-5);
+    EXPECT_NEAR(transform.getZoom(), 10, 1e-5);
+    EXPECT_NEAR(util::rad2deg(transform.getRoll()), 20, 1e-5);
+    EXPECT_EQ(flightFinished, 1u);
+
+    unsigned anchorFinished = 0;
+    AnimationOptions anchorAnimation(Seconds(4));
+    anchorAnimation.transitionFinishFn = [&] {
+        ++anchorFinished;
+    };
+    const ScreenCoordinate anchor{200, 300};
+    const auto fixed = transform.screenCoordinateToLatLng(anchor);
+    transform.easeTo(CameraOptions().withZoom(12).withAnchor(anchor), anchorAnimation);
+    transform.updateTransitions(transform.getLatestTransitionStart() + Seconds(1));
+    const auto pixel = transform.latLngToScreenCoordinate(fixed);
+    EXPECT_NEAR(pixel.x, anchor.x, 1e-5);
+    EXPECT_NEAR(pixel.y, anchor.y, 1e-5);
+    transform.jumpTo(CameraOptions().withBearing(70));
+    const auto rotatedPixel = transform.latLngToScreenCoordinate(fixed);
+    EXPECT_NEAR(rotatedPixel.x, anchor.x, 1e-5);
+    EXPECT_NEAR(rotatedPixel.y, anchor.y, 1e-5);
+    EXPECT_EQ(anchorFinished, 0u);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{10, 15}));
+    EXPECT_EQ(anchorFinished, 1u);
+    EXPECT_FALSE(transform.inTransition());
+    EXPECT_NEAR(transform.getLatLng().latitude(), 10, 1e-5);
+
+    transform.easeTo(CameraOptions().withCenter(LatLng{20, 30}).withAnchor(anchor), anchorAnimation);
+    transform.easeTo(CameraOptions().withZoom(14), AnimationOptions(Seconds(2)));
+    EXPECT_EQ(anchorFinished, 1u); // Explicit center ignores the anchor.
+    transform.cancelTransitions();
+    EXPECT_EQ(anchorFinished, 2u);
+}
+
+TEST(Transform, ComposePaddingPitchAndFieldOfView) {
+    Transform transform;
+    transform.resize({1000, 1000});
+    transform.jumpTo(CameraOptions().withZoom(8));
+    AnimationOptions animation(Seconds(4));
+    animation.easing.emplace(1.0 / 3, 1.0 / 3, 2.0 / 3, 2.0 / 3);
+    transform.easeTo(CameraOptions().withPadding(EdgeInsets{300, 20, 0, 0}), animation);
+    transform.easeTo(CameraOptions().withPitch(60).withFov(45), animation);
+    const auto end = transform.getLatestTransitionStart() + Seconds(4);
+    transform.updateTransitions(end);
+    EXPECT_EQ(transform.getState().getEdgeInsets(), (EdgeInsets{300, 20, 0, 0}));
+    EXPECT_NEAR(util::rad2deg(transform.getFieldOfView()), 45, 1e-5);
+    const auto maxPitch = transform.getState().getMaxPitch() + util::deg2rad(45.0) / 2 -
+                          std::atan(1.3 * std::tan(util::deg2rad(45.0) / 2));
+    ASSERT_LT(maxPitch, util::deg2rad(60.0));
+    EXPECT_NEAR(transform.getPitch(), maxPitch, 1e-5);
+    EXPECT_FALSE(transform.inTransition());
+}
+
+TEST(Transform, CameraCallbacksCanReplaceAndCancelTransitions) {
+    struct Observer : TransformObserver {
+        Transform* transform = nullptr;
+        unsigned changes = 0;
+        std::function<void()> willChange;
+        void onCameraWillChange(MapObserver::CameraChangeMode) override {
+            if (auto callback = std::exchange(willChange, {})) callback();
+        }
+        void onCameraIsChanging() override {
+            ++changes;
+            transform->updateTransitions(Clock::now());
+        }
+    } observer;
+    Transform transform(observer);
+    observer.transform = &transform;
+    transform.resize({1000, 1000});
+    unsigned firstFinished = 0;
+    unsigned secondFinished = 0;
+    AnimationOptions second(Seconds(4));
+    second.transitionFinishFn = [&] {
+        ++secondFinished;
+    };
+    AnimationOptions first(Seconds(2));
+    first.transitionFrameFn = [&](double) {
+        transform.cancelTransitions();
+        transform.easeTo(CameraOptions().withZoom(12), second);
+    };
+    first.transitionFinishFn = [&] {
+        ++firstFinished;
+    };
+    transform.easeTo(CameraOptions().withZoom(10), first);
+    transform.updateTransitions(transform.getLatestTransitionStart() + Seconds(1));
+    EXPECT_EQ(firstFinished, 1u);
+    EXPECT_EQ(secondFinished, 0u);
+    EXPECT_EQ(observer.changes, 1u);
+    EXPECT_TRUE(transform.inTransition());
+    transform.updateTransitions(transform.getLatestTransitionStart() + Seconds(4));
+    EXPECT_EQ(firstFinished, 1u);
+    EXPECT_EQ(secondFinished, 1u);
+    EXPECT_NEAR(transform.getZoom(), 12, 1e-5);
+
+    first.transitionFrameFn = {};
+    first.transitionFinishFn = [&] {
+        ++firstFinished;
+        transform.easeTo(CameraOptions().withBearing(45), second);
+    };
+    transform.easeTo(CameraOptions().withZoom(10), first);
+    transform.cancelTransitions();
+    EXPECT_TRUE(transform.inTransition());
+    transform.updateTransitions(transform.getLatestTransitionStart() + Seconds(4));
+    EXPECT_EQ(firstFinished, 2u);
+    EXPECT_EQ(secondFinished, 2u);
+    EXPECT_NEAR(util::rad2deg(-transform.getBearing()), 45, 1e-5);
+
+    // A will-change observer can cancel even an immediate command and start
+    // its replacement. The canceled command must not apply or finish twice.
+    observer.willChange = [&] {
+        transform.cancelTransitions();
+        transform.easeTo(CameraOptions().withBearing(90), second);
+    };
+    const auto zoom = transform.getZoom();
+    transform.easeTo(CameraOptions().withZoom(3));
+    EXPECT_NEAR(transform.getZoom(), zoom, 1e-5);
+    transform.updateTransitions(transform.getLatestTransitionStart() + Seconds(4));
+    EXPECT_EQ(secondFinished, 3u);
+    EXPECT_NEAR(util::rad2deg(-transform.getBearing()), 90, 1e-5);
+}
+
+TEST(Transform, PartialCameraCommandsFinishTogetherForStillImage) {
+    struct Observer : TransformObserver {
+        std::vector<int> events;
+        void onCameraDidChange(MapObserver::CameraChangeMode) override { events.push_back(0); }
+    } observer;
+    Transform transform(observer);
+    transform.resize({512, 512});
+    AnimationOptions position(Seconds(5));
+    position.transitionFinishFn = [&] {
+        observer.events.push_back(1);
+    };
+    AnimationOptions bearing(Seconds(10));
+    bearing.transitionFinishFn = [&] {
+        observer.events.push_back(2);
+    };
+    transform.easeTo(CameraOptions().withCenter(LatLng{20, 30}).withZoom(12), position);
+    transform.easeTo(CameraOptions().withBearing(60), bearing);
+    observer.events.clear();
+    transform.jumpTo(CameraOptions().withZoom(10));
+    EXPECT_EQ(observer.events, (std::vector<int>{0}));
+
+    // Static maps advance to the maximum time point for a still image. Each
+    // command finishes before its own did-change notification, even when
+    // another command has replaced one of its properties.
+    observer.events.clear();
+    transform.updateTransitions(TimePoint::max());
+    EXPECT_EQ(observer.events, (std::vector<int>{1, 0, 2, 0}));
+    EXPECT_NEAR(transform.getLatLng().latitude(), 20, 1e-5);
+    EXPECT_NEAR(transform.getLatLng().longitude(), 30, 1e-5);
+    EXPECT_NEAR(transform.getZoom(), 10, 1e-5);
+    EXPECT_NEAR(util::rad2deg(-transform.getBearing()), 60, 1e-5);
+    EXPECT_FALSE(transform.inTransition());
+    transform.cancelTransitions();
+    EXPECT_EQ(observer.events, (std::vector<int>{1, 0, 2, 0}));
 }
