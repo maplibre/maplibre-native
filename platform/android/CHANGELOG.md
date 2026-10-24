@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- OpenGL: match active shader attributes by name instead of by driver-assigned location. Drivers that number attributes differently left plugin layers with mixed-up vertex data ([#4800](https://github.com/maplibre/maplibre-native/pull/4800)).
+
 ## 13.7.1
 
 ### ✨ Features and improvements
