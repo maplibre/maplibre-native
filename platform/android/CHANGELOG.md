@@ -4,7 +4,7 @@
 
 ### 🐞 Bug fixes
 
-- Return the features of `MapLibreMap.queryRenderedFeatures` with the features of the topmost style layer first. Previously the features of each layer were together, but the layers were in an arbitrary order.
+- Return the features of `MapLibreMap.queryRenderedFeatures` with the features of the topmost style layer first. Previously the features of each layer were together, but the layers were in an arbitrary order ([#4833](https://github.com/maplibre/maplibre-native/pull/4833)).
 
 ## 13.7.1
 
