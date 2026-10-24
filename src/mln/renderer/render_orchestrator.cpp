@@ -726,9 +726,9 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
         return result;
     }
 
-    // Combine all results based on the style layer renderItems.
-    for (const auto& pair : filteredLayers) {
-        auto it = resultsByLayer.find(pair.second->baseImpl->id);
+    // Topmost layer first.
+    for (auto layerIt = orderedLayers.rbegin(); layerIt != orderedLayers.rend(); ++layerIt) {
+        auto it = resultsByLayer.find(layerIt->get().getID());
         if (it != resultsByLayer.end()) {
             std::move(it->second.begin(), it->second.end(), std::back_inserter(result));
         }

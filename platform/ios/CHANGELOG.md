@@ -5,6 +5,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 ## main
 
 - Call offline-pack invalidation completion after the database operation finishes and propagate its errors.
+- Return the features of `-[MLNMapView visibleFeaturesAtPoint:]` and `-[MLNMapView visibleFeaturesInRect:]` and their variants in z-order with the features of the topmost style layer first. Previously the features of each layer were together, but the layers were in an arbitrary order.
 
 ## 7.0.0-pre2
 

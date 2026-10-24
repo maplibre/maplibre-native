@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Return the features of `MapLibreMap.queryRenderedFeatures` with the features of the topmost style layer first. Previously the features of each layer were together, but the layers were in an arbitrary order.
+
 ## 13.7.1
 
 ### ✨ Features and improvements
