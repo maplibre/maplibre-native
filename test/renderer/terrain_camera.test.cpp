@@ -212,6 +212,66 @@ TEST(TerrainCamera, ClampingCanBeTurnedOff) {
     EXPECT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
 }
 
+// An app can put the centre at any altitude without moving the camera, and restore a saved camera
+// by setting its altitude before its centre and zoom: the same centre and zoom at another altitude
+// are a different camera.
+TEST(TerrainCamera, CentreAltitudeIsSetAndRestoredKeepingTheView) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+
+    const vec3 before = test.eye();
+    const double zoomAtSeaLevel = *test.map.getCameraOptions({}).zoom;
+
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(1500.0));
+    const CameraOptions saved = test.map.getCameraOptions({});
+    EXPECT_NEAR(*saved.centerAltitude, 1500.0, 0.001);
+    EXPECT_GT(*saved.zoom, zoomAtSeaLevel);
+    test.expectEyeAt(before);
+    // Already there: nothing to move.
+    EXPECT_FALSE(test.map.setCenterAltitudeKeepingView(1500.0));
+
+    // Somewhere else, at sea level.
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(0.0));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{47.0, 11.0}).withZoom(9.0));
+
+    // Restore: the altitude first, then the centre and zoom.
+    test.map.setCenterAltitudeKeepingView(*saved.centerAltitude);
+    test.map.jumpTo(CameraOptions().withCenter(*saved.center).withZoom(*saved.zoom));
+    test.expectEyeAt(before);
+
+    // Back at sea level, the original centre and zoom.
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(0.0));
+    EXPECT_NEAR(*test.map.getCameraOptions({}).zoom, zoomAtSeaLevel, 1e-3);
+    test.expectEyeAt(before);
+}
+
+// The same restore while a return to sea level still waits, here for the next render of a still
+// map after the terrain went: setting the altitude runs the return first, so the jump that follows
+// applies the saved centre and zoom at the saved altitude, not at sea level.
+TEST(TerrainCamera, CameraRestoredWhileTheReturnWaitsIsKept) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(1500.0));
+    const CameraOptions saved = test.map.getCameraOptions({});
+    const vec3 savedEye = test.eye();
+
+    // Somewhere else, anchored on the plateau, and then the terrain goes.
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(0.0));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{47.0, 11.0}).withZoom(9.0));
+    // Lets the renderer report the plateau under the centre.
+    ASSERT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+    test.map.anchorCenterOnTerrain();
+    ASSERT_NEAR(*test.map.getCameraOptions({}).centerAltitude, plateauMeters, 0.5);
+    test.map.getStyle().setTerrain(nullptr);
+
+    test.map.setCenterAltitudeKeepingView(*saved.centerAltitude);
+    test.map.jumpTo(CameraOptions().withCenter(*saved.center).withZoom(*saved.zoom));
+    EXPECT_NEAR(*test.map.getCameraOptions({}).centerAltitude, *saved.centerAltitude, 0.001);
+    test.expectEyeAt(savedEye);
+}
+
 // A gesture start anchors the centre on the ground being looked at without moving the camera,
 // and removing the terrain brings it back to sea level, again without moving the camera:
 // otherwise the flat map keeps orbiting a point up in the air.

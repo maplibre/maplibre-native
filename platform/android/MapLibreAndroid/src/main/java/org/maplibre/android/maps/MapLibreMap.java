@@ -469,10 +469,10 @@ public final class MapLibreMap {
   }
 
   /**
-   * Sets whether the map centre rides the 3D terrain surface rather than sea level. On by
-   * default: the centre altitude follows the rendered terrain height under the centre, so
-   * pitching over tall ground keeps the camera above it instead of sinking into it. Has no
-   * effect when terrain is not enabled.
+   * Sets whether the map centre rides the 3D terrain surface rather than sea level. Off by
+   * default. When on, the centre altitude follows the rendered terrain height under the centre,
+   * so pitching over tall ground keeps the camera above it instead of sinking into it. Has no
+   * effect when terrain is not enabled. Experimental: this may change or go away.
    *
    * @param clamped whether to clamp the centre to the ground
    */
@@ -486,6 +486,37 @@ public final class MapLibreMap {
    */
   public boolean getCenterClampedToGround() {
     return nativeMapView.getCenterClampedToGround();
+  }
+
+  /**
+   * Moves the camera's centre along the line of sight to {@code altitude} metres above sea level
+   * without moving the camera. Nothing on screen moves; the target and zoom of
+   * {@link #getCameraPosition()} change to describe the same view from the new centre. Pass 0 to
+   * put the centre back at sea level.
+   * <p>
+   * With 3D terrain, gestures move the centre up onto the terrain under it, and removing the
+   * terrain brings it back down. A target and zoom describe the same view only at the same centre
+   * altitude, so save {@link #getCenterAltitude()} with the camera position, and restore it with
+   * this method before moving the camera to the saved position.
+   *
+   * @param altitude the new centre altitude above sea level in metres, terrain exaggeration applied
+   * @return false if nothing moved: the centre is already at that altitude, the line of sight
+   * nearly grazes the ground at that altitude (a pitch over about 84 degrees) or meets it at (or
+   * nearly at) the camera, or the minimum or maximum zoom or the camera bounds would cut the move
+   * short
+   */
+  public boolean setCenterAltitudeKeepingView(double altitude) {
+    return transform.setCenterAltitudeKeepingView(altitude);
+  }
+
+  /**
+   * @return the altitude of the camera's centre above sea level in metres. With 3D terrain on,
+   * gestures raise it onto the terrain under the centre; the style's root centerAltitude and
+   * {@link #setCenterAltitudeKeepingView(double)} set it too
+   * @see MapLibreMap#setCenterAltitudeKeepingView(double)
+   */
+  public double getCenterAltitude() {
+    return transform.getCenterAltitude();
   }
 
   /**
