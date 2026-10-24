@@ -5,6 +5,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 ## main
 
 - Call offline-pack invalidation completion after the database operation finishes and propagate its errors.
+- Apply feature state changes and removals in call order. Previously, when changes and removals were made before the same render, the map didn't always draw the result of the last call ([#4835](https://github.com/maplibre/maplibre-native/pull/4835)).
 
 ## 7.0.0-pre2
 

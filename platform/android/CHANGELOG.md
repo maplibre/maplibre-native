@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Apply feature state changes and removals in call order. Previously, when changes and removals were made before the same render, the map didn't always draw the result of the last call ([#4835](https://github.com/maplibre/maplibre-native/pull/4835)).
+
 ## 13.7.1
 
 ### ✨ Features and improvements

@@ -2222,6 +2222,158 @@ TEST(Map, FeatureStateChangesRenderedStyle) {
     }
 }
 
+static void loadSelectableHalvesStyle(MapTest<>& test) {
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {
+        "fs": {
+          "type": "geojson",
+          "data": {
+            "type": "FeatureCollection",
+            "features": [{
+              "type": "Feature",
+              "id": 1,
+              "properties": {},
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[-180, -85], [0, -85], [0, 85], [-180, 85], [-180, -85]]]
+              }
+            }, {
+              "type": "Feature",
+              "id": 2,
+              "properties": {},
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[0, -85], [180, -85], [180, 85], [0, 85], [0, -85]]]
+              }
+            }]
+          }
+        }
+      },
+      "layers": [{
+        "id": "fill",
+        "type": "fill",
+        "source": "fs",
+        "paint": {
+          "fill-color": ["case", ["boolean", ["feature-state", "selected"], false], "#ff0000", "#0000ff"]
+        }
+      }]
+    })STYLE");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(0.0));
+}
+
+// Returns whether feature 1 (left half) and feature 2 (right half) render as selected.
+static std::pair<bool, bool> renderSelectedHalves(MapTest<>& test) {
+    const auto image = test.frontend.render(test.map).image;
+    const auto isSelected = [&](size_t x) {
+        const auto* pixel = image.data.get() + (image.size.height / 2) * image.stride() + x * image.channels;
+        return pixel[0] > 200 && pixel[2] < 40;
+    };
+    return {isSelected(image.size.width / 4), isSelected(image.size.width * 3 / 4)};
+}
+
+TEST(Map, FeatureStateRemovalAndChangeOfAnotherFeatureBeforeOneRender) {
+    MapTest<> test;
+    loadSelectableHalvesStyle(test);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, false));
+    auto* renderer = test.frontend.getRenderer();
+    FeatureState selected;
+    selected["selected"] = true;
+
+    renderer->setFeatureState("fs", {}, "1", selected);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(true, false));
+
+    renderer->removeFeatureState("fs", {}, "1"s, {});
+    renderer->setFeatureState("fs", {}, "2", selected);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, true));
+}
+
+TEST(Map, FeatureStateKeyRemovalAndChangeOfSameKeyBeforeOneRender) {
+    MapTest<> test;
+    loadSelectableHalvesStyle(test);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, false));
+    auto* renderer = test.frontend.getRenderer();
+    FeatureState selected;
+    selected["selected"] = true;
+
+    renderer->setFeatureState("fs", {}, "1", selected);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(true, false));
+
+    renderer->removeFeatureState("fs", {}, "1"s, "selected"s);
+    renderer->setFeatureState("fs", {}, "1", selected);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(true, false));
+
+    renderer->setFeatureState("fs", {}, "1", selected);
+    renderer->removeFeatureState("fs", {}, "1"s, "selected"s);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, false));
+}
+
+TEST(Map, FeatureStateChangeAndRemovalOfSameFeatureBeforeOneRender) {
+    MapTest<> test;
+    loadSelectableHalvesStyle(test);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, false));
+    auto* renderer = test.frontend.getRenderer();
+    FeatureState selected;
+    selected["selected"] = true;
+    FeatureState hovered;
+    hovered["hovered"] = true;
+
+    renderer->setFeatureState("fs", {}, "1", selected);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(true, false));
+
+    renderer->setFeatureState("fs", {}, "1", hovered);
+    renderer->removeFeatureState("fs", {}, "1"s, {});
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, false));
+}
+
+TEST(Map, FeatureStateKeyRemovalsOfTwoFeaturesBeforeOneRender) {
+    MapTest<> test;
+    loadSelectableHalvesStyle(test);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, false));
+    auto* renderer = test.frontend.getRenderer();
+    FeatureState selected;
+    selected["selected"] = true;
+
+    renderer->setFeatureState("fs", {}, "1", selected);
+    renderer->setFeatureState("fs", {}, "2", selected);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(true, true));
+
+    renderer->removeFeatureState("fs", {}, "1"s, "selected"s);
+    renderer->removeFeatureState("fs", {}, "2"s, "selected"s);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, false));
+}
+
+TEST(Map, FeatureStateChangeSourceRemovalAndChangeBeforeOneRender) {
+    MapTest<> test;
+    loadSelectableHalvesStyle(test);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, false));
+    auto* renderer = test.frontend.getRenderer();
+    FeatureState selected;
+    selected["selected"] = true;
+
+    renderer->setFeatureState("fs", {}, "1", selected);
+    renderer->removeFeatureState("fs", {}, {}, {});
+    renderer->setFeatureState("fs", {}, "2", selected);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, true));
+}
+
+TEST(Map, FeatureStateSourceRemovalAndChangeBeforeOneRender) {
+    MapTest<> test;
+    loadSelectableHalvesStyle(test);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, false));
+    auto* renderer = test.frontend.getRenderer();
+    FeatureState selected;
+    selected["selected"] = true;
+
+    renderer->setFeatureState("fs", {}, "1", selected);
+    renderer->setFeatureState("fs", {}, "2", selected);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(true, true));
+
+    renderer->removeFeatureState("fs", {}, {}, {});
+    renderer->setFeatureState("fs", {}, "2", selected);
+    EXPECT_EQ(renderSelectedHalves(test), std::make_pair(false, true));
+}
+
 static std::size_t countGreenPixels(const PremultipliedImage& image) {
     std::size_t greenPixels = 0;
     for (std::size_t i = 0; i < image.bytes(); i += image.channels) {
