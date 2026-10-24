@@ -180,6 +180,30 @@ TEST(PMTilesFileSource, RepeatedTileRequest) {
     loop.run();
 }
 
+// A request cancelled before it is answered must be dropped quietly, never answered, and must
+// leave the source serving later requests.
+TEST(PMTilesFileSource, CancelledTileRequest) {
+    util::RunLoop loop;
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    auto cancelled = pmtiles.request(
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response) { ADD_FAILURE() << "A cancelled request was answered"; });
+    cancelled.reset();
+
+    std::unique_ptr<AsyncRequest> req = pmtiles.request(
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response res) {
+            req.reset();
+            EXPECT_EQ(nullptr, res.error);
+            ASSERT_TRUE(res.data.get());
+            loop.stop();
+        });
+
+    loop.run();
+}
+
 // An archive whose header flags tile_compression=GZIP but whose individual tiles are stored
 // without compression must be served without error (uncompressed bytes passed through as-is).
 TEST(PMTilesFileSource, UncompressedTile) {

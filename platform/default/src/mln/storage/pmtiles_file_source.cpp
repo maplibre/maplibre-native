@@ -73,12 +73,12 @@ public:
 
             if (error) {
                 response.error = std::move(error);
-                ref.invoke(&FileSourceRequest::setResponse, response);
+                respond(req, ref, response);
                 return;
             }
 
             response.data = std::make_shared<std::string>(metadata_cache.at(url));
-            ref.invoke(&FileSourceRequest::setResponse, response);
+            respond(req, ref, response);
         });
     }
 
@@ -91,7 +91,7 @@ public:
                 Response response;
                 response.noContent = true;
                 response.error = std::move(error);
-                ref.invoke(&FileSourceRequest::setResponse, response);
+                respond(req, ref, response);
                 return;
             }
 
@@ -100,7 +100,7 @@ public:
             if (resource.tileData->z < header.min_zoom || resource.tileData->z > header.max_zoom) {
                 Response response;
                 response.noContent = true;
-                ref.invoke(&FileSourceRequest::setResponse, response);
+                respond(req, ref, response);
                 return;
             }
 
@@ -115,7 +115,7 @@ public:
                 response.noContent = true;
                 response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
                                                                    std::string("Invalid tile: ") + e.what());
-                ref.invoke(&FileSourceRequest::setResponse, response);
+                respond(req, ref, response);
                 return;
             }
 
@@ -131,14 +131,14 @@ public:
                         Response response;
                         response.noContent = true;
                         response.error = std::move(tileError);
-                        ref.invoke(&FileSourceRequest::setResponse, response);
+                        respond(req, ref, response);
                         return;
                     }
 
                     if (tileAddress.first == 0 && tileAddress.second == 0) {
                         Response response;
                         response.noContent = true;
-                        ref.invoke(&FileSourceRequest::setResponse, response);
+                        respond(req, ref, response);
                         return;
                     }
 
@@ -155,7 +155,7 @@ public:
                             response.error = std::make_unique<Response::Error>(
                                 tileResponse.error->reason,
                                 std::string("Error fetching PMTiles tile: ") + tileResponse.error->message);
-                            ref.invoke(&FileSourceRequest::setResponse, response);
+                            respond(req, ref, response);
                             return;
                         }
 
@@ -166,7 +166,7 @@ public:
                         if (!tileResponse.data) {
                             response.error = std::make_unique<Response::Error>(
                                 Response::Error::Reason::Other, "Error fetching PMTiles tile: response has no data");
-                            ref.invoke(&FileSourceRequest::setResponse, response);
+                            respond(req, ref, response);
                             return;
                         }
 
@@ -191,12 +191,15 @@ public:
                             }
                         }
 
-                        ref.invoke(&FileSourceRequest::setResponse, response);
+                        respond(req, ref, response);
                         return;
                     });
                 });
         });
     }
+
+    // Drops whatever the request still holds open and stops it being answered.
+    void cancel(AsyncRequest* req) { tasks.erase(req); }
 
     void setResourceOptions(ResourceOptions options) {
         std::scoped_lock lock(resourceOptionsMutex);
@@ -230,6 +233,14 @@ private:
     std::map<std::string, std::map<std::string, std::vector<pmtiles::entryv3>>> directory_cache;
     std::map<std::string, std::vector<std::string>> directory_cache_control;
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
+
+    // Answers a request for good. Its task is erased first: the requests it holds, and their
+    // mailboxes, would otherwise live as long as this file source. Erasing it here can destroy the
+    // request whose callback is running; FileSourceRequest::setResponse allows for that.
+    void respond(AsyncRequest* req, const ActorRef<FileSourceRequest>& ref, const Response& response) {
+        tasks.erase(req);
+        ref.invoke(&FileSourceRequest::setResponse, response);
+    }
 
     std::shared_ptr<FileSource> getFileSource() {
         if (!fileSource) {
@@ -636,6 +647,8 @@ PMTilesFileSource::PMTilesFileSource(const ResourceOptions& resourceOptions, con
 
 std::unique_ptr<AsyncRequest> PMTilesFileSource::request(const Resource& resource, FileSource::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
+
+    req->onCancel([actorRef = thread->actor(), req = req.get()]() { actorRef.invoke(&Impl::cancel, req); });
 
     // assume if there is a tile request, that the pmtiles file has been validated
     if (resource.kind == Resource::Tile) {
