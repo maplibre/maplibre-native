@@ -566,7 +566,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                              .imageManager = *imageManager,
                              .patternAtlas = *patternAtlas,
                              .lineAtlas = *lineAtlas,
-                             .state = updateParameters->transformState});
+                             .state = updateParameters->transformState,
+                             .terrain = terrainEnabled});
         if (renderLayer.needsPlacement()) {
             layersNeedPlacement.emplace_back(renderLayer);
         }
