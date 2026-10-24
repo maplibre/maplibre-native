@@ -16,6 +16,20 @@ namespace {
 std::atomic<uint32_t> maxBucketInstanceId;
 } // namespace
 
+bool SymbolBucket::Buffer::hasVisibleVertices(std::size_t offset, std::size_t count) const {
+    const auto& opacities = opacityAttributeData().vector();
+    // If placement has not filled this range yet, keep drawing until we can
+    // determine whether its symbols are hidden.
+    if (offset > opacities.size() || count > opacities.size() - offset) {
+        return true;
+    }
+    return std::any_of(opacities.begin() + offset, opacities.begin() + offset + count, [](const auto& vertex) {
+        // Zero means both zero opacity and an unplaced symbol. Keep symbols
+        // fading out, and placed symbols whose fade-in starts at zero opacity.
+        return vertex.a1[0] != 0.0f;
+    });
+}
+
 std::unique_ptr<SymbolSizeBinder> SymbolSizeBinder::create(const float tileZoom,
                                                            const style::PropertyValue<float>& sizeProperty,
                                                            const float defaultValue) {
