@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Apply the feature state changes and removals of `GeoJsonSource` and `VectorSource` in call order. Previously, when several were made before the map rendered, a change could be lost, or a removal could undo a later change.
+
 ## 13.7.1
 
 ### ✨ Features and improvements

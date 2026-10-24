@@ -5,6 +5,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 ## main
 
 - Call offline-pack invalidation completion after the database operation finishes and propagate its errors.
+- Apply the feature state changes and removals of `MLNShapeSource` and `MLNVectorTileSource` in call order. Previously, when several were made before the map rendered, a change could be lost, or a removal could undo a later change.
 
 ## 7.0.0-pre2
 

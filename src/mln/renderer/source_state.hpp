@@ -25,6 +25,13 @@ public:
     void coalesceChanges(std::vector<RenderTile>& tiles);
 
 private:
+    void cancelQueuedRemovals(const std::string& sourceLayer,
+                              const std::string& featureID,
+                              const FeatureState& newState);
+    void cancelQueuedChanges(const std::string& sourceLayer,
+                             const std::optional<std::string>& featureID,
+                             const std::optional<std::string>& stateKey);
+
     LayerFeatureStates currentStates;
     LayerFeatureStates stateChanges;
     LayerFeatureStates deletedStates;

@@ -15,6 +15,57 @@ void SourceFeatureState::updateState(const std::optional<std::string>& sourceLay
         auto& featureStates = layerStates[featureID];
         featureStates[state.first] = state.second;
     }
+    // coalesceChanges applies removals after changes, so a removal queued before this change would undo it.
+    cancelQueuedRemovals(sourceLayer, featureID, newState);
+}
+
+void SourceFeatureState::cancelQueuedRemovals(const std::string& sourceLayer,
+                                              const std::string& featureID,
+                                              const FeatureState& newState) {
+    const auto layerDeletions = deletedStates.find(sourceLayer);
+    if (layerDeletions == deletedStates.end()) {
+        return;
+    }
+    const auto removalOfKeysNotInNewState = [&](const std::string& id) {
+        FeatureState removal;
+        if (const auto layer = currentStates.find(sourceLayer); layer != currentStates.end()) {
+            if (const auto feature = layer->second.find(id); feature != layer->second.end()) {
+                for (const auto& state : feature->second) {
+                    if (!newState.contains(state.first)) {
+                        removal[state.first] = {};
+                    }
+                }
+            }
+        }
+        return removal;
+    };
+    FeatureStates& featureDeletions = layerDeletions->second;
+    if (featureDeletions.empty()) {
+        if (const auto layer = currentStates.find(sourceLayer); layer != currentStates.end()) {
+            for (const auto& feature : layer->second) {
+                if (feature.first != featureID) {
+                    featureDeletions[feature.first] = {};
+                }
+            }
+        }
+        if (auto removal = removalOfKeysNotInNewState(featureID); !removal.empty()) {
+            featureDeletions[featureID] = std::move(removal);
+        }
+    } else if (const auto feature = featureDeletions.find(featureID); feature != featureDeletions.end()) {
+        if (feature->second.empty()) {
+            feature->second = removalOfKeysNotInNewState(featureID);
+        } else {
+            for (const auto& state : newState) {
+                feature->second.erase(state.first);
+            }
+        }
+        if (feature->second.empty()) {
+            featureDeletions.erase(feature);
+        }
+    }
+    if (featureDeletions.empty()) {
+        deletedStates.erase(layerDeletions);
+    }
 }
 
 void SourceFeatureState::getState(FeatureState& result,
@@ -69,7 +120,7 @@ void SourceFeatureState::coalesceChanges(std::vector<RenderTile>& tiles) {
 
     for (const auto& layerStatesEntry : deletedStates) {
         const auto& sourceLayer = layerStatesEntry.first;
-        FeatureStates layerStates = {{}, {}};
+        FeatureStates& layerStates = changes[sourceLayer];
 
         if (deletedStates[sourceLayer].empty()) {
             for (const auto& featureStatesEntry : currentStates[sourceLayer]) {
@@ -91,7 +142,6 @@ void SourceFeatureState::coalesceChanges(std::vector<RenderTile>& tiles) {
                 layerStates[featureID] = currentStates[sourceLayer][featureID];
             }
         }
-        changes[sourceLayer] = std::move(layerStates);
     }
 
     stateChanges.clear();
@@ -113,26 +163,48 @@ void SourceFeatureState::removeState(const std::optional<std::string>& sourceLay
                                      const std::optional<std::string>& stateKey) {
     std::string sourceLayer = sourceLayerID.value_or(std::string());
 
-    bool sourceLayerDeleted = deletedStates.contains(sourceLayer) && deletedStates[sourceLayer].empty();
+    const auto layerDeletions = deletedStates.find(sourceLayer);
+    bool sourceLayerDeleted = layerDeletions != deletedStates.end() && layerDeletions->second.empty();
     if (sourceLayerDeleted) {
         return;
     }
 
     if (stateKey && featureID) {
-        if (!deletedStates.contains(sourceLayer) && !deletedStates[sourceLayer].contains(*featureID)) {
-            deletedStates[sourceLayer][*featureID][*stateKey] = {};
+        bool featureDeleted = layerDeletions != deletedStates.end() && layerDeletions->second.contains(*featureID) &&
+                              layerDeletions->second.at(*featureID).empty();
+        if (featureDeleted) {
+            return;
         }
+        deletedStates[sourceLayer][*featureID][*stateKey] = {};
     } else if (featureID) {
-        bool updateInQueue = stateChanges.contains(sourceLayer) && stateChanges[sourceLayer].contains(*featureID);
-        if (updateInQueue) {
-            for (const auto& changeEntry : stateChanges[sourceLayer][*featureID]) {
-                deletedStates[sourceLayer][*featureID][changeEntry.first] = {};
-            }
-        } else {
-            deletedStates[sourceLayer][*featureID] = {};
-        }
+        deletedStates[sourceLayer][*featureID] = {};
     } else {
         deletedStates[sourceLayer] = {};
+    }
+    // A later change turns this removal into removals of the state in currentStates, which don't cover queued changes.
+    cancelQueuedChanges(sourceLayer, featureID, stateKey);
+}
+
+void SourceFeatureState::cancelQueuedChanges(const std::string& sourceLayer,
+                                             const std::optional<std::string>& featureID,
+                                             const std::optional<std::string>& stateKey) {
+    const auto layerChanges = stateChanges.find(sourceLayer);
+    if (layerChanges == stateChanges.end()) {
+        return;
+    }
+    if (!featureID) {
+        stateChanges.erase(layerChanges);
+        return;
+    }
+    const auto featureChanges = layerChanges->second.find(*featureID);
+    if (featureChanges == layerChanges->second.end()) {
+        return;
+    }
+    if (stateKey) {
+        featureChanges->second.erase(*stateKey);
+    }
+    if (!stateKey || featureChanges->second.empty()) {
+        layerChanges->second.erase(featureChanges);
     }
 }
 
