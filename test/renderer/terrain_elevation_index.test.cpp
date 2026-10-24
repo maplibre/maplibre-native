@@ -9,6 +9,8 @@
 #include <mln/map/transform.hpp>
 #include <mln/renderer/terrain_elevation_index.hpp>
 #include <mln/style/style.hpp>
+#include <mln/style/image.hpp>
+#include <mln/renderer/renderer.hpp>
 #include <mln/style/terrain.hpp>
 #include <mln/util/image.hpp>
 #include <mln/util/projection.hpp>
@@ -338,4 +340,54 @@ TEST(TerrainElevationIndex, ProjectionOnTerrainAcrossTheAntimeridian) {
     const ScreenCoordinate atHeight = test.map.pixelForLatLng(unwrapped, plateauMeters);
     EXPECT_NEAR(onSurface.x, atHeight.x, 0.5);
     EXPECT_NEAR(onSurface.y, atHeight.y, 0.5);
+}
+
+namespace {
+
+// A plateau DEM to z8 under a point symbol whose GeoJSON source stops at z6, so at map zoom 11 the
+// symbol tile (z6) is shallower than the DEM cover (z8) and, since ancestors are never requested, no
+// DEM tile covers it whole. (z6 keeps the point's tile quantisation to ~2 px at z11.)
+const char* symbolOnTerrainStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 8,
+      "tileSize": 64
+    },
+    "pins": {
+      "type": "geojson",
+      "maxzoom": 6,
+      "data": {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [11.42, 47.28]}}
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": [{"id": "pin", "type": "symbol", "source": "pins", "layout": {"icon-image": "dot"}}]
+})STYLE";
+
+} // namespace
+
+// Placement projects the collision boxes at the terrain height, so a symbol over the plateau is
+// found where it is drawn on the surface and not at its sea-level position. The symbol's tile has
+// no DEM tile covering it whole, so this also needs the sampler's per-point fallback to the deeper
+// DEM tiles.
+TEST(TerrainElevationIndex, SymbolCollisionBoxesSitOnTheTerrain) {
+    TerrainProjectionTest test;
+    test.map.getStyle().loadJSON(symbolOnTerrainStyle);
+    test.map.getStyle().addImage(std::make_unique<style::Image>("dot", PremultipliedImage({8, 8}), 1.0f));
+    test.map.jumpTo(CameraOptions().withCenter(innsbruck).withZoom(11.0).withPitch(60.0));
+    test.render(6);
+    ASSERT_TRUE(test.map.getTerrainElevation(innsbruck));
+
+    const LatLng pin{47.28, 11.42};
+    const ScreenCoordinate onSurface = test.map.pixelForLatLngOnTerrain(pin);
+    const ScreenCoordinate atSeaLevel = test.map.pixelForLatLng(pin);
+    // Far enough apart that an 8 px icon (with its collision padding) cannot cover both
+    ASSERT_GT(std::hypot(onSurface.x - atSeaLevel.x, onSurface.y - atSeaLevel.y), 20.0);
+
+    const RenderedQueryOptions options{std::vector<std::string>{"pin"}};
+    EXPECT_EQ(1u, test.frontend.getRenderer()->queryRenderedFeatures(onSurface, options).size());
+    EXPECT_EQ(0u, test.frontend.getRenderer()->queryRenderedFeatures(atSeaLevel, options).size());
 }
