@@ -75,7 +75,7 @@ std::set<std::string> diffGlobalStateKeys(const GlobalStateMap& previous, const 
         }
     }
     for (const auto& entry : previous) {
-        if (current.find(entry.first) == current.end()) {
+        if (!current.contains(entry.first)) {
             keys.insert(entry.first);
         }
     }

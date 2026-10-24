@@ -27,7 +27,7 @@ env:
 
 jobs:
   pre_job:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
     steps:
@@ -61,7 +61,7 @@ jobs:
             rust: false
           - renderer: opengl
             rust: true
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 240
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -195,7 +195,7 @@ jobs:
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
   linux-coverage:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -206,12 +206,18 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
+      # The cached auto-configured C++ toolchain hardcodes the compiler's
+      # include paths, so a cache from another runner image breaks the build.
+      - name: Get runner image
+        id: runner-image
+        run: echo "os=$ImageOS" >> "$GITHUB_OUTPUT"
+
       - name: Cache Bazel
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          key: ${{ runner.os }}-${{ steps.runner-image.outputs.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
-            ${{ runner.os }}-bazel-
+            ${{ runner.os }}-${{ steps.runner-image.outputs.os }}-bazel-
           path: ~/.cache/bazel
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -244,7 +250,7 @@ jobs:
   linux-ci-result:
     name: Linux CI Result
     if: needs.pre_job.outputs.should_skip != 'true' && always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       - pre_job
       - linux-build-and-test

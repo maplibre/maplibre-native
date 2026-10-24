@@ -7,11 +7,15 @@ packages=(
   libpng-dev
   libglfw3-dev
   libwebp-dev
+  libegl-dev
+  libgles-dev
+  libopengl-dev
   libopengl0
   mesa-vulkan-drivers
   llvm
   glslang-dev
   libbz2-dev
+  libicu-dev
   libxinerama-dev
   libxcursor-dev
   libxi-dev
