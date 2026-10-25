@@ -96,10 +96,22 @@ public:
 
     /// The `maxTiles` tiles whose centres lie nearest `origin` (normalized web-mercator), or all
     /// of them when there are no more than that or `maxTiles` is 0. The mesh-tile cap
-    /// (TerrainLoadBudget::maxMeshTiles) that computeMeshCover applies.
+    /// (TerrainLoadBudget::maxMeshTiles) that computeMeshCover applies, after
+    /// coarsenFarMeshTiles.
     static std::set<UnwrappedTileID> nearestMeshTiles(std::set<UnwrappedTileID> tiles,
                                                       size_t maxTiles,
                                                       const std::array<double, 2>& origin);
+
+    /// While there are more than `maxTiles` tiles (0: no limit), the group of sibling tiles
+    /// farthest from `origin` gives way to its parent, never shallower than `minZoom`. Only
+    /// siblings with nothing deeper inside merge, so detail goes first in the distance, where a
+    /// tile covers little of the screen, and the tiles still cover all the ground they did.
+    /// Whatever is still over `maxTiles` once no tile is deeper than `minZoom`, nearestMeshTiles
+    /// drops.
+    static std::set<UnwrappedTileID> coarsenFarMeshTiles(std::set<UnwrappedTileID> tiles,
+                                                         size_t maxTiles,
+                                                         uint8_t minZoom,
+                                                         const std::array<double, 2>& origin);
 
     /// Resolve the DEM render source from the orchestrator if not yet bound.
     /// Renderer::Impl::render calls this before building the frame's drape-target

@@ -65,9 +65,10 @@ enum class TerrainLoadMode : uint8_t {
 struct TerrainLoadBudget {
     int newTileBuildsPerFrame;  ///< max NEW tiles that build their drawables per frame
     int drapeRerendersPerFrame; ///< max terrain drape targets that re-render per frame
-    /// Hard cap on terrain mesh tiles per frame (0 = unlimited). When the cover exceeds it the
-    /// tiles nearest the camera are kept and the farthest - the horizon tiles a high tilt
-    /// pulls in - are dropped. Everything downstream scales with this (mesh draws, drape
+    /// Hard cap on terrain mesh tiles per frame (0 = unlimited). When the cover exceeds it, the
+    /// farthest tiles past the DEM's maxzoom first go back to coarser ones (down to the DEM's
+    /// maxzoom), and only then are the farthest - the horizon tiles a high tilt pulls in -
+    /// dropped, keeping those nearest the camera. Everything downstream scales with this (mesh draws, drape
     /// targets and re-renders, depth instances), so it is the bluntest frame-time lever - and
     /// it costs terrain render *distance*, which is why Quality keeps a generous cap rather
     /// than the aggressive one Performance uses.

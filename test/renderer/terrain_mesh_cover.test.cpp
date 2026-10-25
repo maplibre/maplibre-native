@@ -5,6 +5,7 @@
 #include <mln/renderer/render_terrain.hpp>
 #include <mln/tile/tile_id.hpp>
 
+#include <algorithm>
 #include <set>
 
 using namespace mln;
@@ -137,4 +138,83 @@ TEST(TerrainMeshCover, MeshGoesAtMostThreeLevelsPastTheDEM) {
     for (const auto mode : allModes) {
         EXPECT_EQ(9, meshMaxZoom(mode, 6));
     }
+}
+
+namespace {
+UnwrappedTileID tile(uint8_t z, uint32_t x, uint32_t y) {
+    return UnwrappedTileID(0, CanonicalTileID(z, x, y));
+}
+
+// Whether every tile of `original` lies inside a tile of `cover`.
+bool coversAll(const std::set<UnwrappedTileID>& cover, const std::set<UnwrappedTileID>& original) {
+    return std::ranges::all_of(original, [&](const UnwrappedTileID& id) {
+        return std::ranges::any_of(cover, [&](const UnwrappedTileID& c) { return c == id || id.isChildOf(c); });
+    });
+}
+
+constexpr std::array<double, 2> northWestCorner{{0.0, 0.0}};
+} // namespace
+
+TEST(TerrainMeshCover, CoarseningLeavesACoverWithinTheCapAlone) {
+    EXPECT_EQ(wholeZ2(), RenderTerrain::coarsenFarMeshTiles(wholeZ2(), 16, 0, worldCentre));
+    EXPECT_EQ(wholeZ2(), RenderTerrain::coarsenFarMeshTiles(wholeZ2(), 0, 0, worldCentre));
+}
+
+TEST(TerrainMeshCover, CoarseningMergesTheFarthestTilesFirst) {
+    // Seen from the north-west corner, the south-east quarter is farthest: its four z2 tiles
+    // become their z1 parent (13 tiles). Then the south-west and north-east quarters lie as far;
+    // the lower ID, z1 (0,1), merges, which leaves 10. The northern half, nearer the corner,
+    // keeps all its z2 tiles.
+    const std::set<UnwrappedTileID> expected{tile(1, 1, 1),
+                                             tile(1, 0, 1),
+                                             tile(2, 0, 0),
+                                             tile(2, 1, 0),
+                                             tile(2, 2, 0),
+                                             tile(2, 3, 0),
+                                             tile(2, 0, 1),
+                                             tile(2, 1, 1),
+                                             tile(2, 2, 1),
+                                             tile(2, 3, 1)};
+    EXPECT_EQ(expected, RenderTerrain::coarsenFarMeshTiles(wholeZ2(), 10, 1, northWestCorner));
+}
+
+TEST(TerrainMeshCover, CoarseningNeverGoesShallowerThanTheMinimumZoom) {
+    // All tiles already at the minimum zoom: nothing changes, and the cap is left to drop tiles.
+    EXPECT_EQ(wholeZ2(), RenderTerrain::coarsenFarMeshTiles(wholeZ2(), 4, 2, worldCentre));
+}
+
+TEST(TerrainMeshCover, CoarseningKeepsAllTheGroundCoveredWithinTheCap) {
+    // The 64 z4 tiles of z1 tile (0,0), seen from the north-west corner, down to 12 tiles, no
+    // coarser than z2 (like a mesh three levels past a z2 DEM).
+    std::set<UnwrappedTileID> original;
+    for (uint32_t y = 0; y < 8; ++y) {
+        for (uint32_t x = 0; x < 8; ++x) {
+            original.insert(tile(4, x, y));
+        }
+    }
+    const auto coarse = RenderTerrain::coarsenFarMeshTiles(original, 12, 2, northWestCorner);
+    EXPECT_LE(coarse.size(), 12u);
+    EXPECT_TRUE(coversAll(coarse, original));
+    EXPECT_TRUE(coarse.contains(tile(4, 0, 0))) << "the tile nearest the camera keeps its zoom";
+    // Detail falls off with distance: the four z4 tiles at the corner, z3 around them, z2 beyond.
+    const std::set<UnwrappedTileID> expected{tile(4, 0, 0),
+                                             tile(4, 1, 0),
+                                             tile(4, 0, 1),
+                                             tile(4, 1, 1),
+                                             tile(3, 1, 0),
+                                             tile(3, 0, 1),
+                                             tile(3, 1, 1),
+                                             tile(2, 1, 0),
+                                             tile(2, 0, 1),
+                                             tile(2, 1, 1)};
+    EXPECT_EQ(expected, coarse);
+}
+
+TEST(TerrainMeshCover, CoarseningHandlesTilesWithoutTheirSiblings) {
+    // The lone far tile becomes its parent, then its grandparent, without the count changing;
+    // then the two near siblings merge, and the result fits.
+    const std::set<UnwrappedTileID> original{tile(3, 0, 0), tile(3, 1, 0), tile(3, 7, 7)};
+    const auto coarse = RenderTerrain::coarsenFarMeshTiles(original, 2, 1, northWestCorner);
+    EXPECT_EQ((std::set<UnwrappedTileID>{tile(2, 0, 0), tile(1, 1, 1)}), coarse);
+    EXPECT_TRUE(coversAll(coarse, original));
 }
