@@ -4,8 +4,10 @@
 #include <mln/actor/scheduler.hpp>
 #include <mln/util/feature.hpp>
 
+#include <array>
 #include <memory>
 #include <numbers>
+#include <optional>
 
 #include <mapbox/std/weak.hpp>
 
@@ -48,6 +50,9 @@ public:
     /// Terrain elevation for the tile cover; null when there is no terrain, which
     /// leaves the cover flat. See util::TileElevationProvider.
     const util::TileElevationProvider* elevationProvider = nullptr;
+    /// Where the distance-based level of detail measures from (normalized web-mercator), in place
+    /// of the map centre; see util::TileCoverParameters::tileLodOrigin.
+    std::optional<std::array<double, 2>> tileLodOrigin = std::nullopt;
     bool isUpdateSynchronous = false;
     bool captureRenderedFeatures = false;
 };
