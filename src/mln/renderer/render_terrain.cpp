@@ -101,8 +101,14 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // per-tile lookup cannot match, so the mesh renders flat off the placeholder; it also
     // undersamples the DEM, aliasing the relief into waves on the fixed 128x128 mesh. Still the
     // elevation-aware ideal cover from the view, not the DEM's loaded tile set.
+    //
+    // Past the DEM source's maxzoom the cover keeps following the view, as maplibre-gl-js's
+    // TerrainSourceCache does (to z22, clamping only the DEM lookup in getSourceTile): each mesh
+    // tile binds its deepest loaded DEM ancestor and samples its sub-square (see update). Capping
+    // the cover at the DEM's maxzoom held every drape target at that zoom, so a z12 DEM drew
+    // a z15 view from 1024 px targets each covering a z12 tile, and the draped map went soft.
     const uint16_t terrainCoverTileSize = demSource->getTileSize();
-    const Range<uint8_t> zoomRange{0, demSource->getMaxZoom()};
+    const Range<uint8_t> zoomRange{0, util::DEFAULT_MAX_ZOOM};
 
     // LOD parameters from the frame drive the same near-high/far-low zoom
     // selection every other source uses, so the near field drapes at a higher
