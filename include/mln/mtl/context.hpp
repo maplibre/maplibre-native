@@ -103,6 +103,11 @@ public:
 
     gfx::Texture2DPtr createTexture2D() override;
 
+    /// A 1x1 texture for a sampler slot a shader declares but a drawable leaves empty, such as the
+    /// terrain DEM and depth samplers with terrain off (Drawable::bindTextures). Metal's API
+    /// validation aborts on a missing binding; Vulkan and WebGPU bind a dummy the same way.
+    const gfx::Texture2DPtr& getDummyTexture();
+
     gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
 
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type, bool stencil) override;
@@ -175,6 +180,8 @@ private:
     std::optional<BufferResource> tileIndexBuffer;
 
     UniqueVertexBufferResource emptyVertexBuffer;
+
+    gfx::Texture2DPtr dummyTexture;
 
     gfx::ShaderProgramBasePtr clipMaskShader;
     MTLDepthStencilStatePtr clipMaskDepthStencilState;
