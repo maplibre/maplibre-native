@@ -408,7 +408,7 @@ private:
     // The mesh-tile cap now comes from the per-map TerrainLoadMode
     // (TerrainLoadBudget::maxMeshTiles) rather than a single constant, so Quality keeps a long
     // terrain render distance while Balanced/Performance trade it for frame time. See
-    // RenderTerrain::update.
+    // computeMeshCover.
 
     // Cached DEM source
     RenderSource* demSource = nullptr;

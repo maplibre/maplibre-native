@@ -875,9 +875,12 @@ deferred work catches up. Because the trade (initial-load sharpness / a bit of
 progressive fill-in vs smoother interaction) is hardware-dependent, it is a
 per-map API knob, not a style property: `Map::setTerrainLoadMode` /
 `TerrainLoadMode { Quality, Balanced, Performance }` (`include/mln/map/mode.hpp`,
-`terrainLoadBudget()` maps each mode to a budget pair). Default **Quality =
+`terrainLoadBudget()` maps each mode to its budgets). Default **Quality =
 unlimited** = the historical sharp snap-load, so nothing regresses; Balanced =
-32 tiles / 16 drapes per frame, Performance = 8 / 4. Exposed on Android
+32 tiles / 16 drapes per frame, Performance = 8 / 4. The mode also sets the mesh-tile
+cap (`maxMeshTiles`: 64 / 48 / 24) and how deep the mesh goes past a coarse DEM
+(`meshTargetZoom`: z16 / z15 / z14), so it changes the final image too: close-up
+sharpness, and detail in the distance in tilted views. Exposed on Android
 (`MapLibreMap.setTerrainLoadMode`, `TerrainLoadMode` enum). All five "3D Terrain"
 test activities share a `TerrainTestOptions` overflow menu that toggles terrain,
 switches load mode, toggles the built-in rendering-stats HUD (FPS + frame
@@ -1403,7 +1406,7 @@ image, it moves the ground.
 **The cache misses were not evidence about the DEM.** Native's ancestor chain (`6-11-25`,
 `7-23-50`, `8-47-100`, `9-94-200`) is byte-for-byte identical whether the encoding is declared
 correctly or not, so it is not the absurd elevations driving it. It is the structural thing:
-the source declared no `maxzoom`, so `computeMeshCover` runs `zoomRange{0, getMaxZoom()}` and
+the source declared no `maxzoom`, so `computeMeshCover` runs `zoomRange{0, meshMaxZoom(mode, getMaxZoom())}`, which is z22 here, and
 the cover DFS descends from z0. That divergence is still open - it just no longer stops these
 tests from running.
 
@@ -1496,7 +1499,7 @@ is what proves the missing ones are occluded rather than off screen.
        62e1fdc, different mechanism. **Metal-specific; do not chase it in shared code.**
     2. **skirts-auto / skirts-none: genuinely missing fixtures, and the tile set
        differs from gl-js.** Their DEM source has **no `maxzoom`**, so
-       `computeMeshCover`'s `zoomRange{0, demSource->getMaxZoom()}` lets tileCover
+       `computeMeshCover`'s `zoomRange{0, meshMaxZoom(mode, demSource->getMaxZoom())}` (z22 here) lets tileCover
        DFS from z0 and native requests a whole **ancestor pyramid** -
        `terrain/6-11-25`, `7-23-50`, `8-47-100`, `9-94-200/201`, `9-95-200`,
        `10-189-400/403`, `10-190-403`, `10-191-401` - none of which are in

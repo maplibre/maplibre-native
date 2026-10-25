@@ -50,15 +50,23 @@ enum class TileLodMode : uint8_t {
 };
 
 /// Controls progressive loading of 3D-terrain content (draped tiles and drape
-/// re-renders). It trades initial-load sharpness for smoother interaction on weaker
-/// GPUs, so it is a per-map, hardware-driven choice. Default is Quality (no budget),
-/// which preserves the historical sharp snap-load behaviour.
+/// re-renders) and how much terrain mesh a frame may have. It trades initial-load
+/// sharpness for smoother interaction on weaker GPUs, so it is a per-map, hardware-driven
+/// choice. Default is Quality (no per-frame budget), which preserves the historical sharp
+/// snap-load behaviour.
+///
+/// The mode also changes the final image: how deep the terrain mesh goes past a coarse DEM
+/// (TerrainLoadBudget::meshTargetZoom) sets how sharp draped content stays in close-ups, and
+/// how many mesh tiles a frame may have (TerrainLoadBudget::maxMeshTiles) sets how much
+/// detail tilted views keep in the distance.
 enum class TerrainLoadMode : uint8_t {
-    Quality,     ///< No budget: all revealed tiles/drapes build immediately. Sharp, may
-                 ///< stall a frame on big bursts (zoom-in over new coverage). Default.
-    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame.
+    Quality,     ///< No per-frame budget: all revealed tiles/drapes build immediately. Sharp, may
+                 ///< stall a frame on big bursts (zoom-in over new coverage). Mesh to z16 over a
+                 ///< coarser DEM, up to 64 mesh tiles. Default.
+    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame. Mesh to z15, up to
+                 ///< 48 mesh tiles.
     Performance, ///< Cap 8 new-tile builds + 4 drape re-renders per frame; smoothest on
-                 ///< weak GPUs, most progressive fill-in.
+                 ///< weak GPUs, most progressive fill-in. Mesh to z14, up to 24 mesh tiles.
 };
 
 /// Budgets for a TerrainLoadMode. A per-frame value <= 0 means unlimited.
