@@ -106,22 +106,20 @@ void GlyphManager::requestRange(GlyphRequest& request,
 }
 
 void GlyphManager::processResponse(const Response& res, const FontStack& fontStack, const GlyphRange& range) {
-    if (res.error) {
-        observer->onGlyphsError(fontStack, range, std::make_exception_ptr(std::runtime_error(res.error->message)));
-        return;
-    }
-
     if (res.notModified) {
         return;
     }
 
+    std::exception_ptr error;
     {
         std::scoped_lock readWriteLock(rwLock);
 
         Entry& entry = entries[fontStack];
         GlyphRequest& request = entry.ranges[range];
 
-        if (!res.noContent) {
+        if (res.error) {
+            error = std::make_exception_ptr(std::runtime_error(res.error->message));
+        } else if (!res.noContent) {
             std::vector<Glyph> glyphs;
 
             try {
@@ -135,8 +133,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
                     }
                 }
             } catch (...) {
-                observer->onGlyphsError(fontStack, range, std::current_exception());
-                return;
+                error = std::current_exception();
             }
 
             for (auto& glyph : glyphs) {
@@ -148,7 +145,12 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
             }
         }
 
-        request.parsed = true;
+        if (error) {
+            // The waiting requestors get the range's glyphs as missing, and the next one to need it asks again.
+            request.req.reset();
+        } else {
+            request.parsed = true;
+        }
 
         for (auto& pair : request.requestors) {
             GlyphRequestor& requestor = *pair.first;
@@ -161,7 +163,11 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
         request.requestors.clear();
     }
 
-    observer->onGlyphsLoaded(fontStack, range);
+    if (error) {
+        observer->onGlyphsError(fontStack, range, error);
+    } else {
+        observer->onGlyphsLoaded(fontStack, range);
+    }
 }
 
 void GlyphManager::setObserver(GlyphManagerObserver* observer_) {
