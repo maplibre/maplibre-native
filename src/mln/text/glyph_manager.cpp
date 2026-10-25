@@ -80,9 +80,10 @@ void GlyphManager::requestRange(GlyphRequest& request,
                                 const FontStack& fontStack,
                                 const GlyphRange& range,
                                 FileSource& fileSource) {
-    if (request.req) {
+    if (request.req && !request.failed) {
         return;
     }
+    request.failed = false;
     Resource res(Resource::Kind::Unknown, "");
     switch (range.type) {
         case GlyphIDType::FontPBF:
@@ -147,7 +148,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
 
         if (error) {
             // The waiting requestors get the range's glyphs as missing, and the next one to need it asks again.
-            request.req.reset();
+            request.failed = true;
         } else {
             request.parsed = true;
         }

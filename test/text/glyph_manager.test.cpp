@@ -581,6 +581,47 @@ TEST(GlyphManager, ImmediateFileSource) {
              GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å', u' '}}}, .shapes = {}});
 }
 
+TEST(GlyphManager, ImmediateFileSourceFailureRequestsTheRangeAgain) {
+    util::RunLoop loop;
+    StubFileSource fileSource{StubFileSource::ResponseType::Synchronous};
+    StubGlyphManagerObserver observer;
+    StubGlyphRequestor requestor;
+    GlyphManager glyphManager(std::make_unique<StubLocalGlyphRasterizer>());
+    int requests = 0;
+    std::vector<bool> answers;
+
+    Log::setObserver(std::make_unique<Log::NullObserver>());
+
+    observer.glyphsRequested = [&](const FontStack&, const GlyphRange&) {
+        ++requests;
+    };
+
+    fileSource.glyphsResponse = [&](const Resource&) {
+        Response response;
+        if (requests == 1) {
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                               "Failed by the test case");
+        } else {
+            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        }
+        return response;
+    };
+
+    requestor.glyphsAvailable = [&](GlyphMap glyphs) {
+        answers.push_back(glyphs.at(FontStackHasher()({{"Test Stack"}})).at(u'a').has_value());
+    };
+
+    glyphManager.setURL("test/fixtures/resources/glyphs.pbf");
+    glyphManager.setObserver(&observer);
+
+    const GlyphDependencies dependencies{.glyphs = {{{{"Test Stack"}}, {u'a'}}}, .shapes = {}};
+    glyphManager.getGlyphs(requestor, dependencies, fileSource);
+    glyphManager.getGlyphs(requestor, dependencies, fileSource);
+
+    EXPECT_EQ(requests, 2);
+    EXPECT_EQ(answers, std::vector<bool>({false, true}));
+}
+
 // Guards against silent drift between allowsFixedWidthGlyphGeneration's range
 // coverage and the precomputed NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK used
 // for offline download progress estimation.
