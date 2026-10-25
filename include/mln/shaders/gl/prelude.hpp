@@ -194,14 +194,14 @@ highp float depth_opacity(vec3 frag, sampler2D depth_texture, highp float depth_
 // Whether a clip-space position is visible in front of the terrain, from the
 // packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
 // Unlike gl-js (global terrain uniforms), the depth sampler and enable flag are
-// passed as arguments. `camera_to_center_distance` is 1.5 x the view height in
-// native's projection, so the near-plane ratio (height / 50) gives a ramp of
-// 500 * height / 50 = 10 * height = 6.67 * camera_to_center_distance.
-float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled, highp float camera_to_center_distance) {
+// passed as arguments. The near-plane ratio (height / 50) gives a ramp of
+// 500 * height / 50 = 10 * height at any field of view; `units_to_pixels_y` is the
+// GlobalPaintParamsUBO's units_to_pixels.y, -/+ height / 2.
+float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled, highp float units_to_pixels_y) {
     if (depth_enabled == 0.0) {
         return 1.0;
     }
-    highp float depth_ramp = 6.67 * camera_to_center_distance;
+    highp float depth_ramp = 20.0 * abs(units_to_pixels_y);
     vec3 frag = pos.xyz / pos.w;
     highp float d = depth_opacity(frag, depth_texture, depth_ramp);
     if (d > 0.95) {

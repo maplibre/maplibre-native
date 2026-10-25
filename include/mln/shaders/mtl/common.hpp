@@ -142,18 +142,18 @@ inline float depth_opacity(float3 frag,
 // packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
 // Unlike gl-js (global terrain uniforms), the depth texture and enable flag are
 // passed as arguments.
-// `camera_to_center_distance` (GlobalPaintParamsUBO) is 1.5 x the view height in
-// native's projection, so the near-plane ratio (height / 50) / 1 gives a ramp of
-// 500 * height / 50 = 10 * height = 6.67 * camera_to_center_distance.
+// The near-plane ratio (height / 50) / 1 gives a ramp of 500 * height / 50 = 10 * height
+// at any field of view; `units_to_pixels_y` is GlobalPaintParamsUBO.units_to_pixels.y,
+// -/+ height / 2.
 inline float calculate_visibility(float4 pos,
                                   texture2d<float, access::sample> depth_texture,
                                   sampler depth_sampler,
                                   float depth_enabled,
-                                  float camera_to_center_distance) {
+                                  float units_to_pixels_y) {
     if (depth_enabled == 0.0) {
         return 1.0;
     }
-    const float depth_ramp = 6.67 * camera_to_center_distance;
+    const float depth_ramp = 20.0 * abs(units_to_pixels_y);
     const float3 frag = pos.xyz / pos.w;
     // check if coordinate is fully visible
     const float d = depth_opacity(frag, depth_texture, depth_sampler, depth_ramp);
@@ -359,6 +359,5 @@ enum {
 };
 
 )";
-
 }
 } // namespace mln
