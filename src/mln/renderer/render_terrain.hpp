@@ -90,6 +90,13 @@ public:
         return static_cast<uint8_t>(demMaxZoom + levels);
     }
 
+    /// {scale, x offset, y offset} mapping a position in `tile` (0..EXTENT) into normalized
+    /// coordinates (0..1) of `demTile`, the tile itself or an ancestor: u = x * scale + x offset.
+    /// A tile past the DEM's maxzoom, or still waiting for its own DEM, takes the sub-square of
+    /// an ancestor this way; it is the start of the demCoords the terrain mesh and the elevated
+    /// layers hand to get_elevation().
+    static std::array<float, 3> demTileMapping(const CanonicalTileID& tile, const CanonicalTileID& demTile);
+
     /// The point the mesh-tile cap measures distance from, in normalized web-mercator [0, 1]:
     /// the ground under the camera (the map centre when the map is not tilted).
     static std::array<double, 2> meshTileCapOrigin(const TransformState& state);

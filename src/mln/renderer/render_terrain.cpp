@@ -202,6 +202,11 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     return out;
 }
 
+std::array<float, 3> RenderTerrain::demTileMapping(const CanonicalTileID& tile, const CanonicalTileID& demTile) {
+    const auto off = demSubTileOffset(tile, demTile);
+    return {{1.0f / (util::EXTENT * off.scale), off.dx / off.scale, off.dy / off.scale}};
+}
+
 std::array<double, 2> RenderTerrain::meshTileCapOrigin(const TransformState& state) {
     // The ground under the camera in normalized web-mercator [0,1] (standard projection): the
     // map centre, moved back along the view by the camera's horizontal distance from it.
@@ -527,11 +532,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 ancestorEntry->lastUsed = demUpdateCounter;
                 demTier = 1;
                 demTileUsed = ancestorID;
-                const auto off = demSubTileOffset(unwrapped.canonical, ancestorID->canonical);
-                demCoords = {{1.0f / (util::EXTENT * off.scale),
-                              off.dx / off.scale,
-                              off.dy / off.scale,
-                              static_cast<float>(demDim)}};
+                const auto mapping = demTileMapping(unwrapped.canonical, ancestorID->canonical);
+                demCoords = {{mapping[0], mapping[1], mapping[2], static_cast<float>(demDim)}};
             }
         }
 
@@ -830,11 +832,11 @@ std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const Un
 
     // Map tile-local coordinates (0..EXTENT) of the requested tile into
     // normalized coordinates (0..1) of the (possibly ancestor) DEM tile
-    const auto off = demSubTileOffset(tileID.canonical, demTileID->canonical);
+    const auto mapping = demTileMapping(tileID.canonical, demTileID->canonical);
 
     return TerrainData{
         .demTexture = entry->texture,
-        .demCoords = {{1.0f / (util::EXTENT * off.scale), off.dx / off.scale, off.dy / off.scale, 0.0f}},
+        .demCoords = {{mapping[0], mapping[1], mapping[2], 0.0f}},
         .demDim = static_cast<float>(entry->dim),
     };
 }

@@ -4,6 +4,7 @@
 #include <mln/map/transform.hpp>
 #include <mln/renderer/render_terrain.hpp>
 #include <mln/tile/tile_id.hpp>
+#include <mln/util/constants.hpp>
 
 #include <algorithm>
 #include <set>
@@ -217,4 +218,39 @@ TEST(TerrainMeshCover, CoarseningHandlesTilesWithoutTheirSiblings) {
     const auto coarse = RenderTerrain::coarsenFarMeshTiles(original, 2, 1, northWestCorner);
     EXPECT_EQ((std::set<UnwrappedTileID>{tile(2, 0, 0), tile(1, 1, 1)}), coarse);
     EXPECT_TRUE(coversAll(coarse, original));
+}
+
+namespace {
+// Where the DEM mapping puts a tile-local position, in the DEM tile's normalized coordinates.
+std::array<float, 2> inDEM(const std::array<float, 3>& mapping, float x, float y) {
+    return {{x * mapping[0] + mapping[1], y * mapping[0] + mapping[2]}};
+}
+} // namespace
+
+TEST(TerrainMeshCover, ATileMapsOntoItsOwnDEMWhole) {
+    const CanonicalTileID tile(12, 2200, 1400);
+    const auto mapping = RenderTerrain::demTileMapping(tile, tile);
+    EXPECT_EQ((std::array<float, 2>{{0.0f, 0.0f}}), inDEM(mapping, 0, 0));
+    EXPECT_EQ((std::array<float, 2>{{1.0f, 1.0f}}), inDEM(mapping, util::EXTENT, util::EXTENT));
+}
+
+TEST(TerrainMeshCover, TilesPastTheDEMMapOntoTheirSubSquareOfTheAncestor) {
+    // A mesh three levels past a z12 DEM: every descendant one to three levels down maps exactly
+    // onto its own sub-square of the z12 tile, so neighbours meet without gaps or overlap.
+    const CanonicalTileID dem(12, 2200, 1400);
+    for (uint8_t depth = 1; depth <= 3; ++depth) {
+        const uint32_t n = 1u << depth;
+        for (uint32_t cy = 0; cy < n; ++cy) {
+            for (uint32_t cx = 0; cx < n; ++cx) {
+                const CanonicalTileID tile(12 + depth, (dem.x << depth) + cx, (dem.y << depth) + cy);
+                const auto mapping = RenderTerrain::demTileMapping(tile, dem);
+                const float side = 1.0f / static_cast<float>(n);
+                EXPECT_EQ((std::array<float, 2>{{cx * side, cy * side}}), inDEM(mapping, 0, 0))
+                    << "depth " << int(depth) << ", child " << cx << "," << cy;
+                EXPECT_EQ((std::array<float, 2>{{(cx + 1) * side, (cy + 1) * side}}),
+                          inDEM(mapping, util::EXTENT, util::EXTENT))
+                    << "depth " << int(depth) << ", child " << cx << "," << cy;
+            }
+        }
+    }
 }
