@@ -83,7 +83,15 @@ std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string&
            parameters. Since style.json can contain TileJSON parameter overrides or non-TileJSON spec parameters, a
            separate mechanism is needed. Ideally these two pathways share parsing logic.
     */
-    auto options = convert<SourceOptions>(value, error);
+    // An invalid `encoding`, `minzoom` or `maxzoom` rejects the source, as for vector sources:
+    // building it without the options decoded a terrarium DEM as Mapbox, with wrong heights and
+    // nothing logged. No options at all is not an error.
+    Error optionsError;
+    auto options = convert<SourceOptions>(value, optionsError);
+    if (!options && !optionsError.message.empty()) {
+        error = std::move(optionsError);
+        return std::nullopt;
+    }
 
     return {std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize, options)};
 }

@@ -1,7 +1,9 @@
 #include <mln/test/util.hpp>
 
 #include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/source.hpp>
 #include <mln/style/conversion/source_options.hpp>
+#include <mln/style/sources/raster_dem_source.hpp>
 #include <mln/util/tileset.hpp>
 
 #include <mln/util/logging.hpp>
@@ -117,4 +119,36 @@ TEST(SourceOptions, ZoomOutOfRange) {
     ASSERT_EQ(0, error.message.find("invalid minzoom"));
     ASSERT_FALSE(convertJSON<SourceOptions>(R"JSON({ "maxzoom": 300 })JSON", error));
     ASSERT_EQ(0, error.message.find("invalid maxzoom"));
+}
+
+// Through the style's source conversion: an invalid inline zoom rejects a raster-dem source instead
+// of building it without its options, which decoded a terrarium DEM as Mapbox with nothing logged.
+TEST(SourceOptions, RasterDEMSourceWithAnInvalidZoomIsRejected) {
+    Error error;
+    const auto source = convertJSON<std::unique_ptr<Source>>(
+        R"JSON({ "type": "raster-dem", "url": "mbtiles://dem", "encoding": "terrarium", "maxzoom": "16" })JSON",
+        error,
+        "dem");
+    ASSERT_FALSE(source);
+    ASSERT_EQ(0, error.message.find("invalid maxzoom"));
+}
+
+// An unknown encoding rejected the options the same way, and the source silently fell back to Mapbox.
+TEST(SourceOptions, RasterDEMSourceWithAnInvalidEncodingIsRejected) {
+    Error error;
+    const auto source = convertJSON<std::unique_ptr<Source>>(
+        R"JSON({ "type": "raster-dem", "url": "mbtiles://dem", "encoding": "terarium" })JSON", error, "dem");
+    ASSERT_FALSE(source);
+    ASSERT_EQ(0, error.message.find("invalid encoding"));
+}
+
+// Valid options, or none at all, still build the source.
+TEST(SourceOptions, RasterDEMSourceWithValidOrNoOptions) {
+    Error error;
+    ASSERT_TRUE(convertJSON<std::unique_ptr<Source>>(
+        R"JSON({ "type": "raster-dem", "url": "mbtiles://dem", "encoding": "terrarium", "maxzoom": 16 })JSON",
+        error,
+        "dem"));
+    ASSERT_TRUE(convertJSON<std::unique_ptr<Source>>(
+        R"JSON({ "type": "raster-dem", "url": "mbtiles://dem" })JSON", error, "dem"));
 }
