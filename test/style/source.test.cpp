@@ -696,6 +696,33 @@ TEST(Source, RasterDEMInlineZoomOverridesTileJSON) {
     test.run();
 }
 
+TEST(Source, RasterInlineZoomOverridesTileJSON) {
+    SourceTest test;
+
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
+        EXPECT_EQ("url", resource.url);
+        Response response;
+        response.data = std::make_unique<std::string>(
+            R"TILEJSON({ "tilejson": "2.1.0", "tiles": [ "tiles" ], "minzoom": 4, "maxzoom": 12 })TILEJSON");
+        return response;
+    };
+
+    test.styleObserver.sourceLoaded = [&](Source& source) {
+        const auto& tileset = static_cast<const TileSource::Impl&>(*source.baseImpl).tileset;
+        ASSERT_TRUE(tileset);
+        // The inline maxzoom wins; minzoom was not given inline, so the TileJSON's is kept.
+        EXPECT_EQ(4, tileset->zoomRange.min);
+        EXPECT_EQ(16, tileset->zoomRange.max);
+        test.end();
+    };
+
+    RasterSource source("source", "url", 512, SourceType::Raster, std::nullopt, 16);
+    source.setObserver(&test.styleObserver);
+    source.loadDescription(*test.fileSource);
+
+    test.run();
+}
+
 TEST(Source, RasterDEMTileJSONZoomKeptWithoutInlineOverride) {
     SourceTest test;
 

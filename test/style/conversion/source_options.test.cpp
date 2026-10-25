@@ -152,3 +152,13 @@ TEST(SourceOptions, RasterDEMSourceWithValidOrNoOptions) {
     ASSERT_TRUE(convertJSON<std::unique_ptr<Source>>(
         R"JSON({ "type": "raster-dem", "url": "mbtiles://dem" })JSON", error, "dem"));
 }
+
+// A raster source takes inline zooms too, and rejects an invalid one, as vector sources do.
+TEST(SourceOptions, RasterSourceZooms) {
+    Error error;
+    ASSERT_TRUE(convertJSON<std::unique_ptr<Source>>(
+        R"JSON({ "type": "raster", "url": "mbtiles://imagery", "minzoom": 2, "maxzoom": 18 })JSON", error, "imagery"));
+    ASSERT_FALSE(convertJSON<std::unique_ptr<Source>>(
+        R"JSON({ "type": "raster", "url": "mbtiles://imagery", "minzoom": "low" })JSON", error, "imagery"));
+    ASSERT_EQ(0, error.message.find("invalid minzoom"));
+}

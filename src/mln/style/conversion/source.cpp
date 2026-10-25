@@ -56,7 +56,23 @@ std::optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id
         tileSize = static_cast<uint16_t>(*size);
     }
 
-    return {std::make_unique<RasterSource>(id, std::move(*urlOrTileset), tileSize)};
+    // Inline zooms win over the TileJSON's (RasterSource::setTilesetOverrides); an invalid one
+    // rejects the source, as for vector sources
+    std::optional<uint8_t> zooms[2];
+    const char* const zoomNames[2] = {"minzoom", "maxzoom"};
+    for (int i = 0; i < 2; ++i) {
+        if (const auto zoomValue = objectMember(value, zoomNames[i])) {
+            const std::optional<float> zoom = toNumber(*zoomValue);
+            if (!zoom || *zoom < 0 || *zoom > std::numeric_limits<uint8_t>::max()) {
+                error.message = std::string("invalid ") + zoomNames[i];
+                return std::nullopt;
+            }
+            zooms[i] = static_cast<uint8_t>(*zoom);
+        }
+    }
+
+    return {
+        std::make_unique<RasterSource>(id, std::move(*urlOrTileset), tileSize, SourceType::Raster, zooms[0], zooms[1])};
 }
 
 std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string& id,
