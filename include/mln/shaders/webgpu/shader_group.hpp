@@ -67,19 +67,26 @@ public:
             constexpr auto featureIndexSlot = shaders::featureIndexAttributeId<ShaderID>();
             [[maybe_unused]] bool useFeatureIndex = false;
             if constexpr (featureIndexSlot.has_value()) {
-                useFeatureIndex = defineFeatureIndex(
-                    shaders::featureAttributeIds<ShaderID>(), propertiesAsUniforms, additionalDefines);
+                constexpr auto attributes = shaders::featureAttributes<ShaderID>();
+                useFeatureIndex = defineFeatureIndex(attributes, propertiesAsUniforms, additionalDefines);
+            }
+
+            std::string featureConstants;
+            if (useFeatureIndex) {
+                constexpr auto attributes = shaders::featureAttributes<ShaderID>();
+                featureConstants = shaders::featureLayoutSource(
+                    shaders::featureLayout(attributes, propertiesAsUniforms.second));
             }
 
             std::string vertexSource;
             std::string fragmentSource;
 
             if constexpr (requires { ShaderSource::prelude; }) {
-                vertexSource = std::string(ShaderSource::prelude) + vert;
-                fragmentSource = std::string(ShaderSource::prelude) + frag;
+                vertexSource = featureConstants + std::string(ShaderSource::prelude) + vert;
+                fragmentSource = featureConstants + std::string(ShaderSource::prelude) + frag;
             } else {
-                vertexSource = vert;
-                fragmentSource = frag;
+                vertexSource = featureConstants + vert;
+                fragmentSource = featureConstants + frag;
             }
 
             std::unordered_map<std::string, bool> defineSet;

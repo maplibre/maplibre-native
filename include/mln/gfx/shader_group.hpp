@@ -13,17 +13,15 @@ namespace mln {
 
 using StringIDSetsPair = std::pair<unordered_set<std::string_view>, unordered_set<size_t>>;
 
-/// Define MLN_FEATURE_INDEX when any attribute in `attributeIds` is data-driven.
+/// Define MLN_FEATURE_INDEX when any catalog attribute is data-driven.
 /// Pass the paint attributes this shader samples. A constant property's id stays
 /// in the uniform set, including the id shared with the per-vertex feature index,
 /// so a variant declares the feature binding only when it reads that table.
 /// @return True if the define was added.
-template <typename AttributeIds, typename Defines>
-bool defineFeatureIndex(const AttributeIds& attributeIds,
-                        const StringIDSetsPair& propertiesAsUniforms,
-                        Defines& defines) {
-    for (const auto id : attributeIds) {
-        if (!propertiesAsUniforms.second.contains(static_cast<std::size_t>(id))) {
+template <typename Catalog, typename Defines>
+bool defineFeatureIndex(const Catalog& catalog, const StringIDSetsPair& propertiesAsUniforms, Defines& defines) {
+    for (const auto& attribute : catalog) {
+        if (!propertiesAsUniforms.second.contains(attribute.id)) {
             defines.insert(std::make_pair(std::string("MLN_FEATURE_INDEX"), std::string()));
             return true;
         }

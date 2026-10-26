@@ -8,6 +8,7 @@
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_tile.hpp>
+#include <mln/shaders/feature_index.hpp>
 #include <mln/shaders/line_layer_ubo.hpp>
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/layers/line_layer_properties.hpp>
@@ -16,6 +17,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <vector>
 
 #if MLN_RENDER_BACKEND_METAL
@@ -27,63 +29,6 @@ namespace mln {
 #if MLN_UBO_CONSOLIDATION
 namespace {
 
-template <typename Binder>
-const std::vector<std::array<float, 4>>* featureValueTable(const Binder& binder) {
-    return binder ? &binder->featureValues() : nullptr;
-}
-
-std::size_t featureTableSize(const std::vector<std::array<float, 4>>* values) {
-    return values ? values->size() : 0;
-}
-
-template <std::size_t N>
-void assignFloats(std::array<float, N>& dst,
-                  const std::vector<std::array<float, 4>>* values,
-                  std::size_t featureIndex) {
-    static_assert(N > 0 && N <= 4);
-    if (values && featureIndex < values->size()) {
-        std::copy_n((*values)[featureIndex].begin(), N, dst.begin());
-    }
-}
-
-struct LineFeatureSources {
-    const std::vector<std::array<float, 4>>* color = nullptr;
-    const std::vector<std::array<float, 4>>* blur = nullptr;
-    const std::vector<std::array<float, 4>>* opacity = nullptr;
-    const std::vector<std::array<float, 4>>* gapwidth = nullptr;
-    const std::vector<std::array<float, 4>>* offset = nullptr;
-    const std::vector<std::array<float, 4>>* width = nullptr;
-    const std::vector<std::array<float, 4>>* floorwidth = nullptr;
-    const std::vector<std::array<float, 4>>* patternFrom = nullptr;
-    const std::vector<std::array<float, 4>>* patternTo = nullptr;
-    std::size_t count = 0;
-};
-
-LineFeatureSources lineFeatureSources(const LineBinders& binders) {
-    LineFeatureSources sources;
-    sources.color = featureValueTable(binders.get<style::LineColor>());
-    sources.blur = featureValueTable(binders.get<style::LineBlur>());
-    sources.opacity = featureValueTable(binders.get<style::LineOpacity>());
-    sources.gapwidth = featureValueTable(binders.get<style::LineGapWidth>());
-    sources.offset = featureValueTable(binders.get<style::LineOffset>());
-    sources.width = featureValueTable(binders.get<style::LineWidth>());
-    sources.floorwidth = featureValueTable(binders.get<style::LineFloorWidth>());
-    const auto& patternBinder = binders.get<style::LinePattern>();
-    sources.patternTo = featureValueTable(patternBinder);
-    sources.patternFrom = patternBinder ? &patternBinder->featurePatterns() : nullptr;
-    const std::array tables{sources.color,
-                            sources.blur,
-                            sources.opacity,
-                            sources.gapwidth,
-                            sources.offset,
-                            sources.width,
-                            sources.floorwidth,
-                            sources.patternTo,
-                            sources.patternFrom};
-    sources.count = featureTableSize(std::ranges::max(tables, {}, featureTableSize));
-    return sources;
-}
-
 // `update` cannot shrink. Recreate when the live set does not fit, or once it drops to
 // half the allocation, so a dense view does not pin the high-water mark. Spare of 256
 // bytes is alignment padding (WebGPU rounds storage allocations up to that).
@@ -92,23 +37,33 @@ bool needNewBuffer(std::size_t capacity, std::size_t bytes) {
     return (capacity < bytes) || (capacity > alignmentSlack && (capacity - alignmentSlack) / 2 > bytes);
 }
 
-void packFeatureRecords(LineBinders& binders, const LineFeatureSources& sources) {
-    auto& records = binders.getFeatureRecords();
-    records.resize(sources.count);
-    for (std::size_t featureIndex = 0; featureIndex < sources.count; ++featureIndex) {
-        auto& record = records[featureIndex];
-        record = {};
-        assignFloats(record.color, sources.color, featureIndex);
-        assignFloats(record.blur, sources.blur, featureIndex);
-        assignFloats(record.opacity, sources.opacity, featureIndex);
-        assignFloats(record.gapwidth, sources.gapwidth, featureIndex);
-        assignFloats(record.offset, sources.offset, featureIndex);
-        assignFloats(record.width, sources.width, featureIndex);
-        assignFloats(record.floorwidth, sources.floorwidth, featureIndex);
-        assignFloats(record.pattern_from, sources.patternFrom, featureIndex);
-        assignFloats(record.pattern_to, sources.patternTo, featureIndex);
+template <typename Function>
+auto withLineFeatureCatalog(LineLayerTweaker::LineType lineType, Function&& function) {
+    switch (lineType) {
+        case LineLayerTweaker::LineType::Simple:
+            return function(shaders::featureAttributes<shaders::BuiltIn::LineShader>());
+        case LineLayerTweaker::LineType::Gradient:
+            return function(shaders::featureAttributes<shaders::BuiltIn::LineGradientShader>());
+        case LineLayerTweaker::LineType::Pattern:
+            return function(shaders::featureAttributes<shaders::BuiltIn::LinePatternShader>());
+        case LineLayerTweaker::LineType::SDF:
+            return function(shaders::featureAttributes<shaders::BuiltIn::LineSDFShader>());
+        case LineLayerTweaker::LineType::GradientSDF:
+            return function(shaders::featureAttributes<shaders::BuiltIn::LineGradientSDFShader>());
     }
-    binders.clearFeatureRecordsDirty();
+    assert(false);
+    return function(shaders::featureAttributes<shaders::BuiltIn::LineShader>());
+}
+
+std::size_t lineFeatureCount(const LineBinders& binders, LineLayerTweaker::LineType lineType) {
+    return withLineFeatureCatalog(lineType, [&](const auto& catalog) { return binders.featureCount(catalog); });
+}
+
+void packLineFeatureRecords(LineBinders& binders, LineLayerTweaker::LineType lineType) {
+    if (!binders.geFeatureRecordsDirty() && !binders.getFeatureRecords().empty()) {
+        return;
+    }
+    withLineFeatureCatalog(lineType, [&](const auto& catalog) { binders.packFeatureRecords(catalog); });
 }
 
 } // namespace
@@ -299,6 +254,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     struct LiveBinder {
         util::SimpleIdentity bucketId;
         LineBinders* binders = nullptr;
+        LineType lineType = LineType::Simple;
     };
     std::vector<LiveBinder> liveBinders;
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -315,8 +271,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         const auto patternPosB = tile->getPattern(linePatternValue.to.id());
         binders->setPatternParameters(patternPosA, patternPosB, crossfade);
 
-        const auto sources = lineFeatureSources(*binders);
-        if (sources.count == 0) {
+        const auto lineType = static_cast<LineType>(drawable.getType());
+        if (lineFeatureCount(*binders, lineType) == 0) {
             binders->setFeatureBase(0);
             return;
         }
@@ -324,7 +280,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         const auto alreadySeen = std::find_if(
             liveBinders.begin(), liveBinders.end(), [&](const LiveBinder& live) { return live.bucketId == bucketId; });
         if (alreadySeen == liveBinders.end()) {
-            liveBinders.push_back({.bucketId = bucketId, .binders = binders});
+            liveBinders.push_back({.bucketId = bucketId, .binders = binders, .lineType = lineType});
         }
     });
 
@@ -344,27 +300,33 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         }
     }
     if (orderChanged || anyDirty || !featureUniformBuffer) {
-        std::vector<LineFeatureUBO> records;
+        std::vector<float> records;
         std::vector<util::SimpleIdentity> binderOrder;
         binderOrder.reserve(liveBinders.size());
+        uint32_t stride = 0;
         uint32_t base = 0;
         for (const LiveBinder& live : liveBinders) {
             auto* binders = live.binders;
-            if (binders->geFeatureRecordsDirty() || binders->getFeatureRecords().empty()) {
-                packFeatureRecords(*binders, lineFeatureSources(*binders));
+            packLineFeatureRecords(*binders, live.lineType);
+            const auto packedStride = binders->getFeatureStride();
+            assert(packedStride > 0);
+            if (stride == 0) {
+                stride = packedStride;
+            } else {
+                assert(stride == packedStride);
             }
             binders->setFeatureBase(base);
             const auto& packed = binders->getFeatureRecords();
             records.insert(records.end(), packed.begin(), packed.end());
-            base += static_cast<uint32_t>(packed.size());
+            base += static_cast<uint32_t>(packed.size() / packedStride);
             binderOrder.push_back(live.bucketId);
         }
         featureBinderOrder = std::move(binderOrder);
 
-        LineFeatureUBO dummyFeature{};
-        const void* featureData = records.empty() ? static_cast<const void*>(&dummyFeature)
+        const std::array<float, 4> dummy{};
+        const void* featureData = records.empty() ? static_cast<const void*>(dummy.data())
                                                   : static_cast<const void*>(records.data());
-        const size_t featureBytes = records.empty() ? sizeof(dummyFeature) : sizeof(LineFeatureUBO) * records.size();
+        const size_t featureBytes = records.empty() ? sizeof(dummy) : records.size() * sizeof(float);
         if (!featureUniformBuffer || needNewBuffer(featureUniformBuffer->getSize(), featureBytes)) {
             featureUniformBuffer = context.createUniformBuffer(featureData, featureBytes, false, true);
         } else {

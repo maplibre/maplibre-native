@@ -65,8 +65,12 @@ public:
             constexpr auto featureIndexSlot = shaders::featureIndexAttributeId<ShaderID>();
             [[maybe_unused]] bool useFeatureIndex = false;
             if constexpr (featureIndexSlot.has_value()) {
-                useFeatureIndex = defineFeatureIndex(
-                    shaders::featureAttributeIds<ShaderID>(), propertiesAsUniforms, additionalDefines);
+                constexpr auto attributes = shaders::featureAttributes<ShaderID>();
+                useFeatureIndex = defineFeatureIndex(attributes, propertiesAsUniforms, additionalDefines);
+                if (useFeatureIndex) {
+                    shaders::defineFeatureConstants(shaders::featureLayout(attributes, propertiesAsUniforms.second),
+                                                    additionalDefines);
+                }
             }
 
             auto& context = static_cast<Context&>(gfxContext);

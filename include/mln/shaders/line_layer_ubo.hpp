@@ -171,21 +171,6 @@ static_assert(sizeof(LineEvaluatedPropsUBO) == 3 * 16);
 
 #if MLN_UBO_CONSOLIDATION
 
-// Per-feature paint property values for lines, referenced per-vertex by the feature index.
-struct alignas(16) LineFeatureUBO {
-    /*  0 */ std::array<float, 4> color;
-    /* 16 */ std::array<float, 2> blur;
-    /* 24 */ std::array<float, 2> opacity;
-    /* 32 */ std::array<float, 2> gapwidth;
-    /* 40 */ std::array<float, 2> offset;
-    /* 48 */ std::array<float, 2> width;
-    /* 56 */ std::array<float, 2> floorwidth;
-    /* 64 */ std::array<float, 4> pattern_from;
-    /* 80 */ std::array<float, 4> pattern_to;
-    /* 96 */
-};
-static_assert(sizeof(LineFeatureUBO) == 96);
-
 union LineDrawableUnionUBO {
     LineDrawableUBO lineDrawableUBO;
     LineGradientDrawableUBO lineGradientDrawableUBO;

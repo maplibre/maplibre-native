@@ -83,6 +83,19 @@ fn get_pattern_pos(pixel_coord_upper: vec2<f32>, pixel_coord_lower: vec2<f32>,
     let offset = gl_mod(offset_b, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
+
+#ifdef MLN_FEATURE_INDEX
+// `MLN_FEATURE_STRIDE` and `MLN_FEATURE_<name>` are variant constants prepended to this
+// shader. The record is a tightly packed float array. Only data-driven fields are present.
+fn featureFloat2(features: ptr<storage, array<f32>, read>, base: u32, index: u32, offset: u32) -> vec2<f32> {
+    let i = (base + index) * MLN_FEATURE_STRIDE + offset;
+    return vec2<f32>((*features)[i], (*features)[i + 1u]);
+}
+fn featureFloat4(features: ptr<storage, array<f32>, read>, base: u32, index: u32, offset: u32) -> vec4<f32> {
+    let i = (base + index) * MLN_FEATURE_STRIDE + offset;
+    return vec4<f32>((*features)[i], (*features)[i + 1u], (*features)[i + 2u], (*features)[i + 3u]);
+}
+#endif
 )";
 };
 

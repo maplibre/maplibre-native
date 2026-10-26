@@ -18,18 +18,6 @@ enum {
     lineUBOCount
 };
 
-struct LineFeature {
-    float4 color;
-    float2 blur;
-    float2 opacity;
-    float2 gapwidth;
-    float2 offset;
-    float2 width;
-    float2 floorwidth;
-    float4 pattern_from;
-    float4 pattern_to;
-};
-static_assert(sizeof(LineFeature) == 96, "LineFeature layout must match LineFeatureUBO");
 
 //
 // Line
@@ -234,36 +222,32 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
 #ifdef MLN_FEATURE_INDEX
-                                device const LineFeature* features [[buffer(idLineFeatureUBO)]],
+                                device const float* features [[buffer(idLineFeatureUBO)]],
 #endif
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                                 device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
     device const LineDrawableUBO& drawable = drawableVector[uboIndex].lineDrawableUBO;
 
-#ifdef MLN_FEATURE_INDEX
-    const device auto& featureValues = features[drawable.feature_base + vertx.feature_index];
-#endif
-
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
     const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2;
 #else
-    const auto gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2;
+    const auto gapwidth = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t) / 2;
 #endif
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
     const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1;
 #else
-    const auto offset   = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1;
+    const auto offset   = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_offset), drawable.offset_t) * -1;
 #endif
 
 #if defined(HAS_UNIFORM_u_width)
     const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
     const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
 #else
-    const auto width    = unpack_mix_float(featureValues.width, drawable.width_t);
+    const auto width    = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -309,13 +293,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .gamma_scale = half(extrude_length_without_perspective / extrude_length_with_perspective),
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color       = unpack_mix_color(featureValues.color, drawable.color_t),
+        .color       = unpack_mix_color(featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_color), drawable.color_t),
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur        = unpack_mix_float(featureValues.blur, drawable.blur_t),
+        .blur        = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_blur), drawable.blur_t),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity     = unpack_mix_float(featureValues.opacity, drawable.opacity_t),
+        .opacity     = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_opacity), drawable.opacity_t),
 #endif
     };
 }
@@ -403,36 +387,32 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
 #ifdef MLN_FEATURE_INDEX
-                                device const LineFeature* features [[buffer(idLineFeatureUBO)]],
+                                device const float* features [[buffer(idLineFeatureUBO)]],
 #endif
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]]) {
 
     device const LineGradientDrawableUBO& drawable = drawableVector[uboIndex].lineGradientDrawableUBO;
 
-#ifdef MLN_FEATURE_INDEX
-    const device auto& featureValues = features[drawable.feature_base + vertx.feature_index];
-#endif
-
 #if !defined(HAS_UNIFORM_u_blur)
-    const auto blur     = unpack_mix_float(featureValues.blur, drawable.blur_t);
+    const auto blur     = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    const auto opacity  = unpack_mix_float(featureValues.opacity,  drawable.opacity_t);
+    const auto opacity  = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_opacity),  drawable.opacity_t);
 #endif
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
 #else
-    const auto gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2;
+    const auto gapwidth = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t) / 2;
 #endif
 #if defined(HAS_UNIFORM_u_offset)
     const auto offset   = props.offset * -1;
 #else
-    const auto offset   = unpack_mix_float(featureValues.offset,   drawable.offset_t) * -1;
+    const auto offset   = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_offset),   drawable.offset_t) * -1;
 #endif
 #if defined(HAS_UNIFORM_u_width)
     const auto width    = props.width;
 #else
-    const auto width    = unpack_mix_float(featureValues.width,    drawable.width_t);
+    const auto width    = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_width),    drawable.width_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -575,43 +555,39 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
 #ifdef MLN_FEATURE_INDEX
-                                device const LineFeature* features [[buffer(idLineFeatureUBO)]],
+                                device const float* features [[buffer(idLineFeatureUBO)]],
 #endif
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                                 device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
     device const LinePatternDrawableUBO& drawable = drawableVector[uboIndex].linePatternDrawableUBO;
 
-#ifdef MLN_FEATURE_INDEX
-    const device auto& featureValues = features[drawable.feature_base + vertx.feature_index];
-#endif
-
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
     const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2;
 #else
-    const auto gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2;
+    const auto gapwidth = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t) / 2;
 #endif
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
     const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1;
 #else
-    const auto offset   = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1;
+    const auto offset   = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_offset), drawable.offset_t) * -1;
 #endif
 
 #if defined(HAS_UNIFORM_u_width)
     const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
     const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
 #else
-    const auto width    = unpack_mix_float(featureValues.width, drawable.width_t);
+    const auto width    = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_floorwidth)
     const auto exprFloorWidth = (props.expressionMask & LineExpressionMask::FloorWidth);
     const auto floorwidth = exprFloorWidth ? expr.floorwidth.eval(paintParams.map_zoom) : props.floorwidth;
 #else
-    const auto floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
+    const auto floorwidth = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -660,16 +636,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .linesofar    = linesofar,
 
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur         = half(unpack_mix_float(featureValues.blur, drawable.blur_t)),
+        .blur         = half(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_blur), drawable.blur_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = half(unpack_mix_float(featureValues.opacity, drawable.opacity_t)),
+        .opacity      = half(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_opacity), drawable.opacity_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_from = featureValues.pattern_from,
+        .pattern_from = featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_pattern_from),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-        .pattern_to   = featureValues.pattern_to,
+        .pattern_to   = featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_pattern_to),
 #endif
         .floorwidth   = floorwidth,
     };
@@ -812,43 +788,39 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
 #ifdef MLN_FEATURE_INDEX
-                                device const LineFeature* features [[buffer(idLineFeatureUBO)]],
+                                device const float* features [[buffer(idLineFeatureUBO)]],
 #endif
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                                 device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
     device const LineSDFDrawableUBO& drawable = drawableVector[uboIndex].lineSDFDrawableUBO;
 
-#ifdef MLN_FEATURE_INDEX
-    const device auto& featureValues = features[drawable.feature_base + vertx.feature_index];
-#endif
-
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
     const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2.0;
 #else
-    const auto gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
+    const auto gapwidth = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t) / 2.0;
 #endif
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
     const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1.0;
 #else
-    const auto offset   = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
+    const auto offset   = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_offset), drawable.offset_t) * -1.0;
 #endif
 
 #if defined(HAS_UNIFORM_u_width)
     const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
     const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
 #else
-    const auto width    = unpack_mix_float(featureValues.width, drawable.width_t);
+    const auto width    = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_floorwidth)
     const auto exprFloorWidth = (props.expressionMask & LineExpressionMask::FloorWidth);
     const auto floorwidth = exprFloorWidth ? expr.floorwidth.eval(paintParams.map_zoom) : props.floorwidth;
 #else
-    const auto floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
+    const auto floorwidth = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -898,13 +870,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex_b        = float2(linesofar * drawable.patternscale_b.x / floorwidth, v_normal.y * drawable.patternscale_b.y + drawable.tex_y_b),
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color        = unpack_mix_color(featureValues.color, drawable.color_t),
+        .color        = unpack_mix_color(featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_color), drawable.color_t),
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur         = unpack_mix_float(featureValues.blur, drawable.blur_t),
+        .blur         = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_blur), drawable.blur_t),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = unpack_mix_float(featureValues.opacity, drawable.opacity_t),
+        .opacity      = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_opacity), drawable.opacity_t),
 #endif
 #if !defined(HAS_UNIFORM_u_floorwidth)
         .floorwidth   = floorwidth,
@@ -1020,43 +992,39 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
 #ifdef MLN_FEATURE_INDEX
-                                device const LineFeature* features [[buffer(idLineFeatureUBO)]],
+                                device const float* features [[buffer(idLineFeatureUBO)]],
 #endif
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                                 device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
     device const LineSDFDrawableUBO& drawable = drawableVector[uboIndex].lineSDFDrawableUBO;
 
-#ifdef MLN_FEATURE_INDEX
-    const device auto& featureValues = features[drawable.feature_base + vertx.feature_index];
-#endif
-
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
     const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2.0;
 #else
-    const auto gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
+    const auto gapwidth = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t) / 2.0;
 #endif
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
     const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1.0;
 #else
-    const auto offset   = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
+    const auto offset   = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_offset), drawable.offset_t) * -1.0;
 #endif
 
 #if defined(HAS_UNIFORM_u_width)
     const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
     const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
 #else
-    const auto width    = unpack_mix_float(featureValues.width, drawable.width_t);
+    const auto width    = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_floorwidth)
     const auto exprFloorWidth = (props.expressionMask & LineExpressionMask::FloorWidth);
     const auto floorwidth = exprFloorWidth ? expr.floorwidth.eval(paintParams.map_zoom) : props.floorwidth;
 #else
-    const auto floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
+    const auto floorwidth = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -1108,10 +1076,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .lineprogress = v_lineprogress,
 
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur         = unpack_mix_float(featureValues.blur, drawable.blur_t),
+        .blur         = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_blur), drawable.blur_t),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = unpack_mix_float(featureValues.opacity, drawable.opacity_t),
+        .opacity      = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_opacity), drawable.opacity_t),
 #endif
 #if !defined(HAS_UNIFORM_u_floorwidth)
         .floorwidth   = floorwidth,

@@ -13,17 +13,6 @@ constexpr auto lineShadePrelude = R"(
 #define idLineFeatureUBO            (idLineTilePropsUBO + 1)
 #define idLineEvaluatedPropsUBO     layerUBOStartId
 
-struct LineFeature {
-    vec4 color;
-    vec2 blur;
-    vec2 opacity;
-    vec2 gapwidth;
-    vec2 offset;
-    vec2 width;
-    vec2 floorwidth;
-    vec4 pattern_from;
-    vec4 pattern_to;
-};
 
 )";
 
@@ -69,8 +58,8 @@ layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buff
 } drawableVector;
 
 #ifdef MLN_FEATURE_INDEX
-layout(std140, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
-    LineFeature features[];
+layout(std430, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
+    float features[];
 } featureData;
 #endif
 
@@ -104,36 +93,32 @@ layout(location = 5) out lowp float frag_opacity;
 
 void main() {
     const LineDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
-#ifdef MLN_FEATURE_INDEX
-    const LineFeature featureValues = featureData.features[drawable.feature_base + in_feature_index];
-#endif
-
 #ifndef HAS_UNIFORM_u_color
-    frag_color = unpack_mix_color(featureValues.color, drawable.color_t);
+    frag_color = unpack_mix_color(featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(featureValues.blur, drawable.blur_t);
+    frag_blur = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(featureValues.opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const lowp float offset = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
+    const lowp float offset = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_offset), drawable.offset_t) * -1.0;
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    mediump float width = unpack_mix_float(featureValues.width, drawable.width_t);
+    mediump float width = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_width), drawable.width_t);
 #else
     mediump float width = props.width;
 #endif
@@ -297,8 +282,8 @@ layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buff
 } drawableVector;
 
 #ifdef MLN_FEATURE_INDEX
-layout(std140, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
-    LineFeature features[];
+layout(std430, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
+    float features[];
 } featureData;
 #endif
 
@@ -329,32 +314,28 @@ layout(location = 5) out lowp float frag_opacity;
 
 void main() {
     const LineGradientDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
-#ifdef MLN_FEATURE_INDEX
-    const LineFeature featureValues = featureData.features[drawable.feature_base + in_feature_index];
-#endif
-
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(featureValues.blur, drawable.blur_t);
+    frag_blur = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(featureValues.opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    mediump float gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
+    mediump float gapwidth = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t) / 2.0;
 #else
     mediump float gapwidth = props.gapwidth / 2.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const lowp float offset = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
+    const lowp float offset = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_offset), drawable.offset_t) * -1.0;
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    mediump float width = unpack_mix_float(featureValues.width, drawable.width_t);
+    mediump float width = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_width), drawable.width_t);
 #else
     mediump float width = props.width;
 #endif
@@ -519,8 +500,8 @@ layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buff
 } drawableVector;
 
 #ifdef MLN_FEATURE_INDEX
-layout(std140, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
-    LineFeature features[];
+layout(std430, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
+    float features[];
 } featureData;
 #endif
 
@@ -561,45 +542,41 @@ layout(location = 8) out mediump float frag_floorwidth;
 
 void main() {
     const LinePatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
-#ifdef MLN_FEATURE_INDEX
-    const LineFeature featureValues = featureData.features[drawable.feature_base + in_feature_index];
-#endif
-
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(featureValues.blur, drawable.blur_t);
+    frag_blur = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(featureValues.opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const lowp float offset = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
+    const lowp float offset = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_offset), drawable.offset_t) * -1.0;
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    mediump float width = unpack_mix_float(featureValues.width, drawable.width_t);
+    mediump float width = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_width), drawable.width_t);
 #else
     mediump float width = props.width;
 #endif
 
 #ifndef HAS_UNIFORM_u_pattern_from
-    frag_pattern_from = featureValues.pattern_from;
+    frag_pattern_from = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_from);
 #endif
 
 #ifndef HAS_UNIFORM_u_pattern_to
-    frag_pattern_to = featureValues.pattern_to;
+    frag_pattern_to = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_to);
 #endif
 #ifndef HAS_UNIFORM_u_floorwidth
-    frag_floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
+    frag_floorwidth = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
 #else
     frag_floorwidth = props.floorwidth;
 #endif
@@ -835,8 +812,8 @@ layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buff
 } drawableVector;
 
 #ifdef MLN_FEATURE_INDEX
-layout(std140, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
-    LineFeature features[];
+layout(std430, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
+    float features[];
 } featureData;
 #endif
 
@@ -876,43 +853,39 @@ layout(location = 8) out mediump float frag_floorwidth;
 
 void main() {
     const LineSDFDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
-#ifdef MLN_FEATURE_INDEX
-    const LineFeature featureValues = featureData.features[drawable.feature_base + in_feature_index];
-#endif
-
 #ifndef HAS_UNIFORM_u_color
-    frag_color = unpack_mix_color(featureValues.color, drawable.color_t);
+    frag_color = unpack_mix_color(featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(featureValues.blur, drawable.blur_t);
+    frag_blur = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(featureValues.opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_floorwidth
-    const float floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
+    const float floorwidth = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
     frag_floorwidth = floorwidth;
 #else
     const float floorwidth = props.floorwidth;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const mediump float offset = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
+    const mediump float offset = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_offset), drawable.offset_t) * -1.0;
 #else
     const mediump float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    const mediump float width = unpack_mix_float(featureValues.width, drawable.width_t);
+    const mediump float width = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_width), drawable.width_t);
 #else
     const mediump float width = props.width;
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif
@@ -1123,8 +1096,8 @@ layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buff
 } drawableVector;
 
 #ifdef MLN_FEATURE_INDEX
-layout(std140, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
-    LineFeature features[];
+layout(std430, set = LAYER_SET_INDEX, binding = idLineFeatureUBO) readonly buffer LineFeatures {
+    float features[];
 } featureData;
 #endif
 
@@ -1161,39 +1134,35 @@ layout(location = 8) out mediump float frag_floorwidth;
 
 void main() {
     const LineSDFDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
-#ifdef MLN_FEATURE_INDEX
-    const LineFeature featureValues = featureData.features[drawable.feature_base + in_feature_index];
-#endif
-
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(featureValues.blur, drawable.blur_t);
+    frag_blur = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(featureValues.opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_floorwidth
-    const float floorwidth = unpack_mix_float(featureValues.floorwidth, drawable.floorwidth_t);
+    const float floorwidth = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
     frag_floorwidth = floorwidth;
 #else
     const float floorwidth = props.floorwidth;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const mediump float offset = unpack_mix_float(featureValues.offset, drawable.offset_t) * -1.0;
+    const mediump float offset = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_offset), drawable.offset_t) * -1.0;
 #else
     const mediump float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    const mediump float width = unpack_mix_float(featureValues.width, drawable.width_t);
+    const mediump float width = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_width), drawable.width_t);
 #else
     const mediump float width = props.width;
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(featureValues.gapwidth, drawable.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif

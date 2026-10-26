@@ -17,10 +17,12 @@
 #include <mln/util/vectors.hpp>
 
 #if MLN_UBO_CONSOLIDATION
-#include <mln/shaders/line_layer_ubo.hpp>
+#include <mln/shaders/feature_index.hpp>
 #endif
 
+#include <algorithm>
 #include <cstring>
+#include <string_view>
 #include <type_traits>
 #include <variant>
 
@@ -1008,6 +1010,7 @@ public:
         featureIndexRequired = other.featureIndexRequired;
         featureSlot = other.featureSlot;
         featureRecords = std::move(other.featureRecords);
+        featureStride = other.featureStride;
         featureBase = other.featureBase;
         featureRecordsDirty = other.featureRecordsDirty;
         patternZoomingIn = other.patternZoomingIn;
@@ -1091,10 +1094,56 @@ public:
 #if MLN_UBO_CONSOLIDATION
     bool geFeatureRecordsDirty() const { return featureRecordsDirty; }
     void clearFeatureRecordsDirty() { featureRecordsDirty = false; }
-    std::vector<shaders::LineFeatureUBO>& getFeatureRecords() { return featureRecords; }
-    const std::vector<shaders::LineFeatureUBO>& getFeatureRecords() const { return featureRecords; }
+    std::vector<float>& getFeatureRecords() { return featureRecords; }
+    const std::vector<float>& getFeatureRecords() const { return featureRecords; }
+    std::uint32_t getFeatureStride() const { return featureStride; }
     uint32_t getFeatureBase() const { return featureBase; }
     void setFeatureBase(uint32_t base) { featureBase = base; }
+
+    /// Number of features that have a value for a data-driven attribute in `catalog`.
+    template <typename Catalog>
+    std::size_t featureCount(const Catalog& catalog) const {
+        std::size_t count = 0;
+        for (const auto& attribute : catalog) {
+            if (!attributeContributes(attribute.name)) {
+                continue;
+            }
+            const auto* table = featureTableFor(attribute.name);
+            count = std::max(count, table ? table->size() : 0);
+        }
+        return count;
+    }
+
+    /// Pack one float record per feature. Constant attributes and attributes the catalog
+    /// does not list are omitted. The first attribute of a property is `featureValues`;
+    /// a second cross-fade attribute is `featurePatterns`.
+    template <typename Catalog>
+    void packFeatureRecords(const Catalog& catalog) {
+        shaders::FeatureLayout layout;
+        std::size_t count = 0;
+        for (const auto& attribute : catalog) {
+            if (!attributeContributes(attribute.name)) {
+                continue;
+            }
+            const auto* table = featureTableFor(attribute.name);
+            count = std::max(count, table ? table->size() : 0);
+            layout.fields.push_back(shaders::FeatureField{.id = attribute.id,
+                                                          .name = attribute.name,
+                                                          .floatCount = attribute.floatCount,
+                                                          .offset = layout.stride});
+            layout.stride += attribute.floatCount;
+        }
+        featureStride = layout.stride;
+        featureRecords = shaders::packFeatureTable(layout, count, [&](std::size_t attributeId) {
+            for (const auto& attribute : catalog) {
+                if (attribute.id == attributeId) {
+                    return featureTableFor(attribute.name);
+                }
+            }
+            return static_cast<const std::vector<std::array<float, 4>>*>(nullptr);
+        });
+        featureRecordsDirty = false;
+    }
 #endif
 
     template <class P>
@@ -1142,10 +1191,59 @@ private:
     gfx::VertexVectorPtr<uint32_t> featureIndexVector;
     bool featureIndexRequired = false;
     std::size_t featureSlot = 0;
-    // Packed per-feature records
-    std::vector<shaders::LineFeatureUBO> featureRecords;
+    // Packed per-feature records. Stride is in floats.
+    std::vector<float> featureRecords;
+    std::uint32_t featureStride = 0;
     // Index of the feature's values within the buffer
     uint32_t featureBase = 0;
+
+    bool attributeContributes(std::string_view attributeName) const {
+        bool contributes = false;
+        (([&] {
+             if constexpr (isFeatureTableProperty<Ps>) {
+                 if (contributes) {
+                     return;
+                 }
+                 const auto& binder = binders.template get<Ps>();
+                 if (!binder || !binder->contributesFeatureIndex()) {
+                     return;
+                 }
+                 for (const auto name : Ps::AttributeNames) {
+                     if (name == attributeName) {
+                         contributes = true;
+                     }
+                 }
+             }
+         }()),
+         ...);
+        return contributes;
+    }
+
+    const std::vector<std::array<float, 4>>* featureTableFor(std::string_view attributeName) const {
+        const std::vector<std::array<float, 4>>* found = nullptr;
+        (([&] {
+             if constexpr (isFeatureTableProperty<Ps>) {
+                 if (found) {
+                     return;
+                 }
+                 const auto& binder = binders.template get<Ps>();
+                 if (!binder) {
+                     return;
+                 }
+                 constexpr auto& names = Ps::AttributeNames;
+                 for (std::size_t index = 0; index < names.size(); ++index) {
+                     if (names[index] != attributeName) {
+                         continue;
+                     }
+                     // The first attribute is the property value. A second attribute is the
+                     // cross-fade partner, stored beside it.
+                     found = index == 0 ? &binder->featureValues() : &binder->featurePatterns();
+                 }
+             }
+         }()),
+         ...);
+        return found;
+    }
     // Feature state or pattern crossfade direction changed
     bool featureRecordsDirty = true;
     // Matches the default crossfade (`fromScale == 0`), which publishes `pattern_from` from `rects.max`.
