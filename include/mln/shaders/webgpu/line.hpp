@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mln/shaders/shader_source.hpp>
-#include <mln/shaders/webgpu/common.hpp>
 #include <mln/shaders/webgpu/shader_program.hpp>
 #include <mln/shaders/line_layer_ubo.hpp>
 
@@ -11,7 +10,6 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineShader";
-    static constexpr auto prelude = ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::WebGPU>::prelude;
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
@@ -108,39 +106,39 @@ fn main(in: VertexInput) -> VertexOutput {
     var color: vec4<f32>;
     color = props.color;
 #ifndef HAS_UNIFORM_u_color
-    color = unpack_mix_color(featureFloat4(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_color), drawable.color_t);
+    color = unpack_mix_color(featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
     var blur: f32;
     blur = props.blur;
 #ifndef HAS_UNIFORM_u_blur
-    blur = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
+    blur = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
     var opacity: f32;
     opacity = props.opacity;
 #ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     var gapwidth: f32;
     gapwidth = props.gapwidth;
 #ifndef HAS_UNIFORM_u_gapwidth
-    gapwidth = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
+    gapwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
 #endif
     gapwidth = gapwidth / 2.0;
 
     var offset: f32;
     offset = props.offset;
 #ifndef HAS_UNIFORM_u_offset
-    offset = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
+    offset = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
 #endif
     offset = -offset;
 
     var width: f32;
     width = props.width;
 #ifndef HAS_UNIFORM_u_width
-    width = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
+    width = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
     let halfwidth = width * 0.5;
@@ -223,7 +221,6 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineGradientShader";
-    static constexpr auto prelude = ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::WebGPU>::prelude;
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
@@ -325,29 +322,29 @@ fn main(in: VertexInput) -> VertexOutput {
     // Unpack attributes using helper functions
     var blur = props.blur;
 #ifndef HAS_UNIFORM_u_blur
-    blur = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
+    blur = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
     var opacity = props.opacity;
 #ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     var gapwidth = props.gapwidth;
 #ifndef HAS_UNIFORM_u_gapwidth
-    gapwidth = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
+    gapwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
 #endif
     gapwidth = gapwidth / 2.0;
 
     var offset = props.offset;
 #ifndef HAS_UNIFORM_u_offset
-    offset = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
+    offset = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
 #endif
     offset = -offset;
 
     var width = props.width;
 #ifndef HAS_UNIFORM_u_width
-    width = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
+    width = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
     let halfwidth = width / 2.0;
@@ -429,7 +426,6 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LinePatternShader";
-    static constexpr auto prelude = ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::WebGPU>::prelude;
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
@@ -550,43 +546,43 @@ fn main(in: VertexInput) -> VertexOutput {
 
     var blur = props.blur;
 #ifndef HAS_UNIFORM_u_blur
-    blur = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
+    blur = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
     var opacity = props.opacity;
 #ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     var gapwidth = props.gapwidth;
 #ifndef HAS_UNIFORM_u_gapwidth
-    gapwidth = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
+    gapwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
 #endif
     gapwidth = gapwidth * 0.5;
 
     var offset = props.offset;
 #ifndef HAS_UNIFORM_u_offset
-    offset = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
+    offset = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
 #endif
     offset = -offset;
 
     var width = props.width;
 #ifndef HAS_UNIFORM_u_width
-    width = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
+    width = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
     var floorwidth = props.floorwidth;
 #ifndef HAS_UNIFORM_u_floorwidth
-    floorwidth = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
+    floorwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
 #endif
 
     var pattern_from = tileProps.pattern_from;
 #ifndef HAS_UNIFORM_u_pattern_from
-    pattern_from = featureFloat4(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_from);
+    pattern_from = featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_from);
 #endif
     var pattern_to = tileProps.pattern_to;
 #ifndef HAS_UNIFORM_u_pattern_to
-    pattern_to = featureFloat4(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_to);
+    pattern_to = featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_to);
 #endif
 
     let halfwidth = width * 0.5;
@@ -740,7 +736,6 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineSDFShader";
-    static constexpr auto prelude = ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::WebGPU>::prelude;
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
@@ -864,39 +859,39 @@ fn main(in: VertexInput) -> VertexOutput {
     // Unpack attributes using helper functions
     var color = props.color;
 #ifndef HAS_UNIFORM_u_color
-    color = unpack_mix_color(featureFloat4(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_color), drawable.color_t);
+    color = unpack_mix_color(featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
     var blur = props.blur;
 #ifndef HAS_UNIFORM_u_blur
-    blur = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
+    blur = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
     var opacity = props.opacity;
 #ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     var gapwidth = props.gapwidth;
 #ifndef HAS_UNIFORM_u_gapwidth
-    gapwidth = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
+    gapwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
 #endif
     gapwidth = gapwidth / 2.0;
 
     var offset = props.offset;
 #ifndef HAS_UNIFORM_u_offset
-    offset = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
+    offset = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
 #endif
     offset = -offset;
 
     var width = props.width;
 #ifndef HAS_UNIFORM_u_width
-    width = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
+    width = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
     var floorwidth = props.floorwidth;
 #ifndef HAS_UNIFORM_u_floorwidth
-    floorwidth = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
+    floorwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
 #endif
 
     let pixel_ratio = max(paintParams.pixel_ratio, 1e-6);
@@ -1025,7 +1020,6 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineGradientSDFShader";
-    static constexpr auto prelude = ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::WebGPU>::prelude;
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
@@ -1135,34 +1129,34 @@ fn main(in: VertexInput) -> VertexOutput {
     // Unpack attributes using helper functions
     var blur = props.blur;
 #ifndef HAS_UNIFORM_u_blur
-    blur = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
+    blur = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
     var opacity = props.opacity;
 #ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     var gapwidth = props.gapwidth;
 #ifndef HAS_UNIFORM_u_gapwidth
-    gapwidth = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
+    gapwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
 #endif
     gapwidth = gapwidth / 2.0;
 
     var offset = props.offset;
 #ifndef HAS_UNIFORM_u_offset
-    offset = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
+    offset = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
 #endif
     offset = -offset;
 
     var width = props.width;
 #ifndef HAS_UNIFORM_u_width
-    width = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
+    width = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
     var floorwidth = props.floorwidth;
 #ifndef HAS_UNIFORM_u_floorwidth
-    floorwidth = unpack_mix_float(featureFloat2(&features, drawable.feature_base, in.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
+    floorwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
 #endif
 
     let pixel_ratio = max(paintParams.pixel_ratio, 1e-6);

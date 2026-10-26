@@ -143,6 +143,23 @@ inline std::string featureLayoutSource(const FeatureLayout& layout) {
     return source.str();
 }
 
+/// WGSL loaders for a feature table. Append these after the shader, which declares
+/// `var<storage, read> features`. A storage pointer is not a legal function parameter,
+/// and the shared prelude is concatenated after preprocessing, so it cannot contain
+/// `#ifdef` or these functions.
+inline std::string featureLoadSource() {
+    return R"(
+fn featureFloat2(base: u32, index: u32, offset: u32) -> vec2<f32> {
+    let i = (base + index) * MLN_FEATURE_STRIDE + offset;
+    return vec2<f32>(features[i], features[i + 1u]);
+}
+fn featureFloat4(base: u32, index: u32, offset: u32) -> vec4<f32> {
+    let i = (base + index) * MLN_FEATURE_STRIDE + offset;
+    return vec4<f32>(features[i], features[i + 1u], features[i + 2u], features[i + 3u]);
+}
+)";
+}
+
 template <typename Defines>
 void defineFeatureConstants(const FeatureLayout& layout, Defines& defines) {
     defines.insert(std::make_pair("MLN_FEATURE_STRIDE", std::to_string(layout.stride)));

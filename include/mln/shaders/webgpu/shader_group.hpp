@@ -100,6 +100,11 @@ public:
 
             vertexSource = detail::preprocessWGSL(vertexSource, defineSet);
             fragmentSource = detail::preprocessWGSL(fragmentSource, defineSet);
+            if (useFeatureIndex) {
+                // The binding is declared in the vertex shader. Loaders go after it.
+                // The fragment stage does not declare `features`.
+                vertexSource += shaders::featureLoadSource();
+            }
 
             auto& context = static_cast<Context&>(gfxContext);
             if constexpr (featureIndexSlot.has_value()) {

@@ -66,6 +66,7 @@ TEST(FeatureTable, SkipsUniformField) {
     EXPECT_NE(source.find("const MLN_FEATURE_color: u32 = 0u;"), std::string::npos);
     EXPECT_NE(source.find("const MLN_FEATURE_width: u32 = 4u;"), std::string::npos);
     EXPECT_EQ(source.find("MLN_FEATURE_opacity"), std::string::npos);
+    EXPECT_EQ(featureLoadSource().find('#'), std::string::npos);
 }
 
 TEST(FeatureTable, PacksWideFieldBeforeScalar) {
