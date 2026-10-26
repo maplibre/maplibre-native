@@ -73,12 +73,6 @@ void FillBucket::generateBuffers(const GeometryCollection& geometry) {
     if (roundedCornerEnabled && triangles.empty()) {
         triangles.emplace_back(0, 1, 2);
     }
-    if (!roundedCornerEnabled && neighbors.empty()) {
-        neighbors.emplace_back(FillBucket::neighborVertex(0, 0));
-    }
-    if (!roundedCornerEnabled && triangleInstances.empty()) {
-        triangleInstances.emplace_back(FillBucket::triangleInstance(0, false, false, 0, false, false, 0, false, false));
-    }
 }
 
 void FillBucket::populateBinders(const GeometryTileFeature& feature,

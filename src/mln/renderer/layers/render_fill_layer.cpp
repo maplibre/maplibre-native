@@ -46,6 +46,9 @@ constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 constexpr auto FillOutlineTriangulatedShaderName = "FillOutlineTriangulatedShader";
 #endif
 
+constexpr auto neighborVertexUniformName = "neighbor_vertex";
+constexpr auto triangleInstanceUniformName = "triangle_instance";
+
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == FillLayer::Impl::staticTypeInfo());
     return static_cast<const FillLayer::Impl&>(*impl);
@@ -357,25 +360,29 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::AttributeDataType::Short2);
         }
 
-        if (const auto& attr = vertexAttrs->set(idFillPrevNextVertexAttribute)) {
-            attr->setSharedRawData(bucket.sharedNeighbors,
-                                   offsetof(FillNeighborVertex, a1),
-                                   /*vertexOffset=*/0,
-                                   sizeof(FillNeighborVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-
         auto instanceAttrs = context.createVertexAttributeArray();
-        if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
-            attr->setSharedRawData(bucket.sharedTriangleInstances,
-                                   offsetof(FillTriangleInstance, a1),
-                                   /*vertexOffset=*/0,
-                                   sizeof(FillTriangleInstance),
-                                   gfx::AttributeDataType::UInt3);
+        if (bucket.isRoundedCornerEnabled()) {
+            if (const auto& attr = vertexAttrs->set(idFillNeighborVertexAttribute)) {
+                attr->setSharedRawData(bucket.sharedNeighbors,
+                                       offsetof(FillNeighborVertex, a1),
+                                       /*vertexOffset=*/0,
+                                       sizeof(FillNeighborVertex),
+                                       gfx::AttributeDataType::Short2);
+            }
+            
+            if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
+                attr->setSharedRawData(bucket.sharedTriangleInstances,
+                                       offsetof(FillTriangleInstance, a1),
+                                       /*vertexOffset=*/0,
+                                       sizeof(FillTriangleInstance),
+                                       gfx::AttributeDataType::UInt3);
+            }
         }
-
-        if (!bucket.isRoundedCornerEnabled()) {
-            propertiesAsUniforms.first.emplace("triangle_instance");
+        else {
+            propertiesAsUniforms.first.emplace(neighborVertexUniformName);
+            propertiesAsUniforms.second.emplace(idFillNeighborVertexAttribute);
+            
+            propertiesAsUniforms.first.emplace(triangleInstanceUniformName);
             propertiesAsUniforms.second.emplace(idFillTriangleInstanceAttribute);
         }
 

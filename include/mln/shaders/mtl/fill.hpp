@@ -150,7 +150,11 @@ union FillTilePropsUnionUBO {
     FillOutlinePatternTilePropsUBO fillOutlinePatternTilePropsUBO;
 };
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if !defined(HAS_UNIFORM_u_neighbor_vertex) && !defined(HAS_UNIFORM_u_triangle_instance)
+#define ROUNDED_CORNER_ENABLED
+#endif
+
+#if defined(ROUNDED_CORNER_ENABLED)
 float sdCircle(float2 p, float r) {
     return length(p) - r;
 }
@@ -284,7 +288,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
     uint3 triangle_indices [[attribute(4)]];
 #endif
 };
@@ -294,7 +298,7 @@ struct PolygonVertex {
 };
 
 struct NeighborVertex {
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
     short prev_offset;
     short next_offset;
 #endif
@@ -321,7 +325,7 @@ struct DataVertex {
 struct FragmentStage {
     float4 position [[position, invariant]];
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
     float2 pos;
 
     float2 v0 [[flat]];
@@ -362,7 +366,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
 
-#if defined(HAS_UNIFORM_u_triangle_instance)
+#if !defined(ROUNDED_CORNER_ENABLED)
     uint index = vertexID;
     float2 position = float2(polygon[index].position);
 #else
@@ -425,7 +429,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position = drawable.matrix * float4(position, 0.0f, 1.0f),
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
         .pos = position,
 
         .v0 = v0,
@@ -474,7 +478,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half opacity = in.opacity;
 #endif
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
     float dTri = -1;
 
     if (in.v0Radius > 0) {
@@ -595,7 +599,7 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
     uint3 triangle_indices [[attribute(6)]];
 #endif
 };
@@ -605,7 +609,7 @@ struct PolygonVertex {
 };
 
 struct NeighborVertex {
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
     short prev_offset;
     short next_offset;
 #endif
@@ -634,7 +638,7 @@ struct FragmentStage {
     float2 v_pos_a;
     float2 v_pos_b;
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
     float2 pos;
 
     float2 v0 [[flat]];
@@ -684,7 +688,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillPatternDrawableUBO& drawable = drawableVector[uboIndex].fillPatternDrawableUBO;
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
 
-#if defined(HAS_UNIFORM_u_triangle_instance)
+#if !defined(ROUNDED_CORNER_ENABLED)
     uint index = vertexID;
     float2 position = float2(polygon[index].position);
 #else
@@ -777,7 +781,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
         .pos = position,
 
         .v0 = v0,
@@ -850,7 +854,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto pattern_to     = float4(in.pattern_to);
 #endif
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
     float dTri = -1;
 
     if (in.v0Radius > 0) {

@@ -12,10 +12,14 @@ constexpr auto fillShaderPrelude = R"(
 #define idFillTilePropsUBO          drawableReservedUBOCount
 #define idFillEvaluatedPropsUBO     layerUBOStartId
 #define idFillPosVertexDrawableUBO        drawableSSBOStartId
-#define idFillPrevNextVertexDrawableUBO   drawableSSBOStartId + 1
+#define idFillNeighborVertexDrawableUBO   drawableSSBOStartId + 1
 #define idFillDataVertexDrawableUBO       drawableSSBOStartId + 2
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if !defined(HAS_UNIFORM_u_neighbor_vertex) && !defined(HAS_UNIFORM_u_triangle_instance)
+#define ROUNDED_CORNER_ENABLED
+#endif
+
+#if defined(ROUNDED_CORNER_ENABLED)
 float sdCircle(vec2 p, float r) {
     return length(p) - r;
 }
@@ -145,7 +149,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
     static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto vertex = R"(
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
 layout(location = 4) in uvec3 in_triangle_indices;
 #endif
 
@@ -176,12 +180,12 @@ layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillPosVertexDrawableUB
     PolygonVertex vertex[];
 } polygonVertexVector;
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
 struct NeighborVertex {
     int prev_next_offset;
 };
 
-layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillPrevNextVertexDrawableUBO) readonly buffer NeighborVertexDrawableUBOVector {
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillNeighborVertexDrawableUBO) readonly buffer NeighborVertexDrawableUBOVector {
     NeighborVertex vertex[];
 } neighborVertexVector;
 #endif
@@ -231,7 +235,7 @@ layout(location = 0) out vec4 frag_color;
 layout(location = 1) out lowp float frag_opacity;
 #endif
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
 struct FragmentData {
     vec2 v0;
     vec2 v1;
@@ -258,7 +262,7 @@ layout(location = 3) flat out FragmentData frag_data;
 void main() {
     const FillDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
-#if defined(HAS_UNIFORM_u_triangle_instance)
+#if !defined(ROUNDED_CORNER_ENABLED)
     uint index = gl_VertexIndex;
     vec2 position = unpack_int(polygonVertexVector.vertex[index].position);
 #else
@@ -361,7 +365,7 @@ layout(location = 0) in vec4 frag_color;
 layout(location = 1) in lowp float frag_opacity;
 #endif
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
 struct FragmentData {
     vec2 v0;
     vec2 v1;
@@ -414,7 +418,7 @@ void main() {
     const float opacity = frag_opacity;
 #endif
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
     float dTri = -1;
 
     if (frag_data.v0Radius > 0) {
@@ -574,7 +578,7 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto vertex = R"(
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
 layout(location = 6) in uvec3 in_triangle_indices;
 #endif
 
@@ -609,12 +613,12 @@ layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillPosVertexDrawableUB
     PolygonVertex vertex[];
 } polygonVertexVector;
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
 struct NeighborVertex {
     int prev_next_offset;
 };
 
-layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillPrevNextVertexDrawableUBO) readonly buffer NeighborVertexDrawableUBOVector {
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillNeighborVertexDrawableUBO) readonly buffer NeighborVertexDrawableUBOVector {
     NeighborVertex vertex[];
 } neighborVertexVector;
 #endif
@@ -687,7 +691,7 @@ layout(location = 4) out mediump vec4 frag_pattern_from;
 layout(location = 5) out mediump vec4 frag_pattern_to;
 #endif
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
 struct FragmentData {
     vec2 v0;
     vec2 v1;
@@ -715,7 +719,7 @@ void main() {
     const FillPatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
     const FillPatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
-#if defined(HAS_UNIFORM_u_triangle_instance)
+#if !defined(ROUNDED_CORNER_ENABLED)
     uint index = gl_VertexIndex;
     vec2 position = unpack_int(polygonVertexVector.vertex[index].position);
 #else
@@ -859,7 +863,7 @@ layout(location = 4) in vec4 frag_pattern_from;
 layout(location = 5) in vec4 frag_pattern_to;
 #endif
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
 struct FragmentData {
     vec2 v0;
     vec2 v1;
@@ -949,7 +953,7 @@ void main() {
     const vec4 pattern_to = frag_pattern_to;
 #endif
 
-#if !defined(HAS_UNIFORM_u_triangle_instance)
+#if defined(ROUNDED_CORNER_ENABLED)
     float dTri = -1;
 
     if (frag_data.v0Radius > 0) {

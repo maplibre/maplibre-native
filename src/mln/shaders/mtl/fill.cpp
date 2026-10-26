@@ -11,13 +11,16 @@ using FillShaderSource = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::M
 
 const std::array<AttributeInfo, 4> FillShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 1, idFillPrevNextVertexAttribute},
+    
+    // Used only in rounded corners
+    AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 1, idFillNeighborVertexAttribute},
 
     // Data driven
     AttributeInfo{2, gfx::AttributeDataType::Float4, fillUBOCount + 2, idFillColorVertexAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Float2, fillUBOCount + 2, idFillOpacityVertexAttribute},
 };
 const std::array<AttributeInfo, 1> FillShaderSource::instanceAttributes = {
+    // Used only in rounded corners
     AttributeInfo{4, gfx::AttributeDataType::UInt3, fillUBOCount + 3, idFillTriangleInstanceAttribute},
 };
 const std::array<TextureInfo, 0> FillShaderSource::textures = {};
@@ -43,7 +46,9 @@ using FillPatternShaderSource = ShaderSource<BuiltIn::FillPatternShader, gfx::Ba
 
 const std::array<AttributeInfo, 6> FillPatternShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 1, idFillPrevNextVertexAttribute},
+    
+    // Used only in rounded corners
+    AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 1, idFillNeighborVertexAttribute},
 
     // Data driven
     AttributeInfo{2, gfx::AttributeDataType::Float4, fillUBOCount + 2, idFillColorVertexAttribute},
@@ -52,6 +57,7 @@ const std::array<AttributeInfo, 6> FillPatternShaderSource::attributes = {
     AttributeInfo{5, gfx::AttributeDataType::UShort4, fillUBOCount + 2, idFillPatternToVertexAttribute},
 };
 const std::array<AttributeInfo, 1> FillPatternShaderSource::instanceAttributes = {
+    // Used only in rounded corners
     AttributeInfo{6, gfx::AttributeDataType::UInt3, fillUBOCount + 3, idFillTriangleInstanceAttribute},
 };
 const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {

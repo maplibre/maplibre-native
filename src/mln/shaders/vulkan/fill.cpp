@@ -13,13 +13,16 @@ using FillShaderSource = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::V
 const std::array<AttributeInfo, 4> FillShaderSource::attributes = {
     // always attributes
     AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute, idFillPosVertexDrawableUBO},
-    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillPrevNextVertexAttribute, idFillPrevNextVertexDrawableUBO},
+
+    // used only in rounded corners
+    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillNeighborVertexAttribute, idFillNeighborVertexDrawableUBO},
 
     // sometimes uniforms
     AttributeInfo{2, gfx::AttributeDataType::Float4, idFillColorVertexAttribute, idFillDataVertexDrawableUBO},
     AttributeInfo{3, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute, idFillDataVertexDrawableUBO},
 };
 const std::array<AttributeInfo, 1> FillShaderSource::instanceAttributes = {
+    // used only in rounded corners
     AttributeInfo{4, gfx::AttributeDataType::UInt3, idFillTriangleInstanceAttribute},
 };
 const std::array<TextureInfo, 0> FillShaderSource::textures = {};
@@ -47,7 +50,9 @@ using FillPatternShaderSource = ShaderSource<BuiltIn::FillPatternShader, gfx::Ba
 const std::array<AttributeInfo, 6> FillPatternShaderSource::attributes = {
     // always attributes
     AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute, idFillPosVertexDrawableUBO},
-    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillPrevNextVertexAttribute, idFillPrevNextVertexDrawableUBO},
+
+    // used only in rounded corners
+    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillNeighborVertexAttribute, idFillNeighborVertexDrawableUBO},
 
     // sometimes uniforms
     AttributeInfo{2, gfx::AttributeDataType::Float4, idFillColorVertexAttribute, idFillDataVertexDrawableUBO},
@@ -56,6 +61,7 @@ const std::array<AttributeInfo, 6> FillPatternShaderSource::attributes = {
     AttributeInfo{5, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute, idFillDataVertexDrawableUBO},
 };
 const std::array<AttributeInfo, 1> FillPatternShaderSource::instanceAttributes = {
+    // used only in rounded corners
     AttributeInfo{6, gfx::AttributeDataType::UInt3, idFillTriangleInstanceAttribute},
 };
 const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {
