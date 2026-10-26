@@ -109,7 +109,7 @@ public:
     std::shared_ptr<const std::string> priorData;
     Duration minimumUpdateInterval{Duration::zero()};
     StoragePolicy storagePolicy{StoragePolicy::Permanent};
-    std::string_view acceptHeader;
+    std::string acceptHeader;
 };
 
 inline bool Resource::hasLoadingMethod(Resource::LoadingMethod method) const {
