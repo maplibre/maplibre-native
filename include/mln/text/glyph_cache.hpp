@@ -4,6 +4,7 @@
 #include <mln/util/immutable.hpp>
 
 #include <cstddef>
+#include <map>
 #include <memory>
 
 namespace mln {
@@ -17,7 +18,12 @@ public:
     GlyphCache(const GlyphCache&) = delete;
     GlyphCache& operator=(const GlyphCache&) = delete;
 
+    using Range = std::map<GlyphID, Immutable<Glyph>>;
+
     Immutable<Glyph> intern(Glyph&&);
+
+    // Ranges are matched by the glyphs they point to: intern the glyphs first.
+    std::shared_ptr<const Range> intern(Range&&);
 
     std::size_t size();
 
