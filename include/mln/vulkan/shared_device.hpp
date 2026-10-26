@@ -23,6 +23,10 @@ public:
     SharedDevice(const SharedDevice&) = delete;
     SharedDevice& operator=(const SharedDevice&) = delete;
 
+    /// The device of the calling thread, which the headless backends `gfx::HeadlessBackend::Create()`
+    /// makes on that thread share. It lives as long as something holds it.
+    static std::shared_ptr<SharedDevice> forCurrentThread();
+
 private:
     friend class RendererBackend;
 

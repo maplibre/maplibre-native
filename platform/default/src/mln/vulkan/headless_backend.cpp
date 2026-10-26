@@ -102,7 +102,9 @@ namespace gfx {
 template <>
 std::unique_ptr<gfx::HeadlessBackend> Backend::Create<gfx::Backend::Type::Vulkan>(
     const Size size, gfx::Renderable::SwapBehaviour swapBehavior, const gfx::ContextMode contextMode) {
-    return std::make_unique<vulkan::HeadlessBackend>(size, swapBehavior, contextMode);
+    // The headless maps of a thread never render at the same time: they can share one device.
+    return std::make_unique<vulkan::HeadlessBackend>(
+        size, swapBehavior, contextMode, vulkan::SharedDevice::forCurrentThread());
 }
 
 } // namespace gfx

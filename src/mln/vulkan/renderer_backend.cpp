@@ -110,6 +110,15 @@ bool checkAvailability(const std::vector<T>& availableValues,
 
 SharedDevice::SharedDevice() = default;
 
+std::shared_ptr<SharedDevice> SharedDevice::forCurrentThread() {
+    thread_local std::weak_ptr<SharedDevice> weak;
+    std::shared_ptr<SharedDevice> device = weak.lock();
+    if (!device) {
+        weak = device = std::make_shared<SharedDevice>();
+    }
+    return device;
+}
+
 SharedDevice::~SharedDevice() {
     if (allocator) vmaDestroyAllocator(allocator);
     if (device) device.destroy(nullptr, dispatcher);

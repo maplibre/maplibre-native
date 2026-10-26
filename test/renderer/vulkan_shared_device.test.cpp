@@ -10,6 +10,7 @@
 #include <mln/vulkan/headless_backend.hpp>
 
 #include <memory>
+#include <thread>
 
 using namespace mln;
 
@@ -33,6 +34,10 @@ constexpr const char* style = R"({
   ]
 })";
 
+vk::Device deviceOf(HeadlessFrontend& frontend) {
+    return static_cast<vulkan::RendererBackend*>(frontend.getBackend())->getDevice().get();
+}
+
 class TestMap {
 public:
     explicit TestMap(std::shared_ptr<vulkan::SharedDevice> device = nullptr)
@@ -47,7 +52,7 @@ public:
         map.getStyle().loadJSON(style);
     }
 
-    vk::Device device() { return static_cast<vulkan::RendererBackend*>(frontend.getBackend())->getDevice().get(); }
+    vk::Device device() { return deviceOf(frontend); }
 
     PremultipliedImage render(double zoom) {
         map.jumpTo(CameraOptions().withZoom(zoom));
@@ -76,6 +81,25 @@ TEST(VulkanSharedDevice, BackendsWithoutOneCreateTheirOwnDevice) {
     TestMap second;
 
     EXPECT_NE(first.device(), second.device());
+}
+
+TEST(VulkanSharedDevice, HeadlessFrontendsOfAThreadShareItsDevice) {
+    util::RunLoop loop;
+    HeadlessFrontend first{size, pixelRatio};
+    HeadlessFrontend second{size, pixelRatio};
+
+    EXPECT_EQ(deviceOf(first), deviceOf(second));
+}
+
+TEST(VulkanSharedDevice, HeadlessFrontendsOfAnotherThreadUseAnotherDevice) {
+    util::RunLoop loop;
+    HeadlessFrontend first{size, pixelRatio};
+
+    std::thread([&] {
+        util::RunLoop threadLoop;
+        HeadlessFrontend second{size, pixelRatio};
+        EXPECT_NE(deviceOf(first), deviceOf(second));
+    }).join();
 }
 
 TEST(VulkanSharedDevice, BackendsTakingTurnsRenderAsWithTheirOwnDevices) {
