@@ -113,6 +113,14 @@ genrule(
     visibility = ["//platform:__pkg__"],
 )
 
+genrule(
+    name = "public_headers",
+    srcs = public_hdrs + [":umbrella_hdr"],
+    outs = ["public_headers.zip"],
+    cmd = "zip -qj $@ $(SRCS)",
+    visibility = ["//platform:__pkg__"],
+)
+
 apple_bundle_version(
     name = "maplibre_macos_version",
     build_label_pattern = "maplibre_macos_{version}",

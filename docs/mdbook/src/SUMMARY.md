@@ -8,7 +8,7 @@
     - [Documentation](./platforms/android/android-documentation.md)
     - [Benchmark](./platforms/android/benchmark.md)
     - [Release](./platforms/android/release.md)
-    - [Rendering Backends](./platforms/android/android-rendering-backends.md)
+    - [Build Flavors](./platforms/android/android-build-flavors.md)
       - [WebGPU](./platforms/android/android-webgpu.md)
   - [iOS](./platforms/ios/README.md)
     - [Tests](./platforms/ios/ios-tests.md)
