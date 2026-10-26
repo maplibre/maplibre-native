@@ -108,6 +108,8 @@ private:
 
     template <class S>
     friend class Immutable;
+    template <class S>
+    friend class WeakImmutable;
 
     // NOLINTNEXTLINE(readability-redundant-declaration)
     template <class S, class U>

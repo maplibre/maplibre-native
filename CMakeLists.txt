@@ -890,6 +890,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/text/get_anchors.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/text/get_anchors.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/text/glyph.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/text/glyph_cache.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/text/glyph_cache.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/text/glyph_manager.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/text/glyph_manager.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/text/glyph_manager_observer.hpp
@@ -1024,6 +1026,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/utf.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/version.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/version.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/weak_immutable.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/work_request.cpp
 )
 list(APPEND SRC_FILES
