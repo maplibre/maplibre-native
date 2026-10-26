@@ -14,6 +14,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include <memory>
+
 #define VMA_VULKAN_VERSION 1000000
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
@@ -30,6 +32,8 @@ namespace mln {
 class ProgramParameters;
 
 namespace vulkan {
+
+class SharedDevice;
 
 using DynamicLoader = vk::detail::DynamicLoader;
 using DispatchLoaderDynamic = VULKAN_HPP_DISPATCH_LOADER_DYNAMIC_TYPE;
@@ -101,6 +105,10 @@ protected:
 
     void destroyResources();
 
+private:
+    bool reusesSharedDevice() const;
+    void shareDevice();
+
 protected:
     DynamicLoader dynamicLoader;
     DispatchLoaderDynamic dispatcher;
@@ -127,6 +135,11 @@ protected:
 
     bool debugUtilsEnabled{false};
     bool usingSharedContext{false};
+    bool usingSharedAllocator{false};
+
+    /// Set before `init()` to use the instance, device and allocator of a `SharedDevice`,
+    /// creating them if it has none yet.
+    std::shared_ptr<SharedDevice> sharedDevice;
 };
 
 } // namespace vulkan

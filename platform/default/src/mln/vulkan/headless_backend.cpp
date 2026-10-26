@@ -33,9 +33,11 @@ public:
 
 HeadlessBackend::HeadlessBackend(const Size size_,
                                  gfx::HeadlessBackend::SwapBehaviour,
-                                 const gfx::ContextMode contextMode_)
+                                 const gfx::ContextMode contextMode_,
+                                 std::shared_ptr<SharedDevice> sharedDevice_)
     : mln::vulkan::RendererBackend(contextMode_),
       mln::gfx::HeadlessBackend(size_) {
+    sharedDevice = std::move(sharedDevice_);
     init();
 }
 

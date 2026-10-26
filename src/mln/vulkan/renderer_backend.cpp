@@ -1,4 +1,5 @@
 #include <mln/vulkan/renderer_backend.hpp>
+#include <mln/vulkan/shared_device.hpp>
 #include <mln/vulkan/context.hpp>
 #include <mln/vulkan/renderable_resource.hpp>
 
@@ -106,6 +107,16 @@ bool checkAvailability(const std::vector<T>& availableValues,
 }
 
 } // namespace
+
+SharedDevice::SharedDevice() = default;
+
+SharedDevice::~SharedDevice() {
+    if (allocator) vmaDestroyAllocator(allocator);
+    if (device) device.destroy(nullptr, dispatcher);
+    if (debugUtilsCallback) instance.destroyDebugUtilsMessengerEXT(debugUtilsCallback, nullptr, dispatcher);
+    if (debugReportCallback) instance.destroyDebugReportCallbackEXT(debugReportCallback, nullptr, dispatcher);
+    if (instance) instance.destroy(nullptr, dispatcher);
+}
 
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
@@ -334,6 +345,12 @@ static VKAPI_ATTR vk::Bool32 VKAPI_CALL vkDebugReportCallback(vk::DebugReportFla
 #endif
 
 void RendererBackend::initDebug() {
+    if (reusesSharedDevice()) {
+        // The shared device has the callbacks of its instance.
+        debugUtilsEnabled = sharedDevice->debugUtilsEnabled;
+        return;
+    }
+
 #ifdef ENABLE_VULKAN_VALIDATION
     if (debugUtilsEnabled) {
         const vk::DebugUtilsMessageSeverityFlagsEXT severity = vk::DebugUtilsMessageSeverityFlagsEXT() |
@@ -398,9 +415,40 @@ void RendererBackend::init() {
     initAllocator();
     initSwapchain();
     initCommandPool();
+
+    if (sharedDevice && !sharedDevice->device) {
+        shareDevice();
+    }
+}
+
+bool RendererBackend::reusesSharedDevice() const {
+    return sharedDevice && sharedDevice->device;
+}
+
+void RendererBackend::shareDevice() {
+    // From here on the shared device owns the instance, the debug callbacks, the device and the allocator.
+    sharedDevice->dispatcher = dispatcher;
+    sharedDevice->instance = instance.get();
+    sharedDevice->debugUtilsCallback = debugUtilsCallback.release();
+    sharedDevice->debugReportCallback = debugReportCallback.release();
+    sharedDevice->debugUtilsEnabled = debugUtilsEnabled;
+    sharedDevice->physicalDevice = physicalDevice;
+    sharedDevice->physicalDeviceFeatures = physicalDeviceFeatures;
+    sharedDevice->device = device.get();
+    sharedDevice->graphicsQueueIndex = graphicsQueueIndex;
+    sharedDevice->presentQueueIndex = presentQueueIndex;
+    sharedDevice->allocator = allocator;
+    usingSharedContext = true;
+    usingSharedAllocator = true;
 }
 
 void RendererBackend::initInstance() {
+    if (reusesSharedDevice()) {
+        usingSharedContext = true;
+        instance = vk::UniqueInstance(sharedDevice->instance, ObjectDestroy<vk::detail::NoParent>(nullptr, dispatcher));
+        return;
+    }
+
     // Vulkan 1.1 on Android is supported on 71% of devices (compared to 1.3 with 6%) as of April 23 2024
     // https://vulkan.gpuinfo.org/
 #ifdef __APPLE__
@@ -465,6 +513,12 @@ void RendererBackend::initSurface() {
 }
 
 void RendererBackend::initAllocator() {
+    if (reusesSharedDevice()) {
+        usingSharedAllocator = true;
+        allocator = sharedDevice->allocator;
+        return;
+    }
+
     VmaVulkanFunctions functions = {};
 
     functions.vkGetInstanceProcAddr = dispatcher.vkGetInstanceProcAddr;
@@ -508,6 +562,15 @@ void RendererBackend::initAllocator() {
 }
 
 void RendererBackend::initDevice() {
+    if (reusesSharedDevice()) {
+        physicalDevice = sharedDevice->physicalDevice;
+        physicalDeviceFeatures = sharedDevice->physicalDeviceFeatures;
+        graphicsQueueIndex = sharedDevice->graphicsQueueIndex;
+        presentQueueIndex = sharedDevice->presentQueueIndex;
+        device = vk::UniqueDevice(sharedDevice->device, ObjectDestroy<vk::detail::NoParent>(nullptr, dispatcher));
+        return;
+    }
+
     const auto& extensions = getDeviceExtensions();
     const auto& surface = getDefaultRenderable().getResource<SurfaceRenderableResource>().getPlatformSurface().get();
 
@@ -652,7 +715,9 @@ void RendererBackend::destroyResources() {
     context.reset();
     commandPool.reset();
 
-    vmaDestroyAllocator(allocator);
+    if (!usingSharedAllocator) {
+        vmaDestroyAllocator(allocator);
+    }
     allocator = nullptr;
 
     usingSharedContext ? void(device.release()) : device.reset();
@@ -662,6 +727,8 @@ void RendererBackend::destroyResources() {
     debugReportCallback.reset();
 
     usingSharedContext ? void(instance.release()) : instance.reset();
+
+    sharedDevice.reset();
 }
 
 /// @brief Register a list of types with a shader registry instance

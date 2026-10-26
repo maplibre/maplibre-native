@@ -28,6 +28,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/vulkan/renderer_backend.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/vulkan/render_pass.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/vulkan/renderable_resource.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/vulkan/shared_device.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/vulkan/texture2d.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/vulkan/tile_layer_group.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/vulkan/uniform_buffer.hpp
