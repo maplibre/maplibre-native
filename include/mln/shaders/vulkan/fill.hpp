@@ -794,7 +794,7 @@ void main() {
 
     frag_data.ext = (external0 > 0 || external1 > 0 || external2 > 0) ? -1.0 : 1.0;
 #endif
-    
+
 #if !defined(HAS_UNIFORM_u_color)
     frag_color = unpack_mix_color(dataVertexVector.vertex[index].color, drawable.color_t);
 #endif
