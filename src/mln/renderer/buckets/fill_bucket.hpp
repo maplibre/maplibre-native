@@ -60,7 +60,7 @@ public:
 
     static FillLayoutVertex layoutVertex(Point<int16_t> p) { return FillLayoutVertex{{p.x, p.y}}; }
     static FillNeighborVertex neighborVertex(int16_t prev_offset, int16_t next_offset) {
-        return FillLayoutVertex{{prev_offset, next_offset}};
+        return FillNeighborVertex{{prev_offset, next_offset}};
     }
     static FillTriangleInstance triangleInstance(uint32_t index0,
                                                  bool ignored0,

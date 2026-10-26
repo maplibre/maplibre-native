@@ -11,28 +11,142 @@ constexpr auto fillShaderPrelude = R"(
 #define idFillDrawableUBO           idDrawableReservedVertexOnlyUBO
 #define idFillTilePropsUBO          drawableReservedUBOCount
 #define idFillEvaluatedPropsUBO     layerUBOStartId
+#define idFillPosVertexDrawableUBO        drawableSSBOStartId
+#define idFillPrevNextVertexDrawableUBO   drawableSSBOStartId + 1
+#define idFillDataVertexDrawableUBO       drawableSSBOStartId + 2
 
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+float sdCircle(vec2 p, float r) {
+    return length(p) - r;
+}
+
+float sdPlane(vec2 p, vec2 n, float h) {
+    // n must be normalized
+    return dot(p, n) + h;
+}
+
+float dot2(vec2 v) {
+    return dot(v, v);
+}
+
+float opUnion(float a, float b) {
+    return min(a, b);
+}
+
+float opSmoothUnion(float d1, float d2, float k) {
+    float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
+    return mix(d2, d1, h) - k * h * (1.0 - h);
+}
+
+float opIntersection(float a, float b) {
+    return max(a, b);
+}
+
+float opSubtraction(float a, float b) {
+    return max(a, -b);
+}
+
+vec2 bisector(vec2 v0, vec2 v1, vec2 v2) {
+    vec2 v01 = normalize(v1 - v0);
+    vec2 v02 = normalize(v2 - v0);
+    return normalize(v01 + v02);
+}
+
+float cotHalf(float cosTheta) {
+    float sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
+    return (1.0 + cosTheta) / sinTheta;
+}
+
+void fitCircle(vec2 v0, vec2 v1, vec2 v2, float radius, inout float angle, inout float distance) {
+    float cosTheta = dot(normalize(v1 - v0), normalize(v2 - v0));
+    float sinHalf = sqrt((1.0 - cosTheta) * 0.5);
+
+    angle = sinHalf;
+    distance = radius / sinHalf;
+}
+
+float dRoundedTri(vec2 p, inout float dTri, vec2 v0, vec2 v1, vec2 v2, float radius) {
+    // circle distance from vertex
+    float angle;
+    float distance;
+    fitCircle(v0, v1, v2, radius, angle, distance);
+
+    // circle used to round it
+    vec2 bisect = bisector(v0, v1, v2);
+    vec2 circlePos = v0 + bisect * distance;
+    float dCircle = sdCircle(p - circlePos, radius);
+
+    // plane to isolate the two halfs of the circle (make the circle cutout asymmetrical)
+    float dPlaneIn = sdPlane(p - circlePos, -bisect, -radius * angle);
+
+    // mask based on plane
+    dTri = opIntersection(dTri, dPlaneIn);
+
+    return dCircle;
+}
+
+float cross2(vec2 a, vec2 b) {
+    return a.x * b.y - a.y * b.x;
+}
+
+float computeRadius(vec2 prevPoint, vec2 cornerPoint, vec2 nextPoint, float desiredCornerDistance) {
+    float maxEdgeLenPercent = 0.5;
+    float sinParallelTreshold = sin(5 * M_PI / 180);
+
+    float edge1Len = distance(prevPoint, cornerPoint);
+    float edge2Len = distance(nextPoint, cornerPoint);
+    if (edge1Len == 0.0 || edge2Len == 0.0) {
+        return 0;
+    }
+
+    // Compute the start and end points of the rounded corner
+    vec2 edge1Vector = normalize(cornerPoint - prevPoint);
+    vec2 edge2Vector = normalize(nextPoint - cornerPoint);
+
+    float edge1MaxCornerDistance = edge1Len * maxEdgeLenPercent;
+    float edge2MaxCornerDistance = edge2Len * maxEdgeLenPercent;
+    float cornerDistance = min(desiredCornerDistance, min(edge1MaxCornerDistance, edge2MaxCornerDistance));
+
+    vec2 startPoint = cornerPoint - edge1Vector * cornerDistance;
+    vec2 endPoint = cornerPoint + edge2Vector * cornerDistance;
+
+    // Perpendicular directions
+    vec2 perp1Vector = vec2(-edge1Vector.y, edge1Vector.x);
+    vec2 perp2Vector = vec2(-edge2Vector.y, edge2Vector.x);
+
+    // Ensure perpendiculars point toward same side
+    if (cross2(edge1Vector, edge2Vector) < 0) {
+        perp1Vector *= -1.0;
+        perp2Vector *= -1.0;
+    }
+
+    // Center = intersection of perpendiculars
+    float perpCrossProduct = cross2(perp1Vector, perp2Vector);
+    if (abs(perpCrossProduct) < sinParallelTreshold) {
+        return 0;
+    }
+    float t = cross2(endPoint - startPoint, perp2Vector) / perpCrossProduct;
+    vec2 centerPoint = startPoint + perp1Vector * t;
+
+    float radius = distance(startPoint, centerPoint);
+    return radius;
+}
+#endif
 )";
 
 template <>
 struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillShader";
 
-    static const std::array<AttributeInfo, 3> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 1> instanceAttributes;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto vertex = R"(
 
-layout(location = 0) in ivec2 in_position;
-
-#if !defined(HAS_UNIFORM_u_color)
-layout(location = 1) in vec4 in_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 2) in vec2 in_opacity;
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+layout(location = 4) in uvec3 in_triangle_indices;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -54,6 +168,61 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buff
     FillDrawableUBO drawable_ubo[];
 } drawableVector;
 
+struct PolygonVertex {
+    int position;
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillPosVertexDrawableUBO) readonly buffer PolygonVertexDrawableUBOVector {
+    PolygonVertex vertex[];
+} polygonVertexVector;
+
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+struct NeighborVertex {
+    int prev_next_offset;
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillPrevNextVertexDrawableUBO) readonly buffer NeighborVertexDrawableUBOVector {
+    NeighborVertex vertex[];
+} neighborVertexVector;
+#endif
+
+#if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_outline_color) || !defined(HAS_UNIFORM_u_pattern_to) || !defined(HAS_UNIFORM_u_pattern_from)
+struct DataVertex {
+#if !defined(HAS_UNIFORM_u_color)
+    float color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_outline_color)
+    float outline_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    uint pattern_to[2];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    uint pattern_from[2];
+#endif
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillDataVertexDrawableUBO) readonly buffer DataVertexDrawableUBOVector {
+    DataVertex vertex[];
+} dataVertexVector;
+#endif
+
+layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEvaluatedPropsUBO {
+    vec4 color;
+    vec4 outline_color;
+    float opacity;
+    float rounded_corner_distance;
+    float fade;
+    float from_scale;
+    float to_scale;
+    float pad1;
+    float pad2;
+    float pad3;
+} props;
+
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 0) out vec4 frag_color;
 #endif
@@ -62,18 +231,122 @@ layout(location = 0) out vec4 frag_color;
 layout(location = 1) out lowp float frag_opacity;
 #endif
 
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+struct FragmentData {
+    vec2 v0;
+    vec2 v1;
+    vec2 v2;
+
+    vec2 v0Prev;
+    vec2 v0Next;
+    float v0Radius;
+
+    vec2 v1Prev;
+    vec2 v1Next;
+    float v1Radius;
+
+    vec2 v2Prev;
+    vec2 v2Next;
+    float v2Radius;
+
+    float ext;
+};
+layout(location = 2) out vec2 frag_pos;
+layout(location = 3) flat out FragmentData frag_data;
+#endif
+
 void main() {
     const FillDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
+#if defined(HAS_UNIFORM_u_triangle_instance)
+    uint index = gl_VertexIndex;
+    vec2 position = unpack_int(polygonVertexVector.vertex[index].position);
+#else
+    uint index = in_triangle_indices[gl_VertexIndex] >> 2;
+    vec2 position = unpack_int(polygonVertexVector.vertex[index].position);
+
+    uint i0 = in_triangle_indices[0] >> 2;
+    uint i1 = in_triangle_indices[1] >> 2;
+    uint i2 = in_triangle_indices[2] >> 2;
+
+    uint ignored0 = in_triangle_indices[0] % 4 >> 1;
+    uint ignored1 = in_triangle_indices[1] % 4 >> 1;
+    uint ignored2 = in_triangle_indices[2] % 4 >> 1;
+
+    uint external0 = in_triangle_indices[0] % 2;
+    uint external1 = in_triangle_indices[1] % 2;
+    uint external2 = in_triangle_indices[2] % 2;
+
+    vec2 v0 = unpack_int(polygonVertexVector.vertex[i0].position);
+    vec2 v1 = unpack_int(polygonVertexVector.vertex[i1].position);
+    vec2 v2 = unpack_int(polygonVertexVector.vertex[i2].position);
+
+    vec2 v0Prev = v0;
+    vec2 v0Next = v0;
+    float v0Radius = 0;
+    if (ignored0 == 0 && props.rounded_corner_distance > 0) {
+        uint i0Prev = i0 + unpack_low_int(neighborVertexVector.vertex[i0].prev_next_offset);
+        uint i0Next = i0 + unpack_high_int(neighborVertexVector.vertex[i0].prev_next_offset);
+
+        v0Prev = unpack_int(polygonVertexVector.vertex[i0Prev].position);
+        v0Next = unpack_int(polygonVertexVector.vertex[i0Next].position);
+        v0Radius = computeRadius(v0Prev, v0, v0Next, props.rounded_corner_distance);
+    }
+
+    vec2 v1Prev = v1;
+    vec2 v1Next = v1;
+    float v1Radius = 0;
+    if (ignored1 == 0 && props.rounded_corner_distance > 0) {
+        uint i1Prev = i1 + unpack_low_int(neighborVertexVector.vertex[i1].prev_next_offset);
+        uint i1Next = i1 + unpack_high_int(neighborVertexVector.vertex[i1].prev_next_offset);
+
+        v1Prev = unpack_int(polygonVertexVector.vertex[i1Prev].position);
+        v1Next = unpack_int(polygonVertexVector.vertex[i1Next].position);
+        v1Radius = computeRadius(v1Prev, v1, v1Next, props.rounded_corner_distance);
+    }
+
+    vec2 v2Prev = v2;
+    vec2 v2Next = v2;
+    float v2Radius = 0;
+    if (ignored2 == 0 && props.rounded_corner_distance > 0) {
+        uint i2Prev = i2 + unpack_low_int(neighborVertexVector.vertex[i2].prev_next_offset);
+        uint i2Next = i2 + unpack_high_int(neighborVertexVector.vertex[i2].prev_next_offset);
+
+        v2Prev = unpack_int(polygonVertexVector.vertex[i2Prev].position);
+        v2Next = unpack_int(polygonVertexVector.vertex[i2Next].position);
+        v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
+    }
+
+    frag_pos = position;
+
+    frag_data.v0 = v0;
+    frag_data.v1 = v1;
+    frag_data.v2 = v2;
+
+    frag_data.v0Prev = v0Prev;
+    frag_data.v0Next = v0Next;
+    frag_data.v0Radius = v0Radius;
+
+    frag_data.v1Prev = v1Prev;
+    frag_data.v1Next = v1Next;
+    frag_data.v1Radius = v1Radius;
+
+    frag_data.v2Prev = v2Prev;
+    frag_data.v2Next = v2Next;
+    frag_data.v2Radius = v2Radius;
+
+    frag_data.ext = (external0 > 0 || external1 > 0 || external2 > 0) ? -1.0 : 1.0;
+#endif
+
 #if !defined(HAS_UNIFORM_u_color)
-    frag_color = vec4(unpack_mix_color(in_color, drawable.color_t));
+    frag_color = vec4(unpack_mix_color(dataVertexVector.vertex[index].color, drawable.color_t));
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(dataVertexVector.vertex[index].opacity, drawable.opacity_t);
 #endif
 
-    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = drawable.matrix * vec4(position, 0.0, 1.0);
     applySurfaceTransform();
 }
 )";
@@ -86,6 +359,30 @@ layout(location = 0) in vec4 frag_color;
 
 #if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 1) in lowp float frag_opacity;
+#endif
+
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+struct FragmentData {
+    vec2 v0;
+    vec2 v1;
+    vec2 v2;
+
+    vec2 v0Prev;
+    vec2 v0Next;
+    float v0Radius;
+
+    vec2 v1Prev;
+    vec2 v1Next;
+    float v1Radius;
+
+    vec2 v2Prev;
+    vec2 v2Next;
+    float v2Radius;
+
+    float ext;
+};
+layout(location = 2) in vec2 frag_pos;
+layout(location = 3) flat in FragmentData frag_data;
 #endif
 
 layout(location = 0) out vec4 out_color;
@@ -115,6 +412,29 @@ void main() {
     const float opacity = props.opacity;
 #else
     const float opacity = frag_opacity;
+#endif
+
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+    float dTri = -1;
+
+    if (frag_data.v0Radius > 0) {
+        float d0 = dRoundedTri(frag_pos, dTri, frag_data.v0, frag_data.v0Prev, frag_data.v0Next, frag_data.v0Radius);
+        dTri = opUnion(dTri, d0);
+    }
+
+    if (frag_data.v1Radius > 0) {
+        float d1 = dRoundedTri(frag_pos, dTri, frag_data.v1, frag_data.v1Prev, frag_data.v1Next, frag_data.v1Radius);
+        dTri = opUnion(dTri, d1);
+    }
+
+    if (frag_data.v2Radius > 0) {
+        float d2 = dRoundedTri(frag_pos, dTri, frag_data.v2, frag_data.v2Prev, frag_data.v2Next, frag_data.v2Radius);
+        dTri = opUnion(dTri, d2);
+    }
+
+    if (dTri * frag_data.ext > 0) {
+        discard;
+    }
 #endif
 
     out_color = color * opacity;
@@ -247,29 +567,15 @@ template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillPatternShader";
 
-    static const std::array<AttributeInfo, 5> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 1> instanceAttributes;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto vertex = R"(
 
-layout(location = 0) in ivec2 in_position;
-
-#if !defined(HAS_UNIFORM_u_color)
-layout(location = 1) in vec4 in_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 2) in mediump uvec4 in_pattern_from;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 3) in mediump uvec4 in_pattern_to;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 4) in vec2 in_opacity;
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+layout(location = 6) in uvec3 in_triangle_indices;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -294,6 +600,48 @@ struct FillPatternDrawableUBO {
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillPatternDrawableUBOVector {
     FillPatternDrawableUBO drawable_ubo[];
 } drawableVector;
+
+struct PolygonVertex {
+    int position;
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillPosVertexDrawableUBO) readonly buffer PolygonVertexDrawableUBOVector {
+    PolygonVertex vertex[];
+} polygonVertexVector;
+
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+struct NeighborVertex {
+    int prev_next_offset;
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillPrevNextVertexDrawableUBO) readonly buffer NeighborVertexDrawableUBOVector {
+    NeighborVertex vertex[];
+} neighborVertexVector;
+#endif
+
+#if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_outline_color) || !defined(HAS_UNIFORM_u_pattern_to) || !defined(HAS_UNIFORM_u_pattern_from)
+struct DataVertex {
+#if !defined(HAS_UNIFORM_u_color)
+    float color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_outline_color)
+    float outline_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    uint pattern_to[2];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    uint pattern_from[2];
+#endif
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillDataVertexDrawableUBO) readonly buffer DataVertexDrawableUBOVector {
+    DataVertex vertex[];
+} dataVertexVector;
+#endif
 
 struct FillPatternTilePropsUBO {
     vec4 pattern_from;
@@ -327,40 +675,146 @@ layout(location = 1) out vec2 frag_pos_b;
 layout(location = 2) out vec4 frag_color;
 #endif
 
+#if !defined(HAS_UNIFORM_u_opacity)
+layout(location = 3) out lowp float frag_opacity;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 3) out mediump vec4 frag_pattern_from;
+layout(location = 4) out mediump vec4 frag_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 4) out mediump vec4 frag_pattern_to;
+layout(location = 5) out mediump vec4 frag_pattern_to;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 5) out lowp float frag_opacity;
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+struct FragmentData {
+    vec2 v0;
+    vec2 v1;
+    vec2 v2;
+
+    vec2 v0Prev;
+    vec2 v0Next;
+    float v0Radius;
+
+    vec2 v1Prev;
+    vec2 v1Next;
+    float v1Radius;
+
+    vec2 v2Prev;
+    vec2 v2Next;
+    float v2Radius;
+
+    float ext;
+};
+layout(location = 6) out vec2 frag_pos;
+layout(location = 7) flat out FragmentData frag_data;
 #endif
 
 void main() {
     const FillPatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
     const FillPatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
+#if defined(HAS_UNIFORM_u_triangle_instance)
+    uint index = gl_VertexIndex;
+    vec2 position = unpack_int(polygonVertexVector.vertex[index].position);
+#else
+    uint index = in_triangle_indices[gl_VertexIndex] >> 2;
+    vec2 position = unpack_int(polygonVertexVector.vertex[index].position);
+
+    uint i0 = in_triangle_indices[0] >> 2;
+    uint i1 = in_triangle_indices[1] >> 2;
+    uint i2 = in_triangle_indices[2] >> 2;
+
+    uint ignored0 = in_triangle_indices[0] % 4 >> 1;
+    uint ignored1 = in_triangle_indices[1] % 4 >> 1;
+    uint ignored2 = in_triangle_indices[2] % 4 >> 1;
+
+    uint external0 = in_triangle_indices[0] % 2;
+    uint external1 = in_triangle_indices[1] % 2;
+    uint external2 = in_triangle_indices[2] % 2;
+
+    vec2 v0 = unpack_int(polygonVertexVector.vertex[i0].position);
+    vec2 v1 = unpack_int(polygonVertexVector.vertex[i1].position);
+    vec2 v2 = unpack_int(polygonVertexVector.vertex[i2].position);
+
+    vec2 v0Prev = v0;
+    vec2 v0Next = v0;
+    float v0Radius = 0;
+    if (ignored0 == 0 && props.rounded_corner_distance > 0) {
+        uint i0Prev = i0 + unpack_low_int(neighborVertexVector.vertex[i0].prev_next_offset);
+        uint i0Next = i0 + unpack_high_int(neighborVertexVector.vertex[i0].prev_next_offset);
+
+        v0Prev = unpack_int(polygonVertexVector.vertex[i0Prev].position);
+        v0Next = unpack_int(polygonVertexVector.vertex[i0Next].position);
+        v0Radius = computeRadius(v0Prev, v0, v0Next, props.rounded_corner_distance);
+    }
+
+    vec2 v1Prev = v1;
+    vec2 v1Next = v1;
+    float v1Radius = 0;
+    if (ignored1 == 0 && props.rounded_corner_distance > 0) {
+        uint i1Prev = i1 + unpack_low_int(neighborVertexVector.vertex[i1].prev_next_offset);
+        uint i1Next = i1 + unpack_high_int(neighborVertexVector.vertex[i1].prev_next_offset);
+
+        v1Prev = unpack_int(polygonVertexVector.vertex[i1Prev].position);
+        v1Next = unpack_int(polygonVertexVector.vertex[i1Next].position);
+        v1Radius = computeRadius(v1Prev, v1, v1Next, props.rounded_corner_distance);
+    }
+
+    vec2 v2Prev = v2;
+    vec2 v2Next = v2;
+    float v2Radius = 0;
+    if (ignored2 == 0 && props.rounded_corner_distance > 0) {
+        uint i2Prev = i2 + unpack_low_int(neighborVertexVector.vertex[i2].prev_next_offset);
+        uint i2Next = i2 + unpack_high_int(neighborVertexVector.vertex[i2].prev_next_offset);
+
+        v2Prev = unpack_int(polygonVertexVector.vertex[i2Prev].position);
+        v2Next = unpack_int(polygonVertexVector.vertex[i2Next].position);
+        v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
+    }
+
+    frag_pos = position;
+
+    frag_data.v0 = v0;
+    frag_data.v1 = v1;
+    frag_data.v2 = v2;
+
+    frag_data.v0Prev = v0Prev;
+    frag_data.v0Next = v0Next;
+    frag_data.v0Radius = v0Radius;
+
+    frag_data.v1Prev = v1Prev;
+    frag_data.v1Next = v1Next;
+    frag_data.v1Radius = v1Radius;
+
+    frag_data.v2Prev = v2Prev;
+    frag_data.v2Next = v2Next;
+    frag_data.v2Radius = v2Radius;
+
+    frag_data.ext = (external0 > 0 || external1 > 0 || external2 > 0) ? -1.0 : 1.0;
+#endif
+    
 #if !defined(HAS_UNIFORM_u_color)
-    frag_color = unpack_mix_color(in_color, drawable.color_t);
+    frag_color = unpack_mix_color(dataVertexVector.vertex[index].color, drawable.color_t);
+#endif
+
+#if !defined(HAS_UNIFORM_u_opacity)
+    frag_opacity = unpack_mix_float(dataVertexVector.vertex[index].opacity, drawable.opacity_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 frag_pattern_from = tileProps.pattern_from;
 #else
-    frag_pattern_from = in_pattern_from;
+    frag_pattern_from = vec4(unpack_uint(dataVertexVector.vertex[index].pattern_from[0]),
+                             unpack_uint(dataVertexVector.vertex[index].pattern_from[1]));
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const vec4 frag_pattern_to = tileProps.pattern_to;
 #else
-    frag_pattern_to = in_pattern_to;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_pattern_to = vec4(unpack_uint(dataVertexVector.vertex[index].pattern_to[0]),
+                           unpack_uint(dataVertexVector.vertex[index].pattern_to[1]));
 #endif
 
     const vec2 pattern_tl_a = frag_pattern_from.xy;
@@ -376,10 +830,10 @@ void main() {
     const vec2 display_size_a = vec2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     const vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
-    frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, in_position),
-    frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, in_position),
+    frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, position),
+    frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, position),
 
-    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = drawable.matrix * vec4(position, 0.0, 1.0);
     applySurfaceTransform();
 }
 )";
@@ -393,16 +847,40 @@ layout(location = 1) in vec2 frag_pos_b;
 layout(location = 2) in vec4 frag_color;
 #endif
 
+#if !defined(HAS_UNIFORM_u_opacity)
+layout(location = 3) in lowp float frag_opacity;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 3) in vec4 frag_pattern_from;
+layout(location = 4) in vec4 frag_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 4) in vec4 frag_pattern_to;
+layout(location = 5) in vec4 frag_pattern_to;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 5) in lowp float frag_opacity;
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+struct FragmentData {
+    vec2 v0;
+    vec2 v1;
+    vec2 v2;
+
+    vec2 v0Prev;
+    vec2 v0Next;
+    float v0Radius;
+
+    vec2 v1Prev;
+    vec2 v1Next;
+    float v1Radius;
+
+    vec2 v2Prev;
+    vec2 v2Next;
+    float v2Radius;
+
+    float ext;
+};
+layout(location = 6) in vec2 frag_pos;
+layout(location = 7) flat in FragmentData frag_data;
 #endif
 
 layout(location = 0) out vec4 out_color;
@@ -447,6 +925,18 @@ void main() {
 
     const FillPatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
+#if defined(HAS_UNIFORM_u_color)
+    const vec4 color = props.color;
+#else
+    const vec4 color = frag_color;
+#endif
+
+#if defined(HAS_UNIFORM_u_opacity)
+    const float opacity = props.opacity;
+#else
+    const float opacity = frag_opacity;
+#endif
+
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 pattern_from = tileProps.pattern_from;
 #else
@@ -459,16 +949,27 @@ void main() {
     const vec4 pattern_to = frag_pattern_to;
 #endif
 
-#if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = props.opacity;
-#else
-    const float opacity = frag_opacity;
-#endif
+#if !defined(HAS_UNIFORM_u_triangle_instance)
+    float dTri = -1;
 
-#if defined(HAS_UNIFORM_u_color)
-    const vec4 color = props.color;
-#else
-    const vec4 color = frag_color;
+    if (frag_data.v0Radius > 0) {
+        float d0 = dRoundedTri(frag_pos, dTri, frag_data.v0, frag_data.v0Prev, frag_data.v0Next, frag_data.v0Radius);
+        dTri = opUnion(dTri, d0);
+    }
+
+    if (frag_data.v1Radius > 0) {
+        float d1 = dRoundedTri(frag_pos, dTri, frag_data.v1, frag_data.v1Prev, frag_data.v1Next, frag_data.v1Radius);
+        dTri = opUnion(dTri, d1);
+    }
+
+    if (frag_data.v2Radius > 0) {
+        float d2 = dRoundedTri(frag_pos, dTri, frag_data.v2, frag_data.v2Prev, frag_data.v2Next, frag_data.v2Radius);
+        dTri = opUnion(dTri, d2);
+    }
+
+    if (dTri * frag_data.ext > 0) {
+        discard;
+    }
 #endif
 
     const vec2 pattern_tl_a = pattern_from.xy;
@@ -515,16 +1016,16 @@ layout(location = 0) in ivec2 in_position;
 layout(location = 1) in vec4 in_color;
 #endif
 
+#if !defined(HAS_UNIFORM_u_opacity)
+layout(location = 2) in vec2 in_opacity;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 2) in mediump uvec4 in_pattern_from;
+layout(location = 3) in mediump uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 3) in mediump uvec4 in_pattern_to;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 4) in vec2 in_opacity;
+layout(location = 4) in mediump uvec4 in_pattern_to;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -583,16 +1084,16 @@ layout(location = 2) out vec2 frag_pos;
 layout(location = 3) out vec4 frag_color;
 #endif
 
+#if !defined(HAS_UNIFORM_u_opacity)
+layout(location = 4) out lowp float frag_opacity;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 4) out mediump vec4 frag_pattern_from;
+layout(location = 5) out mediump vec4 frag_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 5) out mediump vec4 frag_pattern_to;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 6) out lowp float frag_opacity;
+layout(location = 6) out mediump vec4 frag_pattern_to;
 #endif
 
 void main() {
@@ -601,6 +1102,10 @@ void main() {
 
 #if !defined(HAS_UNIFORM_u_color)
     frag_color = unpack_mix_color(in_color, drawable.color_t);
+#endif
+
+#if !defined(HAS_UNIFORM_u_opacity)
+    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
@@ -613,10 +1118,6 @@ void main() {
     const vec4 frag_pattern_to = tileProps.pattern_to;
 #else
     frag_pattern_to = in_pattern_to;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
 #endif
 
     const vec2 pattern_tl_a = frag_pattern_from.xy;
@@ -652,16 +1153,16 @@ layout(location = 2) in vec2 frag_pos;
 layout(location = 3) in vec4 frag_color;
 #endif
 
+#if !defined(HAS_UNIFORM_u_opacity)
+layout(location = 4) in lowp float frag_opacity;
+#endif
+
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 4) in vec4 frag_pattern_from;
+layout(location = 5) in vec4 frag_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 5) in vec4 frag_pattern_to;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 6) in lowp float frag_opacity;
+layout(location = 6) in vec4 frag_pattern_to;
 #endif
 
 layout(location = 0) out vec4 out_color;
@@ -706,6 +1207,18 @@ void main() {
 
     const FillOutlinePatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
+#if defined(HAS_UNIFORM_u_color)
+    const vec4 color = props.color;
+#else
+    const vec4 color = frag_color;
+#endif
+
+#if defined(HAS_UNIFORM_u_opacity)
+    const float opacity = props.opacity;
+#else
+    const float opacity = frag_opacity;
+#endif
+
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 pattern_from = tileProps.pattern_from;
 #else
@@ -716,18 +1229,6 @@ void main() {
     const vec4 pattern_to = tileProps.pattern_to;
 #else
     const vec4 pattern_to = frag_pattern_to;
-#endif
-
-#if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = props.opacity;
-#else
-    const float opacity = frag_opacity;
-#endif
-
-#if defined(HAS_UNIFORM_u_color)
-    const vec4 color = props.color;
-#else
-    const vec4 color = frag_color;
 #endif
 
     const vec2 pattern_tl_a = pattern_from.xy;
