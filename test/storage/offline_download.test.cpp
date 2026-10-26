@@ -11,6 +11,7 @@
 #include <mln/storage/offline_download.hpp>
 #include <mln/storage/http_file_source.hpp>
 #include <mln/text/glyph_range.hpp>
+#include <mln/util/accept_header.hpp>
 #include <mln/util/run_loop.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/compression.hpp>
@@ -192,7 +193,7 @@ TEST(OfflineDownload, InlineMLTSource) {
         const Resource::TileData& tile = *resource.tileData;
         EXPECT_EQ(urlTemplate, tile.urlTemplate);
         EXPECT_TRUE(tile.vectorEncoding == Tileset::VectorEncoding::MLT);
-        EXPECT_EQ(std::string_view{"application/vnd.maplibre-tile"}, resource.acceptHeader);
+        EXPECT_EQ(http::mltMediaType, resource.acceptHeader);
         return test.response("0-0-0.vector.pbf");
     };
 

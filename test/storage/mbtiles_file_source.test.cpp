@@ -1,6 +1,7 @@
 #include <mln/storage/mbtiles_file_source.hpp>
 #include <mln/storage/resource.hpp>
 #include <mln/storage/resource_options.hpp>
+#include <mln/util/accept_header.hpp>
 #include <mln/util/platform.hpp>
 #include <mln/util/run_loop.hpp>
 
@@ -79,6 +80,25 @@ TEST(MBTilesFileSource, TileJSON) {
             ASSERT_TRUE(res.data.get());
             // basic test that TileJSON included a tile URL
             EXPECT_NE((*res.data).find("geography-class-png.mbtiles?file={x}/{y}/{z}"), std::string::npos);
+            loop.stop();
+        });
+
+    loop.run();
+}
+
+// A MapLibre Tile media type in the metadata is translated to the `mlt` source encoding
+TEST(MBTilesFileSource, TileJSONMLTMediaType) {
+    util::RunLoop loop;
+
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = mbtiles.request(
+        {Resource::Unknown, toAbsoluteURL("mlt-media-type.mbtiles")}, [&](Response res) {
+            req.reset();
+            EXPECT_EQ(nullptr, res.error);
+            ASSERT_TRUE(res.data.get());
+            EXPECT_NE(res.data->find(R"("format":")" + std::string(http::mltMediaType) + R"(")"), std::string::npos);
+            EXPECT_NE(res.data->find(R"("encoding":"mlt")"), std::string::npos);
             loop.stop();
         });
 

@@ -6,6 +6,7 @@
 #include <mln/tile/tile_loader_impl.hpp>
 #include <mln/storage/resource_options.hpp>
 
+#include <mln/util/accept_header.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/run_loop.hpp>
 #include <mln/map/transform.hpp>
@@ -42,7 +43,7 @@ TEST(VectorTile, MLTRequestSetsAcceptHeader) {
     tile.setNecessity(TileNecessity::Required);
     auto& fileSource = static_cast<FakeFileSource&>(*test.fileSource);
     ASSERT_EQ(1u, fileSource.requests.size());
-    EXPECT_EQ("application/vnd.maplibre-tile", fileSource.requests.front()->resource.acceptHeader);
+    EXPECT_EQ(http::mltMediaType, fileSource.requests.front()->resource.acceptHeader);
 }
 
 TEST(VectorTile, MVTRequestHasNoAcceptHeader) {

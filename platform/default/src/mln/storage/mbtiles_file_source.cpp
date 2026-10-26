@@ -10,6 +10,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <mln/util/accept_header.hpp>
 #include <mln/util/thread.hpp>
 #include <mln/util/url.hpp>
 #include <mln/util/chrono.hpp>
@@ -106,7 +107,7 @@ public:
         const std::string format = (format_ptr == values.end()) ? "png" : format_ptr->second;
 
         // Translate MIME type field to source encoding.
-        if (format == "mlt" || format == "application/vnd.maplibre-vector-tile") {
+        if (format == "mlt" || format == http::mltMediaType) {
             doc.AddMember("encoding", "mlt", allocator);
         }
 
