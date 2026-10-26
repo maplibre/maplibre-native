@@ -182,7 +182,6 @@ void GlyphManager::setObserver(GlyphManagerObserver* observer_) {
 }
 
 void GlyphManager::notify(GlyphRequestor& requestor, const GlyphDependencies& glyphDependencies) {
-    // getGlyphs() calls this without the lock, while other threads may be adding ranges.
     std::scoped_lock readWriteLock(rwLock);
     GlyphMap response;
 

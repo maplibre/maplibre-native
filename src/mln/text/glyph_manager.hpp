@@ -90,13 +90,12 @@ private:
         bool parsed = false;
         std::unique_ptr<AsyncRequest> req;
         std::unordered_map<GlyphRequestor *, std::shared_ptr<GlyphDependencies>> requestors;
-        // The glyphs of a PBF range, shared with the managers that loaded the same ones.
         std::shared_ptr<const GlyphCache::Range> glyphs;
     };
 
     struct Entry {
         std::map<GlyphRange, GlyphRequest> ranges;
-        // Glyphs drawn here: local ideographs and HarfBuzz font faces.
+        // Local and HarfBuzz glyphs. PBF glyphs are in the ranges.
         std::map<GlyphID, Immutable<Glyph>> glyphs;
     };
 
