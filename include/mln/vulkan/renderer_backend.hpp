@@ -137,8 +137,7 @@ protected:
     bool usingSharedContext{false};
     bool usingSharedAllocator{false};
 
-    /// Set before `init()` to use the instance, device and allocator of a `SharedDevice`,
-    /// creating them if it has none yet.
+    // Set before init() to use the instance, device and allocator of a SharedDevice.
     std::shared_ptr<SharedDevice> sharedDevice;
 };
 

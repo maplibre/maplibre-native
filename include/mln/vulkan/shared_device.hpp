@@ -5,16 +5,8 @@
 namespace mln {
 namespace vulkan {
 
-/// A Vulkan instance, device and memory allocator that several renderer backends use instead of
-/// creating their own: with lavapipe, a device is a whole software rasterizer with its own threads
-/// and memory, which a process that keeps many headless maps does not need once per map.
-///
-/// The first backend given a `SharedDevice` creates its objects; the others reuse them. They are
-/// destroyed with the `SharedDevice`, once the last backend using it and its other owners are gone.
-///
-/// The backends of a `SharedDevice` submit to the same queue, which Vulkan requires to be
-/// externally synchronized: use them one at a time, for example by creating and using them all on
-/// one thread.
+// Instance, device and allocator that renderer backends can share instead of creating their own.
+// The backends of a SharedDevice submit to the same queue: render with one of them at a time.
 class SharedDevice {
 public:
     SharedDevice();
@@ -23,14 +15,12 @@ public:
     SharedDevice(const SharedDevice&) = delete;
     SharedDevice& operator=(const SharedDevice&) = delete;
 
-    /// The device of the calling thread, which the headless backends `gfx::HeadlessBackend::Create()`
-    /// makes on that thread share. It lives as long as something holds it.
+    // Used by the backends gfx::HeadlessBackend::Create() makes on the calling thread.
     static std::shared_ptr<SharedDevice> forCurrentThread();
 
 private:
     friend class RendererBackend;
 
-    // Keeps the Vulkan library loaded while the objects below are alive.
     DynamicLoader dynamicLoader;
     DispatchLoaderDynamic dispatcher;
 

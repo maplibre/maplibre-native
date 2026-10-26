@@ -355,7 +355,6 @@ static VKAPI_ATTR vk::Bool32 VKAPI_CALL vkDebugReportCallback(vk::DebugReportFla
 
 void RendererBackend::initDebug() {
     if (reusesSharedDevice()) {
-        // The shared device has the callbacks of its instance.
         debugUtilsEnabled = sharedDevice->debugUtilsEnabled;
         return;
     }
@@ -435,7 +434,6 @@ bool RendererBackend::reusesSharedDevice() const {
 }
 
 void RendererBackend::shareDevice() {
-    // From here on the shared device owns the instance, the debug callbacks, the device and the allocator.
     sharedDevice->dispatcher = dispatcher;
     sharedDevice->instance = instance.get();
     sharedDevice->debugUtilsCallback = debugUtilsCallback.release();
