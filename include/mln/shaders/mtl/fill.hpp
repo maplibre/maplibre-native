@@ -155,14 +155,13 @@ float sdCircle(float2 p, float r) {
     return length(p) - r;
 }
 
-float sdPlane(float2 p, float2 n, float h)
-{
+float sdPlane(float2 p, float2 n, float h) {
     // n must be normalized
-    return dot(p,n) + h;
+    return dot(p, n) + h;
 }
 
 float dot2(float2 v) {
-    return dot(v,v);
+    return dot(v, v);
 }
 
 float opUnion(float a, float b) {
@@ -170,8 +169,8 @@ float opUnion(float a, float b) {
 }
 
 float opSmoothUnion(float d1, float d2, float k) {
-    float h = clamp(0.5 + 0.5*(d2 - d1)/k, 0.0, 1.0);
-    return mix(d2, d1, h) - k*h*(1.0 - h);
+    float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
+    return mix(d2, d1, h) - k * h * (1.0 - h);
 }
 
 float opIntersection(float a, float b) {
@@ -286,7 +285,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
 #if !defined(HAS_UNIFORM_u_triangle_instance)
-    uint3 triangle_indices [[attribute(5)]];
+    uint3 triangle_indices [[attribute(4)]];
 #endif
 };
 
@@ -305,11 +304,11 @@ struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
     float color[4];
 #endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float opacity[2];
-#endif
 #if !defined(HAS_UNIFORM_u_outline_color)
     float outline_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity[2];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     ushort pattern_to[4];
@@ -616,11 +615,11 @@ struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
     float color[4];
 #endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float opacity[2];
-#endif
 #if !defined(HAS_UNIFORM_u_outline_color)
     float outline_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity[2];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     ushort pattern_to[4];
@@ -660,14 +659,14 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_color)
     half4 color;
 #endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    half opacity;
+#endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
     half4 pattern_from;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     half4 pattern_to;
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    half opacity;
 #endif
 };
 
@@ -803,14 +802,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_color)
         .color          = half4(unpack_mix_color(data[index].color, drawable.color_t)),
 #endif
+#if !defined(HAS_UNIFORM_u_opacity)
+        .opacity        = half(unpack_mix_float(data[index].opacity, drawable.opacity_t)),
+#endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
         .pattern_to     = half4(pattern_to),
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(unpack_mix_float(data[index].opacity, drawable.opacity_t)),
 #endif
     };
 }
@@ -827,6 +826,18 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
 
+#if defined(HAS_UNIFORM_u_color)
+    const auto color          = half4(props.color);
+#else
+    const auto color          = in.color;
+#endif
+
+#if defined(HAS_UNIFORM_u_opacity)
+    const auto opacity        = props.opacity;
+#else
+    const auto opacity        = in.opacity;
+#endif
+
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from   = float4(tileProps.pattern_from);
 #else
@@ -837,12 +848,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto pattern_to     = float4(tileProps.pattern_to);
 #else
     const auto pattern_to     = float4(in.pattern_to);
-#endif
-
-#if defined(HAS_UNIFORM_u_opacity)
-    const auto opacity        = props.opacity;
-#else
-    const auto opacity        = in.opacity;
 #endif
 
 #if !defined(HAS_UNIFORM_u_triangle_instance)
@@ -866,12 +871,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     if (dTri * in.external > 0) {
         discard_fragment();
     }
-#endif
-
-#if defined(HAS_UNIFORM_u_color)
-    const auto color          = half4(props.color);
-#else
-    const auto color          = in.color;
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -939,14 +938,14 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_color)
     half4 color;
 #endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    half opacity;
+#endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
     half4 pattern_from;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     half4 pattern_to;
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    half opacity;
 #endif
 };
 
@@ -960,6 +959,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillOutlinePatternDrawableUBO& drawable = drawableVector[uboIndex].fillOutlinePatternDrawableUBO;
     device const FillOutlinePatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillOutlinePatternTilePropsUBO;
 
+#if !defined(HAS_UNIFORM_u_opacity)
+    const auto opacity      = unpack_mix_float(vertx.opacity, drawable.opacity_t);
+#endif
+
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = tileProps.pattern_from;
 #else
@@ -970,10 +973,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto pattern_to   = tileProps.pattern_to;
 #else
     const auto pattern_to   = float4(vertx.pattern_to);
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-    const auto opacity      = unpack_mix_float(vertx.opacity, drawable.opacity_t);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -1001,14 +1000,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_color)
         .color          = half4(unpack_mix_color(vertx.color, drawable.color_t)),
 #endif
+#if !defined(HAS_UNIFORM_u_opacity)
+        .opacity        = half(opacity),
+#endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
         .pattern_to     = half4(pattern_to),
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(opacity),
 #endif
     };
 }
@@ -1025,6 +1024,18 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     device const FillOutlinePatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillOutlinePatternTilePropsUBO;
 
+#if defined(HAS_UNIFORM_u_color)
+    const auto color          = half4(props.color);
+#else
+    const auto color          = in.color;
+#endif
+
+#if defined(HAS_UNIFORM_u_opacity)
+    const auto opacity        = props.opacity;
+#else
+    const auto opacity        = in.opacity;
+#endif
+
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from   = float4(tileProps.pattern_from);
 #else
@@ -1035,18 +1046,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto pattern_to     = float4(tileProps.pattern_to);
 #else
     const auto pattern_to     = float4(in.pattern_to);
-#endif
-
-#if defined(HAS_UNIFORM_u_opacity)
-    const auto opacity        = props.opacity;
-#else
-    const auto opacity        = in.opacity;
-#endif
-
-#if defined(HAS_UNIFORM_u_color)
-    const auto color          = half4(props.color);
-#else
-    const auto color          = in.color;
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;

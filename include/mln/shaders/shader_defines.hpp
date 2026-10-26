@@ -423,8 +423,8 @@ enum {
 
     // Data driven
     idFillColorVertexAttribute,
-    idFillOpacityVertexAttribute,
     idFillOutlineColorVertexAttribute,
+    idFillOpacityVertexAttribute,
     idFillPatternFromVertexAttribute,
     idFillPatternToVertexAttribute,
 

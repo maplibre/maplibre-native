@@ -14,11 +14,11 @@ const std::array<AttributeInfo, 4> FillShaderSource::attributes = {
     AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 1, idFillPrevNextVertexAttribute},
 
     // Data driven
-    AttributeInfo{3, gfx::AttributeDataType::Float4, fillUBOCount + 2, idFillColorVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float2, fillUBOCount + 2, idFillOpacityVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float4, fillUBOCount + 2, idFillColorVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, fillUBOCount + 2, idFillOpacityVertexAttribute},
 };
 const std::array<AttributeInfo, 1> FillShaderSource::instanceAttributes = {
-    AttributeInfo{5, gfx::AttributeDataType::UInt3, fillUBOCount + 3, idFillTriangleInstanceAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::UInt3, fillUBOCount + 3, idFillTriangleInstanceAttribute},
 };
 const std::array<TextureInfo, 0> FillShaderSource::textures = {};
 
