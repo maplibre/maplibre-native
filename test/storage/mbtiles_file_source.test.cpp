@@ -86,23 +86,42 @@ TEST(MBTilesFileSource, TileJSON) {
     loop.run();
 }
 
-// A MapLibre Tile media type in the metadata is translated to the `mlt` source encoding
-TEST(MBTilesFileSource, TileJSONMLTMediaType) {
+namespace {
+
+// Requests the TileJSON of an MBTiles fixture and returns its content.
+std::string requestTileJSON(const std::string &fileName) {
     util::RunLoop loop;
+    std::string tileJSON;
 
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = mbtiles.request(
-        {Resource::Unknown, toAbsoluteURL("mlt-media-type.mbtiles")}, [&](Response res) {
-            req.reset();
-            EXPECT_EQ(nullptr, res.error);
-            ASSERT_TRUE(res.data.get());
-            EXPECT_NE(res.data->find(R"("format":")" + std::string(http::mltMediaType) + R"(")"), std::string::npos);
-            EXPECT_NE(res.data->find(R"("encoding":"mlt")"), std::string::npos);
-            loop.stop();
-        });
+    std::unique_ptr<AsyncRequest> req = mbtiles.request({Resource::Unknown, toAbsoluteURL(fileName)},
+                                                        [&](Response res) {
+                                                            req.reset();
+                                                            EXPECT_EQ(nullptr, res.error);
+                                                            ASSERT_TRUE(res.data.get());
+                                                            tileJSON = *res.data;
+                                                            loop.stop();
+                                                        });
 
     loop.run();
+    return tileJSON;
+}
+
+} // namespace
+
+// A MapLibre Tile media type in the metadata is translated to the `mlt` source encoding
+TEST(MBTilesFileSource, TileJSONMLTMediaType) {
+    const auto tileJSON = requestTileJSON("mlt-media-type.mbtiles");
+    EXPECT_NE(tileJSON.find(R"("format":")" + std::string(http::mltMediaType) + R"(")"), std::string::npos);
+    EXPECT_NE(tileJSON.find(R"("encoding":"mlt")"), std::string::npos);
+}
+
+// Files written by older versions of Planetiler use the previous MapLibre Tile media type
+TEST(MBTilesFileSource, TileJSONLegacyMLTMediaType) {
+    const auto tileJSON = requestTileJSON("mlt-legacy-media-type.mbtiles");
+    EXPECT_NE(tileJSON.find(R"("format":"application/vnd.maplibre-vector-tile")"), std::string::npos);
+    EXPECT_NE(tileJSON.find(R"("encoding":"mlt")"), std::string::npos);
 }
 
 // Existing tiles return tile data
