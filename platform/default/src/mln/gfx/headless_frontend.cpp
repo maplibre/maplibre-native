@@ -11,6 +11,14 @@
 
 namespace mln {
 
+namespace {
+
+Size physicalSize(const Size size, const float pixelRatio) {
+    return {static_cast<uint32_t>(size.width * pixelRatio), static_cast<uint32_t>(size.height * pixelRatio)};
+}
+
+} // namespace
+
 HeadlessFrontend::HeadlessFrontend(float pixelRatio_,
                                    gfx::HeadlessBackend::SwapBehaviour swapBehavior,
                                    const gfx::ContextMode contextMode,
@@ -23,16 +31,26 @@ HeadlessFrontend::HeadlessFrontend(Size size_,
                                    const gfx::ContextMode contextMode,
                                    const std::optional<std::string>& localFontFamily,
                                    bool invalidateOnUpdate_)
+    : HeadlessFrontend(gfx::HeadlessBackend::Create(physicalSize(size_, pixelRatio_), swapBehavior, contextMode),
+                       size_,
+                       pixelRatio_,
+                       localFontFamily,
+                       invalidateOnUpdate_) {}
+
+HeadlessFrontend::HeadlessFrontend(std::unique_ptr<gfx::HeadlessBackend> backend_,
+                                   Size size_,
+                                   float pixelRatio_,
+                                   const std::optional<std::string>& localFontFamily,
+                                   bool invalidateOnUpdate_)
     : size(size_),
       pixelRatio(pixelRatio_),
       frameTime(0),
-      backend(gfx::HeadlessBackend::Create(
-          {static_cast<uint32_t>(size.width * pixelRatio), static_cast<uint32_t>(size.height * pixelRatio)},
-          swapBehavior,
-          contextMode)),
+      backend(std::move(backend_)),
       asyncInvalidate([this] { renderFrame(); }),
       invalidateOnUpdate(invalidateOnUpdate_),
-      renderer(std::make_unique<Renderer>(*getBackend(), pixelRatio, localFontFamily)) {}
+      renderer(std::make_unique<Renderer>(*getBackend(), pixelRatio, localFontFamily)) {
+    backend->setSize(physicalSize(size, pixelRatio));
+}
 
 HeadlessFrontend::~HeadlessFrontend() = default;
 
@@ -123,8 +141,7 @@ LatLng HeadlessFrontend::latLngForPixel(const ScreenCoordinate& point) {
 void HeadlessFrontend::setSize(Size size_) {
     if (size != size_) {
         size = size_;
-        backend->setSize(
-            {static_cast<uint32_t>(size_.width * pixelRatio), static_cast<uint32_t>(size_.height * pixelRatio)});
+        backend->setSize(physicalSize(size, pixelRatio));
     }
 }
 

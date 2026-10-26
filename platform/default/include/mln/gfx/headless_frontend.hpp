@@ -33,6 +33,13 @@ public:
                      gfx::ContextMode mode = gfx::ContextMode::Unique,
                      const std::optional<std::string>& localFontFamily = std::nullopt,
                      bool invalidateOnUpdate_ = true);
+    /// Renders with the given backend, for example one that shares its graphics device with others.
+    /// The backend is resized to `size` × `pixelRatio`.
+    HeadlessFrontend(std::unique_ptr<gfx::HeadlessBackend>,
+                     Size,
+                     float pixelRatio_,
+                     const std::optional<std::string>& localFontFamily = std::nullopt,
+                     bool invalidateOnUpdate_ = true);
     ~HeadlessFrontend() override;
 
     void reset() override;
