@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/text/glyph.hpp>
+#include <mln/text/glyph_cache.hpp>
 #include <mln/text/glyph_manager_observer.hpp>
 #include <mln/text/glyph_range.hpp>
 #include <mln/text/local_glyph_rasterizer.hpp>
@@ -45,7 +46,8 @@ public:
     GlyphManager(const GlyphManager &) = delete;
     GlyphManager &operator=(const GlyphManager &) = delete;
     explicit GlyphManager(
-        std::unique_ptr<LocalGlyphRasterizer> = std::make_unique<LocalGlyphRasterizer>(std::optional<std::string>()));
+        std::unique_ptr<LocalGlyphRasterizer> = std::make_unique<LocalGlyphRasterizer>(std::optional<std::string>()),
+        std::shared_ptr<GlyphCache> = GlyphCache::Get());
     ~GlyphManager();
 
     // Workers send a `getGlyphs` message to the main thread once they have
@@ -104,6 +106,7 @@ private:
 
     // Shaping objects
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
+    std::shared_ptr<GlyphCache> glyphCache;
     std::shared_ptr<FontFaces> fontFaces;
 
     FreeTypeLibrary ftLibrary;
