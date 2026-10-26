@@ -11,7 +11,7 @@ using FillShaderSource = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::M
 
 const std::array<AttributeInfo, 4> FillShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
-    
+
     // Used only in rounded corners
     AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 1, idFillNeighborVertexAttribute},
 
@@ -46,7 +46,7 @@ using FillPatternShaderSource = ShaderSource<BuiltIn::FillPatternShader, gfx::Ba
 
 const std::array<AttributeInfo, 6> FillPatternShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
-    
+
     // Used only in rounded corners
     AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 1, idFillNeighborVertexAttribute},
 
