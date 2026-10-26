@@ -19,7 +19,7 @@ VectorSource::VectorSource(std::string id,
                            variant<std::string, Tileset> urlOrTileset_,
                            std::optional<float> maxZoom_,
                            std::optional<float> minZoom_,
-                           Tileset::VectorEncoding encoding_)
+                           std::optional<Tileset::VectorEncoding> encoding_)
     : TileSource(id, urlOrTileset_, util::tileSize_I, SourceType::Vector),
       maxZoom(std::move(maxZoom_)),
       minZoom(std::move(minZoom_)),
@@ -32,7 +32,10 @@ void VectorSource::setTilesetOverrides(Tileset& tileset) {
     if (minZoom) {
         tileset.zoomRange.min = static_cast<uint8_t>(*minZoom);
     }
-    tileset.vectorEncoding = encoding;
+    // Only override when the style asked for an encoding, so that one declared by the TileJSON is kept.
+    if (encoding) {
+        tileset.vectorEncoding = encoding;
+    }
 }
 
 const std::vector<std::string> VectorSource::getTiles() const {

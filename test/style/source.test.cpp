@@ -18,6 +18,7 @@
 #include <mln/style/sources/image_source.hpp>
 #include <mln/style/sources/raster_dem_source.hpp>
 #include <mln/style/sources/raster_source.hpp>
+#include <mln/style/sources/tile_source_impl.hpp>
 #include <mln/style/sources/vector_source.hpp>
 #include <mln/style/style.hpp>
 
@@ -663,6 +664,50 @@ TEST(Source, RasterDEMTileAttribution) {
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
     test.run();
+}
+
+namespace {
+
+// Loads a vector source from a TileJSON that contains `tileJSONExtra` and returns the encoding of the resulting
+// tileset.
+std::optional<Tileset::VectorEncoding> loadVectorEncoding(const std::string& tileJSONExtra,
+                                                          std::optional<Tileset::VectorEncoding> requested) {
+    SourceTest test;
+    std::optional<Tileset::VectorEncoding> loaded;
+
+    test.fileSource->sourceResponse = [&](const Resource&) {
+        Response response;
+        response.data = std::make_unique<std::string>(R"TILEJSON({ "tilejson": "2.1.0", "tiles": [ "tiles" ])TILEJSON" +
+                                                      tileJSONExtra + "}");
+        return response;
+    };
+
+    test.styleObserver.sourceLoaded = [&](Source& source) {
+        loaded = static_cast<const TileSource::Impl&>(*source.baseImpl).tileset->vectorEncoding;
+        test.end();
+    };
+
+    VectorSource source("source", "url", std::nullopt, std::nullopt, requested);
+    source.setObserver(&test.styleObserver);
+    source.loadDescription(*test.fileSource);
+
+    test.run();
+    return loaded;
+}
+
+} // namespace
+
+TEST(Source, VectorSourceKeepsEncodingDeclaredByTileJSON) {
+    EXPECT_EQ(Tileset::VectorEncoding::MLT, loadVectorEncoding(R"(, "encoding": "mlt")", std::nullopt));
+}
+
+TEST(Source, VectorSourceEncodingOverridesTileJSON) {
+    EXPECT_EQ(Tileset::VectorEncoding::Mapbox,
+              loadVectorEncoding(R"(, "encoding": "mlt")", Tileset::VectorEncoding::Mapbox));
+}
+
+TEST(Source, VectorSourceEncodingUnspecified) {
+    EXPECT_FALSE(loadVectorEncoding("", std::nullopt));
 }
 
 TEST(Source, GeoJSonSourceUrlUpdate) {
