@@ -5,6 +5,7 @@
 #include <mln/util/weak_immutable.hpp>
 
 #include <cstddef>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -27,8 +28,14 @@ public:
     /// The cache of the process. It lives as long as something holds it.
     static std::shared_ptr<GlyphCache> Get();
 
+    using Range = std::map<GlyphID, Immutable<Glyph>>;
+
     /// Safe to call from any thread.
     Immutable<Glyph> intern(Glyph&&);
+
+    /// The glyphs of a range, shared with the other owners of a range with the same glyphs. Intern the
+    /// glyphs first: ranges are compared by the glyphs they point to. Safe to call from any thread.
+    std::shared_ptr<const Range> intern(Range&&);
 
     /// The number of distinct glyphs alive.
     std::size_t size();
@@ -38,7 +45,9 @@ private:
 
     std::mutex mutex;
     std::unordered_multimap<std::size_t, WeakImmutable<Glyph>> glyphs;
+    std::unordered_multimap<std::size_t, std::weak_ptr<const Range>> ranges;
     std::size_t nextSweep;
+    std::size_t nextRangeSweep;
 };
 
 } // namespace mln

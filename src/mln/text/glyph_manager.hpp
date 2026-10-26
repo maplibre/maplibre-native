@@ -9,6 +9,7 @@
 #include <mln/util/immutable.hpp>
 
 #include <mutex>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -89,12 +90,17 @@ private:
         bool parsed = false;
         std::unique_ptr<AsyncRequest> req;
         std::unordered_map<GlyphRequestor *, std::shared_ptr<GlyphDependencies>> requestors;
+        // The glyphs of a PBF range, shared with the managers that loaded the same ones.
+        std::shared_ptr<const GlyphCache::Range> glyphs;
     };
 
     struct Entry {
         std::map<GlyphRange, GlyphRequest> ranges;
+        // Glyphs drawn here: local ideographs and HarfBuzz font faces.
         std::map<GlyphID, Immutable<Glyph>> glyphs;
     };
+
+    std::optional<Immutable<Glyph>> findGlyph(const Entry &, GlyphID) const;
 
     std::unordered_map<FontStack, Entry, FontStackHasher> entries;
 

@@ -126,6 +126,11 @@ public:
     }
 };
 
+class LatinALocalGlyphRasterizer : public StubLocalGlyphRasterizer {
+public:
+    bool canRasterizeGlyph(const FontStack&, GlyphID glyphID) override { return glyphID.hash == u'a'; }
+};
+
 class StubGlyphManagerObserver : public GlyphManagerObserver {
 public:
     void onGlyphsLoaded(const FontStack& fontStack, const GlyphRange& glyphRange) override {
@@ -305,6 +310,19 @@ TEST(GlyphManager, ReleasesTheGlyphsOfEvictedFontStacks) {
     test.glyphManager.evict({});
 
     EXPECT_EQ(0u, cache->size());
+}
+
+TEST(GlyphManager, DoesNotKeepTheRangeGlyphsItDrawsLocally) {
+    const auto loadedGlyphs = [](std::unique_ptr<LocalGlyphRasterizer> rasterizer) {
+        const auto cache = std::make_shared<GlyphCache>();
+        GlyphManagerTest test(std::move(rasterizer), cache);
+        test.load({"Test Stack"}, {u'a', u'å'});
+        return cache->size();
+    };
+
+    const std::size_t all = loadedGlyphs(std::make_unique<StubLocalGlyphRasterizer>());
+
+    EXPECT_EQ(all - 1, loadedGlyphs(std::make_unique<LatinALocalGlyphRasterizer>()));
 }
 
 TEST(GlyphManager, LoadingCancel) {

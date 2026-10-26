@@ -67,6 +67,21 @@ TEST(GlyphCache, InternsTheSameRangeParsedOnTwoThreads) {
     EXPECT_EQ(first, second);
 }
 
+TEST(GlyphCache, InternsRangesOfTheSameGlyphsOnce) {
+    GlyphCache cache;
+    const Immutable<Glyph> a = cache.intern(glyph(u'a', 1));
+
+    EXPECT_EQ(cache.intern(GlyphCache::Range{{u'a', a}}), cache.intern(GlyphCache::Range{{u'a', a}}));
+}
+
+TEST(GlyphCache, KeepsRangesOfDifferentGlyphsApart) {
+    GlyphCache cache;
+    const Immutable<Glyph> a = cache.intern(glyph(u'a', 1));
+    const Immutable<Glyph> b = cache.intern(glyph(u'a', 2));
+
+    EXPECT_NE(cache.intern(GlyphCache::Range{{u'a', a}}), cache.intern(GlyphCache::Range{{u'a', b}}));
+}
+
 TEST(GlyphCache, GetReturnsTheCacheInUse) {
     const std::shared_ptr<GlyphCache> cache = GlyphCache::Get();
 

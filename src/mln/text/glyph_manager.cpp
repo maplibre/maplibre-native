@@ -141,11 +141,22 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
                 return;
             }
 
-            for (auto& glyph : glyphs) {
-                auto id = glyph.id;
-                if (!localGlyphRasterizer->canRasterizeGlyph(fontStack, id)) {
-                    entry.glyphs.erase(id);
-                    entry.glyphs.emplace(id, glyphCache->intern(std::move(glyph)));
+            if (range.type == GlyphIDType::FontPBF) {
+                GlyphCache::Range rangeGlyphs;
+                for (auto& glyph : glyphs) {
+                    auto id = glyph.id;
+                    if (!localGlyphRasterizer->canRasterizeGlyph(fontStack, id)) {
+                        rangeGlyphs.insert_or_assign(id, glyphCache->intern(std::move(glyph)));
+                    }
+                }
+                request.glyphs = glyphCache->intern(std::move(rangeGlyphs));
+            } else {
+                for (auto& glyph : glyphs) {
+                    auto id = glyph.id;
+                    if (!localGlyphRasterizer->canRasterizeGlyph(fontStack, id)) {
+                        entry.glyphs.erase(id);
+                        entry.glyphs.emplace(id, makeMutable<Glyph>(std::move(glyph)));
+                    }
                 }
             }
         }
@@ -171,6 +182,8 @@ void GlyphManager::setObserver(GlyphManagerObserver* observer_) {
 }
 
 void GlyphManager::notify(GlyphRequestor& requestor, const GlyphDependencies& glyphDependencies) {
+    // getGlyphs() calls this without the lock, while other threads may be adding ranges.
+    std::scoped_lock readWriteLock(rwLock);
     GlyphMap response;
 
     for (const auto& dependency : glyphDependencies.glyphs) {
@@ -181,12 +194,7 @@ void GlyphManager::notify(GlyphRequestor& requestor, const GlyphDependencies& gl
         Entry& entry = entries[fontStack];
 
         for (const auto& glyphID : glyphIDs) {
-            auto it = entry.glyphs.find(glyphID);
-            if (it != entry.glyphs.end()) {
-                glyphs.emplace(*it);
-            } else {
-                glyphs.emplace(glyphID, std::nullopt);
-            }
+            glyphs.emplace(glyphID, findGlyph(entry, glyphID));
         }
     }
 
@@ -225,9 +233,27 @@ bool GlyphManager::loadHBShaper(const FontStack& fontStack, GlyphIDType type, co
     return true;
 }
 
+std::optional<Immutable<Glyph>> GlyphManager::findGlyph(const Entry& entry, GlyphID glyphID) const {
+    if (auto it = entry.glyphs.find(glyphID); it != entry.glyphs.end()) {
+        return it->second;
+    }
+    if (glyphID.complex.type != GlyphIDType::FontPBF) {
+        return std::nullopt;
+    }
+    auto range = entry.ranges.find(getGlyphRange(glyphID));
+    if (range == entry.ranges.end() || !range->second.glyphs) {
+        return std::nullopt;
+    }
+    if (auto it = range->second.glyphs->find(glyphID); it != range->second.glyphs->end()) {
+        return it->second;
+    }
+    return std::nullopt;
+}
+
 Immutable<Glyph> GlyphManager::getGlyph(const FontStack& fontStack, GlyphID glyphID) {
+    std::scoped_lock readWriteLock(rwLock);
     auto& entry = entries[fontStack];
-    if (entry.glyphs.find(glyphID) != entry.glyphs.end()) return entry.glyphs.at(glyphID);
+    if (auto glyph = findGlyph(entry, glyphID)) return *glyph;
 
     if (glyphID.complex.type != FontPBF) {
         auto shaper = getHBShaper(fontStack, glyphID.complex.type);
