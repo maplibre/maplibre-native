@@ -1617,9 +1617,10 @@ std::unique_ptr<mln::AsyncRequest> NodeFileSource::request(const mln::Resource& 
                                    Nan::New<v8::External>(&callback_),
                                    Nan::New<v8::External>(asyncRequest.get()),
                                    Nan::New(resource.url).ToLocalChecked(),
-                                   Nan::New<v8::Integer>(resource.kind)};
+                                   Nan::New<v8::Integer>(resource.kind),
+                                   Nan::New(resource.acceptHeader).ToLocalChecked()};
 
-    Nan::NewInstance(Nan::New(node_mbgl::NodeRequest::constructor), 5, argv).ToLocalChecked();
+    Nan::NewInstance(Nan::New(node_mbgl::NodeRequest::constructor), 6, argv).ToLocalChecked();
 
     return asyncRequest;
 }
