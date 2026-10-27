@@ -25,6 +25,7 @@ public:
 
 private:
     const float zoom;
+    const std::shared_ptr<const GlobalStateMap> globalState;
     std::vector<Immutable<style::LayerProperties>> layers;
     std::unique_ptr<GeometryTileLayer> sourceLayer;
     plugin::RegisteredLayerPtr registration;
