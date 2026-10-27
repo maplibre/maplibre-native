@@ -1,9 +1,13 @@
+#include <mln/storage/file_source_manager.hpp>
 #include <mln/storage/pmtiles_file_source.hpp>
 #include <mln/storage/resource.hpp>
 #include <mln/storage/resource_options.hpp>
+#include <mln/util/async_request.hpp>
 #include <mln/util/platform.hpp>
 #include <mln/util/run_loop.hpp>
 
+#include <atomic>
+#include <cassert>
 #include <filesystem>
 
 #include <climits>
@@ -11,7 +15,7 @@
 
 namespace {
 
-std::string toAbsoluteURL(const std::string &fileName) {
+std::string toAbsoluteURL(const std::string& fileName) {
     auto path = std::filesystem::current_path() / "test/fixtures/storage/pmtiles" / fileName;
     return std::string(mln::util::PMTILES_PROTOCOL) + std::string(mln::util::FILE_PROTOCOL) + path.string();
 }
@@ -19,6 +23,73 @@ std::string toAbsoluteURL(const std::string &fileName) {
 } // namespace
 
 using namespace mln;
+
+namespace {
+
+// Probe installed as the ResourceLoader factory: counts the inner requests a
+// PMTilesFileSource holds live, so tests can observe entries leaking from its `tasks` map
+// (https://github.com/maplibre/maplibre-native/issues/4852).
+class CountingRequest final : public AsyncRequest {
+public:
+    CountingRequest(std::unique_ptr<AsyncRequest> inner_, std::atomic<int>& liveRequests_)
+        : inner(std::move(inner_)),
+          liveRequests(liveRequests_) {
+        ++liveRequests;
+    }
+
+    ~CountingRequest() override { --liveRequests; }
+
+private:
+    std::unique_ptr<AsyncRequest> inner;
+    std::atomic<int>& liveRequests;
+};
+
+class CountingResourceLoader final : public FileSource {
+public:
+    CountingResourceLoader(std::unique_ptr<FileSource> inner_, std::atomic<int>& liveRequests_)
+        : inner(std::move(inner_)),
+          liveRequests(liveRequests_) {}
+
+    std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) override {
+        return std::make_unique<CountingRequest>(inner->request(resource, std::move(callback)), liveRequests);
+    }
+
+    bool canRequest(const Resource& resource) const override { return inner->canRequest(resource); }
+
+    void setResourceOptions(ResourceOptions options) override { inner->setResourceOptions(std::move(options)); }
+    ResourceOptions getResourceOptions() override { return inner->getResourceOptions(); }
+    void setClientOptions(ClientOptions options) override { inner->setClientOptions(std::move(options)); }
+    ClientOptions getClientOptions() override { return inner->getClientOptions(); }
+
+private:
+    std::unique_ptr<FileSource> inner;
+    std::atomic<int>& liveRequests;
+};
+
+// Replaces the ResourceLoader factory with one producing CountingResourceLoaders and restores
+// the original factory on destruction.
+class CountingResourceLoaderGuard {
+public:
+    explicit CountingResourceLoaderGuard(std::atomic<int>& liveRequests)
+        : original(FileSourceManager::get()->unRegisterFileSourceFactory(FileSourceType::ResourceLoader)) {
+        assert(original);
+        FileSourceManager::get()->registerFileSourceFactory(
+            FileSourceType::ResourceLoader,
+            [&liveRequests, factory = original](const ResourceOptions& resourceOptions,
+                                                const ClientOptions& clientOptions) -> std::unique_ptr<FileSource> {
+                return std::make_unique<CountingResourceLoader>(factory(resourceOptions, clientOptions), liveRequests);
+            });
+    }
+
+    ~CountingResourceLoaderGuard() {
+        FileSourceManager::get()->registerFileSourceFactory(FileSourceType::ResourceLoader, std::move(original));
+    }
+
+private:
+    FileSourceManager::FileSourceFactory original;
+};
+
+} // namespace
 
 TEST(PMTilesFileSource, AcceptsURL) {
     PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
@@ -178,6 +249,83 @@ TEST(PMTilesFileSource, RepeatedTileRequest) {
         });
 
     loop.run();
+}
+
+// Regression test for https://github.com/maplibre/maplibre-native/issues/4852 — the entry
+// PMTilesFileSource keeps in its `tasks` map for an outer request must be released when that
+// request is destroyed, or the inner request (and its mailbox) lives as long as the file
+// source. The expected count of 1 is the live request's own entry; anything higher is a leak,
+// and 0 would mean the counting probe was not in use.
+//
+// The later request is always created while the earlier one is still alive: otherwise a new
+// outer request can be allocated at the freed request's address, take over its `tasks` slot,
+// and release the leaked entry by overwriting it, hiding the leak from the test. The
+// synchronous getResourceOptions() ask round-trips the impl thread's mailbox behind the
+// queued cancel, so after it returns the destroyed request's entry is gone for certain, and
+// with every remaining request already answered the count is stable.
+TEST(PMTilesFileSource, ReleasesTaskOfDestroyedRequest) {
+    util::RunLoop loop;
+
+    std::atomic<int> liveInnerRequests{0};
+    CountingResourceLoaderGuard guard(liveInnerRequests);
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req1 = pmtiles.request(
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response res1) {
+            ASSERT_EQ(nullptr, res1.error);
+            ASSERT_TRUE(res1.data.get());
+            loop.stop();
+        });
+
+    loop.run();
+
+    std::unique_ptr<AsyncRequest> req2 = pmtiles.request(
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response res2) {
+            EXPECT_EQ(nullptr, res2.error);
+            ASSERT_TRUE(res2.data.get());
+            loop.stop();
+        });
+    req1.reset();
+
+    loop.run();
+
+    (void)pmtiles.getResourceOptions();
+    EXPECT_EQ(1, liveInnerRequests.load());
+}
+
+// Regression test for https://github.com/maplibre/maplibre-native/issues/4852 — a request
+// cancelled before it is answered must release its task entry too, must never be answered,
+// and must leave the source serving later requests. See ReleasesTaskOfDestroyedRequest for
+// why the second request is created before the first is destroyed and what the ask is for.
+TEST(PMTilesFileSource, ReleasesTaskOfCancelledRequest) {
+    util::RunLoop loop;
+
+    std::atomic<int> liveInnerRequests{0};
+    CountingResourceLoaderGuard guard(liveInnerRequests);
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    auto cancelled = pmtiles.request(
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response) { ADD_FAILURE() << "A cancelled request was answered"; });
+
+    std::unique_ptr<AsyncRequest> req = pmtiles.request(
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response res) {
+            EXPECT_EQ(nullptr, res.error);
+            ASSERT_TRUE(res.data.get());
+            loop.stop();
+        });
+
+    cancelled.reset();
+
+    loop.run();
+
+    (void)pmtiles.getResourceOptions();
+    EXPECT_EQ(1, liveInnerRequests.load());
 }
 
 // An archive whose header flags tile_compression=GZIP but whose individual tiles are stored
