@@ -2,7 +2,6 @@ load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load("@rules_apple//apple:ios.bzl", "ios_application")
 load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
 load("@rules_swift//swift:swift.bzl", "swift_library")
-load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
 # The layer types of the plugins only exist in a build with plugin support, and the plugin wrappers only build with the
 # Metal renderer:
@@ -15,8 +14,6 @@ _PLUGINS_ONLY = select({
     "//:metal_renderer": [],
     "//conditions:default": ["@platforms//:incompatible"],
 })
-
-configure_device_profiles()
 
 swift_library(
     name = "Sources",
@@ -34,6 +31,7 @@ swift_library(
 apple_bundle_version(
     name = "plugin_demo_version",
     build_version = "1.0.0",
+    target_compatible_with = _PLUGINS_ONLY,
 )
 
 ios_application(
@@ -45,7 +43,7 @@ ios_application(
     ],
     infoplists = ["Info.plist"],
     minimum_os_version = "16.0",
-    provisioning_profile = "xcode_profile",
+    provisioning_profile = "//platform/ios:xcode_profile",
     resources = ["//plugins/demo/assets:styles"],
     target_compatible_with = _PLUGINS_ONLY,
     version = ":plugin_demo_version",
