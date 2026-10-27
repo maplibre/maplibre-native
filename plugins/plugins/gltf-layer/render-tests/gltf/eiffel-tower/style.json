@@ -1,0 +1,59 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 256,
+      "height": 320,
+      "pixelRatio": 3,
+      "description": "A real model, the CC0 Eiffel tower, with its many materials drawn at its true size in meters"
+    }
+  },
+  "center": [
+    -0.000614,
+    -0.001688
+  ],
+  "zoom": 15.5,
+  "pitch": 55.0,
+  "bearing": 200.0,
+  "sources": {
+    "tower": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                0
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#eef2f5"
+      }
+    },
+    {
+      "id": "tower",
+      "type": "gltf",
+      "source": "tower",
+      "layout": {
+        "model-uri": "asset://plugins/plugins/gltf-layer/render-tests/assets/eiffel-tower.glb"
+      },
+      "paint": {
+        "model-scale": 1
+      }
+    }
+  ]
+}
