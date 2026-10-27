@@ -121,13 +121,51 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                            std::vector<Immutable<style::LayerProperties>> layers_,
                            std::unique_ptr<GeometryTileLayer> sourceLayer_,
                            plugin::RegisteredLayerPtr registration_,
-                           LayoutResourceDependencies* resourceDependencies)
+                           const LayoutParameters* layoutParameters)
     : zoom(parameters.tileID.overscaledZ),
       globalState(parameters.globalState),
       layers(std::move(layers_)),
       sourceLayer(std::move(sourceLayer_)),
       registration(std::move(registration_)) {
-    if (!sourceLayer || layers.empty() || !usesResources(*registration)) return;
+    if (!sourceLayer || layers.empty()) return;
+
+    // The sprite images that IMAGE properties name, so the worker can load them before createBucket.
+    if (layoutParameters) {
+        for (const auto& layer : layers) {
+            const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
+            for (const auto& definition : registration->properties) {
+                if (definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
+                const auto it = impl.pluginProperties.find(definition.name);
+                if (it == impl.pluginProperties.end()) continue;
+                needsImages = true;
+                const auto& value = it->second;
+                style::PluginPropertyValue::EvaluationStorage storage;
+                const auto add = [&](const mln_plugin_value& image) {
+                    if (image.data.string_value.size)
+                        layoutParameters->imageDependencies.emplace(
+                            std::string(image.data.string_value.data, image.data.string_value.size),
+                            ImageType::Pattern);
+                };
+                for (float z : {zoom - 1, zoom, zoom + 1}) {
+                    if (!value.isDataDriven())
+                        add(value.evaluate(z, definition, storage, &layoutParameters->availableImages));
+                    else
+                        for (size_t i = 0; i < sourceLayer->featureCount(); ++i) {
+                            const auto feature = sourceLayer->getFeature(i);
+                            if (feature)
+                                add(value.evaluate(z + (value.isZoomConstant() ? 0 : 1),
+                                                   *feature,
+                                                   {},
+                                                   definition,
+                                                   storage,
+                                                   &layoutParameters->availableImages));
+                        }
+                }
+            }
+        }
+    }
+
+    if (!usesResources(*registration)) return;
 
     // The resources the tile's features name, so the worker can load them before createBucket.
     const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
@@ -146,7 +184,7 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
             }
         }
     }
-    if (resourceDependencies) resourceDependencies->insert(resourceURLs.begin(), resourceURLs.end());
+    if (layoutParameters) layoutParameters->resourceDependencies.insert(resourceURLs.begin(), resourceURLs.end());
 }
 
 void PluginLayout::prepareResources(const LayoutResourceMap& available) {
@@ -178,7 +216,7 @@ void* PluginLayout::resourceHandle(const std::string& url) {
     return made.get();
 }
 
-void PluginLayout::createBucket(const ImagePositions&,
+void PluginLayout::createBucket(const ImagePositions& imagePositions,
                                 std::unique_ptr<FeatureIndex>& featureIndex,
                                 mln::unordered_map<std::string, LayerRenderData>& renderData,
                                 bool,
@@ -240,6 +278,7 @@ void PluginLayout::createBucket(const ImagePositions&,
     }
 
     auto bucket = std::make_shared<PluginBucket>(registration);
+    const auto positions = std::make_shared<const ImagePositions>(imagePositions);
     std::set<uint32_t> streamIDs;
     bool valid = output.struct_size >= sizeof(output) && std::isfinite(output.query_radius) &&
                  output.query_radius >= 0.0f && (output.vertex_stream_count == 0 || output.vertex_streams) &&
@@ -302,6 +341,8 @@ void PluginLayout::createBucket(const ImagePositions&,
         if (!valid) break;
         std::set<uint32_t> boundAttributeIDs;
         std::optional<std::size_t> drawableVertexCount;
+        std::size_t availableRecords = std::numeric_limits<std::size_t>::max();
+        drawable.instanced = shaderIt->instanced;
         for (size_t bindingIndex = 0; valid && bindingIndex < input.attribute_count; ++bindingIndex) {
             const auto& binding = input.attributes[bindingIndex];
             valid = binding.struct_size >= sizeof(binding);
@@ -318,11 +359,14 @@ void PluginLayout::createBucket(const ImagePositions&,
                     hostAttributeIDs.find(binding.attribute_id) == hostAttributeIDs.end() &&
                     binding.byte_offset <= streamIt->second->getRawSize() &&
                     size <= streamIt->second->getRawSize() - binding.byte_offset &&
+                    binding.element_offset < streamIt->second->getRawCount() &&
                     boundAttributeIDs.emplace(binding.attribute_id).second &&
                     (!drawableVertexCount || *drawableVertexCount == streamIt->second->getRawCount());
             if (valid) {
                 drawableVertexCount = streamIt->second->getRawCount();
-                drawable.attributes.push_back({binding.attribute_id, binding.stream_id, binding.byte_offset, type});
+                availableRecords = std::min(availableRecords, *drawableVertexCount - binding.element_offset);
+                drawable.attributes.push_back(
+                    {binding.attribute_id, binding.stream_id, binding.byte_offset, type, binding.element_offset});
             }
         }
         if (drawableVertexCount) drawable.vertexCount = *drawableVertexCount;
@@ -330,7 +374,13 @@ void PluginLayout::createBucket(const ImagePositions&,
             const auto& segment = input.segments[segmentIndex];
             valid = segment.struct_size >= sizeof(segment) &&
                     validRange(segment.index_offset, segment.index_length, output.index_count) && drawableVertexCount &&
-                    validRange(segment.vertex_offset, segment.vertex_length, *drawableVertexCount);
+                    segment.vertex_length > 0 && segment.vertex_offset <= INT32_MAX &&
+                    segment.vertex_length <= uint32_t(INT32_MAX) - segment.vertex_offset &&
+                    (drawable.instanced
+                         ? segment.instance_count > 0 &&
+                               validRange(segment.first_instance, segment.instance_count, availableRecords)
+                         : segment.first_instance == 0 && segment.instance_count == 0 &&
+                               validRange(segment.vertex_offset, segment.vertex_length, availableRecords));
             if (valid) {
                 for (size_t index = segment.index_offset; index < segment.index_offset + segment.index_length;
                      ++index) {
@@ -341,8 +391,14 @@ void PluginLayout::createBucket(const ImagePositions&,
                 }
             }
             if (valid) {
-                drawable.segments.emplace_back(
-                    segment.vertex_offset, segment.index_offset, segment.vertex_length, segment.index_length);
+                drawable.primitiveVertexCount = std::max(drawable.primitiveVertexCount,
+                                                         size_t(segment.vertex_offset) + segment.vertex_length);
+                drawable.segments.emplace_back(segment.vertex_offset,
+                                               segment.index_offset,
+                                               segment.vertex_length,
+                                               segment.index_length,
+                                               segment.first_instance,
+                                               drawable.instanced ? segment.instance_count : 1);
             }
         }
         if (valid) bucket->drawables.push_back(std::move(drawable));
@@ -398,11 +454,29 @@ void PluginLayout::createBucket(const ImagePositions&,
                                              registration->shaders.end(),
                                              [&](const auto& candidate) { return candidate.id == drawable.shaderID; });
             if (shader == registration->shaders.end() || shader->propertyBindings.empty()) continue;
-            layerBinders.emplace(
-                std::piecewise_construct,
-                std::forward_as_tuple(drawable.key),
-                std::forward_as_tuple(
-                    registration, *shader, drawable.key, drawable.vertexCount, zoom, impl.pluginProperties, features));
+            // Roof and wall drawables can address identical feature records at
+            // different input rates. Share their paint buffers and update once.
+            std::shared_ptr<PluginPaintPropertyBinders> binders;
+            for (const auto& candidate : bucket->drawables) {
+                const auto existing = layerBinders.find(candidate.key);
+                if (existing == layerBinders.end() || candidate.vertexCount != drawable.vertexCount) continue;
+                const auto candidateShader = std::find_if(
+                    registration->shaders.begin(), registration->shaders.end(), [&](const auto& item) {
+                        return item.id == candidate.shaderID;
+                    });
+                if (candidateShader != registration->shaders.end() &&
+                    candidateShader->propertyBindings == shader->propertyBindings &&
+                    features->drawable(candidate.key).ranges == features->drawable(drawable.key).ranges) {
+                    binders = existing->second;
+                    break;
+                }
+            }
+            if (!binders) {
+                binders = std::make_shared<PluginPaintPropertyBinders>(
+                    registration, *shader, drawable.key, drawable.vertexCount, zoom, impl.pluginProperties, features);
+                binders->setPatternPositions(positions);
+            }
+            layerBinders.emplace(drawable.key, std::move(binders));
         }
         bucket->updateQueryRadius(impl.id, impl.pluginProperties, zoom);
     }

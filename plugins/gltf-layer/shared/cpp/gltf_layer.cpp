@@ -449,10 +449,10 @@ mln_plugin_status finishLayout(void* instance, mln_plugin_bucket_v1* output) {
 
     // Attributes 1-5 are the paint properties, which the host binds itself.
     layout.attributes = {{
-        {sizeof(mln_plugin_attribute_binding_v1), 0, vertexStream, offsetof(Vertex, position)},
-        {sizeof(mln_plugin_attribute_binding_v1), 6, vertexStream, offsetof(Vertex, model)},
-        {sizeof(mln_plugin_attribute_binding_v1), 7, vertexStream, offsetof(Vertex, normal)},
-        {sizeof(mln_plugin_attribute_binding_v1), 8, vertexStream, offsetof(Vertex, color)},
+        {sizeof(mln_plugin_attribute_binding_v1), 0, vertexStream, offsetof(Vertex, position), 0},
+        {sizeof(mln_plugin_attribute_binding_v1), 6, vertexStream, offsetof(Vertex, model), 0},
+        {sizeof(mln_plugin_attribute_binding_v1), 7, vertexStream, offsetof(Vertex, normal), 0},
+        {sizeof(mln_plugin_attribute_binding_v1), 8, vertexStream, offsetof(Vertex, color), 0},
     }};
 
     if (!layout.segments.empty()) {
@@ -688,7 +688,9 @@ const mln_plugin_shader_descriptor_v1 shaders[] = {
      uniforms,
      std::size(uniforms),
      propertyBindings,
-     std::size(propertyBindings)},
+     std::size(propertyBindings),
+     0,
+     0},
 };
 const mln_plugin_layer_type_v1 layerType = [] {
     mln_plugin_layer_type_v1 v{};
@@ -705,7 +707,6 @@ const mln_plugin_layer_type_v1 layerType = [] {
     v.finish_layout = finishLayout;
     v.destroy_layout = destroyLayout;
     v.update_uniform_block = updateUniform;
-    v.enable_stencil_overlap_dedup = 0;
     v.enable_near_clipped_matrix = 1;
     v.create_resource = createResource;
     v.destroy_resource = destroyResource;

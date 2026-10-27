@@ -1,6 +1,7 @@
 #include <mln/style/layers/plugin_style_layer.hpp>
 #include <mln/style/layer_observer.hpp>
 #include <mln/style/conversion_impl.hpp>
+#include <mln/style/conversion/stringify.hpp>
 #include <mln/style/conversion/transition_options.hpp>
 
 namespace mln {
@@ -35,7 +36,7 @@ bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const
     if (filter != other.filter || visibility != other.visibility) return true;
     const auto& otherProperties = static_cast<const Impl&>(other).pluginProperties;
     for (const auto& definition : registration->properties) {
-        if (!definition.layout) continue;
+        if (!definition.layout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
         const auto mine = pluginProperties.find(definition.name);
         const auto theirs = otherProperties.find(definition.name);
         const bool mineSet = mine != pluginProperties.end();
@@ -47,6 +48,13 @@ bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const
 
 void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
     writer.StartObject();
+    for (const auto& definition : registration->properties) {
+        if (!definition.layout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
+        const auto it = pluginProperties.find(definition.name);
+        const auto value = it == pluginProperties.end() ? defaultPluginPropertyValue(definition) : it->second;
+        writer.String(definition.name);
+        conversion::stringify(writer, value.toStyleProperty().getValue());
+    }
     writer.EndObject();
 }
 
@@ -56,6 +64,10 @@ const LayerTypeInfo* PluginStyleLayer::Impl::getTypeInfo() const noexcept {
 
 expression::Dependency PluginStyleLayer::Impl::getDependencies() const noexcept {
     expression::Dependency result = expression::Dependency::None;
+    if (std::any_of(registration->properties.begin(), registration->properties.end(), [](const auto& p) {
+            return p.type == MLN_PLUGIN_VALUE_IMAGE;
+        }))
+        result |= expression::Dependency::Zoom;
     for (const auto& [name, value] : pluginProperties) {
         (void)name;
         result |= value.getDependencies();

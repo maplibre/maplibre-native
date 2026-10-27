@@ -26,6 +26,6 @@ std::unique_ptr<Layout> PluginStyleLayerFactory::createLayout(
     std::unique_ptr<GeometryTileLayer> tileLayer,
     const std::vector<Immutable<style::LayerProperties>>& layers) {
     return std::make_unique<PluginLayout>(
-        parameters.bucketParameters, layers, std::move(tileLayer), registration, &parameters.resourceDependencies);
+        parameters.bucketParameters, layers, std::move(tileLayer), registration, &parameters);
 }
 } // namespace mln::plugin
