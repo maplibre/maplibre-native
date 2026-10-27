@@ -209,19 +209,13 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      # The cached auto-configured C++ toolchain hardcodes the compiler's
-      # include paths, so a cache from another runner image breaks the build.
-      - name: Get runner image
-        id: runner-image
-        run: echo "os=$ImageOS" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Bazel
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3 # 0.19.1
         with:
-          key: ${{ runner.os }}-${{ steps.runner-image.outputs.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ steps.runner-image.outputs.os }}-bazel-
-          path: ~/.cache/bazel
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+          cache-save: ${{ github.event_name != 'pull_request' }}
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
