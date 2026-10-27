@@ -12,7 +12,7 @@ on:
 jobs:
   release-check:
     name: Check if version is published
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     defaults:
       run:
         shell: bash
@@ -45,7 +45,7 @@ jobs:
     name: Create draft release
     needs: release-check
     if: ${{ needs.release-check.outputs.published == 'false' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     defaults:
       run:
         shell: bash
@@ -92,9 +92,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-24.04
+          - runs-on: ubuntu-26.04
             arch: x86_64
-          - runs-on: ubuntu-24.04-arm
+          - runs-on: ubuntu-26.04-arm
             arch: arm64
           - runs-on: macos-15-intel
             arch: x86_64
@@ -152,6 +152,8 @@ jobs:
             xvfb \
             libcurl4-openssl-dev \
             libglfw3-dev \
+            libgles-dev \
+            libopengl-dev \
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
@@ -290,7 +292,7 @@ jobs:
           ./scripts/publish.sh --target_arch=arm64
 
   publish_npm:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: [publish_binaries, release-check]
     defaults:
       run:
