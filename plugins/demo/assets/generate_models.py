@@ -3,7 +3,8 @@
 
 The models are authored for the layer's conventions: one mesh unit is one meter, Y is up, and the front of a model
 faces +Z so that `model-heading: 0` points it north. Every model is symmetric left to right. The `gltf` layer only
-reads material base colors, so each part is a primitive with its own flat-colored material.
+reads material base colors, so each part is a primitive with its own flat-colored material. The colors are
+written as sRGB hex, the way they look, and stored as the linear values glTF specifies.
 
 Usage: generate_models.py [output-directory]   (default: models/, next to this script)
 """
@@ -119,9 +120,14 @@ def glb(mesh):
     )
 
 
+def srgb_to_linear(channel):
+    return channel / 12.92 if channel <= 0.04045 else ((channel + 0.055) / 1.055) ** 2.4
+
+
 def rgb(hex_color, alpha=1.0):
+    """A base color factor from a hex color written the way it looks (sRGB): glTF gives base colors in linear."""
     value = int(hex_color.lstrip("#"), 16)
-    return tuple(round(((value >> shift) & 255) / 255, 4) for shift in (16, 8, 0)) + (alpha,)
+    return tuple(round(srgb_to_linear(((value >> shift) & 255) / 255), 6) for shift in (16, 8, 0)) + (alpha,)
 
 
 def car(body_color):

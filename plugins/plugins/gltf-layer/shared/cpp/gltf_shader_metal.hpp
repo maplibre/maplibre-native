@@ -105,8 +105,14 @@ vertex GltfVaryings gltfVertex(GltfVertex in [[stage_in]],
     return out;
 }
 
+// A material's base color factor is linear, as glTF defines it, and the render target holds sRGB values.
+float3 srgbFromLinear(float3 linear) {
+    linear = clamp(linear, 0.0, 1.0);
+    return select(1.055 * pow(linear, float3(1.0 / 2.4)) - 0.055, linear * 12.92, linear <= 0.0031308);
+}
+
 fragment float4 gltfFragment(GltfVaryings in [[stage_in]]) {
     float light = 0.32 + 0.68 * max(dot(normalize(in.normal), normalize(float3(0.35, -0.45, 0.82))), 0.0);
-    return float4(in.color.rgb * light * in.color.a, in.color.a);
+    return float4(srgbFromLinear(in.color.rgb) * light * in.color.a, in.color.a);
 }
 )SHADER";

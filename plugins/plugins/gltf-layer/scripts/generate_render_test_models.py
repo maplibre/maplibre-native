@@ -21,10 +21,15 @@ FACES = [
     ((-1, 0, 0), [(-0.5, 0, -0.5), (-0.5, 0, 0.5), (-0.5, 1, 0.5), (-0.5, 1, -0.5)]),
 ]
 
+# Colors the way they look (sRGB); the files hold the linear values glTF specifies.
 MODELS = {
     "box-red.glb": (0.85, 0.12, 0.1, 1.0),
     "box-blue.glb": (0.1, 0.3, 0.9, 1.0),
 }
+
+
+def srgb_to_linear(channel):
+    return channel / 12.92 if channel <= 0.04045 else ((channel + 0.055) / 1.055) ** 2.4
 
 
 def box(color):
@@ -59,7 +64,7 @@ def box(color):
         "scenes": [{"nodes": [0]}],
         "nodes": [{"mesh": 0}],
         "meshes": [{"primitives": [{"attributes": {"POSITION": 0, "NORMAL": 1}, "indices": 2, "material": 0, "mode": 4}]}],
-        "materials": [{"pbrMetallicRoughness": {"baseColorFactor": list(color), "metallicFactor": 0, "roughnessFactor": 1}}],
+        "materials": [{"pbrMetallicRoughness": {"baseColorFactor": [round(srgb_to_linear(c), 6) for c in color[:3]] + [color[3]], "metallicFactor": 0, "roughnessFactor": 1}}],
         "accessors": accessors,
         "bufferViews": views,
         "buffers": [{"byteLength": len(binary)}],
