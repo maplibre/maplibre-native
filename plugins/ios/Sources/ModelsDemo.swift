@@ -4,42 +4,20 @@ import SwiftUI
 /// The `gltf` layer: `.glb` models drawn at the points of a source. A feature picks its model with `model-id`, and
 /// heading, scale, altitude and opacity are paint properties evaluated every frame.
 ///
-/// The scene is a ring road with three cars on it, trees, and a few extruded buildings. A user "puck" drives up and
-/// down the lane between the buildings. The cars and trees are depth tested against the buildings (`model-occlusion`),
-/// the puck is drawn over everything.
+/// The scene is a ring road with three cars on it, trees, and a few extruded buildings. The cars and trees are depth
+/// tested against the buildings (`model-occlusion`), so a car passing behind one is hidden.
 struct ModelsDemoView: View {
     @StateObject private var status = DemoStatus()
-    @State private var driving = true
-    @State private var occlusion = true
-    @State private var exaggeration = 4.0
 
     var body: some View {
         ZStack(alignment: .top) {
-            ModelsMap(driving: driving, occlusion: occlusion, exaggeration: exaggeration, status: status)
+            ModelsMap(status: status)
             StatusBanner(status: status)
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            ControlPanel(
-                title: "gltf layer",
-                detail: "Each car feature names its model with model-id and its heading with model-heading. "
-                    + "Models are sized in meters, exaggerated here so they are readable."
-            ) {
-                Toggle("Drive", isOn: $driving)
-                Toggle("Buildings hide the cars and trees", isOn: $occlusion)
-                HStack {
-                    Text("Size").frame(width: 50, alignment: .leading)
-                    Slider(value: $exaggeration, in: 1 ... 5)
-                    Text("\(exaggeration, specifier: "%.1f")×").monospacedDigit().frame(width: 40)
-                }
-            }
         }
     }
 }
 
 private struct ModelsMap: UIViewRepresentable {
-    var driving: Bool
-    var occlusion: Bool
-    var exaggeration: Double
     var status: DemoStatus
 
     func makeCoordinator() -> Coordinator { Coordinator(status: status) }
@@ -50,9 +28,7 @@ private struct ModelsMap: UIViewRepresentable {
         return mapView
     }
 
-    func updateUIView(_: MLNMapView, context: Context) {
-        context.coordinator.apply(driving: driving, occlusion: occlusion, exaggeration: exaggeration)
-    }
+    func updateUIView(_: MLNMapView, context _: Context) {}
 
     static func dismantleUIView(_: MLNMapView, coordinator: Coordinator) {
         coordinator.stop()
@@ -63,25 +39,19 @@ private struct ModelsMap: UIViewRepresentable {
         let status: DemoStatus
         private var style: MLNStyle?
         private var timer: Timer?
-        private var lastTick = CACurrentMediaTime()
-        private var elapsed = 0.0
-        private var driving = true
-        private var occlusion = true
-        private var exaggeration = 4.0
+        private var start = CACurrentMediaTime()
 
         init(status: DemoStatus) { self.status = status }
 
         func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
             self.style = style
             mapView.look(at: City.frame.origin, zoom: 16.9, pitch: 58, heading: 12)
-            City.addLayers(to: style, exaggeration: exaggeration, status: status)
-            apply(driving: driving, occlusion: occlusion, exaggeration: exaggeration)
-            lastTick = CACurrentMediaTime()
+            City.addLayers(to: style, status: status)
+            start = CACurrentMediaTime()
             timer?.invalidate()
             timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 20, repeats: true) { [weak self] _ in
                 MainActor.assumeIsolated { self?.tick() }
             }
-            tick()
         }
 
         func stop() {
@@ -89,34 +59,9 @@ private struct ModelsMap: UIViewRepresentable {
             timer = nil
         }
 
-        func apply(driving: Bool, occlusion: Bool, exaggeration: Double) {
-            self.driving = driving
-            self.exaggeration = exaggeration
-            let occlusionChanged = self.occlusion != occlusion
-            self.occlusion = occlusion
-            guard let style else { return }
-            // `model-scale` is a paint property, so this only repaints.
-            style.set("model-scale", exaggeration, on: "vehicles", status: status)
-            style.set("model-scale", ["*", exaggeration, ["coalesce", ["get", "scale"], 1]], on: "trees", status: status)
-            // `model-occlusion` is a layout property, which lays the tiles out again.
-            if occlusionChanged {
-                for layer in ["vehicles", "trees"] {
-                    style.set("model-occlusion", occlusion ? 1 : 0, on: layer, status: status)
-                }
-            }
-        }
-
         private func tick() {
-            let now = CACurrentMediaTime()
-            defer { lastTick = now }
-            guard driving, let style else { return }
-            elapsed += now - lastTick
-            if let vehicles = style.source(withIdentifier: "vehicles") as? MLNShapeSource {
-                vehicles.shape = City.vehicles(at: elapsed)
-            }
-            if let puck = style.source(withIdentifier: "puck") as? MLNShapeSource {
-                puck.shape = City.puck(at: elapsed)
-            }
+            guard let vehicles = style?.source(withIdentifier: "vehicles") as? MLNShapeSource else { return }
+            vehicles.shape = City.vehicles(at: CACurrentMediaTime() - start)
         }
     }
 }
@@ -129,7 +74,8 @@ private enum City {
     static let halfHeight = 38.0
     static let roadWidth = 9.0
     static let carSpeed = 11.0 // meters per second
-    static let puckSpeed = 7.0
+    static let carScale = 4.0 // meters per mesh unit: toy-sized, so the cars are readable
+    static let treeScale = 2.0
     static let laneHalfLength = 48.0
 
     /// The ring road, clockwise seen from above.
@@ -150,27 +96,14 @@ private enum City {
         return MLNShapeCollectionFeature(shapes: features)
     }
 
-    /// The puck drives east along the central lane and back.
-    static func puck(at time: Double) -> MLNShapeCollectionFeature {
-        let length = 2 * laneHalfLength
-        let travelled = (puckSpeed * time).truncatingRemainder(dividingBy: 2 * length)
-        let outbound = travelled <= length
-        let east = outbound ? travelled - laneHalfLength : 3 * laneHalfLength - travelled
-        let feature = MLNPointFeature()
-        feature.coordinate = frame.coordinate(east: east, north: 0)
-        feature.attributes = ["heading": outbound ? 90 : 270]
-        return MLNShapeCollectionFeature(shapes: [feature])
-    }
-
     // MARK: Layers
 
     @MainActor
-    static func addLayers(to style: MLNStyle, exaggeration: Double, status: DemoStatus) {
+    static func addLayers(to style: MLNStyle, status: DemoStatus) {
         style.addSource(MLNShapeSource(identifier: "roads", shape: roads(), options: nil))
         style.addSource(MLNShapeSource(identifier: "buildings", shape: buildings(), options: nil))
         style.addSource(MLNShapeSource(identifier: "trees", shape: trees(), options: nil))
         style.addSource(MLNShapeSource(identifier: "vehicles", shape: vehicles(at: 0), options: nil))
-        style.addSource(MLNShapeSource(identifier: "puck", shape: puck(at: 0), options: nil))
 
         let layers: [[String: Any]] = [
             road(id: "road-casing", color: "#9C9C96", width: roadWidth + 2),
@@ -185,13 +118,13 @@ private enum City {
                     "fill-extrusion-opacity": 1,
                 ],
             ],
-            // One model for every feature, picked by a constant. Each tree has its own size.
+            // One model for every feature, picked by a constant.
             [
                 "id": "trees",
                 "type": "gltf",
                 "source": "trees",
                 "layout": ["models": ["tree": "asset://tree.glb"], "model-id": "tree"],
-                "paint": ["model-scale": ["*", exaggeration, ["coalesce", ["get", "scale"], 1]]],
+                "paint": ["model-scale": treeScale],
             ],
             // Several models in one layer: each car's `kind` property names its model.
             [
@@ -206,16 +139,7 @@ private enum City {
                     ],
                     "model-id": ["get", "kind"],
                 ],
-                "paint": ["model-heading": ["get", "heading"], "model-scale": exaggeration],
-            ],
-            // A puck keeps its size on screen (`model-screen-scale` is points per mesh unit), and is drawn over
-            // everything below it in the layer order, buildings included.
-            [
-                "id": "puck",
-                "type": "gltf",
-                "source": "puck",
-                "layout": ["models": ["puck": "asset://puck.glb"], "model-id": "puck", "model-occlusion": 0],
-                "paint": ["model-heading": ["get", "heading"], "model-screen-scale": 36],
+                "paint": ["model-heading": ["get", "heading"], "model-scale": carScale],
             ],
         ]
         for layer in layers {
@@ -276,7 +200,7 @@ private enum City {
         return MLNShapeCollectionFeature(shapes: polygons)
     }
 
-    /// Trees along both sides of the ring road, at slightly different sizes.
+    /// Trees along both sides of the ring road.
     private static func trees() -> MLNShapeCollectionFeature {
         var features: [MLNPointFeature] = []
         var seed: UInt64 = 7
@@ -295,7 +219,6 @@ private enum City {
                 feature.coordinate = frame.coordinate(
                     east: sample.east + left.east * offset, north: sample.north + left.north * offset
                 )
-                feature.attributes = ["scale": 0.25 + random() * 0.2]
                 features.append(feature)
             }
             distance += 14 + random() * 8

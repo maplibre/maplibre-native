@@ -36,14 +36,14 @@ struct Demo: Identifiable, Hashable {
             id: "models",
             title: "3D models",
             layerType: "gltf",
-            summary: "glTF models for vehicles, trees and a user puck, picked per feature.",
+            summary: "glTF models for cars and trees, picked per feature.",
             systemImage: "car.fill"
         ) { ModelsDemoView() },
         Demo(
             id: "ngons",
             title: "N-gons",
             layerType: "ngon",
-            summary: "Regular polygons drawn by a shader the plugin ships, one per point.",
+            summary: "A regular polygon drawn by a shader the plugin ships, with its properties to edit or randomize.",
             systemImage: "hexagon.fill"
         ) { NgonDemoView() },
     ]

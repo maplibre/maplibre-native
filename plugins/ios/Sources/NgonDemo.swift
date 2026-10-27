@@ -1,47 +1,204 @@
+import CoreLocation
 import MapLibre
 import SwiftUI
 
-/// The `ngon` layer: regular polygons drawn by a shader the plugin ships, one per point feature. Radius, corners,
-/// rotation, color, blur, opacity and stroke are paint properties, so they can come from feature properties or be
-/// changed at runtime.
+/// The `ngon` layer: a regular polygon drawn by a shader the plugin ships, for each point feature. Radius, corners,
+/// rotation, color, blur, opacity and stroke are paint properties read from the feature's properties, so changing one
+/// of them only edits the feature's data.
 struct NgonDemoView: View {
+    private enum Tab: String, CaseIterable {
+        case map = "Map"
+        case json = "JSON"
+    }
+
     @StateObject private var status = DemoStatus()
-    @State private var spin = 0.0
-    @State private var billboard = true
+    @StateObject private var model = NgonModel()
+    @State private var tab = Tab.map
 
     var body: some View {
-        ZStack(alignment: .top) {
-            NgonMap(spin: spin, billboard: billboard, status: status)
-            StatusBanner(status: status)
+        VStack(spacing: 0) {
+            Picker("View", selection: $tab) {
+                ForEach(Tab.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+
+            // The map stays in the hierarchy under the JSON, so switching tabs doesn't reload the style.
+            ZStack(alignment: .top) {
+                NgonMap(model: model, status: status)
+                StatusBanner(status: status)
+                if tab == .json {
+                    NgonJSONView(model: model)
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if tab == .map {
+                    ControlBar { NgonControls(ngon: $model.ngon) }
+                }
+            }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            ControlPanel(
-                title: "ngon layer",
-                detail: "Corners, color, stroke, blur and opacity come from each feature's properties. "
-                    + "The sliders change the layer's paint properties while it is on screen."
-            ) {
-                HStack {
-                    Text("Spin").frame(width: 50, alignment: .leading)
-                    Slider(value: $spin, in: 0 ... 360)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: model.randomize) {
+                    Label("Randomize", systemImage: "dice")
                 }
-                Picker("Alignment", selection: $billboard) {
-                    Text("Faces the screen").tag(true)
-                    Text("Lies on the map").tag(false)
-                }
-                .pickerStyle(.segmented)
             }
         }
     }
 }
 
+// MARK: Model
+
+/// The n-gon's feature properties, which the layer's paint expressions read.
+struct Ngon: Equatable {
+    var sides = 5
+    var color = "#E76F51"
+    var radius = 60.0 // points
+    var rotation = 0.0 // degrees
+    var opacity = 1.0
+    var blur = 0.0
+    var stroke = 0.0 // outline width in points
+    var outline = "#264653"
+
+    var properties: [String: Any] {
+        [
+            "sides": sides, "color": color, "radius": radius, "rotation": rotation, "opacity": opacity,
+            "blur": blur, "stroke": stroke, "outline": outline,
+        ]
+    }
+}
+
+@MainActor
+final class NgonModel: ObservableObject {
+    @Published var ngon = Ngon()
+
+    func randomize() {
+        func rounded(_ value: Double) -> Double { (value * 100).rounded() / 100 }
+        func color() -> String {
+            Color(
+                hue: .random(in: 0 ... 1), saturation: .random(in: 0.45 ... 0.9), brightness: .random(in: 0.6 ... 0.95)
+            ).hex
+        }
+        ngon = Ngon(
+            sides: .random(in: 3 ... 12),
+            color: color(),
+            radius: rounded(.random(in: 24 ... 80)),
+            rotation: rounded(.random(in: 0 ..< 360)),
+            opacity: rounded(.random(in: 0.5 ... 1)),
+            blur: .random() ? 0 : rounded(.random(in: 0.1 ... 0.6)),
+            stroke: .random() ? 0 : rounded(.random(in: 1 ... 8)),
+            outline: color()
+        )
+    }
+}
+
+// MARK: Style
+
+enum NgonStyle {
+    /// The layer, as it is added to the style. Every paint property reads a feature property.
+    static let layer: [String: Any] = [
+        "id": "ngons",
+        "type": "ngon",
+        "source": "shapes",
+        "paint": [
+            "ngon-radius": ["get", "radius"],
+            "ngon-corners": ["get", "sides"],
+            "ngon-color": ["get", "color"],
+            "ngon-rotate": ["get", "rotation"],
+            "ngon-opacity": ["get", "opacity"],
+            "ngon-blur": ["get", "blur"],
+            "ngon-stroke-width": ["get", "stroke"],
+            "ngon-stroke-color": ["get", "outline"],
+            "ngon-pitch-alignment": "viewport",
+            "ngon-pitch-scale": "viewport",
+        ],
+    ]
+}
+
+func prettyJSON(_ object: Any) -> String {
+    guard JSONSerialization.isValidJSONObject(object),
+          let data = try? JSONSerialization.data(
+              withJSONObject: object, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+          )
+    else { return "" }
+    return String(decoding: data, as: UTF8.self)
+}
+
+// MARK: Controls and JSON
+
+private struct NgonControls: View {
+    @Binding var ngon: Ngon
+
+    var body: some View {
+        VStack(spacing: 6) {
+            HStack {
+                Stepper("Corners  \(ngon.sides)", value: $ngon.sides, in: 3 ... 12)
+                ColorPicker("Color", selection: color(\.color)).labelsHidden()
+            }
+            slider("Radius", $ngon.radius, 8 ... 100)
+            slider("Rotation", $ngon.rotation, 0 ... 360)
+            slider("Opacity", $ngon.opacity, 0.1 ... 1)
+            slider("Blur", $ngon.blur, 0 ... 1)
+            HStack {
+                slider("Outline", $ngon.stroke, 0 ... 8)
+                ColorPicker("Outline color", selection: color(\.outline)).labelsHidden()
+            }
+        }
+        .font(.subheadline)
+    }
+
+    private func slider(_ title: String, _ value: Binding<Double>, _ range: ClosedRange<Double>) -> some View {
+        HStack {
+            Text(title).frame(width: 70, alignment: .leading)
+            Slider(value: value, in: range)
+        }
+    }
+
+    private func color(_ keyPath: WritableKeyPath<Ngon, String>) -> Binding<Color> {
+        Binding(
+            get: { Color(hex: ngon[keyPath: keyPath]) },
+            set: { ngon[keyPath: keyPath] = $0.hex }
+        )
+    }
+}
+
+/// The style of the `ngon` layer, and the properties of its feature, as JSON.
+private struct NgonJSONView: View {
+    @ObservedObject var model: NgonModel
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                section("Layer", prettyJSON(NgonStyle.layer))
+                section("Feature properties", prettyJSON(model.ngon.properties))
+            }
+            .padding()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Color(.systemBackground))
+    }
+
+    private func section(_ title: String, _ text: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title).font(.headline)
+            Text(text)
+                .font(.system(.footnote, design: .monospaced))
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
+
+// MARK: Map
+
 private struct NgonMap: UIViewRepresentable {
     static let center = CLLocationCoordinate2D(latitude: 52.3731, longitude: 4.8922)
 
-    var spin: Double
-    var billboard: Bool
+    @ObservedObject var model: NgonModel
     var status: DemoStatus
 
-    func makeCoordinator() -> Coordinator { Coordinator(status: status) }
+    func makeCoordinator() -> Coordinator { Coordinator(model: model, status: status) }
 
     func makeUIView(context: Context) -> MLNMapView {
         let mapView = MLNMapView.demoMap(style: "ngons")
@@ -50,83 +207,43 @@ private struct NgonMap: UIViewRepresentable {
     }
 
     func updateUIView(_: MLNMapView, context: Context) {
-        context.coordinator.apply(spin: spin, billboard: billboard)
+        context.coordinator.sync()
     }
 
     @MainActor
     final class Coordinator: NSObject, @preconcurrency MLNMapViewDelegate {
+        let model: NgonModel
         let status: DemoStatus
-        private var style: MLNStyle?
-        private var spin = 0.0
-        private var billboard = true
+        private var shapes: MLNShapeSource?
+        private var drawn: Ngon?
 
-        init(status: DemoStatus) { self.status = status }
+        init(model: NgonModel, status: DemoStatus) {
+            self.model = model
+            self.status = status
+        }
 
         func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
-            self.style = style
             mapView.look(at: NgonMap.center, zoom: 15.9, pitch: 40, heading: 0)
-            style.addSource(MLNShapeSource(identifier: "shapes", shape: Self.shapes(), options: nil))
-            style.add(layer: Self.layer, status: status)
-            apply(spin: spin, billboard: billboard)
+            let shapes = MLNShapeSource(identifier: "shapes", shape: Self.shape(model.ngon), options: nil)
+            style.addSource(shapes)
+            style.add(layer: NgonStyle.layer, status: status)
+            self.shapes = shapes
+            drawn = model.ngon
+            sync()
         }
 
-        func apply(spin: Double, billboard: Bool) {
-            self.spin = spin
-            self.billboard = billboard
-            guard let style else { return }
-            // `ngon-rotate` is degrees, added here to each feature's own rotation.
-            style.set("ngon-rotate", ["+", ["coalesce", ["get", "rotation"], 0], spin], on: "ngons", status: status)
-            let alignment = billboard ? "viewport" : "map"
-            style.set("ngon-pitch-alignment", alignment, on: "ngons", status: status)
-            style.set("ngon-pitch-scale", alignment, on: "ngons", status: status)
+        /// Draws the model, when it has changed.
+        func sync() {
+            guard let shapes, drawn != model.ngon else { return }
+            shapes.shape = Self.shape(model.ngon)
+            drawn = model.ngon
         }
 
-        private static let layer: [String: Any] = [
-            "id": "ngons",
-            "type": "ngon",
-            "source": "shapes",
-            "paint": [
-                "ngon-radius": ["coalesce", ["get", "radius"], 22],
-                "ngon-corners": ["get", "sides"],
-                "ngon-color": ["get", "color"],
-                "ngon-opacity": ["coalesce", ["get", "opacity"], 1],
-                "ngon-blur": ["coalesce", ["get", "blur"], 0],
-                "ngon-stroke-width": ["coalesce", ["get", "stroke"], 0],
-                "ngon-stroke-color": ["coalesce", ["get", "outline"], "#FFFFFF"],
-                "ngon-pitch-alignment": "viewport",
-                "ngon-pitch-scale": "viewport",
-            ],
-        ]
-
-        /// Four rows of six: plain polygons, outlined ones, increasing blur, and increasing rotation with fading opacity.
-        private static func shapes() -> MLNShapeCollectionFeature {
-            let frame = LocalFrame(origin: NgonMap.center)
-            let palette = ["#E76F51", "#F4A261", "#E9C46A", "#2A9D8F", "#457B9D", "#6D597A"]
-            var features: [MLNPointFeature] = []
-
-            func add(row: Int, column: Int, _ attributes: [String: Any]) {
-                let feature = MLNPointFeature()
-                feature.coordinate = frame.coordinate(
-                    east: (Double(column) - 2.5) * 50, north: (1.5 - Double(row)) * 75
-                )
-                feature.attributes = attributes
-                features.append(feature)
-            }
-
-            for column in 0 ..< 6 {
-                let color = palette[column]
-                add(row: 0, column: column, ["sides": column + 3, "color": color])
-                add(row: 1, column: column, [
-                    "sides": column + 3, "color": color, "stroke": 4, "outline": "#264653",
-                ])
-                add(row: 2, column: column, [
-                    "sides": 6, "color": "#457B9D", "radius": 24, "blur": Double(column) / 5,
-                ])
-                add(row: 3, column: column, [
-                    "sides": 5, "color": "#E76F51", "rotation": column * 15, "opacity": 1 - Double(column) * 0.14,
-                ])
-            }
-            return MLNShapeCollectionFeature(shapes: features)
+        private static func shape(_ ngon: Ngon) -> MLNPointFeature {
+            let feature = MLNPointFeature()
+            feature.coordinate = NgonMap.center
+            feature.attributes = ngon.properties
+            return feature
         }
     }
 }

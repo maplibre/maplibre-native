@@ -19,7 +19,9 @@ extension MLNMapView {
     /// A map showing one of the styles bundled with the app (`Styles/<name>.json`).
     static func demoMap(style name: String) -> MLNMapView {
         let url = Bundle.main.url(forResource: name, withExtension: "json")
-        return MLNMapView(frame: .zero, styleURL: url)
+        let mapView = MLNMapView(frame: .zero, styleURL: url)
+        mapView.attributionButton.isHidden = true
+        return mapView
     }
 
     /// Looks at `center` from the given zoom level, pitch (degrees from straight down) and compass heading. Needs
@@ -33,16 +35,6 @@ extension MLNMapView {
 }
 
 extension MLNStyle {
-    /// Sets a property on a plugin layer, reporting failure to `status` instead of throwing.
-    @MainActor
-    func set(_ property: String, _ value: Any, on layer: String, status: DemoStatus) {
-        do {
-            try setProperty(property, value: value, forLayerWithIdentifier: layer)
-        } catch {
-            status.report("\(layer).\(property): \(error.localizedDescription)")
-        }
-    }
-
     @MainActor
     func add(layer json: [String: Any], below sibling: String? = nil, status: DemoStatus) {
         do {
@@ -79,20 +71,34 @@ struct StatusBanner: View {
     }
 }
 
-/// The caption and controls under a scene's map.
-struct ControlPanel<Content: View>: View {
-    let title: String
-    let detail: String
+/// The bar under a demo's map that holds its controls.
+struct ControlBar<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.headline)
-            Text(detail).font(.footnote).foregroundStyle(.secondary)
             content
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.regularMaterial)
+    }
+}
+
+extension Color {
+    /// `#RRGGBB`.
+    init(hex: String) {
+        var value: UInt64 = 0
+        Scanner(string: hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))).scanHexInt64(&value)
+        self.init(
+            red: Double((value >> 16) & 0xFF) / 255, green: Double((value >> 8) & 0xFF) / 255,
+            blue: Double(value & 0xFF) / 255
+        )
+    }
+
+    var hex: String {
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        UIColor(self).getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        return String(format: "#%02X%02X%02X", Int((red * 255).rounded()), Int((green * 255).rounded()), Int((blue * 255).rounded()))
     }
 }

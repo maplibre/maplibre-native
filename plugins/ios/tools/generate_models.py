@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Generates the low-poly .glb models the plugin demo draws with the `gltf` layer.
 
-The models are authored for the layer's conventions: one mesh unit is one meter (or one point, for the puck
-that uses `model-screen-scale`), Y is up, and the front of a model faces +Z so that `model-heading: 0` points it
-north. Every model is symmetric left to right. The `gltf` layer only reads material base colors, so each part is a
-primitive with its own flat-colored material.
+The models are authored for the layer's conventions: one mesh unit is one meter, Y is up, and the front of a model
+faces +Z so that `model-heading: 0` points it north. Every model is symmetric left to right. The `gltf` layer only
+reads material base colors, so each part is a primitive with its own flat-colored material.
 
 Usage: generate_models.py [output-directory]   (default: ../Models, next to this script)
 """
@@ -64,20 +63,6 @@ class Mesh:
             length = math.sqrt(sum(v * v for v in n))
             self.triangle(color, p1, p0, tip, tuple(v / length for v in n))
             self.triangle(color, p0, p1, (cx, y, cz), (0, -1, 0))
-
-    def prism(self, color, outline, y0, y1):
-        """Extrudes a convex or fan-triangulable XZ outline (counter-clockwise seen from above) between y0 and y1."""
-        first = outline[0]
-        for i in range(1, len(outline) - 1):
-            a, b, c = outline[0], outline[i], outline[i + 1]
-            self.triangle(color, (a[0], y1, a[1]), (b[0], y1, b[1]), (c[0], y1, c[1]), (0, 1, 0))
-            self.triangle(color, (a[0], y0, a[1]), (c[0], y0, c[1]), (b[0], y0, b[1]), (0, -1, 0))
-        for i, p in enumerate(outline):
-            q = outline[(i + 1) % len(outline)]
-            dx, dz = q[0] - p[0], q[1] - p[1]
-            length = math.hypot(dx, dz)
-            normal = (dz / length, 0, -dx / length)
-            self.quad(color, (p[0], y0, p[1]), (q[0], y0, q[1]), (q[0], y1, q[1]), (p[0], y1, p[1]), normal)
 
 
 def pad(data, filler):
@@ -154,17 +139,6 @@ def car(body_color):
     return mesh
 
 
-def puck():
-    """A navigation arrow, 1 unit long and 0.9 wide, for `model-screen-scale` (points per unit)."""
-    outline = [(0, 0.5), (-0.45, -0.5), (0, -0.28), (0.45, -0.5)]  # tip, left tail, notch, right tail
-    mesh = Mesh()
-    # Counter-clockwise from above is +X toward +Z-negative; the fan below follows that for the arrow outline.
-    ring = [(x * 1.18, z * 1.12 - 0.02) for x, z in outline]
-    mesh.prism(rgb("#FFFFFF"), ring[::-1], 0.0, 0.1)
-    mesh.prism(rgb("#1E6FF2"), outline[::-1], 0.1, 0.2)
-    return mesh
-
-
 def tree():
     """A 7 m tree: trunk and a two-tier cone canopy."""
     mesh = Mesh()
@@ -178,7 +152,6 @@ MODELS = {
     "car-red.glb": car("#D32F2F"),
     "car-blue.glb": car("#1976D2"),
     "car-yellow.glb": car("#F9A825"),
-    "puck.glb": puck(),
     "tree.glb": tree(),
 }
 
