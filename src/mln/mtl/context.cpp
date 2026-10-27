@@ -32,6 +32,8 @@
 #include <algorithm>
 #include <cstring>
 
+#include <array>
+
 namespace mln {
 namespace mtl {
 
@@ -49,6 +51,7 @@ Context::~Context() noexcept {
         performCleanup();
 
         emptyVertexBuffer.reset();
+        dummyTexture.reset(); // before the resource check below, like the buffers
         tileVertexBuffer.reset();
         tileIndexBuffer.reset();
         clipMaskShader.reset();
@@ -66,6 +69,18 @@ Context::~Context() noexcept {
 #endif
         assert(stats.isZero());
     }
+}
+
+const gfx::Texture2DPtr& Context::getDummyTexture() {
+    if (!dummyTexture) {
+        dummyTexture = createTexture2D();
+        dummyTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
+                                               .wrapU = gfx::TextureWrapType::Clamp,
+                                               .wrapV = gfx::TextureWrapType::Clamp});
+        const std::array<uint8_t, 4> pixel{};
+        dummyTexture->upload(pixel.data(), Size{1, 1});
+    }
+    return dummyTexture;
 }
 
 void Context::beginFrame() {
