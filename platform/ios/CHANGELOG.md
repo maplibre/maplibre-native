@@ -42,7 +42,9 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ### Plugin API
 
-- Add an experimental C plugin API for extending MapLibre with native code, defined in [`plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h). It currently supports adding custom style layer types. It is only available in the build of MapLibre iOS that is distributed as the separate Swift package [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api), whose `MapLibre` product replaces the standard one. See [Plugin API](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/pluginapi) for how to use it ([#4612](https://github.com/maplibre/maplibre-native/pull/4612), [#4769](https://github.com/maplibre/maplibre-native/pull/4769)).
+MapLibre iOS now has an experimental C plugin API for extending MapLibre with native code, defined in [`plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h). It currently supports adding custom style layer types. It is only available in the build of MapLibre iOS that is distributed as the separate Swift package [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api), whose `MapLibre` product replaces the standard one. See [Plugin API](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/pluginapi) for how to use it ([#4612](https://github.com/maplibre/maplibre-native/pull/4612), [#4769](https://github.com/maplibre/maplibre-native/pull/4769)).
+
+We welcome ideas for extending the plugin API. The [announcement in the newsletter](https://maplibre.org/news/2026-10-01-maplibre-newsletter-september-2026/) contains some inspiration.
 
 ### Features
 
