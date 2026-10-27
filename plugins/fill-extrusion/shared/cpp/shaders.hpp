@@ -237,7 +237,7 @@ struct ExtrusionUniforms {
 };
 
 struct FragmentIn {
-    float4 position [[position]];
+    float4 position [[position, invariant]];
     float4 frag_color;
 #if MLN_PLUGIN_HAS_PATTERN
     float2 frag_pos_a;
