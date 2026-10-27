@@ -9,6 +9,7 @@
 #include <atomic>
 #include <cassert>
 #include <filesystem>
+#include <tuple>
 
 #include <climits>
 #include <gtest/gtest.h>
@@ -292,7 +293,7 @@ TEST(PMTilesFileSource, ReleasesTaskOfDestroyedRequest) {
 
     loop.run();
 
-    (void)pmtiles.getResourceOptions();
+    std::ignore = pmtiles.getResourceOptions();
     EXPECT_EQ(1, liveInnerRequests.load());
 }
 
@@ -324,7 +325,7 @@ TEST(PMTilesFileSource, ReleasesTaskOfCancelledRequest) {
 
     loop.run();
 
-    (void)pmtiles.getResourceOptions();
+    std::ignore = pmtiles.getResourceOptions();
     EXPECT_EQ(1, liveInnerRequests.load());
 }
 
