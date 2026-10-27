@@ -1338,9 +1338,13 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     vec4 color;
     vec4 outline_color;
     float opacity;
+    float rounded_corner_distance;
     float fade;
     float from_scale;
     float to_scale;
+    float pad1;
+    float pad2;
+    float pad3;
 } props;
 
 void main() {

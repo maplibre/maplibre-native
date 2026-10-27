@@ -969,9 +969,13 @@ struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
+    rounded_corner_distance: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct GlobalPaintParamsUBO {
