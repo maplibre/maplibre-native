@@ -1,0 +1,37 @@
+name: plugins-ci
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    paths:
+      - 'plugins/**'
+      - '.github/workflows/plugins-ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  generated-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: ".nvmrc"
+
+      # The platform wrappers in plugins/android are generated from plugins/plugins/*/plugin.json.
+      - name: Check the generated plugin wrappers
+        run: python3 plugins/tools/generate.py --check
+
+      - name: Check the n-gon shader header
+        run: node plugins/plugins/ngon-layer/scripts/generate-shaders.mjs | diff - plugins/plugins/ngon-layer/shared/cpp/ngon_shader_sources.hpp

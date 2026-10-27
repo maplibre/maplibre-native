@@ -130,7 +130,7 @@ objc_library(
         "//platform/default:mbgl-default",
         "//platform/ios/vendor:SMCalloutView",
     ] + select({
-        "//:plugins_enabled": ["//plugins/gltf-layer"],
+        "//:plugins_enabled": ["//plugins/plugins/gltf-layer"],
         "//conditions:default": [],
     }),
 )

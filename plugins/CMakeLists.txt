@@ -1,28 +1,28 @@
-add_subdirectory(ngon-layer)
+add_subdirectory(plugins/ngon-layer)
 target_link_libraries(mln-ngon-layer PUBLIC mbgl-core)
 
-add_executable(mln-ngon-tests EXCLUDE_FROM_ALL ngon-layer/tests/ngon.test.cpp)
+add_executable(mln-ngon-tests EXCLUDE_FROM_ALL plugins/ngon-layer/tests/ngon.test.cpp)
 target_link_libraries(mln-ngon-tests PRIVATE mln-ngon-layer)
 
 add_executable(mln-plugin-render-tests EXCLUDE_FROM_ALL render_test.cpp)
 target_link_libraries(mln-plugin-render-tests PRIVATE mln-ngon-layer mbgl-render-test)
 
-add_library(mln-fill-extrusion STATIC fill-extrusion/shared/cpp/fill_extrusion.cpp)
-target_include_directories(mln-fill-extrusion PUBLIC fill-extrusion/shared/include)
-target_include_directories(mln-fill-extrusion PRIVATE fill-extrusion/vendor)
+add_library(mln-fill-extrusion STATIC plugins/fill-extrusion/shared/cpp/fill_extrusion.cpp)
+target_include_directories(mln-fill-extrusion PUBLIC plugins/fill-extrusion/shared/include)
+target_include_directories(mln-fill-extrusion PRIVATE plugins/fill-extrusion/vendor)
 target_link_libraries(mln-fill-extrusion PUBLIC mbgl-core)
 if(MLN_WITH_METAL)
     target_compile_definitions(mln-fill-extrusion PRIVATE MLN_FILL_EXTRUSION_METAL=1)
 endif()
 
-add_executable(mln-fill-extrusion-render-tests EXCLUDE_FROM_ALL fill-extrusion/render_test.cpp)
+add_executable(mln-fill-extrusion-render-tests EXCLUDE_FROM_ALL plugins/fill-extrusion/render_test.cpp)
 target_link_libraries(mln-fill-extrusion-render-tests PRIVATE mln-fill-extrusion mbgl-render-test)
 
 add_executable(mln-plugin-api-tests EXCLUDE_FROM_ALL
     ../test/plugin/api.test.cpp ../test/plugin/registry.test.cpp
     ../test/plugin/layout.test.cpp ../test/plugin/property_binding.test.cpp ../test/plugin/rendering.test.cpp
-    $<$<BOOL:${MLN_WITH_VULKAN}>:${CMAKE_CURRENT_SOURCE_DIR}/fill-extrusion/tests/host.test.cpp>
-    fill-extrusion/tests/geometry.test.cpp
+    $<$<BOOL:${MLN_WITH_VULKAN}>:${CMAKE_CURRENT_SOURCE_DIR}/plugins/fill-extrusion/tests/host.test.cpp>
+    plugins/fill-extrusion/tests/geometry.test.cpp
     ../test/src/mln/test/stub_file_source.cpp
     ../vendor/googletest/googletest/src/gtest_main.cc)
 target_include_directories(mln-plugin-api-tests PRIVATE ../src ../test/include ../test/src)
@@ -31,7 +31,7 @@ target_link_libraries(mln-plugin-api-tests PRIVATE mln-fill-extrusion mbgl-vendo
 
 if(MLN_WITH_VULKAN)
     add_executable(mln-fill-extrusion-benchmark EXCLUDE_FROM_ALL
-        fill-extrusion/benchmark.cpp ../test/src/mln/test/stub_file_source.cpp)
+        plugins/fill-extrusion/benchmark.cpp ../test/src/mln/test/stub_file_source.cpp)
     target_include_directories(mln-fill-extrusion-benchmark PRIVATE ../src ../test/include ../test/src)
     target_link_libraries(mln-fill-extrusion-benchmark PRIVATE mln-fill-extrusion ${MLN_PLUGIN_TEST_LIBRARIES})
 endif()

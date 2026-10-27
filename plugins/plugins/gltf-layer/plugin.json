@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "gltf-layer",
+  "displayName": "glTF layer",
+  "description": "Draws glTF models at point features",
+  "version": "0.1.0",
+  "registerFunction": "mln_gltf_layer_register",
+  "header": "shared/include/gltf_layer.hpp",
+  "sources": ["shared/cpp/gltf_layer.cpp"],
+  "includeDirectories": ["shared/include", "shared/cpp", "../../../vendor/tinygltf"],
+  "backends": ["metal"]
+}

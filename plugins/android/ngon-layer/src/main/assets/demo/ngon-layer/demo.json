@@ -1,0 +1,12 @@
+{
+  "id": "ngon-layer",
+  "displayName": "N-gon layer",
+  "description": "Source-bound regular polygon (n-gon) style layer",
+  "registerClass": "org.maplibre.plugins.ngonlayer.NgonLayerPlugin",
+  "style": "asset://demo/ngon-layer/style.json",
+  "camera": {
+    "latitude": 0,
+    "longitude": 0,
+    "zoom": 11.3
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 256,
+      "height": 256,
+      "description": "A model with a heading and a size in meters"
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 17,
+  "pitch": 45,
+  "bearing": 0,
+  "sources": {
+    "boxes": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "kind": "blue"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                0
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#eef2f5"
+      }
+    },
+    {
+      "id": "boxes",
+      "type": "gltf",
+      "source": "boxes",
+      "layout": {
+        "models": {
+          "blue": "asset://plugins/plugins/gltf-layer/render-tests/assets/box-blue.glb"
+        },
+        "model-id": "blue"
+      },
+      "paint": {
+        "model-heading": 30,
+        "model-scale": 30
+      }
+    }
+  ]
+}

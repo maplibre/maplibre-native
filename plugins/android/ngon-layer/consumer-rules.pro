@@ -1,0 +1,1 @@
+-keep class org.maplibre.plugins.ngonlayer.NgonLayerPlugin { native <methods>; }

@@ -62,8 +62,8 @@ cc_binary(
         "@glfw",
     ] + select({
         "//:plugins_enabled": [
-            "//plugins/fill-extrusion",
-            "//plugins/ngon-layer",
+            "//plugins/plugins/fill-extrusion",
+            "//plugins/plugins/ngon-layer",
         ],
         "//conditions:default": [],
     }) + select({

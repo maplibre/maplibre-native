@@ -7,9 +7,6 @@
 #if MLN_RENDER_TEST_GLTF
 #include <gltf_layer.hpp>
 #define MLN_REGISTER_PLUGIN mln_gltf_layer_register
-#elif MLN_RENDER_TEST_FILL_EXTRUSION
-#include <fill_extrusion.hpp>
-#define MLN_REGISTER_PLUGIN mln_fill_extrusion_register
 #else
 #include <ngon_layer.hpp>
 #define MLN_REGISTER_PLUGIN mln_ngon_layer_register

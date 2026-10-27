@@ -1,0 +1,1 @@
+-keep class @@QUALIFIED_CLASS_NAME@@ { native <methods>; }
