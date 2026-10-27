@@ -3,7 +3,6 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
-#include <mln/style/rapidjson_conversion.hpp>
 #include <mln/tile/geojson_tile_data.hpp>
 #include <gtest/gtest.h>
 
@@ -319,83 +318,6 @@ TEST(PluginLayout, CopiesGeometryBeforeDestroyingLayout) {
     ASSERT_EQ(1u, bucket->featureVertexRanges.size());
     EXPECT_EQ(3u, bucket->featureVertexRanges.front().vertexCount);
     EXPECT_EQ(12.0f, bucket->queryRadius);
-}
-
-// What the layout callbacks saw of a string layout property.
-struct LayoutPropertyCapture {
-    std::string tile;
-    std::vector<std::string> features;
-    int instance = 0;
-};
-LayoutPropertyCapture* capture = nullptr;
-
-std::string onlyString(const mln_plugin_property_value_v1* properties, size_t count) {
-    if (count != 1 || properties[0].value.type != MLN_PLUGIN_VALUE_STRING) return "<missing>";
-    const auto& value = properties[0].value.data.string_value;
-    return std::string(value.data, value.size);
-}
-
-TEST(PluginLayout, EvaluatesLayoutPropertiesPerFeature) {
-    LayoutPropertyCapture state;
-    capture = &state;
-    plugin::LayerType registration;
-    registration.pluginID = "test.layout-properties";
-    registration.type = "test.layout-properties.layer";
-    registration.geometryTypeMask = MLN_PLUGIN_GEOMETRY_POINT;
-    registration.createLayout = [](const mln_plugin_layout_context_v1* context, void** instance) {
-        capture->tile = onlyString(context->properties, context->property_count);
-        *instance = &capture->instance;
-        return MLN_PLUGIN_STATUS_OK;
-    };
-    registration.layoutFeature = [](void*, const mln_plugin_feature_v1* input) {
-        capture->features.push_back(onlyString(input->layout_properties, input->layout_property_count));
-        return MLN_PLUGIN_STATUS_OK;
-    };
-    registration.finishLayout = [](void*, mln_plugin_bucket_v1* output) {
-        *output = {};
-        output->struct_size = sizeof(*output);
-        return MLN_PLUGIN_STATUS_OK;
-    };
-    registration.destroyLayout = [](void*) {
-    };
-    plugin::PropertyDefinition kind;
-    kind.name = "test-kind";
-    kind.type = MLN_PLUGIN_VALUE_STRING;
-    kind.defaultValue = std::string("none");
-    kind.expressionCapabilities = MLN_PLUGIN_EXPRESSION_FEATURE;
-    kind.layout = true;
-    registration.properties.push_back(kind);
-    const auto shared = std::make_shared<const plugin::RegisteredLayer>(std::move(registration));
-
-    JSDocument document;
-    document.Parse(R"(["get", "kind"])");
-    const JSValue* json = &document;
-    style::conversion::Error error;
-    auto value = style::convertPluginPropertyValue(kind, style::conversion::Convertible(json), error);
-    ASSERT_TRUE(value) << error.message;
-    auto impl = makeMutable<style::PluginStyleLayer::Impl>("test-layer", "points", shared);
-    impl->pluginProperties.emplace(kind.name, std::move(*value));
-    std::vector<Immutable<style::LayerProperties>> layers = {
-        makeMutable<style::PluginStyleLayerProperties>(std::move(impl))};
-
-    auto features = std::make_shared<mapbox::feature::feature_collection<int16_t>>();
-    for (const auto* name : {"car", "truck"}) {
-        mapbox::feature::feature<int16_t> feature{mapbox::geometry::point<int16_t>(10, 20)};
-        feature.properties = {{"kind", std::string(name)}};
-        features->push_back(std::move(feature));
-    }
-    features->push_back(mapbox::feature::feature<int16_t>{mapbox::geometry::point<int16_t>(10, 20)});
-    auto featureIndex = std::make_unique<FeatureIndex>(std::make_unique<GeoJSONTileData>(*features));
-    const BucketParameters parameters{OverscaledTileID{0, 0, {0, 0, 0}}, MapMode::Static, 1, &shared->info};
-    PluginLayout layout(parameters, std::move(layers), std::make_unique<GeoJSONTileLayer>(features), shared);
-    mln::unordered_map<std::string, LayerRenderData> renderData;
-    layout.createBucket({}, featureIndex, renderData, false, false, parameters.tileID.canonical);
-    capture = nullptr;
-
-    // Without a feature the expression falls back to the default; each feature gets its own value, and a
-    // feature without the attribute gets an empty string, as `icon-image` does.
-    EXPECT_EQ("none", state.tile);
-    EXPECT_EQ((std::vector<std::string>{"car", "truck", ""}), state.features);
 }
 
 TEST(PluginLayout, ValidatesInstancingAndShiftedRecordBounds) {

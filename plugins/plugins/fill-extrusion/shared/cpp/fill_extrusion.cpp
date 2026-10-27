@@ -416,7 +416,7 @@ constexpr mln_plugin_property_descriptor_v1 paint(mln_plugin_string name, mln_pl
 }
 constexpr mln_plugin_property_descriptor_v1 roundedProperty() {
     auto p = paint(str("fill-extrusion-rounded-corner-distance"), number(0));
-    p.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
+    p.is_layout = 1;
     p.supports_transitions = 0;
     return p;
 }

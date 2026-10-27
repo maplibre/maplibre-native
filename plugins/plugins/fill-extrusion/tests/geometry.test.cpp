@@ -17,7 +17,7 @@ struct Geometry {
         bucket.struct_size = sizeof(bucket);
         EXPECT_EQ(MLN_PLUGIN_STATUS_OK, mln_fill_extrusion_register(capture, nullptr, 0));
         layer = descriptor->layer_types;
-        mln_plugin_layout_context_v1 context{sizeof(context), 15, 8192, nullptr, 0, nullptr};
+        mln_plugin_layout_context_v1 context{sizeof(context), 15, 8192, nullptr, 0};
         EXPECT_EQ(MLN_PLUGIN_STATUS_OK, layer->create_layout(&context, &layout));
     }
     ~Geometry() { layer->destroy_layout(layout); }
@@ -28,7 +28,7 @@ TEST(FillExtrusionGeometry, RoofHolesWallsRangesAndQueries) {
     const mln_plugin_tile_point_v1 points[] = {
         {0, 0}, {100, 0}, {100, 100}, {0, 100}, {0, 0}, {25, 25}, {25, 75}, {75, 75}, {75, 25}, {25, 25}};
     const uint32_t paths[] = {0, 5, 10};
-    mln_plugin_feature_v1 f{sizeof(f), MLN_PLUGIN_GEOMETRY_POLYGON, 42, points, 10, paths, 2, nullptr, 0};
+    mln_plugin_feature_v1 f{sizeof(f), MLN_PLUGIN_GEOMETRY_POLYGON, 42, points, 10, paths, 2};
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, g.layer->layout_feature(g.layout, &f));
     g.finish();
     ASSERT_EQ(2u, g.bucket.feature_vertex_range_count);
@@ -88,15 +88,8 @@ TEST(FillExtrusionGeometry, SegmentsNeverOverflow16BitIndices) {
                       {{x, y}, {int16_t(x + 30), y}, {int16_t(x + 30), int16_t(y + 30)}, {x, int16_t(y + 30)}, {x, y}});
         paths.push_back(uint32_t(points.size()));
     }
-    mln_plugin_feature_v1 f{sizeof(f),
-                            MLN_PLUGIN_GEOMETRY_POLYGON,
-                            7,
-                            points.data(),
-                            points.size(),
-                            paths.data(),
-                            paths.size() - 1,
-                            nullptr,
-                            0};
+    mln_plugin_feature_v1 f{
+        sizeof(f), MLN_PLUGIN_GEOMETRY_POLYGON, 7, points.data(), points.size(), paths.data(), paths.size() - 1};
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, g.layer->layout_feature(g.layout, &f));
     g.finish();
     const auto& drawable = g.bucket.drawables[0];
@@ -123,8 +116,7 @@ TEST(FillExtrusionGeometry, OversizedOutlineUsesInstancedWallsAndSegmentedRoofs)
     }
     points.push_back(points.front());
     const uint32_t paths[] = {0, uint32_t(points.size())};
-    mln_plugin_feature_v1 f{
-        sizeof(f), MLN_PLUGIN_GEOMETRY_POLYGON, 9, points.data(), points.size(), paths, 1, nullptr, 0};
+    mln_plugin_feature_v1 f{sizeof(f), MLN_PLUGIN_GEOMETRY_POLYGON, 9, points.data(), points.size(), paths, 1};
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, g.layer->layout_feature(g.layout, &f));
     g.finish();
     ASSERT_EQ(2u, g.bucket.drawable_count);

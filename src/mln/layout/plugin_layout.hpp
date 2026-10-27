@@ -15,7 +15,6 @@ public:
                  plugin::RegisteredLayerPtr,
                  const LayoutParameters* = nullptr);
 
-    // A layer waits for the sprite images its IMAGE properties name.
     bool hasDependencies() const override { return needsImages; }
 
     void createBucket(const ImagePositions&,
@@ -29,7 +28,6 @@ private:
     bool needsImages = false;
     const float zoom;
     const std::shared_ptr<const GlobalStateMap> globalState;
-    std::shared_ptr<FileSource> fileSource;
     std::vector<Immutable<style::LayerProperties>> layers;
     std::unique_ptr<GeometryTileLayer> sourceLayer;
     plugin::RegisteredLayerPtr registration;

@@ -383,7 +383,7 @@ TEST(PluginApi, BooleanDefaultsAndShaderEncodingAreValidated) {
 
 TEST(PluginApi, LayoutPropertiesValidateScopeSerializeAndInvalidateGeometry) {
     Descriptor input("test.layout-property");
-    input.property.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
+    input.property.is_layout = 1;
     input.property.type = MLN_PLUGIN_VALUE_FLOAT;
     input.property.default_value.type = MLN_PLUGIN_VALUE_FLOAT;
     input.property.default_value.data.float_value = 0;

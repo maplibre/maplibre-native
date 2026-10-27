@@ -4,12 +4,10 @@ load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
 load("@rules_swift//swift:swift.bzl", "swift_library")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
-# The demo draws with layer types that are only registered in a build with plugin support, and the gltf layer
-# only has a Metal shader:
+# The layer types of the plugins only exist in a build with plugin support, and the fill-extrusion layer only has a
+# Metal shader:
 #
 #   bazel build //plugins/demo/ios:PluginDemo --//:renderer=metal --//:plugins=true
-#
-# (`--ios_multi_cpus=sim_arm64` for the simulator, see README.md.)
 _PLUGINS_ONLY = select({
     "//:plugins_enabled": [],
     "//conditions:default": ["@platforms//:incompatible"],
@@ -46,10 +44,8 @@ ios_application(
     infoplists = ["Info.plist"],
     minimum_os_version = "16.0",
     provisioning_profile = "xcode_profile",
-    # `asset://car-red.glb` in a style resolves against the root of the app bundle. The demos of the plugins that only
-    # need a style and a camera are listed from the metadata the plugin wrappers carry.
+    # The demos are listed from the metadata the plugin wrappers carry.
     resources = [
-        "//plugins/demo/assets:models",
         "//plugins/demo/assets:styles",
         "//plugins/ios:demos",
     ],

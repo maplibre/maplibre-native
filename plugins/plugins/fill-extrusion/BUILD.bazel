@@ -1,5 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//bazel:flags.bzl", "CPP_FLAGS")
+load("//plugins:render_test.bzl", "plugin_render_test")
 
 cc_library(
     name = "fill-extrusion",
@@ -39,16 +40,14 @@ cc_test(
     ],
 )
 
-exports_files(
-    ["render_test.cpp"],
-    visibility = ["//plugins:__pkg__"],
-)
-
-filegroup(
-    name = "render-fixtures",
-    srcs = [
-        "render-tests/manifest-metal.json",
-        "render-tests/results/.gitkeep",
-    ],
-    visibility = ["//plugins:__pkg__"],
+# Every test of the repository that has a fill-extrusion layer, with the plugin replacing the built-in layer.
+plugin_render_test(
+    name = "render-test",
+    data = ["//metrics:render-test-files"],
+    header = "fill_extrusion.hpp",
+    ignore = "render-tests/ignores.json",
+    layer_type = "fill-extrusion",
+    manifest = {"//:metal_renderer": "metrics/ios-metal-render-test-runner-style.json"},
+    plugin = ":fill-extrusion",
+    register = "mln_fill_extrusion_register",
 )

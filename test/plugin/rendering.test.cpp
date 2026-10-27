@@ -88,9 +88,12 @@ void registerTriangles(const std::string& pluginID,
     radius.type = MLN_PLUGIN_VALUE_FLOAT;
     radius.expression_capabilities = MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_CAMERA;
     radius.default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_FLOAT, {.float_value = 1}};
-    std::array<mln_plugin_property_descriptor_v1, 2> animationProperties{radius, radius};
+    // Camera expressions only: a data-driven property needs a shader binding, and a layout property cannot have one.
+    auto cameraRadius = radius;
+    cameraRadius.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    std::array<mln_plugin_property_descriptor_v1, 2> animationProperties{cameraRadius, cameraRadius};
     animationProperties[1].name = {"test-layout", 11};
-    animationProperties[1].scope = MLN_PLUGIN_PROPERTY_LAYOUT;
+    animationProperties[1].is_layout = 1;
     for (std::size_t i = 0; i < layers.size(); ++i) {
         const std::string offset = i == 0 ? "-1.0" : "+1.0";
         const std::string color = i == 0 ? "1,0,0,1" : "0,1,0,1";

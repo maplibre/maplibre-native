@@ -1,6 +1,6 @@
 {
   "id": "ngon-layer",
-  "displayName": "N-gon layer",
+  "displayName": "Ngon layer",
   "description": "Source-bound regular polygon (n-gon) style layer",
   "registerClass": "org.maplibre.plugins.ngonlayer.NgonLayerPlugin",
   "style": "asset://demo/ngon-layer/style.json",

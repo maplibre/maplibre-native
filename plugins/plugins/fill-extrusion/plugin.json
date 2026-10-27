@@ -1,13 +1,5 @@
 {
-  "schemaVersion": 1,
-  "id": "fill-extrusion",
-  "displayName": "Fill extrusion",
   "description": "Replaces the built-in fill-extrusion style layer",
-  "version": "0.1.0",
-  "registerFunction": "mln_fill_extrusion_register",
-  "header": "shared/include/fill_extrusion.hpp",
-  "sources": ["shared/cpp/fill_extrusion.cpp"],
-  "includeDirectories": ["shared/include", "shared/cpp", "vendor"],
   "backends": ["vulkan", "metal"],
   "demo": {
     "style": "https://tiles.openfreemap.org/styles/liberty",

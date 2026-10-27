@@ -1,70 +1,7 @@
-load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
-
-cc_test(
-    name = "render-tests",
-    timeout = "long",
-    srcs = ["render_test.cpp"],
-    args = [
-        "--manifestPath",
-        "plugins/plugins/ngon-layer/render-tests/manifest.json",
+exports_files(
+    [
+        "render_test.cpp",
+        "render_test.bzl",
     ],
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
-    data = ["//plugins/plugins/ngon-layer:render-fixtures"],
-    tags = ["no-sandbox"],
-    deps = [
-        "//plugins/plugins/ngon-layer",
-        "//render-test:render-test-srcs",
-    ],
-)
-
-# The gltf layer only has a Metal shader, so its render tests only run in a Metal build:
-#   bazel test //plugins:render-tests-gltf --//:renderer=metal --//:plugins=true
-cc_test(
-    name = "render-tests-gltf",
-    timeout = "long",
-    srcs = ["render_test.cpp"],
-    args = [
-        "--manifestPath",
-        "plugins/plugins/gltf-layer/render-tests/manifest.json",
-    ],
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
-    data = ["//plugins/plugins/gltf-layer:render-fixtures"],
-    local_defines = ["MLN_RENDER_TEST_GLTF=1"],
-    tags = ["no-sandbox"],
-    target_compatible_with = select({
-        "//:metal_renderer": [],
-        "//conditions:default": ["@platforms//:incompatible"],
-    }),
-    deps = [
-        "//plugins/plugins/gltf-layer",
-        "//render-test:render-test-srcs",
-    ],
-)
-
-# The existing core fill-extrusion fixtures (metrics/integration), run with the fill-extrusion plugin registered so it
-# replaces the built-in implementation. Metal only, like the plugin's shaders; the expectations are the iOS Metal ones.
-#   bazel test //plugins:render-tests-fill-extrusion --//:renderer=metal --//:plugins=true
-cc_test(
-    name = "render-tests-fill-extrusion",
-    timeout = "long",
-    srcs = ["//plugins/plugins/fill-extrusion:render_test.cpp"],
-    args = [
-        "--manifestPath",
-        "plugins/plugins/fill-extrusion/render-tests/manifest-metal.json",
-    ],
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
-    data = [
-        "//metrics:render-test-files",
-        "//plugins/plugins/fill-extrusion:render-fixtures",
-    ],
-    tags = ["no-sandbox"],
-    target_compatible_with = select({
-        "//:metal_renderer": [],
-        "//conditions:default": ["@platforms//:incompatible"],
-    }),
-    deps = [
-        "//plugins/plugins/fill-extrusion",
-        "//render-test:render-test-srcs",
-    ],
+    visibility = ["//plugins:__subpackages__"],
 )

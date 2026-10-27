@@ -56,9 +56,7 @@ struct FeatureView {
                  points.data(),
                  points.size(),
                  offsets.data(),
-                 geometry.size(),
-                 nullptr,
-                 0};
+                 geometry.size()};
     }
     FeatureView(const FeatureView&) = delete;
     FeatureView& operator=(const FeatureView&) = delete;

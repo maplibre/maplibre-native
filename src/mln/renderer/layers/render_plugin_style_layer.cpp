@@ -61,18 +61,14 @@ DrawState drawState(const plugin::RegisteredLayer& registration,
                 pass.cull == MLN_PLUGIN_CULL_BACK_CCW};
     }
     DrawState state;
-    state.cullBack = definition.cullBackFaces;
     if (definition.enableStencilOverlap) {
         // Overlapping tiles are deduplicated by the group's one stencil reference, not by depth.
         state.depthTest = false;
         state.stencil = true;
         state.is3D = true;
     } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
-        // A real depth test against the map's 3D geometry, as fill extrusions do. A 2D drawable's depth test is
-        // turned off for every layer above a 3D layer (see PaintParameters::depthModeForSublayer), so such a
-        // drawable could never be hidden by an extrusion beneath it in the layer order.
         state.depthWrite = true;
-        state.is3D = true;
+        state.cullBack = definition.cullBackFaces;
     } else if (definition.depthMode == PluginDrawableDepthMode::Disabled) {
         state.depthTest = false;
     }
@@ -91,7 +87,7 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
     const auto& definitions = registration->properties;
     const auto& layerImpl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
-        if (definition.layout) continue;
+        if (definition.isLayout) continue;
         const auto property = layerImpl.pluginProperties.find(definition.name);
         auto value = property == layerImpl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
                                                                   : property->second;
@@ -108,7 +104,7 @@ void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) 
     styleDependencies = impl.getDependencies();
     const auto& definitions = impl.registration->properties;
     for (const auto& definition : definitions) {
-        if (definition.layout) continue;
+        if (definition.isLayout) continue;
         const auto property = impl.pluginProperties.find(definition.name);
         auto value = property == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
                                                              : property->second;
@@ -140,7 +136,7 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     const auto& definitions = registration->properties;
     const auto& impl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
-        if (definition.layout) continue;
+        if (definition.isLayout) continue;
         const auto transition = transitioningPaintProperties.find(definition.name);
         if (transition != transitioningPaintProperties.end()) {
             evaluatedPluginProperties.emplace(
@@ -166,7 +162,7 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
         animationProperties.reserve(definitions.size());
         auto storageIt = storage.begin();
         for (const auto& definition : definitions) {
-            if (definition.layout) continue;
+            if (definition.isLayout) continue;
             const auto propertyIt = evaluatedPluginProperties.find(definition.name);
             const auto value = propertyIt == evaluatedPluginProperties.end()
                                    ? style::defaultPluginPropertyValue(definition)
@@ -194,7 +190,7 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
         std::vector<style::PluginPropertyValue::EvaluationStorage> storage(definitions.size());
         for (size_t i = 0; i < definitions.size(); ++i) {
             const auto& definition = definitions[i];
-            if (definition.layout) continue;
+            if (definition.isLayout) continue;
             const auto& value = evaluatedPluginProperties.at(definition.name);
             if (value.isDataDriven()) continue;
             cameraProperties.push_back({sizeof(mln_plugin_property_value_v1),
@@ -384,12 +380,6 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     }
-
-    // The group only draws its 3D drawables with the right depth state when it has stencil tiles, but tile
-    // masks are an extra pass that 2D drawables here never use.
-    bool has3D = registration->is3D;
-    tileLayerGroup->visitDrawables([&](gfx::Drawable& drawable) { has3D = has3D || drawable.getIs3D(); });
-    tileLayerGroup->setStencilTiles(has3D ? renderTiles : nullptr);
 }
 
 bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,

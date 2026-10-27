@@ -1,11 +1,44 @@
+enable_testing()
+
+# The render tests of a plugin: the runner of render_test.cpp with the plugin registered, run by ctest from the
+# repository root. Without MANIFEST the tests are the repository's own, with the manifest of this build's renderer.
+# LAYER_TYPE and IGNORE select them, see render_test.cpp.
+add_custom_target(mln-plugin-render-tests)
+function(mln_plugin_render_test name plugin header register)
+    cmake_parse_arguments(ARG "" "MANIFEST;LAYER_TYPE;IGNORE" "" ${ARGN})
+    add_executable(${name} EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/render_test.cpp)
+    target_compile_definitions(${name} PRIVATE MLN_PLUGIN_HEADER="${header}" MLN_PLUGIN_REGISTER=${register})
+    target_link_libraries(${name} PRIVATE ${plugin} mbgl-render-test)
+    add_dependencies(mln-plugin-render-tests ${name})
+
+    set(manifest ${ARG_MANIFEST})
+    if(NOT manifest)
+        if(MLN_WITH_METAL)
+            set(manifest metrics/ios-metal-render-test-runner-style.json)
+        elseif(MLN_WITH_VULKAN)
+            set(manifest metrics/linux-vulkan.json)
+        else()
+            set(manifest metrics/linux-opengl.json)
+        endif()
+    endif()
+    set(options --manifestPath ${manifest})
+    if(ARG_LAYER_TYPE)
+        list(APPEND options --layer-type ${ARG_LAYER_TYPE})
+    endif()
+    if(ARG_IGNORE)
+        list(APPEND options --ignore ${ARG_IGNORE})
+    endif()
+    add_test(NAME ${name} COMMAND ${name} ${options} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+endfunction()
+
 add_subdirectory(plugins/ngon-layer)
 target_link_libraries(mln-ngon-layer PUBLIC mbgl-core)
 
 add_executable(mln-ngon-tests EXCLUDE_FROM_ALL plugins/ngon-layer/tests/ngon.test.cpp)
 target_link_libraries(mln-ngon-tests PRIVATE mln-ngon-layer)
 
-add_executable(mln-plugin-render-tests EXCLUDE_FROM_ALL render_test.cpp)
-target_link_libraries(mln-plugin-render-tests PRIVATE mln-ngon-layer mbgl-render-test)
+mln_plugin_render_test(mln-ngon-render-test mln-ngon-layer ngon_layer.hpp mln_ngon_layer_register
+    MANIFEST plugins/plugins/ngon-layer/render-tests/manifest.json)
 
 add_library(mln-fill-extrusion STATIC plugins/fill-extrusion/shared/cpp/fill_extrusion.cpp)
 target_include_directories(mln-fill-extrusion PUBLIC plugins/fill-extrusion/shared/include)
@@ -15,8 +48,10 @@ if(MLN_WITH_METAL)
     target_compile_definitions(mln-fill-extrusion PRIVATE MLN_FILL_EXTRUSION_METAL=1)
 endif()
 
-add_executable(mln-fill-extrusion-render-tests EXCLUDE_FROM_ALL plugins/fill-extrusion/render_test.cpp)
-target_link_libraries(mln-fill-extrusion-render-tests PRIVATE mln-fill-extrusion mbgl-render-test)
+if(MLN_WITH_VULKAN OR MLN_WITH_METAL)
+    mln_plugin_render_test(mln-fill-extrusion-render-test mln-fill-extrusion fill_extrusion.hpp mln_fill_extrusion_register
+        LAYER_TYPE fill-extrusion IGNORE plugins/plugins/fill-extrusion/render-tests/ignores.json)
+endif()
 
 add_executable(mln-plugin-api-tests EXCLUDE_FROM_ALL
     ../test/plugin/api.test.cpp ../test/plugin/registry.test.cpp
@@ -28,24 +63,4 @@ add_executable(mln-plugin-api-tests EXCLUDE_FROM_ALL
 target_include_directories(mln-plugin-api-tests PRIVATE ../src ../test/include ../test/src)
 get_target_property(MLN_PLUGIN_TEST_LIBRARIES mbgl-core LINK_LIBRARIES)
 target_link_libraries(mln-plugin-api-tests PRIVATE mln-fill-extrusion mbgl-vendor-googletest ${MLN_PLUGIN_TEST_LIBRARIES})
-
-if(MLN_WITH_METAL)
-    # The glTF layer only has a Metal shader. tinygltf is fetched rather than vendored, and only its two source files
-    # are used: its own CMake project also builds tests and install rules.
-    include(FetchContent)
-    FetchContent_Declare(
-        tinygltf
-        URL https://github.com/syoyo/tinygltf/archive/v3.0.1.tar.gz
-        URL_HASH SHA256=b7e953f13a30d7b6fd677e484de35febde954143a265da15dacd92ed171c73e6
-        SOURCE_SUBDIR none
-    )
-    FetchContent_MakeAvailable(tinygltf)
-
-    add_library(mln-gltf-layer STATIC
-        plugins/gltf-layer/shared/cpp/gltf_layer.cpp ${tinygltf_SOURCE_DIR}/tiny_gltf_v3.c)
-    target_include_directories(mln-gltf-layer PUBLIC plugins/gltf-layer/shared/include ${PROJECT_SOURCE_DIR}/include)
-    target_include_directories(mln-gltf-layer PRIVATE plugins/gltf-layer/shared/cpp ${tinygltf_SOURCE_DIR})
-
-    add_executable(mln-gltf-tests EXCLUDE_FROM_ALL plugins/gltf-layer/tests/gltf.test.cpp)
-    target_link_libraries(mln-gltf-tests PRIVATE mln-gltf-layer)
-endif()
+add_test(NAME mln-plugin-api-tests COMMAND mln-plugin-api-tests WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

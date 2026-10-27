@@ -16,7 +16,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "MapLibrePluginExample"
 include(":app")
-// One generated module per plugin that supports Android, see plugins/tools/generate.py.
+// One generated module per plugin that supports Android, see plugins/tools/generate.ts.
 file("../../android").listFiles { module -> File(module, "build.gradle.kts").isFile }!!.sorted().forEach {
     include(":${it.name}")
     project(":${it.name}").projectDir = it

@@ -67,7 +67,7 @@ typedef enum mln_plugin_value_type {
     MLN_PLUGIN_VALUE_STRING = 4,
     MLN_PLUGIN_VALUE_BOOLEAN = 5,
     /* Sprite image identifier, represented by data.string_value. */
-    MLN_PLUGIN_VALUE_IMAGE = 6
+    MLN_PLUGIN_VALUE_IMAGE = 6,
 } mln_plugin_value_type;
 
 /* Expression dependencies accepted by a plugin property. */
@@ -122,12 +122,6 @@ typedef struct mln_plugin_value {
     mln_plugin_value_data data;
 } mln_plugin_value;
 
-/* Zero (a zero-initialized descriptor) means paint. */
-typedef enum mln_plugin_property_scope {
-    MLN_PLUGIN_PROPERTY_PAINT = 1,
-    MLN_PLUGIN_PROPERTY_LAYOUT = 2
-} mln_plugin_property_scope;
-
 typedef struct mln_plugin_property_descriptor_v1 {
     uint32_t struct_size;
     mln_plugin_string name;
@@ -144,11 +138,9 @@ typedef struct mln_plugin_property_descriptor_v1 {
     /* Optional allowed string values. */
     const mln_plugin_string* enum_values;
     size_t enum_value_count;
-    /* Layout properties are evaluated at layout time, once per tile and once per
-     * feature (see mln_plugin_feature_v1::layout_properties); changing one lays the
-     * tiles out again. They may use camera and feature expressions, but not
-     * feature state or transitions, and they have no binders. */
-    mln_plugin_property_scope scope;
+    /* 0 = paint, 1 = layout. Layout values may use camera expressions only,
+     * never transition, and are evaluated at tile zoom before create_layout. */
+    uint8_t is_layout;
 } mln_plugin_property_descriptor_v1;
 
 typedef struct mln_plugin_property_value_v1 {
@@ -303,10 +295,6 @@ typedef struct mln_plugin_uniform_context_v1 {
     float pixels_to_tile_units;
     float camera_to_center_distance;
     float pixel_ratio;
-    /* World pixels (the xy unit of tile_matrix) per meter at the map center's latitude. The projection takes a
-     * vertex z in meters and scales it by this, so geometry that must keep its proportions across
-     * zoom levels divides its height in pixels by it. */
-    float pixels_per_meter;
     float light_color[3];
     float light_intensity;
     /* Cartesian style-light position, rotated for a viewport anchor. */
@@ -341,55 +329,15 @@ typedef struct mln_plugin_feature_v1 {
     /* path_offsets has path_count + 1 entries and ends at point_count. */
     const uint32_t* path_offsets;
     size_t path_count;
-    /* The layout-scope properties evaluated for this feature, in registration
-     * order. Populated for layout_feature only, empty otherwise. Borrowed and
-     * valid only during the callback. */
-    const mln_plugin_property_value_v1* layout_properties;
-    size_t layout_property_count;
 } mln_plugin_feature_v1;
-
-typedef struct mln_plugin_resource_response_v1 {
-    uint32_t struct_size;
-    uint64_t request_id;
-    const uint8_t* data;
-    size_t data_size;
-    mln_plugin_string error_message;
-} mln_plugin_resource_response_v1;
-
-/* Response bytes and strings are borrowed and valid only during the callback. */
-typedef void (*mln_plugin_resource_callback_fn)(void* callback_context,
-                                                const mln_plugin_resource_response_v1* response);
-
-/* Services the host offers to layout callbacks. Borrowed for the duration of the
- * callback that receives it. */
-typedef struct mln_plugin_host_api_v1 {
-    uint32_t struct_size;
-    uint32_t abi_version;
-    /* severity: 1 info, 2 warning, 3 error. */
-    void (*log)(int32_t severity, mln_plugin_string message);
-    void* context;
-    /* Loads url through MapLibre's configured file source (network policy, URL
-     * transformation, cache, asset:// and file://). The request completes before
-     * this function returns: callback runs on the calling thread, inside the call. */
-    mln_plugin_status (*request_resource)(void* context,
-                                          mln_plugin_string url,
-                                          mln_plugin_resource_callback_fn callback,
-                                          void* callback_context,
-                                          uint64_t* request_id);
-    void (*cancel_resource_request)(void* context, uint64_t request_id);
-} mln_plugin_host_api_v1;
 
 /* Worker-thread input. Paint evaluation is owned by the host binders. */
 typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
-    /* The layout-scope properties evaluated at the tile's zoom without a feature,
-     * in registration order. A feature expression yields its default here. */
     const mln_plugin_property_value_v1* properties;
     size_t property_count;
-    /* Resource requests use MapLibre's configured file source and cache. */
-    const mln_plugin_host_api_v1* host;
 } mln_plugin_layout_context_v1;
 
 /* Returned bytes remain valid until destroy_layout. The host copies them after
@@ -429,13 +377,8 @@ typedef struct mln_plugin_segment_v1 {
 } mln_plugin_segment_v1;
 
 typedef enum mln_plugin_drawable_depth_mode_v1 {
-    /* No depth test: drawn over everything beneath the layer in the layer order. */
     MLN_PLUGIN_DRAWABLE_DEPTH_DISABLED = 0,
-    /* Layer order decides what is in front, as for the host's 2D layers. 3D geometry (fill extrusions) in layers
-     * beneath this one does not hide it. */
     MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY = 1,
-    /* Depth tested and written like the host's 3D layers: hidden by 3D geometry, such as a fill extrusion, that is
-     * in front of it, whatever the layer order. */
     MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE = 2
 } mln_plugin_drawable_depth_mode_v1;
 

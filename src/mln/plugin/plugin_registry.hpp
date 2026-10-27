@@ -23,8 +23,7 @@ struct PropertyDefinition {
     std::optional<float> minimum;
     std::optional<float> maximum;
     std::vector<std::string> enumValues;
-    // Layout properties are evaluated at layout time, per tile and per feature; they have no paint evaluation.
-    bool layout = false;
+    bool isLayout = false;
     bool operator==(const PropertyDefinition&) const = default;
 };
 
@@ -105,11 +104,11 @@ struct LayerType {
     mln_plugin_update_uniform_block_fn updateUniformBlock = nullptr;
     bool replaceBuiltin = false;
     bool is3D = false;
+    std::vector<DrawPass> drawPasses;
+    mln_plugin_evaluate_layer_fn evaluateLayer = nullptr;
     // Without declared draw passes there is one default pass, and each drawable's own depth, stencil and cull flags set
     // the state it is drawn with.
     bool explicitDrawPasses = false;
-    std::vector<DrawPass> drawPasses;
-    mln_plugin_evaluate_layer_fn evaluateLayer = nullptr;
     bool enableNearClippedMatrix = false;
     mln_plugin_should_animate_fn shouldAnimate = nullptr;
     bool operator==(const LayerType&) const = default;

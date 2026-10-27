@@ -13,7 +13,6 @@ bazel_dep(name = "rules_cc", version = "0.2.25")
 bazel_dep(name = "rules_shell", version = "0.8.0")
 bazel_dep(name = "rules_swift_package_manager", version = "1.25.0")
 bazel_dep(name = "googletest", version = "1.18.0.bcr.1")
-bazel_dep(name = "tinygltf", version = "3.0.1")
 bazel_dep(name = "maplibre-tile-spec", version = "0.0.0", repo_name = "maplibre_tile_spec")
 local_path_override(
     module_name = "maplibre-tile-spec",

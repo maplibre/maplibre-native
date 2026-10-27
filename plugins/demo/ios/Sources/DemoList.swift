@@ -49,14 +49,6 @@ struct Demo: Identifiable, Hashable {
     /// The demos with a view of their own.
     static let custom = [
         Demo(
-            id: "models",
-            pluginID: "gltf-layer",
-            title: "3D models",
-            layerType: "gltf",
-            summary: "glTF models for cars and trees, picked per feature.",
-            systemImage: "car.fill"
-        ) { ModelsDemoView() },
-        Demo(
             id: "ngons",
             pluginID: "ngon-layer",
             title: "N-gons",

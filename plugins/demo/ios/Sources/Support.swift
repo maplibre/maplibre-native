@@ -43,7 +43,7 @@ extension MLNStyle {
     /// Objective-C class, so they come from the style document, and the demo only feeds their sources.
     @MainActor
     func demoSource(_ identifier: String, status: DemoStatus) -> MLNShapeSource? {
-        let source = self.source(withIdentifier: identifier) as? MLNShapeSource
+        let source = source(withIdentifier: identifier) as? MLNShapeSource
         if source == nil {
             status.report("The style has no GeoJSON source named \(identifier)")
         }

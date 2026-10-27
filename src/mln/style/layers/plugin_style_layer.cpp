@@ -28,14 +28,13 @@ PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, p
 bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
     assert(other.getTypeInfo() == getTypeInfo());
     if (filter != other.filter || visibility != other.visibility) return true;
-    const auto& otherProperties = static_cast<const Impl&>(other).pluginProperties;
+    const auto& rhs = static_cast<const Impl&>(other);
     for (const auto& definition : registration->properties) {
-        if (!definition.layout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
-        const auto mine = pluginProperties.find(definition.name);
-        const auto theirs = otherProperties.find(definition.name);
-        const bool mineSet = mine != pluginProperties.end();
-        const bool theirsSet = theirs != otherProperties.end();
-        if (mineSet != theirsSet || (mineSet && !(mine->second == theirs->second))) return true;
+        if (!definition.isLayout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
+        const auto a = pluginProperties.find(definition.name), b = rhs.pluginProperties.find(definition.name);
+        const auto av = a == pluginProperties.end() ? defaultPluginPropertyValue(definition) : a->second;
+        const auto bv = b == rhs.pluginProperties.end() ? defaultPluginPropertyValue(definition) : b->second;
+        if (av != bv) return true;
     }
     return false;
 }
@@ -43,7 +42,7 @@ bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const
 void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
     writer.StartObject();
     for (const auto& definition : registration->properties) {
-        if (!definition.layout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
+        if (!definition.isLayout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
         const auto it = pluginProperties.find(definition.name);
         const auto value = it == pluginProperties.end() ? defaultPluginPropertyValue(definition) : it->second;
         writer.String(definition.name);
@@ -109,8 +108,7 @@ std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::
     const auto definition = impl().registration->findProperty(name);
     if (!definition) return Error{"layer doesn't support this property"};
     if (scope) {
-        const auto expected = definition->layout ? PropertyScope::Layout : PropertyScope::Paint;
-        if (*scope != expected) {
+        if (*scope != (definition->isLayout ? PropertyScope::Layout : PropertyScope::Paint)) {
             return Error{"plugin property '" + name + "' is in the wrong style section"};
         }
     }
@@ -173,7 +171,7 @@ Value PluginStyleLayer::serialize() const {
     for (const auto& [name, value] : impl().pluginProperties) {
         const auto definition = impl().registration->findProperty(name);
         if (!definition) continue;
-        auto& object = result[definition->layout ? "layout" : "paint"];
+        auto& object = result[definition->isLayout ? "layout" : "paint"];
         if (!object.getObject()) object = mapbox::base::ValueObject{};
         const auto property = value.toStyleProperty();
         if (property.getKind() != StyleProperty::Kind::Undefined) {

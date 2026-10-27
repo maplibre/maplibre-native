@@ -11,6 +11,11 @@ on:
   pull_request:
     paths:
       - 'plugins/**'
+      - 'include/mln/plugin/**'
+      - 'src/mln/**/*plugin*'
+      - 'test/plugin/**'
+      - 'render-test/**'
+      - 'metrics/**'
       - '.github/workflows/plugins-ci.yml'
 
 concurrency:
@@ -29,9 +34,55 @@ jobs:
         with:
           node-version-file: ".nvmrc"
 
-      # The platform wrappers in plugins/android are generated from plugins/plugins/*/plugin.json.
+      # The platform wrappers in plugins/android and plugins/ios are generated from plugins/plugins/*/plugin.json.
       - name: Check the generated plugin wrappers
-        run: python3 plugins/tools/generate.py --check
+        run: node plugins/tools/generate.ts --check
 
       - name: Check the n-gon shader header
         run: node plugins/plugins/ngon-layer/scripts/generate-shaders.mjs | diff - plugins/plugins/ngon-layer/shared/cpp/ngon_shader_sources.hpp
+
+  # The render tests of every plugin, on every renderer it supports, and the plugin API tests.
+  tests:
+    name: Plugin tests (${{ matrix.preset }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - preset: linux-opengl
+            runner: ubuntu-24.04
+          - preset: linux-vulkan
+            runner: ubuntu-24.04
+          - preset: macos-metal
+            runner: macos-15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: .github/scripts/install-linux-deps
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+        run: brew install cmake ninja pkg-config glfw libuv icu4c jpeg-turbo webp libpng
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }} -DMLN_WITH_PLUGINS=ON
+
+      - name: Build
+        run: cmake --build build-${{ matrix.preset }} --target mln-plugin-render-tests mln-plugin-api-tests
+
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a ctest --test-dir build-${{ matrix.preset }}/plugins --output-on-failure
+
+      - name: Test (macOS)
+        if: runner.os == 'macOS'
+        run: ctest --test-dir build-${{ matrix.preset }}/plugins --output-on-failure

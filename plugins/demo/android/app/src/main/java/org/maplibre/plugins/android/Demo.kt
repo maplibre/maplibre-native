@@ -5,7 +5,7 @@ import org.json.JSONObject
 import java.lang.reflect.InvocationTargetException
 
 /**
- * A plugin demo. Every plugin module carries `assets/demo/<id>/demo.json`, which plugins/tools/generate.py writes from
+ * A plugin demo. Every plugin module carries `assets/demo/<id>/demo.json`, which plugins/tools/generate.ts writes from
  * the `demo` block of the plugin's plugin.json, so a new plugin shows up here without any change to this app.
  */
 class Demo(

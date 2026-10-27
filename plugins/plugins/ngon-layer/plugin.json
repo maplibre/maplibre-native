@@ -1,13 +1,5 @@
 {
-  "schemaVersion": 1,
-  "id": "ngon-layer",
-  "displayName": "N-gon layer",
   "description": "Source-bound regular polygon (n-gon) style layer",
-  "version": "0.1.1",
-  "registerFunction": "mln_ngon_layer_register",
-  "header": "shared/include/ngon_layer.hpp",
-  "sources": ["shared/cpp/ngon_layer.cpp"],
-  "includeDirectories": ["shared/include", "shared/cpp"],
   "demo": {
     "style": "examples/ngon.json",
     "camera": {"latitude": 0, "longitude": 0, "zoom": 11.3}
