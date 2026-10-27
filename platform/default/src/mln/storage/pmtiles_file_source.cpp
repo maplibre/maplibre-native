@@ -648,6 +648,10 @@ PMTilesFileSource::PMTilesFileSource(const ResourceOptions& resourceOptions, con
 std::unique_ptr<AsyncRequest> PMTilesFileSource::request(const Resource& resource, FileSource::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
+    // The raw pointer is used only as a key into `tasks`. Erasing a reused address by mistake is
+    // not possible: this cancel is queued before the request's memory is freed, so it is processed
+    // before the message registering any later request that could be allocated at the same
+    // address. MainResourceLoader relies on the same ordering.
     req->onCancel([actorRef = thread->actor(), req = req.get()]() { actorRef.invoke(&Impl::cancel, req); });
 
     // assume if there is a tile request, that the pmtiles file has been validated

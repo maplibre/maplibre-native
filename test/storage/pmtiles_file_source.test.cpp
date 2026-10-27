@@ -7,12 +7,14 @@
 #include <mln/util/run_loop.hpp>
 
 #include <atomic>
-#include <cassert>
 #include <filesystem>
+#include <stdexcept>
 #include <tuple>
 
 #include <climits>
 #include <gtest/gtest.h>
+
+using namespace mln;
 
 namespace {
 
@@ -20,12 +22,6 @@ std::string toAbsoluteURL(const std::string& fileName) {
     auto path = std::filesystem::current_path() / "test/fixtures/storage/pmtiles" / fileName;
     return std::string(mln::util::PMTILES_PROTOCOL) + std::string(mln::util::FILE_PROTOCOL) + path.string();
 }
-
-} // namespace
-
-using namespace mln;
-
-namespace {
 
 // Probe installed as the ResourceLoader factory: counts the inner requests a
 // PMTilesFileSource holds live, so tests can observe entries leaking from its `tasks` map
@@ -52,7 +48,11 @@ public:
           liveRequests(liveRequests_) {}
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) override {
-        return std::make_unique<CountingRequest>(inner->request(resource, std::move(callback)), liveRequests);
+        auto innerRequest = inner->request(resource, std::move(callback));
+        if (!innerRequest) {
+            return nullptr;
+        }
+        return std::make_unique<CountingRequest>(std::move(innerRequest), liveRequests);
     }
 
     bool canRequest(const Resource& resource) const override { return inner->canRequest(resource); }
@@ -73,7 +73,9 @@ class CountingResourceLoaderGuard {
 public:
     explicit CountingResourceLoaderGuard(std::atomic<int>& liveRequests)
         : original(FileSourceManager::get()->unRegisterFileSourceFactory(FileSourceType::ResourceLoader)) {
-        assert(original);
+        if (!original) {
+            throw std::runtime_error("No ResourceLoader factory was registered");
+        }
         FileSourceManager::get()->registerFileSourceFactory(
             FileSourceType::ResourceLoader,
             [&liveRequests, factory = original](const ResourceOptions& resourceOptions,
