@@ -5,8 +5,7 @@
  *   node generate-release-notes.ts --platform <android|ios> [--target <ref>]
  *     [--tag-prefix <prefix>] [--previous-tag <tag>]
  *
- * The Markdown goes to stdout. Every change links to its pull request with the full URL, which
- * notify-release-on-prs.ts relies on to find the pull requests of a release.
+ * The Markdown goes to stdout. Every change links to its pull request.
  *
  * Needs the full history and the tags, e.g. `fetch-depth: 0` for actions/checkout.
  */
