@@ -35,3 +35,24 @@ if(MLN_WITH_VULKAN)
     target_include_directories(mln-fill-extrusion-benchmark PRIVATE ../src ../test/include ../test/src)
     target_link_libraries(mln-fill-extrusion-benchmark PRIVATE mln-fill-extrusion ${MLN_PLUGIN_TEST_LIBRARIES})
 endif()
+
+if(MLN_WITH_METAL)
+    # The glTF layer only has a Metal shader. tinygltf is fetched rather than vendored, and only its two source files
+    # are used: its own CMake project also builds tests and install rules.
+    include(FetchContent)
+    FetchContent_Declare(
+        tinygltf
+        URL https://github.com/syoyo/tinygltf/archive/v3.0.1.tar.gz
+        URL_HASH SHA256=b7e953f13a30d7b6fd677e484de35febde954143a265da15dacd92ed171c73e6
+        SOURCE_SUBDIR none
+    )
+    FetchContent_MakeAvailable(tinygltf)
+
+    add_library(mln-gltf-layer STATIC
+        plugins/gltf-layer/shared/cpp/gltf_layer.cpp ${tinygltf_SOURCE_DIR}/tiny_gltf_v3.c)
+    target_include_directories(mln-gltf-layer PUBLIC plugins/gltf-layer/shared/include ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(mln-gltf-layer PRIVATE plugins/gltf-layer/shared/cpp ${tinygltf_SOURCE_DIR})
+
+    add_executable(mln-gltf-tests EXCLUDE_FROM_ALL plugins/gltf-layer/tests/gltf.test.cpp)
+    target_link_libraries(mln-gltf-tests PRIVATE mln-gltf-layer)
+endif()

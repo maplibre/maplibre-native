@@ -732,17 +732,3 @@ cc_library(
     strip_include_prefix = "sqlite/include",
     visibility = ["//visibility:public"],
 )
-
-# vendor/tinygltf: the header-only parser plus the single translation unit that carries its implementation.
-cc_library(
-    name = "tinygltf",
-    srcs = ["tinygltf/tiny_gltf.cc"],
-    hdrs = [
-        "tinygltf/json.hpp",
-        "tinygltf/stb_image.h",
-        "tinygltf/stb_image_write.h",
-        "tinygltf/tiny_gltf.h",
-    ],
-    includes = ["tinygltf"],
-    visibility = ["//visibility:public"],
-)

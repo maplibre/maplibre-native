@@ -46,7 +46,7 @@ from the standalone format, all optional:
 
 | Key | Meaning |
 | --- | --- |
-| `includeDirectories` | May point outside the plugin directory, anywhere inside this repository (for example `../../../vendor/tinygltf`). |
+| `includeDirectories` | May point outside the plugin directory, anywhere inside this repository (for example a library under `../../../vendor/`). |
 | `backends` | The renderers the plugin implements, a subset of `opengl`, `vulkan` and `metal` (default: all). A plugin with neither `opengl` nor `vulkan` gets no Android wrapper, and the generated `register()` returns `false` on a renderer outside the list. |
 | `demo.style` | A style file in the plugin directory, or an `https://` URL. |
 | `demo.camera` | `latitude`, `longitude` and `zoom`, and optionally `pitch` and `bearing`. |

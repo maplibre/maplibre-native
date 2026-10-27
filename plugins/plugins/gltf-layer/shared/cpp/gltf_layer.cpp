@@ -1,6 +1,6 @@
 #include "gltf_layer.hpp"
 
-#include <tiny_gltf.h>
+#include "tiny_gltf_v3.h"
 
 #include <algorithm>
 #include <array>
@@ -95,81 +95,74 @@ Matrix multiply(const Matrix& a, const Matrix& b) {
     return result;
 }
 
-Matrix nodeMatrix(const tinygltf::Node& node) {
-    if (node.matrix.size() == 16) {
+Matrix nodeMatrix(const tg3_node& node) {
+    if (node.has_matrix) {
         Matrix result{};
-        std::copy(node.matrix.begin(), node.matrix.end(), result.value);
+        std::copy(node.matrix, node.matrix + 16, result.value);
         return result;
     }
+    // The parser fills in the identity for an absent translation, rotation or scale.
     Matrix translation = identity();
-    if (node.translation.size() == 3) {
-        translation.value[12] = node.translation[0];
-        translation.value[13] = node.translation[1];
-        translation.value[14] = node.translation[2];
-    }
+    translation.value[12] = node.translation[0];
+    translation.value[13] = node.translation[1];
+    translation.value[14] = node.translation[2];
     Matrix rotation = identity();
-    if (node.rotation.size() == 4) {
-        const double x = node.rotation[0], y = node.rotation[1], z = node.rotation[2], w = node.rotation[3];
-        rotation.value[0] = 1.0 - 2.0 * (y * y + z * z);
-        rotation.value[1] = 2.0 * (x * y + z * w);
-        rotation.value[2] = 2.0 * (x * z - y * w);
-        rotation.value[4] = 2.0 * (x * y - z * w);
-        rotation.value[5] = 1.0 - 2.0 * (x * x + z * z);
-        rotation.value[6] = 2.0 * (y * z + x * w);
-        rotation.value[8] = 2.0 * (x * z + y * w);
-        rotation.value[9] = 2.0 * (y * z - x * w);
-        rotation.value[10] = 1.0 - 2.0 * (x * x + y * y);
-    }
+    const double x = node.rotation[0], y = node.rotation[1], z = node.rotation[2], w = node.rotation[3];
+    rotation.value[0] = 1.0 - 2.0 * (y * y + z * z);
+    rotation.value[1] = 2.0 * (x * y + z * w);
+    rotation.value[2] = 2.0 * (x * z - y * w);
+    rotation.value[4] = 2.0 * (x * y - z * w);
+    rotation.value[5] = 1.0 - 2.0 * (x * x + z * z);
+    rotation.value[6] = 2.0 * (y * z + x * w);
+    rotation.value[8] = 2.0 * (x * z + y * w);
+    rotation.value[9] = 2.0 * (y * z - x * w);
+    rotation.value[10] = 1.0 - 2.0 * (x * x + y * y);
     Matrix scale = identity();
-    if (node.scale.size() == 3) {
-        scale.value[0] = node.scale[0];
-        scale.value[5] = node.scale[1];
-        scale.value[10] = node.scale[2];
-    }
+    scale.value[0] = node.scale[0];
+    scale.value[5] = node.scale[1];
+    scale.value[10] = node.scale[2];
     return multiply(translation, multiply(rotation, scale));
 }
 
-double component(const tinygltf::Model& model,
-                 const tinygltf::Accessor& accessor,
-                 size_t element,
-                 size_t componentIndex) {
-    if (accessor.bufferView < 0 || static_cast<size_t>(accessor.bufferView) >= model.bufferViews.size()) return 0.0;
-    const auto& view = model.bufferViews[accessor.bufferView];
-    if (view.buffer < 0 || static_cast<size_t>(view.buffer) >= model.buffers.size()) return 0.0;
+double component(const tg3_model& model, const tg3_accessor& accessor, size_t element, size_t componentIndex) {
+    if (accessor.buffer_view < 0 || static_cast<uint32_t>(accessor.buffer_view) >= model.buffer_views_count) return 0.0;
+    const auto& view = model.buffer_views[accessor.buffer_view];
+    if (view.buffer < 0 || static_cast<uint32_t>(view.buffer) >= model.buffers_count) return 0.0;
     const auto& buffer = model.buffers[view.buffer];
-    const size_t componentSize = tinygltf::GetComponentSizeInBytes(accessor.componentType);
-    const int byteStride = accessor.ByteStride(view);
-    const size_t stride = byteStride > 0 ? static_cast<size_t>(byteStride)
-                                         : componentSize * tinygltf::GetNumComponentsInType(accessor.type);
-    const size_t offset = view.byteOffset + accessor.byteOffset + element * stride + componentIndex * componentSize;
-    if (offset + componentSize > buffer.data.size()) return 0.0;
-    const uint8_t* data = buffer.data.data() + offset;
-    switch (accessor.componentType) {
-        case TINYGLTF_COMPONENT_TYPE_FLOAT: {
+    const int32_t componentBytes = tg3_component_size(accessor.component_type);
+    const int32_t strideBytes = tg3_accessor_byte_stride(&accessor, &view);
+    if (componentBytes <= 0 || strideBytes <= 0) return 0.0;
+    const auto componentSize = static_cast<size_t>(componentBytes);
+    const size_t offset = view.byte_offset + accessor.byte_offset + element * static_cast<size_t>(strideBytes) +
+                          componentIndex * componentSize;
+    if (offset + componentSize > buffer.data.count) return 0.0;
+    const uint8_t* data = buffer.data.data + offset;
+    switch (accessor.component_type) {
+        case TG3_COMPONENT_TYPE_FLOAT: {
             float value;
             std::memcpy(&value, data, sizeof(value));
             return value;
         }
-        case TINYGLTF_COMPONENT_TYPE_DOUBLE: {
+        case TG3_COMPONENT_TYPE_DOUBLE: {
             double value;
             std::memcpy(&value, data, sizeof(value));
             return value;
         }
-        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+        case TG3_COMPONENT_TYPE_UNSIGNED_BYTE:
             return *data;
-        case TINYGLTF_COMPONENT_TYPE_BYTE:
+        case TG3_COMPONENT_TYPE_BYTE:
             return *reinterpret_cast<const int8_t*>(data);
-        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
+        case TG3_COMPONENT_TYPE_UNSIGNED_SHORT: {
             uint16_t value;
             std::memcpy(&value, data, sizeof(value));
             return value;
         }
-        case TINYGLTF_COMPONENT_TYPE_SHORT: {
+        case TG3_COMPONENT_TYPE_SHORT: {
             int16_t value;
             std::memcpy(&value, data, sizeof(value));
             return value;
         }
-        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: {
+        case TG3_COMPONENT_TYPE_UNSIGNED_INT: {
             uint32_t value;
             std::memcpy(&value, data, sizeof(value));
             return value;
@@ -200,31 +193,31 @@ void transformNormal(const Matrix& matrix, const double input[3], float output[3
     }
 }
 
-void appendPrimitive(const tinygltf::Model& source,
-                     const tinygltf::Primitive& primitive,
-                     const Matrix& transform,
-                     Model& output) {
-    if (primitive.mode != TINYGLTF_MODE_TRIANGLES || primitive.indices < 0 ||
-        static_cast<size_t>(primitive.indices) >= source.accessors.size()) {
+int32_t attributeAccessor(const tg3_primitive& primitive, const char* name) {
+    for (uint32_t i = 0; i < primitive.attributes_count; ++i) {
+        if (tg3_str_equals_cstr(primitive.attributes[i].key, name)) return primitive.attributes[i].value;
+    }
+    return -1;
+}
+
+void appendPrimitive(const tg3_model& source, const tg3_primitive& primitive, const Matrix& transform, Model& output) {
+    if (primitive.mode != TG3_MODE_TRIANGLES || primitive.indices < 0 ||
+        static_cast<uint32_t>(primitive.indices) >= source.accessors_count) {
         return;
     }
-    const auto positionIt = primitive.attributes.find("POSITION");
-    if (positionIt == primitive.attributes.end() || positionIt->second < 0 ||
-        static_cast<size_t>(positionIt->second) >= source.accessors.size()) {
-        return;
-    }
-    const auto& positions = source.accessors[positionIt->second];
-    const auto normalIt = primitive.attributes.find("NORMAL");
-    const tinygltf::Accessor* normals = nullptr;
-    if (normalIt != primitive.attributes.end() && normalIt->second >= 0 &&
-        static_cast<size_t>(normalIt->second) < source.accessors.size()) {
-        normals = &source.accessors[normalIt->second];
+    const int32_t positionIndex = attributeAccessor(primitive, "POSITION");
+    if (positionIndex < 0 || static_cast<uint32_t>(positionIndex) >= source.accessors_count) return;
+    const auto& positions = source.accessors[positionIndex];
+    const int32_t normalIndex = attributeAccessor(primitive, "NORMAL");
+    const tg3_accessor* normals = nullptr;
+    if (normalIndex >= 0 && static_cast<uint32_t>(normalIndex) < source.accessors_count) {
+        normals = &source.accessors[normalIndex];
     }
     // Textures are not part of the plugin ABI, so only the material's base color factor is honored.
     double color[4]{0.72, 0.64, 0.48, 1.0};
-    if (primitive.material >= 0 && static_cast<size_t>(primitive.material) < source.materials.size()) {
-        const auto& factor = source.materials[primitive.material].pbrMetallicRoughness.baseColorFactor;
-        if (factor.size() == 4) std::copy(factor.begin(), factor.end(), color);
+    if (primitive.material >= 0 && static_cast<uint32_t>(primitive.material) < source.materials_count) {
+        const auto& factor = source.materials[primitive.material].pbr_metallic_roughness.base_color_factor;
+        std::copy(factor, factor + 4, color);
     }
     const auto vertexOffset = static_cast<uint32_t>(output.vertices.size());
     for (size_t i = 0; i < positions.count; ++i) {
@@ -246,38 +239,44 @@ void appendPrimitive(const tinygltf::Model& source,
     }
 }
 
-void appendNode(const tinygltf::Model& source, int nodeIndex, const Matrix& parent, int depth, Model& output) {
-    if (depth > maxNodeDepth || nodeIndex < 0 || static_cast<size_t>(nodeIndex) >= source.nodes.size()) return;
+void appendNode(const tg3_model& source, int nodeIndex, const Matrix& parent, int depth, Model& output) {
+    if (depth > maxNodeDepth || nodeIndex < 0 || static_cast<uint32_t>(nodeIndex) >= source.nodes_count) return;
     const auto& node = source.nodes[nodeIndex];
     const auto transform = multiply(parent, nodeMatrix(node));
-    if (node.mesh >= 0 && static_cast<size_t>(node.mesh) < source.meshes.size()) {
-        for (const auto& primitive : source.meshes[node.mesh].primitives) {
-            appendPrimitive(source, primitive, transform, output);
+    if (node.mesh >= 0 && static_cast<uint32_t>(node.mesh) < source.meshes_count) {
+        const auto& mesh = source.meshes[node.mesh];
+        for (uint32_t i = 0; i < mesh.primitives_count; ++i) {
+            appendPrimitive(source, mesh.primitives[i], transform, output);
         }
     }
-    for (const int child : node.children) appendNode(source, child, transform, depth + 1, output);
+    for (uint32_t i = 0; i < node.children_count; ++i) {
+        appendNode(source, node.children[i], transform, depth + 1, output);
+    }
 }
 
 std::unique_ptr<Model> parseGLB(const uint8_t* bytes, size_t size, std::string& error) {
-    tinygltf::TinyGLTF loader;
-    // Images are never read, so skip decoding them.
-    loader.SetImageLoader(
-        [](tinygltf::Image*, int, std::string*, std::string*, int, int, const unsigned char*, int, void*) {
-            return true;
-        },
-        nullptr);
-    tinygltf::Model source;
-    std::string warning;
-    if (!loader.LoadBinaryFromMemory(&source, &error, &warning, bytes, static_cast<unsigned int>(size))) {
-        if (error.empty()) error = warning.empty() ? "TinyGLTF could not parse the GLB" : warning;
+    tg3_parse_options options;
+    tg3_parse_options_init(&options);
+    // Images are never read, so skip decoding them. No file system callbacks are set, so a GLB can't make the
+    // parser read external files either.
+    options.images_as_is = 1;
+    tinygltf3::Model parsed;
+    tinygltf3::ErrorStack errors;
+    if (tg3_parse_glb(parsed.get(), errors.get(), bytes, size, "", 0, &options) != TG3_OK) {
+        for (uint32_t i = 0; i < errors.count() && error.empty(); ++i) {
+            if (errors.entry(i)->severity == TG3_SEVERITY_ERROR) error = errors.entry(i)->message;
+        }
+        if (error.empty()) error = "TinyGLTF could not parse the GLB";
         return {};
     }
+    const tg3_model& source = *parsed.get();
     auto result = std::make_unique<Model>();
-    const int sceneIndex = source.defaultScene >= 0 ? source.defaultScene : (source.scenes.empty() ? -1 : 0);
-    if (sceneIndex >= 0 && static_cast<size_t>(sceneIndex) < source.scenes.size()) {
-        for (const int node : source.scenes[sceneIndex].nodes) appendNode(source, node, identity(), 0, *result);
+    const int sceneIndex = source.default_scene >= 0 ? source.default_scene : (source.scenes_count == 0 ? -1 : 0);
+    if (sceneIndex >= 0 && static_cast<uint32_t>(sceneIndex) < source.scenes_count) {
+        const auto& scene = source.scenes[sceneIndex];
+        for (uint32_t i = 0; i < scene.nodes_count; ++i) appendNode(source, scene.nodes[i], identity(), 0, *result);
     } else {
-        for (size_t node = 0; node < source.nodes.size(); ++node) {
+        for (uint32_t node = 0; node < source.nodes_count; ++node) {
             appendNode(source, static_cast<int>(node), identity(), 0, *result);
         }
     }

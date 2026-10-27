@@ -7,6 +7,6 @@
   "registerFunction": "mln_gltf_layer_register",
   "header": "shared/include/gltf_layer.hpp",
   "sources": ["shared/cpp/gltf_layer.cpp"],
-  "includeDirectories": ["shared/include", "shared/cpp", "../../../vendor/tinygltf"],
+  "includeDirectories": ["shared/include", "shared/cpp"],
   "backends": ["metal"]
 }

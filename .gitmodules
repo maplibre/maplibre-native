@@ -113,6 +113,3 @@
 [submodule "vendor/metal-cpp"]
 	path = vendor/metal-cpp
 	url = https://github.com/apple/metal-cpp
-[submodule "vendor/tinygltf"]
-	path = vendor/tinygltf
-	url = https://github.com/syoyo/tinygltf.git
