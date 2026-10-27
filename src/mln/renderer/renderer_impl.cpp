@@ -53,8 +53,9 @@ RendererObserver& nullObserver() {
 
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
-                     const std::optional<std::string>& localFontFamily_)
-    : orchestrator(!backend_.contextIsShared(), backend_.getThreadPool(), localFontFamily_),
+                     const std::optional<std::string>& localFontFamily_,
+                     std::shared_ptr<GlyphCache> glyphCache_)
+    : orchestrator(!backend_.contextIsShared(), backend_.getThreadPool(), localFontFamily_, std::move(glyphCache_)),
       backend(backend_),
       observer(&nullObserver()),
       pixelRatio(pixelRatio_) {}

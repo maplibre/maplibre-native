@@ -30,6 +30,7 @@ class UpdateParameters;
 class RenderStaticData;
 class RenderedQueryOptions;
 class SourceQueryOptions;
+class GlyphCache;
 class GlyphManager;
 class ImageManager;
 class LineAtlas;
@@ -55,7 +56,8 @@ class RenderOrchestrator final : public GlyphManagerObserver, public ImageManage
 public:
     RenderOrchestrator(bool backgroundLayerAsColor_,
                        TaggedScheduler& threadPool_,
-                       const std::optional<std::string>& localFontFamily_);
+                       const std::optional<std::string>& localFontFamily_,
+                       std::shared_ptr<GlyphCache> glyphCache_ = nullptr);
     ~RenderOrchestrator() override;
 
 #if MLN_RENDER_BACKEND_OPENGL

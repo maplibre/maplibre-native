@@ -18,9 +18,11 @@ namespace {
 GlyphManagerObserver nullObserver;
 }
 
-GlyphManager::GlyphManager(std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer_)
+GlyphManager::GlyphManager(std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer_,
+                           std::shared_ptr<GlyphCache> glyphCache_)
     : observer(&nullObserver),
-      localGlyphRasterizer(std::move(localGlyphRasterizer_)) {}
+      localGlyphRasterizer(std::move(localGlyphRasterizer_)),
+      glyphCache(glyphCache_ ? std::move(glyphCache_) : std::make_shared<GlyphCache>()) {}
 
 GlyphManager::~GlyphManager() {
     hbShapers.clear(); // clear harfbuzz + freetype face before library;
@@ -143,7 +145,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
                 auto id = glyph.id;
                 if (!localGlyphRasterizer->canRasterizeGlyph(fontStack, id)) {
                     entry.glyphs.erase(id);
-                    entry.glyphs.emplace(id, makeMutable<Glyph>(std::move(glyph)));
+                    entry.glyphs.emplace(id, glyphCache->intern(std::move(glyph)));
                 }
             }
         }

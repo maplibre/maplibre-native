@@ -12,6 +12,7 @@
 
 namespace mln {
 
+class GlyphCache;
 class Renderer;
 class Map;
 class TransformState;
@@ -32,7 +33,8 @@ public:
                      gfx::HeadlessBackend::SwapBehaviour swapBehavior = gfx::HeadlessBackend::SwapBehaviour::NoFlush,
                      gfx::ContextMode mode = gfx::ContextMode::Unique,
                      const std::optional<std::string>& localFontFamily = std::nullopt,
-                     bool invalidateOnUpdate_ = true);
+                     bool invalidateOnUpdate_ = true,
+                     std::shared_ptr<GlyphCache> glyphCache = nullptr);
     ~HeadlessFrontend() override;
 
     void reset() override;

@@ -134,9 +134,11 @@ public:
 
 RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_,
                                        TaggedScheduler& threadPool_,
-                                       const std::optional<std::string>& localFontFamily_)
+                                       const std::optional<std::string>& localFontFamily_,
+                                       std::shared_ptr<GlyphCache> glyphCache_)
     : observer(&nullObserver()),
-      glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_))),
+      glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_),
+                                                  std::move(glyphCache_))),
       imageManager(ImageManager::create()),
       lineAtlas(std::make_unique<LineAtlas>()),
       patternAtlas(std::make_unique<PatternAtlas>()),

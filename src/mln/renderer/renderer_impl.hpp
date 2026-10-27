@@ -26,7 +26,10 @@ using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 
 class Renderer::Impl : public gfx::ContextObserver {
 public:
-    Impl(gfx::RendererBackend&, float pixelRatio_, const std::optional<std::string>& localFontFamily_);
+    Impl(gfx::RendererBackend&,
+         float pixelRatio_,
+         const std::optional<std::string>& localFontFamily_,
+         std::shared_ptr<GlyphCache> glyphCache_);
     virtual ~Impl();
 
     // ContextObserver
