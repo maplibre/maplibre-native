@@ -3,8 +3,7 @@
 //   node plugins/tools/generate.ts [--check]
 //
 // plugins/android/<id>: a Gradle library module that builds the plugin and registers it from Kotlin.
-// plugins/ios/<id>: a Bazel library with an Objective-C class that registers the plugin. plugins/ios also has a
-// registry that registers any plugin by its id.
+// plugins/ios/<id>: a Bazel library with an Objective-C class that registers the plugin.
 //
 // The outputs are committed. `--check` writes nothing and fails when they are out of date.
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -25,7 +24,7 @@ const ignored = new Set(['build', '.cxx', '.gradle']);
 // of the platform.
 const platforms = [
   { name: 'android', backends: ['opengl', 'vulkan'] },
-  { name: 'ios', backends: ['opengl', 'metal'] },
+  { name: 'ios', backends: ['metal'] },
 ];
 
 type Files = Map<string, string>;

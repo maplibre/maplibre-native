@@ -4,12 +4,15 @@ load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
 load("@rules_swift//swift:swift.bzl", "swift_library")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
-# The layer types of the plugins only exist in a build with plugin support, and the registry links every plugin,
-# including fill-extrusion, which only has a Metal shader:
+# The layer types of the plugins only exist in a build with plugin support, and the plugin wrappers only build with the
+# Metal renderer:
 #
 #   bazel build //plugins/demo/ios:PluginDemo --//:renderer=metal --//:plugins=true
 _PLUGINS_ONLY = select({
     "//:plugins_enabled": [],
+    "//conditions:default": ["@platforms//:incompatible"],
+}) + select({
+    "//:metal_renderer": [],
     "//conditions:default": ["@platforms//:incompatible"],
 })
 
@@ -22,10 +25,9 @@ swift_library(
     tags = ["manual"],
     target_compatible_with = _PLUGINS_ONLY,
     deps = [
-        # The generated wrappers of every plugin in plugins/plugins, and a registry that registers one by its ID. The
-        # app registers a plugin when its demo opens.
+        # The generated wrapper of each plugin that has a demo. The app registers a plugin when its demo opens.
         "//platform:ios-sdk",
-        "//plugins/ios:plugins",
+        "//plugins/ios/ngon-layer",
     ],
 )
 
