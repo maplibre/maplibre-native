@@ -226,7 +226,8 @@ void appendPrimitive(const tg3_model& source, const tg3_primitive& primitive, co
         normals = &source.accessors[normalIndex];
     }
     // Textures are not part of the plugin ABI, so only the material's base color factor is honored.
-    double color[4]{0.72, 0.64, 0.48, 1.0};
+    // For a primitive without a material: the beige (0.72, 0.64, 0.48) in sRGB, as the linear value the shader expects.
+    double color[4]{0.477, 0.3672, 0.196, 1.0};
     if (primitive.material >= 0 && static_cast<uint32_t>(primitive.material) < source.materials_count) {
         const auto& factor = source.materials[primitive.material].pbr_metallic_roughness.base_color_factor;
         std::copy(factor, factor + 4, color);
