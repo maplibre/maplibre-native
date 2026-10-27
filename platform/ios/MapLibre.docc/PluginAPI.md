@@ -1,12 +1,12 @@
 # Plugin API
 
-Add style layer types implemented in native code to MapLibre Native for iOS.
+Extend MapLibre Native for iOS with native code.
 
 > Warning: The plugin API is experimental and does not yet have stability guarantees.
 
 ## Overview
 
-MapLibre Native has a C plugin API for adding style layer types. After a plugin registers its layer types, styles can use them like the built-in layer types, for example `"type": "ngon"`. Layers of plugin types appear as ``MLNStyleLayer`` in `MLNStyle.layers`. The API is defined in [`plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h), which documents the ownership and threading rules that plugins must follow.
+MapLibre Native has a C plugin API for extending it with native code. Currently, plugins can add style layer types. After a plugin registers its layer types, styles can use them like the built-in layer types, for example `"type": "ngon"`. Layers of plugin types appear as ``MLNStyleLayer`` in `MLNStyle.layers`. The API is defined in [`plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h), which documents the ownership and threading rules that plugins must follow.
 
 A plugin describes a layer type with the structures of `plugin_api.h`:
 
@@ -14,8 +14,6 @@ A plugin describes a layer type with the structures of `plugin_api.h`:
 - The paint properties of the layer, with their type, default value and the kinds of expressions they accept.
 - The shaders of the layer. On iOS, which renders with Metal, a plugin provides the complete Metal Shading Language source with its entry points.
 - Callbacks that turn the features of a tile into vertex data, update the uniforms of the shaders and answer queries for rendered features.
-
-> Note: For plugin layers written in Objective-C by subclassing `MLNPluginLayer`, see <doc:PluginLayers>.
 
 ## Add MapLibre with the plugin API
 
