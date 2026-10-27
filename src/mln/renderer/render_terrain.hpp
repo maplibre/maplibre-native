@@ -339,6 +339,9 @@ private:
     // or removed; lastDepthProjMatrix detects camera movement.
     bool depthDirty = true;
     std::optional<mat4> lastDepthProjMatrix;
+    // The group the depth target currently holds; re-attached (and the pass re-run) only when
+    // the target or the group is new, not on every frame
+    const LayerGroupBase* depthLayerGroupAttached = nullptr;
     // See getDepthTexture
     std::shared_ptr<gfx::Texture2D> placeholderDepthTexture;
 
