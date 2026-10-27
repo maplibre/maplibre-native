@@ -41,3 +41,31 @@ cc_test(
         "//render-test:render-test-srcs",
     ],
 )
+
+# The existing core fill-extrusion fixtures (metrics/integration), run with the fill-extrusion plugin registered so it
+# replaces the built-in implementation. Metal only, like the plugin's shaders; the expectations are the iOS Metal ones.
+#   bazel test //plugins:render-tests-fill-extrusion --//:renderer=metal --//:plugins=true
+cc_test(
+    name = "render-tests-fill-extrusion",
+    timeout = "long",
+    srcs = ["render_test.cpp"],
+    args = [
+        "--manifestPath",
+        "plugins/fill-extrusion/render-tests/manifest-metal.json",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = [
+        "//metrics:render-test-files",
+        "//plugins/fill-extrusion:render-fixtures",
+    ],
+    local_defines = ["MLN_RENDER_TEST_FILL_EXTRUSION=1"],
+    tags = ["no-sandbox"],
+    target_compatible_with = select({
+        "//:metal_renderer": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//plugins/fill-extrusion",
+        "//render-test:render-test-srcs",
+    ],
+)

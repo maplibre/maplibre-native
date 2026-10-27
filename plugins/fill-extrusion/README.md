@@ -58,7 +58,7 @@ color, intensity, and bearing-adjusted Cartesian direction.
 Boolean properties use `MLN_PLUGIN_VALUE_BOOLEAN` (0 or 1) and the
 `MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT` shader binding. They parse,
 serialize, evaluate expressions, and validate independently of numeric values.
-Layout descriptors set `is_layout = 1`; the host validates their scope, serializes
+Layout descriptors set `scope = MLN_PLUGIN_PROPERTY_LAYOUT`; the host validates their scope, serializes
 them in `layout`, includes them in bucket grouping/invalidation, and supplies
 tile-zoom values to `create_layout`. Layout properties cannot transition or use
 feature expressions.
@@ -123,6 +123,25 @@ Bazel provides `//plugins/fill-extrusion` and
 `//plugins/fill-extrusion:geometry-tests`. The current repository's Bazel core
 has no Vulkan backend configuration; use CMake for Vulkan render tests.
 Earcut is vendored from the repository's existing copy with its ISC license.
+
+### Metal
+
+Bazel runs the same existing core fixtures (`metrics/integration`, selected by the `filter` in
+`render-tests/manifest-metal.json`) with the plugin registered, so it replaces the built-in implementation:
+
+```sh
+bazel test //plugins:render-tests-fill-extrusion --//:renderer=metal --//:plugins=true
+```
+
+The manifest uses the expectations and ignores of the built-in implementation's iOS Metal run, so the results compare
+with it. On macOS the link may need `--linkopt=-L$(brew --prefix icu4c)/lib`. Run
+`bazel-bin/plugins/render-tests` with the same `--manifestPath` for the built-in baseline: it registers no
+extrusion plugin.
+
+Metal compiles the depth-only and color variants of a shader separately. A translucent extrusion draws a depth-only
+pass and then a color pass, so the vertex shader declares `position` as `[[invariant]]`, which needs the library's
+`preserveInvariance` option (set in `src/mln/mtl/context.cpp`). Without it a translucent extrusion with a
+translation (`fill-extrusion-translate/literal-opacity`) lost its roofs.
 
 ## Performance
 
