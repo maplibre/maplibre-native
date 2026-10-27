@@ -721,8 +721,10 @@ protected:
         EXPECT_EQ(Resource::Priority::Low, request.priority);
         EXPECT_EQ(Resource::Usage::Offline, request.usage);
         EXPECT_EQ(previous.etag, request.priorEtag);
-        EXPECT_EQ(previous.modified, request.priorModified);
-        EXPECT_EQ(Timestamp(Seconds(0)), request.priorExpires);
+        // Compared with ==, not EXPECT_EQ: printing a failed time_point comparison uses std::format's
+        // floating-point formatter, which the iOS deployment target does not have.
+        EXPECT_TRUE(previous.modified == request.priorModified);
+        EXPECT_TRUE(std::optional<Timestamp>(Timestamp(Seconds(0))) == request.priorExpires);
         ASSERT_TRUE(request.priorData);
         EXPECT_EQ(*previous.data, *request.priorData);
         if (resource.tileData) {
