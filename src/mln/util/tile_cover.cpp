@@ -167,10 +167,6 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         uint32_t x, y;
         int16_t wrap;
         bool fullyVisible;
-        // The terrain's elevation range under the tile, asked of the provider at most once: the
-        // frustum test and the precise test of a leaf both want it.
-        std::optional<Range<double>> elevation = std::nullopt;
-        bool elevationKnown = false;
     };
 
     struct ResultTile {
@@ -189,8 +185,6 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
             children[i].zoom = node.zoom + 1;
             children[i].x = childX;
             children[i].y = childY;
-            children[i].elevation.reset();
-            children[i].elevationKnown = false;
         }
         return children;
     };
@@ -265,15 +259,11 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     // decide what is visible, not how finely it is subdivided. It also keeps this
     // change from perturbing tile selection on maps that have no terrain-shaped reason
     // to change.
-    const auto elevatedAABB = [&](Node& node) -> AABB {
+    const auto elevatedAABB = [&](const Node& node) -> AABB {
         if (!state.elevationProvider) {
             return node.aabb;
         }
-        if (!node.elevationKnown) {
-            node.elevation = state.elevationProvider->getTileElevationRange(CanonicalTileID(node.zoom, node.x, node.y));
-            node.elevationKnown = true;
-        }
-        const auto& range = node.elevation;
+        const auto range = state.elevationProvider->getTileElevationRange(CanonicalTileID(node.zoom, node.x, node.y));
         if (!range) {
             return node.aabb; // no DEM loaded here yet: flat, as before
         }
@@ -315,12 +305,13 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         stack.pop_back();
 
         // Use cached visibility information of ancestor nodes
+        bool elevated = false;
         if (!node.fullyVisible) {
             // The flat fast path (frustum.intersects) asserts a zero-elevation box, so
             // an elevated node has to take the 3D path. Nodes stay flat, and keep the
             // cheaper test, until a DEM gives them height via elevatedAABB.
             const AABB testAABB = elevatedAABB(node);
-            const bool elevated = testAABB.min[2] != 0.0 || testAABB.max[2] != 0.0;
+            elevated = testAABB.min[2] != 0.0 || testAABB.max[2] != 0.0;
             const IntersectionResult intersection = elevated ? frustum.intersectsElevated(testAABB)
                                                              : frustum.intersects(testAABB);
 
@@ -372,18 +363,13 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         if (node.zoom == maxZoom || (!shouldSplitTile && node.zoom >= minZoom)) {
             // Perform precise intersection test between the frustum and aabb.
             // This will cull < 1% false positives missed by the original test
-            bool visible = node.fullyVisible;
-            if (!visible) {
-                // Not asked of a node the frustum contains: the answer is known, and the
-                // elevation lookup behind the box is the cost of a cover over a deep DEM.
-                const AABB preciseAABB = elevatedAABB(node);
-                const bool preciseElevated = preciseAABB.min[2] != 0.0 || preciseAABB.max[2] != 0.0;
-                // intersectsPrecise also flattens to z = 0; the 3D method already covers the
-                // elevated case precisely, so reuse it rather than run the flat edge tests.
-                visible = preciseElevated
-                              ? frustum.intersectsElevated(preciseAABB) != IntersectionResult::Separate
-                              : frustum.intersectsPrecise(preciseAABB, true) != IntersectionResult::Separate;
-            }
+            // A node that is not fully visible got here because the frustum test above said it
+            // intersects. For an elevated node that test was already the exact 3D one
+            // (intersectsElevated on the same box), so asking again would only repeat the
+            // elevation lookup and the answer. A flat node's box is node.aabb, which
+            // intersectsPrecise reads in x and y only.
+            const bool visible = node.fullyVisible || elevated ||
+                                 frustum.intersectsPrecise(node.aabb, true) != IntersectionResult::Separate;
             if (visible) {
                 const OverscaledTileID id = {
                     node.zoom == maxZoom ? overscaledZoom : node.zoom, node.wrap, node.zoom, node.x, node.y};
