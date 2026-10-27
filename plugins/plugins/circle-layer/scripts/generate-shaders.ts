@@ -1,0 +1,165 @@
+// Generates the backend sources of the circle plugin from one algorithm, the built-in circle shader.
+// Prints the header that is checked in as shared/cpp/*_shader_sources.hpp.
+
+export {};
+
+type Backend = 'opengl' | 'vulkan' | 'metal';
+type PropertyType = 'float' | 'vec2' | 'vec4' | 'enum';
+
+// The paint properties: the name, the type, and the attribute ids of the values at the lower and upper zoom.
+const properties: [name: string, type: PropertyType, min: number, max: number][] = [
+  ['radius', 'float', 1, 1], ['color', 'vec4', 2, 3], ['blur', 'float', 4, 4], ['opacity', 'float', 5, 5],
+  ['stroke_width', 'float', 6, 6], ['stroke_color', 'vec4', 7, 8], ['stroke_opacity', 'float', 9, 9],
+  ['translate', 'vec2', 10, 10], ['translate_anchor', 'enum', 11, 11], ['pitch_alignment', 'enum', 12, 12],
+  ['pitch_scale', 'enum', 13, 13],
+];
+const uniformFields = `
+    mat4 matrix;
+    vec4 camera;
+    vec4 view;
+    float radius;
+    float blur;
+    float opacity;
+    float stroke_width;
+    float stroke_opacity;
+    float translate_anchor;
+    float pitch_alignment;
+    float pitch_scale;
+    vec4 color;
+    vec4 stroke_color;
+    vec2 translate;
+    vec4 interpolation0;
+    vec4 interpolation1;
+    vec4 interpolation2;
+`;
+const varyings: [type: string, name: string][] = [['vec2', 'extrude'], ['vec4', 'shape'], ['vec4', 'paint'], ['vec4', 'color'], ['vec4', 'stroke_color']];
+const macro = (name: string) => `MLN_PLUGIN_PROPERTY_CIRCLE_${name.toUpperCase()}_IS_UNIFORM`;
+const metal = (s: string) => s.replaceAll('mat4', 'float4x4').replace(/vec([234])/g, 'float$1')
+  .replaceAll('atan(', 'atan2(').replaceAll('mod(', 'fmod(');
+
+function attributes(backend: Backend): string {
+  let result = backend === 'metal' ? '    short2 a_position [[attribute(0)]];\n'
+    : backend === 'vulkan' ? 'layout(location = 0) in ivec2 a_position;\n' : 'in vec2 a_position;\n';
+  for (const [name, type, min, max] of properties) {
+    result += `#if !${macro(name)}\n`;
+    const inputs: [string, string, number][] = min === max ? [[name, type === 'vec2' ? 'vec4' : 'vec2', min]]
+      : [[`${name}_min`, type, min], [`${name}_max`, type, max]];
+    for (const [n, t, id] of inputs) {
+      result += backend === 'metal' ? `    ${metal(t)} a_${n} [[attribute(${id})]];\n`
+        : `${backend === 'vulkan' ? `layout(location = ${id}) ` : ''}in ${t} a_${n};\n`;
+    }
+    result += '#endif\n';
+  }
+  return result;
+}
+
+function evaluate(backend: Backend): string {
+  let result = '';
+  properties.forEach(([name, type, min, max], i) => {
+    const a = backend === 'metal' ? 'in.' : '';
+    const factor = `u.interpolation${Math.floor(i / 4)}.${'xyzw'[i % 4]}`;
+    const low = min !== max ? `${a}a_${name}_min` : `${a}a_${name}.${type === 'vec2' ? 'xy' : 'x'}`;
+    const high = min !== max ? `${a}a_${name}_max` : `${a}a_${name}.${type === 'vec2' ? 'zw' : 'y'}`;
+    result += `    ${type === 'enum' ? 'float' : type} ${name} = u.${name};\n#if !${macro(name)}\n`;
+    result += `    ${name} = ${type === 'enum' ? `${factor} < 1.0 ? ${low} : ${high}` : `mix(${low}, ${high}, ${factor})`};\n#endif\n`;
+  });
+  return result;
+}
+
+// The built-in circle shader (shaders/circle.vertex.glsl and circle.fragment.glsl). The position encodes the tile
+// coordinate of the point times two, plus a bit per axis that says on which side of the point the corner is.
+const projection = `
+    radius = max(radius, 0.0);
+    stroke_width = max(stroke_width, 0.0);
+    vec2 encoded = vec2(POSITION);
+    vec2 center = floor(encoded * 0.5);
+    vec2 extrude = (encoded - 2.0 * center) * 2.0 - 1.0;
+    if (translate_anchor > 0.5) {
+        float c = cos(-u.view.x), s = sin(-u.view.x);
+        translate = vec2(c * translate.x - s * translate.y, s * translate.x + c * translate.y);
+    }
+    center += translate * u.camera.z;
+    vec4 projected = u.matrix * vec4(center, 0.0, 1.0);
+    float size = radius + stroke_width;
+    vec4 position;
+    if (pitch_alignment < 0.5) {
+        vec2 offset = extrude * size * u.camera.z;
+        if (pitch_scale > 0.5) offset *= projected.w / u.camera.w;
+        position = u.matrix * vec4(center + offset, 0.0, 1.0);
+    } else {
+        float scale = pitch_scale < 0.5 ? u.camera.w : projected.w;
+        position = projected + vec4(extrude * size * u.camera.xy * scale, 0.0, 0.0);
+    }
+    OUT_extrude = extrude;
+    OUT_shape = vec4(radius, stroke_width, size > 0.0 ? 1.0 / max(u.view.y, 1.0) / size : 0.0, blur);
+    OUT_paint = vec4(opacity, stroke_opacity, 0.0, 0.0);
+    OUT_color = color;
+    OUT_stroke_color = stroke_color;
+`;
+
+const coverage = `
+    float radius = IN_shape.x;
+    float stroke = IN_shape.y;
+    float antialiased_blur = -max(IN_shape.w, IN_shape.z);
+    float extrude_length = length(IN_extrude);
+    float opacity_t = smoothstep(0.0, antialiased_blur, extrude_length - 1.0);
+    float color_t = stroke < 0.01 ? 0.0 : smoothstep(antialiased_blur, 0.0, extrude_length - radius / (radius + stroke));
+    vec4 result = opacity_t * mix(IN_color * IN_paint.x, IN_stroke_color * IN_paint.y, color_t);
+`;
+
+let output = '// Generated by scripts/generate-shaders.ts. Do not edit by hand.\n// clang-format off\n#pragma once\n\n';
+const emit = (name: string, source: string) => { output += `inline constexpr char ${name}[] = R"SHADER(\n${source})SHADER";\n\n`; };
+for (const backend of ['opengl', 'vulkan', 'metal'] as const) {
+  const vertexBody = evaluate(backend) + projection.replace('POSITION', backend === 'metal' ? 'in.a_position' : 'a_position')
+    .replaceAll('OUT_', backend === 'metal' ? 'out.' : 'v_');
+  if (backend === 'metal') {
+    const source = `struct alignas(16) CircleDrawableUBO {${metal(uniformFields)}};
+struct CircleVertex {\n${attributes(backend)}};
+struct CircleVaryings {
+    float4 position [[position]];
+${varyings.map(([t, n]) => `    ${metal(t)} ${n};`).join('\n')}
+};
+vertex CircleVaryings circleVertex(CircleVertex in [[stage_in]],
+    constant CircleDrawableUBO& u [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]]) {
+    CircleVaryings out;
+${metal(vertexBody)}    out.position = position;
+    return out;
+}
+fragment half4 circleFragment(CircleVaryings in [[stage_in]]) {
+${metal(coverage.replaceAll('IN_', 'in.'))}    return half4(result);
+}
+`;
+    emit('metalSource', source);
+  } else {
+    const io = (direction: string) => varyings.map(([t, n], i) => `${backend === 'vulkan' ? `layout(location = ${i}) ` : ''}${direction} ${t} v_${n};\n`).join('');
+    const layout = backend === 'vulkan'
+      ? 'layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = MLN_PLUGIN_UNIFORM_0_BINDING)'
+      : 'layout(std140)';
+    emit(backend + 'Vertex', `${attributes(backend)}\n${layout} uniform CircleDrawableUBO {${uniformFields}} u;\n${io('out')}
+void main() {
+${vertexBody}    gl_Position = position;
+${backend === 'vulkan' ? '    applySurfaceTransform();\n' : ''}}
+`);
+    emit(backend + 'Fragment', `${io('in')}${backend === 'vulkan' ? 'layout(location = 0) out vec4 fragColor;\n' : ''}
+void main() {
+${coverage.replaceAll('IN_', 'v_')}    fragColor = result;
+}
+`);
+  }
+}
+
+output += 'const mln_plugin_shader_attribute_v1 shaderAttributes[] = {\n    {sizeof(mln_plugin_shader_attribute_v1), 0, 0, str("a_position"), MLN_PLUGIN_VERTEX_INT16_X2},\n';
+for (const [name, type, min, max] of properties) {
+  const names: [string, number][] = min === max ? [[name, min]] : [[name + '_min', min], [name + '_max', max]];
+  for (const [n, id] of names) {
+    const size = type === 'vec4' || type === 'vec2' ? 4 : 2;
+    output += `    {sizeof(mln_plugin_shader_attribute_v1), ${id}, ${id}, str("a_${n}"), MLN_PLUGIN_VERTEX_FLOAT_X${size}},\n`;
+  }
+}
+output += '};\n\nconst mln_plugin_shader_property_binding_v1 propertyBindings[] = {\n';
+properties.forEach(([name, type, min, max], i) => {
+  const encoding = {float: 'FLOAT', vec2: 'FLOAT2', vec4: 'COLOR', enum: 'ENUM_FLOAT'}[type];
+  output += `    {sizeof(mln_plugin_shader_property_binding_v1), str("circle-${name.replaceAll('_','-')}"), MLN_PLUGIN_PROPERTY_ENCODING_${encoding}, 0, offsetof(DrawableUBO, ${name}), ${min}, ${max}, 0, offsetof(DrawableUBO, interpolation) + ${i} * sizeof(float)},\n`;
+});
+output += '};\n';
+process.stdout.write(output);

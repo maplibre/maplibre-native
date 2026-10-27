@@ -1,0 +1,4 @@
+{
+  "description": "Replaces the built-in fill-extrusion style layer",
+  "backends": ["vulkan", "metal"]
+}

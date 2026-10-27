@@ -1,0 +1,34 @@
+{
+  "version": 8,
+  "name": "Plugin demo: n-gons",
+  "sources": {
+    "shapes": {
+      "type": "geojson",
+      "data": { "type": "FeatureCollection", "features": [] }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": { "background-color": "#F3F2ED" }
+    },
+    {
+      "id": "ngons",
+      "type": "ngon",
+      "source": "shapes",
+      "paint": {
+        "ngon-radius": ["get", "radius"],
+        "ngon-corners": ["get", "sides"],
+        "ngon-color": ["get", "color"],
+        "ngon-rotate": ["get", "rotation"],
+        "ngon-opacity": ["get", "opacity"],
+        "ngon-blur": ["get", "blur"],
+        "ngon-stroke-width": ["get", "stroke"],
+        "ngon-stroke-color": ["get", "outline"],
+        "ngon-pitch-alignment": "viewport",
+        "ngon-pitch-scale": "viewport"
+      }
+    }
+  ]
+}

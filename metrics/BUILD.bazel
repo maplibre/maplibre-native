@@ -26,6 +26,7 @@ filegroup(
     ],
     visibility = [
         "//platform/ios/test/common:__pkg__",
+        "//plugins:__subpackages__",
         "//render-test:__subpackages__",
     ],
 )

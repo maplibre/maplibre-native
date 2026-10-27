@@ -104,7 +104,9 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         if (features3d) {
             auto& drawableImpl = static_cast<Drawable&>(drawable);
 
-            const auto& depth = drawableImpl.getEnableDepth() ? depthMode3d.value() : gfx::DepthMode::disabled();
+            auto depth = drawableImpl.getEnableDepth() ? depthMode3d.value() : gfx::DepthMode::disabled();
+            if (drawableImpl.getEnableDepth() && drawableImpl.getDepthMaskFor3D())
+                depth.mask = *drawableImpl.getDepthMaskFor3D();
             drawableImpl.setDepthModeFor3D(depth);
 
             const auto& stencil = drawableImpl.getEnableStencil() ? stencilMode3d.value()

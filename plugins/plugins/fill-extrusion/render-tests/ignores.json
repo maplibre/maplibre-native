@@ -1,0 +1,5 @@
+{
+  "render-tests/fill-extrusion-color/global-state": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/fill-extrusion-color/global-state-with-get": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/fill-extrusion-pattern/global-state": "Plugin properties are not evaluated with the style's global state"
+}

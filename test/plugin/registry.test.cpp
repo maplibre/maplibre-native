@@ -1,4 +1,5 @@
 #include <mln/plugin/plugin_api.h>
+#include <mln/plugin/plugin_registry.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/layer.hpp>
@@ -40,7 +41,7 @@ const mln_plugin_descriptor_v1* testDescriptor() {
     static const mln_plugin_shader_property_binding_v1 binding = {
         sizeof(binding), {"test-radius", 11}, MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     static const mln_plugin_shader_descriptor_v1 shader = {
-        sizeof(shader), {"test", 4}, &source, 1, attributes, 2, &uniform, 1, &binding, 1};
+        sizeof(shader), {"test", 4}, &source, 1, attributes, 2, &uniform, 1, &binding, 1, 0, 0};
     static const mln_plugin_layer_type_v1 layer = [] {
         mln_plugin_layer_type_v1 value{};
         value.struct_size = sizeof(value);
@@ -172,3 +173,27 @@ TEST(PluginStyle, ParsingDefaultsExpressionsAndClone) {
         static_cast<const style::PluginStyleLayer&>(**filtered).impl()));
 }
 } // namespace
+
+TEST(PluginRegistry, ValidatesAndCopiesInstanceMode) {
+    auto descriptor = *testDescriptor();
+    descriptor.plugin_id = {"test.instancing", 15};
+    auto layer = descriptor.layer_types[0];
+    layer.layer_type = {"test-instancing", 15};
+    descriptor.layer_types = &layer;
+    auto shader = layer.shaders[0];
+    layer.shaders = &shader;
+    shader.instanced = 1;
+    char error[256]{};
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, error, sizeof(error)));
+    auto source = shader.sources[0];
+    source.backend = MLN_PLUGIN_BACKEND_VULKAN;
+    layer.backend_mask = MLN_PLUGIN_BACKEND_VULKAN;
+    shader.sources = &source;
+    shader.instanced = 2;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, error, sizeof(error)));
+    shader.instanced = 1;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, error, sizeof(error))) << error;
+    shader.instanced = 0;
+    EXPECT_TRUE(plugin::PluginRegistry::get().findLayerType("test-instancing")->shaders[0].instanced);
+    EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&descriptor, error, sizeof(error)));
+}

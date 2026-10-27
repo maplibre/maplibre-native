@@ -43,8 +43,7 @@ bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFacto
             error = "Layer factory must have a non-empty, immutable type name";
             return false;
         }
-        if (getFactory(info->type) || impl->runtimeFactories.contains(info->type) ||
-            !names.emplace(info->type).second) {
+        if (impl->runtimeFactories.contains(info->type) || !names.emplace(info->type).second) {
             error = "Layer type is already registered: " + std::string(info->type);
             return false;
         }
@@ -61,10 +60,9 @@ bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFacto
 }
 
 LayerFactory* LayerManager::findFactory(const std::string& type) noexcept {
-    if (auto* factory = getFactory(type)) return factory;
     std::lock_guard lock(impl->runtimeMutex);
     const auto found = impl->runtimeFactories.find(type);
-    return found == impl->runtimeFactories.end() ? nullptr : found->second.get();
+    return found == impl->runtimeFactories.end() ? getFactory(type) : found->second.get();
 }
 
 LayerFactory* LayerManager::findFactory(const style::LayerTypeInfo* info) noexcept {
@@ -73,13 +71,13 @@ LayerFactory* LayerManager::findFactory(const style::LayerTypeInfo* info) noexce
     // layers, which can carry separate but equivalent LayerTypeInfo instances.
     // Check the name first because some platform pointer lookups assert when
     // they encounter a runtime type.
-    if (getFactory(info->type)) return getFactory(info);
 
     // Runtime factories require factory-owned type identity, not just a name.
     std::lock_guard lock(impl->runtimeMutex);
     const auto found = impl->runtimeFactories.find(info->type);
     auto* factory = found == impl->runtimeFactories.end() ? nullptr : found->second.get();
-    return factory && factory->getTypeInfo() == info ? factory : nullptr;
+    if (factory && factory->getTypeInfo() == info) return factory;
+    return getFactory(info->type) ? getFactory(info) : nullptr;
 }
 
 #else
