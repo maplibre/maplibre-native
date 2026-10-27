@@ -16,7 +16,7 @@
 We understand that MapLibre is used in large mission critical applications where updating to the latest version is not always immediately possible. We do not have the capacity to offer LTS releases, but we do want to facilitate backporting.
 
 1. Create an issue and request that a branch is created from the release you want to target. Also mention the feature or bugfix you want to backport.
-2. Once the branch is created, make a PR that includes the feature or bugfix and that targets this branch. Also update the relevant changelog.
+2. Once the branch is created, make a PR that includes the feature or bugfix and that targets this branch.
 3. When the PR is approved and merged, a release is attempted. If the release workflow significantly changed and the release fails, you may need to help to backport changes to the release workflow as well.
 
 The branch names for older versions follow a pattern as follows: `platform-x.x.x` (e.g. [`android-10.x.x`](https://github.com/maplibre/maplibre-native/tree/android-10.x.x) for the MapLibre Native Android 10.x.x release series). These branches have some minimal branch protection (a pull request is required to push changes to them).

@@ -16,6 +16,12 @@ jobs:
         working-directory: platform/android
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the release notes are generated from the commits since the previous release tag
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: ".nvmrc"
 
       - name: Validate and set version
         working-directory: .
@@ -29,7 +35,8 @@ jobs:
         id: prepare_release
         run: |
           RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
-          node scripts/release-notes.mjs ${{ env.version }} > "${RELEASE_NOTES_PATH}"
+          node "$GITHUB_WORKSPACE/.github/scripts/generate-release-notes.ts" --platform android --target "$GITHUB_SHA" > "${RELEASE_NOTES_PATH}"
+          cat "${RELEASE_NOTES_PATH}"
           echo release_notes="${RELEASE_NOTES_PATH}" >> "$GITHUB_OUTPUT"
           echo version_tag=android-v${{ env.version }} >> "$GITHUB_OUTPUT"
         shell: bash

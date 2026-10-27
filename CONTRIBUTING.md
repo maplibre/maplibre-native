@@ -18,7 +18,7 @@ If you want to contribute code:
 
 1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-native/pulls) and [issues](https://github.com/maplibre/maplibre-native/issues) don’t already cover your contribution or question.
 
-1. Pull requests are gladly accepted. If there are any changes that developers using one of the platforms should be aware of, please update the **main** section of the relevant `CHANGELOG.md`.
+1. Pull requests are gladly accepted. The release notes of Android and iOS are generated from the titles of the merged pull requests, so give your pull request a title that tells developers using the SDK what changed. For the other platforms, update the **main** section of the relevant `CHANGELOG.md` if there are any changes that developers should be aware of.
 
 ## Note on AI usage
 
