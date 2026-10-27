@@ -17,6 +17,8 @@ Checks: >
     -modernize-use-override,
     -modernize-use-constraints,
     -modernize-use-trailing-return-type,
+    -modernize-use-designated-initializers,
+    -modernize-use-ranges,
     misc-static-assert,
     -clang-analyzer-security.ArrayBound,
     -clang-analyzer-security.insecureAPI.rand,

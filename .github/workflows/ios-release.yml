@@ -89,7 +89,7 @@ jobs:
       contents: write         # allow making a release
       actions: write          # for triggering ios-release-cocoapods.yml
       issues: write           # for notify-release-on-prs.ts
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: ios-build
     defaults:
       run:
