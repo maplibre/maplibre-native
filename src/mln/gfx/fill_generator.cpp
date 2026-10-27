@@ -40,7 +40,7 @@ namespace rounded_corner {
 void addFillIndices(SegmentVector& fillSegments,
                     gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                     const std::span<const uint32_t>& indices,
-                    const std::vector<bool>& ignoredVertices,
+                    const std::vector<bool>& convexAngleVertices,
                     const std::size_t startVertices) {
     const std::size_t nInstances = indices.size() / 3;
     assert(nInstances * 3 == indices.size());
@@ -53,16 +53,13 @@ void addFillIndices(SegmentVector& fillSegments,
     triangleSegment.instanceCount += nInstances;
 
     for (std::size_t i = 0; i < nInstances; i++) {
-        fillTriangles.emplace_back(
-            FillBucket::triangleInstance(static_cast<uint32_t>(startVertices) + indices[i * 3],
-                                         ignoredVertices[indices[i * 3]],
-                                         false,
-                                         static_cast<uint32_t>(startVertices) + indices[i * 3 + 1],
-                                         ignoredVertices[indices[i * 3 + 1]],
-                                         false,
-                                         static_cast<uint32_t>(startVertices) + indices[i * 3 + 2],
-                                         ignoredVertices[indices[i * 3 + 2]],
-                                         false));
+        std::vector<uint32_t> triangleIndices;
+        std::vector<bool> enableRounding;
+        for(int k = 0; k < 3; k++) {
+            triangleIndices.emplace_back(static_cast<uint32_t>(startVertices) + indices[i * 3 + k]);
+            enableRounding.emplace_back(convexAngleVertices[indices[i * 3 + k]]);
+        }
+        fillTriangles.emplace_back(FillBucket::triangleInstance(triangleIndices, enableRounding, false));
     }
 }
 
@@ -81,16 +78,13 @@ void addFillExternalIndices(SegmentVector& fillSegments,
     triangleSegment.instanceCount += nInstances;
 
     for (std::size_t i = 0; i < nInstances; i++) {
-        fillTriangles.emplace_back(
-            FillBucket::triangleInstance(static_cast<uint32_t>(startVertices) + indices[i * 3],
-                                         true,
-                                         false,
-                                         static_cast<uint32_t>(startVertices) + indices[i * 3 + 1],
-                                         false,
-                                         true,
-                                         static_cast<uint32_t>(startVertices) + indices[i * 3 + 2],
-                                         true,
-                                         false));
+        std::vector<uint32_t> triangleIndices;
+        std::vector<bool> enableRounding;
+        for(int k = 0; k < 3; k++) {
+            triangleIndices.emplace_back(static_cast<uint32_t>(startVertices) + indices[i * 3 + k]);
+            enableRounding.emplace_back(k == 1);
+        }
+        fillTriangles.emplace_back(FillBucket::triangleInstance(triangleIndices, enableRounding, true));
     }
 }
 
@@ -99,7 +93,7 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& fillVertices,
                             gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                             SegmentVector& fillSegments,
                             const GeometryCoordinates& ring,
-                            std::vector<bool>& ignoredVertices) {
+                            std::vector<bool>& convexAngleVertices) {
     std::size_t startVertices = fillVertices.elements();
     uint32_t countVertices = static_cast<uint32_t>(ring.size() - 1);
     if (countVertices < 3) {
@@ -113,19 +107,19 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& fillVertices,
         auto& point = ring[i];
         auto& next = ring[nextIndex];
 
-        bool isReflexAngle = util::crossProduct(prev - point, next - point) > 0;
-        if (isReflexAngle) {
+        bool isConvexAngle = util::crossProduct(prev - point, next - point) < 0;
+        if (!isConvexAngle) {
             std::vector<uint32_t> indices = {prevIndex, i, nextIndex};
             addFillExternalIndices(fillSegments, fillTriangles, indices, startVertices);
         }
 
         fillVertices.emplace_back(FillBucket::layoutVertex(point));
         fillNeighbors.emplace_back(FillBucket::neighborVertex(prevIndex - i, nextIndex - i));
-        ignoredVertices.emplace_back(isReflexAngle);
+        convexAngleVertices.emplace_back(isConvexAngle);
     }
     fillVertices.emplace_back(FillBucket::layoutVertex(ring[countVertices]));
     fillNeighbors.emplace_back(FillBucket::neighborVertex(-1, -countVertices + 1));
-    ignoredVertices.emplace_back(ignoredVertices[0]);
+    convexAngleVertices.emplace_back(convexAngleVertices[0]);
     return ring.size();
 }
 
@@ -178,11 +172,11 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& fillVertices,
                             gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                             SegmentVector& fillSegments,
                             const GeometryCoordinates& ring,
-                            std::vector<bool>& ignoredVertices,
+                            std::vector<bool>& convexAngleVertices,
                             bool fillRoundedCornerEnabled) {
     if (fillRoundedCornerEnabled) {
         return rounded_corner::addRingVertices(
-            fillVertices, fillNeighbors, fillTriangles, fillSegments, ring, ignoredVertices);
+            fillVertices, fillNeighbors, fillTriangles, fillSegments, ring, convexAngleVertices);
     } else {
         return sharp_corner::addRingVertices(fillVertices, ring);
     }
@@ -201,12 +195,12 @@ void addFillIndices(SegmentVector& fillSegments,
                     gfx::VertexVector<FillTriangleInstance>& fillTriangles,
                     gfx::IndexVector<gfx::Triangles>& fillIndexes,
                     const std::span<const uint32_t>& indices,
-                    const std::vector<bool>& ignoredVertices,
+                    const std::vector<bool>& convexAngleVertices,
                     const std::size_t startVertices,
                     const std::size_t totalVertices,
                     bool fillRoundedCornerEnabled) {
     if (fillRoundedCornerEnabled) {
-        rounded_corner::addFillIndices(fillSegments, fillTriangles, indices, ignoredVertices, startVertices);
+        rounded_corner::addFillIndices(fillSegments, fillTriangles, indices, convexAngleVertices, startVertices);
     } else {
         sharp_corner::addFillIndices(fillSegments, fillIndexes, indices, startVertices, totalVertices);
     }
@@ -250,7 +244,7 @@ void generateFillBuffers(const GeometryCollection& geometry,
 
         std::size_t totalVertices = totalVerticesCheck(polygon);
         std::size_t startVertices = fillVertices.elements();
-        std::vector<bool> ignoredVertices;
+        std::vector<bool> convexAngleVertices;
 
         for (const auto& ring : polygon) {
             addRingVertices(fillVertices,
@@ -258,7 +252,7 @@ void generateFillBuffers(const GeometryCollection& geometry,
                             fillTriangles,
                             fillSegments,
                             ring,
-                            ignoredVertices,
+                            convexAngleVertices,
                             fillRoundedCornerEnabled);
         }
 
@@ -267,7 +261,7 @@ void generateFillBuffers(const GeometryCollection& geometry,
                        fillTriangles,
                        fillIndexes,
                        indices,
-                       ignoredVertices,
+                       convexAngleVertices,
                        startVertices,
                        totalVertices,
                        fillRoundedCornerEnabled);
@@ -289,7 +283,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
         std::size_t totalVertices = totalVerticesCheck(polygon);
         std::size_t startVertices = fillVertices.elements();
-        std::vector<bool> ignoredVertices;
+        std::vector<bool> convexAngleVertices;
 
         for (const auto& ring : polygon) {
             std::size_t base = fillVertices.elements();
@@ -298,7 +292,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                                     fillTriangles,
                                                     fillSegments,
                                                     ring,
-                                                    ignoredVertices,
+                                                    convexAngleVertices,
                                                     fillRoundedCornerEnabled);
             addOutlineIndices(base, nVertices, lineSegments, lineIndexes);
         }
@@ -308,7 +302,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                        fillTriangles,
                        fillIndexes,
                        indices,
-                       ignoredVertices,
+                       convexAngleVertices,
                        startVertices,
                        totalVertices,
                        fillRoundedCornerEnabled);
@@ -344,7 +338,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
         std::size_t totalVertices = totalVerticesCheck(polygon);
         std::size_t startVertices = fillVertices.elements();
-        std::vector<bool> ignoredVertices;
+        std::vector<bool> convexAngleVertices;
 
         for (const auto& ring : polygon) {
             addRingVertices(fillVertices,
@@ -352,7 +346,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                             fillTriangles,
                             fillSegments,
                             ring,
-                            ignoredVertices,
+                            convexAngleVertices,
                             fillRoundedCornerEnabled);
             lineGenerator.generate(ring, lineOptions);
         }
@@ -362,7 +356,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                        fillTriangles,
                        fillIndexes,
                        indices,
-                       ignoredVertices,
+                       convexAngleVertices,
                        startVertices,
                        totalVertices,
                        fillRoundedCornerEnabled);
@@ -399,7 +393,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
     if (!geometry.getTriangles().empty()) {
         const std::size_t startVertices = fillVertices.elements();
         std::size_t totalVertices = 0;
-        std::vector<bool> ignoredVertices;
+        std::vector<bool> convexAngleVertices;
         for (const auto& polygon : geometry) {
             totalVertices += polygon.size();
             addRingVertices(fillVertices,
@@ -407,14 +401,14 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                             fillTriangles,
                             fillSegments,
                             polygon,
-                            ignoredVertices,
+                            convexAngleVertices,
                             fillRoundedCornerEnabled);
         }
         addFillIndices(fillSegments,
                        fillTriangles,
                        fillIndexes,
                        geometry.getTriangles(),
-                       ignoredVertices,
+                       convexAngleVertices,
                        startVertices,
                        totalVertices,
                        fillRoundedCornerEnabled);
@@ -427,7 +421,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
         const std::size_t totalVertices = totalVerticesCheck(polygon);
         const std::size_t startVertices = fillVertices.elements();
-        std::vector<bool> ignoredVertices;
+        std::vector<bool> convexAngleVertices;
 
         for (const auto& ring : polygon) {
             const std::size_t base = fillVertices.elements();
@@ -436,7 +430,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                                           fillTriangles,
                                                           fillSegments,
                                                           ring,
-                                                          ignoredVertices,
+                                                          convexAngleVertices,
                                                           fillRoundedCornerEnabled);
             addOutlineIndices(base, nVertices, basicLineSegments, basicLineIndexes);
             lineGenerator.generate(ring, lineOptions);
@@ -449,7 +443,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                        fillTriangles,
                        fillIndexes,
                        indices,
-                       ignoredVertices,
+                       convexAngleVertices,
                        startVertices,
                        totalVertices,
                        fillRoundedCornerEnabled);

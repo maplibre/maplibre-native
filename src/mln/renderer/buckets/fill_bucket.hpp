@@ -62,18 +62,13 @@ public:
     static FillNeighborVertex neighborVertex(int16_t prev_offset, int16_t next_offset) {
         return FillNeighborVertex{{prev_offset, next_offset}};
     }
-    static FillTriangleInstance triangleInstance(uint32_t index0,
-                                                 bool ignored0,
-                                                 bool external0,
-                                                 uint32_t index1,
-                                                 bool ignored1,
-                                                 bool external1,
-                                                 uint32_t index2,
-                                                 bool ignored2,
-                                                 bool external2) {
-        return FillTriangleInstance{{index0 * 4 + (ignored0 ? 1 : 0) * 2 + (external0 ? 1 : 0),
-                                     index1 * 4 + (ignored1 ? 1 : 0) * 2 + (external1 ? 1 : 0),
-                                     index2 * 4 + (ignored2 ? 1 : 0) * 2 + (external2 ? 1 : 0)}};
+    static FillTriangleInstance triangleInstance(std::vector<uint32_t>& indices,
+                                                 std::vector<bool>& enableRounding,
+                                                 bool invertRounding) {
+        assert(indices.size() == 3 && enableRounding.size() == 3);
+        return FillTriangleInstance{{indices[0] * 4 + (enableRounding[0] ? 1 : 0) * 2 + (invertRounding ? 1 : 0),
+                                     indices[1] * 4 + (enableRounding[1] ? 1 : 0) * 2 + (invertRounding ? 1 : 0),
+                                     indices[2] * 4 + (enableRounding[2] ? 1 : 0) * 2 + (invertRounding ? 1 : 0)}};
     }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES

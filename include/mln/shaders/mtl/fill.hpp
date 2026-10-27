@@ -326,25 +326,25 @@ struct FragmentStage {
     float4 position [[position, invariant]];
 
 #if defined(ROUNDED_CORNER_ENABLED)
-    float2 pos;
+    float2 triangle_pos;
 
-    float2 v0 [[flat]];
-    float2 v1 [[flat]];
-    float2 v2 [[flat]];
+    float2 triangle_v0_pos [[flat]];
+    float2 polygon_v0_prev [[flat]];
+    float2 polygon_v0_next [[flat]];
 
-    float2 v0Prev [[flat]];
-    float2 v0Next [[flat]];
-    float v0Radius [[flat]];
+    float2 triangle_v1_pos [[flat]];
+    float2 polygon_v1_prev [[flat]];
+    float2 polygon_v1_next [[flat]];
 
-    float2 v1Prev [[flat]];
-    float2 v1Next [[flat]];
-    float v1Radius [[flat]];
+    float2 triangle_v2_pos [[flat]];
+    float2 polygon_v2_prev [[flat]];
+    float2 polygon_v2_next [[flat]];
 
-    float2 v2Prev [[flat]];
-    float2 v2Next [[flat]];
-    float v2Radius [[flat]];
+    float triangle_v0_radius [[flat]];
+    float triangle_v1_radius [[flat]];
+    float triangle_v2_radius [[flat]];
 
-    float external [[flat]];
+    float triangle_discard_side [[flat]];
 #endif
 
 #if !defined(HAS_UNIFORM_u_color)
@@ -367,62 +367,40 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
 
 #if !defined(ROUNDED_CORNER_ENABLED)
-    uint index = vertexID;
-    float2 position = float2(polygon[index].position);
+    uint vertex_index = vertexID;
+    float2 position = float2(polygon[vertex_index].position);
 #else
-    uint index = vertx.triangle_indices[vertexID] >> 2;
-    float2 position = float2(polygon[index].position);
+    uint vertex_index = vertx.triangle_indices[vertexID] >> 2;
+    float2 position = float2(polygon[vertex_index].position);
 
-    uint i0 = vertx.triangle_indices[0] >> 2;
-    uint i1 = vertx.triangle_indices[1] >> 2;
-    uint i2 = vertx.triangle_indices[2] >> 2;
+    float2 triangle_vertex_pos[3];
+    float2 polygon_prev_vertex[3];
+    float2 polygon_next_vertex[3];
+    float triangle_vertex_radius[3];
+    bool invert_rounding = false;
+    for (int i = 0; i < 3; i++) {
+        bool enable_rounding = (vertx.triangle_indices[i] % 4) >> 1;
+        if (!enable_rounding || props.rounded_corner_distance <= 0.0) {
+            triangle_vertex_pos[i] = float2(0.0);
+            polygon_prev_vertex[i] = float2(0.0);
+            polygon_next_vertex[i] = float2(0.0);
+            triangle_vertex_radius[i] = 0.0;
+            continue;
+        }
+        uint triangle_index = vertx.triangle_indices[i] >> 2;
+        uint polygon_prev_index = triangle_index + neighbor[triangle_index].prev_offset;
+        uint polygon_next_index = triangle_index + neighbor[triangle_index].next_offset;
 
-    uint ignored0 = vertx.triangle_indices[0] % 4 >> 1;
-    uint ignored1 = vertx.triangle_indices[1] % 4 >> 1;
-    uint ignored2 = vertx.triangle_indices[2] % 4 >> 1;
+        triangle_vertex_pos[i] = float2(polygon[triangle_index].position);
+        polygon_prev_vertex[i] = float2(polygon[polygon_prev_index].position);
+        polygon_next_vertex[i] = float2(polygon[polygon_next_index].position);
+        
+        triangle_vertex_radius[i] = computeRadius(polygon_prev_vertex[i], 
+                                                  triangle_vertex_pos[i], 
+                                                  polygon_next_vertex[i], 
+                                                  props.rounded_corner_distance);
 
-    uint external0 = vertx.triangle_indices[0] % 2;
-    uint external1 = vertx.triangle_indices[1] % 2;
-    uint external2 = vertx.triangle_indices[2] % 2;
-
-    float2 v0 = float2(polygon[i0].position);
-    float2 v1 = float2(polygon[i1].position);
-    float2 v2 = float2(polygon[i2].position);
-
-    float2 v0Prev = v0;
-    float2 v0Next = v0;
-    float v0Radius = 0;
-    if (ignored0 == 0 && props.rounded_corner_distance > 0) {
-        uint i0Prev = i0 + neighbor[i0].prev_offset;
-        uint i0Next = i0 + neighbor[i0].next_offset;
-
-        v0Prev = float2(polygon[i0Prev].position);
-        v0Next = float2(polygon[i0Next].position);
-        v0Radius = computeRadius(v0Prev, v0, v0Next, props.rounded_corner_distance);
-    }
-
-    float2 v1Prev = v1;
-    float2 v1Next = v1;
-    float v1Radius = 0;
-    if (ignored1 == 0 && props.rounded_corner_distance > 0) {
-        uint i1Prev = i1 + neighbor[i1].prev_offset;
-        uint i1Next = i1 + neighbor[i1].next_offset;
-
-        v1Prev = float2(polygon[i1Prev].position);
-        v1Next = float2(polygon[i1Next].position);
-        v1Radius = computeRadius(v1Prev, v1, v1Next, props.rounded_corner_distance);
-    }
-
-    float2 v2Prev = v2;
-    float2 v2Next = v2;
-    float v2Radius = 0;
-    if (ignored2 == 0 && props.rounded_corner_distance > 0) {
-        uint i2Prev = i2 + neighbor[i2].prev_offset;
-        uint i2Next = i2 + neighbor[i2].next_offset;
-
-        v2Prev = float2(polygon[i2Prev].position);
-        v2Next = float2(polygon[i2Next].position);
-        v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
+        invert_rounding = invert_rounding || (vertx.triangle_indices[i] % 2);
     }
 #endif
 
@@ -430,32 +408,32 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position = drawable.matrix * float4(position, 0.0f, 1.0f),
 
 #if defined(ROUNDED_CORNER_ENABLED)
-        .pos = position,
+        .triangle_pos = position,
 
-        .v0 = v0,
-        .v1 = v1,
-        .v2 = v2,
+        .triangle_v0_pos = triangle_vertex_pos[0],
+        .polygon_v0_prev = polygon_prev_vertex[0],
+        .polygon_v0_next = polygon_next_vertex[0],
 
-        .v0Prev = v0Prev,
-        .v0Next = v0Next,
-        .v0Radius = v0Radius,
+        .triangle_v1_pos = triangle_vertex_pos[1],
+        .polygon_v1_prev = polygon_prev_vertex[1],
+        .polygon_v1_next = polygon_next_vertex[1],
 
-        .v1Prev = v1Prev,
-        .v1Next = v1Next,
-        .v1Radius = v1Radius,
+        .triangle_v2_pos = triangle_vertex_pos[2],
+        .polygon_v2_prev = polygon_prev_vertex[2],
+        .polygon_v2_next = polygon_next_vertex[2],
 
-        .v2Prev = v2Prev,
-        .v2Next = v2Next,
-        .v2Radius = v2Radius,
+        .triangle_v0_radius = triangle_vertex_radius[0],
+        .triangle_v1_radius = triangle_vertex_radius[1],
+        .triangle_v2_radius = triangle_vertex_radius[2],
 
-        .external = (external0 || external1 || external2) ? -1.0 : 1.0,
+        .triangle_discard_side = invert_rounding ? -1.0 : 1.0,
 #endif
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color    = half4(unpack_mix_color(data[index].color, drawable.color_t)),
+        .color    = half4(unpack_mix_color(data[vertex_index].color, drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity  = half(unpack_mix_float(data[index].opacity, drawable.opacity_t)),
+        .opacity  = half(unpack_mix_float(data[vertex_index].opacity, drawable.opacity_t)),
 #endif
     };
 }
@@ -464,6 +442,29 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
+#endif
+
+#if defined(ROUNDED_CORNER_ENABLED)
+    float dTri = -1.0;
+
+    if (in.triangle_v0_radius > 0.0) {
+        float d0 = dRoundedTri(in.triangle_pos, dTri, in.triangle_v0_pos, in.polygon_v0_prev, in.polygon_v0_next, in.triangle_v0_radius);
+        dTri = opUnion(dTri, d0);
+    }
+
+    if (in.triangle_v1_radius > 0.0) {
+        float d1 = dRoundedTri(in.triangle_pos, dTri, in.triangle_v1_pos, in.polygon_v1_prev, in.polygon_v1_next, in.triangle_v1_radius);
+        dTri = opUnion(dTri, d1);
+    }
+
+    if (in.triangle_v2_radius > 0.0) {
+        float d2 = dRoundedTri(in.triangle_pos, dTri, in.triangle_v2_pos, in.polygon_v2_prev, in.polygon_v2_next, in.triangle_v2_radius);
+        dTri = opUnion(dTri, d2);
+    }
+
+    if (dTri * in.triangle_discard_side > 0.0) {
+        discard_fragment();
+    }
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
@@ -476,29 +477,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half opacity = props.opacity;
 #else
     const half opacity = in.opacity;
-#endif
-
-#if defined(ROUNDED_CORNER_ENABLED)
-    float dTri = -1;
-
-    if (in.v0Radius > 0) {
-        float d0 = dRoundedTri(in.pos, dTri, in.v0, in.v0Prev, in.v0Next, in.v0Radius);
-        dTri = opUnion(dTri, d0);
-    }
-
-    if (in.v1Radius > 0) {
-        float d1 = dRoundedTri(in.pos, dTri, in.v1, in.v1Prev, in.v1Next, in.v1Radius);
-        dTri = opUnion(dTri, d1);
-    }
-
-    if (in.v2Radius > 0) {
-        float d2 = dRoundedTri(in.pos, dTri, in.v2, in.v2Prev, in.v2Next, in.v2Radius);
-        dTri = opUnion(dTri, d2);
-    }
-
-    if (dTri * in.external > 0) {
-        discard_fragment();
-    }
 #endif
 
     return half4(color * opacity);
@@ -639,25 +617,25 @@ struct FragmentStage {
     float2 v_pos_b;
 
 #if defined(ROUNDED_CORNER_ENABLED)
-    float2 pos;
+    float2 triangle_pos;
 
-    float2 v0 [[flat]];
-    float2 v1 [[flat]];
-    float2 v2 [[flat]];
+    float2 triangle_v0_pos [[flat]];
+    float2 polygon_v0_prev [[flat]];
+    float2 polygon_v0_next [[flat]];
 
-    float2 v0Prev [[flat]];
-    float2 v0Next [[flat]];
-    float v0Radius [[flat]];
+    float2 triangle_v1_pos [[flat]];
+    float2 polygon_v1_prev [[flat]];
+    float2 polygon_v1_next [[flat]];
 
-    float2 v1Prev [[flat]];
-    float2 v1Next [[flat]];
-    float v1Radius [[flat]];
+    float2 triangle_v2_pos [[flat]];
+    float2 polygon_v2_prev [[flat]];
+    float2 polygon_v2_next [[flat]];
 
-    float2 v2Prev [[flat]];
-    float2 v2Next [[flat]];
-    float v2Radius [[flat]];
+    float triangle_v0_radius [[flat]];
+    float triangle_v1_radius [[flat]];
+    float triangle_v2_radius [[flat]];
 
-    float external [[flat]];
+    float triangle_discard_side [[flat]];
 #endif
 
 #if !defined(HAS_UNIFORM_u_color)
@@ -689,77 +667,59 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
 
 #if !defined(ROUNDED_CORNER_ENABLED)
-    uint index = vertexID;
-    float2 position = float2(polygon[index].position);
+    uint vertex_index = vertexID;
+    float2 position = float2(polygon[vertex_index].position);
 #else
-    uint index = vertx.triangle_indices[vertexID] >> 2;
-    float2 position = float2(polygon[index].position);
+    uint vertex_index = vertx.triangle_indices[vertexID] >> 2;
+    float2 position = float2(polygon[vertex_index].position);
 
-    uint i0 = vertx.triangle_indices[0] >> 2;
-    uint i1 = vertx.triangle_indices[1] >> 2;
-    uint i2 = vertx.triangle_indices[2] >> 2;
+    float2 triangle_vertex_pos[3];
+    float2 polygon_prev_vertex[3];
+    float2 polygon_next_vertex[3];
+    float triangle_vertex_radius[3];
+    bool invert_rounding = false;
+    for (int i = 0; i < 3; i++) {
+        bool enable_rounding = (vertx.triangle_indices[i] % 4) >> 1;
+        if (!enable_rounding || props.rounded_corner_distance <= 0.0) {
+            triangle_vertex_pos[i] = float2(0.0);
+            polygon_prev_vertex[i] = float2(0.0);
+            polygon_next_vertex[i] = float2(0.0);
+            triangle_vertex_radius[i] = 0.0;
+            continue;
+        }
+        uint triangle_index = vertx.triangle_indices[i] >> 2;
+        uint polygon_prev_index = triangle_index + neighbor[triangle_index].prev_offset;
+        uint polygon_next_index = triangle_index + neighbor[triangle_index].next_offset;
 
-    uint ignored0 = vertx.triangle_indices[0] % 4 >> 1;
-    uint ignored1 = vertx.triangle_indices[1] % 4 >> 1;
-    uint ignored2 = vertx.triangle_indices[2] % 4 >> 1;
+        triangle_vertex_pos[i] = float2(polygon[triangle_index].position);
+        polygon_prev_vertex[i] = float2(polygon[polygon_prev_index].position);
+        polygon_next_vertex[i] = float2(polygon[polygon_next_index].position);
+        
+        triangle_vertex_radius[i] = computeRadius(polygon_prev_vertex[i], 
+                                                  triangle_vertex_pos[i], 
+                                                  polygon_next_vertex[i], 
+                                                  props.rounded_corner_distance);
 
-    uint external0 = vertx.triangle_indices[0] % 2;
-    uint external1 = vertx.triangle_indices[1] % 2;
-    uint external2 = vertx.triangle_indices[2] % 2;
-
-    float2 v0 = float2(polygon[i0].position);
-    float2 v1 = float2(polygon[i1].position);
-    float2 v2 = float2(polygon[i2].position);
-
-    float2 v0Prev = v0;
-    float2 v0Next = v0;
-    float v0Radius = 0;
-    if (ignored0 == 0 && props.rounded_corner_distance > 0) {
-        uint i0Prev = i0 + neighbor[i0].prev_offset;
-        uint i0Next = i0 + neighbor[i0].next_offset;
-
-        v0Prev = float2(polygon[i0Prev].position);
-        v0Next = float2(polygon[i0Next].position);
-        v0Radius = computeRadius(v0Prev, v0, v0Next, props.rounded_corner_distance);
-    }
-
-    float2 v1Prev = v1;
-    float2 v1Next = v1;
-    float v1Radius = 0;
-    if (ignored1 == 0 && props.rounded_corner_distance > 0) {
-        uint i1Prev = i1 + neighbor[i1].prev_offset;
-        uint i1Next = i1 + neighbor[i1].next_offset;
-
-        v1Prev = float2(polygon[i1Prev].position);
-        v1Next = float2(polygon[i1Next].position);
-        v1Radius = computeRadius(v1Prev, v1, v1Next, props.rounded_corner_distance);
-    }
-
-    float2 v2Prev = v2;
-    float2 v2Next = v2;
-    float v2Radius = 0;
-    if (ignored2 == 0 && props.rounded_corner_distance > 0) {
-        uint i2Prev = i2 + neighbor[i2].prev_offset;
-        uint i2Next = i2 + neighbor[i2].next_offset;
-
-        v2Prev = float2(polygon[i2Prev].position);
-        v2Next = float2(polygon[i2Next].position);
-        v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
+        invert_rounding = invert_rounding || (vertx.triangle_indices[i] % 2);
     }
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
 #else
-    const auto pattern_from = float4(data[index].pattern_from[0], data[index].pattern_from[1],
-                                     data[index].pattern_from[2], data[index].pattern_from[3]);
+    const auto pattern_from = float4(data[vertex_index].pattern_from[0], 
+                                     data[vertex_index].pattern_from[1],
+                                     data[vertex_index].pattern_from[2], 
+                                     data[vertex_index].pattern_from[3]);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = float4(tileProps.pattern_to);
 #else
-    const auto pattern_to   = float4(data[index].pattern_to[0], data[index].pattern_to[1],
-                                     data[index].pattern_to[2], data[index].pattern_to[3]);
+    const auto pattern_to   = float4(data[vertex_index].pattern_to[0], 
+                                     data[vertex_index].pattern_to[1],
+                                     data[vertex_index].pattern_to[2], 
+                                     data[vertex_index].pattern_to[3]);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -782,32 +742,32 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
 
 #if defined(ROUNDED_CORNER_ENABLED)
-        .pos = position,
+        .triangle_pos = position,
 
-        .v0 = v0,
-        .v1 = v1,
-        .v2 = v2,
+        .triangle_v0_pos = triangle_vertex_pos[0],
+        .polygon_v0_prev = polygon_prev_vertex[0],
+        .polygon_v0_next = polygon_next_vertex[0],
 
-        .v0Prev = v0Prev,
-        .v0Next = v0Next,
-        .v0Radius = v0Radius,
+        .triangle_v1_pos = triangle_vertex_pos[1],
+        .polygon_v1_prev = polygon_prev_vertex[1],
+        .polygon_v1_next = polygon_next_vertex[1],
 
-        .v1Prev = v1Prev,
-        .v1Next = v1Next,
-        .v1Radius = v1Radius,
+        .triangle_v2_pos = triangle_vertex_pos[2],
+        .polygon_v2_prev = polygon_prev_vertex[2],
+        .polygon_v2_next = polygon_next_vertex[2],
 
-        .v2Prev = v2Prev,
-        .v2Next = v2Next,
-        .v2Radius = v2Radius,
+        .triangle_v0_radius = triangle_vertex_radius[0],
+        .triangle_v1_radius = triangle_vertex_radius[1],
+        .triangle_v2_radius = triangle_vertex_radius[2],
 
-        .external = (external0 || external1 || external2) ? -1.0 : 1.0,
+        .triangle_discard_side = invert_rounding ? -1.0 : 1.0,
 #endif
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color          = half4(unpack_mix_color(data[index].color, drawable.color_t)),
+        .color          = half4(unpack_mix_color(data[vertex_index].color, drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(unpack_mix_float(data[index].opacity, drawable.opacity_t)),
+        .opacity        = half(unpack_mix_float(data[vertex_index].opacity, drawable.opacity_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),
@@ -826,6 +786,29 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
+#endif
+
+#if defined(ROUNDED_CORNER_ENABLED)
+    float dTri = -1.0;
+
+    if (in.triangle_v0_radius > 0.0) {
+        float d0 = dRoundedTri(in.triangle_pos, dTri, in.triangle_v0_pos, in.polygon_v0_prev, in.polygon_v0_next, in.triangle_v0_radius);
+        dTri = opUnion(dTri, d0);
+    }
+
+    if (in.triangle_v1_radius > 0.0) {
+        float d1 = dRoundedTri(in.triangle_pos, dTri, in.triangle_v1_pos, in.polygon_v1_prev, in.polygon_v1_next, in.triangle_v1_radius);
+        dTri = opUnion(dTri, d1);
+    }
+
+    if (in.triangle_v2_radius > 0.0) {
+        float d2 = dRoundedTri(in.triangle_pos, dTri, in.triangle_v2_pos, in.polygon_v2_prev, in.polygon_v2_next, in.triangle_v2_radius);
+        dTri = opUnion(dTri, d2);
+    }
+
+    if (dTri * in.triangle_discard_side > 0.0) {
+        discard_fragment();
+    }
 #endif
 
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
@@ -852,29 +835,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto pattern_to     = float4(tileProps.pattern_to);
 #else
     const auto pattern_to     = float4(in.pattern_to);
-#endif
-
-#if defined(ROUNDED_CORNER_ENABLED)
-    float dTri = -1;
-
-    if (in.v0Radius > 0) {
-        float d0 = dRoundedTri(in.pos, dTri, in.v0, in.v0Prev, in.v0Next, in.v0Radius);
-        dTri = opUnion(dTri, d0);
-    }
-
-    if (in.v1Radius > 0) {
-        float d1 = dRoundedTri(in.pos, dTri, in.v1, in.v1Prev, in.v1Next, in.v1Radius);
-        dTri = opUnion(dTri, d1);
-    }
-
-    if (in.v2Radius > 0) {
-        float d2 = dRoundedTri(in.pos, dTri, in.v2, in.v2Prev, in.v2Next, in.v2Radius);
-        dTri = opUnion(dTri, d2);
-    }
-
-    if (dTri * in.external > 0) {
-        discard_fragment();
-    }
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
