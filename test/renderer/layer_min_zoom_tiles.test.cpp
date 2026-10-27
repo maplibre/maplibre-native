@@ -60,8 +60,12 @@ std::string makeFlatDEMTile() {
 std::string pointsOverTerrainStyle() {
     std::ostringstream points;
     bool first = true;
-    for (double lat = 36.0; lat < 40.5; lat += 0.2) {
-        for (double lon = -124.0; lon < -117.5; lon += 0.2) {
+    // 0.2 degree steps from 36.0 to 40.4 north and from -124.0 to -117.6 east; integer counters,
+    // as clang-tidy rejects floating-point loop counters.
+    for (int i = 0; i < 23; ++i) {
+        const double lat = 36.0 + 0.2 * i;
+        for (int j = 0; j < 33; ++j) {
+            const double lon = -124.0 + 0.2 * j;
             points << (first ? "" : ",") << "[" << lon << "," << lat << "]";
             first = false;
         }
