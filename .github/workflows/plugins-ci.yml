@@ -38,11 +38,13 @@ jobs:
       - name: Check the generated plugin wrappers
         run: node plugins/tools/generate.ts --check
 
-      - name: Check the n-gon shader header
-        run: node plugins/plugins/ngon-layer/scripts/generate-shaders.mjs | diff - plugins/plugins/ngon-layer/shared/cpp/ngon_shader_sources.hpp
-
-      - name: Check the circle shader header
-        run: node plugins/plugins/circle-layer/scripts/generate-shaders.mjs | diff - plugins/plugins/circle-layer/shared/cpp/circle_shader_sources.hpp
+      # A plugin with scripts/generate-shaders.mjs prints the shader header in shared/cpp.
+      - name: Check the generated shader headers
+        run: |
+          for script in plugins/plugins/*/scripts/generate-shaders.mjs; do
+            plugin=$(dirname "$(dirname "$script")")
+            node "$script" | diff - "$plugin"/shared/cpp/*_shader_sources.hpp
+          done
 
   # The render tests of every plugin, on every renderer it supports, and the plugin API tests.
   tests:
