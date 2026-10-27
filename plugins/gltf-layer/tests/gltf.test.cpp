@@ -132,7 +132,8 @@ int main() {
           layer.properties[1].scope == MLN_PLUGIN_PROPERTY_LAYOUT);
     CHECK(std::string_view(layer.properties[1].resources.data, layer.properties[1].resources.size) == "models");
     CHECK(std::string_view(layer.properties[2].name.data, layer.properties[2].name.size) == "model-occlusion" &&
-          layer.properties[2].type == MLN_PLUGIN_VALUE_FLOAT && layer.properties[2].scope == MLN_PLUGIN_PROPERTY_LAYOUT);
+          layer.properties[2].type == MLN_PLUGIN_VALUE_FLOAT &&
+          layer.properties[2].scope == MLN_PLUGIN_PROPERTY_LAYOUT);
 
     // Every paint property is bound to the shader, and the binding offsets stay inside the uniform block.
     const auto& shader = layer.shaders[0];
