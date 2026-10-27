@@ -338,6 +338,9 @@ typedef struct mln_plugin_layout_context_v1 {
     uint32_t extent;
     const mln_plugin_property_value_v1* properties;
     size_t property_count;
+    /* 1 when the map renders a still image, 0 for a continuous map. The features of a still image include the points
+     * in the buffer around the tile, which no neighboring tile has to draw. */
+    uint8_t still_image;
 } mln_plugin_layout_context_v1;
 
 /* Returned bytes remain valid until destroy_layout. The host copies them after

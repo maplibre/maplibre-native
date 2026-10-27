@@ -40,6 +40,15 @@ target_link_libraries(mln-ngon-tests PRIVATE mln-ngon-layer)
 mln_plugin_render_test(mln-ngon-render-test mln-ngon-layer ngon_layer.hpp mln_ngon_layer_register
     MANIFEST plugins/plugins/ngon-layer/render-tests/manifest.json)
 
+add_subdirectory(plugins/circle-layer)
+target_link_libraries(mln-circle-layer PUBLIC mbgl-core)
+
+add_executable(mln-circle-tests EXCLUDE_FROM_ALL plugins/circle-layer/tests/circle.test.cpp)
+target_link_libraries(mln-circle-tests PRIVATE mln-circle-layer)
+
+mln_plugin_render_test(mln-circle-render-test mln-circle-layer circle_layer.hpp mln_circle_layer_register
+    LAYER_TYPE circle IGNORE plugins/plugins/circle-layer/render-tests/ignores.json)
+
 add_library(mln-fill-extrusion STATIC plugins/fill-extrusion/shared/cpp/fill_extrusion.cpp)
 target_include_directories(mln-fill-extrusion PUBLIC plugins/fill-extrusion/shared/include)
 target_include_directories(mln-fill-extrusion PRIVATE plugins/fill-extrusion/vendor)

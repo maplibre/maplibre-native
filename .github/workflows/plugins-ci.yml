@@ -41,6 +41,9 @@ jobs:
       - name: Check the n-gon shader header
         run: node plugins/plugins/ngon-layer/scripts/generate-shaders.mjs | diff - plugins/plugins/ngon-layer/shared/cpp/ngon_shader_sources.hpp
 
+      - name: Check the circle shader header
+        run: node plugins/plugins/circle-layer/scripts/generate-shaders.mjs | diff - plugins/plugins/circle-layer/shared/cpp/circle_shader_sources.hpp
+
   # The render tests of every plugin, on every renderer it supports, and the plugin API tests.
   tests:
     name: Plugin tests (${{ matrix.preset }})

@@ -16,6 +16,7 @@ objc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//plugins/ios/circle-layer",
         "//plugins/ios/fill-extrusion",
         "//plugins/ios/ngon-layer",
     ],

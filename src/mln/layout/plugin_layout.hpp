@@ -27,6 +27,7 @@ public:
 private:
     bool needsImages = false;
     const float zoom;
+    const MapMode mode;
     const std::shared_ptr<const GlobalStateMap> globalState;
     std::vector<Immutable<style::LayerProperties>> layers;
     std::unique_ptr<GeometryTileLayer> sourceLayer;

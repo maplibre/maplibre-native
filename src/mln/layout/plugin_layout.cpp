@@ -28,6 +28,7 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                            plugin::RegisteredLayerPtr registration_,
                            const LayoutParameters* layoutParameters)
     : zoom(parameters.tileID.overscaledZ),
+      mode(parameters.mode),
       globalState(parameters.globalState),
       layers(std::move(layers_)),
       sourceLayer(std::move(sourceLayer_)),
@@ -79,6 +80,7 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
     context.struct_size = sizeof(context);
     context.zoom = zoom;
     context.extent = util::EXTENT;
+    context.still_image = mode != MapMode::Continuous;
     std::vector<mln_plugin_property_value_v1> layoutProperties;
     std::vector<style::PluginPropertyValue::EvaluationStorage> storage(registration->properties.size());
     for (size_t i = 0; i < registration->properties.size(); ++i) {
