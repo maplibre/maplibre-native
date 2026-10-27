@@ -421,12 +421,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 addPolylineDrawable(tileLayerGroup, tile);
             }
 #else
-            const DebugUBO debugUBO = {/* .matrix = */ .matrix = util::cast<float>(tile.matrix),
-                                       /* .color = */ .color = Color::red(),
-                                       /* .overlay_scale = */ .overlay_scale = 1.0f,
-                                       /* .pad1 = */ .pad1 = 0,
-                                       /* .pad2 = */ .pad2 = 0,
-                                       /* .pad3 = */ .pad3 = 0};
+            const DebugUBO debugUBO = {.matrix = util::cast<float>(tile.matrix),
+                                       .color = Color::red(),
+                                       .overlay_scale = 1.0f,
+                                       .pad1 = 0,
+                                       .pad2 = 0,
+                                       .pad3 = 0};
 
             if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
                 addDrawable(tileLayerGroup,

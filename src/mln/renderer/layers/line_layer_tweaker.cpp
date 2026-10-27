@@ -173,13 +173,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .expressionMask = expressionMask,
             .pad1 = 0};
 #else
-        const LineEvaluatedPropsUBO propsUBO{/*color =*/.color = evaluate<LineColor>(parameters),
-                                             /*blur =*/.blur = evaluate<LineBlur>(parameters),
-                                             /*opacity =*/.opacity = evaluate<LineOpacity>(parameters),
-                                             /*gapwidth =*/.gapwidth = evaluate<LineGapWidth>(parameters),
-                                             /*offset =*/.offset = evaluate<LineOffset>(parameters),
-                                             /*width =*/.width = evaluate<LineWidth>(parameters),
-                                             /*floorwidth =*/.floorwidth = evaluate<LineFloorWidth>(parameters),
+        const LineEvaluatedPropsUBO propsUBO{.color = evaluate<LineColor>(parameters),
+                                             .blur = evaluate<LineBlur>(parameters),
+                                             .opacity = evaluate<LineOpacity>(parameters),
+                                             .gapwidth = evaluate<LineGapWidth>(parameters),
+                                             .offset = evaluate<LineOffset>(parameters),
+                                             .width = evaluate<LineWidth>(parameters),
+                                             .floorwidth = evaluate<LineFloorWidth>(parameters),
                                              .expressionMask = LineExpressionMask::None,
                                              .pad1 = 0};
 #endif // MLN_RENDER_BACKEND_METAL
