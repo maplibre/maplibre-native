@@ -24,6 +24,8 @@ permissions:
 
 env:
   EGL_PLATFORM: surfaceless
+  # Mesa 26's gfxstream ICD leaks a pthread key per vkCreateInstance, which exhausts glibc's 1024 keys in the Vulkan render tests.
+  VK_DRIVER_FILES: /usr/share/vulkan/icd.d/lvp_icd.json
 
 jobs:
   pre_job:
