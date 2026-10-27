@@ -488,6 +488,7 @@ MLN_CORE_SOURCE = [
     "src/mln/text/get_anchors.cpp",
     "src/mln/text/get_anchors.hpp",
     "src/mln/text/glyph.cpp",
+    "src/mln/text/glyph_cache.cpp",
     "src/mln/text/glyph_manager.cpp",
     "src/mln/text/glyph_manager.hpp",
     "src/mln/text/glyph_manager_observer.hpp",
@@ -627,6 +628,7 @@ MLN_CORE_SOURCE = [
     "src/mln/util/utf.hpp",
     "src/mln/util/version.cpp",
     "src/mln/util/version.hpp",
+    "src/mln/util/weak_immutable.hpp",
     "src/mln/util/work_request.cpp",
 ] + select({
     "//:rust": [
@@ -811,6 +813,7 @@ MLN_CORE_HEADERS = [
     "include/mln/style/undefined.hpp",
     "include/mln/style/variable_anchor_offset_collection.hpp",
     "include/mln/text/glyph.hpp",
+    "include/mln/text/glyph_cache.hpp",
     "include/mln/text/glyph_range.hpp",
     "include/mln/tile/tile_id.hpp",
     "include/mln/tile/tile_operation.hpp",
