@@ -45,7 +45,6 @@ struct LineDrawableUBO {
     offset_t: f32,
     width_t: f32,
     pad1: f32,
-    drape_tile: vec4<f32>,
 };
 
 struct LineEvaluatedPropsUBO {
@@ -58,7 +57,6 @@ struct LineEvaluatedPropsUBO {
     floorwidth: f32,
     expressionMask: u32,
     pad1: f32,
-    drape_tile: vec4<f32>,
 };
 
 struct GlobalPaintParamsUBO {
@@ -284,7 +282,6 @@ struct LineEvaluatedPropsUBO {
     floorwidth: f32,
     expressionMask: u32,
     pad1: f32,
-    drape_tile: vec4<f32>,
 };
 
 struct GlobalPaintParamsUBO {
@@ -511,7 +508,6 @@ struct LineEvaluatedPropsUBO {
     floorwidth: f32,
     expressionMask: u32,
     pad1: f32,
-    drape_tile: vec4<f32>,
 };
 
 struct GlobalPaintParamsUBO {
@@ -834,7 +830,6 @@ struct LineEvaluatedPropsUBO {
     floorwidth: f32,
     expressionMask: u32,
     pad1: f32,
-    drape_tile: vec4<f32>,
 };
 
 struct GlobalPaintParamsUBO {

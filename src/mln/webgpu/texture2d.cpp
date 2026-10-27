@@ -376,6 +376,11 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     WGPUExtent3D writeSize = {static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height), 1};
 
     wgpuQueueWriteTexture(queue, &destination, copyData.dataPtr, copyData.dataSize, &dataLayout, &writeSize);
+
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numTextureUpdates++;
+        stats.textureUpdateBytes += static_cast<std::size_t>(getPixelStride() * size.width * size.height);
+    });
 }
 
 void Texture2D::upload() noexcept {
@@ -418,6 +423,11 @@ void Texture2D::uploadSubRegion(const void* pixelData,
     WGPUExtent3D writeSize = {static_cast<uint32_t>(regionSize.width), static_cast<uint32_t>(regionSize.height), 1};
 
     wgpuQueueWriteTexture(queue, &destination, copyData.dataPtr, copyData.dataSize, &dataLayout, &writeSize);
+
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numTextureUpdates++;
+        stats.textureUpdateBytes += static_cast<std::size_t>(getPixelStride() * regionSize.width * regionSize.height);
+    });
 }
 
 } // namespace webgpu
