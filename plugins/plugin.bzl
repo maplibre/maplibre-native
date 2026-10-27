@@ -4,23 +4,11 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//bazel:flags.bzl", "CPP_FLAGS")
 load("//plugins:render_test.bzl", "plugin_render_test")
 
-# The renderers that Bazel builds, by the name of their backend in plugin.json, with the manifest of the repository's
-# render tests for each.
-_RENDERERS = {
-    "opengl": ("//:drawable_renderer", "metrics/linux-opengl.json"),
-    "metal": ("//:metal_renderer", "metrics/ios-metal-render-test-runner-style.json"),
-}
-
-def mln_plugin(backends = ["opengl", "vulkan", "metal"]):
+def mln_plugin():
     """Builds the plugin of this package, which is the directory plugins/plugins/<id>.
 
     shared/cpp/*.cpp, shared/include and vendor make the cc_library <id>. tests/*.test.cpp are googletest tests of
-    the library. render-tests are the render tests of the plugin: its own with render-tests/manifest.json, or else the
-    repository's tests of the layer types that the plugin registers, without the tests in render-tests/ignores.json.
-    They run with the renderers that are among the backends.
-
-    Args:
-      backends: The `backends` of plugin.json.
+    the library. render-tests are the render tests of the plugin, see render_test.cpp.
     """
     id = native.package_name().split("/")[-1]
     only_with_plugins = select({
@@ -54,20 +42,10 @@ def mln_plugin(backends = ["opengl", "vulkan", "metal"]):
             deps = [":" + id, "@googletest//:gtest_main"],
         )
 
-    own_manifest = native.glob(["render-tests/manifest.json"], allow_empty = True)
-    renderers = {renderer: manifest for backend, (renderer, manifest) in _RENDERERS.items() if backend in backends}
-    ignores = native.glob(["render-tests/ignores.json"], allow_empty = True)
-    if own_manifest:
-        plugin_render_test(
-            name = "render-test",
-            data = native.glob(["render-tests/**"], exclude = ["render-tests/results/**"]) + ["render-tests/results/.gitkeep"],
-            manifest = native.package_name() + "/render-tests/manifest.json",
-        )
-    elif renderers:
-        plugin_render_test(
-            name = "render-test",
-            data = ["//metrics:render-test-files"],
-            ignore = "render-tests/ignores.json" if ignores else None,
-            manifest = renderers,
-            plugin_layers = True,
-        )
+    # The plugin's own render tests, or else the repository's.
+    data = native.glob(["render-tests/**"], exclude = ["render-tests/results/**"], allow_empty = True)
+    if native.glob(["render-tests/manifest.json"], allow_empty = True):
+        data = data + ["render-tests/results/.gitkeep"]
+    else:
+        data = data + ["//metrics:render-test-files"]
+    plugin_render_test(name = "render-test", data = data)

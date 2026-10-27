@@ -1,7 +1,4 @@
 load("//plugins:plugin.bzl", "mln_plugin")
 
 # The directory layout is all that there is to say about the plugin, see plugins/plugin.bzl.
-mln_plugin(backends = [
-    "vulkan",
-    "metal",
-])
+mln_plugin()
