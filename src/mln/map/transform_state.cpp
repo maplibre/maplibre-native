@@ -8,6 +8,7 @@
 #include <mln/util/logging.hpp>
 #include <mln/util/projection.hpp>
 #include <mln/util/tile_coordinate.hpp>
+#include <mln/util/tile_lod.hpp>
 
 #include <numbers>
 
@@ -15,13 +16,7 @@ using namespace std::numbers;
 
 namespace mln {
 
-/*
- * The maximum angle to use for the Mercator horizon. This must be less than 90
- * to prevent errors in `MercatorTransform::_calcMatrices()`. It shouldn't be too close
- * to 90, or the distance to the horizon will become very large, unnecessarily increasing
- * the number of tiles needed to render the map.
- */
-const double maxMercatorHorizonAngle = util::deg2rad(89.25);
+const double maxMercatorHorizonAngle = util::deg2rad(util::maxMercatorHorizonAngleDegrees);
 
 namespace {
 LatLng latLngFromMercator(Point<double> mercatorCoordinate, LatLng::WrapMode wrapMode = LatLng::WrapMode::Unwrapped) {
