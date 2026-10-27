@@ -600,3 +600,30 @@ TEST(TerrainDrape, MasksAreDrawnOnlyForTilesOverlappingTheTarget) {
     EXPECT_LE(counts.drawn, 4 * counts.targets)
         << counts.drawn << " masks over " << counts.targets << " targets, " << counts.skipped << " skipped";
 }
+
+// The depth pass (the symbol-occlusion depth texture) is a function of the camera and the mesh
+// set. With both unchanged the previous texture still holds, so still frames run no pass.
+// RenderingStats counters accumulate across frames, so the test reads differences.
+TEST(TerrainDepthPass, StillCameraSkipsThePass) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.renderAndGetAltitude(8);
+    const auto depthPassesAfterFrame = [&] {
+        test.loop.runOnce();
+        return test.frontend.render(test.map).stats.numDepthPasses;
+    };
+
+    // Tiles and DEM data still arriving mark the pass dirty, so wait for three frames in a row
+    // without a pass. Before the pass was skipped on still frames it ran on every frame.
+    int passes = depthPassesAfterFrame();
+    int stillFrames = 0;
+    for (int frame = 0; frame < 60 && stillFrames < 3; ++frame) {
+        const int next = depthPassesAfterFrame();
+        stillFrames = next == passes ? stillFrames + 1 : 0;
+        passes = next;
+    }
+    ASSERT_EQ(stillFrames, 3) << "the depth pass ran on still frames";
+
+    test.map.jumpTo(CameraOptions().withPitch(61.0));
+    EXPECT_GT(depthPassesAfterFrame(), passes) << "a camera move must redraw the depth texture";
+}
