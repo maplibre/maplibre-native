@@ -12,55 +12,55 @@ import { glob } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
-import type { AndroidValues, Plugin, RegistryValues, Template } from './templates/values.ts';
+import type { Plugin, Template } from './templates/values.ts';
 
 const root = join(import.meta.dirname, '..');
 const repository = join(root, '..');
 const backendNames = ['opengl', 'vulkan', 'metal'];
+const manifestKeys = ['description', 'backends'];
+// Build outputs in the generated directories, which are neither generated nor stale.
 const ignored = new Set(['build', '.cxx', '.gradle']);
 
-// The templates in templates/<directory>: one module per generated file, see templates/values.ts.
-async function loadTemplates<Values>(directory: string): Promise<Template<Values>[]> {
-  const base = join(import.meta.dirname, 'templates', directory);
-  const names = (await Array.fromAsync(glob('*.ts', { cwd: base }))).sort();
-  return Promise.all(names.map((name) => import(pathToFileURL(join(base, name)).href)));
-}
+// The platforms. plugins/<name> gets the files of the templates in templates/<name> for the plugins that have a backend
+// of the platform.
+const platforms = [
+  { name: 'android', backends: ['opengl', 'vulkan'] },
+  { name: 'ios', backends: ['opengl', 'metal'] },
+];
 
-const androidTemplates = await loadTemplates<AndroidValues>('android');
-const iosTemplates = await loadTemplates<Plugin>('ios');
-const registryTemplates = await loadTemplates<RegistryValues>('ios/registry');
+type Files = Map<string, string>;
 
 interface Manifest {
   description?: string;
   backends?: string[];
 }
 
-interface PluginSource extends Plugin {
-  directory: string;
-}
-
-type Files = Map<string, string>;
-
 function fail(message: string): never {
   console.error(`error: ${message}`);
   process.exit(1);
 }
 
-function readPlugin(id: string, directory: string): PluginSource {
+function readPlugin(id: string, directory: string): Plugin {
   const where = `plugins/plugins/${id}/plugin.json`;
   if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) fail(`${where}: the directory must be a kebab-case id`);
   const manifest: Manifest = JSON.parse(readFileSync(join(directory, 'plugin.json'), 'utf8'));
   for (const key of Object.keys(manifest)) {
-    if (!['description', 'backends'].includes(key)) fail(`${where}: unknown key ${key}`);
+    if (!manifestKeys.includes(key)) fail(`${where}: unknown key ${key}`);
   }
   const backends = manifest.backends ?? backendNames;
   if (!backends.length || !backends.every((backend) => backendNames.includes(backend))) {
     fail(`${where}: backends must be a non-empty subset of ${backendNames.join(', ')}`);
   }
-  return { id, directory, backends };
+  // The rest follows from the directory layout.
+  return {
+    id,
+    backends,
+    sources: readdirSync(join(directory, 'shared/cpp')).filter((name) => name.endsWith('.cpp')).sort(),
+    includeDirectories: ['shared/include', 'shared/cpp', 'vendor'].filter((name) => existsSync(join(directory, name))),
+  };
 }
 
-function readPlugins(): PluginSource[] {
+function readPlugins(): Plugin[] {
   const directory = join(root, 'plugins');
   return readdirSync(directory, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && existsSync(join(directory, entry.name, 'plugin.json')))
@@ -68,41 +68,23 @@ function readPlugins(): PluginSource[] {
     .sort((a, b) => a.id.localeCompare(b.id));
 }
 
-// The wrappers build a plugin from its directory layout: shared/cpp/*.cpp, shared/include/<id>.hpp and a register
-// function named mln_<id>_register.
-function sources(plugin: PluginSource): string[] {
-  return readdirSync(join(plugin.directory, 'shared/cpp')).filter((name) => name.endsWith('.cpp')).sort();
+async function loadTemplates(platform: string): Promise<Template[]> {
+  const directory = join(import.meta.dirname, 'templates', platform);
+  const names = (await Array.fromAsync(glob('*.ts', { cwd: directory }))).sort();
+  return Promise.all(names.map((name) => import(pathToFileURL(join(directory, name)).href)));
 }
 
-function includeDirectories(plugin: PluginSource): string[] {
-  return ['shared/include', 'shared/cpp', 'vendor'].filter((name) => existsSync(join(plugin.directory, name)));
-}
-
-function androidFiles(plugins: PluginSource[]): Files {
-  const ndk = readFileSync(join(repository, 'platform/android/buildSrc/src/main/kotlin/Versions.kt'), 'utf8')
-    .match(/ndkVersion\s*=\s*"([^"]+)"/)?.[1];
-  if (!ndk) fail('Cannot find ndkVersion in platform/android/buildSrc/src/main/kotlin/Versions.kt');
-  const files: Files = new Map([['.gitignore', '/*/build/\n/*/.cxx/\n/*/.gradle/\n']]);
-  for (const plugin of plugins.filter((p) => p.backends.some((b) => b === 'opengl' || b === 'vulkan'))) {
-    const values: AndroidValues = {
-      plugin,
-      ndkVersion: ndk,
-      sources: sources(plugin),
-      includeDirectories: includeDirectories(plugin),
-    };
-    for (const template of androidTemplates) files.set(template.path(values), template.default(values));
-  }
-  return files;
-}
-
-function iosFiles(plugins: PluginSource[]): Files {
+// The files of a platform, by their path in plugins/<name>.
+async function render(platform: (typeof platforms)[number], plugins: Plugin[]): Promise<Files> {
+  const supported = plugins.filter((plugin) => plugin.backends.some((backend) => platform.backends.includes(backend)));
   const files: Files = new Map();
-  const supported = plugins.filter((p) => p.backends.some((b) => b === 'opengl' || b === 'metal'));
-  for (const plugin of supported) {
-    for (const template of iosTemplates) files.set(template.path(plugin), template.default(plugin));
+  for (const template of await loadTemplates(platform.name)) {
+    if (template.scope === 'plugins') {
+      files.set(template.path(supported), template.default(supported));
+    } else {
+      for (const plugin of supported) files.set(template.path(plugin), template.default(plugin));
+    }
   }
-  const registry: RegistryValues = { plugins: supported };
-  for (const template of registryTemplates) files.set(template.path(registry), template.default(registry));
   return files;
 }
 
@@ -146,14 +128,12 @@ function sync(directory: string, files: Files, check: boolean): string[] {
 
 const { values } = parseArgs({ options: { check: { type: 'boolean' } } });
 const plugins = readPlugins();
-const outputs: [string, Files][] = [
-  ['plugins/android', androidFiles(plugins)],
-  ['plugins/ios', iosFiles(plugins)],
-];
-
-const stale = outputs.flatMap(([directory, files]) =>
-  sync(join(repository, directory), files, !!values.check).map((path) => `  ${directory}/${path}`),
-);
+const stale: string[] = [];
+for (const platform of platforms) {
+  const directory = `plugins/${platform.name}`;
+  const changed = sync(join(repository, directory), await render(platform, plugins), !!values.check);
+  stale.push(...changed.map((path) => `  ${directory}/${path}`));
+}
 if (values.check) {
   if (stale.length) fail(`The generated plugin wrappers are out of date. Run node plugins/tools/generate.ts and commit the result:\n${stale.join('\n')}`);
   console.log('The generated plugin wrappers are up to date.');

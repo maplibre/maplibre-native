@@ -1,4 +1,6 @@
-import { code } from '../../../code.ts';
+import { code } from '../../code.ts';
+
+export const scope = 'plugins';
 
 // The path of the file in plugins/ios.
 export const path = () => 'include/PluginRegistry/PluginRegistry.h';
