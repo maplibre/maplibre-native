@@ -394,10 +394,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         triangle_vertex_pos[i] = float2(polygon[triangle_index].position);
         polygon_prev_vertex[i] = float2(polygon[polygon_prev_index].position);
         polygon_next_vertex[i] = float2(polygon[polygon_next_index].position);
-        
-        triangle_vertex_radius[i] = computeRadius(polygon_prev_vertex[i], 
-                                                  triangle_vertex_pos[i], 
-                                                  polygon_next_vertex[i], 
+
+        triangle_vertex_radius[i] = computeRadius(polygon_prev_vertex[i],
+                                                  triangle_vertex_pos[i],
+                                                  polygon_next_vertex[i],
                                                   props.rounded_corner_distance);
 
         invert_rounding = invert_rounding || (vertx.triangle_indices[i] % 2);
@@ -694,10 +694,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         triangle_vertex_pos[i] = float2(polygon[triangle_index].position);
         polygon_prev_vertex[i] = float2(polygon[polygon_prev_index].position);
         polygon_next_vertex[i] = float2(polygon[polygon_next_index].position);
-        
-        triangle_vertex_radius[i] = computeRadius(polygon_prev_vertex[i], 
-                                                  triangle_vertex_pos[i], 
-                                                  polygon_next_vertex[i], 
+
+        triangle_vertex_radius[i] = computeRadius(polygon_prev_vertex[i],
+                                                  triangle_vertex_pos[i],
+                                                  polygon_next_vertex[i],
                                                   props.rounded_corner_distance);
 
         invert_rounding = invert_rounding || (vertx.triangle_indices[i] % 2);
@@ -707,18 +707,18 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
 #else
-    const auto pattern_from = float4(data[vertex_index].pattern_from[0], 
+    const auto pattern_from = float4(data[vertex_index].pattern_from[0],
                                      data[vertex_index].pattern_from[1],
-                                     data[vertex_index].pattern_from[2], 
+                                     data[vertex_index].pattern_from[2],
                                      data[vertex_index].pattern_from[3]);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = float4(tileProps.pattern_to);
 #else
-    const auto pattern_to   = float4(data[vertex_index].pattern_to[0], 
+    const auto pattern_to   = float4(data[vertex_index].pattern_to[0],
                                      data[vertex_index].pattern_to[1],
-                                     data[vertex_index].pattern_to[2], 
+                                     data[vertex_index].pattern_to[2],
                                      data[vertex_index].pattern_to[3]);
 #endif
 

@@ -55,7 +55,7 @@ void addFillIndices(SegmentVector& fillSegments,
     for (std::size_t i = 0; i < nInstances; i++) {
         std::vector<uint32_t> triangleIndices;
         std::vector<bool> enableRounding;
-        for(int k = 0; k < 3; k++) {
+        for (int k = 0; k < 3; k++) {
             triangleIndices.emplace_back(static_cast<uint32_t>(startVertices) + indices[i * 3 + k]);
             enableRounding.emplace_back(convexAngleVertices[indices[i * 3 + k]]);
         }
@@ -80,7 +80,7 @@ void addFillExternalIndices(SegmentVector& fillSegments,
     for (std::size_t i = 0; i < nInstances; i++) {
         std::vector<uint32_t> triangleIndices;
         std::vector<bool> enableRounding;
-        for(int k = 0; k < 3; k++) {
+        for (int k = 0; k < 3; k++) {
             triangleIndices.emplace_back(static_cast<uint32_t>(startVertices) + indices[i * 3 + k]);
             enableRounding.emplace_back(k == 1);
         }
