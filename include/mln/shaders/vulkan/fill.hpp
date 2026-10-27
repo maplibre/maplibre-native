@@ -237,25 +237,25 @@ layout(location = 1) out lowp float frag_opacity;
 
 #if defined(ROUNDED_CORNER_ENABLED)
 struct FragmentData {
-    vec2 v0;
-    vec2 v1;
-    vec2 v2;
+    vec2 triangle_v0_pos;
+    vec2 polygon_v0_prev;
+    vec2 polygon_v0_next;
 
-    vec2 v0Prev;
-    vec2 v0Next;
-    float v0Radius;
+    vec2 triangle_v1_pos;
+    vec2 polygon_v1_prev;
+    vec2 polygon_v1_next;
 
-    vec2 v1Prev;
-    vec2 v1Next;
-    float v1Radius;
+    vec2 triangle_v2_pos;
+    vec2 polygon_v2_prev;
+    vec2 polygon_v2_next;
 
-    vec2 v2Prev;
-    vec2 v2Next;
-    float v2Radius;
+    float triangle_v0_radius;
+    float triangle_v1_radius;
+    float triangle_v2_radius;
 
-    float ext;
+    float triangle_discard_side;
 };
-layout(location = 2) out vec2 frag_pos;
+layout(location = 2) out vec2 frag_triangle_pos;
 layout(location = 3) flat out FragmentData frag_data;
 #endif
 
@@ -263,91 +263,69 @@ void main() {
     const FillDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if !defined(ROUNDED_CORNER_ENABLED)
-    uint index = gl_VertexIndex;
-    vec2 position = unpack_int(polygonVertexVector.vertex[index].position);
+    uint vertex_index = gl_VertexIndex;
+    vec2 position = unpack_int(polygonVertexVector.vertex[vertex_index].position);
 #else
-    uint index = in_triangle_indices[gl_VertexIndex] >> 2;
-    vec2 position = unpack_int(polygonVertexVector.vertex[index].position);
+    uint vertex_index = in_triangle_indices[gl_VertexIndex] >> 2;
+    vec2 position = unpack_int(polygonVertexVector.vertex[vertex_index].position);
 
-    uint i0 = in_triangle_indices[0] >> 2;
-    uint i1 = in_triangle_indices[1] >> 2;
-    uint i2 = in_triangle_indices[2] >> 2;
+    vec2 triangle_vertex_pos[3];
+    vec2 polygon_prev_vertex[3];
+    vec2 polygon_next_vertex[3];
+    float triangle_vertex_radius[3];
+    bool invert_rounding = false;
+    for (int i = 0; i < 3; i++) {
+        bool enable_rounding = (in_triangle_indices[i] % 4 >> 1) > 0;
+        if (!enable_rounding || props.rounded_corner_distance <= 0.0) {
+            triangle_vertex_pos[i] = vec2(0.0);
+            polygon_prev_vertex[i] = vec2(0.0);
+            polygon_next_vertex[i] = vec2(0.0);
+            triangle_vertex_radius[i] = 0.0;
+            continue;
+        }
+        uint triangle_index = in_triangle_indices[i] >> 2;
+        uint polygon_prev_index = triangle_index + unpack_low_int(neighborVertexVector.vertex[triangle_index].prev_next_offset);
+        uint polygon_next_index = triangle_index + unpack_high_int(neighborVertexVector.vertex[triangle_index].prev_next_offset);
 
-    uint ignored0 = in_triangle_indices[0] % 4 >> 1;
-    uint ignored1 = in_triangle_indices[1] % 4 >> 1;
-    uint ignored2 = in_triangle_indices[2] % 4 >> 1;
+        triangle_vertex_pos[i] = unpack_int(polygonVertexVector.vertex[triangle_index].position);
+        polygon_prev_vertex[i] = unpack_int(polygonVertexVector.vertex[polygon_prev_index].position);
+        polygon_next_vertex[i] = unpack_int(polygonVertexVector.vertex[polygon_next_index].position);
 
-    uint external0 = in_triangle_indices[0] % 2;
-    uint external1 = in_triangle_indices[1] % 2;
-    uint external2 = in_triangle_indices[2] % 2;
+        triangle_vertex_radius[i] = computeRadius(polygon_prev_vertex[i],
+                                                  triangle_vertex_pos[i],
+                                                  polygon_next_vertex[i],
+                                                  props.rounded_corner_distance);
 
-    vec2 v0 = unpack_int(polygonVertexVector.vertex[i0].position);
-    vec2 v1 = unpack_int(polygonVertexVector.vertex[i1].position);
-    vec2 v2 = unpack_int(polygonVertexVector.vertex[i2].position);
-
-    vec2 v0Prev = v0;
-    vec2 v0Next = v0;
-    float v0Radius = 0;
-    if (ignored0 == 0 && props.rounded_corner_distance > 0) {
-        uint i0Prev = i0 + unpack_low_int(neighborVertexVector.vertex[i0].prev_next_offset);
-        uint i0Next = i0 + unpack_high_int(neighborVertexVector.vertex[i0].prev_next_offset);
-
-        v0Prev = unpack_int(polygonVertexVector.vertex[i0Prev].position);
-        v0Next = unpack_int(polygonVertexVector.vertex[i0Next].position);
-        v0Radius = computeRadius(v0Prev, v0, v0Next, props.rounded_corner_distance);
+        invert_rounding = invert_rounding || (in_triangle_indices[i] % 2 > 0);
     }
 
-    vec2 v1Prev = v1;
-    vec2 v1Next = v1;
-    float v1Radius = 0;
-    if (ignored1 == 0 && props.rounded_corner_distance > 0) {
-        uint i1Prev = i1 + unpack_low_int(neighborVertexVector.vertex[i1].prev_next_offset);
-        uint i1Next = i1 + unpack_high_int(neighborVertexVector.vertex[i1].prev_next_offset);
+    frag_triangle_pos = position;
 
-        v1Prev = unpack_int(polygonVertexVector.vertex[i1Prev].position);
-        v1Next = unpack_int(polygonVertexVector.vertex[i1Next].position);
-        v1Radius = computeRadius(v1Prev, v1, v1Next, props.rounded_corner_distance);
-    }
+    frag_data.triangle_v0_pos = triangle_vertex_pos[0];
+    frag_data.polygon_v0_prev = polygon_prev_vertex[0];
+    frag_data.polygon_v0_next = polygon_next_vertex[0];
 
-    vec2 v2Prev = v2;
-    vec2 v2Next = v2;
-    float v2Radius = 0;
-    if (ignored2 == 0 && props.rounded_corner_distance > 0) {
-        uint i2Prev = i2 + unpack_low_int(neighborVertexVector.vertex[i2].prev_next_offset);
-        uint i2Next = i2 + unpack_high_int(neighborVertexVector.vertex[i2].prev_next_offset);
+    frag_data.triangle_v1_pos = triangle_vertex_pos[1];
+    frag_data.polygon_v1_prev = polygon_prev_vertex[1];
+    frag_data.polygon_v1_next = polygon_next_vertex[1];
 
-        v2Prev = unpack_int(polygonVertexVector.vertex[i2Prev].position);
-        v2Next = unpack_int(polygonVertexVector.vertex[i2Next].position);
-        v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
-    }
+    frag_data.triangle_v2_pos = triangle_vertex_pos[2];
+    frag_data.polygon_v2_prev = polygon_prev_vertex[2];
+    frag_data.polygon_v2_next = polygon_next_vertex[2];
 
-    frag_pos = position;
+    frag_data.triangle_v0_radius = triangle_vertex_radius[0];
+    frag_data.triangle_v1_radius = triangle_vertex_radius[1];
+    frag_data.triangle_v2_radius = triangle_vertex_radius[2];
 
-    frag_data.v0 = v0;
-    frag_data.v1 = v1;
-    frag_data.v2 = v2;
-
-    frag_data.v0Prev = v0Prev;
-    frag_data.v0Next = v0Next;
-    frag_data.v0Radius = v0Radius;
-
-    frag_data.v1Prev = v1Prev;
-    frag_data.v1Next = v1Next;
-    frag_data.v1Radius = v1Radius;
-
-    frag_data.v2Prev = v2Prev;
-    frag_data.v2Next = v2Next;
-    frag_data.v2Radius = v2Radius;
-
-    frag_data.ext = (external0 > 0 || external1 > 0 || external2 > 0) ? -1.0 : 1.0;
+    frag_data.triangle_discard_side = invert_rounding ? -1.0 : 1.0;
 #endif
 
 #if !defined(HAS_UNIFORM_u_color)
-    frag_color = vec4(unpack_mix_color(dataVertexVector.vertex[index].color, drawable.color_t));
+    frag_color = vec4(unpack_mix_color(dataVertexVector.vertex[vertex_index].color, drawable.color_t));
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(dataVertexVector.vertex[index].opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(dataVertexVector.vertex[vertex_index].opacity, drawable.opacity_t);
 #endif
 
     gl_Position = drawable.matrix * vec4(position, 0.0, 1.0);
@@ -367,25 +345,25 @@ layout(location = 1) in lowp float frag_opacity;
 
 #if defined(ROUNDED_CORNER_ENABLED)
 struct FragmentData {
-    vec2 v0;
-    vec2 v1;
-    vec2 v2;
+    vec2 triangle_v0_pos;
+    vec2 polygon_v0_prev;
+    vec2 polygon_v0_next;
 
-    vec2 v0Prev;
-    vec2 v0Next;
-    float v0Radius;
+    vec2 triangle_v1_pos;
+    vec2 polygon_v1_prev;
+    vec2 polygon_v1_next;
 
-    vec2 v1Prev;
-    vec2 v1Next;
-    float v1Radius;
+    vec2 triangle_v2_pos;
+    vec2 polygon_v2_prev;
+    vec2 polygon_v2_next;
 
-    vec2 v2Prev;
-    vec2 v2Next;
-    float v2Radius;
+    float triangle_v0_radius;
+    float triangle_v1_radius;
+    float triangle_v2_radius;
 
-    float ext;
+    float triangle_discard_side;
 };
-layout(location = 2) in vec2 frag_pos;
+layout(location = 2) in vec2 frag_triangle_pos;
 layout(location = 3) flat in FragmentData frag_data;
 #endif
 
@@ -406,6 +384,46 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
 
 void main() {
 
+#if defined(OVERDRAW_INSPECTOR)
+    out_color = vec4(1.0);
+    return;
+#endif
+
+#if defined(ROUNDED_CORNER_ENABLED)
+    float dTri = -1;
+
+    if (frag_data.triangle_v0_radius > 0.0) {
+        float d0 = dRoundedTri(frag_triangle_pos, dTri,
+                               frag_data.triangle_v0_pos,
+                               frag_data.polygon_v0_prev,
+                               frag_data.polygon_v0_next,
+                               frag_data.triangle_v0_radius);
+        dTri = opUnion(dTri, d0);
+    }
+
+    if (frag_data.triangle_v1_radius > 0.0) {
+        float d1 = dRoundedTri(frag_triangle_pos, dTri,
+                               frag_data.triangle_v1_pos,
+                               frag_data.polygon_v1_prev,
+                               frag_data.polygon_v1_next,
+                               frag_data.triangle_v1_radius);
+        dTri = opUnion(dTri, d1);
+    }
+
+    if (frag_data.triangle_v2_radius > 0.0) {
+        float d2 = dRoundedTri(frag_triangle_pos, dTri,
+                               frag_data.triangle_v2_pos,
+                               frag_data.polygon_v2_prev,
+                               frag_data.polygon_v2_next,
+                               frag_data.triangle_v2_radius);
+        dTri = opUnion(dTri, d2);
+    }
+
+    if (dTri * frag_data.triangle_discard_side > 0.0) {
+        discard;
+    }
+#endif
+
 #if defined(HAS_UNIFORM_u_color)
     const vec4 color = props.color;
 #else
@@ -416,29 +434,6 @@ void main() {
     const float opacity = props.opacity;
 #else
     const float opacity = frag_opacity;
-#endif
-
-#if defined(ROUNDED_CORNER_ENABLED)
-    float dTri = -1;
-
-    if (frag_data.v0Radius > 0) {
-        float d0 = dRoundedTri(frag_pos, dTri, frag_data.v0, frag_data.v0Prev, frag_data.v0Next, frag_data.v0Radius);
-        dTri = opUnion(dTri, d0);
-    }
-
-    if (frag_data.v1Radius > 0) {
-        float d1 = dRoundedTri(frag_pos, dTri, frag_data.v1, frag_data.v1Prev, frag_data.v1Next, frag_data.v1Radius);
-        dTri = opUnion(dTri, d1);
-    }
-
-    if (frag_data.v2Radius > 0) {
-        float d2 = dRoundedTri(frag_pos, dTri, frag_data.v2, frag_data.v2Prev, frag_data.v2Next, frag_data.v2Radius);
-        dTri = opUnion(dTri, d2);
-    }
-
-    if (dTri * frag_data.ext > 0) {
-        discard;
-    }
 #endif
 
     out_color = color * opacity;
@@ -693,25 +688,25 @@ layout(location = 5) out mediump vec4 frag_pattern_to;
 
 #if defined(ROUNDED_CORNER_ENABLED)
 struct FragmentData {
-    vec2 v0;
-    vec2 v1;
-    vec2 v2;
+    vec2 triangle_v0_pos;
+    vec2 polygon_v0_prev;
+    vec2 polygon_v0_next;
 
-    vec2 v0Prev;
-    vec2 v0Next;
-    float v0Radius;
+    vec2 triangle_v1_pos;
+    vec2 polygon_v1_prev;
+    vec2 polygon_v1_next;
 
-    vec2 v1Prev;
-    vec2 v1Next;
-    float v1Radius;
+    vec2 triangle_v2_pos;
+    vec2 polygon_v2_prev;
+    vec2 polygon_v2_next;
 
-    vec2 v2Prev;
-    vec2 v2Next;
-    float v2Radius;
+    float triangle_v0_radius;
+    float triangle_v1_radius;
+    float triangle_v2_radius;
 
-    float ext;
+    float triangle_discard_side;
 };
-layout(location = 6) out vec2 frag_pos;
+layout(location = 6) out vec2 frag_triangle_pos;
 layout(location = 7) flat out FragmentData frag_data;
 #endif
 
@@ -720,105 +715,83 @@ void main() {
     const FillPatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if !defined(ROUNDED_CORNER_ENABLED)
-    uint index = gl_VertexIndex;
-    vec2 position = unpack_int(polygonVertexVector.vertex[index].position);
+    uint vertex_index = gl_VertexIndex;
+    vec2 position = unpack_int(polygonVertexVector.vertex[vertex_index].position);
 #else
-    uint index = in_triangle_indices[gl_VertexIndex] >> 2;
-    vec2 position = unpack_int(polygonVertexVector.vertex[index].position);
+    uint vertex_index = in_triangle_indices[gl_VertexIndex] >> 2;
+    vec2 position = unpack_int(polygonVertexVector.vertex[vertex_index].position);
 
-    uint i0 = in_triangle_indices[0] >> 2;
-    uint i1 = in_triangle_indices[1] >> 2;
-    uint i2 = in_triangle_indices[2] >> 2;
+    vec2 triangle_vertex_pos[3];
+    vec2 polygon_prev_vertex[3];
+    vec2 polygon_next_vertex[3];
+    float triangle_vertex_radius[3];
+    bool invert_rounding = false;
+    for (int i = 0; i < 3; i++) {
+        bool enable_rounding = (in_triangle_indices[i] % 4 >> 1) > 0;
+        if (!enable_rounding || props.rounded_corner_distance <= 0.0) {
+            triangle_vertex_pos[i] = vec2(0.0);
+            polygon_prev_vertex[i] = vec2(0.0);
+            polygon_next_vertex[i] = vec2(0.0);
+            triangle_vertex_radius[i] = 0.0;
+            continue;
+        }
+        uint triangle_index = in_triangle_indices[i] >> 2;
+        uint polygon_prev_index = triangle_index + unpack_low_int(neighborVertexVector.vertex[triangle_index].prev_next_offset);
+        uint polygon_next_index = triangle_index + unpack_high_int(neighborVertexVector.vertex[triangle_index].prev_next_offset);
 
-    uint ignored0 = in_triangle_indices[0] % 4 >> 1;
-    uint ignored1 = in_triangle_indices[1] % 4 >> 1;
-    uint ignored2 = in_triangle_indices[2] % 4 >> 1;
+        triangle_vertex_pos[i] = unpack_int(polygonVertexVector.vertex[triangle_index].position);
+        polygon_prev_vertex[i] = unpack_int(polygonVertexVector.vertex[polygon_prev_index].position);
+        polygon_next_vertex[i] = unpack_int(polygonVertexVector.vertex[polygon_next_index].position);
 
-    uint external0 = in_triangle_indices[0] % 2;
-    uint external1 = in_triangle_indices[1] % 2;
-    uint external2 = in_triangle_indices[2] % 2;
+        triangle_vertex_radius[i] = computeRadius(polygon_prev_vertex[i],
+                                                  triangle_vertex_pos[i],
+                                                  polygon_next_vertex[i],
+                                                  props.rounded_corner_distance);
 
-    vec2 v0 = unpack_int(polygonVertexVector.vertex[i0].position);
-    vec2 v1 = unpack_int(polygonVertexVector.vertex[i1].position);
-    vec2 v2 = unpack_int(polygonVertexVector.vertex[i2].position);
-
-    vec2 v0Prev = v0;
-    vec2 v0Next = v0;
-    float v0Radius = 0;
-    if (ignored0 == 0 && props.rounded_corner_distance > 0) {
-        uint i0Prev = i0 + unpack_low_int(neighborVertexVector.vertex[i0].prev_next_offset);
-        uint i0Next = i0 + unpack_high_int(neighborVertexVector.vertex[i0].prev_next_offset);
-
-        v0Prev = unpack_int(polygonVertexVector.vertex[i0Prev].position);
-        v0Next = unpack_int(polygonVertexVector.vertex[i0Next].position);
-        v0Radius = computeRadius(v0Prev, v0, v0Next, props.rounded_corner_distance);
+        invert_rounding = invert_rounding || (in_triangle_indices[i] % 2 > 0);
     }
 
-    vec2 v1Prev = v1;
-    vec2 v1Next = v1;
-    float v1Radius = 0;
-    if (ignored1 == 0 && props.rounded_corner_distance > 0) {
-        uint i1Prev = i1 + unpack_low_int(neighborVertexVector.vertex[i1].prev_next_offset);
-        uint i1Next = i1 + unpack_high_int(neighborVertexVector.vertex[i1].prev_next_offset);
+    frag_triangle_pos = position;
 
-        v1Prev = unpack_int(polygonVertexVector.vertex[i1Prev].position);
-        v1Next = unpack_int(polygonVertexVector.vertex[i1Next].position);
-        v1Radius = computeRadius(v1Prev, v1, v1Next, props.rounded_corner_distance);
-    }
+    frag_data.triangle_v0_pos = triangle_vertex_pos[0];
+    frag_data.polygon_v0_prev = polygon_prev_vertex[0];
+    frag_data.polygon_v0_next = polygon_next_vertex[0];
 
-    vec2 v2Prev = v2;
-    vec2 v2Next = v2;
-    float v2Radius = 0;
-    if (ignored2 == 0 && props.rounded_corner_distance > 0) {
-        uint i2Prev = i2 + unpack_low_int(neighborVertexVector.vertex[i2].prev_next_offset);
-        uint i2Next = i2 + unpack_high_int(neighborVertexVector.vertex[i2].prev_next_offset);
+    frag_data.triangle_v1_pos = triangle_vertex_pos[1];
+    frag_data.polygon_v1_prev = polygon_prev_vertex[1];
+    frag_data.polygon_v1_next = polygon_next_vertex[1];
 
-        v2Prev = unpack_int(polygonVertexVector.vertex[i2Prev].position);
-        v2Next = unpack_int(polygonVertexVector.vertex[i2Next].position);
-        v2Radius = computeRadius(v2Prev, v2, v2Next, props.rounded_corner_distance);
-    }
+    frag_data.triangle_v2_pos = triangle_vertex_pos[2];
+    frag_data.polygon_v2_prev = polygon_prev_vertex[2];
+    frag_data.polygon_v2_next = polygon_next_vertex[2];
 
-    frag_pos = position;
+    frag_data.triangle_v0_radius = triangle_vertex_radius[0];
+    frag_data.triangle_v1_radius = triangle_vertex_radius[1];
+    frag_data.triangle_v2_radius = triangle_vertex_radius[2];
 
-    frag_data.v0 = v0;
-    frag_data.v1 = v1;
-    frag_data.v2 = v2;
-
-    frag_data.v0Prev = v0Prev;
-    frag_data.v0Next = v0Next;
-    frag_data.v0Radius = v0Radius;
-
-    frag_data.v1Prev = v1Prev;
-    frag_data.v1Next = v1Next;
-    frag_data.v1Radius = v1Radius;
-
-    frag_data.v2Prev = v2Prev;
-    frag_data.v2Next = v2Next;
-    frag_data.v2Radius = v2Radius;
-
-    frag_data.ext = (external0 > 0 || external1 > 0 || external2 > 0) ? -1.0 : 1.0;
+    frag_data.triangle_discard_side = invert_rounding ? -1.0 : 1.0;
 #endif
 
 #if !defined(HAS_UNIFORM_u_color)
-    frag_color = unpack_mix_color(dataVertexVector.vertex[index].color, drawable.color_t);
+    frag_color = unpack_mix_color(dataVertexVector.vertex[vertex_index].color, drawable.color_t);
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(dataVertexVector.vertex[index].opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(dataVertexVector.vertex[vertex_index].opacity, drawable.opacity_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 frag_pattern_from = tileProps.pattern_from;
 #else
-    frag_pattern_from = vec4(unpack_uint(dataVertexVector.vertex[index].pattern_from[0]),
-                             unpack_uint(dataVertexVector.vertex[index].pattern_from[1]));
+    frag_pattern_from = vec4(unpack_uint(dataVertexVector.vertex[vertex_index].pattern_from[0]),
+                             unpack_uint(dataVertexVector.vertex[vertex_index].pattern_from[1]));
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const vec4 frag_pattern_to = tileProps.pattern_to;
 #else
-    frag_pattern_to = vec4(unpack_uint(dataVertexVector.vertex[index].pattern_to[0]),
-                           unpack_uint(dataVertexVector.vertex[index].pattern_to[1]));
+    frag_pattern_to = vec4(unpack_uint(dataVertexVector.vertex[vertex_index].pattern_to[0]),
+                           unpack_uint(dataVertexVector.vertex[vertex_index].pattern_to[1]));
 #endif
 
     const vec2 pattern_tl_a = frag_pattern_from.xy;
@@ -865,25 +838,25 @@ layout(location = 5) in vec4 frag_pattern_to;
 
 #if defined(ROUNDED_CORNER_ENABLED)
 struct FragmentData {
-    vec2 v0;
-    vec2 v1;
-    vec2 v2;
+    vec2 triangle_v0_pos;
+    vec2 polygon_v0_prev;
+    vec2 polygon_v0_next;
 
-    vec2 v0Prev;
-    vec2 v0Next;
-    float v0Radius;
+    vec2 triangle_v1_pos;
+    vec2 polygon_v1_prev;
+    vec2 polygon_v1_next;
 
-    vec2 v1Prev;
-    vec2 v1Next;
-    float v1Radius;
+    vec2 triangle_v2_pos;
+    vec2 polygon_v2_prev;
+    vec2 polygon_v2_next;
 
-    vec2 v2Prev;
-    vec2 v2Next;
-    float v2Radius;
+    float triangle_v0_radius;
+    float triangle_v1_radius;
+    float triangle_v2_radius;
 
-    float ext;
+    float triangle_discard_side;
 };
-layout(location = 6) in vec2 frag_pos;
+layout(location = 6) in vec2 frag_triangle_pos;
 layout(location = 7) flat in FragmentData frag_data;
 #endif
 
@@ -927,6 +900,41 @@ void main() {
     return;
 #endif
 
+#if defined(ROUNDED_CORNER_ENABLED)
+    float dTri = -1;
+
+    if (frag_data.triangle_v0_radius > 0.0) {
+        float d0 = dRoundedTri(frag_triangle_pos, dTri,
+                               frag_data.triangle_v0_pos,
+                               frag_data.polygon_v0_prev,
+                               frag_data.polygon_v0_next,
+                               frag_data.triangle_v0_radius);
+        dTri = opUnion(dTri, d0);
+    }
+
+    if (frag_data.triangle_v1_radius > 0.0) {
+        float d1 = dRoundedTri(frag_triangle_pos, dTri,
+                               frag_data.triangle_v1_pos,
+                               frag_data.polygon_v1_prev,
+                               frag_data.polygon_v1_next,
+                               frag_data.triangle_v1_radius);
+        dTri = opUnion(dTri, d1);
+    }
+
+    if (frag_data.triangle_v2_radius > 0.0) {
+        float d2 = dRoundedTri(frag_triangle_pos, dTri,
+                               frag_data.triangle_v2_pos,
+                               frag_data.polygon_v2_prev,
+                               frag_data.polygon_v2_next,
+                               frag_data.triangle_v2_radius);
+        dTri = opUnion(dTri, d2);
+    }
+
+    if (dTri * frag_data.triangle_discard_side > 0.0) {
+        discard;
+    }
+#endif
+
     const FillPatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_color)
@@ -951,29 +959,6 @@ void main() {
     const vec4 pattern_to = tileProps.pattern_to;
 #else
     const vec4 pattern_to = frag_pattern_to;
-#endif
-
-#if defined(ROUNDED_CORNER_ENABLED)
-    float dTri = -1;
-
-    if (frag_data.v0Radius > 0) {
-        float d0 = dRoundedTri(frag_pos, dTri, frag_data.v0, frag_data.v0Prev, frag_data.v0Next, frag_data.v0Radius);
-        dTri = opUnion(dTri, d0);
-    }
-
-    if (frag_data.v1Radius > 0) {
-        float d1 = dRoundedTri(frag_pos, dTri, frag_data.v1, frag_data.v1Prev, frag_data.v1Next, frag_data.v1Radius);
-        dTri = opUnion(dTri, d1);
-    }
-
-    if (frag_data.v2Radius > 0) {
-        float d2 = dRoundedTri(frag_pos, dTri, frag_data.v2, frag_data.v2Prev, frag_data.v2Next, frag_data.v2Radius);
-        dTri = opUnion(dTri, d2);
-    }
-
-    if (dTri * frag_data.ext > 0) {
-        discard;
-    }
 #endif
 
     const vec2 pattern_tl_a = pattern_from.xy;
