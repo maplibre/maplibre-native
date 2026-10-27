@@ -1795,6 +1795,30 @@ val terrain = style.getTerrain() // null when terrain is not enabled
 style.setTerrain(null)           // disable terrain
 ```
 
+### Saving and restoring the camera
+
+With terrain on, gestures move the camera's centre up onto the terrain under it
+(`anchorCenterOnTerrain`), and removing the terrain brings it back to sea level.
+The view does not change, but the centre and zoom do: at Mt Buller (1,800 m) the
+centre moves ~2 km towards the camera and the zoom rises ~0.5. A saved centre and
+zoom put back at another centre altitude are a different camera, lower for a
+lower altitude. In core the camera options carry the altitude, so one jump
+restores all of it:
+
+```cpp
+const auto saved = map.getCameraOptions(); // includes centerAltitude
+// ... later
+map.jumpTo(saved);
+```
+
+The iOS and Android camera types don't carry the altitude, so there it takes two
+steps: save `MLNMapView.centerAltitude` (`MapLibreMap.getCenterAltitude()`) with
+the camera, and restore it with `-setCenterAltitudeKeepingView:`
+(`setCenterAltitudeKeepingView(double)`) before setting the saved centre and
+zoom. That call returns false when the zoom limits or bounds, or a near-grazing
+pitch, would not let the centre move there; the saved centre and zoom then
+describe a different view.
+
 ### Style JSON API
 
 ```json

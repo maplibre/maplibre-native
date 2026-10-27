@@ -31,8 +31,8 @@ layout (std140) uniform LinePatternDrawableUBO {
     // Interpolations
     lowp float u_blur_t;
     lowp float u_opacity_t;
-    lowp float u_offset_t;
     lowp float u_gapwidth_t;
+    lowp float u_offset_t;
     lowp float u_width_t;
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;

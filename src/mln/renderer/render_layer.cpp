@@ -1,5 +1,8 @@
 #include <mln/renderer/render_layer.hpp>
 
+#include <algorithm>
+#include <cmath>
+
 #include <mln/gfx/context.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
@@ -49,6 +52,29 @@ bool RenderLayer::hasRenderPass(RenderPass pass) const {
 
 bool RenderLayer::needsRendering() const {
     return passes != RenderPass::None && baseImpl->visibility != style::VisibilityType::None;
+}
+
+bool tileZoomReachesLayerMinZoom(uint8_t tileOverscaledZoom, float layerMinZoom) {
+    if (!(layerMinZoom > 0.0f)) return true;
+    return static_cast<float>(tileOverscaledZoom) >= std::floor(layerMinZoom);
+}
+
+void RenderLayer::dropTilesBelowMinZoom(const LayerPrepareParameters& params) {
+    if (!params.terrain || !renderTiles) return;
+    const float minZoom = baseImpl->minZoom;
+    if (!(minZoom > 0.0f)) return;
+    const auto fits = [minZoom](const RenderTile& tile) {
+        return tileZoomReachesLayerMinZoom(tile.getOverscaledTileID().overscaledZ, minZoom);
+    };
+    if (std::all_of(renderTiles->begin(), renderTiles->end(), [&](const RenderTile& tile) { return fits(tile); })) {
+        return;
+    }
+    auto kept = std::make_shared<std::vector<std::reference_wrapper<const RenderTile>>>();
+    kept->reserve(renderTiles->size());
+    for (const RenderTile& tile : *renderTiles) {
+        if (fits(tile)) kept->emplace_back(tile);
+    }
+    renderTiles = std::move(kept);
 }
 
 bool RenderLayer::supportsZoom(float zoom) const {

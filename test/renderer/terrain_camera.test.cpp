@@ -13,7 +13,9 @@
 #include <mln/util/image.hpp>
 #include <mln/util/run_loop.hpp>
 
+#include <chrono>
 #include <cmath>
+#include <thread>
 
 using namespace mln;
 
@@ -97,6 +99,74 @@ struct TerrainCameraTest {
     }
 };
 
+// A fill layer over a geojson source that covers far more tiles than the terrain mesh has,
+// beside the DEM that gives the mesh.
+const char* drapedFillStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 6,
+      "tileSize": 64
+    },
+    "area": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {"type": "Polygon", "coordinates": [[[-60, 10], [80, 10], [80, 75], [-60, 75], [-60, 10]]]}
+      }
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": [{"id": "area", "type": "fill", "source": "area", "paint": {"fill-color": "#c33"}}]
+})STYLE";
+
+struct DrapeMaskCounts {
+    int targets = 0; // drape targets re-rendered
+    int drawn = 0;   // masks drawn inside them
+    int skipped = 0; // masks left out because the tile does not overlap the target
+};
+
+// Renders until the geojson tiles have arrived and drawn into the drape targets, then a few
+// frames more, summing the counters the target passes add (RenderingStats accumulate across
+// frames).
+DrapeMaskCounts drapeMasksOverFrames(int maxFrames) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string tile = makeFlatDEMTile();
+    fileSource->tileResponse = [&](const Resource&) {
+        Response res;
+        res.data = std::make_shared<std::string>(tile);
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.getStyle().loadJSON(drapedFillStyle);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.2692, 11.4041}).withZoom(5.0).withPitch(75.0));
+
+    gfx::RenderingStats before;
+    DrapeMaskCounts counts;
+    int settling = 0;
+    for (int i = 0; i < maxFrames && settling < 4; ++i) {
+        loop.runOnce();
+        const auto stats = frontend.render(map).stats;
+        counts.targets += stats.numDrapeTargetsRendered - before.numDrapeTargetsRendered;
+        counts.drawn += stats.numDrapeMasksDrawn - before.numDrapeMasksDrawn;
+        counts.skipped += stats.numDrapeMasksSkipped - before.numDrapeMasksSkipped;
+        before = stats;
+        if (counts.drawn > 0) ++settling;
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    return counts;
+}
+
 } // namespace
 
 // With the clamp on (it is off by default), the centre rides the terrain instead of sea level,
@@ -140,6 +210,66 @@ TEST(TerrainCamera, ClampingCanBeTurnedOff) {
     EXPECT_FALSE(test.map.getCenterClampedToGround());
 
     EXPECT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+}
+
+// An app can put the centre at any altitude without moving the camera, and restore a saved camera
+// by setting its altitude before its centre and zoom: the same centre and zoom at another altitude
+// are a different camera.
+TEST(TerrainCamera, CentreAltitudeIsSetAndRestoredKeepingTheView) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+
+    const vec3 before = test.eye();
+    const double zoomAtSeaLevel = *test.map.getCameraOptions({}).zoom;
+
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(1500.0));
+    const CameraOptions saved = test.map.getCameraOptions({});
+    EXPECT_NEAR(*saved.centerAltitude, 1500.0, 0.001);
+    EXPECT_GT(*saved.zoom, zoomAtSeaLevel);
+    test.expectEyeAt(before);
+    // Already there: nothing to move.
+    EXPECT_FALSE(test.map.setCenterAltitudeKeepingView(1500.0));
+
+    // Somewhere else, at sea level.
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(0.0));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{47.0, 11.0}).withZoom(9.0));
+
+    // Restore: the altitude first, then the centre and zoom.
+    test.map.setCenterAltitudeKeepingView(*saved.centerAltitude);
+    test.map.jumpTo(CameraOptions().withCenter(*saved.center).withZoom(*saved.zoom));
+    test.expectEyeAt(before);
+
+    // Back at sea level, the original centre and zoom.
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(0.0));
+    EXPECT_NEAR(*test.map.getCameraOptions({}).zoom, zoomAtSeaLevel, 1e-3);
+    test.expectEyeAt(before);
+}
+
+// The same restore while a return to sea level still waits, here for the next render of a still
+// map after the terrain went: setting the altitude runs the return first, so the jump that follows
+// applies the saved centre and zoom at the saved altitude, not at sea level.
+TEST(TerrainCamera, CameraRestoredWhileTheReturnWaitsIsKept) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(1500.0));
+    const CameraOptions saved = test.map.getCameraOptions({});
+    const vec3 savedEye = test.eye();
+
+    // Somewhere else, anchored on the plateau, and then the terrain goes.
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(0.0));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{47.0, 11.0}).withZoom(9.0));
+    // Lets the renderer report the plateau under the centre.
+    ASSERT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+    test.map.anchorCenterOnTerrain();
+    ASSERT_NEAR(*test.map.getCameraOptions({}).centerAltitude, plateauMeters, 0.5);
+    test.map.getStyle().setTerrain(nullptr);
+
+    test.map.setCenterAltitudeKeepingView(*saved.centerAltitude);
+    test.map.jumpTo(CameraOptions().withCenter(*saved.center).withZoom(*saved.zoom));
+    EXPECT_NEAR(*test.map.getCameraOptions({}).centerAltitude, *saved.centerAltitude, 0.001);
+    test.expectEyeAt(savedEye);
 }
 
 // A gesture start anchors the centre on the ground being looked at without moving the camera,
@@ -456,4 +586,44 @@ TEST(TerrainCamera, ClampDoesNotApplyAfterTerrainRemoval) {
     ASSERT_TRUE(removedMidTransition);
 
     EXPECT_NEAR(test.altitude(), 0.0, 0.001);
+}
+
+// A drape target is drawn into only by the source tiles that overlap its own tile, so the
+// masks it draws follow those tiles and not every tile the source covers.
+TEST(TerrainDrape, MasksAreDrawnOnlyForTilesOverlappingTheTarget) {
+    const auto counts = drapeMasksOverFrames(60);
+    ASSERT_GT(counts.targets, 0);
+    EXPECT_GT(counts.drawn, 0);
+    EXPECT_GT(counts.skipped, 0);
+    // The source's tiles are coarser than the mesh or the same size, so a target overlaps a
+    // handful of them at most.
+    EXPECT_LE(counts.drawn, 4 * counts.targets)
+        << counts.drawn << " masks over " << counts.targets << " targets, " << counts.skipped << " skipped";
+}
+
+// The depth pass (the symbol-occlusion depth texture) is a function of the camera and the mesh
+// set. With both unchanged the previous texture still holds, so still frames run no pass.
+// RenderingStats counters accumulate across frames, so the test reads differences.
+TEST(TerrainDepthPass, StillCameraSkipsThePass) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.renderAndGetAltitude(8);
+    const auto depthPassesAfterFrame = [&] {
+        test.loop.runOnce();
+        return test.frontend.render(test.map).stats.numDepthPasses;
+    };
+
+    // Tiles and DEM data still arriving mark the pass dirty, so wait for three frames in a row
+    // without a pass. Before the pass was skipped on still frames it ran on every frame.
+    int passes = depthPassesAfterFrame();
+    int stillFrames = 0;
+    for (int frame = 0; frame < 60 && stillFrames < 3; ++frame) {
+        const int next = depthPassesAfterFrame();
+        stillFrames = next == passes ? stillFrames + 1 : 0;
+        passes = next;
+    }
+    ASSERT_EQ(stillFrames, 3) << "the depth pass ran on still frames";
+
+    test.map.jumpTo(CameraOptions().withPitch(61.0));
+    EXPECT_GT(depthPassesAfterFrame(), passes) << "a camera move must redraw the depth texture";
 }

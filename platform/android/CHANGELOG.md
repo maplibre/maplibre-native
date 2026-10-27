@@ -2,6 +2,10 @@
 
 ## main
 
+### ✨ Features and improvements
+
+- With 3D terrain, pinch, rotate, tilt and quick-zoom gestures turn around the ground under the middle of the screen instead of a sea-level point beneath it. Add `MapLibreMap.getCenterAltitude()` and `setCenterAltitudeKeepingView(double)`: a target and zoom describe the same view only at the same centre altitude, so save the altitude with a `CameraPosition` and restore it before moving the camera back ([#4712](https://github.com/maplibre/maplibre-native/pull/4712)).
+
 ### 🐞 Bug fixes
 
 - With 3D terrain on, the map draped on the terrain no longer keeps showing old content after a data change: a `GeoJsonSource` updated with `setGeoJson` or emptied of its features, or a new style whose raster source has the same tiling, now shows at once instead of at the next zoom level ([#4816](https://github.com/maplibre/maplibre-native/pull/4816)).

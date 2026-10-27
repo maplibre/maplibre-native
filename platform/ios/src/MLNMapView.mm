@@ -3245,6 +3245,14 @@ static void *windowScreenContext = &windowScreenContext;
   return NSEdgeInsetsFromMLNEdgeInsets(_mbglMap->getFrustumOffset());
 }
 
+- (void)setCenterClampedToGround:(BOOL)centerClampedToGround {
+  _mbglMap->setCenterClampedToGround(centerClampedToGround);
+}
+
+- (BOOL)isCenterClampedToGround {
+  return _mbglMap->getCenterClampedToGround();
+}
+
 // MARK: - Accessibility -
 
 - (NSString *)accessibilityValue {
@@ -3936,6 +3944,23 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)setZoomLevel:(double)zoomLevel {
   MLNLogDebug(@"Setting zoomLevel: %f", zoomLevel);
   [self setZoomLevel:zoomLevel animated:NO];
+}
+
+- (CLLocationDistance)centerAltitude {
+  return self.mbglMap.getCameraOptions().centerAltitude.value_or(0.0);
+}
+
+- (BOOL)setCenterAltitudeKeepingView:(CLLocationDistance)altitude {
+  MLNLogDebug(@"Setting centerAltitude keeping the view: %f", altitude);
+  // Set before the call, which reports the camera change; take it back if nothing moved, or it
+  // would show up in the reason of the next, unrelated change.
+  MLNCameraChangeReason previousReasons = self.cameraChangeReasonBitmask;
+  self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
+  BOOL moved = self.mbglMap.setCenterAltitudeKeepingView(altitude);
+  if (!moved) {
+    self.cameraChangeReasonBitmask = previousReasons;
+  }
+  return moved;
 }
 
 - (void)setZoomLevel:(double)zoomLevel animated:(BOOL)animated {

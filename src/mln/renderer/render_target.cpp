@@ -143,8 +143,7 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
                 return;
             }
             const UnwrappedTileID unwrapped = drawable.getTileID()->toUnwrapped();
-            const bool overlaps = unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID) ||
-                                  drapeTileID->isChildOf(unwrapped);
+            const bool overlaps = PaintParameters::tilesOverlap(unwrapped, *drapeTileID);
             if (overlaps) {
                 drawnTiles.insert(unwrapped);
             }
@@ -275,8 +274,7 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
             bool overlaps = false;
             if (const auto& tileID = drawable.getTileID()) {
                 const UnwrappedTileID unwrapped = tileID->toUnwrapped();
-                overlaps = unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID) ||
-                           drapeTileID->isChildOf(unwrapped);
+                overlaps = PaintParameters::tilesOverlap(unwrapped, *drapeTileID);
             }
             drawable.setEnabled(drawable.getEnabled() && overlaps);
         });
@@ -426,6 +424,7 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // builds this target's tile clipping masks (clipMatrixForTile). Set before
         // clearing the stencil, which itself draws a covering quad on some backends.
         parameters.currentDrapeTile = drapeTileValues;
+        parameters.currentDrapeTileID = drapeTileID;
         // Drop clipping masks cached from the main passes or another drape target:
         // the same tile set placed into a different target needs different masks.
         // The render pass above already cleared the stencil buffer itself.
@@ -455,6 +454,7 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // (their tweakers already ran in the main layer group update)
         renderDrapedLayerGroups(orchestrator, parameters);
         parameters.currentDrapeTile = {{0, 0, 0, 0}};
+        parameters.currentDrapeTileID.reset();
         // Leaving drape placement: the masks just built do not apply to what renders next
         parameters.invalidateTileClippingMasks();
     } else {
