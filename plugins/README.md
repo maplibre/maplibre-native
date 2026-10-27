@@ -72,7 +72,7 @@ try NgonLayerPlugin.registerPlugin()
 
 It depends on the plugin's Bazel library, `//plugins/plugins/<id>`, which defines the sources and compiler flags of
 every Bazel build (the SDK, the tests and the render tests) in one place. Compiling `sources` a second time instead
-would define the plugin's symbols twice in an app whose SDK links the plugin, as it does for `gltf-layer`. The library
+would define the plugin's symbols twice in an app whose SDK links the plugin. The library
 must therefore exist, be named after the plugin and export the plugin's header.
 `//plugins/ios:plugins` links the wrappers of all plugins and adds `PluginRegistry`, which registers one by its ID, and
 `//plugins/ios:demos` collects their demo metadata.

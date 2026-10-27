@@ -129,10 +129,7 @@ objc_library(
         "//platform/darwin:darwin-objcpp",
         "//platform/default:mbgl-default",
         "//platform/ios/vendor:SMCalloutView",
-    ] + select({
-        "//:plugins_enabled": ["//plugins/plugins/gltf-layer"],
-        "//conditions:default": [],
-    }),
+    ],
 )
 
 # platform/ios/sdk-files.json
