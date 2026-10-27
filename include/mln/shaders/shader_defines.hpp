@@ -39,13 +39,21 @@ enum {
 
 enum {
     idFillDrawableUBO = idDrawableReservedVertexOnlyUBO, // SSBO
-    idFillTilePropsUBO = drawableReservedUBOCount,       // SSBO
+#if MLN_UBO_CONSOLIDATION
+    // The fragment-reserved slot is unused by fill. Binding the feature table here
+    // leaves tile props at 4 and evaluated props at 5.
+    idFillFeatureUBO = idDrawableReservedFragmentOnlyUBO, // SSBO of per-feature fill paint
+#endif
+    idFillTilePropsUBO = drawableReservedUBOCount, // SSBO
     fillLayerSSBOCount
 };
 
 enum {
     idFillExtrusionDrawableUBO = idDrawableReservedVertexOnlyUBO, // SSBO
-    idFillExtrusionTilePropsUBO = drawableReservedUBOCount,       // both SSBO and UBO?
+#if MLN_UBO_CONSOLIDATION
+    idFillExtrusionFeatureUBO = idDrawableReservedFragmentOnlyUBO, // SSBO of per-feature extrusion paint
+#endif
+    idFillExtrusionTilePropsUBO = drawableReservedUBOCount, // both SSBO and UBO?
     fillExtrusionLayerSSBOCount
 };
 

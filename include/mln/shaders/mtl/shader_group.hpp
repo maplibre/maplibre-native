@@ -65,11 +65,14 @@ public:
             constexpr auto featureIndexSlot = shaders::featureIndexAttributeId<ShaderID>();
             [[maybe_unused]] bool useFeatureIndex = false;
             if constexpr (featureIndexSlot.has_value()) {
-                constexpr auto attributes = shaders::featureAttributes<ShaderID>();
-                useFeatureIndex = defineFeatureIndex(attributes, propertiesAsUniforms, additionalDefines);
+                // Samples decide whether this variant reads the table. Offsets come from the
+                // full catalog so shaders that share a binders object agree on the record.
+                useFeatureIndex = defineFeatureIndex(
+                    shaders::featureSamples<ShaderID>(), propertiesAsUniforms, additionalDefines);
                 if (useFeatureIndex) {
-                    shaders::defineFeatureConstants(shaders::featureLayout(attributes, propertiesAsUniforms.second),
-                                                    additionalDefines);
+                    shaders::defineFeatureConstants(
+                        shaders::featureLayout(shaders::featureAttributes<ShaderID>(), propertiesAsUniforms.second),
+                        additionalDefines);
                 }
             }
 
@@ -102,6 +105,15 @@ public:
                 }
             }
             for (const auto& attrib : ShaderClass::instanceAttributes) {
+                // Instanced extrusion binds the feature index on the instance stream.
+                if constexpr (featureIndexSlot.has_value()) {
+                    if (attrib.id == *featureIndexSlot) {
+                        if (useFeatureIndex) {
+                            shader->initInstanceAttribute(attrib);
+                        }
+                        continue;
+                    }
+                }
                 if (!propertiesAsUniforms.second.count(attrib.id)) {
                     shader->initInstanceAttribute(attrib);
                 }

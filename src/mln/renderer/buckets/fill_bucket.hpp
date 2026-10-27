@@ -24,7 +24,11 @@ namespace mln {
 class BucketParameters;
 class RenderFillLayer;
 
-using FillBinders = PaintPropertyBinders<style::FillPaintProperties::DataDrivenProperties>;
+// Stored once per feature. Fill and its outline share this list, so they share one record.
+using FillFeatureTableProperties =
+    TypeList<style::FillColor, style::FillOpacity, style::FillOutlineColor, style::FillPattern>;
+
+using FillBinders = PaintPropertyBinders<style::FillPaintProperties::DataDrivenProperties, FillFeatureTableProperties>;
 using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
 
 class FillBucket final : public Bucket {

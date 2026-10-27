@@ -722,9 +722,9 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
     std::vector<vk::DescriptorSetLayoutBinding> bindings;
     for (size_t i = 0; i < storageCount + uniformCount; ++i) {
         auto stageFlags = vk::ShaderStageFlags();
-        if (startId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
-            stageFlags |= vk::ShaderStageFlagBits::eVertex;
-        }
+        // The fragment-reserved slot holds a fragment buffer for most layers. Fill and
+        // fill-extrusion put the feature table there and read it in the vertex shader.
+        stageFlags |= vk::ShaderStageFlagBits::eVertex;
 
         if (startId + i != shaders::idDrawableReservedVertexOnlyUBO) {
             stageFlags |= vk::ShaderStageFlagBits::eFragment;

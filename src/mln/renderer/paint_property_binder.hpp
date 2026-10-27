@@ -113,6 +113,21 @@ using ZoomInterpolatedAttributeType =
 template <class A>
 using ZoomInterpolatedVertexType = typename gfx::detail::VertexType<ZoomInterpolatedAttributeType<A>>;
 
+#if MLN_UBO_CONSOLIDATION
+/// Rebuild the zoom-interpolated vertex that the interleaved buffer used to store.
+/// Source colors repeat the packed pair, source floats repeat the value, and composite
+/// values are stored directly. Leading components of the table entry match either way.
+template <class A>
+ZoomInterpolatedVertexType<A> vertexFromFeatureTable(const std::array<float, 4>& stored) {
+    using Attribute = ZoomInterpolatedAttributeType<A>;
+    typename Attribute::Value value{};
+    for (std::size_t i = 0; i < value.size() && i < stored.size(); ++i) {
+        value[i] = static_cast<typename Attribute::ElementType>(stored[i]);
+    }
+    return ZoomInterpolatedVertexType<A>{value};
+}
+#endif
+
 inline std::array<float, 1> attributeValue(float v) {
     return {{v}};
 }
@@ -510,6 +525,13 @@ public:
     }
 
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
+#if MLN_UBO_CONSOLIDATION
+        if (this->featureTable) {
+            const auto& indices = *this->featureIndexVector;
+            const auto tableIndex = indices.at(index);
+            return {vertexFromFeatureTable<A>(this->featureValueTable.at(tableIndex))};
+        }
+#endif
         const BaseVertex& value = this->interleavedVertexBuffer->template get<BaseVertex>(index, this->vertexOffset);
         return {ZoomInterpolatedVertexType<A>{concatenate(value.a1, value.a1)}};
     }
@@ -696,6 +718,13 @@ public:
     }
 
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
+#if MLN_UBO_CONSOLIDATION
+        if (this->featureTable) {
+            const auto& indices = *this->featureIndexVector;
+            const auto tableIndex = indices.at(index);
+            return {vertexFromFeatureTable<A>(this->featureValueTable.at(tableIndex))};
+        }
+#endif
         return {this->interleavedVertexBuffer->template get<Vertex>(index, this->vertexOffset)};
     }
 
@@ -822,6 +851,17 @@ public:
 
     std::tuple<ZoomInterpolatedVertexType<A1>, ZoomInterpolatedVertexType<A2>> getVertexValue(
         std::size_t index) const override {
+#if MLN_UBO_CONSOLIDATION
+        if (this->featureTable) {
+            const auto& indices = *this->featureIndexVector;
+            const auto tableIndex = indices.at(index);
+            const auto& rects = patternRects.at(tableIndex);
+            const auto& from = crossfade.fromScale == 2 ? rects.min : rects.max;
+            return {ZoomInterpolatedVertexType<A1>{concatenate(rects.mid, rects.mid)}, ZoomInterpolatedVertexType<A2> {
+                        concatenate(from, from)
+                    }};
+        }
+#endif
         const Vertex& patternValue = this->interleavedVertexBuffer->template get<Vertex>(index, this->vertexOffset);
         const Vertex2& zoomValue = crossfade.fromScale == 2 ? zoomInVertexVector.at(index)
                                                             : zoomOutVertexVector.at(index);

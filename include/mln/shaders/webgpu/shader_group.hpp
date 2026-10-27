@@ -67,8 +67,8 @@ public:
             constexpr auto featureIndexSlot = shaders::featureIndexAttributeId<ShaderID>();
             [[maybe_unused]] bool useFeatureIndex = false;
             if constexpr (featureIndexSlot.has_value()) {
-                constexpr auto attributes = shaders::featureAttributes<ShaderID>();
-                useFeatureIndex = defineFeatureIndex(attributes, propertiesAsUniforms, additionalDefines);
+                useFeatureIndex = defineFeatureIndex(
+                    shaders::featureSamples<ShaderID>(), propertiesAsUniforms, additionalDefines);
             }
 
             std::string featureConstants;

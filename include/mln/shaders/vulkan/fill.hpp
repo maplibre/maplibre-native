@@ -9,6 +9,7 @@ namespace shaders {
 constexpr auto fillShaderPrelude = R"(
 
 #define idFillDrawableUBO           idDrawableReservedVertexOnlyUBO
+#define idFillFeatureUBO            idDrawableReservedFragmentOnlyUBO
 #define idFillTilePropsUBO          drawableReservedUBOCount
 #define idFillEvaluatedPropsUBO     layerUBOStartId
 
@@ -18,7 +19,7 @@ template <>
 struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillShader";
 
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -27,12 +28,8 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
 
 layout(location = 0) in ivec2 in_position;
 
-#if !defined(HAS_UNIFORM_u_color)
-layout(location = 1) in vec4 in_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 2) in vec2 in_opacity;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 1) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -44,7 +41,7 @@ struct FillDrawableUBO {
     // Interpolations
     float color_t;
     float opacity_t;
-    float pad1;
+    uint feature_base;
     float pad2;
     vec4 pad3;
     vec4 pad4;
@@ -53,6 +50,12 @@ struct FillDrawableUBO {
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillDrawableUBOVector {
     FillDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std430, set = LAYER_SET_INDEX, binding = idFillFeatureUBO) readonly buffer FillFeatures {
+    float features[];
+} featureData;
+#endif
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 0) out vec4 frag_color;
@@ -66,11 +69,11 @@ void main() {
     const FillDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if !defined(HAS_UNIFORM_u_color)
-    frag_color = vec4(unpack_mix_color(in_color, drawable.color_t));
+    frag_color = vec4(unpack_mix_color(featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_color), drawable.color_t));
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
@@ -122,7 +125,7 @@ template <>
 struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillOutlineShader";
 
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -131,12 +134,8 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Vulkan> {
 
 layout(location = 0) in ivec2 in_position;
 
-#if !defined(HAS_UNIFORM_u_outline_color)
-layout(location = 1) in vec4 in_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 2) in vec2 in_opacity;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 1) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -148,7 +147,7 @@ struct FillOutlineDrawableUBO {
     // Interpolations
     float outline_color_t;
     float opacity_t;
-    float pad1;
+    uint feature_base;
     float pad2;
     vec4 pad3;
     vec4 pad4;
@@ -157,6 +156,12 @@ struct FillOutlineDrawableUBO {
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillOutlineDrawableUBOVector {
     FillOutlineDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std430, set = LAYER_SET_INDEX, binding = idFillFeatureUBO) readonly buffer FillFeatures {
+    float features[];
+} featureData;
+#endif
 
 #if !defined(HAS_UNIFORM_u_outline_color)
 layout(location = 0) out vec4 frag_color;
@@ -172,11 +177,11 @@ void main() {
     const FillOutlineDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if !defined(HAS_UNIFORM_u_outline_color)
-    frag_color = vec4(unpack_mix_color(in_color, drawable.outline_color_t));
+    frag_color = vec4(unpack_mix_color(featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_outline_color), drawable.outline_color_t));
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
@@ -239,7 +244,7 @@ template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillPatternShader";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -248,20 +253,8 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
 
 layout(location = 0) in ivec2 in_position;
 
-#if !defined(HAS_UNIFORM_u_color)
-layout(location = 1) in vec4 in_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 2) in mediump uvec4 in_pattern_from;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 3) in mediump uvec4 in_pattern_to;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 4) in vec2 in_opacity;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 1) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -278,7 +271,7 @@ struct FillPatternDrawableUBO {
     float pattern_to_t;
     float opacity_t;
     float color_t;
-    float pad1;
+    uint feature_base;
     float pad2;
     float pad3;
 };
@@ -286,6 +279,12 @@ struct FillPatternDrawableUBO {
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillPatternDrawableUBOVector {
     FillPatternDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std430, set = LAYER_SET_INDEX, binding = idFillFeatureUBO) readonly buffer FillFeatures {
+    float features[];
+} featureData;
+#endif
 
 struct FillPatternTilePropsUBO {
     vec4 pattern_from;
@@ -332,23 +331,23 @@ void main() {
     const FillPatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if !defined(HAS_UNIFORM_u_color)
-    frag_color = unpack_mix_color(in_color, drawable.color_t);
+    frag_color = unpack_mix_color(featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 frag_pattern_from = tileProps.pattern_from;
 #else
-    frag_pattern_from = in_pattern_from;
+    frag_pattern_from = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_from);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const vec4 frag_pattern_to = tileProps.pattern_to;
 #else
-    frag_pattern_to = in_pattern_to;
+    frag_pattern_to = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_to);
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     const vec2 pattern_tl_a = frag_pattern_from.xy;
@@ -486,7 +485,7 @@ template <>
 struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillOutlinePatternShader";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -495,20 +494,8 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Vulka
 
 layout(location = 0) in ivec2 in_position;
 
-#if !defined(HAS_UNIFORM_u_color)
-layout(location = 1) in vec4 in_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 2) in mediump uvec4 in_pattern_from;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 3) in mediump uvec4 in_pattern_to;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 4) in vec2 in_opacity;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 1) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -525,7 +512,7 @@ struct FillOutlinePatternDrawableUBO {
     float pattern_to_t;
     float opacity_t;
     float color_t;
-    float pad1;
+    uint feature_base;
     float pad2;
     float pad3;
 };
@@ -533,6 +520,12 @@ struct FillOutlinePatternDrawableUBO {
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillOutlinePatternDrawableUBOVector {
     FillOutlinePatternDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std430, set = LAYER_SET_INDEX, binding = idFillFeatureUBO) readonly buffer FillFeatures {
+    float features[];
+} featureData;
+#endif
 
 struct FillOutlinePatternTilePropsUBO {
     vec4 pattern_from;
@@ -580,23 +573,23 @@ void main() {
     const FillOutlinePatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if !defined(HAS_UNIFORM_u_color)
-    frag_color = unpack_mix_color(in_color, drawable.color_t);
+    frag_color = unpack_mix_color(featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 frag_pattern_from = tileProps.pattern_from;
 #else
-    frag_pattern_from = in_pattern_from;
+    frag_pattern_from = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_from);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const vec4 frag_pattern_to = tileProps.pattern_to;
 #else
-    frag_pattern_to = in_pattern_to;
+    frag_pattern_to = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_to);
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     const vec2 pattern_tl_a = frag_pattern_from.xy;

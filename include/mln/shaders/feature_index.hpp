@@ -40,8 +40,7 @@ struct FeatureLayout {
 };
 
 /// Attribute id where this shader's per-vertex feature index is bound.
-/// That is the pack's first data-driven attribute id, which for lines is line-color.
-/// Another layer returns its own first attribute id. Empty when the shader does not
+/// That is the pack's first data-driven attribute id. Empty when the shader does not
 /// sample a feature table.
 template <BuiltIn ShaderID>
 constexpr std::optional<std::size_t> featureIndexAttributeId() {
@@ -49,6 +48,14 @@ constexpr std::optional<std::size_t> featureIndexAttributeId() {
                   ShaderID == BuiltIn::LinePatternShader || ShaderID == BuiltIn::LineSDFShader ||
                   ShaderID == BuiltIn::LineGradientSDFShader) {
         return idLineColorVertexAttribute;
+    } else if constexpr (ShaderID == BuiltIn::FillShader || ShaderID == BuiltIn::FillOutlineShader ||
+                         ShaderID == BuiltIn::FillPatternShader || ShaderID == BuiltIn::FillOutlinePatternShader) {
+        return idFillColorVertexAttribute;
+    } else if constexpr (ShaderID == BuiltIn::FillExtrusionShader ||
+                         ShaderID == BuiltIn::FillExtrusionInstancedShader ||
+                         ShaderID == BuiltIn::FillExtrusionPatternShader ||
+                         ShaderID == BuiltIn::FillExtrusionPatternInstancedShader) {
+        return idFillExtrusionBaseVertexAttribute;
     } else {
         return std::nullopt;
     }
@@ -110,8 +117,74 @@ constexpr auto featureAttributes() {
             FeatureAttribute{.id = idLineWidthVertexAttribute, .name = "width", .floatCount = scalar},
             FeatureAttribute{.id = idLineFloorWidthVertexAttribute, .name = "floorwidth", .floatCount = scalar},
         };
+    } else if constexpr (ShaderID == BuiltIn::FillShader || ShaderID == BuiltIn::FillOutlineShader ||
+                         ShaderID == BuiltIn::FillPatternShader || ShaderID == BuiltIn::FillOutlinePatternShader) {
+        return std::array{
+            FeatureAttribute{.id = idFillColorVertexAttribute, .name = "color", .floatCount = wide},
+            FeatureAttribute{.id = idFillOpacityVertexAttribute, .name = "opacity", .floatCount = scalar},
+            FeatureAttribute{.id = idFillOutlineColorVertexAttribute, .name = "outline_color", .floatCount = wide},
+            FeatureAttribute{.id = idFillPatternFromVertexAttribute, .name = "pattern_from", .floatCount = wide},
+            FeatureAttribute{.id = idFillPatternToVertexAttribute, .name = "pattern_to", .floatCount = wide},
+        };
+    } else if constexpr (ShaderID == BuiltIn::FillExtrusionShader ||
+                         ShaderID == BuiltIn::FillExtrusionInstancedShader ||
+                         ShaderID == BuiltIn::FillExtrusionPatternShader ||
+                         ShaderID == BuiltIn::FillExtrusionPatternInstancedShader) {
+        return std::array{
+            FeatureAttribute{.id = idFillExtrusionBaseVertexAttribute, .name = "base", .floatCount = scalar},
+            FeatureAttribute{.id = idFillExtrusionColorVertexAttribute, .name = "color", .floatCount = wide},
+            FeatureAttribute{.id = idFillExtrusionHeightVertexAttribute, .name = "height", .floatCount = scalar},
+            FeatureAttribute{
+                .id = idFillExtrusionPatternFromVertexAttribute, .name = "pattern_from", .floatCount = wide},
+            FeatureAttribute{.id = idFillExtrusionPatternToVertexAttribute, .name = "pattern_to", .floatCount = wide},
+        };
     } else {
         return std::array<FeatureAttribute, 0>{};
+    }
+}
+
+/// Fields this shader actually reads. `defineFeatureIndex` uses this list, so a variant
+/// declares the index only when one of its own samples is data-driven. The packed record
+/// and its offsets still come from `featureAttributes`.
+template <BuiltIn ShaderID>
+constexpr auto featureSamples() {
+    constexpr std::uint32_t scalar = 2;
+    constexpr std::uint32_t wide = 4;
+    if constexpr (ShaderID == BuiltIn::FillShader) {
+        return std::array{
+            FeatureAttribute{.id = idFillColorVertexAttribute, .name = "color", .floatCount = wide},
+            FeatureAttribute{.id = idFillOpacityVertexAttribute, .name = "opacity", .floatCount = scalar},
+        };
+    } else if constexpr (ShaderID == BuiltIn::FillOutlineShader) {
+        return std::array{
+            FeatureAttribute{.id = idFillOutlineColorVertexAttribute, .name = "outline_color", .floatCount = wide},
+            FeatureAttribute{.id = idFillOpacityVertexAttribute, .name = "opacity", .floatCount = scalar},
+        };
+    } else if constexpr (ShaderID == BuiltIn::FillPatternShader || ShaderID == BuiltIn::FillOutlinePatternShader) {
+        return std::array{
+            FeatureAttribute{.id = idFillColorVertexAttribute, .name = "color", .floatCount = wide},
+            FeatureAttribute{.id = idFillOpacityVertexAttribute, .name = "opacity", .floatCount = scalar},
+            FeatureAttribute{.id = idFillPatternFromVertexAttribute, .name = "pattern_from", .floatCount = wide},
+            FeatureAttribute{.id = idFillPatternToVertexAttribute, .name = "pattern_to", .floatCount = wide},
+        };
+    } else if constexpr (ShaderID == BuiltIn::FillExtrusionShader ||
+                         ShaderID == BuiltIn::FillExtrusionInstancedShader) {
+        return std::array{
+            FeatureAttribute{.id = idFillExtrusionBaseVertexAttribute, .name = "base", .floatCount = scalar},
+            FeatureAttribute{.id = idFillExtrusionColorVertexAttribute, .name = "color", .floatCount = wide},
+            FeatureAttribute{.id = idFillExtrusionHeightVertexAttribute, .name = "height", .floatCount = scalar},
+        };
+    } else if constexpr (ShaderID == BuiltIn::FillExtrusionPatternShader ||
+                         ShaderID == BuiltIn::FillExtrusionPatternInstancedShader) {
+        return std::array{
+            FeatureAttribute{.id = idFillExtrusionBaseVertexAttribute, .name = "base", .floatCount = scalar},
+            FeatureAttribute{.id = idFillExtrusionHeightVertexAttribute, .name = "height", .floatCount = scalar},
+            FeatureAttribute{
+                .id = idFillExtrusionPatternFromVertexAttribute, .name = "pattern_from", .floatCount = wide},
+            FeatureAttribute{.id = idFillExtrusionPatternToVertexAttribute, .name = "pattern_to", .floatCount = wide},
+        };
+    } else {
+        return featureAttributes<ShaderID>();
     }
 }
 

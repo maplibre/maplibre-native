@@ -65,11 +65,12 @@ public:
             constexpr auto featureIndexSlot = shaders::featureIndexAttributeId<ShaderID>();
             [[maybe_unused]] bool useFeatureIndex = false;
             if constexpr (featureIndexSlot.has_value()) {
-                constexpr auto attributes = shaders::featureAttributes<ShaderID>();
-                useFeatureIndex = defineFeatureIndex(attributes, propertiesAsUniforms, additionalDefines);
+                useFeatureIndex = defineFeatureIndex(
+                    shaders::featureSamples<ShaderID>(), propertiesAsUniforms, additionalDefines);
                 if (useFeatureIndex) {
-                    shaders::defineFeatureConstants(shaders::featureLayout(attributes, propertiesAsUniforms.second),
-                                                    additionalDefines);
+                    shaders::defineFeatureConstants(
+                        shaders::featureLayout(shaders::featureAttributes<ShaderID>(), propertiesAsUniforms.second),
+                        additionalDefines);
                 }
             }
 
@@ -104,6 +105,14 @@ public:
                 }
             }
             for (const auto& attrib : ShaderClass::instanceAttributes) {
+                if constexpr (featureIndexSlot.has_value()) {
+                    if (attrib.id == *featureIndexSlot) {
+                        if (useFeatureIndex) {
+                            shader->initInstanceAttribute(attrib);
+                        }
+                        continue;
+                    }
+                }
                 if (!propertiesAsUniforms.second.contains(attrib.id)) {
                     shader->initInstanceAttribute(attrib);
                 }
