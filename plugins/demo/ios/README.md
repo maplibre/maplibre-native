@@ -6,7 +6,7 @@ A small SwiftUI app that shows the in-tree plugin layers on a map. It is separat
 | Demo | Layer | What it shows |
 |---|---|---|
 | N-gons | [`ngon`](../../plugins/ngon-layer) | One n-gon with controls for its corners, color, radius, rotation, opacity, blur and outline. The paint properties read the feature's properties, so an edit changes only the feature's data. The Randomize button picks new ones, and the JSON tab shows the layer's style and the feature's properties. |
-| 3D models | [`gltf`](../../plugins/gltf-layer) | Cars and trees drawn from `.glb` files. A feature picks its model with `model-id`; heading and size are paint properties; buildings hide the cars through `model-occlusion`. |
+| 3D models | [`gltf`](../../plugins/gltf-layer) | Cars and trees drawn from `.glb` files. A feature picks its model with `model-id`; heading and size are paint properties; buildings hide the cars through `model-occlusion`. A slider resizes the trees: their `model-scale` reads a feature property, so it only edits the trees' data. |
 | Any other plugin | | A plugin whose `plugin.json` has a `demo` is listed with its style at its camera, like in the Android demo. At the moment that is [`fill-extrusion`](../../plugins/fill-extrusion), on the OpenFreeMap Liberty style. |
 
 The layer types only exist in a build with plugin support, and the `gltf` and `fill-extrusion` layers only have a Metal
@@ -42,12 +42,11 @@ and add an entry to `Demo.custom` in `Sources/DemoList.swift`.
 - A demo registers its plugin when it opens, because a style naming an unregistered layer type drops the layer. A
   plugin stays registered for the rest of the process, so `fill-extrusion` replaces the built-in layer in the demos
   opened after it until the app restarts.
-- The SDK also links the `gltf` layer, for `MLNPuckPlugin`. The wrapper depends on the same library, so the plugin's
-  code is in the app once.
 - The list of the other demos comes from the `<id>.demo.json` files the wrappers carry, bundled through
   `//plugins/ios:demos`.
-- Plugin layers have no Objective-C class, so the app adds them from JSON with
-  `MLNStyle.addLayer(withJSON:belowLayerWithIdentifier:)`.
+- Plugin layers have no Objective-C class, so the SDK has no way to add one at runtime. The styles of the two demos with
+  a view of their own (`models.json`, `ngons.json`) contain the layers and declare their GeoJSON sources empty, and the
+  app puts the geometry into those sources once the style has loaded.
 
 ## Assets
 

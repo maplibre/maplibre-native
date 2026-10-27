@@ -6,18 +6,32 @@ import SwiftUI
 ///
 /// The scene is a ring road with three cars on it, trees, and a few extruded buildings. The cars and trees are depth
 /// tested against the buildings (`model-occlusion`), so a car passing behind one is hidden.
+///
+/// The trees' `model-scale` reads their `scale` property, so the slider only edits the trees' data.
 struct ModelsDemoView: View {
     @StateObject private var status = DemoStatus()
+    @State private var treeSize = City.defaultTreeSize
 
     var body: some View {
         ZStack(alignment: .top) {
-            ModelsMap(status: status)
+            ModelsMap(treeSize: treeSize, status: status)
             StatusBanner(status: status)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            ControlBar {
+                HStack {
+                    Text("Tree size").frame(width: 70, alignment: .leading)
+                    Slider(value: $treeSize, in: City.treeSizes)
+                    Text("\(treeSize, specifier: "%.1f")×").monospacedDigit().frame(width: 40)
+                }
+                .font(.subheadline)
+            }
         }
     }
 }
 
 private struct ModelsMap: UIViewRepresentable {
+    var treeSize: Double
     var status: DemoStatus
 
     func makeCoordinator() -> Coordinator { Coordinator(status: status) }
@@ -28,7 +42,9 @@ private struct ModelsMap: UIViewRepresentable {
         return mapView
     }
 
-    func updateUIView(_: MLNMapView, context _: Context) {}
+    func updateUIView(_: MLNMapView, context: Context) {
+        context.coordinator.apply(treeSize: treeSize)
+    }
 
     static func dismantleUIView(_: MLNMapView, coordinator: Coordinator) {
         coordinator.stop()
@@ -40,18 +56,31 @@ private struct ModelsMap: UIViewRepresentable {
         private var style: MLNStyle?
         private var timer: Timer?
         private var start = CACurrentMediaTime()
+        private var treeSize = City.defaultTreeSize
 
         init(status: DemoStatus) { self.status = status }
 
         func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
             self.style = style
             mapView.look(at: City.frame.origin, zoom: 16.9, pitch: 58, heading: 12)
-            City.addLayers(to: style, status: status)
+            City.fillSources(of: style, treeSize: treeSize, status: status)
             start = CACurrentMediaTime()
             timer?.invalidate()
             timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 20, repeats: true) { [weak self] _ in
                 MainActor.assumeIsolated { self?.tick() }
             }
+        }
+
+        func mapViewDidFailLoadingMap(_: MLNMapView, withError error: Error) {
+            status.report("models: \(error.localizedDescription)")
+        }
+
+        /// Resizes the trees, by writing the new size into their data. Before the style has loaded it is only
+        /// remembered, for `fillSources`.
+        func apply(treeSize: Double) {
+            guard treeSize != self.treeSize else { return }
+            self.treeSize = treeSize
+            (style?.source(withIdentifier: "trees") as? MLNShapeSource)?.shape = City.trees(size: treeSize)
         }
 
         func stop() {
@@ -66,16 +95,20 @@ private struct ModelsMap: UIViewRepresentable {
     }
 }
 
-/// The demo city's geometry and its layers.
+/// The demo city's geometry. Its layers are in `models.json`: the roads are drawn `roadWidth` meters wide there, at
+/// this latitude, and the cars are scaled up (4 meters per mesh unit) so they are readable. The trees are scaled by
+/// their `scale` property, which is the size from the slider.
 private enum City {
     static let frame = LocalFrame(origin: CLLocationCoordinate2D(latitude: 52.3731, longitude: 4.8922))
+
+    /// Meters per mesh unit of the trees, and the range of the slider.
+    static let defaultTreeSize = 2.0
+    static let treeSizes = 1.0 ... 5.0
 
     static let halfWidth = 55.0
     static let halfHeight = 38.0
     static let roadWidth = 9.0
     static let carSpeed = 11.0 // meters per second
-    static let carScale = 4.0 // meters per mesh unit: toy-sized, so the cars are readable
-    static let treeScale = 2.0
     static let laneHalfLength = 48.0
 
     /// The ring road, clockwise seen from above.
@@ -98,69 +131,16 @@ private enum City {
 
     // MARK: Layers
 
+    /// Puts the scene's geometry into the sources `models.json` declares, which its layers draw.
     @MainActor
-    static func addLayers(to style: MLNStyle, status: DemoStatus) {
-        style.addSource(MLNShapeSource(identifier: "roads", shape: roads(), options: nil))
-        style.addSource(MLNShapeSource(identifier: "buildings", shape: buildings(), options: nil))
-        style.addSource(MLNShapeSource(identifier: "trees", shape: trees(), options: nil))
-        style.addSource(MLNShapeSource(identifier: "vehicles", shape: vehicles(at: 0), options: nil))
-
-        let layers: [[String: Any]] = [
-            road(id: "road-casing", color: "#9C9C96", width: roadWidth + 2),
-            road(id: "road", color: "#5E6064", width: roadWidth),
-            [
-                "id": "buildings",
-                "type": "fill-extrusion",
-                "source": "buildings",
-                "paint": [
-                    "fill-extrusion-color": ["get", "color"],
-                    "fill-extrusion-height": ["get", "height"],
-                    "fill-extrusion-opacity": 1,
-                ],
-            ],
-            // One model for every feature, picked by a constant.
-            [
-                "id": "trees",
-                "type": "gltf",
-                "source": "trees",
-                "layout": ["models": ["tree": "asset://tree.glb"], "model-id": "tree"],
-                "paint": ["model-scale": treeScale],
-            ],
-            // Several models in one layer: each car's `kind` property names its model.
-            [
-                "id": "vehicles",
-                "type": "gltf",
-                "source": "vehicles",
-                "layout": [
-                    "models": [
-                        "car-red": "asset://car-red.glb",
-                        "car-blue": "asset://car-blue.glb",
-                        "car-yellow": "asset://car-yellow.glb",
-                    ],
-                    "model-id": ["get", "kind"],
-                ],
-                "paint": ["model-heading": ["get", "heading"], "model-scale": carScale],
-            ],
+    static func fillSources(of style: MLNStyle, treeSize: Double, status: DemoStatus) {
+        let shapes: [(source: String, shape: MLNShapeCollectionFeature)] = [
+            ("roads", roads()), ("buildings", buildings()), ("trees", trees(size: treeSize)),
+            ("vehicles", vehicles(at: 0)),
         ]
-        for layer in layers {
-            style.add(layer: layer, status: status)
+        for (source, shape) in shapes {
+            style.demoSource(source, status: status)?.shape = shape
         }
-    }
-
-    /// A line `meters` wide at the map's latitude, whatever the zoom: pixels double with every zoom level.
-    private static func road(id: String, color: String, width meters: Double) -> [String: Any] {
-        let metersPerPointAtZoom0 = 78271.517 * cos(frame.origin.latitude * .pi / 180)
-        let pointsAtZoom10 = meters * 1024 / metersPerPointAtZoom0
-        return [
-            "id": id,
-            "type": "line",
-            "source": "roads",
-            "layout": ["line-cap": "round", "line-join": "round"],
-            "paint": [
-                "line-color": color,
-                "line-width": ["interpolate", ["exponential", 2], ["zoom"], 10, pointsAtZoom10, 22, pointsAtZoom10 * 4096],
-            ],
-        ]
     }
 
     private static func roads() -> MLNShapeCollectionFeature {
@@ -200,8 +180,9 @@ private enum City {
         return MLNShapeCollectionFeature(shapes: polygons)
     }
 
-    /// Trees along both sides of the ring road.
-    private static func trees() -> MLNShapeCollectionFeature {
+    /// Trees along both sides of the ring road, each drawn `size` meters per mesh unit. Where the trees stand doesn't
+    /// depend on the size, so resizing only changes their `scale` property.
+    static func trees(size: Double) -> MLNShapeCollectionFeature {
         var features: [MLNPointFeature] = []
         var seed: UInt64 = 7
         func random() -> Double {
@@ -219,6 +200,7 @@ private enum City {
                 feature.coordinate = frame.coordinate(
                     east: sample.east + left.east * offset, north: sample.north + left.north * offset
                 )
+                feature.attributes = ["scale": size]
                 features.append(feature)
             }
             distance += 14 + random() * 8

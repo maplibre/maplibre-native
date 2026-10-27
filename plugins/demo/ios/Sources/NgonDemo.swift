@@ -96,24 +96,8 @@ final class NgonModel: ObservableObject {
 // MARK: Style
 
 enum NgonStyle {
-    /// The layer, as it is added to the style. Every paint property reads a feature property.
-    static let layer: [String: Any] = [
-        "id": "ngons",
-        "type": "ngon",
-        "source": "shapes",
-        "paint": [
-            "ngon-radius": ["get", "radius"],
-            "ngon-corners": ["get", "sides"],
-            "ngon-color": ["get", "color"],
-            "ngon-rotate": ["get", "rotation"],
-            "ngon-opacity": ["get", "opacity"],
-            "ngon-blur": ["get", "blur"],
-            "ngon-stroke-width": ["get", "stroke"],
-            "ngon-stroke-color": ["get", "outline"],
-            "ngon-pitch-alignment": "viewport",
-            "ngon-pitch-scale": "viewport",
-        ],
-    ]
+    /// The layer, from `ngons.json`. Every paint property reads a feature property.
+    static let layer = bundledStyleLayer("ngons", in: "ngons")
 }
 
 func prettyJSON(_ object: Any) -> String {
@@ -224,12 +208,13 @@ private struct NgonMap: UIViewRepresentable {
 
         func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
             mapView.look(at: NgonMap.center, zoom: 15.9, pitch: 40, heading: 0)
-            let shapes = MLNShapeSource(identifier: "shapes", shape: Self.shape(model.ngon), options: nil)
-            style.addSource(shapes)
-            style.add(layer: NgonStyle.layer, status: status)
-            self.shapes = shapes
-            drawn = model.ngon
+            shapes = style.demoSource("shapes", status: status)
+            drawn = nil
             sync()
+        }
+
+        func mapViewDidFailLoadingMap(_: MLNMapView, withError error: Error) {
+            status.report("ngons: \(error.localizedDescription)")
         }
 
         /// Draws the model, when it has changed.

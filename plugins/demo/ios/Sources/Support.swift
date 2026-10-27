@@ -39,14 +39,26 @@ extension MLNMapView {
 }
 
 extension MLNStyle {
+    /// The GeoJSON source `identifier` that a bundled style declares empty, for the demo to fill. Plugin layers have no
+    /// Objective-C class, so they come from the style document, and the demo only feeds their sources.
     @MainActor
-    func add(layer json: [String: Any], below sibling: String? = nil, status: DemoStatus) {
-        do {
-            try addLayer(withJSON: json, belowLayerWithIdentifier: sibling)
-        } catch {
-            status.report("\(json["id"] ?? "layer"): \(error.localizedDescription)")
+    func demoSource(_ identifier: String, status: DemoStatus) -> MLNShapeSource? {
+        let source = self.source(withIdentifier: identifier) as? MLNShapeSource
+        if source == nil {
+            status.report("The style has no GeoJSON source named \(identifier)")
         }
+        return source
     }
+}
+
+/// The layer `id` of a style bundled with the app (`plugins/demo/assets/styles/<style>.json`), as JSON.
+func bundledStyleLayer(_ id: String, in style: String) -> [String: Any] {
+    guard let url = Bundle.main.url(forResource: style, withExtension: "json"),
+          let data = try? Data(contentsOf: url),
+          let document = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+          let layers = document["layers"] as? [[String: Any]]
+    else { return [:] }
+    return layers.first { $0["id"] as? String == id } ?? [:]
 }
 
 /// The first thing that went wrong in a scene, shown over the map so a broken plugin layer isn't a silent blank.

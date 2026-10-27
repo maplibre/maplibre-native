@@ -1,12 +1,80 @@
 {
   "version": 8,
   "name": "Plugin demo: 3D models",
-  "sources": {},
+  "sources": {
+    "roads": {
+      "type": "geojson",
+      "data": { "type": "FeatureCollection", "features": [] }
+    },
+    "buildings": {
+      "type": "geojson",
+      "data": { "type": "FeatureCollection", "features": [] }
+    },
+    "trees": {
+      "type": "geojson",
+      "data": { "type": "FeatureCollection", "features": [] }
+    },
+    "vehicles": {
+      "type": "geojson",
+      "data": { "type": "FeatureCollection", "features": [] }
+    }
+  },
   "layers": [
     {
       "id": "background",
       "type": "background",
       "paint": { "background-color": "#DDE5D3" }
+    },
+    {
+      "id": "road-casing",
+      "type": "line",
+      "source": "roads",
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#9C9C96",
+        "line-width": ["interpolate", ["exponential", 2], ["zoom"], 10, 0.2357170940128481, 22, 965.4972170766258]
+      }
+    },
+    {
+      "id": "road",
+      "type": "line",
+      "source": "roads",
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#5E6064",
+        "line-width": ["interpolate", ["exponential", 2], ["zoom"], 10, 0.19285944055596663, 22, 789.9522685172393]
+      }
+    },
+    {
+      "id": "buildings",
+      "type": "fill-extrusion",
+      "source": "buildings",
+      "paint": {
+        "fill-extrusion-color": ["get", "color"],
+        "fill-extrusion-height": ["get", "height"],
+        "fill-extrusion-opacity": 1
+      }
+    },
+    {
+      "id": "trees",
+      "type": "gltf",
+      "source": "trees",
+      "layout": { "models": { "tree": "asset://tree.glb" }, "model-id": "tree" },
+      "paint": { "model-scale": ["get", "scale"] }
+    },
+    {
+      "id": "vehicles",
+      "type": "gltf",
+      "source": "vehicles",
+      "layout": {
+        "models": {
+          "car-red": "asset://car-red.glb",
+          "car-blue": "asset://car-blue.glb",
+          "car-yellow": "asset://car-yellow.glb"
+        },
+        "model-id": ["get", "kind"]
+      },
+      "paint": { "model-heading": ["get", "heading"], "model-scale": 4 }
     }
   ]
 }
