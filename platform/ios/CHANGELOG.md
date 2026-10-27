@@ -4,7 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## 7.0.0
 
-### Breaking changes
+### 💥 Breaking changes
 
 - Raise the minimum supported iOS version to 15.5, remove the filesystem polyfill, and clean up obsolete compatibility code ([#4648](https://github.com/maplibre/maplibre-native/pull/4648), [#4656](https://github.com/maplibre/maplibre-native/pull/4656)).
 - Replace the `Mapbox.h` umbrella header with `MapLibre.h`. `MapLibre.xcframework` no longer ships `Mapbox.h` ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
@@ -42,16 +42,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ### Plugin API
 
-- Distribute a build of MapLibre iOS with the experimental C plugin API enabled as a separate Swift package, [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api). Its `MapLibre` product replaces the standard one, so applications keep using `import MapLibre`. Plugin packages depend on its header-only `MapLibrePluginApi` product. Layers of plugin types appear as `MLNStyleLayer` in `MLNStyle.layers`. The GitHub release also includes a static XCFramework of this build, `MapLibre.static.plugins.xcframework.zip` ([#4769](https://github.com/maplibre/maplibre-native/pull/4769)).
-- Add the first version of the C plugin API for custom style layer types, with an ngon layer as example ([#4612](https://github.com/maplibre/maplibre-native/pull/4612)).
-- Add the `should_animate` callback ([#4654](https://github.com/maplibre/maplibre-native/pull/4654)).
-- Add stencil overlap and near-clipped matrix options ([#4665](https://github.com/maplibre/maplibre-native/pull/4665)).
-- Add per-drawable depth, stencil and cull state ([#4692](https://github.com/maplibre/maplibre-native/pull/4692)).
-- Export `MLNPluginStyleLayer` from the dynamic framework ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
-- Premultiply plugin default colors ([#4663](https://github.com/maplibre/maplibre-native/pull/4663)).
-- Reevaluate camera-dependent plugin paint properties when the zoom changes ([#4721](https://github.com/maplibre/maplibre-native/pull/4721)).
-- Fix plugin layer filters ignoring the style's global state ([#4807](https://github.com/maplibre/maplibre-native/pull/4807)).
-- Fix plugin paint properties that do not support transitions still being transitioned by the style's transition options ([#4808](https://github.com/maplibre/maplibre-native/pull/4808)).
+- Add an experimental C plugin API for adding custom style layer types, defined in [`plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h). It is only available in the build of MapLibre iOS that is distributed as the separate Swift package [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api), whose `MapLibre` product replaces the standard one. See [Plugin API](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/pluginapi) for how to use it ([#4612](https://github.com/maplibre/maplibre-native/pull/4612), [#4769](https://github.com/maplibre/maplibre-native/pull/4769)).
 
 ### Features
 
