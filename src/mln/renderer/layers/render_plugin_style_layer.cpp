@@ -256,9 +256,12 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setIs3D(true);
                 builder->setEnableStencil(true);
             } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
+                // A real depth test against the map's 3D geometry, as fill extrusions do. A 2D drawable's depth
+                // test is turned off for every layer above a 3D layer (see PaintParameters::depthModeForSublayer),
+                // so such a drawable could never be hidden by an extrusion beneath it in the layer order.
                 builder->setEnableDepth(true);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setIs3D(false);
+                builder->setIs3D(true);
                 builder->setEnableStencil(false);
                 if (definition.cullBackFaces) {
                     builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
@@ -293,6 +296,12 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     }
+
+    // The group only draws its 3D drawables with the right depth state when it has stencil tiles, but tile
+    // masks are an extra pass that 2D drawables here never use.
+    bool has3D = registration->enableStencilOverlapDedup;
+    tileLayerGroup->visitDrawables([&](gfx::Drawable& drawable) { has3D = has3D || drawable.getIs3D(); });
+    tileLayerGroup->setStencilTiles(has3D ? renderTiles : nullptr);
 }
 
 bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,

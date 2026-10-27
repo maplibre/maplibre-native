@@ -390,8 +390,13 @@ typedef struct mln_plugin_segment_v1 {
 } mln_plugin_segment_v1;
 
 typedef enum mln_plugin_drawable_depth_mode_v1 {
+    /* No depth test: drawn over everything beneath the layer in the layer order. */
     MLN_PLUGIN_DRAWABLE_DEPTH_DISABLED = 0,
+    /* Layer order decides what is in front, as for the host's 2D layers. 3D geometry (fill extrusions) in layers
+     * beneath this one does not hide it. */
     MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY = 1,
+    /* Depth tested and written like the host's 3D layers: hidden by 3D geometry, such as a fill extrusion, that is
+     * in front of it, whatever the layer order. */
     MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE = 2
 } mln_plugin_drawable_depth_mode_v1;
 

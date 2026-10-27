@@ -30,3 +30,12 @@ cc_test(
     copts = CPP_FLAGS,
     deps = [":gltf-layer"],
 )
+
+filegroup(
+    name = "render-fixtures",
+    srcs = glob(
+        ["render-tests/**"],
+        exclude = ["render-tests/results/**"],
+    ) + ["render-tests/results/.gitkeep"],
+    visibility = ["//plugins:__pkg__"],
+)
