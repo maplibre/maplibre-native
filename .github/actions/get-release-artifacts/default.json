@@ -1,0 +1,12 @@
+{
+  "main": {
+    "android": {
+      "artifactId": "android-sdk"
+    },
+    "ios": {
+      "swiftPackage": "maplibre/maplibre-gl-native-distribution",
+      "pluginsSwiftPackage": "maplibre/maplibre-ios-with-plugin-api",
+      "podName": "MapLibre"
+    }
+  }
+}

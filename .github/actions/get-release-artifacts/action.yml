@@ -1,0 +1,44 @@
+name: get-release-artifacts
+description: "Looks up the names under which a branch is released (see README.md in this directory)"
+inputs:
+  config:
+    description: >-
+      JSON object mapping branch names to artifact names, i.e. the value of the RELEASE_ARTIFACTS
+      repository variable, which the caller passes in. If empty, the default in default.json is used.
+    required: false
+    default: ""
+  branch:
+    description: >-
+      Branch to look up. Defaults to the target branch of a pull request, or else the branch
+      of the workflow run. Pass it explicitly if the workflow runs on a tag.
+    required: false
+    default: ${{ github.base_ref || github.ref_name }}
+outputs:
+  branch:
+    description: "The branch that was looked up"
+    value: ${{ steps.resolve.outputs.branch }}
+  config:
+    description: "The entry of the branch as compact JSON, for use with fromJSON"
+    value: ${{ steps.resolve.outputs.config }}
+  android-artifact-id:
+    description: "Maven artifact ID of the Android SDK, replaces 'android-sdk'"
+    value: ${{ steps.resolve.outputs.android-artifact-id }}
+  ios-swift-package:
+    description: "GitHub repository of the Swift package of the iOS XCFramework"
+    value: ${{ steps.resolve.outputs.ios-swift-package }}
+  ios-plugins-swift-package:
+    description: "GitHub repository of the Swift package of the iOS XCFramework with the plugin API"
+    value: ${{ steps.resolve.outputs.ios-plugins-swift-package }}
+  ios-pod-name:
+    description: "Name of the iOS CocoaPod"
+    value: ${{ steps.resolve.outputs.ios-pod-name }}
+runs:
+  using: composite
+  steps:
+    - id: resolve
+      shell: bash
+      env:
+        CONFIG: ${{ inputs.config }}
+        BRANCH: ${{ inputs.branch }}
+        DEFAULT_CONFIG_FILE: ${{ github.action_path }}/default.json
+      run: "$GITHUB_ACTION_PATH/resolve.sh"

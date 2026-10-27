@@ -276,7 +276,6 @@ filegroup(
     name = "extra_files",
     srcs = [
         "BAZEL.md",
-        "CHANGELOG.md",
         "MapLibre.podspec",
         "PrivacyInfo.xcprivacy",
         "README.md",
