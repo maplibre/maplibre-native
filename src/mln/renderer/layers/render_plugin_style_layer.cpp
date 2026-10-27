@@ -349,17 +349,19 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                         builder->addTweaker(std::make_shared<gfx::DrawableAtlasesTweaker>(
                             atlases, std::nullopt, 0, false, false, style::AlignmentType::Auto, false, false));
                 }
-                const auto state = drawState(*registration, pass, definition);
+                const auto passState = drawState(*registration, pass, definition);
                 builder->setDrawPriority(passIndex);
-                builder->setEnableDepth(state.depthTest);
-                builder->setDepthType(state.depthWrite ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
-                builder->setIs3D(state.is3D);
-                builder->setEnableStencil(state.stencil);
-                builder->setEnableColor(state.colorWrite);
-                builder->setColorMode(!state.colorWrite ? gfx::ColorMode::disabled()
-                                      : state.blend     ? gfx::ColorMode::alphaBlended()
-                                                        : gfx::ColorMode::unblended());
-                builder->setCullFaceMode(state.cullBack ? gfx::CullFaceMode::backCCW() : gfx::CullFaceMode::disabled());
+                builder->setEnableDepth(passState.depthTest);
+                builder->setDepthType(passState.depthWrite ? gfx::DepthMaskType::ReadWrite
+                                                           : gfx::DepthMaskType::ReadOnly);
+                builder->setIs3D(passState.is3D);
+                builder->setEnableStencil(passState.stencil);
+                builder->setEnableColor(passState.colorWrite);
+                builder->setColorMode(!passState.colorWrite ? gfx::ColorMode::disabled()
+                                      : passState.blend     ? gfx::ColorMode::alphaBlended()
+                                                            : gfx::ColorMode::unblended());
+                builder->setCullFaceMode(passState.cullBack ? gfx::CullFaceMode::backCCW()
+                                                            : gfx::CullFaceMode::disabled());
                 if (definition.instanced)
                     builder->setInstanceAttributes(std::move(attributes));
                 else
@@ -373,8 +375,8 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                     drawable->setLayerTweaker(layerTweaker);
                     if (paintBinders) drawable->setBinders(renderData->bucket, paintBinders);
                     drawable->setData(std::make_unique<plugin::DrawableData>(definition.shaderID, passIndex));
-                    drawable->setDepthMaskFor3D(state.depthWrite ? gfx::DepthMaskType::ReadWrite
-                                                                 : gfx::DepthMaskType::ReadOnly);
+                    drawable->setDepthMaskFor3D(passState.depthWrite ? gfx::DepthMaskType::ReadWrite
+                                                                     : gfx::DepthMaskType::ReadOnly);
                     drawable->setRenderTile(renderTilesOwner, &tile);
                     tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.drawablesAdded;
