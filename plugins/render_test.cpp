@@ -1,13 +1,14 @@
 // The render-test runner of a plugin. A build defines MLN_PLUGIN_HEADER and MLN_PLUGIN_REGISTER for the plugin it
 // tests.
 //
-// With `--layer-type <type>` it only runs the tests in the manifest's test directory whose style has a layer of that
-// type, so a new test of the layer needs no change to the plugin. `--ignore <file>` leaves out the tests named in a
-// JSON file, as the ignore files of the platforms do: {"render-tests/<test>": "reason"}.
+// With `--plugin-layers` it only runs the tests in the manifest's test directory whose style has a layer of a type that
+// the plugin registers, so a new test of the layer needs no change to the plugin. `--ignore <file>` leaves out the
+// tests named in a JSON file, as the ignore files of the platforms do: {"render-tests/<test>": "reason"}.
 #include <mln/render_test.hpp>
 
 #include MLN_PLUGIN_HEADER
 
+#include <algorithm>
 #include <cctype>
 #include <filesystem>
 #include <fstream>
@@ -71,13 +72,15 @@ std::map<std::string, std::string> ignoredTests(const std::string& path) {
     return ignored;
 }
 
-// A `--filter` regex that matches the style of every test with a layer of `layerType`, except the ignored ones.
-std::string filterForLayerType(const fs::path& manifestPath,
-                               const std::string& layerType,
-                               const std::map<std::string, std::string>& ignored) {
+// A `--filter` regex that matches the style of every test with a layer of one of `layerTypes`, except the ignored ones.
+std::string filterForLayerTypes(const fs::path& manifestPath,
+                                const std::vector<std::string>& layerTypes,
+                                const std::map<std::string, std::string>& ignored) {
     const auto base =
         (manifestPath.parent_path() / manifestValue(readFile(manifestPath), "base_test_path")).lexically_normal();
-    const std::regex layer("\"type\"\\s*:\\s*\"" + layerType + "\"");
+    std::string alternatives;
+    for (size_t i = 0; i < layerTypes.size(); ++i) alternatives += (i ? "|" : "") + layerTypes[i];
+    const std::regex layer("\"type\"\\s*:\\s*\"(" + alternatives + ")\"");
     std::vector<std::string> tests;
     for (const auto& entry : fs::recursive_directory_iterator(base)) {
         if (entry.path().filename() != "style.json") continue;
@@ -96,10 +99,30 @@ std::string filterForLayerType(const fs::path& manifestPath,
     return filter + ")/style\\.json$";
 }
 
+std::vector<std::string> registeredLayerTypes;
+
+// Collects the layer types of the plugin instead of registering it.
+mln_plugin_status collectLayerTypes(const mln_plugin_descriptor_v1* descriptor, char*, size_t) {
+    for (size_t i = 0; i < descriptor->layer_type_count; ++i) {
+        const auto& type = descriptor->layer_types[i].layer_type;
+        registeredLayerTypes.emplace_back(type.data, type.size);
+    }
+    return MLN_PLUGIN_STATUS_OK;
+}
+
+// Whether `args` has the switch `name`, which is removed.
+bool takeSwitch(std::vector<std::string>& args, const std::string& name) {
+    const auto found = std::find(args.begin(), args.end(), name);
+    if (found == args.end()) return false;
+    args.erase(found);
+    return true;
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
     char error[512]{};
+    MLN_PLUGIN_REGISTER(collectLayerTypes, error, sizeof(error));
     const auto status = MLN_PLUGIN_REGISTER(mln_plugin_register_v1, error, sizeof(error));
     if (status != MLN_PLUGIN_STATUS_OK && status != MLN_PLUGIN_STATUS_ALREADY_REGISTERED) {
         std::cerr << "Plugin registration failed: " << error << '\n';
@@ -107,12 +130,12 @@ int main(int argc, char** argv) {
     }
 
     std::vector<std::string> args(argv, argv + argc);
-    const auto layerType = flag(args, "--layer-type", "", true);
-    if (!layerType.empty()) {
+    const auto ignored = ignoredTests(flag(args, "--ignore", "", true));
+    if (takeSwitch(args, "--plugin-layers")) {
         const auto manifest = flag(args, "--manifestPath", "-p", false);
-        const auto filter = filterForLayerType(manifest, layerType, ignoredTests(flag(args, "--ignore", "", true)));
+        const auto filter = filterForLayerTypes(manifest, registeredLayerTypes, ignored);
         if (filter.empty()) {
-            std::cerr << "No test in the directory of " << manifest << " has a layer of type " << layerType << '\n';
+            std::cerr << "No test in the directory of " << manifest << " has a layer of a type of the plugin\n";
             return 1;
         }
         args.push_back("--filter=" + filter);

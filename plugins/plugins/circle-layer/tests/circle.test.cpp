@@ -1,16 +1,7 @@
 #include "circle_layer.hpp"
-#include <cstdlib>
-#include <iostream>
+#include <gtest/gtest.h>
 #include <string_view>
 #include <vector>
-
-#define CHECK(condition)                                   \
-    do {                                                   \
-        if (!(condition)) {                                \
-            std::cerr << __LINE__ << ": " #condition "\n"; \
-            std::abort();                                  \
-        }                                                  \
-    } while (false)
 
 namespace {
 const mln_plugin_descriptor_v1* registered = nullptr;
@@ -30,67 +21,87 @@ mln_plugin_property_value_v1 number(const char* name, float value) {
 }
 } // namespace
 
-int main() {
-    CHECK(mln_circle_layer_register(nullptr, nullptr, 0) == MLN_PLUGIN_STATUS_NOT_FOUND);
-    CHECK(mln_circle_layer_register(capture, nullptr, 0) == MLN_PLUGIN_STATUS_OK);
-    CHECK(registered && registered->layer_type_count == 1);
-    const auto& layer = registered->layer_types[0];
-    CHECK(layer.property_count == 11 && layer.shader_count == 1);
-    CHECK(layer.shaders[0].attribute_count == 14);
-    CHECK(layer.shaders[0].property_binding_count == 11);
-    for (size_t i = 0; i < layer.property_count; ++i) {
-        CHECK(layer.properties[i].expression_capabilities & MLN_PLUGIN_EXPRESSION_FEATURE_STATE);
-        CHECK(layer.properties[i].expression_capabilities & MLN_PLUGIN_EXPRESSION_COMPOSITE);
+class CircleLayer : public testing::Test {
+protected:
+    void SetUp() override {
+        ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_circle_layer_register(capture, nullptr, 0));
+        ASSERT_TRUE(registered && registered->layer_type_count == 1);
+        layer = registered->layer_types[0];
+        context.struct_size = sizeof(context);
+        context.extent = 8192;
+        feature.struct_size = sizeof(feature);
+        feature.geometry_type = MLN_PLUGIN_GEOMETRY_POINT;
+        feature.feature_index = 3;
     }
 
+    mln_plugin_layer_type_v1 layer{};
     mln_plugin_layout_context_v1 context{};
-    context.struct_size = sizeof(context);
-    context.extent = 8192;
-    void* layout = nullptr;
-    CHECK(layer.create_layout(nullptr, &layout) == MLN_PLUGIN_STATUS_INVALID_ARGUMENT);
-    CHECK(layer.create_layout(&context, &layout) == MLN_PLUGIN_STATUS_OK);
-    const mln_plugin_tile_point_v1 points[] = {{0, 0}, {8191, 8191}, {8192, 0}, {-1, 0}};
     mln_plugin_feature_v1 feature{};
-    feature.struct_size = sizeof(feature);
-    feature.geometry_type = MLN_PLUGIN_GEOMETRY_POINT;
-    feature.feature_index = 3;
+};
+
+TEST_F(CircleLayer, RegistersItsDescriptor) {
+    EXPECT_EQ(MLN_PLUGIN_STATUS_NOT_FOUND, mln_circle_layer_register(nullptr, nullptr, 0));
+    EXPECT_EQ(11u, layer.property_count);
+    ASSERT_EQ(1u, layer.shader_count);
+    EXPECT_EQ(14u, layer.shaders[0].attribute_count);
+    EXPECT_EQ(11u, layer.shaders[0].property_binding_count);
+    for (size_t i = 0; i < layer.property_count; ++i) {
+        EXPECT_TRUE(layer.properties[i].expression_capabilities & MLN_PLUGIN_EXPRESSION_FEATURE_STATE);
+        EXPECT_TRUE(layer.properties[i].expression_capabilities & MLN_PLUGIN_EXPRESSION_COMPOSITE);
+    }
+}
+
+TEST_F(CircleLayer, OwnsThePointsOfItsTile) {
+    void* layout = nullptr;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, layer.create_layout(nullptr, &layout));
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, layer.create_layout(&context, &layout));
+    const mln_plugin_tile_point_v1 points[] = {{0, 0}, {8191, 8191}, {8192, 0}, {-1, 0}};
     feature.points = points;
     feature.point_count = 4;
-    CHECK(layer.layout_feature(layout, &feature) == MLN_PLUGIN_STATUS_OK);
+    EXPECT_EQ(MLN_PLUGIN_STATUS_OK, layer.layout_feature(layout, &feature));
     mln_plugin_bucket_v1 bucket{};
     bucket.struct_size = sizeof(bucket);
-    CHECK(layer.finish_layout(layout, &bucket) == MLN_PLUGIN_STATUS_OK);
-    CHECK(bucket.vertex_stream_count == 1 && bucket.vertex_streams[0].vertex_count == 8);
-    CHECK(bucket.index_count == 12 && bucket.drawable_count == 1);
-    CHECK(bucket.feature_vertex_range_count == 1);
-    CHECK(bucket.feature_vertex_ranges[0].feature_index == 3);
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, layer.finish_layout(layout, &bucket));
+    ASSERT_EQ(1u, bucket.vertex_stream_count);
+    EXPECT_EQ(8u, bucket.vertex_streams[0].vertex_count);
+    EXPECT_EQ(12u, bucket.index_count);
+    EXPECT_EQ(1u, bucket.drawable_count);
+    ASSERT_EQ(1u, bucket.feature_vertex_range_count);
+    EXPECT_EQ(3u, bucket.feature_vertex_ranges[0].feature_index);
     layer.destroy_layout(layout);
 
     // A still image also lays out the points in the buffer of the tile.
     context.still_image = 1;
-    CHECK(layer.create_layout(&context, &layout) == MLN_PLUGIN_STATUS_OK);
-    CHECK(layer.layout_feature(layout, &feature) == MLN_PLUGIN_STATUS_OK);
-    CHECK(layer.finish_layout(layout, &bucket) == MLN_PLUGIN_STATUS_OK);
-    CHECK(bucket.vertex_streams[0].vertex_count == 16 && bucket.index_count == 24);
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, layer.create_layout(&context, &layout));
+    EXPECT_EQ(MLN_PLUGIN_STATUS_OK, layer.layout_feature(layout, &feature));
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, layer.finish_layout(layout, &bucket));
+    EXPECT_EQ(16u, bucket.vertex_streams[0].vertex_count);
+    EXPECT_EQ(24u, bucket.index_count);
     layer.destroy_layout(layout);
-    context.still_image = 0;
+}
 
-    // Force more than one 16-bit index segment without duplicating tile geometry.
-    CHECK(layer.create_layout(&context, &layout) == MLN_PLUGIN_STATUS_OK);
+TEST_F(CircleLayer, SplitsABucketIntoSegmentsOf16BitIndices) {
+    void* layout = nullptr;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, layer.create_layout(&context, &layout));
     std::vector<mln_plugin_tile_point_v1> many(17000, {100, 100});
     feature.points = many.data();
     feature.point_count = many.size();
-    CHECK(layer.layout_feature(layout, &feature) == MLN_PLUGIN_STATUS_OK);
-    CHECK(layer.finish_layout(layout, &bucket) == MLN_PLUGIN_STATUS_OK);
-    CHECK(bucket.drawables[0].segment_count == 2);
+    EXPECT_EQ(MLN_PLUGIN_STATUS_OK, layer.layout_feature(layout, &feature));
+    mln_plugin_bucket_v1 bucket{};
+    bucket.struct_size = sizeof(bucket);
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, layer.finish_layout(layout, &bucket));
+    ASSERT_EQ(2u, bucket.drawables[0].segment_count);
     for (size_t s = 0; s < bucket.drawables[0].segment_count; ++s) {
         const auto& segment = bucket.drawables[0].segments[s];
-        CHECK(segment.vertex_length <= 65535);
-        for (size_t i = 0; i < segment.index_length; ++i)
-            CHECK(bucket.indices[segment.index_offset + i] < segment.vertex_length);
+        EXPECT_LE(segment.vertex_length, 65535u);
+        for (size_t i = 0; i < segment.index_length; ++i) {
+            EXPECT_LT(bucket.indices[segment.index_offset + i], segment.vertex_length);
+        }
     }
     layer.destroy_layout(layout);
+}
 
+TEST_F(CircleLayer, QueriesTheShapeAndNotItsQuad) {
     mln_plugin_query_context_v1 query{};
     query.struct_size = sizeof(query);
     query.pixels_to_tile_units = query.camera_to_center_distance = 1;
@@ -107,13 +118,12 @@ int main() {
         const mln_plugin_tile_point_v1 point{x, y};
         return layer.query_feature(&feature, &point, 1, &query, properties.data(), properties.size());
     };
-    CHECK(hit(100, 85));
-    CHECK(hit(100, 119));
-    CHECK(!hit(100, 125)); // Outside the circle, but inside its bounding quad.
+    EXPECT_TRUE(hit(100, 85));
+    EXPECT_TRUE(hit(100, 119));
+    EXPECT_FALSE(hit(100, 125)); // Outside the circle, but inside its bounding quad.
     properties.push_back(number("circle-stroke-width", 10));
-    CHECK(hit(100, 125));
+    EXPECT_TRUE(hit(100, 125));
     properties[0] = number("circle-radius", 0);
     properties[1] = number("circle-stroke-width", 0);
-    CHECK(!hit(100, 100));
-    std::cout << "circle descriptor, ownership, segmentation and query tests passed\n";
+    EXPECT_FALSE(hit(100, 100));
 }

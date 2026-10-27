@@ -1,5 +1,6 @@
 exports_files(
     [
+        "plugin.bzl",
         "render_test.cpp",
         "render_test.bzl",
     ],
