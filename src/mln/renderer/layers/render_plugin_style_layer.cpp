@@ -255,7 +255,6 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
                 // Drawn like fill-extrusion: the per-layer depth mode is disabled above the opaque-pass
                 // cutoff, so a 2D drawable would not depth test against itself or the extrusions.
-                hasDepthDrawables = true;
                 builder->setEnableDepth(true);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                 builder->setIs3D(true);
@@ -293,10 +292,17 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     }
-    if (hasDepthDrawables) {
+    if (!registration->enableStencilOverlapDedup) {
+        // Derived from the live drawables on every update so that the stencil tiles go away again once a
+        // layer stops producing read-write drawables (e.g. after zooming out of a 3D representation).
+        bool hasDepthDrawables = false;
+        tileLayerGroup->visitDrawables([&](gfx::Drawable& drawable) {
+            hasDepthDrawables |= drawable.getIs3D() && !drawable.getEnableStencil() && drawable.getEnableDepth() &&
+                                 drawable.getDepthType() == gfx::DepthMaskType::ReadWrite;
+        });
         // The group only applies the 3D depth mode to is3D drawables when it has stencil tiles; read-write
         // drawables disable stencil, so no clipping masks are drawn for them.
-        tileLayerGroup->setStencilTiles(renderTiles);
+        tileLayerGroup->setStencilTiles(hasDepthDrawables ? renderTiles : RenderTiles{});
     }
 }
 
