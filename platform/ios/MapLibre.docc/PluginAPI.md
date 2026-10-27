@@ -1,6 +1,6 @@
 # Plugin API
 
-Extend MapLibre Native for iOS with native code.
+Extend MapLibre iOS with native code.
 
 > Warning: The plugin API is experimental and does not yet have stability guarantees.
 
