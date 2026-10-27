@@ -1,9 +1,7 @@
 load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load("@rules_apple//apple:ios.bzl", "ios_application")
 load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
-load("@rules_cc//cc:defs.bzl", "objc_library")
 load("@rules_swift//swift:swift.bzl", "swift_library")
-load("//bazel:flags.bzl", "CPP_FLAGS")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
 # The demo draws with layer types that are only registered in a build with plugin support, and the gltf layer
@@ -19,19 +17,6 @@ _PLUGINS_ONLY = select({
 
 configure_device_profiles()
 
-# The SDK links the gltf layer and registers it through `MLNPuckPlugin`. The ngon layer is not part of the SDK, so
-# the app links it itself and registers it through this small wrapper.
-objc_library(
-    name = "PluginRegistration",
-    srcs = ["Registration/NgonPlugin.mm"],
-    hdrs = ["Registration/NgonPlugin.h"],
-    copts = CPP_FLAGS,
-    includes = ["Registration"],
-    module_name = "PluginRegistration",
-    target_compatible_with = _PLUGINS_ONLY,
-    deps = ["//plugins/plugins/ngon-layer"],
-)
-
 swift_library(
     name = "Sources",
     srcs = glob(["Sources/**/*.swift"]),
@@ -39,8 +24,10 @@ swift_library(
     tags = ["manual"],
     target_compatible_with = _PLUGINS_ONLY,
     deps = [
-        ":PluginRegistration",
+        # The generated wrappers of every plugin in plugins/plugins, and a registry that registers one by its ID. The
+        # app registers a plugin when its demo opens.
         "//platform:ios-sdk",
+        "//plugins/ios:plugins",
     ],
 )
 
@@ -59,11 +46,13 @@ ios_application(
     infoplists = ["Info.plist"],
     minimum_os_version = "16.0",
     provisioning_profile = "xcode_profile",
-    # `asset://car-red.glb` in a style resolves against the root of the app bundle.
-    resources = glob([
-        "Models/*.glb",
-        "Styles/*.json",
-    ]),
+    # `asset://car-red.glb` in a style resolves against the root of the app bundle. The demos of the plugins that only
+    # need a style and a camera are listed from the metadata the plugin wrappers carry.
+    resources = [
+        "//plugins/demo/assets:models",
+        "//plugins/demo/assets:styles",
+        "//plugins/ios:demos",
+    ],
     target_compatible_with = _PLUGINS_ONLY,
     version = ":plugin_demo_version",
     visibility = ["//visibility:public"],

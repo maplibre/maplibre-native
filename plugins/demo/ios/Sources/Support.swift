@@ -16,9 +16,13 @@ struct LocalFrame {
 }
 
 extension MLNMapView {
-    /// A map showing one of the styles bundled with the app (`Styles/<name>.json`).
+    /// A map showing one of the styles bundled with the app (`plugins/demo/assets/styles/<name>.json`).
     static func demoMap(style name: String) -> MLNMapView {
-        let url = Bundle.main.url(forResource: name, withExtension: "json")
+        demoMap(styleURL: Bundle.main.url(forResource: name, withExtension: "json"))
+    }
+
+    /// A map showing the style at `url`.
+    static func demoMap(styleURL url: URL?) -> MLNMapView {
         let mapView = MLNMapView(frame: .zero, styleURL: url)
         mapView.attributionButton.isHidden = true
         return mapView

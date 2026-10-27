@@ -5,7 +5,7 @@ The models are authored for the layer's conventions: one mesh unit is one meter,
 faces +Z so that `model-heading: 0` points it north. Every model is symmetric left to right. The `gltf` layer only
 reads material base colors, so each part is a primitive with its own flat-colored material.
 
-Usage: generate_models.py [output-directory]   (default: ../Models, next to this script)
+Usage: generate_models.py [output-directory]   (default: models/, next to this script)
 """
 
 import json
@@ -99,7 +99,7 @@ def glb(mesh):
             "mode": 4,
         })
     document = {
-        "asset": {"version": "2.0", "generator": "plugins/demo/ios/tools/generate_models.py"},
+        "asset": {"version": "2.0", "generator": "plugins/demo/assets/generate_models.py"},
         "scene": 0,
         "scenes": [{"nodes": [0]}],
         "nodes": [{"mesh": 0}],
@@ -157,7 +157,7 @@ MODELS = {
 
 
 def main():
-    out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "Models"
+    out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent / "models"
     out.mkdir(parents=True, exist_ok=True)
     for name, mesh in MODELS.items():
         data = glb(mesh)

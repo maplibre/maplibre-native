@@ -1,0 +1,12 @@
+# Assets the demo apps share. An app bundles them at the root, so a style names a model as `asset://car-red.glb`.
+filegroup(
+    name = "models",
+    srcs = glob(["models/*.glb"]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "styles",
+    srcs = glob(["styles/*.json"]),
+    visibility = ["//visibility:public"],
+)
