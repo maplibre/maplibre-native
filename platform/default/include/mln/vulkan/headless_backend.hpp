@@ -2,6 +2,7 @@
 
 #include <mln/gfx/headless_backend.hpp>
 #include <mln/vulkan/renderer_backend.hpp>
+#include <mln/vulkan/shared_device.hpp>
 #include <memory>
 #include <functional>
 
@@ -14,7 +15,8 @@ class HeadlessBackend final : public vulkan::RendererBackend, public gfx::Headle
 public:
     HeadlessBackend(Size = {256, 256},
                     SwapBehaviour = SwapBehaviour::NoFlush,
-                    gfx::ContextMode = gfx::ContextMode::Unique);
+                    gfx::ContextMode = gfx::ContextMode::Unique,
+                    std::shared_ptr<SharedDevice> = nullptr);
     ~HeadlessBackend() override;
     gfx::Renderable& getDefaultRenderable() override;
     PremultipliedImage readStillImage() override;

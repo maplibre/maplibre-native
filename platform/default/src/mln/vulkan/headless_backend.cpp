@@ -33,9 +33,11 @@ public:
 
 HeadlessBackend::HeadlessBackend(const Size size_,
                                  gfx::HeadlessBackend::SwapBehaviour,
-                                 const gfx::ContextMode contextMode_)
+                                 const gfx::ContextMode contextMode_,
+                                 std::shared_ptr<SharedDevice> sharedDevice_)
     : mln::vulkan::RendererBackend(contextMode_),
       mln::gfx::HeadlessBackend(size_) {
+    sharedDevice = std::move(sharedDevice_);
     init();
 }
 
@@ -100,7 +102,8 @@ namespace gfx {
 template <>
 std::unique_ptr<gfx::HeadlessBackend> Backend::Create<gfx::Backend::Type::Vulkan>(
     const Size size, gfx::Renderable::SwapBehaviour swapBehavior, const gfx::ContextMode contextMode) {
-    return std::make_unique<vulkan::HeadlessBackend>(size, swapBehavior, contextMode);
+    return std::make_unique<vulkan::HeadlessBackend>(
+        size, swapBehavior, contextMode, vulkan::SharedDevice::forCurrentThread());
 }
 
 } // namespace gfx
