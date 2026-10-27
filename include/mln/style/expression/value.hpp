@@ -162,6 +162,19 @@ struct ValueConverter<Rotation> {
     static std::optional<Rotation> fromExpressionValue(const Value& v);
 };
 
+// Defined in conversion/hillshade_conversions.cpp, declared here so nothing can instantiate them first.
+template <>
+type::Type valueTypeToExpressionType<std::vector<Color>>();
+
+template <>
+type::Type valueTypeToExpressionType<HillshadeMethodType>();
+
+template <>
+std::optional<std::vector<Color>> ValueConverter<std::vector<Color>>::fromExpressionValue(const Value& value);
+
+template <>
+std::optional<HillshadeMethodType> ValueConverter<HillshadeMethodType>::fromExpressionValue(const Value& value);
+
 } // namespace expression
 } // namespace style
 } // namespace mln

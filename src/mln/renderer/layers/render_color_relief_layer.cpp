@@ -31,7 +31,7 @@ using namespace shaders;
 
 namespace {
 
-inline const ColorReliefLayer::Impl& impl_cast(const Immutable<Layer::Impl>& impl) {
+inline const ColorReliefLayer::Impl& colorReliefImplCast(const Immutable<Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == ColorReliefLayer::Impl::staticTypeInfo());
     return static_cast<const ColorReliefLayer::Impl&>(*impl);
 }
@@ -40,7 +40,7 @@ inline const ColorReliefLayer::Impl& impl_cast(const Immutable<Layer::Impl>& imp
 
 RenderColorReliefLayer::RenderColorReliefLayer(Immutable<ColorReliefLayer::Impl> _impl)
     : RenderLayer(makeMutable<ColorReliefLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+      unevaluated(colorReliefImplCast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
 
     // Initialize color ramp data with RGBA format (4 floats per stop)
@@ -55,7 +55,7 @@ RenderColorReliefLayer::RenderColorReliefLayer(Immutable<ColorReliefLayer::Impl>
 RenderColorReliefLayer::~RenderColorReliefLayer() = default;
 
 void RenderColorReliefLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    unevaluated = colorReliefImplCast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     styleDependencies = unevaluated.getDependencies();
     updateColorRamp();
 }

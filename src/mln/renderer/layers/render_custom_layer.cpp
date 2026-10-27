@@ -33,7 +33,7 @@ using namespace style;
 
 namespace {
 
-inline const CustomLayer::Impl& impl(const Immutable<style::Layer::Impl>& impl) {
+inline const CustomLayer::Impl& customImplCast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == CustomLayer::Impl::staticTypeInfo());
     return static_cast<const CustomLayer::Impl&>(*impl);
 }
@@ -71,7 +71,7 @@ void callPreRender(const std::shared_ptr<style::CustomLayerHost>& host,
 
 RenderCustomLayer::RenderCustomLayer(Immutable<style::CustomLayer::Impl> _impl)
     : RenderLayer(makeMutable<CustomLayerProperties>(std::move(_impl))),
-      host(impl(baseImpl).host) {
+      host(customImplCast(baseImpl).host) {
     assert(gfx::BackendScope::exists());
 }
 
@@ -119,13 +119,13 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
 
     // check if host changed and update
-    bool hostChanged = (host != impl(baseImpl).host);
+    bool hostChanged = (host != customImplCast(baseImpl).host);
     if (hostChanged) {
         // If the context changed, deinitialize the previous one before initializing the new one.
         if (host && !contextDestroyed) {
             MBGL_CHECK_ERROR(host->deinitialize());
         }
-        host = impl(baseImpl).host;
+        host = customImplCast(baseImpl).host;
         needsInitialize = true;
     }
 

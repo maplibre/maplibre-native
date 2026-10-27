@@ -38,7 +38,7 @@ constexpr int pmtilesHeaderLength = 127;
 // set a limit so it doesn't grow unlimited
 constexpr int MAX_DIRECTORY_CACHE_ENTRIES = 100;
 
-bool acceptsURL(const std::string& url) {
+bool acceptsPMTilesURL(const std::string& url) {
     return url.starts_with(mln::util::PMTILES_PROTOCOL);
 }
 
@@ -53,7 +53,6 @@ const uint8_t TILETYPE_MLT = 0x6;
 } // namespace pmtiles
 
 namespace mln {
-using namespace rapidjson;
 
 using AsyncCallback = std::function<void(std::unique_ptr<Response::Error>)>;
 using AsyncTileCallback = std::function<void(std::pair<uint64_t, uint32_t>, std::unique_ptr<Response::Error>)>;
@@ -320,7 +319,7 @@ private:
                 pmtiles::headerv3 header = header_cache.at(url);
 
                 auto parse_callback = [=, this](const std::string& data) {
-                    Document doc;
+                    rapidjson::Document doc;
 
                     auto& allocator = doc.GetAllocator();
 
@@ -618,9 +617,9 @@ private:
             });
     }
 
-    std::string serialize(Document& doc) {
-        StringBuffer buffer;
-        Writer<StringBuffer> writer(buffer);
+    std::string serialize(rapidjson::Document& doc) {
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         doc.Accept(writer);
 
         return std::string(buffer.GetString(), buffer.GetSize());
@@ -649,7 +648,7 @@ std::unique_ptr<AsyncRequest> PMTilesFileSource::request(const Resource& resourc
 }
 
 bool PMTilesFileSource::canRequest(const Resource& resource) const {
-    return acceptsURL(resource.url);
+    return acceptsPMTilesURL(resource.url);
 }
 
 PMTilesFileSource::~PMTilesFileSource() = default;

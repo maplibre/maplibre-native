@@ -4,6 +4,7 @@ option(MLN_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MLN_WITH_PLUGINS "Build source-bound native plugin layers" OFF)
 option(MLN_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
 option(MLN_WITH_COVERAGE "Enable code coverage collection" OFF)
+option(MLN_UNITY_BUILD "Compile mbgl-core as a unity build" OFF)
 option(MLN_WITH_QT "Build MapLibre Native Qt bindings" OFF)
 option(MLN_WITH_NODE "Build MapLibre Native Node.js bindings" OFF)
 option(MLN_WITH_GLFW "Set up targets for GLFW platform" ON)
@@ -1085,6 +1086,17 @@ target_sources(
 
 if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-core PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
+endif()
+
+if (MLN_UNITY_BUILD)
+    set_target_properties(mbgl-core PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 16)
+    # sqlite3.cpp defines explicit specializations that another source of the batch can instantiate first.
+    # geojson_impl.cpp defines functions that render-test/parser.cpp defines too, so it must stay in its own object for the linker to skip it.
+    set_source_files_properties(
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/sqlite3.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/util/geojson_impl.cpp
+        PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
+    )
 endif()
 
 set_source_files_properties(

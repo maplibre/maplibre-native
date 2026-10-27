@@ -122,9 +122,9 @@ TransitionOptions ColorReliefLayer::getColorReliefOpacityTransition() const {
     return impl().paint.template get<ColorReliefOpacity>().options;
 }
 
-using namespace conversion;
+namespace color_relief_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 4u;
 
@@ -168,9 +168,10 @@ StyleProperty getLayerProperty(const ColorReliefLayer& layer, const std::string&
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace color_relief_layer_properties
 
 Value ColorReliefLayer::serialize() const {
+    using namespace color_relief_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -181,7 +182,8 @@ Value ColorReliefLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> ColorReliefLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> ColorReliefLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace color_relief_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -228,7 +230,7 @@ std::optional<Error> ColorReliefLayer::setPropertyInternal(const std::string& na
 }
 
 StyleProperty ColorReliefLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return color_relief_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> ColorReliefLayer::mutableBaseImpl() const {

@@ -392,9 +392,9 @@ TransitionOptions LocationIndicatorLayer::getTopImageSizeTransition() const {
     return impl().paint.template get<TopImageSize>().options;
 }
 
-using namespace conversion;
+namespace location_indicator_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 20u;
 
@@ -514,9 +514,10 @@ StyleProperty getLayerProperty(const LocationIndicatorLayer& layer, const std::s
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace location_indicator_layer_properties
 
 Value LocationIndicatorLayer::serialize() const {
+    using namespace location_indicator_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -527,7 +528,8 @@ Value LocationIndicatorLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> LocationIndicatorLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace location_indicator_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -692,7 +694,7 @@ std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::stri
 }
 
 StyleProperty LocationIndicatorLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return location_indicator_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> LocationIndicatorLayer::mutableBaseImpl() const {

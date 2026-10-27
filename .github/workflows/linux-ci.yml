@@ -121,7 +121,8 @@ jobs:
             -DCLANG_TIDY_COMMAND=/usr/local/bin/ctcache/clang-tidy \
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
-            -DMLN_WITH_COVERAGE=ON
+            -DMLN_WITH_COVERAGE=ON \
+            -DMLN_UNITY_BUILD=ON
           cmake --build build-linux-${{ matrix.variant.renderer }} --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # mbgl-render (used for size test) & mbgl-benchmark-runner

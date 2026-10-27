@@ -7,14 +7,14 @@
 namespace mln {
 
 namespace {
-TileObserver nullObserver;
+TileObserver nullTileObserver;
 }
 
 Tile::Tile(Kind kind_, OverscaledTileID id_, std::string sourceID_, TileObserver* observer_)
     : kind(kind_),
       id(id_),
       sourceID(std::move(sourceID_)) {
-    observer = observer_ ? observer_ : &nullObserver;
+    observer = observer_ ? observer_ : &nullTileObserver;
 }
 
 Tile::~Tile() = default;

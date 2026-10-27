@@ -150,9 +150,9 @@ TransitionOptions BackgroundLayer::getBackgroundPatternTransition() const {
     return impl().paint.template get<BackgroundPattern>().options;
 }
 
-using namespace conversion;
+namespace background_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 6u;
 
@@ -204,9 +204,10 @@ StyleProperty getLayerProperty(const BackgroundLayer& layer, const std::string& 
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace background_layer_properties
 
 Value BackgroundLayer::serialize() const {
+    using namespace background_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -217,7 +218,8 @@ Value BackgroundLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> BackgroundLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> BackgroundLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace background_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -279,7 +281,7 @@ std::optional<Error> BackgroundLayer::setPropertyInternal(const std::string& nam
 }
 
 StyleProperty BackgroundLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return background_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> BackgroundLayer::mutableBaseImpl() const {

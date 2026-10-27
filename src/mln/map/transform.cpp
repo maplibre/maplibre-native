@@ -17,8 +17,6 @@
 #include <utility>
 #include <numbers>
 
-using namespace std::numbers;
-
 namespace mln {
 
 /** Converts the given angle (in radians) to be numerically close to the anchor
@@ -29,8 +27,8 @@ double _normalizeAngle(double angle, double anchorAngle) {
         return 0;
     }
 
-    angle = util::wrap(angle, -pi, pi);
-    if (angle == -pi) angle = pi;
+    angle = util::wrap(angle, -std::numbers::pi, std::numbers::pi);
+    if (angle == -std::numbers::pi) angle = std::numbers::pi;
     double diff = std::abs(angle - anchorAngle);
     if (std::abs(angle - util::M2PI - anchorAngle) < diff) {
         angle -= util::M2PI;
@@ -186,7 +184,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             state.setLatLngZoom(frameLatLng, frameZoom);
             state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, t));
             if (bearing != startBearing) {
-                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -pi, pi));
+                state.setBearing(
+                    util::wrap(util::interpolate(startBearing, bearing, t), -std::numbers::pi, std::numbers::pi));
             }
             if (padding != startEdgeInsets) {
                 // Interpolate edge insets
@@ -378,7 +377,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
             state.setLatLngZoom(frameLatLng, frameZoom);
             state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, us));
             if (bearing != startBearing) {
-                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -pi, pi));
+                state.setBearing(
+                    util::wrap(util::interpolate(startBearing, bearing, k), -std::numbers::pi, std::numbers::pi));
             }
 
             if (padding != startEdgeInsets) {

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <mln/gfx/attribute.hpp>
 #include <mln/gfx/color_mode.hpp>
 #include <mln/gfx/cull_face_mode.hpp>

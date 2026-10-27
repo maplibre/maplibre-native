@@ -7,8 +7,6 @@
 
 namespace mln {
 
-using namespace style;
-
 namespace {
 
 const Shaping& getAnyShaping(const ShapedTextOrientations& shapedTextOrientations) {
@@ -85,7 +83,7 @@ SymbolInstance::SymbolInstance(Anchor& anchor_,
                                const std::optional<PositionedIcon>& verticallyShapedIcon,
                                const float textBoxScale_,
                                const float textPadding,
-                               const SymbolPlacementType textPlacement,
+                               const style::SymbolPlacementType textPlacement,
                                const std::array<float, 2>& textOffset_,
                                const float iconBoxScale,
                                const Padding iconPadding,

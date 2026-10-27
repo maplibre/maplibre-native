@@ -3,7 +3,11 @@
 
 namespace mln {
 
-using namespace style;
+using style::SourceType, style::VisibilityType, style::TranslateAnchorType, style::RasterResamplingType,
+    style::HillshadeIlluminationAnchorType, style::RotateAnchorType, style::CirclePitchScaleType, style::LineCapType,
+    style::LineJoinType, style::SymbolPlacementType, style::SymbolAnchorType, style::SymbolZOrderType,
+    style::TextJustifyType, style::TextTransformType, style::TextWritingModeType, style::AlignmentType,
+    style::IconTextFitType, style::LightAnchorType;
 
 MBGL_DEFINE_ENUM(SourceType,
                  {{SourceType::Vector, "vector"},

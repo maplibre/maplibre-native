@@ -7,12 +7,12 @@ namespace mln {
 namespace style {
 
 namespace {
-SourceObserver nullObserver;
+SourceObserver nullSourceObserver;
 }
 
 Source::Source(Immutable<Impl> impl)
     : baseImpl(std::move(impl)),
-      observer(&nullObserver) {}
+      observer(&nullSourceObserver) {}
 
 Source::~Source() = default;
 
@@ -41,7 +41,7 @@ void Source::setVolatile(bool set) noexcept {
 }
 
 void Source::setObserver(SourceObserver* observer_) {
-    observer = observer_ ? observer_ : &nullObserver;
+    observer = observer_ ? observer_ : &nullSourceObserver;
 }
 
 void Source::setPrefetchZoomDelta(std::optional<uint8_t> delta) noexcept {

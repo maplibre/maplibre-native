@@ -15,7 +15,7 @@
 #include <string>
 
 namespace {
-bool acceptsURL(const std::string& url) {
+bool acceptsFileURL(const std::string& url) {
     return url.starts_with(mln::util::FILE_PROTOCOL);
 }
 
@@ -40,7 +40,7 @@ public:
           clientOptions(clientOptions_.clone()) {}
 
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
-        if (!acceptsURL(resource.url)) {
+        if (!acceptsFileURL(resource.url)) {
             Response response;
             response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Invalid file URL");
             req.invoke(&FileSourceRequest::setResponse, response);
@@ -96,7 +96,7 @@ std::unique_ptr<AsyncRequest> LocalFileSource::request(const Resource& resource,
 }
 
 bool LocalFileSource::canRequest(const Resource& resource) const {
-    return acceptsURL(resource.url);
+    return acceptsFileURL(resource.url);
 }
 
 void LocalFileSource::pause() {

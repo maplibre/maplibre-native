@@ -28,7 +28,7 @@
 #endif
 
 namespace {
-bool acceptsURL(const std::string &url) {
+bool acceptsMBTilesURL(const std::string &url) {
     return url.starts_with(mln::util::MBTILES_PROTOCOL);
 }
 
@@ -38,7 +38,6 @@ std::string url_to_path(const std::string &url) {
 } // namespace
 
 namespace mln {
-using namespace rapidjson;
 
 class MBTilesFileSource::Impl {
 public:
@@ -62,9 +61,9 @@ public:
         return elems;
     }
 
-    std::string serialize(Document &doc) {
-        StringBuffer buffer;
-        Writer<StringBuffer> writer(buffer);
+    std::string serialize(rapidjson::Document &doc) {
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         doc.Accept(writer);
 
         return std::string(buffer.GetString(), buffer.GetSize());
@@ -78,7 +77,7 @@ public:
 
         Response response;
 
-        Document doc;
+        rapidjson::Document doc;
         auto &allocator = doc.GetAllocator();
 
         std::map<std::string, std::string> values;
@@ -116,7 +115,7 @@ public:
 
         // We use file location with appended parameter query parameter as URL for actual tile data
         std::string tile_url = std::string(resource.url + "?file={x}/{y}/{z}." + format);
-        rapidjson::Value arr(kArrayType);
+        rapidjson::Value arr(rapidjson::kArrayType);
         rapidjson::Value tile_url_val(std::move(tile_url), allocator);
         arr.PushBack(tile_url_val, allocator);
         doc.AddMember("tiles", arr, allocator);
@@ -150,7 +149,7 @@ public:
                 doc.AddMember("scale", std::stod(entry.second), allocator);
             } else if (entry.first == "minzoom" || entry.first == "maxzoom") {
                 auto name = rapidjson::Value(entry.first, allocator);
-                Document::ValueType value{entry.second.empty() ? 0 : std::stoi(entry.second)};
+                rapidjson::Document::ValueType value{entry.second.empty() ? 0 : std::stoi(entry.second)};
                 doc.AddMember(std::move(name), std::move(value), allocator);
             } else if (entry.first == "bounds") {
                 const std::vector<double> bounds_values = split(entry.second, ',');
@@ -164,14 +163,14 @@ public:
                 const int cZoom = (minZoom + maxZoom) / 2;
 
                 if (format != "pbf") {
-                    rapidjson::Value bounds_arr(kArrayType);
+                    rapidjson::Value bounds_arr(rapidjson::kArrayType);
                     for (auto vv : bounds_values) {
                         bounds_arr.PushBack(vv, allocator);
                     }
                     doc.AddMember("bounds", std::move(bounds_arr), allocator);
                 }
 
-                rapidjson::Value center_arr(kArrayType);
+                rapidjson::Value center_arr(rapidjson::kArrayType);
                 center_arr.PushBack(cLon, allocator);
                 center_arr.PushBack(cLat, allocator);
                 center_arr.PushBack(cZoom, allocator);
@@ -317,7 +316,7 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
 }
 
 bool MBTilesFileSource::canRequest(const Resource &resource) const {
-    return acceptsURL(resource.url);
+    return acceptsMBTilesURL(resource.url);
 }
 
 MBTilesFileSource::~MBTilesFileSource() = default;

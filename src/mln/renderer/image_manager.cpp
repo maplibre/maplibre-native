@@ -12,7 +12,7 @@
 namespace mln {
 
 namespace {
-ImageManagerObserver nullObserver;
+ImageManagerObserver nullImageManagerObserver;
 } // namespace
 
 ImageManager::ImageManager() = default;
@@ -20,7 +20,7 @@ ImageManager::ImageManager() = default;
 ImageManager::~ImageManager() = default;
 
 void ImageManager::setObserver(ImageManagerObserver* observer_) {
-    observer = observer_ ? observer_ : &nullObserver;
+    observer = observer_ ? observer_ : &nullImageManagerObserver;
 }
 
 void ImageManager::setLoaded(bool loaded_) {

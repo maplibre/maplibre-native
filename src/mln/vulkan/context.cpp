@@ -12,6 +12,7 @@
 #include <mln/vulkan/renderable_resource.hpp>
 #include <mln/vulkan/render_pass.hpp>
 #include <mln/vulkan/texture2d.hpp>
+#include <mln/vulkan/upload_pass.hpp>
 #include <mln/vulkan/vertex_attribute.hpp>
 #include <mln/shaders/vulkan/shader_program.hpp>
 #include <mln/shaders/vulkan/clipping_mask.hpp>
@@ -47,11 +48,6 @@ namespace {
 std::mutex glslangMutex;
 uint32_t glslangRefCount = 0;
 } // namespace
-
-class RenderbufferResource : public gfx::RenderbufferResource {
-public:
-    RenderbufferResource() = default;
-};
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),

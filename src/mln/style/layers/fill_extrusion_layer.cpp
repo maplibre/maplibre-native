@@ -306,9 +306,9 @@ TransitionOptions FillExtrusionLayer::getFillExtrusionVerticalGradientTransition
     return impl().paint.template get<FillExtrusionVerticalGradient>().options;
 }
 
-using namespace conversion;
+namespace fill_extrusion_layer_properties {
 
-namespace {
+using namespace conversion;
 
 constexpr uint8_t kPaintPropertyCount = 16u;
 
@@ -404,9 +404,10 @@ StyleProperty getLayerProperty(const FillExtrusionLayer& layer, const std::strin
     return getLayerProperty(layer, static_cast<Property>(it->second));
 }
 
-} // namespace
+} // namespace fill_extrusion_layer_properties
 
 Value FillExtrusionLayer::serialize() const {
+    using namespace fill_extrusion_layer_properties;
     auto result = Layer::serialize();
     assert(result.getObject());
     for (const auto& property : layerProperties) {
@@ -417,7 +418,8 @@ Value FillExtrusionLayer::serialize() const {
     return result;
 }
 
-std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> FillExtrusionLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+    using namespace fill_extrusion_layer_properties;
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
@@ -558,7 +560,7 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
 }
 
 StyleProperty FillExtrusionLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    return fill_extrusion_layer_properties::getLayerProperty(*this, name);
 }
 
 Mutable<Layer::Impl> FillExtrusionLayer::mutableBaseImpl() const {

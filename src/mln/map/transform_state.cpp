@@ -11,8 +11,6 @@
 
 #include <numbers>
 
-using namespace std::numbers;
-
 namespace mln {
 
 /*
@@ -25,7 +23,8 @@ const double maxMercatorHorizonAngle = util::deg2rad(89.25);
 
 namespace {
 LatLng latLngFromMercator(Point<double> mercatorCoordinate, LatLng::WrapMode wrapMode = LatLng::WrapMode::Unwrapped) {
-    return {util::rad2deg(2 * std::atan(std::exp(pi - mercatorCoordinate.y * 2 * pi)) - (pi / 2)),
+    return {util::rad2deg(2 * std::atan(std::exp(std::numbers::pi - mercatorCoordinate.y * 2 * std::numbers::pi)) -
+                          (std::numbers::pi / 2)),
             mercatorCoordinate.x * 360.0 - 180.0,
             wrapMode};
 }
@@ -432,11 +431,11 @@ void TransformState::setNorthOrientation(const NorthOrientation val) {
 double TransformState::getNorthOrientationAngle() const {
     double angleOrientation = 0;
     if (orientation == NorthOrientation::Rightwards) {
-        angleOrientation += pi / 2;
+        angleOrientation += std::numbers::pi / 2;
     } else if (orientation == NorthOrientation::Downwards) {
-        angleOrientation += pi;
+        angleOrientation += std::numbers::pi;
     } else if (orientation == NorthOrientation::Leftwards) {
-        angleOrientation -= pi / 2;
+        angleOrientation -= std::numbers::pi / 2;
     }
     return angleOrientation;
 }
@@ -493,7 +492,7 @@ void TransformState::setEdgeInsets(const EdgeInsets& val) {
 // MARK: - Position
 
 LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
-    return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * pi), -x / Bc, wrapMode};
+    return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * std::numbers::pi), -x / Bc, wrapMode};
 }
 
 double TransformState::getCenterAltitude() const {

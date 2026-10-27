@@ -10,14 +10,14 @@ namespace style {
 
 namespace {
 
-using namespace expression;
-bool checkGPUCapable(const Expression& expression, const ZoomCurvePtr& zoomCurve) {
-    return (expression.dependencies == Dependency::Zoom) && !zoomCurve.is<std::nullptr_t>() &&
-           (expression.getType().is<type::NumberType>() || expression.getType().is<type::ColorType>());
+bool checkGPUCapable(const expression::Expression& expression, const expression::ZoomCurvePtr& zoomCurve) {
+    return (expression.dependencies == expression::Dependency::Zoom) && !zoomCurve.is<std::nullptr_t>() &&
+           (expression.getType().is<expression::type::NumberType>() ||
+            expression.getType().is<expression::type::ColorType>());
 }
 
-std::shared_ptr<const std::set<std::string>> collectGlobalStateRefsShared(const Expression& expression) {
-    if (!expression.has(Dependency::GlobalState)) {
+std::shared_ptr<const std::set<std::string>> collectGlobalStateRefsShared(const expression::Expression& expression) {
+    if (!expression.has(expression::Dependency::GlobalState)) {
         return nullptr;
     }
     auto refs = std::make_shared<std::set<std::string>>();
@@ -29,11 +29,12 @@ std::shared_ptr<const std::set<std::string>> collectGlobalStateRefsShared(const 
 PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expression> expression_)
     : expression(std::move(expression_)),
       globalStateRefs(collectGlobalStateRefsShared(*expression)),
-      zoomCurve(expression->has(Dependency::Zoom) ? expression::findZoomCurveChecked(*expression) : nullptr),
+      zoomCurve(expression->has(expression::Dependency::Zoom) ? expression::findZoomCurveChecked(*expression)
+                                                              : nullptr),
       useIntegerZoom_(false),
-      isZoomConstant_(!expression->has(Dependency::Zoom)),
-      isFeatureConstant_(!expression->has(Dependency::Feature)),
-      isRuntimeConstant_(!expression->has(Dependency::Image | Dependency::GlobalState)),
+      isZoomConstant_(!expression->has(expression::Dependency::Zoom)),
+      isFeatureConstant_(!expression->has(expression::Dependency::Feature)),
+      isRuntimeConstant_(!expression->has(expression::Dependency::Image | expression::Dependency::GlobalState)),
       isGPUCapable_(checkGPUCapable(*expression, zoomCurve)) {
     assert(isZoomConstant_ == expression::isZoomConstant(*expression));
     assert(isFeatureConstant_ == expression::isFeatureConstant(*expression));

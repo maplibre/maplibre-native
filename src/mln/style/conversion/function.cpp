@@ -20,8 +20,11 @@ namespace mln {
 namespace style {
 namespace conversion {
 
+// Keeps the using-directives from leaking into the other files of a unity build.
+namespace function_names {
 using namespace expression;
 using namespace expression::dsl;
+} // namespace function_names
 
 namespace {
 const std::string_view tokenReservedChars = "{}";
@@ -44,17 +47,20 @@ bool hasTokens(const std::string& source) {
     return false;
 }
 
-std::unique_ptr<Expression> convertTokenStringToFormatExpression(const std::string& source) {
+std::unique_ptr<expression::Expression> convertTokenStringToFormatExpression(const std::string& source) {
+    using namespace function_names;
     auto textExpression = convertTokenStringToExpression(source);
     std::vector<FormatExpressionSection> sections{FormatExpressionSection(std::move(textExpression))};
     return std::make_unique<FormatExpression>(std::move(sections));
 }
 
-std::unique_ptr<Expression> convertTokenStringToImageExpression(const std::string& source) {
+std::unique_ptr<expression::Expression> convertTokenStringToImageExpression(const std::string& source) {
+    using namespace function_names;
     return std::make_unique<ImageExpression>(convertTokenStringToExpression(source));
 }
 
-std::unique_ptr<Expression> convertTokenStringToExpression(const std::string& source) {
+std::unique_ptr<expression::Expression> convertTokenStringToExpression(const std::string& source) {
+    using namespace function_names;
     std::vector<std::unique_ptr<Expression>> inputs;
 
     auto pos = source.begin();
@@ -171,12 +177,12 @@ template std::optional<PropertyExpression<std::vector<Color>>> convertFunctionTo
     const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<HillshadeMethodType>> convertFunctionToExpression<HillshadeMethodType>(
     const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<Formatted>> convertFunctionToExpression<Formatted>(const Convertible&,
-                                                                                             Error&,
-                                                                                             bool);
+template std::optional<PropertyExpression<expression::Formatted>> convertFunctionToExpression<expression::Formatted>(
+    const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<std::vector<TextWritingModeType>>>
 convertFunctionToExpression<std::vector<TextWritingModeType>>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<Image>> convertFunctionToExpression<Image>(const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<expression::Image>> convertFunctionToExpression<expression::Image>(
+    const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<Rotation>> convertFunctionToExpression<Rotation>(const Convertible&,
                                                                                            Error&,
                                                                                            bool);
@@ -206,6 +212,7 @@ struct Converter<int64_t> {
     }
 };
 
+namespace function_names {
 namespace {
 
 enum class FunctionType {
@@ -358,7 +365,7 @@ std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
                 return std::nullopt;
             }
             return convertTokens ? std::make_unique<ImageExpression>(convertTokenStringToImageExpression(*result))
-                                 : literal(Image(result->c_str()));
+                                 : literal(expression::Image(result->c_str()));
         });
 }
 
@@ -794,11 +801,13 @@ std::optional<std::unique_ptr<Expression>> composite(type::Type type,
 }
 
 } // namespace
+} // namespace function_names
 
-std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Type type,
-                                                                       const Convertible& value,
-                                                                       Error& err,
-                                                                       bool convertTokens) {
+std::optional<std::unique_ptr<expression::Expression>> convertFunctionToExpression(expression::type::Type type,
+                                                                                   const Convertible& value,
+                                                                                   Error& err,
+                                                                                   bool convertTokens) {
+    using namespace function_names;
     if (!isObject(value)) {
         err.message = "function must be an object";
         return std::nullopt;

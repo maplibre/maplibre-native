@@ -11,7 +11,7 @@ namespace expression {
 
 namespace {
 /// Collators are considered feature-dependent, see `isFeatureConstant`
-constexpr auto extraDependency = Dependency::Feature;
+constexpr auto collatorDependency = Dependency::Feature;
 } // namespace
 
 CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive_,
@@ -19,7 +19,7 @@ CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive
                                        std::optional<std::unique_ptr<Expression>> locale_)
     : Expression(Kind::CollatorExpression,
                  type::Collator,
-                 depsOf(caseSensitive_) | depsOf(diacriticSensitive_) | depsOf(locale_) | extraDependency),
+                 depsOf(caseSensitive_) | depsOf(diacriticSensitive_) | depsOf(locale_) | collatorDependency),
       caseSensitive(std::move(caseSensitive_)),
       diacriticSensitive(std::move(diacriticSensitive_)),
       locale(std::move(locale_)) {}
