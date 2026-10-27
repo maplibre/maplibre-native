@@ -7,6 +7,14 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'plugins/**'
+      - 'include/mln/plugin/**'
+      - 'src/mln/**/*plugin*'
+      - 'test/plugin/**'
+      - 'render-test/**'
+      - 'metrics/**'
+      - '.github/workflows/plugins-ci.yml'
 
   pull_request:
     paths:
@@ -38,10 +46,10 @@ jobs:
       - name: Check the generated plugin wrappers
         run: node plugins/tools/generate.ts --check
 
-      # A plugin with scripts/generate-shaders.mjs prints the shader header in shared/cpp.
+      # A plugin with scripts/generate-shaders.ts prints the shader header in shared/cpp.
       - name: Check the generated shader headers
         run: |
-          for script in plugins/plugins/*/scripts/generate-shaders.mjs; do
+          for script in plugins/plugins/*/scripts/generate-shaders.ts; do
             plugin=$(dirname "$(dirname "$script")")
             node "$script" | diff - "$plugin"/shared/cpp/*_shader_sources.hpp
           done
@@ -78,11 +86,17 @@ jobs:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
         run: brew install cmake ninja pkg-config glfw libuv icu4c jpeg-turbo webp libpng
 
+      # The presets compile through ccache.
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        with:
+          key: plugins-${{ matrix.preset }}
+
       - name: Configure
         run: cmake --preset ${{ matrix.preset }} -DMLN_WITH_PLUGINS=ON
 
       - name: Build
-        run: cmake --build build-${{ matrix.preset }} --target mln-plugin-render-tests mln-plugin-api-tests
+        run: cmake --build build-${{ matrix.preset }} --target mln-plugin-tests
 
       - name: Test (Linux)
         if: runner.os == 'Linux'

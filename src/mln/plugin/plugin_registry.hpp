@@ -102,7 +102,6 @@ struct LayerType {
     mln_plugin_query_feature_fn queryFeature = nullptr;
     mln_plugin_query_radius_fn queryRadius = nullptr;
     mln_plugin_update_uniform_block_fn updateUniformBlock = nullptr;
-    bool replaceBuiltin = false;
     bool is3D = false;
     std::vector<DrawPass> drawPasses;
     mln_plugin_evaluate_layer_fn evaluateLayer = nullptr;

@@ -502,12 +502,11 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         copiedLayerType.queryFeature = layerType.query_feature;
         copiedLayerType.queryRadius = layerType.get_query_radius;
         copiedLayerType.updateUniformBlock = layerType.update_uniform_block;
-        if (layerType.replace_builtin > 1 || layerType.is_3d > 1 || layerType.enable_near_clipped_matrix > 1 ||
-            layerType.draw_pass_count > 32 || (layerType.draw_pass_count && !layerType.draw_passes)) {
+        if (layerType.is_3d > 1 || layerType.enable_near_clipped_matrix > 1 || layerType.draw_pass_count > 32 ||
+            (layerType.draw_pass_count && !layerType.draw_passes)) {
             error = "plugin rendering descriptor is malformed";
             return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
-        copiedLayerType.replaceBuiltin = layerType.replace_builtin;
         copiedLayerType.is3D = layerType.is_3d;
         copiedLayerType.evaluateLayer = layerType.evaluate_layer;
         for (size_t passIndex = 0; passIndex < layerType.draw_pass_count; ++passIndex) {
@@ -623,10 +622,7 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         pendingTypes.emplace(type->type, type);
         factories.push_back(std::make_unique<PluginStyleLayerFactory>(type));
     }
-    std::vector<std::string> replacements;
-    for (const auto& type : newLayerTypes)
-        if (type->replaceBuiltin) replacements.push_back(type->type);
-    if (!LayerManager::get()->registerLayerFactories(std::move(factories), error, replacements)) {
+    if (!LayerManager::get()->registerLayerFactories(std::move(factories), error)) {
         return MLN_PLUGIN_STATUS_CONFLICT;
     }
     layerTypes.merge(pendingTypes);

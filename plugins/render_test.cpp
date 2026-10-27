@@ -8,12 +8,12 @@
 
 #include MLN_PLUGIN_HEADER
 
-#include <algorithm>
 #include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <regex>
 #include <string>
 #include <vector>
@@ -61,13 +61,12 @@ std::string manifestValue(const std::string& manifest, const std::string& key) {
     return std::regex_search(manifest, match, pattern) ? match[1].str() : std::string{};
 }
 
-std::vector<std::pair<std::string, std::string>> ignoredTests(const std::string& path) {
-    std::vector<std::pair<std::string, std::string>> ignored;
-    if (path.empty()) return ignored;
+std::map<std::string, std::string> ignoredTests(const std::string& path) {
+    std::map<std::string, std::string> ignored;
     const auto text = readFile(path);
     const std::regex entry("\"([^\"]+)\"\\s*:\\s*\"([^\"]*)\"");
     for (auto it = std::sregex_iterator(text.begin(), text.end(), entry); it != std::sregex_iterator(); ++it) {
-        ignored.emplace_back((*it)[1].str(), (*it)[2].str());
+        ignored.emplace((*it)[1].str(), (*it)[2].str());
     }
     return ignored;
 }
@@ -75,7 +74,7 @@ std::vector<std::pair<std::string, std::string>> ignoredTests(const std::string&
 // A `--filter` regex that matches the style of every test with a layer of `layerType`, except the ignored ones.
 std::string filterForLayerType(const fs::path& manifestPath,
                                const std::string& layerType,
-                               const std::vector<std::pair<std::string, std::string>>& ignored) {
+                               const std::map<std::string, std::string>& ignored) {
     const auto base =
         (manifestPath.parent_path() / manifestValue(readFile(manifestPath), "base_test_path")).lexically_normal();
     const std::regex layer("\"type\"\\s*:\\s*\"" + layerType + "\"");
@@ -84,7 +83,7 @@ std::string filterForLayerType(const fs::path& manifestPath,
         if (entry.path().filename() != "style.json") continue;
         if (!std::regex_search(readFile(entry.path()), layer)) continue;
         const auto test = entry.path().parent_path().lexically_relative(base).generic_string();
-        const auto skip = std::find_if(ignored.begin(), ignored.end(), [&](const auto& i) { return i.first == test; });
+        const auto skip = ignored.find(test);
         if (skip != ignored.end()) {
             std::cout << "* ignore " << test << " (" << skip->second << ")\n";
             continue;
@@ -92,9 +91,8 @@ std::string filterForLayerType(const fs::path& manifestPath,
         tests.push_back(escape(test));
     }
     if (tests.empty()) return {};
-    std::sort(tests.begin(), tests.end());
     std::string filter = "/(";
-    for (const auto& test : tests) filter += (filter.size() > 2 ? "|" : "") + test;
+    for (size_t i = 0; i < tests.size(); ++i) filter += (i ? "|" : "") + tests[i];
     return filter + ")/style\\.json$";
 }
 

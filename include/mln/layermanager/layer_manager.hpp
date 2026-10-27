@@ -38,15 +38,13 @@ public:
 #if MLN_WITH_PLUGINS
     /**
      * Registers runtime layer factories as one atomic operation. The manager
-     * takes ownership, including on failure. Built-in names may be explicitly replaced.
+     * takes ownership, including on failure. A factory replaces the built-in factory of its name.
      * Factories and their immutable LayerTypeInfo must remain valid for the
      * manager's lifetime. Call before loading styles that use these types.
      * Registration and lookups are thread-safe; callbacks run without the lock.
      * This is a C++ API for code built against the same core, not a DSO ABI.
      */
-    bool registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>>,
-                                std::string& error,
-                                const std::vector<std::string>& replaceBuiltins = {});
+    bool registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>>, std::string& error);
 #endif
 
     bool hasLayerType(const std::string&) noexcept;

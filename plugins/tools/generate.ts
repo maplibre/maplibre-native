@@ -1,6 +1,6 @@
 // Generates the platform wrappers of the plugins in plugins/plugins from their plugin.json.
 //
-//   node plugins/tools/generate.ts [--check] [--platform android|ios]
+//   node plugins/tools/generate.ts [--check]
 //
 // plugins/android/<id>: a Gradle library module that builds the plugin and registers it from Kotlin.
 // plugins/ios/<id>: a Bazel library with an Objective-C class that registers the plugin. plugins/ios also has a
@@ -8,14 +8,27 @@
 //
 // The outputs are committed. `--check` writes nothing and fails when they are out of date.
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { glob } from 'node:fs/promises';
 import { join, posix, relative, sep } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
+import type { AndroidValues, IosValues, RegistryValues, Template } from './templates/values.ts';
 
 const root = join(import.meta.dirname, '..');
 const repository = join(root, '..');
-const templates = join(import.meta.dirname, 'templates');
 const backendNames = ['opengl', 'vulkan', 'metal'];
 const ignored = new Set(['build', '.cxx', '.gradle']);
+
+// The templates in templates/<directory>: one module per generated file, see templates/values.ts.
+async function loadTemplates<Values>(directory: string): Promise<Template<Values>[]> {
+  const base = join(import.meta.dirname, 'templates', directory);
+  const names = (await Array.fromAsync(glob('*.ts', { cwd: base }))).sort();
+  return Promise.all(names.map((name) => import(pathToFileURL(join(base, name)).href)));
+}
+
+const androidTemplates = await loadTemplates<AndroidValues>('android');
+const iosTemplates = await loadTemplates<IosValues>('ios');
+const registryTemplates = await loadTemplates<RegistryValues>('ios/registry');
 
 interface Camera {
   latitude: number;
@@ -36,7 +49,9 @@ interface Plugin extends Manifest {
   directory: string;
   displayName: string;
   pascal: string;
-  snake: string;
+  // The header and register function of the plugin follow from its id.
+  header: string;
+  register: string;
   backends: string[];
 }
 
@@ -47,8 +62,7 @@ function fail(message: string): never {
   process.exit(1);
 }
 
-function readPlugin(directory: string): Plugin {
-  const id = directory.split(sep).at(-1)!;
+function readPlugin(id: string, directory: string): Plugin {
   const where = `plugins/plugins/${id}/plugin.json`;
   if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) fail(`${where}: the directory must be a kebab-case id`);
   const manifest: Manifest = JSON.parse(readFileSync(join(directory, 'plugin.json'), 'utf8'));
@@ -66,22 +80,15 @@ function readPlugin(directory: string): Plugin {
   const snake = id.replaceAll('-', '_');
   const pascal = id.split('-').map((part) => part[0].toUpperCase() + part.slice(1)).join('');
   const displayName = id[0].toUpperCase() + id.slice(1).replaceAll('-', ' ');
-  return { ...manifest, id, directory, displayName, pascal, snake, backends };
+  return { ...manifest, id, directory, displayName, pascal, header: `${snake}.hpp`, register: `mln_${snake}_register`, backends };
 }
 
 function readPlugins(): Plugin[] {
   const directory = join(root, 'plugins');
   return readdirSync(directory, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && existsSync(join(directory, entry.name, 'plugin.json')))
-    .map((entry) => readPlugin(join(directory, entry.name)))
+    .map((entry) => readPlugin(entry.name, join(directory, entry.name)))
     .sort((a, b) => a.id.localeCompare(b.id));
-}
-
-function fill(template: string, values: Record<string, string>): string {
-  let text = readFileSync(join(templates, template), 'utf8');
-  for (const [key, value] of Object.entries(values)) text = text.replaceAll(`@@${key}@@`, value);
-  if (text.includes('@@')) fail(`Unfilled placeholder in ${template}`);
-  return text;
 }
 
 function demoMetadata(plugin: Plugin, style: string, extra: Record<string, string> = {}): string {
@@ -114,37 +121,28 @@ function androidFiles(plugins: Plugin[]): Files {
   for (const plugin of plugins.filter((p) => p.backends.some((b) => b === 'opengl' || b === 'vulkan'))) {
     const namespace = `org.maplibre.plugins.${plugin.id.replaceAll('-', '')}`;
     const className = `${plugin.pascal}Plugin`;
+    const qualifiedClassName = `${namespace}.${className}`;
     const pluginRoot = posix.relative(`plugins/android/${plugin.id}/src/main/cpp`, `plugins/plugins/${plugin.id}`);
-    const values = {
-      ID: plugin.id,
-      DISPLAY_NAME: plugin.displayName,
-      NAMESPACE: namespace,
-      PRODUCT: plugin.pascal,
-      CLASS_NAME: className,
-      QUALIFIED_CLASS_NAME: `${namespace}.${className}`,
-      LIBRARY_NAME: plugin.id,
-      COMPILE_SDK: '35',
-      MIN_SDK: '23',
-      NDK_VERSION: ndk,
-      PLUGIN_ROOT: pluginRoot,
-      SOURCES: sources(plugin).map((name) => `    "\${PLUGIN_ROOT}/shared/cpp/${name}"\n`).join(''),
-      INCLUDE_DIRECTORIES: includeDirectories(plugin).map((name) => `    "\${PLUGIN_ROOT}/${name}"\n`).join(''),
-      HEADER_INCLUDE: `${plugin.snake}.hpp`,
-      REGISTER_FUNCTION: `mln_${plugin.snake}_register`,
-      JNI_CLASS: `${namespace}.${className}`.replaceAll('_', '_1').replaceAll('.', '_'),
-      BACKENDS: plugin.backends.join(', '),
-      OPENGL: String(plugin.backends.includes('opengl')),
-      VULKAN: String(plugin.backends.includes('vulkan')),
+    const values: AndroidValues = {
+      id: plugin.id,
+      displayName: plugin.displayName,
+      namespace,
+      product: plugin.pascal,
+      className,
+      qualifiedClassName,
+      ndkVersion: ndk,
+      pluginRoot,
+      sources: sources(plugin).map((name) => `    "\${PLUGIN_ROOT}/shared/cpp/${name}"\n`).join(''),
+      includeDirectories: includeDirectories(plugin).map((name) => `    "\${PLUGIN_ROOT}/${name}"\n`).join(''),
+      header: plugin.header,
+      register: plugin.register,
+      jniClass: qualifiedClassName.replaceAll('_', '_1').replaceAll('.', '_'),
+      backends: plugin.backends.join(', '),
+      opengl: String(plugin.backends.includes('opengl')),
+      vulkan: String(plugin.backends.includes('vulkan')),
     };
     const module = (path: string) => `${plugin.id}/${path}`;
-    files.set(module('build.gradle.kts'), fill('android/build.gradle.kts.in', values));
-    files.set(module('consumer-rules.pro'), fill('android/consumer-rules.pro.in', values));
-    files.set(module('src/main/cpp/CMakeLists.txt'), fill('android/CMakeLists.txt.in', values));
-    files.set(module('src/main/cpp/plugin.cpp'), fill('android/plugin.cpp.in', values));
-    files.set(
-      module(`src/main/java/${namespace.replaceAll('.', '/')}/${className}.kt`),
-      fill('android/Plugin.kt.in', values),
-    );
+    for (const template of androidTemplates) files.set(template.path(values), template.default(values));
     const demo = plugin.demo;
     if (demo?.style) {
       let style = demo.style;
@@ -152,7 +150,7 @@ function androidFiles(plugins: Plugin[]): Files {
         files.set(module(`src/main/assets/demo/${plugin.id}/style.json`), readFileSync(join(plugin.directory, style), 'utf8'));
         style = `asset://demo/${plugin.id}/style.json`;
       }
-      files.set(module(`src/main/assets/demo/${plugin.id}/demo.json`), demoMetadata(plugin, style, { registerClass: `${namespace}.${className}` }));
+      files.set(module(`src/main/assets/demo/${plugin.id}/demo.json`), demoMetadata(plugin, style, { registerClass: qualifiedClassName }));
     }
   }
   return files;
@@ -193,34 +191,30 @@ function iosFiles(plugins: Plugin[]): Files {
       files.set(`${plugin.id}/demo/${plugin.id}.demo.json`, demoMetadata(plugin, style));
       demoTargets = `\nfilegroup(\n    name = "demo",\n    srcs = [\n${sourceFiles.map((name) => `        "${name}",\n`).join('')}    ],\n    visibility = ["//visibility:public"],\n)\n`;
     }
-    const values = {
-      ID: plugin.id,
-      PRODUCT: plugin.pascal,
-      CLASS: className,
-      SWIFT_NAME: `${plugin.pascal}Plugin`,
-      ERROR_DOMAIN: `org.maplibre.plugins.${plugin.id}`,
-      DISPLAY_NAME: objcString(plugin.displayName),
-      REGISTER_FUNCTION: `mln_${plugin.snake}_register`,
-      HEADER_INCLUDE: `${plugin.snake}.hpp`,
-      COMPATIBLE: plugin.backends.includes('opengl') ? pluginsEnabled : pluginsEnabledMetal,
-      DEMO: demoTargets,
+    const values: IosValues = {
+      id: plugin.id,
+      product: plugin.pascal,
+      className,
+      swiftName: `${plugin.pascal}Plugin`,
+      errorDomain: `org.maplibre.plugins.${plugin.id}`,
+      displayName: objcString(plugin.displayName),
+      register: plugin.register,
+      header: plugin.header,
+      compatible: plugin.backends.includes('opengl') ? pluginsEnabled : pluginsEnabledMetal,
+      demo: demoTargets,
     };
-    files.set(`${plugin.id}/BUILD.bazel`, fill('ios/BUILD.bazel.in', values).replace(/\n+$/, '\n'));
-    files.set(`${plugin.id}/include/${plugin.pascal}/${plugin.pascal}.h`, fill('ios/Plugin.h.in', values));
-    files.set(`${plugin.id}/src/${plugin.pascal}.mm`, fill('ios/Plugin.mm.in', values));
+    for (const template of iosTemplates) files.set(template.path(values), template.default(values));
   }
-  const registry = {
-    IMPORTS: supported.map((p) => `#import <${p.pascal}/${p.pascal}.h>`).join('\n'),
-    IDENTIFIERS: supported.map((p) => `        @"${p.id}",`).join('\n'),
-    CASES: supported
+  const registry: RegistryValues = {
+    imports: supported.map((p) => `#import <${p.pascal}/${p.pascal}.h>`).join('\n'),
+    identifiers: supported.map((p) => `        @"${p.id}",`).join('\n'),
+    cases: supported
       .map((p) => `    if ([identifier isEqualToString:@"${p.id}"]) {\n        return [MLN${p.pascal}Plugin registerPluginWithError:error];\n    }`)
       .join('\n'),
-    DEPS: supported.map((p) => `        "//plugins/ios/${p.id}",`).join('\n'),
-    DEMOS: supported.filter((p) => p.demo?.style).map((p) => `        "//plugins/ios/${p.id}:demo",`).join('\n'),
+    deps: supported.map((p) => `        "//plugins/ios/${p.id}",`).join('\n'),
+    demos: supported.filter((p) => p.demo?.style).map((p) => `        "//plugins/ios/${p.id}:demo",`).join('\n'),
   };
-  files.set('BUILD.bazel', fill('ios/RegistryBUILD.bazel.in', registry));
-  files.set('include/PluginRegistry/PluginRegistry.h', fill('ios/Registry.h.in', registry));
-  files.set('src/PluginRegistry.mm', fill('ios/Registry.mm.in', registry));
+  for (const template of registryTemplates) files.set(template.path(registry), template.default(registry));
   return files;
 }
 
@@ -262,12 +256,12 @@ function sync(directory: string, files: Files, check: boolean): string[] {
   return changed;
 }
 
-const { values } = parseArgs({ options: { check: { type: 'boolean' }, platform: { type: 'string' } } });
-if (values.platform && !['android', 'ios'].includes(values.platform)) fail('--platform must be android or ios');
+const { values } = parseArgs({ options: { check: { type: 'boolean' } } });
 const plugins = readPlugins();
-const outputs: [string, Files][] = [];
-if (values.platform !== 'ios') outputs.push(['plugins/android', androidFiles(plugins)]);
-if (values.platform !== 'android') outputs.push(['plugins/ios', iosFiles(plugins)]);
+const outputs: [string, Files][] = [
+  ['plugins/android', androidFiles(plugins)],
+  ['plugins/ios', iosFiles(plugins)],
+];
 
 const stale = outputs.flatMap(([directory, files]) =>
   sync(join(repository, directory), files, !!values.check).map((path) => `  ${directory}/${path}`),

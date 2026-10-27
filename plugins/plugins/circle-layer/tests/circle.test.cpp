@@ -1,5 +1,4 @@
 #include "circle_layer.hpp"
-#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <string_view>

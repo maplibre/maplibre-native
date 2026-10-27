@@ -9,13 +9,8 @@
 #include <limits>
 #include <memory>
 #include <new>
-#include <string>
 #include <string_view>
 #include <vector>
-
-#ifndef MLN_CIRCLE_PLUGIN_VERSION
-#define MLN_CIRCLE_PLUGIN_VERSION "0.1.0-local"
-#endif
 
 namespace {
 
@@ -356,6 +351,7 @@ uint8_t queryFeature(const mln_plugin_feature_v1* feature,
         offset = {c * offset.x - s * offset.y, s * offset.x + c * offset.y};
     }
     std::vector<Point> polygon;
+    polygon.reserve(queryCount);
     for (size_t i = 0; i < queryCount; ++i) {
         const Point tile = {double(query[i].x), double(query[i].y)};
         polygon.push_back(alignWithMap ? tile : screen(project(tile, context->tile_matrix), *context));
@@ -431,16 +427,12 @@ const mln_plugin_shader_descriptor_v1 shader = {
     0,
     0,
 };
-const mln_plugin_draw_pass_v1 drawPass = {sizeof(mln_plugin_draw_pass_v1), 1, 0, 1, 1, 0, MLN_PLUGIN_CULL_NONE};
 const mln_plugin_layer_type_v1 layerType = [] {
     mln_plugin_layer_type_v1 v{};
     v.struct_size = sizeof(v);
     v.layer_type = str("circle");
-    v.replace_builtin = 1;
     // The built-in circle layer uses the unaligned projection, and a plugin only gets that with this flag.
     v.enable_near_clipped_matrix = 1;
-    v.draw_passes = &drawPass;
-    v.draw_pass_count = 1;
     v.backend_mask = MLN_PLUGIN_BACKEND_OPENGL | MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL;
     v.properties = properties;
     v.property_count = std::size(properties);
@@ -460,7 +452,7 @@ const mln_plugin_descriptor_v1 descriptor = {
     sizeof(mln_plugin_descriptor_v1),
     MLN_PLUGIN_ABI_VERSION_1,
     str("org.maplibre.circle-layer"),
-    str(MLN_CIRCLE_PLUGIN_VERSION),
+    str("0.1.0-local"),
     MLN_PLUGIN_ABI_VERSION_1,
     MLN_PLUGIN_ABI_VERSION_1,
     &layerType,

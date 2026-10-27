@@ -13,10 +13,6 @@
 #include <string_view>
 #include <vector>
 
-#ifndef MLN_NGON_PLUGIN_VERSION
-#define MLN_NGON_PLUGIN_VERSION "0.1.0-local"
-#endif
-
 namespace {
 
 constexpr uint32_t positionAttribute = 0;
@@ -461,7 +457,7 @@ const mln_plugin_descriptor_v1 descriptor = {
     sizeof(mln_plugin_descriptor_v1),
     MLN_PLUGIN_ABI_VERSION_1,
     str("org.maplibre.ngon-layer"),
-    str(MLN_NGON_PLUGIN_VERSION),
+    str("0.1.0-local"),
     MLN_PLUGIN_ABI_VERSION_1,
     MLN_PLUGIN_ABI_VERSION_1,
     &layerType,

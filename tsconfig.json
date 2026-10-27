@@ -13,7 +13,8 @@
   },
   "include": [
     ".github/scripts/*.ts",
-    "plugins/tools/*.ts",
+    "plugins/tools/**/*.ts",
+    "plugins/plugins/*/scripts/*.ts",
     "scripts/**/*.mjs",
     "scripts/**/*.d.ts"
   ],

@@ -1,15 +1,26 @@
 enable_testing()
 
-# The render tests of a plugin: the runner of render_test.cpp with the plugin registered, run by ctest from the
-# repository root. Without MANIFEST the tests are the repository's own, with the manifest of this build's renderer.
-# LAYER_TYPE and IGNORE select them, see render_test.cpp.
-add_custom_target(mln-plugin-render-tests)
-function(mln_plugin_render_test name plugin header register)
+# `mln-plugin-tests` builds the tests of every plugin, which ctest runs from the repository root. The library, header and
+# register function of the plugin in plugins/<id> are the ones its directory names, see README.md.
+add_custom_target(mln-plugin-tests)
+
+function(mln_plugin_unit_test id source)
+    add_executable(mln-${id}-tests EXCLUDE_FROM_ALL ${source})
+    target_link_libraries(mln-${id}-tests PRIVATE mln-${id})
+    add_dependencies(mln-plugin-tests mln-${id}-tests)
+    add_test(NAME mln-${id}-tests COMMAND mln-${id}-tests WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+endfunction()
+
+# The runner of render_test.cpp with the plugin registered. Without MANIFEST the tests are the repository's own, with the
+# manifest of this build's renderer. LAYER_TYPE and IGNORE select them, see render_test.cpp.
+function(mln_plugin_render_test id)
     cmake_parse_arguments(ARG "" "MANIFEST;LAYER_TYPE;IGNORE" "" ${ARGN})
+    string(REPLACE "-" "_" snake ${id})
+    set(name mln-${id}-render-test)
     add_executable(${name} EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/render_test.cpp)
-    target_compile_definitions(${name} PRIVATE MLN_PLUGIN_HEADER="${header}" MLN_PLUGIN_REGISTER=${register})
-    target_link_libraries(${name} PRIVATE ${plugin} mbgl-render-test)
-    add_dependencies(mln-plugin-render-tests ${name})
+    target_compile_definitions(${name} PRIVATE MLN_PLUGIN_HEADER="${snake}.hpp" MLN_PLUGIN_REGISTER=mln_${snake}_register)
+    target_link_libraries(${name} PRIVATE mln-${id} mbgl-render-test)
+    add_dependencies(mln-plugin-tests ${name})
 
     set(manifest ${ARG_MANIFEST})
     if(NOT manifest)
@@ -33,21 +44,13 @@ endfunction()
 
 add_subdirectory(plugins/ngon-layer)
 target_link_libraries(mln-ngon-layer PUBLIC mbgl-core)
-
-add_executable(mln-ngon-tests EXCLUDE_FROM_ALL plugins/ngon-layer/tests/ngon.test.cpp)
-target_link_libraries(mln-ngon-tests PRIVATE mln-ngon-layer)
-
-mln_plugin_render_test(mln-ngon-render-test mln-ngon-layer ngon_layer.hpp mln_ngon_layer_register
-    MANIFEST plugins/plugins/ngon-layer/render-tests/manifest.json)
+mln_plugin_unit_test(ngon-layer plugins/ngon-layer/tests/ngon.test.cpp)
+mln_plugin_render_test(ngon-layer MANIFEST plugins/plugins/ngon-layer/render-tests/manifest.json)
 
 add_subdirectory(plugins/circle-layer)
 target_link_libraries(mln-circle-layer PUBLIC mbgl-core)
-
-add_executable(mln-circle-tests EXCLUDE_FROM_ALL plugins/circle-layer/tests/circle.test.cpp)
-target_link_libraries(mln-circle-tests PRIVATE mln-circle-layer)
-
-mln_plugin_render_test(mln-circle-render-test mln-circle-layer circle_layer.hpp mln_circle_layer_register
-    LAYER_TYPE circle IGNORE plugins/plugins/circle-layer/render-tests/ignores.json)
+mln_plugin_unit_test(circle-layer plugins/circle-layer/tests/circle.test.cpp)
+mln_plugin_render_test(circle-layer LAYER_TYPE circle IGNORE plugins/plugins/circle-layer/render-tests/ignores.json)
 
 add_library(mln-fill-extrusion STATIC plugins/fill-extrusion/shared/cpp/fill_extrusion.cpp)
 target_include_directories(mln-fill-extrusion PUBLIC plugins/fill-extrusion/shared/include)
@@ -58,7 +61,7 @@ if(MLN_WITH_METAL)
 endif()
 
 if(MLN_WITH_VULKAN OR MLN_WITH_METAL)
-    mln_plugin_render_test(mln-fill-extrusion-render-test mln-fill-extrusion fill_extrusion.hpp mln_fill_extrusion_register
+    mln_plugin_render_test(fill-extrusion
         LAYER_TYPE fill-extrusion IGNORE plugins/plugins/fill-extrusion/render-tests/ignores.json)
 endif()
 
@@ -72,4 +75,5 @@ add_executable(mln-plugin-api-tests EXCLUDE_FROM_ALL
 target_include_directories(mln-plugin-api-tests PRIVATE ../src ../test/include ../test/src)
 get_target_property(MLN_PLUGIN_TEST_LIBRARIES mbgl-core LINK_LIBRARIES)
 target_link_libraries(mln-plugin-api-tests PRIVATE mln-fill-extrusion mbgl-vendor-googletest ${MLN_PLUGIN_TEST_LIBRARIES})
+add_dependencies(mln-plugin-tests mln-plugin-api-tests)
 add_test(NAME mln-plugin-api-tests COMMAND mln-plugin-api-tests WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

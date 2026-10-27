@@ -2,19 +2,6 @@ import CoreLocation
 import MapLibre
 import SwiftUI
 
-/// A flat east/north frame in meters around an origin. Good enough for a scene a few hundred meters across.
-struct LocalFrame {
-    let origin: CLLocationCoordinate2D
-
-    func coordinate(east: Double, north: Double) -> CLLocationCoordinate2D {
-        let metersPerDegree = 111_320.0
-        return CLLocationCoordinate2D(
-            latitude: origin.latitude + north / metersPerDegree,
-            longitude: origin.longitude + east / (metersPerDegree * cos(origin.latitude * .pi / 180))
-        )
-    }
-}
-
 extension MLNMapView {
     /// A map showing one of the styles bundled with the app (`plugins/demo/assets/styles/<name>.json`).
     static func demoMap(style name: String) -> MLNMapView {

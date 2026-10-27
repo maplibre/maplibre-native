@@ -44,10 +44,7 @@ cc_test(
 plugin_render_test(
     name = "render-test",
     data = ["//metrics:render-test-files"],
-    header = "fill_extrusion.hpp",
     ignore = "render-tests/ignores.json",
     layer_type = "fill-extrusion",
     manifest = {"//:metal_renderer": "metrics/ios-metal-render-test-runner-style.json"},
-    plugin = ":fill-extrusion",
-    register = "mln_fill_extrusion_register",
 )

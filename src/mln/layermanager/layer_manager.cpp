@@ -33,9 +33,7 @@ LayerManager::LayerManager() = default;
 LayerManager::~LayerManager() = default;
 
 #if MLN_WITH_PLUGINS
-bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>> factories,
-                                          std::string& error,
-                                          const std::vector<std::string>& replaceBuiltins) {
+bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>> factories, std::string& error) {
     std::lock_guard lock(impl->runtimeMutex);
     error.clear();
     std::set<std::string> names;
@@ -45,9 +43,7 @@ bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFacto
             error = "Layer factory must have a non-empty, immutable type name";
             return false;
         }
-        if ((getFactory(info->type) &&
-             std::find(replaceBuiltins.begin(), replaceBuiltins.end(), info->type) == replaceBuiltins.end()) ||
-            impl->runtimeFactories.contains(info->type) || !names.emplace(info->type).second) {
+        if (impl->runtimeFactories.contains(info->type) || !names.emplace(info->type).second) {
             error = "Layer type is already registered: " + std::string(info->type);
             return false;
         }

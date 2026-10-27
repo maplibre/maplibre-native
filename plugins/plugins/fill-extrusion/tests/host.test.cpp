@@ -81,12 +81,7 @@ TEST(FillExtrusionPlugin, ReplacementAndDynamicParity) {
     char error[512]{};
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_fill_extrusion_register(captureDescriptor, nullptr, 0));
     auto copy = *registeredDescriptor;
-    auto type = copy.layer_types[0];
-    copy.layer_types = &type;
-    type.replace_builtin = 0;
-    EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&copy, error, sizeof(error)));
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_fill_extrusion_register(mln_plugin_register_v1, error, sizeof(error))) << error;
-    type.replace_builtin = 1;
     copy.plugin_id = {"another-extrusion", 17};
     EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&copy, error, sizeof(error)));
     EXPECT_EQ(MLN_PLUGIN_STATUS_ALREADY_REGISTERED,
@@ -208,7 +203,6 @@ TEST(FillExtrusionPlugin, ImageDescriptorValidation) {
     descriptor.plugin_id = {"test.pattern-descriptor", 23};
     auto layer = descriptor.layer_types[0];
     layer.layer_type = {"test-pattern-descriptor", 23};
-    layer.replace_builtin = 0;
     descriptor.layer_types = &layer;
     auto shader = layer.shaders[0];
     layer.shaders = &shader;

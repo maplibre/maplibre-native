@@ -338,8 +338,9 @@ typedef struct mln_plugin_layout_context_v1 {
     uint32_t extent;
     const mln_plugin_property_value_v1* properties;
     size_t property_count;
-    /* 1 when the map renders a still image, 0 for a continuous map. The features of a still image include the points
-     * in the buffer around the tile, which no neighboring tile has to draw. */
+    /* 1 when the map renders a still image or a tile, 0 for a continuous map. A continuous map draws a point only in
+     * the tile that contains it, and a still image also draws the points in the buffer around the tile, as the
+     * built-in circle layer does. */
     uint8_t still_image;
 } mln_plugin_layout_context_v1;
 
@@ -535,6 +536,8 @@ typedef mln_plugin_status (*mln_plugin_evaluate_layer_fn)(const mln_plugin_prope
  * maps. */
 typedef uint8_t (*mln_plugin_should_animate_fn)(const mln_plugin_property_value_v1* properties, size_t property_count);
 
+/* A layer type with the name of a built-in layer replaces it: styles that use the name get the plugin's layer. Existing
+ * objects keep their implementation identity. A plugin never replaces another plugin. */
 typedef struct mln_plugin_layer_type_v1 {
     uint32_t struct_size;
     mln_plugin_string layer_type;
@@ -551,9 +554,6 @@ typedef struct mln_plugin_layer_type_v1 {
     mln_plugin_query_feature_fn query_feature;
     mln_plugin_update_uniform_block_fn update_uniform_block;
     mln_plugin_query_radius_fn get_query_radius;
-    /* Explicitly opt into replacing a built-in STYLE name. Existing objects
-     * keep their implementation identity. Does not replace another plugin. */
-    uint8_t replace_builtin;
     uint8_t is_3d;
     const mln_plugin_draw_pass_v1* draw_passes;
     size_t draw_pass_count;

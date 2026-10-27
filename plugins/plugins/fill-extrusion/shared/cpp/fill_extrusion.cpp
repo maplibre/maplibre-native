@@ -621,7 +621,6 @@ const mln_plugin_layer_type_v1 layer = [] {
     l.query_feature = queryFeature;
     l.get_query_radius = queryRadius;
     l.update_uniform_block = updateUniform;
-    l.replace_builtin = 1;
     l.is_3d = 1;
     l.draw_passes = passes;
     l.draw_pass_count = std::size(passes);
