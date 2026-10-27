@@ -119,7 +119,7 @@ void TransformState::matrixFor(mat4& matrix, const UnwrappedTileID& tileID) cons
     matrix::identity(matrix);
     matrix::translate(matrix,
                       matrix,
-                      int64_t(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
+                      (tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
                       int64_t(tileID.canonical.y) * s,
                       0);
     matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);

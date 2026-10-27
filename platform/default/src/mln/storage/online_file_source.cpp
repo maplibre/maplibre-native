@@ -171,11 +171,11 @@ public:
 
     void setResourceTransform(ResourceTransform transform) { resourceTransform = std::move(transform); }
 
-    void setResourceOptions(ResourceOptions options) { resourceOptions = options; }
+    void setResourceOptions(ResourceOptions options) { resourceOptions = std::move(options); }
 
     const ResourceOptions& getResourceOptions() const { return resourceOptions; }
 
-    void setClientOptions(ClientOptions options) { clientOptions = options; }
+    void setClientOptions(ClientOptions options) { clientOptions = std::move(options); }
 
     const ClientOptions& getClientOptions() const { return clientOptions; }
 
@@ -323,7 +323,7 @@ public:
     std::unique_ptr<AsyncRequest> request(Callback callback, Resource res) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
         req->onCancel(
-            [actorRef = thread->actor(), req = req.get()]() { actorRef.invoke(&OnlineFileSourceThread::cancel, req); });
+            [actorRef = thread->actor(), req = req.get()] { actorRef.invoke(&OnlineFileSourceThread::cancel, req); });
         thread->actor().invoke(&OnlineFileSourceThread::request, req.get(), std::move(res), req->actor());
         return req;
     }
@@ -340,7 +340,7 @@ public:
         thread->actor().invoke(&OnlineFileSourceThread::setResourceOptions, options.clone());
         {
             std::scoped_lock lock(resourceOptionsMutex);
-            cachedResourceOptions = options;
+            cachedResourceOptions = std::move(options);
         }
     }
 
@@ -353,7 +353,7 @@ public:
         thread->actor().invoke(&OnlineFileSourceThread::setClientOptions, options.clone());
         {
             std::scoped_lock lock(clientOptionsMutex);
-            cachedClientOptions = options;
+            cachedClientOptions = std::move(options);
         }
     }
 
