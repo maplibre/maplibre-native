@@ -58,6 +58,21 @@ void runServer(std::unique_ptr<httplib::Server>& server) {
         res.set_content("Response " + std::to_string(++cacheCounter), "text/plain");
     });
 
+    std::atomic_int implicitCacheCounter(0);
+    server->Get("/implicit-cache", [&](const Request&, Response& res) {
+        res.set_content("Response " + std::to_string(++implicitCacheCounter), "text/plain");
+    });
+
+    server->Get("/must-revalidate", [](const Request&, Response& res) {
+        res.set_header("Cache-Control", "must-revalidate");
+        res.set_content("Response", "text/plain");
+    });
+
+    server->Get("/explicit-max-age", [](const Request&, Response& res) {
+        res.set_header("Cache-Control", "max-age=30");
+        res.set_content("Response", "text/plain");
+    });
+
     server->Get("/revalidate-same", [](const Request& req, Response& res) {
         if (req.get_header_value("if-none-match") == "snowfall") {
             // Second request can be cached for 1 second.
