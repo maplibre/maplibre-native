@@ -1,43 +1,22 @@
 // What generate.ts passes to the templates of each kind.
 
-export interface AndroidValues {
+/** A plugin in plugins/plugins. */
+export interface Plugin {
   id: string;
-  displayName: string;
-  namespace: string;
-  product: string;
-  className: string;
-  qualifiedClassName: string;
-  ndkVersion: string;
-  pluginRoot: string;
-  sources: string;
-  includeDirectories: string;
-  header: string;
-  register: string;
-  jniClass: string;
-  backends: string;
-  opengl: string;
-  vulkan: string;
+  backends: string[];
 }
 
-export interface IosValues {
-  id: string;
-  product: string;
-  className: string;
-  swiftName: string;
-  errorDomain: string;
-  displayName: string;
-  header: string;
-  register: string;
-  compatible: string;
-  demo: string;
+export interface AndroidValues {
+  plugin: Plugin;
+  ndkVersion: string;
+  /** The files in shared/cpp that are built. */
+  sources: string[];
+  /** The directories of the plugin that are on the include path. */
+  includeDirectories: string[];
 }
 
 export interface RegistryValues {
-  imports: string;
-  identifiers: string;
-  cases: string;
-  deps: string;
-  demos: string;
+  plugins: Plugin[];
 }
 
 // A template module in templates/: the path of its file relative to plugins/<platform>, and its content.

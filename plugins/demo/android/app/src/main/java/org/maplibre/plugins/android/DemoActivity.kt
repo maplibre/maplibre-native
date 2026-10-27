@@ -3,13 +3,10 @@ package org.maplibre.plugins.android
 import android.app.Activity
 import android.os.Bundle
 import android.widget.Toast
-import org.json.JSONObject
 import org.maplibre.android.MapLibre
 import org.maplibre.android.RenderingEngine
 import org.maplibre.android.WellKnownTileServer
-import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 
@@ -33,7 +30,7 @@ class DemoActivity : Activity() {
         }
         MapLibre.getInstance(this, null, WellKnownTileServer.MapLibre, requestedRenderer)
 
-        val demo = intent.getStringExtra("plugin")?.let { Demo.find(this, it) }
+        val demo = intent.getStringExtra("plugin")?.let { Demo.find(it) }
         if (demo == null) {
             Toast.makeText(this, "Unknown plugin: ${intent.getStringExtra("plugin")}", Toast.LENGTH_LONG).show()
             finish()
@@ -50,19 +47,12 @@ class DemoActivity : Activity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
             if (savedInstanceState == null) {
-                demo.camera?.let { map.moveCamera(CameraUpdateFactory.newCameraPosition(it.toCameraPosition())) }
+                map.moveCamera(CameraUpdateFactory.newCameraPosition(demo.camera))
             }
             // Plugin layers are loaded from JSON; the SDK has no Java Layer peer for them yet.
             map.setStyle(Style.Builder().fromUri(intent.getStringExtra("style") ?: demo.style))
         }
     }
-
-    private fun JSONObject.toCameraPosition() = CameraPosition.Builder()
-        .target(LatLng(getDouble("latitude"), getDouble("longitude")))
-        .zoom(getDouble("zoom"))
-        .tilt(optDouble("pitch", 0.0))
-        .bearing(optDouble("bearing", 0.0))
-        .build()
 
     override fun onStart() {
         super.onStart()

@@ -18,6 +18,7 @@ mln_plugin_status capture(const mln_plugin_descriptor_v1* d, char*, size_t) {
     registered = d;
     return MLN_PLUGIN_STATUS_OK;
 }
+
 mln_plugin_property_value_v1 number(const char* name, float value) {
     mln_plugin_property_value_v1 p{};
     p.struct_size = sizeof(p);

@@ -9,6 +9,7 @@ mln_plugin_status capture(const mln_plugin_descriptor_v1* d, char*, size_t) {
     descriptor = d;
     return MLN_PLUGIN_STATUS_OK;
 }
+
 struct Geometry {
     const mln_plugin_layer_type_v1* layer;
     void* layout = nullptr;
@@ -23,6 +24,7 @@ struct Geometry {
     ~Geometry() { layer->destroy_layout(layout); }
     void finish() { ASSERT_EQ(MLN_PLUGIN_STATUS_OK, layer->finish_layout(layout, &bucket)); }
 };
+
 TEST(FillExtrusionGeometry, RoofHolesWallsRangesAndQueries) {
     Geometry g;
     const mln_plugin_tile_point_v1 points[] = {
@@ -78,6 +80,7 @@ TEST(FillExtrusionGeometry, RoofHolesWallsRangesAndQueries) {
     f.path_offsets = invalidPaths;
     EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, g.layer->layout_feature(g.layout, &f));
 }
+
 TEST(FillExtrusionGeometry, SegmentsNeverOverflow16BitIndices) {
     Geometry g;
     std::vector<mln_plugin_tile_point_v1> points;
@@ -106,6 +109,7 @@ TEST(FillExtrusionGeometry, SegmentsNeverOverflow16BitIndices) {
     EXPECT_EQ(total, g.bucket.feature_vertex_ranges[0].vertex_count);
     EXPECT_EQ(total, g.bucket.vertex_streams[0].vertex_count);
 }
+
 TEST(FillExtrusionGeometry, OversizedOutlineUsesInstancedWallsAndSegmentedRoofs) {
     Geometry g;
     std::vector<mln_plugin_tile_point_v1> points;

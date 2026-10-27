@@ -1,42 +1,30 @@
 package org.maplibre.plugins.android
 
-import android.content.Context
-import org.json.JSONObject
-import java.lang.reflect.InvocationTargetException
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.plugins.ngonlayer.NgonLayerPlugin
 
-/**
- * A plugin demo. Every plugin module carries `assets/demo/<id>/demo.json`, which plugins/tools/generate.ts writes from
- * the `demo` block of the plugin's plugin.json, so a new plugin shows up here without any change to this app.
- */
+/** A plugin demo: its style at a camera. To show another plugin, add an entry to [all]. */
 class Demo(
     val id: String,
     val displayName: String,
     val style: String,
-    val camera: JSONObject?,
-    private val registerClass: String,
-) {
+    val camera: CameraPosition,
     /** Registers the plugin's layer types. Returns false when the active renderer does not implement the plugin. */
-    fun register(): Boolean = try {
-        Class.forName(registerClass).getMethod("register").invoke(null) as Boolean
-    } catch (error: InvocationTargetException) {
-        throw error.targetException
-    }
-
+    val register: () -> Boolean,
+) {
     companion object {
-        fun all(context: Context): List<Demo> =
-            (context.assets.list("demo") ?: emptyArray()).sorted().map { load(context, it) }
+        val all = listOf(
+            Demo(
+                id = "ngon-layer",
+                displayName = "N-gons",
+                // plugins/plugins/ngon-layer/examples/ngon.json, see app/build.gradle.kts.
+                style = "asset://ngon.json",
+                camera = CameraPosition.Builder().target(LatLng(0.0, 0.0)).zoom(11.3).build(),
+                register = NgonLayerPlugin::register,
+            ),
+        )
 
-        fun find(context: Context, id: String): Demo? = all(context).firstOrNull { it.id == id }
-
-        private fun load(context: Context, id: String): Demo {
-            val json = JSONObject(context.assets.open("demo/$id/demo.json").bufferedReader().use { it.readText() })
-            return Demo(
-                id = id,
-                displayName = json.getString("displayName"),
-                style = json.getString("style"),
-                camera = json.optJSONObject("camera"),
-                registerClass = json.getString("registerClass"),
-            )
-        }
+        fun find(id: String): Demo? = all.firstOrNull { it.id == id }
     }
 }

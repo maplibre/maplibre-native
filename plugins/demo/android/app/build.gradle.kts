@@ -26,6 +26,11 @@ android {
         }
     }
 
+    sourceSets.getByName("main") {
+        // The style of the n-gon demo, as an asset.
+        assets.srcDir("../../../plugins/ngon-layer/examples")
+    }
+
     buildFeatures {
         buildConfig = true
     }

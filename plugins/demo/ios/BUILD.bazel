@@ -4,8 +4,8 @@ load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
 load("@rules_swift//swift:swift.bzl", "swift_library")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
-# The layer types of the plugins only exist in a build with plugin support, and the fill-extrusion layer only has a
-# Metal shader:
+# The layer types of the plugins only exist in a build with plugin support, and the registry links every plugin,
+# including fill-extrusion, which only has a Metal shader:
 #
 #   bazel build //plugins/demo/ios:PluginDemo --//:renderer=metal --//:plugins=true
 _PLUGINS_ONLY = select({
@@ -44,11 +44,7 @@ ios_application(
     infoplists = ["Info.plist"],
     minimum_os_version = "16.0",
     provisioning_profile = "xcode_profile",
-    # The demos are listed from the metadata the plugin wrappers carry.
-    resources = [
-        "//plugins/demo/assets:styles",
-        "//plugins/ios:demos",
-    ],
+    resources = ["//plugins/demo/assets:styles"],
     target_compatible_with = _PLUGINS_ONLY,
     version = ":plugin_demo_version",
     visibility = ["//visibility:public"],

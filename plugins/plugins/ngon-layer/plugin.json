@@ -1,7 +1,3 @@
 {
-  "description": "Source-bound regular polygon (n-gon) style layer",
-  "demo": {
-    "style": "examples/ngon.json",
-    "camera": {"latitude": 0, "longitude": 0, "zoom": 11.3}
-  }
+  "description": "Source-bound regular polygon (n-gon) style layer"
 }

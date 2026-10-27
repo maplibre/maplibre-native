@@ -18,12 +18,3 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = ["//plugins/plugins/ngon-layer"],
 )
-
-filegroup(
-    name = "demo",
-    srcs = [
-        "demo/ngon-layer.demo.json",
-        "demo/ngon-layer.style.json",
-    ],
-    visibility = ["//visibility:public"],
-)

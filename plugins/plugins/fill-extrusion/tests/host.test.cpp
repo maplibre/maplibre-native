@@ -24,11 +24,50 @@ mln_plugin_status captureDescriptor(const mln_plugin_descriptor_v1* d, char*, si
     registeredDescriptor = d;
     return MLN_PLUGIN_STATUS_OK;
 }
-const char* styleJSON = R"({"version":8,"center":[0,0],"zoom":15.5,"pitch":55,"bearing":25,
-"sources":{"s":{"type":"geojson","data":{"type":"FeatureCollection","features":[
-{"type":"Feature","id":1,"properties":{"h":100},"geometry":{"type":"Polygon","coordinates":[[[-0.002,-0.002],[0.002,-0.002],[0.002,0.002],[-0.002,0.002],[-0.002,-0.002]],[[-0.001,-0.001],[-0.001,0.001],[0.001,0.001],[0.001,-0.001],[-0.001,-0.001]]]}},
-{"type":"Feature","id":2,"properties":{"h":60},"geometry":{"type":"Polygon","coordinates":[[[0,-0.002],[0.004,-0.002],[0.004,0.001],[0,0.001],[0,-0.002]]]}}
-]}}},"layers":[{"id":"background","type":"background","paint":{"background-color":"#bcd"}}]})";
+
+const char* styleJSON = R"({
+    "version": 8,
+    "center": [0, 0],
+    "zoom": 15.5,
+    "pitch": 55,
+    "bearing": 25,
+    "sources": {
+        "s": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "id": 1,
+                        "properties": {"h": 100},
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [
+                                [[-0.002, -0.002], [0.002, -0.002], [0.002, 0.002], [-0.002, 0.002], [-0.002, -0.002]],
+                                [[-0.001, -0.001], [-0.001, 0.001], [0.001, 0.001], [0.001, -0.001], [-0.001, -0.001]]
+                            ]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "id": 2,
+                        "properties": {"h": 60},
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [
+                                [[0, -0.002], [0.004, -0.002], [0.004, 0.001], [0, 0.001], [0, -0.002]]
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "layers": [
+        {"id": "background", "type": "background", "paint": {"background-color": "#bcd"}}
+    ]
+})";
 struct Scene {
     std::shared_ptr<StubFileSource> source = std::make_shared<StubFileSource>();
     MapObserver observer;
@@ -57,6 +96,7 @@ struct Scene {
         EXPECT_FALSE(layer->setProperty(name, style::conversion::Convertible(value)));
     }
 };
+
 void compare(Scene& builtin, Scene& plugin) {
     const auto a = builtin.frontend.render(builtin.map);
     const auto b = plugin.frontend.render(plugin.map);
@@ -71,6 +111,7 @@ void compare(Scene& builtin, Scene& plugin) {
     }
     EXPECT_LE(different, size_t(65));
 }
+
 TEST(FillExtrusionPlugin, ReplacementAndDynamicParity) {
     util::RunLoop loop;
     // Construct and render a built-in object before registration; it must also
@@ -151,6 +192,7 @@ TEST(FillExtrusionPlugin, RoundedCornerParity) {
         compare(builtin, plugin);
     }
 }
+
 TEST(FillExtrusionPlugin, PatternRuntimeAndRoundedParity) {
     util::RunLoop loop;
     const auto status = mln_fill_extrusion_register(mln_plugin_register_v1, nullptr, 0);
@@ -197,6 +239,7 @@ TEST(FillExtrusionPlugin, PatternRuntimeAndRoundedParity) {
         }
     }
 }
+
 TEST(FillExtrusionPlugin, ImageDescriptorValidation) {
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_fill_extrusion_register(captureDescriptor, nullptr, 0));
     auto descriptor = *registeredDescriptor;

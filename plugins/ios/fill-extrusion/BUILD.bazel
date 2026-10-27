@@ -21,11 +21,3 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = ["//plugins/plugins/fill-extrusion"],
 )
-
-filegroup(
-    name = "demo",
-    srcs = [
-        "demo/fill-extrusion.demo.json",
-    ],
-    visibility = ["//visibility:public"],
-)

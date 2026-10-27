@@ -21,13 +21,3 @@ objc_library(
         "//plugins/ios/ngon-layer",
     ],
 )
-
-# The demo metadata and styles of the plugins that have a demo, for an app to bundle.
-filegroup(
-    name = "demos",
-    srcs = [
-        "//plugins/ios/fill-extrusion:demo",
-        "//plugins/ios/ngon-layer:demo",
-    ],
-    visibility = ["//visibility:public"],
-)

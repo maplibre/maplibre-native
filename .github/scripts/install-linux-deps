@@ -8,6 +8,7 @@ packages=(
   libglfw3-dev
   libwebp-dev
   libopengl0
+  libgles-dev
   mesa-vulkan-drivers
   llvm
   glslang-dev

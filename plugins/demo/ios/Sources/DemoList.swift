@@ -1,14 +1,11 @@
 import PluginRegistry
 import SwiftUI
 
-/// One entry in the list of demos.
-///
-/// A plugin whose `plugin.json` has a `demo` is listed without any code here, with its style at its camera. To show a
-/// plugin with a view of its own, write the view and add an entry to `Demo.custom`.
+/// One entry in the list of demos. To show a plugin, write its view and add an entry to `Demo.all`.
 struct Demo: Identifiable, Hashable {
     /// Also the value of the `-demo` launch argument that opens the demo directly.
     let id: String
-    /// The `id` of the plugin's `plugin.json`. The demo registers the plugin when it opens.
+    /// The directory name of the plugin in `plugins/plugins`. The demo registers the plugin when it opens.
     let pluginID: String
     let title: String
     /// The style layer type the demo draws with, if it is shown.
@@ -35,19 +32,11 @@ struct Demo: Identifiable, Hashable {
         self.destination = { AnyView(RegisteredDemo(pluginID: pluginID, content: destination)) }
     }
 
-    init(metadata: PluginDemoMetadata) {
-        self.init(
-            id: metadata.id, pluginID: metadata.id, title: metadata.displayName, summary: metadata.description,
-            systemImage: "map"
-        ) { StyleDemoView(metadata: metadata) }
-    }
-
     static func == (lhs: Demo, rhs: Demo) -> Bool { lhs.id == rhs.id }
 
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 
-    /// The demos with a view of their own.
-    static let custom = [
+    static let all = [
         Demo(
             id: "ngons",
             pluginID: "ngon-layer",
@@ -57,17 +46,11 @@ struct Demo: Identifiable, Hashable {
             systemImage: "hexagon.fill"
         ) { NgonDemoView() },
     ]
-
-    static let all =
-        custom
-            + PluginDemoMetadata.bundled()
-            .filter { metadata in !custom.contains { $0.pluginID == metadata.id } }
-            .map(Demo.init(metadata:))
 }
 
 /// Registers a demo's plugin before the demo creates its map: a style that names an unregistered layer type drops the
-/// layer. A plugin registers for the rest of the process, so a plugin that replaces a built-in layer, like
-/// `fill-extrusion`, keeps replacing it in the demos opened afterwards.
+/// layer. A plugin registers for the rest of the process, so a plugin that replaces a built-in layer keeps replacing
+/// it in the demos opened afterwards.
 private struct RegisteredDemo<Content: View>: View {
     let pluginID: String
     let content: () -> Content

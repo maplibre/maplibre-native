@@ -173,6 +173,7 @@ struct alignas(16) DrawableUBO {
     float translate[2], padding[2];
     float interpolation[12];
 };
+
 static_assert(offsetof(DrawableUBO, radius) == 96);
 static_assert(offsetof(DrawableUBO, color) == 128);
 static_assert(offsetof(DrawableUBO, translate) == 160);
@@ -207,6 +208,7 @@ constexpr mln_plugin_value number(float n) {
     v.data.float_value = n;
     return v;
 }
+
 constexpr mln_plugin_value color() {
     mln_plugin_value v{};
     v.struct_size = sizeof(v);
@@ -214,6 +216,7 @@ constexpr mln_plugin_value color() {
     v.data.color_value = {0, 0, 0, 1};
     return v;
 }
+
 constexpr mln_plugin_value translate() {
     mln_plugin_value v{};
     v.struct_size = sizeof(v);
@@ -221,6 +224,7 @@ constexpr mln_plugin_value translate() {
     v.data.float2_value = {0, 0};
     return v;
 }
+
 constexpr mln_plugin_value text(mln_plugin_string s) {
     mln_plugin_value v{};
     v.struct_size = sizeof(v);
@@ -228,6 +232,7 @@ constexpr mln_plugin_value text(mln_plugin_string s) {
     v.data.string_value = s;
     return v;
 }
+
 constexpr mln_plugin_string anchors[] = {str("map"), str("viewport")};
 constexpr mln_plugin_property_descriptor_v1 property(mln_plugin_string name,
                                                      mln_plugin_value value,
@@ -269,11 +274,13 @@ const mln_plugin_property_descriptor_v1 properties[] = {
 struct Point {
     double x, y;
 };
+
 bool onSegment(Point a, Point b, Point p) {
     const double cross = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
     return std::abs(cross) < 1e-8 && p.x >= std::min(a.x, b.x) - 1e-8 && p.x <= std::max(a.x, b.x) + 1e-8 &&
            p.y >= std::min(a.y, b.y) - 1e-8 && p.y <= std::max(a.y, b.y) + 1e-8;
 }
+
 bool contains(const std::vector<Point>& polygon, Point p) {
     if (polygon.size() < 3) return false;
     bool inside = false;
@@ -284,6 +291,7 @@ bool contains(const std::vector<Point>& polygon, Point p) {
     }
     return inside;
 }
+
 double distanceToSegment(Point p, Point a, Point b) {
     const double dx = b.x - a.x, dy = b.y - a.y;
     const double length2 = dx * dx + dy * dy;
@@ -307,22 +315,26 @@ const mln_plugin_value* valueFor(const mln_plugin_property_value_v1* values, siz
     }
     return nullptr;
 }
+
 double scalar(const mln_plugin_property_value_v1* values, size_t count, std::string_view name, double fallback) {
     const auto* value = valueFor(values, count, name);
     return value && value->type == MLN_PLUGIN_VALUE_FLOAT ? value->data.float_value : fallback;
 }
+
 bool viewport(const mln_plugin_property_value_v1* values, size_t count, std::string_view name, bool fallback) {
     const auto* value = valueFor(values, count, name);
     if (!value || value->type != MLN_PLUGIN_VALUE_STRING) return fallback;
     const std::string_view anchor(value->data.string_value.data, value->data.string_value.size);
     return anchor == "viewport" ? true : anchor == "map" ? false : fallback;
 }
+
 std::array<double, 4> project(Point p, const double* m) {
     return {m[0] * p.x + m[4] * p.y + m[12],
             m[1] * p.x + m[5] * p.y + m[13],
             m[2] * p.x + m[6] * p.y + m[14],
             m[3] * p.x + m[7] * p.y + m[15]};
 }
+
 Point screen(const std::array<double, 4>& p, const mln_plugin_query_context_v1& c) {
     return {(p[0] / p[3] + 1) * 0.5 * c.viewport_width, (1 - p[1] / p[3]) * 0.5 * c.viewport_height};
 }
@@ -405,6 +417,7 @@ const mln_plugin_shader_source_v1 shaderSources[] = {
      str("circleVertex"),
      str("circleFragment")},
 };
+
 const mln_plugin_uniform_block_descriptor_v1 uniforms[] = {
     {sizeof(mln_plugin_uniform_block_descriptor_v1),
      0,
@@ -413,6 +426,7 @@ const mln_plugin_uniform_block_descriptor_v1 uniforms[] = {
      MLN_PLUGIN_SHADER_STAGE_VERTEX,
      MLN_PLUGIN_UNIFORM_DRAWABLE},
 };
+
 const mln_plugin_shader_descriptor_v1 shader = {
     sizeof(mln_plugin_shader_descriptor_v1),
     str("circle"),
@@ -427,6 +441,7 @@ const mln_plugin_shader_descriptor_v1 shader = {
     0,
     0,
 };
+
 const mln_plugin_layer_type_v1 layerType = [] {
     mln_plugin_layer_type_v1 v{};
     v.struct_size = sizeof(v);

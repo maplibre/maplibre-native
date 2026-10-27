@@ -6,12 +6,11 @@ A plugin is a directory in `plugins/plugins` with its platform-independent code,
 ```json
 {
   "description": "What the plugin does",
-  "backends": ["vulkan", "metal"],
-  "demo": {"style": "examples/style.json", "camera": {"latitude": 0, "longitude": 0, "zoom": 1}}
+  "backends": ["vulkan", "metal"]
 }
 ```
 
-`backends` (default: all) and `demo` are optional. Everything else follows from the directory name `<id>`: the code is
+`backends` (default: all) is optional. Everything else follows from the directory name `<id>`: the code is
 `shared/cpp/*.cpp` with the header `shared/include/<id with underscores>.hpp` and the function
 `mln_<id with underscores>_register`.
 
@@ -22,6 +21,6 @@ changing a `plugin.json` or `plugins/tools/templates`, run
 node plugins/tools/generate.ts
 ```
 
-`plugins/demo/android` and `plugins/demo/ios` are demo apps. They list the plugins that have a `demo` and register them
+`plugins/demo/android` and `plugins/demo/ios` are demo apps. They list their demos themselves and register the plugins
 through their wrappers. Build the iOS app with
 `bazel build //plugins/demo/ios:PluginDemo --//:renderer=metal --//:plugins=true`.

@@ -6,11 +6,11 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.ListView
 
-/** Lists the demo of every plugin. `am start -n .../.DemoActivity -e plugin <id>` opens one directly. */
+/** Lists the demos. `am start -n .../.DemoActivity -e plugin <id>` opens one directly. */
 class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val demos = Demo.all(this)
+        val demos = Demo.all
         val list = ListView(this)
         list.fitsSystemWindows = true
         list.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, demos.map { it.displayName })
