@@ -1,4 +1,5 @@
 #include <mln/storage/resource_options.hpp>
+#include <mln/util/chrono.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/tile_server_options.hpp>
 
@@ -11,6 +12,7 @@ public:
     std::string cachePath = ":memory:";
     std::string assetPath = ".";
     uint64_t maximumSize = mln::util::DEFAULT_MAX_CACHE_SIZE;
+    Duration implicitCacheLifetime = Duration::zero();
     void* platformContext = nullptr;
 };
 
@@ -77,6 +79,15 @@ ResourceOptions& ResourceOptions::withMaximumCacheSize(uint64_t size) {
 
 uint64_t ResourceOptions::maximumCacheSize() const {
     return impl_->maximumSize;
+}
+
+ResourceOptions& ResourceOptions::withImplicitCacheLifetime(Duration lifetime) {
+    impl_->implicitCacheLifetime = lifetime;
+    return *this;
+}
+
+Duration ResourceOptions::implicitCacheLifetime() const {
+    return impl_->implicitCacheLifetime;
 }
 
 ResourceOptions& ResourceOptions::withPlatformContext(void* context) {
