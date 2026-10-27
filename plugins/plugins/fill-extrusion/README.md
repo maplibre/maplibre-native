@@ -137,21 +137,3 @@ The manifest uses the expectations and ignores of the built-in implementation's 
 with it. On macOS the link may need `--linkopt=-L$(brew --prefix icu4c)/lib`. Run
 `bazel-bin/plugins/render-tests` with the same `--manifestPath` for the built-in baseline: it registers no
 extrusion plugin.
-
-## Performance
-
-A separate built-in/plugin benchmark measures initial loading, steady frames,
-paint updates, feature-state updates, draw calls, and buffer memory:
-
-```sh
-cmake --build build-plugin-vulkan --target mln-fill-extrusion-benchmark
-LP_NUM_THREADS=4 python3 plugins/plugins/fill-extrusion/benchmarks/run.py \
-  build-plugin-vulkan/plugins/mln-fill-extrusion-benchmark \
-  --side 100 --frames 80 --trials 4 --output /tmp/extrusion-benchmark.json
-```
-
-Both implementations run in separate processes with alternating execution order.
-Select the same Vulkan driver for both and keep other builds and tests idle.
-Use `--baseline-plugin /path/to/previous-benchmark` to compare two plugin builds,
-or `--scenario translucent` to isolate a scene. Save generated captures outside
-the source tree.
