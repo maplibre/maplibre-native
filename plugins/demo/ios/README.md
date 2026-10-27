@@ -6,7 +6,7 @@ A small SwiftUI app that shows the in-tree plugin layers on a map. It is separat
 | Demo | Layer | What it shows |
 |---|---|---|
 | N-gons | [`ngon`](../../plugins/ngon-layer) | One n-gon with controls for its corners, color, radius, rotation, opacity, blur and outline. The paint properties read the feature's properties, so an edit changes only the feature's data. The Randomize button picks new ones, and the JSON tab shows the layer's style and the feature's properties. |
-| 3D models | [`gltf`](../../plugins/gltf-layer) | Cars and trees drawn from `.glb` files. A feature picks its model with `model-id`; heading and size are paint properties; buildings hide the cars through `model-occlusion`. A slider resizes the trees: their `model-scale` reads a feature property, so it only edits the trees' data. |
+| 3D models | [`gltf`](../../plugins/gltf-layer) | Cars and trees drawn from `.glb` files. A feature picks its model with `model-uri`; heading and size are paint properties; buildings hide the cars through `model-occlusion`. A slider resizes the trees: their `model-scale` reads a feature property, so it only edits the trees' data. |
 | Any other plugin | | A plugin whose `plugin.json` has a `demo` is listed with its style at its camera, like in the Android demo. At the moment that is [`fill-extrusion`](../../plugins/fill-extrusion), on the OpenFreeMap Liberty style. |
 
 The layer types only exist in a build with plugin support, and the `gltf` and `fill-extrusion` layers only have a Metal

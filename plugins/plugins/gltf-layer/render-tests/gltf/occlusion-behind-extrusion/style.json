@@ -119,13 +119,14 @@
       "type": "gltf",
       "source": "boxes",
       "layout": {
-        "models": {
-          "red": "asset://plugins/plugins/gltf-layer/render-tests/assets/box-red.glb",
-          "blue": "asset://plugins/plugins/gltf-layer/render-tests/assets/box-blue.glb"
-        },
-        "model-id": [
-          "get",
-          "kind"
+        "model-uri": [
+          "concat",
+          "asset://plugins/plugins/gltf-layer/render-tests/assets/box-",
+          [
+            "get",
+            "kind"
+          ],
+          ".glb"
         ]
       },
       "paint": {

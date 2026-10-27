@@ -50,10 +50,7 @@
       "type": "gltf",
       "source": "boxes",
       "layout": {
-        "models": {
-          "blue": "asset://plugins/plugins/gltf-layer/render-tests/assets/box-blue.glb"
-        },
-        "model-id": "blue"
+        "model-uri": "asset://plugins/plugins/gltf-layer/render-tests/assets/box-blue.glb"
       },
       "paint": {
         "model-heading": 30,

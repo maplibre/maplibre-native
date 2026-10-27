@@ -4,15 +4,18 @@
 #include <mln/geometry/feature_index.hpp>
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/storage/resource.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
+#include <mln/util/run_loop.hpp>
 
-#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <limits>
 #include <set>
+#include <thread>
 
 namespace mln {
 namespace {
@@ -21,98 +24,83 @@ bool validRange(std::size_t offset, std::size_t length, std::size_t size) {
     return offset <= size && length <= size - offset;
 }
 
-void logFromPlugin(int32_t severity, mln_plugin_string message) {
-    const std::string text = message.data ? std::string(message.data, message.size) : std::string{};
-    if (severity >= 3) {
-        Log::Error(Event::Style, text);
-    } else if (severity == 2) {
-        Log::Warning(Event::Style, text);
-    } else {
-        Log::Info(Event::Style, text);
-    }
-}
-
-const mln_plugin_host_api_v1 hostAPI{sizeof(mln_plugin_host_api_v1), MLN_PLUGIN_ABI_VERSION_1, logFromPlugin};
-
-bool usesResources(const plugin::RegisteredLayer& registration) {
-    return std::any_of(registration.properties.begin(), registration.properties.end(), [](const auto& property) {
-        return property.type == MLN_PLUGIN_VALUE_RESOURCE;
-    });
-}
-
-// Whether the layer lays out the feature: a geometry it accepts, passing its filter.
-bool laysOut(const plugin::RegisteredLayer& registration,
-             const style::PluginStyleLayer::Impl& leader,
-             const GeometryTileFeature& feature,
-             float zoom,
-             const CanonicalTileID& canonical,
-             const GlobalStateMap* globalState) {
-    const auto type = plugin::geometryType(feature.getType());
-    return type != 0 && (registration.geometryTypeMask & type) != 0 &&
-           leader.filter(style::expression::EvaluationContext(zoom, &feature)
-                             .withCanonicalTileID(&canonical)
-                             .withGlobalState(globalState));
-}
-
-// The URL that a RESOURCE value names in the layer's RESOURCES property, or null.
-const std::string* resourceURL(const style::PluginStyleLayer::Impl& leader,
-                               const plugin::PropertyDefinition& definition,
-                               const mln_plugin_value& value) {
-    const auto& name = value.data.resource_value.name;
-    const auto resources = leader.pluginResources.find(definition.resources);
-    if (resources == leader.pluginResources.end() || !name.data) return nullptr;
-    const auto url = resources->second.find(std::string(name.data, name.size));
-    return url == resources->second.end() ? nullptr : &url->second;
-}
-
-// The layout-scope properties in registration order, RESOURCES left out: evaluated once for the tile, and
-// again for each feature where they are data-driven. The C values point into this object, so it stays put.
-class LayoutPropertyValues {
+// Services for layout callbacks. Layout runs on a tile worker, so a FileSource
+// request started there would wait on that same scheduler. Each request gets a
+// short-lived thread with its own run loop, and its result is delivered to the
+// callback on the layout thread before request_resource returns.
+class LayoutResourceHost {
 public:
-    LayoutPropertyValues(const plugin::RegisteredLayer& registration,
-                         const style::PluginStyleLayer::Impl& leader,
-                         float zoom_)
-        : zoom(zoom_) {
-        for (const auto& definition : registration.properties) {
-            if (!definition.layout || definition.type == MLN_PLUGIN_VALUE_RESOURCES) continue;
-            const auto stored = leader.pluginProperties.find(definition.name);
-            definitions.push_back(&definition);
-            values.push_back(stored == leader.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                                     : stored->second);
-            mln_plugin_property_value_v1 property{};
-            property.struct_size = sizeof(property);
-            property.name = {definition.name.data(), definition.name.size()};
-            property.explicitly_set = stored != leader.pluginProperties.end();
-            tile.push_back(property);
-        }
-        tileStorage.resize(values.size());
-        featureStorage.resize(values.size());
-        for (std::size_t i = 0; i < values.size(); ++i) {
-            tile[i].value = values[i].evaluate(zoom, *definitions[i], tileStorage[i]);
-        }
-        feature = tile;
-    }
-    LayoutPropertyValues(const LayoutPropertyValues&) = delete;
-    LayoutPropertyValues& operator=(const LayoutPropertyValues&) = delete;
-
-    // Updates `feature` for the given feature; values that are not data-driven keep their tile value.
-    void evaluate(const GeometryTileFeature& input) {
-        for (std::size_t i = 0; i < values.size(); ++i) {
-            if (!values[i].isDataDriven()) continue;
-            feature[i].value = values[i].evaluate(zoom, input, noFeatureState, *definitions[i], featureStorage[i]);
-        }
+    explicit LayoutResourceHost(std::shared_ptr<FileSource> fileSource_)
+        : fileSource(std::move(fileSource_)) {
+        api.struct_size = sizeof(api);
+        api.abi_version = MLN_PLUGIN_ABI_VERSION_1;
+        api.log = log;
+        api.context = this;
+        api.request_resource = requestResource;
+        api.cancel_resource_request = cancelResourceRequest;
     }
 
-    std::vector<const plugin::PropertyDefinition*> definitions;
-    std::vector<mln_plugin_property_value_v1> tile;
-    std::vector<mln_plugin_property_value_v1> feature;
+    const mln_plugin_host_api_v1* getAPI() const noexcept { return &api; }
 
 private:
-    const float zoom;
-    std::vector<style::PluginPropertyValue> values;
-    std::vector<style::PluginPropertyValue::EvaluationStorage> tileStorage;
-    std::vector<style::PluginPropertyValue::EvaluationStorage> featureStorage;
-    const FeatureState noFeatureState;
+    static void log(int32_t severity, mln_plugin_string message) {
+        const std::string text = message.data ? std::string(message.data, message.size) : std::string{};
+        if (severity >= 3) {
+            Log::Error(Event::Style, text);
+        } else if (severity == 2) {
+            Log::Warning(Event::Style, text);
+        } else {
+            Log::Info(Event::Style, text);
+        }
+    }
+
+    static mln_plugin_status requestResource(void* context,
+                                             mln_plugin_string url,
+                                             mln_plugin_resource_callback_fn callback,
+                                             void* callbackContext,
+                                             uint64_t* requestID) {
+        auto* self = static_cast<LayoutResourceHost*>(context);
+        if (!self || !self->fileSource || !url.data || !url.size || !callback || !requestID) {
+            return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+        }
+        const auto id = self->nextRequestID++;
+        *requestID = id;
+        const std::string resourceURL(url.data, url.size);
+        Response response;
+        bool receivedResponse = false;
+        const auto fileSource = self->fileSource;
+        std::thread loader([&] {
+            util::RunLoop runLoop(util::RunLoop::Type::New);
+            auto request = fileSource->request(Resource(Resource::Kind::Unknown, resourceURL), [&](Response result) {
+                response = std::move(result);
+                receivedResponse = true;
+                runLoop.stop();
+            });
+            if (!request) return;
+            runLoop.run();
+        });
+        loader.join();
+        if (!receivedResponse) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
+
+        std::string error;
+        if (response.error) error = response.error->message;
+        mln_plugin_resource_response_v1 result{};
+        result.struct_size = sizeof(result);
+        result.request_id = id;
+        if (response.data) {
+            result.data = reinterpret_cast<const uint8_t*>(response.data->data());
+            result.data_size = response.data->size();
+        }
+        result.error_message = {error.data(), error.size()};
+        callback(callbackContext, &result);
+        return MLN_PLUGIN_STATUS_OK;
+    }
+
+    static void cancelResourceRequest(void*, uint64_t) {}
+
+    mln_plugin_host_api_v1 api{};
+    std::shared_ptr<FileSource> fileSource;
+    uint64_t nextRequestID = 1;
 };
 
 } // namespace
@@ -124,96 +112,44 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                            const LayoutParameters* layoutParameters)
     : zoom(parameters.tileID.overscaledZ),
       globalState(parameters.globalState),
+      fileSource(parameters.fileSource),
       layers(std::move(layers_)),
       sourceLayer(std::move(sourceLayer_)),
       registration(std::move(registration_)) {
-    if (!sourceLayer || layers.empty()) return;
+    if (!layoutParameters || !sourceLayer || layers.empty()) return;
 
     // The sprite images that IMAGE properties name, so the worker can load them before createBucket.
-    if (layoutParameters) {
-        for (const auto& layer : layers) {
-            const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
-            for (const auto& definition : registration->properties) {
-                if (definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
-                const auto it = impl.pluginProperties.find(definition.name);
-                if (it == impl.pluginProperties.end()) continue;
-                needsImages = true;
-                const auto& value = it->second;
-                style::PluginPropertyValue::EvaluationStorage storage;
-                const auto add = [&](const mln_plugin_value& image) {
-                    if (image.data.string_value.size)
-                        layoutParameters->imageDependencies.emplace(
-                            std::string(image.data.string_value.data, image.data.string_value.size),
-                            ImageType::Pattern);
-                };
-                for (float z : {zoom - 1, zoom, zoom + 1}) {
-                    if (!value.isDataDriven())
-                        add(value.evaluate(z, definition, storage, &layoutParameters->availableImages));
-                    else
-                        for (size_t i = 0; i < sourceLayer->featureCount(); ++i) {
-                            const auto feature = sourceLayer->getFeature(i);
-                            if (feature)
-                                add(value.evaluate(z + (value.isZoomConstant() ? 0 : 1),
-                                                   *feature,
-                                                   {},
-                                                   definition,
-                                                   storage,
-                                                   &layoutParameters->availableImages));
-                        }
-                }
+    for (const auto& layer : layers) {
+        const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
+        for (const auto& definition : registration->properties) {
+            if (definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
+            const auto it = impl.pluginProperties.find(definition.name);
+            if (it == impl.pluginProperties.end()) continue;
+            needsImages = true;
+            const auto& value = it->second;
+            style::PluginPropertyValue::EvaluationStorage storage;
+            const auto add = [&](const mln_plugin_value& image) {
+                if (image.data.string_value.size)
+                    layoutParameters->imageDependencies.emplace(
+                        std::string(image.data.string_value.data, image.data.string_value.size), ImageType::Pattern);
+            };
+            for (float z : {zoom - 1, zoom, zoom + 1}) {
+                if (!value.isDataDriven())
+                    add(value.evaluate(z, definition, storage, &layoutParameters->availableImages));
+                else
+                    for (size_t i = 0; i < sourceLayer->featureCount(); ++i) {
+                        const auto feature = sourceLayer->getFeature(i);
+                        if (feature)
+                            add(value.evaluate(z + (value.isZoomConstant() ? 0 : 1),
+                                               *feature,
+                                               {},
+                                               definition,
+                                               storage,
+                                               &layoutParameters->availableImages));
+                    }
             }
         }
     }
-
-    if (!usesResources(*registration)) return;
-
-    // The resources the tile's features name, so the worker can load them before createBucket.
-    const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
-    LayoutPropertyValues properties(*registration, leader, zoom);
-    for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
-        const auto feature = sourceLayer->getFeature(i);
-        if (!feature ||
-            !laysOut(*registration, leader, *feature, zoom, parameters.tileID.canonical, globalState.get())) {
-            continue;
-        }
-        properties.evaluate(*feature);
-        for (std::size_t p = 0; p < properties.definitions.size(); ++p) {
-            if (properties.definitions[p]->type != MLN_PLUGIN_VALUE_RESOURCE) continue;
-            if (const auto* url = resourceURL(leader, *properties.definitions[p], properties.feature[p].value)) {
-                resourceURLs.insert(*url);
-            }
-        }
-    }
-    if (layoutParameters) layoutParameters->resourceDependencies.insert(resourceURLs.begin(), resourceURLs.end());
-}
-
-void PluginLayout::prepareResources(const LayoutResourceMap& available) {
-    for (const auto& url : resourceURLs) {
-        const auto found = available.find(url);
-        if (found != available.end()) resources.insert_or_assign(url, found->second);
-    }
-}
-
-void* PluginLayout::resourceHandle(const std::string& url) {
-    const auto found = resources.find(url);
-    if (found == resources.end() || !found->second) return nullptr;
-    const auto made = found->second->getOrCreate(
-        registration.get(), [&](const std::string& bytes) -> std::shared_ptr<void> {
-            void* handle = nullptr;
-            const auto status = registration->createResource(&hostAPI,
-                                                             {url.data(), url.size()},
-                                                             reinterpret_cast<const uint8_t*>(bytes.data()),
-                                                             bytes.size(),
-                                                             &handle);
-            if (status != MLN_PLUGIN_STATUS_OK || !handle) {
-                if (handle) registration->destroyResource(handle);
-                Log::Error(Event::Style,
-                           "Plugin layer type '" + registration->type + "' failed to create '" + url + "'");
-                return nullptr;
-            }
-            return std::shared_ptr<void>(handle, registration->destroyResource);
-        });
-    return made.get();
 }
 
 void PluginLayout::createBucket(const ImagePositions& imagePositions,
@@ -225,14 +161,42 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
     if (!sourceLayer || layers.empty()) return;
 
     const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
-    LayoutPropertyValues properties(*registration, leader, zoom);
     mln_plugin_layout_context_v1 context{};
     context.struct_size = sizeof(context);
     context.zoom = zoom;
     context.extent = util::EXTENT;
-    context.properties = properties.tile.data();
-    context.property_count = properties.tile.size();
-    context.host = &hostAPI;
+
+    // Layout-scope properties, evaluated for the tile here and again for each feature below.
+    LayoutResourceHost resourceHost(fileSource);
+    std::vector<const plugin::PropertyDefinition*> layoutDefinitions;
+    std::vector<style::PluginPropertyValue> layoutValues;
+    std::vector<mln_plugin_property_value_v1> layoutProperties;
+    layoutDefinitions.reserve(registration->properties.size());
+    layoutValues.reserve(registration->properties.size());
+    layoutProperties.reserve(registration->properties.size());
+    for (const auto& definition : registration->properties) {
+        if (!definition.layout) continue;
+        const auto stored = leader.pluginProperties.find(definition.name);
+        layoutDefinitions.push_back(&definition);
+        layoutValues.push_back(stored == leader.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
+                                                                       : stored->second);
+        mln_plugin_property_value_v1 property{};
+        property.struct_size = sizeof(property);
+        property.name = {definition.name.data(), definition.name.size()};
+        property.explicitly_set = stored != leader.pluginProperties.end();
+        layoutProperties.push_back(property);
+    }
+    std::vector<style::PluginPropertyValue::EvaluationStorage> layoutStorage(layoutValues.size());
+    for (std::size_t i = 0; i < layoutValues.size(); ++i) {
+        layoutProperties[i].value = layoutValues[i].evaluate(zoom, *layoutDefinitions[i], layoutStorage[i]);
+    }
+    // Per-feature copies; only data-driven values are evaluated again.
+    std::vector<mln_plugin_property_value_v1> featureProperties = layoutProperties;
+    std::vector<style::PluginPropertyValue::EvaluationStorage> featureStorage(layoutValues.size());
+    const FeatureState noFeatureState;
+    context.properties = layoutProperties.data();
+    context.property_count = layoutProperties.size();
+    context.host = resourceHost.getAPI();
 
     void* layoutInstance = nullptr;
     const auto createStatus = registration->createLayout(&context, &layoutInstance);
@@ -243,26 +207,25 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
         return;
     }
 
-    // Handles by URL, so each resource is looked up once per tile.
-    std::map<std::string, void*> handles;
     for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
         auto feature = sourceLayer->getFeature(i);
-        if (!feature || !laysOut(*registration, leader, *feature, zoom, canonical, globalState.get())) continue;
+        if (!feature) continue;
+        const auto type = plugin::geometryType(feature->getType());
+        if (type == 0 || (registration->geometryTypeMask & type) == 0) continue;
+        if (!leader.filter(style::expression::EvaluationContext(zoom, feature.get())
+                               .withCanonicalTileID(&canonical)
+                               .withGlobalState(globalState.get()))) {
+            continue;
+        }
 
-        properties.evaluate(*feature);
-        for (std::size_t p = 0; p < properties.definitions.size(); ++p) {
-            if (properties.definitions[p]->type != MLN_PLUGIN_VALUE_RESOURCE) continue;
-            auto& value = properties.feature[p].value;
-            value.data.resource_value.handle = nullptr;
-            if (const auto* url = resourceURL(leader, *properties.definitions[p], value)) {
-                const auto [handle, added] = handles.emplace(*url, nullptr);
-                if (added) handle->second = resourceHandle(*url);
-                value.data.resource_value.handle = handle->second;
-            }
+        for (std::size_t p = 0; p < layoutValues.size(); ++p) {
+            if (!layoutValues[p].isDataDriven()) continue;
+            featureProperties[p].value = layoutValues[p].evaluate(
+                zoom, *feature, noFeatureState, *layoutDefinitions[p], featureStorage[p]);
         }
         plugin::FeatureView pluginFeature(*feature, i);
-        pluginFeature.value.layout_properties = properties.feature.data();
-        pluginFeature.value.layout_property_count = properties.feature.size();
+        pluginFeature.value.layout_properties = featureProperties.data();
+        pluginFeature.value.layout_property_count = featureProperties.size();
         if (registration->layoutFeature(layoutInstance, &pluginFeature.value) != MLN_PLUGIN_STATUS_OK) {
             Log::Error(Event::Style, "Plugin layer '" + leader.id + "' failed while laying out a feature");
             return;

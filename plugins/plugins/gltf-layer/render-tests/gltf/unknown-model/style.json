@@ -4,7 +4,7 @@
     "test": {
       "width": 256,
       "height": 256,
-      "description": "A feature that names a model the layer does not have is not drawn"
+      "description": "A feature that names a model that cannot be loaded is not drawn, and does not fail the tile"
     }
   },
   "center": [
@@ -63,12 +63,14 @@
       "type": "gltf",
       "source": "boxes",
       "layout": {
-        "models": {
-          "blue": "asset://plugins/plugins/gltf-layer/render-tests/assets/box-blue.glb"
-        },
-        "model-id": [
-          "get",
-          "kind"
+        "model-uri": [
+          "concat",
+          "asset://plugins/plugins/gltf-layer/render-tests/assets/box-",
+          [
+            "get",
+            "kind"
+          ],
+          ".glb"
         ]
       },
       "paint": {

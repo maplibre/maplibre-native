@@ -114,10 +114,6 @@ auto withPropertyType(mln_plugin_value_type type, Fn&& fn) {
         case MLN_PLUGIN_VALUE_COLOR:
             return fn.template operator()<Color>();
         case MLN_PLUGIN_VALUE_STRING:
-        // A RESOURCE is held as its name. A RESOURCES map lives in the layer (PluginStyleLayer::Impl) and is
-        // held here only as an empty string, so that code walking every property can evaluate it.
-        case MLN_PLUGIN_VALUE_RESOURCES:
-        case MLN_PLUGIN_VALUE_RESOURCE:
             return fn.template operator()<std::string>();
     }
     throw std::logic_error("Invalid plugin property type");
@@ -243,18 +239,8 @@ float PluginPropertyValue::interpolationFactor(float bucketZoom, float currentZo
 mln_plugin_value PluginPropertyValue::evaluate(const expression::EvaluationContext& context,
                                                const plugin::PropertyDefinition& definition,
                                                EvaluationStorage& storage) const {
-    auto result = std::visit(
+    return std::visit(
         [&](const auto& typed) { return toPluginValue(evaluateTyped(typed, context, definition), storage); }, value);
-    if (definition.type == MLN_PLUGIN_VALUE_RESOURCE) {
-        // The handle is filled in by the layout, which has the loaded resources.
-        const auto name = result.data.string_value;
-        result.type = MLN_PLUGIN_VALUE_RESOURCE;
-        result.data.resource_value = {name, nullptr};
-    } else if (definition.type == MLN_PLUGIN_VALUE_RESOURCES) {
-        result.type = MLN_PLUGIN_VALUE_RESOURCES;
-        result.data.string_value = {};
-    }
-    return result;
 }
 
 mln_plugin_value PluginPropertyValue::evaluate(float zoom,

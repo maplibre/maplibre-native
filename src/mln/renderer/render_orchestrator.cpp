@@ -23,7 +23,6 @@
 #include <mln/style/source_impl.hpp>
 #include <mln/style/transition_options.hpp>
 #include <mln/text/glyph_manager.hpp>
-#include <mln/tile/layout_resource_manager.hpp>
 #include <mln/tile/tile.hpp>
 #include <mln/util/instrumentation.hpp>
 #include <mln/util/math.hpp>
@@ -139,7 +138,6 @@ RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_,
     : observer(&nullObserver()),
       glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_))),
       imageManager(ImageManager::create()),
-      layoutResourceManager(std::make_shared<LayoutResourceManager>()),
       lineAtlas(std::make_unique<LineAtlas>()),
       patternAtlas(std::make_unique<PatternAtlas>()),
       imageImpls(makeMutable<std::vector<Immutable<style::Image::Impl>>>()),
@@ -236,8 +234,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   .tileLodMode = updateParameters->tileLodMode,
                                   .dynamicTextureAtlas = dynamicTextureAtlas,
                                   .globalState = globalState,
-                                  .captureRenderedFeatures = updateParameters->captureRenderedFeatures,
-                                  .layoutResourceManager = layoutResourceManager};
+                                  .captureRenderedFeatures = updateParameters->captureRenderedFeatures};
 
     glyphManager->setURL(updateParameters->glyphURL);
     glyphManager->setFontFaces(updateParameters->fontFaces);

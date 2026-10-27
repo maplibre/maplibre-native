@@ -14,7 +14,7 @@ On macOS the link may need ICU, which Homebrew keeps out of the default library 
 | `basic` | A model drawn with a heading and a size in meters. |
 | `occlusion-behind-extrusion` | A fill extrusion hides a model behind it, and leaves the models in front of and beside it alone. |
 | `occlusion-disabled` | With `model-occlusion: 0` the same model is drawn over the extrusion. |
-| `unknown-model` | A feature that names a model the layer doesn't have is not drawn. |
+| `unknown-model` | A feature that names a model that can't be loaded is not drawn, and the tile still renders. |
 
 `occlusion-behind-extrusion` is a regression test: the layer used to be drawn with a 2D depth state, which the
 renderer turns off for every layer above a 3D layer, so nothing could hide a model. Its expected image is the scene

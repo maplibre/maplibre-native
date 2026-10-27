@@ -59,7 +59,7 @@
       "id": "trees",
       "type": "gltf",
       "source": "trees",
-      "layout": { "models": { "tree": "asset://tree.glb" }, "model-id": "tree" },
+      "layout": { "model-uri": "asset://tree.glb" },
       "paint": { "model-scale": ["get", "scale"] }
     },
     {
@@ -67,12 +67,7 @@
       "type": "gltf",
       "source": "vehicles",
       "layout": {
-        "models": {
-          "car-red": "asset://car-red.glb",
-          "car-blue": "asset://car-blue.glb",
-          "car-yellow": "asset://car-yellow.glb"
-        },
-        "model-id": ["get", "kind"]
+        "model-uri": ["concat", "asset://", ["get", "kind"], ".glb"]
       },
       "paint": { "model-heading": ["get", "heading"], "model-scale": 4 }
     }

@@ -10,6 +10,7 @@
 #include <cstring>
 #include <limits>
 #include <memory>
+#include <mutex>
 #include <new>
 #include <string>
 #include <string_view>
@@ -65,6 +66,14 @@ static_assert(offsetof(Vertex, model) == 4 && offsetof(Vertex, normal) == 16 && 
 static_assert(sizeof(Vertex) == 44);
 
 struct Layout {
+    const mln_plugin_host_api_v1* host = nullptr;
+    // The layer's model: its tile-wide `model-uri`, or else the mesh set through mln_gltf_layer_set_model.
+    // Null when neither is given; a layer whose `model-uri` is a feature expression needs none.
+    std::string uri;
+    std::shared_ptr<const Model> model;
+    // Models named by features, kept by uri so each is resolved once per tile and a failed one is not retried
+    // for every feature. A null entry is a model that could not be loaded.
+    std::unordered_map<std::string, std::shared_ptr<const Model>> featureModels;
     uint32_t extent = 8192;
     // Whether the map's geometry can hide the mesh. When false it is drawn over everything, whatever the layer order.
     bool occluded = true;
@@ -76,6 +85,9 @@ struct Layout {
     std::array<mln_plugin_attribute_binding_v1, 4> attributes{};
     std::array<mln_plugin_drawable_descriptor_v1, 1> drawables{};
 };
+
+std::mutex currentModelMutex;
+std::shared_ptr<const Model> currentModel;
 
 Matrix identity() {
     Matrix result{};
@@ -254,7 +266,7 @@ void appendNode(const tg3_model& source, int nodeIndex, const Matrix& parent, in
     }
 }
 
-std::unique_ptr<Model> parseGLB(const uint8_t* bytes, size_t size, std::string& error) {
+std::shared_ptr<const Model> parseGLB(const uint8_t* bytes, size_t size, std::string& error) {
     tg3_parse_options options;
     tg3_parse_options_init(&options);
     // Images are never read, so skip decoding them. No file system callbacks are set, so a GLB can't make the
@@ -270,7 +282,7 @@ std::unique_ptr<Model> parseGLB(const uint8_t* bytes, size_t size, std::string& 
         return {};
     }
     const tg3_model& source = *parsed.get();
-    auto result = std::make_unique<Model>();
+    auto result = std::make_shared<Model>();
     const int sceneIndex = source.default_scene >= 0 ? source.default_scene : (source.scenes_count == 0 ? -1 : 0);
     if (sceneIndex >= 0 && static_cast<uint32_t>(sceneIndex) < source.scenes_count) {
         const auto& scene = source.scenes[sceneIndex];
@@ -288,10 +300,72 @@ std::unique_ptr<Model> parseGLB(const uint8_t* bytes, size_t size, std::string& 
     return result;
 }
 
+void copyDiagnostic(const std::string& message, char* output, size_t capacity) {
+    if (!output || capacity == 0) return;
+    const size_t length = std::min(message.size(), capacity - 1);
+    std::memcpy(output, message.data(), length);
+    output[length] = '\0';
+}
+
 void log(const mln_plugin_host_api_v1* host, int32_t severity, const std::string& message) {
     if (host && host->log) {
         host->log(severity, {message.data(), message.size()});
     }
+}
+
+struct ModelResponse {
+    std::shared_ptr<const Model> model;
+    std::string error;
+};
+
+void modelLoaded(void* context, const mln_plugin_resource_response_v1* response) {
+    auto& result = *static_cast<ModelResponse*>(context);
+    if (!response || !response->data || response->data_size == 0) {
+        result.error = response && response->error_message.data
+                           ? std::string(response->error_message.data, response->error_message.size)
+                           : "empty response";
+        return;
+    }
+    result.model = parseGLB(response->data, response->data_size, result.error);
+}
+
+// Tiles share one parsed model per uri. Failures are not cached, so a later tile retries.
+std::mutex modelCacheMutex;
+std::unordered_map<std::string, std::shared_ptr<const Model>> modelCache;
+
+std::shared_ptr<const Model> loadModel(const mln_plugin_host_api_v1* host, const std::string& uri) {
+    {
+        std::lock_guard lock(modelCacheMutex);
+        const auto found = modelCache.find(uri);
+        if (found != modelCache.end()) return found->second;
+    }
+    if (!host || host->struct_size < sizeof(*host) || !host->request_resource) {
+        log(host, 3, "gltf: the host cannot load resources");
+        return {};
+    }
+    ModelResponse response;
+    uint64_t requestID = 0;
+    const auto status = host->request_resource(
+        host->context, {uri.data(), uri.size()}, modelLoaded, &response, &requestID);
+    if (status != MLN_PLUGIN_STATUS_OK || !response.model) {
+        log(host,
+            3,
+            "gltf: failed to load '" + uri + "': " + (response.error.empty() ? "request rejected" : response.error));
+        return {};
+    }
+    std::lock_guard lock(modelCacheMutex);
+    return modelCache.emplace(uri, std::move(response.model)).first->second;
+}
+
+// A string layout property by name; empty when absent.
+std::string layoutString(const mln_plugin_property_value_v1* properties, size_t count, std::string_view name) {
+    for (size_t i = 0; i < count; ++i) {
+        const auto& property = properties[i];
+        if (std::string_view(property.name.data, property.name.size) != name) continue;
+        if (property.value.type != MLN_PLUGIN_VALUE_STRING || !property.value.data.string_value.data) return {};
+        return std::string(property.value.data.string_value.data, property.value.data.string_value.size);
+    }
+    return {};
 }
 
 void startSegment(Layout& layout) {
@@ -302,41 +376,17 @@ void startSegment(Layout& layout) {
     layout.segments.push_back(segment);
 }
 
-// The model a feature is drawn as: the one its `model-id` names in the layer's `models`, which the host has
-// loaded and create_resource has parsed. Null when the name is unknown or the model could not be loaded, in
-// which case the feature is skipped rather than failing every other feature in the tile. The model is chosen
-// at layout time, which is why it can differ per feature but not per frame.
-const Model* modelForFeature(const mln_plugin_feature_v1& feature) {
-    for (size_t i = 0; i < feature.layout_property_count; ++i) {
-        const auto& property = feature.layout_properties[i];
-        if (std::string_view(property.name.data, property.name.size) != "model-id") continue;
-        if (property.value.type != MLN_PLUGIN_VALUE_RESOURCE) return nullptr;
-        return static_cast<const Model*>(property.value.data.resource_value.handle);
-    }
-    return nullptr;
-}
-
-// Parses a model once, when the host has loaded it; the handle is the parsed Model.
-mln_plugin_status createResource(
-    const mln_plugin_host_api_v1* host, mln_plugin_string url, const uint8_t* data, size_t size, void** handle) try {
-    if (!handle) return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
-    *handle = nullptr;
-    std::string error;
-    auto model = data && size ? parseGLB(data, size, error) : nullptr;
-    if (!model) {
-        log(host,
-            3,
-            "gltf: cannot read '" + std::string(url.data, url.size) + "': " + (error.empty() ? "empty" : error));
-        return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
-    }
-    *handle = model.release();
-    return MLN_PLUGIN_STATUS_OK;
-} catch (...) {
-    return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
-}
-
-void destroyResource(void* handle) {
-    delete static_cast<Model*>(handle);
+// The model a feature is drawn as: its `model-uri`, which may be a feature expression, else the layer's.
+// Null when neither is usable, in which case the feature is skipped rather than failing every other feature
+// in the tile. The model is chosen at layout time, which is why it can differ per feature but not per frame.
+std::shared_ptr<const Model> modelForFeature(Layout& layout, const mln_plugin_feature_v1& feature) {
+    const auto uri = layoutString(feature.layout_properties, feature.layout_property_count, "model-uri");
+    if (uri.empty() || uri == layout.uri) return layout.model;
+    const auto cached = layout.featureModels.find(uri);
+    if (cached != layout.featureModels.end()) return cached->second;
+    auto model = loadModel(layout.host, uri);
+    layout.featureModels.emplace(uri, model);
+    return model;
 }
 
 mln_plugin_status createLayout(const mln_plugin_layout_context_v1* context, void** instance) try {
@@ -345,6 +395,18 @@ mln_plugin_status createLayout(const mln_plugin_layout_context_v1* context, void
     }
     auto layout = std::unique_ptr<Layout>(new (std::nothrow) Layout());
     if (!layout) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
+    layout->host = context->host;
+    // The layer's `model-uri` wins; a layer without one draws the mesh set through mln_gltf_layer_set_model.
+    // A constant uri that is given but cannot be loaded fails the layout rather than silently drawing another
+    // model. A feature expression evaluates to its default here, and each feature loads its own model.
+    layout->uri = layoutString(context->properties, context->property_count, "model-uri");
+    if (!layout->uri.empty()) {
+        layout->model = loadModel(layout->host, layout->uri);
+        if (!layout->model) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
+    } else {
+        std::lock_guard lock(currentModelMutex);
+        layout->model = currentModel;
+    }
     layout->extent = context->extent;
     // A missing or malformed value keeps the default: occluded.
     for (size_t i = 0; context->properties && i < context->property_count; ++i) {
@@ -366,7 +428,7 @@ mln_plugin_status layoutFeature(void* instance, const mln_plugin_feature_v1* fea
     }
     auto& layout = *static_cast<Layout*>(instance);
     // No usable model: draw nothing rather than fail the tile.
-    const auto* modelPointer = modelForFeature(*feature);
+    const auto modelPointer = modelForFeature(layout, *feature);
     if (!modelPointer) return MLN_PLUGIN_STATUS_OK;
     const auto& model = *modelPointer;
     const auto firstVertex = static_cast<uint32_t>(layout.vertices.size());
@@ -532,32 +594,25 @@ constexpr mln_plugin_value number(float n) {
     return v;
 }
 
-// Names and the .glb URLs they stand for, e.g. {"car": "asset://car.glb"}. The host loads the ones that
-// `model-id` names; the plugin only sees them parsed, through create_resource.
-constexpr mln_plugin_property_descriptor_v1 resourcesProperty(mln_plugin_string name) {
-    mln_plugin_property_descriptor_v1 p{};
-    p.struct_size = sizeof(p);
-    p.name = name;
-    p.type = MLN_PLUGIN_VALUE_RESOURCES;
-    p.default_value.struct_size = sizeof(p.default_value);
-    p.default_value.type = MLN_PLUGIN_VALUE_RESOURCES;
-    p.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
-    return p;
+constexpr mln_plugin_value text(mln_plugin_string t) {
+    mln_plugin_value v{};
+    v.struct_size = sizeof(v);
+    v.type = MLN_PLUGIN_VALUE_STRING;
+    v.data.string_value = t;
+    return v;
 }
 
-// A name in `resources`, evaluated when a tile is laid out, for each feature; it takes camera and feature
-// expressions, but no feature state or transitions.
-constexpr mln_plugin_property_descriptor_v1 resourceProperty(mln_plugin_string name, mln_plugin_string resources) {
+// A layout property is evaluated when a tile is laid out, for the tile and for each feature; it takes camera
+// and feature expressions, but no feature state or transitions.
+constexpr mln_plugin_property_descriptor_v1 layoutProperty(mln_plugin_string name, mln_plugin_value value) {
     mln_plugin_property_descriptor_v1 p{};
     p.struct_size = sizeof(p);
     p.name = name;
-    p.type = MLN_PLUGIN_VALUE_RESOURCE;
-    p.default_value.struct_size = sizeof(p.default_value);
-    p.default_value.type = MLN_PLUGIN_VALUE_RESOURCE;
+    p.type = value.type;
+    p.default_value = value;
     p.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
                                 MLN_PLUGIN_EXPRESSION_COMPOSITE;
     p.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
-    p.resources = resources;
     return p;
 }
 
@@ -600,12 +655,10 @@ constexpr mln_plugin_property_descriptor_v1 property(mln_plugin_string name,
 }
 
 const mln_plugin_property_descriptor_v1 properties[] = {
-    // The models the layer can draw: names mapped to .glb files with embedded buffers, loaded through the
-    // host's file source (asset://, file:// or https://).
-    resourcesProperty(str("models")),
-    // The name in `models` a feature is drawn as; usually a feature expression such as ["get", "kind"], so
-    // one layer draws several models. A feature whose name is not in `models` is not drawn.
-    resourceProperty(str("model-id"), str("models")),
+    // A .glb with embedded buffers, loaded through the host's file source: an asset://, file:// or https:// url.
+    // May be a feature expression, e.g. ["get", "model"], so each feature draws its own model.
+    // Optional: without it the layer draws the mesh set through mln_gltf_layer_set_model.
+    layoutProperty(str("model-uri"), text(str(""))),
     // 1 draws the mesh depth tested against the map, so extrusions can hide it. 0 draws it above everything
     // beneath it in the layer order.
     layoutProperty(str("model-occlusion"), number(1), 0, 1),
@@ -707,8 +760,6 @@ const mln_plugin_layer_type_v1 layerType = [] {
     v.destroy_layout = destroyLayout;
     v.update_uniform_block = updateUniform;
     v.enable_near_clipped_matrix = 1;
-    v.create_resource = createResource;
-    v.destroy_resource = destroyResource;
     return v;
 }();
 const mln_plugin_descriptor_v1 descriptor = {
@@ -729,4 +780,28 @@ extern "C" mln_plugin_status mln_gltf_layer_register(mln_plugin_register_functio
                                                      size_t capacity) {
     if (!registerPlugin) return MLN_PLUGIN_STATUS_NOT_FOUND;
     return registerPlugin(&descriptor, error, capacity);
+}
+
+extern "C" mln_plugin_status mln_gltf_layer_set_model(const uint8_t* bytes,
+                                                      size_t size,
+                                                      char* error,
+                                                      size_t capacity) try {
+    copyDiagnostic({}, error, capacity);
+    if (!bytes || size == 0) {
+        std::lock_guard lock(currentModelMutex);
+        currentModel.reset();
+        return MLN_PLUGIN_STATUS_OK;
+    }
+    std::string message;
+    auto model = parseGLB(bytes, size, message);
+    if (!model) {
+        copyDiagnostic(message, error, capacity);
+        return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+    }
+    std::lock_guard lock(currentModelMutex);
+    currentModel = std::move(model);
+    return MLN_PLUGIN_STATUS_OK;
+} catch (...) {
+    copyDiagnostic("unexpected failure while reading the model", error, capacity);
+    return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
 }

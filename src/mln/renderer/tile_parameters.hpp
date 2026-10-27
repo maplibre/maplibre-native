@@ -16,7 +16,6 @@ class FileSource;
 class AnnotationManager;
 class ImageManager;
 class GlyphManager;
-class LayoutResourceManager;
 
 namespace gfx {
 class DynamicTextureAtlas;
@@ -44,8 +43,6 @@ public:
     std::shared_ptr<const GlobalStateMap> globalState = nullptr;
     bool isUpdateSynchronous = false;
     bool captureRenderedFeatures = false;
-    // Shared by the map's tiles; a tile without one keeps its own.
-    std::shared_ptr<LayoutResourceManager> layoutResourceManager = nullptr;
 };
 
 } // namespace mln

@@ -1,7 +1,7 @@
 import MapLibre
 import SwiftUI
 
-/// The `gltf` layer: `.glb` models drawn at the points of a source. A feature picks its model with `model-id`, and
+/// The `gltf` layer: `.glb` models drawn at the points of a source. A feature picks its model with `model-uri`, and
 /// heading, scale, altitude and opacity are paint properties evaluated every frame.
 ///
 /// The scene is a ring road with three cars on it, trees, and a few extruded buildings. The cars and trees are depth
