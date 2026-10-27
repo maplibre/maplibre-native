@@ -988,7 +988,7 @@ TEST(OfflineDownload, TEST_REQUIRES_SERVER(RevalidationNotModifiedRetainsTileDat
     EXPECT_EQ(cachedTile.etag, cached->etag);
     EXPECT_TRUE(cached->mustRevalidate);
     ASSERT_TRUE(cached->expires);
-    EXPECT_GT(*cached->expires, *cachedTile.expires);
+    EXPECT_TRUE(*cached->expires > *cachedTile.expires); // not EXPECT_GT: see expectRequest
     EXPECT_EQ(tileSize, download.getStatus().completedTileSize);
     EXPECT_EQ(1u, download.getStatus().completedTileCount);
 }
