@@ -6,7 +6,7 @@ repository and a standalone plugin repository. Paths are relative to the plugin'
 * includeDirectories may point outside the plugin directory, as long as they stay inside this repository
   (for example at a vendored dependency).
 * Optional `backends`: the renderers the plugin implements, a subset of opengl, vulkan and metal (default: all).
-  A plugin without OpenGL or Vulkan gets no Android wrapper.
+  A plugin without OpenGL or Vulkan gets no Android wrapper, and one without OpenGL or Metal gets no iOS wrapper.
 * `demo.style` may be an https URL, and `demo.camera` may have `pitch` and `bearing`.
 
 Every tool reads plugins through resolve(), so naming defaults live in one place.
@@ -22,6 +22,7 @@ REPO_ROOT = PLUGINS_ROOT.parent
 PLUGIN_SOURCES = PLUGINS_ROOT / "plugins"
 BACKENDS = ("opengl", "vulkan", "metal")
 ANDROID_BACKENDS = ("opengl", "vulkan")
+APPLE_BACKENDS = ("opengl", "metal")
 
 
 class ConfigError(Exception):
@@ -106,6 +107,17 @@ def resolve(plugin_dir):
     android["qualifiedClassName"] = android["namespace"] + "." + android["className"]
     android["supported"] = any(b in ANDROID_BACKENDS for b in backends)
 
+    apple = dict(raw.get("apple", {}))
+    apple.setdefault("product", product)
+    apple.setdefault("className", "MLN" + apple["product"] + "Plugin")
+    apple.setdefault("swiftName", apple["product"] + "Plugin")
+    apple.setdefault("errorDomain", "org.maplibre.plugins." + plugin_id)
+    for key in ("product", "className", "swiftName"):
+        _require(re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", apple[key]), f"{where}: apple.{key}")
+    apple["supported"] = any(b in APPLE_BACKENDS for b in backends)
+    # A plugin that has no OpenGL implementation can only be linked into a Metal build.
+    apple["metalOnly"] = "opengl" not in backends
+
     demo = dict(raw.get("demo", {}))
     if "style" in demo:
         if not demo["style"].startswith("https://"):
@@ -130,6 +142,7 @@ def resolve(plugin_dir):
         "includeDirectories": include_directories,
         "backends": backends,
         "android": android,
+        "apple": apple,
         "demo": demo,
     }
 

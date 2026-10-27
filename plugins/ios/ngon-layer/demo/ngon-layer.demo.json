@@ -1,0 +1,11 @@
+{
+  "id": "ngon-layer",
+  "displayName": "N-gon layer",
+  "description": "Source-bound regular polygon (n-gon) style layer",
+  "style": "ngon-layer.style.json",
+  "camera": {
+    "latitude": 0,
+    "longitude": 0,
+    "zoom": 11.3
+  }
+}
