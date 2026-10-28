@@ -124,20 +124,12 @@ gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n,
         return gfx::DepthMode::disabled();
     }
 
-#if MLN_RENDER_BACKEND_OPENGL
     float depth = depthRangeSize + ((1 + currentLayer) * numSublayers + n) * depthEpsilon;
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, mask, {depth, depth}};
-#else
-    return gfx::DepthMode{.func = gfx::DepthFunctionType::LessEqual, .mask = mask};
-#endif
 }
 
 gfx::DepthMode PaintParameters::depthModeFor3D() const {
-#if MLN_RENDER_BACKEND_OPENGL
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite, {0.0, depthRangeSize}};
-#else
-    return gfx::DepthMode{.func = gfx::DepthFunctionType::LessEqual, .mask = gfx::DepthMaskType::ReadWrite};
-#endif
 }
 
 namespace {

@@ -262,9 +262,25 @@ void Drawable::draw(PaintParameters& parameters) const {
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
             // FIXME: https://github.com/maplibre/maplibre-native/issues/3248
             if (newStencilMode) impl->previousStencilMode = *newStencilMode;
+
+            MTL::Viewport viewport = {0.0f,
+                                      0.0f,
+                                      static_cast<double>(renderable.getSize().width),
+                                      static_cast<double>(renderable.getSize().height),
+                                      depthMode.range.min,
+                                      depthMode.range.max};
+            encoder->setViewport(viewport);
         }
         renderPass.setDepthStencilState(impl->depthStencilState);
         renderPass.setStencilReference(impl->previousStencilMode.ref);
+    } else {
+        MTL::Viewport viewport = {0.0f,
+                                  0.0f,
+                                  static_cast<double>(renderable.getSize().width),
+                                  static_cast<double>(renderable.getSize().height),
+                                  0.0f,
+                                  1.0f};
+        encoder->setViewport(viewport);
     }
 
     for (const auto& seg_ : impl->segments) {
