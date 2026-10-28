@@ -7,6 +7,7 @@
 #include <mln/map/camera.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/math/angles.hpp>
+#include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/terrain.hpp>
 #include <mln/util/constants.hpp>
@@ -626,4 +627,93 @@ TEST(TerrainDepthPass, StillCameraSkipsThePass) {
 
     test.map.jumpTo(CameraOptions().withPitch(61.0));
     EXPECT_GT(depthPassesAfterFrame(), passes) << "a camera move must redraw the depth texture";
+}
+
+namespace {
+
+// A red fill over a geojson source on a flat terrain, seen from straight above, on a white
+// background: the pixel at the centre of the view shows whether the drape draws the fill there.
+const char* drapedFillUpdateStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 6,
+      "tileSize": 64
+    },
+    "area": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": [
+    {"id": "ground", "type": "background", "paint": {"background-color": "#fff"}},
+    {"id": "area", "type": "fill", "source": "area", "paint": {"fill-color": "#f00"}}
+  ]
+})STYLE";
+
+// Around the centre of the view, well beyond its edges
+const char* areaGeoJSON = R"JSON({"type": "Polygon",
+  "coordinates": [[[2, 42], [21, 42], [21, 52], [2, 52], [2, 42]]]})JSON";
+// The same area with a hole at the centre of the view: new data on the same tiles
+const char* areaWithHoleGeoJSON = R"JSON({"type": "Polygon",
+  "coordinates": [[[2, 42], [21, 42], [21, 52], [2, 52], [2, 42]],
+                  [[10.9, 46.9], [10.9, 47.6], [11.9, 47.6], [11.9, 46.9], [10.9, 46.9]]]})JSON";
+const char* noFeaturesGeoJSON = R"JSON({"type": "FeatureCollection", "features": []})JSON";
+
+struct DrapedFillTest {
+    util::RunLoop loop;
+    std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(),
+                                                                                  ClientOptions());
+    std::string tile = makeFlatDEMTile();
+    HeadlessFrontend frontend{{256, 256}, 1};
+    MapAdapter map{frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
+
+    DrapedFillTest() {
+        fileSource->tileResponse = [this](const Resource&) {
+            Response res;
+            res.data = std::make_shared<std::string>(tile);
+            return res;
+        };
+        map.getStyle().loadJSON(drapedFillUpdateStyle);
+        map.jumpTo(CameraOptions().withCenter(LatLng{47.2692, 11.4041}).withZoom(5.0));
+    }
+
+    void setArea(const char* geojson) {
+        map.getStyle().getSource("area")->as<style::GeoJSONSource>()->setGeoJSON(mapbox::geojson::parse(geojson));
+    }
+
+    // Whether the fill is drawn at the centre of the view
+    bool fillAtCentre() {
+        const auto image = frontend.render(map).image;
+        const uint8_t* px = image.data.get() + (image.size.height / 2 * image.size.width + image.size.width / 2) * 4;
+        return px[0] > 200 && px[1] < 100 && px[2] < 100;
+    }
+};
+
+} // namespace
+
+// New data on the tiles the drape already shows - a geojson source updated with setGeoJSON -
+// is drawn at once, not when the next zoom level changes the tiles.
+TEST(TerrainDrape, NewDataOnTheSameTilesIsDrawn) {
+    DrapedFillTest test;
+    test.setArea(areaGeoJSON);
+    ASSERT_TRUE(test.fillAtCentre());
+
+    test.setArea(areaWithHoleGeoJSON);
+    EXPECT_FALSE(test.fillAtCentre());
+}
+
+// A source emptied of its features clears the drape instead of leaving the old fill on the
+// terrain.
+TEST(TerrainDrape, AnEmptiedSourceIsCleared) {
+    DrapedFillTest test;
+    test.setArea(areaGeoJSON);
+    ASSERT_TRUE(test.fillAtCentre());
+
+    test.setArea(noFeaturesGeoJSON);
+    EXPECT_FALSE(test.fillAtCentre());
 }

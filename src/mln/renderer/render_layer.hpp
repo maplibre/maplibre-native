@@ -215,6 +215,11 @@ protected:
     /// far field the level of detail coarsened neither draws nor places this layer.
     void dropTilesBelowMinZoom(const LayerPrepareParameters&);
 
+    /// With terrain on, tells a draped layer group which render tiles have no data for the layer
+    /// (see TileLayerGroup::setEmptyTileIDs). Called by the vector layers and the raster layer;
+    /// the DEM layers (hillshade, color-relief) keep the hold for their tiles.
+    void updateEmptyTileIDs(const LayerPrepareParameters&);
+
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
 
     void setLayerGroup(LayerGroupBasePtr, UniqueChangeRequestVec&);
