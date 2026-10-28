@@ -360,7 +360,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::AttributeDataType::Short2);
         }
 
-        auto instanceAttrs = context.createVertexAttributeArray();
+        gfx::VertexAttributeArrayPtr instanceAttrs;
         if (bucket.isRoundedCornerEnabled()) {
             if (const auto& attr = vertexAttrs->set(idFillNeighborVertexAttribute)) {
                 attr->setSharedRawData(bucket.sharedNeighbors,
@@ -370,6 +370,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::Short2);
             }
 
+            instanceAttrs = context.createVertexAttributeArray();
             if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
                 attr->setSharedRawData(bucket.sharedTriangleInstances,
                                        offsetof(FillTriangleInstance, a1),
@@ -495,7 +496,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
 #endif
                 fillBuilder->setVertexAttributes(std::move(vertexAttrs));
-                fillBuilder->setInstanceAttributes(std::move(instanceAttrs));
+                if (bucket.isRoundedCornerEnabled()) {
+                    fillBuilder->setInstanceAttributes(std::move(instanceAttrs));
+                }
 
                 fillBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
                 fillBuilder->setSegments(gfx::Triangles(),
@@ -594,7 +597,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlinePatternBuilder->setVertexAttributes(vertexAttrs);
                 }
                 patternBuilder->setVertexAttributes(std::move(vertexAttrs));
-                patternBuilder->setInstanceAttributes(std::move(instanceAttrs));
+                if (bucket.isRoundedCornerEnabled()) {
+                    patternBuilder->setInstanceAttributes(std::move(instanceAttrs));
+                }
                 patternBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
                 patternBuilder->setSegments(gfx::Triangles(),
                                             bucket.sharedTriangles,
