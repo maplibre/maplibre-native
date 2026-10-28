@@ -376,7 +376,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         MLN_TRACE_ZONE(create source);
         std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second, threadPool);
         renderSource->setObserver(this);
-        renderSource->setCacheEnabled(tileCacheEnabled);
         renderSource->setCacheSize(tileCacheSize);
         renderSource->setFastPFOREnabled(updateParameters->fastPFOREnabled);
         renderSources.emplace(entry.first, std::move(renderSource));
@@ -817,15 +816,11 @@ void RenderOrchestrator::removeFeatureState(const std::string& sourceID,
 }
 
 void RenderOrchestrator::setTileCacheEnabled(bool enable) {
-    tileCacheEnabled = enable;
-
-    for (const auto& entry : renderSources) {
-        entry.second->setCacheEnabled(enable);
-    }
+    setTileCacheSize(enable ? std::nullopt : std::optional<std::size_t>(0));
 }
 
 bool RenderOrchestrator::getTileCacheEnabled() const {
-    return tileCacheEnabled;
+    return tileCacheSize != 0u;
 }
 
 void RenderOrchestrator::setTileCacheSize(std::optional<std::size_t> size) {
@@ -834,10 +829,6 @@ void RenderOrchestrator::setTileCacheSize(std::optional<std::size_t> size) {
     for (const auto& entry : renderSources) {
         entry.second->setCacheSize(size);
     }
-}
-
-std::optional<std::size_t> RenderOrchestrator::getTileCacheSize() const {
-    return tileCacheSize;
 }
 
 void RenderOrchestrator::reduceMemoryUse() {

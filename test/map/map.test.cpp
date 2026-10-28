@@ -2336,11 +2336,85 @@ TEST(Map, LocationIndicatorWithoutImages) {
     EXPECT_EQ(test.frontend.render(test.map).stats.numDrawCalls, 0);
 }
 
-TEST(Map, TileCacheSize) {
+namespace {
+
+// Renders a view, a view elsewhere and the first view again; returns how many tiles the first and the last
+// render load (tiles kept in the cache are only revalidated).
+std::pair<int, int> tileRequestsGoingBack(const std::function<void(Renderer&)>& configure,
+                                          bool afterFirstRender = false) {
     MapTest<> test;
-    EXPECT_EQ(std::nullopt, test.frontend.getRenderer()->getTileCacheSize());
+    test.fileSource->tileResponse = [](const Resource& resource) {
+        Response response;
+        response.expires = util::now() + std::chrono::hours(1);
+        if (resource.priorExpires) {
+            response.notModified = true;
+            return response;
+        }
+        ++requestsCount;
+        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/vector.tile"));
+        return response;
+    };
+    test.fileSource->styleResponse = makeResponse("style_vector.json");
+    test.fileSource->sourceResponse = makeResponse("source_vector.json");
+    test.fileSource->glyphsResponse = makeResponse("glyphs.pbf");
+    test.fileSource->spriteJSONResponse = makeResponse("sprite.json");
+    test.fileSource->spriteImageResponse = makeResponse("sprite.png");
+    if (!afterFirstRender) configure(*test.frontend.getRenderer());
+    test.map.getStyle().loadURL("maptiler://maps/streets");
 
-    test.frontend.getRenderer()->setTileCacheSize(2);
+    test.map.jumpTo(CameraOptions().withZoom(10).withCenter(LatLng{0, 0}));
+    requestsCount = 0;
+    test.frontend.render(test.map);
+    const int first = requestsCount;
+    if (afterFirstRender) configure(*test.frontend.getRenderer());
+    test.map.jumpTo(CameraOptions().withZoom(10).withCenter(LatLng{40, 100}));
+    test.frontend.render(test.map);
+    test.map.jumpTo(CameraOptions().withZoom(10).withCenter(LatLng{0, 0}));
+    requestsCount = 0;
+    test.frontend.render(test.map);
+    return {first, requestsCount};
+}
 
-    EXPECT_EQ(std::optional<std::size_t>(2), test.frontend.getRenderer()->getTileCacheSize());
+} // namespace
+
+TEST(Map, TileCacheKeepsTheTilesThatLeftTheView) {
+    const auto [first, back] = tileRequestsGoingBack([](Renderer&) {});
+
+    ASSERT_LT(2, first);
+    EXPECT_EQ(0, back);
+}
+
+TEST(Map, DisabledTileCacheKeepsNoTiles) {
+    const auto [first, back] = tileRequestsGoingBack([](Renderer& renderer) { renderer.setTileCacheEnabled(false); });
+
+    EXPECT_EQ(first, back);
+}
+
+TEST(Map, TileCacheKeepsAsManyTilesAsItsSize) {
+    const auto [first, back] = tileRequestsGoingBack([](Renderer& renderer) { renderer.setTileCacheSize(2); });
+
+    EXPECT_EQ(first - 2, back);
+}
+
+TEST(Map, TileCacheSizeAppliesToExistingSources) {
+    const auto [first, back] = tileRequestsGoingBack([](Renderer& renderer) { renderer.setTileCacheSize(2); }, true);
+
+    EXPECT_EQ(first - 2, back);
+}
+
+TEST(Map, EnablingTheTileCacheRestoresItsDefaultSize) {
+    const auto [first, back] = tileRequestsGoingBack([](Renderer& renderer) {
+        renderer.setTileCacheSize(2);
+        renderer.setTileCacheEnabled(true);
+    });
+
+    EXPECT_EQ(0, back);
+}
+
+TEST(Map, TileCacheOfSizeZeroIsDisabled) {
+    MapTest<> test;
+
+    test.frontend.getRenderer()->setTileCacheSize(0);
+
+    EXPECT_FALSE(test.frontend.getRenderer()->getTileCacheEnabled());
 }

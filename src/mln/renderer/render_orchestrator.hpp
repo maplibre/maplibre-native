@@ -96,7 +96,6 @@ public:
     void setTileCacheEnabled(bool);
     bool getTileCacheEnabled() const;
     void setTileCacheSize(std::optional<std::size_t>);
-    std::optional<std::size_t> getTileCacheSize() const;
     void reduceMemoryUse();
     void dumpDebugLogs();
     void collectPlacedSymbolData(bool);
@@ -234,7 +233,7 @@ private:
     const bool backgroundLayerAsColor;
     bool contextLost = false;
     bool placedSymbolDataCollected = false;
-    bool tileCacheEnabled = true;
+    // Without a value, the default size.
     std::optional<std::size_t> tileCacheSize;
 
 #if MLN_RENDER_BACKEND_OPENGL

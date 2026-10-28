@@ -6,7 +6,6 @@
 #include <mln/util/geojson.hpp>
 
 #include <memory>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -112,14 +111,15 @@ public:
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
 
     // Memory
+    /**
+     * @brief How many tiles each source keeps once they leave the view. By default, half a viewport of
+     * tiles for each zoom level of the map's zoom range (11 for a 512 × 512 map with zoom 0-22).
+     * `setTileCacheEnabled(false)` is the same as a size of 0, and `setTileCacheEnabled(true)` restores
+     * the default. Changes apply from the next render.
+     */
     void setTileCacheEnabled(bool);
     bool getTileCacheEnabled() const;
-    /**
-     * @brief Sets how many tiles each source keeps once they are out of view.
-     * Without a value (the default), it keeps enough to pan and zoom back to.
-     */
-    void setTileCacheSize(std::optional<std::size_t>);
-    std::optional<std::size_t> getTileCacheSize() const;
+    void setTileCacheSize(std::size_t);
     void reduceMemoryUse();
     void clearData();
 

@@ -238,7 +238,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
     }
 
-    if (type != SourceType::Annotations && cacheEnabled) {
+    if (type != SourceType::Annotations) {
         cache.setSize(cacheSize(parameters.transformState, tileSize, configuredCacheSize));
     } else {
         cache.setSize(0);
@@ -422,10 +422,6 @@ std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& 
     }
 
     return result;
-}
-
-void TilePyramid::setCacheEnabled(bool enable) {
-    cacheEnabled = enable;
 }
 
 void TilePyramid::setCacheSize(std::optional<std::size_t> size) {

@@ -62,10 +62,8 @@ public:
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const;
 
-    // Without a configured size, enough tiles to pan and zoom back to.
     static std::size_t cacheSize(const TransformState&, uint16_t tileSize, std::optional<std::size_t> configured);
 
-    void setCacheEnabled(bool);
     void setCacheSize(std::optional<std::size_t>);
     void reduceMemoryUse();
 
@@ -90,7 +88,6 @@ private:
     float prevLng = 0;
 
     bool fadingTiles = false;
-    bool cacheEnabled = true;
     std::optional<std::size_t> configuredCacheSize;
 };
 

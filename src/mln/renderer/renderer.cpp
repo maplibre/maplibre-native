@@ -165,12 +165,8 @@ bool Renderer::getTileCacheEnabled() const {
     return impl->orchestrator.getTileCacheEnabled();
 }
 
-void Renderer::setTileCacheSize(std::optional<std::size_t> size) {
+void Renderer::setTileCacheSize(std::size_t size) {
     impl->orchestrator.setTileCacheSize(size);
-}
-
-std::optional<std::size_t> Renderer::getTileCacheSize() const {
-    return impl->orchestrator.getTileCacheSize();
 }
 
 void Renderer::reduceMemoryUse() {
