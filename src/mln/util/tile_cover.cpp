@@ -8,6 +8,7 @@
 #include <mln/util/tile_cover_impl.hpp>
 #include <mln/util/tile_lod.hpp>
 
+#include <algorithm>
 #include <functional>
 #include <list>
 
@@ -292,17 +293,79 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     std::vector<ResultTile> result;
     stack.reserve(128);
 
+    // With a tile limit the walk is nearest first instead: a heap of nodes, keyed by the nearest a
+    // tile below them can be to `tileLimitOrigin`, and of the visible tiles found, keyed by their
+    // own distance. Whatever comes off the heap as a tile is the nearest of those left, so the
+    // walk stops at the limit having read only the nodes near the origin.
+    const bool limited = state.tileLimit > 0;
+    struct QueueItem {
+        double key; // squared distance to the origin: of the nearest point below a node, or of a tile
+        bool tile;
+        Node node;
+    };
+    std::vector<QueueItem> queue;
+    const auto tileIdOf = [&](const Node& node) {
+        return OverscaledTileID{
+            node.zoom == maxZoom ? overscaledZoom : node.zoom, node.wrap, node.zoom, node.x, node.y};
+    };
+    // Distance from the origin to a tile's center, in normalized web-mercator.
+    const auto tileKey = [&](const Node& node) {
+        const double scale = static_cast<double>(1u << node.zoom);
+        const double dx = (static_cast<double>(node.x) + 0.5) / scale + node.wrap - state.tileLimitOrigin[0];
+        const double dy = (static_cast<double>(node.y) + 0.5) / scale - state.tileLimitOrigin[1];
+        return dx * dx + dy * dy;
+    };
+    // Distance from the origin to the nearest point of a node's box, which no tile below it beats.
+    const auto nodeKey = [&](const Node& node) {
+        const double size = 1.0 / static_cast<double>(1u << node.zoom);
+        const double minX = static_cast<double>(node.x) * size + node.wrap;
+        const double minY = static_cast<double>(node.y) * size;
+        const double dx = std::max({minX - state.tileLimitOrigin[0], 0.0, state.tileLimitOrigin[0] - (minX + size)});
+        const double dy = std::max({minY - state.tileLimitOrigin[1], 0.0, state.tileLimitOrigin[1] - (minY + size)});
+        return dx * dx + dy * dy;
+    };
+    // The heap's top is the smallest key. At equal keys a node comes before a tile, so every tile
+    // at a distance is in the heap before the first of them is taken, and tiles at one distance
+    // come in ID order.
+    const auto later = [&](const QueueItem& a, const QueueItem& b) {
+        if (a.key != b.key) return a.key > b.key;
+        if (a.tile != b.tile) return a.tile;
+        return a.tile && tileIdOf(b.node) < tileIdOf(a.node);
+    };
+    const auto pushNode = [&](Node node) {
+        if (limited) {
+            const double key = nodeKey(node);
+            queue.push_back({key, false, std::move(node)});
+            std::push_heap(queue.begin(), queue.end(), later);
+        } else {
+            stack.push_back(std::move(node));
+        }
+    };
+
     // World copies shall be rendered three times on both sides from closest to farthest
     for (int i = 1; i <= 3; i++) {
-        stack.push_back(newRootTile(-i));
-        stack.push_back(newRootTile(i));
+        pushNode(newRootTile(-i));
+        pushNode(newRootTile(i));
     }
 
-    stack.push_back(newRootTile(0));
+    pushNode(newRootTile(0));
 
-    while (!stack.empty()) {
-        Node node = stack.back();
-        stack.pop_back();
+    while (limited ? !queue.empty() : !stack.empty()) {
+        Node node;
+        if (limited) {
+            std::pop_heap(queue.begin(), queue.end(), later);
+            QueueItem item = std::move(queue.back());
+            queue.pop_back();
+            if (item.tile) {
+                result.push_back({tileIdOf(item.node), item.key});
+                if (result.size() >= state.tileLimit) break;
+                continue;
+            }
+            node = std::move(item.node);
+        } else {
+            node = stack.back();
+            stack.pop_back();
+        }
 
         // Use cached visibility information of ancestor nodes
         if (!node.fullyVisible) {
@@ -377,17 +440,30 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                 const double dx = node.wrap * numTiles + node.x + 0.5 - coordToLoadFirst[0];
                 const double dy = node.y + 0.5 - coordToLoadFirst[1];
 
-                result.push_back({id, dx * dx + dy * dy});
+                if (limited) {
+                    const double key = tileKey(node);
+                    queue.push_back({key, true, std::move(node)});
+                    std::push_heap(queue.begin(), queue.end(), later);
+                } else {
+                    result.push_back({id, dx * dx + dy * dy});
+                }
             }
         } else {
             std::vector<Node> children = childrenOf(node);
-            stack.insert(stack.end(), children.begin(), children.end());
+            if (limited) {
+                for (auto& child : children) pushNode(std::move(child));
+            } else {
+                stack.insert(stack.end(), children.begin(), children.end());
+            }
         }
     }
 
-    // Sort results by distance
-    std::sort(
-        result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) { return a.sqrDist < b.sqrDist; });
+    // Sort results by distance (a limited walk already found them in order)
+    if (!limited) {
+        std::sort(result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) {
+            return a.sqrDist < b.sqrDist;
+        });
+    }
 
     std::vector<OverscaledTileID> ids;
     ids.reserve(result.size());
