@@ -65,6 +65,7 @@ public:
     void onWillStartRenderingMap() final;
     void onDidFinishRenderingMap() final;
     void onTerrainCenterElevationChanged(double elevationMeters) final;
+    void onTerrainEyeElevationChanged(double elevationMeters) final;
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;
@@ -128,6 +129,16 @@ public:
     bool centerClampedToGround = false;
     /// Terrain height under the centre, as the renderer last reported it (NaN until then).
     double terrainCenterElevation = std::numeric_limits<double>::quiet_NaN();
+    /// Terrain height under the camera's eye, as the renderer last reported it (NaN until then).
+    double terrainEyeElevation = std::numeric_limits<double>::quiet_NaN();
+    /// How far above the ground under it the eye is kept, in meters.
+    static constexpr double eyeClearanceMeters = 10.0;
+    /// The height the clamp puts the center at: the ground under it, or higher when the eye
+    /// would otherwise sit under the ground under the eye.
+    double clampedCenterAltitude() const;
+    /// Applies the clamp for the heights last reported, or leaves it to the end of a running
+    /// transition.
+    void applyCenterClamp();
     void anchorCenterOnTerrain();
     /// Slides the centre along the line of sight to `altitudeMeters`, the zoom following, so the
     /// camera stays where it is. False, changing nothing, when there was nothing to move, the line

@@ -137,7 +137,7 @@ void Map::Impl::onUpdate() {
     if (centerAwaitingTerrainAnchor && !transform.inTransition()) {
         centerAwaitingTerrainAnchor = false;
         if (centerClampedToGround && style->impl->getTerrain() && !std::isnan(terrainCenterElevation)) {
-            clampCenterToTerrain(terrainCenterElevation);
+            clampCenterToTerrain(clampedCenterAltitude());
         }
     }
 
@@ -444,11 +444,19 @@ void Map::Impl::settleCenterAwaitingSeaLevel() {
     }
 }
 
-void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
-    terrainCenterElevation = elevationMeters;
-    if (!centerClampedToGround) {
-        return;
+double Map::Impl::clampedCenterAltitude() const {
+    if (std::isnan(terrainEyeElevation)) {
+        return terrainCenterElevation;
     }
+    // The eye sits this far above the center's height, along the line of sight.
+    const TransformState& state = transform.getState();
+    const double metresPerPixel = Projection::getMetersPerPixelAtLatitude(state.getLatLng().latitude(),
+                                                                          state.getZoom());
+    const double eyeAboveCenter = state.getCameraToCenterDistance() * metresPerPixel * std::cos(state.getPitch());
+    return std::max(terrainCenterElevation, terrainEyeElevation + eyeClearanceMeters - eyeAboveCenter);
+}
+
+void Map::Impl::applyCenterClamp() {
     // A running transition (an animated recenter, a fling) owns the camera: the jump below
     // would cancel it, and across relief the height changes every frame, so the move stopped
     // within a few kilometres of where it started. Let it finish; onUpdate applies the latest
@@ -457,9 +465,29 @@ void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
         centerAwaitingTerrainAnchor = true;
         return;
     }
-    if (clampCenterToTerrain(elevationMeters)) {
+    // The eye's height can be reported before the center's.
+    if (std::isnan(terrainCenterElevation)) {
+        return;
+    }
+    if (clampCenterToTerrain(clampedCenterAltitude())) {
         onUpdate();
     }
+}
+
+void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
+    terrainCenterElevation = elevationMeters;
+    if (!centerClampedToGround) {
+        return;
+    }
+    applyCenterClamp();
+}
+
+void Map::Impl::onTerrainEyeElevationChanged(double elevationMeters) {
+    terrainEyeElevation = elevationMeters;
+    if (!centerClampedToGround) {
+        return;
+    }
+    applyCenterClamp();
 }
 
 bool Map::Impl::clampCenterToTerrain(double elevationMeters) {

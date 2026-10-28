@@ -13,8 +13,10 @@
 #include <mln/util/image.hpp>
 #include <mln/util/run_loop.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <thread>
 
 using namespace mln;
@@ -626,4 +628,88 @@ TEST(TerrainDepthPass, StillCameraSkipsThePass) {
 
     test.map.jumpTo(CameraOptions().withPitch(61.0));
     EXPECT_GT(depthPassesAfterFrame(), passes) << "a camera move must redraw the depth texture";
+}
+
+namespace {
+
+// Ground that rises to the south: nothing north of the ridge line, then a steep climb to 6,000 m,
+// as a function of latitude alone so the test knows the height anywhere.
+constexpr double rampStartLatitude = 47.30;
+double rampMeters(double latitude) {
+    return std::clamp((rampStartLatitude - latitude) * 100000.0, 0.0, 6000.0);
+}
+
+std::string makeRampDEMTile(const std::string& url) {
+    // ".../{z}-{x}-{y}.png"
+    int z = 0, x = 0, y = 0;
+    const auto name = url.substr(url.rfind('/') + 1);
+    std::sscanf(name.c_str(), "%d-%d-%d.png", &z, &x, &y);
+    const double n = std::pow(2.0, z);
+    PremultipliedImage image({demTileSize, demTileSize});
+    for (uint32_t row = 0; row < demTileSize; ++row) {
+        const double mercatorY = (y + (row + 0.5) / demTileSize) / n;
+        const double latitude = util::rad2deg(std::atan(std::sinh(M_PI * (1.0 - 2.0 * mercatorY))));
+        const auto encoded = static_cast<uint32_t>(std::lround((rampMeters(latitude) + 10000.0) * 10.0));
+        for (uint32_t col = 0; col < demTileSize; ++col) {
+            uint8_t* px = image.data.get() + (row * demTileSize + col) * 4;
+            px[0] = static_cast<uint8_t>(encoded >> 16);
+            px[1] = static_cast<uint8_t>((encoded >> 8) & 0xFF);
+            px[2] = static_cast<uint8_t>(encoded & 0xFF);
+            px[3] = 255;
+        }
+    }
+    return encodePNG(image);
+}
+
+const char* rampStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 9,
+      "tileSize": 64
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": []
+})STYLE";
+
+} // namespace
+
+// A pan that drags the eye towards a slope rising in front of it must not leave the eye under
+// the ground: at a steep pitch the eye sits only a little above the center, so the ground under
+// the center being the camera's floor is not enough. The camera is lifted until the eye clears
+// the ground under it.
+TEST(TerrainCamera, EyeStaysAboveTheSlopeRisingTowardsTheCamera) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(rampStyle);
+    // The center on the ridge line, looking north from the climb behind it.
+    map.jumpTo(
+        CameraOptions().withCenter(LatLng{rampStartLatitude, 11.4041}).withZoom(12.0).withPitch(80.0).withBearing(0.0));
+
+    for (int i = 0; i < 24; ++i) {
+        loop.runOnce();
+        frontend.render(map);
+    }
+
+    const auto location = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(location.has_value());
+    const double ground = rampMeters(location->location.latitude());
+    ASSERT_GT(ground, 100.0) << "the eye is over the climb";
+    EXPECT_GE(location->altitude, ground + 5.0) << "eye altitude " << location->altitude << " over ground " << ground;
 }
