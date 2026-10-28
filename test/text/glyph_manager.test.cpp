@@ -128,7 +128,7 @@ public:
 
 class LatinALocalGlyphRasterizer : public StubLocalGlyphRasterizer {
 public:
-    bool canRasterizeGlyph(const FontStack&, GlyphID glyphID) override { return glyphID.hash == u'a'; }
+    bool canRasterizeGlyph(const FontStack&, GlyphID glyphID) override { return glyphID == GlyphID(u'a'); }
 };
 
 class StubGlyphManagerObserver : public GlyphManagerObserver {
@@ -333,6 +333,8 @@ TEST(GlyphManager, DoesNotKeepTheRangeGlyphsItDrawsLocally) {
     };
 
     const std::size_t all = loadedGlyphs(std::make_unique<StubLocalGlyphRasterizer>());
+
+    // The fixture has u'a', the only glyph LatinALocalGlyphRasterizer draws.
 
     EXPECT_EQ(all - 1, loadedGlyphs(std::make_unique<LatinALocalGlyphRasterizer>()));
 }

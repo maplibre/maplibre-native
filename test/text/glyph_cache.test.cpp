@@ -5,7 +5,9 @@
 #include <mln/util/io.hpp>
 
 #include <cstring>
+#include <memory>
 #include <thread>
+#include <utility>
 #include <vector>
 
 using namespace mln;
@@ -22,9 +24,12 @@ Glyph glyph(char16_t id, uint8_t value) {
     return glyph;
 }
 
+// The range in test/fixtures/resources/glyphs.pbf.
+const GlyphRange fixtureRange(0, 255, GlyphIDType::FontPBF);
+
 std::vector<Immutable<Glyph>> internRange(GlyphCache& cache, const std::string& data) {
     std::vector<Immutable<Glyph>> interned;
-    for (auto& parsed : parseGlyphPBF(GlyphRange(0, 255, GlyphIDType::FontPBF), data)) {
+    for (auto& parsed : parseGlyphPBF(fixtureRange, data)) {
         interned.push_back(cache.intern(std::move(parsed)));
     }
     return interned;
@@ -44,15 +49,25 @@ TEST(GlyphCache, KeepsGlyphsWithTheSameIdAndDifferentBitmapsApart) {
     EXPECT_NE(cache.intern(glyph(u'a', 1)), cache.intern(glyph(u'a', 2)));
 }
 
+TEST(GlyphCache, KeepsGlyphsWithDifferentIdsOrMetricsApart) {
+    GlyphCache cache;
+    const Immutable<Glyph> a = cache.intern(glyph(u'a', 1));
+    Glyph shifted = glyph(u'a', 1);
+    shifted.metrics.left = 1;
+
+    EXPECT_NE(a, cache.intern(glyph(u'b', 1)));
+    EXPECT_NE(a, cache.intern(std::move(shifted)));
+}
+
 TEST(GlyphCache, ReleasesAGlyphWithItsLastOwner) {
     GlyphCache cache;
     const Immutable<Glyph> kept = cache.intern(glyph(u'a', 1));
     cache.intern(glyph(u'b', 1));
 
-    EXPECT_EQ(1u, cache.size());
+    EXPECT_EQ(1u, std::as_const(cache).size());
 }
 
-TEST(GlyphCache, InternsTheSameRangeParsedOnTwoThreads) {
+TEST(GlyphCache, InternsTheGlyphsOfARangeParsedOnTwoThreads) {
     GlyphCache cache;
     const std::string data = util::read_file("test/fixtures/resources/glyphs.pbf");
     std::vector<Immutable<Glyph>> first;
@@ -80,4 +95,12 @@ TEST(GlyphCache, KeepsRangesOfDifferentGlyphsApart) {
     const Immutable<Glyph> b = cache.intern(glyph(u'a', 2));
 
     EXPECT_NE(cache.intern(GlyphCache::Range{{u'a', a}}), cache.intern(GlyphCache::Range{{u'a', b}}));
+}
+
+TEST(GlyphCache, ReleasesARangeWithItsLastOwner) {
+    GlyphCache cache;
+    const Immutable<Glyph> a = cache.intern(glyph(u'a', 1));
+    const std::weak_ptr<const GlyphCache::Range> range = cache.intern(GlyphCache::Range{{u'a', a}});
+
+    EXPECT_TRUE(range.expired());
 }
