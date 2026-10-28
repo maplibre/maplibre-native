@@ -1,6 +1,5 @@
 #include <mln/vulkan/pipeline.hpp>
 #include <mln/gfx/cull_face_mode.hpp>
-#include <mln/renderer/paint_parameters.hpp>
 #include <mln/util/hash.hpp>
 #include <mln/vulkan/renderable_resource.hpp>
 
@@ -317,10 +316,6 @@ void PipelineInfo::setDepthMode(const gfx::DepthMode& value) {
 
     viewport.minDepth = value.range.min;
     viewport.maxDepth = value.range.max;
-
-    if (viewport.maxDepth <= viewport.minDepth) {
-        viewport.maxDepth = viewport.minDepth + PaintParameters::depthEpsilon / 4;
-    }
 }
 
 void PipelineInfo::setStencilMode(const gfx::StencilMode& value) {
