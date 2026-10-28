@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   pre_job:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_modified != 'true' }}
     steps:
@@ -375,7 +375,7 @@ jobs:
           sccache --show-stats
 
   ios-ci-result:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       actions: write
       contents: read
