@@ -154,6 +154,7 @@ void Map::jumpTo(const CameraOptions& camera) {
 
 void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->noteCameraSet();
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.easeTo(camera, animation);
     impl->onUpdate();
@@ -161,6 +162,7 @@ void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation)
 
 void Map::flyTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->noteCameraSet();
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.flyTo(camera, animation);
     impl->onUpdate();
@@ -168,6 +170,8 @@ void Map::flyTo(const CameraOptions& camera, const AnimationOptions& animation) 
 
 void Map::moveBy(const ScreenCoordinate& point, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    // An animated pan is how platforms carry a pan gesture's momentum on after the finger lifts.
+    impl->noteCameraSet(animation.duration && *animation.duration > Duration::zero());
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.moveBy(point, animation);
     impl->onUpdate();
@@ -184,6 +188,7 @@ void Map::scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, c
 
 void Map::rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->noteCameraSet();
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.rotateBy(first, second, animation);
     impl->onUpdate();

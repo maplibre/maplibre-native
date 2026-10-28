@@ -17,6 +17,8 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <functional>
+#include <limits>
 #include <thread>
 
 using namespace mln;
@@ -712,4 +714,294 @@ TEST(TerrainCamera, EyeStaysAboveTheSlopeRisingTowardsTheCamera) {
     const double ground = rampMeters(location->location.latitude());
     ASSERT_GT(ground, 100.0) << "the eye is over the climb";
     EXPECT_GE(location->altitude, ground + 5.0) << "eye altitude " << location->altitude << " over ground " << ground;
+}
+
+// A drag over relief keeps the camera at the height it started at, as gl-js's elevationFreeze
+// does: the clamp following the ground under the center moved the camera up and down with every
+// ridge and valley the drag passed. When the gesture ends, the center goes onto the ground
+// without moving the camera.
+TEST(TerrainCamera, AGestureKeepsTheCameraHeightAndItsEndKeepsTheView) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.getStyle().loadJSON(rampStyle);
+    const auto settle = [&] {
+        for (int i = 0; i < 24; ++i) {
+            loop.runOnce();
+            frontend.render(map);
+        }
+    };
+    const auto eye = [&] {
+        const auto location = map.getFreeCameraOptions().getLocation();
+        EXPECT_TRUE(location.has_value());
+        return location.value_or(LatLngAltitude{});
+    };
+    // High enough that the eye clears the 6,000 m plateau by a wide margin, so only the hold
+    // decides the camera's height.
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.40, 11.4041}).withZoom(10.0).withPitch(45.0).withBearing(0.0));
+    settle();
+    ASSERT_NEAR(*map.getCameraOptions().centerAltitude, 0.0, 1.0) << "the center starts on flat ground";
+    const double eyeAltitudeBefore = eye().altitude;
+
+    // Drag the center from the flat ground onto the plateau.
+    map.setGestureInProgress(true);
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.20, 11.4041}));
+    settle();
+    EXPECT_NEAR(*map.getCameraOptions().centerAltitude, 0.0, 1.0) << "the gesture holds the center's height";
+    // The eye sits a fixed number of pixels from the center, so its height above the held center
+    // scales with the meters per pixel at the center's latitude; without the hold it rose 6,000 m.
+    const double scaleChange = std::cos(util::deg2rad(47.20)) / std::cos(util::deg2rad(47.40));
+    EXPECT_NEAR(eye().altitude, eyeAltitudeBefore * scaleChange, 2.0)
+        << "the camera keeps its height during the gesture";
+
+    const auto eyeAtRelease = eye();
+    map.setGestureInProgress(false);
+    settle();
+    EXPECT_NEAR(*map.getCameraOptions().centerAltitude, rampMeters(map.getCameraOptions().center->latitude()), 10.0)
+        << "the end anchors the center on the ground";
+    const auto eyeAfter = eye();
+    // The anchor takes the meters per pixel at the old center, so with the camera 47 km out it
+    // lands within meters of where it was; following the ground instead would lift it 6,000 m.
+    EXPECT_NEAR(eyeAfter.altitude, eyeAtRelease.altitude, 10.0) << "the anchor keeps the camera where it is";
+    EXPECT_NEAR(eyeAfter.location.latitude(), eyeAtRelease.location.latitude(), 1e-4);
+    EXPECT_NEAR(eyeAfter.location.longitude(), eyeAtRelease.location.longitude(), 1e-4);
+}
+
+// A gesture that ends over a slope: the end anchors the center at the height of the ground under
+// the old center, which puts it on ground that is higher or lower than that. Correcting the
+// center's height in place then moves the camera by the difference, the jump the hold was meant
+// to remove. As gl-js's recalculateZoomAndCenter does in passes, each correction slides the
+// center along the line of sight instead, so the camera stays where the gesture left it.
+TEST(TerrainCamera, AGestureEndingOverASlopeKeepsTheCameraWhereItIs) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.getStyle().loadJSON(rampStyle);
+    const auto settle = [&] {
+        for (int i = 0; i < 24; ++i) {
+            loop.runOnce();
+            frontend.render(map);
+        }
+    };
+    const auto eye = [&] {
+        const auto location = map.getFreeCameraOptions().getLocation();
+        EXPECT_TRUE(location.has_value());
+        return location.value_or(LatLngAltitude{});
+    };
+    // Looking north, so the camera sits south of the center, up the slope.
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.40, 11.4041}).withZoom(12.0).withPitch(60.0).withBearing(0.0));
+    settle();
+
+    // Drag the center onto the middle of the slope, where the ground is 3,000 m.
+    map.setGestureInProgress(true);
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.27, 11.4041}));
+    settle();
+    const auto eyeAtRelease = eye();
+    map.setGestureInProgress(false);
+    settle();
+
+    const auto eyeAfter = eye();
+    EXPECT_NEAR(eyeAfter.altitude, eyeAtRelease.altitude, 10.0) << "the camera stays where the gesture left it";
+    EXPECT_NEAR(eyeAfter.location.latitude(), eyeAtRelease.location.latitude(), 1e-4);
+    const auto camera = map.getCameraOptions();
+    EXPECT_NEAR(*camera.centerAltitude, rampMeters(camera.center->latitude()), 30.0)
+        << "the center ends on the ground it looks at";
+}
+
+namespace {
+
+// Ground in east-west bands 0.01 degrees wide, alternately 2,000 m and 2,600 m, south of the
+// ridge line; flat at 0 north of it. At pitch 60 a 600 m change in the center's height moves the
+// center about a band along the line of sight, so taking the height of the ground under the new
+// center each time flips between the two.
+double bandMeters(double latitude) {
+    if (latitude > rampStartLatitude) return 0.0;
+    return (static_cast<int>(std::floor((rampStartLatitude - latitude) / 0.01)) % 2 == 0) ? 2000.0 : 2600.0;
+}
+
+std::string makeBandDEMTile(const std::string& url) {
+    int z = 0, x = 0, y = 0;
+    const auto name = url.substr(url.rfind('/') + 1);
+    std::sscanf(name.c_str(), "%d-%d-%d.png", &z, &x, &y);
+    const double n = std::pow(2.0, z);
+    PremultipliedImage image({demTileSize, demTileSize});
+    for (uint32_t row = 0; row < demTileSize; ++row) {
+        const double mercatorY = (y + (row + 0.5) / demTileSize) / n;
+        const double latitude = util::rad2deg(std::atan(std::sinh(M_PI * (1.0 - 2.0 * mercatorY))));
+        const auto encoded = static_cast<uint32_t>(std::lround((bandMeters(latitude) + 10000.0) * 10.0));
+        for (uint32_t col = 0; col < demTileSize; ++col) {
+            uint8_t* px = image.data.get() + (row * demTileSize + col) * 4;
+            px[0] = static_cast<uint8_t>(encoded >> 16);
+            px[1] = static_cast<uint8_t>((encoded >> 8) & 0xFF);
+            px[2] = static_cast<uint8_t>(encoded & 0xFF);
+            px[3] = 255;
+        }
+    }
+    return encodePNG(image);
+}
+
+} // namespace
+
+// Over broken ground the height under the center can flip between two values as the center slides
+// along the line of sight, so the passes after an anchor never agree with it. They must still not
+// fall back to moving the camera: the center is narrowed onto where the line of sight meets the
+// ground, and left there.
+TEST(TerrainCamera, AGestureEndingOverBrokenGroundKeepsTheCameraWhereItIs) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeBandDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.getStyle().loadJSON(rampStyle);
+    const auto settle = [&] {
+        for (int i = 0; i < 40; ++i) {
+            loop.runOnce();
+            frontend.render(map);
+        }
+    };
+    const auto eye = [&] {
+        const auto location = map.getFreeCameraOptions().getLocation();
+        EXPECT_TRUE(location.has_value());
+        return location.value_or(LatLngAltitude{});
+    };
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.40, 11.4041}).withZoom(12.0).withPitch(60.0).withBearing(0.0));
+    settle();
+
+    for (const double latitude : {47.255, 47.245, 47.235, 47.225}) {
+        map.setGestureInProgress(true);
+        map.jumpTo(CameraOptions().withCenter(LatLng{latitude, 11.4041}));
+        settle();
+        const auto eyeAtRelease = eye();
+        map.setGestureInProgress(false);
+        settle();
+        const auto eyeAfter = eye();
+        EXPECT_NEAR(eyeAfter.altitude, eyeAtRelease.altitude, 10.0)
+            << "released over " << latitude << ": the camera stays where the gesture left it";
+    }
+}
+
+// Looking from flat ground at a wall of terrain, the line of sight meets the wall almost at once, so
+// the center cannot slide onto the height of the ground under it with the camera kept where it is.
+// The end of the gesture must then leave the center, not move the camera onto that height.
+TEST(TerrainCamera, AGestureEndingWhereTheCenterCannotSlideKeepsTheCamera) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(rampStyle);
+    const auto settle = [&] {
+        for (int i = 0; i < 40; ++i) {
+            loop.runOnce();
+            frontend.render(map);
+        }
+    };
+    const auto eye = [&] {
+        const auto location = map.getFreeCameraOptions().getLocation();
+        EXPECT_TRUE(location.has_value());
+        return location.value_or(LatLngAltitude{});
+    };
+    // Looking south from the flat ground at the climb.
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.40, 11.4041}).withZoom(13.0).withPitch(80.0).withBearing(180.0));
+    settle();
+
+    map.setGestureInProgress(true);
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.25, 11.4041}));
+    settle();
+    const auto eyeAtRelease = eye();
+    ASSERT_LT(eyeAtRelease.altitude, 4000.0) << "the eye is still low over the flat ground, below the plateau";
+    map.setGestureInProgress(false);
+    settle();
+    EXPECT_NEAR(eye().altitude, eyeAtRelease.altitude, 10.0) << "the camera stays where the gesture left it";
+}
+
+// A fling at a steep pitch towards rising ground carried the eye under the ground: the clamp stands
+// aside while a transition runs. As gl-js keeps the camera above the terrain during an animation,
+// the eye clearance still lifts a fling's camera, which ends the fling at the slope.
+//
+// The fling here is long and short in distance, and the eye starts under the ground it is over, so
+// the outcome does not depend on how fast the frames run: the camera barely moves while the report
+// of the ground under it arrives, however late that is, and only a lift can bring the eye above the
+// ground before the fling is over.
+TEST(TerrainCamera, AFlingDoesNotCarryTheEyeUnderTheGround) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize()));
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(rampStyle);
+    const auto pump = [&](std::chrono::milliseconds duration, const std::function<bool()>& done = nullptr) {
+        const auto end = std::chrono::steady_clock::now() + duration;
+        while (std::chrono::steady_clock::now() < end && !(done && done())) {
+            loop.runOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(8));
+        }
+    };
+    const auto clearance = [&] {
+        const auto location = map.getFreeCameraOptions().getLocation();
+        EXPECT_TRUE(location.has_value());
+        return location ? location->altitude - rampMeters(location->location.latitude()) : 0.0;
+    };
+
+    // With the clamp off, put the center half way up the climb at sea level, looking south: the eye
+    // sits a little north of it, on the slope, with the ground a couple of thousand meters above it. The renderer
+    // reports that ground whatever the clamp does.
+    map.setCenterClampedToGround(false);
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.289, 11.4041}).withZoom(16.0).withPitch(80.0).withBearing(180.0));
+    pump(std::chrono::milliseconds(2000));
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.27, 11.4041}));
+    pump(std::chrono::milliseconds(3000));
+    ASSERT_LT(clearance(), -1000.0) << "the eye starts inside the climb";
+
+    // Turn the clamp on and start a fling that moves the camera a few tens of meters in 30 s. Its
+    // first frames move the eye enough for the renderer to report the ground under it again.
+    map.setCenterClampedToGround(true);
+    map.moveBy({0, 40}, AnimationOptions(Milliseconds(30000)));
+    pump(std::chrono::milliseconds(10000), [&] { return clearance() > 0.0; });
+    EXPECT_GT(clearance(), 0.0) << "the eye was lifted out of the ground while the fling ran";
 }
