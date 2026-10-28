@@ -2335,3 +2335,12 @@ TEST(Map, LocationIndicatorWithoutImages) {
     // Neither the accuracy circle nor any image should produce a draw call.
     EXPECT_EQ(test.frontend.render(test.map).stats.numDrawCalls, 0);
 }
+
+TEST(Map, TileCacheSize) {
+    MapTest<> test;
+    EXPECT_EQ(std::nullopt, test.frontend.getRenderer()->getTileCacheSize());
+
+    test.frontend.getRenderer()->setTileCacheSize(2);
+
+    EXPECT_EQ(std::optional<std::size_t>(2), test.frontend.getRenderer()->getTileCacheSize());
+}

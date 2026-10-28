@@ -239,11 +239,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     }
 
     if (type != SourceType::Annotations && cacheEnabled) {
-        auto conservativeCacheSize = static_cast<size_t>(
-            std::max(static_cast<double>(parameters.transformState.getSize().width) / tileSize, 1.0) *
-            std::max(static_cast<double>(parameters.transformState.getSize().height) / tileSize, 1.0) *
-            (parameters.transformState.getMaxZoom() - parameters.transformState.getMinZoom() + 1) * 0.5);
-        cache.setSize(conservativeCacheSize);
+        cache.setSize(cacheSize(parameters.transformState, tileSize, configuredCacheSize));
     } else {
         cache.setSize(0);
     }
@@ -297,6 +293,17 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     }
 
     cache.deferPendingReleases();
+}
+
+std::size_t TilePyramid::cacheSize(const TransformState& transformState,
+                                   const uint16_t tileSize,
+                                   const std::optional<std::size_t> configured) {
+    if (configured) {
+        return *configured;
+    }
+    return static_cast<std::size_t>(std::max(static_cast<double>(transformState.getSize().width) / tileSize, 1.0) *
+                                    std::max(static_cast<double>(transformState.getSize().height) / tileSize, 1.0) *
+                                    (transformState.getMaxZoom() - transformState.getMinZoom() + 1) * 0.5);
 }
 
 void TilePyramid::handleWrapJump(float lng) {
@@ -419,6 +426,10 @@ std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& 
 
 void TilePyramid::setCacheEnabled(bool enable) {
     cacheEnabled = enable;
+}
+
+void TilePyramid::setCacheSize(std::optional<std::size_t> size) {
+    configuredCacheSize = size;
 }
 
 void TilePyramid::reduceMemoryUse() {

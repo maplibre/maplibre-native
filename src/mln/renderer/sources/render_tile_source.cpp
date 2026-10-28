@@ -565,6 +565,10 @@ void RenderTileSource::setCacheEnabled(bool enable) {
     tilePyramid.setCacheEnabled(enable);
 }
 
+void RenderTileSource::setCacheSize(std::optional<std::size_t> size) {
+    tilePyramid.setCacheSize(size);
+}
+
 void RenderTileSource::reduceMemoryUse() {
     tilePyramid.reduceMemoryUse();
 }

@@ -95,6 +95,8 @@ public:
 
     void setTileCacheEnabled(bool);
     bool getTileCacheEnabled() const;
+    void setTileCacheSize(std::optional<std::size_t>);
+    std::optional<std::size_t> getTileCacheSize() const;
     void reduceMemoryUse();
     void dumpDebugLogs();
     void collectPlacedSymbolData(bool);
@@ -233,6 +235,7 @@ private:
     bool contextLost = false;
     bool placedSymbolDataCollected = false;
     bool tileCacheEnabled = true;
+    std::optional<std::size_t> tileCacheSize;
 
 #if MLN_RENDER_BACKEND_OPENGL
     bool androidGoldfishMitigationEnabled{false};

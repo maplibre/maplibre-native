@@ -6,6 +6,7 @@
 #include <mln/util/geojson.hpp>
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -113,6 +114,12 @@ public:
     // Memory
     void setTileCacheEnabled(bool);
     bool getTileCacheEnabled() const;
+    /**
+     * @brief Sets how many tiles each source keeps once they are out of view.
+     * Without a value (the default), it keeps enough to pan and zoom back to.
+     */
+    void setTileCacheSize(std::optional<std::size_t>);
+    std::optional<std::size_t> getTileCacheSize() const;
     void reduceMemoryUse();
     void clearData();
 

@@ -377,6 +377,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second, threadPool);
         renderSource->setObserver(this);
         renderSource->setCacheEnabled(tileCacheEnabled);
+        renderSource->setCacheSize(tileCacheSize);
         renderSource->setFastPFOREnabled(updateParameters->fastPFOREnabled);
         renderSources.emplace(entry.first, std::move(renderSource));
     }
@@ -825,6 +826,18 @@ void RenderOrchestrator::setTileCacheEnabled(bool enable) {
 
 bool RenderOrchestrator::getTileCacheEnabled() const {
     return tileCacheEnabled;
+}
+
+void RenderOrchestrator::setTileCacheSize(std::optional<std::size_t> size) {
+    tileCacheSize = size;
+
+    for (const auto& entry : renderSources) {
+        entry.second->setCacheSize(size);
+    }
+}
+
+std::optional<std::size_t> RenderOrchestrator::getTileCacheSize() const {
+    return tileCacheSize;
 }
 
 void RenderOrchestrator::reduceMemoryUse() {
