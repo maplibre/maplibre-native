@@ -98,7 +98,7 @@
       "paint": {
         "fill-color": "#2E8B57",
         "fill-opacity": 1,
-        "fill-outline-color": "#0B3D24"
+        "fill-antialias": false
       }
     },
     {
