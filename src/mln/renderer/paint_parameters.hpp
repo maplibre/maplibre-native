@@ -136,7 +136,7 @@ private:
 
 public:
     uint32_t currentLayer;
-    float depthRangeSize;
+    float depthRangeSize = 1.0f;
     uint32_t opaquePassCutoff = 0;
     float symbolFadeChange;
     const uint64_t frameCount;
