@@ -381,18 +381,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                     util::hash_combine(h, tile.canonical.z);
                     util::hash_combine(h, tile.canonical.x);
                     util::hash_combine(h, tile.canonical.y);
-                    // Fold the source bucket's identity so an in-place content upgrade - a drape
-                    // built from an over-zoomed ancestor bucket, then the tile's own native bucket
-                    // loads under the same covering-tile id - re-renders the drape instead of
-                    // serving the stale low-detail bake until the next zoom. Keyed on the bucket id
-                    // (stable across paint/fade), not the drawable id (which churns every frame).
-                    // Excluded for hillshade: its drape samples a separate DEM "prepare" target with
-                    // its own render lifecycle, and folding its bucket here broke it on initial load.
-                    if (drawable.getName() != "hillshade") {
-                        if (const auto& bucket = drawable.getBucket()) {
-                            util::hash_combine(h, bucket->getID().id());
-                        }
-                    }
+                    // Fold the identity of the drawn data so new data under the same covering-tile
+                    // id re-renders the drape instead of serving the stale bake until the next zoom.
+                    util::hash_combine(h, RenderTarget::drapedDataID(drawable));
                     util::hash_combine(signature, h);
                     drapedTiles.emplace_back(tile, h);
                 });
