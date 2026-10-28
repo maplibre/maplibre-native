@@ -1005,3 +1005,62 @@ TEST(TerrainCamera, AFlingDoesNotCarryTheEyeUnderTheGround) {
     pump(std::chrono::milliseconds(10000), [&] { return clearance() > 0.0; });
     EXPECT_GT(clearance(), 0.0) << "the eye was lifted out of the ground while the fling ran";
 }
+
+// A camera animation the app asks for (a recenter on the user, a flight to a place) from high
+// ground to low kept the center at the height it left, and only when it ended did the clamp jump
+// the center down to the ground: the camera dropped thousands of meters in one frame. As gl-js
+// does, the center's height eases to the ground under the target once it is known, so the
+// animation ends with the center on the ground it was headed for.
+TEST(TerrainCamera, AFlightEasesTheCenterHeightToTheGroundItIsHeadedFor) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(rampStyle);
+    const auto pump = [&](std::chrono::milliseconds duration, const std::function<bool()>& done = nullptr) {
+        const auto end = std::chrono::steady_clock::now() + duration;
+        while (std::chrono::steady_clock::now() < end && !(done && done())) {
+            loop.runOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(8));
+        }
+    };
+    // On the 6,000 m plateau, from far enough above it that the renderer reports the ground under
+    // the center, then tilted and close.
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.20, 11.4041}).withZoom(10.0).withPitch(0.0).withBearing(0.0));
+    pump(std::chrono::milliseconds(2000));
+    map.jumpTo(CameraOptions().withZoom(14.0).withPitch(60.0));
+    pump(std::chrono::milliseconds(2000));
+    ASSERT_NEAR(*map.getCameraOptions().centerAltitude, 6000.0, 30.0) << "the center starts on the plateau";
+
+    // Fly to the flat ground north of the ridge, as a recenter does, and read the center's height at
+    // the moment the animation ends, before anything that follows it can move it.
+    const LatLng target{47.40, 11.4041};
+    bool finished = false;
+    double altitudeAtTheEnd = std::numeric_limits<double>::quiet_NaN();
+    AnimationOptions animation(Milliseconds(3000));
+    animation.transitionFinishFn = [&] {
+        finished = true;
+        altitudeAtTheEnd = map.getCameraOptions().centerAltitude.value_or(0.0);
+    };
+    map.easeTo(CameraOptions().withCenter(target).withZoom(14.0), animation);
+    pump(std::chrono::milliseconds(15000), [&] { return finished; });
+    ASSERT_TRUE(finished);
+    EXPECT_NEAR(altitudeAtTheEnd, 0.0, 30.0) << "the center's height reached the ground it was headed for";
+
+    pump(std::chrono::milliseconds(1000));
+    const auto camera = map.getCameraOptions();
+    EXPECT_NEAR(camera.center->latitude(), target.latitude(), 1e-3) << "the flight lands on the center asked for";
+    EXPECT_NEAR(camera.center->longitude(), target.longitude(), 1e-3);
+    EXPECT_NEAR(*camera.zoom, 14.0, 0.05) << "at the zoom asked for";
+    EXPECT_NEAR(*camera.centerAltitude, 0.0, 30.0) << "with the center on the ground there";
+}
