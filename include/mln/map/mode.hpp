@@ -61,8 +61,9 @@ enum class TileLodMode : uint8_t {
 /// detail tilted views keep in the distance.
 enum class TerrainLoadMode : uint8_t {
     Quality,     ///< No per-frame budget: all revealed tiles/drapes build immediately. Sharp, may
-                 ///< stall a frame on big bursts (zoom-in over new coverage). Mesh to z16 over a
-                 ///< coarser DEM, up to 64 mesh tiles. Default.
+                 ///< stall a frame on big bursts (zoom-in over new coverage). The mesh follows
+                 ///< the view past a coarser DEM, as maplibre-gl-js does, up to 64 mesh tiles.
+                 ///< Default.
     Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame. Mesh to z15, up to
                  ///< 48 mesh tiles.
     Performance, ///< Cap 8 new-tile builds + 4 drape re-renders per frame; smoothest on
@@ -85,7 +86,9 @@ struct TerrainLoadBudget {
     /// mesh tile drapes into its own 1024 px target, so how sharp draped content stays in a
     /// close-up follows the zoom of the mesh tiles, not of the DEM; each level deeper also adds
     /// tiles to the near field, and drape memory with them. A DEM at or past this zoom meshes
-    /// at its own maxzoom.
+    /// at its own maxzoom. Quality's 22 (util::DEFAULT_MAX_ZOOM, the deepest a map goes) sets no
+    /// limit: the mesh follows the view as maplibre-gl-js's terrain does, and only the tile cap
+    /// bounds it. The other modes stop at most RenderTerrain::maxMeshOverzoomLevels past the DEM.
     uint8_t meshTargetZoom;
 };
 
@@ -97,7 +100,7 @@ constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
             return {8, 4, 24, 14};
         case TerrainLoadMode::Quality:
         default:
-            return {0, 0, 64, 16}; // no per-frame budget, generous tile cap, deepest mesh
+            return {0, 0, 64, 22}; // no per-frame budget, generous tile cap, mesh follows the view
     }
 }
 

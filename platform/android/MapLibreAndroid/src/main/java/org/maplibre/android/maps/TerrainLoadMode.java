@@ -16,8 +16,8 @@ public enum TerrainLoadMode {
 
   /**
    * No budget: all revealed tiles and drapes build immediately. Sharpest initial view; may
-   * stall a frame on large bursts (e.g. zooming in over new coverage). Meshes the terrain to z16
-   * over a coarser DEM, with up to 64 mesh tiles. Default.
+   * stall a frame on large bursts (e.g. zooming in over new coverage). The terrain mesh follows
+   * the view past a coarser DEM, as MapLibre GL JS does, with up to 64 mesh tiles. Default.
    */
   QUALITY,
 
