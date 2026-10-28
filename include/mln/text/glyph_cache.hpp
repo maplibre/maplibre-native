@@ -30,7 +30,7 @@ public:
 
 private:
     class Impl;
-    std::unique_ptr<Impl> impl = std::make_unique<Impl>();
+    std::unique_ptr<Impl> impl;
 };
 
 } // namespace mln

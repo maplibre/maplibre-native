@@ -37,7 +37,8 @@ public:
     std::size_t nextRangeSweep = minSweep;
 };
 
-GlyphCache::GlyphCache() = default;
+GlyphCache::GlyphCache()
+    : impl(std::make_unique<Impl>()) {}
 
 GlyphCache::~GlyphCache() = default;
 
