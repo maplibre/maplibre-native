@@ -114,4 +114,39 @@ TEST(CustomLayer, Basic) {
     test::checkImage("test/fixtures/custom_layer/basic", frontend.render(map).image, 0.0006, 0.1);
 }
 
+// Binds its program and draws nothing, so the layers drawn after it must look the same as without it.
+class BindOnlyLayer : public TestLayer {
+public:
+    void render(const mln::style::CustomLayerRenderParameters&) override { MBGL_CHECK_ERROR(glUseProgram(program)); }
+};
+
+TEST(CustomLayer, RebindsProgram) {
+    if (gfx::Backend::GetType() != gfx::Backend::Type::OpenGL) {
+        return;
+    }
+
+    util::RunLoop loop;
+
+    HeadlessFrontend frontend{1};
+    Map map(frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
+    // Translucent, so both layers and the custom layer between them are drawn in layer order with the same program.
+    map.getStyle().loadJSON(R"JSON({
+        "version": 8,
+        "sources": {},
+        "layers": [
+            {"id": "below", "type": "background", "paint": {"background-color": "rgba(255, 0, 0, 0.5)"}},
+            {"id": "above", "type": "background", "paint": {"background-color": "rgba(0, 0, 255, 0.5)"}}
+        ]
+    })JSON");
+
+    const auto expected = frontend.render(map).image;
+
+    map.getStyle().addLayer(std::make_unique<CustomLayer>("custom", std::make_unique<BindOnlyLayer>()), "above");
+
+    EXPECT_TRUE(expected == frontend.render(map).image);
+}
+
 #endif

@@ -19,6 +19,8 @@
 #include <mln/util/mat4.hpp>
 #include <mln/util/run_loop.hpp>
 
+#include <optional>
+
 using namespace mln;
 using namespace mln::style;
 using namespace mln::platform;
@@ -122,6 +124,44 @@ TEST(GLContextMode, Shared) {
     }
 
     test::checkImage("test/fixtures/shared_context", frontend.render(map).image, 0.5, 0.1);
+}
+
+TEST(GLContextMode, SharedRebindsProgram) {
+    if (gfx::Backend::GetType() != gfx::Backend::Type::OpenGL) {
+        return;
+    }
+
+    util::RunLoop loop;
+
+    HeadlessFrontend frontend{1, gfx::HeadlessBackend::SwapBehaviour::NoFlush, gfx::ContextMode::Shared};
+
+    Map map(frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
+    // A single opaque layer: the program cached at the end of a frame is the first one used in the next, and a frame
+    // drawn over the previous one (shared contexts don't clear) looks the same.
+    map.getStyle().loadJSON(R"JSON({
+        "version": 8,
+        "sources": {},
+        "layers": [{"id": "background", "type": "background", "paint": {"background-color": "rgba(255, 0, 0, 1)"}}]
+    })JSON");
+
+    const auto expected = frontend.render(map).image;
+
+    std::optional<Shader> foreignShader;
+    {
+        // Another user of the shared context leaves its own program bound.
+        gfx::BackendScope scope{*frontend.getBackend()};
+        foreignShader.emplace(vertexShaderSource, fragmentShaderSource);
+        MBGL_CHECK_ERROR(glUseProgram(foreignShader->program));
+    }
+
+    const auto actual = frontend.render(map).image;
+    EXPECT_TRUE(expected == actual);
+
+    gfx::BackendScope scope{*frontend.getBackend()};
+    foreignShader.reset();
 }
 
 #endif
