@@ -49,6 +49,7 @@ void RenderPluginLayerTweaker::execute([[maybe_unused]] mln::gfx::Drawable& draw
 #if MLN_RENDER_BACKEND_METAL
     const auto& mtlRenderPass = static_cast<mln::mtl::RenderPass*>(paintParameters.renderPass.get());
     mtlRenderPass->resetState();
+    mtlRenderPass->setDepthRange({0.0f, 1.0f});
 
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);
 #else
