@@ -24,10 +24,12 @@ permissions:
 
 env:
   EGL_PLATFORM: surfaceless
+  # Mesa 26's gfxstream ICD leaks a pthread key per vkCreateInstance, which exhausts glibc's 1024 keys in the Vulkan render tests.
+  VK_DRIVER_FILES: /usr/share/vulkan/icd.d/lvp_icd.json
 
 jobs:
   pre_job:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
     steps:
@@ -61,7 +63,7 @@ jobs:
             rust: false
           - renderer: opengl
             rust: true
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 240
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -195,7 +197,7 @@ jobs:
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
   linux-coverage:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -206,13 +208,13 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - name: Cache Bazel
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3 # 0.19.1
         with:
-          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
-          restore-keys: |
-            ${{ runner.os }}-bazel-
-          path: ~/.cache/bazel
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+          cache-save: ${{ github.event_name != 'pull_request' }}
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -244,7 +246,7 @@ jobs:
   linux-ci-result:
     name: Linux CI Result
     if: needs.pre_job.outputs.should_skip != 'true' && always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       - pre_job
       - linux-build-and-test
