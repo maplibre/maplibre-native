@@ -18,7 +18,7 @@ public:
     GlyphPositions glyphPositions;
     std::vector<TextureHandle> textureHandles;
     DynamicTexturePtr dynamicTexture;
-    
+
     void uploadGlyph(const Immutable<Glyph>& glyph, TextureHandle& texHandle);
 };
 
@@ -28,7 +28,7 @@ public:
     ImagePositions patternPositions;
     std::vector<TextureHandle> textureHandles;
     DynamicTexturePtr dynamicTexture;
-    
+
     void uploadIcon(const Immutable<style::Image::Impl>& glyph, TextureHandle& texHandle);
     void uploadPattern(const Immutable<style::Image::Impl>& glyph, TextureHandle& texHandle);
 };

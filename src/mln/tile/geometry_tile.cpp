@@ -47,7 +47,7 @@ void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager)
     for (auto& updatedImageVersion : imageManager.updatedImageVersions) {
         const std::string& name = updatedImageVersion.first;
         const uint32_t version = updatedImageVersion.second;
-        
+
         const auto itIcon = imageAtlas.iconPositions.find(name);
         if (itIcon != imageAtlas.iconPositions.end()) {
             auto& iconPos = itIcon->second;
@@ -61,7 +61,7 @@ void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager)
             if (updatedIcon == nullptr) {
                 continue;
             }
-            
+
             for (auto& texHandle : imageAtlas.textureHandles) {
                 if (texHandle.getId() == texHandleId) {
                     imageAtlas.uploadIcon(*updatedIcon, texHandle);
@@ -69,7 +69,7 @@ void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager)
                 }
             }
         }
-        
+
         const auto itPattern = imageAtlas.patternPositions.find(name);
         if (itPattern != imageAtlas.patternPositions.end()) {
             auto& patternPos = itPattern->second;
@@ -83,7 +83,7 @@ void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager)
             if (updatedPattern == nullptr) {
                 continue;
             }
-            
+
             for (auto& texHandle : imageAtlas.textureHandles) {
                 if (texHandle.getId() == texHandleId) {
                     imageAtlas.uploadPattern(*updatedPattern, texHandle);
