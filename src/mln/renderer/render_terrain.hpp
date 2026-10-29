@@ -11,6 +11,7 @@
 #include <mln/renderer/texture_pool.hpp>
 #include <mln/util/mat4.hpp>
 
+#include <algorithm>
 #include <array>
 #include <memory>
 #include <map>
@@ -76,16 +77,48 @@ public:
     std::set<UnwrappedTileID> computeMeshCover(const TransformState& state,
                                                const std::shared_ptr<UpdateParameters>& updateParameters) const;
 
+    /// Zoom levels the terrain mesh goes past the DEM source's maxzoom at most.
+    static constexpr uint8_t maxMeshOverzoomLevels = 3;
+
+    /// The deepest zoom of the terrain mesh over a DEM whose maxzoom is `demMaxZoom`: the load
+    /// mode's TerrainLoadBudget::meshTargetZoom, at most maxMeshOverzoomLevels past the DEM and
+    /// never shallower than it. A mesh tile past the DEM samples its DEM ancestor through a
+    /// sub-tile offset.
+    static constexpr uint8_t meshMaxZoom(TerrainLoadMode mode, uint8_t demMaxZoom) {
+        const int levels = std::clamp(
+            terrainLoadBudget(mode).meshTargetZoom - demMaxZoom, 0, static_cast<int>(maxMeshOverzoomLevels));
+        return static_cast<uint8_t>(demMaxZoom + levels);
+    }
+
+    /// {scale, x offset, y offset} mapping a position in `tile` (0..EXTENT) into normalized
+    /// coordinates (0..1) of `demTile`, the tile itself or an ancestor: u = x * scale + x offset.
+    /// A tile past the DEM's maxzoom, or still waiting for its own DEM, takes the sub-square of
+    /// an ancestor this way; it is the start of the demCoords the terrain mesh and the elevated
+    /// layers hand to get_elevation().
+    static std::array<float, 3> demTileMapping(const CanonicalTileID& tile, const CanonicalTileID& demTile);
+
     /// The point the mesh-tile cap measures distance from, in normalized web-mercator [0, 1]:
     /// the ground under the camera (the map centre when the map is not tilted).
     static std::array<double, 2> meshTileCapOrigin(const TransformState& state);
 
     /// The `maxTiles` tiles whose centres lie nearest `origin` (normalized web-mercator), or all
     /// of them when there are no more than that or `maxTiles` is 0. The mesh-tile cap
-    /// (TerrainLoadBudget::maxMeshTiles) that computeMeshCover applies.
+    /// (TerrainLoadBudget::maxMeshTiles) that computeMeshCover applies, after
+    /// coarsenFarMeshTiles.
     static std::set<UnwrappedTileID> nearestMeshTiles(std::set<UnwrappedTileID> tiles,
                                                       size_t maxTiles,
                                                       const std::array<double, 2>& origin);
+
+    /// While there are more than `maxTiles` tiles (0: no limit), the group of sibling tiles
+    /// farthest from `origin` gives way to its parent, never shallower than `minZoom`. Only
+    /// siblings with nothing deeper inside merge, so detail goes first in the distance, where a
+    /// tile covers little of the screen, and the tiles still cover all the ground they did.
+    /// Whatever is still over `maxTiles` once no tile is deeper than `minZoom`, nearestMeshTiles
+    /// drops.
+    static std::set<UnwrappedTileID> coarsenFarMeshTiles(std::set<UnwrappedTileID> tiles,
+                                                         size_t maxTiles,
+                                                         uint8_t minZoom,
+                                                         const std::array<double, 2>& origin);
 
     /// Resolve the DEM render source from the orchestrator if not yet bound.
     /// Renderer::Impl::render calls this before building the frame's drape-target
@@ -378,7 +411,7 @@ private:
     // The mesh-tile cap now comes from the per-map TerrainLoadMode
     // (TerrainLoadBudget::maxMeshTiles) rather than a single constant, so Quality keeps a long
     // terrain render distance while Balanced/Performance trade it for frame time. See
-    // RenderTerrain::update.
+    // computeMeshCover.
 
     // Cached DEM source
     RenderSource* demSource = nullptr;
