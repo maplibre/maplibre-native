@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="https://maplibre.org/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1517,19 +1517,19 @@
     <p class="inline-attribution">Map data <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>. © <a href="https://openmaptiles.org/">OpenMapTiles</a>.</p>
 </caption></figure>
 <p>We use the <a href="https://openfreemap.org/quick_start/">OpenFreeMap Bright</a> style which, unlike OpenFreeMap Libery, does not have a fill extrusion layer by default. However, if you inspect this style with <a href="https://maplibre.org/maputnik">Maputnik</a> you will find that the multipolygons in the  <code>building</code> layer (of the <code>openfreemap</code> source) each have <code>render_min_height</code> and <code>render_height</code> properties.</p>
-<div class="language-kotlin highlight"><span class="filename">Setting up the fill extrusion layer</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">val</span><span class="w"> </span><span class="nv">fillExtrusionLayer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FillExtrusionLayer</span><span class="p">(</span><span class="s">&quot;building-3d&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;openmaptiles&quot;</span><span class="p">)</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">fillExtrusionLayer</span><span class="p">.</span><span class="na">sourceLayer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;building&quot;</span>
+<div class="language-kotlin highlight"><span class="filename">Setting up the fill extrusion layer</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">val</span><span class="w"> </span><span class="nv">fillExtrusionLayer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FillExtrusionLayer</span><span class="p">(</span><span class="s">"building-3d"</span><span class="p">,</span><span class="w"> </span><span class="s">"openmaptiles"</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">fillExtrusionLayer</span><span class="p">.</span><span class="na">sourceLayer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"building"</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">fillExtrusionLayer</span><span class="p">.</span><span class="na">setFilter</span><span class="p">(</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">Expression</span><span class="p">.</span><span class="na">all</span><span class="p">(</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="n">Expression</span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">&quot;render_height&quot;</span><span class="p">),</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="n">Expression</span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">&quot;render_min_height&quot;</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="n">Expression</span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">"render_height"</span><span class="p">),</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="n">Expression</span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">"render_min_height"</span><span class="p">)</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="p">)</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">fillExtrusionLayer</span><span class="p">.</span><span class="na">minZoom</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">15f</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">fillExtrusionLayer</span><span class="p">.</span><span class="na">setProperties</span><span class="p">(</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">fillExtrusionColor</span><span class="p">(</span><span class="n">Color</span><span class="p">.</span><span class="na">LTGRAY</span><span class="p">),</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">fillExtrusionHeight</span><span class="p">(</span><span class="n">Expression</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;render_height&quot;</span><span class="p">)),</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">fillExtrusionBase</span><span class="p">(</span><span class="n">Expression</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;render_min_height&quot;</span><span class="p">)),</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">fillExtrusionHeight</span><span class="p">(</span><span class="n">Expression</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"render_height"</span><span class="p">)),</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">fillExtrusionBase</span><span class="p">(</span><span class="n">Expression</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"render_min_height"</span><span class="p">)),</span>
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">fillExtrusionOpacity</span><span class="p">(</span><span class="m">0.9f</span><span class="p">)</span>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">)</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">style</span><span class="p">.</span><span class="na">addLayer</span><span class="p">(</span><span class="n">fillExtrusionLayer</span><span class="p">)</span>
@@ -1659,10 +1659,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "search.suggest", "navigation.instant", "navigation.sections", "content.action.edit", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "search.suggest", "navigation.instant", "navigation.sections", "content.action.edit", "toc.integrate"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>
