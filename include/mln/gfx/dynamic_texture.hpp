@@ -52,7 +52,8 @@ public:
     TexturePixelType getPixelFormat() const;
     bool isEmpty() const;
 
-    int32_t getVersion(int32_t uniqueId) const;
+    std::optional<TextureHandle> getTexHandle(int32_t uniqueId);
+    int32_t getVersion(int32_t uniqueId);
 
     std::optional<TextureHandle> reserveSize(const Size& size, int32_t uniqueId);
 

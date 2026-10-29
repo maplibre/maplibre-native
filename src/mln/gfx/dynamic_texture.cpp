@@ -35,7 +35,17 @@ bool DynamicTexture::isEmpty() const {
     return (numTextures == 0);
 }
 
-int32_t DynamicTexture::getVersion(int32_t uniqueId) const {
+std::optional<TextureHandle> DynamicTexture::getTexHandle(int32_t uniqueId) {
+    std::scoped_lock lock(mutex);
+    auto* bin = shelfPack.getBin(uniqueId);
+    if (!bin) {
+        return std::nullopt;
+    }
+    return TextureHandle(*bin);
+}
+
+int32_t DynamicTexture::getVersion(int32_t uniqueId) {
+    std::scoped_lock lock(mutex);
     if (versionMap.contains(uniqueId)) {
         return versionMap.at(uniqueId);
     }

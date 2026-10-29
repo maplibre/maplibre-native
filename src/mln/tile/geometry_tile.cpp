@@ -43,55 +43,31 @@ LayerRenderData* GeometryTile::LayoutResult::getLayerRenderData(const style::Lay
     return &result;
 }
 
-void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager) {
+void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager, bool icons) {
     for (auto& updatedImageVersion : imageManager.updatedImageVersions) {
-        const std::string& name = updatedImageVersion.first;
-        const uint32_t version = updatedImageVersion.second;
+        const std::string& imageId = updatedImageVersion.first;
+        const int32_t imageVersion = updatedImageVersion.second;
 
-        const auto itIcon = imageAtlas.iconPositions.find(name);
-        if (itIcon != imageAtlas.iconPositions.end()) {
-            auto& iconPos = itIcon->second;
-            auto nameId = sqrt(util::hash(name)) / 2;
-            int32_t texHandleId = static_cast<int32_t>(nameId +
-                                                       (iconPos.paddedRect.w - 2 * ImagePosition::padding) *
-                                                           (iconPos.paddedRect.h - 2 * ImagePosition::padding));
-            if (static_cast<int32_t>(version) <= imageAtlas.dynamicTexture->getVersion(texHandleId)) {
+        const auto& imagePositions = icons ? imageAtlas.iconPositions : imageAtlas.patternPositions;
+        const auto it = imagePositions.find(imageId);
+        if (it != imagePositions.end()) {
+            auto& imagePos = it->second;
+            int32_t texHandleId = imageAtlas.generateUniqueId(imageId, imagePos.imageSize());
+            auto texVersion = imageAtlas.dynamicTexture->getVersion(texHandleId);
+            if (imageVersion <= texVersion) {
                 continue;
             }
 
-            const auto updatedIcon = imageManager.getSharedImage(name);
-            if (updatedIcon == nullptr) {
+            const auto updatedImage = imageManager.getSharedImage(imageId);
+            if (updatedImage == nullptr) {
                 continue;
             }
 
-            for (auto& texHandle : imageAtlas.textureHandles) {
-                if (texHandle.getId() == texHandleId) {
-                    imageAtlas.uploadIcon(*updatedIcon, texHandle);
-                    break;
-                }
-            }
-        }
-
-        const auto itPattern = imageAtlas.patternPositions.find(name);
-        if (itPattern != imageAtlas.patternPositions.end()) {
-            auto& patternPos = itPattern->second;
-            auto nameId = sqrt(util::hash(name)) / 2;
-            int32_t texHandleId = static_cast<int32_t>(nameId +
-                                                       (patternPos.paddedRect.w - 2 * ImagePosition::padding) *
-                                                           (patternPos.paddedRect.h - 2 * ImagePosition::padding));
-            if (static_cast<int32_t>(version) <= imageAtlas.dynamicTexture->getVersion(texHandleId)) {
-                continue;
-            }
-
-            const auto updatedPattern = imageManager.getSharedImage(name);
-            if (updatedPattern == nullptr) {
-                continue;
-            }
-
-            for (auto& texHandle : imageAtlas.textureHandles) {
-                if (texHandle.getId() == texHandleId) {
-                    imageAtlas.uploadPattern(*updatedPattern, texHandle);
-                    break;
+            if (auto texHandle = imageAtlas.dynamicTexture->getTexHandle(texHandleId)) {
+                if (icons) {
+                    imageAtlas.uploadIcon(*updatedImage, *texHandle);
+                } else {
+                    imageAtlas.uploadPattern(*updatedImage, *texHandle);
                 }
             }
         }
@@ -162,7 +138,8 @@ void GeometryTileRenderData::prepare(const SourcePrepareParameters& parameters) 
     MLN_TRACE_FUNC();
 
     if (!layoutResult) return;
-    updateImages(layoutResult->imageAtlas, parameters.imageManager);
+    updateImages(layoutResult->imageAtlas, parameters.imageManager, true);
+    updateImages(layoutResult->imageAtlas, parameters.imageManager, false);
 }
 
 Bucket* GeometryTileRenderData::getBucket(const Layer::Impl& layer) const {

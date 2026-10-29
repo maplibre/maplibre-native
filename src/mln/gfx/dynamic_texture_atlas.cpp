@@ -19,6 +19,11 @@ Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
 }
 } // namespace
 
+int32_t GlyphAtlas::generateUniqueId(const FontStackHash& fontStack, const GlyphID& glyphId) const {
+    int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyphId.hash);
+    return uniqueId;
+}
+
 void GlyphAtlas::uploadGlyph(const Immutable<Glyph>& glyph, TextureHandle& texHandle) {
     const auto& rect = texHandle.getRectangle();
     AlphaImage paddedImage(Size{rect.w, rect.h});
@@ -26,6 +31,12 @@ void GlyphAtlas::uploadGlyph(const Immutable<Glyph>& glyph, TextureHandle& texHa
     AlphaImage::copy(glyph->bitmap, paddedImage, {0, 0}, {padding, padding}, glyph->bitmap.size);
 
     dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+}
+
+int32_t ImageAtlas::generateUniqueId(const std::string& imageId, Size size) const {
+    auto imageHash = util::hash(imageId);
+    int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2 + size.area());
+    return uniqueId;
 }
 
 void ImageAtlas::uploadIcon(const Immutable<style::Image::Impl>& icon, TextureHandle& texHandle) {
@@ -100,7 +111,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
                 const auto& glyph = glyphEntry.second;
 
                 if (glyph.has_value() && glyph.value()->bitmap.valid()) {
-                    int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyph.value()->id.hash);
+                    int32_t uniqueId = glyphAtlas.generateUniqueId(fontStack, glyph.value()->id);
                     const auto size = Size(glyph.value()->bitmap.size.width + 2 * padding,
                                            glyph.value()->bitmap.size.height + 2 * padding);
                     const auto& texHandle = glyphAtlas.dynamicTexture->reserveSize(size, uniqueId);
@@ -181,8 +192,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         bool hasSpace = true;
         for (const auto& iconEntry : icons) {
             const auto& icon = iconEntry.second;
-            auto imageHash = util::hash(icon->id);
-            int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2 + icon->image.size.area());
+            int32_t uniqueId = imageAtlas.generateUniqueId(icon->id, icon->image.size);
             const auto size = Size(icon->image.size.width + 2 * padding, icon->image.size.height + 2 * padding);
             const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
             if (!texHandle) {
@@ -194,8 +204,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         if (hasSpace) {
             for (const auto& patternEntry : patterns) {
                 const auto& pattern = patternEntry.second;
-                auto patternHash = util::hash(pattern->id);
-                int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2 + pattern->image.size.area());
+                int32_t uniqueId = imageAtlas.generateUniqueId(pattern->id, pattern->image.size);
                 const auto size = Size(pattern->image.size.width + 2 * padding,
                                        pattern->image.size.height + 2 * padding);
                 const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
@@ -227,10 +236,10 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
     for (auto& [texHandle, icon] : iconsToUpload) {
         const auto& rect = texHandle.getRectangle();
         const auto it = versionMap.find(icon->id);
-        const auto version = it != versionMap.end() ? it->second : 0;
+        const auto iconVersion = it != versionMap.end() ? it->second : 0;
+        const auto texVersion = imageAtlas.dynamicTexture->getVersion(texHandle.getId());
 
-        if (texHandle.isUploadNeeded() ||
-            static_cast<int32_t>(version) > imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
+        if (texHandle.isUploadNeeded() || iconVersion > texVersion) {
             imageAtlas.uploadIcon(icon, texHandle);
         }
         imageAtlas.textureHandles.emplace_back(texHandle);
@@ -241,10 +250,10 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
     for (auto& [texHandle, pattern] : patternsToUpload) {
         const auto& rect = texHandle.getRectangle();
         const auto it = versionMap.find(pattern->id);
-        const auto version = it != versionMap.end() ? it->second : 0;
+        const auto patternVersion = it != versionMap.end() ? it->second : 0;
+        const auto texVersion = imageAtlas.dynamicTexture->getVersion(texHandle.getId());
 
-        if (texHandle.isUploadNeeded() ||
-            static_cast<int32_t>(version) > imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
+        if (texHandle.isUploadNeeded() || patternVersion > texVersion) {
             imageAtlas.uploadPattern(pattern, texHandle);
         }
         imageAtlas.textureHandles.emplace_back(texHandle);

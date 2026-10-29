@@ -58,7 +58,7 @@ enum class ImageType : bool {
 using ImageMap = mln::unordered_map<std::string, Immutable<style::Image::Impl>>;
 using ImageDependencies = mln::unordered_map<std::string, ImageType>;
 using ImageRequestPair = std::pair<ImageDependencies, uint64_t>;
-using ImageVersionMap = mln::unordered_map<std::string, uint32_t>;
+using ImageVersionMap = mln::unordered_map<std::string, int32_t>;
 inline bool operator<(const Immutable<mln::style::Image::Impl>& a, const Immutable<mln::style::Image::Impl>& b) {
     return a->id < b->id;
 }
@@ -101,10 +101,16 @@ public:
         return {{_tl[0], _tl[1], _br[0], _br[1]}};
     }
 
+    Size imageSize() const {
+        return {static_cast<uint32_t>(paddedRect.w - padding * 2),
+                static_cast<uint32_t>(paddedRect.h - padding * 2)};
+    }
+
     std::array<float, 2> displaySize() const {
+        const auto& size = imageSize();
         return {{
-            static_cast<float>(paddedRect.w - padding * 2) / pixelRatio,
-            static_cast<float>(paddedRect.h - padding * 2) / pixelRatio,
+            static_cast<float>(size.width) / pixelRatio,
+            static_cast<float>(size.height) / pixelRatio,
         }};
     }
 };

@@ -19,6 +19,8 @@ public:
     std::vector<TextureHandle> textureHandles;
     DynamicTexturePtr dynamicTexture;
 
+    int32_t generateUniqueId(const FontStackHash& fontStack, const GlyphID& glyphId) const;
+
     void uploadGlyph(const Immutable<Glyph>& glyph, TextureHandle& texHandle);
 };
 
@@ -28,6 +30,8 @@ public:
     ImagePositions patternPositions;
     std::vector<TextureHandle> textureHandles;
     DynamicTexturePtr dynamicTexture;
+
+    int32_t generateUniqueId(const std::string& imageId, Size size) const;
 
     void uploadIcon(const Immutable<style::Image::Impl>& glyph, TextureHandle& texHandle);
     void uploadPattern(const Immutable<style::Image::Impl>& glyph, TextureHandle& texHandle);
