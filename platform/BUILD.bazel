@@ -361,25 +361,24 @@ objc_library(
     ],
 )
 
-# Checks that the public classes and constants in the built XCFrameworks are
-# marked MLN_EXPORT.
+# Checks that the public classes and constants are marked MLN_EXPORT.
 [
     js_test(
         name = "check-public-symbols-" + platform.lower(),
         data = [
-            xcframework,
+            headers,
             "@sourcekitten",
         ],
         entry_point = "scripts/check-public-symbols.js",
         fixed_args = [
             "$(rootpath @sourcekitten)",
             platform,
-            "$(rootpath %s)" % xcframework,
+            "$(rootpath %s)" % headers,
         ],
         tags = ["manual"],
     )
-    for platform, xcframework in [
-        ("iOS", "//platform/ios:MapLibre.dynamic"),
-        ("macOS", "//platform/macos:MapLibre.dynamic"),
+    for platform, headers in [
+        ("iOS", "//platform/ios:public_headers"),
+        ("macOS", "//platform/macos:public_headers"),
     ]
 ]

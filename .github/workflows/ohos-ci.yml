@@ -52,7 +52,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -96,11 +96,8 @@ jobs:
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
-          key: OHOS_${{ matrix.preset }}_${{ env.OHOS_SDK_VERSION }}_${{ github.sha }}
-          restore-keys: |
-            OHOS_${{ matrix.preset }}_${{ env.OHOS_SDK_VERSION }}_${{ github.ref }}
-            OHOS_${{ matrix.preset }}_${{ env.OHOS_SDK_VERSION }}
-          max-size: 200M
+          key: OHOS_${{ matrix.preset }}_${{ env.OHOS_SDK_VERSION }}
+          max-size: 500M
 
       - name: Print tool versions
         run: |

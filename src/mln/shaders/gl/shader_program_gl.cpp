@@ -95,11 +95,14 @@ ShaderProgramGL::ShaderProgramGL(UniqueProgram&& program,
       vertexAttributes(std::move(attributes_)),
       samplerLocations(std::move(samplerLocations_)) {}
 
+// Only the base subobject of `other` is moved before its members are.
+// NOLINTBEGIN(bugprone-use-after-move)
 ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
     : ShaderProgramBase(std::forward<ShaderProgramBase&&>(other)),
       glProgram(std::move(other.glProgram)),
       vertexAttributes(std::move(other.vertexAttributes)),
       samplerLocations(std::move(other.samplerLocations)) {}
+// NOLINTEND(bugprone-use-after-move)
 
 std::optional<size_t> ShaderProgramGL::getSamplerLocation(const size_t id) const {
     return (id < samplerLocations.size()) ? samplerLocations[id] : std::nullopt;
@@ -135,12 +138,15 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
              additionalDefines.c_str(),
              shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
              fragmentSource.c_str()});
+        // The shader info names view string literals or std::strings, so data() is null-terminated.
+        // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
         auto program = context.createProgram(vertProg, fragProg, firstAttribName.data());
 
         context.getObserver().onPostCompileShader(
             programParameters.getProgramType(), gfx::Backend::Type::OpenGL, additionalDefines);
 
         for (const auto& blockInfo : uniformBlocksInfo) {
+            // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
             const GLuint index = MBGL_CHECK_ERROR(glGetUniformBlockIndex(program, blockInfo.name.data()));
             if (index == GL_INVALID_INDEX) {
                 // Declared for the program but not referenced by this variant of it.
@@ -155,6 +161,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
 
         SamplerLocationArray samplerLocations;
         for (const auto& textureInfo : texturesInfo) {
+            // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
             GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, textureInfo.name.data()));
             assert(location != -1);
             if (location != -1) {

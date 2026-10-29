@@ -1375,7 +1375,7 @@ TEST(Map, GlobePrefetchRequestsCoarserTiles) {
     std::set<int> zooms;
     test.fileSource->tileResponse = [&](const Resource& resource) {
         if (resource.tileData) {
-            const std::lock_guard lock(mutex);
+            const std::scoped_lock lock(mutex);
             zooms.insert(resource.tileData->z);
         }
         Response res;
@@ -1388,7 +1388,7 @@ TEST(Map, GlobePrefetchRequestsCoarserTiles) {
     };
     test.runLoop.run();
 
-    const std::lock_guard lock(mutex);
+    const std::scoped_lock lock(mutex);
     EXPECT_TRUE(zooms.contains(4));
     EXPECT_TRUE(zooms.contains(8));
 }
@@ -1410,7 +1410,7 @@ TEST(Map, GlobeTileDrawnForItsChildrenMeetsFinerTilesWithoutAGap) {
     std::set<CanonicalTileID> served;
     test.fileSource->tileResponse = [&](const Resource& resource) -> std::optional<Response> {
         const auto& tile = *resource.tileData;
-        const std::lock_guard lock(mutex);
+        const std::scoped_lock lock(mutex);
         if (holdChildren && tile.z == 8 && tile.x / 2 == 20 && tile.y / 2 == 49) {
             return std::nullopt;
         }
@@ -1430,7 +1430,7 @@ TEST(Map, GlobeTileDrawnForItsChildrenMeetsFinerTilesWithoutAGap) {
     test.observer.didFinishLoadingMapCallback = nullptr;
 
     {
-        const std::lock_guard lock(mutex);
+        const std::scoped_lock lock(mutex);
         holdChildren = true;
         served.clear();
     }
@@ -1446,7 +1446,7 @@ TEST(Map, GlobeTileDrawnForItsChildrenMeetsFinerTilesWithoutAGap) {
             test.runLoop.stop();
             return;
         }
-        const std::lock_guard lock(mutex);
+        const std::scoped_lock lock(mutex);
         allParsed = !served.empty() && std::includes(parsed.begin(), parsed.end(), served.begin(), served.end());
     };
     test.map.jumpTo(CameraOptions().withZoom(8.2));
@@ -2311,7 +2311,7 @@ TEST(Map, GlobeKeepsItsTilesAcrossTheAntimeridian) {
     std::vector<OverscaledTileID> parsed;
     test.observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string&) {
         if (op == TileOperation::StartParse) {
-            const std::lock_guard lock(mutex);
+            const std::scoped_lock lock(mutex);
             parsed.push_back(id);
         }
     };
@@ -2320,7 +2320,7 @@ TEST(Map, GlobeKeepsItsTilesAcrossTheAntimeridian) {
     (void)test.frontend.render(test.map);
     ASSERT_TRUE(test.map.getTransformState().isGlobeRendering());
     {
-        const std::lock_guard lock(mutex);
+        const std::scoped_lock lock(mutex);
         ASSERT_FALSE(parsed.empty());
         for (const auto& id : parsed) {
             ASSERT_EQ(OverscaledTileID(0, 0, 0, 0, 0), id);
@@ -2331,7 +2331,7 @@ TEST(Map, GlobeKeepsItsTilesAcrossTheAntimeridian) {
     test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 181}));
     (void)test.frontend.render(test.map);
     EXPECT_NEAR(181.0, test.map.getTransformState().getLatLng().longitude(), 1e-9);
-    const std::lock_guard lock(mutex);
+    const std::scoped_lock lock(mutex);
     EXPECT_TRUE(parsed.empty()) << parsed.size() << " tiles parsed again, the first " << util::toString(parsed.front());
 }
 

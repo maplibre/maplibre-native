@@ -160,10 +160,6 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                                     const RenderTree&,
                                     UniqueChangeRequestVec& changes) {
     const auto& registration = pluginImpl(baseImpl).registration;
-    // The globe skips the depth test for 2D drawables, so read/write depth drawables are built 3D there, to test
-    // against the planet's depth.
-    updateProjectionVariant(state);
-    const bool globe = projectionVariant == gfx::ProjectionVariant::Globe;
     readWriteDepth = false;
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
@@ -266,9 +262,12 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setIs3D(true);
                 builder->setEnableStencil(true);
             } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
+                // Drawn like fill-extrusion: the per-layer depth mode is disabled above the opaque-pass
+                // cutoff and on the globe, so a 2D drawable would not depth test against itself, the extrusions
+                // or the planet.
                 builder->setEnableDepth(true);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setIs3D(globe);
+                builder->setIs3D(true);
                 builder->setEnableStencil(false);
                 if (definition.cullBackFaces) {
                     builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
