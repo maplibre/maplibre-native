@@ -330,7 +330,7 @@ std::string canonicalizeSourceURL(const TileServerOptions& tileServerOptions, co
         auto tokenMap = createTokenMap(tileServerOptions.sourceTemplate(), url);
 
         auto retVal = tileServerOptions.uriSchemeAlias() + "://";
-        if (tokenMap.find("domain") != tokenMap.end()) {
+        if (tokenMap.contains("domain")) {
             retVal += tokenMap.at("domain");
         } else {
             if (!tileServerOptions.sourceDomainName().empty()) retVal += tileServerOptions.sourceDomainName();
@@ -339,12 +339,12 @@ std::string canonicalizeSourceURL(const TileServerOptions& tileServerOptions, co
         if (tileServerOptions.sourceVersionPrefix().has_value())
             retVal += tileServerOptions.sourceVersionPrefix().value();
 
-        if (tokenMap.find("path") != tokenMap.end()) {
+        if (tokenMap.contains("path")) {
             retVal += tokenMap.at("path");
         } else {
-            if (tokenMap.find("directory") != tokenMap.end()) retVal += tokenMap.at("directory");
-            if (tokenMap.find("filename") != tokenMap.end()) retVal += tokenMap.at("filename");
-            if (tokenMap.find("extension") != tokenMap.end()) retVal += tokenMap.at("extension");
+            if (tokenMap.contains("directory")) retVal += tokenMap.at("directory");
+            if (tokenMap.contains("filename")) retVal += tokenMap.at("filename");
+            if (tokenMap.contains("extension")) retVal += tokenMap.at("extension");
         }
 
         return retVal;
@@ -359,7 +359,7 @@ std::string canonicalizeSpriteURL(const TileServerOptions& tileServerOptions, co
         auto tokenMap = createTokenMap(tileServerOptions.spritesTemplate(), url);
 
         auto retVal = tileServerOptions.uriSchemeAlias() + "://";
-        if (tokenMap.find("domain") != tokenMap.end()) {
+        if (tokenMap.contains("domain")) {
             retVal += tokenMap.at("domain");
         } else {
             if (!tileServerOptions.spritesDomainName().empty()) retVal += tileServerOptions.spritesDomainName();
@@ -368,12 +368,12 @@ std::string canonicalizeSpriteURL(const TileServerOptions& tileServerOptions, co
         if (tileServerOptions.spritesVersionPrefix().has_value())
             retVal += tileServerOptions.spritesVersionPrefix().value();
 
-        if (tokenMap.find("path") != tokenMap.end()) {
+        if (tokenMap.contains("path")) {
             retVal += tokenMap.at("path");
         } else {
-            if (tokenMap.find("directory") != tokenMap.end()) retVal += tokenMap.at("directory");
-            if (tokenMap.find("filename") != tokenMap.end()) retVal += tokenMap.at("filename");
-            if (tokenMap.find("extension") != tokenMap.end()) retVal += tokenMap.at("extension");
+            if (tokenMap.contains("directory")) retVal += tokenMap.at("directory");
+            if (tokenMap.contains("filename")) retVal += tokenMap.at("filename");
+            if (tokenMap.contains("extension")) retVal += tokenMap.at("extension");
         }
 
         return retVal;
@@ -390,7 +390,7 @@ std::string canonicalizeGlyphURL(const TileServerOptions& tileServerOptions, con
         auto tokenMap = createTokenMap(tileServerOptions.glyphsTemplate(), url);
 
         auto retVal = tileServerOptions.uriSchemeAlias() + "://";
-        if (tokenMap.find("domain") != tokenMap.end()) {
+        if (tokenMap.contains("domain")) {
             retVal += tokenMap.at("domain");
         } else {
             if (!tileServerOptions.glyphsDomainName().empty()) retVal += tileServerOptions.glyphsDomainName();
@@ -399,12 +399,12 @@ std::string canonicalizeGlyphURL(const TileServerOptions& tileServerOptions, con
         if (tileServerOptions.glyphsVersionPrefix().has_value())
             retVal += tileServerOptions.glyphsVersionPrefix().value();
 
-        if (tokenMap.find("path") != tokenMap.end()) {
+        if (tokenMap.contains("path")) {
             retVal += tokenMap.at("path");
         } else {
-            if (tokenMap.find("directory") != tokenMap.end()) retVal += tokenMap.at("directory");
-            if (tokenMap.find("filename") != tokenMap.end()) retVal += tokenMap.at("filename");
-            if (tokenMap.find("extension") != tokenMap.end()) retVal += tokenMap.at("extension");
+            if (tokenMap.contains("directory")) retVal += tokenMap.at("directory");
+            if (tokenMap.contains("filename")) retVal += tokenMap.at("filename");
+            if (tokenMap.contains("extension")) retVal += tokenMap.at("extension");
         }
 
         return retVal;
