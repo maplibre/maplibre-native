@@ -12,7 +12,7 @@ on:
 
 jobs:
   create-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -52,7 +52,7 @@ jobs:
 
       - run: brew install webp libuv llvm
 
-      - uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
+      - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
         with:
           tool: armerge@2
 
@@ -92,16 +92,16 @@ jobs:
       matrix:
         include:
           - renderer: opengl
-            runner: { os: ubuntu-latest, arch: x64 }
+            runner: { os: ubuntu-26.04, arch: x64 }
           - renderer: vulkan
-            runner: { os: ubuntu-latest, arch: x64 }
+            runner: { os: ubuntu-26.04, arch: x64 }
           - renderer: wgpu
             preset_renderer: webgpu-wgpu
-            runner: { os: ubuntu-latest, arch: x64 }
+            runner: { os: ubuntu-26.04, arch: x64 }
           - renderer: opengl
-            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+            runner: { os: ubuntu-26.04-arm, arch: arm64 }
           - renderer: vulkan
-            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+            runner: { os: ubuntu-26.04-arm, arch: arm64 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -110,7 +110,7 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
+      - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
         with:
           tool: armerge@2
 
