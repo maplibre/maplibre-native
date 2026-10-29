@@ -879,7 +879,8 @@ per-map API knob, not a style property: `Map::setTerrainLoadMode` /
 unlimited** = the historical sharp snap-load, so nothing regresses; Balanced =
 32 tiles / 16 drapes per frame, Performance = 8 / 4. The mode also sets the mesh-tile
 cap (`maxMeshTiles`: 64 / 48 / 24) and how deep the mesh goes past a coarse DEM
-(`meshTargetZoom`: z16 / z15 / z14), so it changes the final image too: close-up
+(`meshTargetZoom`: Quality follows the view as gl-js does; Balanced z15, Performance z14,
+at most three levels past the DEM), so it changes the final image too: close-up
 sharpness, and detail in the distance in tilted views. Exposed on Android
 (`MapLibreMap.setTerrainLoadMode`, `TerrainLoadMode` enum). All five "3D Terrain"
 test activities share a `TerrainTestOptions` overflow menu that toggles terrain,
