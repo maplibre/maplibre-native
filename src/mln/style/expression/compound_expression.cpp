@@ -436,7 +436,7 @@ const auto& hasObjectCompoundExpression() {
     static auto signature = detail::makeSignature(
         "has",
         [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<bool> {
-            return object.find(key) != object.end();
+            return object.contains(key);
         },
         Dependency::Feature);
     return signature;
@@ -466,7 +466,7 @@ const auto& getObjectCompoundExpression() {
     static auto signature = detail::makeSignature(
         "get",
         [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<Value> {
-            if (object.find(key) == object.end()) {
+            if (!object.contains(key)) {
                 return Null;
             }
             return object.at(key);
