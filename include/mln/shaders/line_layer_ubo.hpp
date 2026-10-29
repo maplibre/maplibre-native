@@ -22,7 +22,12 @@ struct alignas(16) LineDrawableUBO {
     /* 80 */ float gapwidth_t;
     /* 84 */ float offset_t;
     /* 88 */ float width_t;
+#if MLN_UBO_CONSOLIDATION
+    // Index where this drawable's values begin in the layer feature-value buffer.
+    /* 92 */ uint32_t feature_base;
+#else
     /* 92 */ float pad1;
+#endif
     /* 96 */
 };
 static_assert(sizeof(LineDrawableUBO) == 6 * 16);
@@ -40,7 +45,11 @@ struct alignas(16) LineGradientDrawableUBO {
     /* 76 */ float gapwidth_t;
     /* 80 */ float offset_t;
     /* 84 */ float width_t;
+#if MLN_UBO_CONSOLIDATION
+    /* 88 */ uint32_t feature_base;
+#else
     /* 88 */ float pad1;
+#endif
     /* 92 */ float pad2;
     /* 96 */
 };
@@ -62,7 +71,11 @@ struct alignas(16) LinePatternDrawableUBO {
     /* 88 */ float pattern_from_t;
     /* 92 */ float pattern_to_t;
     /* 96 */ float floorwidth_t;
+#if MLN_UBO_CONSOLIDATION
+    /* 100 */ uint32_t feature_base;
+#else
     /* 100 */ float pad1;
+#endif
     /* 104 */ float pad2;
     /* 108 */ float pad3;
     /* 112 */
@@ -99,7 +112,11 @@ struct alignas(16) LineSDFDrawableUBO {
     /* 108 */ float offset_t;
     /* 112 */ float width_t;
     /* 116 */ float floorwidth_t;
+#if MLN_UBO_CONSOLIDATION
+    /* 120 */ uint32_t feature_base;
+#else
     /* 120 */ float pad1;
+#endif
     /* 124 */ float pad2;
     /* 128 */
 };

@@ -10,6 +10,7 @@
 #include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/paint_property_binder.hpp>
+#include <mln/shaders/feature_index.hpp>
 #include <mln/shaders/shader_source.hpp>
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/shaders/fill_layer_ubo.hpp>
@@ -17,7 +18,24 @@
 #include <mln/util/convert.hpp>
 #include <mln/util/std.hpp>
 
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <vector>
+
 namespace mln {
+
+#if MLN_UBO_CONSOLIDATION
+namespace {
+
+// Allow large buffers to shrink
+bool needNewBuffer(std::size_t capacity, std::size_t bytes) {
+    constexpr std::size_t slack = 256;
+    return (capacity < bytes) || (capacity > slack && (capacity - slack) / 2 > bytes);
+}
+
+} // namespace
+#endif
 
 using namespace style;
 using namespace shaders;
@@ -51,6 +69,91 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idFillEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+
+#if MLN_UBO_CONSOLIDATION
+    struct LiveBinder {
+        util::SimpleIdentity bucketId;
+        FillBinders* binders = nullptr;
+    };
+    std::vector<LiveBinder> liveBinders;
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
+            return;
+        }
+        auto* binders = static_cast<FillBinders*>(drawable.getBinders());
+        const auto* tile = drawable.getRenderTile();
+        const auto& bucket = drawable.getBucket();
+        if (!binders || !tile || !bucket) {
+            return;
+        }
+        const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(
+            Faded<expression::Image>{.from = "", .to = ""});
+        binders->setPatternParameters(
+            tile->getPattern(fillPatternValue.from.id()), tile->getPattern(fillPatternValue.to.id()), crossfade);
+        if (binders->featureCount(featureAttributes<BuiltIn::FillShader>()) == 0) {
+            binders->setFeatureBase(0);
+            return;
+        }
+        const auto bucketId = bucket->getID();
+        const auto alreadySeen = std::find_if(
+            liveBinders.begin(), liveBinders.end(), [&](const LiveBinder& live) { return live.bucketId == bucketId; });
+        if (alreadySeen == liveBinders.end()) {
+            liveBinders.push_back({.bucketId = bucketId, .binders = binders});
+        }
+    });
+
+    const bool orderChanged = liveBinders.size() != featureBinderOrder.size() ||
+                              !std::ranges::equal(liveBinders, featureBinderOrder, [](const auto& live, auto id) {
+                                  return live.bucketId == id;
+                              });
+
+    bool anyDirty = false;
+    if (!orderChanged) {
+        for (const LiveBinder& live : liveBinders) {
+            if (live.binders->geFeatureRecordsDirty()) {
+                anyDirty = true;
+                break;
+            }
+        }
+    }
+    if (orderChanged || anyDirty || !featureUniformBuffer) {
+        std::vector<float> records;
+        std::vector<util::SimpleIdentity> binderOrder;
+        binderOrder.reserve(liveBinders.size());
+        uint32_t stride = 0;
+        uint32_t base = 0;
+        for (const LiveBinder& live : liveBinders) {
+            if (live.binders->geFeatureRecordsDirty() || live.binders->getFeatureRecords().empty()) {
+                live.binders->packFeatureRecords(shaders::featureAttributes<shaders::BuiltIn::FillShader>());
+            }
+
+            const auto packedStride = live.binders->getFeatureStride();
+            assert(packedStride > 0);
+            if (stride == 0) {
+                stride = packedStride;
+            } else {
+                assert(stride == packedStride);
+            }
+            live.binders->setFeatureBase(base);
+            const auto& packed = live.binders->getFeatureRecords();
+            records.insert(records.end(), packed.begin(), packed.end());
+            base += static_cast<uint32_t>(packed.size() / packedStride);
+            binderOrder.push_back(live.bucketId);
+        }
+        featureBinderOrder = std::move(binderOrder);
+
+        const std::array<float, 4> dummy{};
+        const void* featureData = records.empty() ? static_cast<const void*>(dummy.data())
+                                                  : static_cast<const void*>(records.data());
+        const size_t featureBytes = records.empty() ? sizeof(dummy) : records.size() * sizeof(float);
+        if (!featureUniformBuffer || needNewBuffer(featureUniformBuffer->getSize(), featureBytes)) {
+            featureUniformBuffer = context.createUniformBuffer(featureData, featureBytes, false, true);
+        } else {
+            featureUniformBuffer->update(featureData, featureBytes);
+        }
+    }
+    layerUniforms.set(idFillFeatureUBO, featureUniformBuffer);
+#endif
 
     const auto& translation = evaluated.get<FillTranslate>();
     const auto anchor = evaluated.get<FillTranslateAnchor>();
@@ -119,7 +222,11 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                    .feature_base = binders->getFeatureBase(),
+#else
                     .pad1 = 0,
+#endif
                     .pad2 = 0
                 };
 
@@ -138,7 +245,11 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     .outline_color_t = std::get<0>(binders->get<FillOutlineColor>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                    .feature_base = binders->getFeatureBase(),
+#else
                     .pad1 = 0,
+#endif
                     .pad2 = 0
                 };
 
@@ -163,7 +274,11 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_to_t = std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
                     .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                    .feature_base = binders->getFeatureBase(),
+#else
                     .pad1 = 0,
+#endif
                     .pad2 = 0,
                     .pad3 = 0
                 };
@@ -203,7 +318,11 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_to_t = std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
                     .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                    .feature_base = binders->getFeatureBase(),
+#else
                     .pad1 = 0,
+#endif
                     .pad2 = 0,
                     .pad3 = 0
                 };

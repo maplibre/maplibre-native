@@ -14,7 +14,13 @@ namespace mln {
 class BucketParameters;
 class RenderFillExtrusionLayer;
 
-using FillExtrusionBinders = PaintPropertyBinders<style::FillExtrusionPaintProperties::DataDrivenProperties>;
+using FillExtrusionFeatureTableProperties = TypeList<style::FillExtrusionBase,
+                                                     style::FillExtrusionColor,
+                                                     style::FillExtrusionHeight,
+                                                     style::FillExtrusionPattern>;
+
+using FillExtrusionBinders = PaintPropertyBinders<style::FillExtrusionPaintProperties::DataDrivenProperties,
+                                                  FillExtrusionFeatureTableProperties>;
 using FillExtrusionStaticVertex = gfx::Vertex<TypeList<attributes::pos>>;
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING

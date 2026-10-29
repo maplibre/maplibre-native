@@ -33,17 +33,30 @@ constexpr T factor() noexcept {
     return 16777619;
 }
 
-/// Generate a hash key from a collection of integer values which doesn't depend on their order.
+/// Generate an order-independent hash from a range of values.
+/// Integers are mixed directly, `std::hash` is used for other elements.
 /// Adapted from https://stackoverflow.com/a/76993810/135138
 template <typename TIter, typename TKey = detail::TIterVal<TIter>, TKey factor = factor<TKey>()>
 TKey order_independent_hash(std::remove_const_t<TIter> cur, const TIter end) noexcept {
-    detail::TIterVal<TIter> sum = 0, product = 1;
-    for (; cur != end; ++cur) {
-        const auto& value = *cur;
-        sum += value;
-        product *= (1 + value) * factor;
+    using Value = std::remove_cv_t<typename TIter::value_type>;
+    if constexpr (std::is_integral_v<Value>) {
+        detail::TIterVal<TIter> sum = 0, product = 1;
+        for (; cur != end; ++cur) {
+            const auto& value = *cur;
+            sum += value;
+            product *= (1 + value) * factor;
+        }
+        return sum ^ product;
+    } else {
+        TKey sum = 0, product = 1;
+        const std::hash<Value> hasher;
+        for (; cur != end; ++cur) {
+            const auto value = static_cast<TKey>(hasher(*cur));
+            sum += value;
+            product *= (1 + value) * factor;
+        }
+        return sum ^ product;
     }
-    return sum ^ product;
 }
 
 } // namespace util
