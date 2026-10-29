@@ -22,6 +22,7 @@
 #include <mln/storage/online_file_source.hpp>
 #include <mln/storage/resource_options.hpp>
 #include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/property_value.hpp>
 #include <mln/style/conversion/layer.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/image_impl.hpp>
@@ -49,7 +50,9 @@
 #include <mln/util/run_loop.hpp>
 #include <mln/util/timer.hpp>
 
+#include <array>
 #include <atomic>
+#include <thread>
 
 using namespace mln;
 using namespace mln::style;
@@ -2334,4 +2337,88 @@ TEST(Map, LocationIndicatorWithoutImages) {
 
     // Neither the accuracy circle nor any image should produce a draw call.
     EXPECT_EQ(test.frontend.render(test.map).stats.numDrawCalls, 0);
+}
+
+namespace {
+
+/// Renders a frame and returns the RGB of the pixel at the centre of the map.
+std::array<uint8_t, 3> renderCenterPixel(MapTest<>& test) {
+    test.map.triggerRepaint();
+    test.frontend.renderFrame();
+    gfx::BackendScope scope{*test.frontend.getBackend()};
+    const auto image = test.frontend.readStillImage();
+    const auto index = (image.size.height / 2 * image.size.width + image.size.width / 2) * 4;
+    return {image.data[index], image.data[index + 1], image.data[index + 2]};
+}
+
+} // namespace
+
+TEST(Map, GlobalStateChangeTransitionsPaintProperty) {
+    using namespace std::chrono_literals;
+
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "transition": { "duration": 100, "delay": 0 },
+      "state": { "color": { "default": "#ff0000" } },
+      "sources": {},
+      "layers": [{
+        "id": "background",
+        "type": "background",
+        "paint": { "background-color": ["global-state", "color"] }
+      }]
+    })STYLE");
+
+    const auto initial = renderCenterPixel(test);
+    ASSERT_GT(initial[0], 240);
+    ASSERT_LT(initial[2], 10);
+
+    test.map.getStyle().setGlobalStateProperty("color", std::string("#0000ff"));
+
+    // The frame that picks up the change starts the transition at its own time point, so it still shows red.
+    const auto changed = renderCenterPixel(test);
+    EXPECT_GT(changed[0], 200);
+    EXPECT_LT(changed[2], 55);
+
+    // Once the transition has run its course, the new state shows.
+    std::this_thread::sleep_for(200ms);
+    const auto finished = renderCenterPixel(test);
+    EXPECT_LT(finished[0], 10);
+    EXPECT_GT(finished[2], 240);
+}
+
+TEST(Map, LayerAddedWithGlobalStateChangeShowsNewState) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "transition": { "duration": 100, "delay": 0 },
+      "state": { "color": { "default": "#0000ff" } },
+      "sources": {},
+      "layers": [{
+        "id": "base",
+        "type": "background",
+        "paint": { "background-color": "#ff0000" }
+      }]
+    })STYLE");
+
+    const auto initial = renderCenterPixel(test);
+    ASSERT_GT(initial[0], 240);
+    ASSERT_LT(initial[1], 10);
+
+    // The state changes and a layer reading it is added before the next frame.
+    test.map.getStyle().setGlobalStateProperty("color", std::string("#00ff00"));
+
+    conversion::Error error;
+    const auto color = conversion::convertJSON<PropertyValue<Color>>(
+        R"(["global-state", "color"])", error, false, false);
+    ASSERT_TRUE(color) << error.message;
+    auto layer = std::make_unique<BackgroundLayer>("added");
+    layer->setBackgroundColor(*color);
+    test.map.getStyle().addLayer(std::move(layer));
+
+    // The new layer never showed the prior state, so it must show the current one at once.
+    const auto added = renderCenterPixel(test);
+    EXPECT_LT(added[0], 10);
+    EXPECT_GT(added[1], 240);
+    EXPECT_LT(added[2], 10);
 }

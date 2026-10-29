@@ -50,11 +50,33 @@ public:
     /// binders) can resolve `global-state` expressions without explicit
     /// plumbing.  Only retained if the expression actually depends on it.
     void captureGlobalState(std::shared_ptr<const GlobalStateMap> globalState) {
-        if (expression && expression->has(Dependency::GlobalState)) {
+        if (expression && expression->has(Dependency::GlobalState) && !globalStatePinned_) {
             capturedGlobalState = std::move(globalState);
         }
     }
     const std::shared_ptr<const GlobalStateMap>& getCapturedGlobalState() const noexcept { return capturedGlobalState; }
+
+    /// Evaluate `global-state` with this snapshot even when the evaluation
+    /// context carries a state of its own, so a value shown before a global
+    /// state change keeps its look while it transitions out. The first pin
+    /// wins: a value already showing an older state keeps showing it.
+    void pinGlobalState(std::shared_ptr<const GlobalStateMap> globalState) {
+        assert(globalState);
+        if (globalStatePinned_) {
+            return;
+        }
+        capturedGlobalState = std::move(globalState);
+        globalStatePinned_ = true;
+    }
+
+    /// The global state an evaluation with `context` reads: a pinned snapshot
+    /// wins, and the captured one fills in for a context that carries none.
+    const GlobalStateMap* globalStateFor(const expression::EvaluationContext& context) const noexcept {
+        if (capturedGlobalState && (globalStatePinned_ || context.globalState == nullptr)) {
+            return capturedGlobalState.get();
+        }
+        return context.globalState;
+    }
 
     /// Null if the expression does not reference the global state.
     const std::set<std::string>* getGlobalStateRefs() const noexcept { return globalStateRefs.get(); }
@@ -80,6 +102,7 @@ protected:
     ZoomCurvePtr zoomCurve;
 
     bool useIntegerZoom_ = false;
+    bool globalStatePinned_ = false;
     bool isZoomConstant_;
     bool isFeatureConstant_;
     bool isRuntimeConstant_;
@@ -100,9 +123,9 @@ public:
           defaultValue(std::move(defaultValue_)) {}
 
     T evaluate(const expression::EvaluationContext& context, T finalDefaultValue = T()) const {
-        if (context.globalState == nullptr && capturedGlobalState != nullptr) {
+        if (const auto* globalState = globalStateFor(context); globalState != context.globalState) {
             expression::EvaluationContext contextWithState = context;
-            contextWithState.globalState = capturedGlobalState.get();
+            contextWithState.globalState = globalState;
             return evaluateContext(contextWithState, std::move(finalDefaultValue));
         }
         return evaluateContext(context, std::move(finalDefaultValue));

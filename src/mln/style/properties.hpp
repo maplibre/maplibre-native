@@ -19,6 +19,42 @@ class GeometryTileFeature;
 
 namespace style {
 
+namespace expression {
+class Image;
+} // namespace expression
+
+/// Whether the value reads one of the global-state keys in `changedKeys`; a null
+/// set means the keys are unknown, and every reference counts as changed.
+template <class Value>
+bool readsGlobalState(const Value& value, const std::set<std::string>* changedKeys) {
+    return (value.getDependencies() & expression::Dependency::GlobalState) &&
+           expression::globalStateRefsIntersect(value.getGlobalStateRefs(), changedKeys);
+}
+
+/// Whether a change of the keys in `changedKeys` transitions the value rather than
+/// snapping it. Pattern images are never interpolated, so a transition would only
+/// delay the image the tiles are laid out with; color ramps are rebuilt by their
+/// layers instead.
+template <class Value>
+bool transitionsOnGlobalStateChange(const Value& value, const std::set<std::string>* changedKeys) {
+    if constexpr (std::is_same_v<Value, ColorRampPropertyValue> ||
+                  std::is_same_v<Value, PropertyValue<expression::Image>>) {
+        return false;
+    } else {
+        return !value.isDataDriven() && readsGlobalState(value, changedKeys);
+    }
+}
+
+/// Keeps the value reading the global state from before `change`, if it transitions on it.
+template <class Value>
+void retainPriorGlobalState(Value& value, const GlobalStateChange& change) {
+    if constexpr (!std::is_same_v<Value, ColorRampPropertyValue>) {
+        if (value.isExpression() && transitionsOnGlobalStateChange(value, change.changedKeys.get())) {
+            value.asExpression().pinGlobalState(change.priorState);
+        }
+    }
+}
+
 template <class Value>
 class Transitioning {
 public:
@@ -73,6 +109,15 @@ public:
 
     bool isUndefined() const noexcept { return value.isUndefined(); }
 
+    /// Keeps every step that reads a key changed by `change` on the state from
+    /// before it, so that a new transition starts from what this one shows.
+    void retainPriorGlobalState(const GlobalStateChange& change) {
+        style::retainPriorGlobalState(value, change);
+        if (prior) {
+            prior->get().retainPriorGlobalState(change);
+        }
+    }
+
     Value& getValue() noexcept { return value; }
     const Value& getValue() const noexcept { return value; }
 
@@ -90,6 +135,12 @@ public:
     TransitionOptions options;
 
     Transitioning<Value> transition(const TransitionParameters& params, Transitioning<Value> prior) const {
+        if (const auto& change = params.globalStateChange) {
+            prior.retainPriorGlobalState(*change);
+            if (change->stateOnly && !transitionsOnGlobalStateChange(value, change->changedKeys.get())) {
+                return prior;
+            }
+        }
         return Transitioning<Value>(value, std::move(prior), options.reverseMerge(params.transition), params.now);
     }
 };
@@ -334,9 +385,8 @@ public:
             const bool needEvaluate = parameters.layerChanged || parameters.hasCrossfade || property.hasTransition() ||
                                       (parameters.zoomChanged && (getDependencies(property) & Dependency::Zoom)) ||
                                       (parameters.globalStateChanged &&
-                                       (getDependencies(property) & Dependency::GlobalState) &&
-                                       expression::globalStateRefsIntersect(getGlobalStateRefs(property),
-                                                                            parameters.changedGlobalStateKeys.get()));
+                                       style::readsGlobalState(property.getValue(),
+                                                               parameters.changedGlobalStateKeys.get()));
             return needEvaluate ? property.evaluate(Evaluator(parameters, P::defaultValue()), parameters.now)
                                 : oldResult;
         }
