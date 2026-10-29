@@ -17,7 +17,8 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
   protected final RenderThreadManager renderThreadManager = new RenderThreadManager();
 
   protected SurfaceViewMapRenderer renderer;
-  protected RenderThread renderThread;
+  // Replaced on every attach, and read from any thread that schedules work on the render thread
+  protected volatile RenderThread renderThread;
   protected OnSurfaceViewDetachedListener detachedListener;
 
   protected boolean detached;
@@ -250,6 +251,9 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
       detachedListener.onSurfaceViewDetached();
     }
     if (renderThread != null && renderThread.isAlive()) {
+      // The render thread releases the native renderer itself before it exits, see
+      // SurfaceViewMapRenderer#onRenderThreadExit. Waiting here for it to service a reset request
+      // instead would block this thread forever if that request is never picked up.
       renderThread.requestExitAndWait();
     }
     detached = true;
@@ -274,6 +278,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
       renderMode = MapRenderer.RenderingRefreshMode.WHEN_DIRTY;
       wantRenderNotification = false;
       renderThreadManager = aRenderThreadManager;
+      eventQueue = aRenderThreadManager.eventQueue;
     }
 
     @Override
@@ -285,6 +290,16 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
       } catch (InterruptedException exception) {
         // fall thru and exit normally
       } finally {
+        // This thread won't draw again. Report a pending draw as finished, otherwise the
+        // SurfaceView keeps waiting for it.
+        Runnable finishDrawing;
+        synchronized (renderThreadManager) {
+          finishDrawing = finishDrawingRunnable;
+          finishDrawingRunnable = null;
+        }
+        if (finishDrawing != null) {
+          finishDrawing.run();
+        }
         renderThreadManager.threadExiting(this);
       }
     }
@@ -331,20 +346,28 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
           return;
         }
 
-        wantRenderNotification = true;
-        requestRender = true;
-        renderComplete = false;
-        final Runnable oldCallback = finishDrawingRunnable;
-        finishDrawingRunnable = () -> {
-          if (oldCallback != null) {
-            oldCallback.run();
-          }
-          if (finishDrawing != null) {
-            finishDrawing.run();
-          }
-        };
+        if (!shouldExit && !exited) {
+          wantRenderNotification = true;
+          requestRender = true;
+          renderComplete = false;
+          final Runnable oldCallback = finishDrawingRunnable;
+          finishDrawingRunnable = () -> {
+            if (oldCallback != null) {
+              oldCallback.run();
+            }
+            if (finishDrawing != null) {
+              finishDrawing.run();
+            }
+          };
 
-        renderThreadManager.notifyAll();
+          renderThreadManager.notifyAll();
+          return;
+        }
+      }
+
+      // This thread is exiting and won't draw this frame, don't keep the SurfaceView waiting for it
+      if (finishDrawing != null) {
+        finishDrawing.run();
       }
     }
 
@@ -471,7 +494,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     public void waitForEmpty() {
       synchronized (renderThreadManager) {
         // Wait for the queue to be empty
-        while (!this.eventQueue.isEmpty()) {
+        while (!exited && !this.eventQueue.isEmpty()) {
           try {
             renderThreadManager.wait();
           } catch (InterruptedException ex) {
@@ -495,7 +518,8 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     protected boolean requestRender;
     protected boolean wantRenderNotification;
     protected boolean renderComplete;
-    protected ArrayList<Runnable> eventQueue = new ArrayList<>();
+    // Shared by all render threads of a view, see RenderThreadManager#eventQueue
+    protected final ArrayList<Runnable> eventQueue;
     protected boolean sizeChanged = true;
     protected Runnable finishDrawingRunnable = null;
     protected final RenderThreadManager renderThreadManager;
@@ -512,6 +536,12 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
   }
 
   protected static class RenderThreadManager {
+
+    // Outlives the render threads: a render thread only exists while the view is attached, but
+    // work can be queued at any time. Whatever the previous thread did not get to, or what is
+    // queued while detached, runs on the next render thread. Dropping it would also leave the
+    // native mailboxes that scheduled it waiting forever for their receive to run.
+    final ArrayList<Runnable> eventQueue = new ArrayList<>();
 
     synchronized void threadExiting(RenderThread thread) {
       thread.exited = true;

@@ -123,6 +123,16 @@ public abstract class MapRenderer implements MapRendererScheduler {
     nativeOnSurfaceDestroyed();
   }
 
+  /**
+   * Must be called on the render thread, right before it exits. Releases the native renderer and
+   * the graphics resources owned by that thread. The map keeps its state, a renderer is created
+   * again when the next render thread creates its surface.
+   */
+  @CallSuper
+  protected void onRenderThreadExit() {
+    nativeOnRenderThreadExit();
+  }
+
   @CallSuper
   protected void onDrawFrame() {
     long startTime = System.nanoTime();
@@ -175,6 +185,8 @@ public abstract class MapRenderer implements MapRendererScheduler {
   private native void nativeOnSurfaceChanged(int width, int height);
 
   private native void nativeOnSurfaceDestroyed();
+
+  private native void nativeOnRenderThreadExit();
 
   protected native void nativeReset();
 

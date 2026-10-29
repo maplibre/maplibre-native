@@ -89,6 +89,12 @@ void MapRenderer::reset() {
             }
         }
 
+        {
+            // Also held on to when the renderer was released by an exiting render thread
+            std::scoped_lock lock(updateMutex);
+            updateParameters.reset();
+        }
+
         // Lock to make sure there is no concurrent initialisation on the render thread
         std::scoped_lock lock(initialisationMutex);
         rendererObserver.reset();
@@ -220,19 +226,32 @@ void MapRenderer::resetRenderer() {
         updateParameters.reset();
     }
 
-    {
-        std::scoped_lock lock(initialisationMutex);
+    releaseRenderer();
+}
 
-        rendererRef.reset();
-        mailboxData.reset();
-        renderer.reset();
+void MapRenderer::releaseRenderer() {
+    std::scoped_lock lock(initialisationMutex);
 
-        if (!asyncRendererCleanup) {
-            backend.reset();
-        }
+    rendererRef.reset();
+    mailboxData.reset();
+    renderer.reset();
 
-        window.reset();
-        swapBehaviorFlush = false;
+    if (!asyncRendererCleanup) {
+        backend.reset();
+    }
+
+    window.reset();
+    swapBehaviorFlush = false;
+}
+
+void MapRenderer::onRenderThreadExit(JNIEnv&) {
+    try {
+        // Release directly instead of through the mailbox: there is no later point at which this
+        // thread could service it. The update parameters are kept, so the renderer created for the
+        // next surface draws the map right away instead of staying blank until the map changes.
+        releaseRenderer();
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android, std::string("MapRenderer::onRenderThreadExit failed: ") + exception.what());
     }
 }
 
@@ -295,7 +314,8 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     }
 
     if (backend) {
-        if (backend->createSurface(window_.get())) {
+        // A backend kept by asyncRendererCleanup is not reused once its renderer was released
+        if (renderer && backend->createSurface(window_.get())) {
             window = std::move(window_);
             return;
         }
@@ -333,6 +353,12 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
 
     backend->setSwapBehavior(swapBehaviorFlush ? gfx::Renderable::SwapBehaviour::Flush
                                                : gfx::Renderable::SwapBehaviour::NoFlush);
+
+    // A snapshot requested while there was no backend is read back from the first frame of this one
+    if (snapshotCallback) {
+        gfx::BackendScope backendGuard{backend->getImpl()};
+        backend->enableFramebufferRead(true);
+    }
 
     // Set the observer on the new Renderer implementation
     if (rendererObserver) {
@@ -399,6 +425,7 @@ void MapRenderer::registerNative(jni::JNIEnv& env) {
         METHOD(&MapRenderer::onSurfaceCreated, "nativeOnSurfaceCreated"),
         METHOD(&MapRenderer::onSurfaceChanged, "nativeOnSurfaceChanged"),
         METHOD(&MapRenderer::onSurfaceDestroyed, "nativeOnSurfaceDestroyed"),
+        METHOD(&MapRenderer::onRenderThreadExit, "nativeOnRenderThreadExit"),
         METHOD(&MapRenderer::setSwapBehaviorFlush, "nativeSetSwapBehaviorFlush"));
 }
 

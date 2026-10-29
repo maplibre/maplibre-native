@@ -363,6 +363,7 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
       haveEglContext = false;
       haveEglSurface = false;
       wantRenderNotification = false;
+      Runnable finishDrawingRunnable = null;
 
       try {
         GL10 gl = null;
@@ -377,7 +378,6 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
         int w = 0;
         int h = 0;
         Runnable event = null;
-        Runnable finishDrawingRunnable = null;
 
         while (true) {
           synchronized (renderThreadManager) {
@@ -600,12 +600,25 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
         }
 
       } finally {
-        /*
-         * clean-up everything...
-         */
-        synchronized (renderThreadManager) {
-          stopEglSurfaceLocked();
-          stopEglContextLocked();
+        try {
+          if (finishDrawingRunnable != null) {
+            finishDrawingRunnable.run();
+          }
+
+          // Release the native renderer here, on the thread that created it and while its EGL
+          // context is still current. The next render thread creates a new one.
+          MapLibreGLSurfaceView view = mSurfaceViewWeakRef.get();
+          if (view != null) {
+            view.renderer.onRenderThreadExit();
+          }
+        } finally {
+          /*
+           * clean-up everything...
+           */
+          synchronized (renderThreadManager) {
+            stopEglSurfaceLocked();
+            stopEglContextLocked();
+          }
         }
       }
     }

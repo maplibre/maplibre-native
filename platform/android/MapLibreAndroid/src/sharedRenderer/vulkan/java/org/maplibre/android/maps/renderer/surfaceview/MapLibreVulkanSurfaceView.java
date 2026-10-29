@@ -31,6 +31,19 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
 
     @Override
     protected void guardedRun() throws InterruptedException {
+      try {
+        renderLoop();
+      } finally {
+        // Release the native renderer here, on the thread that created it. The next render
+        // thread creates a new one.
+        MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
+        if (view != null) {
+          view.renderer.onRenderThreadExit();
+        }
+      }
+    }
+
+    private void renderLoop() throws InterruptedException {
       wantRenderNotification = false;
 
       boolean sizeChanged = false;
