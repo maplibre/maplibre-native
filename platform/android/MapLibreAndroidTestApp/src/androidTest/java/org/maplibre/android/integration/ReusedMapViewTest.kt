@@ -1,6 +1,8 @@
 package org.maplibre.android.integration
 
 import android.os.SystemClock
+import android.util.Log
+import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.test.filters.LargeTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
@@ -9,6 +11,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.testapp.activity.fragment.ReusedMapViewActivity
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Regression tests for a single activity app that reuses one MapView for all of its screens, see
@@ -27,6 +30,8 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
     private val activity: ReusedMapViewActivity
         get() = rule.activity as ReusedMapViewActivity
 
+    private val surfaces = SurfaceCounter()
+
     /** Show the map, open a screen without it, return, and open a screen without it again. */
     @Test
     @LargeTest
@@ -36,15 +41,23 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
 
         for (i in 0 until CYCLES) {
             openScreenWithoutMap("cycle $i")
+            val created = surfaces.created.get()
             returnToMapScreen("cycle $i")
             assertMapRendersAFrame("after returning to the map screen, cycle $i")
+            Assert.assertTrue(
+                "Returning to the map screen did not create a new surface (cycle $i)",
+                surfaces.created.get() > created
+            )
         }
 
         openScreenWithoutMap("after $CYCLES cycles")
         returnToMapScreen("after $CYCLES cycles")
     }
 
-    /** Return to the map screen and leave it again before the map had a chance to draw. */
+    /**
+     * Return to the map screen and leave it again before the map had a chance to draw. The MapView
+     * never gets a surface on these returns, so only the first leave destroys one.
+     */
     @Test
     @LargeTest
     fun returnAndLeaveBeforeTheMapIsDrawn() {
@@ -62,7 +75,8 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
     /**
      * A snapshot requested on the screen without map is scheduled for the renderer while no render
      * thread exists. Returning and leaving again before the map is drawn used to block the UI thread
-     * forever.
+     * forever. That detach happens before the MapView gets a surface again, so it is not preceded by
+     * surfaceDestroyed, unlike leaving a map screen that is showing the map.
      */
     @Test
     @LargeTest
@@ -85,14 +99,23 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
             "ReusedMapViewActivity has to render with a SurfaceView, see textureMode",
             mapView.renderView is SurfaceView
         )
+        runOnUiThreadWithin(QUERY_TIMEOUT_MS, "watching the map's surface", Runnable {
+            (mapView.renderView as SurfaceView).holder.addCallback(surfaces)
+        })
     }
 
+    /** Leaves the map screen while the MapView has a surface, which destroys that surface. */
     private fun openScreenWithoutMap(context: String) {
+        val destroyed = surfaces.destroyed.get()
         runOnUiThreadWithin(LIFECYCLE_TIMEOUT_MS, "opening the screen without map ($context)", Runnable {
             activity.openScreenWithoutMap()
             activity.supportFragmentManager.executePendingTransactions()
         })
         awaitMapViewAttached(false, "opening the screen without map ($context)")
+        Assert.assertTrue(
+            "Leaving the map screen did not destroy the map's surface ($context)",
+            surfaces.destroyed.get() > destroyed
+        )
     }
 
     private fun returnToMapScreen(context: String) {
@@ -104,6 +127,7 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
 
     /** In a single message, so no traversal runs in between and the MapView never gets a surface. */
     private fun returnAndLeaveInOneMessage(context: String) {
+        val created = surfaces.created.get()
         runOnUiThreadWithin(LIFECYCLE_TIMEOUT_MS, "returning and leaving again in one message ($context)", Runnable {
             Assert.assertTrue("Not on the screen without map", activity.supportFragmentManager.popBackStackImmediate())
             Assert.assertTrue("Returning did not attach the MapView", mapView.isAttachedToWindow)
@@ -111,6 +135,11 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
             activity.supportFragmentManager.executePendingTransactions()
         })
         awaitMapViewAttached(false, "returning and leaving again in one message ($context)")
+        Assert.assertEquals(
+            "The MapView got a surface although it was attached and detached in one message ($context)",
+            created,
+            surfaces.created.get()
+        )
     }
 
     private fun awaitMapViewAttached(attached: Boolean, context: String) {
@@ -130,7 +159,25 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
         }
     }
 
+    /** Counts the surfaces the MapView gets and loses, and logs them. */
+    private class SurfaceCounter : SurfaceHolder.Callback {
+        val created = AtomicInteger()
+        val destroyed = AtomicInteger()
+
+        override fun surfaceCreated(holder: SurfaceHolder) {
+            Log.i(TAG, "Map surface created (${created.incrementAndGet()})")
+        }
+
+        override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
+
+        override fun surfaceDestroyed(holder: SurfaceHolder) {
+            Log.i(TAG, "Map surface destroyed (${destroyed.incrementAndGet()})")
+        }
+    }
+
     companion object {
+        private const val TAG = "ReusedMapViewTest"
+
         private const val CYCLES = 10
 
         private const val POLL_INTERVAL_MS = 20L
