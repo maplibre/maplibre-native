@@ -1159,7 +1159,7 @@ TEST(Source, TileModeCameraSpanningTilesWarns) {
     VectorSource source("source", tileset);
     source.loadDescription(*test.fileSource);
 
-    test.transform.jumpTo(CameraOptions().withCenter(LatLng{CanonicalTileID(10, 512, 340)}).withZoom(10.0));
+    test.transform.jumpTo(CameraOptions().withCenter(LatLng{CanonicalTileID(12, 2051, 1362)}).withZoom(10.0));
     test.transformState = test.transform.getState();
 
     auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
@@ -1170,6 +1170,6 @@ TEST(Source, TileModeCameraSpanningTilesWarns) {
               log.count({EventSeverity::Warning,
                          Event::General,
                          -1,
-                         "Provided camera options returned 4 tiles, only 10/512/340=>10 is taken in Tile mode."}));
+                         "Provided camera options returned 2 tiles, only 10/512/340=>10 is taken in Tile mode."}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
