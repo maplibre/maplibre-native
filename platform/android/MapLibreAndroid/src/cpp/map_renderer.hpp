@@ -120,9 +120,6 @@ private:
     // Resets the renderer
     void resetRenderer();
 
-    // Releases the renderer and the backend, keeping the update parameters
-    void releaseRenderer();
-
     // Renders a frame.
     void render(JNIEnv&);
 
@@ -131,9 +128,6 @@ private:
     void onSurfaceChanged(JNIEnv&, jint width, jint height);
 
     void onSurfaceDestroyed(JNIEnv&);
-
-    // Called by a render thread that is about to exit
-    void onRenderThreadExit(JNIEnv&);
 
 private:
     // Called on either Main or render thread //

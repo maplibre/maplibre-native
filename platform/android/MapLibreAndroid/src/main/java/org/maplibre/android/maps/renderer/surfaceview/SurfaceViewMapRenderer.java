@@ -24,6 +24,17 @@ public class SurfaceViewMapRenderer extends MapRenderer {
                                 String localIdeographFontFamily) {
     super(context, localIdeographFontFamily);
     this.surfaceView = surfaceView;
+
+    surfaceView.setDetachedListener(new MapLibreSurfaceView.OnSurfaceViewDetachedListener() {
+      @Override
+      public void onSurfaceViewDetached() {
+        // because the GL thread is destroyed when the view is detached from window,
+        // we need to ensure releasing the native renderer as well.
+        // This avoids releasing it only when the view is being recreated, which is already on a new GL thread,
+        // and leads to JNI crashes like https://github.com/mapbox/mapbox-gl-native/issues/14618
+        nativeReset();
+      }
+    });
   }
 
   @Override
@@ -62,16 +73,6 @@ public class SurfaceViewMapRenderer extends MapRenderer {
 
   public void onSurfaceDestroyed() {
     super.onSurfaceDestroyed();
-  }
-
-  /**
-   * Called on the render thread right before it exits. {@link MapLibreSurfaceView} stops its
-   * render thread when it is detached from the window, so the native renderer has to be released
-   * as well. Releasing it later, when the view is attached again, would happen on a new render
-   * thread and lead to JNI crashes like https://github.com/mapbox/mapbox-gl-native/issues/14618
-   */
-  public void onRenderThreadExit() {
-    super.onRenderThreadExit();
   }
 
   public void onSurfaceChanged(int width, int height) {
