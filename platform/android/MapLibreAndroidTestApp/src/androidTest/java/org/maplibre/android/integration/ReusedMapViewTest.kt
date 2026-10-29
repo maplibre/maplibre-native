@@ -1,6 +1,7 @@
 package org.maplibre.android.integration
 
 import android.os.SystemClock
+import android.view.SurfaceView
 import androidx.test.filters.LargeTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import org.junit.Assert
@@ -30,7 +31,7 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
     @Test
     @LargeTest
     fun leaveAndReturnToMapScreen() {
-        validateTestSetup()
+        validateSurfaceViewSetup()
         assertMapRendersAFrame("on the map screen")
 
         for (i in 0 until CYCLES) {
@@ -47,7 +48,7 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
     @Test
     @LargeTest
     fun returnAndLeaveBeforeTheMapIsDrawn() {
-        validateTestSetup()
+        validateSurfaceViewSetup()
         openScreenWithoutMap("start")
 
         for (i in 0 until CYCLES) {
@@ -66,7 +67,7 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
     @Test
     @LargeTest
     fun snapshotOnScreenWithoutMap() {
-        validateTestSetup()
+        validateSurfaceViewSetup()
         openScreenWithoutMap("start")
 
         runOnUiThreadWithin(QUERY_TIMEOUT_MS, "requesting a snapshot on the screen without map", Runnable {
@@ -76,6 +77,14 @@ class ReusedMapViewTest : SurfaceViewDetachTestBase() {
 
         returnToMapScreen("end")
         assertMapRendersAFrame("after returning to the map screen")
+    }
+
+    private fun validateSurfaceViewSetup() {
+        validateTestSetup()
+        Assert.assertTrue(
+            "ReusedMapViewActivity has to render with a SurfaceView, see textureMode",
+            mapView.renderView is SurfaceView
+        )
     }
 
     private fun openScreenWithoutMap(context: String) {

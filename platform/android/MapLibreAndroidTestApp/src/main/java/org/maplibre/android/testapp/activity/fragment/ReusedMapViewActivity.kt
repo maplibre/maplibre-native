@@ -11,12 +11,14 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 
 /**
- * Test activity for a single activity app that reuses one MapView for all of its screens.
+ * Test activity for a single activity app that reuses one SurfaceView based MapView for all of
+ * its screens.
  *
  * The MapView is created with the activity, which forwards its lifecycle to it. The map screen
  * adds the MapView to its layout and removes it again when its view is destroyed, so the MapView
@@ -32,7 +34,8 @@ class ReusedMapViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(FrameLayout(this).apply { id = R.id.container })
 
-        mapView = MapView(this)
+        // A SurfaceView, unlike a TextureView, stops its render thread whenever it is detached
+        mapView = MapView(this, MapLibreMapOptions.createFromAttributes(this).textureMode(false))
         mapView.id = R.id.mapView
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { it.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) }
