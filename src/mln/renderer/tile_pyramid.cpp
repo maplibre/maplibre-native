@@ -161,7 +161,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         idealTiles = util::tileCover(tileCoverParameters, idealZoom, zoomRange, tileZoom);
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
-            // Rounding at high zooms adds the neighbours of an exactly framed tile to the cover; that is no misuse.
+            // Rounding at high zooms may add the neighbours of an exactly framed tile to `idealTiles`
             if (!viewportWithinTile(parameters.transformState, idealTiles[0].toUnwrapped())) {
                 mln::Log::Warning(mln::Event::General,
                                   "Provided camera options returned " + std::to_string(idealTiles.size()) +
