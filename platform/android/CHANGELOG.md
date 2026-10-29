@@ -8,6 +8,7 @@
 
 ### 🐞 Bug fixes
 
+- With 3D terrain on, the map draped on the terrain no longer keeps showing old content after a data change: a `GeoJsonSource` updated with `setGeoJson` or emptied of its features, or a new style whose raster source has the same tiling, now shows at once instead of at the next zoom level ([#4816](https://github.com/maplibre/maplibre-native/pull/4816)).
 - With 3D terrain on and the centre clamp enabled, the clamp no longer cancels a running camera animation; the camera is anchored to the ground once the animation ends ([#4768](https://github.com/maplibre/maplibre-native/pull/4768)).
 
 ## 13.7.1

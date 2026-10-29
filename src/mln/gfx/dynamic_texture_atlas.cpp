@@ -276,7 +276,10 @@ void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textu
 void DynamicTextureAtlas::removeUnusedDynamicTextures() {
     std::scoped_lock lock(mutex);
 
-    std::erase_if(dynamicTextures, [](auto& dynamicTexture) { return dynamicTexture->isEmpty(); });
+    // release textures not referenced elsewhere (by an atlas still alive on a
+    // worker thread), so the last reference is always dropped on the render thread
+    std::erase_if(dynamicTextures,
+                  [](auto& dynamicTexture) { return dynamicTexture.use_count() == 1 && dynamicTexture->isEmpty(); });
 }
 
 } // namespace gfx

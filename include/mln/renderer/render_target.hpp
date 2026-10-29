@@ -123,9 +123,10 @@ protected:
         /// tiles, an ancestor n levels up, or nothing - see terrain::DrapeGroupFallback
         std::vector<terrain::DrapeGroupFallback> groups;
 
-        /// Hash of the covering tile ids overlapping this target (summed, order-independent),
-        /// so it changes only when the SET of covering tiles changes - a tile loading,
-        /// unloading, or an integer-zoom crossing. Deliberately NOT keyed on drawable-instance
+        /// Hash of the covering tile ids overlapping this target, each with its source bucket's
+        /// id (summed, order-independent), so it changes only when the SET of covering tiles or
+        /// their data changes - a tile loading, unloading or getting new data (a GeoJSON source
+        /// update), or an integer-zoom crossing. Deliberately NOT keyed on drawable-instance
         /// ids: those are rebuilt with fresh ids every frame during fades/bucket updates, which
         /// churned the signature and re-rendered every drape each frame while panning.
         std::size_t contentHash = 0;

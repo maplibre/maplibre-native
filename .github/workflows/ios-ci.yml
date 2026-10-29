@@ -21,13 +21,12 @@ permissions:
 
 jobs:
   pre_job:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          submodules: recursive
           persist-credentials: false
 
       - name: Get all iOS files that have changed
@@ -68,7 +67,7 @@ jobs:
         working-directory: .
 
       - name: Update submodules
-        run: git submodule update --init --recursive
+        run: git submodule update --init --recursive --jobs 8
         working-directory: .
 
       - name: Install Apple signing assets
@@ -376,7 +375,7 @@ jobs:
           sccache --show-stats
 
   ios-ci-result:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       actions: write
       contents: read

@@ -106,6 +106,9 @@ struct RenderingStats {
     /// not with the tiles of the source
     int numDrapeMasksDrawn = 0;
     int numDrapeMasksSkipped = 0;
+    /// Terrain depth passes (the symbol-occlusion depth texture) rendered; one per frame in
+    /// which the camera or the mesh set changed, none for a still frame
+    int numDepthPasses = 0;
 
     /// Per-phase CPU time of the terrain path this frame (seconds), for profiling
     /// where the terrain overhead goes when nothing re-renders

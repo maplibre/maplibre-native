@@ -385,6 +385,7 @@ void PipelineInfo::updateVertexInputHash() {
 
     for (const auto& value : inputBindings) {
         util::hash_combine(vertexInputHash, value.binding);
+        util::hash_combine(vertexInputHash, value.stride);
         util::hash_combine(vertexInputHash, value.inputRate);
     }
 }
