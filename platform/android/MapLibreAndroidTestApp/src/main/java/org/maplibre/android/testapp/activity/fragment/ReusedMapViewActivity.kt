@@ -114,7 +114,10 @@ class ReusedMapViewActivity : AppCompatActivity() {
         mapView.onSaveInstanceState(outState)
     }
 
-    /** Shows the activity's MapView for as long as its view exists. */
+    /**
+     * Shows the activity's MapView. The MapView is only taken out of this screen by
+     * [openScreenWithoutMap].
+     */
     class MapScreenFragment : Fragment() {
 
         private val hostActivity: ReusedMapViewActivity
@@ -122,9 +125,11 @@ class ReusedMapViewActivity : AppCompatActivity() {
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
             val root = FrameLayout(inflater.context)
-            val mapView = hostActivity.mapView
-            hostActivity.detachMapView()
-            root.addView(mapView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+            root.addView(
+                hostActivity.mapView,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
 
             val openButton = Button(inflater.context)
             openButton.setText(R.string.reused_map_view_open_screen_without_map)
@@ -138,13 +143,6 @@ class ReusedMapViewActivity : AppCompatActivity() {
                 )
             )
             return root
-        }
-
-        override fun onDestroyView() {
-            // The MapView outlives this screen, take it out of the view that is being destroyed. This
-            // also covers leaving the screen without openScreenWithoutMap, e.g. when the activity ends.
-            hostActivity.detachMapView()
-            super.onDestroyView()
         }
     }
 
