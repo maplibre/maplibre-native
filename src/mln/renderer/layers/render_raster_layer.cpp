@@ -150,6 +150,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
         builder->setSubLayerIndex(0);
+        builder->setEnableDepth(false);
         builder->setDepthType(gfx::DepthMaskType::ReadOnly);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
