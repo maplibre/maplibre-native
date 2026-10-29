@@ -102,8 +102,7 @@ public:
     }
 
     Size imageSize() const {
-        return {static_cast<uint32_t>(paddedRect.w - padding * 2),
-                static_cast<uint32_t>(paddedRect.h - padding * 2)};
+        return {static_cast<uint32_t>(paddedRect.w - padding * 2), static_cast<uint32_t>(paddedRect.h - padding * 2)};
     }
 
     std::array<float, 2> displaySize() const {
