@@ -474,6 +474,28 @@ TEST(PluginRendering, ReadWriteDepthDrawablesAreHiddenByThePlanet) {
     EXPECT_EQ(0, render("globe"));
 }
 
+// A layer above a fill-extrusion layer has no per-layer depth test, so on Mercator a read/write depth drawable is 3D
+// geometry too: the extrusion's roof hides the triangle behind it, and the one in front of the roof draws.
+TEST(PluginRendering, ReadWriteDepthDrawablesAreHiddenByFillExtrusionsInFrontOfThem) {
+    ASSERT_NO_FATAL_FAILURE(
+        registerTriangles("test.read-write-depth-extrusion", false, false, false, false, nullptr, false, true));
+    RenderTest test;
+    test.map.getStyle().loadJSON(R"({"version":8,"sources":{
+        "points":{"type":"geojson","data":{"type":"Point","coordinates":[0,0]}},
+        "box":{"type":"geojson","data":{"type":"Polygon",
+            "coordinates":[[[-170,-80],[170,-80],[170,80],[-170,80],[-170,-80]]]}}},"layers":[
+        {"id":"box","type":"fill-extrusion","source":"box",
+            "paint":{"fill-extrusion-color":"#0000ff","fill-extrusion-height":1000000}},
+        {"id":"left","type":"test.read-write-depth-extrusion.left","source":"points"},
+        {"id":"right","type":"test.read-write-depth-extrusion.right","source":"points"}]})");
+    const auto result = test.frontend.render(test.map);
+    const auto* left = result.image.data.get() + (32 * 64 + 16) * 4;
+    const auto* right = result.image.data.get() + (32 * 64 + 48) * 4;
+    EXPECT_LT(left[0], 64);
+    EXPECT_GT(left[2], 128);
+    EXPECT_EQ(255, right[1]);
+}
+
 TEST(PluginRendering, UnchangedUniformUploadsAreSkippedButPaintChangesUpload) {
     ASSERT_NO_FATAL_FAILURE(registerTriangles("test.cached-uniforms", false, true));
     RenderTest test;
