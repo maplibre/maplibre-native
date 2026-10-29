@@ -50,39 +50,54 @@ enum class TileLodMode : uint8_t {
 };
 
 /// Controls progressive loading of 3D-terrain content (draped tiles and drape
-/// re-renders). It trades initial-load sharpness for smoother interaction on weaker
-/// GPUs, so it is a per-map, hardware-driven choice. Default is Quality (no budget),
-/// which preserves the historical sharp snap-load behaviour.
+/// re-renders) and how much terrain mesh a frame may have. It trades initial-load
+/// sharpness for smoother interaction on weaker GPUs, so it is a per-map, hardware-driven
+/// choice. Default is Quality (no per-frame budget), which preserves the historical sharp
+/// snap-load behaviour.
+///
+/// The mode also changes the final image: how deep the terrain mesh goes past a coarse DEM
+/// (TerrainLoadBudget::meshTargetZoom) sets how sharp draped content stays in close-ups, and
+/// how many mesh tiles a frame may have (TerrainLoadBudget::maxMeshTiles) sets how much
+/// detail tilted views keep in the distance.
 enum class TerrainLoadMode : uint8_t {
-    Quality,     ///< No budget: all revealed tiles/drapes build immediately. Sharp, may
-                 ///< stall a frame on big bursts (zoom-in over new coverage). Default.
-    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame.
+    Quality,     ///< No per-frame budget: all revealed tiles/drapes build immediately. Sharp, may
+                 ///< stall a frame on big bursts (zoom-in over new coverage). Mesh to z16 over a
+                 ///< coarser DEM, up to 64 mesh tiles. Default.
+    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame. Mesh to z15, up to
+                 ///< 48 mesh tiles.
     Performance, ///< Cap 8 new-tile builds + 4 drape re-renders per frame; smoothest on
-                 ///< weak GPUs, most progressive fill-in.
+                 ///< weak GPUs, most progressive fill-in. Mesh to z14, up to 24 mesh tiles.
 };
 
-/// Per-frame budgets for a TerrainLoadMode. A value <= 0 means unlimited.
+/// Budgets for a TerrainLoadMode. A per-frame value <= 0 means unlimited.
 struct TerrainLoadBudget {
     int newTileBuildsPerFrame;  ///< max NEW tiles that build their drawables per frame
     int drapeRerendersPerFrame; ///< max terrain drape targets that re-render per frame
-    /// Hard cap on terrain mesh tiles per frame (0 = unlimited). When the cover exceeds it the
-    /// tiles nearest the camera are kept and the farthest - the horizon tiles a high tilt
-    /// pulls in - are dropped. Everything downstream scales with this (mesh draws, drape
+    /// Hard cap on terrain mesh tiles per frame (0 = unlimited). When the cover exceeds it, the
+    /// farthest tiles past the DEM's maxzoom first go back to coarser ones (down to the DEM's
+    /// maxzoom), and only then are the farthest - the horizon tiles a high tilt pulls in -
+    /// dropped, keeping those nearest the camera. Everything downstream scales with this (mesh draws, drape
     /// targets and re-renders, depth instances), so it is the bluntest frame-time lever - and
     /// it costs terrain render *distance*, which is why Quality keeps a generous cap rather
     /// than the aggressive one Performance uses.
     size_t maxMeshTiles;
+    /// The zoom the terrain mesh reaches over a coarser DEM (RenderTerrain::meshMaxZoom). Each
+    /// mesh tile drapes into its own 1024 px target, so how sharp draped content stays in a
+    /// close-up follows the zoom of the mesh tiles, not of the DEM; each level deeper also adds
+    /// tiles to the near field, and drape memory with them. A DEM at or past this zoom meshes
+    /// at its own maxzoom.
+    uint8_t meshTargetZoom;
 };
 
 constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
     switch (mode) {
         case TerrainLoadMode::Balanced:
-            return {32, 16, 48};
+            return {32, 16, 48, 15};
         case TerrainLoadMode::Performance:
-            return {8, 4, 24};
+            return {8, 4, 24, 14};
         case TerrainLoadMode::Quality:
         default:
-            return {0, 0, 64}; // no per-frame budget, generous tile cap
+            return {0, 0, 64, 16}; // no per-frame budget, generous tile cap, deepest mesh
     }
 }
 

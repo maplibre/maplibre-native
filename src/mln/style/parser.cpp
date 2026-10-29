@@ -356,7 +356,7 @@ void Parser::parseSprites(const JSValue& value) {
                 continue;
             }
 
-            if (spriteIds.find(sprite->id) != spriteIds.end()) {
+            if (spriteIds.contains(sprite->id)) {
                 Log::Warning(Event::ParseStyle, "sprite ids must be unique");
                 continue;
             }

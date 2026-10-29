@@ -70,6 +70,14 @@ struct DEMSubTileOffset {
     float dy;
 };
 
+// Squared distance from `origin` (normalized web-mercator) to the tile's centre.
+double tileCentreDistance2(const UnwrappedTileID& id, const std::array<double, 2>& origin) {
+    const double scale = static_cast<double>(1u << id.canonical.z);
+    const double dx = (static_cast<double>(id.canonical.x) + 0.5) / scale + id.wrap - origin[0];
+    const double dy = (static_cast<double>(id.canonical.y) + 0.5) / scale - origin[1];
+    return dx * dx + dy * dy;
+}
+
 DEMSubTileOffset demSubTileOffset(const CanonicalTileID& child, const CanonicalTileID& ancestor) {
     const int dz = child.z - ancestor.z;
     return {static_cast<float>(1u << dz),
@@ -102,7 +110,13 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // undersamples the DEM, aliasing the relief into waves on the fixed 128x128 mesh. Still the
     // elevation-aware ideal cover from the view, not the DEM's loaded tile set.
     const uint16_t terrainCoverTileSize = demSource->getTileSize();
-    const Range<uint8_t> zoomRange{0, demSource->getMaxZoom()};
+    // Deeper than the DEM goes, as maplibre-gl-js does: a tile past its maxzoom samples its DEM
+    // ancestor through a sub-tile offset (the ancestor fallback in update()), and its 1024 px
+    // drape target covers a smaller area. Capped at the DEM's maxzoom, a close-up at z16 over a
+    // z12 DEM stretched each target 8x (dotted roads, blocky imagery). How deep depends on the
+    // load mode (meshMaxZoom): each level deeper adds tiles, and drape memory with them.
+    const TerrainLoadMode loadMode = updateParameters ? updateParameters->terrainLoadMode : TerrainLoadMode::Quality;
+    const Range<uint8_t> zoomRange{0, meshMaxZoom(loadMode, demSource->getMaxZoom())};
 
     // LOD parameters from the frame drive the same near-high/far-low zoom
     // selection every other source uses, so the near field drapes at a higher
@@ -174,12 +188,23 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // for frame time. It caps the cover, not just the mesh: the drape-target pool allocates a
     // 1024 px target per cover tile, so a cap on the mesh alone still allocated one for every
     // tile it dropped.
+    // Before the cap drops any tile, the farthest tiles past the DEM's maxzoom go back to their
+    // parents (coarsenFarMeshTiles): the deeper mesh (meshMaxZoom) then costs detail in the
+    // distance, where a tile covers little of the screen, instead of terrain render distance.
+    // Never shallower than the DEM, which the per-tile lookup needs (see above), so the cover is
+    // never coarser than it would be without the deeper mesh.
     if (updateParameters) {
-        out = nearestMeshTiles(std::move(out),
-                               terrainLoadBudget(updateParameters->terrainLoadMode).maxMeshTiles,
-                               meshTileCapOrigin(state));
+        const size_t maxTiles = terrainLoadBudget(updateParameters->terrainLoadMode).maxMeshTiles;
+        const auto origin = meshTileCapOrigin(state);
+        out = coarsenFarMeshTiles(std::move(out), maxTiles, demSource->getMaxZoom(), origin);
+        out = nearestMeshTiles(std::move(out), maxTiles, origin);
     }
     return out;
+}
+
+std::array<float, 3> RenderTerrain::demTileMapping(const CanonicalTileID& tile, const CanonicalTileID& demTile) {
+    const auto off = demSubTileOffset(tile, demTile);
+    return {{1.0f / (util::EXTENT * off.scale), off.dx / off.scale, off.dy / off.scale}};
 }
 
 std::array<double, 2> RenderTerrain::meshTileCapOrigin(const TransformState& state) {
@@ -200,14 +225,6 @@ std::set<UnwrappedTileID> RenderTerrain::nearestMeshTiles(std::set<UnwrappedTile
     if (maxTiles == 0 || tiles.size() <= maxTiles) {
         return tiles;
     }
-    const auto tileDist2 = [&](const UnwrappedTileID& id) {
-        const double scale = static_cast<double>(1u << id.canonical.z);
-        const double tx = (static_cast<double>(id.canonical.x) + 0.5) / scale + id.wrap;
-        const double ty = (static_cast<double>(id.canonical.y) + 0.5) / scale;
-        const double dx = tx - origin[0];
-        const double dy = ty - origin[1];
-        return dx * dx + dy * dy;
-    };
 
     // Ties go by tile ID, so the same view keeps the same tiles from one call to the next.
     std::vector<UnwrappedTileID> sorted(tiles.begin(), tiles.end());
@@ -215,11 +232,57 @@ std::set<UnwrappedTileID> RenderTerrain::nearestMeshTiles(std::set<UnwrappedTile
                       sorted.begin() + static_cast<std::ptrdiff_t>(maxTiles),
                       sorted.end(),
                       [&](const UnwrappedTileID& a, const UnwrappedTileID& b) {
-                          const double da = tileDist2(a);
-                          const double db = tileDist2(b);
+                          const double da = tileCentreDistance2(a, origin);
+                          const double db = tileCentreDistance2(b, origin);
                           return da < db || (da == db && a < b);
                       });
     return {sorted.begin(), sorted.begin() + static_cast<std::ptrdiff_t>(maxTiles)};
+}
+
+std::set<UnwrappedTileID> RenderTerrain::coarsenFarMeshTiles(std::set<UnwrappedTileID> tiles,
+                                                             size_t maxTiles,
+                                                             uint8_t minZoom,
+                                                             const std::array<double, 2>& origin) {
+    if (maxTiles == 0) {
+        return tiles;
+    }
+    while (tiles.size() > maxTiles) {
+        // A parent can take its children's place when they are leaves: no tile inside it goes
+        // deeper than its children, so the merge never swallows finer tiles nearer the camera
+        // and drops at most three tiles. Parents of tiles at minZoom are not candidates.
+        std::set<UnwrappedTileID> parents;
+        std::set<UnwrappedTileID> withDeeperTiles;
+        for (const auto& id : tiles) {
+            if (id.canonical.z <= minZoom) {
+                continue;
+            }
+            parents.emplace(id.wrap, id.canonical.scaledTo(id.canonical.z - 1));
+            for (int z = id.canonical.z - 2; z >= minZoom; --z) {
+                withDeeperTiles.emplace(id.wrap, id.canonical.scaledTo(static_cast<uint8_t>(z)));
+            }
+        }
+        // The farthest such parent goes first. Ties go by tile ID, as in nearestMeshTiles.
+        std::optional<UnwrappedTileID> farthest;
+        double farthestDist2 = 0;
+        for (const auto& parent : parents) {
+            if (withDeeperTiles.contains(parent)) {
+                continue;
+            }
+            const double dist2 = tileCentreDistance2(parent, origin);
+            if (!farthest || dist2 > farthestDist2 || (dist2 == farthestDist2 && parent < *farthest)) {
+                farthest = parent;
+                farthestDist2 = dist2;
+            }
+        }
+        if (!farthest) {
+            break;
+        }
+        // Each round takes tiles away or makes one shallower, so the loop ends by minZoom at the
+        // latest.
+        std::erase_if(tiles, [&](const UnwrappedTileID& id) { return id.isChildOf(*farthest); });
+        tiles.insert(*farthest);
+    }
+    return tiles;
 }
 
 void RenderTerrain::prepareSource(RenderOrchestrator& orchestrator) {
@@ -469,11 +532,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 ancestorEntry->lastUsed = demUpdateCounter;
                 demTier = 1;
                 demTileUsed = ancestorID;
-                const auto off = demSubTileOffset(unwrapped.canonical, ancestorID->canonical);
-                demCoords = {{1.0f / (util::EXTENT * off.scale),
-                              off.dx / off.scale,
-                              off.dy / off.scale,
-                              static_cast<float>(demDim)}};
+                const auto mapping = demTileMapping(unwrapped.canonical, ancestorID->canonical);
+                demCoords = {{mapping[0], mapping[1], mapping[2], static_cast<float>(demDim)}};
             }
         }
 
@@ -772,11 +832,11 @@ std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const Un
 
     // Map tile-local coordinates (0..EXTENT) of the requested tile into
     // normalized coordinates (0..1) of the (possibly ancestor) DEM tile
-    const auto off = demSubTileOffset(tileID.canonical, demTileID->canonical);
+    const auto mapping = demTileMapping(tileID.canonical, demTileID->canonical);
 
     return TerrainData{
         .demTexture = entry->texture,
-        .demCoords = {{1.0f / (util::EXTENT * off.scale), off.dx / off.scale, off.dy / off.scale, 0.0f}},
+        .demCoords = {{mapping[0], mapping[1], mapping[2], 0.0f}},
         .demDim = static_cast<float>(entry->dim),
     };
 }
