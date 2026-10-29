@@ -748,6 +748,7 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
 
 void Context::buildImageDescriptorSetLayout() {
     std::vector<vk::DescriptorSetLayoutBinding> bindings;
+    bindings.reserve(shaders::maxTextureCountPerShader);
 
     for (size_t i = 0; i < shaders::maxTextureCountPerShader; ++i) {
         bindings.push_back(vk::DescriptorSetLayoutBinding()
