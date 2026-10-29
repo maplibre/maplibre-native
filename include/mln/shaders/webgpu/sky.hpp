@@ -96,12 +96,12 @@ struct AtmospherePropsUBO {
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let target = atmosphere.inv_view_projection * vec4<f32>(pos, 0.0, 1.0);
+    let view_position = atmosphere.inv_view_projection * vec4<f32>(pos, 0.0, 1.0);
     var out: VertexOutput;
     // WebGPU uses a zero-to-one NDC depth range, so 0.5 matches WebGL's
     // framebuffer depth for clip-space z=0.
     out.position = vec4<f32>(pos, 0.5, 1.0);
-    out.view_direction = target.xyz / target.w - atmosphere.camera_position.xyz;
+    out.view_direction = view_position.xyz / view_position.w - atmosphere.camera_position.xyz;
     return out;
 }
 )";
@@ -119,7 +119,7 @@ struct AtmospherePropsUBO {
 
 @group(0) @binding(5) var<uniform> atmosphere: AtmospherePropsUBO;
 
-const PI: f32 = 3.141592653589793;
+const ATMOSPHERE_PI: f32 = 3.141592653589793;
 const PRIMARY_STEPS: i32 = 5;
 const LIGHT_STEPS: i32 = 3;
 const EARTH_RADIUS: f32 = 6371000.0;
@@ -165,8 +165,8 @@ fn scatter(direction: vec3<f32>, origin: vec3<f32>, sun: vec3<f32>) -> vec4<f32>
     let mu = dot(ray, sun_direction);
     let mu_squared = mu * mu;
     let g_squared = mie_direction * mie_direction;
-    let rayleigh_phase = 3.0 / (16.0 * PI) * (1.0 + mu_squared);
-    let mie_phase = 3.0 / (8.0 * PI) * ((1.0 - g_squared) * (mu_squared + 1.0)) /
+    let rayleigh_phase = 3.0 / (16.0 * ATMOSPHERE_PI) * (1.0 + mu_squared);
+    let mie_phase = 3.0 / (8.0 * ATMOSPHERE_PI) * ((1.0 - g_squared) * (mu_squared + 1.0)) /
         (pow(1.0 + g_squared - 2.0 * mu * mie_direction, 1.5) * (2.0 + g_squared));
 
     for (var i: i32 = 0; i < PRIMARY_STEPS; i++) {

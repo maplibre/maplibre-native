@@ -160,10 +160,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                                     const RenderTree&,
                                     UniqueChangeRequestVec& changes) {
     const auto& registration = pluginImpl(baseImpl).registration;
-    // The globe skips the depth test for 2D drawables, so read/write depth drawables are built 3D there, to test
-    // against the planet's depth.
     updateProjectionVariant(state);
-    const bool globe = projectionVariant == gfx::ProjectionVariant::Globe;
     readWriteDepth = false;
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
