@@ -1101,3 +1101,75 @@ TEST(Source, RasterDEMTileRoundsCoveringZoom) {
         EXPECT_EQ(5, z);
     }
 }
+
+TEST(Source, TileModeCameraFramingOneTileDoesNotWarn) {
+    SourceTest test;
+    FixtureLog log;
+
+    test.fileSource->tileResponse = [&](const Resource&) {
+        Response response;
+        response.noContent = true;
+        return response;
+    };
+
+    LineLayer layer("id", "source");
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
+
+    Tileset tileset;
+    tileset.tiles = {"tiles"};
+
+    VectorSource source("source", tileset);
+    source.loadDescription(*test.fileSource);
+
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
+    renderSource->setObserver(&test.renderSourceObserver);
+    for (const auto& tile : {CanonicalTileID{16, 46810, 32768},
+                             CanonicalTileID{17, 65536, 0},
+                             CanonicalTileID{17, 131071, 65536},
+                             CanonicalTileID{18, 87381, 187245}}) {
+        const LatLng center{CanonicalTileID(tile.z + 1, (tile.x * 2) + 1, (tile.y * 2) + 1)};
+        test.transform.jumpTo(CameraOptions().withCenter(center).withZoom(tile.z));
+        test.transformState = test.transform.getState();
+        renderSource->update(source.baseImpl, layers, true, true, test.tileParameters(MapMode::Tile));
+    }
+
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+TEST(Source, TileModeCameraSpanningTilesWarns) {
+    SourceTest test;
+    FixtureLog log;
+
+    test.fileSource->tileResponse = [&](const Resource&) {
+        Response response;
+        response.noContent = true;
+        return response;
+    };
+
+    LineLayer layer("id", "source");
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
+
+    Tileset tileset;
+    tileset.tiles = {"tiles"};
+
+    VectorSource source("source", tileset);
+    source.loadDescription(*test.fileSource);
+
+    test.transform.jumpTo(CameraOptions().withCenter(LatLng{CanonicalTileID(10, 512, 340)}).withZoom(10.0));
+    test.transformState = test.transform.getState();
+
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
+    renderSource->setObserver(&test.renderSourceObserver);
+    renderSource->update(source.baseImpl, layers, true, true, test.tileParameters(MapMode::Tile));
+
+    EXPECT_EQ(1u,
+              log.count({EventSeverity::Warning,
+                         Event::General,
+                         -1,
+                         "Provided camera options returned 4 tiles, only 10/512/340=>10 is taken in Tile mode."}));
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
