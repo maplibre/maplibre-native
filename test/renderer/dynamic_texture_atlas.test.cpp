@@ -40,12 +40,12 @@ TEST_F(DynamicTextureAtlasTest, SharesAllocationWithinImageRevision) {
 
     const auto firstAtlas = uploadPattern(image);
     EXPECT_EQ(firstAtlas.dynamicTexture->getVersion(firstAtlas.textureHandles.at(0).getId()), 0);
-    
+
     const auto secondAtlas = uploadPattern(image, 1);
-    
+
     EXPECT_EQ(firstAtlas.textureHandles.at(0).getId(), secondAtlas.textureHandles.at(0).getId());
     EXPECT_EQ(firstAtlas.textureHandles.at(0).getRectangle(), secondAtlas.textureHandles.at(0).getRectangle());
-    
+
     EXPECT_EQ(secondAtlas.dynamicTexture->getVersion(secondAtlas.textureHandles.at(0).getId()), 1);
 }
 
