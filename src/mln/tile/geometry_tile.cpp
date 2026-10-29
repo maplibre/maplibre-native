@@ -52,7 +52,8 @@ void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager)
         if (itIcon != imageAtlas.iconPositions.end()) {
             auto& iconPos = itIcon->second;
             auto nameId = sqrt(util::hash(name)) / 2;
-            int32_t texHandleId = static_cast<int32_t>(nameId + iconPos.paddedRect.w * iconPos.paddedRect.h);
+            int32_t texHandleId = static_cast<int32_t>(nameId + (iconPos.paddedRect.w - 2 * ImagePosition::padding) *
+                                                                (iconPos.paddedRect.h - 2 * ImagePosition::padding));
             if (static_cast<int32_t>(version) <= imageAtlas.dynamicTexture->getVersion(texHandleId)) {
                 continue;
             }
@@ -74,7 +75,8 @@ void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager)
         if (itPattern != imageAtlas.patternPositions.end()) {
             auto& patternPos = itPattern->second;
             auto nameId = sqrt(util::hash(name)) / 2;
-            int32_t texHandleId = static_cast<int32_t>(nameId + patternPos.paddedRect.w * patternPos.paddedRect.h);
+            int32_t texHandleId = static_cast<int32_t>(nameId + (patternPos.paddedRect.w - 2 * ImagePosition::padding) *
+                                                                (patternPos.paddedRect.h - 2 * ImagePosition::padding));
             if (static_cast<int32_t>(version) <= imageAtlas.dynamicTexture->getVersion(texHandleId)) {
                 continue;
             }
