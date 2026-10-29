@@ -19,6 +19,44 @@ Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
 }
 } // namespace
 
+void GlyphAtlas::uploadGlyph(const Immutable<Glyph>& glyph, TextureHandle& texHandle) {
+    const auto& rect = texHandle.getRectangle();
+    AlphaImage paddedImage(Size{rect.w, rect.h});
+    paddedImage.fill(0);
+    AlphaImage::copy(glyph->bitmap, paddedImage, {0, 0}, {padding, padding}, glyph->bitmap.size);
+
+    dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+}
+
+void ImageAtlas::uploadIcon(const Immutable<style::Image::Impl>& icon, TextureHandle& texHandle) {
+    const auto& rect = texHandle.getRectangle();
+    PremultipliedImage paddedImage(Size{rect.w, rect.h});
+    paddedImage.fill(0);
+    PremultipliedImage::copy(icon->image, paddedImage, {0, 0}, {padding, padding}, icon->image.size);
+
+    dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+}
+
+void ImageAtlas::uploadPattern(const Immutable<style::Image::Impl>& pattern, TextureHandle& texHandle) {
+    const auto& rect = texHandle.getRectangle();
+    PremultipliedImage paddedImage(Size{rect.w, rect.h});
+    paddedImage.fill(0);
+    PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {padding, padding}, pattern->image.size);
+
+    const uint32_t x = padding;
+    const uint32_t y = padding;
+    const uint32_t w = pattern->image.size.width;
+    const uint32_t h = pattern->image.size.height;
+
+    // Add 1 pixel wrapped padding on each side of the image.
+    PremultipliedImage::copy(pattern->image, paddedImage, {0, h - 1}, {x, y - 1}, {w, 1}); // T
+    PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x, y + h}, {w, 1});     // B
+    PremultipliedImage::copy(pattern->image, paddedImage, {w - 1, 0}, {x - 1, y}, {1, h}); // L
+    PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x + w, y}, {1, h});     // R
+
+    dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+}
+
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
     using GlyphsToUpload = std::vector<std::tuple<TextureHandle, Immutable<Glyph>, FontStackHash>>;
     std::scoped_lock lock(mutex);
@@ -91,11 +129,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
         const auto& rect = texHandle.getRectangle();
 
         if (texHandle.isUploadNeeded()) {
-            AlphaImage paddedImage(Size{rect.w, rect.h});
-            paddedImage.fill(0);
-            AlphaImage::copy(glyph->bitmap, paddedImage, {0, 0}, {padding, padding}, glyph->bitmap.size);
-
-            glyphAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+            glyphAtlas.uploadGlyph(glyph, texHandle);
         }
         glyphAtlas.textureHandles.emplace_back(texHandle);
         glyphAtlas.glyphPositions[fontStack].emplace(
@@ -197,11 +231,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
 
         if (texHandle.isUploadNeeded() ||
             static_cast<int32_t>(version) > imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
-            PremultipliedImage paddedImage(Size{rect.w, rect.h});
-            paddedImage.fill(0);
-            PremultipliedImage::copy(icon->image, paddedImage, {0, 0}, {padding, padding}, icon->image.size);
-
-            imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+            imageAtlas.uploadIcon(icon, texHandle);
         }
         imageAtlas.textureHandles.emplace_back(texHandle);
         imageAtlas.iconPositions.emplace(icon->id, ImagePosition{rectWithoutExtraPadding(rect), *icon});
@@ -215,22 +245,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
 
         if (texHandle.isUploadNeeded() ||
             static_cast<int32_t>(version) > imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
-            PremultipliedImage paddedImage(Size{rect.w, rect.h});
-            paddedImage.fill(0);
-            PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {padding, padding}, pattern->image.size);
-
-            const uint32_t x = padding;
-            const uint32_t y = padding;
-            const uint32_t w = pattern->image.size.width;
-            const uint32_t h = pattern->image.size.height;
-
-            // Add 1 pixel wrapped padding on each side of the image.
-            PremultipliedImage::copy(pattern->image, paddedImage, {0, h - 1}, {x, y - 1}, {w, 1}); // T
-            PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x, y + h}, {w, 1});     // B
-            PremultipliedImage::copy(pattern->image, paddedImage, {w - 1, 0}, {x - 1, y}, {1, h}); // L
-            PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x + w, y}, {1, h});     // R
-
-            imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+            imageAtlas.uploadPattern(pattern, texHandle);
         }
         imageAtlas.textureHandles.emplace_back(texHandle);
         imageAtlas.patternPositions.emplace(pattern->id, ImagePosition{rectWithoutExtraPadding(rect), *pattern});

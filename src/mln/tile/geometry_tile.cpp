@@ -47,25 +47,48 @@ void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager)
     for (auto& updatedImageVersion : imageManager.updatedImageVersions) {
         const std::string& name = updatedImageVersion.first;
         const uint32_t version = updatedImageVersion.second;
-        auto nameId = sqrt(util::hash(name)) / 2;
-        for (auto& texHandle : imageAtlas.textureHandles) {
-            int32_t uniqueId = static_cast<int32_t>(nameId + (texHandle.getRectangle().w - 4) *
-                                                                 (texHandle.getRectangle().h - 4));
-            if (texHandle.getId() == uniqueId) {
-                if (static_cast<int32_t>(version) <= imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
-                    continue;
+        
+        const auto itIcon = imageAtlas.iconPositions.find(name);
+        if (itIcon != imageAtlas.iconPositions.end()) {
+            auto& iconPos = itIcon->second;
+            auto nameId = sqrt(util::hash(name)) / 2;
+            int32_t texHandleId = static_cast<int32_t>(nameId + iconPos.paddedRect.w * iconPos.paddedRect.h);
+            if (static_cast<int32_t>(version) <= imageAtlas.dynamicTexture->getVersion(texHandleId)) {
+                continue;
+            }
+
+            const auto updatedIcon = imageManager.getSharedImage(name);
+            if (updatedIcon == nullptr) {
+                continue;
+            }
+            
+            for (auto& texHandle : imageAtlas.textureHandles) {
+                if (texHandle.getId() == texHandleId) {
+                    imageAtlas.uploadIcon(*updatedIcon, texHandle);
+                    break;
                 }
+            }
+        }
+        
+        const auto itPattern = imageAtlas.patternPositions.find(name);
+        if (itPattern != imageAtlas.patternPositions.end()) {
+            auto& patternPos = itPattern->second;
+            auto nameId = sqrt(util::hash(name)) / 2;
+            int32_t texHandleId = static_cast<int32_t>(nameId + patternPos.paddedRect.w * patternPos.paddedRect.h);
+            if (static_cast<int32_t>(version) <= imageAtlas.dynamicTexture->getVersion(texHandleId)) {
+                continue;
+            }
 
-                const auto updatedImage = imageManager.getSharedImage(name);
-                if (updatedImage == nullptr) continue;
-
-                PremultipliedImage paddedImage(Size{texHandle.getRectangle().w, texHandle.getRectangle().h});
-                paddedImage.fill(0);
-                PremultipliedImage::copy(
-                    updatedImage->get()->image, paddedImage, {0, 0}, {2, 2}, updatedImage->get()->image.size);
-
-                imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
-                break;
+            const auto updatedPattern = imageManager.getSharedImage(name);
+            if (updatedPattern == nullptr) {
+                continue;
+            }
+            
+            for (auto& texHandle : imageAtlas.textureHandles) {
+                if (texHandle.getId() == texHandleId) {
+                    imageAtlas.uploadPattern(*updatedPattern, texHandle);
+                    break;
+                }
             }
         }
     }
