@@ -49,6 +49,25 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
 
+    // webgpu::Drawable::draw takes the depth and stencil state of a 3D drawable from what
+    // the layer group set, as TileLayerGroup::render does. Without it the terrain surface
+    // mesh and its depth pass drew with the drawable's defaults: depth off and a
+    // default-constructed stencil test, Never, so nothing they drew reached the target.
+    // stencilModeFor3D hands out a new reference value per call, so the 3D drawables here
+    // share one.
+    bool features3d = false;
+    bool stencil3d = false;
+    visitDrawables([&](const gfx::Drawable& drawable) {
+        if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+            features3d = true;
+            if (drawable.getEnableStencil()) {
+                stencil3d = true;
+            }
+        }
+    });
+    const auto depthMode3d = features3d ? parameters.depthModeFor3D() : gfx::DepthMode::disabled();
+    const auto stencilMode3d = stencil3d ? parameters.stencilModeFor3D() : gfx::StencilMode::disabled();
+
     bool bindUBOs = false;
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
@@ -73,6 +92,12 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
+        }
+
+        if (drawable.getIs3D()) {
+            drawableWebGPU.setDepthModeFor3D(drawable.getEnableDepth() ? depthMode3d : gfx::DepthMode::disabled());
+            drawableWebGPU.setStencilModeFor3D(drawable.getEnableStencil() ? stencilMode3d
+                                                                           : gfx::StencilMode::disabled());
         }
 
         drawable.draw(parameters);
