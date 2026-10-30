@@ -59,7 +59,7 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
 
-    scheduler.runOnRenderThread([renderData_{std::move(renderData)}]() {});
+    scheduler.runOnRenderThread([renderData_{std::move(renderData)}] {});
 }
 
 /*
@@ -326,7 +326,7 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults 
                     std::optional<Immutable<Glyph>>& glyph = newGlyph.second;
 
                     if (pendingGlyphIDs.erase(glyphID)) {
-                        if (!(glyphID.complex.code == 0 && glyphID.complex.type != GlyphIDType::FontPBF)) {
+                        if (glyphID.complex.code != 0 || glyphID.complex.type == GlyphIDType::FontPBF) {
                             glyphs.emplace(glyphID, std::move(glyph));
                         }
                     }
@@ -347,7 +347,7 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults 
                 const GlyphID& glyphID = newGlyph.first;
                 std::optional<Immutable<Glyph>>& glyph = newGlyph.second;
 
-                if (!(glyphID.complex.code == 0 && glyphID.complex.type != GlyphIDType::FontPBF))
+                if (glyphID.complex.code != 0 || glyphID.complex.type == GlyphIDType::FontPBF)
                     glyphs.emplace(glyphID, std::move(glyph));
             }
         }
@@ -459,7 +459,7 @@ void GeometryTileWorker::parse() {
             continue; // Tile has no data.
         }
 
-        const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
+        const style::Layer::Impl& leaderImpl = *group.at(0)->baseImpl;
         BucketParameters parameters{.tileID = id,
                                     .mode = mode,
                                     .pixelRatio = pixelRatio,

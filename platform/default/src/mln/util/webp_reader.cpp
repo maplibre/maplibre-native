@@ -8,7 +8,8 @@
 namespace mln {
 
 PremultipliedImage decodeWEBP(const uint8_t* data, size_t size) {
-    int32_t width, height;
+    int32_t width;
+    int32_t height;
     if (!WebPGetInfo(data, size, &width, &height)) {
         Log::Warning(Event::Image, "Failed to decode WebP image header!");
         return {};

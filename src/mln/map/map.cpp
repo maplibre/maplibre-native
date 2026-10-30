@@ -416,7 +416,10 @@ LatLngBounds globeBounds(const Transform& transform) {
     const auto width = static_cast<double>(transform.getState().getSize().width);
     const auto height = static_cast<double>(transform.getState().getSize().height);
     const LatLng center = transform.getLatLng();
-    double west = 0, east = 0, south = 0, north = 0;
+    double west = 0;
+    double east = 0;
+    double south = 0;
+    double north = 0;
     for (const ScreenCoordinate& point : std::array<ScreenCoordinate, 8>{{{0, 0},
                                                                           {width / 2, 0},
                                                                           {width, 0},

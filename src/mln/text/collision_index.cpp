@@ -56,7 +56,7 @@ float CollisionIndex::approximateTileDistance(const TileDistance& tileDistance,
                                               const float lastSegmentAngle,
                                               const float pixelsToTileUnits,
                                               const float cameraToAnchorDistance,
-                                              const bool pitchWithMap) {
+                                              const bool pitchWithMap) const {
     // This is a quick and dirty solution for choosing which collision circles to
     // use (since collision circles are laid out in tile units). Ideally, I
     // think we should generate collision circles on the fly in viewport
@@ -276,12 +276,12 @@ PlacedFeatureResult CollisionIndex::placeLineFeature(
     float firstTileDistance = 0.f;
     float lastTileDistance = 0.f;
     if (firstAndLastGlyph) {
-        firstTileDistance = approximateTileDistance(*(firstAndLastGlyph->first.tileDistance),
+        firstTileDistance = approximateTileDistance(*firstAndLastGlyph->first.tileDistance,
                                                     firstAndLastGlyph->first.angle,
                                                     pixelsToTileUnits,
                                                     projectedAnchor.second,
                                                     pitchWithMap);
-        lastTileDistance = approximateTileDistance(*(firstAndLastGlyph->second.tileDistance),
+        lastTileDistance = approximateTileDistance(*firstAndLastGlyph->second.tileDistance,
                                                    firstAndLastGlyph->second.angle,
                                                    pixelsToTileUnits,
                                                    projectedAnchor.second,
@@ -354,7 +354,7 @@ PlacedFeatureResult CollisionIndex::placeLineFeature(
         if ((avoidEdges && !isInsideTile(collisionBoundaries, *avoidEdges)) ||
             (!allowOverlap && collisionGrid.hitTest(projectedBoxes[i].circle(), collisionGroupPredicate))) {
             if (!collisionDebug) {
-                return {false, false};
+                return {.placed = false, .offscreen = false};
             } else {
                 // Don't early exit if we're showing the debug circles because
                 // we still want to calculate which circles are in use
@@ -363,7 +363,7 @@ PlacedFeatureResult CollisionIndex::placeLineFeature(
         }
     }
 
-    return {!collisionDetected && firstAndLastGlyph && inGrid, entirelyOffscreen};
+    return {.placed = !collisionDetected && firstAndLastGlyph && inGrid, .offscreen = entirelyOffscreen};
 }
 
 void CollisionIndex::insertFeature(const CollisionFeature& feature,
@@ -541,7 +541,8 @@ CollisionIndex::ProjectedBox CollisionIndex::projectCollisionBox(const Collision
         vecSouth = {-std::sin(angle), std::cos(angle)};
     } else if (!rotateWithMap && pitchWithMap) {
         // Pitched texts that stay aligned with the viewport's X axis.
-        vec2 east, south;
+        vec2 east;
+        vec2 south;
         getTileSkewVectors(transformState, east, south);
         vecEast = {static_cast<float>(east[0]), static_cast<float>(east[1])};
         vecSouth = {static_cast<float>(south[0]), static_cast<float>(south[1])};

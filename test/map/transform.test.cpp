@@ -490,6 +490,30 @@ TEST(Transform, Antimeridian) {
     ASSERT_NEAR(coordinateWaikiri.longitude(), coordinateFromPixel.longitude(), 1e-4);
 }
 
+// A zoom around a point across the antimeridian leaves the center wrapped, as GL JS's setLocationAtPoint does. Bounds
+// across the antimeridian keep it in their range, as easeTo does.
+TEST(Transform, ZoomAroundAPointAcrossTheAntimeridian) {
+    for (const bool bounded : {false, true}) {
+        SCOPED_TRACE(bounded ? "bounds from 170 to 190 degrees" : "no bounds");
+        Transform transform;
+        transform.resize({256, 256});
+        if (bounded) {
+            transform.setLatLngBounds(LatLngBounds::hull({-10.0, 170.0}, {10.0, 190.0}));
+        }
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 179.9}).withZoom(5.0));
+        transform.jumpTo(CameraOptions().withZoom(6.0).withAnchor(ScreenCoordinate{230.0, 128.0}));
+
+        const double longitude = transform.getLatLng(LatLng::Unwrapped).longitude();
+        if (bounded) {
+            EXPECT_GT(longitude, 180.0);
+            EXPECT_LT(longitude, 190.0);
+        } else {
+            EXPECT_GT(longitude, -180.0);
+            EXPECT_LT(longitude, -178.0);
+        }
+    }
+}
+
 TEST(Transform, Camera) {
     Transform transform;
     transform.resize({1000, 1000});
@@ -3068,14 +3092,17 @@ TEST(GlobeTransform, ZoomAroundNearThePoleMatchesGLJS) {
     }
 }
 
-// On Mercator a zoom around a point across the antimeridian leaves the center on the next world copy, as it does on
-// main: the camera reports that copy, which converts back to the middle of the view.
+// On Mercator a move across the antimeridian during a gesture starts on the world copy next to the one it ends on, as
+// it does on main: the camera reports that copy, which converts back to the middle of the view.
 TEST(Transform, MercatorCameraCenterIsOnTheTransformsWorldCopy) {
     Transform transform;
     transform.resize({800, 600});
-    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 179.9}).withZoom(5));
-    transform.jumpTo(CameraOptions().withZoom(6).withAnchor(ScreenCoordinate{700, 300}));
-    ASSERT_GT(transform.getLatLng(LatLng::Unwrapped).longitude(), 180.0);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 179}).withZoom(5));
+    const double degree = 512.0 * 32.0 / 360.0;
+    transform.setGestureInProgress(true);
+    transform.moveBy({-2.0 * degree, 0.0}, AnimationOptions(Seconds(10)));
+    transform.updateTransitions(transform.getTransitionStart());
+    ASSERT_LT(transform.getLatLng(LatLng::Unwrapped).longitude(), -180.0);
     const LatLng center = *transform.getCameraOptions(std::nullopt).center;
     EXPECT_NEAR(transform.getLatLng(LatLng::Unwrapped).longitude(), center.longitude(), 1e-9);
     const ScreenCoordinate point = transform.latLngToScreenCoordinate(center);

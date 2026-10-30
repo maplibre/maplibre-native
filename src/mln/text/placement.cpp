@@ -938,7 +938,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         Point<float> vecEast{1, 0};
         Point<float> vecSouth{0, 1};
         if (pitchWithMap && !rotateWithMap) {
-            vec2 east, south;
+            vec2 east;
+            vec2 south;
             getTileSkewVectors(state, east, south);
             vecEast = {static_cast<float>(east[0]), static_cast<float>(east[1])};
             vecSouth = {static_cast<float>(south[0]), static_cast<float>(south[1])};
@@ -1516,7 +1517,7 @@ private:
                          const std::vector<ProjectedCollisionBox>&,
                          const std::vector<ProjectedCollisionBox>&) override;
 
-    bool shouldRetryPlacement(const JointPlacement&, const PlacementContext&);
+    bool shouldRetryPlacement(const JointPlacement&, const PlacementContext&) const;
 
     std::unordered_map<uint32_t, bool> locationCache;
     std::optional<CollisionBoundaries> tileBorders;
@@ -1791,7 +1792,7 @@ void TilePlacement::newSymbolPlaced(const SymbolInstance& symbol,
     placedSymbolsData.emplace_back(std::move(symbolData));
 }
 
-bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const PlacementContext& ctx) {
+bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const PlacementContext& ctx) const {
     // We re-try the placement to try out remaining variable anchors.
     return populateIntersections && !placement.placed() && ctx.getBucket().hasVariableTextAnchors();
 }

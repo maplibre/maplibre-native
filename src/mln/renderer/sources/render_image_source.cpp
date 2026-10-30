@@ -63,7 +63,7 @@ ImageWarp imageWarp(const GeometryCoordinates& corners) {
                                   *std::min_element(std::begin(denominators), std::end(denominators));
     const double blend = std::max(
         0.0, (1 - projectiveForeshortening / foreshortening) / (1 - projectiveForeshortening / bilinearForeshortening));
-    if (!(foreshortening >= 1 && foreshortening <= bilinearForeshortening) || blend >= 1) {
+    if (!std::isfinite(foreshortening) || foreshortening < 1 || foreshortening > bilinearForeshortening || blend >= 1) {
         return {};
     }
     return {.perspectiveX = perspectiveX, .perspectiveY = perspectiveY, .blend = blend};

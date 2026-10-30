@@ -50,13 +50,13 @@ public:
     static vec3 tileCoordinatesToSphere(const Point<double>& tilePoint, const UnwrappedTileID&);
 
     /// The view-projection matrix that takes unit-sphere positions to clip space.
-    static mat4 globeViewProjectionMatrix(const TransformState&, double globeRadiusPixels);
+    static mat4 globeViewProjectionMatrix(const TransformState&, double radius);
 
     /// The plane (as ax + by + cz + d) that separates the visible hemisphere from the back of the globe.
-    static vec4 clippingPlane(const TransformState&, double globeRadiusPixels);
+    static vec4 clippingPlane(const TransformState&, double radius);
 
     /// Camera position in unit-sphere space.
-    static vec3 cameraPosition(const TransformState&, double globeRadiusPixels);
+    static vec3 cameraPosition(const TransformState&, double radius);
 
     static vec3 surfaceVector(const LatLng&);
     static LatLng surfaceVectorToLatLng(const vec3&);

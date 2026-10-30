@@ -347,7 +347,7 @@ void Style::Impl::setProjection(std::unique_ptr<Projection> projection_) {
     projection->setObserver(this);
     if constexpr (!util::GLOBE_ENABLED) {
         const auto type = projection->getType();
-        if (!type.isUndefined() && !(type.isConstant() && type.asConstant().transitionState() == 0)) {
+        if (!type.isUndefined() && (!type.isConstant() || type.asConstant().transitionState() != 0)) {
             Log::Warning(Event::Style,
                          "This build has no globe (MLN_WITH_GLOBE), so the style's projection draws as Mercator");
         }

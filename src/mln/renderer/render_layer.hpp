@@ -226,7 +226,7 @@ protected:
     void activateLayerGroup(const LayerGroupBasePtr&, bool activate, UniqueChangeRequestVec& changes);
 
     /// Change the layer index on a layer group associated with this layer
-    void changeLayerIndex(const LayerGroupBasePtr&, int32_t newLayerIndex, UniqueChangeRequestVec&);
+    void changeLayerIndex(const LayerGroupBasePtr& group, int32_t newIndex, UniqueChangeRequestVec& changes);
 
     /// Update the drawables for a tile.
     /// @param tileGroup The tile layer group to consider

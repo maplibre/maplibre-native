@@ -96,7 +96,7 @@ std::optional<RaySphereIntersection> raySphereIntersection(const vec3& origin, c
     if (std::max(t0, t1) < 0) {
         return std::nullopt;
     }
-    return RaySphereIntersection{std::min(t0, t1), std::max(t0, t1)};
+    return RaySphereIntersection{.tMin = std::min(t0, t1), .tMax = std::max(t0, t1)};
 }
 
 double pointPlaneSignedDistance(const vec4& plane, const vec3& point) {
