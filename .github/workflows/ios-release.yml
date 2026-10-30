@@ -89,7 +89,7 @@ jobs:
       contents: write         # allow making a release
       actions: write          # for triggering ios-release-cocoapods.yml
       issues: write           # for notify-release-on-prs.ts
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: ios-build
     defaults:
       run:
@@ -133,7 +133,7 @@ jobs:
 
       - name: Extract changelog for version
         run: |
-          awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "${{ env.changelog_version_heading }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
+          awk '/^## / { p = 0 }; p == 1 { print }; $0 == "${{ env.changelog_version_heading }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
           cat changelog_for_version.md
 
       - name: Configure AWS Credentials
