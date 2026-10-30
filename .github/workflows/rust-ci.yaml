@@ -24,7 +24,7 @@ jobs:
         include:
           - os: macos-latest  # M-series CPU
           - os: windows-latest
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
     steps:
       - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
         with: { tool: just }
@@ -35,7 +35,7 @@ jobs:
 
   msrv:
     name: Rust tests MSRV (Minimal Supported Rust Version)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
         with: { tool: just }
