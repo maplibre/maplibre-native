@@ -50,7 +50,7 @@ public:
 
             additionalDefines += "#define HAS_UNIFORM_u_";
             additionalDefines += prefix;
-            additionalDefines += "\n";
+            additionalDefines += '\n';
         }
         if (variant == gfx::ProjectionVariant::Globe) {
             additionalDefines += "#define ";

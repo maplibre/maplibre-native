@@ -94,7 +94,7 @@ struct LocationIndicatorRenderParameters {
     // some testing defaults, for before it gets updated via props
     double puckBearing = 0.0;
     LatLng puckPosition = {0, 0};
-    double errorRadiusMeters;
+    double errorRadiusMeters = 0.0;
     mln::Color errorRadiusColor{0, 0, 0, 0};
     mln::Color errorRadiusBorderColor{0, 0, 0, 0};
     float puckScale = 0;
@@ -330,7 +330,7 @@ public:
         */
         void assign(const Immutable<style::Image::Impl>* img) {
             imageDirty = true;
-            image = (img) ? &(img->get()->image) : nullptr;
+            image = img ? &img->get()->image : nullptr;
             width = height = 0;
             pixelRatio = 1.0f;
             if (image) {
@@ -385,7 +385,7 @@ public:
             MBGL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, texId));
         }
         void detach() { MBGL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0)); }
-        bool isValid() { return imageDirty || image; }
+        bool isValid() const { return imageDirty || image; }
         GLuint texId = 0;
         const mln::PremultipliedImage* image = nullptr;
         std::optional<Immutable<style::Image::Impl>> sharedImage;
@@ -434,7 +434,7 @@ public:
     struct TextureInfo {
         std::shared_ptr<gfx::Texture2D> texture;
         std::optional<Immutable<style::Image::Impl>> image;
-        std::string id = "";
+        std::string id;
         float pixelRatio = 1.0f;
         size_t width = 0;
         size_t height = 0;
@@ -522,8 +522,9 @@ public:
                    params.puckLayersDisplacement != oldParams.puckLayersDisplacement ||
                    params.perspectiveCompensation != oldParams.perspectiveCompensation ||
                    params.puckScale != oldParams.puckScale || params.puckHatScale != oldParams.puckHatScale ||
-                   params.puckShadowScale != oldParams.puckShadowScale)
+                   params.puckShadowScale != oldParams.puckShadowScale) {
             bearingChanged = true; // changes puck geometry but not necessarily the location
+        }
         if (params.errorRadiusMeters != oldParams.errorRadiusMeters) radiusChanged = true;
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
         bearingChanged |= setTextureFromImageID(params.puckImagePath, texPuck, params);
@@ -756,14 +757,14 @@ protected:
         //     ^ clamping this to 0.8 to avoid growing the puck too much close to the camera.
 
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
-        const double shadowRadius = ((texShadow) ? texShadow->width / texShadow->pixelRatio : 0.0) *
+        const double shadowRadius = (texShadow ? texShadow->width / texShadow->pixelRatio : 0.0) *
                                     params.puckShadowScale * M_SQRT2 * 0.5 *
                                     horizontalScaleFactor; // Technically it's not the radius, but
                                                            // the half diagonal of the quad.
-        const double puckRadius = ((texPuck) ? texPuck->width / texPuck->pixelRatio : 0.0) * params.puckScale *
-                                  M_SQRT2 * 0.5 * horizontalScaleFactor;
-        const double hatRadius = ((texPuckHat) ? texPuckHat->width / texPuckHat->pixelRatio : 0.0) *
-                                 params.puckHatScale * M_SQRT2 * 0.5 * horizontalScaleFactor;
+        const double puckRadius = (texPuck ? texPuck->width / texPuck->pixelRatio : 0.0) * params.puckScale * M_SQRT2 *
+                                  0.5 * horizontalScaleFactor;
+        const double hatRadius = (texPuckHat ? texPuckHat->width / texPuckHat->pixelRatio : 0.0) * params.puckHatScale *
+                                 M_SQRT2 * 0.5 * horizontalScaleFactor;
 #else
         const double shadowScale = shadowDrawableInfo.textureInfo.width / shadowDrawableInfo.textureInfo.pixelRatio;
         const double shadowRadius = shadowScale * params.puckShadowScale * M_SQRT2 * 0.5 * horizontalScaleFactor;
@@ -876,7 +877,7 @@ protected:
                 tx->assign(nullptr);
             }
             textures[imagePath] = tx;
-            texture = tx;
+            texture = std::move(tx);
         } else {
             const Immutable<style::Image::Impl>* sharedImage = params.imageManager->getSharedImage(imagePath);
             const mln::PremultipliedImage* img = sharedImage ? &sharedImage->get()->image : nullptr;
@@ -1273,7 +1274,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             return drawable;
         };
 
-        const auto createCircleDrawable = [&]() {
+        const auto createCircleDrawable = [&] {
             // circle[0] is the center
             const auto& geometry = renderImpl->circleDrawableInfo.geometry;
             const uint16_t vertexCount = static_cast<uint16_t>(geometry.size());
@@ -1330,7 +1331,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         createQuadDrawable(renderImpl->hatDrawableInfo, "locationPuckHat", LocationIndicatorComponentType::PuckHat);
     };
 
-    const auto updateCircleDrawable = [&]() {
+    const auto updateCircleDrawable = [&] {
         auto& circleDrawable = renderImpl->circleDrawableInfo.drawable.value().get();
         auto& circleOutlineDrawable = renderImpl->circleDrawableInfo.outlineDrawable.value().get();
 

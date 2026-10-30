@@ -254,7 +254,7 @@ public:
     /**
      * @brief Gets the default styles.
      */
-    const std::vector<mln::util::DefaultStyle> defaultStyles() const;
+    std::vector<mln::util::DefaultStyle> defaultStyles() const;
 
     /**
      * @brief Sets the collection default styles.

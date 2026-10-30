@@ -20,7 +20,7 @@ void mercatorTileMatrix(mat4& matrix, const UnwrappedTileID& tileID, double scal
     matrix::identity(matrix);
     matrix::translate(matrix,
                       matrix,
-                      static_cast<int64_t>(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
+                      (tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
                       static_cast<int64_t>(tileID.canonical.y) * s,
                       0);
     matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);

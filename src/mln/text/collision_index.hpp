@@ -105,7 +105,7 @@ private:
                                   float lastSegmentAngle,
                                   float pixelsToTileUnits,
                                   float cameraToAnchorDistance,
-                                  bool pitchWithMap);
+                                  bool pitchWithMap) const;
 
     struct ProjectedAnchor {
         Point<float> point;
