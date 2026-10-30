@@ -25,8 +25,8 @@
 namespace mln {
 namespace {
 
-using MapLibreTile = mlt::MapLibreTile;
-using GeometryType = mlt::metadata::tileset::GeometryType;
+using mlt::MapLibreTile;
+using mlt::metadata::tileset::GeometryType;
 
 class VectorMLTTileFeature final : public GeometryTileFeature {
 public:
@@ -128,7 +128,7 @@ FeatureIdentifier VectorMLTTileFeature::getID() const {
 struct PointConverter {
     double scale;
 
-    inline constexpr static GeometryCoordinate convert(double scale, const mlt::Coordinate& coord) {
+    constexpr static GeometryCoordinate convert(double scale, const mlt::Coordinate& coord) {
         return {static_cast<std::int16_t>(std::round(coord.x * scale)),
                 static_cast<std::int16_t>(std::round(coord.y * scale))};
     }

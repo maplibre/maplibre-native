@@ -27,7 +27,7 @@ void DrawableBuilder::init() {
         drawable.setVertices(std::move(raw), impl->rawVerticesCount, impl->rawVerticesType);
     } else {
         const auto& verts = impl->vertices.vector();
-        constexpr auto vertSize = sizeof(std::remove_reference<decltype(verts)>::type::value_type);
+        constexpr auto vertSize = sizeof(std::remove_reference_t<decltype(verts)>::value_type);
         std::vector<uint8_t> raw(verts.size() * vertSize);
         std::memcpy(raw.data(), verts.data(), raw.size());
         drawable.setVertices(std::move(raw), verts.size(), gfx::AttributeDataType::Short2);

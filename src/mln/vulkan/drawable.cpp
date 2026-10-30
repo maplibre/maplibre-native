@@ -56,7 +56,7 @@ Drawable::Drawable(std::string name_)
     : gfx::Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
 
-Drawable::~Drawable() {}
+Drawable::~Drawable() = default;
 
 void Drawable::setEnableColor(bool value) {
     gfx::Drawable::setEnableColor(value);
