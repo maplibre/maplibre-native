@@ -419,8 +419,9 @@ public final class MapLibreMap {
   /**
    * Selects the 3D-terrain progressive-loading budget. Trades initial-load sharpness for
    * smoother interaction on weaker GPUs by spreading new-tile builds and drape re-renders
-   * across frames. Default is {@link TerrainLoadMode#QUALITY} (no budget). Has no effect
-   * when terrain is not enabled.
+   * across frames. The mode also sets how deep the terrain mesh goes past a coarse DEM and how
+   * many mesh tiles a frame may have (see {@link TerrainLoadMode}). Default is
+   * {@link TerrainLoadMode#QUALITY} (no budget). Has no effect when terrain is not enabled.
    *
    * @param mode the terrain load mode
    */

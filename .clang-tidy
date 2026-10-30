@@ -126,6 +126,7 @@ Checks: [
     -misc-use-internal-linkage,
     -modernize-use-ranges,
     -modernize-use-integer-sign-comparison,
+    -modernize-use-designated-initializers,
     -clang-analyzer-core.CallAndMessage,
     -clang-diagnostic-deprecated-declarations,
     -clang-analyzer-security.ArrayBound
