@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/text/glyph.hpp>
+#include <mln/text/glyph_cache.hpp>
 #include <mln/text/glyph_manager_observer.hpp>
 #include <mln/text/glyph_range.hpp>
 #include <mln/text/local_glyph_rasterizer.hpp>
@@ -8,6 +9,7 @@
 #include <mln/util/immutable.hpp>
 
 #include <mutex>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -45,7 +47,8 @@ public:
     GlyphManager(const GlyphManager &) = delete;
     GlyphManager &operator=(const GlyphManager &) = delete;
     explicit GlyphManager(
-        std::unique_ptr<LocalGlyphRasterizer> = std::make_unique<LocalGlyphRasterizer>(std::optional<std::string>()));
+        std::unique_ptr<LocalGlyphRasterizer> = std::make_unique<LocalGlyphRasterizer>(std::optional<std::string>()),
+        std::shared_ptr<GlyphCache> = nullptr);
     ~GlyphManager();
 
     // Workers send a `getGlyphs` message to the main thread once they have
@@ -87,12 +90,16 @@ private:
         bool parsed = false;
         std::unique_ptr<AsyncRequest> req;
         std::unordered_map<GlyphRequestor *, std::shared_ptr<GlyphDependencies>> requestors;
+        std::shared_ptr<const GlyphCache::Range> glyphs;
     };
 
     struct Entry {
         std::map<GlyphRange, GlyphRequest> ranges;
+        // Local and HarfBuzz glyphs. PBF glyphs are in the ranges.
         std::map<GlyphID, Immutable<Glyph>> glyphs;
     };
+
+    std::optional<Immutable<Glyph>> findGlyph(const Entry &, GlyphID) const;
 
     std::unordered_map<FontStack, Entry, FontStackHasher> entries;
 
@@ -104,6 +111,7 @@ private:
 
     // Shaping objects
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
+    std::shared_ptr<GlyphCache> glyphCache;
     std::shared_ptr<FontFaces> fontFaces;
 
     FreeTypeLibrary ftLibrary;

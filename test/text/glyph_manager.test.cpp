@@ -126,6 +126,11 @@ public:
     }
 };
 
+class LatinALocalGlyphRasterizer : public StubLocalGlyphRasterizer {
+public:
+    bool canRasterizeGlyph(const FontStack&, GlyphID glyphID) override { return glyphID == GlyphID(u'a'); }
+};
+
 class StubGlyphManagerObserver : public GlyphManagerObserver {
 public:
     void onGlyphsLoaded(const FontStack& fontStack, const GlyphRange& glyphRange) override {
@@ -158,8 +163,9 @@ public:
     GlyphManager glyphManager;
 
     GlyphManagerTest(
-        std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer = std::make_unique<StubLocalGlyphRasterizer>())
-        : glyphManager(std::move(localGlyphRasterizer)) {}
+        std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer = std::make_unique<StubLocalGlyphRasterizer>(),
+        std::shared_ptr<GlyphCache> glyphCache = nullptr)
+        : glyphManager(std::move(localGlyphRasterizer), std::move(glyphCache)) {}
 
     void run(const std::string& url, GlyphDependencies dependencies) {
         // Squelch logging.
@@ -173,6 +179,19 @@ public:
     }
 
     void end() { loop.stop(); }
+
+    void load(const FontStack& fontStack, GlyphIDs glyphIDs) {
+        fileSource.glyphsResponse = [](const Resource&) {
+            Response response;
+            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+            return response;
+        };
+        requestor.glyphsAvailable = [&](GlyphMap) {
+            end();
+        };
+        run("test/fixtures/resources/glyphs.pbf",
+            GlyphDependencies{.glyphs = {{fontStack, std::move(glyphIDs)}}, .shapes = {}});
+    }
 };
 
 TEST(GlyphManager, LoadingSuccess) {
@@ -267,6 +286,56 @@ TEST(GlyphManager, LoadingCorrupted) {
 
     test.run("test/fixtures/resources/glyphs.pbf",
              GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å'}}}, .shapes = {}});
+}
+
+TEST(GlyphManager, SharesParsedGlyphsBetweenManagersAndFontStacks) {
+    const auto cache = std::make_shared<GlyphCache>();
+    const auto load = [&](const FontStack& fontStack) {
+        GlyphManagerTest test(std::make_unique<StubLocalGlyphRasterizer>(), cache);
+        test.load(fontStack, {u'a'});
+        return test.glyphManager.getGlyph(fontStack, u'a');
+    };
+
+    const Immutable<Glyph> first = load({"Test Stack"});
+
+    EXPECT_EQ(first, load({"Other Stack"}));
+}
+
+TEST(GlyphManager, KeepsItsOwnGlyphsWithoutACache) {
+    const auto load = [](const FontStack& fontStack) {
+        GlyphManagerTest test;
+        test.load(fontStack, {u'a'});
+        return test.glyphManager.getGlyph(fontStack, u'a');
+    };
+
+    const Immutable<Glyph> first = load({"Test Stack"});
+
+    EXPECT_NE(first, load({"Test Stack"}));
+}
+
+TEST(GlyphManager, ReleasesTheGlyphsOfEvictedFontStacks) {
+    const auto cache = std::make_shared<GlyphCache>();
+    GlyphManagerTest test(std::make_unique<StubLocalGlyphRasterizer>(), cache);
+    test.load({"Test Stack"}, {u'a'});
+    ASSERT_NE(0u, cache->size());
+
+    test.glyphManager.evict({});
+
+    EXPECT_EQ(0u, cache->size());
+}
+
+TEST(GlyphManager, DoesNotKeepTheRangeGlyphsItDrawsLocally) {
+    const auto loadedGlyphs = [](std::unique_ptr<LocalGlyphRasterizer> rasterizer) {
+        const auto cache = std::make_shared<GlyphCache>();
+        GlyphManagerTest test(std::move(rasterizer), cache);
+        test.load({"Test Stack"}, {u'a', u'å'});
+        return cache->size();
+    };
+
+    const std::size_t all = loadedGlyphs(std::make_unique<StubLocalGlyphRasterizer>());
+
+    // The fixture has u'a', the only glyph LatinALocalGlyphRasterizer draws.
+    EXPECT_EQ(all - 1, loadedGlyphs(std::make_unique<LatinALocalGlyphRasterizer>()));
 }
 
 TEST(GlyphManager, LoadingCancel) {

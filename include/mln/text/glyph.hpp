@@ -45,6 +45,7 @@ union GlyphID {
 
     operator char16_t() { return complex.code; }
     operator char32_t() { return hash; }
+    bool operator==(const GlyphID &other) const { return hash == other.hash; }
     bool operator<(const GlyphID &other) const { return hash < other.hash; }
     bool operator>(const GlyphID &other) const { return hash > other.hash; }
 
@@ -86,6 +87,8 @@ public:
 
     // Glyph metrics
     GlyphMetrics metrics;
+
+    bool operator==(const Glyph &) const = default;
 };
 
 using Glyphs = std::map<GlyphID, std::optional<Immutable<Glyph>>>;

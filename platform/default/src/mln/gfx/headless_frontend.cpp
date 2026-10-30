@@ -22,7 +22,8 @@ HeadlessFrontend::HeadlessFrontend(Size size_,
                                    gfx::HeadlessBackend::SwapBehaviour swapBehavior,
                                    const gfx::ContextMode contextMode,
                                    const std::optional<std::string>& localFontFamily,
-                                   bool invalidateOnUpdate_)
+                                   bool invalidateOnUpdate_,
+                                   std::shared_ptr<GlyphCache> glyphCache)
     : size(size_),
       pixelRatio(pixelRatio_),
       frameTime(0),
@@ -32,7 +33,7 @@ HeadlessFrontend::HeadlessFrontend(Size size_,
           contextMode)),
       asyncInvalidate([this] { renderFrame(); }),
       invalidateOnUpdate(invalidateOnUpdate_),
-      renderer(std::make_unique<Renderer>(*getBackend(), pixelRatio, localFontFamily)) {}
+      renderer(std::make_unique<Renderer>(*getBackend(), pixelRatio, localFontFamily, std::move(glyphCache))) {}
 
 HeadlessFrontend::~HeadlessFrontend() = default;
 
