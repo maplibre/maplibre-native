@@ -346,7 +346,7 @@ void SurfaceRenderableResource::swap() {
     }
 }
 
-const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
+vk::Image SurfaceRenderableResource::getAcquiredImage() const {
     if (surface) {
         return swapchainImages[acquiredImageIndex];
     }
@@ -597,7 +597,8 @@ std::shared_ptr<PremultipliedImage> SurfaceRenderableResource::readImage() {
     // swizzle pixels to RGBA
     if (!useBlit && colorFormat == vk::Format::eB8G8R8A8Unorm) {
         for (size_t i = 0, size = image->size.area(); i < size; ++i) {
-            std::swap(image->data[i * image->channels + 0], image->data[i * image->channels + 2]);
+            std::swap(image->data[i * mln::Image<mln::ImageAlphaMode::Premultiplied>::channels + 0],
+                      image->data[i * mln::Image<mln::ImageAlphaMode::Premultiplied>::channels + 2]);
         }
     }
 
