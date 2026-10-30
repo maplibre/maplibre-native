@@ -573,6 +573,15 @@ void OnlineFileRequest::completed(Response response) {
     } else {
         failedRequests = 0;
         failedRequestReason = Response::Error::Reason::Success;
+
+        // Responses with no explicit information are revalidated on every request.
+        // If so configured, give them a lifetime so the stored data can be reused.
+        if (!response.expires) {
+            const Duration lifetime = impl.getResourceOptions().implicitCacheLifetime();
+            if (lifetime > Duration::zero()) {
+                response.expires = util::now() + std::chrono::duration_cast<Seconds>(lifetime);
+            }
+        }
     }
 
     schedule(getUpdateInterval(response.expires));
