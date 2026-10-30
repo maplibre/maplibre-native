@@ -91,7 +91,7 @@ auto convert_array(const std::array<U, N>& arr, std::index_sequence<Is...>) {
 
 template <typename T, typename U>
 auto as_array(U&& value) {
-    using Decayed = std::remove_cv_t<std::remove_reference_t<U>>;
+    using Decayed = std::remove_cvref_t<U>;
     if constexpr (is_std_array_v<Decayed>) {
         return convert_array<T>(value, std::make_index_sequence<std::tuple_size_v<Decayed>>{});
     } else {

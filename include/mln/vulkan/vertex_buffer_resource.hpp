@@ -10,7 +10,7 @@ namespace vulkan {
 
 class VertexBufferResource : public gfx::VertexBufferResource {
 public:
-    VertexBufferResource(BufferResource&& buffer_) noexcept;
+    VertexBufferResource(BufferResource&& ptr) noexcept;
     VertexBufferResource(VertexBufferResource&& other) noexcept
         : buffer(std::move(other.buffer)) {}
     ~VertexBufferResource() noexcept override;

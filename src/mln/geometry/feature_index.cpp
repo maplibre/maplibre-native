@@ -94,6 +94,9 @@ IndexedSubfeature::IndexedSubfeature(std::size_t index_,
       bucketLeaderIDCopy(std::move(bucketName_)) {}
 
 IndexedSubfeature& IndexedSubfeature::operator=(const IndexedSubfeature& other) {
+    if (this == &other) {
+        return *this;
+    }
     index = other.index;
     sourceLayerName = sourceLayerNameCopy;
     bucketLeaderID = bucketLeaderIDCopy;
@@ -369,7 +372,7 @@ void DynamicFeatureIndex::query(std::unordered_map<std::string, std::vector<Feat
 
 void DynamicFeatureIndex::insert(std::shared_ptr<Feature> feature,
                                  std::shared_ptr<mapbox::geometry::polygon<int64_t>> envelope) {
-    features.push_back({std::move(feature), std::move(envelope)});
+    features.push_back({.feature = std::move(feature), .envelope = std::move(envelope)});
 }
 
 } // namespace mln

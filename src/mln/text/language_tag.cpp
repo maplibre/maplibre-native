@@ -117,9 +117,9 @@ struct bcp47_parser : qi::grammar<Iterator> {
 
         start %= no_case[langtag | privateuse | grandfathered];
 
-        langtag %= (language)[phoenix::ref(languageTag.language) = _1] >>
-                   -("-" >> (script)[phoenix::ref(languageTag.script) = _1]) >>
-                   -("-" >> (region)[phoenix::ref(languageTag.region) = _1]) >> *("-" >> variant) >>
+        langtag %= language[phoenix::ref(languageTag.language) = _1] >>
+                   -("-" >> script[phoenix::ref(languageTag.script) = _1]) >>
+                   -("-" >> region[phoenix::ref(languageTag.region) = _1]) >> *("-" >> variant) >>
                    *("-" >> extension) >> -("-" >> privateuse);
 
         language %= (repeat(2, 3)[alpha] >> -("-" >> extlang)) // shortest ISO 639 code

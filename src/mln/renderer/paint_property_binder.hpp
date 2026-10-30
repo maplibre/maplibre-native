@@ -318,7 +318,7 @@ public:
     SourceFunctionPaintPropertyBinder(style::PropertyExpression<T> expression_, T defaultValue_)
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)) {}
-    ~SourceFunctionPaintPropertyBinder() override {}
+    ~SourceFunctionPaintPropertyBinder() override = default;
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -421,7 +421,7 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
-    ~CompositeFunctionPaintPropertyBinder() override {}
+    ~CompositeFunctionPaintPropertyBinder() override = default;
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -545,7 +545,7 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
-    ~CompositeCrossFadedPaintPropertyBinder() override {}
+    ~CompositeCrossFadedPaintPropertyBinder() override = default;
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -726,20 +726,22 @@ public:
         : binders(Binder<Ps>::create(properties.template get<Ps>(), z, Ps::defaultValue())...) {
         (void)z; // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56958
 
-        (([&] {
-             binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
-         }()),
-         ...);
+        (
+            [&] {
+                binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
+            }(),
+            ...);
     }
 
     PaintPropertyBinders(PaintPropertyBinders&& other) noexcept {
         binders = std::move(other.binders);
         interleavedVertexBuffer = std::move(other.interleavedVertexBuffer);
 
-        (([&] {
-             binders.template get<Ps>()->interleavedVertexBuffer = &interleavedVertexBuffer;
-         }()),
-         ...);
+        (
+            [&] {
+                binders.template get<Ps>()->interleavedVertexBuffer = &interleavedVertexBuffer;
+            }(),
+            ...);
     }
 
     PaintPropertyBinders(const PaintPropertyBinders&) = delete;

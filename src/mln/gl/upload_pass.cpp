@@ -15,6 +15,7 @@
 #include <mln/gl/texture2d.hpp>
 
 #include <algorithm>
+#include <utility>
 
 namespace mln {
 namespace gl {
@@ -155,7 +156,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     std::vector<std::uint8_t> allData;
 
     uint32_t vertexStride = 0;
-    if (vertexAttributeIndex != static_cast<std::size_t>(-1) && !vertexData.empty()) {
+    if (std::cmp_not_equal(vertexAttributeIndex, -1) && !vertexData.empty()) {
         allData.reserve(vertexData.size() + (defaults.getTotalSize() + align) * vertexCount);
 
         // Fill in vertices
@@ -163,11 +164,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         bindings.resize(vertexAttributeIndex + 1);
         vertexStride = static_cast<uint32_t>(vertexData.size() / vertexCount);
         bindings[vertexAttributeIndex] = {
-            /*.attribute = */ {vertexType, 0},
-            /* vertexStride = */ vertexStride,
-            /* vertexBufferResource = */ nullptr, // buffer details established later
-            /* vertexOffset = */ 0,
-            /*.bufferIndex = */ 0,
+            .attribute = {.dataType = vertexType, .offset = 0},
+            .vertexStride = vertexStride,
+            .vertexBufferResource = nullptr, // buffer details established later
+            .vertexOffset = 0,
+            .bufferIndex = 0,
         };
     }
 
