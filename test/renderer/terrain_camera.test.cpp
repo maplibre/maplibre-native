@@ -723,6 +723,11 @@ TEST(TerrainDepthPass, StillCameraSkipsThePass) {
     }
     ASSERT_EQ(stillFrames, 3) << "the depth pass ran on still frames";
 
-    test.map.jumpTo(CameraOptions().withPitch(61.0));
+    // Tilt one degree less. The maximum pitch defaults to 60 degrees, so asking for 61 clamps back to
+    // 60 and leaves the camera where it was. A small tilt also keeps the tile cover the same, so the
+    // pass can only run because the gate saw the camera move, not because the mesh set changed.
+    const double pitch = test.map.getCameraOptions({}).pitch.value_or(0.0);
+    test.map.jumpTo(CameraOptions().withPitch(pitch - 1.0));
+    ASSERT_NEAR(test.map.getCameraOptions({}).pitch.value_or(0.0), pitch - 1.0, 1e-6) << "the camera did not move";
     EXPECT_GT(depthPassesAfterFrame(), passes) << "a camera move must redraw the depth texture";
 }
