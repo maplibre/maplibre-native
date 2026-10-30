@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.maplibre.android.location.LocationComponentConstants.ACCURACY_RADIUS_ANIMATION_DURATION;
+import static org.maplibre.android.location.LocationComponentConstants.COMPASS_MIN_ANIMATED_CHANGE_DEGREES;
 import static org.maplibre.android.location.LocationComponentConstants.COMPASS_UPDATE_RATE_MS;
 import static org.maplibre.android.location.LocationComponentConstants.MAX_ANIMATION_DURATION_MS;
 import static org.maplibre.android.location.LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS;
@@ -45,6 +46,9 @@ import org.maplibre.android.geometry.LatLng;
 final class LocationAnimatorCoordinator {
 
   private static final String TAG = "Mbgl-LocationAnimatorCoordinator";
+
+  // Animated bearing targets can be shifted by 360 degrees for the shortest rotation, which costs float precision.
+  private static final float BEARING_ROUNDING_DEGREES = 0.001f;
 
   @VisibleForTesting
   final SparseArray<MapLibreAnimator> animatorArray = new SparseArray<>();
@@ -110,6 +114,12 @@ final class LocationAnimatorCoordinator {
     if (previousLocation == null) {
       previousLocation = newLocation;
       locationUpdateTimestamp = SystemClock.elapsedRealtime() - TRANSITION_ANIMATION_DURATION_MS;
+    } else if (newLocations.length == 1 && !lookAheadUpdate && isUnchangedLocation(newLocation, isGpsNorth)) {
+      // Nothing that is shown would change. Starting new animators towards the same targets would update the
+      // location layer and camera on every frame and keep the map rendering while the device is stationary.
+      locationUpdateTimestamp = SystemClock.elapsedRealtime();
+      previousLocation = newLocation;
+      return;
     }
 
     LatLng previousLayerLatLng = getPreviousLayerLatLng();
@@ -177,6 +187,12 @@ final class LocationAnimatorCoordinator {
   }
 
   void feedNewCompassBearing(float targetCompassBearing, @NonNull CameraPosition currentCameraPosition) {
+    if (isAnimatingTo(ANIMATOR_LAYER_COMPASS_BEARING, targetCompassBearing, COMPASS_MIN_ANIMATED_CHANGE_DEGREES)
+      && isAnimatingTo(ANIMATOR_CAMERA_COMPASS_BEARING, targetCompassBearing, COMPASS_MIN_ANIMATED_CHANGE_DEGREES)) {
+      // sensor noise, for example while the device lies still
+      return;
+    }
+
     if (previousCompassBearing < 0) {
       previousCompassBearing = targetCompassBearing;
     }
@@ -194,6 +210,12 @@ final class LocationAnimatorCoordinator {
   }
 
   void feedNewAccuracyRadius(float targetAccuracyRadius, boolean noAnimation) {
+    if (!noAnimation && targetAccuracyRadius == previousAccuracyRadius
+      && isRunningOrFinished(ANIMATOR_LAYER_ACCURACY)) {
+      // the accuracy circle already shows, or is animating towards, this radius
+      return;
+    }
+
     if (previousAccuracyRadius < 0) {
       previousAccuracyRadius = targetAccuracyRadius;
     }
@@ -245,6 +267,57 @@ final class LocationAnimatorCoordinator {
                    @Nullable MapLibreMap.CancelableCallback callback) {
     updateTiltAnimator((float) targetTilt, (float) currentCameraPosition.tilt, callback);
     playAnimators(animationDuration, ANIMATOR_TILT);
+  }
+
+  /**
+   * Whether every location animator that has a listener is running towards, or has finished at, the values that
+   * {@code newLocation} would animate to.
+   */
+  private boolean isUnchangedLocation(@NonNull Location newLocation, boolean isGpsNorth) {
+    float cameraBearing = isGpsNorth ? 0 : newLocation.getBearing();
+    return isAnimatingTo(ANIMATOR_LAYER_LATLNG, newLocation)
+      && isAnimatingTo(ANIMATOR_CAMERA_LATLNG, newLocation)
+      && isAnimatingTo(ANIMATOR_LAYER_GPS_BEARING, newLocation.getBearing(), BEARING_ROUNDING_DEGREES)
+      && isAnimatingTo(ANIMATOR_CAMERA_GPS_BEARING, cameraBearing, BEARING_ROUNDING_DEGREES);
+  }
+
+  private boolean isAnimatingTo(@MapLibreAnimator.Type int animatorType, @NonNull Location location) {
+    if (listeners.get(animatorType) == null) {
+      return true;
+    }
+    if (!isRunningOrFinished(animatorType)) {
+      return false;
+    }
+    LatLng target = (LatLng) animatorArray.get(animatorType).getTarget();
+    return target.getLatitude() == location.getLatitude() && target.getLongitude() == location.getLongitude();
+  }
+
+  /**
+   * Whether the bearing animator of the given type is running towards, or has finished at, a bearing that differs
+   * less than {@code tolerance} degrees from {@code bearing}. Animator types without a listener count as unchanged.
+   */
+  private boolean isAnimatingTo(@MapLibreAnimator.Type int animatorType, float bearing, float tolerance) {
+    if (listeners.get(animatorType) == null) {
+      return true;
+    }
+    if (!isRunningOrFinished(animatorType)) {
+      return false;
+    }
+    float target = (float) animatorArray.get(animatorType).getTarget();
+    return Math.abs(normalize(bearing - target + 180) - 180) < tolerance;
+  }
+
+  /**
+   * Whether the animator of the given type is running or has finished at its target, delivering values to the current
+   * listener. Animator types without a listener aren't shown, so they count as finished.
+   */
+  private boolean isRunningOrFinished(@MapLibreAnimator.Type int animatorType) {
+    MapLibreAnimator.AnimationsValueChangeListener listener = listeners.get(animatorType);
+    if (listener == null) {
+      return true;
+    }
+    MapLibreAnimator animator = animatorArray.get(animatorType);
+    return animator != null && animator.isRunningOrFinishedFor(listener);
   }
 
   private LatLng getPreviousLayerLatLng() {
