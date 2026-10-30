@@ -153,7 +153,7 @@ std::unique_ptr<Tile> TileCache::pop(const OverscaledTileID& key) {
 }
 
 bool TileCache::has(const OverscaledTileID& key) {
-    return tiles.find(key) != tiles.end();
+    return tiles.contains(key);
 }
 
 void TileCache::clear() {

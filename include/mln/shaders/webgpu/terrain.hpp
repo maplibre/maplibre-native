@@ -88,9 +88,11 @@ struct FragmentInput {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    // Sample the map texture (render-to-texture output) for the surface color
-    // Note: Y-coordinate is flipped (1.0 - y) to match OpenGL convention
-    return textureSample(map_texture, texture_sampler, vec2<f32>(in.uv.x, 1.0 - in.uv.y));
+    // Sample the map texture (render-to-texture output) for the surface color. WebGPU's
+    // NDC is Y-up, as Metal's is, so the drape target is stored upright and uv.y is
+    // sampled as it is. Flipping it (1.0 - uv.y, as Vulkan, whose NDC is Y-down, must)
+    // turns the draped map upside down about each mesh tile.
+    return textureSample(map_texture, texture_sampler, in.uv);
 }
 )";
 };
