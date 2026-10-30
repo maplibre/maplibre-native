@@ -29,11 +29,11 @@ public:
 
 class TransitionParameters {
 public:
-    TimePoint now;
-    style::TransitionOptions transition;
+    TimePoint now{};
+    style::TransitionOptions transition{};
 
     /// Set when the global state changed since the last transition.
-    std::optional<GlobalStateChange> globalStateChange;
+    std::optional<GlobalStateChange> globalStateChange{};
 
     bool isGlobalStateOnly() const noexcept { return globalStateChange && globalStateChange->stateOnly; }
 };
