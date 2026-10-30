@@ -6,6 +6,7 @@
 #include <mln/util/image.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/run_loop.hpp>
+#include <mln/style/layers/circle_layer.hpp>
 #include <mln/style/layers/symbol_layer.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/image.hpp>
@@ -366,4 +367,21 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
     EXPECT_EQ(offsetLeaves3[0].properties["name"].get<std::string>(), "Cape Hatteras"s);
     EXPECT_EQ(offsetLeaves3[1].properties["name"].get<std::string>(), "Cape Sable"s);
     EXPECT_EQ(offsetLeaves3[2].properties["name"].get<std::string>(), "Cape Cod"s);
+}
+
+TEST(Query, QueryRenderedFeaturesState) {
+    QueryTest test;
+    test.map.getStyle().addLayer(std::make_unique<CircleLayer>("circle_layer", "source4"));
+    FeatureState state;
+    state["selected"] = true;
+    test.frontend.getRenderer()->setFeatureState("source4", {}, "feature1", state);
+    test.frontend.render(test.map);
+
+    const auto point = test.map.pixelForLatLng({0, 0});
+    for (const auto& layerID : {"layer4", "circle_layer"}) {
+        SCOPED_TRACE(layerID);
+        const auto features = test.frontend.getRenderer()->queryRenderedFeatures(point, {{{layerID}}, {}});
+        ASSERT_EQ(features.size(), 1u);
+        EXPECT_EQ(features[0].state, state);
+    }
 }
