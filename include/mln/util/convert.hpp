@@ -34,14 +34,16 @@ constexpr std::array<To, Size> cast(const std::array<From, Size>& from)
 
 /// Convert an `N`-tuple of all `T`s to `array<T,N>`
 template <typename... Ts>
-inline constexpr auto to_array(std::tuple<Ts...>&& tuple) {
+constexpr auto to_array(std::tuple<Ts...>&& tuple) {
     return std::apply([](auto&&... x) { return std::array{std::forward<decltype(x)>(x)...}; },
                       std::forward<std::tuple<Ts...>>(tuple));
 }
 
 /// Convert string to integral types
 template <typename T>
-std::enable_if_t<std::is_integral_v<T>, std::optional<T>> parse(std::string_view str, int base = 10) noexcept {
+std::optional<T> parse(std::string_view str, int base = 10) noexcept
+    requires(std::is_integral_v<T>)
+{
     static_assert(std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t> || std::is_same_v<T, int64_t> ||
                       std::is_same_v<T, uint64_t>,
                   "Unsupported integral type in mln::util::parse<T>.");
@@ -68,7 +70,9 @@ std::enable_if_t<std::is_integral_v<T>, std::optional<T>> parse(std::string_view
 
 /// Convert string to floating point types
 template <typename T>
-std::enable_if_t<std::is_floating_point_v<T>, std::optional<T>> parse(std::string_view str) noexcept {
+std::optional<T> parse(std::string_view str) noexcept
+    requires(std::is_floating_point_v<T>)
+{
     static_assert(std::is_same_v<T, float> || std::is_same_v<T, double> || std::is_same_v<T, long double>,
                   "Unsupported floating point type in mln::util::parse<T>.");
     char* end = nullptr;

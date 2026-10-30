@@ -43,7 +43,7 @@ public:
 
     void setResourceOptions(ResourceOptions options) {
         std::scoped_lock lock(resourceOptionsMutex);
-        resourceOptions = options;
+        resourceOptions = std::move(options);
     }
 
     ResourceOptions getResourceOptions() {
@@ -53,7 +53,7 @@ public:
 
     void setClientOptions(ClientOptions options) {
         std::scoped_lock lock(clientOptionsMutex);
-        clientOptions = options;
+        clientOptions = std::move(options);
     }
 
     ClientOptions getClientOptions() {
