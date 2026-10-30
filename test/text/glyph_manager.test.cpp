@@ -335,7 +335,6 @@ TEST(GlyphManager, DoesNotKeepTheRangeGlyphsItDrawsLocally) {
     const std::size_t all = loadedGlyphs(std::make_unique<StubLocalGlyphRasterizer>());
 
     // The fixture has u'a', the only glyph LatinALocalGlyphRasterizer draws.
-
     EXPECT_EQ(all - 1, loadedGlyphs(std::make_unique<LatinALocalGlyphRasterizer>()));
 }
 

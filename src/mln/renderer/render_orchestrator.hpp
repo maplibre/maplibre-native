@@ -57,7 +57,7 @@ public:
     RenderOrchestrator(bool backgroundLayerAsColor_,
                        TaggedScheduler& threadPool_,
                        const std::optional<std::string>& localFontFamily_,
-                       std::shared_ptr<GlyphCache> glyphCache_ = nullptr);
+                       std::shared_ptr<GlyphCache> glyphCache_);
     ~RenderOrchestrator() override;
 
 #if MLN_RENDER_BACKEND_OPENGL
