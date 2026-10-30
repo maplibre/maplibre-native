@@ -1,5 +1,6 @@
 #include <sstream>
 #include <map>
+#include <tuple>
 
 #include <mln/platform/settings.hpp>
 #include <mln/storage/file_source_manager.hpp>
@@ -67,6 +68,8 @@ public:
     // Generate a tilejson resource from .pmtiles file
     void request_tilejson(AsyncRequest* req, const Resource& resource, const ActorRef<FileSourceRequest>& ref) {
         auto url = extract_url(resource.url);
+
+        dropCachesIfLocalFileChanged(url);
 
         getMetadata(url, req, [=, this](std::unique_ptr<Response::Error> error) {
             Response response;
@@ -229,7 +232,36 @@ private:
     std::map<std::string, std::string> metadata_cache;
     std::map<std::string, std::map<std::string, std::vector<pmtiles::entryv3>>> directory_cache;
     std::map<std::string, std::vector<std::string>> directory_cache_control;
+    std::map<std::string, std::tuple<uint64_t, int64_t, int64_t>> local_file_stamps;
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
+
+    // A local archive replaced at the same path (an app updating its offline data) would otherwise be read
+    // with the old file's header and directories, at the old offsets, until the process restarts. Checked
+    // when a source asks for its TileJSON, so a style reload picks up the new file and tile requests pay
+    // nothing.
+    void dropCachesIfLocalFileChanged(const std::string& url) {
+        if (!url.starts_with(mln::util::FILE_PROTOCOL)) {
+            return;
+        }
+
+        const auto path = util::percentDecode(url.substr(std::char_traits<char>::length(mln::util::FILE_PROTOCOL)));
+        struct stat info{};
+        if (stat(path.c_str(), &info) != 0) {
+            return;
+        }
+
+        const auto stamp = std::make_tuple(static_cast<uint64_t>(info.st_ino),
+                                           static_cast<int64_t>(info.st_size),
+                                           static_cast<int64_t>(info.st_mtime));
+        const auto known = local_file_stamps.find(url);
+        if (known != local_file_stamps.end() && known->second != stamp) {
+            header_cache.erase(url);
+            metadata_cache.erase(url);
+            directory_cache.erase(url);
+            directory_cache_control.erase(url);
+        }
+        local_file_stamps[url] = stamp;
+    }
 
     std::shared_ptr<FileSource> getFileSource() {
         if (!fileSource) {
@@ -592,9 +624,22 @@ private:
                     return;
                 }
 
-                pmtiles::headerv3 header = header_cache.at(url);
-                std::vector<pmtiles::entryv3> directory = directory_cache.at(url).at(
-                    url + "|" + std::to_string(directoryOffset) + "|" + std::to_string(directoryLength));
+                // The caches can be dropped while this directory was being read (the local file changed).
+                const auto headerEntry = header_cache.find(url);
+                const auto directories = directory_cache.find(url);
+                const std::string directoryKey = url + "|" + std::to_string(directoryOffset) + "|" +
+                                                 std::to_string(directoryLength);
+                if (headerEntry == header_cache.end() || directories == directory_cache.end() ||
+                    !directories->second.contains(directoryKey)) {
+                    callback(std::make_pair(0, 0),
+                             std::make_unique<Response::Error>(
+                                 Response::Error::Reason::Other,
+                                 std::string("Error fetching PMTiles tile address: the archive changed")));
+                    return;
+                }
+
+                pmtiles::headerv3 header = headerEntry->second;
+                std::vector<pmtiles::entryv3> directory = directories->second.at(directoryKey);
 
                 pmtiles::entryv3 entry = pmtiles::find_tile(directory, tileID);
 
