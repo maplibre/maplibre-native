@@ -35,7 +35,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
-- [OpenGL] Fix drawables keeping a stale GL program after `gl::Context::setDirtyState()`, which made shared contexts and custom layers draw with a foreign program.
+- [OpenGL] Fix drawables keeping a stale GL program after `gl::Context::setDirtyState()`, which made them draw with the program left bound by a shared context's host, a custom or plugin layer, or the location indicator.
 - [core] Fix plugin layer filters ignoring the style's global state.
 - [core] Fix plugin layers with read-write depth drawables not depth testing when drawn above a `fill-extrusion` layer.
 - [core] Fix a crash in `RenderImageSource::update` when an image source's coordinates give an empty tile cover, such as an image wholly beyond the latitudes Web Mercator can show.

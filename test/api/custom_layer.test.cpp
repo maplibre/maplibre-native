@@ -132,7 +132,8 @@ TEST(CustomLayer, RebindsProgram) {
             MapObserver::nullObserver(),
             MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
             ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
-    // Translucent, so both layers and the custom layer between them are drawn in layer order with the same program.
+    // "below" is drawn as the clear color. "above" is translucent, so it's drawn after the custom layer, with the
+    // program that the previous frame left cached.
     map.getStyle().loadJSON(R"JSON({
         "version": 8,
         "sources": {},

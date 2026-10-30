@@ -19,8 +19,6 @@
 #include <mln/util/mat4.hpp>
 #include <mln/util/run_loop.hpp>
 
-#include <optional>
-
 using namespace mln;
 using namespace mln::style;
 using namespace mln::platform;
@@ -149,19 +147,12 @@ TEST(GLContextMode, SharedRebindsProgram) {
 
     const auto expected = frontend.render(map).image;
 
-    std::optional<Shader> foreignShader;
-    {
-        // Another user of the shared context leaves its own program bound.
-        gfx::BackendScope scope{*frontend.getBackend()};
-        foreignShader.emplace(vertexShaderSource, fragmentShaderSource);
-        MBGL_CHECK_ERROR(glUseProgram(foreignShader->program));
-    }
-
-    const auto actual = frontend.render(map).image;
-    EXPECT_TRUE(expected == actual);
-
+    // Another user of the shared context leaves its own program bound.
     gfx::BackendScope scope{*frontend.getBackend()};
-    foreignShader.reset();
+    Shader foreignShader(vertexShaderSource, fragmentShaderSource);
+    MBGL_CHECK_ERROR(glUseProgram(foreignShader.program));
+
+    EXPECT_TRUE(expected == frontend.render(map).image);
 }
 
 #endif
