@@ -299,7 +299,7 @@ void Texture2DPool::shrink() {
 }
 
 bool Texture2DPool::isPooled(TextureID id) const {
-    return descriptions.find(id) != descriptions.end();
+    return descriptions.contains(id);
 }
 
 bool Texture2DPool::isUsed(TextureID id) const {
@@ -309,7 +309,7 @@ bool Texture2DPool::isUsed(TextureID id) const {
     }
     const auto& desc = desc_it->second;
     const auto& used_set = pool.at(desc).used;
-    return used_set.find(id) != used_set.end();
+    return used_set.contains(id);
 }
 
 bool Texture2DPool::isUnused(TextureID id) const {
@@ -319,7 +319,7 @@ bool Texture2DPool::isUnused(TextureID id) const {
     }
     const auto& desc = desc_it->second;
     const auto& free_set = pool.at(desc).free;
-    return free_set.find(id) != free_set.end();
+    return free_set.contains(id);
 }
 
 size_t Texture2DPool::usedStorage() const {

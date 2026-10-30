@@ -60,7 +60,7 @@ EvaluationResult ImageExpression::evaluate(const EvaluationContext& ctx) const {
         return EvaluationError({"Could not evaluate ID for 'image' expression."});
     }
 
-    bool available = ctx.availableImages && ctx.availableImages->count(*evaluatedImageID);
+    bool available = ctx.availableImages && ctx.availableImages->contains(*evaluatedImageID);
     return Image(*evaluatedImageID, available);
 }
 
