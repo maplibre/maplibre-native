@@ -167,6 +167,85 @@ DrapeMaskCounts drapeMasksOverFrames(int maxFrames) {
     return counts;
 }
 
+// A raster layer over a flat DEM at sea level, seen straight down: draped or not, it must look
+// the same.
+const char* drapedRasterStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/dem/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 9,
+      "tileSize": 256
+    },
+    "quadrants": {
+      "type": "raster",
+      "tiles": ["http://example.com/quadrants/{z}-{x}-{y}.png"],
+      "tileSize": 256
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": [{"id": "quadrants", "type": "raster", "source": "quadrants", "paint": {"raster-fade-duration": 0}}]
+})STYLE";
+
+// Each raster tile is red in its top half and green in its left half, so a draped map that is
+// flipped or mirrored puts the colours in the wrong place.
+std::string makeQuadrantsTile() {
+    PremultipliedImage image({256, 256});
+    for (uint32_t y = 0; y < 256; ++y) {
+        for (uint32_t x = 0; x < 256; ++x) {
+            uint8_t* px = image.data.get() + (y * 256 + x) * 4;
+            px[0] = y < 128 ? 255 : 0;
+            px[1] = x < 128 ? 255 : 0;
+            px[2] = 0;
+            px[3] = 255;
+        }
+    }
+    return encodePNG(image);
+}
+
+std::string makeSeaLevelDEMTile() {
+    PremultipliedImage image({256, 256});
+    for (uint32_t i = 0; i < 256 * 256; ++i) {
+        // Sea level in Terrain-RGB: (0 + 10000) / 0.1 = 100000 = 1 * 65536 + 134 * 256 + 160
+        image.data[i * 4 + 0] = 1;
+        image.data[i * 4 + 1] = 134;
+        image.data[i * 4 + 2] = 160;
+        image.data[i * 4 + 3] = 255;
+    }
+    return encodePNG(image);
+}
+
+PremultipliedImage renderQuadrants(bool terrain) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string demTile = makeSeaLevelDEMTile();
+    const std::string quadrantsTile = makeQuadrantsTile();
+    fileSource->tileResponse = [&](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(resource.url.find("/dem/") != std::string::npos ? demTile
+                                                                                                 : quadrantsTile);
+        return res;
+    };
+    HeadlessFrontend frontend{{256, 256}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.getStyle().loadJSON(drapedRasterStyle);
+    if (!terrain) {
+        map.getStyle().setTerrain(nullptr);
+    }
+    map.jumpTo(CameraOptions().withCenter(LatLng{46.0, 10.0}).withZoom(8.6).withPitch(0.0));
+    PremultipliedImage image;
+    for (int i = 0; i < 4; ++i) {
+        loop.runOnce();
+        image = frontend.render(map).image;
+    }
+    return image;
+}
+
 } // namespace
 
 // With the clamp on (it is off by default), the centre rides the terrain instead of sea level,
@@ -601,6 +680,26 @@ TEST(TerrainDrape, MasksAreDrawnOnlyForTilesOverlappingTheTarget) {
         << counts.drawn << " masks over " << counts.targets << " targets, " << counts.skipped << " skipped";
 }
 
+// Flat terrain at sea level seen straight down covers the map exactly, so the draped frame must
+// match the frame without terrain, colour for colour. On WebGPU the terrain surface drew nothing
+// (its layer group never set the 3D depth and stencil state), and the drape texture was sampled
+// upside down.
+TEST(TerrainDrape, FlatTerrainLooksLikeTheFlatMap) {
+    const auto flat = renderQuadrants(false);
+    const auto draped = renderQuadrants(true);
+    ASSERT_EQ(flat.size, draped.size);
+    const size_t pixels = static_cast<size_t>(flat.size.width) * flat.size.height;
+    size_t same = 0;
+    for (size_t i = 0; i < pixels; ++i) {
+        const bool red = (flat.data[i * 4] > 127) == (draped.data[i * 4] > 127);
+        const bool green = (flat.data[i * 4 + 1] > 127) == (draped.data[i * 4 + 1] > 127);
+        const bool opaque = draped.data[i * 4 + 3] > 127;
+        same += red && green && opaque ? 1 : 0;
+    }
+    // Only pixels on a colour edge may differ.
+    EXPECT_GT(same, pixels * 95 / 100) << same << " of " << pixels << " pixels match";
+}
+
 // The depth pass (the symbol-occlusion depth texture) is a function of the camera and the mesh
 // set. With both unchanged the previous texture still holds, so still frames run no pass.
 // RenderingStats counters accumulate across frames, so the test reads differences.
@@ -624,6 +723,11 @@ TEST(TerrainDepthPass, StillCameraSkipsThePass) {
     }
     ASSERT_EQ(stillFrames, 3) << "the depth pass ran on still frames";
 
-    test.map.jumpTo(CameraOptions().withPitch(61.0));
+    // Tilt one degree less. The maximum pitch defaults to 60 degrees, so asking for 61 clamps back to
+    // 60 and leaves the camera where it was. A small tilt also keeps the tile cover the same, so the
+    // pass can only run because the gate saw the camera move, not because the mesh set changed.
+    const double pitch = test.map.getCameraOptions({}).pitch.value_or(0.0);
+    test.map.jumpTo(CameraOptions().withPitch(pitch - 1.0));
+    ASSERT_NEAR(test.map.getCameraOptions({}).pitch.value_or(0.0), pitch - 1.0, 1e-6) << "the camera did not move";
     EXPECT_GT(depthPassesAfterFrame(), passes) << "a camera move must redraw the depth texture";
 }
