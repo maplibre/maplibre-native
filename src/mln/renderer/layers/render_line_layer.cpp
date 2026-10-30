@@ -184,9 +184,6 @@ void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
     constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
     constexpr bool nearClipped = false;
     constexpr bool aligned = false;
-    constexpr bool is3d = false;
-    constexpr bool enableDepth = true;
-    constexpr std::int32_t subLayerIndex = 1;
     const auto translation = evaluated.get<LineTranslate>();
     const auto translationAnchor = evaluated.get<LineTranslateAnchor>();
     const std::optional<mln::Point<double>> origin = std::nullopt;
@@ -222,13 +219,9 @@ void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
             tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
                                                      state,
                                                      transformParams,
-                                                     layerIndex,
                                                      translation,
                                                      translationAnchor,
                                                      origin,
-                                                     is3d,
-                                                     enableDepth,
-                                                     subLayerIndex,
                                                      nearClipped,
                                                      inViewportPixelUnits,
                                                      aligned);

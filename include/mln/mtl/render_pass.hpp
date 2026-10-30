@@ -2,6 +2,7 @@
 
 #include <mln/gfx/render_pass.hpp>
 #include <mln/mtl/mtl_fwd.hpp>
+#include <mln/util/range.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLCommandEncoder.hpp>
@@ -65,6 +66,8 @@ public:
     void setFrontFacingWinding(const MTL::Winding);
     void setScissorRect(const MTL::ScissorRect);
 
+    void setDepthRange(const Range<float>&);
+
 private:
     void pushDebugGroup(const char* name) override;
     void popDebugGroup() override;
@@ -96,6 +99,7 @@ private:
     MTL::CullMode currentCullMode = MTL::CullModeNone;
     MTL::Winding currentWinding = MTL::WindingClockwise;
     MTL::ScissorRect currentScissorRect;
+    std::optional<Range<float>> currentDepthRange;
 
     size_t width;
     size_t height;

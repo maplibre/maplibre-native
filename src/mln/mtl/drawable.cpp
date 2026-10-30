@@ -250,13 +250,12 @@ void Drawable::draw(PaintParameters& parameters) const {
                 impl->depthStencilState.reset();
             }
         }
+        const auto depthMode = getEnableDepth() ? parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType())
+                                                : gfx::DepthMode::disabled();
         if (!impl->depthStencilState) {
             if (enableStencil && !newStencilMode) {
                 newStencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
             }
-            const auto depthMode = getEnableDepth()
-                                       ? parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType())
-                                       : gfx::DepthMode::disabled();
             const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
                                                    : gfx::StencilMode::disabled();
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
@@ -265,6 +264,9 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
         renderPass.setDepthStencilState(impl->depthStencilState);
         renderPass.setStencilReference(impl->previousStencilMode.ref);
+        renderPass.setDepthRange(depthMode.range);
+    } else {
+        renderPass.setDepthRange(parameters.depthModeFor3D().range);
     }
 
     for (const auto& seg_ : impl->segments) {

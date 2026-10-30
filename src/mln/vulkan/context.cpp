@@ -650,8 +650,10 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     const auto& pipeline = shaderImpl.getPipeline(clipping.pipelineInfo);
 
     commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
-    clipping.pipelineInfo.setScissorRect(
-        {0, 0, clipping.pipelineInfo.viewExtent.width, clipping.pipelineInfo.viewExtent.height});
+    clipping.pipelineInfo.setScissorRect({0,
+                                          0,
+                                          static_cast<uint32_t>(clipping.pipelineInfo.viewport.width),
+                                          static_cast<uint32_t>(clipping.pipelineInfo.viewport.height)});
     clipping.pipelineInfo.setDynamicValues(backend, commandBuffer);
 
     const std::array<vk::Buffer, 1> vertexBuffers = {clipping.vertexBuffer->getVulkanBuffer()};
