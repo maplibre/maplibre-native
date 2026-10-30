@@ -10,6 +10,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <mln/util/accept_header.hpp>
 #include <mln/util/thread.hpp>
 #include <mln/util/url.hpp>
 #include <mln/util/chrono.hpp>
@@ -31,6 +32,11 @@ namespace {
 bool acceptsURL(const std::string &url) {
     return url.starts_with(mln::util::MBTILES_PROTOCOL);
 }
+
+// Older versions of Planetiler wrote this media type for MapLibre Tiles, before renaming it to
+// `mln::http::mltMediaType`. Keep recognizing it for backward compatibility.
+// See https://github.com/onthegomap/planetiler/issues/1549
+constexpr std::string_view legacyMLTMediaType = "application/vnd.maplibre-vector-tile";
 
 std::string url_to_path(const std::string &url) {
     return mln::util::percentDecode(url.substr(std::char_traits<char>::length(mln::util::MBTILES_PROTOCOL)));
@@ -106,7 +112,7 @@ public:
         const std::string format = (format_ptr == values.end()) ? "png" : format_ptr->second;
 
         // Translate MIME type field to source encoding.
-        if (format == "mlt" || format == "application/vnd.maplibre-vector-tile") {
+        if (format == "mlt" || format == http::mltMediaType || format == legacyMLTMediaType) {
             doc.AddMember("encoding", "mlt", allocator);
         }
 
