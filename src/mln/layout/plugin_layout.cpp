@@ -8,6 +8,7 @@
 #include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <limits>
@@ -20,19 +21,202 @@ bool validRange(std::size_t offset, std::size_t length, std::size_t size) {
     return offset <= size && length <= size - offset;
 }
 
+void logFromPlugin(int32_t severity, mln_plugin_string message) {
+    const std::string text = message.data ? std::string(message.data, message.size) : std::string{};
+    if (severity >= 3) {
+        Log::Error(Event::Style, text);
+    } else if (severity == 2) {
+        Log::Warning(Event::Style, text);
+    } else {
+        Log::Info(Event::Style, text);
+    }
+}
+
+const mln_plugin_host_api_v1 hostAPI{sizeof(mln_plugin_host_api_v1), MLN_PLUGIN_ABI_VERSION_1, logFromPlugin};
+
+bool usesResources(const plugin::RegisteredLayer& registration) {
+    return std::any_of(registration.properties.begin(), registration.properties.end(), [](const auto& property) {
+        return property.type == MLN_PLUGIN_VALUE_RESOURCE;
+    });
+}
+
+// Whether the layer lays out the feature: a geometry it accepts, passing its filter.
+bool laysOut(const plugin::RegisteredLayer& registration,
+             const style::PluginStyleLayer::Impl& leader,
+             const GeometryTileFeature& feature,
+             float zoom,
+             const CanonicalTileID& canonical,
+             const GlobalStateMap* globalState) {
+    const auto type = plugin::geometryType(feature.getType());
+    return type != 0 && (registration.geometryTypeMask & type) != 0 &&
+           leader.filter(style::expression::EvaluationContext(zoom, &feature)
+                             .withCanonicalTileID(&canonical)
+                             .withGlobalState(globalState));
+}
+
+// The URL that a RESOURCE value names in the layer's RESOURCES property, or null.
+const std::string* resourceURL(const style::PluginStyleLayer::Impl& leader,
+                               const plugin::PropertyDefinition& definition,
+                               const mln_plugin_value& value) {
+    const auto& name = value.data.resource_value.name;
+    const auto resources = leader.pluginResources.find(definition.resources);
+    if (resources == leader.pluginResources.end() || !name.data) return nullptr;
+    const auto url = resources->second.find(std::string(name.data, name.size));
+    return url == resources->second.end() ? nullptr : &url->second;
+}
+
+// The layout-scope properties in registration order, RESOURCES left out: evaluated once for the tile, and
+// again for each feature where they are data-driven. The C values point into this object, so it stays put.
+class LayoutPropertyValues {
+public:
+    LayoutPropertyValues(const plugin::RegisteredLayer& registration,
+                         const style::PluginStyleLayer::Impl& leader,
+                         float zoom_)
+        : zoom(zoom_) {
+        for (const auto& definition : registration.properties) {
+            if (!definition.layout || definition.type == MLN_PLUGIN_VALUE_RESOURCES) continue;
+            const auto stored = leader.pluginProperties.find(definition.name);
+            definitions.push_back(&definition);
+            values.push_back(stored == leader.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
+                                                                     : stored->second);
+            mln_plugin_property_value_v1 property{};
+            property.struct_size = sizeof(property);
+            property.name = {definition.name.data(), definition.name.size()};
+            property.explicitly_set = stored != leader.pluginProperties.end();
+            tile.push_back(property);
+        }
+        tileStorage.resize(values.size());
+        featureStorage.resize(values.size());
+        for (std::size_t i = 0; i < values.size(); ++i) {
+            tile[i].value = values[i].evaluate(zoom, *definitions[i], tileStorage[i]);
+        }
+        feature = tile;
+    }
+    LayoutPropertyValues(const LayoutPropertyValues&) = delete;
+    LayoutPropertyValues& operator=(const LayoutPropertyValues&) = delete;
+
+    // Updates `feature` for the given feature; values that are not data-driven keep their tile value.
+    void evaluate(const GeometryTileFeature& input) {
+        for (std::size_t i = 0; i < values.size(); ++i) {
+            if (!values[i].isDataDriven()) continue;
+            feature[i].value = values[i].evaluate(zoom, input, noFeatureState, *definitions[i], featureStorage[i]);
+        }
+    }
+
+    std::vector<const plugin::PropertyDefinition*> definitions;
+    std::vector<mln_plugin_property_value_v1> tile;
+    std::vector<mln_plugin_property_value_v1> feature;
+
+private:
+    const float zoom;
+    std::vector<style::PluginPropertyValue> values;
+    std::vector<style::PluginPropertyValue::EvaluationStorage> tileStorage;
+    std::vector<style::PluginPropertyValue::EvaluationStorage> featureStorage;
+    const FeatureState noFeatureState;
+};
+
 } // namespace
 
 PluginLayout::PluginLayout(const BucketParameters& parameters,
                            std::vector<Immutable<style::LayerProperties>> layers_,
                            std::unique_ptr<GeometryTileLayer> sourceLayer_,
-                           plugin::RegisteredLayerPtr registration_)
+                           plugin::RegisteredLayerPtr registration_,
+                           const LayoutParameters* layoutParameters)
     : zoom(parameters.tileID.overscaledZ),
       globalState(parameters.globalState),
       layers(std::move(layers_)),
       sourceLayer(std::move(sourceLayer_)),
-      registration(std::move(registration_)) {}
+      registration(std::move(registration_)) {
+    if (!sourceLayer || layers.empty()) return;
 
-void PluginLayout::createBucket(const ImagePositions&,
+    // The sprite images that IMAGE properties name, so the worker can load them before createBucket.
+    if (layoutParameters) {
+        for (const auto& layer : layers) {
+            const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
+            for (const auto& definition : registration->properties) {
+                if (definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
+                const auto it = impl.pluginProperties.find(definition.name);
+                if (it == impl.pluginProperties.end()) continue;
+                needsImages = true;
+                const auto& value = it->second;
+                style::PluginPropertyValue::EvaluationStorage storage;
+                const auto add = [&](const mln_plugin_value& image) {
+                    if (image.data.string_value.size)
+                        layoutParameters->imageDependencies.emplace(
+                            std::string(image.data.string_value.data, image.data.string_value.size),
+                            ImageType::Pattern);
+                };
+                for (float z : {zoom - 1, zoom, zoom + 1}) {
+                    if (!value.isDataDriven())
+                        add(value.evaluate(z, definition, storage, &layoutParameters->availableImages));
+                    else
+                        for (size_t i = 0; i < sourceLayer->featureCount(); ++i) {
+                            const auto feature = sourceLayer->getFeature(i);
+                            if (feature)
+                                add(value.evaluate(z + (value.isZoomConstant() ? 0 : 1),
+                                                   *feature,
+                                                   {},
+                                                   definition,
+                                                   storage,
+                                                   &layoutParameters->availableImages));
+                        }
+                }
+            }
+        }
+    }
+
+    if (!usesResources(*registration)) return;
+
+    // The resources the tile's features name, so the worker can load them before createBucket.
+    const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
+    LayoutPropertyValues properties(*registration, leader, zoom);
+    for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
+        const auto feature = sourceLayer->getFeature(i);
+        if (!feature ||
+            !laysOut(*registration, leader, *feature, zoom, parameters.tileID.canonical, globalState.get())) {
+            continue;
+        }
+        properties.evaluate(*feature);
+        for (std::size_t p = 0; p < properties.definitions.size(); ++p) {
+            if (properties.definitions[p]->type != MLN_PLUGIN_VALUE_RESOURCE) continue;
+            if (const auto* url = resourceURL(leader, *properties.definitions[p], properties.feature[p].value)) {
+                resourceURLs.insert(*url);
+            }
+        }
+    }
+    if (layoutParameters) layoutParameters->resourceDependencies.insert(resourceURLs.begin(), resourceURLs.end());
+}
+
+void PluginLayout::prepareResources(const LayoutResourceMap& available) {
+    for (const auto& url : resourceURLs) {
+        const auto found = available.find(url);
+        if (found != available.end()) resources.insert_or_assign(url, found->second);
+    }
+}
+
+void* PluginLayout::resourceHandle(const std::string& url) {
+    const auto found = resources.find(url);
+    if (found == resources.end() || !found->second) return nullptr;
+    const auto made = found->second->getOrCreate(
+        registration.get(), [&](const std::string& bytes) -> std::shared_ptr<void> {
+            void* handle = nullptr;
+            const auto status = registration->createResource(&hostAPI,
+                                                             {url.data(), url.size()},
+                                                             reinterpret_cast<const uint8_t*>(bytes.data()),
+                                                             bytes.size(),
+                                                             &handle);
+            if (status != MLN_PLUGIN_STATUS_OK || !handle) {
+                if (handle) registration->destroyResource(handle);
+                Log::Error(Event::Style,
+                           "Plugin layer type '" + registration->type + "' failed to create '" + url + "'");
+                return nullptr;
+            }
+            return std::shared_ptr<void>(handle, registration->destroyResource);
+        });
+    return made.get();
+}
+
+void PluginLayout::createBucket(const ImagePositions& imagePositions,
                                 std::unique_ptr<FeatureIndex>& featureIndex,
                                 mln::unordered_map<std::string, LayerRenderData>& renderData,
                                 bool,
@@ -41,10 +225,14 @@ void PluginLayout::createBucket(const ImagePositions&,
     if (!sourceLayer || layers.empty()) return;
 
     const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
+    LayoutPropertyValues properties(*registration, leader, zoom);
     mln_plugin_layout_context_v1 context{};
     context.struct_size = sizeof(context);
     context.zoom = zoom;
     context.extent = util::EXTENT;
+    context.properties = properties.tile.data();
+    context.property_count = properties.tile.size();
+    context.host = &hostAPI;
 
     void* layoutInstance = nullptr;
     const auto createStatus = registration->createLayout(&context, &layoutInstance);
@@ -55,18 +243,26 @@ void PluginLayout::createBucket(const ImagePositions&,
         return;
     }
 
+    // Handles by URL, so each resource is looked up once per tile.
+    std::map<std::string, void*> handles;
     for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
         auto feature = sourceLayer->getFeature(i);
-        if (!feature) continue;
-        const auto type = plugin::geometryType(feature->getType());
-        if (type == 0 || (registration->geometryTypeMask & type) == 0) continue;
-        if (!leader.filter(style::expression::EvaluationContext(zoom, feature.get())
-                               .withCanonicalTileID(&canonical)
-                               .withGlobalState(globalState.get()))) {
-            continue;
-        }
+        if (!feature || !laysOut(*registration, leader, *feature, zoom, canonical, globalState.get())) continue;
 
-        const plugin::FeatureView pluginFeature(*feature, i);
+        properties.evaluate(*feature);
+        for (std::size_t p = 0; p < properties.definitions.size(); ++p) {
+            if (properties.definitions[p]->type != MLN_PLUGIN_VALUE_RESOURCE) continue;
+            auto& value = properties.feature[p].value;
+            value.data.resource_value.handle = nullptr;
+            if (const auto* url = resourceURL(leader, *properties.definitions[p], value)) {
+                const auto [handle, added] = handles.emplace(*url, nullptr);
+                if (added) handle->second = resourceHandle(*url);
+                value.data.resource_value.handle = handle->second;
+            }
+        }
+        plugin::FeatureView pluginFeature(*feature, i);
+        pluginFeature.value.layout_properties = properties.feature.data();
+        pluginFeature.value.layout_property_count = properties.feature.size();
         if (registration->layoutFeature(layoutInstance, &pluginFeature.value) != MLN_PLUGIN_STATUS_OK) {
             Log::Error(Event::Style, "Plugin layer '" + leader.id + "' failed while laying out a feature");
             return;
@@ -82,6 +278,7 @@ void PluginLayout::createBucket(const ImagePositions&,
     }
 
     auto bucket = std::make_shared<PluginBucket>(registration);
+    const auto positions = std::make_shared<const ImagePositions>(imagePositions);
     std::set<uint32_t> streamIDs;
     bool valid = output.struct_size >= sizeof(output) && std::isfinite(output.query_radius) &&
                  output.query_radius >= 0.0f && (output.vertex_stream_count == 0 || output.vertex_streams) &&
@@ -144,6 +341,8 @@ void PluginLayout::createBucket(const ImagePositions&,
         if (!valid) break;
         std::set<uint32_t> boundAttributeIDs;
         std::optional<std::size_t> drawableVertexCount;
+        std::size_t availableRecords = std::numeric_limits<std::size_t>::max();
+        drawable.instanced = shaderIt->instanced;
         for (size_t bindingIndex = 0; valid && bindingIndex < input.attribute_count; ++bindingIndex) {
             const auto& binding = input.attributes[bindingIndex];
             valid = binding.struct_size >= sizeof(binding);
@@ -160,11 +359,14 @@ void PluginLayout::createBucket(const ImagePositions&,
                     hostAttributeIDs.find(binding.attribute_id) == hostAttributeIDs.end() &&
                     binding.byte_offset <= streamIt->second->getRawSize() &&
                     size <= streamIt->second->getRawSize() - binding.byte_offset &&
+                    binding.element_offset < streamIt->second->getRawCount() &&
                     boundAttributeIDs.emplace(binding.attribute_id).second &&
                     (!drawableVertexCount || *drawableVertexCount == streamIt->second->getRawCount());
             if (valid) {
                 drawableVertexCount = streamIt->second->getRawCount();
-                drawable.attributes.push_back({binding.attribute_id, binding.stream_id, binding.byte_offset, type});
+                availableRecords = std::min(availableRecords, *drawableVertexCount - binding.element_offset);
+                drawable.attributes.push_back(
+                    {binding.attribute_id, binding.stream_id, binding.byte_offset, type, binding.element_offset});
             }
         }
         if (drawableVertexCount) drawable.vertexCount = *drawableVertexCount;
@@ -172,7 +374,13 @@ void PluginLayout::createBucket(const ImagePositions&,
             const auto& segment = input.segments[segmentIndex];
             valid = segment.struct_size >= sizeof(segment) &&
                     validRange(segment.index_offset, segment.index_length, output.index_count) && drawableVertexCount &&
-                    validRange(segment.vertex_offset, segment.vertex_length, *drawableVertexCount);
+                    segment.vertex_length > 0 && segment.vertex_offset <= INT32_MAX &&
+                    segment.vertex_length <= uint32_t(INT32_MAX) - segment.vertex_offset &&
+                    (drawable.instanced
+                         ? segment.instance_count > 0 &&
+                               validRange(segment.first_instance, segment.instance_count, availableRecords)
+                         : segment.first_instance == 0 && segment.instance_count == 0 &&
+                               validRange(segment.vertex_offset, segment.vertex_length, availableRecords));
             if (valid) {
                 for (size_t index = segment.index_offset; index < segment.index_offset + segment.index_length;
                      ++index) {
@@ -183,8 +391,14 @@ void PluginLayout::createBucket(const ImagePositions&,
                 }
             }
             if (valid) {
-                drawable.segments.emplace_back(
-                    segment.vertex_offset, segment.index_offset, segment.vertex_length, segment.index_length);
+                drawable.primitiveVertexCount = std::max(drawable.primitiveVertexCount,
+                                                         size_t(segment.vertex_offset) + segment.vertex_length);
+                drawable.segments.emplace_back(segment.vertex_offset,
+                                               segment.index_offset,
+                                               segment.vertex_length,
+                                               segment.index_length,
+                                               segment.first_instance,
+                                               drawable.instanced ? segment.instance_count : 1);
             }
         }
         if (valid) bucket->drawables.push_back(std::move(drawable));
@@ -240,11 +454,29 @@ void PluginLayout::createBucket(const ImagePositions&,
                                              registration->shaders.end(),
                                              [&](const auto& candidate) { return candidate.id == drawable.shaderID; });
             if (shader == registration->shaders.end() || shader->propertyBindings.empty()) continue;
-            layerBinders.emplace(
-                std::piecewise_construct,
-                std::forward_as_tuple(drawable.key),
-                std::forward_as_tuple(
-                    registration, *shader, drawable.key, drawable.vertexCount, zoom, impl.pluginProperties, features));
+            // Roof and wall drawables can address identical feature records at
+            // different input rates. Share their paint buffers and update once.
+            std::shared_ptr<PluginPaintPropertyBinders> binders;
+            for (const auto& candidate : bucket->drawables) {
+                const auto existing = layerBinders.find(candidate.key);
+                if (existing == layerBinders.end() || candidate.vertexCount != drawable.vertexCount) continue;
+                const auto candidateShader = std::find_if(
+                    registration->shaders.begin(), registration->shaders.end(), [&](const auto& item) {
+                        return item.id == candidate.shaderID;
+                    });
+                if (candidateShader != registration->shaders.end() &&
+                    candidateShader->propertyBindings == shader->propertyBindings &&
+                    features->drawable(candidate.key).ranges == features->drawable(drawable.key).ranges) {
+                    binders = existing->second;
+                    break;
+                }
+            }
+            if (!binders) {
+                binders = std::make_shared<PluginPaintPropertyBinders>(
+                    registration, *shader, drawable.key, drawable.vertexCount, zoom, impl.pluginProperties, features);
+                binders->setPatternPositions(positions);
+            }
+            layerBinders.emplace(drawable.key, std::move(binders));
         }
         bucket->updateQueryRadius(impl.id, impl.pluginProperties, zoom);
     }
