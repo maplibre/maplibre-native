@@ -1027,7 +1027,7 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
         for (size_t x = 0; x < vps; ++x) {
             addVert(x * step, extent, 1);
         }
-        for (uint16_t x = 0; x < gridSize; ++x) {
+        for (size_t x = 0; x < gridSize; ++x) {
             indices.insert(indices.end(),
                            {static_cast<uint16_t>(offsetBottomEdge + x),
                             static_cast<uint16_t>(offsetBottom + x),
@@ -1053,7 +1053,7 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
                 }
             }
         }
-        for (uint16_t y = 0; y < gridSize * 2; y += 2) {
+        for (size_t y = 0; y < gridSize * 2; y += 2) {
             indices.insert(indices.end(),
                            {static_cast<uint16_t>(offsetLeft + y),
                             static_cast<uint16_t>(offsetLeft + y + 1),
