@@ -13,6 +13,7 @@
 #include <mln/renderer/renderer.hpp>
 #include <mln/style/terrain.hpp>
 #include <mln/util/image.hpp>
+#include <mln/util/io.hpp>
 #include <mln/util/projection.hpp>
 #include <mln/util/run_loop.hpp>
 
@@ -390,4 +391,105 @@ TEST(TerrainElevationIndex, SymbolCollisionBoxesSitOnTheTerrain) {
     const RenderedQueryOptions options{std::vector<std::string>{"pin"}};
     EXPECT_EQ(1u, test.frontend.getRenderer()->queryRenderedFeatures(onSurface, options).size());
     EXPECT_EQ(0u, test.frontend.getRenderer()->queryRenderedFeatures(atSeaLevel, options).size());
+}
+
+namespace {
+
+// Two z10 DEM columns either side of a tile edge: 2000 m to the west of it, sea level to the east.
+// The glyph source stops at z10 too, so each symbol tile has exactly one DEM tile of its own.
+constexpr int edgeTileX = 545;
+constexpr double westMeters = 2000.0;
+
+std::string labelAcrossTheEdgeStyle(const LatLng& from, const LatLng& to) {
+    const auto coordinate = [](const LatLng& latLng) {
+        return "[" + std::to_string(latLng.longitude()) + ", " + std::to_string(latLng.latitude()) + "]";
+    };
+    return R"STYLE({
+  "version": 8,
+  "glyphs": "http://example.com/{fontstack}/{range}.pbf",
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 10,
+      "tileSize": 64
+    },
+    "road": {
+      "type": "geojson",
+      "maxzoom": 10,
+      "data": {"type": "Feature", "properties": {}, "geometry": {"type": "LineString", "coordinates": [)STYLE" +
+           coordinate(from) + ", " + coordinate(to) + R"STYLE(]}}
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": [{
+    "id": "label",
+    "type": "symbol",
+    "source": "road",
+    "layout": {
+      "symbol-placement": "line-center",
+      "text-field": "ABCDEFGHIJKLMNOP",
+      "text-font": ["Open Sans Regular"],
+      "text-size": 12
+    }
+  }]
+})STYLE";
+}
+
+} // namespace
+
+// A line label's collision circles run past its tile's edge, and so past the edge of the DEM tile it
+// samples. There they take the neighbouring DEM tile's height rather than the height at the edge
+// they left: with a cliff at the edge, the part of the label past it is found on the low ground it is
+// drawn on.
+TEST(TerrainElevationIndex, LineLabelPastTheTileEdgeSitsOnTheNeighbouringTile) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string high = encodePNG(makeDEMImage(westMeters));
+    const std::string low = encodePNG(makeDEMImage(0.0));
+    fileSource->tileResponse = [&](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(resource.tileData && resource.tileData->x < edgeTileX ? high : low);
+        return res;
+    };
+    fileSource->glyphsResponse = [](const Resource&) {
+        Response res;
+        res.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        return res;
+    };
+    HeadlessFrontend frontend{{512, 512}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(false);
+
+    // The label is centred 25 px west of the edge at z11 and about 120 px long, so its east end
+    // runs well past the edge. The line reaches less far east than west, so the eastern tile's
+    // share of it centres outside that tile and gives it no label of its own.
+    const double edgeLongitude = edgeTileX / 1024.0 * 360.0 - 180.0;
+    const double degreesPerPixel = 360.0 / (512.0 * 2048.0);
+    const double latitude = 47.2692;
+    const LatLng edge{latitude, edgeLongitude};
+    map.getStyle().loadJSON(labelAcrossTheEdgeStyle({latitude, edgeLongitude - 150.0 * degreesPerPixel},
+                                                    {latitude, edgeLongitude + 100.0 * degreesPerPixel}));
+    map.jumpTo(CameraOptions().withCenter(edge).withZoom(11.0).withPitch(60.0));
+    for (int i = 0; i < 6; ++i) {
+        loop.runOnce();
+        frontend.render(map);
+    }
+    ASSERT_TRUE(map.getTerrainElevation(edge));
+
+    // 20 px past the edge, on the sea-level side. Clamped to the edge, this part of the label was
+    // found at the western tile's height instead, 70 px up the screen.
+    const LatLng pastTheEdge{latitude, edgeLongitude + 20.0 * degreesPerPixel};
+    ASSERT_NEAR(0.0, map.getTerrainElevation(pastTheEdge).value_or(-1.0), 1.0);
+    const ScreenCoordinate onSurface = map.pixelForLatLngOnTerrain(pastTheEdge);
+    const ScreenCoordinate atTheWesternHeight = map.pixelForLatLng(pastTheEdge, westMeters);
+    ASSERT_GT(std::hypot(onSurface.x - atTheWesternHeight.x, onSurface.y - atTheWesternHeight.y), 20.0);
+
+    const RenderedQueryOptions options{std::vector<std::string>{"label"}};
+    EXPECT_EQ(1u, frontend.getRenderer()->queryRenderedFeatures(onSurface, options).size());
+    EXPECT_EQ(0u, frontend.getRenderer()->queryRenderedFeatures(atTheWesternHeight, options).size());
 }
