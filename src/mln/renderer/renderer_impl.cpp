@@ -630,8 +630,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // draw layer groups, opaque pass
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            if (!(parameters.terrain && layerGroup.getType() == LayerGroupBase::Type::TileLayerGroup &&
-                  layerGroup.shouldRenderToTerrain())) {
+            if (!parameters.terrain || layerGroup.getType() != LayerGroupBase::Type::TileLayerGroup ||
+                !layerGroup.shouldRenderToTerrain()) {
                 layerGroup.render(orchestrator, parameters);
             }
             parameters.currentLayer++;
@@ -648,8 +648,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // terrain render targets (RenderTarget::renderDrapedLayerGroups)
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            if (!(parameters.terrain && layerGroup.getType() == LayerGroupBase::Type::TileLayerGroup &&
-                  layerGroup.shouldRenderToTerrain())) {
+            if (!parameters.terrain || layerGroup.getType() != LayerGroupBase::Type::TileLayerGroup ||
+                !layerGroup.shouldRenderToTerrain()) {
                 layerGroup.render(orchestrator, parameters);
             }
             if (parameters.currentLayer > 0) {
