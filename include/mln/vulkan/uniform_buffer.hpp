@@ -54,7 +54,9 @@ public:
     }
 
     UniformBufferArray& operator=(const UniformBufferArray& other) {
-        gfx::UniformBufferArray::operator=(other);
+        if (this != &other) {
+            gfx::UniformBufferArray::operator=(other);
+        }
         return *this;
     }
 

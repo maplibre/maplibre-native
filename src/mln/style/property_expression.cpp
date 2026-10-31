@@ -51,16 +51,7 @@ PropertyExpressionBase::PropertyExpressionBase(PropertyExpressionBase&& other)
       isRuntimeConstant_(other.isRuntimeConstant_),
       isGPUCapable_(other.isGPUCapable_) {}
 
-PropertyExpressionBase::PropertyExpressionBase(const PropertyExpressionBase& other)
-    : expression(other.expression),
-      capturedGlobalState(other.capturedGlobalState),
-      globalStateRefs(other.globalStateRefs),
-      zoomCurve(other.zoomCurve),
-      useIntegerZoom_(other.useIntegerZoom_),
-      isZoomConstant_(other.isZoomConstant_),
-      isFeatureConstant_(other.isFeatureConstant_),
-      isRuntimeConstant_(other.isRuntimeConstant_),
-      isGPUCapable_(other.isGPUCapable_) {}
+PropertyExpressionBase::PropertyExpressionBase(const PropertyExpressionBase& other) = default;
 
 PropertyExpressionBase& PropertyExpressionBase::operator=(PropertyExpressionBase&& other) {
     expression = std::move(other.expression);
@@ -75,18 +66,7 @@ PropertyExpressionBase& PropertyExpressionBase::operator=(PropertyExpressionBase
     return *this;
 }
 
-PropertyExpressionBase& PropertyExpressionBase::operator=(const PropertyExpressionBase& other) {
-    expression = other.expression;
-    capturedGlobalState = other.capturedGlobalState;
-    globalStateRefs = other.globalStateRefs;
-    zoomCurve = other.zoomCurve;
-    useIntegerZoom_ = other.useIntegerZoom_;
-    isZoomConstant_ = other.isZoomConstant_;
-    isFeatureConstant_ = other.isFeatureConstant_;
-    isRuntimeConstant_ = other.isRuntimeConstant_;
-    isGPUCapable_ = other.isGPUCapable_;
-    return *this;
-}
+PropertyExpressionBase& PropertyExpressionBase::operator=(const PropertyExpressionBase& other) = default;
 
 gfx::UniqueGPUExpression PropertyExpressionBase::getGPUExpression(bool intZoom) const {
     return isGPUCapable_ ? gfx::GPUExpression::create(*expression, zoomCurve, useIntegerZoom_ || intZoom)

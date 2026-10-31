@@ -56,7 +56,7 @@ Drawable::Drawable(std::string name_)
     : gfx::Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
 
-Drawable::~Drawable() {}
+Drawable::~Drawable() = default;
 
 void Drawable::setEnableColor(bool value) {
     gfx::Drawable::setEnableColor(value);
@@ -310,7 +310,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         uint32_t uboIndex;
         float pad[3];
         std::array<float, 4> drapeTile;
-    } pushData{uboIndex, {0, 0, 0}, parameters.currentDrapeTile};
+    } pushData{.uboIndex = uboIndex, .pad = {0, 0, 0}, .drapeTile = parameters.currentDrapeTile};
     static_assert(sizeof(pushData) == 32);
     commandBuffer->pushConstants(
         context.getGeneralPipelineLayout().get(),
