@@ -107,7 +107,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
             auto& resource = static_cast<VertexBufferResource&>(*rawData->resource);
 
             if (rawBufSize <= resource.getSizeInBytes()) {
-                if (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated())) {
+                if (vec->hasRawData() && (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated()))) {
                     updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
                     resource.setLastUpdated(vec->getLastModified());
                 }

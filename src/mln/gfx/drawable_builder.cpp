@@ -211,7 +211,8 @@ void DrawableBuilder::setSegments(const gfx::DrawMode mode,
         const auto vertexCount = curVertexCount();
         assert(!vertexCount || seg.vertexOffset + seg.vertexLength <= curVertexCount());
         assert(seg.indexOffset + seg.indexLength <= impl->sharedIndexes->elements());
-        if (vertexCount) {
+        // The CPU copy of a released index vector is freed once it is uploaded.
+        if (vertexCount && seg.indexOffset + seg.indexLength <= impl->sharedIndexes->vector().size()) {
             for (decltype(seg.indexLength) j = 0; j < seg.indexLength; ++j) {
                 assert(impl->sharedIndexes->vector()[seg.indexOffset + j] < vertexCount);
             }

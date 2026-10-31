@@ -92,6 +92,21 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
 
 void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     uploaded = true;
+    // Layout is final: once these are in GPU buffers the CPU copies are dropped, unless the map
+    // reads them back to report rendered features.
+    if (retainFeaturesById) {
+        return;
+    }
+    sharedVertices->release();
+    sharedTriangles->release();
+    sharedBasicLineIndexes->release();
+#if MLN_TRIANGULATE_FILL_OUTLINES
+    sharedLineVertices->release();
+    sharedLineIndexes->release();
+#endif
+    for (auto& pair : paintPropertyBinders) {
+        pair.second.release();
+    }
 }
 
 bool FillBucket::hasData() const {
