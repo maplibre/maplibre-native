@@ -33,8 +33,8 @@ public:
 
     int32_t generateUniqueId(const std::string& imageId, Size size) const;
 
-    void uploadIcon(const Immutable<style::Image::Impl>& glyph, TextureHandle& texHandle);
-    void uploadPattern(const Immutable<style::Image::Impl>& glyph, TextureHandle& texHandle);
+    void uploadIcon(const Immutable<style::Image::Impl>& icon, TextureHandle& texHandle);
+    void uploadPattern(const Immutable<style::Image::Impl>& pattern, TextureHandle& texHandle);
 };
 
 class DynamicTextureAtlas {
