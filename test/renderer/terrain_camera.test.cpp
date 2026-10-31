@@ -263,6 +263,27 @@ TEST(TerrainCamera, CentreRidesTheTerrainSurface) {
     EXPECT_NEAR(settled, plateauMeters, 5.0);
 }
 
+// A camera placed by its altitude above sea level over high ground starts inside the ground. The
+// tile cover then found every tile above the camera and asked for none, the DEM that would lift the
+// camera onto the ground included, so the clamp never learned of the ground and the camera stayed
+// under it. The cover falls back to the flat footprint, the DEM stays, and the clamp lifts the camera.
+TEST(TerrainCamera, ACameraStartingInsideTheGroundIsLiftedOntoIt) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(true);
+    // Opened at sea-level altitude over the 1,000 m plateau, close in: the eye is a few hundred
+    // meters up, under the ground.
+    test.map.jumpTo(CameraOptions().withZoom(15.0).withPitch(60.0));
+    const auto eyeMeters = [&] {
+        const double mercatorToMeters = util::M2PI * util::EARTH_RADIUS_M * std::cos(util::deg2rad(47.2692));
+        return test.eye()[2] * mercatorToMeters;
+    };
+    ASSERT_LT(eyeMeters(), plateauMeters) << "the camera starts inside the ground";
+
+    test.renderAndGetAltitude(20);
+    EXPECT_NEAR(*test.map.getCameraOptions({}).centerAltitude, plateauMeters, 5.0);
+    EXPECT_GT(eyeMeters(), plateauMeters) << "the camera is above the ground";
+}
+
 // The historical worry about a terrain-anchored centre was that raising it re-samples a new
 // elevation and runs away. Raising the centre moves the orbit plane, not the centre's lng/lat,
 // so it must settle - and the centre must not drift while it does.

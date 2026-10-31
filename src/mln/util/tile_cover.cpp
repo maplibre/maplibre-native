@@ -403,6 +403,18 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         ids.push_back(tile.id);
     }
 
+    // A camera inside the ground has every tile above it: the terrain around the center is higher
+    // than the eye, so the elevated boxes all lie behind the view and the cover comes back empty.
+    // That is what a camera placed by sea-level altitude over high ground meets on entering
+    // terrain, and an empty cover asks for no tiles at all, the elevation tiles that would lift
+    // the camera onto the ground included: the map stayed blank until the view was moved by hand.
+    // Fall back to the flat footprint, as the first frame does before any elevation is known.
+    if (ids.empty() && state.elevationProvider) {
+        TileCoverParameters flat = state;
+        flat.elevationProvider = nullptr;
+        return tileCover(flat, z, zoomRange, overscaledZ);
+    }
+
     return ids;
 }
 

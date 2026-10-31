@@ -746,6 +746,39 @@ int uncoveredBottomPoints(const TransformState& state, const std::vector<Unwrapp
 
 } // namespace
 
+// A camera placed by sea-level altitude over high ground starts inside the ground: all the terrain
+// around the center is higher than the eye, so none of it is in view and the elevated cover is
+// empty. An empty cover requests nothing, the elevation tiles that would lift the camera included,
+// so the map stayed blank until the view was moved. The cover falls back to the flat footprint,
+// which is what the first frame, before any elevation is known, covers.
+TEST(TileCover, CameraInsideTheGroundStillCoversTheFootprint) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.jumpTo(CameraOptions().withCenter(LatLng{50.7, 15.0}).withZoom(12.0).withPitch(58.0));
+    const TransformState& state = transform.getState();
+
+    const double metersPerPixel = Projection::getMetersPerPixelAtLatitude(50.7, 12.0);
+    const double cameraHeight = state.getCameraToCenterDistance() * metersPerPixel * std::cos(state.getPitch());
+
+    const auto flat = util::tileCover({.transformState = state}, 12, Range<uint8_t>{0, 12}, std::optional<uint8_t>{12});
+    ASSERT_FALSE(flat.empty());
+
+    const PlateauElevation aboveTheCamera(cameraHeight * 2.0);
+    const auto inside = util::tileCover({.transformState = state, .elevationProvider = &aboveTheCamera},
+                                        12,
+                                        Range<uint8_t>{0, 12},
+                                        std::optional<uint8_t>{12});
+    EXPECT_EQ(inside, flat) << "the footprint is covered while the camera is inside the ground";
+
+    // Ground below the camera is not affected: it still takes the elevated cover.
+    const PlateauElevation belowTheCamera(cameraHeight * 0.5);
+    EXPECT_FALSE(util::tileCover({.transformState = state, .elevationProvider = &belowTheCamera},
+                                 12,
+                                 Range<uint8_t>{0, 12},
+                                 std::optional<uint8_t>{12})
+                     .empty());
+}
+
 // Steeply pitched over high ground with the centre anchored on it (as terrain gestures leave it),
 // the elevation-aware cover must still contain the ground at the bottom of the view; on an iPhone
 // it did not, and the near field drew the map background with skirts hanging into it.
