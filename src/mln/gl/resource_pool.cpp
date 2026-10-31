@@ -145,16 +145,16 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
     // Bind to TU 0 and upload
     context->activeTextureUnit = 0;
     context->texture[0] = id;
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::sizedFor(desc.pixelFormat, desc.channelType),
-                                  desc.size.width,
-                                  desc.size.height,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::to(desc.pixelFormat),
-                                  Enum<gfx::TextureChannelDataType>::to(desc.channelType),
-                                  nullptr));
-    if (glGetError()) {
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 Enum<gfx::TexturePixelType>::sizedFor(desc.pixelFormat, desc.channelType),
+                 desc.size.width,
+                 desc.size.height,
+                 0,
+                 Enum<gfx::TexturePixelType>::to(desc.pixelFormat),
+                 Enum<gfx::TextureChannelDataType>::to(desc.channelType),
+                 nullptr);
+    if (hadOutOfMemoryError()) {
         throw std::bad_alloc();
     }
 
