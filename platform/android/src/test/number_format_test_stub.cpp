@@ -6,8 +6,8 @@ namespace platform {
 std::string formatNumber(double /*number*/,
                          const std::string& /*localeId */,
                          const std::string& /*currency*/,
-                         uint8_t /*minFractionDigits*/,
-                         uint8_t /*maxFractionDigits*/
+                         std::optional<uint8_t> /*minFractionDigits*/,
+                         std::optional<uint8_t> /*maxFractionDigits*/
 ) {
     return "";
 }
