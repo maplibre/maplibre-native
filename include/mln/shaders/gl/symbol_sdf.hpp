@@ -205,13 +205,6 @@ lowp float halo_blur = u_halo_blur;
 )";
     static constexpr const char* fragment = R"(#define SDF_PX 8.0
 
-layout (std140) uniform SymbolTilePropsUBO {
-    bool u_is_text;
-    bool u_is_halo;
-    highp float u_gamma_scale;
-    lowp float tileprops_pad1;
-};
-
 layout (std140) uniform SymbolEvaluatedPropsUBO {
     highp vec4 u_text_fill_color;
     highp vec4 u_text_halo_color;
@@ -225,6 +218,13 @@ layout (std140) uniform SymbolEvaluatedPropsUBO {
     highp float u_icon_halo_width;
     highp float u_icon_halo_blur;
     lowp float props_pad2;
+};
+
+layout (std140) uniform SymbolTilePropsUBO {
+    bool u_is_text;
+    bool u_is_halo;
+    highp float u_gamma_scale;
+    lowp float tileprops_pad1;
 };
 
 uniform sampler2D u_texture;
