@@ -59,6 +59,7 @@ We welcome ideas for extending the plugin API.
 
 ### Bug fixes
 
+- `raster` and `raster-dem` sources loaded from a `url` take the style's inline `minzoom` and `maxzoom` over the TileJSON's, as `vector` sources and maplibre-gl-js already do. A `raster-dem` source with an invalid `encoding`, `minzoom` or `maxzoom`, or a `raster` source with an invalid `minzoom` or `maxzoom`, is now rejected with an error, as a `vector` source is. Before, such a `raster-dem` source still loaded, decoded as Mapbox whatever its `encoding` ([#4557](https://github.com/maplibre/maplibre-native/pull/4557)).
 - Size `line-pattern` images like MapLibre GL JS. They were drawn about 1.7× bigger and stretched along the line ([#4726](https://github.com/maplibre/maplibre-native/pull/4726)).
 - Load `raster-dem` tiles at the rounded zoom level, like raster sources and MapLibre GL JS ([#4650](https://github.com/maplibre/maplibre-native/pull/4650)).
 - Fix `line-gradient` being drawn as `line-color` when combined with `line-dasharray` ([#4725](https://github.com/maplibre/maplibre-native/pull/4725)).

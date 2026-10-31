@@ -10,6 +10,10 @@ namespace style {
 struct SourceOptions {
     std::optional<Tileset::RasterEncoding> rasterEncoding = std::nullopt;
     std::optional<Tileset::VectorEncoding> vectorEncoding = std::nullopt;
+    // The style's inline zoom range, which wins over a fetched TileJSON's, as in maplibre-gl-js:
+    // https://github.com/maplibre/maplibre-gl-js/blob/32e555b2c114d6b60da4acd824d272182c656bbe/src/source/load_tilejson.ts#L39
+    std::optional<uint8_t> minzoom = std::nullopt;
+    std::optional<uint8_t> maxzoom = std::nullopt;
 };
 
 // NOTE: Any derived class must invalidate `weakFactory` in the destructor
