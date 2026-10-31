@@ -10,9 +10,11 @@
 #include <mln/text/glyph.hpp>
 #include <mln/util/chrono.hpp>
 #include <mln/util/feature.hpp>
+#include <mln/util/geo.hpp>
 #include <mln/util/immutable.hpp>
 
 #include <numbers>
+#include <optional>
 #include <vector>
 
 #include <mapbox/std/weak.hpp>
@@ -69,6 +71,9 @@ public:
     // (ABOVE-GROUND ...). Off by default; the per-frame elevation sampling is skipped entirely
     // when off, so it has no cost unless explicitly enabled (Map::setDebugAboveGroundLog).
     bool debugAboveGroundLog = false;
+    // The center a running camera animation is headed for (Transform::getTransitionTargetCenter):
+    // the renderer reports the ground there so the map can ease the center's height to it.
+    std::optional<LatLng> transitionTargetCenter;
 };
 
 } // namespace mln
