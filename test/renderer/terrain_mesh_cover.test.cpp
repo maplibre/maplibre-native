@@ -3,11 +3,14 @@
 #include <mln/map/camera.hpp>
 #include <mln/map/transform.hpp>
 #include <mln/renderer/render_terrain.hpp>
+#include <mln/util/tile_cover.hpp>
 #include <mln/tile/tile_id.hpp>
 #include <mln/util/constants.hpp>
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <limits>
 #include <set>
 
 using namespace mln;
@@ -278,4 +281,75 @@ TEST(TerrainMeshCover, TilesPastTheDEMMapOntoTheirSubSquareOfTheAncestor) {
             }
         }
     }
+}
+
+namespace {
+
+// Elevation a flat plateau `meters` up, for a cover that is tested against terrain.
+struct Plateau final : util::TileElevationProvider {
+    explicit Plateau(double meters_)
+        : meters(meters_) {}
+    std::optional<Range<double>> getTileElevationRange(const CanonicalTileID&) const override {
+        return Range<double>{meters, meters};
+    }
+    double meters;
+};
+
+// The zoom of the cover tile whose centre lies nearest `origin` (normalized web-mercator).
+int zoomOfTileNearest(const std::vector<OverscaledTileID>& cover, const std::array<double, 2>& origin) {
+    int zoom = -1;
+    double nearest = std::numeric_limits<double>::max();
+    for (const auto& id : cover) {
+        const double scale = std::exp2(id.canonical.z);
+        const double distance = std::hypot((id.canonical.x + 0.5) / scale - origin[0],
+                                           (id.canonical.y + 0.5) / scale - origin[1]);
+        if (distance < nearest) {
+            nearest = distance;
+            zoom = id.canonical.z;
+        }
+    }
+    return zoom;
+}
+
+} // namespace
+
+TEST(TerrainMeshCover, TheTilesUnderATiltedCameraKeepTheFinestZoom) {
+    // A phone-sized view over a plateau 2800 m up, tilted to 80 degrees. The ground at the bottom of
+    // the screen is the biggest on it, and the level of detail has to keep it at the zoom asked for.
+    // Measured from where the centre ray meets sea level, tens of tiles past the plateau, it left the
+    // tile nearest the camera four levels coarser (z12 at z16 asked for), which the mesh then draped
+    // from 16 times fewer texels.
+    Transform transform;
+    transform.resize({402, 874});
+    transform.setMaxPitch(85.0);
+    transform.jumpTo(
+        CameraOptions().withCenter(LatLng{38.684, -120.091}).withZoom(15.0).withPitch(80.0).withCenterAltitude(2800.0));
+    const Plateau plateau(2800.0);
+    const std::array<double, 2> underTheCamera = RenderTerrain::meshTileCapOrigin(transform.getState());
+
+    util::TileCoverParameters parameters{.transformState = transform.getState(), .elevationProvider = &plateau};
+    parameters.tileLodOrigin = underTheCamera;
+    const auto cover = util::tileCover(parameters, 16, Range<uint8_t>{0, 16}, uint8_t(16));
+    EXPECT_EQ(16, zoomOfTileNearest(cover, underTheCamera));
+}
+
+TEST(TerrainMeshCover, DilationSkipsNeighboursOverTilesTheCoverHas) {
+    // A z2 tile with a z3 tile beside it, to its east: the z2 tile's east neighbour is the z2 tile
+    // over the z3 one, and the z3 tile's west neighbours are inside the z2 tile. None of them is
+    // new ground; each would be a second surface over ground that has one.
+    const UnwrappedTileID coarse(0, CanonicalTileID(2, 1, 1));
+    const UnwrappedTileID fine(0, CanonicalTileID(3, 4, 2));
+    const std::set<UnwrappedTileID> dilated = RenderTerrain::dilateCover({coarse, fine});
+
+    for (const auto& a : dilated) {
+        for (const auto& b : dilated) {
+            EXPECT_FALSE(a != b && (a.isChildOf(b) || b.isChildOf(a)))
+                << "z" << int(a.canonical.z) << "/" << a.canonical.x << "/" << a.canonical.y << " and z"
+                << int(b.canonical.z) << "/" << b.canonical.x << "/" << b.canonical.y << " overlap";
+        }
+    }
+    // The ground the cover leaves out is still taken: the z2 tile to the north of the coarse one.
+    EXPECT_TRUE(dilated.contains(UnwrappedTileID(0, CanonicalTileID(2, 1, 0))));
+    EXPECT_TRUE(dilated.contains(coarse));
+    EXPECT_TRUE(dilated.contains(fine));
 }

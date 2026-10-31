@@ -128,15 +128,7 @@ BufferResource::BufferResource(BufferResource&& other) noexcept
     other.bufferAllocation = nullptr;
 }
 
-BufferResource::BufferResource(const BufferResource& other) noexcept
-    : context(other.context),
-      size(other.size),
-      usage(other.usage),
-      version(other.version),
-      persistent(other.persistent),
-      bufferAllocation(other.bufferAllocation),
-      bufferWindowSize(other.bufferWindowSize),
-      bufferWindowVersions(other.bufferWindowVersions) {}
+BufferResource::BufferResource(const BufferResource& other) noexcept = default;
 
 BufferResource::~BufferResource() noexcept {
     destroy(true);

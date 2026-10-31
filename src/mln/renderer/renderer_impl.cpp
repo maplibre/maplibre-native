@@ -751,6 +751,17 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             lastReportedCenterElevation = centerElevation;
             observer->onTerrainCenterElevationChanged(centerElevation);
         }
+        // And under the eye: a camera dragged towards a slope rising in front of it ends up under
+        // the ground (the steeper the pitch, the less it sits above the center), and the map
+        // lifts it out when it knows the height there.
+        if (const auto eye = updateParameters->transformState.getFreeCameraOptions().getLocation()) {
+            const double eyeElevation = terrain->getElevationForLatLng(eye->location);
+            if (!std::isnan(eyeElevation) &&
+                (std::isnan(lastReportedEyeElevation) || std::abs(eyeElevation - lastReportedEyeElevation) > 0.25)) {
+                lastReportedEyeElevation = eyeElevation;
+                observer->onTerrainEyeElevationChanged(eyeElevation);
+            }
+        }
     }
 
     auto stats = std::make_shared<gfx::RenderingStats>(context.threadSafeCopyRenderingStats());

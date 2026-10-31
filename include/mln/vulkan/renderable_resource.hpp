@@ -85,7 +85,7 @@ public:
     uint32_t getImageCount() const { return static_cast<uint32_t>(swapchainFramebuffers.size()); };
     uint32_t getAcquiredImageIndex() const { return acquiredImageIndex; };
     void setAcquiredImageIndex(uint32_t index) { acquiredImageIndex = index; };
-    const vk::Image getAcquiredImage() const;
+    vk::Image getAcquiredImage() const;
     const vk::Semaphore& getAcquireSemaphore() const;
     const vk::Semaphore& getPresentSemaphore() const;
 
