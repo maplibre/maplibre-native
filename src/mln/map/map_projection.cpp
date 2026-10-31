@@ -15,9 +15,7 @@ MapProjection::~MapProjection() = default;
 
 ScreenCoordinate MapProjection::pixelForLatLng(const LatLng& latLng) const {
     // The implementation is just a copy from map.cpp
-    LatLng unwrappedLatLng = latLng.wrapped();
-    unwrappedLatLng.unwrapForShortestPath(transform->getLatLng());
-    return transform->latLngToScreenCoordinate(unwrappedLatLng);
+    return transform->latLngToScreenCoordinate(transform->getState().latLngNearCenter(latLng));
 }
 
 LatLng MapProjection::latLngForPixel(const ScreenCoordinate& pixel, LatLng::WrapMode wrapMode) const {
