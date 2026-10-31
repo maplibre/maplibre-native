@@ -1,8 +1,8 @@
 import MapLibre
 import XCTest
 
-/// Tests that ``MLNSource/isVolatile`` reaches the core source. That volatile
-/// tiles stay out of the ambient cache is tested in the core.
+/// Tests that ``MLNSource/isVolatile`` defaults to `false` and keeps its value
+/// when the source is added to and removed from the style.
 class MLNSourceVolatileTests: XCTestCase, MLNMapViewDelegate {
     var mapView: MLNMapView!
     var styleLoadingExpectation: XCTestExpectation?
