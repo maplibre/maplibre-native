@@ -49,14 +49,14 @@ void RendererBackend::assumeFramebufferBinding(const gl::FramebufferID fbo) {
 void RendererBackend::assumeViewport(int32_t x, int32_t y, const Size& size) {
     MLN_TRACE_FUNC();
 
-    getContext<gl::Context>().viewport.setCurrentValue({x, y, size});
+    getContext<gl::Context>().viewport.setCurrentValue({.x = x, .y = y, .size = size});
     assert(gl::value::Viewport::Get() == getContext<gl::Context>().viewport.getCurrentValue());
 }
 
 void RendererBackend::assumeScissorTest(int32_t x, int32_t y, uint32_t width, uint32_t height) {
     MLN_TRACE_FUNC();
 
-    getContext<gl::Context>().scissorTest.setCurrentValue({x, y, width, height});
+    getContext<gl::Context>().scissorTest.setCurrentValue({.x = x, .y = y, .width = width, .height = height});
     assert(gl::value::ScissorTest::Get() == getContext<gl::Context>().scissorTest.getCurrentValue());
 }
 
@@ -78,14 +78,14 @@ void RendererBackend::setFramebufferBinding(const gl::FramebufferID fbo) {
 void RendererBackend::setViewport(int32_t x, int32_t y, const Size& size) {
     MLN_TRACE_FUNC();
 
-    getContext<gl::Context>().viewport = {x, y, size};
+    getContext<gl::Context>().viewport = {.x = x, .y = y, .size = size};
     assert(gl::value::Viewport::Get() == getContext<gl::Context>().viewport.getCurrentValue());
 }
 
 void RendererBackend::setScissorTest(int32_t x, int32_t y, uint32_t width, uint32_t height) {
     MLN_TRACE_FUNC();
 
-    getContext<gl::Context>().scissorTest = {x, y, width, height};
+    getContext<gl::Context>().scissorTest = {.x = x, .y = y, .width = width, .height = height};
     assert(gl::value::ScissorTest::Get() == getContext<gl::Context>().scissorTest.getCurrentValue());
 }
 
@@ -106,7 +106,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     /// failure, we shouldn't expect registration to fail unless the shader
     /// registry instance provided already has conflicting programs present.
     (
-        [&]() {
+        [&] {
             const auto name = std::string(shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::name);
             if (!registry.registerShaderGroup(std::make_shared<ShaderGroupGL<ShaderID>>(programParameters), name)) {
                 throw std::runtime_error("Failed to register " + name + " with shader registry!");

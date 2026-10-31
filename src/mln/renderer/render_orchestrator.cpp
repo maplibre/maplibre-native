@@ -399,7 +399,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         evaluationParameters.hasCrossfade = layer.hasCrossfade();
 
         // Only re-evaluate on change of zoom if the style has some reference to it
-        using Dependency = expression::Dependency;
+        using expression::Dependency;
         const bool zoomChangedAndMatters = zoomChanged && !layerAddedOrChanged &&
                                            (layer.getStyleDependencies() & Dependency::Zoom);
 
@@ -1131,10 +1131,12 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
 
             // don't use insert to eliminate the double-lookup because it doesn't
             // guarantee that the source isn't moved when the item is not inserted.
-            if (const auto hit = allFeatures.find({sourceId, layerId}); hit != allFeatures.end()) {
+            if (const auto hit = allFeatures.find({.sourceID = sourceId, .layerID = layerId});
+                hit != allFeatures.end()) {
                 RenderLayer::Stats::merge(hit->second, renderLayer.stats.renderedFeatures);
             } else {
-                allFeatures.insert({{sourceId, layerId}, std::move(renderLayer.stats.renderedFeatures)});
+                allFeatures.insert(
+                    {{.sourceID = sourceId, .layerID = layerId}, std::move(renderLayer.stats.renderedFeatures)});
             }
             renderLayer.stats.renderedFeatures.clear();
         }

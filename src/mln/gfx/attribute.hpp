@@ -211,9 +211,6 @@ struct Descriptor<VertexType<A1>> {
                                                     }};
 };
 
-template <class A1>
-constexpr const VertexDescriptor Descriptor<VertexType<A1>>::data;
-
 template <class A1, class A2>
 struct Descriptor<VertexType<A1, A2>> {
     using Type = VertexType<A1, A2>;
@@ -226,9 +223,6 @@ struct Descriptor<VertexType<A1, A2>> {
                                                         {A2::DataType, offsetof(Type, a2)},
                                                     }};
 };
-
-template <class A1, class A2>
-constexpr const VertexDescriptor Descriptor<VertexType<A1, A2>>::data;
 
 template <class A1, class A2, class A3>
 struct Descriptor<VertexType<A1, A2, A3>> {
@@ -243,9 +237,6 @@ struct Descriptor<VertexType<A1, A2, A3>> {
                                                         {A3::DataType, offsetof(Type, a3)},
                                                     }};
 };
-
-template <class A1, class A2, class A3>
-constexpr const VertexDescriptor Descriptor<VertexType<A1, A2, A3>>::data;
 
 template <class A1, class A2, class A3, class A4>
 struct Descriptor<VertexType<A1, A2, A3, A4>> {
@@ -262,9 +253,6 @@ struct Descriptor<VertexType<A1, A2, A3, A4>> {
                                                     }};
 };
 
-template <class A1, class A2, class A3, class A4>
-constexpr const VertexDescriptor Descriptor<VertexType<A1, A2, A3, A4>>::data;
-
 template <class A1, class A2, class A3, class A4, class A5>
 struct Descriptor<VertexType<A1, A2, A3, A4, A5>> {
     using Type = VertexType<A1, A2, A3, A4, A5>;
@@ -280,9 +268,6 @@ struct Descriptor<VertexType<A1, A2, A3, A4, A5>> {
                                                         {A5::DataType, offsetof(Type, a5)},
                                                     }};
 };
-
-template <class A1, class A2, class A3, class A4, class A5>
-constexpr const VertexDescriptor Descriptor<VertexType<A1, A2, A3, A4, A5>>::data;
 
 template <class>
 struct Vertex;

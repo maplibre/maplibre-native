@@ -41,7 +41,7 @@ public:
 
     mln::Value serialize() const;
 
-    bool empty() const { return anchorOffsets.size() == 0; }
+    bool empty() const { return anchorOffsets.empty(); }
 
     CollectionType::size_type size() const { return anchorOffsets.size(); }
 
