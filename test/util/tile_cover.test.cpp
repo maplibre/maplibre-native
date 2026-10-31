@@ -728,3 +728,42 @@ TEST(TileCover, ElevatedCentreCoversTheGroundAtTheBottomOfTheView) {
         }
     }
 }
+
+TEST(TileCover, KeepNearestTilesKeepsThoseNearestTheOrigin) {
+    // z3 row 4: columns 0..7 run west to east; the origin sits on column 2.
+    std::vector<OverscaledTileID> tiles;
+    for (uint32_t x = 0; x < 8; ++x) tiles.emplace_back(3, x, 4);
+    const std::array<double, 2> origin{{(2 + 0.5) / 8.0, (4 + 0.5) / 8.0}};
+
+    util::keepNearestTiles(tiles, 3, origin);
+
+    ASSERT_EQ(tiles.size(), 3u);
+    EXPECT_EQ(tiles[0], OverscaledTileID(3, 2, 4));
+    // Columns 1 and 3 tie on distance; the lower ID comes first.
+    EXPECT_EQ(tiles[1], OverscaledTileID(3, 1, 4));
+    EXPECT_EQ(tiles[2], OverscaledTileID(3, 3, 4));
+}
+
+TEST(TileCover, KeepNearestTilesLeavesSmallAndUnlimitedCoversAlone) {
+    std::vector<OverscaledTileID> tiles{{3, 0, 4}, {3, 7, 4}};
+    const std::array<double, 2> origin{{0.5, 0.5}};
+
+    util::keepNearestTiles(tiles, 2, origin);
+    ASSERT_EQ(tiles.size(), 2u);
+    EXPECT_EQ(tiles[0], OverscaledTileID(3, 0, 4));
+
+    util::keepNearestTiles(tiles, 0, origin);
+    EXPECT_EQ(tiles.size(), 2u);
+}
+
+TEST(TileCover, KeepNearestTilesMeasuresAcrossZoomsAndWraps) {
+    // A z1 tile centred at x=0.75 and a wrapped z2 copy of the origin's own tile: the wrapped
+    // copy is a world away, so the z1 tile wins despite its coarser zoom.
+    std::vector<OverscaledTileID> tiles{OverscaledTileID(2, 1, {2, 0, 0}), OverscaledTileID(1, 0, {1, 1, 0})};
+    const std::array<double, 2> origin{{0.125, 0.125}};
+
+    util::keepNearestTiles(tiles, 1, origin);
+
+    ASSERT_EQ(tiles.size(), 1u);
+    EXPECT_EQ(tiles[0], OverscaledTileID(1, 0, {1, 1, 0}));
+}
