@@ -2,6 +2,7 @@
 
 #include <mln/map/mode.hpp>
 #include <mln/tile/tile_id.hpp>
+#include <mln/map/projection_base.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/style/image_impl.hpp>
 #include <mln/style/layer_impl.hpp>
@@ -39,6 +40,8 @@ public:
     RenderTile& operator=(const RenderTile&) = delete;
 
     UnwrappedTileID id;
+    /// The projection contract for this tile; `matrix` is its main matrix.
+    ProjectionData projection;
     mat4 matrix;
     mat4 nearClippedMatrix;
     // Contains the tile ID string for painting debug information.
@@ -65,6 +68,12 @@ public:
 
     void upload(gfx::UploadPass&) const;
     void prepare(const SourcePrepareParameters&);
+
+    /// The layer's translation in tile units, rotated for its anchor.
+    static std::array<float, 2> tileUnitTranslation(const UnwrappedTileID& id,
+                                                    const std::array<float, 2>& translation,
+                                                    style::TranslateAnchorType anchor,
+                                                    const TransformState& state);
 
     static mat4 translateVtxMatrix(const UnwrappedTileID& id,
                                    const mat4& tileMatrix,

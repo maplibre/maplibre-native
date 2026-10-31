@@ -5,6 +5,7 @@
 #include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/shaders/shader_source.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 
 #include <mln/shaders/vulkan/shader_group.hpp>
@@ -16,6 +17,7 @@
 #include <mln/shaders/vulkan/debug.hpp>
 #include <mln/shaders/vulkan/fill.hpp>
 #include <mln/shaders/vulkan/fill_extrusion.hpp>
+#include <mln/shaders/vulkan/globe_depth.hpp>
 #include <mln/shaders/vulkan/heatmap.hpp>
 #include <mln/shaders/vulkan/heatmap_texture.hpp>
 #include <mln/shaders/vulkan/hillshade.hpp>
@@ -723,6 +725,9 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
+    if constexpr (util::GLOBE_ENABLED) {
+        registerTypes<shaders::BuiltIn::GlobeDepthShader>(shaders, programParameters);
+    }
 }
 
 } // namespace vulkan

@@ -4,6 +4,9 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
+- feat(ios): with `rotateEnabled`, drags and zooms on the globe turn the bearing with the planet, so the place under the finger stays under it over the poles and nothing spins about them ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
+- feat(ios): `-[MLNMapView isCoordinateOccluded:]` tells whether the globe hides a coordinate, for views placed over the map ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 
 ## 7.0.0

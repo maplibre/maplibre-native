@@ -52,8 +52,15 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     // force disable depth test for debugging
     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
-    // For 3D mode, stenciling is handled by the layer group
-    if (!is3D) {
+    if (stencilWriteRef) {
+        context.setStencilMode(gfx::StencilMode{.test = gfx::StencilMode::Always{},
+                                                .ref = *stencilWriteRef,
+                                                .mask = 0b11111111,
+                                                .fail = gfx::StencilOpType::Keep,
+                                                .depthFail = gfx::StencilOpType::Keep,
+                                                .pass = gfx::StencilOpType::Replace});
+    } else if (!is3D) {
+        // For 3D mode, stenciling is handled by the layer group
         context.setStencilMode(makeStencilMode(parameters));
     }
 

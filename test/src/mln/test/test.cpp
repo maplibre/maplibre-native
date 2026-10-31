@@ -1,8 +1,11 @@
 #include <mln/actor/scheduler.hpp>
 #include <mln/test.hpp>
 #include <mln/test/util.hpp>
+#include <mln/util/constants.hpp>
 
 #include <gtest/gtest.h>
+
+#include <string>
 
 namespace mln {
 
@@ -12,6 +15,14 @@ int runTests(int argc, char *argv[]) {
 #endif
 
     testing::InitGoogleTest(&argc, argv);
+
+    // A build without the globe (`MLN_WITH_GLOBE`) draws a globe projection as Mercator and never subdivides, which
+    // the globe's tests don't expect.
+    if constexpr (!util::GLOBE_ENABLED) {
+        std::string filter = testing::GTEST_FLAG(filter);
+        filter += filter.find('-') == std::string::npos ? "-" : ":";
+        testing::GTEST_FLAG(filter) = filter + "*Globe*:VerticalPerspective*:Subdivision.*";
+    }
 
     // In order to run specific tests
     // testing::GTEST_FLAG(filter) = "TileServerOptions*";
