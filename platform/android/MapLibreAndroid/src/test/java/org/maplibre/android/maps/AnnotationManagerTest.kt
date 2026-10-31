@@ -3,6 +3,7 @@ package org.maplibre.android.maps
 import androidx.collection.LongSparseArray
 import org.maplibre.android.annotations.Annotation
 import org.maplibre.android.annotations.BaseMarkerOptions
+import org.maplibre.android.annotations.InfoWindow
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
@@ -42,6 +43,35 @@ class AnnotationManagerTest : BaseTest() {
         polylines,
         shapeAnnotations
     )
+
+    @Test
+    fun markerBehindTheGlobeIsNotSelected() {
+        val projection = Mockito.mock(Projection::class.java)
+        Mockito.`when`(aMapLibreMap.projection).thenReturn(projection)
+        val marker = Mockito.mock(Marker::class.java)
+        Mockito.`when`(marker.position).thenReturn(LatLng(0.0, 180.0))
+        Mockito.`when`(projection.isLocationOccluded(marker.position)).thenReturn(true)
+        annotationManager.bind(aMapLibreMap)
+        annotationManager.selectMarker(marker)
+        Assert.assertTrue(annotationManager.selectedMarkers.isEmpty())
+    }
+
+    @Test
+    fun selectedMarkerTurningBehindTheGlobeIsDeselected() {
+        val projection = Mockito.mock(Projection::class.java)
+        Mockito.`when`(aMapLibreMap.projection).thenReturn(projection)
+        val marker = Mockito.mock(Marker::class.java)
+        Mockito.`when`(marker.position).thenReturn(LatLng(0.0, 90.0))
+        Mockito.`when`(marker.showInfoWindow(aMapLibreMap, aMapView)).thenReturn(Mockito.mock(InfoWindow::class.java))
+        annotationManager.bind(aMapLibreMap)
+        annotationManager.selectMarker(marker)
+        Assert.assertEquals(listOf(marker), annotationManager.selectedMarkers)
+        Mockito.`when`(marker.isInfoWindowShown).thenReturn(true)
+        Mockito.`when`(projection.isLocationOccluded(marker.position)).thenReturn(true)
+        annotationManager.update()
+        Assert.assertTrue(annotationManager.selectedMarkers.isEmpty())
+        Mockito.verify(marker).hideInfoWindow()
+    }
 
     @Test
     @Throws(Exception::class)

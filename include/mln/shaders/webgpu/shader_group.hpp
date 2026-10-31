@@ -47,6 +47,7 @@ public:
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& gfxContext,
                                      const StringIDSetsPair& propertiesAsUniforms,
+                                     gfx::ProjectionVariant variant,
                                      std::string_view /*firstAttribName*/) override {
         using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::WebGPU>;
         constexpr auto& name = ShaderSource::name;
@@ -56,22 +57,28 @@ public:
         std::size_t seed = 0;
         mln::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
         mln::util::hash_combine(seed, programParameters.getDefinesHash());
+        mln::util::hash_combine(seed, static_cast<uint8_t>(variant));
         const std::string shaderName = getShaderName(name, seed);
 
         auto shader = get<webgpu::ShaderProgram>(shaderName);
         if (!shader) {
             DefinesMap additionalDefines;
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
+            if (variant == gfx::ProjectionVariant::Globe) {
+                additionalDefines.emplace(globeDefine, std::string());
+            }
 
-            std::string vertexSource;
-            std::string fragmentSource;
+            // The common prelude goes through the preprocessor with the shader, so its `#ifdef`s see the defines.
+            using CommonPrelude = shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::WebGPU>;
+            std::string vertexSource = std::string(CommonPrelude::prelude) + "\n";
+            std::string fragmentSource = vertexSource;
 
             if constexpr (requires { ShaderSource::prelude; }) {
-                vertexSource = std::string(ShaderSource::prelude) + vert;
-                fragmentSource = std::string(ShaderSource::prelude) + frag;
+                vertexSource += std::string(ShaderSource::prelude) + vert;
+                fragmentSource += std::string(ShaderSource::prelude) + frag;
             } else {
-                vertexSource = vert;
-                fragmentSource = frag;
+                vertexSource += vert;
+                fragmentSource += frag;
             }
 
             std::unordered_map<std::string, bool> defineSet;

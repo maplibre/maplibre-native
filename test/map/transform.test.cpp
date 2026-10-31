@@ -1,13 +1,20 @@
 #include <mln/test/util.hpp>
 
 #include <gmock/gmock.h>
+#include <array>
 #include <cmath>
+#include <mln/map/map_impl.hpp>
+#include <mln/map/mercator_projection.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/map/transform.hpp>
+#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/util/geo.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/util/quaternion.hpp>
 
 #include <numbers>
+#include <tuple>
 
 using namespace std::numbers;
 using namespace mln;
@@ -1086,6 +1093,21 @@ TEST(Transform, FreeCameraOptionsInvalidZ) {
     EXPECT_LE(transform.getFreeCameraOptions().position.value()[2], 1.0);
 }
 
+TEST(Transform, CameraFollowsJumpsBelowAFractionalMinimumZoom) {
+    const double mercatorY = 0.5 - std::log(std::tan(pi / 4 + util::deg2rad(10.0) / 2)) / (2 * pi);
+    for (const double minZoom : {1.525373023184723, 1.55, 3.1, 6.2}) {
+        Transform transform;
+        transform.resize({512, 512});
+        transform.setMinZoom(minZoom);
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(minZoom + 2.0));
+        transform.jumpTo(CameraOptions().withCenter(LatLng{10.0, 20.0}).withZoom(0.0));
+        EXPECT_TRUE(transform.getState().valid()) << minZoom;
+        const vec3 position = transform.getFreeCameraOptions().position.value();
+        EXPECT_NEAR(200.0 / 360.0, position[0], 1e-12) << minZoom;
+        EXPECT_NEAR(mercatorY, position[1], 1e-12) << minZoom;
+    }
+}
+
 TEST(Transform, FreeCameraOptionsHighPitch) {
     Transform transform;
     transform.resize({100, 100});
@@ -1291,4 +1313,1444 @@ TEST(Camera, SetOrientationWithRollNoPitch) {
     EXPECT_NEAR(bearing - roll, bearing_, 1.0e-9);
     EXPECT_NEAR(pitch, pitch_, 1.0e-9);
     EXPECT_NEAR(0.0, roll_, 1.0e-9);
+}
+
+namespace {
+
+// The tile matrix as TransformState::matrixFor computed it before the projection seam.
+mat4 referenceTileMatrix(double scale, const UnwrappedTileID& tileID) {
+    const uint64_t tileScale = 1ull << tileID.canonical.z;
+    const double s = Projection::worldSize(scale) / tileScale;
+
+    mat4 matrix;
+    matrix::identity(matrix);
+    matrix::translate(matrix,
+                      matrix,
+                      static_cast<double>(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
+                      static_cast<double>(tileID.canonical.y) * s,
+                      0);
+    matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);
+    return matrix;
+}
+
+} // namespace
+
+TEST(MercatorProjection, MatchesStaticProjection) {
+    const MercatorProjection projection;
+    for (const double zoom : {0.0, 1.0, 3.5, 7.25, 12.0, 18.0}) {
+        const double scale = std::pow(2.0, zoom);
+        for (const double lat : {-85.0, -45.0, 0.0, 30.0, 80.0}) {
+            for (const double lon : {-180.0, -90.0, 0.0, 45.0, 179.0}) {
+                const LatLng latLng{lat, lon};
+                const Point<double> expected = Projection::project(latLng, scale);
+                const Point<double> actual = projection.project(latLng, scale);
+                EXPECT_EQ(expected.x, actual.x);
+                EXPECT_EQ(expected.y, actual.y);
+
+                const LatLng unprojected = projection.unproject(actual, scale, LatLng::Wrapped);
+                const LatLng expectedUnprojected = Projection::unproject(expected, scale, LatLng::Wrapped);
+                EXPECT_EQ(expectedUnprojected.latitude(), unprojected.latitude());
+                EXPECT_EQ(expectedUnprojected.longitude(), unprojected.longitude());
+            }
+        }
+    }
+}
+
+TEST(TransformState, ProjectionDataMatchesTileMatrix) {
+    Transform transform;
+    const std::vector<UnwrappedTileID> tileIDs{
+        {0, 0, 0}, {1, 0, 1}, {3, 5, 2}, {10, 512, 340}, {14, 16000, 8000}, {-1, CanonicalTileID{2, 1, 1}}};
+
+    for (const Size size : {Size{1, 1}, Size{512, 512}, Size{1024, 768}, Size{333, 777}}) {
+        transform.resize(size);
+        for (const double zoom : {0.0, 2.5, 6.0, 11.75, 16.0}) {
+            for (const double pitch : {0.0, 30.0, 60.0}) {
+                for (const double bearing : {0.0, 45.0, 210.0}) {
+                    for (const double roll : {0.0, 15.0}) {
+                        transform.jumpTo(CameraOptions()
+                                             .withCenter(LatLng{37.7749, -122.4194})
+                                             .withZoom(zoom)
+                                             .withPitch(pitch)
+                                             .withBearing(bearing)
+                                             .withRoll(roll));
+                        const TransformState& state = transform.getState();
+                        const double scale = state.getScale();
+
+                        for (const bool aligned : {false, true}) {
+                            mat4 projMatrix;
+                            state.getProjMatrix(projMatrix, 1, aligned);
+
+                            for (const auto& tileID : tileIDs) {
+                                const mat4 tileMatrix = referenceTileMatrix(scale, tileID);
+                                mat4 actualTileMatrix;
+                                state.matrixFor(actualTileMatrix, tileID);
+                                EXPECT_EQ(tileMatrix, actualTileMatrix);
+
+                                mat4 expected;
+                                matrix::multiply(expected, projMatrix, tileMatrix);
+                                EXPECT_EQ(expected, state.getProjectionData(tileID, projMatrix).mainMatrix);
+                            }
+                        }
+
+                        for (const auto& tileID : tileIDs) {
+                            mat4 expected;
+                            matrix::multiply(expected, state.getProjectionMatrix(), referenceTileMatrix(scale, tileID));
+                            EXPECT_EQ(expected, state.getProjectionData(tileID).mainMatrix);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+TEST(TransformState, ProjectionDataMercatorFields) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.jumpTo(CameraOptions().withCenter(LatLng{10, 20}).withZoom(5.0).withPitch(20.0).withBearing(30.0));
+    const TransformState& state = transform.getState();
+
+    for (const auto& tileID :
+         {UnwrappedTileID{0, 0, 0}, UnwrappedTileID{3, 5, 2}, UnwrappedTileID{-1, CanonicalTileID{2, 1, 1}}}) {
+        const ProjectionData data = state.getProjectionData(tileID);
+        const double tileScale = static_cast<double>(1u << tileID.canonical.z);
+        EXPECT_EQ(data.mainMatrix, data.fallbackMatrix);
+        EXPECT_EQ(tileID.canonical.x / tileScale, data.tileMercatorCoords[0]);
+        EXPECT_EQ(tileID.canonical.y / tileScale, data.tileMercatorCoords[1]);
+        EXPECT_EQ(1.0 / tileScale / util::EXTENT, data.tileMercatorCoords[2]);
+        EXPECT_EQ(1.0 / tileScale / util::EXTENT, data.tileMercatorCoords[3]);
+        EXPECT_EQ((vec4{{0, 0, 0, 0}}), data.clippingPlane);
+        EXPECT_EQ(0.0, data.projectionTransition);
+    }
+}
+
+TEST(Transform, GlobeProjectionDefinition) {
+    Transform transform;
+    ASSERT_FALSE(transform.getState().isGlobeRendering());
+    ASSERT_DOUBLE_EQ(0.0, transform.getState().getProjectionTransition());
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective", "mercator", 0.5));
+    ASSERT_TRUE(transform.getState().isGlobeRendering());
+    ASSERT_DOUBLE_EQ(0.5, transform.getState().getProjectionTransition());
+    // The transition is how far the globe has gone, whichever way the definition reads.
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective", "mercator", 0.25));
+    ASSERT_DOUBLE_EQ(0.75, transform.getState().getProjectionTransition());
+    transform.setProjectionDefinition(ProjectionDefinition("mercator", "vertical-perspective", 0.25));
+    ASSERT_DOUBLE_EQ(0.25, transform.getState().getProjectionTransition());
+    transform.setProjectionDefinition(ProjectionDefinition("mercator"));
+    ASSERT_FALSE(transform.getState().isGlobeRendering());
+    ASSERT_DOUBLE_EQ(0.0, transform.getState().getProjectionTransition());
+}
+
+// A transition past either end, from a literal or an overshooting curve, holds at that end's projection.
+TEST(Transform, GlobeProjectionTransitionPastEitherEnd) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.setProjectionDefinition(ProjectionDefinition("mercator", "vertical-perspective", 1.5));
+    EXPECT_DOUBLE_EQ(1.0, transform.getState().getProjectionTransition());
+    transform.jumpTo(CameraOptions().withZoom(1));
+    for (int step = 1; step <= 3; ++step) {
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0, 40.0 + 120.0 * step}));
+    }
+    ASSERT_NEAR(400, transform.getState().getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+    // Past Mercator the globe leaves as it does at 0, so the center wraps back into Mercator's world.
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective", "mercator", 1.5));
+    EXPECT_FALSE(transform.getState().isGlobeRendering());
+    EXPECT_DOUBLE_EQ(0.0, transform.getState().getProjectionTransition());
+    EXPECT_NEAR(40, transform.getState().getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+}
+
+// An animation that crosses into the globe ends where a jump to its camera would, at a zoom only the globe allows.
+TEST(Transform, AnimationIntoTheGlobeTakesTheGlobesMinimumZoom) {
+    const auto projectionForZoom = [](double zoom) {
+        return ProjectionDefinition(zoom < 3 ? "vertical-perspective" : "mercator");
+    };
+    // A viewport taller than the world raises Mercator's minimum zoom, which the globe does not have.
+    for (const Size size : {Size{512, 512}, Size{512, 1024}}) {
+        for (const auto& [center, zoom] : {std::pair{LatLng{60, 0}, -0.5}, std::pair{LatLng{0, 0}, 0.0}}) {
+            for (const bool fly : {false, true}) {
+                SCOPED_TRACE(std::string(fly ? "flyTo" : "easeTo") + " to zoom " + std::to_string(zoom) + " at " +
+                             std::to_string(center.latitude()) + " on " + std::to_string(size.height) + " px");
+                Transform transform;
+                transform.resize(size);
+                transform.setProjectionForZoom(projectionForZoom);
+                transform.setProjectionDefinition(projectionForZoom(5));
+                transform.jumpTo(CameraOptions().withCenter(center).withZoom(5));
+                const auto camera = CameraOptions().withCenter(center).withZoom(zoom);
+                const AnimationOptions animation(Milliseconds(1000));
+                fly ? transform.flyTo(camera, animation) : transform.easeTo(camera, animation);
+                // As the map does each frame, the projection follows the zoom.
+                for (int frame = 1; frame <= 20; ++frame) {
+                    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
+                    transform.setProjectionDefinition(projectionForZoom(transform.getZoom()));
+                }
+                EXPECT_TRUE(transform.getState().isGlobeRendering());
+                EXPECT_NEAR(zoom, transform.getZoom(), 1e-9);
+            }
+        }
+    }
+}
+
+TEST(VerticalPerspectiveProjection, TileCoordinatesToSphere) {
+    const auto near = [](const vec3& a, const vec3& b) {
+        return std::abs(a[0] - b[0]) < 1e-9 && std::abs(a[1] - b[1]) < 1e-9 && std::abs(a[2] - b[2]) < 1e-9;
+    };
+    const UnwrappedTileID world{0, 0, 0};
+    const double half = util::EXTENT / 2.0;
+    // (0°, 0°) is the +Z axis; the equator runs through ±X; latitude is Y.
+    EXPECT_TRUE(near({{0, 0, 1}}, VerticalPerspectiveProjection::tileCoordinatesToSphere({half, half}, world)));
+    EXPECT_TRUE(near({{1, 0, 0}}, VerticalPerspectiveProjection::tileCoordinatesToSphere({half * 1.5, half}, world)));
+    EXPECT_TRUE(near({{-1, 0, 0}}, VerticalPerspectiveProjection::tileCoordinatesToSphere({half * 0.5, half}, world)));
+    const vec3 north = VerticalPerspectiveProjection::tileCoordinatesToSphere({half, 0}, world);
+    EXPECT_GT(north[1], 0.99);
+    const vec3 south = VerticalPerspectiveProjection::tileCoordinatesToSphere({half, util::EXTENT}, world);
+    EXPECT_LT(south[1], -0.99);
+}
+
+namespace {
+
+void setUpGlobe(Transform& transform, const LatLng& center, double zoom, double bearing = 0, double pitch = 0) {
+    transform.resize({800, 600});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(center).withZoom(zoom).withBearing(bearing).withPitch(pitch));
+}
+
+// The GL JS camera tests run on a 512 by 512 globe.
+void setUpGlobeCamera(Transform& transform, const LatLng& center, double zoom) {
+    transform.resize({512, 512});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(center).withZoom(zoom));
+}
+
+// One second with a linear easing, so a frame at half time is the frame at k = 0.5.
+AnimationOptions linearSecond() {
+    AnimationOptions animation;
+    animation.duration = Milliseconds(1000);
+    animation.easing.emplace(0, 0, 1, 1);
+    return animation;
+}
+
+void runTo(Transform& transform, double k) {
+    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(static_cast<int64_t>(k * 1000)));
+}
+
+} // namespace
+
+TEST(VerticalPerspectiveProjection, CenterProjectsToScreenCenter) {
+    Transform transform;
+    setUpGlobe(transform, {37.0, -122.0}, 3.0, 20.0, 30.0);
+    const TransformState& state = transform.getState();
+    ASSERT_TRUE(state.isGlobeRendering());
+
+    const double radius = VerticalPerspectiveProjection::globeRadiusPixels(Projection::worldSize(state.getScale()),
+                                                                           state.getLatLng().latitude());
+    const mat4 matrix = VerticalPerspectiveProjection::globeViewProjectionMatrix(state, radius);
+    const vec3 center = VerticalPerspectiveProjection::surfaceVector(state.getLatLng());
+    const vec4 surface = {{center[0], center[1], center[2], 1}};
+    vec4 clip;
+    matrix::transformMat4(clip, surface, matrix);
+    EXPECT_NEAR(0.0, clip[0] / clip[3], 1e-6);
+    EXPECT_NEAR(0.0, clip[1] / clip[3], 1e-6);
+
+    const vec4 plane = VerticalPerspectiveProjection::clippingPlane(state, radius);
+    EXPECT_GT(plane[0] * surface[0] + plane[1] * surface[1] + plane[2] * surface[2] + plane[3], 0.0);
+    const vec4 antipode = {{-surface[0], -surface[1], -surface[2], 1}};
+    EXPECT_LT(plane[0] * antipode[0] + plane[1] * antipode[1] + plane[2] * antipode[2] + plane[3], 0.0);
+}
+
+TEST(GlobeTransform, CachedViewStateFollowsTheCamera) {
+    Transform transform;
+    setUpGlobe(transform, {20.0, -40.0}, 2.5, 35.0, 25.0);
+    const TransformState& state = transform.getState();
+    const auto check = [&] {
+        const double radius = VerticalPerspectiveProjection::globeRadiusPixels(Projection::worldSize(state.getScale()),
+                                                                               state.getLatLng().latitude());
+        EXPECT_DOUBLE_EQ(radius, state.getGlobeRadiusPixels());
+        const mat4 expected = VerticalPerspectiveProjection::globeViewProjectionMatrix(state, radius);
+        const vec4 plane = VerticalPerspectiveProjection::clippingPlane(state, radius);
+        const vec3 camera = VerticalPerspectiveProjection::cameraPosition(state, radius);
+        for (std::size_t i = 0; i < 16; ++i) {
+            EXPECT_DOUBLE_EQ(expected[i], state.getGlobeViewProjectionMatrix()[i]) << "element " << i;
+        }
+        for (std::size_t i = 0; i < 4; ++i) {
+            EXPECT_DOUBLE_EQ(plane[i], state.getGlobeClippingPlane()[i]) << "plane " << i;
+        }
+        for (std::size_t i = 0; i < 3; ++i) {
+            EXPECT_DOUBLE_EQ(camera[i], state.getGlobeCameraPosition()[i]) << "camera " << i;
+        }
+        mat4 roundTrip;
+        matrix::multiply(roundTrip, state.getGlobeViewProjectionMatrix(), state.getInverseGlobeViewProjectionMatrix());
+        for (std::size_t i = 0; i < 16; ++i) {
+            EXPECT_NEAR(i % 5 == 0 ? 1.0 : 0.0, roundTrip[i], 1e-9) << "inverse element " << i;
+        }
+    };
+    check();
+    transform.jumpTo(CameraOptions().withCenter(LatLng{-30.0, 100.0}).withZoom(4.0).withPitch(50.0).withBearing(-80.0));
+    check();
+    transform.resize({1024, 300});
+    check();
+}
+
+TEST(GlobeTransform, UnprojectRoundTrip) {
+    Transform transform;
+    setUpGlobe(transform, {20.0, -40.0}, 2.5, 35.0, 25.0);
+    for (const ScreenCoordinate& point :
+         {ScreenCoordinate{400, 300}, ScreenCoordinate{300, 200}, ScreenCoordinate{500, 420}}) {
+        const LatLng latLng = transform.screenCoordinateToLatLng(point);
+        const ScreenCoordinate back = transform.latLngToScreenCoordinate(latLng);
+        EXPECT_NEAR(point.x, back.x, 1e-6);
+        EXPECT_NEAR(point.y, back.y, 1e-6);
+    }
+    const LatLng center = transform.screenCoordinateToLatLng({400, 300});
+    EXPECT_NEAR(20.0, center.latitude(), 1e-9);
+    EXPECT_NEAR(-40.0, center.longitude(), 1e-9);
+}
+
+TEST(GlobeTransform, OffGlobePixelsSnapToTheHorizon) {
+    Transform transform;
+    setUpGlobe(transform, {0.0, 0.0}, 0.5);
+    // Zoom 0.5 shows the whole globe with room around it; a corner pixel is off the planet.
+    const LatLng corner = transform.screenCoordinateToLatLng({0, 0});
+    EXPECT_LT(corner.latitude(), 90.0);
+    EXPECT_GT(corner.latitude(), 0.0);
+    EXPECT_LT(corner.longitude(), 0.0);
+    // The snap lands on the horizon: from a camera `d` radii out, that circle is acos(1 / d) from the center.
+    const vec3& camera = transform.getState().getGlobeCameraPosition();
+    const double horizon = std::acos(1.0 / std::hypot(camera[0], camera[1], camera[2]));
+    const double angle = std::acos(std::cos(util::deg2rad(corner.latitude())) *
+                                   std::cos(util::deg2rad(corner.longitude())));
+    EXPECT_NEAR(horizon, angle, 1e-6);
+}
+
+TEST(GlobeTransform, MoveByPutsTheDraggedPointAtTheCenter) {
+    Transform transform;
+    setUpGlobe(transform, {10.0, 20.0}, 3.0);
+    for (int i = 0; i < 8; i++) {
+        const ScreenCoordinate offset{i % 2 ? 60.0 : -45.0, i % 3 ? 30.0 : -50.0};
+        const LatLng expected = transform.screenCoordinateToLatLng({400 - offset.x, 300 - offset.y});
+        const double zoomBefore = transform.getZoom();
+        const double latitudeBefore = transform.getLatLng().latitude();
+        transform.moveBy(offset);
+        EXPECT_NEAR(expected.latitude(), transform.getLatLng().latitude(), 1e-6);
+        EXPECT_NEAR(expected.longitude(), transform.getLatLng().longitude(), 1e-6);
+        // The planet keeps its apparent size: zoom follows the latitude.
+        EXPECT_NEAR(zoomBefore + VerticalPerspectiveProjection::zoomAdjustment(latitudeBefore, expected.latitude()),
+                    transform.getZoom(),
+                    1e-6);
+    }
+}
+
+TEST(GlobeTransform, AnchoredZoomKeepsTheAnchorInPlace) {
+    Transform transform;
+    setUpGlobe(transform, {30.0, 15.0}, 3.0);
+    const ScreenCoordinate anchor{250, 180};
+    const LatLng anchorLatLng = transform.screenCoordinateToLatLng(anchor);
+    transform.jumpTo(CameraOptions().withZoom(4.5).withAnchor(anchor));
+    EXPECT_NE(30.0, transform.getLatLng().latitude());
+    const ScreenCoordinate after = transform.latLngToScreenCoordinate(anchorLatLng);
+    EXPECT_NEAR(anchor.x, after.x, 0.5);
+    EXPECT_NEAR(anchor.y, after.y, 0.5);
+}
+
+TEST(GlobeTransform, ZoomingOutAroundAnAnchorNearTheHorizonStaysContinuous) {
+    // A fast pinch-out with the focal point drifting off the planet: the exact re-anchoring jumped the center by
+    // ten degrees of latitude and the zoom by half a level for one frame (a much larger globe); GL JS blends in a
+    // damped heuristic near the horizon.
+    Transform transform;
+    setUpGlobe(transform, {48.0, 10.0}, 6.0);
+    const ScreenCoordinate anchor{600, 200};
+    double lastRadius = transform.getState().getGlobeRadiusPixels();
+    LatLng lastCenter = transform.getLatLng();
+    for (int i = 1; i <= 60; ++i) {
+        transform.easeTo(CameraOptions().withZoom(6.0 - i * 0.1).withAnchor(anchor));
+        if (i % 3 == 0) transform.moveBy({-7, 4});
+        const double radius = transform.getState().getGlobeRadiusPixels();
+        const LatLng center = transform.getLatLng();
+        EXPECT_LE(radius, lastRadius * 1.005) << "step " << i;
+        EXPECT_LT(std::abs(center.latitude() - lastCenter.latitude()), 5.0) << "step " << i;
+        lastRadius = radius;
+        lastCenter = center;
+    }
+}
+
+// Near the limb the zoom around a point leans on GL JS's damped heuristic, which adds up step by step: an animated
+// zoom moves the center about as far as the same zoom in one jump.
+TEST(GlobeTransform, AnimatedZoomAroundAPointNearTheLimbMovesLikeAJump) {
+    const ScreenCoordinate anchor{256 + 159, 256};
+    Transform jumped;
+    setUpGlobeCamera(jumped, {0.0, 0.0}, 1.0);
+    jumped.jumpTo(CameraOptions().withZoom(2.0).withAnchor(anchor));
+    const double jumpMove = jumped.getLatLng().longitude();
+    ASSERT_GT(jumpMove, 1.0);
+
+    Transform animated;
+    setUpGlobeCamera(animated, {0.0, 0.0}, 1.0);
+    animated.easeTo(CameraOptions().withZoom(2.0).withAnchor(anchor), linearSecond());
+    for (int frame = 1; frame <= 10; ++frame) {
+        runTo(animated, frame / 10.0);
+    }
+    EXPECT_NEAR(2.0, animated.getZoom(), 1e-9);
+    const double animatedMove = animated.getLatLng().longitude();
+    EXPECT_GT(animatedMove, 0.75 * jumpMove);
+    EXPECT_LT(animatedMove, 1.25 * jumpMove);
+}
+
+// An animation around an anchor ends where the same change in one jump does, zoom included: the planet keeps its
+// size as the anchor carries the center to another latitude.
+TEST(GlobeTransform, AnimationsAroundAnAnchorEndLikeAJump) {
+    const ScreenCoordinate anchor{256, 256 - 150};
+    for (const bool rotate : {false, true}) {
+        SCOPED_TRACE(rotate ? "rotate" : "zoom");
+        const CameraOptions change = rotate ? CameraOptions().withBearing(60.0).withAnchor(anchor)
+                                            : CameraOptions().withZoom(4.0).withAnchor(anchor);
+        Transform jumped;
+        setUpGlobeCamera(jumped, {45.0, 0.0}, 3.0);
+        jumped.jumpTo(change);
+        ASSERT_GT(std::abs(jumped.getLatLng().latitude() - 45.0), 0.5);
+
+        Transform animated;
+        setUpGlobeCamera(animated, {45.0, 0.0}, 3.0);
+        animated.easeTo(change, linearSecond());
+        for (int frame = 1; frame <= 10; ++frame) {
+            runTo(animated, frame / 10.0);
+        }
+        EXPECT_NEAR(jumped.getLatLng().latitude(), animated.getLatLng().latitude(), 1e-6);
+        EXPECT_NEAR(jumped.getLatLng().longitude(), animated.getLatLng().longitude(), 1e-6);
+        EXPECT_NEAR(jumped.getZoom(), animated.getZoom(), 1e-6);
+    }
+}
+
+TEST(GlobeTransform, PolesAreReachableAndZoomFollowsLatitude) {
+    Transform transform;
+    setUpGlobe(transform, {0.0, 0.0}, 0.0);
+    const double radiusAtEquator = transform.getState().getGlobeRadiusPixels();
+    transform.jumpTo(CameraOptions().withCenter(LatLng{80.0, 0.0}));
+    EXPECT_NEAR(80.0, transform.getLatLng().latitude(), 1e-9);
+    // Moving the center towards the pole lowers the zoom by log2(cos 80), below the map's minimum zoom of 0, so the
+    // planet keeps its size on screen.
+    EXPECT_NEAR(VerticalPerspectiveProjection::zoomAdjustment(0.0, 80.0), transform.getZoom(), 1e-9);
+    EXPECT_NEAR(radiusAtEquator, transform.getState().getGlobeRadiusPixels(), 1e-6);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{80.0, 0.0}).withZoom(3.0));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}));
+    EXPECT_NEAR(3.0 + VerticalPerspectiveProjection::zoomAdjustment(80.0, 0.0), transform.getZoom(), 1e-9);
+
+    // Past the Mercator range the center goes as far toward the pole as the zoom it lands on allows, and the zoom
+    // follows the edge of the range: the planet keeps its size. A drag over the pole stops where the zoom lets the
+    // center go. GL JS: 89 at zoom 1.9907089805355933, then 89.50632407943635.
+    const double radiusBefore = transform.getState().getGlobeRadiusPixels();
+    transform.jumpTo(CameraOptions().withCenter(LatLng{89.0, 0.0}));
+    EXPECT_NEAR(89.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(1.9907089805355933, transform.getZoom(), 1e-6);
+    EXPECT_NEAR(radiusBefore, transform.getState().getGlobeRadiusPixels(), 1e-6);
+    transform.moveBy({0.0, 300.0});
+    EXPECT_NEAR(89.50632407943635, transform.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(radiusBefore, transform.getState().getGlobeRadiusPixels(), 1e-6);
+}
+
+TEST(GlobeTransform, BoundsKeepTheCenterInside) {
+    // GL JS ignores `maxBounds` on the globe (its TODO); native keeps honoring them, in every constrain mode.
+    const LatLngBounds bounds = LatLngBounds::hull({40.0, -10.0}, {70.0, 40.0});
+    for (const auto mode : {ConstrainMode::HeightOnly, ConstrainMode::WidthAndHeight, ConstrainMode::Screen}) {
+        Transform transform;
+        setUpGlobe(transform, {56.0, 11.0}, 4.0);
+        transform.setConstrainMode(mode);
+        transform.setLatLngBounds(bounds);
+        EXPECT_NEAR(56.0, transform.getLatLng().latitude(), 1e-9);
+        EXPECT_NEAR(11.0, transform.getLatLng().longitude(), 1e-9);
+        for (const LatLng& outside :
+             {LatLng{56.0, -65.0}, LatLng{80.0, 11.0}, LatLng{56.0, 50.0}, LatLng{30.0, 11.0}}) {
+            transform.jumpTo(CameraOptions().withCenter(outside).withZoom(4.0));
+            EXPECT_TRUE(bounds.contains(transform.getLatLng()))
+                << transform.getLatLng().latitude() << ", " << transform.getLatLng().longitude();
+        }
+        // A center the whole screen fits around stays where it was asked for.
+        transform.jumpTo(CameraOptions().withCenter(LatLng{55.0, 15.0}).withZoom(4.0));
+        EXPECT_NEAR(55.0, transform.getLatLng().latitude(), 1e-9);
+        EXPECT_NEAR(15.0, transform.getLatLng().longitude(), 1e-9);
+        if (mode == ConstrainMode::Screen) {
+            // The screen has to fit inside the bounds, so zooming out is stopped short.
+            transform.jumpTo(CameraOptions().withCenter(LatLng{56.0, 11.0}).withZoom(1.0));
+            EXPECT_GT(transform.getZoom(), 1.0);
+            EXPECT_TRUE(bounds.contains(transform.getLatLng()));
+        }
+    }
+}
+
+TEST(GlobeTransform, MinZoomFollowsLatitude) {
+    Transform transform;
+    setUpGlobe(transform, {0.0, 0.0}, 2.0);
+    const TransformState& state = transform.getState();
+    EXPECT_DOUBLE_EQ(0.0, state.getMinZoom());
+    EXPECT_DOUBLE_EQ(0.0, state.getMinZoomAtLatitude(0.0));
+    EXPECT_NEAR(-1.0, state.getMinZoomAtLatitude(60.0), 1e-12);
+    EXPECT_NEAR(std::log2(std::cos(util::deg2rad(80.0))), state.getMinZoomAtLatitude(80.0), 1e-12);
+
+    // Zoom requests clamp to the floor at the requested center, not at the equator's.
+    transform.jumpTo(CameraOptions().withCenter(LatLng{80.0, 0.0}).withZoom(-5.0));
+    EXPECT_NEAR(state.getMinZoomAtLatitude(80.0), transform.getZoom(), 1e-9);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(-1.0));
+    EXPECT_DOUBLE_EQ(0.0, transform.getZoom());
+    EXPECT_EQ(0, state.getIntegerZoom());
+
+    // Integer zoom never wraps below zero.
+    transform.jumpTo(CameraOptions().withCenter(LatLng{80.0, 0.0}).withZoom(-2.0));
+    EXPECT_NEAR(-2.0, transform.getZoom(), 1e-9);
+    EXPECT_EQ(0, state.getIntegerZoom());
+
+    // Mercator keeps the plain minimum.
+    transform.setProjectionDefinition(ProjectionDefinition("mercator"));
+    EXPECT_DOUBLE_EQ(state.getMinZoom(), state.getMinZoomAtLatitude(80.0));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{80.0, 0.0}).withZoom(-2.0));
+    EXPECT_GE(transform.getZoom(), 0.0);
+}
+
+TEST(GlobeTransform, CameraFollowsTheGlobeBelowTheMinimumScale) {
+    Transform transform;
+    setUpGlobe(transform, {80.0, 0.0}, 8.0);
+    transform.setMinZoom(6.0);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{80.0, 90.0}).withZoom(0.0));
+    EXPECT_NEAR(transform.getState().getMinZoomAtLatitude(80.0), transform.getZoom(), 1e-9);
+    EXPECT_LT(transform.getZoom(), 6.0);
+    EXPECT_TRUE(transform.getState().valid());
+    const vec3 position = transform.getFreeCameraOptions().position.value();
+    EXPECT_NEAR(0.75, position[0], 1e-12);
+    EXPECT_NEAR(0.5 - std::log(std::tan(pi / 4 + util::deg2rad(80.0) / 2)) / (2 * pi), position[1], 1e-12);
+}
+
+TEST(GlobeTransform, ZoomAdjustment) {
+    EXPECT_DOUBLE_EQ(0.0, VerticalPerspectiveProjection::zoomAdjustment(20.0, 20.0));
+    EXPECT_NEAR(-1.0, VerticalPerspectiveProjection::zoomAdjustment(0.0, 60.0), 1e-12);
+    EXPECT_NEAR(1.0, VerticalPerspectiveProjection::zoomAdjustment(60.0, 0.0), 1e-12);
+    // Past the Mercator range the globe keeps its size at the edge of the range.
+    EXPECT_EQ(0.0, VerticalPerspectiveProjection::zoomAdjustment(util::LATITUDE_MAX, 90.0));
+}
+
+// The expected numbers below come from GL JS's own camera (`camera.test.ts`, "globe projection" suites, and its
+// `VerticalPerspectiveCameraHelper`) run on the same 512 by 512 viewport with a linear easing.
+
+TEST(GlobeTransform, EaseAdjustsTheZoomToTheNewLatitude) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 1.0);
+    transform.easeTo(CameraOptions().withCenter(LatLng{40.0, 0.0}), linearSecond());
+    runTo(transform, 1.0);
+    EXPECT_FALSE(transform.inTransition());
+    EXPECT_NEAR(40.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(0.61549999962236379, transform.getZoom(), 1e-9);
+}
+
+TEST(GlobeTransform, FlyAdjustsTheZoomToTheNewLatitude) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 1.0);
+    transform.flyTo(CameraOptions().withCenter(LatLng{40.0, 0.0}), linearSecond());
+    runTo(transform, 0.5);
+    EXPECT_NEAR(20.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(0.87493158146277261, transform.getZoom(), 1e-9);
+    runTo(transform, 1.0);
+    EXPECT_FALSE(transform.inTransition());
+    EXPECT_NEAR(40.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(0.61549999962236379, transform.getZoom(), 1e-9);
+}
+
+TEST(GlobeTransform, EaseKeepsThePlanetSizeAcrossLatitudes) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 3.0);
+    const double radius = transform.getState().getGlobeRadiusPixels();
+    transform.easeTo(CameraOptions().withCenter(LatLng{60.0, 0.0}), linearSecond());
+    runTo(transform, 0.5);
+    EXPECT_NEAR(30.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(0.0, transform.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(2.7924812503605780, transform.getZoom(), 1e-9);
+    EXPECT_NEAR(radius, transform.getState().getGlobeRadiusPixels(), 1e-6);
+    runTo(transform, 1.0);
+    EXPECT_NEAR(60.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(2.0, transform.getZoom(), 1e-9);
+    EXPECT_NEAR(radius, transform.getState().getGlobeRadiusPixels(), 1e-6);
+}
+
+TEST(GlobeTransform, EaseFollowsTheLongitudeSpeedCurve) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 3.0);
+    transform.easeTo(CameraOptions().withCenter(LatLng{60.0, 60.0}), linearSecond());
+    runTo(transform, 0.5);
+    EXPECT_NEAR(25.026136930423718, transform.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(30.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(2.7924812503605780, transform.getZoom(), 1e-9);
+    runTo(transform, 1.0);
+    EXPECT_NEAR(60.0, transform.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(60.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(2.0, transform.getZoom(), 1e-9);
+}
+
+TEST(GlobeTransform, EaseWithZoomSpeedsUpTheCenter) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 3.0);
+    transform.easeTo(CameraOptions().withCenter(LatLng{60.0, 0.0}).withZoom(5.0), linearSecond());
+    runTo(transform, 0.5);
+    EXPECT_NEAR(42.426406871192853, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(4.0619751435424885, transform.getZoom(), 1e-9);
+    runTo(transform, 1.0);
+    EXPECT_NEAR(60.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(5.0, transform.getZoom(), 1e-9);
+}
+
+TEST(GlobeTransform, FlyFollowsTheGlobePath) {
+    {
+        Transform transform;
+        setUpGlobeCamera(transform, {0.0, 0.0}, 3.0);
+        transform.flyTo(CameraOptions().withCenter(LatLng{60.0, 60.0}), linearSecond());
+        runTo(transform, 0.5);
+        EXPECT_NEAR(25.026136930425196, transform.getLatLng().longitude(), 1e-9);
+        EXPECT_NEAR(30.0, transform.getLatLng().latitude(), 1e-8);
+        EXPECT_NEAR(1.8176209209717085, transform.getZoom(), 1e-9);
+        runTo(transform, 1.0);
+        EXPECT_NEAR(60.0, transform.getLatLng().longitude(), 1e-8);
+        EXPECT_NEAR(60.0, transform.getLatLng().latitude(), 1e-8);
+        EXPECT_NEAR(2.0, transform.getZoom(), 1e-9);
+    }
+    {
+        Transform transform;
+        setUpGlobeCamera(transform, {0.0, 0.0}, 3.0);
+        transform.flyTo(CameraOptions().withCenter(LatLng{60.0, 60.0}).withZoom(6.0), linearSecond());
+        runTo(transform, 0.5);
+        EXPECT_NEAR(54.663652625664554, transform.getLatLng().longitude(), 1e-9);
+        EXPECT_NEAR(56.470588235293114, transform.getLatLng().latitude(), 1e-9);
+        EXPECT_NEAR(2.4045752372957860, transform.getZoom(), 1e-9);
+        runTo(transform, 1.0);
+        EXPECT_NEAR(60.0, transform.getLatLng().longitude(), 1e-8);
+        EXPECT_NEAR(60.0, transform.getLatLng().latitude(), 1e-8);
+        EXPECT_NEAR(6.0, transform.getZoom(), 1e-9);
+    }
+}
+
+TEST(GlobeTransform, FlyStaysAboveTheMinimumZoom) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 20.0);
+    AnimationOptions animation = linearSecond();
+    animation.minZoom = 10.0;
+    transform.flyTo(CameraOptions().withCenter(LatLng{0.0, 1.0}).withZoom(20.0), animation);
+    double lowest = 20.0;
+    for (int frame = 1; frame <= 10; ++frame) {
+        runTo(transform, frame / 10.0);
+        lowest = std::min(lowest, transform.getZoom());
+    }
+    // GL JS bottoms out at 9.9999993 on the same frames.
+    EXPECT_GE(lowest, 10.0 - 1e-5);
+    EXPECT_LE(lowest, 10.01);
+    EXPECT_NEAR(20.0, transform.getZoom(), 1e-9);
+}
+
+TEST(GlobeTransform, CameraForBoundsFitsTheGlobe) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 0.0);
+    const LatLngBounds bounds = LatLngBounds::hull({16.0, -133.0}, {50.0, -68.0});
+    const std::vector<LatLng> corners = {
+        bounds.northwest(), bounds.southwest(), bounds.southeast(), bounds.northeast()};
+
+    // The flat fit the globe starts from is 1.4e-8 zoom from GL JS's 2.4694852833012204 on Mercator already, and the
+    // globe fit inherits that; the zooms below are GL JS's to within 1.6e-8.
+    {
+        Transform flat;
+        flat.resize({512, 512});
+        flat.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(0.0));
+        const CameraOptions flatFit = cameraForLatLngs(corners, flat, {});
+        ASSERT_TRUE(flatFit.zoom);
+        EXPECT_NEAR(2.4694852833012204, *flatFit.zoom, 1e-7);
+    }
+
+    CameraOptions fit = cameraForLatLngs(corners, transform, {});
+    ASSERT_TRUE(fit.center && fit.zoom);
+    EXPECT_NEAR(-100.5, fit.center->longitude(), 1e-9);
+    EXPECT_NEAR(34.717077774070773, fit.center->latitude(), 1e-9);
+    EXPECT_NEAR(2.4964711163134550, *fit.zoom, 1e-7);
+
+    fit = cameraForLatLngs(corners, transform, {15.0, 15.0, 15.0, 15.0});
+    ASSERT_TRUE(fit.center && fit.zoom);
+    EXPECT_NEAR(-100.5, fit.center->longitude(), 1e-9);
+    EXPECT_NEAR(34.717077774070773, fit.center->latitude(), 1e-9);
+    EXPECT_NEAR(2.3985253272853888, *fit.zoom, 1e-7);
+
+    transform.jumpTo(CameraOptions().withBearing(45.0));
+    fit = cameraForLatLngs(corners, transform, {});
+    ASSERT_TRUE(fit.center && fit.zoom);
+    EXPECT_NEAR(-100.5, fit.center->longitude(), 1e-9);
+    EXPECT_NEAR(34.717077774070773, fit.center->latitude(), 1e-9);
+    EXPECT_NEAR(2.4499189488903967, *fit.zoom, 1e-7);
+}
+
+// Bounds fitted with uneven padding fill the padded part of the view the camera shows: every corner and edge
+// midpoint lands inside it and the nearest touches its edge.
+TEST(GlobeTransform, CameraForBoundsFitsThePaddedView) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 0.0);
+    const LatLngBounds bounds = LatLngBounds::hull({16.0, -133.0}, {50.0, -68.0});
+    const std::vector<LatLng> corners = {
+        bounds.northwest(), bounds.southwest(), bounds.southeast(), bounds.northeast()};
+    const double midLatitude = (bounds.north() + bounds.south()) / 2.0;
+    const double midLongitude = (bounds.west() + bounds.east()) / 2.0;
+    const std::vector<LatLng> samples = {bounds.northwest(),
+                                         bounds.southwest(),
+                                         bounds.southeast(),
+                                         bounds.northeast(),
+                                         {midLatitude, bounds.west()},
+                                         {midLatitude, bounds.east()},
+                                         {bounds.north(), midLongitude},
+                                         {bounds.south(), midLongitude}};
+
+    for (const EdgeInsets& padding : {EdgeInsets{0, 0, 200, 0}, EdgeInsets{150, 60, 0, 0}}) {
+        SCOPED_TRACE(::testing::Message()
+                     << padding.top() << " " << padding.left() << " " << padding.bottom() << " " << padding.right());
+        const CameraOptions fit = cameraForLatLngs(corners, transform, padding);
+        ASSERT_TRUE(fit.center && fit.zoom);
+        Transform shown(transform.getState());
+        shown.jumpTo(fit);
+        const TransformState& state = shown.getState();
+        const double left = padding.left() / 512.0 * 2.0 - 1.0;
+        const double right = (512.0 - padding.right()) / 512.0 * 2.0 - 1.0;
+        const double top = padding.top() / 512.0 * -2.0 + 1.0;
+        const double bottom = (512.0 - padding.bottom()) / 512.0 * -2.0 + 1.0;
+        double nearest = std::numeric_limits<double>::infinity();
+        for (const LatLng& sample : samples) {
+            const vec3 surface = VerticalPerspectiveProjection::surfaceVector(sample);
+            vec4 clip = {{surface[0], surface[1], surface[2], 1.0}};
+            matrix::transformMat4(clip, clip, state.getGlobeViewProjectionMatrix());
+            const double x = clip[0] / clip[3];
+            const double y = clip[1] / clip[3];
+            nearest = std::min({nearest, x - left, right - x, top - y, y - bottom});
+        }
+        EXPECT_NEAR(0.0, nearest, 1e-3);
+    }
+}
+
+TEST(TileProjector, MercatorMatchesTheTileMatrix) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(1.0).withBearing(30.0).withPitch(20.0));
+    const TransformState& state = transform.getState();
+    ASSERT_FALSE(state.isGlobeRendering());
+
+    // The bottom-right corner of tile 1/0/0 is lat 0, lng 0: the map center.
+    const UnwrappedTileID tileID(1, 0, 0);
+    const TileProjector projector(state, tileID);
+    const Point<double> corner{util::EXTENT, util::EXTENT};
+    vec4 pos = {{corner.x, corner.y, 0, 1}};
+    matrix::transformMat4(pos, pos, state.getProjectionData(tileID).mainMatrix);
+
+    const auto projected = projector.project(corner);
+    EXPECT_NEAR(pos[0] / pos[3], projected.point.x, 1e-9);
+    EXPECT_NEAR(pos[1] / pos[3], projected.point.y, 1e-9);
+    EXPECT_NEAR(0.0, projected.point.x, 1e-6);
+    EXPECT_NEAR(0.0, projected.point.y, 1e-6);
+    EXPECT_DOUBLE_EQ(pos[3], projected.signedDistanceFromCamera);
+    EXPECT_FALSE(projected.occluded);
+    EXPECT_FALSE(projector.project({0.0, 0.0}).occluded);
+    EXPECT_DOUBLE_EQ(1.0, projector.circleRadiusCorrection());
+    EXPECT_DOUBLE_EQ(1.0, projector.pitchedTextCorrection({100.0, 100.0}));
+    EXPECT_DOUBLE_EQ(1.0, state.getProjection().pixelScale(state));
+}
+
+TEST(TileProjector, GlobeOccludesTheFarSideAndCorrectsForLatitude) {
+    Transform transform;
+    setUpGlobe(transform, {40.0, 0.0}, 1.0);
+    const TransformState& state = transform.getState();
+    const UnwrappedTileID tileID(1, 0, 0);
+    const TileProjector projector(state, tileID);
+
+    // The bottom-right corner (lat 0, lng 0) faces the camera; the bottom-left one (lng -180, lat 0) is behind it.
+    EXPECT_FALSE(projector.project({util::EXTENT, util::EXTENT}).occluded);
+    EXPECT_TRUE(projector.project({0.0, util::EXTENT}).occluded);
+
+    const double cos40 = std::cos(util::deg2rad(40.0));
+    EXPECT_NEAR(cos40, projector.circleRadiusCorrection(), 1e-12);
+    EXPECT_NEAR(1.0 / cos40, state.getProjection().pixelScale(state), 1e-12);
+    // Tile y of latitude 60 in tile 1/0/0.
+    const double tileY = Projection::project(LatLng{60.0, 0.0}, 2.0).y / util::tileSize_D * util::EXTENT;
+    EXPECT_NEAR(cos40 / std::cos(util::deg2rad(60.0)), projector.pitchedTextCorrection({100.0, tileY}), 1e-6);
+    EXPECT_NEAR(cos40, projector.pitchedTextCorrection({100.0, util::EXTENT}), 1e-6);
+}
+
+// A query on the globe is padded with GL JS's Mercator pitch factor, taken at the screen corner's unclamped Mercator
+// position: the values are GL JS's `GlobeTransform.maxPitchScaleFactor()` for the same views.
+// Map-aligned circles, pitched text and line widths blend their globe size with Mercator's through the projection
+// transition: the values are GL JS's `GlobeTransform` corrections for the same center and transition.
+TEST(Transform, GlobeSizeCorrectionsBlendThroughTheTransition) {
+    struct Case {
+        double latitude;
+        double transition;
+        double circle;
+        double pixel;
+        double pitched;
+    };
+    for (const auto& c :
+         {Case{.latitude = 52.499167,
+               .transition = 0.5,
+               .circle = 0.8043864815927202,
+               .pixel = 1.321324254256826,
+               .pitched = 1.2637600088069},
+          Case{.latitude = 60, .transition = 0.25, .circle = 0.875, .pixel = 1.25, .pitched = 1.0636473098322572},
+          Case{.latitude = 60, .transition = 1, .circle = 0.5, .pixel = 2, .pitched = 1.2545892393290283},
+          Case{.latitude = 0, .transition = 0.5, .circle = 1, .pixel = 1, .pitched = 1.7545892393290279}}) {
+        Transform transform;
+        transform.resize({256, 256});
+        transform.setProjectionDefinition(
+            ProjectionDefinition(ProjectionType::Mercator, ProjectionType::VerticalPerspective, c.transition));
+        transform.jumpTo(CameraOptions().withCenter(LatLng{c.latitude, 13.418056}).withZoom(11.5));
+        const auto& state = transform.getState();
+        const auto& projection = state.getProjection();
+        EXPECT_NEAR(c.circle, projection.circleRadiusCorrection(state), 1e-9);
+        EXPECT_NEAR(c.pixel, projection.pixelScale(state), 1e-9);
+        // An anchor a quarter of the way down the zoom 0 tile, at 66.5 degrees north.
+        EXPECT_NEAR(c.pitched, projection.pitchedTextCorrection(state, {4096, 2048}, UnwrappedTileID(0, 0, 0)), 1e-9);
+    }
+}
+
+TEST(Transform, GlobeMaxPitchScaleFactor) {
+    struct View {
+        LatLng center;
+        double zoom;
+        double pitch;
+        double factor;
+    };
+    for (const auto& view : {View{.center = {20, 30}, .zoom = 1, .pitch = 50, .factor = 1.659065925812732},
+                             View{.center = {0, 0}, .zoom = 1, .pitch = 60, .factor = 2.3660254037842425},
+                             View{.center = {20, 30}, .zoom = 2, .pitch = 50, .factor = 1.6590659258122578}}) {
+        Transform transform;
+        transform.resize({512, 512});
+        transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+        transform.jumpTo(CameraOptions().withCenter(view.center).withZoom(view.zoom).withPitch(view.pitch));
+        EXPECT_NEAR(view.factor, transform.getState().maxPitchScaleFactor(), 1e-4);
+    }
+}
+
+TEST(Transform, GlobeLocationOcclusion) {
+    Transform transform;
+    setUpGlobe(transform, {0, 0}, 1);
+    EXPECT_FALSE(transform.isLocationOccluded({0, 0}));
+    EXPECT_FALSE(transform.isLocationOccluded({0, 60}));
+    EXPECT_FALSE(transform.isLocationOccluded({-60, 0}));
+    EXPECT_TRUE(transform.isLocationOccluded({0, 100}));
+    EXPECT_TRUE(transform.isLocationOccluded({0, 180}));
+    EXPECT_TRUE(transform.isLocationOccluded({-30, -120}));
+
+    setUpGlobe(transform, {0, 180}, 1);
+    EXPECT_TRUE(transform.isLocationOccluded({0, 0}));
+    EXPECT_FALSE(transform.isLocationOccluded({0, 180}));
+
+    transform.setProjectionDefinition(ProjectionDefinition("mercator"));
+    EXPECT_FALSE(transform.isLocationOccluded({0, 0}));
+
+    Transform unsized;
+    unsized.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    EXPECT_FALSE(unsized.isLocationOccluded({0, 180}));
+}
+
+TEST(Transform, GlobeCenterLongitudeStaysContinuous) {
+    Transform transform;
+    setUpGlobe(transform, {0, 179}, 1);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, -179}));
+    EXPECT_NEAR(181, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+    EXPECT_NEAR(-179, transform.getLatLng(LatLng::Wrapped).longitude(), 1e-9);
+    transform.moveBy({-40, 0});
+    EXPECT_GT(transform.getLatLng(LatLng::Unwrapped).longitude(), 181);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 179}));
+    EXPECT_NEAR(179, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+
+    // Mercator keeps its wrapped center.
+    transform.setProjectionDefinition(ProjectionDefinition("mercator"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, -179}));
+    EXPECT_NEAR(-179, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+}
+
+// Leaving the globe applies Mercator's limits again: its lowest zoom for the view's height and a wrapped center.
+TEST(Transform, LeavingTheGlobeConstrainsTheCamera) {
+    Transform transform;
+    transform.resize({400, 800});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(0.3));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 120}));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, -150}));
+    ASSERT_NEAR(210, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+    ASSERT_NEAR(0.3, transform.getZoom(), 1e-9);
+
+    transform.setProjectionDefinition(ProjectionDefinition("mercator"));
+    EXPECT_NEAR(std::log2(800.0 / 512.0), transform.getZoom(), 1e-9);
+    EXPECT_NEAR(-150, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+}
+
+// Bounds across the antimeridian keep a globe center past 180 degrees, which the globe hands over wrapped.
+TEST(Transform, GlobeBoundsAcrossTheAntimeridian) {
+    Transform transform;
+    setUpGlobe(transform, {0, 150}, 3);
+    transform.setLatLngBounds(LatLngBounds::hull({-10.0, 120.0}, {10.0, 240.0}));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 175.0}));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, -175.0}));
+    EXPECT_NEAR(185.0, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+
+    // A drag east across the antimeridian.
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 179.0}));
+    transform.moveBy({-100, 0});
+    EXPECT_GT(transform.getLatLng(LatLng::Unwrapped).longitude(), 180.0);
+    EXPECT_LT(transform.getLatLng(LatLng::Unwrapped).longitude(), 240.0);
+}
+
+// The camera the platforms read carries the wrapped center, whichever copy of it the globe keeps.
+// Bounds across the antimeridian keep the center in their own range, past 180 degrees: the camera reports it there,
+// so jumping back to the reported camera does not move the map, on either projection.
+TEST(Transform, CameraRoundTripsInsideBoundsAcrossTheAntimeridian) {
+    for (const bool globe : {false, true}) {
+        SCOPED_TRACE(globe ? "globe" : "mercator");
+        Transform transform;
+        transform.resize({800, 600});
+        if (globe) {
+            transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+        }
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 180.0}).withZoom(5.0));
+        transform.setLatLngBounds(LatLngBounds::hull({-10.0, 170.0}, {10.0, 190.0}));
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 185.0}));
+        ASSERT_NEAR(185.0, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+        transform.jumpTo(transform.getCameraOptions(std::nullopt));
+        EXPECT_NEAR(185.0, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+        if (globe) {
+            transform.setProjectionDefinition(ProjectionDefinition("mercator"));
+            EXPECT_NEAR(185.0, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+        }
+    }
+}
+
+TEST(Transform, GlobeCameraCenterIsWrapped) {
+    Transform transform;
+    setUpGlobe(transform, {0, 179}, 1);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, -179}));
+    ASSERT_NEAR(181, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+    EXPECT_NEAR(-179, transform.getCameraOptions(std::nullopt).center->longitude(), 1e-9);
+}
+
+// The expected centers are GL JS's inertia (handlePanInertia) for the same transforms: a fling turns the planet by
+// degrees per pixel at the center's latitude, and the zoom follows the latitude to keep the planet's size.
+TEST(Transform, GlobeFlingEndsAtGLJSInertiaCenter) {
+    struct Pan {
+        LatLng center;
+        double zoom;
+        double bearing;
+        ScreenCoordinate offset;
+        LatLng expected;
+    };
+    for (const auto& pan : {Pan{{30, -20}, 4, 30, {120, -80}, {29.64674667013475, -26.3247433402695}},
+                            Pan{{-45, 170}, 8, -100, {-50, 25}, {-44.91280009391755, 169.90853166980656}},
+                            Pan{{70, 0}, 5, 0, {200, 0}, {70, -4.23757815424085}}}) {
+        SCOPED_TRACE("zoom " + std::to_string(pan.zoom));
+        Transform transform;
+        setUpGlobe(transform, pan.center, pan.zoom, pan.bearing);
+        transform.moveBy(pan.offset, linearSecond());
+        transform.updateTransitions(transform.getTransitionStart() + Milliseconds(1000));
+        EXPECT_NEAR(pan.expected.latitude(), transform.getLatLng().latitude(), 1e-9);
+        EXPECT_NEAR(pan.expected.longitude(), transform.getLatLng().longitude(), 1e-9);
+        EXPECT_NEAR(
+            pan.zoom + VerticalPerspectiveProjection::zoomAdjustment(pan.center.latitude(), pan.expected.latitude()),
+            transform.getZoom(),
+            1e-9);
+    }
+}
+
+// A fling toward a pole eases along its own meridian, as GL JS's inertia does, as far toward the pole as the zoom it
+// starts from lets the center go: onto the pole from zoom 1.5 on this 800 by 600 view, short of it from zoom 3.
+// Moving the location under the end of the fling to the center took it over the pole, and the planet spun as it
+// bounced back.
+TEST(Transform, GlobeFlingTowardAPoleStaysOnItsMeridian) {
+    struct Fling {
+        double zoom;
+        std::array<std::pair<double, double>, 2> halves; // GL JS's latitude and zoom halfway and at the end
+    };
+    for (const auto& fling :
+         {Fling{1.5, {{{75, 0.5500156865235035}, {90, -1.0350518437681169}}}},
+          Fling{3, {{{73.2171601091423, 2.2078682014999638}, {86.43432021828463, 0.4649481562318831}}}}}) {
+        SCOPED_TRACE("zoom " + std::to_string(fling.zoom));
+        Transform transform;
+        setUpGlobe(transform, {60, 10}, fling.zoom);
+        transform.moveBy({0, 3000}, linearSecond());
+        double latitude = 60;
+        for (int frame = 1; frame <= 20; ++frame) {
+            transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
+            EXPECT_NEAR(10, transform.getLatLng().longitude(), 1e-9);
+            EXPECT_GE(transform.getLatLng().latitude(), latitude - 1e-9);
+            latitude = transform.getLatLng().latitude();
+            if (frame % 10 == 0) {
+                const auto& [expectedLatitude, expectedZoom] = fling.halves[(frame / 10) - 1];
+                EXPECT_NEAR(expectedLatitude, latitude, 1e-6);
+                EXPECT_NEAR(expectedZoom, transform.getZoom(), 1e-6);
+            }
+        }
+    }
+}
+
+// A fling worth more than half a turn stops at 179.5° the way it was going, like GL JS's inertia, rather than easing
+// the shorter way round, against the fling.
+TEST(Transform, GlobeFlingStopsShortOfHalfATurn) {
+    Transform transform;
+    setUpGlobe(transform, {0, 0}, 0.5);
+    transform.moveBy({-5000, 0}, linearSecond());
+    double longitude = 0;
+    for (int frame = 1; frame <= 20; ++frame) {
+        transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
+        EXPECT_GE(transform.getLatLng(LatLng::Unwrapped).longitude(), longitude - 1e-9);
+        longitude = transform.getLatLng(LatLng::Unwrapped).longitude();
+    }
+    EXPECT_NEAR(179.5, longitude, 1e-9);
+    EXPECT_NEAR(0, transform.getLatLng().latitude(), 1e-9);
+}
+
+// GL JS's drag (`versorSetLocationAtPoint` in globe_utils.ts at a6976b2d2) on a 640 by 480 vertical perspective
+// globe, one step at a time from the state GL JS had before it. GL JS builds the step's rotation with
+// `quat.fromValues`, a Float32Array, which near a pole moves its center by up to 2e-3 degrees a step; the expected
+// centers are GL JS's drag run in doubles. The location under a pixel differs from GL JS's by a few times 1e-8
+// degrees, which a step carries.
+TEST(GlobeTransform, DragCenterMatchesGLJS) {
+    struct Step {
+        const char* name;
+        LatLng center;
+        double zoom;
+        double bearing;
+        double pitch;
+        ScreenCoordinate point;
+        ScreenCoordinate panDelta;
+        LatLng expected;
+    };
+    for (const auto& step : {
+             Step{"center-drag-east 0", {20, 10}, 1, 0, 0, {330, 240}, {10, 0}, {19.96528220871278, 6.48152888184427}},
+             Step{"center-drag-east 2",
+                  {19.93062984381388, 2.96383097806563},
+                  1.0006345588283656,
+                  0,
+                  0,
+                  {330, 240},
+                  {10, 0},
+                  {19.89604275335306, -0.5530967909885476}},
+             Step{"center-drag-east 4",
+                  {19.86152078591744, -4.06925749079096},
+                  1.0012643498868492,
+                  0,
+                  0,
+                  {330, 240},
+                  {10, 0},
+                  {19.8270637906032, -7.584654172731689}},
+             Step{"off-center-drag 2",
+                  {16.074405186537916, 4.212860800653175},
+                  1.0322017912167816,
+                  0,
+                  0,
+                  {400, 180},
+                  {6, -4},
+                  {14.115311037321156, 1.3609496277557582}},
+             Step{"off-center-drag 4",
+                  {12.158623543717447, -1.4683004008273883},
+                  1.057008507859097,
+                  0,
+                  0,
+                  {400, 180},
+                  {6, -4},
+                  {10.204304619531165, -4.278521558340458}},
+             Step{"drag-north-into-pole 0",
+                  {70, -100},
+                  1,
+                  0,
+                  0,
+                  {320, 300},
+                  {0, 6},
+                  {70.73728720083854, -100.00000000000205}},
+             Step{"drag-north-into-pole 20",
+                  {84.74574401678998, -100.00000000000068},
+                  -0.9010463352914224,
+                  0,
+                  0,
+                  {320, 300},
+                  {0, 6},
+                  {85.48303121762915, -100.00000000000068}},
+             Step{"drag-north-into-pole 21",
+                  {85.48303121762915, -100.00000000000068},
+                  -0.9872050442266238,
+                  0,
+                  0,
+                  {320, 300},
+                  {0, 6},
+                  {86.22031841846909, -100.00000000000068}},
+             Step{"drag-north-into-pole 27",
+                  {89.90675442266692, -100.00000000000068},
+                  -0.9872050442266238,
+                  0,
+                  0,
+                  {320, 300},
+                  {0, 6},
+                  {90, -100.00000000000068}},
+             Step{"drag-north-into-pole 28",
+                  {90, -100.00000000000068},
+                  -0.9872050442266238,
+                  0,
+                  0,
+                  {320, 300},
+                  {0, 6},
+                  {90, -100.00000000000068}},
+             Step{"side-drag-at-pole 0",
+                  {85.0511287798066, -100},
+                  1,
+                  0,
+                  0,
+                  {380, 240},
+                  {6, 0},
+                  {85.0477656113963, -101.87137817590371}},
+             Step{"side-drag-at-pole 30",
+                  {84.95121303919578, -155.737980622539},
+                  1.0287640984336475,
+                  0,
+                  0,
+                  {380, 240},
+                  {6, 0},
+                  {84.94791671962916, -157.58177081818087}},
+             Step{"side-drag-at-pole 59",
+                  {84.85648183647973, 151.15114974424728},
+                  1.0555120380074723,
+                  0,
+                  0,
+                  {380, 240},
+                  {6, 0},
+                  {84.85324650692623, 149.33280710271083}},
+             Step{"side-drag-centred-pole 0",
+                  {89, 0},
+                  0.5,
+                  0,
+                  0,
+                  {340, 200},
+                  {0, 8},
+                  {89.34438829057913, 13.508337366700857}},
+             Step{"side-drag-centred-pole 2",
+                  {89.68877639444831, 22.57677926378733},
+                  0.5,
+                  0,
+                  0,
+                  {340, 200},
+                  {0, 8},
+                  {90, 28.803865724291313}},
+             Step{"side-drag-centred-pole 15",
+                  {90, 83.80781405685116},
+                  0.5,
+                  0,
+                  0,
+                  {340, 200},
+                  {0, 8},
+                  {90, 88.39147641789782}},
+             Step{"side-drag-centred-pole 29",
+                  {90, 147.97908711150444},
+                  0.5,
+                  0,
+                  0,
+                  {340, 200},
+                  {0, 8},
+                  {90, 152.5627494725511}},
+             Step{"drag-off-globe 0", {10, 5}, 1, 0, 0, {620, 240}, {20, 0}, {9.982236219514714, 1.5494610302675937}},
+             Step{"drag-off-globe 2",
+                  {9.964504640751409, -1.9008899375490955},
+                  1.0001573094988878,
+                  0,
+                  0,
+                  {620, 240},
+                  {20, 0},
+                  {9.946805201839899, -5.3510535945838456}},
+             Step{"drag-off-globe 4",
+                  {9.929137841049005, -8.801030629313573},
+                  1.0003134815524495,
+                  0,
+                  0,
+                  {620, 240},
+                  {20, 0},
+                  {9.911502496783827, -12.250821727578682}},
+             Step{"drag-bearing-pitch 0",
+                  {40, 30},
+                  2.5,
+                  30,
+                  40,
+                  {300, 330},
+                  {-7, 5},
+                  {40.100686468998106, 30.988488451527928}},
+             Step{"drag-bearing-pitch 4",
+                  {40.40265566873954, 33.96278116325789},
+                  2.4914316029001595,
+                  30,
+                  40,
+                  {300, 330},
+                  {-7, 5},
+                  {40.50328185738783, 34.95717865523261}},
+             Step{"drag-bearing-pitch 7",
+                  {40.70448865902955, 36.95046737255302},
+                  2.4849281889924244,
+                  30,
+                  40,
+                  {300, 330},
+                  {-7, 5},
+                  {40.80506918481425, 37.94937335237137}},
+             Step{"drag-across-antimeridian 0", {0, 175}, 1.5, 0, 0, {300, 240}, {-12, 0}, {0, 177.9946248399193}},
+             Step{"drag-across-antimeridian 5",
+                  {0, -170.02687580040782},
+                  1.5,
+                  0,
+                  0,
+                  {300, 240},
+                  {-12, 0},
+                  {0, -167.0322509604884}},
+             Step{"drag-across-antimeridian 9",
+                  {0, -158.0483764407433},
+                  1.5,
+                  0,
+                  0,
+                  {300, 240},
+                  {-12, 0},
+                  {0, -155.0537516008231}},
+             Step{"drag-south-pole 0",
+                  {-80, 40},
+                  0.8,
+                  0,
+                  0,
+                  {320, 200},
+                  {0, -7},
+                  {-80.49305711248556, 40.00000000000148}},
+             Step{"drag-south-pole 10",
+                  {-84.93057112485239, 40.00000000000193},
+                  -0.17465574390064653,
+                  0,
+                  0,
+                  {320, 200},
+                  {0, -7},
+                  {-85.42362823733717, 40.00000000000193}},
+             Step{"drag-south-pole 19",
+                  {-89.36808513722191, 40.00000000000193},
+                  -0.20929101946440645,
+                  0,
+                  0,
+                  {320, 200},
+                  {0, -7},
+                  {-89.86114224970903, 40.00000000000193}},
+             Step{"drag-south-pole 20",
+                  {-89.86114224970903, 40.00000000000193},
+                  -0.20929101946440645,
+                  0,
+                  0,
+                  {320, 200},
+                  {0, -7},
+                  {-90, 40.00000000000193}},
+         }) {
+        SCOPED_TRACE(step.name);
+        Transform transform;
+        transform.resize({640, 480});
+        transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+        transform.jumpTo(CameraOptions()
+                             .withCenter(step.center)
+                             .withZoom(step.zoom)
+                             .withBearing(step.bearing)
+                             .withPitch(step.pitch));
+        const LatLng center = VerticalPerspectiveProjection::dragCenter(
+            transform.getState(), {step.point.x, 480 - step.point.y}, {step.panDelta.x, -step.panDelta.y});
+        EXPECT_NEAR(step.expected.latitude(), center.latitude(), 1e-7);
+        EXPECT_NEAR(
+            0.0,
+            VerticalPerspectiveProjection::differenceOfAnglesDegrees(step.expected.longitude(), center.longitude()),
+            1e-4);
+    }
+}
+
+// Dragging sideways at the pole turns the globe around it with the latitude held, as GL JS's drag does. The center
+// used to come from the location beside it, so it slid away from the pole and the planet spun.
+TEST(GlobeTransform, DragAroundThePoleHoldsItsLatitude) {
+    Transform transform;
+    transform.resize({640, 480});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{util::LATITUDE_MAX, -100.0}).withZoom(1.0));
+    for (int step = 0; step < 60; ++step) {
+        transform.moveBy({6, 0}, ScreenCoordinate{380, 240});
+    }
+    // GL JS after the same 60 steps, run in doubles as in DragCenterMatchesGLJS.
+    EXPECT_NEAR(84.85324650692623, transform.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(
+        0.0,
+        VerticalPerspectiveProjection::differenceOfAnglesDegrees(149.33280710271083, transform.getLatLng().longitude()),
+        1e-6);
+    EXPECT_NEAR(1.0564167839713543, transform.getZoom(), 1e-6);
+}
+
+// Dragging north over the pole stops on it, as GL JS's drag does, the zoom holding the planet's size from the edge of
+// the Mercator range on. GL JS after the same 40 steps, run in doubles: (90, -100) at zoom -0.9872050442266238.
+TEST(GlobeTransform, DragOverThePoleStopsOnIt) {
+    Transform transform;
+    transform.resize({640, 480});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{70.0, -100.0}).withZoom(1.0));
+    for (int step = 0; step < 40; ++step) {
+        transform.moveBy({0, 6}, ScreenCoordinate{320, 300});
+    }
+    EXPECT_EQ(90.0, transform.getLatLng().latitude());
+    EXPECT_NEAR(-100.0, transform.getLatLng().longitude(), 1e-6);
+    EXPECT_NEAR(-0.9872050442266238, transform.getZoom(), 1e-6);
+}
+
+// GL JS #8629, its camera at 512 by 512: the center reaches the pole while the area past the Mercator range fits in
+// the view, and comes back to the edge of the range as a zoom in grows that area past it.
+TEST(GlobeTransform, CenterReachesThePoleAtLowZoom) {
+    Transform transform;
+    setUpGlobeCamera(transform, {60.2, 0.0}, 8.0);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{90.0, 0.0}).withZoom(0.0));
+    EXPECT_EQ(90.0, transform.getLatLng().latitude());
+    EXPECT_NEAR(0.0, transform.getZoom(), 1e-9);
+
+    setUpGlobeCamera(transform, {0.0, 0.0}, 0.0);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{90.0, 0.0}).withZoom(2.0));
+    EXPECT_NEAR(88.57750940365021, transform.getLatLng().latitude(), 1e-6);
+
+    for (const auto& [zoom, latitude] : std::array<std::pair<double, double>, 6>{{{1.0, 90.0},
+                                                                                  {1.5, 90.0},
+                                                                                  {2.0, 88.57750940365021},
+                                                                                  {2.5, 87.06149291090357},
+                                                                                  {3.0, 85.98950736849177},
+                                                                                  {4.0, util::LATITUDE_MAX}}}) {
+        SCOPED_TRACE("zoom " + std::to_string(zoom));
+        setUpGlobeCamera(transform, {90.0, 0.0}, 0.5);
+        transform.jumpTo(CameraOptions().withZoom(zoom));
+        EXPECT_NEAR(latitude, transform.getLatLng().latitude(), 1e-6);
+        EXPECT_NEAR(zoom, transform.getZoom(), 1e-9);
+    }
+}
+
+// Without a zoom, GL JS's jump bounds a center past the Mercator range by the zoom it lands on, and its ease and
+// flight bound it by the zoom they start from (GL JS's camera at 512 by 512).
+TEST(GlobeTransform, JumpBoundsThePoleByTheZoomItLandsOn) {
+    const double landingZoom = -0.5129658685303338;
+    Transform jump;
+    setUpGlobeCamera(jump, {10.0, 0.0}, 3.0);
+    jump.jumpTo(CameraOptions().withCenter(LatLng{89.0, 30.0}));
+    EXPECT_NEAR(89.0, jump.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(30.0, jump.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(landingZoom, jump.getZoom(), 1e-6);
+
+    Transform ease;
+    setUpGlobeCamera(ease, {10.0, 0.0}, 3.0);
+    ease.easeTo(CameraOptions().withCenter(LatLng{89.0, 30.0}), linearSecond());
+    runTo(ease, 0.5);
+    EXPECT_NEAR(47.99475368424589, ease.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(7.785022180215378, ease.getLatLng().longitude(), 1e-6);
+    EXPECT_NEAR(2.442592415258865, ease.getZoom(), 1e-6);
+    runTo(ease, 1.0);
+    EXPECT_NEAR(85.98950736849177, ease.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(30.0, ease.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(landingZoom, ease.getZoom(), 1e-6);
+
+    Transform fly;
+    setUpGlobeCamera(fly, {10.0, 0.0}, 3.0);
+    fly.flyTo(CameraOptions().withCenter(LatLng{89.0, 30.0}), linearSecond());
+    runTo(fly, 1.0);
+    EXPECT_NEAR(85.98950736849132, fly.getLatLng().latitude(), 1e-6);
+    EXPECT_NEAR(landingZoom, fly.getZoom(), 1e-6);
+}
+
+// Eases onto, off, and at the pole follow GL JS's camera at 512 by 512, halfway and at the end: a zoom in at the pole
+// eases the center back to the edge of the Mercator range.
+TEST(GlobeTransform, EasesOntoAndOffThePole) {
+    struct Frame {
+        double latitude;
+        double longitude;
+        double zoom;
+    };
+    struct Ease {
+        const char* name;
+        LatLng start;
+        double startZoom;
+        CameraOptions camera;
+        std::array<Frame, 2> halves;
+    };
+    for (const auto& ease :
+         {Ease{"onto the pole",
+               {60.0, 20.0},
+               2.0,
+               CameraOptions().withCenter(LatLng{90.0, 20.0}).withZoom(0.0),
+               {{{78.05612639366316, 20, 0.9949038280649232}, {90, 20, 0}}}},
+          Ease{"onto the pole without a zoom",
+               {60.0, 20.0},
+               1.0,
+               CameraOptions().withCenter(LatLng{89.5, 50.0}),
+               {{{74.75, 29.139640453666175, 0.07330592239273392}, {89.5, 50, -1.5350518437681169}}}},
+          Ease{"off the pole",
+               {90.0, 0.0},
+               0.0,
+               CameraOptions().withCenter(LatLng{30.0, 40.0}).withZoom(1.0),
+               {{{68.78679656440357, 24.852188049491588, 0.9047067439922991}, {30, 40, 1}}}},
+          Ease{"zooming in at the pole",
+               {90.0, 0.0},
+               0.5,
+               CameraOptions().withZoom(4.0),
+               {{{86.50061975668255, 0, 2.25}, {util::LATITUDE_MAX, 0, 4}}}}}) {
+        SCOPED_TRACE(ease.name);
+        Transform transform;
+        setUpGlobeCamera(transform, ease.start, ease.startZoom);
+        transform.easeTo(ease.camera, linearSecond());
+        for (int half = 1; half <= 2; ++half) {
+            runTo(transform, half / 2.0);
+            const Frame& expected = ease.halves[half - 1];
+            EXPECT_NEAR(expected.latitude, transform.getLatLng().latitude(), 1e-6);
+            EXPECT_NEAR(expected.longitude, transform.getLatLng().longitude(), 1e-6);
+            EXPECT_NEAR(expected.zoom, transform.getZoom(), 1e-6);
+        }
+    }
+}
+
+// Flights land on the pole as GL JS's do (its camera at 512 by 512). From zoom 2, GL JS's flight to the pole itself
+// stops at that zoom's limit, as its `setLocationAtPoint` has no solution for the pole at the center of the view; a
+// flight to any other latitude lands, as this one to 89.9 does, and GL JS's own test flies onto the pole from zoom 8.
+TEST(GlobeTransform, FliesOntoThePole) {
+    Transform transform;
+    setUpGlobeCamera(transform, {60.2, 0.0}, 8.0);
+    transform.flyTo(CameraOptions().withCenter(LatLng{90.0, 0.0}).withZoom(0.0), linearSecond());
+    runTo(transform, 1.0);
+    EXPECT_EQ(90.0, transform.getLatLng().latitude());
+    EXPECT_NEAR(0.0, transform.getZoom(), 1e-9);
+
+    setUpGlobeCamera(transform, {60.0, 20.0}, 2.0);
+    transform.flyTo(CameraOptions().withCenter(LatLng{89.9, 20.0}).withZoom(0.0), linearSecond());
+    for (const auto& [k, latitude, zoom] : std::array<std::tuple<double, double, double>, 2>{
+             {{0.5, 77.69090627898427, 0.6859841910974791}, {1.0, 89.9, 0.0}}}) {
+        SCOPED_TRACE("k " + std::to_string(k));
+        runTo(transform, k);
+        EXPECT_NEAR(latitude, transform.getLatLng().latitude(), 1e-6);
+        EXPECT_NEAR(20.0, transform.getLatLng().longitude(), 1e-9);
+        EXPECT_NEAR(zoom, transform.getZoom(), 1e-6);
+    }
+}
+
+// GL JS's zoom around a point near the pole on an 800 by 600 globe: the center goes past the Mercator range as far as
+// the new zoom lets it.
+TEST(GlobeTransform, ZoomAroundNearThePoleMatchesGLJS) {
+    struct Zoom {
+        LatLng center;
+        double zoom;
+        double zoomDelta;
+        ScreenCoordinate anchor;
+        LatLng expected;
+    };
+    for (const auto& zoom : {Zoom{{89.0, 0.0}, 1.0, 1.0, {450, 200}, {88.2247980153879, 39.898924941760924}},
+                             Zoom{{90.0, 0.0}, 0.5, 2.0, {400, 300}, {87.69055327579845, 0.0}}}) {
+        SCOPED_TRACE("zoom " + std::to_string(zoom.zoom));
+        Transform transform;
+        setUpGlobe(transform, zoom.center, zoom.zoom);
+        transform.jumpTo(CameraOptions().withZoom(zoom.zoom + zoom.zoomDelta).withAnchor(zoom.anchor));
+        EXPECT_NEAR(zoom.expected.latitude(), transform.getLatLng().latitude(), 1e-6);
+        EXPECT_NEAR(zoom.expected.longitude(), transform.getLatLng().longitude(), 1e-6);
+        EXPECT_NEAR(zoom.zoom + zoom.zoomDelta, transform.getZoom(), 1e-9);
+    }
+}
+
+// On Mercator a zoom around a point across the antimeridian leaves the center on the next world copy, as it does on
+// main: the camera reports that copy, which converts back to the middle of the view.
+TEST(Transform, MercatorCameraCenterIsOnTheTransformsWorldCopy) {
+    Transform transform;
+    transform.resize({800, 600});
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 179.9}).withZoom(5));
+    transform.jumpTo(CameraOptions().withZoom(6).withAnchor(ScreenCoordinate{700, 300}));
+    ASSERT_GT(transform.getLatLng(LatLng::Unwrapped).longitude(), 180.0);
+    const LatLng center = *transform.getCameraOptions(std::nullopt).center;
+    EXPECT_NEAR(transform.getLatLng(LatLng::Unwrapped).longitude(), center.longitude(), 1e-9);
+    const ScreenCoordinate point = transform.latLngToScreenCoordinate(center);
+    EXPECT_NEAR(400.0, point.x, 1e-6);
+    EXPECT_NEAR(300.0, point.y, 1e-6);
 }

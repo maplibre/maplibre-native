@@ -1,0 +1,21 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {}
+  },
+  "zoom": 2,
+  "sources": {},
+  "sprite": "local://sprites/emerald",
+  "projection": {
+    "type": "globe"
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-pattern": "cemetery_icon"
+      }
+    }
+  ]
+}
