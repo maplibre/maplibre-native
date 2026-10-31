@@ -4,7 +4,7 @@
 
 namespace mln {
 
-/// Receives errors detected by the symbol guard checks (see `MLN_SYMBOL_GUARDS`).
+/// Receives errors detected by the symbol guard checks (enabled by the environment variable `MLN_SYMBOL_GUARDS=1`).
 /// Both `TileObserver` and `RendererObserver` derive from this, so that whichever of them owns
 /// the thread a check ran on can be installed as that thread's error destination, see `ErrorSink`.
 class SymbolErrorObserver {
