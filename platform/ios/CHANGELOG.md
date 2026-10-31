@@ -2,6 +2,10 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+- Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
+
 ## 7.0.0
 
 ### 💥 Breaking changes
