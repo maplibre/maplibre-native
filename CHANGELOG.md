@@ -35,6 +35,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
+- [core] Fix rendered-feature queries near the final endpoint of an offset line.
 - [core] Fix plugin layer filters ignoring the style's global state.
 - [core] Fix plugin layers with read-write depth drawables not depth testing when drawn above a `fill-extrusion` layer.
 - [core] Revalidate unusable cached resources when resuming an offline download, preserving cached data for conditional requests ([#410](https://github.com/maplibre/maplibre-native/issues/410)).
