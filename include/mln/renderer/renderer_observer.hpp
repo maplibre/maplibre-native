@@ -81,6 +81,10 @@ public:
     /// slope rising towards the camera puts the eye under the ground.
     virtual void onTerrainEyeElevationChanged(double /*elevationMeters*/) {}
 
+    /// The terrain height at the center a running camera animation is headed for, once a DEM tile
+    /// covers it (UpdateParameters::transitionTargetCenter), and whenever a finer one changes it.
+    virtual void onTerrainTransitionTargetElevationChanged(double /*elevationMeters*/) {}
+
     /// Style is missing an image
     using StyleImageMissingCallback = std::function<void()>;
     virtual void onStyleImageMissing(const std::string&, const StyleImageMissingCallback& done) { done(); }
