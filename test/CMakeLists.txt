@@ -35,6 +35,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/layer_min_zoom_tiles.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_cache_policy.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_mesh_cover.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_source_cover.test.cpp
     $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_parser.test.cpp
