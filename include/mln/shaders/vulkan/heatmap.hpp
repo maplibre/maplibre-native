@@ -19,7 +19,7 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Vulkan> {
 
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = heatmapShaderPrelude;
     static constexpr auto vertex = R"(
@@ -53,11 +53,22 @@ struct HeatmapDrawableUBO {
     float weight_t;
     float radius_t;
     float pad1;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idHeatmapDrawableUBO) readonly buffer HeatmapDrawableUBOVector {
     HeatmapDrawableUBO drawable_ubo[];
 } drawableVector;
+
+// The Vulkan drawable binds textures by their texture-id enum value, so the
+// binding must equal idHeatmapDEMTexture (= 2)
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D dem_sampler;
 
 layout(set = LAYER_SET_INDEX, binding = idHeatmapEvaluatedPropsUBO) uniform HeatmapEvaluatedPropsUBO {
     float weight;
@@ -109,7 +120,12 @@ void main() {
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
-    gl_Position = drawable.matrix * vec4(floor(in_position * 0.5) + scaled_extrude, 0, 1);
+    const vec2 center = floor(in_position * 0.5);
+
+    // With 3D terrain on, lift the kernel to the terrain height at its centre
+    const float ele = get_elevation(center, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+
+    gl_Position = drawable.matrix * vec4(center + scaled_extrude, ele, 1);
     gl_Position.y *= -1.0;
 
     frag_weight = weight;
