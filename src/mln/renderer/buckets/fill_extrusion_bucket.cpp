@@ -77,6 +77,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                                      const PatternLayerMap& patternDependencies,
                                      std::size_t index,
                                      const CanonicalTileID& canonical) {
+    double roundedCornerDistance = layout.get<FillExtrusionRoundedCornerDistance>();
+
     const auto vertexOffset = vertices.elements();
 
     for (auto& polygon : classifyRings(geometry)) {
@@ -84,7 +86,6 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         limitHoles(polygon, 500);
 
         std::variant<GeometryCollection, GeometryCollectionFloat> polyVariant = polygon;
-        double roundedCornerDistance = layout.get<FillExtrusionRoundedCornerDistance>();
         if (roundedCornerDistance > 0) {
             polyVariant = roundPolygonCorners(polygon, roundedCornerDistance);
         }

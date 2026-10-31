@@ -949,11 +949,10 @@ void Drawable::draw(PaintParameters& parameters) const {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
         if (mlSegment.indexLength > 0) {
-            const uint32_t instanceCount = instanceAttributes ? static_cast<uint32_t>(instanceAttributes->getMinCount())
-                                                              : 1;
+            const uint32_t instanceCount = mlSegment.instanceCount;
+            const uint32_t baseInstance = mlSegment.baseInstance;
             const uint32_t indexOffset = static_cast<uint32_t>(mlSegment.indexOffset);
             const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
-            const uint32_t baseInstance = 0;
 
             // Check if encoder is valid before drawing
             if (!renderPassEncoder) {
