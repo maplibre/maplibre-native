@@ -762,6 +762,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                 observer->onTerrainEyeElevationChanged(eyeElevation);
             }
         }
+        // And where a camera animation is headed, while it runs: the map eases the center's height
+        // to the ground there, as gl-js does, instead of arriving at the height it left. Only once a
+        // DEM tile covers the spot: ground not loaded yet is not sea level.
+        if (const auto& target = updateParameters->transitionTargetCenter) {
+            if (const auto targetElevation = terrain->findElevationForLatLng(*target)) {
+                if (std::isnan(lastReportedTargetElevation) ||
+                    std::abs(*targetElevation - lastReportedTargetElevation) > 0.25) {
+                    lastReportedTargetElevation = *targetElevation;
+                    observer->onTerrainTransitionTargetElevationChanged(*targetElevation);
+                }
+            }
+        } else {
+            lastReportedTargetElevation = std::numeric_limits<double>::quiet_NaN();
+        }
     }
 
     auto stats = std::make_shared<gfx::RenderingStats>(context.threadSafeCopyRenderingStats());
