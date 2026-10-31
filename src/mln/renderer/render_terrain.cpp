@@ -55,6 +55,7 @@
 #include <functional>
 #include <iomanip>
 #include <sstream>
+#include <unordered_map>
 #include <unordered_set>
 
 namespace mln {
@@ -281,44 +282,81 @@ std::set<UnwrappedTileID> RenderTerrain::coarsenFarMeshTiles(std::set<UnwrappedT
                                                              size_t maxTiles,
                                                              uint8_t minZoom,
                                                              const std::array<double, 2>& origin) {
-    if (maxTiles == 0) {
+    if (maxTiles == 0 || tiles.size() <= maxTiles) {
         return tiles;
     }
-    while (tiles.size() > maxTiles) {
-        // A parent can take its children's place when they are leaves: no tile inside it goes
-        // deeper than its children, so the merge never swallows finer tiles nearer the camera
-        // and drops at most three tiles. Parents of tiles at minZoom are not candidates.
-        std::set<UnwrappedTileID> parents;
-        std::set<UnwrappedTileID> withDeeperTiles;
-        for (const auto& id : tiles) {
-            if (id.canonical.z <= minZoom) {
-                continue;
-            }
-            parents.emplace(id.wrap, id.canonical.scaledTo(id.canonical.z - 1));
-            for (int z = id.canonical.z - 2; z >= minZoom; --z) {
-                withDeeperTiles.emplace(id.wrap, id.canonical.scaledTo(static_cast<uint8_t>(z)));
+
+    // A parent can take its children's place when they are leaves: no tile inside it goes deeper
+    // than its children, so the merge never swallows finer tiles nearer the camera and drops at
+    // most three tiles. Parents of tiles at minZoom are not candidates. Each parent counts the
+    // tiles directly inside it and those deeper, kept up to date as tiles merge, so a round
+    // costs the depth of the tiles it touches, not the size of the cover.
+    struct Count {
+        int children = 0;
+        int deeper = 0;
+        bool queued = false;
+    };
+    std::unordered_map<UnwrappedTileID, Count> counts;
+
+    // The parents ready to merge, farthest first. Ties go by tile ID, as in nearestMeshTiles.
+    struct Candidate {
+        double dist2;
+        UnwrappedTileID id;
+        bool operator<(const Candidate& other) const {
+            return dist2 > other.dist2 || (dist2 == other.dist2 && id < other.id);
+        }
+    };
+    std::set<Candidate> ready;
+
+    const auto refresh = [&](const UnwrappedTileID& id, Count& count) {
+        const bool isReady = count.children > 0 && count.deeper == 0;
+        if (isReady == count.queued) {
+            return;
+        }
+        const Candidate candidate{tileCentreDistance2(id, origin), id};
+        if (isReady) {
+            ready.insert(candidate);
+        } else {
+            ready.erase(candidate);
+        }
+        count.queued = isReady;
+    };
+
+    // Adds (+1) or removes (-1) a tile in the counts of the parents it lies in; with `update`,
+    // also refreshes them.
+    const auto account = [&](const UnwrappedTileID& tile, int change, bool update) {
+        if (tile.canonical.z <= minZoom) {
+            return;
+        }
+        for (int z = tile.canonical.z - 1; z >= minZoom; --z) {
+            const UnwrappedTileID parent(tile.wrap, tile.canonical.scaledTo(static_cast<uint8_t>(z)));
+            Count& count = counts[parent];
+            (z == tile.canonical.z - 1 ? count.children : count.deeper) += change;
+            if (update) {
+                refresh(parent, count);
             }
         }
-        // The farthest such parent goes first. Ties go by tile ID, as in nearestMeshTiles.
-        std::optional<UnwrappedTileID> farthest;
-        double farthestDist2 = 0;
-        for (const auto& parent : parents) {
-            if (withDeeperTiles.contains(parent)) {
-                continue;
-            }
-            const double dist2 = tileCentreDistance2(parent, origin);
-            if (!farthest || dist2 > farthestDist2 || (dist2 == farthestDist2 && parent < *farthest)) {
-                farthest = parent;
-                farthestDist2 = dist2;
+    };
+
+    for (const auto& id : tiles) {
+        account(id, 1, false);
+    }
+    for (auto& [id, count] : counts) {
+        refresh(id, count);
+    }
+
+    // Each round takes tiles away or makes one shallower, so the loop ends by minZoom at the
+    // latest.
+    while (tiles.size() > maxTiles && !ready.empty()) {
+        const UnwrappedTileID farthest = ready.begin()->id;
+        for (const auto& child : farthest.children()) {
+            if (tiles.erase(child) > 0) {
+                account(child, -1, true);
             }
         }
-        if (!farthest) {
-            break;
+        if (tiles.insert(farthest).second) {
+            account(farthest, 1, true);
         }
-        // Each round takes tiles away or makes one shallower, so the loop ends by minZoom at the
-        // latest.
-        std::erase_if(tiles, [&](const UnwrappedTileID& id) { return id.isChildOf(*farthest); });
-        tiles.insert(*farthest);
     }
     return tiles;
 }

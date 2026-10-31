@@ -88,7 +88,7 @@ public:
     /// maxMeshOverzoomLevels past the DEM. A mesh tile past the DEM samples its DEM ancestor
     /// through a sub-tile offset.
     static constexpr uint8_t meshMaxZoom(TerrainLoadMode mode, uint8_t demMaxZoom) {
-        const int target = terrainLoadBudget(mode).meshTargetZoom;
+        const uint8_t target = terrainLoadBudget(mode).meshTargetZoom;
         const int maxLevels = target >= util::DEFAULT_MAX_ZOOM ? target : static_cast<int>(maxMeshOverzoomLevels);
         const int levels = std::clamp(target - demMaxZoom, 0, maxLevels);
         return static_cast<uint8_t>(demMaxZoom + levels);
