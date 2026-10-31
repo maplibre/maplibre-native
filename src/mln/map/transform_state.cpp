@@ -119,7 +119,7 @@ void TransformState::matrixFor(mat4& matrix, const UnwrappedTileID& tileID) cons
     matrix::identity(matrix);
     matrix::translate(matrix,
                       matrix,
-                      int64_t(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
+                      (tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
                       int64_t(tileID.canonical.y) * s,
                       0);
     matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);
@@ -1008,7 +1008,9 @@ void TransformState::moveLatLng(const LatLng& latLng, const ScreenCoordinate& an
     auto centerCoord = Projection::project(getLatLng(LatLng::Unwrapped), scale);
     auto latLngCoord = Projection::project(latLng, scale);
     auto anchorCoord = Projection::project(screenCoordinateToLatLng(anchor), scale);
-    setLatLngZoom(Projection::unproject(centerCoord + latLngCoord - anchorCoord, scale), getZoom());
+    const LatLng center = Projection::unproject(centerCoord + latLngCoord - anchorCoord, scale);
+    // Wrapped, as easeTo and GL JS's setLocationAtPoint leave it, unless bounds keep it in their range.
+    setLatLngZoom(bounds == LatLngBounds() ? center.wrapped() : center, getZoom());
 }
 
 void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {

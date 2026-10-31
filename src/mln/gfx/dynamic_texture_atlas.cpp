@@ -73,7 +73,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
     std::scoped_lock lock(mutex);
 
     GlyphAtlas glyphAtlas;
-    if (!glyphs.size()) {
+    if (glyphs.empty()) {
         glyphAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::Alpha];
         if (!glyphAtlas.dynamicTexture) {
             AlphaImage dummyImage(dummySize);
@@ -156,7 +156,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
     std::scoped_lock lock(mutex);
 
     ImageAtlas imageAtlas;
-    if (!icons.size() && !patterns.size()) {
+    if (icons.empty() && patterns.empty()) {
         imageAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::RGBA];
         if (!imageAtlas.dynamicTexture) {
             PremultipliedImage dummyImage(dummySize);
