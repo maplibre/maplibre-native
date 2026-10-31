@@ -14,7 +14,7 @@ GeometryCollection clipLines(
 
         auto end = line.end() - 1;
         for (auto it = line.begin(); it != end; it++) {
-            GeometryCoordinate p0 = *(it);
+            GeometryCoordinate p0 = *it;
             GeometryCoordinate p1 = *(it + 1);
 
             if (p0.x < x1 && p1.x < x1) {
