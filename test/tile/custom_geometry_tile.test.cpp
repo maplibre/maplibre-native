@@ -8,6 +8,7 @@
 #include <mln/util/run_loop.hpp>
 #include <mln/map/transform.hpp>
 #include <mln/renderer/tile_parameters.hpp>
+#include <mln/renderer/query.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/layers/circle_layer.hpp>
 #include <mln/style/layers/circle_layer_impl.hpp>
@@ -136,9 +137,16 @@ TEST(CustomGeometryTile, InvokeTileChanged) {
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
     tile.setLayers(layers, test.tileParameters.globalState);
     tile.setObserver(&observer);
+    std::vector<Feature> result;
+    tile.querySourceFeatures(result, {}, nullptr);
+    EXPECT_TRUE(result.empty());
+
     tile.setTileData(features);
 
     while (!tile.isComplete()) {
         test.loop.runOnce();
     }
+
+    tile.querySourceFeatures(result, {}, nullptr);
+    EXPECT_EQ(1u, result.size());
 }

@@ -548,7 +548,7 @@ void RendererBackend::initDevice() {
         return true;
     };
 
-    const auto& pickPhysicalDevice = [&]() {
+    const auto& pickPhysicalDevice = [&] {
         const auto& physicalDevices = instance->enumeratePhysicalDevices(dispatcher);
         if (physicalDevices.empty()) throw std::runtime_error("No Vulkan compatible GPU found");
 
@@ -677,7 +677,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     // failure, we shouldn't expect registration to fail unless the shader
     // registry instance provided already has conflicting programs present.
     (
-        [&]() {
+        [&] {
             using namespace std::string_literals;
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Vulkan>;
             auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters);
@@ -714,6 +714,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LineSDFShader,
+                  shaders::BuiltIn::LineGradientSDFShader,
                   shaders::BuiltIn::LinePatternShader,
                   shaders::BuiltIn::LocationIndicatorShader,
                   shaders::BuiltIn::LocationIndicatorTexturedShader,

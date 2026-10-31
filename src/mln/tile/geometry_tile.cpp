@@ -229,7 +229,7 @@ GeometryTile::~GeometryTile() {
 
     if (layoutResult) {
         threadPool.runOnRenderThread(
-            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {
+            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}] {
                 layoutResult_->dynamicTextureAtlas->removeUnusedDynamicTextures();
             });
     }

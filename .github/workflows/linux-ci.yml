@@ -10,8 +10,6 @@ on:
       - linux-*
 
   pull_request:
-    branches:
-      - '*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,16 +24,17 @@ permissions:
 
 env:
   EGL_PLATFORM: surfaceless
+  # Mesa 26's gfxstream ICD leaks a pthread key per vkCreateInstance, which exhausts glibc's 1024 keys in the Vulkan render tests.
+  VK_DRIVER_FILES: /usr/share/vulkan/icd.d/lvp_icd.json
 
 jobs:
   pre_job:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          submodules: recursive
           persist-credentials: false
 
       - name: Get all Linux files that have changed
@@ -64,7 +63,8 @@ jobs:
             rust: false
           - renderer: opengl
             rust: true
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -72,27 +72,28 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           languages: cpp
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@26e9283f268b880168bdbd2c545dfcd60ec2c6ab # v2.87.13
+      - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
         with:
           tool: armerge@2
 
       - if: matrix.variant.rust
-        run: cargo install cxxbridge-cmd --version 1.0.157 --locked
+        run: cargo install cxxbridge-cmd --version 1.0.202 --locked
 
       - name: Install ctcache
         run: |
-          # pending open PR https://github.com/matus-chochlik/ctcache/pull/94
-          git clone https://github.com/louwers/ctcache.git
-          cd ctcache
-          cd ..
-          mv ctcache /usr/local/bin
+          git init ctcache
+          git -C ctcache remote add origin https://github.com/matus-chochlik/ctcache.git
+          git -C ctcache fetch --depth=1 origin 857b14271d3ded5511c2e6a60f2dc20c1e4b5680
+          git -C ctcache checkout --detach FETCH_HEAD
+          sudo apt-get install -y python3-requests
+          sudo mv ctcache /usr/local/bin
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
@@ -102,19 +103,18 @@ jobs:
       - name: Build MapLibre Native
         env:
           CI: 1
+          # Public cache address so forks can read it without repository variables.
+          CTCACHE_HOST: 32.194.98.193
+          CTCACHE_AUTH_KEY: ${{ secrets.CTCACHE_AUTH_KEY }}
         run: |
           cmake --version
 
           # ctcache configuration
-          export CTCACHE_HOST=34.229.50.221
           export CTCACHE_PORT=5000
           export CTCACHE_PROTO=http
 
-          if [ -n "${{ secrets.CTCACHE_AUTH_KEY }}" ]; then
-            echo "setting CTCACHE_AUTH_KEY"
-            export CTCACHE_AUTH_KEY=${{ secrets.CTCACHE_AUTH_KEY }}
-          else
-            # do not write to cache if CTCACHE_AUTH_KEY not set
+          if [ -z "$CTCACHE_AUTH_KEY" ]; then
+            # Fork pull requests can read the cache without a write key.
             export CTCACHE_HOST_READ_ONLY=1
           fi
 
@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload mbgl-render as artifact
         if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: mbgl-render
           path: |
@@ -141,7 +141,7 @@ jobs:
 
       - name: Upload mbgl-benchmark-runner as artifact
         if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: mbgl-benchmark-runner
           path: |
@@ -156,7 +156,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           category: "/language:cpp"
 
@@ -183,7 +183,7 @@ jobs:
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: render-test-result-${{ matrix.variant.renderer }}
           path: |
@@ -197,7 +197,8 @@ jobs:
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
   linux-coverage:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -207,15 +208,15 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - name: Cache Bazel
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3 # 0.19.1
         with:
-          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
-          restore-keys: |
-            ${{ runner.os }}-bazel-
-          path: ~/.cache/bazel
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+          cache-save: ${{ github.event_name != 'pull_request' }}
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: '.nvmrc'
 
@@ -237,7 +238,7 @@ jobs:
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-report
           path: ${{ env.coverage_report }}
@@ -245,7 +246,7 @@ jobs:
   linux-ci-result:
     name: Linux CI Result
     if: needs.pre_job.outputs.should_skip != 'true' && always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       - pre_job
       - linux-build-and-test

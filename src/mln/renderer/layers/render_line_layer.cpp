@@ -359,10 +359,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-            return true;
-        }
-        return false;
+        return drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID));
     });
 
     auto createLineBuilder = [&](const std::string& name,
@@ -406,6 +403,17 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
     tileLayerGroup->setStencilTiles(renderTiles);
 
+    // The ramp texture is shared by every tile of the layer.
+    const auto ensureColorRampTexture = [&] {
+        if (!colorRampTexture2D && colorRamp->valid()) {
+            colorRampTexture2D = context.createTexture2D();
+            colorRampTexture2D->setImage(colorRamp);
+            colorRampTexture2D->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                         .wrapU = gfx::TextureWrapType::Clamp,
+                                                         .wrapV = gfx::TextureWrapType::Clamp});
+        }
+    };
+
     StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -438,11 +446,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         setRenderTileBucketID(tileID, bucket.getID());
 
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-            return true;
+            // A drawable produced on a previous style/bucket should not be updated.
+            return drawable.getLayerTweaker() == layerTweaker;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
@@ -477,7 +482,38 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                    LinePattern>(
             paintPropertyBinders, evaluated, propertiesAsUniforms, idLineColorVertexAttribute);
 
-        if (!evaluated.get<LineDasharray>().from.empty()) {
+        if (!evaluated.get<LineDasharray>().from.empty() && !unevaluated.get<LineGradient>().getValue().isUndefined()) {
+            // dash array over a gradient
+            if (!lineGradientSDFShaderGroup) {
+                lineGradientSDFShaderGroup = shaders.getShaderGroup("LineGradientSDFShader");
+                if (!lineGradientSDFShaderGroup) {
+                    continue;
+                }
+            }
+
+            auto shader = lineGradientSDFShaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, posNormalAttribName);
+            if (!shader) {
+                continue;
+            }
+
+            auto builder = createLineBuilder("lineGradientSDF", std::move(shader));
+
+            // vertices and attributes
+            addAttributes(*builder, bucket, std::move(vertexAttrs));
+
+            ensureColorRampTexture();
+            if (colorRampTexture2D) {
+                builder->setTexture(colorRampTexture2D, idLineImageTexture);
+
+                setSegments(builder, bucket);
+
+                builder->flush(context);
+                for (auto& drawable : builder->clearDrawables()) {
+                    addDrawable(std::move(drawable), LineLayerTweaker::LineType::GradientSDF);
+                }
+            }
+        } else if (!evaluated.get<LineDasharray>().from.empty()) {
             // dash array line (SDF)
             if (!lineSDFShaderGroup) {
                 lineSDFShaderGroup = shaders.getShaderGroup("LineSDFShader");
@@ -561,16 +597,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             // vertices and attributes
             addAttributes(*builder, bucket, std::move(vertexAttrs));
 
-            // texture
-            if (!colorRampTexture2D && colorRamp->valid()) {
-                // create texture. to be reused for all the tiles of the layer
-                colorRampTexture2D = context.createTexture2D();
-                colorRampTexture2D->setImage(colorRamp);
-                colorRampTexture2D->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
-                                                             .wrapU = gfx::TextureWrapType::Clamp,
-                                                             .wrapV = gfx::TextureWrapType::Clamp});
-            }
-
+            ensureColorRampTexture();
             if (colorRampTexture2D) {
                 builder->setTexture(colorRampTexture2D, idLineImageTexture);
 

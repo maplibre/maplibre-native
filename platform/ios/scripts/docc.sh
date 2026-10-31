@@ -25,11 +25,13 @@ build_dir=build
 
 rm -rf "$build_dir"/symbol-graphs
 rm -rf "$build_dir"/headers
+rm -rf "$build_dir"/include
 
 mkdir -p "$build_dir"/symbol-graphs
 mkdir -p "$build_dir"/headers
+mkdir -p "$build_dir"/include
 
-bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs
+bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs //platform/ios:umbrella_hdr //platform/ios:mln_defines
 
 # download resources from S3
 
@@ -39,6 +41,10 @@ public_headers=$(bazel query 'kind("source file", deps(//platform:ios-sdk, 2))' 
 style_headers=$(bazel cquery --//:renderer=metal //platform/darwin:generated_style_public_hdrs --output=files)
 
 cp $style_headers "$build_dir"/headers
+
+# MapLibre.h and MLNDefines.h, imported by some of the public headers
+include_headers=$(bazel cquery --//:renderer=metal "set(//platform/ios:umbrella_hdr //platform/ios:mln_defines)" --output=files)
+cp $include_headers "$build_dir"/include
 
 filter_filenames() {
     local prefix="$1"
@@ -67,6 +73,8 @@ clang_options=(
   -F "$SDK_PATH/System/Library/Frameworks"
   -I "$PWD"
   -I "$build_dir/headers"
+  -I "$build_dir/include"
+  -I platform/ios/src
   -I platform/darwin/src
   -x objective-c-header
 )

@@ -21,6 +21,7 @@
 #include <mln/util/instrumentation.hpp>
 
 #include <cassert>
+#include <optional>
 #if !defined(NDEBUG)
 #include <sstream>
 #endif
@@ -55,7 +56,7 @@ Drawable::Drawable(std::string name_)
     : gfx::Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
 
-Drawable::~Drawable() {}
+Drawable::~Drawable() = default;
 
 void Drawable::setEnableColor(bool value) {
     gfx::Drawable::setEnableColor(value);
@@ -272,7 +273,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     if (buildAttribs || buildInstanceBuffer) {
-        buildVulkanInputBindings();
+        buildVulkanInputBindings(static_cast<Context&>(uploadPass.getContext()));
     }
 
     const bool texturesNeedUpload = std::any_of(
@@ -368,6 +369,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
 
         context.renderingStats().numDrawCalls++;
+        context.renderingStats().totalDrawCalls++;
     }
 }
 
@@ -416,7 +418,7 @@ void Drawable::setSharedBuffers(const gfx::VertexAttributeArray& attribs, const 
         }
 
         const auto& binding = bindings[vkAttrib.getIndex()];
-        if (!binding) {
+        if (!binding || !binding->vertexBufferResource) {
             return;
         }
 
@@ -425,7 +427,7 @@ void Drawable::setSharedBuffers(const gfx::VertexAttributeArray& attribs, const 
     });
 }
 
-void Drawable::buildVulkanInputBindings() {
+void Drawable::buildVulkanInputBindings(Context& context) {
     MLN_TRACE_FUNC();
 
     impl->vulkanVertexBuffers.clear();
@@ -435,11 +437,40 @@ void Drawable::buildVulkanInputBindings() {
     impl->pipelineInfo.inputBindings.clear();
 
     std::vector<const gfx::VertexBufferResource*> uniqueBuffers;
+    std::optional<uint32_t> dummyBindingIndex;
 
     const auto buildBindings = [&](const gfx::AttributeBindingArray& bindings, vk::VertexInputRate inputRate) {
         for (size_t i = 0; i < bindings.size(); ++i) {
             const auto& binding = bindings[i];
-            if (!binding.has_value() || !binding->vertexBufferResource) continue;
+            if (!binding.has_value()) {
+                continue;
+            }
+
+            if (!binding->vertexBufferResource) {
+                // back missing attributes with a zero-stride dummy buffer that reads a constant value
+                if (!dummyBindingIndex) {
+                    dummyBindingIndex = static_cast<uint32_t>(impl->pipelineInfo.inputBindings.size());
+
+                    // sync `uniqueBuffers` with `inputBindings`
+                    uniqueBuffers.push_back(nullptr);
+
+                    impl->pipelineInfo.inputBindings.push_back(vk::VertexInputBindingDescription()
+                                                                   .setBinding(*dummyBindingIndex)
+                                                                   .setStride(0)
+                                                                   .setInputRate(inputRate));
+
+                    impl->vulkanVertexBuffers.push_back(context.getDummyBuffer()->getVulkanBuffer());
+                    impl->vulkanVertexOffsets.push_back(0u);
+                }
+
+                impl->pipelineInfo.inputAttributes.push_back(
+                    vk::VertexInputAttributeDescription()
+                        .setBinding(*dummyBindingIndex)
+                        .setLocation(static_cast<uint32_t>(i))
+                        .setFormat(PipelineInfo::vulkanFormat(binding->attribute.dataType))
+                        .setOffset(0));
+                continue;
+            }
 
             const auto& vertexBuffer = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
             const auto& buffer = vertexBuffer->get();

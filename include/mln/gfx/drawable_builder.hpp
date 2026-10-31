@@ -79,7 +79,7 @@ public:
     void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
     /// Whether to enable depth testing
-    bool getEnableDepth() { return enableDepth; }
+    bool getEnableDepth() const { return enableDepth; }
     void setEnableDepth(bool value) { enableDepth = value; }
 
     /// Depth writability for 2D drawables
@@ -216,7 +216,7 @@ public:
     /// return the current vertex count
     std::size_t curVertexCount() const;
 
-    bool empty() const { return !(drawables.size() || curVertexCount()); }
+    bool empty() const { return drawables.empty() && !curVertexCount(); }
 
 protected:
     /// Create an instance of the appropriate drawable type

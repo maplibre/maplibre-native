@@ -1,6 +1,7 @@
 #include <mln/i18n/number_format.hpp>
 #include <mln/style/conversion_impl.hpp>
 #include <mln/style/expression/number_format.hpp>
+#include <mln/util/exception.hpp>
 
 namespace mln {
 namespace style {
@@ -71,10 +72,15 @@ EvaluationResult NumberFormat::evaluate(const EvaluationContext& params) const {
         evaluatedMaxFractionDigits = static_cast<uint8_t>(maxDigitsResult->get<double>());
     }
 
-    std::string output;
-    output = platform::formatNumber(
-        evaluatedNumber, evaluatedLocale, evaluatedCurrency, evaluatedMinFractionDigits, evaluatedMaxFractionDigits);
-    return output;
+    try {
+        return platform::formatNumber(evaluatedNumber,
+                                      evaluatedLocale,
+                                      evaluatedCurrency,
+                                      evaluatedMinFractionDigits,
+                                      evaluatedMaxFractionDigits);
+    } catch (const util::LocaleException& error) {
+        return EvaluationError{error.what()};
+    }
 }
 
 void NumberFormat::eachChild(const std::function<void(const Expression&)>& visit) const {

@@ -125,6 +125,8 @@ constexpr const auto expressionRegistry = mapbox::eternal::hash_map<mapbox::eter
      {"format", FormatExpression::parse},
      {"image", ImageExpression::parse},
      {"interpolate", parseInterpolate},
+     {"interpolate-hcl", parseInterpolate},
+     {"interpolate-lab", parseInterpolate},
      {"length", Length::parse},
      {"let", Let::parse},
      {"literal", Literal::parse},
@@ -285,7 +287,7 @@ std::string ParsingContext::getCombinedErrors() const {
     std::string combinedError;
     for (const ParsingError& parsingError : *errors) {
         if (!combinedError.empty()) {
-            combinedError += "\n";
+            combinedError += '\n';
         }
         if (!parsingError.key.empty()) {
             combinedError += parsingError.key + ": ";

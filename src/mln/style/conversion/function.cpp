@@ -512,7 +512,8 @@ std::unique_ptr<Expression> interpolate(type::Type type,
                                         std::unique_ptr<Expression> input,
                                         std::map<double, std::unique_ptr<Expression>> stops) {
     ParsingContext ctx;
-    auto result = createInterpolate(std::move(type), std::move(interpolator), std::move(input), std::move(stops), ctx);
+    auto result = createInterpolate(
+        std::move(type), std::move(interpolator), ColorSpace::RGB, std::move(input), std::move(stops), ctx);
     if (!result) {
         assert(false);
         return {};
