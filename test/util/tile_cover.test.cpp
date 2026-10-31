@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include <algorithm>
+#include <map>
 #include <cstdlib> /* srand, rand */
 #include <ctime>   /* time */
 #include <gtest/gtest.h>
@@ -589,6 +590,51 @@ TEST(TileCover, CoveringZoomLevelRoundsForRasterSources) {
     EXPECT_EQ(5, util::coveringZoomLevel(4.6, style::SourceType::Video, util::tileSize_I));
     EXPECT_EQ(4, util::coveringZoomLevel(4.4, style::SourceType::RasterDEM, util::tileSize_I));
     EXPECT_EQ(6, util::coveringZoomLevel(4.6, style::SourceType::RasterDEM, 256));
+}
+
+namespace {
+
+// Answers by tile and records which tiles the cover asked about, and how often.
+class RecordingElevation final : public util::TileElevationProvider {
+public:
+    std::optional<Range<double>> getTileElevationRange(const CanonicalTileID& id) const override {
+        ++asked[id];
+        const double base = id.z * 100.0 + static_cast<double>(id.x % 7);
+        return Range<double>{base, base + 50.0};
+    }
+
+    mutable std::map<CanonicalTileID, int> asked;
+};
+
+} // namespace
+
+// A cover asks for the terrain's height under the nodes it visits, for every source, every frame,
+// and what it costs depends on the elevation source. A node is asked about once, not once for the
+// frustum test and again for the precise test of a leaf; and a node the frustum contains is not
+// asked about for the precise test at all, as the answer is known.
+TEST(TileCover, ElevationIsAskedOncePerNodeAndNotForNodesTheFrustumContains) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.jumpTo(CameraOptions().withCenter(LatLng{50.7, 15.0}).withZoom(12.0).withPitch(0.0));
+
+    const RecordingElevation provider;
+    const auto tiles = util::tileCover({.transformState = transform.getState(), .elevationProvider = &provider},
+                                       14,
+                                       Range<uint8_t>{0, 14},
+                                       std::optional<uint8_t>{14});
+    ASSERT_FALSE(tiles.empty());
+
+    // The seven world copies share the zoom 0 tile; below it each node is one tile.
+    for (const auto& [id, count] : provider.asked) {
+        if (id.z == 0) continue;
+        EXPECT_EQ(count, 1) << "z" << int(id.z) << "/" << id.x << "/" << id.y << " was asked about " << count
+                            << " times";
+    }
+    size_t leavesAsked = 0;
+    for (const auto& tile : tiles) {
+        leavesAsked += provider.asked.count(tile.canonical);
+    }
+    EXPECT_LT(leavesAsked, tiles.size()) << "tiles inside the frustum are asked about too";
 }
 
 TEST(TileCover, DISABLED_FuzzPoly) {

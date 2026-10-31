@@ -499,13 +499,13 @@ bool hasUprightVerticalOrientation(char16_t chr) {
 
     if (isInBopomofo(chr) || isInBopomofoExtended(chr)) return true;
     if (isInCJKCompatibilityForms(chr)) {
-        if (!(chr >= u'﹉' && chr <= u'﹏')) return true;
+        if (chr < u'﹉' || chr > u'﹏') return true;
     }
     if (isInCJKCompatibility(chr) || isInCJKCompatibilityIdeographs(chr) || isInCJKRadicalsSupplement(chr) ||
         isInCJKStrokes(chr))
         return true;
     if (isInCJKSymbolsandPunctuation(chr)) {
-        if (!(chr >= u'〈' && chr <= u'】') && !(chr >= u'〔' && chr <= u'〟') && chr != u'〰') return true;
+        if ((chr < u'〈' || chr > u'】') && (chr < u'〔' || chr > u'〟') && chr != u'〰') return true;
     }
     if (isInCJKUnifiedIdeographs(chr) || isInCJKUnifiedIdeographsExtensionA(chr) ||
         isInEnclosedCJKLettersandMonths(chr) || isInHangulCompatibilityJamo(chr) || isInHangulJamo(chr) ||
@@ -517,13 +517,13 @@ bool hasUprightVerticalOrientation(char16_t chr) {
     }
     if (isInKatakanaPhoneticExtensions(chr)) return true;
     if (isInHalfwidthandFullwidthForms(chr)) {
-        if (chr != u'（' && chr != u'）' && chr != u'－' && !(chr >= u'：' && chr <= u'＞') && chr != u'［' &&
-            chr != u'］' && chr != u'＿' && !(chr >= u'｛' && chr <= 0xFFDF) && chr != u'￣' &&
-            !(chr >= u'￨' && chr <= 0xFFEF))
+        if (chr != u'（' && chr != u'）' && chr != u'－' && (chr < u'：' || chr > u'＞') && chr != u'［' &&
+            chr != u'］' && chr != u'＿' && (chr < u'｛' || chr > 0xFFDF) && chr != u'￣' &&
+            (chr < u'￨' || chr > 0xFFEF))
             return true;
     }
     if (isInSmallFormVariants(chr)) {
-        if (!(chr >= u'﹘' && chr <= u'﹞') && !(chr >= u'﹣' && chr <= u'﹦')) return true;
+        if ((chr < u'﹘' || chr > u'﹞') && (chr < u'﹣' || chr > u'﹦')) return true;
     }
     if (isInUnifiedCanadianAboriginalSyllabics(chr) || isInUnifiedCanadianAboriginalSyllabicsExtended(chr) ||
         isInVerticalForms(chr) || isInYijingHexagramSymbols(chr) || isInYiSyllables(chr) || isInYiRadicals(chr))

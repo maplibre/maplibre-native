@@ -65,6 +65,7 @@ public:
     void onWillStartRenderingMap() final;
     void onDidFinishRenderingMap() final;
     void onTerrainCenterElevationChanged(double elevationMeters) final;
+    void onTerrainEyeElevationChanged(double elevationMeters) final;
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;
@@ -121,13 +122,57 @@ public:
     TileLodMode tileLodMode = TileLodMode::Default;
     TerrainLoadMode terrainLoadMode = TerrainLoadMode::Quality;
     TerrainSkirtLength terrainSkirtLength = TerrainSkirtLength::Auto;
-    /// Off by default: the clamp jumps the camera asynchronously, including part-way
-    /// through a gesture, and browsing a terrain map with it on runs away rather than
-    /// pans. Opt in with Map::setCenterClampedToGround until it is applied during render
-    /// setup instead, the way GL JS's recalculateZoomAndCenter is.
+    /// Off by default. Opt in with Map::setCenterClampedToGround. A gesture holds the center's
+    /// height, and its end anchors the center on the ground keeping the view, the way GL JS's
+    /// elevationFreeze and recalculateZoomAndCenter do.
     bool centerClampedToGround = false;
     /// Terrain height under the centre, as the renderer last reported it (NaN until then).
     double terrainCenterElevation = std::numeric_limits<double>::quiet_NaN();
+    /// Terrain height under the camera's eye, as the renderer last reported it (NaN until then).
+    double terrainEyeElevation = std::numeric_limits<double>::quiet_NaN();
+    /// How far above the ground under it the eye is kept, in meters.
+    static constexpr double eyeClearanceMeters = 10.0;
+    /// The lowest height the center can be at with the eye `eyeClearanceMeters` above the ground
+    /// under it; -infinity until the renderer has reported that ground.
+    double eyeClearCenterAltitude() const;
+    /// The height the clamp puts the center at: the ground under it, or higher when the eye
+    /// would otherwise sit under the ground under the eye.
+    double clampedCenterAltitude() const;
+    /// The center altitude a gesture holds, as gl-js's elevationFreeze does, so the camera keeps
+    /// its height while the ground under the center rises and falls; empty while no gesture is
+    /// in progress.
+    std::optional<double> gestureHeldCenterAltitude;
+    /// How many more ground reports after an anchor may move the center along the line of sight
+    /// instead of moving the camera. The anchor takes the height of the ground under the old
+    /// center, so on a slope the center lands on a plane above or below the ground it then looks
+    /// at; as gl-js's recalculateZoomAndCenter does in its passes, the next reports slide it along
+    /// the line of sight onto that ground with the camera kept in place.
+    int anchorPassesLeft = 0;
+    /// The heights the passes have shown the line of sight meets the ground above and below:
+    /// over broken ground the height under the center can flip between two values as it slides,
+    /// so the passes halve the bracket instead of chasing them, and leave the center there once
+    /// it is under a meter wide.
+    double anchorBracketLow = -std::numeric_limits<double>::infinity();
+    double anchorBracketHigh = std::numeric_limits<double>::infinity();
+    /// The passes left the center beside a cliff in the data, off the height under it: the clamp
+    /// leaves it there until the camera next moves, rather than move the camera onto that height.
+    bool centerSettledBesideACliff = false;
+    /// The running transition is a pan's momentum (an animated Map::moveBy), which the eye
+    /// clearance may cut short, rather than a camera move the app asked for, which it leaves
+    /// alone.
+    bool transitionIsFling = false;
+    /// What the clamp is owed when the transition or gesture ends (centerAwaitingTerrainAnchor)
+    /// is an anchor that keeps the view, because a gesture or its fling moved the camera, and not
+    /// the plain jump onto the ground that follows an animation the app asked for.
+    bool centerAnchorKeepsView = false;
+    /// Notes that the app sets the camera: a pass budget and a settled center belong to the
+    /// camera being replaced, and `fling` marks a pan's momentum.
+    void noteCameraSet(bool fling = false);
+    /// Ends a hold: anchors the center keeping the view and starts the passes that follow it.
+    void anchorAfterHold();
+    /// Applies the clamp for the heights last reported, or leaves it to the end of a running
+    /// transition.
+    void applyCenterClamp();
     void anchorCenterOnTerrain();
     /// Slides the centre along the line of sight to `altitudeMeters`, the zoom following, so the
     /// camera stays where it is. False, changing nothing, when there was nothing to move, the line
@@ -146,8 +191,8 @@ public:
     /// Runs a return still waiting before the app sets a camera, which every camera entry point
     /// does first, so that the return does not move the app's camera afterwards.
     void settleCenterAwaitingSeaLevel();
-    /// A height report arrived while a camera transition was running; the clamp applies it
-    /// once the transition ends instead of cutting the transition short.
+    /// A height report arrived while a camera transition or a gesture was running; the clamp
+    /// applies it once that ends instead of cutting it short.
     bool centerAwaitingTerrainAnchor = false;
     /// Moves the centre altitude to `elevationMeters` keeping lng/lat; false when the change
     /// is under the sub-metre threshold.

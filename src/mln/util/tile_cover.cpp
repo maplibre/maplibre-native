@@ -52,9 +52,10 @@ void scanSpans(edge e0, edge e1, int32_t ymin, int32_t ymax, ScanLine& scanLine)
     // scan lines!
     const double m0 = e0.dx / e0.dy;
     const double m1 = e1.dx / e1.dy;
-    const double d0 = e0.dx > 0;       // use y + 1 to compute x0
-    const double d1 = e1.dx < 0;       // use y + 1 to compute x1
-    for (double y = y0; y < y1; y++) { // NOLINT(clang-analyzer-security.FloatLoopCounter)
+    const double d0 = e0.dx > 0; // use y + 1 to compute x0
+    const double d1 = e1.dx < 0; // use y + 1 to compute x1
+    // NOLINTNEXTLINE(clang-analyzer-security.FloatLoopCounter,bugprone-float-loop-counter,cert-flp30-c)
+    for (double y = y0; y < y1; y++) {
         double x0 = m0 * ::fmax(0, ::fmin(e0.dy, y + d0 - e0.y0)) + e0.x0;
         double x1 = m1 * ::fmax(0, ::fmin(e1.dy, y + d1 - e1.y0)) + e1.x0;
         scanLine(static_cast<int32_t>(std::floor(x1)), static_cast<int32_t>(std::ceil(x0)), static_cast<int32_t>(y));
@@ -208,6 +209,11 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                  .p;
 
     const vec3 centerCoord = {{centerPoint.x, centerPoint.y, 0.0}};
+    // Where the distance-based level of detail below measures from: the map centre, or
+    // `tileLodOrigin` when the caller gives one.
+    const vec3 lodCoord = state.tileLodOrigin
+                              ? vec3{{(*state.tileLodOrigin)[0] * numTiles, (*state.tileLodOrigin)[1] * numTiles, 0.0}}
+                              : centerCoord;
 
     assert(transform.getFreeCameraOptions().position);
     const vec3 cameraPositionMercator = *transform.getFreeCameraOptions().position;
@@ -306,12 +312,13 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         stack.pop_back();
 
         // Use cached visibility information of ancestor nodes
+        bool elevated = false;
         if (!node.fullyVisible) {
             // The flat fast path (frustum.intersects) asserts a zero-elevation box, so
             // an elevated node has to take the 3D path. Nodes stay flat, and keep the
             // cheaper test, until a DEM gives them height via elevatedAABB.
             const AABB testAABB = elevatedAABB(node);
-            const bool elevated = testAABB.min[2] != 0.0 || testAABB.max[2] != 0.0;
+            elevated = testAABB.min[2] != 0.0 || testAABB.max[2] != 0.0;
             const IntersectionResult intersection = elevated ? frustum.intersectsElevated(testAABB)
                                                              : frustum.intersects(testAABB);
 
@@ -342,7 +349,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                                                        cameraToCenterDistanceMercator /
                                                                        state.tileLodScale * nominalScale;
         } else {
-            const vec3 distanceXyz = node.aabb.distanceXYZ(centerCoord);
+            const vec3 distanceXyz = node.aabb.distanceXYZ(lodCoord);
             const double* longestDim = std::max_element(distanceXyz.data(), distanceXyz.data() + distanceXyz.size());
             assert(longestDim);
 
@@ -363,14 +370,13 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         if (node.zoom == maxZoom || (!shouldSplitTile && node.zoom >= minZoom)) {
             // Perform precise intersection test between the frustum and aabb.
             // This will cull < 1% false positives missed by the original test
-            const AABB preciseAABB = elevatedAABB(node);
-            const bool preciseElevated = preciseAABB.min[2] != 0.0 || preciseAABB.max[2] != 0.0;
-            // intersectsPrecise also flattens to z = 0; the 3D method already covers the
-            // elevated case precisely, so reuse it rather than run the flat edge tests.
-            const bool visible = node.fullyVisible ||
-                                 (preciseElevated
-                                      ? frustum.intersectsElevated(preciseAABB) != IntersectionResult::Separate
-                                      : frustum.intersectsPrecise(preciseAABB, true) != IntersectionResult::Separate);
+            // A node that is not fully visible got here because the frustum test above said it
+            // intersects. For an elevated node that test was already the exact 3D one
+            // (intersectsElevated on the same box), so asking again would only repeat the
+            // elevation lookup and the answer. A flat node's box is node.aabb, which
+            // intersectsPrecise reads in x and y only.
+            const bool visible = node.fullyVisible || elevated ||
+                                 frustum.intersectsPrecise(node.aabb, true) != IntersectionResult::Separate;
             if (visible) {
                 const OverscaledTileID id = {
                     node.zoom == maxZoom ? overscaledZoom : node.zoom, node.wrap, node.zoom, node.x, node.y};
@@ -378,7 +384,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                 const double dx = node.wrap * numTiles + node.x + 0.5 - coordToLoadFirst[0];
                 const double dy = node.y + 0.5 - coordToLoadFirst[1];
 
-                result.push_back({id, dx * dx + dy * dy});
+                result.push_back({.id = id, .sqrDist = dx * dx + dy * dy});
             }
         } else {
             std::vector<Node> children = childrenOf(node);
