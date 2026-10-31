@@ -73,14 +73,18 @@ struct FragmentInput {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    // Pack the fragment depth into RGBA8, matching the maplibre-gl-js
-    // terrain_depth shader; unpacked by unpack_depth() for calculate_visibility()
-    let depth = in.position.z;
-    let bit_shift = vec4<f32>(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);
-    let bit_mask = vec4<f32>(0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0);
-    var res = fract(depth * bit_shift);
-    res = res - res.xxyz * bit_mask;
-    return res;
+    // Pack the window depth into RGBA8 as four base-256 digits, each written as k / 255 so the
+    // unorm8 target stores it exactly (the gl-js fract/bit_mask scheme stores k / 256 and loses
+    // up to 0.002 to unorm rounding). Decoded by unpack_depth() for calculate_visibility().
+    var r = min(in.position.z, 0.99999994) * 256.0;
+    let d0 = floor(r);
+    r = (r - d0) * 256.0;
+    let d1 = floor(r);
+    r = (r - d1) * 256.0;
+    let d2 = floor(r);
+    r = (r - d2) * 256.0;
+    let d3 = floor(r);
+    return vec4<f32>(d0, d1, d2, d3) / 255.0;
 }
 )";
 };

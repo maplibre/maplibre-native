@@ -101,46 +101,61 @@ fn apply_drape_transform(clip: vec4<f32>, matrix: mat4x4<f32>, target_tile: vec4
     return result;
 }
 
-// Unpack a depth value packed by the terrain depth pass (webgpu/terrain_depth.hpp),
-// converted to NDC z, as in the maplibre-gl-js prelude
+// Unpack a depth value packed by the terrain depth pass (webgpu/terrain_depth.hpp), converted
+// to NDC z: four base-256 digits of the window depth, each stored exactly as k / 255 in the RGBA8
+// target (the gl-js fract/bit_mask scheme stores k / 256 into a unorm8 that holds n / 255, an
+// error of up to 0.002, far more than the depth differences the test looks for at native's 1 px
+// near plane).
 fn unpack_depth(rgba_depth: vec4<f32>) -> f32 {
-    let bit_shift = vec4<f32>(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
-    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+    let digits = floor(rgba_depth * 255.0 + 0.5);
+    let weights = vec4<f32>(1.0 / 256.0, 1.0 / 65536.0, 1.0 / 16777216.0, 1.0 / 4294967296.0);
+    return dot(digits, weights) * 2.0 - 1.0;
 }
 
 // Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully
-// hidden, with a soft ramp over ~0.002 NDC depth and a small bias so geometry
-// sitting exactly on the terrain surface (e.g. a label anchored to it) does not
-// occlude itself. Matches the maplibre-gl-js depthOpacity() prelude function.
+// hidden, with a soft ramp and a small bias so geometry sitting exactly on the
+// terrain surface (e.g. a label anchored to it) does not occlude itself. Matches the
+// maplibre-gl-js depthOpacity() prelude function.
 // WebGPU has y-up NDC but a top-left texture origin (like Metal, unlike GL), so
 // the V coordinate is flipped here where the GL version does not flip.
+// `depth_ramp` scales the gl-js ramp (500 per NDC unit) to this projection: gl-js uses a near
+// plane of height / 50 where native's TransformState::getProjMatrix uses 1 (one pixel at the
+// view centre), which compresses every fragment's NDC depth into the top ~0.1%. Scaling by the
+// near-plane ratio keeps gl-js's behaviour (fully hidden ~0.11 view-heights behind the surface
+// at the centre distance, self-occlusion bias ~5 px); see calculate_visibility for the value.
 fn depth_opacity(frag: vec3<f32>,
                  depth_texture: texture_2d<f32>,
-                 depth_sampler: sampler) -> f32 {
+                 depth_sampler: sampler,
+                 depth_ramp: f32) -> f32 {
     let uv = frag.xy * 0.5 + 0.5;
+    let bias = 0.05 / depth_ramp; // gl-js: 0.0001 * 500
     let d = unpack_depth(textureSampleLevel(depth_texture, depth_sampler, vec2<f32>(uv.x, 1.0 - uv.y), 0.0)) +
-            0.0001 - frag.z;
-    return 1.0 - max(0.0, min(1.0, -d * 500.0));
+            bias - frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * depth_ramp));
 }
 
 // Whether a clip-space position is visible in front of the terrain, from the
 // packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
+// The near-plane ratio (height / 50) gives a ramp of 500 * height / 50 = 10 * height at any field
+// of view; `units_to_pixels_y` is GlobalPaintParamsUBO.units_to_pixels.y, -/+ height / 2.
 fn calculate_visibility(pos: vec4<f32>,
                         depth_texture: texture_2d<f32>,
                         depth_sampler: sampler,
-                        depth_enabled: f32) -> f32 {
+                        depth_enabled: f32,
+                        units_to_pixels_y: f32) -> f32 {
     if (depth_enabled == 0.0) {
         return 1.0;
     }
+    let depth_ramp = 20.0 * abs(units_to_pixels_y);
     let frag = pos.xyz / pos.w;
     // check if coordinate is fully visible
-    let d = depth_opacity(frag, depth_texture, depth_sampler);
+    let d = depth_opacity(frag, depth_texture, depth_sampler, depth_ramp);
     if (d > 0.95) {
         return 1.0;
     }
     // if not, sample some pixels above: a label whose anchor is just behind a
     // ridge still shows if its glyphs poke above it (maplibre-gl-js behaviour)
-    return (d + depth_opacity(frag + vec3<f32>(0.0, 0.01, 0.0), depth_texture, depth_sampler)) / 2.0;
+    return (d + depth_opacity(frag + vec3<f32>(0.0, 0.01, 0.0), depth_texture, depth_sampler, depth_ramp)) / 2.0;
 }
 
 fn radians(degrees: f32) -> f32 {
