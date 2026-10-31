@@ -111,7 +111,7 @@ public:
     /// Get the mutable uniform buffer array attached to this layer group
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
 
-    bool shouldRenderToTerrain() { return renderToTerrain; }
+    bool shouldRenderToTerrain() const { return renderToTerrain; }
 
     /// Set observer
     void setObserver(gfx::ContextObserver*);
