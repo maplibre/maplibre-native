@@ -542,8 +542,8 @@ struct LinePatternDrawableUBO {
     // Interpolations
     float blur_t;
     float opacity_t;
-    float offset_t;
     float gapwidth_t;
+    float offset_t;
     float width_t;
     float pattern_from_t;
     float pattern_to_t;

@@ -20,13 +20,12 @@ concurrency:
 
 jobs:
   pre_job:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          submodules: recursive
           persist-credentials: false
 
       - name: Get all Android files that have changed
@@ -37,7 +36,7 @@ jobs:
           files_yaml_from_source_file: .github/changed-files.yml
 
   android-build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 240
     needs:
       - pre_job
@@ -199,7 +198,7 @@ jobs:
         run: sccache --show-stats
 
   android-build-cpp-test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
 
     needs:
@@ -229,9 +228,9 @@ jobs:
 
       - name: Build C++ Unit Tests App
         run: |
-          ./gradlew assembleDebug assembleAndroidTest -Pmaplibre.abis=arm64-v8a
-          cp app/build/outputs/apk/debug/app-debug.apk .
-          cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk .
+          ./gradlew assembleOpenglDebug assembleOpenglAndroidTest -Pmaplibre.abis=arm64-v8a
+          cp app/build/outputs/apk/opengl/debug/app-opengl-debug.apk app-debug.apk
+          cp app/build/outputs/apk/androidTest/opengl/release/app-opengl-release-androidTest.apk app-release-androidTest.apk
 
       - name: Store C++ Unit Tests .apk files
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -248,7 +247,7 @@ jobs:
       matrix:
         flavor: [opengl, vulkan]
 
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 120
 
     needs:
@@ -275,7 +274,7 @@ jobs:
           flavor: ${{ matrix.flavor }}
 
   android-build-webgpu-dawn:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     needs:
       - pre_job
@@ -305,7 +304,7 @@ jobs:
         run: sccache --show-stats
 
   android-build-webgpu-wgpu:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     needs:
       - pre_job
@@ -371,7 +370,7 @@ jobs:
         run: sccache --show-stats
 
   android-ci-result:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       actions: write
       contents: write

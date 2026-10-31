@@ -71,15 +71,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
-          fetch-depth: 0
 
-      - name: Cache Bazel
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3 # 0.19.1
         with:
-          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
-          restore-keys: |
-            ${{ runner.os }}-bazel-
-          path: ~/.cache/bazel
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+          cache-save: ${{ github.event_name != 'pull_request' }}
 
       - name: Install dependencies
         run: |
@@ -91,6 +90,10 @@ jobs:
 
       - name: Check public symbol exports
         run: bazel test //platform:check-public-symbols-macos --test_output=errors --//:renderer=metal
+
+      - name: Build dynamic XCFramework for macOS
+        if: github.event_name != 'pull_request'
+        run: bazel build //platform/macos:MapLibre.dynamic --//:renderer=metal
 
       - name: Generate Xcode project for macOS
         run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
@@ -121,6 +124,11 @@ jobs:
         run: |
           brew install cmake ninja pkg-config python@3.11 go glfw libuv icu4c jpeg-turbo webp libpng ccache
           brew link --overwrite python@3.11
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        with:
+          key: macos-webgpu-${{ matrix.variant.impl }}
 
       - name: Configure environment
         run: |

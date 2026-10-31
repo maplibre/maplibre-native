@@ -27,6 +27,7 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                            std::unique_ptr<GeometryTileLayer> sourceLayer_,
                            plugin::RegisteredLayerPtr registration_)
     : zoom(parameters.tileID.overscaledZ),
+      globalState(parameters.globalState),
       layers(std::move(layers_)),
       sourceLayer(std::move(sourceLayer_)),
       registration(std::move(registration_)) {}
@@ -59,7 +60,9 @@ void PluginLayout::createBucket(const ImagePositions&,
         if (!feature) continue;
         const auto type = plugin::geometryType(feature->getType());
         if (type == 0 || (registration->geometryTypeMask & type) == 0) continue;
-        if (!leader.filter(style::expression::EvaluationContext(zoom, feature.get()).withCanonicalTileID(&canonical))) {
+        if (!leader.filter(style::expression::EvaluationContext(zoom, feature.get())
+                               .withCanonicalTileID(&canonical)
+                               .withGlobalState(globalState.get()))) {
             continue;
         }
 

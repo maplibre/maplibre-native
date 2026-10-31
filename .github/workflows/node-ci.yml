@@ -75,9 +75,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-24.04
+          - runs-on: ubuntu-26.04
             arch: x86_64
-          - runs-on: ubuntu-24.04-arm
+          - runs-on: ubuntu-26.04-arm
             arch: arm64
           - runs-on: macos-15-intel
             arch: x86_64
@@ -135,6 +135,8 @@ jobs:
             xvfb \
             libcurl4-openssl-dev \
             libglfw3-dev \
+            libgles-dev \
+            libopengl-dev \
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
@@ -217,12 +219,12 @@ jobs:
           $vcpkg_commit_id = ($(git submodule status .\platform\windows\vendor\vcpkg).Trim() -split ' ')[0]
           Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
 
-      - name: Restore vcpkg binary cache
+      - name: Cache vcpkg binaries
         if: runner.os == 'Windows'
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
-          key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
+          key: vcpkg-${{ matrix.arch }}-${{ env.VCPKG_COMMIT_ID }}
 
       - name: Configure maplibre-native (Windows x64)
         if: runner.os == 'Windows' && matrix.arch == 'x86_64'

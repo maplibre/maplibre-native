@@ -29,11 +29,13 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/dem_elevation_provider.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_camera.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation_index.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_resolution.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/layer_min_zoom_tiles.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_cache_policy.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_mesh_cover.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_source_cover.test.cpp
     $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_parser.test.cpp
@@ -168,6 +170,14 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
+
+if(MLN_WITH_METAL)
+    target_sources(
+        mbgl-test
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/test/renderer/metal_renderable.test.cpp
+    )
+endif()
 
 if(MLN_WITH_VULKAN)
     target_sources(

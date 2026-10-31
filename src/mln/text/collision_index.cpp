@@ -414,7 +414,7 @@ std::unordered_map<uint32_t, std::vector<IndexedSubfeature>> CollisionIndex::que
 
         // Skip already seen features.
         auto& seenFeatures = seenBuckets[feature.getBucketInstanceId()];
-        if (seenFeatures.find(feature.getIndex()) != seenFeatures.end()) continue;
+        if (seenFeatures.contains(feature.getIndex())) continue;
 
         if (!polygonIntersectsBox(gridQuery, bbox)) {
             continue;

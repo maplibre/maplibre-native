@@ -63,6 +63,11 @@ void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) 
         const auto property = impl.pluginProperties.find(definition.name);
         auto value = property == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
                                                              : property->second;
+        if (!definition.supportsTransitions) {
+            transitioningPaintProperties.insert_or_assign(definition.name,
+                                                          style::PluginTransitioningPropertyValue{std::move(value)});
+            continue;
+        }
         auto prior = transitioningPaintProperties.find(definition.name);
         auto priorValue = prior == transitioningPaintProperties.end()
                               ? style::PluginTransitioningPropertyValue{style::defaultPluginPropertyValue(definition)}
@@ -250,9 +255,11 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setIs3D(true);
                 builder->setEnableStencil(true);
             } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
+                // Drawn like fill-extrusion: the per-layer depth mode is disabled above the opaque-pass
+                // cutoff, so a 2D drawable would not depth test against itself or the extrusions.
                 builder->setEnableDepth(true);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setIs3D(false);
+                builder->setIs3D(true);
                 builder->setEnableStencil(false);
                 if (definition.cullBackFaces) {
                     builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
@@ -286,6 +293,18 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 ++stats.drawablesAdded;
             }
         }
+    }
+    if (!registration->enableStencilOverlapDedup) {
+        // Derived from the live drawables on every update so that the stencil tiles go away again once a
+        // layer stops producing read-write drawables (e.g. after zooming out of a 3D representation).
+        bool hasDepthDrawables = false;
+        tileLayerGroup->visitDrawables([&](gfx::Drawable& drawable) {
+            hasDepthDrawables |= drawable.getIs3D() && !drawable.getEnableStencil() && drawable.getEnableDepth() &&
+                                 drawable.getDepthType() == gfx::DepthMaskType::ReadWrite;
+        });
+        // The group only applies the 3D depth mode to is3D drawables when it has stencil tiles; read-write
+        // drawables disable stencil, so no clipping masks are drawn for them.
+        tileLayerGroup->setStencilTiles(hasDepthDrawables ? renderTiles : RenderTiles{});
     }
 }
 
