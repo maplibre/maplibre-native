@@ -213,7 +213,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
         },
         duration,
         camera.centerAltitude ? std::nullopt
-                              : std::optional<CenterAltitudeEase>({startCenterAlt, centerAlt, 0.0, latLng}));
+                              : std::optional<CenterAltitudeEase>(CenterAltitudeEase{
+                                    .start = startCenterAlt, .target = centerAlt, .progress = 0.0, .center = latLng}));
 }
 
 /** This method implements an “optimal path” animation, as detailed in:
@@ -412,7 +413,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
         },
         duration,
         camera.centerAltitude ? std::nullopt
-                              : std::optional<CenterAltitudeEase>({startCenterAlt, centerAlt, 0.0, latLng}));
+                              : std::optional<CenterAltitudeEase>(CenterAltitudeEase{
+                                    .start = startCenterAlt, .target = centerAlt, .progress = 0.0, .center = latLng}));
 }
 
 // MARK: - Position
