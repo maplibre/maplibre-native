@@ -2,6 +2,8 @@
 
 ## main
 
+- Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
+
 ### 🐞 Bug fixes
 
 - Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).

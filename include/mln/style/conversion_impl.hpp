@@ -142,68 +142,68 @@ public:
     Convertible(const Convertible&) = delete;
     Convertible& operator=(const Convertible&) = delete;
 
-    friend inline bool isUndefined(const Convertible& v) {
+    friend bool isUndefined(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->isUndefined(v.storage);
     }
 
-    friend inline bool isArray(const Convertible& v) {
+    friend bool isArray(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->isArray(v.storage);
     }
 
-    friend inline std::size_t arrayLength(const Convertible& v) {
+    friend std::size_t arrayLength(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->arrayLength(v.storage);
     }
 
-    friend inline Convertible arrayMember(const Convertible& v, std::size_t i) {
+    friend Convertible arrayMember(const Convertible& v, std::size_t i) {
         assert(v.vtable);
         return v.vtable->arrayMember(v.storage, i);
     }
 
-    friend inline bool isObject(const Convertible& v) {
+    friend bool isObject(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->isObject(v.storage);
     }
 
-    friend inline std::optional<Convertible> objectMember(const Convertible& v, const char* name) {
+    friend std::optional<Convertible> objectMember(const Convertible& v, const char* name) {
         assert(v.vtable);
         return v.vtable->objectMember(v.storage, name);
     }
 
-    friend inline std::optional<Error> eachMember(
+    friend std::optional<Error> eachMember(
         const Convertible& v, const std::function<std::optional<Error>(const std::string&, const Convertible&)>& fn) {
         assert(v.vtable);
         return v.vtable->eachMember(v.storage, fn);
     }
 
-    friend inline std::optional<bool> toBool(const Convertible& v) {
+    friend std::optional<bool> toBool(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->toBool(v.storage);
     }
 
-    friend inline std::optional<float> toNumber(const Convertible& v) {
+    friend std::optional<float> toNumber(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->toNumber(v.storage);
     }
 
-    friend inline std::optional<double> toDouble(const Convertible& v) {
+    friend std::optional<double> toDouble(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->toDouble(v.storage);
     }
 
-    friend inline std::optional<std::string> toString(const Convertible& v) {
+    friend std::optional<std::string> toString(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->toString(v.storage);
     }
 
-    friend inline std::optional<Value> toValue(const Convertible& v) {
+    friend std::optional<Value> toValue(const Convertible& v) {
         assert(v.vtable);
         return v.vtable->toValue(v.storage);
     }
 
-    friend inline std::optional<GeoJSON> toGeoJSON(const Convertible& v, Error& error) {
+    friend std::optional<GeoJSON> toGeoJSON(const Convertible& v, Error& error) {
         assert(v.vtable);
         return v.vtable->toGeoJSON(v.storage, error);
     }
