@@ -65,9 +65,6 @@ MLN_EXPORT
 
  Set it before adding the source to a style, so that no tile is requested
  under the old setting.
-
- This property corresponds to `Source.isVolatile()` and `Source.setVolatile()`
- in the Android SDK. (`volatile` is a C keyword, hence the property's name.)
  */
 @property (nonatomic, getter=isVolatile, setter=setVolatile:) BOOL isVolatile;
 
