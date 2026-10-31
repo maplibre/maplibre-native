@@ -153,6 +153,11 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
     }
 
+    if (parameters.coverTileLimit > 0) {
+        util::keepNearestTiles(idealTiles, parameters.coverTileLimit, parameters.coverTileLimitOrigin);
+        util::keepNearestTiles(panTiles, parameters.coverTileLimit, parameters.coverTileLimitOrigin);
+    }
+
     // Stores a list of all the tiles that we're definitely going to retain.
     // There are two kinds of tiles we need: the ideal tiles determined by the
     // tile cover. They may not yet be in use because they're still loading. In
