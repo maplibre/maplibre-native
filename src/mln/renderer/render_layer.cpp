@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <mln/gfx/context.hpp>
+#include <mln/renderer/bucket.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_source.hpp>
@@ -77,6 +78,28 @@ void RenderLayer::dropTilesBelowMinZoom(const LayerPrepareParameters& params) {
     renderTiles = std::move(kept);
 }
 
+void RenderLayer::updateEmptyTileIDs(const LayerPrepareParameters& params) {
+    if (!layerGroup || layerGroup->getType() != LayerGroupBase::Type::TileLayerGroup ||
+        !layerGroup->shouldRenderToTerrain()) {
+        return;
+    }
+    auto& tileGroup = static_cast<TileLayerGroup&>(*layerGroup);
+    std::vector<UnwrappedTileID> emptyTileIDs;
+    if (params.terrain && renderTiles) {
+        for (const RenderTile& tile : *renderTiles) {
+            // Only a tile whose data has none for the layer: one whose drawables are merely not
+            // built yet (the tile build budget) must not clear the drape.
+            const Bucket* bucket = tile.getBucket(*baseImpl);
+            if (!bucket || !bucket->hasData()) {
+                emptyTileIDs.push_back(tile.getOverscaledTileID().toUnwrapped());
+            }
+        }
+    }
+    if (!emptyTileIDs.empty() || !tileGroup.getEmptyTileIDs().empty()) {
+        tileGroup.setEmptyTileIDs(std::move(emptyTileIDs));
+    }
+}
+
 bool RenderLayer::supportsZoom(float zoom) const {
     // TODO: shall we use rounding or epsilon comparisons?
     return baseImpl->minZoom <= zoom && baseImpl->maxZoom >= zoom;
@@ -93,6 +116,7 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     addRenderPassesFromTiles();
 
     updateRenderTileIDs();
+    updateEmptyTileIDs(params);
 }
 
 std::optional<Color> RenderLayer::getSolidBackground() const {
@@ -188,20 +212,6 @@ std::size_t RenderLayer::removeAllDrawables() {
 }
 
 void RenderLayer::updateRenderTileIDs() {
-    // A draped layer tells the terrain drape which tiles it covers, drawn on or not
-    // (see TileLayerGroup::setCoverTileIDs).
-    if (layerGroup && layerGroup->getType() == LayerGroupBase::Type::TileLayerGroup &&
-        layerGroup->shouldRenderToTerrain()) {
-        std::vector<UnwrappedTileID> coverTileIDs;
-        if (renderTiles) {
-            coverTileIDs.reserve(renderTiles->size());
-            for (const RenderTile& tile : *renderTiles) {
-                coverTileIDs.push_back(tile.getOverscaledTileID().toUnwrapped());
-            }
-        }
-        static_cast<TileLayerGroup&>(*layerGroup).setCoverTileIDs(std::move(coverTileIDs));
-    }
-
     if (!renderTiles || renderTiles->empty()) {
         renderTileIDs.clear();
         return;

@@ -76,6 +76,7 @@ void RenderRasterLayer::prepare(const LayerPrepareParameters& params) {
     assert(renderTiles || imageData || !params.source->isEnabled());
 
     updateRenderTileIDs();
+    updateEmptyTileIDs(params);
 }
 
 void RenderRasterLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {

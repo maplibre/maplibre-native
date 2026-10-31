@@ -1,6 +1,10 @@
 #pragma once
 
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/hash.hpp>
+
 #include <cstdint>
+#include <optional>
 #include <vector>
 
 namespace mln {
@@ -67,6 +71,76 @@ inline bool drapeFallbackStrictlyWorse(const std::vector<DrapeGroupFallback>& no
     }
     return worse;
 }
+
+/// What one draped layer group would render into a drape target, gathered tile by tile from the
+/// tiles the group draws on and the tiles its layer has no data on. Tiles that do not overlap the
+/// target are ignored.
+///
+/// `contentHash` identifies the content, so the drape re-renders when it changes. It is keyed on
+/// the tiles and the data drawn on them, NOT on drawable instances: those are rebuilt with fresh
+/// ids on every bucket update and fade transition, and a drawable-id hash churned every frame
+/// while panning and re-rendered every drape (~4x overdraw). Summed, so the order tiles are added
+/// in does not matter. Matches maplibre-gl-js, which keys its terrain render cache on tile coverage.
+///
+/// `fallback` tells drapeFallbackStrictlyWorse whether the content got worse. A tile the layer has
+/// no data on is content, empty content: a GeoJSON source updated to have no features there must
+/// clear the drape too. A tile neither drawn nor empty - still loading, or with its drawables
+/// deferred by the tile build budget - is missing, and meanwhile the drape keeps its bake.
+class DrapeGroupCoverage {
+public:
+    DrapeGroupCoverage(const UnwrappedTileID& target_, int32_t layerIndex_)
+        : target(target_),
+          layerIndex(layerIndex_) {}
+
+    /// A tile the group draws on, once per drawable. `dataID` identifies the data drawn there (the
+    /// source bucket's id, 0 when unknown), so new data under the same tile - a GeoJSON source
+    /// updated with setGeoJson - is new content.
+    void addDrawn(const UnwrappedTileID& tile, std::size_t dataID) { add(tile, /*drawn=*/true, dataID); }
+
+    /// A tile the group's layer covers but has no data on
+    void addEmpty(const UnwrappedTileID& tile) { add(tile, /*drawn=*/false, 0); }
+
+    std::size_t contentHash() const { return hash; }
+
+    DrapeGroupFallback fallback() const {
+        // Only the coarsest standalone fallback counts as lost detail; when an exact or deeper
+        // tile is present the ancestor is clipped away by the tile masks and costs nothing.
+        if (exactOrDescendant) {
+            return {layerIndex, 0};
+        }
+        if (bestAncestorZoom) {
+            return {layerIndex, static_cast<int16_t>(target.canonical.z - *bestAncestorZoom)};
+        }
+        return {layerIndex, -1};
+    }
+
+private:
+    void add(const UnwrappedTileID& tile, bool drawn, std::size_t dataID) {
+        if (tile == target || tile.isChildOf(target)) {
+            exactOrDescendant = true;
+        } else if (target.isChildOf(tile)) {
+            if (!bestAncestorZoom || tile.canonical.z > *bestAncestorZoom) {
+                bestAncestorZoom = tile.canonical.z;
+            }
+        } else {
+            return;
+        }
+        std::size_t tileHash = 0;
+        util::hash_combine(tileHash, tile.wrap);
+        util::hash_combine(tileHash, tile.canonical.z);
+        util::hash_combine(tileHash, tile.canonical.x);
+        util::hash_combine(tileHash, tile.canonical.y);
+        util::hash_combine(tileHash, drawn);
+        util::hash_combine(tileHash, dataID);
+        hash += tileHash;
+    }
+
+    UnwrappedTileID target;
+    int32_t layerIndex;
+    bool exactOrDescendant = false;
+    std::optional<uint8_t> bestAncestorZoom;
+    std::size_t hash = 0;
+};
 
 } // namespace terrain
 } // namespace mln
