@@ -11,8 +11,6 @@ namespace value {
 
 using namespace platform;
 
-const constexpr ClearDepth::Type ClearDepth::Default;
-
 void ClearDepth::Set(const Type& value) {
     MLN_TRACE_ZONE(ClearDepth::Set);
     MLN_TRACE_FUNC_GL();
@@ -43,8 +41,6 @@ ClearColor::Type ClearColor::Get() {
     return {clearColor[0], clearColor[1], clearColor[2], clearColor[3]};
 }
 
-const constexpr ClearStencil::Type ClearStencil::Default;
-
 void ClearStencil::Set(const Type& value) {
     MLN_TRACE_ZONE(ClearStencil::Set);
     MLN_TRACE_FUNC_GL();
@@ -58,8 +54,6 @@ ClearStencil::Type ClearStencil::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &clearStencil));
     return clearStencil;
 }
-
-const constexpr StencilMask::Type StencilMask::Default;
 
 void StencilMask::Set(const Type& value) {
     MLN_TRACE_ZONE(StencilMask::Set);
@@ -75,8 +69,6 @@ StencilMask::Type StencilMask::Get() {
     return stencilMask;
 }
 
-const constexpr DepthMask::Type DepthMask::Default;
-
 void DepthMask::Set(const Type& value) {
     MLN_TRACE_ZONE(DepthMask::Set);
     MLN_TRACE_FUNC_GL();
@@ -91,8 +83,6 @@ DepthMask::Type DepthMask::Get() {
     return Enum<gfx::DepthMaskType>::from(depthMask);
 }
 
-const constexpr ColorMask::Type ColorMask::Default;
-
 void ColorMask::Set(const Type& value) {
     MLN_TRACE_ZONE(ColorMask::Set);
     MLN_TRACE_FUNC_GL();
@@ -104,13 +94,11 @@ ColorMask::Type ColorMask::Get() {
     MLN_TRACE_FUNC_GL();
     GLboolean bools[4];
     MBGL_CHECK_ERROR(glGetBooleanv(GL_COLOR_WRITEMASK, bools));
-    return {static_cast<bool>(bools[0]),
-            static_cast<bool>(bools[1]),
-            static_cast<bool>(bools[2]),
-            static_cast<bool>(bools[3])};
+    return {.r = static_cast<bool>(bools[0]),
+            .g = static_cast<bool>(bools[1]),
+            .b = static_cast<bool>(bools[2]),
+            .a = static_cast<bool>(bools[3])};
 }
-
-const constexpr StencilFunc::Type StencilFunc::Default;
 
 void StencilFunc::Set(const Type& value) {
     MLN_TRACE_ZONE(StencilFunc::Set);
@@ -127,10 +115,8 @@ StencilFunc::Type StencilFunc::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_FUNC, &func));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_REF, &ref));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_VALUE_MASK, &mask));
-    return {Enum<gfx::StencilFunctionType>::from(func), ref, static_cast<uint32_t>(mask)};
+    return {.func = Enum<gfx::StencilFunctionType>::from(func), .ref = ref, .mask = static_cast<uint32_t>(mask)};
 }
-
-const constexpr StencilTest::Type StencilTest::Default;
 
 void StencilTest::Set(const Type& value) {
     MLN_TRACE_ZONE(StencilTest::Set);
@@ -145,8 +131,6 @@ StencilTest::Type StencilTest::Get() {
     MBGL_CHECK_ERROR(stencilTest = glIsEnabled(GL_STENCIL_TEST));
     return stencilTest;
 }
-
-const constexpr StencilOp::Type StencilOp::Default;
 
 void StencilOp::Set(const Type& value) {
     MLN_TRACE_ZONE(StencilOp::Set);
@@ -165,13 +149,12 @@ StencilOp::Type StencilOp::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_FAIL, &sfail));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &dpfail));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &dppass));
-    return {Enum<gfx::StencilOpType>::from(sfail),
-            Enum<gfx::StencilOpType>::from(dpfail),
-            Enum<gfx::StencilOpType>::from(dppass)};
+    return {.sfail = Enum<gfx::StencilOpType>::from(sfail),
+            .dpfail = Enum<gfx::StencilOpType>::from(dpfail),
+            .dppass = Enum<gfx::StencilOpType>::from(dppass)};
 }
 
 #if MLN_RENDER_BACKEND_OPENGL
-const constexpr DepthRange::Type DepthRange::Default;
 
 void DepthRange::Set(const Type& value) {
     MLN_TRACE_ZONE(DepthRange::Set);
@@ -188,8 +171,6 @@ DepthRange::Type DepthRange::Get() {
 }
 #endif
 
-const constexpr DepthTest::Type DepthTest::Default;
-
 void DepthTest::Set(const Type& value) {
     MLN_TRACE_ZONE(DepthTest::Set);
     MLN_TRACE_FUNC_GL();
@@ -203,8 +184,6 @@ DepthTest::Type DepthTest::Get() {
     MBGL_CHECK_ERROR(depthTest = glIsEnabled(GL_DEPTH_TEST));
     return depthTest;
 }
-
-const constexpr DepthFunc::Type DepthFunc::Default;
 
 void DepthFunc::Set(const DepthFunc::Type& value) {
     MLN_TRACE_ZONE(DepthFunc::Set);
@@ -220,8 +199,6 @@ DepthFunc::Type DepthFunc::Get() {
     return Enum<gfx::DepthFunctionType>::from(depthFunc);
 }
 
-const constexpr Blend::Type Blend::Default;
-
 void Blend::Set(const Type& value) {
     MLN_TRACE_ZONE(Blend::Set);
     MLN_TRACE_FUNC_GL();
@@ -235,8 +212,6 @@ Blend::Type Blend::Get() {
     MBGL_CHECK_ERROR(blend = glIsEnabled(GL_BLEND));
     return blend;
 }
-
-const constexpr BlendEquation::Type BlendEquation::Default;
 
 void BlendEquation::Set(const Type& value) {
     MLN_TRACE_ZONE(BlendEquation::Set);
@@ -252,8 +227,6 @@ BlendEquation::Type BlendEquation::Get() {
     return Enum<gfx::ColorBlendEquationType>::from(blend);
 }
 
-const constexpr BlendFunc::Type BlendFunc::Default;
-
 void BlendFunc::Set(const Type& value) {
     MLN_TRACE_ZONE(BlendFunc::Set);
     MLN_TRACE_FUNC_GL();
@@ -268,7 +241,8 @@ BlendFunc::Type BlendFunc::Get() {
     GLint dfactor;
     MBGL_CHECK_ERROR(glGetIntegerv(GL_BLEND_SRC_ALPHA, &sfactor));
     MBGL_CHECK_ERROR(glGetIntegerv(GL_BLEND_DST_ALPHA, &dfactor));
-    return {Enum<gfx::ColorBlendFactorType>::from(sfactor), Enum<gfx::ColorBlendFactorType>::from(dfactor)};
+    return {.sfactor = Enum<gfx::ColorBlendFactorType>::from(sfactor),
+            .dfactor = Enum<gfx::ColorBlendFactorType>::from(dfactor)};
 }
 
 const BlendColor::Type BlendColor::Default{0, 0, 0, 0};
@@ -287,8 +261,6 @@ BlendColor::Type BlendColor::Get() {
     return {floats[0], floats[1], floats[2], floats[3]};
 }
 
-const constexpr Program::Type Program::Default;
-
 void Program::Set(const Type& value) {
     MLN_TRACE_ZONE(Program::Set);
     MLN_TRACE_FUNC_GL();
@@ -302,8 +274,6 @@ Program::Type Program::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_CURRENT_PROGRAM, &program));
     return program;
 }
-
-const constexpr LineWidth::Type LineWidth::Default;
 
 void LineWidth::Set(const Type& value) {
     MLN_TRACE_ZONE(LineWidth::Set);
@@ -319,8 +289,6 @@ LineWidth::Type LineWidth::Get() {
     return lineWidth;
 }
 
-const constexpr ActiveTextureUnit::Type ActiveTextureUnit::Default;
-
 void ActiveTextureUnit::Set(const Type& value) {
     MLN_TRACE_ZONE(ActiveTextureUnit::Set);
     MLN_TRACE_FUNC_GL();
@@ -335,8 +303,6 @@ ActiveTextureUnit::Type ActiveTextureUnit::Get() {
     return static_cast<Type>(activeTexture - GL_TEXTURE0);
 }
 
-const constexpr Viewport::Type Viewport::Default;
-
 void Viewport::Set(const Type& value) {
     MLN_TRACE_ZONE(Viewport::Set);
     MLN_TRACE_FUNC_GL();
@@ -348,12 +314,10 @@ Viewport::Type Viewport::Get() {
     MLN_TRACE_FUNC_GL();
     GLint viewport[4];
     MBGL_CHECK_ERROR(glGetIntegerv(GL_VIEWPORT, viewport));
-    return {static_cast<int32_t>(viewport[0]),
-            static_cast<int32_t>(viewport[1]),
-            {static_cast<uint32_t>(viewport[2]), static_cast<uint32_t>(viewport[3])}};
+    return {.x = static_cast<int32_t>(viewport[0]),
+            .y = static_cast<int32_t>(viewport[1]),
+            .size = {static_cast<uint32_t>(viewport[2]), static_cast<uint32_t>(viewport[3])}};
 }
-
-const constexpr ScissorTest::Type ScissorTest::Default;
 
 void ScissorTest::Set(const Type& value) {
     MLN_TRACE_ZONE(ScissorTest::Set);
@@ -368,10 +332,11 @@ ScissorTest::Type ScissorTest::Get() {
     MLN_TRACE_FUNC_GL();
     GLint scissor[4];
     MBGL_CHECK_ERROR(glGetIntegerv(GL_SCISSOR_BOX, scissor));
-    return {scissor[0], scissor[1], static_cast<uint32_t>(scissor[2]), static_cast<uint32_t>(scissor[3])};
+    return {.x = scissor[0],
+            .y = scissor[1],
+            .width = static_cast<uint32_t>(scissor[2]),
+            .height = static_cast<uint32_t>(scissor[3])};
 }
-
-const constexpr BindFramebuffer::Type BindFramebuffer::Default;
 
 void BindFramebuffer::Set(const Type& value) {
     MLN_TRACE_ZONE(BindFramebuffer::Set);
@@ -387,8 +352,6 @@ BindFramebuffer::Type BindFramebuffer::Get() {
     return binding;
 }
 
-const constexpr BindRenderbuffer::Type BindRenderbuffer::Default;
-
 void BindRenderbuffer::Set(const Type& value) {
     MLN_TRACE_ZONE(BindRenderbuffer::Set);
     MLN_TRACE_FUNC_GL();
@@ -402,8 +365,6 @@ BindRenderbuffer::Type BindRenderbuffer::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_RENDERBUFFER_BINDING, &binding));
     return binding;
 }
-
-const constexpr CullFace::Type CullFace::Default;
 
 void CullFace::Set(const Type& value) {
     MLN_TRACE_ZONE(CullFace::Set);
@@ -419,8 +380,6 @@ CullFace::Type CullFace::Get() {
     return cullFace;
 }
 
-const constexpr CullFaceSide::Type CullFaceSide::Default;
-
 void CullFaceSide::Set(const Type& value) {
     MLN_TRACE_ZONE(CullFaceSide::Set);
     MLN_TRACE_FUNC_GL();
@@ -434,8 +393,6 @@ CullFaceSide::Type CullFaceSide::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_CULL_FACE_MODE, &cullFaceMode));
     return Enum<gfx::CullFaceSideType>::from(cullFaceMode);
 }
-
-const constexpr CullFaceWinding::Type CullFaceWinding::Default;
 
 void CullFaceWinding::Set(const Type& value) {
     MLN_TRACE_ZONE(CullFaceWinding::Set);
@@ -451,8 +408,6 @@ CullFaceWinding::Type CullFaceWinding::Get() {
     return Enum<gfx::CullFaceWindingType>::from(frontFace);
 }
 
-const constexpr BindTexture::Type BindTexture::Default;
-
 void BindTexture::Set(const Type& value) {
     MLN_TRACE_ZONE(BindTexture::Set);
     MLN_TRACE_FUNC_GL();
@@ -466,8 +421,6 @@ BindTexture::Type BindTexture::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_2D, &binding));
     return binding;
 }
-
-const constexpr BindVertexBuffer::Type BindVertexBuffer::Default;
 
 void BindVertexBuffer::Set(const Type& value) {
     MLN_TRACE_ZONE(BindVertexBuffer::Set);
@@ -483,8 +436,6 @@ BindVertexBuffer::Type BindVertexBuffer::Get() {
     return binding;
 }
 
-const constexpr BindElementBuffer::Type BindElementBuffer::Default;
-
 void BindElementBuffer::Set(const Type& value) {
     MLN_TRACE_ZONE(BindElementBuffer::Set);
     MLN_TRACE_FUNC_GL();
@@ -498,8 +449,6 @@ BindElementBuffer::Type BindElementBuffer::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &binding));
     return binding;
 }
-
-const constexpr BindVertexArray::Type BindVertexArray::Default;
 
 void BindVertexArray::Set(const Type& value) {
     MLN_TRACE_ZONE(BindVertexArray::Set);
@@ -639,8 +588,6 @@ void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocati
 #pragma warning(pop)
 #endif
 
-const constexpr PixelStorePack::Type PixelStorePack::Default;
-
 void PixelStorePack::Set(const Type& value) {
     MLN_TRACE_ZONE(PixelStorePack::Set);
     MLN_TRACE_FUNC_GL();
@@ -655,8 +602,6 @@ PixelStorePack::Type PixelStorePack::Get() {
     MBGL_CHECK_ERROR(glGetIntegerv(GL_PACK_ALIGNMENT, &value.alignment));
     return value;
 }
-
-const constexpr PixelStoreUnpack::Type PixelStoreUnpack::Default;
 
 void PixelStoreUnpack::Set(const Type& value) {
     MLN_TRACE_ZONE(PixelStoreUnpack::Set);

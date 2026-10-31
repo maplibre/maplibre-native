@@ -12,14 +12,14 @@
 #include <mln/util/logging.hpp>
 
 #define MBGL_CONSTRUCTOR(f) \
-    static void f(void);    \
+    static void f();        \
     struct f##_t_ {         \
-        f##_t_(void) {      \
+        f##_t_() {          \
             f();            \
         }                   \
     };                      \
     static f##_t_ f##_;     \
-    static void f(void)
+    static void f()
 
 namespace mapbox {
 namespace sqlite {
@@ -74,8 +74,8 @@ public:
         }
     }
 
-    void setBusyTimeout(std::chrono::milliseconds timeout);
-    void exec(const std::string& sql);
+    void setBusyTimeout(std::chrono::milliseconds timeout) const;
+    void exec(const std::string& sql) const;
 
     sqlite3* db;
 };
@@ -96,7 +96,7 @@ public:
         sqlite3_finalize(stmt);
     }
 
-    void check(int err) {
+    void check(int err) const {
         if (err != SQLITE_OK) {
             throw Exception{err, sqlite3_errmsg(sqlite3_db_handle(stmt))};
         }
@@ -117,12 +117,12 @@ void logSqlMessage(void*, const int err, const char* msg) {
 MBGL_CONSTRUCTOR(initialize) {
     if (sqlite3_libversion_number() / 1000000 != SQLITE_VERSION_NUMBER / 1000000) {
         char message[96];
-        snprintf(message,
-                 96,
-                 "sqlite3 libversion mismatch: headers report %d, but library "
-                 "reports %d",
-                 SQLITE_VERSION_NUMBER,
-                 sqlite3_libversion_number());
+        (void)snprintf(message,
+                       96,
+                       "sqlite3 libversion mismatch: headers report %d, but library "
+                       "reports %d",
+                       SQLITE_VERSION_NUMBER,
+                       sqlite3_libversion_number());
         throw std::runtime_error(message);
     }
 
@@ -177,7 +177,7 @@ void Database::setBusyTimeout(std::chrono::milliseconds timeout) {
     impl->setBusyTimeout(timeout);
 }
 
-void DatabaseImpl::setBusyTimeout(std::chrono::milliseconds timeout) {
+void DatabaseImpl::setBusyTimeout(std::chrono::milliseconds timeout) const {
     const int err = sqlite3_busy_timeout(
         db, int(std::min<std::chrono::milliseconds::rep>(timeout.count(), std::numeric_limits<int>::max())));
     if (err != SQLITE_OK) {
@@ -190,7 +190,7 @@ void Database::exec(const std::string& sql) {
     impl->exec(sql);
 }
 
-void DatabaseImpl::exec(const std::string& sql) {
+void DatabaseImpl::exec(const std::string& sql) const {
     char* msg = nullptr;
     const int err = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &msg);
     if (msg) {

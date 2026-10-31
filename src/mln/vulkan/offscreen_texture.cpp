@@ -32,8 +32,9 @@ public:
 
         texture.setSize(size);
         texture.setFormat(gfx::TexturePixelType::RGBA, type);
-        texture.setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        texture.setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                         .wrapU = gfx::TextureWrapType::Clamp,
+                                         .wrapV = gfx::TextureWrapType::Clamp});
         texture.setUsage(Texture2DUsage::Attachment);
 
         backend.getContext().renderingStats().numFrameBuffers++;
