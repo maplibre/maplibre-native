@@ -57,6 +57,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 namespace mln {
 
@@ -81,9 +82,9 @@ double tileCentreDistance2(const UnwrappedTileID& id, const std::array<double, 2
 
 DEMSubTileOffset demSubTileOffset(const CanonicalTileID& child, const CanonicalTileID& ancestor) {
     const int dz = child.z - ancestor.z;
-    return {static_cast<float>(1u << dz),
-            static_cast<float>(child.x - (ancestor.x << dz)),
-            static_cast<float>(child.y - (ancestor.y << dz))};
+    return {.scale = static_cast<float>(1u << dz),
+            .dx = static_cast<float>(child.x - (ancestor.x << dz)),
+            .dy = static_cast<float>(child.y - (ancestor.y << dz))};
 }
 
 } // namespace
@@ -139,7 +140,7 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
 
     const double zoom = util::clamp<double>(state.getZoom() + zoomShift, state.getMinZoom(), state.getMaxZoom());
     const int32_t overscaledZoom = util::coveringZoomLevel(zoom, style::SourceType::RasterDEM, terrainCoverTileSize);
-    if (overscaledZoom < static_cast<int32_t>(zoomRange.min)) {
+    if (std::cmp_less(overscaledZoom, zoomRange.min)) {
         return out;
     }
     const int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
@@ -313,7 +314,7 @@ std::set<UnwrappedTileID> RenderTerrain::coarsenFarMeshTiles(std::set<UnwrappedT
         if (isReady == count.queued) {
             return;
         }
-        const Candidate candidate{tileCentreDistance2(id, origin), id};
+        const Candidate candidate{.dist2 = tileCentreDistance2(id, origin), .id = id};
         if (isReady) {
             ready.insert(candidate);
         } else {
@@ -328,7 +329,7 @@ std::set<UnwrappedTileID> RenderTerrain::coarsenFarMeshTiles(std::set<UnwrappedT
         if (tile.canonical.z <= minZoom) {
             return;
         }
-        for (int z = tile.canonical.z - 1; z >= minZoom; --z) {
+        for (int z = tile.canonical.z - 1; std::cmp_greater_equal(z, minZoom); --z) {
             const UnwrappedTileID parent(tile.wrap, tile.canonical.scaledTo(static_cast<uint8_t>(z)));
             Count& count = counts[parent];
             (z == tile.canonical.z - 1 ? count.children : count.deeper) += change;
@@ -455,7 +456,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 existing->second.lastUsed = demUpdateCounter;
             } else if (auto texture = createDEMTexture(context, *demData)) {
                 // Keep the texture available for elevation sampling by non-draped layers
-                demTextures[renderTile.id] = {texture, demData->dim, demUpdateCounter};
+                demTextures[renderTile.id] = {.texture = texture, .dim = demData->dim, .lastUsed = demUpdateCounter};
 #if MLN_RENDER_BACKEND_OPENGL
                 // Also pack this tile's DEM into the array for the (upcoming) instanced
                 // depth pass. Additive: the per-tile texture above is still the fallback.
@@ -589,7 +590,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             int bestZoom = -1;
             for (auto& [candidate, entry] : demTextures) {
                 if (candidate != unwrapped && unwrapped.isChildOf(candidate) &&
-                    static_cast<int>(candidate.canonical.z) > bestZoom) {
+                    std::cmp_greater(candidate.canonical.z, bestZoom)) {
                     bestZoom = candidate.canonical.z;
                     ancestorID = &candidate;
                     ancestorEntry = &entry;
@@ -618,7 +619,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         // z13 tile first built on a z6 ancestor renders flat until z12 replaces it) - then
         // replace it
         const terrain::DEMBinding binding{
-            demTier, static_cast<int8_t>(demTileUsed ? static_cast<int>(demTileUsed->canonical.z) : -1)};
+            .tier = demTier,
+            .demZoom = static_cast<int8_t>(demTileUsed ? static_cast<int>(demTileUsed->canonical.z) : -1)};
         if (const auto existing = tilesWithDrawables.find(tileID); existing != tilesWithDrawables.end()) {
             if (!terrain::shouldRebind(existing->second, binding)) {
                 continue;
@@ -802,8 +804,7 @@ float RenderTerrain::getElevation(const UnwrappedTileID& tileID_, float x, float
     int bestZoom = -1;
     for (const auto& renderTile : *renderTiles) {
         const UnwrappedTileID& candidate = renderTile.id;
-        if ((candidate == tileID || tileID.isChildOf(candidate)) &&
-            static_cast<int>(candidate.canonical.z) > bestZoom) {
+        if ((candidate == tileID || tileID.isChildOf(candidate)) && std::cmp_greater(candidate.canonical.z, bestZoom)) {
             bestZoom = candidate.canonical.z;
             demRenderTile = &renderTile;
         }
@@ -895,8 +896,7 @@ std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const Un
     const DEMTextureEntry* entry = nullptr;
     int bestZoom = -1;
     for (const auto& [candidate, candidateEntry] : demTextures) {
-        if ((candidate == tileID || tileID.isChildOf(candidate)) &&
-            static_cast<int>(candidate.canonical.z) > bestZoom) {
+        if ((candidate == tileID || tileID.isChildOf(candidate)) && std::cmp_greater(candidate.canonical.z, bestZoom)) {
             bestZoom = candidate.canonical.z;
             demTileID = &candidate;
             entry = &candidateEntry;
@@ -1145,12 +1145,12 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
         }
     }
 
-    mesh = TerrainMesh{nullptr, // vertexBuffer - created when building the drawable
-                       nullptr, // indexBuffer - created when building the drawable
-                       vertices.size() / 4,
-                       indices.size(),
-                       std::move(vertices),
-                       std::move(indices)};
+    mesh = TerrainMesh{.vertexBuffer = nullptr, // created when building the drawable
+                       .indexBuffer = nullptr,  // created when building the drawable
+                       .vertexCount = vertices.size() / 4,
+                       .indexCount = indices.size(),
+                       .vertices = std::move(vertices),
+                       .indices = std::move(indices)};
 }
 
 std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& context, const DEMData& demData) {
