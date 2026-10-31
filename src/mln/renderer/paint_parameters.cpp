@@ -140,7 +140,8 @@ mat4 PaintParameters::clipMatrixForTile(const UnwrappedTileID& tileID) const {
     const double y = tileID.canonical.y;
     const double k = currentDrapeTile[0] - z;
     const double scale = std::exp2(k);
-    double offsetX, offsetY;
+    double offsetX;
+    double offsetY;
     if (k >= 0.0) {
         offsetX = x * scale - currentDrapeTile[1];
         offsetY = y * scale - currentDrapeTile[2];
