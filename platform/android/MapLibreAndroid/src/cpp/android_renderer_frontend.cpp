@@ -70,6 +70,10 @@ public:
         delegate.invoke(&RendererObserver::onTerrainEyeElevationChanged, elevationMeters);
     }
 
+    void onTerrainTransitionTargetElevationChanged(double elevationMeters) override {
+        delegate.invoke(&RendererObserver::onTerrainTransitionTargetElevationChanged, elevationMeters);
+    }
+
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
         delegate.invoke(&RendererObserver::onStyleImageMissing, id, done);
     }
