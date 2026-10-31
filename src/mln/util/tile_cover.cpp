@@ -8,6 +8,7 @@
 #include <mln/util/tile_cover_impl.hpp>
 #include <mln/util/tile_lod.hpp>
 
+#include <algorithm>
 #include <functional>
 #include <list>
 
@@ -526,6 +527,25 @@ std::optional<UnwrappedTileID> TileCover::next() {
 
 bool TileCover::hasNext() {
     return impl->hasNext();
+}
+
+void keepNearestTiles(std::vector<OverscaledTileID>& tiles, size_t maxTiles, const std::array<double, 2>& origin) {
+    if (maxTiles == 0 || tiles.size() <= maxTiles) {
+        return;
+    }
+    const auto dist2 = [&](const OverscaledTileID& id) {
+        const double scale = static_cast<double>(1u << id.canonical.z);
+        const double dx = (static_cast<double>(id.canonical.x) + 0.5) / scale + id.wrap - origin[0];
+        const double dy = (static_cast<double>(id.canonical.y) + 0.5) / scale - origin[1];
+        return dx * dx + dy * dy;
+    };
+    const auto keep = tiles.begin() + static_cast<std::ptrdiff_t>(maxTiles);
+    std::partial_sort(tiles.begin(), keep, tiles.end(), [&](const OverscaledTileID& a, const OverscaledTileID& b) {
+        const double da = dist2(a);
+        const double db = dist2(b);
+        return da < db || (da == db && a < b);
+    });
+    tiles.erase(keep, tiles.end());
 }
 
 } // namespace util
