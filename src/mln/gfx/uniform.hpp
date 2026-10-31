@@ -21,12 +21,12 @@
         }                                            \
     }
 
-#define MBGL_DEFINE_UNIFORM_MATRIX(type_, n_, name_) \
-    struct name_ {                                   \
-        using Value = std::array<type_, n_ * n_>;    \
-        static constexpr auto name() {               \
-            return #name_;                           \
-        }                                            \
+#define MBGL_DEFINE_UNIFORM_MATRIX(type_, n_, name_)  \
+    struct name_ {                                    \
+        using Value = std::array<type_, (n_) * (n_)>; \
+        static constexpr auto name() {                \
+            return #name_;                            \
+        }                                             \
     }
 
 namespace mln {

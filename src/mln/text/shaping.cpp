@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <list>
 #include <cmath>
+#include <utility>
 
 namespace {
 // Zero width space that is used to suggest break points for Japanese labels.
@@ -203,7 +204,7 @@ void justifyLine(std::vector<PositionedGlyph>& positionedGlyphs, float justify, 
 
     PositionedGlyph& lastGlyph = positionedGlyphs.back();
     const float lastAdvance = lastGlyph.metrics.advance * lastGlyph.scale;
-    const auto lineIndent = static_cast<float>(lastGlyph.x + lastAdvance) * justify;
+    const auto lineIndent = (lastGlyph.x + lastAdvance) * justify;
     for (auto& positionedGlyph : positionedGlyphs) {
         positionedGlyph.x -= lineIndent;
         positionedGlyph.y += lineOffset;
@@ -521,8 +522,8 @@ void shapeLines(Shaping& shaping,
             const HBShapeAdjust* adjust = nullptr;
             if (section.adjusts) {
                 assert(section.startIndex >= 0);
-                if (i >= (std::size_t)section.startIndex && i - section.startIndex < section.adjusts->size()) {
-                    adjust = &((*section.adjusts)[i - section.startIndex]);
+                if (std::cmp_greater_equal(i, section.startIndex) && i - section.startIndex < section.adjusts->size()) {
+                    adjust = &(*section.adjusts)[i - section.startIndex];
                 }
             }
             GlyphID codePoint(line.getCharCodeAt(i), section.type);
@@ -704,7 +705,7 @@ Shaping getShaping(const TaggedString& formattedString,
                    bool allowVerticalPlacement) {
     assert(layoutTextSize);
     std::vector<TaggedString> reorderedLines;
-    if (formattedString.rawText().length()) {
+    if (!formattedString.rawText().empty()) {
         if (formattedString.sectionCount() == 1) {
             if (formattedString.getSection(0).type != GlyphIDType::FontPBF) {
                 reorderedLines.emplace_back(formattedString);
@@ -722,7 +723,7 @@ Shaping getShaping(const TaggedString& formattedString,
             auto strLen = formattedString.getStyledText().first.length();
 
             std::vector<SectionOptions> formattedSections = formattedString.getSections();
-            if (formattedSections.size() > 0) sectionType = formattedSections[0].type;
+            if (!formattedSections.empty()) sectionType = formattedSections[0].type;
 
             std::vector<StyledText> pendStrings;
 
@@ -752,8 +753,8 @@ Shaping getShaping(const TaggedString& formattedString,
                 }
             };
 
-            auto applySubString = [&]() {
-                if (subString.first.length()) {
+            auto applySubString = [&] {
+                if (!subString.first.empty()) {
                     if (GlyphIDType::FontPBF == sectionType) {
                         auto processedLines = bidi.processStyledText(
                             subString,
