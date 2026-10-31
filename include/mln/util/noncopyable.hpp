@@ -16,7 +16,7 @@ protected:
 };
 } // namespace non_copyable_
 
-using noncopyable = non_copyable_::noncopyable;
+using non_copyable_::noncopyable;
 
 } // namespace util
 } // namespace mln

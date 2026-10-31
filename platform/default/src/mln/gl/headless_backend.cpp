@@ -24,8 +24,8 @@ public:
 
     void bind() override {
         context.bindFramebuffer = framebuffer.framebuffer;
-        context.scissorTest = {0, 0, 0, 0};
-        context.viewport = {0, 0, framebuffer.size};
+        context.scissorTest = {.x = 0, .y = 0, .width = 0, .height = 0};
+        context.viewport = {.x = 0, .y = 0, .size = framebuffer.size};
     }
 
     void swap() override {

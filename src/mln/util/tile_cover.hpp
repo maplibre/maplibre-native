@@ -64,6 +64,11 @@ struct TileCoverParameters {
     /// Optional; when null the cover is computed against the flat ground plane, as
     /// it was before terrain support.
     const TileElevationProvider* elevationProvider = nullptr;
+    /// Normalized web-mercator point the default (non-adaptive) level of detail measures its
+    /// distance from, in place of the map centre: tiles within `tileLodMinRadius` of it get the
+    /// finest zoom, and the zoom drops with distance from it. Unset (the default) measures from
+    /// the map centre. Only read once the pitch passes `tileLodPitchThreshold`.
+    std::optional<std::array<double, 2>> tileLodOrigin = std::nullopt;
 };
 
 int32_t coveringZoomLevel(double z, style::SourceType type, uint16_t tileSize) noexcept;

@@ -8,7 +8,7 @@
 
 namespace mln {
 
-using Dependency = style::expression::Dependency;
+using style::expression::Dependency;
 
 namespace style {
 namespace expression {

@@ -19,7 +19,7 @@ class RenderPass;
 class TileLayerGroup : public mln::TileLayerGroup {
 public:
     TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain);
-    ~TileLayerGroup() override {}
+    ~TileLayerGroup() override = default;
 
     void upload(gfx::UploadPass&) override;
     void render(RenderOrchestrator&, PaintParameters&) override;
