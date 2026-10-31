@@ -174,7 +174,9 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
     if (!layerGroup) {
-        if (auto group = context.createTileLayerGroup(layerIndex, 64, getID())) {
+        // Not draped: the plugin's own shaders draw in the main pass, over the terrain, and
+        // don't apply the drape transform a render-to-terrain group would need.
+        if (auto group = context.createTileLayerGroup(layerIndex, 64, getID(), /*renderToTerrain=*/false)) {
             setLayerGroup(std::move(group), changes);
         } else {
             return;

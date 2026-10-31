@@ -1,6 +1,7 @@
 layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_decimals_ed;
 layout (location = 2) in vec2 a_normal2d;
+layout (location = 3) in vec2 a_centroid;
 out vec4 v_color;
 
 layout (std140) uniform FillExtrusionDrawableUBO {
@@ -16,7 +17,16 @@ layout (std140) uniform FillExtrusionDrawableUBO {
     highp float u_pattern_from_t;
     highp float u_pattern_to_t;
     lowp float drawable_pad1;
+    // 3D terrain elevation
+    highp vec4 u_dem_coords;
+    highp vec4 u_dem_unpack;
+    highp float u_dem_dim;
+    highp float u_dem_exaggeration;
+    lowp float u_dem_enabled;
+    lowp float drawable_pad2;
 };
+
+uniform sampler2D u_dem;
 
 layout (std140) uniform FillExtrusionTilePropsUBO {
     highp vec4 u_pattern_from;
@@ -55,6 +65,13 @@ void main() {
 
     base = max(0.0, base);
     height = max(0.0, height);
+
+    // Raise the whole extrusion by the terrain elevation sampled once at the
+    // polygon centroid (so it doesn't shear across a slope), and drop ground-level
+    // floors slightly so buildings don't hang off a slope (matches maplibre-gl-js)
+    float ele = get_elevation(a_centroid, u_dem, u_dem_coords, u_dem_unpack, u_dem_dim, u_dem_exaggeration, u_dem_enabled);
+    base += ele - (base > 0.0 ? 0.0 : 10.0) * u_dem_enabled;
+    height += ele;
 
     float t = mod(a_decimals_ed.x, 2.0);
     float z = t > 0.0 ? height : base;

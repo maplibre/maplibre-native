@@ -19,6 +19,7 @@ layout (std140) uniform GlobalPaintParamsUBO {
     highp float u_pixel_ratio;
     highp float u_map_zoom;
     lowp float global_pad1;
+    highp vec4 u_drape_tile;
 };
 
 layout (std140) uniform FillOutlineTriangulatedDrawableUBO {
@@ -73,6 +74,7 @@ void main() {
 
     vec4 projected_extrude = u_matrix * vec4(dist / u_ratio, 0.0, 0.0);
     gl_Position = u_matrix * vec4(pos, 0.0, 1.0) + projected_extrude;
+    gl_Position = apply_drape_transform(gl_Position, u_matrix, u_drape_tile);
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);

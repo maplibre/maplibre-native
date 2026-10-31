@@ -96,12 +96,13 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const BackgroundDrawableUnionUBO* drawableVector [[buffer(idBackgroundDrawableUBO)]]) {
 
     device const BackgroundDrawableUBO& drawable = drawableVector[uboIndex].backgroundDrawableUBO;
 
     return {
-        .position = drawable.matrix * float4(float2(in.position.xy), 0, 1)
+        .position = apply_drape_transform(drawable.matrix * float4(float2(in.position.xy), 0, 1), drawable.matrix, paintParams.drape_tile)
     };
 }
 
@@ -141,6 +142,7 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const BackgroundDrawableUnionUBO* drawableVector [[buffer(idBackgroundDrawableUBO)]],
                                 device const BackgroundPatternPropsUBO& props [[buffer(idBackgroundPropsUBO)]]) {
 
@@ -158,7 +160,7 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
                                          drawable.tile_units_to_pixels,
                                          pos);
     return {
-        .position = drawable.matrix * float4(float2(in.position.xy), 0, 1),
+        .position = apply_drape_transform(drawable.matrix * float4(float2(in.position.xy), 0, 1), drawable.matrix, paintParams.drape_tile),
         .pos_a = pos_a,
         .pos_b = pos_b,
     };

@@ -257,6 +257,9 @@ void Texture2D::bind(RenderPass& renderPass, int32_t location) {
         updateSamplerConfiguration();
     }
 
+    // Bind to BOTH vertex and fragment stages to support vertex shader texture sampling (e.g., terrain DEM)
+    renderPass.setVertexTexture(metalTexture, location);
+    renderPass.setVertexSamplerState(metalSamplerState, location);
     renderPass.setFragmentTexture(metalTexture, location);
     renderPass.setFragmentSamplerState(metalSamplerState, location);
 

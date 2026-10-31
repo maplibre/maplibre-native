@@ -161,13 +161,15 @@ void UniformBufferArrayGL::bind() const {
     for (size_t id = 0; id < allocatedSize(); id++) {
         const auto& uniformBuffer = get(id);
         if (!uniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
         const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(*uniformBuffer);
-        MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
-                                           binding,
-                                           uniformBufferGL.getID(),
-                                           uniformBufferGL.getManagedBuffer().getBindingOffset(),
-                                           uniformBufferGL.getSize()));
+        // Routed through the context (accessible via friendship) so redundant binds
+        // (same buffer/offset/size at a binding point) are skipped - the per-draw
+        // overhead reduction.
+        uniformBufferGL.context.bindUniformBufferRange(
+            static_cast<uint32_t>(id),
+            static_cast<uint32_t>(uniformBufferGL.getID()),
+            static_cast<int64_t>(uniformBufferGL.getManagedBuffer().getBindingOffset()),
+            static_cast<int64_t>(uniformBufferGL.getSize()));
     }
 }
 
@@ -177,8 +179,8 @@ void UniformBufferArrayGL::unbind() const {
     for (size_t id = 0; id < allocatedSize(); id++) {
         const auto& uniformBuffer = get(id);
         if (!uniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, binding, 0));
+        const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(*uniformBuffer);
+        uniformBufferGL.context.unbindUniformBuffer(static_cast<uint32_t>(id));
     }
 }
 

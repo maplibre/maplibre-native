@@ -55,6 +55,9 @@ public:
     const OverscaledTileID& getOverscaledTileID() const;
     bool holdForFade() const;
 
+    Tile& getTile() { return tile; }
+    const Tile& getTile() const { return tile; }
+
     Bucket* getBucket(const style::Layer::Impl&) const;
     const LayerRenderData* getLayerRenderData(const style::Layer::Impl&) const;
     std::optional<ImagePosition> getPattern(const std::string& pattern) const;

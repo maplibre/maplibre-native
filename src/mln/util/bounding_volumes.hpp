@@ -49,6 +49,14 @@ public:
     // It is possible run only edge cases that were not covered in intersects()
     IntersectionResult intersectsPrecise(const AABB& aabb, bool edgeCasesOnly = false) const;
 
+    // Intersection test that accounts for the aabb's elevation (min/max z), for
+    // testing terrain against the view volume. `intersects` and `intersectsPrecise`
+    // flatten the box to z = 0; this tests all three axes, via a plane/aabb halfspace
+    // test against each frustum plane (the p-vertex/n-vertex method), matching
+    // maplibre-gl-js Aabb::intersectsFrustum. Use this only when z may be non-zero:
+    // it is a little more work and the flat fast paths are enough otherwise.
+    IntersectionResult intersectsElevated(const AABB& aabb) const;
+
     const std::array<vec3, 8>& getPoints() const { return points; }
     const std::array<vec4, 6>& getPlanes() const { return planes; }
 

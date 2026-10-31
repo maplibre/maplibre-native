@@ -1,14 +1,18 @@
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_impl.hpp>
+#include <mln/math/wrap.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source.hpp>
 #include <mln/style/style_impl.hpp>
 #include <mln/util/exception.hpp>
 #include <mln/util/logging.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/util/traits.hpp>
 #include <mln/util/action_journal.hpp>
 #include <mln/util/action_journal_impl.hpp>
 #include <mln/gfx/rendering_stats.hpp>
+
+#include <cmath>
 
 namespace mln {
 
@@ -106,6 +110,10 @@ void Map::Impl::onSourceChanged(style::Source& source) {
 }
 
 void Map::Impl::onUpdate() {
+    // Ahead of the still-mode return below: a camera the app sets before the next still render
+    // has to know that the terrain went (see settleCenterAwaitingSeaLevel).
+    noteTerrainRemoval();
+
     // Don't load/render anything in still mode until explicitly requested.
     if (mode != MapMode::Continuous && !stillImageRequest) {
         return;
@@ -114,6 +122,43 @@ void Map::Impl::onUpdate() {
     TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
     transform.updateTransitions(timePoint);
+
+    // Terrain removed: a centre that gestures anchored on it (or the clamp held there) would stay
+    // up to kilometres above the now flat map, and pans, tile cover and label placement would
+    // all work on that raised plane. Bring it back to sea level, keeping the view - once no
+    // transition is running, since one in flight re-applies the altitude it started with.
+    if (centerAwaitingSeaLevel && !transform.inTransition()) {
+        returnCenterToSeaLevel();
+    }
+
+    if (!transform.isGestureInProgress()) {
+        gestureHeldCenterAltitude.reset();
+    }
+
+    // The clamp stood aside for a transition or a gesture (applyCenterClamp); now that it is
+    // over, put the center on the ground it arrived over: keeping the view after a gesture or its
+    // fling, with a plain jump after an animation the app asked for. The reported height outlives
+    // a terrain removed during the transition, so only apply it while there is still terrain.
+    if (centerAwaitingTerrainAnchor && !transform.inTransition() && !transform.isGestureInProgress()) {
+        const bool keepView = centerAnchorKeepsView;
+        centerAwaitingTerrainAnchor = false;
+        centerAnchorKeepsView = false;
+        if (centerClampedToGround && style->impl->getTerrain() && !std::isnan(terrainCenterElevation)) {
+            if (keepView) {
+                anchorAfterHold();
+                // The anchor put the center on the ground it arrived over; the eye may still be
+                // under the ground in front of it.
+                applyCenterClamp();
+            } else {
+                clampCenterToTerrain(clampedCenterAltitude());
+            }
+        }
+    }
+
+    std::optional<Immutable<style::Terrain::Impl>> terrainImpl;
+    if (auto* terrain = style->impl->getTerrain()) {
+        terrainImpl = terrain->impl;
+    }
 
     UpdateParameters params = {.styleLoaded = style->impl->isLoaded(),
                                .mode = mode,
@@ -126,6 +171,7 @@ void Map::Impl::onUpdate() {
                                .spriteLoaded = style->impl->areSpritesLoaded(),
                                .transitionOptions = style->impl->getTransitionOptions(),
                                .light = style->impl->getLight()->impl,
+                               .terrain = terrainImpl,
                                .images = style->impl->getImageImpls(),
                                .sources = style->impl->getSourceImpls(),
                                .layers = style->impl->getLayerImpls(),
@@ -141,7 +187,10 @@ void Map::Impl::onUpdate() {
                                .tileLodScale = tileLodScale,
                                .tileLodPitchThreshold = tileLodPitchThreshold,
                                .tileLodZoomShift = tileLodZoomShift,
-                               .tileLodMode = tileLodMode};
+                               .tileLodMode = tileLodMode,
+                               .terrainLoadMode = terrainLoadMode,
+                               .terrainSkirtLength = terrainSkirtLength,
+                               .debugAboveGroundLog = debugAboveGroundLog};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
 }
@@ -316,8 +365,250 @@ void Map::Impl::onDidFinishRenderingMap() {
     }
 };
 
+void Map::Impl::anchorAfterHold() {
+    centerAwaitingTerrainAnchor = false;
+    centerAnchorKeepsView = false;
+    anchorCenterOnTerrain();
+    anchorPassesLeft = 16;
+    anchorBracketLow = -std::numeric_limits<double>::infinity();
+    anchorBracketHigh = std::numeric_limits<double>::infinity();
+}
+
+void Map::Impl::noteCameraSet(bool fling) {
+    anchorPassesLeft = 0;
+    centerSettledBesideACliff = false;
+    transitionIsFling = fling;
+}
+
+void Map::Impl::anchorCenterOnTerrain() {
+    // The last reported height outlives a removed terrain; the style says whether there is one.
+    if (!style->impl->getTerrain() || std::isnan(terrainCenterElevation)) {
+        return;
+    }
+    if (setCenterAltitudeKeepingView(terrainCenterElevation)) {
+        onUpdate();
+    }
+}
+
+bool Map::Impl::setCenterAltitudeKeepingView(double altitudeMeters) {
+    const TransformState& state = transform.getState();
+    const double rise = altitudeMeters - state.getCenterAltitude();
+    if (std::abs(rise) < 1.0) {
+        return false;
+    }
+    const CameraOptions camera = transform.getCameraOptions(std::nullopt);
+    if (!camera.center || !camera.zoom) {
+        return false;
+    }
+    const double pitch = util::deg2rad(camera.pitch.value_or(0.0));
+    // Near grazing, the line of sight runs almost along the plane: the centre would slide off
+    // towards the horizon, past a pole close to 90 degrees. gl-js stops at the same angle
+    // (_distanceToCenterFromAltElevationPitch).
+    if (std::cos(pitch) < 0.1) {
+        return false;
+    }
+    const double bearing = util::deg2rad(camera.bearing.value_or(0.0));
+    // In pixels at the current zoom, the unit of the camera-to-centre distance along the line
+    // of sight.
+    const double metresPerPixel = Projection::getMetersPerPixelAtLatitude(camera.center->latitude(), *camera.zoom);
+    const double risePixels = rise / metresPerPixel;
+    const double distance = state.getCameraToCenterDistance();
+    // Up the line of sight by `rise` (down, for a negative one): rise/cos(pitch) closer to the
+    // camera, rise·tan(pitch) nearer it on the ground.
+    const double remaining = distance - risePixels / std::cos(pitch);
+    if (remaining < distance * 0.05) {
+        return false; // the ground is (nearly) at the camera: leave it
+    }
+    const double shift = risePixels * std::tan(pitch);
+    // Towards the camera, which sits opposite the bearing; y grows southwards.
+    const double scale = state.getScale();
+    const Point<double> center = Projection::project(*camera.center, scale);
+    const LatLng anchored = Projection::unproject(
+        {center.x - shift * std::sin(bearing), center.y + shift * std::cos(bearing)}, scale);
+    const double zoom = *camera.zoom + std::log2(distance / remaining);
+    const auto keepingView = CameraOptions().withCenter(anchored).withZoom(zoom).withCenterAltitude(altitudeMeters);
+
+    // The zoom limits, the bounds and the constrain mode cut off whatever part of a move they
+    // don't allow, and a move cut short shifts the view (gl-js's moveCenterOntoTerrain undoes one
+    // that passes maxZoom). Try it on a copy, and leave the camera alone unless all of it goes
+    // through.
+    Transform trial(state);
+    trial.jumpTo(keepingView);
+    const LatLng reached = trial.getLatLng();
+    if (std::abs(trial.getZoom() - zoom) > 1e-9 || std::abs(reached.latitude() - anchored.latitude()) > 1e-9 ||
+        std::abs(util::wrap(reached.longitude() - anchored.longitude(), -180.0, 180.0)) > 1e-9) {
+        return false;
+    }
+    transform.jumpTo(keepingView);
+    return true;
+}
+
+void Map::Impl::returnCenterToSeaLevel() {
+    centerAwaitingSeaLevel = false;
+    // Where the limits refuse the move that keeps the view, keep the centre and zoom instead, as
+    // gl-js does (applyTerrainChange), rather than leave the centre up in the air.
+    if (!setCenterAltitudeKeepingView(0.0) && transform.getState().getCenterAltitude() != 0.0) {
+        transform.jumpTo(CameraOptions().withCenterAltitude(0.0));
+    }
+}
+
+void Map::Impl::noteTerrainRemoval() {
+    const bool hasTerrain = style->impl->getTerrain() != nullptr;
+    if (hadTerrain && !hasTerrain) {
+        centerAwaitingSeaLevel = true;
+    } else if (hasTerrain) {
+        centerAwaitingSeaLevel = false;
+    }
+    hadTerrain = hasTerrain;
+}
+
+void Map::Impl::settleCenterAwaitingSeaLevel() {
+    // A return still waiting, for a transition or for a still render, would move the camera the
+    // app is about to set instead of the one it replaces. The transition would give way to that
+    // camera anyway.
+    noteTerrainRemoval();
+    if (centerAwaitingSeaLevel) {
+        transform.cancelTransitions();
+        returnCenterToSeaLevel();
+    }
+}
+
+double Map::Impl::eyeClearCenterAltitude() const {
+    if (std::isnan(terrainEyeElevation)) {
+        return -std::numeric_limits<double>::infinity();
+    }
+    // The eye sits this far above the center's height, along the line of sight.
+    const TransformState& state = transform.getState();
+    const double metresPerPixel = Projection::getMetersPerPixelAtLatitude(state.getLatLng().latitude(),
+                                                                          state.getZoom());
+    const double eyeAboveCenter = state.getCameraToCenterDistance() * metresPerPixel * std::cos(state.getPitch());
+    return terrainEyeElevation + eyeClearanceMeters - eyeAboveCenter;
+}
+
+double Map::Impl::clampedCenterAltitude() const {
+    return std::max(terrainCenterElevation, eyeClearCenterAltitude());
+}
+
+void Map::Impl::applyCenterClamp() {
+    // A running transition (an animated recenter, a fling) owns the camera: the jump below
+    // would cancel it, and across relief the height changes every frame, so the move stopped
+    // within a few kilometres of where it started. Let it finish; onUpdate applies the latest
+    // height once it has.
+    if (transform.inTransition()) {
+        centerAwaitingTerrainAnchor = true;
+        centerSettledBesideACliff = false;
+        // A fling towards rising ground can carry the eye under it. As gl-js keeps the camera
+        // above the terrain during an animation, lift it; the jump ends the fling at the slope.
+        if (transitionIsFling) {
+            centerAnchorKeepsView = true;
+            if (eyeClearCenterAltitude() > transform.getState().getCenterAltitude() + 0.5) {
+                transform.jumpTo(CameraOptions().withCenterAltitude(eyeClearCenterAltitude()));
+                onUpdate();
+            }
+        }
+        return;
+    }
+    double target = 0.0;
+    if (transform.isGestureInProgress()) {
+        // A gesture keeps the camera at the height it started at, as gl-js's elevationFreeze
+        // does: following the ground under the center would move the camera up and down with
+        // every ridge and valley the drag passes. Only the eye clearance lifts it, and only as
+        // far as the ground under the eye needs. The gesture's end anchors the center on the
+        // ground keeping the view (onUpdate), as gl-js's recalculateZoomAndCenter does.
+        if (!gestureHeldCenterAltitude) {
+            gestureHeldCenterAltitude = transform.getState().getCenterAltitude();
+        }
+        centerAwaitingTerrainAnchor = true;
+        centerAnchorKeepsView = true;
+        anchorPassesLeft = 0;
+        centerSettledBesideACliff = false;
+        target = std::max(*gestureHeldCenterAltitude, eyeClearCenterAltitude());
+    } else {
+        // The eye's height can be reported before the center's.
+        if (std::isnan(terrainCenterElevation)) {
+            return;
+        }
+        // A ground report can arrive before the update that follows the end of a gesture or a
+        // fling: anchor first, so the passes below handle it rather than a plain jump.
+        if (centerAwaitingTerrainAnchor && centerAnchorKeepsView) {
+            anchorAfterHold();
+        }
+        target = clampedCenterAltitude();
+        if (centerSettledBesideACliff && target == terrainCenterElevation) {
+            return;
+        }
+        // Right after an anchor, a center that is off the ground it looks at slides along the line
+        // of sight onto it, keeping the camera; only the eye clearance moves the camera. Ground
+        // above the center means the line of sight meets it higher up, nearer the camera; ground
+        // below, lower down. Once both sides are known the next height is the middle of them.
+        const double current = transform.getState().getCenterAltitude();
+        if (anchorPassesLeft > 0 && target == terrainCenterElevation && std::abs(current - target) >= 0.5) {
+            --anchorPassesLeft;
+            if (target > current) {
+                anchorBracketLow = std::max(anchorBracketLow, current);
+            } else {
+                anchorBracketHigh = std::min(anchorBracketHigh, current);
+            }
+            const bool bracketed = std::isfinite(anchorBracketLow) && std::isfinite(anchorBracketHigh);
+            if (bracketed && anchorBracketHigh - anchorBracketLow < 1.0) {
+                // The line of sight meets the ground within a meter of here, at a cliff in the data
+                // the height under the center jumps across: leave the center where it is.
+                anchorPassesLeft = 0;
+                centerSettledBesideACliff = true;
+                return;
+            }
+            const double next = bracketed ? (anchorBracketLow + anchorBracketHigh) / 2 : target;
+            if (setCenterAltitudeKeepingView(next)) {
+                onUpdate();
+                return;
+            }
+            // A step too small to take inside a bracket, or one the line of sight cannot make (at a
+            // steep pitch close to the ground it meets the ground almost at the camera): moving the
+            // camera instead is the jump the hold was meant to remove. Leave the center; only the
+            // eye clearance moves the camera.
+            anchorPassesLeft = 0;
+            centerSettledBesideACliff = true;
+            return;
+        }
+    }
+    if (clampCenterToTerrain(target)) {
+        onUpdate();
+    }
+}
+
+void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
+    terrainCenterElevation = elevationMeters;
+    if (!centerClampedToGround) {
+        return;
+    }
+    applyCenterClamp();
+}
+
+void Map::Impl::onTerrainEyeElevationChanged(double elevationMeters) {
+    terrainEyeElevation = elevationMeters;
+    if (!centerClampedToGround) {
+        return;
+    }
+    applyCenterClamp();
+}
+
+bool Map::Impl::clampCenterToTerrain(double elevationMeters) {
+    // Sub-metre differences are the terrain cover shifting under a camera that just moved,
+    // not the ground actually changing height; acting on them would chase itself.
+    constexpr double minimumChangeMeters = 0.5;
+    if (std::abs(transform.getState().getCenterAltitude() - elevationMeters) < minimumChangeMeters) {
+        return false;
+    }
+    // Raising the centre onto the terrain moves the orbit plane, not the centre's lng/lat,
+    // so this settles rather than feeding back into the next frame's sample.
+    transform.jumpTo(CameraOptions().withCenterAltitude(elevationMeters));
+    return true;
+}
+
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
+    noteCameraSet();
+    settleCenterAwaitingSeaLevel();
     transform.jumpTo(camera);
     onUpdate();
 }
