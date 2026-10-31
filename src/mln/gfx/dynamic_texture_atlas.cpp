@@ -24,7 +24,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
     std::scoped_lock lock(mutex);
 
     GlyphAtlas glyphAtlas;
-    if (!glyphs.size()) {
+    if (glyphs.empty()) {
         glyphAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::Alpha];
         if (!glyphAtlas.dynamicTexture) {
             AlphaImage dummyImage(dummySize);
@@ -111,7 +111,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
     std::scoped_lock lock(mutex);
 
     ImageAtlas imageAtlas;
-    if (!icons.size() && !patterns.size()) {
+    if (icons.empty() && patterns.empty()) {
         imageAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::RGBA];
         if (!imageAtlas.dynamicTexture) {
             PremultipliedImage dummyImage(dummySize);
@@ -235,14 +235,14 @@ std::optional<TextureHandle> DynamicTextureAtlas::reserveImage(const DynamicText
                                                                const Immutable<style::Image::Impl>& image,
                                                                ImageType type) {
     const auto size = Size(image->image.size.width + 2 * padding, image->image.size.height + 2 * padding);
-    const ImageAllocationKey key{dynamicTexture.get(), image.get(), type};
+    const ImageAllocationKey key{.dynamicTexture = dynamicTexture.get(), .image = image.get(), .type = type};
 
     // Reuse the bin of this exact revision; otherwise let the shelf pack assign a fresh id.
     const auto it = imageAllocations.find(key);
     auto texHandle = dynamicTexture->reserveSize(size, it != imageAllocations.end() ? it->second.binId : -1);
     if (texHandle && it == imageAllocations.end()) {
-        imageAllocations.emplace(key, ImageAllocation{image, texHandle->getId()});
-        imageAllocationKeys.emplace(BinKey{dynamicTexture.get(), texHandle->getId()}, key);
+        imageAllocations.emplace(key, ImageAllocation{.image = image, .binId = texHandle->getId()});
+        imageAllocationKeys.emplace(BinKey{.dynamicTexture = dynamicTexture.get(), .binId = texHandle->getId()}, key);
     }
     return texHandle;
 }
@@ -253,7 +253,8 @@ void DynamicTextureAtlas::releaseTexture(const DynamicTexturePtr& dynamicTexture
     }
 
     // The last handle was released, so forget the revision; its bin may now be reused by other images.
-    const auto it = imageAllocationKeys.find(BinKey{dynamicTexture.get(), texHandle.getId()});
+    const auto it = imageAllocationKeys.find(
+        BinKey{.dynamicTexture = dynamicTexture.get(), .binId = texHandle.getId()});
     if (it != imageAllocationKeys.end()) {
         imageAllocations.erase(it->second);
         imageAllocationKeys.erase(it);

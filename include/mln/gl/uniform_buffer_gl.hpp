@@ -56,10 +56,7 @@ public:
         UniformBufferArray::operator=(std::move(other));
         return *this;
     }
-    UniformBufferArrayGL& operator=(const UniformBufferArrayGL& other) {
-        UniformBufferArray::operator=(other);
-        return *this;
-    }
+    UniformBufferArrayGL& operator=(const UniformBufferArrayGL& other) = default;
 
     void bind() const;
     void unbind() const;

@@ -15,7 +15,7 @@ namespace vulkan {
 UploadPass::UploadPass(gfx::Renderable&, CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_) {
     // Push the group for the name provided
-    debugGroups.emplace_back(gfx::DebugGroup<gfx::UploadPass>{*this, name});
+    debugGroups.emplace_back(*this, name);
 }
 
 UploadPass::~UploadPass() {
@@ -123,11 +123,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         // attribute at compile time, regardless of whether it's ever used at runtime.
         const auto setEmptyBinding = [&]() {
             bindings[index] = {
-                /*.attribute = */ {defaultAttr.getDataType(), /*offset=*/0},
-                /*.vertexStride = */ static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
-                /*.vertexBufferResource = */ nullptr,
-                /*.vertexOffset = */ 0,
-                /*.bufferIndex = */ 0,
+                .attribute = {.dataType = defaultAttr.getDataType(), .offset = 0},
+                .vertexStride = static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
+                .vertexBufferResource = nullptr,
+                .vertexOffset = 0,
+                .bufferIndex = 0,
             };
         };
 
