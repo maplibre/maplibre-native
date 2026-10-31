@@ -43,7 +43,7 @@ RenderTarget::RenderTarget(gfx::Context& context_,
     backgroundColor = Color{0.0f, 0.0f, 0.0f, 1.0f};
 }
 
-RenderTarget::~RenderTarget() {}
+RenderTarget::~RenderTarget() = default;
 
 const gfx::Texture2DPtr& RenderTarget::getTexture() {
     return offscreenTexture->getTexture();

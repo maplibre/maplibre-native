@@ -51,16 +51,13 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
 
     std::vector<vk::DescriptorPoolSize> sizes;
     if (growablePool.descriptorStoragePerSet > 0) {
-        sizes.emplace_back(
-            vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorStoragePerSet));
+        sizes.emplace_back(vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorStoragePerSet);
     }
     if (growablePool.descriptorUniformsPerSet > 0) {
-        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer,
-                                                  maxSets * growablePool.descriptorUniformsPerSet));
+        sizes.emplace_back(vk::DescriptorType::eUniformBuffer, maxSets * growablePool.descriptorUniformsPerSet);
     }
     if (growablePool.descriptorTexturesPerSet > 0) {
-        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler,
-                                                  maxSets * growablePool.descriptorTexturesPerSet));
+        sizes.emplace_back(vk::DescriptorType::eCombinedImageSampler, maxSets * growablePool.descriptorTexturesPerSet);
     }
 
     const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(poolFlags).setPoolSizes(sizes).setMaxSets(maxSets);

@@ -58,9 +58,9 @@ const std::string& ProgramParameters::getDefinesString() const {
 const std::string& ProgramParameters::vertexSource(gfx::Backend::Type backend) const {
     assert(gfx::Backend::Type::TYPE_MAX != backend);
 
-    if (userSources[static_cast<size_t>(backend)].vertex.length() > 0) {
+    if (!userSources[static_cast<size_t>(backend)].vertex.empty()) {
         return userSources[static_cast<size_t>(backend)].vertex;
-    } else if (defaultSources[static_cast<size_t>(backend)].vertex.length() > 0) {
+    } else if (!defaultSources[static_cast<size_t>(backend)].vertex.empty()) {
         return defaultSources[static_cast<size_t>(backend)].vertex;
     } else {
         throw std::runtime_error("No vertex shader source provided for selected backend!");
@@ -70,9 +70,9 @@ const std::string& ProgramParameters::vertexSource(gfx::Backend::Type backend) c
 const std::string& ProgramParameters::fragmentSource(gfx::Backend::Type backend) const {
     assert(gfx::Backend::Type::TYPE_MAX != backend);
 
-    if (userSources[static_cast<size_t>(backend)].fragment.length() > 0) {
+    if (!userSources[static_cast<size_t>(backend)].fragment.empty()) {
         return userSources[static_cast<size_t>(backend)].fragment;
-    } else if (defaultSources[static_cast<size_t>(backend)].fragment.length() > 0) {
+    } else if (!defaultSources[static_cast<size_t>(backend)].fragment.empty()) {
         return defaultSources[static_cast<size_t>(backend)].fragment;
     } else {
         throw std::runtime_error("No fragment shader source provided for selected backend!");

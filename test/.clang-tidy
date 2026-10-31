@@ -2,6 +2,7 @@
 Checks: >
     modernize-*,
     -modernize-avoid-bind,
+    -modernize-avoid-c-style-cast,
     -modernize-avoid-c-arrays,
     -modernize-concat-nested-namespaces,
     -modernize-macro-to-enum,
@@ -16,6 +17,10 @@ Checks: >
     -modernize-use-nullptr,
     -modernize-use-override,
     -modernize-use-constraints,
+    -modernize-use-designated-initializers,
+    -modernize-use-ranges,
+    -modernize-use-string-view,
+    -modernize-use-structured-binding,
     -modernize-use-trailing-return-type,
     -modernize-use-designated-initializers,
     -modernize-use-ranges,
