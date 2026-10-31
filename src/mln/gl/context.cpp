@@ -681,7 +681,7 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color,
                                             0));
     bindDepthRenderbuffer(depth);
     checkFramebuffer();
-    return {color.getSize(), std::move(fbo)};
+    return {.size = color.getSize(), .framebuffer = std::move(fbo)};
 }
 
 Framebuffer Context::createFramebuffer(
@@ -700,7 +700,7 @@ Framebuffer Context::createFramebuffer(
                                             0));
     bindDepthStencilRenderbuffer(depthStencil);
     checkFramebuffer();
-    return {color.getSize(), std::move(fbo)};
+    return {.size = color.getSize(), .framebuffer = std::move(fbo)};
 }
 
 gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
@@ -896,7 +896,7 @@ void Context::bindUniformBufferRange(uint32_t bindingIndex, uint32_t buffer, int
     if (cur.buffer == buffer && cur.offset == offset && cur.size == size) {
         return; // identical binding already in place - skip the redundant GL call
     }
-    cur = {buffer, offset, size};
+    cur = {.buffer = buffer, .offset = offset, .size = size};
     MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
                                        static_cast<GLuint>(bindingIndex),
                                        static_cast<GLuint>(buffer),
@@ -912,7 +912,7 @@ void Context::unbindUniformBuffer(uint32_t bindingIndex) {
     if (cur.buffer == 0) {
         return;
     }
-    cur = {0, -1, -1};
+    cur = {.buffer = 0, .offset = -1, .size = -1};
     MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, static_cast<GLuint>(bindingIndex), 0));
 }
 
