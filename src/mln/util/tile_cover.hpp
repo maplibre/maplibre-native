@@ -6,6 +6,7 @@
 #include <mln/util/geometry.hpp>
 #include <mln/util/range.hpp>
 
+#include <array>
 #include <vector>
 #include <memory>
 #include <numbers>
@@ -79,6 +80,13 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
 /// covers - so they render empty. Culling the mesh set to the frustum drops that
 /// off-screen area. Uses params.elevationProvider the same way tileCover does.
 std::set<UnwrappedTileID> frustumCull(const TileCoverParameters& state, const std::set<UnwrappedTileID>& tiles);
+
+/// Keep the `maxTiles` tiles whose centres lie nearest `origin` (normalized web-mercator; pass
+/// the ground under the camera to keep those nearest the camera), nearest first; all of them
+/// when there are no more than that or `maxTiles` is 0. The kept tiles are in this order, not
+/// the order tileCover returned them in. Ties go by tile ID, so the same view keeps the same
+/// tiles from one call to the next.
+void keepNearestTiles(std::vector<OverscaledTileID>& tiles, size_t maxTiles, const std::array<double, 2>& origin);
 std::vector<UnwrappedTileID> tileCover(const LatLngBounds&, uint8_t z);
 std::vector<UnwrappedTileID> tileCover(const Geometry<double>&, uint8_t z);
 
