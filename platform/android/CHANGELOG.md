@@ -1,5 +1,9 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+- Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
+
 ## 13.7.1
 
 ### ✨ Features and improvements
