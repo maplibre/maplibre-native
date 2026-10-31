@@ -27,6 +27,7 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                            std::unique_ptr<GeometryTileLayer> sourceLayer_,
                            plugin::RegisteredLayerPtr registration_)
     : zoom(parameters.tileID.overscaledZ),
+      globalState(parameters.globalState),
       layers(std::move(layers_)),
       sourceLayer(std::move(sourceLayer_)),
       registration(std::move(registration_)) {}
@@ -59,7 +60,9 @@ void PluginLayout::createBucket(const ImagePositions&,
         if (!feature) continue;
         const auto type = plugin::geometryType(feature->getType());
         if (type == 0 || (registration->geometryTypeMask & type) == 0) continue;
-        if (!leader.filter(style::expression::EvaluationContext(zoom, feature.get()).withCanonicalTileID(&canonical))) {
+        if (!leader.filter(style::expression::EvaluationContext(zoom, feature.get())
+                               .withCanonicalTileID(&canonical)
+                               .withGlobalState(globalState.get()))) {
             continue;
         }
 
@@ -114,12 +117,24 @@ void PluginLayout::createBucket(const ImagePositions&,
         if (!valid) break;
         drawable.key = input.drawable_key;
         drawable.shaderID.assign(input.shader_id.data, input.shader_id.size);
+        drawable.depthMode = static_cast<PluginDrawableDepthMode>(input.depth_mode);
+        drawable.enableStencilOverlap = input.enable_stencil_overlap != 0;
+        drawable.cullBackFaces = input.cull_back_faces != 0;
         const auto shaderIt = std::find_if(registration->shaders.begin(),
                                            registration->shaders.end(),
                                            [&](const auto& shader) { return shader.id == drawable.shaderID; });
         std::set<uint32_t> hostAttributeIDs;
         if (shaderIt != registration->shaders.end()) {
+            const auto referencesShaderAttribute = [&](uint32_t attributeID) {
+                return std::any_of(shaderIt->attributes.begin(),
+                                   shaderIt->attributes.end(),
+                                   [&](const auto& attribute) { return attribute.id == attributeID; });
+            };
             for (const auto& binding : shaderIt->propertyBindings) {
+                if (!referencesShaderAttribute(binding.minimumAttributeID) &&
+                    !referencesShaderAttribute(binding.maximumAttributeID)) {
+                    continue;
+                }
                 hostAttributeIDs.emplace(binding.minimumAttributeID);
                 hostAttributeIDs.emplace(binding.maximumAttributeID);
             }

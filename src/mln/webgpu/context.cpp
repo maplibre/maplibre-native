@@ -67,6 +67,8 @@ void Context::endFrame() {
 
 void Context::performCleanup() {
     backend.getThreadPool().runRenderJobs();
+    stats.numDrawCalls = 0;
+    stats.numFrames++;
 }
 
 void Context::reduceMemoryUsage() {

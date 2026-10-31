@@ -9,10 +9,13 @@
 #include <mln/util/traits.hpp>
 #include <mln/util/variant.hpp>
 
+#include <algorithm>
 #include <array>
 #include <memory>
 #include <numeric>
 #include <optional>
+#include <set>
+#include <string>
 #include <vector>
 
 namespace mln {
@@ -85,6 +88,11 @@ public:
         return *this;
     };
 
+    EvaluationContext& withGlobalState(const GlobalStateMap* globalState_) noexcept {
+        globalState = globalState_;
+        return *this;
+    };
+
     std::optional<float> zoom;
     std::optional<mln::Value> accumulated;
     GeometryTileFeature const* feature = nullptr;
@@ -95,6 +103,7 @@ public:
     const FeatureState* featureState = nullptr;
     const std::set<std::string>* availableImages = nullptr;
     const mln::CanonicalTileID* canonical = nullptr;
+    const GlobalStateMap* globalState = nullptr;
 };
 
 template <typename T>
@@ -109,7 +118,7 @@ public:
     static_assert(std::is_nothrow_constructible_v<Variant>);
 
     template <typename U>
-    VARIANT_INLINE Result(U&& val)
+    VARIANT_INLINE Result(U&& val) // NOLINT(bugprone-forwarding-reference-overload)
         : Variant(std::forward<U>(val)) {}
 
     template <typename U>
@@ -214,15 +223,16 @@ enum class Kind : int32_t {
 
 enum class Dependency : uint32_t {
     None = 0,
-    Feature = 1 << 0,   // Data reference
-    Image = 1 << 1,     // Image reference (equivalent to not "runtime constant")
-    Zoom = 1 << 2,      // Zoom level
-    Location = 1 << 3,  // Not used yet, "distance-from-center" not supported
-    Bind = 1 << 4,      // Create variable binding ("let")
-    Var = 1 << 5,       // Use variable binding
-    Override = 1 << 6,  // Property override
-    Elevation = 1 << 7, // Elevation from DEM
-    MaskCount = 8,
+    Feature = 1 << 0,     // Data reference
+    Image = 1 << 1,       // Image reference (equivalent to not "runtime constant")
+    Zoom = 1 << 2,        // Zoom level
+    Location = 1 << 3,    // Not used yet, "distance-from-center" not supported
+    Bind = 1 << 4,        // Create variable binding ("let")
+    Var = 1 << 5,         // Use variable binding
+    Override = 1 << 6,    // Property override
+    Elevation = 1 << 7,   // Elevation from DEM
+    GlobalState = 1 << 8, // Global state ("global-state")
+    MaskCount = 9,
     All = (1 << MaskCount) - 1,
 };
 
@@ -307,13 +317,13 @@ protected:
                            const std::pair<T, std::unique_ptr<Expression>>& rhs) noexcept
         requires(std::is_scalar_v<T>)
     {
-        return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
+        return lhs.first == rhs.first && *lhs.second == *rhs.second;
     }
 
     template <typename T, typename = std::enable_if_t<std::is_scalar_v<T>>, typename = void>
     static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
                            const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept {
-        return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
+        return lhs.first == rhs.first && *lhs.second == *rhs.second;
     }
 
     template <typename T>
@@ -327,12 +337,12 @@ protected:
         bool (*equality_method)(const T&, const T&) noexcept = &std::operator==;
         static_assert(std::is_nothrow_invocable_v<decltype(equality_method), const T&, const T&>);
 #endif
-        return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
+        return lhs.first == rhs.first && *lhs.second == *rhs.second;
     }
 
     static bool childEqual(const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& lhs,
                            const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs) noexcept {
-        return *(lhs.first) == *(rhs.first) && *(lhs.second) == *(rhs.second);
+        return *lhs.first == *rhs.first && *lhs.second == *rhs.second;
     }
 
     static Dependency depsOf(const std::shared_ptr<Expression>& ex) { return ex ? ex->dependencies : Dependency::None; }
@@ -376,6 +386,20 @@ private:
     Kind kind;
     type::Type type;
 };
+
+/// Collect the names of the global-state properties referenced by
+/// "global-state" expressions in the given expression tree.
+void collectGlobalStateRefs(const Expression&, std::set<std::string>& refs);
+
+/// Whether any of the global-state keys referenced by an expression is among
+/// the changed keys. A null set on either side means "unknown" and is
+/// conservatively treated as a match.
+inline bool globalStateRefsIntersect(const std::set<std::string>* refs, const std::set<std::string>* changedKeys) {
+    if (refs == nullptr || changedKeys == nullptr) {
+        return true;
+    }
+    return std::any_of(refs->begin(), refs->end(), [&](const std::string& key) { return changedKeys->count(key); });
+}
 
 } // namespace expression
 } // namespace style

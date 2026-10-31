@@ -10,6 +10,9 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.log.Logger;
@@ -684,6 +687,37 @@ public class Style {
   }
 
   //
+  // Global state
+  //
+
+  /**
+   * Set a global state property, used by the
+   * <a href="https://maplibre.org/maplibre-style-spec/expressions/#global-state">global-state</a> expression.
+   * <p>
+   * Setting a {@code null} value (or {@link com.google.gson.JsonNull}) resets the property to the default
+   * defined in the style's root {@code state} property, or to null if there is none.
+   *
+   * @param name  the name of the state property
+   * @param value the new value of the state property
+   */
+  public void setGlobalStateProperty(@NonNull String name, @Nullable JsonElement value) {
+    validateState("setGlobalStateProperty");
+    nativeMap.setGlobalStateProperty(name, value);
+  }
+
+  /**
+   * Get a snapshot of the map's current global state, used by the
+   * <a href="https://maplibre.org/maplibre-style-spec/expressions/#global-state">global-state</a> expression.
+   *
+   * @return the current global state
+   */
+  @NonNull
+  public JsonObject getGlobalState() {
+    validateState("getGlobalState");
+    return nativeMap.getGlobalState();
+  }
+
+  //
   // Light
   //
 
@@ -824,6 +858,9 @@ public class Style {
      * <li>{@code asset://...}:
      * loads the style from the APK {@code assets/} directory.
      * This is used to load a style bundled with your app.</li>
+     * <li>{@code file:///android_asset/...}:
+     * same as {@code asset://}, using the Android WebView-style asset URI
+     * (also produced by Compose Multiplatform {@code Res.getUri()}).</li>
      * <li>{@code file://...}:
      * loads the style from a file path. This is used to load a style from disk.
      * </li>
@@ -861,6 +898,9 @@ public class Style {
      * <li>{@code asset://...}:
      * loads the style from the APK {@code assets/} directory.
      * This is used to load a style bundled with your app.</li>
+     * <li>{@code file:///android_asset/...}:
+     * same as {@code asset://}, using the Android WebView-style asset URI
+     * (also produced by Compose Multiplatform {@code Res.getUri()}).</li>
      * <li>{@code file://...}:
      * loads the style from a file path. This is used to load a style from disk.
      * </li>

@@ -1,6 +1,6 @@
 #import <XCTest/XCTest.h>
 
-#import <Mapbox.h>
+#import <MapLibre.h>
 #import "MLNGeometry_Private.h"
 #import "MLNTileSource_Private.h"
 #import "MLNVectorTileSource.h"

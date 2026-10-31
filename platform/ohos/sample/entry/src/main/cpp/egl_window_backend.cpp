@@ -22,7 +22,7 @@ namespace ohos {
 namespace {
 
 void logDiagnostic(const std::string& message) {
-    Log::Info(Event::OpenGL, message);
+    Log::Info(Event::GraphicsBackend, message);
 }
 
 std::string eglErrorMessage(const char* operation) {
@@ -38,7 +38,7 @@ void setNativeWindowPixelFormat(OHNativeWindow* window) {
 
     const auto format = static_cast<std::int32_t>(NATIVEBUFFER_PIXEL_FMT_RGBA_8888);
     if (OH_NativeWindow_NativeWindowHandleOpt(window, SET_FORMAT, format) != 0) {
-        Log::Warning(Event::OpenGL, "OH_NativeWindow_NativeWindowHandleOpt SET_FORMAT failed");
+        Log::Warning(Event::GraphicsBackend, "OH_NativeWindow_NativeWindowHandleOpt SET_FORMAT failed");
     }
 }
 
@@ -279,7 +279,7 @@ EGLWindowBackend::EGLWindowBackend(OHNativeWindow* window_, Size size_)
 
     try {
         if (!setNativeWindowBufferGeometry(window, size_)) {
-            Log::Warning(Event::OpenGL, "OH_NativeWindow_NativeWindowHandleOpt SET_BUFFER_GEOMETRY failed");
+            Log::Warning(Event::GraphicsBackend, "OH_NativeWindow_NativeWindowHandleOpt SET_BUFFER_GEOMETRY failed");
         }
         setNativeWindowPixelFormat(window);
         logNativeWindowFormat(window);
@@ -310,7 +310,7 @@ EGLWindowBackend::~EGLWindowBackend() {
 
     if (eglContext != EGL_NO_CONTEXT && eglSurface != EGL_NO_SURFACE) {
         if (!eglMakeCurrent(displayConfig->display, eglSurface, eglSurface, eglContext)) {
-            Log::Warning(Event::OpenGL, eglErrorMessage("eglMakeCurrent"));
+            Log::Warning(Event::GraphicsBackend, eglErrorMessage("eglMakeCurrent"));
         }
     }
 
@@ -318,20 +318,20 @@ EGLWindowBackend::~EGLWindowBackend() {
 
     if (eglContext != EGL_NO_CONTEXT) {
         if (!eglMakeCurrent(displayConfig->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT)) {
-            Log::Warning(Event::OpenGL, eglErrorMessage("eglMakeCurrent"));
+            Log::Warning(Event::GraphicsBackend, eglErrorMessage("eglMakeCurrent"));
         }
     }
 
     if (eglSurface != EGL_NO_SURFACE) {
         if (!eglDestroySurface(displayConfig->display, eglSurface)) {
-            Log::Warning(Event::OpenGL, eglErrorMessage("eglDestroySurface"));
+            Log::Warning(Event::GraphicsBackend, eglErrorMessage("eglDestroySurface"));
         }
         eglSurface = EGL_NO_SURFACE;
     }
 
     if (eglContext != EGL_NO_CONTEXT) {
         if (!eglDestroyContext(displayConfig->display, eglContext)) {
-            Log::Warning(Event::OpenGL, eglErrorMessage("eglDestroyContext"));
+            Log::Warning(Event::GraphicsBackend, eglErrorMessage("eglDestroyContext"));
         }
         eglContext = EGL_NO_CONTEXT;
     }
@@ -343,9 +343,9 @@ EGLWindowBackend::~EGLWindowBackend() {
 }
 
 void EGLWindowBackend::setSize(Size size_) {
-    size = size_;
-    if (!setNativeWindowBufferGeometry(window, size)) {
-        Log::Warning(Event::OpenGL, "OH_NativeWindow_NativeWindowHandleOpt SET_BUFFER_GEOMETRY failed");
+    setRenderableSize(size_);
+    if (!setNativeWindowBufferGeometry(window, size_)) {
+        Log::Warning(Event::GraphicsBackend, "OH_NativeWindow_NativeWindowHandleOpt SET_BUFFER_GEOMETRY failed");
     }
 }
 
@@ -353,7 +353,7 @@ void EGLWindowBackend::swap() {
     MLN_TRACE_FUNC();
 
     if (!eglSwapBuffers(displayConfig->display, eglSurface)) {
-        Log::Warning(Event::OpenGL, eglErrorMessage("eglSwapBuffers"));
+        Log::Warning(Event::GraphicsBackend, eglErrorMessage("eglSwapBuffers"));
     }
 }
 
@@ -387,7 +387,7 @@ void EGLWindowBackend::updateAssumedState() {
     MLN_TRACE_FUNC();
 
     assumeFramebufferBinding(0);
-    assumeViewport(0, 0, size);
+    assumeViewport(0, 0, getSize());
 }
 
 } // namespace ohos

@@ -432,8 +432,8 @@ ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {
     return impl->transform.latLngToScreenCoordinate(unwrappedLatLng);
 }
 
-LatLng Map::latLngForPixel(const ScreenCoordinate& pixel) const {
-    return impl->transform.screenCoordinateToLatLng(pixel);
+LatLng Map::latLngForPixel(const ScreenCoordinate& pixel, LatLng::WrapMode wrapMode) const {
+    return impl->transform.screenCoordinateToLatLng(pixel, wrapMode);
 }
 
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {
@@ -445,11 +445,12 @@ std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& l
     return ret;
 }
 
-std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& screenCoords) const {
+std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& screenCoords,
+                                          LatLng::WrapMode wrapMode) const {
     std::vector<LatLng> ret;
     ret.reserve(screenCoords.size());
     for (const auto& point : screenCoords) {
-        ret.emplace_back(latLngForPixel(point));
+        ret.emplace_back(latLngForPixel(point, wrapMode));
     }
     return ret;
 }
@@ -528,7 +529,9 @@ void Map::enableRenderingStatsView(bool value) {
 }
 
 void Map::setPrefetchZoomDelta(uint8_t delta) {
+    if (impl->prefetchZoomDelta == delta) return;
     impl->prefetchZoomDelta = delta;
+    impl->onUpdate();
 }
 
 uint8_t Map::getPrefetchZoomDelta() const {
@@ -560,7 +563,9 @@ FreeCameraOptions Map::getFreeCameraOptions() const {
 }
 
 void Map::setTileLodMinRadius(double radius) {
+    if (impl->tileLodMinRadius == radius) return;
     impl->tileLodMinRadius = radius;
+    impl->onUpdate();
 }
 
 double Map::getTileLodMinRadius() const {
@@ -568,7 +573,9 @@ double Map::getTileLodMinRadius() const {
 }
 
 void Map::setTileLodScale(double scale) {
+    if (impl->tileLodScale == scale) return;
     impl->tileLodScale = scale;
+    impl->onUpdate();
 }
 
 double Map::getTileLodScale() const {
@@ -576,7 +583,9 @@ double Map::getTileLodScale() const {
 }
 
 void Map::setTileLodPitchThreshold(double threshold) {
+    if (impl->tileLodPitchThreshold == threshold) return;
     impl->tileLodPitchThreshold = threshold;
+    impl->onUpdate();
 }
 
 double Map::getTileLodPitchThreshold() const {
@@ -584,7 +593,9 @@ double Map::getTileLodPitchThreshold() const {
 }
 
 void Map::setTileLodZoomShift(double shift) {
+    if (impl->tileLodZoomShift == shift) return;
     impl->tileLodZoomShift = shift;
+    impl->onUpdate();
 }
 
 double Map::getTileLodZoomShift() const {
@@ -592,7 +603,9 @@ double Map::getTileLodZoomShift() const {
 }
 
 void Map::setTileLodMode(TileLodMode mode) {
+    if (impl->tileLodMode == mode) return;
     impl->tileLodMode = mode;
+    impl->onUpdate();
 }
 
 TileLodMode Map::getTileLodMode() const {

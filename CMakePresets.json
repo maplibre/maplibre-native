@@ -362,9 +362,12 @@
     {
       "name": "windows-arm64",
       "hidden": true,
-      "generator": "Visual Studio 17 2022",
       "architecture": {
         "value": "ARM64",
+        "strategy": "set"
+      },
+      "toolset": {
+        "value": "v143",
         "strategy": "set"
       },
       "environment": {

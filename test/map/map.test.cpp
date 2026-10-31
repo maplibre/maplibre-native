@@ -10,7 +10,9 @@
 #include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_options.hpp>
+#include <mln/map/map_projection.hpp>
 #include <mln/math/log2.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/renderer/update_parameters.hpp>
@@ -19,6 +21,8 @@
 #include <mln/storage/network_status.hpp>
 #include <mln/storage/online_file_source.hpp>
 #include <mln/storage/resource_options.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/layer.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/image_impl.hpp>
 #include <mln/style/image.hpp>
@@ -26,6 +30,7 @@
 #include <mln/style/layers/background_layer.hpp>
 #include <mln/style/layers/fill_layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
 #include <mln/style/layers/raster_layer.hpp>
 #include <mln/style/layers/symbol_layer.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
@@ -42,6 +47,7 @@
 #include <mln/util/io.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/run_loop.hpp>
+#include <mln/util/timer.hpp>
 
 #include <atomic>
 
@@ -360,6 +366,57 @@ TEST(Map, CameraToLatLngBoundsUnwrappedCrossDateLine) {
         test.map.latLngForPixel({double(size.width) / 2, double(size.height) / 2})));
 
     ASSERT_TRUE(test.map.latLngBoundsForCameraUnwrapped(camera).crossesAntimeridian());
+}
+
+TEST(Map, LatLngForPixelUnwrapped) {
+    MapTest<> test;
+    test.map.setSize({2048, 512});
+
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(0.0));
+    const auto left = test.map.latLngForPixel({0.0, 256.0}, LatLng::Unwrapped);
+    const auto right = test.map.latLngForPixel({2048.0, 256.0}, LatLng::Unwrapped);
+    EXPECT_NEAR(-720.0, left.longitude(), 1e-4);
+    EXPECT_NEAR(720.0, right.longitude(), 1e-4);
+    EXPECT_NEAR(0.0, test.map.latLngForPixel({0.0, 256.0}).longitude(), 1e-4);
+    EXPECT_NEAR(0.0, test.map.latLngForPixel({2048.0, 256.0}).longitude(), 1e-4);
+
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 180.0}).withZoom(4.0));
+    const auto west = test.map.latLngForPixel({0.0, 256.0}, LatLng::Unwrapped);
+    const auto east = test.map.latLngForPixel({2048.0, 256.0}, LatLng::Unwrapped);
+    EXPECT_NEAR(-225.0, west.longitude(), 1e-4);
+    EXPECT_NEAR(-135.0, east.longitude(), 1e-4);
+    EXPECT_NEAR(135.0, test.map.latLngForPixel({0.0, 256.0}).longitude(), 1e-4);
+    EXPECT_NEAR(-135.0, test.map.latLngForPixel({2048.0, 256.0}).longitude(), 1e-4);
+    EXPECT_NEAR(90.0, east.longitude() - west.longitude(), 1e-4);
+
+    const auto both = test.map.latLngsForPixels({{0.0, 256.0}, {2048.0, 256.0}}, LatLng::Unwrapped);
+    ASSERT_EQ(2u, both.size());
+    EXPECT_DOUBLE_EQ(west.longitude(), both[0].longitude());
+    EXPECT_DOUBLE_EQ(east.longitude(), both[1].longitude());
+
+    const MapProjection projection(test.map);
+    EXPECT_DOUBLE_EQ(east.longitude(), projection.latLngForPixel({2048.0, 256.0}, LatLng::Unwrapped).longitude());
+    EXPECT_NEAR(-135.0, projection.latLngForPixel({2048.0, 256.0}).longitude(), 1e-4);
+}
+
+// A zoom around a point keeps the place under it. Across the antimeridian the center comes back wrapped, as GL JS's
+// setLocationAtPoint leaves it, or pixelForLatLng puts every place a world away.
+TEST(Map, PixelForLatLngAfterZoomAroundAPointAcrossTheAntimeridian) {
+    MapTest<> test;
+    test.map.setSize({256, 256});
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 179.9}).withZoom(5.0));
+
+    const ScreenCoordinate anchor{230.0, 128.0};
+    const LatLng place = test.map.latLngForPixel(anchor);
+    test.map.jumpTo(CameraOptions().withZoom(6.0).withAnchor(anchor));
+
+    EXPECT_LE(std::abs(test.map.getCameraOptions().center->longitude()), 180.0);
+    const ScreenCoordinate point = test.map.pixelForLatLng(place);
+    EXPECT_NEAR(anchor.x, point.x, 1e-6);
+    EXPECT_NEAR(anchor.y, point.y, 1e-6);
+    const ScreenCoordinate projected = MapProjection(test.map).pixelForLatLng(place);
+    EXPECT_NEAR(anchor.x, projected.x, 1e-6);
+    EXPECT_NEAR(anchor.y, projected.y, 1e-6);
 }
 
 TEST(Map, Offline) {
@@ -990,6 +1047,23 @@ TEST(Map, Issue15216) {
     test.map.getStyle().addLayer(std::make_unique<RasterLayer>("RasterLayer", "ImageSource"));
     // Passes, if there is no assertion hit.
     test.runLoop.runOnce();
+}
+
+// https://github.com/maplibre/maplibre-native/pull/4753
+// An image source wholly beyond the latitudes Web Mercator can show has an
+// empty tile cover, which used to crash RenderImageSource::update.
+TEST(Map, ImageSourceBeyondMercatorLatitudes) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    auto source = std::make_unique<ImageSource>("image",
+                                                std::array<LatLng, 4>{{{88, -10}, {88, 10}, {86, 10}, {86, -10}}});
+    source->setImage(PremultipliedImage({4, 4}));
+    test.map.getStyle().addSource(std::move(source));
+    test.map.getStyle().addLayer(std::make_unique<RasterLayer>("image", "image"));
+
+    // Passes, if rendering a frame doesn't crash.
+    test.frontend.renderFrame();
 }
 
 // https://github.com/mapbox/mapbox-gl-native/issues/15342
@@ -2168,6 +2242,103 @@ TEST(Map, FeatureStateChangesRenderedStyle) {
     }
 }
 
+static std::size_t countGreenPixels(const PremultipliedImage& image) {
+    std::size_t greenPixels = 0;
+    for (std::size_t i = 0; i < image.bytes(); i += image.channels) {
+        if (image.data[i] < 40 && image.data[i + 1] > 200 && image.data[i + 2] < 40) {
+            ++greenPixels;
+        }
+    }
+    return greenPixels;
+}
+
+TEST(Map, LocationIndicatorAccuracyColorsTransition) {
+    if (!LayerManager::get()->hasLayerType("location-indicator")) {
+        GTEST_SKIP() << "location-indicator layer is not registered on this platform";
+    }
+
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {},
+      "layers": [{
+        "id": "location",
+        "type": "location-indicator",
+        "paint": {
+          "location": [0, 0, 0],
+          "accuracy-radius": 100,
+          "accuracy-radius-color": "blue",
+          "accuracy-radius-border-color": "white"
+        }
+      }]
+    })STYLE");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(16));
+
+    const auto renderUntilIdle = [&] {
+        bool idle = false;
+        util::Timer timeout;
+        timeout.start(std::chrono::seconds(5), Duration::zero(), [&] { test.runLoop.stop(); });
+        test.observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus status) {
+            if (status.mode == MapObserver::RenderMode::Full && !status.needsRepaint) {
+                idle = true;
+                test.runLoop.stop();
+            }
+        };
+        test.runLoop.run();
+        test.observer.didFinishRenderingFrameCallback = {};
+        return idle;
+    };
+    const auto centerChannel = [](const PremultipliedImage& image, std::size_t channel) {
+        return image.data[(image.size.height / 2 * image.size.width + image.size.width / 2) * 4 + channel];
+    };
+
+    const auto readImage = [&] {
+        gfx::BackendScope scope{*test.frontend.getBackend()};
+        return test.frontend.readStillImage();
+    };
+
+    ASSERT_TRUE(renderUntilIdle());
+    const auto initial = readImage();
+    ASSERT_GT(centerChannel(initial, 2), 240);
+    ASSERT_LT(centerChannel(initial, 0), 10);
+
+    auto* layer = static_cast<LocationIndicatorLayer*>(test.map.getStyle().getLayer("location"));
+    ASSERT_NE(layer, nullptr);
+    TransitionOptions transition;
+    transition.duration = std::chrono::milliseconds(100);
+    layer->setAccuracyRadiusColorTransition(transition);
+    layer->setAccuracyRadiusBorderColorTransition(transition);
+    layer->setAccuracyRadiusColor(Color::red());
+    layer->setAccuracyRadiusBorderColor(Color{0, 1, 0, 1});
+
+    ASSERT_TRUE(renderUntilIdle());
+    const auto result = readImage();
+    EXPECT_GT(centerChannel(result, 0), 240);
+    EXPECT_LT(centerChannel(result, 2), 10);
+    EXPECT_GT(countGreenPixels(result), 0u) << "The accuracy border should finish transitioning to green";
+}
+
+TEST(Map, RenderingStatisticsTrackDrawsAcrossFrames) {
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version":8,"sources":{"points":{"type":"geojson","data":{
+        "type":"Point","coordinates":[0,0]}}},"layers":[{"id":"circle","type":"circle","source":"points"}]})");
+    const auto first = test.frontend.render(test.map).stats;
+    ASSERT_GT(first.numFrames, 0);
+    ASSERT_GT(first.numDrawCalls, 0);
+    EXPECT_GE(first.totalDrawCalls, first.numDrawCalls);
+
+    const auto second = test.frontend.render(test.map).stats;
+    EXPECT_EQ(first.numFrames + 1, second.numFrames);
+    EXPECT_GT(second.numDrawCalls, 0);
+    EXPECT_EQ(first.totalDrawCalls + second.numDrawCalls, second.totalDrawCalls);
+
+    test.map.getStyle().getLayer("circle")->setVisibility(VisibilityType::None);
+    const auto empty = test.frontend.render(test.map).stats;
+    EXPECT_EQ(second.numFrames + 1, empty.numFrames);
+    EXPECT_EQ(0, empty.numDrawCalls);
+    EXPECT_EQ(second.totalDrawCalls, empty.totalDrawCalls);
+}
+
 TEST(Map, LocationIndicatorWithoutImages) {
     MapTest<> test;
     test.map.getStyle().loadJSON(R"STYLE({
@@ -2183,4 +2354,38 @@ TEST(Map, LocationIndicatorWithoutImages) {
 
     // Neither the accuracy circle nor any image should produce a draw call.
     EXPECT_EQ(test.frontend.render(test.map).stats.numDrawCalls, 0);
+}
+
+TEST(Map, TileSelectionOptionsPublishUpdates) {
+    util::RunLoop loop;
+    class Frontend final : public RendererFrontend {
+    public:
+        std::shared_ptr<UpdateParameters> parameters;
+        TaggedScheduler scheduler{Scheduler::GetBackground(), {}};
+        void reset() override {}
+        void setObserver(RendererObserver&) override {}
+        void update(std::shared_ptr<UpdateParameters> value) override { parameters = std::move(value); }
+        const TaggedScheduler& getThreadPool() const override { return scheduler; }
+    } frontend;
+    StubMapObserver observer;
+    MapAdapter map{
+        frontend, observer, std::make_shared<StubFileSource>(), MapOptions().withMapMode(MapMode::Continuous)};
+    map.getStyle().loadJSON(R"({"version":8,"sources":{},"layers":[]})");
+    ASSERT_TRUE(frontend.parameters);
+
+    const auto check = [&](auto setter, auto member, auto value) {
+        const auto before = frontend.parameters;
+        (map.*setter)(value);
+        EXPECT_NE(before, frontend.parameters);
+        EXPECT_EQ(value, frontend.parameters.get()->*member);
+        const auto after = frontend.parameters;
+        (map.*setter)(value);
+        EXPECT_EQ(after, frontend.parameters);
+    };
+    check(&Map::setPrefetchZoomDelta, &UpdateParameters::prefetchZoomDelta, uint8_t{2});
+    check(&Map::setTileLodMinRadius, &UpdateParameters::tileLodMinRadius, 4.0);
+    check(&Map::setTileLodScale, &UpdateParameters::tileLodScale, 2.0);
+    check(&Map::setTileLodPitchThreshold, &UpdateParameters::tileLodPitchThreshold, 0.5);
+    check(&Map::setTileLodZoomShift, &UpdateParameters::tileLodZoomShift, 1.0);
+    check(&Map::setTileLodMode, &UpdateParameters::tileLodMode, TileLodMode::Distance);
 }

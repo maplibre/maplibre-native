@@ -136,6 +136,21 @@ Database& Database::operator=(Database&& other) noexcept {
 
 Database::~Database() {}
 
+std::string Database::getFilename() const {
+    assert(impl);
+    QSqlQuery query(QSqlDatabase::database(impl->connectionName));
+    if (!query.exec("PRAGMA database_list")) {
+        checkQueryError(query);
+    }
+    while (query.next()) {
+        if (query.value(1).toString() == "main") {
+            return query.value(2).toString().toStdString();
+        }
+    }
+    checkQueryError(query);
+    return "";
+}
+
 void Database::setBusyTimeout(std::chrono::milliseconds timeout) {
     assert(impl);
     impl->setBusyTimeout(timeout);

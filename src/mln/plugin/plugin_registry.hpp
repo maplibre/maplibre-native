@@ -91,6 +91,7 @@ struct LayerType {
     mln_plugin_update_uniform_block_fn updateUniformBlock = nullptr;
     bool enableStencilOverlapDedup = false;
     bool enableNearClippedMatrix = false;
+    mln_plugin_should_animate_fn shouldAnimate = nullptr;
     bool operator==(const LayerType&) const = default;
 
     const PropertyDefinition* findProperty(const std::string& name) const;

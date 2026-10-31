@@ -32,7 +32,8 @@ void registerTriangles(const std::string& pluginID,
                        bool packedColor = false,
                        bool withUniforms = false,
                        bool scopedUniforms = false,
-                       bool stencilOverlapDedup = false) {
+                       bool stencilOverlapDedup = false,
+                       mln_plugin_should_animate_fn shouldAnimate = nullptr) {
     static const float vertices[] = {-1, -1, 1, -1, 0, 1};
     static const uint16_t indices[] = {0, 1, 2};
     static const mln_plugin_vertex_stream_v1 stream = {
@@ -40,7 +41,7 @@ void registerTriangles(const std::string& pluginID,
     static const mln_plugin_attribute_binding_v1 binding = {sizeof(binding), 0, 0, 0};
     static const mln_plugin_segment_v1 segment = {sizeof(segment), 0, 0, 3, 3};
     static const mln_plugin_drawable_descriptor_v1 drawable = {
-        sizeof(drawable), 1, {"main", 4}, &binding, 1, &segment, 1};
+        sizeof(drawable), 1, {"main", 4}, &binding, 1, &segment, 1, MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY, 0, 0, 0, 0};
     static const mln_plugin_feature_vertex_range_v1 range = {sizeof(range), 0, 1, 0, 3};
     const mln_plugin_shader_attribute_v1 attribute = {
         sizeof(attribute), 0, 0, {"a_pos", 5}, MLN_PLUGIN_VERTEX_FLOAT_X2};
@@ -57,8 +58,18 @@ void registerTriangles(const std::string& pluginID,
     static const mln_plugin_vertex_stream_v1 colorStreams[] = {stream,
                                                                {sizeof(stream), 1, colors, sizeof(colors), 3, 4}};
     static const mln_plugin_attribute_binding_v1 colorBindings[] = {binding, {sizeof(binding), 1, 1, 0}};
-    static const mln_plugin_drawable_descriptor_v1 colorDrawable = {
-        sizeof(drawable), 1, {"main", 4}, colorBindings, 2, &segment, 1};
+    static const mln_plugin_drawable_descriptor_v1 colorDrawable = {sizeof(drawable),
+                                                                    1,
+                                                                    {"main", 4},
+                                                                    colorBindings,
+                                                                    2,
+                                                                    &segment,
+                                                                    1,
+                                                                    MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY,
+                                                                    0,
+                                                                    0,
+                                                                    0,
+                                                                    0};
     const mln_plugin_shader_attribute_v1 colorAttributes[] = {
         attribute, {sizeof(attribute), 1, 1, {"a_color", 7}, MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED}};
     std::array<std::string, 2> types = {pluginID + ".left", pluginID + ".right"};
@@ -70,6 +81,7 @@ void registerTriangles(const std::string& pluginID,
     radius.struct_size = sizeof(radius);
     radius.name = {"test-radius", 11};
     radius.type = MLN_PLUGIN_VALUE_FLOAT;
+    radius.expression_capabilities = MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_CAMERA;
     radius.default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_FLOAT, {.float_value = 1}};
     for (std::size_t i = 0; i < layers.size(); ++i) {
         const std::string offset = i == 0 ? "-1.0" : "+1.0";
@@ -187,6 +199,7 @@ void registerTriangles(const std::string& pluginID,
         layer.properties = withUniforms ? &radius : nullptr;
         layer.property_count = withUniforms ? 1u : 0u;
         layer.enable_stencil_overlap_dedup = stencilOverlapDedup;
+        layer.should_animate = shouldAnimate;
         layer.update_uniform_block = [](const mln_plugin_uniform_context_v1*, uint32_t, uint8_t*, size_t) {
             return MLN_PLUGIN_STATUS_OK;
         };
@@ -208,10 +221,16 @@ void registerTriangles(const std::string& pluginID,
             *instance = new (std::nothrow) int(0);
             return *instance ? MLN_PLUGIN_STATUS_OK : MLN_PLUGIN_STATUS_CALLBACK_ERROR;
         };
-        layer.layout_feature = [](void*, const mln_plugin_feature_v1*) {
+        layer.layout_feature = [](void* instance, const mln_plugin_feature_v1*) {
+            ++*static_cast<int*>(instance);
             return MLN_PLUGIN_STATUS_OK;
         };
-        layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
+        layer.finish_layout = [](void* instance, mln_plugin_bucket_v1* output) {
+            if (*static_cast<int*>(instance) == 0) {
+                *output = {};
+                output->struct_size = sizeof(*output);
+                return MLN_PLUGIN_STATUS_OK;
+            }
             *output = {sizeof(*output), &stream, 1, indices, 3, &drawable, 1, 0, &range, 1};
             return MLN_PLUGIN_STATUS_OK;
         };
@@ -270,6 +289,26 @@ TEST(PluginRendering, LayerLocalShaderIDsProduceDifferentPrograms) {
     test.expectTriangles("test.shader-identity");
 }
 
+TEST(PluginRendering, FilterUsesGlobalStateDefaultsAndUpdates) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.global-state-filter"));
+    RenderTest test;
+    auto& style = test.map.getStyle();
+    style.loadJSON(R"({"version":8,"state":{"show":{"default":true}},"sources":{"points":{"type":"geojson","data":{
+        "type":"Point","coordinates":[0,0]}}},"layers":[{"id":"left","type":"test.global-state-filter.left",
+        "source":"points","filter":["==",["global-state","show"],true]}]})");
+    const auto expectVisible = [&](bool visible) {
+        const auto result = test.frontend.render(test.map);
+        const auto* pixel = result.image.data.get() + (32 * 64 + 16) * 4;
+        EXPECT_EQ(visible ? 255 : 0, pixel[0]);
+        EXPECT_EQ(visible ? 255 : 0, pixel[3]);
+    };
+    expectVisible(true);
+    style.setGlobalStateProperty("show", false);
+    expectVisible(false);
+    style.setGlobalStateProperty("show", NullValue());
+    expectVisible(true);
+}
+
 TEST(PluginRendering, DoesNotGenerateUnusedStencilMasks) {
     ASSERT_NO_FATAL_FAILURE(registerTriangles("test.no-stencil"));
     RenderTest test;
@@ -288,6 +327,31 @@ TEST(PluginRendering, StencilOverlapDedupGeneratesStencilUpdates) {
     test.expectTriangles("test.stencil-dedup");
     const auto result = test.frontend.render(test.map);
     EXPECT_GT(result.stats.stencilUpdates, 0u);
+}
+
+TEST(PluginRendering, CameraPaintRefreshesAfterPropertyAndZoomChanges) {
+    static float radius;
+    const auto recordRadius = [](const mln_plugin_property_value_v1* properties, size_t) -> uint8_t {
+        radius = properties[0].value.data.float_value;
+        return false;
+    };
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.camera-paint", false, true, false, false, recordRadius));
+    RenderTest test;
+    test.map.getStyle().loadJSON(R"({"version":8,"sources":{"points":{"type":"geojson","maxzoom":0,"data":{
+        "type":"Point","coordinates":[0,0]}}},"layers":[{"id":"left","type":"test.camera-paint.left",
+        "source":"points","paint":{"test-radius":0.25}}]})");
+    const auto expectRadius = [&](double zoom, float expected) {
+        test.map.jumpTo(CameraOptions().withZoom(zoom));
+        test.frontend.render(test.map);
+        EXPECT_FLOAT_EQ(expected, radius);
+    };
+    expectRadius(0, 0.25f);
+    JSDocument value;
+    value.Parse(R"(["interpolate",["linear"],["zoom"],0,1,1,0.5])");
+    ASSERT_FALSE(test.map.getStyle().getLayer("left")->setProperty(
+        "test-radius", style::conversion::Convertible(static_cast<const JSValue*>(&value))));
+    expectRadius(0, 1);
+    expectRadius(1, 0.5f);
 }
 
 TEST(PluginRendering, UnchangedUniformUploadsAreSkippedButPaintChangesUpload) {

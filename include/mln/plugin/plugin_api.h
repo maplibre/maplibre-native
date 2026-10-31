@@ -331,10 +331,17 @@ typedef struct mln_plugin_segment_v1 {
     uint32_t index_length;
 } mln_plugin_segment_v1;
 
+typedef enum mln_plugin_drawable_depth_mode_v1 {
+    MLN_PLUGIN_DRAWABLE_DEPTH_DISABLED = 0,
+    MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY = 1,
+    MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE = 2
+} mln_plugin_drawable_depth_mode_v1;
+
 typedef struct mln_plugin_drawable_descriptor_v1 {
-    /* Indexed triangles in the translucent pass, premultiplied-alpha blending,
-     * read-only depth and no tile stencil/culling. Point ownership belongs to
-     * layout; screen-space marks may extend beyond their owning tile. */
+    /* Indexed triangles in the translucent pass, premultiplied-alpha blending by
+     * default. depth_mode, enable_stencil_overlap, and cull_back_faces select the
+     * host depth/stencil/cull state for this drawable. blend_mode and reserved are
+     * unused; set them to zero. */
     uint32_t struct_size;
     uint64_t drawable_key;
     mln_plugin_string shader_id;
@@ -342,6 +349,11 @@ typedef struct mln_plugin_drawable_descriptor_v1 {
     size_t attribute_count;
     const mln_plugin_segment_v1* segments;
     size_t segment_count;
+    uint8_t depth_mode;
+    uint8_t enable_stencil_overlap;
+    uint8_t cull_back_faces;
+    uint8_t blend_mode;
+    uint8_t reserved;
 } mln_plugin_drawable_descriptor_v1;
 
 typedef struct mln_plugin_feature_vertex_range_v1 {
@@ -426,6 +438,16 @@ typedef float (*mln_plugin_query_radius_fn)(const mln_plugin_property_statistics
                                             const mln_plugin_property_value_v1* camera_properties,
                                             size_t camera_property_count);
 
+/* Optional animation signal, consulted on the render thread during layer
+ * evaluation with the camera-evaluated paint property values (the same array
+ * shape as query_feature; feature-dependent properties evaluate without a
+ * feature). The property array and its strings are borrowed for the call only.
+ * A nonzero return marks the layer as animating, and the map keeps repainting;
+ * return zero while the layer's animation is disabled. A null callback means
+ * the layer never animates. It must support concurrent calls for different
+ * maps. */
+typedef uint8_t (*mln_plugin_should_animate_fn)(const mln_plugin_property_value_v1* properties, size_t property_count);
+
 typedef struct mln_plugin_layer_type_v1 {
     uint32_t struct_size;
     mln_plugin_string layer_type;
@@ -460,6 +482,7 @@ typedef struct mln_plugin_layer_type_v1 {
      * non-pixel-snapped, near-clipped projection.
      */
     uint8_t enable_near_clipped_matrix;
+    mln_plugin_should_animate_fn should_animate;
 } mln_plugin_layer_type_v1;
 
 typedef struct mln_plugin_descriptor_v1 {

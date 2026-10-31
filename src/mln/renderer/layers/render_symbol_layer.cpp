@@ -167,7 +167,7 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
     const auto& layout = impl_cast(baseImpl).layout;
 
     if (hasFormatSectionOverrides) {
-        SymbolLayerPaintPropertyOverrides::setOverrides(layout, evaluated);
+        SymbolLayerPaintPropertyOverrides::setOverrides(layout, evaluated, unevaluated, parameters.globalState);
     }
 
     const auto hasIconOpacity = evaluated.get<style::IconColor>().constantOr(IconColor::defaultValue()).a > 0 ||
@@ -824,19 +824,13 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-            return true;
-        }
-        return false;
+        return drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID));
     });
     if (collisionTileLayerGroup) {
         stats.drawablesRemoved += collisionTileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
             // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
             const auto& tileID = drawable.getTileID();
-            if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-                return true;
-            }
-            return false;
+            return drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID));
         });
     }
 
