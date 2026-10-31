@@ -109,6 +109,7 @@ private:
     /// post an observer message every frame.
     double lastReportedCenterElevation = 0.0;
     double lastReportedEyeElevation = std::numeric_limits<double>::quiet_NaN();
+    double lastReportedTargetElevation = std::numeric_limits<double>::quiet_NaN();
 
     enum class RenderState {
         Never,

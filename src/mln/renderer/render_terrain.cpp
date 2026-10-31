@@ -890,6 +890,48 @@ double RenderTerrain::getElevationForLatLng(const LatLng& latLng) const {
     return getElevationWithExaggeration(sampleTile, localX, localY);
 }
 
+std::optional<double> RenderTerrain::findElevationForLatLng(const LatLng& latLng) const {
+    if (!demSource) {
+        return std::nullopt;
+    }
+    int sampleZoom = -1;
+    const auto renderTiles = demSource->getRawRenderTiles();
+    for (const auto& renderTile : *renderTiles) {
+        if (renderTile.getTile().kind == Tile::Kind::RasterDEM) {
+            sampleZoom = std::max(sampleZoom, static_cast<int>(renderTile.id.canonical.z));
+        }
+    }
+    if (sampleZoom < 0) {
+        return std::nullopt;
+    }
+    const double n = std::pow(2.0, sampleZoom);
+    const auto point = Projection::project(latLng, sampleZoom);
+    const auto tx = static_cast<int64_t>(std::floor(point.x));
+    const auto ty = static_cast<int64_t>(std::floor(point.y));
+    if (ty < 0 || static_cast<double>(ty) >= n) {
+        return std::nullopt;
+    }
+    const UnwrappedTileID sampleTile(static_cast<uint8_t>(sampleZoom), tx, ty);
+    const auto localX = static_cast<float>((point.x - static_cast<double>(tx)) * util::EXTENT);
+    const auto localY = static_cast<float>((point.y - static_cast<double>(ty)) * util::EXTENT);
+
+    // A DEM tile has to cover the point: getElevation answers 0 where none does.
+    UnwrappedTileID covered = sampleTile;
+    float coveredX = localX;
+    float coveredY = localY;
+    if (!normalizeTileCoordinates(covered, coveredX, coveredY)) {
+        return std::nullopt;
+    }
+    const bool found = std::any_of(renderTiles->begin(), renderTiles->end(), [&](const RenderTile& renderTile) {
+        return renderTile.getTile().kind == Tile::Kind::RasterDEM &&
+               (renderTile.id == covered || covered.isChildOf(renderTile.id));
+    });
+    if (!found) {
+        return std::nullopt;
+    }
+    return getElevationWithExaggeration(sampleTile, localX, localY);
+}
+
 std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const UnwrappedTileID& tileID) const {
     // Find the DEM texture matching the requested tile, or its closest available ancestor
     const UnwrappedTileID* demTileID = nullptr;

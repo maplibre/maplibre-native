@@ -190,7 +190,10 @@ void Map::Impl::onUpdate() {
                                .tileLodMode = tileLodMode,
                                .terrainLoadMode = terrainLoadMode,
                                .terrainSkirtLength = terrainSkirtLength,
-                               .debugAboveGroundLog = debugAboveGroundLog};
+                               .debugAboveGroundLog = debugAboveGroundLog,
+                               .transitionTargetCenter = centerClampedToGround && !transitionIsFling
+                                                             ? transform.getTransitionTargetCenter()
+                                                             : std::nullopt};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
 }
@@ -582,6 +585,16 @@ void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
         return;
     }
     applyCenterClamp();
+}
+
+void Map::Impl::onTerrainTransitionTargetElevationChanged(double elevationMeters) {
+    // A camera animation the app asked for (a recenter, a flight) eases the center's height to the
+    // ground it is headed for, as gl-js does. Without it the animation kept the height it left,
+    // and the clamp jumped the center, and the camera with it, onto the ground when it ended.
+    if (!centerClampedToGround || transitionIsFling || !transform.inTransition()) {
+        return;
+    }
+    transform.retargetTransitionCenterAltitude(elevationMeters);
 }
 
 void Map::Impl::onTerrainEyeElevationChanged(double elevationMeters) {
