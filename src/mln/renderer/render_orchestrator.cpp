@@ -295,6 +295,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         terrainEnabled ? getRenderSource(renderTerrain->getSourceID()) : nullptr,
         terrainEnabled ? renderTerrain->getExaggeration() : 1.0};
     tileParameters.elevationProvider = terrainEnabled ? &elevationProvider : nullptr;
+    // With the view pitched the finest tiles belong under the camera, where the screen is densest,
+    // not at the map centre far ahead of it: the point the mesh-tile cap measures from. Every
+    // source takes it, so they ask for what the mesh covers.
+    if (terrainEnabled) {
+        tileParameters.tileLodOrigin = RenderTerrain::meshTileCapOrigin(updateParameters->transformState);
+    }
 
     // A source whose minzoom is deeper than the far field's zoom is covered at that minzoom out
     // to the horizon: thousands of tiles at a steep pitch, each kept with its geometry for as

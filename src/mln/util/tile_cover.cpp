@@ -209,6 +209,11 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                  .p;
 
     const vec3 centerCoord = {{centerPoint.x, centerPoint.y, 0.0}};
+    // Where the distance-based level of detail below measures from: the map centre, or
+    // `tileLodOrigin` when the caller gives one.
+    const vec3 lodCoord = state.tileLodOrigin
+                              ? vec3{{(*state.tileLodOrigin)[0] * numTiles, (*state.tileLodOrigin)[1] * numTiles, 0.0}}
+                              : centerCoord;
 
     assert(transform.getFreeCameraOptions().position);
     const vec3 cameraPositionMercator = *transform.getFreeCameraOptions().position;
@@ -343,7 +348,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                                                        cameraToCenterDistanceMercator /
                                                                        state.tileLodScale * nominalScale;
         } else {
-            const vec3 distanceXyz = node.aabb.distanceXYZ(centerCoord);
+            const vec3 distanceXyz = node.aabb.distanceXYZ(lodCoord);
             const double* longestDim = std::max_element(distanceXyz.data(), distanceXyz.data() + distanceXyz.size());
             assert(longestDim);
 

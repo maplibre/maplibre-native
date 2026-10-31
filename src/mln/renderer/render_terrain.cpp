@@ -124,6 +124,10 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // selection every other source uses, so the near field drapes at a higher
     // zoom (smaller ground area per 1024 target = sharper draped content).
     util::TileCoverParameters coverParams{.transformState = state, .elevationProvider = &elevationProvider};
+    // The finest tiles go under the camera (where the screen is densest), as the mesh-tile cap below
+    // keeps the tiles nearest it; measured from the map centre, a steep pitch gives the ground at the
+    // bottom of the screen the coarsest tiles of the cover.
+    coverParams.tileLodOrigin = meshTileCapOrigin(state);
     double zoomShift = 0.0;
     if (updateParameters) {
         coverParams.tileLodMinRadius = updateParameters->tileLodMinRadius;
@@ -155,28 +159,7 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // this is correct for terrain above OR below sea level (bathymetry) without hardcoding
     // a direction; the frustum trim stops it from tripling the cover like a blind ring
     // would. Drop the frustumCull line to fall back to a pure uniform 1-ring dilation.
-    std::set<UnwrappedTileID> dilated = out;
-    for (const auto& id : out) {
-        const int32_t numTiles = 1 << id.canonical.z;
-        for (int dy = -1; dy <= 1; ++dy) {
-            for (int dx = -1; dx <= 1; ++dx) {
-                if (dx == 0 && dy == 0) continue;
-                const int ny = static_cast<int>(id.canonical.y) + dy;
-                if (ny < 0 || ny >= numTiles) continue; // nothing past the poles
-                int nx = static_cast<int>(id.canonical.x) + dx;
-                int nwrap = id.wrap;
-                if (nx < 0) {
-                    nx += numTiles;
-                    --nwrap;
-                } else if (nx >= numTiles) {
-                    nx -= numTiles;
-                    ++nwrap;
-                }
-                dilated.emplace(static_cast<int16_t>(nwrap),
-                                CanonicalTileID(id.canonical.z, static_cast<uint32_t>(nx), static_cast<uint32_t>(ny)));
-            }
-        }
-    }
+    std::set<UnwrappedTileID> dilated = dilateCover(out);
     if (dilated.size() != out.size()) {
         out = util::frustumCull(coverParams, dilated);
     }
@@ -207,6 +190,60 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
 std::array<float, 3> RenderTerrain::demTileMapping(const CanonicalTileID& tile, const CanonicalTileID& demTile) {
     const auto off = demSubTileOffset(tile, demTile);
     return {{1.0f / (util::EXTENT * off.scale), off.dx / off.scale, off.dy / off.scale}};
+}
+
+std::set<UnwrappedTileID> RenderTerrain::dilateCover(const std::set<UnwrappedTileID>& cover) {
+    std::set<UnwrappedTileID> dilated = cover;
+    // Every tile kept and every ancestor of one: a neighbour in this set lies over a tile kept.
+    std::set<UnwrappedTileID> overlapped;
+    const auto keep = [&](const UnwrappedTileID& id) {
+        for (int z = id.canonical.z; z >= 0; --z) {
+            overlapped.emplace(id.wrap, id.canonical.scaledTo(static_cast<uint8_t>(z)));
+        }
+    };
+    for (const auto& id : cover) keep(id);
+    // Whether a tile kept lies over this tile (an ancestor of it), or under it.
+    const auto coveredAlready = [&](const UnwrappedTileID& tile) {
+        if (overlapped.contains(tile)) return true;
+        for (int z = tile.canonical.z - 1; z >= 0; --z) {
+            if (dilated.contains(UnwrappedTileID(tile.wrap, tile.canonical.scaledTo(static_cast<uint8_t>(z))))) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    for (const auto& id : cover) {
+        const int32_t numTiles = 1 << id.canonical.z;
+        for (int dy = -1; dy <= 1; ++dy) {
+            for (int dx = -1; dx <= 1; ++dx) {
+                if (dx == 0 && dy == 0) continue;
+                const int ny = static_cast<int>(id.canonical.y) + dy;
+                if (ny < 0 || ny >= numTiles) continue; // nothing past the poles
+                int nx = static_cast<int>(id.canonical.x) + dx;
+                int nwrap = id.wrap;
+                if (nx < 0) {
+                    nx += numTiles;
+                    --nwrap;
+                } else if (nx >= numTiles) {
+                    nx -= numTiles;
+                    ++nwrap;
+                }
+                const UnwrappedTileID neighbour(
+                    static_cast<int16_t>(nwrap),
+                    CanonicalTileID(id.canonical.z, static_cast<uint32_t>(nx), static_cast<uint32_t>(ny)));
+                // The neighbour at this tile's zoom may sit over ground a tile of another zoom
+                // already covers (the cover mixes zooms, a finer tile beside a coarser one): meshing
+                // it would add a second surface over that ground, sampled from a coarser or finer
+                // DEM, and a drape target and 1024 px of texture to hold it. Only ground the cover
+                // leaves out is worth a tile.
+                if (coveredAlready(neighbour)) continue;
+                dilated.insert(neighbour);
+                keep(neighbour);
+            }
+        }
+    }
+    return dilated;
 }
 
 std::array<double, 2> RenderTerrain::meshTileCapOrigin(const TransformState& state) {
