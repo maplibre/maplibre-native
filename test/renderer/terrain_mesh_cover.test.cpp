@@ -7,6 +7,7 @@
 #include <mln/util/constants.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <set>
 
 using namespace mln;
@@ -215,6 +216,24 @@ TEST(TerrainMeshCover, CoarseningKeepsAllTheGroundCoveredWithinTheCap) {
                                              tile(2, 0, 1),
                                              tile(2, 1, 1)};
     EXPECT_EQ(expected, coarse);
+}
+
+TEST(TerrainMeshCover, CoarseningAWideCoverIsFast) {
+    // A camera high over rising ground puts thousands of tiles in the cover (6,000 in a test
+    // view), far more than the cap. Merging them took a pass over the whole cover for each merge,
+    // seconds a frame. The 16,384 z7 tiles of the world go down to 64 in well under a second.
+    std::set<UnwrappedTileID> original;
+    for (uint32_t y = 0; y < 128; ++y) {
+        for (uint32_t x = 0; x < 128; ++x) {
+            original.insert(tile(7, x, y));
+        }
+    }
+    const auto start = std::chrono::steady_clock::now();
+    const auto coarse = RenderTerrain::coarsenFarMeshTiles(original, 64, 0, northWestCorner);
+    const auto elapsed = std::chrono::steady_clock::now() - start;
+    EXPECT_LE(coarse.size(), 64u);
+    EXPECT_TRUE(coversAll(coarse, original));
+    EXPECT_LT(elapsed, std::chrono::seconds(2)) << "coarsening the cover took too long";
 }
 
 TEST(TerrainMeshCover, CoarseningHandlesTilesWithoutTheirSiblings) {
