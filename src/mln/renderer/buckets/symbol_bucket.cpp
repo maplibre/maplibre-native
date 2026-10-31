@@ -313,6 +313,8 @@ bool SymbolBucket::check(source_location source) {
         return false;
     }
 
+    if (!SymbolInstance::guardsEnabled()) return true;
+
     for (std::size_t i = 0; i < symbolInstances.size(); ++i) {
         if (!symbolInstances[i].check(source)) {
             return false;
