@@ -213,12 +213,7 @@ public:
         }
 
         // Align a pointer on a set block size
-        static size_t align(size_t ptr, size_t alignment) {
-            if (ptr == alignment) {
-                return ptr;
-            }
-            return ((ptr + alignment) / alignment) * alignment;
-        }
+        static size_t align(size_t ptr, size_t alignment) { return ((ptr + alignment - 1) / alignment) * alignment; }
     };
 
 public:

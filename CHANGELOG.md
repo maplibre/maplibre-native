@@ -39,6 +39,7 @@
 - [core] Fix plugin layers with read-write depth drawables not depth testing when drawn above a `fill-extrusion` layer.
 - [core] Fix a crash in `RenderImageSource::update` when an image source's coordinates give an empty tile cover, such as an image wholly beyond the latitudes Web Mercator can show.
 - [OpenGL] Fix invisible raster layers on Adreno 3xx by avoiding an in-place alpha assignment in the fragment shader.
+- [OpenGL] Fix crashes when allocating 8 KiB uniform blocks or updating larger uniform blocks within the GPU's supported size limit.
 - [core] Draw numbers and short uppercase codes upright in vertical CJK line labels ([#4565](https://github.com/maplibre/maplibre-native/issues/4565)), compat to [maplibre-gl-js#8205](https://github.com/maplibre/maplibre-gl-js/pull/8205).
 - [core] Fix `ImageSource` not rendering across world copies ([#4508](https://github.com/maplibre/maplibre-native/issues/4508)).
 - [core] Repaint data-driven symbol paint properties after feature-state updates.
