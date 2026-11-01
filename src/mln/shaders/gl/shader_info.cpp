@@ -251,7 +251,9 @@ const std::vector<AttributeInfo> HeatmapShaderInfo::attributes = {
     AttributeInfo{"a_weight", idHeatmapWeightVertexAttribute},
     AttributeInfo{"a_radius", idHeatmapRadiusVertexAttribute},
 };
-const std::vector<TextureInfo> HeatmapShaderInfo::textures = {};
+const std::vector<TextureInfo> HeatmapShaderInfo::textures = {
+    TextureInfo{"u_dem", idHeatmapDEMTexture},
+};
 
 // Heatmap Texture
 using HeatmapTextureShaderInfo = ShaderInfo<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::OpenGL>;

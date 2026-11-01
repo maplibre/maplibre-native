@@ -47,9 +47,11 @@ Terrain rendering enables draping the map over 3D elevation data from Digital El
   decoded via the source's unpack vector like hillshade and color-relief
 - **Layer Draping**: background, fill, line, raster, hillshade, and color-relief
   layers render into per-tile render targets draped over the terrain mesh
-- **Elevated Layers**: symbol, circle, and fill-extrusion layers sample the DEM in
-  their vertex shaders and are displaced by the terrain elevation. **Caveat:
+- **Elevated Layers**: symbol, circle, heatmap, and fill-extrusion layers sample the
+  DEM in their vertex shaders and are displaced by the terrain elevation. **Caveat:
   fill-extrusion elevation is GL/WebGPU only** - see the backend parity section.
+  **Heatmap caveat:** kernels are elevated by their centre only, and the colour-ramp
+  composite is still a screen-space pass that draws over everything.
 - **Exaggeration**: styled vertical exaggeration multiplier (1.0 = true scale)
 - **Shared Elevation Function**: a `get_elevation()` helper in every backend's
   shader prelude
@@ -290,7 +292,7 @@ Implemented:
   `Frustum::intersectsElevated`), and the terrain mesh is frustum-culled so a
   sparse DEM's low-zoom ancestor tiles are not meshed off-screen.
 - Elevation for the non-draped layers: symbol (icon/SDF/text-and-icon), circle,
-  and fill-extrusion on all four backends, via the shared `get_elevation()`
+  heatmap, and fill-extrusion on all four backends, via the shared `get_elevation()`
   prelude helper and per-drawable DEM bindings
 - Style parsing of the `terrain` root property (`source`, `exaggeration`) per the
   style spec, with exaggeration applied as styled (1.0 = true scale)
@@ -1332,7 +1334,9 @@ terrain during placement sees the previous frame's state - the same first-frame 
   render_terrain.cpp are one-time warning/error logs; terrain_layer_tweaker.cpp
   has no per-frame logging.
 - Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
-- Decide whether heatmap should be draped (gl-js does not drape it)
+- **(done)** Heatmap is elevated, not draped, as in gl-js (which does not drape it): each
+  kernel is lifted to the DEM height at its centre in the kernel vertex shader, and the
+  colour-ramp composite stays a screen-space pass.
 - Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing
