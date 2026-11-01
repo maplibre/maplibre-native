@@ -17,8 +17,8 @@ import org.maplibre.android.style.sources.GeoJsonSource
  * detached from its window.
  *
  *
- * Detaching runs `MapLibreSurfaceView#onDetachedFromWindow`, which calls `nativeReset()`
- * and destroys the native `Renderer` on the render thread before the thread itself exits.
+ * Detaching runs `MapLibreSurfaceView#onDetachedFromWindow`, which stops the render thread. The
+ * render thread destroys the native `Renderer` before it exits.
  * Every entry point below then reaches `AndroidRendererFrontend`, which historically used
  * `MapRenderer::actor()` without checking whether the renderer still existed.
  *
