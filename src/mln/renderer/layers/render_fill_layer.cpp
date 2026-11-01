@@ -46,6 +46,9 @@ constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 constexpr auto FillOutlineTriangulatedShaderName = "FillOutlineTriangulatedShader";
 #endif
 
+constexpr auto neighborVertexUniformName = "neighbor_vertex";
+constexpr auto triangleInstanceUniformName = "triangle_instance";
+
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == FillLayer::Impl::staticTypeInfo());
     return static_cast<const FillLayer::Impl&>(*impl);
@@ -335,7 +338,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         // `Fill*Program` all use `style::FillPaintProperties`
         auto vertexAttrs = context.createVertexAttributeArray();
-        vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
+        vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOutlineColor, FillOpacity, FillPattern>(
             binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
 
         // Outline always occurs in translucent pass, defaults to fill color
@@ -355,6 +358,32 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    /*vertexOffset=*/0,
                                    sizeof(FillLayoutVertex),
                                    gfx::AttributeDataType::Short2);
+        }
+
+        gfx::VertexAttributeArrayPtr instanceAttrs;
+        if (bucket.isRoundedCornerEnabled()) {
+            if (const auto& attr = vertexAttrs->set(idFillNeighborVertexAttribute)) {
+                attr->setSharedRawData(bucket.sharedNeighbors,
+                                       offsetof(FillNeighborVertex, a1),
+                                       /*vertexOffset=*/0,
+                                       sizeof(FillNeighborVertex),
+                                       gfx::AttributeDataType::Short2);
+            }
+
+            instanceAttrs = context.createVertexAttributeArray();
+            if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
+                attr->setSharedRawData(bucket.sharedTriangleInstances,
+                                       offsetof(FillTriangleInstance, a1),
+                                       /*vertexOffset=*/0,
+                                       sizeof(FillTriangleInstance),
+                                       gfx::AttributeDataType::UInt3);
+            }
+        } else {
+            propertiesAsUniforms.first.emplace(neighborVertexUniformName);
+            propertiesAsUniforms.second.emplace(idFillNeighborVertexAttribute);
+
+            propertiesAsUniforms.first.emplace(triangleInstanceUniformName);
+            propertiesAsUniforms.second.emplace(idFillTriangleInstanceAttribute);
         }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
@@ -467,6 +496,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
 #endif
                 fillBuilder->setVertexAttributes(std::move(vertexAttrs));
+                if (bucket.isRoundedCornerEnabled()) {
+                    fillBuilder->setInstanceAttributes(std::move(instanceAttrs));
+                }
 
                 fillBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
                 fillBuilder->setSegments(gfx::Triangles(),
@@ -565,6 +597,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlinePatternBuilder->setVertexAttributes(vertexAttrs);
                 }
                 patternBuilder->setVertexAttributes(std::move(vertexAttrs));
+                if (bucket.isRoundedCornerEnabled()) {
+                    patternBuilder->setInstanceAttributes(std::move(instanceAttrs));
+                }
                 patternBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
                 patternBuilder->setSegments(gfx::Triangles(),
                                             bucket.sharedTriangles,
