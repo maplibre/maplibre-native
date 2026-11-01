@@ -40,7 +40,7 @@ struct alignas(16) LineGradientDrawableUBO {
     /* 76 */ float gapwidth_t;
     /* 80 */ float offset_t;
     /* 84 */ float width_t;
-    /* 88 */ float pad1;
+    /* 88 */ float pad1; // Reused padding slot to flag terrain render-to-texture tiles
     /* 92 */ float pad2;
     /* 96 */
 };
@@ -62,7 +62,7 @@ struct alignas(16) LinePatternDrawableUBO {
     /* 88 */ float pattern_from_t;
     /* 92 */ float pattern_to_t;
     /* 96 */ float floorwidth_t;
-    /* 100 */ float pad1;
+    /* 100 */ float pad1; // Reused padding slot to flag terrain render-to-texture tiles
     /* 104 */ float pad2;
     /* 108 */ float pad3;
     /* 112 */
@@ -99,7 +99,7 @@ struct alignas(16) LineSDFDrawableUBO {
     /* 108 */ float offset_t;
     /* 112 */ float width_t;
     /* 116 */ float floorwidth_t;
-    /* 120 */ float pad1;
+    /* 120 */ float pad1; // Reused padding slot to flag terrain render-to-texture tiles
     /* 124 */ float pad2;
     /* 128 */
 };

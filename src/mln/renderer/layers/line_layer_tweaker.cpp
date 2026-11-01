@@ -278,7 +278,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
+                    .pad1 = renderingToTerrain ? 1.0f : 0.0f,
                     .pad2 = 0
                 };
 
@@ -308,7 +308,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_from_t = std::get<0>(binders->get<LinePattern>()->interpolationFactor(zoom)),
                     .pattern_to_t = std::get<1>(binders->get<LinePattern>()->interpolationFactor(zoom)),
                     .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
+                    .pad1 = renderingToTerrain ? 1.0f : 0.0f,
                     .pad2 = 0,
                     .pad3 = 0
                 };
@@ -382,7 +382,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                         .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
                         .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
-                        .pad1 = 0,
+                        .pad1 = renderingToTerrain ? 1.0f : 0.0f,
                         .pad2 = 0
                     };
 
