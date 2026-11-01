@@ -55,3 +55,29 @@ TEST(DatabaseFileSource, VolatileResource) {
     });
     loop.run();
 }
+
+TEST(DatabaseFileSource, VolatileResourceIsNotStored) {
+    util::RunLoop loop;
+
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
+                                                                               ResourceOptions{});
+
+    Resource resource{
+        Resource::Unknown, "http://127.0.0.1:3000/volatile-not-stored", {}, Resource::LoadingMethod::CacheOnly};
+    resource.storagePolicy = Resource::StoragePolicy::Volatile;
+    Response response{};
+    response.data = std::make_shared<std::string>("Volatile value");
+
+    // Forwarding a volatile response must not write it to the database,
+    // so a regular request for the same resource finds nothing.
+    dbfs->forward(resource, response, nullptr);
+    resource.storagePolicy = Resource::StoragePolicy::Permanent;
+    std::unique_ptr<mln::AsyncRequest> req = dbfs->request(resource, [&](Response res) {
+        req.reset();
+        loop.stop();
+        EXPECT_TRUE(res.noContent);
+        ASSERT_TRUE(res.error.get());
+        EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
+    });
+    loop.run();
+}
