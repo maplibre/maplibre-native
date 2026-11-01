@@ -70,6 +70,21 @@ public:
     /// Final frame
     virtual void onDidFinishRenderingMap() {}
 
+    /// The rendered terrain height under the map centre changed. Only the render side knows
+    /// it - the DEM lives there - so a map that wants its centre to ride the terrain
+    /// (Map::setCenterClampedToGround) learns of it here, one frame behind.
+    virtual void onTerrainCenterElevationChanged(double /*elevationMeters*/) {}
+
+    /// The rendered terrain height under the camera's eye changed (one frame behind, like the
+    /// center's). A map that keeps its eye above the ground (Map::setCenterClampedToGround)
+    /// learns of it here: at a steep pitch the eye sits only a little above the center, so a
+    /// slope rising towards the camera puts the eye under the ground.
+    virtual void onTerrainEyeElevationChanged(double /*elevationMeters*/) {}
+
+    /// The terrain height at the center a running camera animation is headed for, once a DEM tile
+    /// covers it (UpdateParameters::transitionTargetCenter), and whenever a finer one changes it.
+    virtual void onTerrainTransitionTargetElevationChanged(double /*elevationMeters*/) {}
+
     /// Style is missing an image
     using StyleImageMissingCallback = std::function<void()>;
     virtual void onStyleImageMissing(const std::string&, const StyleImageMissingCallback& done) { done(); }

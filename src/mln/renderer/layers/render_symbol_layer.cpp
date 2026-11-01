@@ -199,6 +199,7 @@ bool RenderSymbolLayer::hasCrossfade() const {
 
 void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTilesSortedByYPosition();
+    dropTilesBelowMinZoom(params);
 
     updateRenderTileIDs();
     addRenderPassesFromTiles();
@@ -769,7 +770,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), false)) {
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
@@ -782,7 +783,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     const auto& getCollisionTileLayerGroup = [&] {
         if (!collisionTileLayerGroup) {
             collisionTileLayerGroup = context.createTileLayerGroup(
-                layerIndex, /*initialCapacity=*/64, getID() + "-collision");
+                layerIndex, /*initialCapacity=*/64, getID() + "-collision", false);
             if (collisionTileLayerGroup) {
                 activateLayerGroup(collisionTileLayerGroup, true, changes);
             }

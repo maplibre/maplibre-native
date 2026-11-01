@@ -30,6 +30,7 @@ layout(location = 1) in ivec2 in_texture_position;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct HillshadeDrawableUBO {
@@ -46,7 +47,8 @@ void main() {
     const HillshadeDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    applySurfaceTransform();
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
+    applySurfaceTransform(constant.drape_tile);
 
     frag_position = vec2(in_texture_position) / 8192.0;
     frag_position.y = 1.0 - frag_position.y;
@@ -67,6 +69,7 @@ layout(location = 0) out vec4 out_color;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct HillshadeTilePropsUBO {
@@ -227,7 +230,11 @@ void main() {
 
     const HillshadeTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
-    vec4 pixel = texture(image_sampler, frag_position);
+    // The prepare target carries a 1px ring of derivatives from outside the tile, so that
+    // bilinear filtering at the tile edge blends against a real neighbour. Inset past it.
+    const vec2 size = vec2(textureSize(image_sampler, 0));
+    const vec2 texturePos = (frag_position * (size - 2.0) + 1.0) / size;
+    vec4 pixel = texture(image_sampler, texturePos);
 
     // Scale the derivative based on the mercator distortion at this latitude
     float scaleFactor = cos(radians((tileProps.latrange[0] - tileProps.latrange[1]) * frag_position.y + tileProps.latrange[1]));

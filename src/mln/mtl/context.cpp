@@ -32,6 +32,8 @@
 #include <algorithm>
 #include <cstring>
 
+#include <array>
+
 namespace mln {
 namespace mtl {
 
@@ -49,6 +51,7 @@ Context::~Context() noexcept {
         performCleanup();
 
         emptyVertexBuffer.reset();
+        dummyTexture.reset(); // before the resource check below, like the buffers
         tileVertexBuffer.reset();
         tileIndexBuffer.reset();
         clipMaskShader.reset();
@@ -66,6 +69,18 @@ Context::~Context() noexcept {
 #endif
         assert(stats.isZero());
     }
+}
+
+const gfx::Texture2DPtr& Context::getDummyTexture() {
+    if (!dummyTexture) {
+        dummyTexture = createTexture2D();
+        dummyTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
+                                               .wrapU = gfx::TextureWrapType::Clamp,
+                                               .wrapV = gfx::TextureWrapType::Clamp});
+        const std::array<uint8_t, 4> pixel{};
+        dummyTexture->upload(pixel.data(), Size{1, 1});
+    }
+    return dummyTexture;
 }
 
 void Context::beginFrame() {
@@ -218,14 +233,21 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
     return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
-TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    auto tileLayerGroup = std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex,
+                                                std::size_t initialCapacity,
+                                                std::string name,
+                                                bool renderToTerrain) {
+    auto tileLayerGroup = std::make_shared<TileLayerGroup>(
+        layerIndex, initialCapacity, std::move(name), renderToTerrain);
     tileLayerGroup->setObserver(observer);
     return tileLayerGroup;
 }
 
-LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    auto layerGroup = std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
+                                        std::size_t initialCapacity,
+                                        std::string name,
+                                        bool renderToTerrain) {
+    auto layerGroup = std::make_shared<LayerGroup>(layerIndex, initialCapacity, name, renderToTerrain);
     layerGroup->setObserver(observer);
     return layerGroup;
 }
@@ -238,8 +260,10 @@ gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixe
     return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
-RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    return std::make_shared<RenderTarget>(*this, size, type);
+RenderTargetPtr Context::createRenderTarget(const Size size,
+                                            const gfx::TextureChannelDataType type,
+                                            const bool stencil) {
+    return std::make_shared<RenderTarget>(*this, size, type, stencil);
 }
 
 void Context::resetState(gfx::DepthMode, gfx::ColorMode) {}
@@ -464,7 +488,7 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
-    return createOffscreenTexture(size, type, false, false);
+    return createOffscreenTexture(size, type, /*depth=*/true, /*stencil=*/false);
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {

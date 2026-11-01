@@ -38,6 +38,10 @@ public:
 
     std::optional<size_t> getSamplerLocation(const size_t id) const override;
 
+    /// The uniform blocks the shader declares; every block's binding point must
+    /// have a buffer bound when a draw call is issued.
+    const std::vector<shaders::UniformBlockInfo>& getUniformBlocks() const { return uniformBlocks; }
+
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
 
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
@@ -50,6 +54,7 @@ protected:
     VertexAttributeArrayGL vertexAttributes;
     VertexAttributeArrayGL instanceAttributes;
     SamplerLocationArray samplerLocations;
+    std::vector<shaders::UniformBlockInfo> uniformBlocks;
 };
 
 } // namespace gl

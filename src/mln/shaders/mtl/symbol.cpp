@@ -32,8 +32,10 @@ const std::array<AttributeInfo, 10> SymbolIconShaderSource::instanceAttributes =
     // Data driven
     AttributeInfo{10, gfx::AttributeDataType::Float2, symbolUBOCount + 5, idSymbolOpacityAttribute},
 };
-const std::array<TextureInfo, 1> SymbolIconShaderSource::textures = {
+const std::array<TextureInfo, 3> SymbolIconShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
+    TextureInfo{1, idSymbolDEMTexture},
+    TextureInfo{2, idSymbolDepthTexture},
 };
 
 //
@@ -68,8 +70,10 @@ const std::array<AttributeInfo, 14> SymbolSDFShaderSource::instanceAttributes = 
     AttributeInfo{13, gfx::AttributeDataType::Float2, symbolUBOCount + 5, idSymbolHaloWidthAttribute},
     AttributeInfo{14, gfx::AttributeDataType::Float2, symbolUBOCount + 5, idSymbolHaloBlurAttribute},
 };
-const std::array<TextureInfo, 1> SymbolSDFShaderSource::textures = {
+const std::array<TextureInfo, 3> SymbolSDFShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
+    TextureInfo{1, idSymbolDEMTexture},
+    TextureInfo{2, idSymbolDepthTexture},
 };
 
 //
@@ -104,9 +108,11 @@ const std::array<AttributeInfo, 14> SymbolTextAndIconShaderSource::instanceAttri
     AttributeInfo{13, gfx::AttributeDataType::Float2, symbolUBOCount + 5, idSymbolHaloWidthAttribute},
     AttributeInfo{14, gfx::AttributeDataType::Float2, symbolUBOCount + 5, idSymbolHaloBlurAttribute},
 };
-const std::array<TextureInfo, 2> SymbolTextAndIconShaderSource::textures = {
+const std::array<TextureInfo, 4> SymbolTextAndIconShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
     TextureInfo{1, idSymbolImageIconTexture},
+    TextureInfo{2, idSymbolDEMTexture},
+    TextureInfo{3, idSymbolDepthTexture},
 };
 
 } // namespace shaders

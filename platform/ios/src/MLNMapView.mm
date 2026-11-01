@@ -2207,6 +2207,8 @@ public:
 
   if (pan.state == UIGestureRecognizerStateBegan) {
     self.userTrackingMode = MLNUserTrackingModeNone;
+    // With terrain, drag the ground being looked at, not a sea-level plane under it.
+    self.mbglMap.anchorCenterOnTerrain();
 
     [self notifyGestureDidBegin];
   } else if (pan.state == UIGestureRecognizerStateChanged) {
@@ -2279,6 +2281,8 @@ public:
   self.cameraChangeReasonBitmask |= MLNCameraChangeReasonGesturePinch;
 
   if (pinch.state == UIGestureRecognizerStateBegan) {
+    // With terrain, turn round the ground being looked at, not a sea-level point behind it.
+    self.mbglMap.anchorCenterOnTerrain();
     self.scale = powf(2, [self zoomLevel]);
 
     if (abs(pinch.velocity) > abs(self.rotate.velocity)) {
@@ -2388,6 +2392,10 @@ public:
     return;
   }
 
+  if (rotate.state == UIGestureRecognizerStateBegan) {
+    // With terrain, turn round the ground being looked at, not a sea-level point behind it.
+    self.mbglMap.anchorCenterOnTerrain();
+  }
   if (rotate.state == UIGestureRecognizerStateBegan || !self.isRotating) {
     self.angle = MLNRadiansFromDegrees(*self.mbglMap.getCameraOptions().bearing) * -1;
 
@@ -2669,6 +2677,8 @@ public:
   static CGFloat initialPitch;
 
   if (twoFingerDrag.state == UIGestureRecognizerStateBegan) {
+    // With terrain, turn round the ground being looked at, not a sea-level point behind it.
+    self.mbglMap.anchorCenterOnTerrain();
     CGPoint midPoint = [twoFingerDrag translationInView:twoFingerDrag.view];
     // In the following if and for the first execution middlePoint
     // will be equal to dragGestureMiddlePoint and the resulting
@@ -3233,6 +3243,14 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (UIEdgeInsets)frustumOffset {
   return NSEdgeInsetsFromMLNEdgeInsets(_mbglMap->getFrustumOffset());
+}
+
+- (void)setCenterClampedToGround:(BOOL)centerClampedToGround {
+  _mbglMap->setCenterClampedToGround(centerClampedToGround);
+}
+
+- (BOOL)isCenterClampedToGround {
+  return _mbglMap->getCenterClampedToGround();
 }
 
 // MARK: - Accessibility -
@@ -3926,6 +3944,23 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)setZoomLevel:(double)zoomLevel {
   MLNLogDebug(@"Setting zoomLevel: %f", zoomLevel);
   [self setZoomLevel:zoomLevel animated:NO];
+}
+
+- (CLLocationDistance)centerAltitude {
+  return self.mbglMap.getCameraOptions().centerAltitude.value_or(0.0);
+}
+
+- (BOOL)setCenterAltitudeKeepingView:(CLLocationDistance)altitude {
+  MLNLogDebug(@"Setting centerAltitude keeping the view: %f", altitude);
+  // Set before the call, which reports the camera change; take it back if nothing moved, or it
+  // would show up in the reason of the next, unrelated change.
+  MLNCameraChangeReason previousReasons = self.cameraChangeReasonBitmask;
+  self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
+  BOOL moved = self.mbglMap.setCenterAltitudeKeepingView(altitude);
+  if (!moved) {
+    self.cameraChangeReasonBitmask = previousReasons;
+  }
+  return moved;
 }
 
 - (void)setZoomLevel:(double)zoomLevel animated:(BOOL)animated {

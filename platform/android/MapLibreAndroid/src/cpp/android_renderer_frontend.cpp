@@ -62,6 +62,18 @@ public:
 
     void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }
 
+    void onTerrainCenterElevationChanged(double elevationMeters) override {
+        delegate.invoke(&RendererObserver::onTerrainCenterElevationChanged, elevationMeters);
+    }
+
+    void onTerrainEyeElevationChanged(double elevationMeters) override {
+        delegate.invoke(&RendererObserver::onTerrainEyeElevationChanged, elevationMeters);
+    }
+
+    void onTerrainTransitionTargetElevationChanged(double elevationMeters) override {
+        delegate.invoke(&RendererObserver::onTerrainTransitionTargetElevationChanged, elevationMeters);
+    }
+
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
         delegate.invoke(&RendererObserver::onStyleImageMissing, id, done);
     }
