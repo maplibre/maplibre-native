@@ -708,7 +708,9 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
         colorFormat = wgpu::TextureFormat::BGRA8Unorm;
     }
     colorTarget.format = static_cast<WGPUTextureFormat>(colorFormat);
-    colorTarget.blend = &blendState;
+    // Replace (ColorMode::unblended) writes the fragment as is, as GL, Metal and Vulkan do; blending it
+    // with its own alpha threw away output whose alpha is data, such as the terrain depth pass
+    colorTarget.blend = colorMode.blendFunction.is<gfx::ColorMode::Replace>() ? nullptr : &blendState;
     colorTarget.writeMask = (colorMode.mask.r ? WGPUColorWriteMask_Red : WGPUColorWriteMask_None) |
                             (colorMode.mask.g ? WGPUColorWriteMask_Green : WGPUColorWriteMask_None) |
                             (colorMode.mask.b ? WGPUColorWriteMask_Blue : WGPUColorWriteMask_None) |

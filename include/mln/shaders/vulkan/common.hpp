@@ -204,9 +204,13 @@ vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
 // is still in GL convention ([-1,1]). Returning the stored [0,1] value unconverted
 // made the comparison almost never fire (labels showed through terrain); converting
 // back to [-1,1] puts both sides in the same (GL) z space.
+// The pass stores four base-256 digits, each exactly as k / 255 in the RGBA8 target (the gl-js
+// fract/bit_mask scheme stores k / 256 into a unorm8 that holds n / 255, an error of up to 0.002,
+// far more than the depth differences the test looks for at native's 1 px near plane).
 float unpack_depth(vec4 rgba_depth) {
-    const vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
-    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+    const vec4 digits = floor(rgba_depth * 255.0 + 0.5);
+    const vec4 weights = vec4(1.0 / 256.0, 1.0 / 65536.0, 1.0 / 16777216.0, 1.0 / 4294967296.0);
+    return dot(digits, weights) * 2.0 - 1.0;
 }
 
 // Whether a clip-space position is visible in front of the terrain, from the
@@ -215,20 +219,29 @@ float unpack_depth(vec4 rgba_depth) {
 // the depth pass rendered in; Vulkan's y-down NDC and top-left texture origin
 // then agree, so no V flip is needed (unlike Metal).
 // Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully
-// hidden, with a soft ramp over ~0.002 NDC depth and a small bias so geometry
-// sitting exactly on the terrain surface (e.g. a label anchored to it) does not
-// occlude itself. Matches the maplibre-gl-js depthOpacity() prelude function.
-float depth_opacity(vec3 frag, sampler2D depth_texture) {
-    const float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + 0.0001 - frag.z;
-    return 1.0 - max(0.0, min(1.0, -d * 500.0));
+// hidden, with a soft ramp and a small bias so geometry sitting exactly on the
+// terrain surface (e.g. a label anchored to it) does not occlude itself. Matches the
+// maplibre-gl-js depthOpacity() prelude function.
+// `depth_ramp` scales the gl-js ramp (500 per NDC unit) to this projection: gl-js uses a near
+// plane of height / 50 where native's TransformState::getProjMatrix uses 1 (one pixel at the
+// view centre), which compresses every fragment's NDC depth into the top ~0.1%. Scaling by the
+// near-plane ratio keeps gl-js's behaviour (fully hidden ~0.11 view-heights behind the surface
+// at the centre distance, self-occlusion bias ~5 px); see calculate_visibility for the value.
+float depth_opacity(vec3 frag, sampler2D depth_texture, float depth_ramp) {
+    const float bias = 0.05 / depth_ramp; // gl-js: 0.0001 * 500
+    const float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + bias - frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * depth_ramp));
 }
-float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled) {
+// The near-plane ratio (height / 50) gives a ramp of 500 * height / 50 = 10 * height at any field
+// of view; `units_to_pixels_y` is GlobalPaintParamsUBO.units_to_pixels.y, -/+ height / 2.
+float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled, float units_to_pixels_y) {
     if (depth_enabled == 0.0) {
         return 1.0;
     }
+    const float depth_ramp = 20.0 * abs(units_to_pixels_y);
     const vec3 frag = pos.xyz / pos.w;
     // check if coordinate is fully visible
-    const float d = depth_opacity(frag, depth_texture);
+    const float d = depth_opacity(frag, depth_texture, depth_ramp);
     if (d > 0.95) {
         return 1.0;
     }
@@ -236,7 +249,7 @@ float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enable
     // ridge still shows if its glyphs poke above it (maplibre-gl-js behaviour).
     // Vulkan NDC is y-down (pos comes after applySurfaceTransform), so "above"
     // on screen is -y, where gl-js's y-up NDC uses +y.
-    return (d + depth_opacity(frag + vec3(0.0, -0.01, 0.0), depth_texture)) / 2.0;
+    return (d + depth_opacity(frag + vec3(0.0, -0.01, 0.0), depth_texture, depth_ramp)) / 2.0;
 }
 
 // Decode one DEM texel to meters. The clamp at the call sites matters: texelFetch out of
