@@ -58,14 +58,14 @@ enum class ImageType : bool {
 using ImageMap = mln::unordered_map<std::string, Immutable<style::Image::Impl>>;
 using ImageDependencies = mln::unordered_map<std::string, ImageType>;
 using ImageRequestPair = std::pair<ImageDependencies, uint64_t>;
-using ImageVersionMap = mln::unordered_map<std::string, uint32_t>;
+using ImageVersionMap = mln::unordered_map<std::string, int32_t>;
 inline bool operator<(const Immutable<mln::style::Image::Impl>& a, const Immutable<mln::style::Image::Impl>& b) {
     return a->id < b->id;
 }
 
 class ImagePosition {
 public:
-    ImagePosition(const Rect<uint16_t>& rect, const style::Image::Impl& image, uint32_t version_ = 0)
+    ImagePosition(const Rect<uint16_t>& rect, const style::Image::Impl& image)
         : paddedRect(rect),
           pixelRatio(image.pixelRatio),
           sdf(image.sdf),
@@ -73,8 +73,7 @@ public:
           stretchY(image.stretchY),
           content(image.content),
           textFitWidth(image.textFitWidth),
-          textFitHeight(image.textFitHeight),
-          version(version_) {}
+          textFitHeight(image.textFitHeight) {}
 
     static constexpr const uint16_t padding = 1u;
 
@@ -86,7 +85,6 @@ public:
     std::optional<style::ImageContent> content;
     std::optional<style::TextFit> textFitWidth;
     std::optional<style::TextFit> textFitHeight;
-    uint32_t version;
 
     std::array<uint16_t, 2> tl() const {
         return {{static_cast<uint16_t>(paddedRect.x + padding), static_cast<uint16_t>(paddedRect.y + padding)}};
@@ -103,10 +101,15 @@ public:
         return {{_tl[0], _tl[1], _br[0], _br[1]}};
     }
 
+    Size imageSize() const {
+        return {static_cast<uint32_t>(paddedRect.w - padding * 2), static_cast<uint32_t>(paddedRect.h - padding * 2)};
+    }
+
     std::array<float, 2> displaySize() const {
+        const auto& size = imageSize();
         return {{
-            static_cast<float>(paddedRect.w - padding * 2) / pixelRatio,
-            static_cast<float>(paddedRect.h - padding * 2) / pixelRatio,
+            static_cast<float>(size.width) / pixelRatio,
+            static_cast<float>(size.height) / pixelRatio,
         }};
     }
 };
