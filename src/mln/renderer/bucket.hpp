@@ -4,6 +4,7 @@
 #include <mln/style/image_impl.hpp>
 #include <mln/style/layer_impl.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
+#include <mln/text/cross_tile_symbol_index.hpp>
 #include <mln/util/identity.hpp>
 
 #include <atomic>
@@ -65,7 +66,10 @@ public:
     // Returns a pair, the first element of which is a bucket cross-tile id
     // on success call; `0` otherwise. The second element is `true` if
     // the bucket was originally registered; `false` otherwise.
-    virtual std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&, const RenderTile&) {
+    // `getElevation` (null off terrain) lifts symbols onto the terrain for the index's viewport test.
+    virtual std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&,
+                                                               const RenderTile&,
+                                                               const SymbolElevationFn* /*getElevation*/) {
         return std::make_pair(0u, false);
     }
     // Places this bucket to the given placement.

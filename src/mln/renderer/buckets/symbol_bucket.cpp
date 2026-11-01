@@ -336,8 +336,9 @@ bool SymbolBucket::hasVariableTextAnchors() const {
 }
 
 std::pair<uint32_t, bool> SymbolBucket::registerAtCrossTileIndex(CrossTileSymbolLayerIndex& index,
-                                                                 const RenderTile& renderTile) {
-    bool firstTimeAdded = index.addBucket(renderTile.getOverscaledTileID(), renderTile.matrix, *this);
+                                                                 const RenderTile& renderTile,
+                                                                 const SymbolElevationFn* getElevation) {
+    bool firstTimeAdded = index.addBucket(renderTile.getOverscaledTileID(), renderTile.matrix, *this, getElevation);
     return std::make_pair(bucketInstanceId, firstTimeAdded);
 }
 
