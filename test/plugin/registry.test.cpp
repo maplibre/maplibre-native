@@ -1,4 +1,5 @@
 #include <mln/plugin/plugin_api.h>
+#include <mln/plugin/plugin_registry.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/layer.hpp>
@@ -40,7 +41,7 @@ const mln_plugin_descriptor_v1* testDescriptor() {
     static const mln_plugin_shader_property_binding_v1 binding = {
         sizeof(binding), {"test-radius", 11}, MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     static const mln_plugin_shader_descriptor_v1 shader = {
-        sizeof(shader), {"test", 4}, &source, 1, attributes, 2, &uniform, 1, &binding, 1};
+        sizeof(shader), {"test", 4}, &source, 1, attributes, 2, &uniform, 1, &binding, 1, 0, 0};
     static const mln_plugin_layer_type_v1 layer = [] {
         mln_plugin_layer_type_v1 value{};
         value.struct_size = sizeof(value);
@@ -171,4 +172,99 @@ TEST(PluginStyle, ParsingDefaultsExpressionsAndClone) {
     EXPECT_TRUE(static_cast<const style::PluginStyleLayer&>(layer).impl().hasLayoutDifference(
         static_cast<const style::PluginStyleLayer&>(**filtered).impl()));
 }
+
+TEST(PluginRegistry, ValidatesResourceProperties) {
+    auto descriptor = *testDescriptor();
+    descriptor.plugin_id = {"test.resources", 14};
+    auto layer = descriptor.layer_types[0];
+    layer.layer_type = {"test-resources", 14};
+    descriptor.layer_types = &layer;
+    mln_plugin_property_descriptor_v1 properties[4] = {layer.properties[0], layer.properties[1], {}, {}};
+    auto& models = properties[2];
+    models.struct_size = sizeof(models);
+    models.name = {"test-models", 11};
+    models.type = MLN_PLUGIN_VALUE_RESOURCES;
+    models.default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_RESOURCES, {}};
+    models.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
+    auto& model = properties[3];
+    model.struct_size = sizeof(model);
+    model.name = {"test-model", 10};
+    model.type = MLN_PLUGIN_VALUE_RESOURCE;
+    model.default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_RESOURCE, {}};
+    model.expression_capabilities = MLN_PLUGIN_EXPRESSION_FEATURE;
+    model.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
+    model.resources = {"test-models", 11};
+    layer.properties = properties;
+    layer.property_count = 4;
+    char message[256]{};
+
+    // A layer with resource properties needs the resource callbacks.
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, message, sizeof(message)));
+    layer.create_resource = [](const mln_plugin_host_api_v1*, mln_plugin_string, const uint8_t*, size_t, void**) {
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    layer.destroy_resource = [](void*) {
+    };
+    // A RESOURCE must name a RESOURCES property of the same layer type.
+    model.resources = {"test-radius", 11};
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, message, sizeof(message)));
+    model.resources = {"test-models", 11};
+    // Resource properties are layout properties, and a RESOURCES map takes no expressions.
+    models.scope = MLN_PLUGIN_PROPERTY_PAINT;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, message, sizeof(message)));
+    models.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
+    models.expression_capabilities = MLN_PLUGIN_EXPRESSION_FEATURE;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, message, sizeof(message)));
+    models.expression_capabilities = MLN_PLUGIN_EXPRESSION_NONE;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, message, sizeof(message))) << message;
+
+    // The style gives the map as an object of names to URLs, and the name as an expression.
+    style::conversion::Error error;
+    auto parsed = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+        R"({"id":"p","type":"test-resources","source":"points","layout":{"test-models":{"car":"asset://car.glb"},"test-model":["get","kind"]}})",
+        error);
+    ASSERT_TRUE(parsed) << error.message;
+    const auto& impl = static_cast<const style::PluginStyleLayer&>(**parsed).impl();
+    EXPECT_EQ((std::map<std::string, std::string>{{"car", "asset://car.glb"}}), impl.pluginResources.at("test-models"));
+    const auto stored = (*parsed)->getProperty("test-models").getValue();
+    ASSERT_NE(nullptr, stored.getObject());
+    EXPECT_EQ("asset://car.glb", *stored.getObject()->at("car").getString());
+    const auto serialized = (*parsed)->serialize();
+    EXPECT_EQ(stored, serialized.getObject()->at("layout").getObject()->at("test-models"));
+    // Changing the map lays the tiles out again.
+    auto changed = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+        R"({"id":"p","type":"test-resources","source":"points","layout":{"test-models":{"car":"asset://other.glb"},"test-model":["get","kind"]}})",
+        error);
+    ASSERT_TRUE(changed) << error.message;
+    EXPECT_TRUE(impl.hasLayoutDifference(static_cast<const style::PluginStyleLayer&>(**changed).impl()));
+
+    EXPECT_FALSE(style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+        R"({"id":"p","type":"test-resources","source":"points","layout":{"test-models":["asset://car.glb"]}})", error));
+    EXPECT_FALSE(style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+        R"({"id":"p","type":"test-resources","source":"points","layout":{"test-models":{"car":7}}})", error));
+}
 } // namespace
+
+TEST(PluginRegistry, ValidatesAndCopiesInstanceMode) {
+    auto descriptor = *testDescriptor();
+    descriptor.plugin_id = {"test.instancing", 15};
+    auto layer = descriptor.layer_types[0];
+    layer.layer_type = {"test-instancing", 15};
+    descriptor.layer_types = &layer;
+    auto shader = layer.shaders[0];
+    layer.shaders = &shader;
+    shader.instanced = 1;
+    char error[256]{};
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, error, sizeof(error)));
+    auto source = shader.sources[0];
+    source.backend = MLN_PLUGIN_BACKEND_VULKAN;
+    layer.backend_mask = MLN_PLUGIN_BACKEND_VULKAN;
+    shader.sources = &source;
+    shader.instanced = 2;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, error, sizeof(error)));
+    shader.instanced = 1;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, error, sizeof(error))) << error;
+    shader.instanced = 0;
+    EXPECT_TRUE(plugin::PluginRegistry::get().findLayerType("test-instancing")->shaders[0].instanced);
+    EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&descriptor, error, sizeof(error)));
+}

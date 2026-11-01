@@ -211,6 +211,8 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       fileSource(parameters.fileSource),
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
+      layoutResourceManager(parameters.layoutResourceManager ? parameters.layoutResourceManager
+                                                             : std::make_shared<LayoutResourceManager>()),
       mode(parameters.mode),
       showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
 
@@ -221,6 +223,7 @@ GeometryTile::~GeometryTile() {
 
     glyphManager->removeRequestor(*this);
     imageManager->removeRequestor(*this);
+    layoutResourceManager->removeRequestor(*this);
 
     if (pending) {
         // This tile never finished loading or was abandoned, emit a cancellation event
@@ -461,6 +464,18 @@ void GeometryTile::getImages(ImageRequestPair pair) {
     MLN_TRACE_FUNC();
 
     imageManager->getImages(*this, std::move(pair));
+}
+
+void GeometryTile::onLayoutResourcesAvailable(LayoutResourceMap resources) {
+    MLN_TRACE_FUNC();
+
+    worker.self().invoke(&GeometryTileWorker::onLayoutResourcesAvailable, std::move(resources));
+}
+
+void GeometryTile::getLayoutResources(LayoutResourceDependencies dependencies) {
+    MLN_TRACE_FUNC();
+
+    layoutResourceManager->getResources(*this, dependencies, fileSource.get());
 }
 
 std::shared_ptr<FeatureIndex> GeometryTile::getFeatureIndex() const {

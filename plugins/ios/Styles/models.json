@@ -1,0 +1,12 @@
+{
+  "version": 8,
+  "name": "Plugin demo: 3D models",
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": { "background-color": "#DDE5D3" }
+    }
+  ]
+}
