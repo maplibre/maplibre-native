@@ -1077,6 +1077,12 @@ This known issue is closed.
     `projectedPoint` that does match. Verify the two depths agree (e.g. render
     the sampled depth as colour) *before* wiring the discard, and note the depth
     pass now packs clip-space NDC z with no `*2-1` remap.
+  - **Fixed (2026-10-17): it was the depth space.** With terrain on,
+    `FillExtrusionLayerTweaker` now projects extrusions the way the mesh is
+    projected (default near plane, and the same clip z remap to [0, 1] off GL), so
+    terrain in front of an extrusion hides it per fragment in the ordinary depth
+    test. `terrain/fill-extrusion-occluded` (a block behind a ridge) covers it,
+    graded against a linux-opengl baseline.
 - The terrain mesh/drape cover is now a direct elevation-aware ideal cover
   (`RenderTerrain::computeMeshCover`, see the tile-cover item above), but only
   *visibility* is elevation-aware. Native's tile LOD system
