@@ -1409,3 +1409,76 @@ TEST(UpdateRenderables, MaxParentOverscaleFactor) {
                          GetTileDataAction{{5, 0, {5, 3, 1}}, NotFound}}),
               log);
 }
+
+// With nothing loaded to draw from, every ideal tile used to walk every tile held, asking each
+// whether it renders and lies under the ideal tile: a few thousand of each is millions of
+// questions per update, and over LiDAR zoom 17 elevation at a steep pitch, 90 s of the main
+// thread's CPU on the phone (vtm#3690). The tiles that render are found once.
+TEST(UpdateRenderables, IdealTilesWithNothingToDrawFromDoNotWalkEveryTileHeld) {
+    ActionLog log;
+    MockSource source;
+    auto getTileData = getTileDataFn(log, source.dataTiles);
+    auto createTileData = createTileDataFn(log, source.dataTiles);
+    auto retainTileData = retainTileDataFn(log);
+    auto renderTile = renderTileFn(log);
+
+    // Tiles held, none of them loaded.
+    constexpr uint32_t heldColumns = 128;
+    constexpr uint32_t heldRows = 24;
+    for (uint32_t y = 0; y < heldRows; ++y) {
+        for (uint32_t x = 0; x < heldColumns; ++x) source.createTileData(OverscaledTileID{14, 0, {14, x, y}});
+    }
+    // Ideal tiles, none held.
+    constexpr uint32_t idealColumns = 64;
+    constexpr uint32_t idealRows = 32;
+    for (uint32_t y = 0; y < idealRows; ++y) {
+        for (uint32_t x = 0; x < idealColumns; ++x) source.idealTiles.emplace(OverscaledTileID{12, 0, {12, x, y}});
+    }
+
+    const size_t before = MockTileData::renderableChecks;
+    algorithm::updateRenderables(
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
+    const size_t checks = MockTileData::renderableChecks - before;
+
+    constexpr size_t tiles = size_t{heldColumns} * heldRows + size_t{idealColumns} * idealRows;
+    EXPECT_LT(checks, 4 * tiles) << "each tile is asked about a few times, not once per ideal tile";
+    for (const auto& entry : log) {
+        EXPECT_FALSE(entry.is<RenderTileAction>()) << "nothing was loaded to draw";
+    }
+}
+
+// What the walk found is still found: a loaded tile deeper than the children, under an ideal
+// tile that has no loaded parent or child, is drawn in its place, for every ideal tile that has
+// one, and for no other.
+TEST(UpdateRenderables, LoadedTilesDeeperThanTheChildrenStillStandInForIdealTiles) {
+    ActionLog log;
+    MockSource source;
+    auto getTileData = getTileDataFn(log, source.dataTiles);
+    auto createTileData = createTileDataFn(log, source.dataTiles);
+    auto retainTileData = retainTileDataFn(log);
+    auto renderTile = renderTileFn(log);
+
+    source.idealTiles.emplace(OverscaledTileID{8, 0, {8, 0, 0}});
+    source.idealTiles.emplace(OverscaledTileID{8, 0, {8, 1, 0}}); // reaches its ascent already walked
+    source.idealTiles.emplace(OverscaledTileID{8, 0, {8, 5, 5}}); // nothing under it
+    auto* under0 = source.createTileData(OverscaledTileID{10, 0, {10, 1, 3}});
+    under0->renderable = true;
+    auto* under1 = source.createTileData(OverscaledTileID{10, 0, {10, 7, 1}});
+    under1->renderable = true;
+    source.createTileData(OverscaledTileID{10, 0, {10, 2, 2}}); // under the first, not loaded
+    auto* elsewhere = source.createTileData(OverscaledTileID{10, 0, {10, 40, 40}});
+    elsewhere->renderable = true;
+    auto* otherWrap = source.createTileData(OverscaledTileID{10, 1, {10, 1, 3}});
+    otherWrap->renderable = true;
+
+    algorithm::updateRenderables(
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
+
+    std::vector<RenderTileAction> rendered;
+    for (const auto& entry : log) {
+        if (entry.is<RenderTileAction>()) rendered.push_back(entry.get<RenderTileAction>());
+    }
+    ASSERT_EQ(2u, rendered.size());
+    EXPECT_EQ((RenderTileAction{{10, 1, 3}, *under0}), rendered[0]);
+    EXPECT_EQ((RenderTileAction{{10, 7, 1}, *under1}), rendered[1]);
+}

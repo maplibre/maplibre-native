@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <memory>
@@ -28,7 +29,13 @@ struct MockTileData {
 
     bool hasTriedCache() const { return triedOptional; }
 
-    bool isRenderable() const { return renderable; }
+    bool isRenderable() const {
+        ++renderableChecks;
+        return renderable;
+    }
+
+    // How often any mock tile was asked whether it renders; tests read the difference.
+    static inline size_t renderableChecks = 0;
 
     bool isLoaded() const { return loaded; }
 
