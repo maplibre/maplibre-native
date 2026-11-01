@@ -89,6 +89,11 @@ public class Projection {
    * Returns the geographic location that corresponds to a screen location.
    * The screen location is specified in screen pixels (not display pixels) relative to the
    * top left of the map (not the top left of the whole screen).
+   * <p>
+   * With 3D terrain, the location is where the point's line of sight first meets the terrain
+   * surface (the nearest surface, so a ridge in front wins), rather than the point at sea level
+   * behind it. Without terrain, or where no terrain data has loaded yet, it is the sea-level
+   * point. For a camera target, use {@link #fromScreenLocationAtCenterAltitude}.
    *
    * @param point A Point on the screen in screen pixels.
    * @return The LatLng corresponding to the point on the screen, or null if the ray through
@@ -97,6 +102,20 @@ public class Projection {
   @NonNull
   public LatLng fromScreenLocation(@NonNull PointF point) {
     return nativeMapView.latLngForPixel(point);
+  }
+
+  /**
+   * Returns the geographic location under a screen location on the plane the camera's centre sits
+   * on: sea level, unless a gesture over 3D terrain has lifted the centre onto the ground. For code
+   * that turns a screen location into a camera target. With 3D terrain, {@link #fromScreenLocation}
+   * answers on the terrain surface in front of that plane, and a target taken from it moves the view.
+   *
+   * @param point A Point on the screen in screen pixels.
+   * @return The LatLng on the camera centre's plane under the point on the screen.
+   */
+  @NonNull
+  public LatLng fromScreenLocationAtCenterAltitude(@NonNull PointF point) {
+    return nativeMapView.latLngForPixelAtCenterAltitude(point);
   }
 
 
@@ -284,6 +303,10 @@ public class Projection {
    * Returns a screen location that corresponds to a geographical coordinate (LatLng).
    * The screen location is in screen pixels (not display pixels) relative to the top left
    * of the map (not of the whole screen).
+   * <p>
+   * With 3D terrain, the screen location is where the coordinate appears on the terrain surface,
+   * at its terrain height, rather than at sea level. Without terrain, or where no terrain data
+   * has loaded yet, it is the sea-level point. The same holds for the batch conversions.
    *
    * @param location A LatLng on the map to convert to a screen location.
    * @return A Point representing the screen location in screen pixels.

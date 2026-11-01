@@ -209,6 +209,38 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         return tiles.emplace(tileID, std::move(tile)).first->second.get();
     };
 
+    // Keep ancestors of the ideal cover that are already loaded (but not rendered) when asked to -
+    // see TileParameters::retainAncestorLevels. Never request one: that fetched up to eight extra
+    // levels and made still renders wait for them. As maplibre-gl-js does, only a parent that has
+    // already loaded is bound.
+    if (parameters.retainAncestorLevels > 0) {
+        std::set<OverscaledTileID> ancestors;
+        for (const auto& id : idealTiles) {
+            const auto& c = id.canonical;
+            for (uint8_t level = 1; level <= parameters.retainAncestorLevels && level <= c.z; ++level) {
+                const auto az = static_cast<uint8_t>(c.z - level);
+                if (az < zoomRange.min) {
+                    break;
+                }
+                ancestors.emplace(az, id.wrap, CanonicalTileID(az, c.x >> level, c.y >> level));
+            }
+        }
+        for (const auto& id : ancestors) {
+            Tile* tile = getTileFn(id);
+            if (!tile) {
+                // Back from the cache only if it is complete: an incomplete one held as Optional
+                // would wait on a cache-only load, and still renders on it (isLoaded)
+                const auto& cached = cache.getTiles();
+                if (const auto it = cached.find(id); it != cached.end() && it->second->isComplete()) {
+                    tile = tiles.emplace(id, cache.pop(id)).first->second.get();
+                }
+            }
+            if (tile && tile->isComplete()) {
+                retainTileFn(*tile, TileNecessity::Optional);
+            }
+        }
+    }
+
     auto previouslyRenderedTiles = std::move(renderedTiles);
 
     auto renderTileFn = [&](const UnwrappedTileID& tileID, Tile& tile) {

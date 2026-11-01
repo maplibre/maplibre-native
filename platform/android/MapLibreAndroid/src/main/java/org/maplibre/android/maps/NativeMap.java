@@ -242,6 +242,8 @@ interface NativeMap {
 
   LatLng latLngForPixel(@NonNull PointF pixel);
 
+  LatLng latLngForPixelAtCenterAltitude(@NonNull PointF pixel);
+
   void latLngsForPixels(@NonNull double[] input, @NonNull double[] output);
 
   //

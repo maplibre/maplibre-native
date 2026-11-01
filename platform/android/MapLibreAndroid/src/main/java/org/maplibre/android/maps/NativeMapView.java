@@ -754,6 +754,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public LatLng latLngForPixelAtCenterAltitude(@NonNull PointF pixel) {
+    if (checkState("latLngForPixelAtCenterAltitude")) {
+      return new LatLng();
+    }
+    return nativeLatLngForPixelAtCenterAltitude(pixel.x / pixelRatio, pixel.y / pixelRatio);
+  }
+
+  @Override
   public void latLngsForPixels(@NonNull double[] input, @NonNull double[] output) {
     if (!checkState("latLngsForPixels")) {
       nativeLatLngsForPixels(input, output, pixelRatio);
@@ -1773,6 +1781,9 @@ final class NativeMapView implements NativeMap {
   @NonNull
   @Keep
   private native LatLng nativeLatLngForPixel(float x, float y);
+
+  @Keep
+  private native LatLng nativeLatLngForPixelAtCenterAltitude(float x, float y);
 
   @Keep
   private native void nativeLatLngsForPixels(double[] input, double[] output, float pixelRatio);
