@@ -4,6 +4,10 @@
 
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 
+### 🐞 Bug fixes
+
+- Revalidate unusable cached resources when resuming an offline download ([#410](https://github.com/maplibre/maplibre-native/issues/410)).
+
 ## 13.7.1
 
 ### ✨ Features and improvements
