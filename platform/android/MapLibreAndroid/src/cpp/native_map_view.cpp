@@ -297,6 +297,10 @@ void NativeMapView::setGestureInProgress(jni::JNIEnv&, jni::jboolean inProgress)
     map->setGestureInProgress(inProgress);
 }
 
+void NativeMapView::setGlobeFreeBearing(jni::JNIEnv&, jni::jboolean freeBearing) {
+    map->setGlobeFreeBearing(freeBearing);
+}
+
 void NativeMapView::moveBy(jni::JNIEnv&, jni::jdouble dx, jni::jdouble dy, jni::jlong duration) {
     mln::AnimationOptions animationOptions;
     if (duration > 0) {
@@ -304,6 +308,10 @@ void NativeMapView::moveBy(jni::JNIEnv&, jni::jdouble dx, jni::jdouble dy, jni::
         animationOptions.easing.emplace(mln::util::UnitBezier{0.1, 0.4, 0.35, 1.0});
     }
     map->moveBy({dx, dy}, animationOptions);
+}
+
+void NativeMapView::moveByAround(jni::JNIEnv&, jni::jdouble dx, jni::jdouble dy, jni::jdouble x, jni::jdouble y) {
+    map->moveBy({dx, dy}, mln::ScreenCoordinate{x, y});
 }
 
 void NativeMapView::jumpTo(jni::JNIEnv& env,
@@ -747,6 +755,10 @@ void NativeMapView::pixelsForLatLngs(JNIEnv& env,
 
 jni::Local<jni::Object<LatLng>> NativeMapView::latLngForPixel(JNIEnv& env, jfloat x, jfloat y) {
     return LatLng::New(env, map->latLngForPixel(mln::ScreenCoordinate(x, y)));
+}
+
+jboolean NativeMapView::isLocationOccluded(JNIEnv&, jdouble latitude, jdouble longitude) {
+    return map->isLocationOccluded(mln::LatLng(latitude, longitude));
 }
 
 void NativeMapView::latLngsForPixels(JNIEnv& env,
@@ -1391,7 +1403,9 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setStyleJson, "nativeSetStyleJson"),
         METHOD(&NativeMapView::cancelTransitions, "nativeCancelTransitions"),
         METHOD(&NativeMapView::setGestureInProgress, "nativeSetGestureInProgress"),
+        METHOD(&NativeMapView::setGlobeFreeBearing, "nativeSetGlobeFreeBearing"),
         METHOD(&NativeMapView::moveBy, "nativeMoveBy"),
+        METHOD(&NativeMapView::moveByAround, "nativeMoveByAround"),
         METHOD(&NativeMapView::jumpTo, "nativeJumpTo"),
         METHOD(&NativeMapView::easeTo, "nativeEaseTo"),
         METHOD(&NativeMapView::flyTo, "nativeFlyTo"),
@@ -1438,6 +1452,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getVisibleCoordinateBounds, "nativeGetVisibleCoordinateBounds"),
         METHOD(&NativeMapView::latLngForProjectedMeters, "nativeLatLngForProjectedMeters"),
         METHOD(&NativeMapView::latLngForPixel, "nativeLatLngForPixel"),
+        METHOD(&NativeMapView::isLocationOccluded, "nativeIsLocationOccluded"),
         METHOD(&NativeMapView::latLngsForPixels, "nativeLatLngsForPixels"),
         METHOD(&NativeMapView::addPolylines, "nativeAddPolylines"),
         METHOD(&NativeMapView::addPolygons, "nativeAddPolygons"),

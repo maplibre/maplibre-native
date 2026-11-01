@@ -175,7 +175,7 @@ bool RenderPluginLayer::queryIntersectsFeature([[maybe_unused]] const GeometryCo
                                                [[maybe_unused]] float,
                                                [[maybe_unused]] const TransformState&,
                                                [[maybe_unused]] float,
-                                               [[maybe_unused]] const mat4&,
+                                               [[maybe_unused]] const TileProjector&,
                                                [[maybe_unused]] const FeatureState&) const {
     return false;
 }

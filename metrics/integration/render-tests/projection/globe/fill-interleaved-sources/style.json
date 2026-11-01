@@ -1,0 +1,38 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "Translucent fills from two sources, interleaved, with one tile each in view: every layer is drawn through its own source's tile mask.",
+      "width": 64,
+      "height": 64
+    }
+  },
+  "center": [0.3516, -0.3516],
+  "zoom": 9.5,
+  "projection": {"type": "globe"},
+  "sources": {
+    "fine": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {"type": "Polygon", "coordinates": [[[-170, -80], [170, -80], [170, 80], [-170, 80], [-170, -80]]]}
+      }
+    },
+    "coarse": {
+      "type": "geojson",
+      "maxzoom": 4,
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {"type": "Polygon", "coordinates": [[[-170, -80], [170, -80], [170, 80], [-170, 80], [-170, -80]]]}
+      }
+    }
+  },
+  "layers": [
+    {"id": "background", "type": "background", "paint": {"background-color": "white"}},
+    {"id": "fine-below", "type": "fill", "source": "fine", "paint": {"fill-color": "blue", "fill-opacity": 0.8, "fill-antialias": false}},
+    {"id": "coarse", "type": "fill", "source": "coarse", "paint": {"fill-color": "red", "fill-opacity": 0.5, "fill-antialias": false}},
+    {"id": "fine-above", "type": "fill", "source": "fine", "paint": {"fill-color": "lime", "fill-opacity": 0.5, "fill-antialias": false}}
+  ]
+}
