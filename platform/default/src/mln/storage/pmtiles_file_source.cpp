@@ -22,6 +22,8 @@
 #include <pmtiles.hpp>
 #include <utility>
 
+#include <cassert>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -199,6 +201,15 @@ public:
                     });
                 });
         });
+    }
+
+    // Releases the inner request held for an outer request, cancelling it if it is still in
+    // flight. Invoked whenever the outer request is destroyed; this is the only point where
+    // `tasks` entries are removed. Answering a request must not release its inner request,
+    // because that request can respond again (e.g. a revalidated tile after expired cache data).
+    void cancel(AsyncRequest* req) {
+        assert(req);
+        tasks.erase(req);
     }
 
     void setResourceOptions(ResourceOptions options) {
@@ -639,6 +650,12 @@ PMTilesFileSource::PMTilesFileSource(const ResourceOptions& resourceOptions, con
 
 std::unique_ptr<AsyncRequest> PMTilesFileSource::request(const Resource& resource, FileSource::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
+
+    // The raw pointer is used only as a key into `tasks`. Erasing a reused address by mistake is
+    // not possible: this cancel is queued before the request's memory is freed, so it is processed
+    // before the message registering any later request that could be allocated at the same
+    // address.
+    req->onCancel([actorRef = thread->actor(), req = req.get()]() { actorRef.invoke(&Impl::cancel, req); });
 
     // assume if there is a tile request, that the pmtiles file has been validated
     if (resource.kind == Resource::Tile) {
