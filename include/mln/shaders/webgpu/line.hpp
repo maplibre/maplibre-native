@@ -386,7 +386,9 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = position;
     out.v_width2 = vec2<f32>(outset, inset);
     out.v_normal = v_normal;
-    out.v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    // 1.0 when drawn into a terrain render-to-texture tile (see the line shader)
+    out.v_gamma_scale = select(
+        extrude_length_without_perspective / extrude_length_with_perspective, 1.0, drawable.pad1 != 0.0);
     out.v_lineprogress = v_lineprogress;
     out.v_blur = blur;
     out.v_opacity = opacity;
@@ -620,7 +622,9 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let extrude_length_without_perspective = length(dist);
     let extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
-    let gamma_scale = extrude_length_without_perspective / max(extrude_length_with_perspective, 1e-6);
+    // 1.0 when drawn into a terrain render-to-texture tile (see the line shader)
+    let gamma_scale = select(
+        extrude_length_without_perspective / max(extrude_length_with_perspective, 1e-6), 1.0, drawable.pad1 != 0.0);
 
     out.position = position;
     out.v_width2 = vec2<f32>(outset, inset);
@@ -963,7 +967,9 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = position;
     out.v_width2 = vec2<f32>(outset, inset);
     out.v_normal = v_normal;
-    out.v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    // 1.0 when drawn into a terrain render-to-texture tile (see the line shader)
+    out.v_gamma_scale = select(
+        extrude_length_without_perspective / extrude_length_with_perspective, 1.0, drawable.pad1 != 0.0);
     out.v_tex_a = tex_a;
     out.v_tex_b = tex_b;
     out.v_color = color;
@@ -1238,7 +1244,9 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = position;
     out.v_width2 = vec2<f32>(outset, inset);
     out.v_normal = v_normal;
-    out.v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    // 1.0 when drawn into a terrain render-to-texture tile (see the line shader)
+    out.v_gamma_scale = select(
+        extrude_length_without_perspective / extrude_length_with_perspective, 1.0, drawable.pad1 != 0.0);
     out.v_tex_a = tex_a;
     out.v_tex_b = tex_b;
     out.v_blur = blur;

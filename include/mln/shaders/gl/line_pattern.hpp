@@ -191,9 +191,15 @@ mediump vec4 pattern_to = u_pattern_to;
     gl_Position = apply_drape_transform(gl_Position, u_matrix, u_drape_tile);
 
     // calculate how much the perspective view squishes or stretches the extrude
-    float extrude_length_without_perspective = length(dist);
-    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * u_units_to_pixels);
-    v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    if (drawable_pad1 != 0.0) {
+        // Drawn into a terrain render-to-texture tile with an orthographic matrix;
+        // perspective scaling happens when the textured terrain mesh is projected
+        v_gamma_scale = 1.0;
+    } else {
+        float extrude_length_without_perspective = length(dist);
+        float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * u_units_to_pixels);
+        v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    }
 
     v_linesofar = a_linesofar;
     v_width2 = vec2(outset, inset);
