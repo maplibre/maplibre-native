@@ -22,7 +22,9 @@ ResourceOptions::ResourceOptions(ResourceOptions&&) noexcept = default;
 ResourceOptions::ResourceOptions(const ResourceOptions& other)
     : impl_(std::make_unique<Impl>(*other.impl_)) {}
 ResourceOptions& ResourceOptions::operator=(const ResourceOptions& other) {
-    impl_ = std::make_unique<Impl>(*other.impl_);
+    if (this != &other) {
+        impl_ = std::make_unique<Impl>(*other.impl_);
+    }
     return *this;
 }
 ResourceOptions& ResourceOptions::operator=(ResourceOptions&& options) {
@@ -48,7 +50,7 @@ ResourceOptions& ResourceOptions::withTileServerOptions(TileServerOptions tileSe
     return *this;
 }
 
-const TileServerOptions ResourceOptions::tileServerOptions() const {
+TileServerOptions ResourceOptions::tileServerOptions() const {
     return impl_->tileServerOptions.clone();
 }
 

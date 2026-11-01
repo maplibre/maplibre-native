@@ -4,6 +4,7 @@
 #include <istream>
 #include <sstream>
 #include <array>
+#include <utility>
 
 extern "C" {
 #include <jpeglib.h>
@@ -38,7 +39,7 @@ void skip(j_decompress_ptr cinfo, long count) {
     if (count <= 0) return; // A zero or negative skip count should be treated as a no-op.
     auto* wrap = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
 
-    if (wrap->manager.bytes_in_buffer > 0 && count < static_cast<long>(wrap->manager.bytes_in_buffer)) {
+    if (wrap->manager.bytes_in_buffer > 0 && std::cmp_less(count, wrap->manager.bytes_in_buffer)) {
         wrap->manager.bytes_in_buffer -= count;
         wrap->manager.next_input_byte = &wrap->buffer[BUF_SIZE - wrap->manager.bytes_in_buffer];
     } else {

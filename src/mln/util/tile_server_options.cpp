@@ -192,7 +192,7 @@ bool TileServerOptions::requiresApiKey() const {
     return impl_->apiKeyRequired;
 }
 
-const std::vector<mln::util::DefaultStyle> TileServerOptions::defaultStyles() const {
+std::vector<mln::util::DefaultStyle> TileServerOptions::defaultStyles() const {
     return impl_->defaultStyles;
 }
 

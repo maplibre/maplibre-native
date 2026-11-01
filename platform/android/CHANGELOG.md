@@ -4,6 +4,7 @@
 
 ### ✨ Features and improvements
 
+- Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 - With 3D terrain, pinch, rotate, tilt and quick-zoom gestures turn around the ground under the middle of the screen instead of a sea-level point beneath it. Add `MapLibreMap.getCenterAltitude()` and `setCenterAltitudeKeepingView(double)`: a target and zoom describe the same view only at the same centre altitude, so save the altitude with a `CameraPosition` and restore it before moving the camera back ([#4712](https://github.com/maplibre/maplibre-native/pull/4712)).
 
 - With 3D terrain, markers, view annotations, line-placed labels and the collision index sit on the terrain surface instead of at sea level, and `Projection.toScreenLocation` / `fromScreenLocation` and their batch versions answer on the terrain surface, from a copy of the terrain heights kept on the map side, without waiting on the render thread. Add `Projection.fromScreenLocationAtCenterAltitude` for code that turns a screen point into a camera target ([#4558](https://github.com/maplibre/maplibre-native/pull/4558)).

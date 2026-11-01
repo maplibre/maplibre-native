@@ -116,6 +116,13 @@ public:
     TimePoint getTransitionStart() const { return transitionStart; }
     Duration getTransitionDuration() const { return transitionDuration; }
     void cancelTransitions();
+    /// The center a running ease or flight is headed for, while the center altitude it ends at may
+    /// still move (retargetTransitionCenterAltitude); empty otherwise.
+    std::optional<LatLng> getTransitionTargetCenter() const;
+    /// Moves the center altitude a running ease or flight ends at, keeping this frame's altitude
+    /// where it is, as gl-js's Camera._updateElevation does when the ground under the target
+    /// becomes known. Inert without such a transition, or when its camera set the center altitude.
+    void retargetTransitionCenterAltitude(double altitudeMeters);
 
     // Gesture
     void setGestureInProgress(bool);
@@ -148,10 +155,21 @@ private:
     TransformObserver& observer;
     TransformState state;
 
+    /// The center altitude a running ease or flight interpolates, kept here so it can be retargeted
+    /// mid-flight: from `start` to `target` by the frame's `progress`, headed for `center`.
+    struct CenterAltitudeEase {
+        double start;
+        double target;
+        double progress;
+        LatLng center;
+    };
+    std::optional<CenterAltitudeEase> centerAltitudeEase;
+
     void startTransition(const CameraOptions&,
                          const AnimationOptions&,
                          const std::function<void(double)>&,
-                         const Duration&);
+                         const Duration&,
+                         std::optional<CenterAltitudeEase> = std::nullopt);
 
     // We don't want to show horizon: limit max pitch based on edge insets.
     double getMaxPitchForEdgeInsets(const EdgeInsets& insets) const;

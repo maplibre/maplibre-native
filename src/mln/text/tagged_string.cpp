@@ -121,7 +121,7 @@ void TaggedString::verticalizePunctuation() {
         auto &sec = getSection(i);
         if (sec.type != GlyphIDType::FontPBF) replaced[i] = styledText.first[i];
     }
-    styledText.first = replaced;
+    styledText.first = std::move(replaced);
 }
 
 bool TaggedString::allowsVerticalWritingMode() {

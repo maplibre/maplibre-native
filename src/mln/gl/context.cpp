@@ -189,14 +189,14 @@ void Context::initializeExtensions(const std::function<gl::ProcAddress(const cha
             return nullptr;
         };
 
-        static const std::string renderer = []() {
+        static const std::string renderer = [] {
             std::string r = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_RENDERER)));
             Log::Info(Event::General, "GPU Identifier: " + r);
             return r;
         }();
 
         // Block ANGLE on Direct3D since the debugging extension is causing crashes
-        if (!(renderer.find("ANGLE") != std::string::npos && renderer.find("Direct3D") != std::string::npos)) {
+        if (renderer.find("ANGLE") == std::string::npos || renderer.find("Direct3D") == std::string::npos) {
             debugging = std::make_unique<extension::Debugging>(fn);
         }
 
@@ -452,7 +452,7 @@ Framebuffer Context::createFramebuffer(
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorResource.renderbuffer));
     bindDepthStencilRenderbuffer(depthStencil);
     checkFramebuffer();
-    return {color.getSize(), std::move(fbo)};
+    return {.size = color.getSize(), .framebuffer = std::move(fbo)};
 }
 
 Framebuffer Context::createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>& color) {
@@ -464,7 +464,7 @@ Framebuffer Context::createFramebuffer(const gfx::Renderbuffer<gfx::Renderbuffer
     MBGL_CHECK_ERROR(
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorResource.renderbuffer));
     checkFramebuffer();
-    return {color.getSize(), std::move(fbo)};
+    return {.size = color.getSize(), .framebuffer = std::move(fbo)};
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Size size,
@@ -508,7 +508,7 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setStencilMode(gfx::StencilMode::disabled());
     setColorMode(colorMode);
     setCullFaceMode(gfx::CullFaceMode::disabled());
-    setScissorTest({0, 0, 0, 0});
+    setScissorTest({.x = 0, .y = 0, .width = 0, .height = 0});
 }
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
@@ -662,7 +662,7 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
                                             static_cast<const gl::Texture2D&>(color).getTextureID(),
                                             0));
     checkFramebuffer();
-    return {color.getSize(), std::move(fbo)};
+    return {.size = color.getSize(), .framebuffer = std::move(fbo)};
 }
 
 Framebuffer Context::createFramebuffer(const gfx::Texture2D& color,
@@ -681,7 +681,7 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color,
                                             0));
     bindDepthRenderbuffer(depth);
     checkFramebuffer();
-    return {color.getSize(), std::move(fbo)};
+    return {.size = color.getSize(), .framebuffer = std::move(fbo)};
 }
 
 Framebuffer Context::createFramebuffer(
@@ -700,7 +700,7 @@ Framebuffer Context::createFramebuffer(
                                             0));
     bindDepthStencilRenderbuffer(depthStencil);
     checkFramebuffer();
-    return {color.getSize(), std::move(fbo)};
+    return {.size = color.getSize(), .framebuffer = std::move(fbo)};
 }
 
 gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
@@ -780,7 +780,7 @@ void Context::setStencilMode(const gfx::StencilMode& stencil) {
     } else {
         stencilTest = true;
         stencilMask = stencil.mask;
-        stencilOp = {stencil.fail, stencil.depthFail, stencil.pass};
+        stencilOp = {.sfail = stencil.fail, .dpfail = stencil.depthFail, .dppass = stencil.pass};
         apply_visitor([&](const auto& test) { stencilFunc = {test.func, stencil.ref, test.mask}; }, stencil.test);
     }
 }
@@ -896,7 +896,7 @@ void Context::bindUniformBufferRange(uint32_t bindingIndex, uint32_t buffer, int
     if (cur.buffer == buffer && cur.offset == offset && cur.size == size) {
         return; // identical binding already in place - skip the redundant GL call
     }
-    cur = {buffer, offset, size};
+    cur = {.buffer = buffer, .offset = offset, .size = size};
     MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
                                        static_cast<GLuint>(bindingIndex),
                                        static_cast<GLuint>(buffer),
@@ -912,7 +912,7 @@ void Context::unbindUniformBuffer(uint32_t bindingIndex) {
     if (cur.buffer == 0) {
         return;
     }
-    cur = {0, -1, -1};
+    cur = {.buffer = 0, .offset = -1, .size = -1};
     MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, static_cast<GLuint>(bindingIndex), 0));
 }
 

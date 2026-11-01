@@ -630,8 +630,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // draw layer groups, opaque pass
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            if (!(parameters.terrain && layerGroup.getType() == LayerGroupBase::Type::TileLayerGroup &&
-                  layerGroup.shouldRenderToTerrain())) {
+            if (!parameters.terrain || layerGroup.getType() != LayerGroupBase::Type::TileLayerGroup ||
+                !layerGroup.shouldRenderToTerrain()) {
                 layerGroup.render(orchestrator, parameters);
             }
             parameters.currentLayer++;
@@ -648,8 +648,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // terrain render targets (RenderTarget::renderDrapedLayerGroups)
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            if (!(parameters.terrain && layerGroup.getType() == LayerGroupBase::Type::TileLayerGroup &&
-                  layerGroup.shouldRenderToTerrain())) {
+            if (!parameters.terrain || layerGroup.getType() != LayerGroupBase::Type::TileLayerGroup ||
+                !layerGroup.shouldRenderToTerrain()) {
                 layerGroup.render(orchestrator, parameters);
             }
             if (parameters.currentLayer > 0) {
@@ -751,6 +751,31 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         if (std::abs(centerElevation - lastReportedCenterElevation) > 0.25) {
             lastReportedCenterElevation = centerElevation;
             observer->onTerrainCenterElevationChanged(centerElevation);
+        }
+        // And under the eye: a camera dragged towards a slope rising in front of it ends up under
+        // the ground (the steeper the pitch, the less it sits above the center), and the map
+        // lifts it out when it knows the height there.
+        if (const auto eye = updateParameters->transformState.getFreeCameraOptions().getLocation()) {
+            const double eyeElevation = terrain->getElevationForLatLng(eye->location).value_or(0.0);
+            if (!std::isnan(eyeElevation) &&
+                (std::isnan(lastReportedEyeElevation) || std::abs(eyeElevation - lastReportedEyeElevation) > 0.25)) {
+                lastReportedEyeElevation = eyeElevation;
+                observer->onTerrainEyeElevationChanged(eyeElevation);
+            }
+        }
+        // And where a camera animation is headed, while it runs: the map eases the center's height
+        // to the ground there, as gl-js does, instead of arriving at the height it left. Only once a
+        // DEM tile covers the spot: ground not loaded yet is not sea level.
+        if (const auto& target = updateParameters->transitionTargetCenter) {
+            if (const auto targetElevation = terrain->getElevationForLatLng(*target)) {
+                if (std::isnan(lastReportedTargetElevation) ||
+                    std::abs(*targetElevation - lastReportedTargetElevation) > 0.25) {
+                    lastReportedTargetElevation = *targetElevation;
+                    observer->onTerrainTransitionTargetElevationChanged(*targetElevation);
+                }
+            }
+        } else {
+            lastReportedTargetElevation = std::numeric_limits<double>::quiet_NaN();
         }
     }
 

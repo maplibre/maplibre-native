@@ -254,10 +254,17 @@ public:
     TerrainSkirtLength getTerrainSkirtLength() const;
 
     /// Whether the map centre rides the terrain surface rather than sea level. Off by
-    /// default (the clamp is applied asynchronously and can run away during a gesture);
-    /// with it on the centre altitude follows the rendered terrain height under the
+    /// default; with it on the center altitude follows the rendered terrain height under the
     /// centre, so pitching over tall ground keeps the camera above it instead of sinking
-    /// in, as in maplibre-gl-js. Inert when terrain is not enabled.
+    /// in, as in maplibre-gl-js. The camera's eye is kept 10 m above the ground under it as well:
+    /// at a steep pitch the eye sits only a little above the center, so dragging the center away
+    /// from the camera over rising ground would otherwise leave the eye inside the hill.
+    ///
+    /// While a gesture is in progress the center keeps the height it had when the gesture
+    /// started, so the camera does not rise and fall with every ridge and valley the drag passes
+    /// (maplibre-gl-js's elevationFreeze); only the eye clearance lifts it. The end of the
+    /// gesture, and of the momentum that follows it, anchors the center on the ground without
+    /// moving the camera. Inert when terrain is not enabled.
     ///
     /// Gestures anchor the centre on the terrain (anchorCenterOnTerrain), and removing the
     /// terrain brings it back to sea level, whatever this is set to. maplibre-gl-js does both

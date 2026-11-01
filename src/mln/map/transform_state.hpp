@@ -261,7 +261,7 @@ public:
     void setCenterAltitude(double alt_m);
 
     void constrain(double& scale, double& x, double& y) const;
-    bool constrainScreen(double& scale_, double& x_, double& y_) const;
+    bool constrainScreen(double& scale_, double& lat, double& lon) const;
     void constrainCameraAndZoomToBounds(CameraOptions& camera, double& zoom) const;
 
     const mat4& getProjectionMatrix() const;

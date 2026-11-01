@@ -102,7 +102,7 @@ private:
                                   float lastSegmentAngle,
                                   float pixelsToTileUnits,
                                   float cameraToAnchorDistance,
-                                  bool pitchWithMap);
+                                  bool pitchWithMap) const;
 
     std::pair<float, float> projectAnchor(const mat4& posMatrix,
                                           const Point<float>& point,

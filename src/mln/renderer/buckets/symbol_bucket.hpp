@@ -318,30 +318,32 @@ public:
                                   uint16_t(symbol.isSDF);
         const uint16_t aSizeMax = std::min(MAX_PACKED_SIZE, static_cast<uint16_t>(sizeData.max * SIZE_PACK_FACTOR));
 
-        return {{static_cast<int16_t>(labelAnchor.point.x),
-                 static_cast<int16_t>(labelAnchor.point.y),
-                 static_cast<int16_t>(symbol.minFontScale.x * 256),
-                 static_cast<int16_t>(symbol.minFontScale.y * 256)},
+        return {.a1 = {static_cast<int16_t>(labelAnchor.point.x),
+                       static_cast<int16_t>(labelAnchor.point.y),
+                       static_cast<int16_t>(symbol.minFontScale.x * 256),
+                       static_cast<int16_t>(symbol.minFontScale.y * 256)},
 
-                {static_cast<int16_t>(std::round(symbol.tl.x * 32)),
-                 static_cast<int16_t>(std::round((symbol.tl.y + symbol.glyphOffset.y) * 32)),
-                 static_cast<int16_t>(std::round(symbol.tr.x * 32)),
-                 static_cast<int16_t>(std::round((symbol.tr.y + symbol.glyphOffset.y) * 32))},
+                .a2 = {static_cast<int16_t>(std::round(symbol.tl.x * 32)),
+                       static_cast<int16_t>(std::round((symbol.tl.y + symbol.glyphOffset.y) * 32)),
+                       static_cast<int16_t>(std::round(symbol.tr.x * 32)),
+                       static_cast<int16_t>(std::round((symbol.tr.y + symbol.glyphOffset.y) * 32))},
 
-                {static_cast<int16_t>(std::round(symbol.bl.x * 32)),
-                 static_cast<int16_t>(std::round((symbol.bl.y + symbol.glyphOffset.y) * 32)),
-                 static_cast<int16_t>(std::round(symbol.br.x * 32)),
-                 static_cast<int16_t>(std::round((symbol.br.y + symbol.glyphOffset.y) * 32))},
+                .a3 = {static_cast<int16_t>(std::round(symbol.bl.x * 32)),
+                       static_cast<int16_t>(std::round((symbol.bl.y + symbol.glyphOffset.y) * 32)),
+                       static_cast<int16_t>(std::round(symbol.br.x * 32)),
+                       static_cast<int16_t>(std::round((symbol.br.y + symbol.glyphOffset.y) * 32))},
 
-                {symbol.tex.x, symbol.tex.y, symbol.tex.w, symbol.tex.h},
+                .a4 = {symbol.tex.x, symbol.tex.y, symbol.tex.w, symbol.tex.h},
 
-                {static_cast<int16_t>(symbol.pixelOffsetTL.x * 16),
-                 static_cast<int16_t>(symbol.pixelOffsetTL.y * 16),
-                 static_cast<int16_t>(symbol.pixelOffsetBR.x * 16),
-                 static_cast<int16_t>(symbol.pixelOffsetBR.y * 16)},
+                .a5 = {static_cast<int16_t>(symbol.pixelOffsetTL.x * 16),
+                       static_cast<int16_t>(symbol.pixelOffsetTL.y * 16),
+                       static_cast<int16_t>(symbol.pixelOffsetBR.x * 16),
+                       static_cast<int16_t>(symbol.pixelOffsetBR.y * 16)},
 
-                { aSizeMin,
-                  aSizeMax }};
+                .a6 = {
+                    aSizeMin,
+                    aSizeMax
+                }};
     }
 #else
     static SymbolLayoutAttributes layoutAttributes(Point<float> labelAnchor,
@@ -531,13 +533,13 @@ public:
     static CollisionBoxLayoutVertexAttributes collisionLayoutVertex(Point<float> a,
                                                                     Point<float> anchor,
                                                                     Point<float> o) {
-        return {{{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
-                {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
-                {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
+        return {.a1 = {{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
+                .a2 = {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
+                .a3 = {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
     }
 
     static CollisionBoxDynamicVertexAttributes collisionDynamicVertex(bool placed, bool notUsed, Point<float> shift) {
-        return {{{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, {{shift.x, shift.y}}};
+        return {.a1 = {{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, .a2 = {{shift.x, shift.y}}};
     }
 
     const float tilePixelRatio;

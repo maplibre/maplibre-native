@@ -1436,7 +1436,7 @@ private:
                          const std::vector<ProjectedCollisionBox>&,
                          const std::vector<ProjectedCollisionBox>&) override;
 
-    bool shouldRetryPlacement(const JointPlacement&, const PlacementContext&);
+    bool shouldRetryPlacement(const JointPlacement&, const PlacementContext&) const;
 
     std::unordered_map<uint32_t, bool> locationCache;
     std::optional<CollisionBoundaries> tileBorders;
@@ -1718,7 +1718,7 @@ void TilePlacement::newSymbolPlaced(const SymbolInstance& symbol,
     placedSymbolsData.emplace_back(std::move(symbolData));
 }
 
-bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const PlacementContext& ctx) {
+bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const PlacementContext& ctx) const {
     // We re-try the placement to try out remaining variable anchors.
     return populateIntersections && !placement.placed() && ctx.getBucket().hasVariableTextAnchors();
 }
