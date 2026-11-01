@@ -17,7 +17,7 @@ on:
 
 jobs:
   macos-build-dynamic:
-    runs-on: macos-14
+    runs-on: macos-15
     defaults:
       run:
         working-directory: platform/macos
@@ -64,7 +64,7 @@ jobs:
             MapLibre_macos_device.framework.dSYM.zip
 
   macos-build-static:
-    runs-on: macos-14
+    runs-on: macos-15
     defaults:
       run:
         working-directory: platform/macos
