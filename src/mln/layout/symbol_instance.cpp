@@ -3,6 +3,8 @@
 #include <mln/util/error_sink.hpp>
 #include <mln/util/logging.hpp>
 
+#include <cstdlib>
+#include <string_view>
 #include <utility>
 
 namespace mln {
@@ -236,7 +238,18 @@ std::optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex() cons
 }
 
 #if MLN_SYMBOL_GUARDS
+bool SymbolInstance::guardsEnabled() {
+    static const bool enabled = [] {
+        // getenv only races with setenv, and the library never changes the environment.
+        // NOLINTNEXTLINE(concurrency-mt-unsafe)
+        const char* value = std::getenv("MLN_SYMBOL_GUARDS");
+        return value != nullptr && std::string_view(value) == "1";
+    }();
+    return enabled;
+}
+
 bool SymbolInstance::check(const source_location& source) const {
+    if (!guardsEnabled()) return true;
     return !isFailed && check(check01, 1, source) && check(check02, 2, source) && check(check03, 3, source) &&
            check(check04, 4, source) && check(check05, 5, source) && check(check06, 6, source) &&
            check(check07, 7, source) && check(check08, 8, source) && check(check09, 9, source) &&
@@ -253,6 +266,7 @@ bool SymbolInstance::checkIndexes(std::size_t textCount,
                                   std::size_t iconSize,
                                   std::size_t sdfSize,
                                   const source_location& source) const {
+    if (!guardsEnabled()) return true;
     return !isFailed && checkIndex(placedRightTextIndex, textCount, source) &&
            checkIndex(placedCenterTextIndex, textCount, source) && checkIndex(placedLeftTextIndex, textCount, source) &&
            checkIndex(placedVerticalTextIndex, textCount, source) &&
@@ -296,6 +310,7 @@ bool SymbolInstance::checkKey(const source_location& source) const {
 bool SymbolInstance::checkIndex(const std::optional<std::size_t>& index,
                                 std::size_t size,
                                 const source_location& source) const {
+    if (!guardsEnabled()) return true;
     if (index.has_value() && *index >= size) {
         fail("SymbolInstance index corrupted with value=" + util::toString(*index) + " size=" + util::toString(size) +
              locationSuffix(source));
@@ -304,7 +319,7 @@ bool SymbolInstance::checkIndex(const std::optional<std::size_t>& index,
 }
 
 void SymbolInstance::forceFail() const {
-    if (!isFailed) {
+    if (guardsEnabled() && !isFailed) {
         fail("SymbolInstance marked as failed by an external check");
     }
 }
