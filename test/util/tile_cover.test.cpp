@@ -6,7 +6,9 @@
 #include <mln/util/mat4.hpp>
 #include <mln/util/interpolate.hpp>
 
+#include <array>
 #include <cmath>
+#include <set>
 
 #include <algorithm>
 #include <map>
@@ -173,6 +175,107 @@ TEST(TileCover, PitchWithLargerResultSet) {
                                              {5, 13, 18},
                                              {5, 15, 19}}),
               (std::vector<OverscaledTileID>{cover.begin(), cover.begin() + 16}));
+}
+
+namespace {
+
+// What a tile limit has to return: the `limit` tiles of a whole cover whose centers lie nearest
+// `origin` (web-mercator, world copies one apart), nearest first, ties in tile ID order.
+std::vector<OverscaledTileID> nearestTiles(std::vector<OverscaledTileID> tiles,
+                                           size_t limit,
+                                           const std::array<double, 2>& origin) {
+    const auto distance = [&](const OverscaledTileID& id) {
+        const double scale = static_cast<double>(1u << id.canonical.z);
+        const double dx = (static_cast<double>(id.canonical.x) + 0.5) / scale + id.wrap - origin[0];
+        const double dy = (static_cast<double>(id.canonical.y) + 0.5) / scale - origin[1];
+        return dx * dx + dy * dy;
+    };
+    std::sort(tiles.begin(), tiles.end(), [&](const OverscaledTileID& a, const OverscaledTileID& b) {
+        const double da = distance(a);
+        const double db = distance(b);
+        return da != db ? da < db : a < b;
+    });
+    if (tiles.size() > limit) tiles.erase(tiles.begin() + static_cast<std::ptrdiff_t>(limit), tiles.end());
+    return tiles;
+}
+
+// Answers no height, and counts how many times it is asked: one question per node the cover reads.
+struct CountingElevation : util::TileElevationProvider {
+    std::optional<Range<double>> getTileElevationRange(const CanonicalTileID&) const override {
+        ++asked;
+        return std::nullopt;
+    }
+    mutable size_t asked = 0;
+};
+
+} // namespace
+
+// A source whose minzoom is as deep as the view's zoom is covered at that zoom out to the horizon:
+// at a steep pitch, a couple of hundred thousand tiles, of which a caller may want a few hundred.
+// With a tile limit the cover is walked nearest first and stops once it has them, so it reads the
+// nodes near the origin and no more, and what it returns is the nearest tiles of the whole cover.
+TEST(TileCover, TileLimitReturnsTheNearestTilesWithoutWalkingTheWholeView) {
+    Transform transform;
+    transform.resize({390, 844});
+    transform.setMaxPitch(85.0);
+    transform.jumpTo(
+        CameraOptions().withCenter(LatLng{38.692, -120.095}).withZoom(12.0).withBearing(30.0).withPitch(80.0));
+
+    constexpr uint8_t z = 14; // the source's minzoom, deeper than the view's zoom
+    constexpr size_t limit = 40;
+    const Range<uint8_t> deep{z, z};
+    const CountingElevation counter;
+    util::TileCoverParameters params{.transformState = transform.getState(), .elevationProvider = &counter};
+
+    const auto whole = util::tileCover(params, z, deep);
+    ASSERT_GT(whole.size(), 1000 * limit)
+        << "a steep view covers well over a hundred thousand tiles at the source's minzoom";
+    const size_t askedForWhole = counter.asked;
+    counter.asked = 0;
+
+    // A point a little off the camera's own, so the order is not the cover's order.
+    const Point<double> projected = Projection::project(LatLng{38.70, -120.10}, 0);
+    const std::array<double, 2> origin{{projected.x, projected.y}};
+    const auto expected = nearestTiles(whole, limit, origin);
+    ASSERT_EQ(expected.size(), limit);
+
+    params.tileLimit = limit;
+    params.tileLimitOrigin = origin;
+    const auto limited = util::tileCover(params, z, deep);
+    EXPECT_EQ(expected, limited);
+
+    // Nodes read: well under the whole view's, and a small multiple of the tiles kept.
+    EXPECT_LT(counter.asked, askedForWhole / 10);
+    EXPECT_LT(counter.asked, 60 * limit);
+}
+
+// The limit counts tiles of every zoom the cover mixes, in both level-of-detail modes, and a view
+// with fewer tiles than the limit comes back whole, in the order the origin gives.
+TEST(TileCover, TileLimitAcrossZoomsAndAboveTheCoverSize) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.setMaxPitch(85.0);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.1, -0.1}).withZoom(8.0).withBearing(5.0).withPitch(80.0));
+    constexpr uint8_t z = 8;
+    const std::array<double, 2> origin{{0.5, 0.5}};
+
+    for (const auto mode : {TileLodMode::Default, TileLodMode::Distance}) {
+        util::TileCoverParameters params{transform.getState()};
+        params.tileLodMode = mode;
+        const auto whole = util::tileCover(params, z, zoomRange);
+        ASSERT_GT(whole.size(), 8u);
+        std::set<uint8_t> zooms;
+        for (const auto& id : whole) zooms.insert(id.canonical.z);
+        ASSERT_GT(zooms.size(), 1u) << "the cover mixes zooms";
+
+        for (const size_t limit : {size_t{1}, size_t{5}, whole.size() - 1, whole.size(), whole.size() + 10}) {
+            util::TileCoverParameters limited = params;
+            limited.tileLimit = limit;
+            limited.tileLimitOrigin = origin;
+            const auto got = util::tileCover(limited, z, zoomRange);
+            EXPECT_EQ(nearestTiles(whole, limit, origin), got) << "limit " << limit;
+        }
+    }
 }
 
 TEST(TileCover, WorldZ1) {
