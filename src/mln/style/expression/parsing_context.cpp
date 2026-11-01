@@ -287,7 +287,7 @@ std::string ParsingContext::getCombinedErrors() const {
     std::string combinedError;
     for (const ParsingError& parsingError : *errors) {
         if (!combinedError.empty()) {
-            combinedError += "\n";
+            combinedError += '\n';
         }
         if (!parsingError.key.empty()) {
             combinedError += parsingError.key + ": ";
