@@ -482,15 +482,29 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
     *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=, this]() mutable {
         requests.erase(workRequestsIt);
         const auto resourceKind = resource.kind;
-        auto offlineResponse = offlineDatabase.getRegionResource(resource);
-        if (offlineResponse && offlineResponse->first.isUsable()) {
+        // Entries that are still usable only need a cheap lookup (no blob read, no `accessed` write).
+        // The full response is loaded when a callback needs it or when the entry must be revalidated.
+        std::optional<std::pair<Response, uint64_t>> offlineResponse;
+        std::optional<uint64_t> usableSize;
+        if (callback) {
+            offlineResponse = offlineDatabase.getRegionResource(resource);
+            if (offlineResponse && offlineResponse->first.isUsable()) usableSize = offlineResponse->second;
+        } else if (auto cached = offlineDatabase.hasRegionResource(resource)) {
+            if (cached->isUsable()) {
+                usableSize = cached->size;
+            } else {
+                offlineResponse = offlineDatabase.getRegionResource(resource);
+            }
+        }
+
+        if (usableSize) {
             if (callback) callback(offlineResponse->first);
             resourcesToBeMarkedAsUsed.emplace_back(resource);
             status.completedResourceCount++;
-            status.completedResourceSize += offlineResponse->second;
+            status.completedResourceSize += *usableSize;
             if (resourceKind == Resource::Kind::Tile) {
                 status.completedTileCount += 1;
-                status.completedTileSize += offlineResponse->second;
+                status.completedTileSize += *usableSize;
             }
 
             observer->statusChanged(status);

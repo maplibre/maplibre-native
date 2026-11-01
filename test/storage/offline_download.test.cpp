@@ -993,6 +993,77 @@ TEST(OfflineDownload, TEST_REQUIRES_SERVER(RevalidationNotModifiedRetainsTileDat
     EXPECT_EQ(1u, download.getStatus().completedTileCount);
 }
 
+#ifndef __QT__ // Needs a database file that a second connection can edit.
+// Resuming a region must not load or touch tiles that are still usable: only entries that are past `expires`
+// with `must_revalidate` set need the full read, which also bumps `accessed`.
+TEST(OfflineDownload, ResumeOnlyReadsTilesThatNeedRevalidation) {
+    deleteDatabaseFiles();
+    OfflineTest test{filename};
+    FakeFileSource fileSource;
+    const Resource style = Resource::style("http://127.0.0.1:3000/style.json");
+    const Resource tile = Resource::tile(
+        "http://127.0.0.1:3000/{z}-{x}-{y}.vector.pbf", 1, 0, 0, 0, Tileset::Scheme::XYZ);
+    const OfflineRegionDefinition definition = OfflineTilePyramidRegionDefinition(
+        style.url, LatLngBounds::world(), 0.0, 0.0, 1.0, false);
+    auto region = test.db.createRegion(definition, {});
+    ASSERT_TRUE(region);
+
+    auto cachedStyle = test.response("inline_source.style.json");
+    cachedStyle.expires = util::now() + std::chrono::hours(24);
+    cachedStyle.mustRevalidate = true;
+    test.db.putRegionResource(region->getID(), style, cachedStyle);
+    auto cachedTile = test.response("0-0-0.vector.pbf");
+    cachedTile.etag = "tile-1";
+    cachedTile.expires = util::now() + std::chrono::hours(24);
+    cachedTile.mustRevalidate = true;
+    test.db.putRegionResource(region->getID(), tile, cachedTile);
+
+    constexpr int64_t oldAccessed = 1000;
+    auto tileAccessed = [&](std::optional<int64_t> set = std::nullopt) {
+        mapbox::sqlite::Database db = mapbox::sqlite::Database::open(filename, mapbox::sqlite::ReadWriteCreate);
+        if (set) {
+            mapbox::sqlite::Statement update{db, "UPDATE tiles SET accessed = ?1"};
+            mapbox::sqlite::Query updateQuery{update};
+            updateQuery.bind(1, *set);
+            updateQuery.run();
+        }
+        mapbox::sqlite::Statement select{db, "SELECT accessed FROM tiles"};
+        mapbox::sqlite::Query selectQuery{select};
+        EXPECT_TRUE(selectQuery.run());
+        return selectQuery.get<int64_t>(0);
+    };
+
+    // A usable tile completes without a network request, a blob read or an `accessed` write.
+    ASSERT_EQ(oldAccessed, tileAccessed(oldAccessed));
+    {
+        OfflineDownload download(region->getID(), definition, test.db, fileSource);
+        download.setState(OfflineRegionDownloadState::Active);
+        test.loop.runOnce();
+        EXPECT_TRUE(fileSource.requests.empty());
+        EXPECT_TRUE(download.getStatus().complete());
+        EXPECT_EQ(1u, download.getStatus().completedTileCount);
+        EXPECT_EQ(oldAccessed, tileAccessed());
+    }
+
+    // An expired must-revalidate tile still gets the full read and is requested with its validators.
+    cachedTile.expires = Timestamp(Seconds(0));
+    test.db.putRegionResource(region->getID(), tile, cachedTile);
+    ASSERT_EQ(oldAccessed, tileAccessed(oldAccessed));
+    {
+        OfflineDownload download(region->getID(), definition, test.db, fileSource);
+        download.setState(OfflineRegionDownloadState::Active);
+        test.loop.runOnce();
+        ASSERT_EQ(1u, fileSource.requests.size());
+        EXPECT_EQ(tile.url, fileSource.requests.front()->resource.url);
+        EXPECT_EQ(cachedTile.etag, fileSource.requests.front()->resource.priorEtag);
+        ASSERT_TRUE(fileSource.requests.front()->resource.priorData);
+        EXPECT_EQ(*cachedTile.data, *fileSource.requests.front()->resource.priorData);
+        EXPECT_FALSE(download.getStatus().complete());
+        EXPECT_LT(oldAccessed, tileAccessed());
+    }
+}
+#endif // __QT__
+
 TEST(OfflineDownload, ReactivatePreviouslyCompletedDownload) {
     OfflineTest test;
     auto region = test.createRegion();
