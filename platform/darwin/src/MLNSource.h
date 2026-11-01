@@ -51,6 +51,23 @@ MLN_EXPORT
  */
 @property (nonatomic, copy) NSString *identifier;
 
+// MARK: Caching
+
+/**
+ Whether the tiles this source loads are kept out of persistent storage.
+
+ When `YES`, tiles of this source are neither written to nor read from the
+ ambient cache on disk, whatever the response’s `Cache-Control` header says;
+ they are held in memory for as long as the map needs them. Use it for content
+ whose terms forbid storing it, or that must not outlive the session. Other
+ resources, such as a TileJSON file the source is configured with, are still
+ cached. The default is `NO`.
+
+ Set it before adding the source to a style, so that no tile is requested
+ under the old setting.
+ */
+@property (nonatomic, getter=isVolatile, setter=setVolatile:) BOOL isVolatile;
+
 @end
 
 NS_ASSUME_NONNULL_END
