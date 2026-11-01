@@ -33,7 +33,7 @@ TerrainElevationIndex::TerrainElevationIndex(std::vector<Tile> tiles_, float exa
         const uint8_t z = tile.id.canonical.z;
         auto level = std::find_if(levels.begin(), levels.end(), [z](const Level& l) { return l.z == z; });
         if (level == levels.end()) {
-            levels.push_back(Level{z, {}});
+            levels.push_back(Level{.z = z, .tiles = {}});
             level = std::prev(levels.end());
         }
         const int64_t across = int64_t{1} << z;

@@ -1,7 +1,6 @@
 #include <mln/renderer/render_terrain.hpp>
 #include <mln/renderer/sources/render_tile_source.hpp>
 #include <mln/renderer/tile_pyramid.hpp>
-#include <mln/util/projection.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/renderer/render_tile.hpp>
@@ -144,7 +143,7 @@ std::vector<LoadedDEMTile> loadedDEMTiles(const RenderSource* demSource) {
         if (!seen.insert(unwrapped).second) {
             continue;
         }
-        out.push_back({unwrapped, &demData});
+        out.push_back({.id = unwrapped, .data = &demData});
     }
     return out;
 }
@@ -979,9 +978,9 @@ bool RenderTerrain::updateElevationIndex() {
             found != elevationGrids.end() && found->second.source == tile.data) {
             copy = found->second;
         } else {
-            copy = {tile.data, std::make_shared<const TerrainElevationIndex::Grid>(*tile.data)};
+            copy = {.source = tile.data, .grid = std::make_shared<const TerrainElevationIndex::Grid>(*tile.data)};
         }
-        tiles.push_back({tile.id, copy.grid});
+        tiles.push_back({.id = tile.id, .grid = copy.grid});
         grids.emplace(tile.id, std::move(copy));
     }
     elevationGrids = std::move(grids);
@@ -1008,7 +1007,7 @@ std::optional<double> RenderTerrain::getElevationForLatLng(const LatLng& latLng)
     for (const auto& candidate : loaded) {
         const UnwrappedTileID& id = candidate.id;
         const auto z = static_cast<int32_t>(id.canonical.z);
-        if (best && z <= static_cast<int32_t>(best->id.canonical.z)) {
+        if (best && std::cmp_less_equal(z, best->id.canonical.z)) {
             continue;
         }
         // The integer-zoom overload projects into tile units (world size 2^z), not pixels.
@@ -1027,9 +1026,11 @@ std::optional<double> RenderTerrain::getElevationForLatLng(const LatLng& latLng)
         return std::nullopt;
     }
     // Sample the tile just found; getElevation would search the DEM tiles for it again
-    return static_cast<double>(
-        sampleDEM(*best->data, {1.0f, 0.0f, 0.0f}, static_cast<float>(bestX), static_cast<float>(bestY)) *
-        getExaggeration());
+    return static_cast<double>(sampleDEM(*best->data,
+                                         {.scale = 1.0f, .dx = 0.0f, .dy = 0.0f},
+                                         static_cast<float>(bestX),
+                                         static_cast<float>(bestY)) *
+                               getExaggeration());
 }
 
 std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const UnwrappedTileID& tileID) const {
