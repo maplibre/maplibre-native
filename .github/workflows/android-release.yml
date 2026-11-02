@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   android-create-release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       version_tag: ${{ steps.prepare_release.outputs.version_tag }}
     defaults:
@@ -151,7 +151,7 @@ jobs:
 
   android-publish-maven-central:
     needs: android-build-and-upload-release
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -169,7 +169,7 @@ jobs:
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
 
   finilize-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs:
       - android-create-release
       - android-publish-maven-central

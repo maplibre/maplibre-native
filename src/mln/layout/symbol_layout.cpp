@@ -234,7 +234,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                             const auto chType = getCharGlyphIDType(
                                 *u16Char, sectionFontStack, layoutParameters.fontFaces, subStringtype);
                             if (chType != subStringtype) {
-                                if (subString.length()) {
+                                if (!subString.empty()) {
                                     ft.formattedText->addTextSection(subString,
                                                                      sectionScale,
                                                                      sectionFontStack,
@@ -259,7 +259,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                             ++u16Char;
                         }
 
-                        if (subString.length()) {
+                        if (!subString.empty()) {
                             ft.formattedText->addTextSection(subString,
                                                              section.fontScale ? *section.fontScale : 1.0,
                                                              section.fontStack ? *section.fontStack : baseFontStack,
@@ -356,8 +356,8 @@ void SymbolLayout::finalizeSymbols(HBShapeResults& results) {
             auto sectionIndex = styleText.second[0];
             auto strLen = styleText.first.length();
 
-            auto applySubString = [&]() {
-                if (subString.length()) {
+            auto applySubString = [&] {
+                if (!subString.empty()) {
                     auto& section = sections[sectionIndex];
                     if (GlyphIDType::FontPBF == section.type) {
                         shapedString.addTextSection(subString,
@@ -572,7 +572,7 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
                         break;
                 }
 
-                anchorOffsets.push_back(AnchorOffsetPair{anchorOffset.anchorType, variableTextOffset});
+                anchorOffsets.emplace_back(anchorOffset.anchorType, variableTextOffset);
             }
 
             result = VariableAnchorOffsetCollection(std::move(anchorOffsets));
@@ -595,7 +595,7 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
             for (auto anchor : variableTextAnchor) {
                 auto offset = variableTextOffset;
                 offset = SymbolLayout::evaluateVariableOffset(anchor, offset);
-                anchorOffsetPairs.push_back(AnchorOffsetPair{anchor, offset});
+                anchorOffsetPairs.emplace_back(anchor, offset);
             }
 
             result = VariableAnchorOffsetCollection(std::move(anchorOffsetPairs));

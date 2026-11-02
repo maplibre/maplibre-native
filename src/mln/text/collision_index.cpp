@@ -54,7 +54,7 @@ float CollisionIndex::approximateTileDistance(const TileDistance& tileDistance,
                                               const float lastSegmentAngle,
                                               const float pixelsToTileUnits,
                                               const float cameraToAnchorDistance,
-                                              const bool pitchWithMap) {
+                                              const bool pitchWithMap) const {
     // This is a quick and dirty solution for choosing which collision circles to
     // use (since collision circles are laid out in tile units). Ideally, I
     // think we should generate collision circles on the fly in viewport
@@ -238,12 +238,12 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
     float firstTileDistance = 0.f;
     float lastTileDistance = 0.f;
     if (firstAndLastGlyph) {
-        firstTileDistance = approximateTileDistance(*(firstAndLastGlyph->first.tileDistance),
+        firstTileDistance = approximateTileDistance(*firstAndLastGlyph->first.tileDistance,
                                                     firstAndLastGlyph->first.angle,
                                                     pixelsToTileUnits,
                                                     projectedAnchor.second,
                                                     pitchWithMap);
-        lastTileDistance = approximateTileDistance(*(firstAndLastGlyph->second.tileDistance),
+        lastTileDistance = approximateTileDistance(*firstAndLastGlyph->second.tileDistance,
                                                    firstAndLastGlyph->second.angle,
                                                    pixelsToTileUnits,
                                                    projectedAnchor.second,
@@ -409,7 +409,7 @@ std::unordered_map<uint32_t, std::vector<IndexedSubfeature>> CollisionIndex::que
 
         // Skip already seen features.
         auto& seenFeatures = seenBuckets[feature.getBucketInstanceId()];
-        if (seenFeatures.find(feature.getIndex()) != seenFeatures.end()) continue;
+        if (seenFeatures.contains(feature.getIndex())) continue;
 
         if (!polygonIntersectsBox(gridQuery, bbox)) {
             continue;

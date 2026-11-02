@@ -75,9 +75,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-24.04
+          - runs-on: ubuntu-26.04
             arch: x86_64
-          - runs-on: ubuntu-24.04-arm
+          - runs-on: ubuntu-26.04-arm
             arch: arm64
           - runs-on: macos-15-intel
             arch: x86_64
@@ -135,6 +135,8 @@ jobs:
             xvfb \
             libcurl4-openssl-dev \
             libglfw3-dev \
+            libgles-dev \
+            libopengl-dev \
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \

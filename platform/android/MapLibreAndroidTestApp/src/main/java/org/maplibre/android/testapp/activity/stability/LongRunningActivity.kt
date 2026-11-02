@@ -8,10 +8,13 @@ import android.content.Intent
 import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.maplibre.android.location.permissions.PermissionsManager
+import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.testapp.R
 import java.util.logging.Logger
 import kotlin.time.Duration.Companion.hours
@@ -48,8 +51,46 @@ class LongRunningActivity : AppCompatActivity() {
         }
     }
 
+    private var permissionsManager: PermissionsManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // NavigationService runs as a location foreground service, which requires location permissions
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+            start()
+        } else {
+            permissionsManager = PermissionsManager(object : PermissionsListener {
+                override fun onExplanationNeeded(permissionsToExplain: List<String>) {
+                    Toast.makeText(
+                        this@LongRunningActivity,
+                        "Location permissions are required to run this test",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                override fun onPermissionResult(granted: Boolean) {
+                    if (granted) {
+                        start()
+                    } else {
+                        finish()
+                    }
+                }
+            })
+            permissionsManager!!.requestLocationPermissions(this)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionsManager?.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    private fun start() {
         setContentView(R.layout.activity_long_running_maps)
 
         if (USE_SECONDARY_DISPLAY && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

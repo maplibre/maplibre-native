@@ -102,7 +102,7 @@ jobs:
     permissions:
       contents: write
       issues: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs:
       - macos-build-dynamic
       - macos-build-static

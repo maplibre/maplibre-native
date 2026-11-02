@@ -15,7 +15,7 @@ RenderTarget::RenderTarget(gfx::Context& context_, const Size size, const gfx::T
     offscreenTexture = context.createOffscreenTexture(size, type);
 }
 
-RenderTarget::~RenderTarget() {}
+RenderTarget::~RenderTarget() = default;
 
 const gfx::Texture2DPtr& RenderTarget::getTexture() {
     return offscreenTexture->getTexture();

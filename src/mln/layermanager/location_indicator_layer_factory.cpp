@@ -12,7 +12,7 @@ const style::LayerTypeInfo* LocationIndicatorLayerFactory::getTypeInfo() const n
 
 std::unique_ptr<style::Layer> LocationIndicatorLayerFactory::createLayer(
     const std::string& id, const style::conversion::Convertible&) noexcept {
-    return std::unique_ptr<style::Layer>(new style::LocationIndicatorLayer(id));
+    return std::make_unique<style::LocationIndicatorLayer>(id);
 }
 
 std::unique_ptr<RenderLayer> LocationIndicatorLayerFactory::createRenderLayer(
