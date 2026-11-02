@@ -11,6 +11,7 @@
 #include <mln/style/terrain.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/image.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/util/run_loop.hpp>
 
 #include <algorithm>
@@ -19,7 +20,10 @@
 #include <cstdio>
 #include <functional>
 #include <limits>
+#include <optional>
+#include <string>
 #include <thread>
+#include <vector>
 
 using namespace mln;
 
@@ -1167,4 +1171,166 @@ TEST(TerrainCamera, AFlightEasesTheCenterHeightToTheGroundItIsHeadedFor) {
     EXPECT_NEAR(camera.center->longitude(), target.longitude(), 1e-3);
     EXPECT_NEAR(*camera.zoom, 14.0, 0.05) << "at the zoom asked for";
     EXPECT_NEAR(*camera.centerAltitude, 0.0, 30.0) << "with the center on the ground there";
+}
+
+namespace {
+
+// A DEM tile of one height everywhere, in Terrain-RGB: -10000 + (R * 65536 + G * 256 + B) * 0.1.
+std::string makeUniformDEMTile(double meters) {
+    const auto encoded = static_cast<uint32_t>(std::lround((meters + 10000.0) * 10.0));
+    PremultipliedImage image({demTileSize, demTileSize});
+    for (uint32_t i = 0; i < demTileSize * demTileSize; ++i) {
+        uint8_t* px = image.data.get() + i * 4;
+        px[0] = static_cast<uint8_t>(encoded >> 16);
+        px[1] = static_cast<uint8_t>((encoded >> 8) & 0xFF);
+        px[2] = static_cast<uint8_t>(encoded & 0xFF);
+        px[3] = 255;
+    }
+    return encodePNG(image);
+}
+
+// ".../{z}-{x}-{y}.png" holds the position, at its zoom, the tile covers.
+bool tileUrlCovers(const std::string& url, const LatLng& position) {
+    int z = 0, x = 0, y = 0;
+    const auto name = url.substr(url.rfind('/') + 1);
+    if (std::sscanf(name.c_str(), "%d-%d-%d.png", &z, &x, &y) != 3) {
+        return false;
+    }
+    const auto at = Projection::project(position, z);
+    return std::floor(at.x) == x && std::floor(at.y) == y;
+}
+
+// The ramp's ground again, with tiles fine enough that the one under a camera a few kilometers
+// from the center is not the center's.
+const char* deepRampStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 14,
+      "tileSize": 64
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": []
+})STYLE";
+
+} // namespace
+
+// Ground that has not loaded is not sea level. Close to the ground in a basin below sea level
+// (the Dead Sea, -430 m), the eye check read the DEM tile under the eye that had not arrived as
+// 0 m, took the ground to be 430 m higher than it is, and lifted the camera to 10 m over it.
+TEST(TerrainCamera, EyeOverUnloadedGroundBelowSeaLevelIsNotLifted) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string basin = makeUniformDEMTile(-430.0);
+    std::optional<LatLng> eyeGround;
+    // The server has no DEM tile for the ground under the eye, of any zoom: nothing covers it.
+    fileSource->tileResponse = [&](const Resource& resource) {
+        Response res;
+        if (eyeGround && tileUrlCovers(resource.url, *eyeGround)) {
+            res.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
+        } else {
+            res.data = std::make_shared<std::string>(basin);
+        }
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(deepRampStyle);
+    // Looking north from close to the water: the eye sits a couple of hundred meters above the
+    // center and a few kilometers south of it.
+    map.jumpTo(CameraOptions().withCenter(LatLng{31.5, 35.5}).withZoom(15.0).withPitch(85.0).withBearing(0.0));
+    const auto start = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(start.has_value());
+    eyeGround = start->location;
+
+    for (int i = 0; i < 24; ++i) {
+        loop.runOnce();
+        frontend.render(map);
+    }
+
+    ASSERT_NEAR(*map.getCameraOptions().centerAltitude, -430.0, 1.0) << "the center is on the basin floor";
+    const auto eye = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(eye.has_value());
+    EXPECT_LT(eye->altitude, 0.0) << "the eye was lifted over ground that is not known";
+}
+
+// The ground under the eye is often outside the view, behind or below it: the tile cover drops its
+// tile once the DEM is known to lie below the frustum, and a camera backed towards a mountain behind
+// it ended up inside it. The tile under the eye is always asked for, and the eye clears the ground
+// it holds.
+TEST(TerrainCamera, TheTileUnderTheEyeKeepsTheEyeOutOfTheMountainBehind) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(deepRampStyle);
+    // Looking north from the foot of the climb, which rises to the south, behind the camera: the
+    // center is on ground 1,000 m high and the eye a few kilometers up the slope behind it.
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.29, 11.4041}).withZoom(14.0).withPitch(85.0).withBearing(0.0));
+    const auto start = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(start.has_value());
+    ASSERT_GT(rampMeters(start->location.latitude()), 3000.0) << "the eye starts well inside the mountain";
+
+    for (int i = 0; i < 24; ++i) {
+        loop.runOnce();
+        frontend.render(map);
+    }
+
+    const auto eye = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(eye.has_value());
+    const double ground = rampMeters(eye->location.latitude());
+    EXPECT_GE(eye->altitude, ground + 5.0) << "eye altitude " << eye->altitude << " over ground " << ground;
+}
+
+// A center on ground at exactly 0 m is ground like any other: the renderer's last reported height
+// started at 0, so the height under the center was never reported, the clamp never ran, and the
+// eye check with it.
+TEST(TerrainCamera, TheEyeIsLiftedWhenTheGroundUnderTheCenterIsAtSeaLevel) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(rampStyle);
+    // The center on the flat ground north of the ridge line, the climb behind the camera.
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.34, 11.4041}).withZoom(12.0).withPitch(80.0).withBearing(0.0));
+
+    for (int i = 0; i < 24; ++i) {
+        loop.runOnce();
+        frontend.render(map);
+    }
+
+    const auto location = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(location.has_value());
+    const double ground = rampMeters(location->location.latitude());
+    ASSERT_GT(ground, 100.0) << "the eye is over the climb";
+    EXPECT_GE(location->altitude, ground + 5.0) << "eye altitude " << location->altitude << " over ground " << ground;
 }
