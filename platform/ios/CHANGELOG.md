@@ -8,6 +8,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
 - feat(ios): `-[MLNMapView isCoordinateOccluded:]` tells whether the globe hides a coordinate, for views placed over the map ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
 - Call offline-pack invalidation completion after the database operation finishes and propagate its errors.
+- Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
+- Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 
 ## 7.0.0
 

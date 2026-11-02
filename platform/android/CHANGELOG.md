@@ -3,6 +3,7 @@
 ## main
 
 - Add runtime `Sky` style API support, including zoom expressions, transitions, and removal.
+- Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 
 ### ✨ Features and improvements
 
