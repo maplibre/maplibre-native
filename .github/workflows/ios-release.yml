@@ -120,8 +120,8 @@ jobs:
             version="$(head VERSION)"
             version="${version%%-pre*}"-pre${{ github.sha }}
           fi
-          if [[ "$version" != *"pre"* ]]; then
-            echo "::error::Pre-release version must include 'pre' (Current version: $version)"
+          if [[ "$version" != *-* ]]; then
+            echo "::error::Pre-release version must have a pre-release part after a hyphen (Current version: $version)"
             exit 1
           fi
           echo version="$version" >> "$GITHUB_ENV"
