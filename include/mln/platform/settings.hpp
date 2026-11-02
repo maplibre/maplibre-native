@@ -7,7 +7,8 @@
 namespace mln {
 namespace platform {
 
-#define DECLARE_MAPLIBRE_SETTING(name, value) constexpr const char* name = "maplibre_" #value
+#define DECLARE_MAPLIBRE_SETTING(name, value) \
+    constexpr const char* name = "maplibre_" #value // NOLINT(bugprone-macro-parentheses)
 
 // The value for EXPERIMENTAL_THREAD_PRIORITY_* keys, must be a double.
 DECLARE_MAPLIBRE_SETTING(EXPERIMENTAL_THREAD_PRIORITY_WORKER, thread_priority_worker);

@@ -31,7 +31,7 @@ HBShaper::Impl::Impl(GlyphIDType type_, const std::string &fontFileData, const F
       face(fontFileData.data(), fontFileData.size(), lib) {
     if (!face.isValid()) return;
 
-    font = hb_ft_font_create(face.getFace(), NULL);
+    font = hb_ft_font_create(face.getFace(), nullptr);
     buffer = hb_buffer_create();
 
     hb_buffer_allocation_successful(buffer);
@@ -65,11 +65,11 @@ void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
         auto script = getUnicodeScript(text[i]);
 
         if (lastTextPart->script == script || script == HB_SCRIPT_INHERITED) {
-            lastTextPart->text += (ch);
+            lastTextPart->text += ch;
         } else {
             textParts.emplace_back();
             lastTextPart = &textParts.back();
-            lastTextPart->text = (ch);
+            lastTextPart->text = ch;
             lastTextPart->script = script;
         }
     }
@@ -86,7 +86,7 @@ void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
         hb_buffer_add_utf16(buffer, (const uint16_t *)textPart.text.c_str(), (int)length, 0, (int)length);
 
         // harfbuzz shaping
-        hb_shape(font, buffer, NULL, 0);
+        hb_shape(font, buffer, nullptr, 0);
 
         // Get Harfbuzz adjustion
         uint32_t glyphCount;
@@ -99,9 +99,9 @@ void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
         for (uint32_t i = 0; i < glyphCount; ++i) {
             glyphIDs.emplace_back(glyphInfo[i].codepoint, type);
 
-            float x_advance = static_cast<float>(glyphPos[i].x_advance / 64.0f);
-            float x_offset = static_cast<float>(glyphPos[i].x_offset / 64.0f);
-            float y_offset = static_cast<float>(-glyphPos[i].y_offset / 64.0f);
+            float x_advance = (glyphPos[i].x_advance / 64.0f);
+            float x_offset = (glyphPos[i].x_offset / 64.0f);
+            float y_offset = (-glyphPos[i].y_offset / 64.0f);
 
             adjusts.emplace_back(x_offset, y_offset, x_advance);
         }

@@ -37,7 +37,7 @@ public:
         if (!lhs.expression || !rhs.expression) {
             return lhs.expression == rhs.expression;
         } else {
-            return *(lhs.expression) == *(rhs.expression);
+            return *lhs.expression == *rhs.expression;
         }
     }
 

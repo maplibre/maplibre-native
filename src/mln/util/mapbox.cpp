@@ -63,7 +63,7 @@ std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate
          i != std::sregex_iterator();
          ++i) {
         const std::smatch& m = *i;
-        if (m.size() > 0) {
+        if (!m.empty()) {
             auto captureGroupValue = m[1].str();
             if (!captureGroupValue.empty()) {
                 std::pair<std::string, std::string> tokenInfo;
@@ -84,7 +84,7 @@ std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate
     for (std::sregex_iterator i = std::sregex_iterator(path.begin(), path.end(), r2); i != std::sregex_iterator();
          ++i) {
         const std::smatch& m = *i;
-        if (m.size() > 0) {
+        if (!m.empty()) {
             auto captureGroupValue = m[1].str();
             if (!captureGroupValue.empty()) {
                 tokenList[idx].second = captureGroupValue;
@@ -109,11 +109,7 @@ bool isNormalizedSourceURL(const std::string& baseURL, const std::string& urlTem
                              "(.*)";
     std::string pattern(baseURL + urlPattern);
 
-    if (std::regex_match(url, std::regex(pattern))) {
-        return true;
-    }
-
-    return false;
+    return std::regex_match(url, std::regex(pattern));
 }
 
 bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::string& str) {
@@ -171,7 +167,7 @@ std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
         throw std::runtime_error("You must provide API key for tile sources");
     }
 
-    std::string suffix = "";
+    std::string suffix;
     if (tileServerOptions.uriSchemeAlias() == "mapbox") {
         suffix = "&secure";
     }

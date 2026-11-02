@@ -83,7 +83,7 @@ int Collator::compare(const std::string& lhs, const std::string& rhs) const {
 }
 
 bool Collator::operator==(const Collator& other) const {
-    return *impl == *(other.impl);
+    return *impl == *other.impl;
 }
 
 std::string Collator::resolvedLocale() const {

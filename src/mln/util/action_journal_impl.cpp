@@ -229,29 +229,29 @@ std::string ActionJournal::Impl::getDirectoryName() {
 }
 
 void ActionJournal::Impl::onCameraWillChange(CameraChangeMode mode) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         log(ActionJournalEvent("onCameraWillChange", env).addEvent("cameraMode", static_cast<int>(mode)));
     });
 }
 
 void ActionJournal::Impl::onCameraDidChange(CameraChangeMode mode) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         log(ActionJournalEvent("onCameraDidChange", env).addEvent("cameraMode", static_cast<int>(mode)));
     });
 }
 
 void ActionJournal::Impl::onWillStartLoadingMap() {
     scheduler->schedule(
-        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onWillStartLoadingMap", env)); });
+        [=, this, env = MapEnvironmentSnapshot(*this)] { log(ActionJournalEvent("onWillStartLoadingMap", env)); });
 }
 
 void ActionJournal::Impl::onDidFinishLoadingMap() {
     scheduler->schedule(
-        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onDidFinishLoadingMap", env)); });
+        [=, this, env = MapEnvironmentSnapshot(*this)] { log(ActionJournalEvent("onDidFinishLoadingMap", env)); });
 }
 
 void ActionJournal::Impl::onDidFailLoadingMap(MapLoadError error, const std::string& errorStr) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         log(ActionJournalEvent("onDidFailLoadingMap", env)
                 .addEvent("error", errorStr)
                 .addEvent("code", static_cast<int>(error)));
@@ -289,7 +289,7 @@ void ActionJournal::Impl::onDidFinishRenderingFrame(const RenderFrameStatus& fra
         return;
     }
 
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), stats = std::move(renderingStats)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), stats = std::move(renderingStats)] {
         log(ActionJournalEvent("renderingStats", env)
                 .addEvent("encodingMin", stats.encodingMin)
                 .addEvent("encodingMax", stats.encodingMax)
@@ -304,43 +304,43 @@ void ActionJournal::Impl::onDidFinishRenderingFrame(const RenderFrameStatus& fra
 
 void ActionJournal::Impl::onWillStartRenderingMap() {
     scheduler->schedule(
-        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onWillStartRenderingMap", env)); });
+        [=, this, env = MapEnvironmentSnapshot(*this)] { log(ActionJournalEvent("onWillStartRenderingMap", env)); });
 }
 
 void ActionJournal::Impl::onDidFinishRenderingMap(RenderMode) {
     scheduler->schedule(
-        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onDidFinishRenderingMap", env)); });
+        [=, this, env = MapEnvironmentSnapshot(*this)] { log(ActionJournalEvent("onDidFinishRenderingMap", env)); });
 }
 
 void ActionJournal::Impl::onDidFinishLoadingStyle() {
     scheduler->schedule(
-        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onDidFinishLoadingStyle", env)); });
+        [=, this, env = MapEnvironmentSnapshot(*this)] { log(ActionJournalEvent("onDidFinishLoadingStyle", env)); });
 }
 
 void ActionJournal::Impl::onSourceChanged(style::Source& source) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), type = source.getType(), id = source.getID()]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), type = source.getType(), id = source.getID()] {
         log(ActionJournalEvent("onSourceChanged", env).addEventEnum("type", type).addEvent("id", id));
     });
 }
 
 void ActionJournal::Impl::onDidBecomeIdle() {
     scheduler->schedule(
-        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onDidBecomeIdle", env)); });
+        [=, this, env = MapEnvironmentSnapshot(*this)] { log(ActionJournalEvent("onDidBecomeIdle", env)); });
 }
 
 void ActionJournal::Impl::onStyleImageMissing(const std::string& id) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         log(ActionJournalEvent("onStyleImageMissing", env).addEvent("id", id));
     });
 }
 
 void ActionJournal::Impl::onRegisterShaders(gfx::ShaderRegistry&) {
     scheduler->schedule(
-        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onRegisterShaders", env)); });
+        [=, this, env = MapEnvironmentSnapshot(*this)] { log(ActionJournalEvent("onRegisterShaders", env)); });
 }
 
 void ActionJournal::Impl::onPreCompileShader(shaders::BuiltIn id, gfx::Backend::Type backend, const std::string&) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         log(ActionJournalEvent("onPreCompileShader", env)
                 .addEventEnum("shader", id)
                 .addEvent("backend", static_cast<int>(backend)));
@@ -348,7 +348,7 @@ void ActionJournal::Impl::onPreCompileShader(shaders::BuiltIn id, gfx::Backend::
 }
 
 void ActionJournal::Impl::onPostCompileShader(shaders::BuiltIn id, gfx::Backend::Type backend, const std::string&) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         log(ActionJournalEvent("onPostCompileShader", env)
                 .addEventEnum("shader", id)
                 .addEvent("backend", static_cast<int>(backend)));
@@ -358,7 +358,7 @@ void ActionJournal::Impl::onPostCompileShader(shaders::BuiltIn id, gfx::Backend:
 void ActionJournal::Impl::onShaderCompileFailed(shaders::BuiltIn id,
                                                 gfx::Backend::Type backend,
                                                 const std::string& defines) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         log(ActionJournalEvent("onShaderCompileFailed", env)
                 .addEventEnum("shader", id)
                 .addEvent("backend", static_cast<int>(backend))
@@ -367,7 +367,7 @@ void ActionJournal::Impl::onShaderCompileFailed(shaders::BuiltIn id,
 }
 
 void ActionJournal::Impl::onGlyphsLoaded(const FontStack& fonts, const GlyphRange& range) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         log(ActionJournalEvent("onGlyphsLoaded", env)
                 .addEventStringArray("fonts", fonts)
                 .addEvent("rangeStart", range.first)
@@ -376,7 +376,7 @@ void ActionJournal::Impl::onGlyphsLoaded(const FontStack& fonts, const GlyphRang
 }
 
 void ActionJournal::Impl::onGlyphsError(const FontStack& fonts, const GlyphRange& range, std::exception_ptr error) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         ActionJournalEvent event("onGlyphsError", env);
 
         event.addEventStringArray("fonts", fonts);
@@ -396,7 +396,7 @@ void ActionJournal::Impl::onGlyphsError(const FontStack& fonts, const GlyphRange
 }
 
 void ActionJournal::Impl::onGlyphsRequested(const FontStack& fonts, const GlyphRange& range) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         log(ActionJournalEvent("onGlyphsRequested", env)
                 .addEventStringArray("fonts", fonts)
                 .addEvent("rangeStart", range.first)
@@ -405,7 +405,7 @@ void ActionJournal::Impl::onGlyphsRequested(const FontStack& fonts, const GlyphR
 }
 
 void ActionJournal::Impl::onTileAction(TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         log(ActionJournalEvent("onTileAction", env)
                 .addEventEnum("action", op)
                 .addEvent("tileX", id.canonical.x)
@@ -417,7 +417,7 @@ void ActionJournal::Impl::onTileAction(TileOperation op, const OverscaledTileID&
 }
 
 void ActionJournal::Impl::onSpriteLoaded(const std::optional<style::Sprite>& sprite) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         ActionJournalEvent event("onSpriteLoaded", *this);
 
         if (sprite) {
@@ -430,7 +430,7 @@ void ActionJournal::Impl::onSpriteLoaded(const std::optional<style::Sprite>& spr
 }
 
 void ActionJournal::Impl::onSpriteError(const std::optional<style::Sprite>& sprite, std::exception_ptr error) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         ActionJournalEvent event("onSpriteError", env);
 
         if (sprite) {
@@ -451,7 +451,7 @@ void ActionJournal::Impl::onSpriteError(const std::optional<style::Sprite>& spri
 }
 
 void ActionJournal::Impl::onSpriteRequested(const std::optional<style::Sprite>& sprite) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         ActionJournalEvent event("onSpriteRequested", env);
 
         if (sprite) {
@@ -464,7 +464,7 @@ void ActionJournal::Impl::onSpriteRequested(const std::optional<style::Sprite>& 
 }
 
 void ActionJournal::Impl::onRenderError(std::exception_ptr e) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         ActionJournalEvent event("onRenderError", env);
 
         event.addEvent("exception", toString(e));
@@ -474,7 +474,7 @@ void ActionJournal::Impl::onRenderError(std::exception_ptr e) {
 }
 
 void ActionJournal::Impl::onSymbolError(const std::string& message) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)] {
         ActionJournalEvent event("onSymbolError", env);
 
         event.addEvent("message", message);
@@ -485,12 +485,12 @@ void ActionJournal::Impl::onSymbolError(const std::string& message) {
 
 void ActionJournal::Impl::onMapCreate() {
     scheduler->schedule(
-        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onMapCreate", env)); });
+        [=, this, env = MapEnvironmentSnapshot(*this)] { log(ActionJournalEvent("onMapCreate", env)); });
 }
 
 void ActionJournal::Impl::onMapDestroy() {
     scheduler->schedule(
-        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onMapDestroy", env)); });
+        [=, this, env = MapEnvironmentSnapshot(*this)] { log(ActionJournalEvent("onMapDestroy", env)); });
 }
 
 void ActionJournal::Impl::log(ActionJournalEvent& value) {

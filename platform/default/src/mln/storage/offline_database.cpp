@@ -110,7 +110,7 @@ bool OfflineDatabase::disabled() {
     }
 
     auto regions = listRegions();
-    return !(regions && !regions.value().empty());
+    return !regions || regions.value().empty();
 }
 
 void OfflineDatabase::handleError(const mapbox::sqlite::Exception& ex, const char* action) {
@@ -241,7 +241,7 @@ void OfflineDatabase::vacuum() {
     }
 }
 
-void OfflineDatabase::checkFlags() {
+void OfflineDatabase::checkFlags() const {
     if (readOnly) {
         throw std::runtime_error("Cannot modify database in read-only mode");
     }
@@ -1419,7 +1419,7 @@ void OfflineDatabase::setOfflineMapboxTileCountLimit(uint64_t limit) {
     offlineMapboxTileCountLimit = limit;
 }
 
-uint64_t OfflineDatabase::getOfflineMapboxTileCountLimit() {
+uint64_t OfflineDatabase::getOfflineMapboxTileCountLimit() const {
     return offlineMapboxTileCountLimit;
 }
 
