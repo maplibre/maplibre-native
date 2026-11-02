@@ -43,8 +43,8 @@ union GlyphID {
         complex.code = index;
     }
 
-    operator char16_t() { return complex.code; }
-    operator char32_t() { return hash; }
+    operator char16_t() const { return complex.code; }
+    operator char32_t() const { return hash; }
     bool operator<(const GlyphID &other) const { return hash < other.hash; }
     bool operator>(const GlyphID &other) const { return hash > other.hash; }
 

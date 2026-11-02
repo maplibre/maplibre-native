@@ -227,10 +227,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (!(drawable.getRenderPass() & drawPass) || (tileID && !hasRenderTile(*tileID))) {
-            return true;
-        }
-        return false;
+        return !(drawable.getRenderPass() & drawPass) || (tileID && !hasRenderTile(*tileID));
     });
 
     const auto layerPrefix = getID() + "/";
@@ -314,11 +311,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-            return true;
+            // A drawable produced on a previous style/bucket should not be updated.
+            return drawable.getLayerTweaker() == layerTweaker;
         };
         if (updateTile(drawPass, tileID, std::move(updateExisting))) {
             continue;

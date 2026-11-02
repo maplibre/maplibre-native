@@ -35,7 +35,7 @@ RasterTile::~RasterTile() {
 
     // The bucket has resources that need to be released on the render thread.
     if (bucket) {
-        threadPool.runOnRenderThread([bucket_{std::move(bucket)}]() {});
+        threadPool.runOnRenderThread([bucket_{std::move(bucket)}] {});
     }
 }
 

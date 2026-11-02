@@ -82,9 +82,9 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 
     passes = RenderPass::Translucent;
 
-    if (!(!unevaluated.get<style::FillPattern>().isUndefined() ||
-          evaluated.get<style::FillColor>().constantOr(Color()).a < 1.0f ||
-          evaluated.get<style::FillOpacity>().constantOr(0) < 1.0f)) {
+    if (unevaluated.get<style::FillPattern>().isUndefined() &&
+        evaluated.get<style::FillColor>().constantOr(Color()).a >= 1.0f &&
+        evaluated.get<style::FillOpacity>().constantOr(0) >= 1.0f) {
         // Supply both - evaluated based on opaquePassCutoff in render().
         passes |= RenderPass::Opaque;
     }
@@ -302,7 +302,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
 
         gfx::DrawableTweakerPtr atlasTweaker;
-        auto getAtlasTweaker = [&]() {
+        auto getAtlasTweaker = [&] {
             if (!atlasTweaker) {
                 if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
                     atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(

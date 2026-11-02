@@ -62,7 +62,7 @@ public:
     void reset(uint64_t correlationID_);
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
 
-    void onGlyphsAvailable(GlyphMap glyphs, HBShapeResults requests);
+    void onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults results);
 
     void onImagesAvailable(ImageMap newIconMap,
                            ImageMap newPatternMap,
