@@ -185,7 +185,8 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& fillVertices,
 std::size_t totalVerticesCheck(const GeometryCollection& polygon, bool fillRoundedCornerEnabled) {
     std::size_t totalVertices = 0;
     for (const auto& ring : polygon) {
-        if (fillRoundedCornerEnabled && ring.size() > std::numeric_limits<int16_t>::max()) throw GeometryTooLongException();
+        if (fillRoundedCornerEnabled && ring.size() > std::numeric_limits<int16_t>::max())
+            throw GeometryTooLongException();
         totalVertices += ring.size();
     }
     if (totalVertices > std::numeric_limits<uint16_t>::max()) throw GeometryTooLongException();
