@@ -64,7 +64,7 @@ jobs:
             qt_target: desktop
             compiler: "gcc-14"
           - name: macOS
-            os: macos-14
+            os: macos-15
             build_type: RelWithDebInfo
             qt_version: 6.9.1
             qt_target: desktop
@@ -74,7 +74,7 @@ jobs:
           # disabled due to https://github.com/llvm/llvm-project/issues/77653
           # https://github.com/maplibre/maplibre-native/pull/3879#issuecomment-3406495279
           # - name: macOS_LLVM
-          #   os: macos-14
+          #   os: macos-15
           #   build_type: RelWithDebInfo
           #   qt_version: 6.9.1
           #   qt_target: desktop
@@ -164,7 +164,7 @@ jobs:
         if: runner.os == 'macOS'
         uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
         with:
-          xcode-version: latest-stable
+          xcode-version: '16.4'  # Qt 6.9.1 links the AGL framework, which Xcode 26's macOS SDK dropped
 
       - name: Setup MSVC
         if: matrix.qt_arch == 'win64_msvc2022_64'
