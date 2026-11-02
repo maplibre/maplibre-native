@@ -28,6 +28,8 @@ FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
 
 FillBucket::~FillBucket() {
     sharedVertices->release();
+    sharedNeighbors->release();
+    sharedTriangleInstances->release();
 }
 
 void FillBucket::recordSDFPattern(const std::string& layerID, const bool sdf) {

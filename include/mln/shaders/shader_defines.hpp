@@ -166,7 +166,7 @@ static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(
                                                           static_cast<uint32_t>(symbolLayerUBOCount)});
 
 enum {
-    idFillPosVertexDrawableUBO = getEnumValue(symbolLayerUBOCount, drawableSSBOStartId),
+    idFillPosVertexDrawableUBO = getEnumValue(fillLayerUBOCount, drawableSSBOStartId),
     idFillNeighborVertexDrawableUBO,
     idFillDataVertexDrawableUBO,
     fillDrawableSSBOCount

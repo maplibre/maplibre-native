@@ -53,11 +53,11 @@ void addFillIndices(SegmentVector& fillSegments,
     triangleSegment.instanceCount += nInstances;
 
     for (std::size_t i = 0; i < nInstances; i++) {
-        std::vector<uint32_t> triangleIndices;
-        std::vector<bool> enableRounding;
+        std::array<uint32_t, 3> triangleIndices;
+        std::array<bool, 3> enableRounding;
         for (int k = 0; k < 3; k++) {
-            triangleIndices.emplace_back(static_cast<uint32_t>(startVertices) + indices[i * 3 + k]);
-            enableRounding.emplace_back(convexAngleVertices[indices[i * 3 + k]]);
+            triangleIndices[k] = static_cast<uint32_t>(startVertices) + indices[i * 3 + k];
+            enableRounding[k] = convexAngleVertices[indices[i * 3 + k]];
         }
         fillTriangles.emplace_back(FillBucket::triangleInstance(triangleIndices, enableRounding, false));
     }
@@ -78,11 +78,11 @@ void addFillExternalIndices(SegmentVector& fillSegments,
     triangleSegment.instanceCount += nInstances;
 
     for (std::size_t i = 0; i < nInstances; i++) {
-        std::vector<uint32_t> triangleIndices;
-        std::vector<bool> enableRounding;
+        std::array<uint32_t, 3> triangleIndices;
+        std::array<bool, 3> enableRounding;
         for (int k = 0; k < 3; k++) {
-            triangleIndices.emplace_back(static_cast<uint32_t>(startVertices) + indices[i * 3 + k]);
-            enableRounding.emplace_back(k == 1);
+            triangleIndices[k] = static_cast<uint32_t>(startVertices) + indices[i * 3 + k];
+            enableRounding[k] = (k == 1);
         }
         fillTriangles.emplace_back(FillBucket::triangleInstance(triangleIndices, enableRounding, true));
     }
@@ -94,11 +94,11 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& fillVertices,
                             SegmentVector& fillSegments,
                             const GeometryCoordinates& ring,
                             std::vector<bool>& convexAngleVertices) {
-    std::size_t startVertices = fillVertices.elements();
-    uint32_t countVertices = static_cast<uint32_t>(ring.size() - 1);
-    if (countVertices < 3) {
+    if (ring.size() <= 3) {
         return 0;
     }
+    std::size_t startVertices = fillVertices.elements();
+    uint32_t countVertices = static_cast<uint32_t>(ring.size() - 1);
     for (uint32_t i = 0; i < countVertices; i++) {
         uint32_t prevIndex = (i + countVertices - 1) % countVertices;
         uint32_t nextIndex = (i + 1) % countVertices;
@@ -182,9 +182,10 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& fillVertices,
     }
 }
 
-std::size_t totalVerticesCheck(const GeometryCollection& polygon) {
+std::size_t totalVerticesCheck(const GeometryCollection& polygon, bool fillRoundedCornerEnabled) {
     std::size_t totalVertices = 0;
     for (const auto& ring : polygon) {
+        if (fillRoundedCornerEnabled && ring.size() > std::numeric_limits<int16_t>::max()) throw GeometryTooLongException();
         totalVertices += ring.size();
     }
     if (totalVertices > std::numeric_limits<uint16_t>::max()) throw GeometryTooLongException();
@@ -242,7 +243,7 @@ void generateFillBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        std::size_t totalVertices = totalVerticesCheck(polygon);
+        std::size_t totalVertices = totalVerticesCheck(polygon, fillRoundedCornerEnabled);
         std::size_t startVertices = fillVertices.elements();
         std::vector<bool> convexAngleVertices;
 
@@ -281,7 +282,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        std::size_t totalVertices = totalVerticesCheck(polygon);
+        std::size_t totalVertices = totalVerticesCheck(polygon, fillRoundedCornerEnabled);
         std::size_t startVertices = fillVertices.elements();
         std::vector<bool> convexAngleVertices;
 
@@ -336,7 +337,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        std::size_t totalVertices = totalVerticesCheck(polygon);
+        std::size_t totalVertices = totalVerticesCheck(polygon, fillRoundedCornerEnabled);
         std::size_t startVertices = fillVertices.elements();
         std::vector<bool> convexAngleVertices;
 
@@ -419,7 +420,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
-        const std::size_t totalVertices = totalVerticesCheck(polygon);
+        const std::size_t totalVertices = totalVerticesCheck(polygon, fillRoundedCornerEnabled);
         const std::size_t startVertices = fillVertices.elements();
         std::vector<bool> convexAngleVertices;
 

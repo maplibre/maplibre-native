@@ -62,8 +62,8 @@ public:
     static FillNeighborVertex neighborVertex(int16_t prev_offset, int16_t next_offset) {
         return FillNeighborVertex{{prev_offset, next_offset}};
     }
-    static FillTriangleInstance triangleInstance(std::vector<uint32_t>& indices,
-                                                 std::vector<bool>& enableRounding,
+    static FillTriangleInstance triangleInstance(std::array<uint32_t, 3>& indices,
+                                                 std::array<bool, 3>& enableRounding,
                                                  bool invertRounding) {
         assert(indices.size() == 3 && enableRounding.size() == 3);
         return FillTriangleInstance{{indices[0] * 4 + (enableRounding[0] ? 1 : 0) * 2 + (invertRounding ? 1 : 0),
