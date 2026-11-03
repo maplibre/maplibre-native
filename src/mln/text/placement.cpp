@@ -773,6 +773,52 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
 }
 } // namespace
 
+namespace {
+// The placed horizontal texts of a symbol (its vertical text is placed by its own rule).
+template <typename F>
+void forEachPlacedLineText(const SymbolInstance& symbol, std::size_t placedSymbolCount, F&& f) {
+    for (const auto& index :
+         {symbol.getPlacedRightTextIndex(), symbol.getPlacedCenterTextIndex(), symbol.getPlacedLeftTextIndex()}) {
+        if (index && *index < placedSymbolCount) {
+            f(*index);
+        }
+    }
+}
+} // namespace
+
+void Placement::restoreLineLabelDirections(SymbolBucket& bucket) const {
+    const Placement* prev = getPrevPlacement();
+    for (const SymbolInstance& symbol : bucket.symbolInstances) {
+        const uint32_t crossTileID = symbol.getCrossTileID();
+        if (crossTileID == SymbolInstance::invalidCrossTileID) continue;
+        std::optional<bool> flipped;
+        if (auto found = lineLabelsFlipped.find(crossTileID); found != lineLabelsFlipped.end()) {
+            flipped = found->second;
+        } else if (prev) {
+            if (auto older = prev->lineLabelsFlipped.find(crossTileID); older != prev->lineLabelsFlipped.end()) {
+                flipped = older->second;
+            }
+        }
+        // Overwritten even when the placed symbol remembers a direction: a tile drawn again after
+        // a while (back from the cache at another zoom) would bring back an old one.
+        forEachPlacedLineText(symbol, bucket.text.placedSymbols.size(), [&](std::size_t index) {
+            bucket.text.placedSymbols[index].keepUprightFlipped = flipped;
+        });
+    }
+}
+
+void Placement::rememberLineLabelDirections(const SymbolBucket& bucket) const {
+    for (const SymbolInstance& symbol : bucket.symbolInstances) {
+        const uint32_t crossTileID = symbol.getCrossTileID();
+        if (crossTileID == SymbolInstance::invalidCrossTileID) continue;
+        forEachPlacedLineText(symbol, bucket.text.placedSymbols.size(), [&](std::size_t index) {
+            if (const auto& flipped = bucket.text.placedSymbols[index].keepUprightFlipped) {
+                lineLabelsFlipped[crossTileID] = *flipped;
+            }
+        });
+    }
+}
+
 bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                                  const TransformState& state,
                                                  const RenderTile& tile) const {
@@ -818,6 +864,11 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         if (bucket.hasTextData() && layout.get<TextRotationAlignment>() == AlignmentType::Map) {
             const bool pitchWithMap = layout.get<style::TextPitchAlignment>() == style::AlignmentType::Map;
             const bool keepUpright = layout.get<style::TextKeepUpright>();
+            if (keepUpright) {
+                // Every copy of a label (tiles of two zoom levels, a tile back from the cache)
+                // reads the way the label was last drawn.
+                restoreLineLabelDirections(bucket);
+            }
             reprojectLineLabels(bucket.text.dynamicAttributeData(),
                                 bucket.text.placedSymbols,
                                 tile.matrix,
@@ -827,6 +878,9 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                 tile,
                                 *bucket.textSizeBinder,
                                 state);
+            if (keepUpright) {
+                rememberLineLabelDirections(bucket);
+            }
             result = true;
         }
     } else if (hasVariableAnchors) {

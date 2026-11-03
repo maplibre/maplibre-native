@@ -178,6 +178,8 @@ protected:
                                const SymbolInstance&,
                                style::TextWritingModeType orientation) const;
     void markUsedOrientation(SymbolBucket&, style::TextWritingModeType, const SymbolInstance&) const;
+    void restoreLineLabelDirections(SymbolBucket&) const;
+    void rememberLineLabelDirections(const SymbolBucket&) const;
     const Placement* getPrevPlacement() const { return prevPlacement ? prevPlacement->get() : nullptr; }
     bool isTiltedView() const;
 
@@ -195,6 +197,10 @@ protected:
     std::unordered_map<uint32_t, JointOpacityState> opacities;
     std::unordered_map<uint32_t, VariableOffset> variableOffsets;
     std::unordered_map<uint32_t, style::TextWritingModeType> placedOrientations;
+    // Whether a line label kept upright was last drawn flipped, by cross tile id: every copy of the
+    // label (tiles of two zoom levels, a tile back from the cache) reads one way. Written on each
+    // drawing, like the label's vertices.
+    mutable std::unordered_map<uint32_t, bool> lineLabelsFlipped;
 
     std::unordered_map<uint32_t, RetainedQueryData> retainedQueryData;
     CollisionGroups collisionGroups;
