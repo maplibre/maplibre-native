@@ -99,6 +99,7 @@ We welcome ideas for extending the plugin API.
 
 ## 6.29.0
 
+- iOS: Clear transient edge padding when setting an unchanged camera.
 - fix(core): accept alpha in hsl colors ([#4435](https://github.com/maplibre/maplibre-native/pull/4435)).
 - fix(core): repaint feature-state-driven symbol paint properties ([#4445](https://github.com/maplibre/maplibre-native/pull/4445)).
 - Make string expressions operate on unicode ([#4344](https://github.com/maplibre/maplibre-native/pull/4344)).
