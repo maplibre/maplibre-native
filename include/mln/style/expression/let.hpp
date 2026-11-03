@@ -30,7 +30,7 @@ public:
     bool operator==(const Expression& e) const noexcept override {
         if (e.getKind() == Kind::Let) {
             const auto* rhs = static_cast<const Let*>(&e);
-            return *result == *(rhs->result);
+            return *result == *rhs->result;
         }
         return false;
     }
@@ -62,7 +62,7 @@ public:
     bool operator==(const Expression& e) const noexcept override {
         if (e.getKind() == Kind::Var) {
             auto rhs = static_cast<const Var*>(&e);
-            return *value == *(rhs->value);
+            return *value == *rhs->value;
         }
         return false;
     }

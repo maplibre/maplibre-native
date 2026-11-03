@@ -40,7 +40,7 @@ class BufferResource {
 public:
     BufferResource() noexcept = delete;
 
-    BufferResource(Context& context_, const void* raw, std::size_t size, std::uint32_t usage, bool persistent);
+    BufferResource(Context& context_, const void* data, std::size_t size_, std::uint32_t usage_, bool persistent_);
     BufferResource(BufferResource&&) noexcept;
     virtual ~BufferResource() noexcept;
 

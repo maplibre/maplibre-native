@@ -89,7 +89,7 @@ bool CollatorExpression::operator==(const Expression& e) const noexcept {
         if ((!lLocSet && rLocSet) || (lLocSet && (!rLocSet || **locale != **rhs->locale))) {
             return false;
         }
-        return *caseSensitive == *(rhs->caseSensitive) && *diacriticSensitive == *(rhs->diacriticSensitive);
+        return *caseSensitive == *rhs->caseSensitive && *diacriticSensitive == *rhs->diacriticSensitive;
     }
     return false;
 }

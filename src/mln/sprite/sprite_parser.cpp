@@ -123,8 +123,8 @@ style::ImageStretches getStretches(const JSValue& value, const char* property, c
                 const JSValue& stretch = v[i];
                 if (stretch.IsArray() && stretch.Size() == 2 && stretch[rapidjson::SizeType(0)].IsNumber() &&
                     stretch[rapidjson::SizeType(1)].IsNumber()) {
-                    stretches.emplace_back(style::ImageStretch{stretch[rapidjson::SizeType(0)].GetFloat(),
-                                                               stretch[rapidjson::SizeType(1)].GetFloat()});
+                    stretches.emplace_back(stretch[rapidjson::SizeType(0)].GetFloat(),
+                                           stretch[rapidjson::SizeType(1)].GetFloat());
                 } else {
                     Log::Warning(Event::Sprite,
                                  "Invalid sprite image '" + std::string(name) + "': members of '" + property +
