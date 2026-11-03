@@ -100,20 +100,9 @@ void LayerTweaker::multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
     const auto& projMatrixRef = aligned ? transformParams.alignedProjMatrix
                                         : (nearClipped ? transformParams.nearClippedProjMatrix
                                                        : transformParams.projMatrix);
-#if !MLN_RENDER_BACKEND_OPENGL
-    // If this drawable is participating in depth testing, offset the
-    // projection matrix NDC depth range for the drawable's layer and sublayer.
-    if (!is3d && useDepth) {
-        // copy and adjust the projection matrix
-        mat4 projMatrix = projMatrixRef;
-        projMatrix[14] -= ((1 + currentLayerIndex) * PaintParameters::numSublayers - subLayerIndex) *
-                          PaintParameters::depthEpsilon;
-        // multiply with the copy
-        matrix::multiply(matrix, projMatrix, matrix);
-        // early return
-        return;
-    }
-#endif
+    // 2D drawables no longer carry a per-layer depth offset in their matrix: on the non-GL
+    // backends they are not depth-tested (PaintParameters::depthModeForSublayer), and the offset
+    // did not survive the float32 cast of a matrix with a large translation anyway.
     matrix::multiply(matrix, projMatrixRef, matrix);
 }
 
