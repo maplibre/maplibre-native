@@ -4,6 +4,7 @@
 #include <mln/geometry/feature_index.hpp>
 #include <mln/style/layers/custom_layer.hpp>
 #include <mln/renderer/layers/render_custom_layer.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/layers/render_background_layer.hpp>
@@ -328,6 +329,7 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
                          std::move(impls),
                          std::move(globalState),
                          imageManager->getAvailableImages(),
+                         subdivisionGranularity,
                          correlationID);
 }
 
@@ -339,6 +341,12 @@ void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
         ++correlationID;
         worker.self().invoke(&GeometryTileWorker::setShowCollisionBoxes, showCollisionBoxes, correlationID);
     }
+}
+
+void GeometryTile::setSubdivisionGranularity(const SubdivisionGranularitySetting& subdivisionGranularity_) {
+    MLN_TRACE_FUNC();
+
+    subdivisionGranularity = subdivisionGranularity_;
 }
 
 void GeometryTile::onLayout(std::shared_ptr<LayoutResult>&& result, const uint64_t resultCorrelationID) {
@@ -523,14 +531,13 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
 
     const float queryPadding = getQueryPadding(layers);
 
-    mat4 posMatrix;
-    transformState.matrixFor(posMatrix, id.toUnwrapped());
-    matrix::multiply(posMatrix, projMatrix, posMatrix);
+    const TileProjector projector(
+        transformState, id.toUnwrapped(), transformState.getProjectionData(id.toUnwrapped(), projMatrix));
 
     layoutResult->featureIndex->query(result,
                                       queryGeometry,
                                       transformState,
-                                      posMatrix,
+                                      projector,
                                       util::tileSize_D * id.overscaleFactor(),
                                       std::pow(2, transformState.getZoom() - id.overscaledZ),
                                       options,

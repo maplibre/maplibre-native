@@ -4,6 +4,8 @@
 #include <mln/style/sprite.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/light.hpp>
+#include <mln/style/projection.hpp>
+#include <mln/style/sky.hpp>
 
 #include <mln/text/glyph.hpp>
 
@@ -15,6 +17,7 @@
 
 #include <vector>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -40,6 +43,8 @@ public:
 
     TransitionOptions transition{{util::DEFAULT_TRANSITION_DURATION}};
     Light light;
+    std::optional<Sky> sky;
+    Projection projection;
 
     // Default values of the root "state" property, keyed by state property
     // name, used by the "global-state" expression.
@@ -59,6 +64,8 @@ public:
 private:
     void parseTransition(const JSValue&);
     void parseLight(const JSValue&);
+    void parseSky(const JSValue&);
+    void parseProjection(const JSValue&);
     void parseState(const JSValue&);
     void parseSources(const JSValue&);
     void parseSprites(const JSValue&);

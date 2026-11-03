@@ -30,11 +30,19 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idDebugUBO) uniform DebugUBO {
     float pad3;
 } debug;
 
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 layout(location = 0) out vec2 frag_uv;
 
 void main() {
 
-    gl_Position = debug.matrix * vec4(in_position * debug.overlay_scale, 0, 1);
+    gl_Position = projectTile(in_position * debug.overlay_scale, projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 
     // This vertex shader expects a EXTENT x EXTENT quad,

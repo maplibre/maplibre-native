@@ -75,6 +75,13 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             tweaker->execute(drawable, parameters);
         }
 
+        if (drawable.getIs3D()) {
+            drawableWebGPU.setDepthModeFor3D(drawable.getEnableDepth()
+                                                 ? parameters.depthModeFor3D(drawable.getDepthType())
+                                                 : gfx::DepthMode::disabled());
+            drawableWebGPU.setStencilModeFor3D(gfx::StencilMode::disabled());
+        }
+
         drawable.draw(parameters);
     });
 }

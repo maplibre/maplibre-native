@@ -52,6 +52,13 @@ struct SymbolDrawableUBO {
     opacity_t: f32,
     halo_width_t: f32,
     halo_blur_t: f32,
+
+    is_along_line: u32,
+    is_variable_anchor: u32,
+    pitched_scale: f32,
+    translation: vec2<f32>,
+    pad1: f32,
+    pad2: f32,
 };
 
 struct SymbolTilePropsUBO {
@@ -117,6 +124,7 @@ struct VertexOutput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -166,7 +174,9 @@ fn main(in: VertexInput) -> VertexOutput {
         size = drawable.size;
     }
 
-    let projectedPoint = drawable.matrix * vec4<f32>(a_pos, 0.0, 1.0);
+    let projection = projectionVector[globalIndex.value];
+    let translated_a_pos = a_pos + drawable.translation;
+    let projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
     let camera_to_anchor_distance = projectedPoint.w;
     let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
@@ -185,7 +195,7 @@ fn main(in: VertexInput) -> VertexOutput {
 
     var symbol_rotation = 0.0;
     if (drawable.rotate_symbol != 0u) {
-        let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), 0.0, 1.0);
+        let offsetProjectedPoint = projectTileWithElevation(translated_a_pos + vec2<f32>(1.0, 0.0), 0.0, projection);
         let a = projectedPoint.xy / projectedPoint.w;
         let b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
         symbol_rotation = atan2((b.y - a.y) / paintParams.aspect_ratio, b.x - a.x);
@@ -195,10 +205,28 @@ fn main(in: VertexInput) -> VertexOutput {
     let angle_cos = cos(segment_angle + symbol_rotation);
     let rotation_matrix = mat2x2<f32>(angle_cos, -angle_sin, angle_sin, angle_cos);
 
-    let projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy, 0.0, 1.0);
-    let pos0 = projected_pos.xy / projected_pos.w;
+    var projected_pos: vec4<f32>;
+    if (drawable.is_along_line != 0u || drawable.is_variable_anchor != 0u) {
+        projected_pos = vec4<f32>(in.projected_pos.xy, 0.0, 1.0);
+    } else if (drawable.pitch_with_map != 0u) {
+        projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy + drawable.translation, 0.0, 1.0);
+    } else {
+        projected_pos = drawable.label_plane_matrix * projectTileWithElevation(in.projected_pos.xy + drawable.translation, 0.0, projection);
+    }
+    let z = select(0.0, projected_pos.z / projected_pos.w, drawable.pitch_with_map != 0u);
+
+    var projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map != 0u) {
+        let anchor_pos_tile_y = (drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
     let posOffset = a_offset * max(a_minFontScale, vec2<f32>(fontScale)) / 32.0 + a_pxoffset / 16.0;
-    let position = drawable.coord_matrix * vec4<f32>(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
+    var position = drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w + rotation_matrix * posOffset * projectionScaling, z, 1.0);
+    if (drawable.pitch_with_map != 0u) {
+        position = projectTileWithElevation(position.xy, position.z, projection);
+    }
 
     out.position = position;
     out.tex = a_tex / drawable.texsize;
@@ -222,7 +250,7 @@ struct FragmentInput {
 
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
-@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var image: texture_2d<f32>;
 
@@ -299,7 +327,8 @@ struct VertexOutput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
-@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
+@group(0) @binding(5) var<uniform> props: SymbolEvaluatedPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -341,7 +370,9 @@ fn main(in: VertexInput) -> VertexOutput {
         size = drawable.size;
     }
 
-    let projectedPoint = drawable.matrix * vec4<f32>(a_pos, 0.0, 1.0);
+    let projection = projectionVector[globalIndex.value];
+    let translated_a_pos = a_pos + drawable.translation;
+    let projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
     let camera_to_anchor_distance = projectedPoint.w;
     let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
@@ -360,7 +391,7 @@ fn main(in: VertexInput) -> VertexOutput {
 
     var symbol_rotation = 0.0;
     if (drawable.rotate_symbol != 0u) {
-        let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), 0.0, 1.0);
+        let offsetProjectedPoint = projectTileWithElevation(translated_a_pos + vec2<f32>(1.0, 0.0), 0.0, projection);
         let a = projectedPoint.xy / projectedPoint.w;
         let b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
         symbol_rotation = atan2((b.y - a.y) / paintParams.aspect_ratio, b.x - a.x);
@@ -370,10 +401,28 @@ fn main(in: VertexInput) -> VertexOutput {
     let angle_cos = cos(segment_angle + symbol_rotation);
     let rotation_matrix = mat2x2<f32>(angle_cos, -angle_sin, angle_sin, angle_cos);
 
-    let projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy, 0.0, 1.0);
+    var projected_pos: vec4<f32>;
+    if (drawable.is_along_line != 0u || drawable.is_variable_anchor != 0u) {
+        projected_pos = vec4<f32>(in.projected_pos.xy, 0.0, 1.0);
+    } else if (drawable.pitch_with_map != 0u) {
+        projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy + drawable.translation, 0.0, 1.0);
+    } else {
+        projected_pos = drawable.label_plane_matrix * projectTileWithElevation(in.projected_pos.xy + drawable.translation, 0.0, projection);
+    }
+    let z = select(0.0, projected_pos.z / projected_pos.w, drawable.pitch_with_map != 0u);
+
+    var projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map != 0u) {
+        let anchor_pos_tile_y = (drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
     let pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
-    let pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    let position = drawable.coord_matrix * vec4<f32>(pos0, 0.0, 1.0);
+    var position = drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot * projectionScaling, z, 1.0);
+    if (drawable.pitch_with_map != 0u) {
+        position = projectTileWithElevation(position.xy, position.z, projection);
+    }
 
     out.position = position;
     out.tex = a_tex / drawable.texsize;
@@ -426,7 +475,7 @@ struct FragmentInput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
-@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var glyph_atlas: texture_2d<f32>;
 
@@ -548,6 +597,7 @@ struct VertexOutput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 
 const SDF = 1.0;
 const ICON = 0.0;
@@ -592,7 +642,9 @@ fn main(in: VertexInput) -> VertexOutput {
         size = drawable.size;
     }
 
-    let projectedPoint = drawable.matrix * vec4<f32>(a_pos, 0.0, 1.0);
+    let projection = projectionVector[globalIndex.value];
+    let translated_a_pos = a_pos + drawable.translation;
+    let projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
     let camera_to_anchor_distance = projectedPoint.w;
     let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
@@ -610,7 +662,7 @@ fn main(in: VertexInput) -> VertexOutput {
 
     var symbol_rotation = 0.0;
     if (drawable.rotate_symbol != 0u) {
-        let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), 0.0, 1.0);
+        let offsetProjectedPoint = projectTileWithElevation(translated_a_pos + vec2<f32>(1.0, 0.0), 0.0, projection);
         let a = projectedPoint.xy / projectedPoint.w;
         let b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
         symbol_rotation = atan2((b.y - a.y) / paintParams.aspect_ratio, b.x - a.x);
@@ -620,10 +672,28 @@ fn main(in: VertexInput) -> VertexOutput {
     let angle_cos = cos(segment_angle + symbol_rotation);
     let rotation_matrix = mat2x2<f32>(angle_cos, -angle_sin, angle_sin, angle_cos);
 
-    let projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy, 0.0, 1.0);
+    var projected_pos: vec4<f32>;
+    if (drawable.is_along_line != 0u || drawable.is_variable_anchor != 0u) {
+        projected_pos = vec4<f32>(in.projected_pos.xy, 0.0, 1.0);
+    } else if (drawable.pitch_with_map != 0u) {
+        projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy + drawable.translation, 0.0, 1.0);
+    } else {
+        projected_pos = drawable.label_plane_matrix * projectTileWithElevation(in.projected_pos.xy + drawable.translation, 0.0, projection);
+    }
+    let z = select(0.0, projected_pos.z / projected_pos.w, drawable.pitch_with_map != 0u);
+
+    var projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map != 0u && drawable.is_along_line == 0u) {
+        let anchor_pos_tile_y = (drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
     let pos_rot = a_offset / 32.0 * fontScale;
-    let pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    let position = drawable.coord_matrix * vec4<f32>(pos0, 0.0, 1.0);
+    var position = drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot * projectionScaling, z, 1.0);
+    if (drawable.pitch_with_map != 0u) {
+        position = projectTileWithElevation(position.xy, position.z, projection);
+    }
     let gamma_scale = position.w;
     let is_icon = select(1.0, 0.0, is_sdf == SDF);
 
@@ -683,7 +753,7 @@ struct FragmentInput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
-@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var glyph_sampler: sampler;
 @group(1) @binding(1) var glyph_image: texture_2d<f32>;
 @group(1) @binding(2) var icon_sampler: sampler;

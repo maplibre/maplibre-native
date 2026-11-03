@@ -24,6 +24,7 @@
 #include "map/camera_position.hpp"
 #include "map/image.hpp"
 #include "style/light.hpp"
+#include "style/sky.hpp"
 #include "native_map_options.hpp"
 #include "bitmap.hpp"
 
@@ -92,6 +93,8 @@ public:
     void setGestureInProgress(jni::JNIEnv&, jni::jboolean);
 
     void moveBy(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jlong);
+
+    void moveByAround(jni::JNIEnv&, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble);
 
     void jumpTo(jni::JNIEnv&,
                 jni::jdouble,
@@ -223,6 +226,8 @@ public:
 
     void latLngsForPixels(JNIEnv&, const jni::Array<jdouble>&, jni::Array<jdouble>&, jfloat);
 
+    jboolean isLocationOccluded(JNIEnv&, jdouble, jdouble);
+
     jni::Local<jni::Array<jlong>> addPolylines(JNIEnv&, const jni::Array<jni::Object<Polyline>>&);
 
     jni::Local<jni::Array<jlong>> addPolygons(JNIEnv&, const jni::Array<jni::Object<Polygon>>&);
@@ -281,6 +286,9 @@ public:
     jni::Local<jni::Object<gson::JsonObject>> getGlobalState(JNIEnv&);
 
     jni::Local<jni::Object<Light>> getLight(JNIEnv&);
+
+    jni::Local<jni::Object<Sky>> getSky(JNIEnv&);
+    void setSky(JNIEnv&, const jni::Object<Sky>&);
 
     jni::Local<jni::Array<jni::Object<Layer>>> getLayers(JNIEnv&);
 

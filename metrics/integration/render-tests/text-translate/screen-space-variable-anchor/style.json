@@ -1,0 +1,43 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "A screen-space label with a variable anchor and a text-translate lands where main draws it: placement adds no map translation to its laid-out position.",
+      "allowed": 0.0005,
+      "width": 256,
+      "height": 256
+    }
+  },
+  "zoom": 0,
+  "center": [0, 0],
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "point": {
+      "type": "geojson",
+      "maxzoom": 0,
+      "data": {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [0, 0]}}
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {"background-color": "white"}
+    },
+    {
+      "id": "label",
+      "type": "symbol",
+      "source": "point",
+      "layout": {
+        "symbol-screen-space": true,
+        "text-field": "A",
+        "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+        "text-size": 32,
+        "text-variable-anchor": ["center"],
+        "text-allow-overlap": true,
+        "text-ignore-placement": true
+      },
+      "paint": {"text-translate": [2048, 0]}
+    }
+  ]
+}

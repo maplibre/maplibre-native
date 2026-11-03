@@ -1,0 +1,111 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "allowed": 0.0025,
+      "height": 256,
+      "width": 256
+    }
+  },
+  "zoom": 0.5,
+  "center": [
+    0,
+    15
+  ],
+  "pitch": 0,
+  "bearing": 0,
+  "projection": {
+    "type": "globe"
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -50,
+              0
+            ],
+            [
+              50,
+              0
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "line",
+      "type": "line",
+      "source": "geojson",
+      "paint": {
+        "line-color": "green",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "text-map",
+      "type": "symbol",
+      "source": "geojson",
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": "AAAAAAAA",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-rotation-alignment": "map",
+        "text-pitch-alignment": "map",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true
+      },
+      "paint": {
+        "text-color": "red",
+        "text-translate": [
+          0,
+          -30
+        ],
+        "text-translate-anchor": "map"
+      }
+    },
+    {
+      "id": "text-viewport",
+      "type": "symbol",
+      "source": "geojson",
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": "BBBBBBBB",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-rotation-alignment": "map",
+        "text-pitch-alignment": "map",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true
+      },
+      "paint": {
+        "text-color": "blue",
+        "text-translate": [
+          0,
+          30
+        ],
+        "text-translate-anchor": "viewport"
+      }
+    }
+  ]
+}

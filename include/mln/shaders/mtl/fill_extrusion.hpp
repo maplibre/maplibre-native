@@ -104,6 +104,7 @@ struct FragmentOutput {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]]) {
 
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
@@ -124,7 +125,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
     const float2 decimals = unpack_float(float(vertx.decimals_ed.x / 2)) / 128.0;
 
-    const float4 position = drawable.matrix * float4(float2(vertx.pos) + decimals, z, 1);
+    const float4 position = projectTileFor3D(float2(vertx.pos) + decimals, z, projectionVector[uboIndex]);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -231,6 +232,7 @@ struct FragmentOutput {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
                                 uint instanceID [[ instance_id ]],
                                 device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]]) {
@@ -264,7 +266,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float t = float(vertx.pos.y);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
 
-    const float4 position = drawable.matrix * float4(vertx.pos.x == 0.0 ? p1 : p2, z, 1);
+    const float4 position = projectTileFor3D(vertx.pos.x == 0.0 ? p1 : p2, z, projectionVector[uboIndex]);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -380,6 +382,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]],
                                 device const FillExtrusionTilePropsUBO* tilePropsVector [[buffer(idFillExtrusionTilePropsUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]]) {
 
@@ -402,7 +405,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
     const float2 decimals = unpack_float(float(vertx.decimals_ed.x / 2)) / 128.0;
 
-    const float4 position = drawable.matrix * float4(float2(vertx.pos) + decimals, z, 1);
+    const float4 position = projectTileFor3D(float2(vertx.pos) + decimals, z, projectionVector[uboIndex]);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -571,6 +574,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]],
                                 device const FillExtrusionTilePropsUBO* tilePropsVector [[buffer(idFillExtrusionTilePropsUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
                                 uint instanceID [[ instance_id ]],
@@ -616,7 +620,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float t = float(vertx.pos.y);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
 
-    const float4 position = drawable.matrix * float4(vertx.pos.x == 0.0 ? p1 : p2, z, 1);
+    const float4 position = projectTileFor3D(vertx.pos.x == 0.0 ? p1 : p2, z, projectionVector[uboIndex]);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {

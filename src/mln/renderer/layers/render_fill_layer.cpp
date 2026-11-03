@@ -8,6 +8,7 @@
 #include <mln/gfx/renderable.hpp>
 #include <mln/gfx/renderer_backend.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/renderer/buckets/fill_bucket.hpp>
 #include <mln/renderer/image_manager.hpp>
 #include <mln/renderer/layer_group.hpp>
@@ -106,7 +107,7 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                              const float,
                                              const TransformState& transformState,
                                              const float pixelsToTileUnits,
-                                             const mat4&,
+                                             const TileProjector&,
                                              const FeatureState&) const {
     const auto& evaluated = getEvaluated<FillLayerProperties>(evaluatedProperties);
     auto translatedQueryGeometry = FeatureIndex::translateQueryGeometry(queryGeometry,
@@ -150,6 +151,11 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
     const std::optional<mln::Point<double>> origin = std::nullopt;
     const auto zoomFraction = state.getZoomFraction();
     std::optional<mat4> tileMatrix;
+    // On the globe the tile's projection stands in for the tile matrix, and takes the translation in tile units.
+    const auto projector = state.isGlobeRendering() ? std::make_optional<TileProjector>(state, tileID.toUnwrapped())
+                                                    : std::nullopt;
+    const auto tileTranslation = RenderTile::tileUnitTranslation(
+        tileID.toUnwrapped(), translation, translationAnchor, state);
 
     const auto& features = bucket.getRetainedFeatures();
     stats.renderedFeatures.reserve(features.size());
@@ -176,7 +182,7 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
         }
 
         // Compute the tile matrix once
-        if (!tileMatrix.has_value()) {
+        if (!projector && !tileMatrix.has_value()) {
             tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
                                                      state,
                                                      transformParams,
@@ -196,7 +202,9 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
             const auto& vertex = bucket.vertices.at(vertexOffset + vi).a1;
             return vec3{vertex[0] + 0.0, vertex[1] + 0.0, 0};
         };
-        if (const auto bound = computeFeatureNDCBound(featureEntry.vertexCount, *tileMatrix, getVertex)) {
+        if (const auto bound = projector ? computeFeatureNDCBound(
+                                               featureEntry.vertexCount, *projector, tileTranslation, getVertex)
+                                         : computeFeatureNDCBound(featureEntry.vertexCount, *tileMatrix, getVertex)) {
             stats.addRenderedFeature(featureID, *bound, {tileID});
         }
     }
@@ -236,6 +244,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
+
+    updateProjectionVariant(state);
 
     if (!fillShaderGroup) {
         fillShaderGroup = shaders.getShaderGroup(std::string(FillShaderName));
@@ -399,7 +409,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 continue;
             }
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+                fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant));
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
             const auto outlineTriangulatedShader = doOutline && !dataDrivenOutline ? [&]() -> auto {
@@ -407,7 +417,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     {"a_color", "a_opacity", "a_width"},
                     {idLineColorVertexAttribute, idLineOpacityVertexAttribute, idLineWidthVertexAttribute}};
                 return std::static_pointer_cast<gfx::ShaderProgramBase>(
-                    outlineTriangulatedShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));
+                    outlineTriangulatedShaderGroup->getOrCreateShader(
+                        context, outlinePropertiesAsUniforms, projectionVariant));
             }()
                 : nullptr;
 
@@ -424,10 +435,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
             };
 #endif
-            const auto outlineShader = doOutline
-                                           ? std::static_pointer_cast<gfx::ShaderProgramBase>(
-                                                 outlineShaderGroup->getOrCreateShader(context, propertiesAsUniforms))
-                                           : nullptr;
+            const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
+                                                       outlineShaderGroup->getOrCreateShader(
+                                                           context, propertiesAsUniforms, projectionVariant))
+                                                 : nullptr;
 
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
@@ -515,10 +526,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                patternShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+                patternShaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant));
             const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
                                                        outlinePatternShaderGroup->getOrCreateShader(
-                                                           context, propertiesAsUniforms))
+                                                           context, propertiesAsUniforms, projectionVariant))
                                                  : nullptr;
 
             if (!patternBuilder) {

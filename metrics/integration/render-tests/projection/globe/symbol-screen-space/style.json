@@ -1,0 +1,55 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "A screen-space label draws over the view at its screen position, here the center, though its map position is behind the planet.",
+      "allowed": 0.0005,
+      "width": 256,
+      "height": 256
+    }
+  },
+  "zoom": 0,
+  "center": [
+    180,
+    0
+  ],
+  "projection": {
+    "type": "globe"
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "point": {
+      "type": "geojson",
+      "maxzoom": 0,
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "label",
+      "type": "symbol",
+      "source": "point",
+      "layout": {
+        "symbol-screen-space": true,
+        "text-field": "A",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 32,
+        "text-allow-overlap": true,
+        "text-ignore-placement": true
+      }
+    }
+  ]
+}

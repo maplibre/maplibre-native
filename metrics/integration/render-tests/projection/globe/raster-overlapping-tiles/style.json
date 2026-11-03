@@ -1,0 +1,46 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "Tests that a translucent raster tile does not draw where its loaded children draw.",
+      "width": 512,
+      "height": 512
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 1,
+  "projection": {
+    "type": "globe"
+  },
+  "sources": {
+    "source": {
+      "type": "raster",
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.cross-fade.png"
+      ],
+      "maxzoom": 17,
+      "tileSize": 256
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "black"
+      }
+    },
+    {
+      "id": "raster",
+      "type": "raster",
+      "source": "source",
+      "paint": {
+        "raster-fade-duration": 0,
+        "raster-opacity": 0.5
+      }
+    }
+  ]
+}

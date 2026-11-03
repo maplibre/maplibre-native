@@ -67,6 +67,10 @@ public:
         @param offset The distance to pan the map by, measured in pixels from
             top to bottom and from left to right. */
     void moveBy(const ScreenCoordinate& offset, const AnimationOptions& = {});
+    /// A drag on the globe turns the planet so that the location under `anchor` follows the cursor.
+    void moveBy(const ScreenCoordinate& offset,
+                const std::optional<ScreenCoordinate>& anchor,
+                const AnimationOptions& = {});
     LatLng getLatLng(LatLng::WrapMode = LatLng::Wrapped) const;
 
     // Bounds
@@ -94,7 +98,10 @@ public:
     double getRoll() const;
     double getFieldOfView() const;
 
-    // North Orientation
+    // Projection
+    void setProjectionDefinition(const ProjectionDefinition&);
+    /// The projection the style gives at a zoom, which constrains an animation's target as it constrains a jump.
+    void setProjectionForZoom(std::function<ProjectionDefinition(double zoom)>);
     void setNorthOrientation(NorthOrientation);
     NorthOrientation getNorthOrientation() const;
 
@@ -130,6 +137,7 @@ public:
     // Conversion and projection
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Wrapped) const;
+    bool isLocationOccluded(const LatLng& latLng) const { return state.isLocationOccluded(latLng); }
 
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);
@@ -154,6 +162,7 @@ private:
     Duration transitionDuration;
     std::function<bool(const TimePoint)> transitionFrameFn;
     std::function<void()> transitionFinishFn;
+    std::function<ProjectionDefinition(double)> projectionForZoom;
 };
 
 } // namespace mln

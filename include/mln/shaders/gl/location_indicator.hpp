@@ -16,7 +16,7 @@ struct ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::OpenGL
 layout(location = 0) in vec2 a_pos;
 
 void main() {
-    gl_Position = u_matrix * vec4(a_pos, 0.0, 1.0);
+    gl_Position = projectTile(a_pos);
 }
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform LocationIndicatorDrawableUBO {

@@ -2,6 +2,7 @@
 
 #include <mln/render_test.hpp>
 #include <mln/storage/network_status.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/run_loop.hpp>
@@ -256,6 +257,16 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
             if (ignoreReason.starts_with("skip")) {
                 printf(ANSI_COLOR_GRAY "* skipped %s (%s)" ANSI_COLOR_RESET "\n", id.c_str(), ignoreReason.c_str());
                 mln::Log::Info(mln::Event::General, "* skipped " + id + "(" + ignoreReason + ")");
+                continue;
+            }
+        }
+
+        // A build without the globe draws a globe style as Mercator, which its expectation doesn't show.
+        if (!mln::util::GLOBE_ENABLED && metadata.document.IsObject() && metadata.document.HasMember("projection")) {
+            const auto& projection = metadata.document["projection"];
+            if (!projection.IsObject() || !projection.HasMember("type") || !projection["type"].IsString() ||
+                std::string_view(projection["type"].GetString()) != "mercator") {
+                printf(ANSI_COLOR_GRAY "* skipped %s (no globe in this build)" ANSI_COLOR_RESET "\n", id.c_str());
                 continue;
             }
         }

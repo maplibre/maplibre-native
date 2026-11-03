@@ -33,7 +33,7 @@ out vec2 v_pos0;
 out vec2 v_pos1;
 
 void main() {
-    gl_Position = u_matrix * vec4(a_pos, 0, 1);
+    gl_Position = projectTile(a_pos, a_pos);
     // We are using Int16 for texture position coordinates to give us enough precision for
     // fractional coordinates. We use 8192 to scale the texture coordinates in the buffer
     // as an arbitrarily high number to preserve adequate precision when rendering.
