@@ -338,7 +338,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         // `Fill*Program` all use `style::FillPaintProperties`
         auto vertexAttrs = context.createVertexAttributeArray();
-        vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOutlineColor, FillOpacity, FillPattern>(
+        vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
 
         // Outline always occurs in translucent pass, defaults to fill color

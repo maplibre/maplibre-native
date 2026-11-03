@@ -304,15 +304,16 @@ struct NeighborVertex {
 #endif
 };
 
+// Same order as in FillPaintProperties
 struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
     float color[4];
 #endif
-#if !defined(HAS_UNIFORM_u_outline_color)
-    float outline_color[4];
-#endif
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_outline_color)
+    float outline_color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     ushort pattern_to[4];
@@ -593,15 +594,16 @@ struct NeighborVertex {
 #endif
 };
 
+// Same order as in FillPaintProperties
 struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
     float color[4];
 #endif
-#if !defined(HAS_UNIFORM_u_outline_color)
-    float outline_color[4];
-#endif
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_outline_color)
+    float outline_color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     ushort pattern_to[4];

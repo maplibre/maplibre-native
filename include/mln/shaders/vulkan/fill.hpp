@@ -191,15 +191,16 @@ layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillNeighborVertexDrawa
 #endif
 
 #if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_outline_color) || !defined(HAS_UNIFORM_u_pattern_to) || !defined(HAS_UNIFORM_u_pattern_from)
+// Same order as in FillPaintProperties
 struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
     float color[4];
 #endif
-#if !defined(HAS_UNIFORM_u_outline_color)
-    float outline_color[4];
-#endif
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_outline_color)
+    float outline_color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     uint pattern_to[2];
@@ -619,15 +620,16 @@ layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillNeighborVertexDrawa
 #endif
 
 #if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_outline_color) || !defined(HAS_UNIFORM_u_pattern_to) || !defined(HAS_UNIFORM_u_pattern_from)
+// Same order as in FillPaintProperties
 struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
     float color[4];
 #endif
-#if !defined(HAS_UNIFORM_u_outline_color)
-    float outline_color[4];
-#endif
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_outline_color)
+    float outline_color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
     uint pattern_to[2];
