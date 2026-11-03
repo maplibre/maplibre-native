@@ -120,11 +120,14 @@ public:
     const VertexBufferResource* vertexBufferResource;
     uint32_t vertexOffset;
     uint32_t bufferIndex;
+    // Attribute advance rate: 0 (default) = one value per vertex; 1 = one value per
+    // instance (glVertexAttribDivisor), for instanced draws.
+    uint32_t divisor = 0;
 
     friend bool operator==(const AttributeBinding& lhs, const AttributeBinding& rhs) {
         return lhs.attribute == rhs.attribute && lhs.vertexStride == rhs.vertexStride &&
                lhs.vertexBufferResource == rhs.vertexBufferResource && lhs.vertexOffset == rhs.vertexOffset &&
-               lhs.bufferIndex == rhs.bufferIndex;
+               lhs.bufferIndex == rhs.bufferIndex && lhs.divisor == rhs.divisor;
     }
 
     bool operator!=(const AttributeBinding& rhs) const { return !(*this == rhs); }

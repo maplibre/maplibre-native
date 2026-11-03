@@ -30,6 +30,9 @@ struct CustomLayerRenderParameters {
     /// A 4×4 matrix representing the map view’s current near clip projection state.
     std::array<double, 16> nearClippedProjectionMatrix;
 
+    /// The 3D terrain's exaggeration, or 0 when terrain is off.
+    double terrainExaggeration = 0;
+
     CustomLayerRenderParameters(const PaintParameters&);
 };
 

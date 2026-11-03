@@ -4,8 +4,10 @@
 #include <mln/actor/scheduler.hpp>
 #include <mln/util/feature.hpp>
 
+#include <array>
 #include <memory>
 #include <numbers>
+#include <optional>
 
 #include <mapbox/std/weak.hpp>
 
@@ -21,6 +23,10 @@ namespace gfx {
 class DynamicTextureAtlas;
 using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 } // namespace gfx
+
+namespace util {
+class TileElevationProvider;
+} // namespace util
 
 class TileParameters {
 public:
@@ -41,8 +47,22 @@ public:
     TileLodMode tileLodMode = TileLodMode::Default;
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     std::shared_ptr<const GlobalStateMap> globalState = nullptr;
+    /// Terrain elevation for the tile cover; null when there is no terrain, which
+    /// leaves the cover flat. See util::TileElevationProvider.
+    const util::TileElevationProvider* elevationProvider = nullptr;
+    /// Where the distance-based level of detail measures from (normalized web-mercator), in place
+    /// of the map centre; see util::TileCoverParameters::tileLodOrigin.
+    std::optional<std::array<double, 2>> tileLodOrigin = std::nullopt;
     bool isUpdateSynchronous = false;
     bool captureRenderedFeatures = false;
+    /// With terrain on: the most tiles one source covers (ideal and prefetch covers each),
+    /// keeping those nearest `coverTileLimitOrigin`. A source whose minzoom is deeper than the
+    /// far field needs is covered at that minzoom to the horizon, thousands of tiles at a steep
+    /// pitch however few the mesh draws there. 0 = no limit.
+    size_t coverTileLimit = 0;
+    /// Where coverTileLimit measures from (normalized web-mercator): the ground under the
+    /// camera, RenderTerrain::meshTileCapOrigin, the same point the mesh-tile cap uses.
+    std::array<double, 2> coverTileLimitOrigin{{0.0, 0.0}};
 };
 
 } // namespace mln

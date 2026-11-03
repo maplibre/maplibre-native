@@ -12,7 +12,7 @@ namespace shaders {
 
 using FillExtrusionShaderSource = ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<AttributeInfo, 5> FillExtrusionShaderSource::attributes = {
+const std::array<AttributeInfo, 6> FillExtrusionShaderSource::attributes = {
     AttributeInfo{
         0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute, idFillExtrusionInstancedDrawableUBO},
     AttributeInfo{
@@ -20,8 +20,13 @@ const std::array<AttributeInfo, 5> FillExtrusionShaderSource::attributes = {
     AttributeInfo{2, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Float2, idFillExtrusionBaseVertexAttribute},
     AttributeInfo{4, gfx::AttributeDataType::Float2, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Short2, idFillExtrusionCentroidVertexAttribute},
 };
-const std::array<TextureInfo, 0> FillExtrusionShaderSource::textures = {};
+// DEM for terrain elevation. The GLSL binding is the texture-id slot (1), not
+// this array's order - see the shader source note.
+const std::array<TextureInfo, 1> FillExtrusionShaderSource::textures = {
+    TextureInfo{1, idFillExtrusionDEMTexture},
+};
 
 //
 // Fill extrusion instanced
@@ -43,7 +48,9 @@ const std::array<AttributeInfo, 5> FillExtrusionInstancedShaderSource::instanceA
     AttributeInfo{4, gfx::AttributeDataType::Float2, idFillExtrusionBaseVertexAttribute},
     AttributeInfo{5, gfx::AttributeDataType::Float2, idFillExtrusionHeightVertexAttribute},
 };
-const std::array<TextureInfo, 0> FillExtrusionInstancedShaderSource::textures = {};
+const std::array<TextureInfo, 1> FillExtrusionInstancedShaderSource::textures = {
+    TextureInfo{1, idFillExtrusionDEMTexture},
+};
 
 //
 // Fill extrusion pattern

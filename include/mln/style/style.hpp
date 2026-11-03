@@ -19,6 +19,7 @@ class FileSource;
 namespace style {
 
 class Light;
+class Terrain;
 class Source;
 class Layer;
 
@@ -50,6 +51,11 @@ public:
 
     void setLight(std::unique_ptr<Light>);
 
+    // Terrain
+    Terrain* getTerrain();
+    const Terrain* getTerrain() const;
+
+    void setTerrain(std::unique_ptr<Terrain>);
     // Global state, used by the "global-state" expression.
     // Setting a null value resets the property to the default defined in the
     // style's root "state" property (or null if there is none).

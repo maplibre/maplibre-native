@@ -5,6 +5,9 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import io.mockk.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -207,5 +210,42 @@ class TransformTest : BaseTest() {
             }
         }
         transform.animateCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(expected), 500, callback)
+    }
+
+    @Test
+    fun testAnchorCenterOnTerrainRefreshesCameraPosition() {
+        transform.cameraPosition // cache the sea-level camera
+        // Anchoring moves the centre toward the camera and raises the zoom, keeping the view.
+        val anchored = CameraPosition.Builder().target(LatLng(1.0, 2.0)).zoom(13.5).tilt(60.0).build()
+        every { nativeMapView.anchorCenterOnTerrain() } answers {
+            every { nativeMapView.cameraPosition } returns anchored
+        }
+
+        transform.anchorCenterOnTerrain()
+
+        verify(exactly = 1) { nativeMapView.anchorCenterOnTerrain() }
+        assertEquals(anchored, transform.cameraPosition)
+    }
+
+    @Test
+    fun testSetCenterAltitudeKeepingViewRefreshesCameraPositionWhenMoved() {
+        transform.cameraPosition // cache the sea-level camera
+        val raised = CameraPosition.Builder().target(LatLng(1.0, 2.0)).zoom(13.5).tilt(60.0).build()
+        every { nativeMapView.setCenterAltitudeKeepingView(1500.0) } answers {
+            every { nativeMapView.cameraPosition } returns raised
+            true
+        }
+
+        assertTrue(transform.setCenterAltitudeKeepingView(1500.0))
+        assertEquals(raised, transform.cameraPosition)
+    }
+
+    @Test
+    fun testSetCenterAltitudeKeepingViewKeepsCameraPositionWhenNothingMoved() {
+        transform.cameraPosition
+        every { nativeMapView.setCenterAltitudeKeepingView(any()) } returns false
+
+        assertFalse(transform.setCenterAltitudeKeepingView(0.0))
+        verify(exactly = 1) { nativeMapView.cameraPosition }
     }
 }

@@ -35,6 +35,8 @@ public:
     bool has(const OverscaledTileID& key);
     void clear();
 
+    const std::map<OverscaledTileID, std::unique_ptr<Tile>>& getTiles() const { return tiles; }
+
     /// Set aside a tile to be destroyed later, without blocking
     void deferredRelease(std::unique_ptr<Tile>&&);
 

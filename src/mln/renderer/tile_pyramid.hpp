@@ -68,6 +68,8 @@ public:
     void dumpDebugLogs() const;
 
     const std::map<OverscaledTileID, std::unique_ptr<Tile>>& getTiles() const { return tiles; }
+    /// Tiles that left the cover, kept for when it comes back to them.
+    const TileCache& getCache() const { return cache; }
     void clearAll();
 
     void updateFadingTiles();

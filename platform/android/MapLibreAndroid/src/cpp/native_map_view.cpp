@@ -7,6 +7,7 @@
 #include <mln/style/filter.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/style.hpp>
+#include <mln/style/terrain.hpp>
 #include <mln/util/action_journal.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/event.hpp>
@@ -1040,6 +1041,27 @@ jni::Local<jni::Object<Light>> NativeMapView::getLight(JNIEnv& env) {
     }
 }
 
+void NativeMapView::setTerrain(JNIEnv& env, const jni::String& sourceId, jni::jfloat exaggeration) {
+    map->getStyle().setTerrain(
+        std::make_unique<mln::style::Terrain>(jni::Make<std::string>(env, sourceId), exaggeration));
+}
+
+void NativeMapView::removeTerrain(JNIEnv&) {
+    map->getStyle().setTerrain(nullptr);
+}
+
+jni::Local<jni::String> NativeMapView::getTerrainSourceId(JNIEnv& env) {
+    if (const auto* terrain = map->getStyle().getTerrain()) {
+        return jni::Make<jni::String>(env, terrain->getSource());
+    }
+    return jni::Local<jni::String>();
+}
+
+jni::jfloat NativeMapView::getTerrainExaggeration(JNIEnv&) {
+    const auto* terrain = map->getStyle().getTerrain();
+    return terrain ? terrain->getExaggeration() : 1.0f;
+}
+
 jni::Local<jni::Array<jni::Object<Layer>>> NativeMapView::getLayers(JNIEnv& env) {
     // Get the core layers
     std::vector<style::Layer*> layers = map->getStyle().getLayers();
@@ -1311,6 +1333,46 @@ jni::jdouble NativeMapView::getTileLodScale(JNIEnv&) {
     return jni::jdouble(map->getTileLodScale());
 }
 
+void NativeMapView::setTerrainLoadMode(JNIEnv&, jni::jint mode) {
+    map->setTerrainLoadMode(static_cast<mln::TerrainLoadMode>(mode));
+}
+
+jni::jint NativeMapView::getTerrainLoadMode(JNIEnv&) {
+    return jni::jint(static_cast<int>(map->getTerrainLoadMode()));
+}
+
+void NativeMapView::anchorCenterOnTerrain(JNIEnv&) {
+    map->anchorCenterOnTerrain();
+}
+
+jni::jboolean NativeMapView::setCenterAltitudeKeepingView(JNIEnv&, jni::jdouble altitude) {
+    return jni::jboolean(map->setCenterAltitudeKeepingView(altitude));
+}
+
+jni::jdouble NativeMapView::getCenterAltitude(JNIEnv&) {
+    return jni::jdouble(map->getCameraOptions().centerAltitude.value_or(0.0));
+}
+
+void NativeMapView::setTerrainSkirtLength(JNIEnv&, jni::jint length) {
+    map->setTerrainSkirtLength(static_cast<mln::TerrainSkirtLength>(length));
+}
+
+jni::jint NativeMapView::getTerrainSkirtLength(JNIEnv&) {
+    return jni::jint(static_cast<int>(map->getTerrainSkirtLength()));
+}
+
+void NativeMapView::setCenterClampedToGround(JNIEnv&, jni::jboolean clamped) {
+    map->setCenterClampedToGround(clamped);
+}
+
+jni::jboolean NativeMapView::getCenterClampedToGround(JNIEnv&) {
+    return jni::jboolean(map->getCenterClampedToGround());
+}
+
+void NativeMapView::setDebugAboveGroundLog(JNIEnv&, jni::jboolean enabled) {
+    map->setDebugAboveGroundLog(enabled);
+}
+
 void NativeMapView::setTileLodPitchThreshold(JNIEnv&, jni::jdouble threshold) {
     map->setTileLodPitchThreshold(threshold);
 }
@@ -1459,6 +1521,10 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setGlobalStateProperty, "nativeSetGlobalStateProperty"),
         METHOD(&NativeMapView::getGlobalState, "nativeGetGlobalState"),
         METHOD(&NativeMapView::getLight, "nativeGetLight"),
+        METHOD(&NativeMapView::setTerrain, "nativeSetTerrain"),
+        METHOD(&NativeMapView::removeTerrain, "nativeRemoveTerrain"),
+        METHOD(&NativeMapView::getTerrainSourceId, "nativeGetTerrainSourceId"),
+        METHOD(&NativeMapView::getTerrainExaggeration, "nativeGetTerrainExaggeration"),
         METHOD(&NativeMapView::getLayers, "nativeGetLayers"),
         METHOD(&NativeMapView::getLayer, "nativeGetLayer"),
         METHOD(&NativeMapView::addLayer, "nativeAddLayer"),
@@ -1485,6 +1551,16 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getTileLodMinRadius, "nativeGetTileLodMinRadius"),
         METHOD(&NativeMapView::setTileLodScale, "nativeSetTileLodScale"),
         METHOD(&NativeMapView::getTileLodScale, "nativeGetTileLodScale"),
+        METHOD(&NativeMapView::setTerrainLoadMode, "nativeSetTerrainLoadMode"),
+        METHOD(&NativeMapView::getTerrainLoadMode, "nativeGetTerrainLoadMode"),
+        METHOD(&NativeMapView::anchorCenterOnTerrain, "nativeAnchorCenterOnTerrain"),
+        METHOD(&NativeMapView::setCenterAltitudeKeepingView, "nativeSetCenterAltitudeKeepingView"),
+        METHOD(&NativeMapView::getCenterAltitude, "nativeGetCenterAltitude"),
+        METHOD(&NativeMapView::setTerrainSkirtLength, "nativeSetTerrainSkirtLength"),
+        METHOD(&NativeMapView::getTerrainSkirtLength, "nativeGetTerrainSkirtLength"),
+        METHOD(&NativeMapView::setCenterClampedToGround, "nativeSetCenterClampedToGround"),
+        METHOD(&NativeMapView::getCenterClampedToGround, "nativeGetCenterClampedToGround"),
+        METHOD(&NativeMapView::setDebugAboveGroundLog, "nativeSetDebugAboveGroundLog"),
         METHOD(&NativeMapView::setTileLodPitchThreshold, "nativeSetTileLodPitchThreshold"),
         METHOD(&NativeMapView::getTileLodPitchThreshold, "nativeGetTileLodPitchThreshold"),
         METHOD(&NativeMapView::setTileLodZoomShift, "nativeSetTileLodZoomShift"),

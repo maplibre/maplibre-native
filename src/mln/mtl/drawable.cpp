@@ -420,22 +420,33 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const {
 }
 
 void Drawable::bindTextures(RenderPass& renderPass) const {
-    for (size_t id = 0; id < textures.size(); id++) {
-        if (const auto& texture = textures[id]) {
-            if (const auto& location = shader->getSamplerLocation(id)) {
-                static_cast<mtl::Texture2D&>(*texture).bind(renderPass, static_cast<int32_t>(*location));
-            }
+    for (size_t id = 0; id < shaders::maxTextureCountPerShader; id++) {
+        const auto location = shader->getSamplerLocation(id);
+        if (!location) {
+            continue;
         }
+        // A sampler the shader declares but this drawable leaves empty, such as the terrain DEM and
+        // depth samplers with terrain off, gets the context's dummy, as Vulkan and WebGPU do: Metal's
+        // API validation aborts on a missing binding. The shader doesn't sample it.
+        const auto& texture = id < textures.size() && textures[id]
+                                  ? textures[id]
+                                  : renderPass.getCommandEncoder().getContext().getDummyTexture();
+        static_cast<mtl::Texture2D&>(*texture).bind(renderPass, static_cast<int32_t>(*location));
     }
 }
 
 void Drawable::unbindTextures(RenderPass& renderPass) const noexcept {
-    for (size_t id = 0; id < textures.size(); id++) {
-        if (const auto& texture = textures[id]) {
-            if (const auto& location = shader->getSamplerLocation(id)) {
-                static_cast<mtl::Texture2D&>(*texture).unbind(renderPass, static_cast<int32_t>(*location));
-            }
+    // Mirrors bindTextures slot for slot, the dummy included, so every binding it counted is
+    // released (RenderingStats::numTextureBindings); bindTextures has already created the dummy
+    for (size_t id = 0; id < shaders::maxTextureCountPerShader; id++) {
+        const auto location = shader->getSamplerLocation(id);
+        if (!location) {
+            continue;
         }
+        const auto& texture = id < textures.size() && textures[id]
+                                  ? textures[id]
+                                  : renderPass.getCommandEncoder().getContext().getDummyTexture();
+        static_cast<mtl::Texture2D&>(*texture).unbind(renderPass, static_cast<int32_t>(*location));
     }
 }
 

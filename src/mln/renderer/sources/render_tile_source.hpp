@@ -76,8 +76,19 @@ protected:
                                 bool needsRendering,
                                 bool needsRelayout,
                                 const TileParameters&) = 0;
+    /// The fetched TileJSON's `tileSize` when it declares one, else `declared`: TileJSON wins,
+    /// as in maplibre-gl-js.
+    uint16_t resolveTileSize(uint16_t declared) const;
+
     // Returns tileset from the current impl.
     virtual const std::optional<Tileset>& getTileset() const = 0;
+
+    /// The tileset the tile pyramid's tiles come from.
+    const std::optional<Tileset>& getCachedTileset() const { return cachedTileset; }
+
+    /// Called when the tileset changes, once the tiles of the old one have been dropped, so that
+    /// anything kept from them can go too.
+    virtual void onTilesetChanged() {}
 
 private:
     uint8_t getMaxZoom() const final;

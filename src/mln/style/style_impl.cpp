@@ -34,6 +34,7 @@ Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio, con
     : fileSource(std::move(fileSource_)),
       spriteLoader(std::make_unique<SpriteLoader>(pixelRatio, threadPool_)),
       light(std::make_unique<Light>()),
+      terrain(nullptr),
       observer(&nullObserver) {
     spriteLoader->setObserver(this);
     light->setObserver(this);
@@ -127,6 +128,12 @@ void Style::Impl::parse(const std::string& json_) {
     defaultCamera.roll = parser.roll;
 
     setLight(std::make_unique<Light>(parser.light));
+
+    if (parser.terrain) {
+        setTerrain(std::make_unique<Terrain>(*parser.terrain));
+    } else {
+        setTerrain(nullptr);
+    }
 
     if (fileSource) {
         if (parser.sprites.empty()) {
@@ -337,6 +344,20 @@ Light* Style::Impl::getLight() const {
     return light.get();
 }
 
+void Style::Impl::setTerrain(std::unique_ptr<Terrain> terrain_) {
+    terrain = std::move(terrain_);
+    if (terrain) {
+        terrain->setObserver(this);
+        onTerrainChanged(*terrain);
+    } else {
+        observer->onUpdate();
+    }
+}
+
+Terrain* Style::Impl::getTerrain() const {
+    return terrain.get();
+}
+
 std::string Style::Impl::getName() const {
     return name;
 }
@@ -508,6 +529,10 @@ void Style::Impl::onLayerChanged(Layer& layer) {
 }
 
 void Style::Impl::onLightChanged(const Light&) {
+    observer->onUpdate();
+}
+
+void Style::Impl::onTerrainChanged(const Terrain&) {
     observer->onUpdate();
 }
 
