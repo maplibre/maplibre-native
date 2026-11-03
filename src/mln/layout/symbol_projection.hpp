@@ -48,8 +48,23 @@ mat4 getGlCoordMatrix(
 using PointAndCameraDistance = std::pair<Point<float>, float>;
 PointAndCameraDistance project(const Point<float>& point, const mat4& matrix);
 
+/// How far past the vertical the reading direction of a line label kept upright has to turn before
+/// the label is turned over, in degrees.
+constexpr float lineLabelFlipMarginDegrees = 20.0f;
+
+/// Whether a horizontal line label kept upright has to be drawn flipped, given where its first and
+/// last glyph project (gl coordinates) when it is drawn unflipped. A label drawn for the first time
+/// (`wasFlipped` unset) is flipped when it runs right to left. After that it keeps the direction it
+/// was drawn with until that direction is more than lineLabelFlipMarginDegrees past the vertical:
+/// without this margin a label on a line close to the vertical of a rotating map turned over and
+/// back at every small rotation.
+bool lineLabelNeedsFlip(const Point<float>& firstPoint,
+                        const Point<float>& lastPoint,
+                        float aspectRatio,
+                        std::optional<bool> wasFlipped);
+
 void reprojectLineLabels(SymbolBucket::DynamicAttributeVector&,
-                         const std::vector<PlacedSymbol>&,
+                         std::vector<PlacedSymbol>&,
                          const mat4& posMatrix,
                          bool pitchWithMap,
                          bool rotateWithMap,

@@ -4,6 +4,7 @@
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/layers/render_symbol_layer.hpp>
 #include <mln/util/math.hpp>
+#include <mln/math/angles.hpp>
 
 #include <numbers>
 
@@ -355,10 +356,26 @@ std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(const 
     return std::make_pair(*firstPlacedGlyph, *lastPlacedGlyph);
 }
 
+bool lineLabelNeedsFlip(const Point<float>& firstPoint,
+                        const Point<float>& lastPoint,
+                        const float aspectRatio,
+                        const std::optional<bool> wasFlipped) {
+    // Gl coordinates: y points up; x scaled by the aspect ratio so that angles are the screen's.
+    const float dx = (lastPoint.x - firstPoint.x) * aspectRatio;
+    if (!wasFlipped) {
+        // Drawn for the first time: flipped when it runs right to left, as without the margin.
+        return dx < 0;
+    }
+    const float dy = lastPoint.y - firstPoint.y;
+    const float margin = std::sqrt(dx * dx + dy * dy) * std::sin(util::deg2radf(lineLabelFlipMarginDegrees));
+    return *wasFlipped ? dx <= margin : dx < -margin;
+}
+
 std::optional<PlacementResult> requiresOrientationChange(const WritingModeType writingModes,
                                                          const Point<float>& firstPoint,
                                                          const Point<float>& lastPoint,
-                                                         const float aspectRatio) {
+                                                         const float aspectRatio,
+                                                         const std::optional<bool> wasFlipped) {
     if (writingModes == (WritingModeType::Horizontal | WritingModeType::Vertical)) {
         // On top of choosing whether to flip, choose whether to render this
         // version of the glyphs or the alternate vertical glyphs. We can't just
@@ -372,7 +389,9 @@ std::optional<PlacementResult> requiresOrientationChange(const WritingModeType w
         }
     }
 
-    if ((writingModes == WritingModeType::Vertical) ? (firstPoint.y < lastPoint.y) : (firstPoint.x > lastPoint.x)) {
+    if ((writingModes == WritingModeType::Vertical)
+            ? (firstPoint.y < lastPoint.y)
+            : lineLabelNeedsFlip(firstPoint, lastPoint, aspectRatio, wasFlipped)) {
         // Includes "horizontalOnly" case for labels without vertical glyphs
         return PlacementResult::NeedsFlipping;
     }
@@ -413,7 +432,8 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
         const Point<float> lastPoint = project(firstAndLastGlyph->second.point, glCoordMatrix).first;
 
         if (keepUpright && !flip) {
-            auto orientationChange = requiresOrientationChange(symbol.writingModes, firstPoint, lastPoint, aspectRatio);
+            auto orientationChange = requiresOrientationChange(
+                symbol.writingModes, firstPoint, lastPoint, aspectRatio, symbol.keepUprightFlipped);
             if (orientationChange) {
                 return *orientationChange;
             }
@@ -459,7 +479,8 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
                                        : projectTruncatedLineSegment(
                                              symbol.anchorPoint, tileSegmentEnd, a, 1, posMatrix);
 
-            auto orientationChange = requiresOrientationChange(symbol.writingModes, a, b, aspectRatio);
+            auto orientationChange = requiresOrientationChange(
+                symbol.writingModes, a, b, aspectRatio, symbol.keepUprightFlipped);
             if (orientationChange) {
                 return *orientationChange;
             }
@@ -495,7 +516,7 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
 }
 
 void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArray,
-                         const std::vector<PlacedSymbol>& placedSymbols,
+                         std::vector<PlacedSymbol>& placedSymbols,
                          const mat4& posMatrix,
                          bool pitchWithMap,
                          bool rotateWithMap,
@@ -574,6 +595,9 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
                                   anchorPoint,
                                   state.getSize().aspectRatio()) == PlacementResult::NotEnoughRoom)) {
             hideGlyphs(placedSymbol.glyphOffsets.size(), dynamicVertexArray);
+        } else if (keepUpright) {
+            // Remember the direction it was drawn with (see lineLabelNeedsFlip).
+            placedSymbol.keepUprightFlipped = placeUnflipped == PlacementResult::NeedsFlipping;
         }
     }
 }

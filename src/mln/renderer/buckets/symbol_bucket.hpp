@@ -245,6 +245,11 @@ public:
     // support placement for orientation variants.
     std::optional<style::TextWritingModeType> placedOrientation;
     float angle = 0;
+    // For a line label kept upright: whether it was last drawn flipped (from its last glyph to its
+    // first); unset until it is drawn. It lets the label keep its reading direction while the map
+    // rotates close to the vertical of its line, see lineLabelNeedsFlip(). Placement sets it before
+    // each drawing from the label's direction shared by all its copies (Placement::lineLabelsFlipped).
+    std::optional<bool> keepUprightFlipped;
 
     // Reference to placed icon, only applicable for text symbols.
     std::optional<size_t> placedIconIndex;
