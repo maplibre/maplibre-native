@@ -29,10 +29,10 @@ Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mln::Can
                    size / util::DEGREES_MAX;
 
     Point<int64_t> p;
-    p.x = (util::clamp<int64_t>(
-        static_cast<int64_t>(x), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
-    p.y = (util::clamp<int64_t>(
-        static_cast<int64_t>(y), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
+    p.x = util::clamp<int64_t>(
+        static_cast<int64_t>(x), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max());
+    p.y = util::clamp<int64_t>(
+        static_cast<int64_t>(y), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max());
 
     return p;
 };

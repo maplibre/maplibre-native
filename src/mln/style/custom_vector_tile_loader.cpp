@@ -25,7 +25,7 @@ void CustomVectorTileLoader::fetchTile(const OverscaledTileID& tileID, const Act
                 return;
             }
         }
-        tileCallbacks->second.emplace_back(std::make_tuple(tileID.overscaledZ, tileID.wrap, tileRef));
+        tileCallbacks->second.emplace_back(tileID.overscaledZ, tileID.wrap, tileRef);
     }
     if (cachedTileData == dataCache.end()) {
         invokeTileFetch(tileID.canonical);

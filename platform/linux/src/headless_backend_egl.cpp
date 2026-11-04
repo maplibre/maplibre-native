@@ -28,7 +28,9 @@ public:
             throw std::runtime_error("Failed to obtain a valid EGL display.\n");
         }
 
-        EGLint major, minor, numConfigs;
+        EGLint major;
+        EGLint minor;
+        EGLint numConfigs;
         if (!eglInitialize(display, &major, &minor)) {
             throw std::runtime_error("eglInitialize() failed.\n");
         }
@@ -59,7 +61,7 @@ public:
 
 public:
     EGLDisplay display = EGL_NO_DISPLAY;
-    EGLConfig config = 0;
+    EGLConfig config = nullptr;
 };
 
 class EGLBackendImpl final : public HeadlessBackend::Impl {

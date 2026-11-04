@@ -19,6 +19,7 @@ class StencilMode;
 namespace vulkan {
 
 class CommandEncoder;
+class Context;
 class UploadPass;
 
 class Drawable : public gfx::Drawable {
@@ -58,7 +59,7 @@ public:
 
 protected:
     void setSharedBuffers(const gfx::VertexAttributeArray&, const gfx::AttributeBindingArray&);
-    void buildVulkanInputBindings();
+    void buildVulkanInputBindings(Context&);
 
     bool bindAttributes(CommandEncoder&) const;
     bool bindDescriptors(CommandEncoder&) const;

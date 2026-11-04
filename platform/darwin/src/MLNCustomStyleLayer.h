@@ -47,8 +47,9 @@ typedef struct MLNStyleLayerDrawingContext {
 /// create a new ``MLNCustomStyleLayer`` and add it to the style using a method such as
 /// ``MLNStyle/addLayer:``.
 ///
-/// - Warning: This API experimental. It may change
-///   at any time without notice.
+/// - Warning: This is an advanced feature. Use it at your own risk. Bugs in your
+///   drawing code can break rendering or crash the app, and keeping it working
+///   with future versions of MapLibre Native is up to you.
 MLN_EXPORT
 @interface MLNCustomStyleLayer : MLNStyleLayer
 

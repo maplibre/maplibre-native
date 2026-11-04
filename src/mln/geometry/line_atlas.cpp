@@ -31,7 +31,7 @@ std::vector<DashRange> getDashRanges(const std::vector<float>& dasharray, float 
 
     std::vector<DashRange> ranges;
     ranges.reserve(dasharray.size());
-    ranges.push_back({left, right, isDash, dasharray.front() == 0.0f});
+    ranges.push_back({.left = left, .right = right, .isDash = isDash, .isZeroLength = dasharray.front() == 0.0f});
 
     float currentDashLength = dasharray.front();
     for (size_t i = 1; i < dasharray.size(); ++i) {
@@ -42,7 +42,7 @@ std::vector<DashRange> getDashRanges(const std::vector<float>& dasharray, float 
         currentDashLength += dashLength;
         right = currentDashLength * stretch;
 
-        ranges.push_back({left, right, isDash, dashLength == 0.0f});
+        ranges.push_back({.left = left, .right = right, .isDash = isDash, .isZeroLength = dashLength == 0.0f});
     }
 
     return ranges;
@@ -219,7 +219,7 @@ void DashPatternTexture::upload(gfx::UploadPass& uploadPass) {
 
 static const gfx::Texture2DPtr noTexture;
 const std::shared_ptr<gfx::Texture2D>& DashPatternTexture::getTexture() const {
-    return (std::holds_alternative<gfx::Texture2DPtr>(texture)) ? std::get<gfx::Texture2DPtr>(texture) : noTexture;
+    return std::holds_alternative<gfx::Texture2DPtr>(texture) ? std::get<gfx::Texture2DPtr>(texture) : noTexture;
 }
 
 Size DashPatternTexture::getSize() const {
