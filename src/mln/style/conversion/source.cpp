@@ -165,16 +165,6 @@ std::optional<std::unique_ptr<Source>> convertImageSource(const std::string& id,
                                                           const Convertible& value,
                                                           Error& error) {
     auto urlValue = objectMember(value, "url");
-    if (!urlValue) {
-        error.message = "Image source must have a url value";
-        return std::nullopt;
-    }
-
-    auto urlString = toString(*urlValue);
-    if (!urlString) {
-        error.message = "Image url must be a URL string";
-        return std::nullopt;
-    }
 
     auto coordinatesValue = objectMember(value, "coordinates");
     if (!coordinatesValue) {
@@ -198,7 +188,14 @@ std::optional<std::unique_ptr<Source>> convertImageSource(const std::string& id,
         coordinates[i] = *latLng;
     }
     auto result = std::make_unique<ImageSource>(id, coordinates);
-    result->setURL(*urlString);
+    if (urlValue) {
+        auto urlString = toString(*urlValue);
+        if (!urlString) {
+            error.message = "Image url must be a URL string";
+            return std::nullopt;
+        }
+        result->setURL(*urlString);
+    }
 
     return {std::move(result)};
 }
