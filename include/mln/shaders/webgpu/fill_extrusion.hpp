@@ -33,6 +33,8 @@ struct VertexInput {
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) color: vec4<f32>,
+    // Height of walls above the ground in meters, for the ambient occlusion. Negative on roofs.
+    @location(1) wall_z: f32,
 };
 
 struct FillExtrusionDrawableUBO {
@@ -60,7 +62,7 @@ struct FillExtrusionPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad2: f32,
+    ambient_occlusion_wall_radius: f32,
 };
 
 struct GlobalIndexUBO {
@@ -96,6 +98,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
 
     out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
+    out.wall_z = select(-1.0, z, normal.z == 0.0);
 
 #ifdef OVERDRAW_INSPECTOR
     out.color = vec4<f32>(1.0, 1.0, 1.0, 1.0);
@@ -136,11 +139,43 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) color: vec4<f32>,
+    @location(1) wall_z: f32,
 };
+
+struct FillExtrusionPropsUBO {
+    color: vec4<f32>,
+    light_color_pad: vec4<f32>,
+    light_position_base: vec4<f32>,
+    height: f32,
+    light_intensity: f32,
+    vertical_gradient: f32,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+    ambient_occlusion_wall_radius: f32,
+};
+
+@group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
+
+// Ambient occlusion of a wall at `z` meters above the ground: 1 leaves the color as is, lower values darken it.
+// Smooth, and fully faded out at the radius. Roofs are left alone. `light_color_pad.w` holds
+// fill-extrusion-ambient-occlusion-wall-intensity.
+fn wallAmbientOcclusion(z: f32) -> f32 {
+    let intensity = props.light_color_pad.w;
+    if (z < 0.0 || intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
+        return 1.0;
+    }
+    return 1.0 - intensity * (1.0 - smoothstep(0.0, props.ambient_occlusion_wall_radius, z));
+}
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+#ifdef OVERDRAW_INSPECTOR
     return in.color;
+#endif
+    // Darken the bottom of the walls. The color is premultiplied, so only scale its rgb.
+    return vec4<f32>(in.color.rgb * wallAmbientOcclusion(in.wall_z), in.color.a);
 }
 )";
 };
@@ -182,6 +217,8 @@ struct VertexOutput {
 #ifndef HAS_UNIFORM_u_pattern_to
     @location(4) pattern_to: vec4<f32>,
 #endif
+    // Height of walls above the ground in meters, for the ambient occlusion. Negative on roofs.
+    @location(5) wall_z: f32,
 };
 
 struct FillExtrusionPatternDrawableUBO {
@@ -217,7 +254,7 @@ struct FillExtrusionPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad2: f32,
+    ambient_occlusion_wall_radius: f32,
 };
 
 struct GlobalPaintParamsUBO {
@@ -261,6 +298,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
 
     out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
+    out.wall_z = select(-1.0, z, normal.z == 0.0);
 
     var patternPos: vec2<f32>;
     if (normal.z == 1.0) {
@@ -342,6 +380,7 @@ struct FragmentInput {
 #ifndef HAS_UNIFORM_u_pattern_to
     @location(4) pattern_to: vec4<f32>,
 #endif
+    @location(5) wall_z: f32,
 };
 
 struct FillExtrusionPatternTilePropsUBO {
@@ -363,7 +402,7 @@ struct FillExtrusionPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad2: f32,
+    ambient_occlusion_wall_radius: f32,
 };
 
 struct GlobalIndexUBO {
@@ -376,6 +415,17 @@ struct GlobalIndexUBO {
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
+
+// Ambient occlusion of a wall at `z` meters above the ground: 1 leaves the color as is, lower values darken it.
+// Smooth, and fully faded out at the radius. Roofs are left alone. `light_color_pad.w` holds
+// fill-extrusion-ambient-occlusion-wall-intensity.
+fn wallAmbientOcclusion(z: f32) -> f32 {
+    let intensity = props.light_color_pad.w;
+    if (z < 0.0 || intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
+        return 1.0;
+    }
+    return 1.0 - intensity * (1.0 - smoothstep(0.0, props.ambient_occlusion_wall_radius, z));
+}
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
@@ -407,7 +457,9 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let color_b = textureSample(pattern_texture, texture_sampler, pos_b);
 
     let pattern_color = mix(color_a, color_b, props.fade);
-    return pattern_color * in.lighting;
+    // Darken the bottom of the walls. The color is premultiplied, so only scale its rgb.
+    let color = pattern_color * in.lighting;
+    return vec4<f32>(color.rgb * wallAmbientOcclusion(in.wall_z), color.a);
 }
 )";
 };

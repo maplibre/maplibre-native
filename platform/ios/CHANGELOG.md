@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Add `MLNFillExtrusionStyleLayer.fillExtrusionAmbientOcclusionWallIntensity` and `fillExtrusionAmbientOcclusionWallRadius`, with their transitions, for the new `fill-extrusion-ambient-occlusion-wall-intensity` and `fill-extrusion-ambient-occlusion-wall-radius` paint properties. They darken the bottom of fill-extrusion walls (#TBD).
 - Call offline-pack invalidation completion after the database operation finishes and propagate its errors.
 
 ## 7.0.0-pre2

@@ -5,6 +5,8 @@ layout (location = 2) in vec2 a_normal2d;
 out vec2 v_pos_a;
 out vec2 v_pos_b;
 out vec4 v_lighting;
+// Height of walls above the ground in meters, for the ambient occlusion. Negative on roofs.
+out highp float v_wall_z;
 
 layout (std140) uniform GlobalPaintParamsUBO {
     highp vec2 u_pattern_atlas_texsize;
@@ -44,7 +46,7 @@ layout (std140) uniform FillExtrusionTilePropsUBO {
 layout (std140) uniform FillExtrusionPropsUBO {
     highp vec4 u_color;
     highp vec3 u_lightcolor;
-    lowp float props_pad1;
+    highp float u_ambient_occlusion_wall_intensity;
     highp vec3 u_lightpos;
     highp float u_base;
     highp float u_height;
@@ -54,7 +56,7 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad2;
+    highp float u_ambient_occlusion_wall_radius;
 };
 
 #pragma mapbox: define lowp float base
@@ -92,6 +94,7 @@ void main() {
     vec2 decimals = unpack_float(floor(a_decimals_ed.x / 2.0)) / 128.0;
 
     gl_Position = u_matrix * vec4(a_pos + decimals, z, 1);
+    v_wall_z = normal.z == 0.0 ? z : -1.0;
 
     // extrusion top or side
     vec2 pos = normal.z == 1.0 ? a_pos : vec2(edgedistance, z * u_height_factor);

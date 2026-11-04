@@ -84,13 +84,13 @@ void main() {
     const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
-    const float base = props.light_position_base.w;
+    const float base = max(props.light_position_base.w, 0.0);
 #else
     const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
-    const float height = props.height;
+    const float height = max(props.height, 0.0);
 #else
     const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
@@ -223,7 +223,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float ambient_occlusion_wall_radius;
 } props;
 
 struct OutlineInstance {
@@ -236,8 +236,11 @@ layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedD
 } instanceVector;
 
 layout(location = 0) out mediump vec4 frag_color;
+// Height above the ground in meters, for the ambient occlusion
+layout(location = 1) out float frag_z;
 
 void main() {
+    frag_z = 0.0;
 
     const vec2 instancePos = unpack_int(instanceVector.instance[gl_InstanceIndex].pos);
     const vec2 instanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex].decimals_ed);
@@ -252,13 +255,13 @@ void main() {
     const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
-    const float base = props.light_position_base.w;
+    const float base = max(props.light_position_base.w, 0.0);
 #else
     const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
-    const float height = props.height;
+    const float height = max(props.height, 0.0);
 #else
     const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
@@ -281,6 +284,7 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
     applySurfaceTransform();
+    frag_z = z;
 
 #if defined(OVERDRAW_INSPECTOR)
     frag_color = vec4(1.0);
@@ -329,10 +333,40 @@ void main() {
     static constexpr auto fragment = R"(
 
 layout(location = 0) in vec4 frag_color;
+layout(location = 1) in float frag_z;
 layout(location = 0) out vec4 out_color;
 
+layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
+    vec4 color;
+    vec4 light_color_pad;
+    vec4 light_position_base;
+    float height;
+    float light_intensity;
+    float vertical_gradient;
+    float opacity;
+    float fade;
+    float from_scale;
+    float to_scale;
+    float ambient_occlusion_wall_radius;
+} props;
+
+// Ambient occlusion of a wall at `z` meters above the ground: 1 leaves the color as is, lower values darken it.
+// Smooth, and fully faded out at the radius. `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
+float wallAmbientOcclusion(float z) {
+    const float intensity = props.light_color_pad.w;
+    if (intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
+        return 1.0;
+    }
+    return 1.0 - intensity * (1.0 - smoothstep(0.0, props.ambient_occlusion_wall_radius, z));
+}
+
 void main() {
+#if defined(OVERDRAW_INSPECTOR)
     out_color = frag_color;
+    return;
+#endif
+    // Darken the bottom of the walls. The color is premultiplied, so only scale its rgb.
+    out_color = vec4(frag_color.rgb * wallAmbientOcclusion(frag_z), frag_color.a);
 }
 )";
 };
@@ -433,13 +467,13 @@ void main() {
     const FillExtrusionTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
-    const float base = props.light_position_base.w;
+    const float base = max(props.light_position_base.w, 0.0);
 #else
     const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
-    const float height = props.height;
+    const float height = max(props.height, 0.0);
 #else
     const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
@@ -690,7 +724,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float ambient_occlusion_wall_radius;
 } props;
 
 layout(location = 0) out mediump vec4 frag_lighting;
@@ -705,7 +739,12 @@ layout(location = 3) out mediump vec4 frag_pattern_from;
 layout(location = 4) out mediump vec4 frag_pattern_to;
 #endif
 
+// Height above the ground in meters, for the ambient occlusion
+layout(location = 5) out float frag_z;
+
 void main() {
+    frag_z = 0.0;
+
     const vec2 instancePos = unpack_int(instanceVector.instance[gl_InstanceIndex].pos);
     const vec2 instanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex].decimals_ed);
 
@@ -719,13 +758,13 @@ void main() {
     const FillExtrusionTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
-    const float base = props.light_position_base.w;
+    const float base = max(props.light_position_base.w, 0.0);
 #else
     const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
-    const float height = props.height;
+    const float height = max(props.height, 0.0);
 #else
     const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
@@ -743,6 +782,7 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
     applySurfaceTransform();
+    frag_z = z;
 
 #if defined(OVERDRAW_INSPECTOR)
     frag_lighting = vec4(1.0);
@@ -827,6 +867,8 @@ layout(location = 3) in mediump vec4 frag_pattern_from;
 layout(location = 4) in mediump vec4 frag_pattern_to;
 #endif
 
+layout(location = 5) in float frag_z;
+
 layout(location = 0) out vec4 out_color;
 
 layout(push_constant) uniform Constants {
@@ -856,10 +898,20 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float ambient_occlusion_wall_radius;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
+
+// Ambient occlusion of a wall at `z` meters above the ground: 1 leaves the color as is, lower values darken it.
+// Smooth, and fully faded out at the radius. `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
+float wallAmbientOcclusion(float z) {
+    const float intensity = props.light_color_pad.w;
+    if (intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
+        return 1.0;
+    }
+    return 1.0 - intensity * (1.0 - smoothstep(0.0, props.ambient_occlusion_wall_radius, z));
+}
 
 void main() {
 
@@ -894,7 +946,9 @@ void main() {
     const vec2 pos2 = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
     const vec4 color2 = texture(image0_sampler, pos2);
 
-    out_color = mix(color1, color2, props.fade) * frag_lighting;
+    // Darken the bottom of the walls. The color is premultiplied, so only scale its rgb.
+    const vec4 color = mix(color1, color2, props.fade) * frag_lighting;
+    out_color = vec4(color.rgb * wallAmbientOcclusion(frag_z), color.a);
 }
 )";
 };

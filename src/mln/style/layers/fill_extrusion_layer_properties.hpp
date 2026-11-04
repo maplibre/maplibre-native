@@ -21,6 +21,14 @@ struct FillExtrusionRoundedCornerDistance : LayoutProperty<float> {
     static float defaultValue() { return 0.f; }
 };
 
+struct FillExtrusionAmbientOcclusionWallIntensity : PaintProperty<float> {
+    static float defaultValue() { return 0.f; }
+};
+
+struct FillExtrusionAmbientOcclusionWallRadius : PaintProperty<float> {
+    static float defaultValue() { return 3.f; }
+};
+
 struct FillExtrusionBase : DataDrivenPaintProperty<float, attributes::base, uniforms::base> {
     static float defaultValue() { return 0.f; }
 };
@@ -58,6 +66,8 @@ class FillExtrusionLayoutProperties : public Properties<
 > {};
 
 class FillExtrusionPaintProperties : public Properties<
+    FillExtrusionAmbientOcclusionWallIntensity,
+    FillExtrusionAmbientOcclusionWallRadius,
     FillExtrusionBase,
     FillExtrusionColor,
     FillExtrusionHeight,
