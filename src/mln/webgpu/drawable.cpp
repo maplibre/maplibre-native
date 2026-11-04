@@ -838,7 +838,18 @@ void Drawable::draw(PaintParameters& parameters) const {
             Log::Error(Event::Render, "renderPassEncoder is null!");
             return;
         }
+
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipelineState);
+
+        const auto size = webgpuRenderPass.getDescriptor().renderable.getSize();
+        wgpuRenderPassEncoderSetViewport(renderPassEncoder,
+                                         0.0f,
+                                         0.0f,
+                                         static_cast<float>(size.width),
+                                         static_cast<float>(size.height),
+                                         depthMode.range.min,
+                                         depthMode.range.max);
+
         if (getEnableStencil()) {
             wgpuRenderPassEncoderSetStencilReference(renderPassEncoder, static_cast<uint32_t>(stencilMode.ref));
         }
