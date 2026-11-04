@@ -201,6 +201,9 @@ public:
         });
     }
 
+    // Release the range request made on behalf of a request that no longer exists
+    void cancel(AsyncRequest* req) { tasks.erase(req); }
+
     void setResourceOptions(ResourceOptions options) {
         std::scoped_lock lock(resourceOptionsMutex);
         resourceOptions = std::move(options);
@@ -639,6 +642,8 @@ PMTilesFileSource::PMTilesFileSource(const ResourceOptions& resourceOptions, con
 
 std::unique_ptr<AsyncRequest> PMTilesFileSource::request(const Resource& resource, FileSource::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
+
+    req->onCancel([actorRef = thread->actor(), req = req.get()]() { actorRef.invoke(&Impl::cancel, req); });
 
     // assume if there is a tile request, that the pmtiles file has been validated
     if (resource.kind == Resource::Tile) {
