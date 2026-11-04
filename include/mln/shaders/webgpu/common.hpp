@@ -41,7 +41,9 @@ fn gl_mod(x: vec2<f32>, y: vec2<f32>) -> vec2<f32> {
 
 // Sample the terrain elevation in meters at a tile-local coordinate, with manual
 // bilinear interpolation on DEM pixel centers (the DEM has a 2px backfilled border),
-// matching the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
+// matching the maplibre-gl-js get_elevation() prelude function. DEM pixel i holds the
+// height of its cell, centred at tile coordinate (i + 0.5) / dim, and sits at texel
+// i + 2 behind the border, so the texel coordinate is uv * dim + 1.5. Unlike gl-js (global
 // terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
 // texture and dem_* values are passed in as arguments rather than read from globals.
 // Decode one DEM texel to meters. The clamp at the call sites matters: textureLoad out of
@@ -64,7 +66,7 @@ fn get_elevation(pos: vec2<f32>,
     if (dem_enabled == 0.0) {
         return 0.0;
     }
-    let coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
+    let coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.5;
     let f = fract(coord);
     let c = vec2<i32>(floor(coord));
     let hi = vec2<i32>(textureDimensions(dem, 0)) - vec2<i32>(1);

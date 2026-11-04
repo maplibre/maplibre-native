@@ -12,6 +12,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - Add `MLNMapView.centerAltitude` and `-[MLNMapView setCenterAltitudeKeepingView:]`. With 3D terrain, a center coordinate and zoom level describe the same view only at the same center altitude, so save the altitude with a camera and restore it before setting the camera back ([#4712](https://github.com/maplibre/maplibre-native/pull/4712)).
 - With 3D terrain on and the centre clamp enabled, the clamp no longer cancels a running camera animation; the camera is anchored to the ground once the animation ends ([#4768](https://github.com/maplibre/maplibre-native/pull/4768)).
 - With 3D terrain, annotation views, the user location view, callouts, line-placed labels and the collision index sit on the terrain surface instead of at sea level, so labels show, hide and overlap where they are drawn and pins on slopes can be selected. `-convertCoordinate:toPointToView:` and `-convertPoint:toCoordinateFromView:` answer on the terrain surface, from a copy of the terrain heights kept on the map side ([#4558](https://github.com/maplibre/maplibre-native/pull/4558)).
+- With 3D terrain, each height of the DEM stands at the centre of its pixel, where a hillshade or color-relief layer of the same source draws it, as in maplibre-gl-js. The terrain stood half a DEM pixel north-west of its data (about 6 m with 512 px tiles at zoom 12), so the shading of a hillshade did not line up with the slopes it shades.
 
 ## 7.0.0
 
