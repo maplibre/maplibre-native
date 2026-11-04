@@ -69,9 +69,9 @@ public:
     void setFillExtrusionTranslateAnchorTransition(const TransitionOptions&);
     TransitionOptions getFillExtrusionTranslateAnchorTransition() const;
 
-    static PropertyValue<bool> getDefaultFillExtrusionVerticalGradient();
-    const PropertyValue<bool>& getFillExtrusionVerticalGradient() const;
-    void setFillExtrusionVerticalGradient(const PropertyValue<bool>&);
+    static PropertyValue<VerticalGradient> getDefaultFillExtrusionVerticalGradient();
+    const PropertyValue<VerticalGradient>& getFillExtrusionVerticalGradient() const;
+    void setFillExtrusionVerticalGradient(const PropertyValue<VerticalGradient>&);
     void setFillExtrusionVerticalGradientTransition(const TransitionOptions&);
     TransitionOptions getFillExtrusionVerticalGradientTransition() const;
 
