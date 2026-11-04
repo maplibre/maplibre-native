@@ -56,6 +56,14 @@ public:
 
     jni::Local<jni::Object<jni::ObjectTag>> getFillExtrusionVerticalGradient(jni::JNIEnv&);
 
+    jni::Local<jni::Object<jni::ObjectTag>> getFillExtrusionAmbientOcclusionWallIntensity(jni::JNIEnv&);
+    void setFillExtrusionAmbientOcclusionWallIntensityTransition(jni::JNIEnv&, jlong duration, jlong delay);
+    jni::Local<jni::Object<TransitionOptions>> getFillExtrusionAmbientOcclusionWallIntensityTransition(jni::JNIEnv&);
+
+    jni::Local<jni::Object<jni::ObjectTag>> getFillExtrusionAmbientOcclusionWallRadius(jni::JNIEnv&);
+    void setFillExtrusionAmbientOcclusionWallRadiusTransition(jni::JNIEnv&, jlong duration, jlong delay);
+    jni::Local<jni::Object<TransitionOptions>> getFillExtrusionAmbientOcclusionWallRadiusTransition(jni::JNIEnv&);
+
 }; // class FillExtrusionLayer
 
 class FillExtrusionJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::FillExtrusionLayerFactory {

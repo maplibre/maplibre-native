@@ -198,4 +198,41 @@ modifiedReferenceSpec["layout_symbol"]["symbol-screen-space"] = {
     "doc": "Internal use only"
 };
 
+// Ambient occlusion of fill-extrusions, see
+// https://github.com/maplibre/maplibre-style-spec/issues/1796#issuecomment-6194201898. Darkens the
+// walls near the ground; extrusions standing on other extrusions are not occluded. Both are
+// `data-constant` and live in per-layer uniform buffers.
+// Not in the published spec yet.
+modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-ambient-occlusion-wall-intensity"] = {
+    "type": "number",
+    "default": 0,
+    "minimum": 0,
+    "maximum": 1,
+    "doc": "How much the bottom of the extrusion's walls is darkened, where they meet the ground. A value of `0` disables the effect. Walls of parts that do not reach the ground, i.e. with a `fill-extrusion-base` above the radius, are not darkened.",
+    "transition": true,
+    "expression": {
+        "interpolated": true,
+        "parameters": [
+            "zoom"
+        ]
+    },
+    "property-type": "data-constant"
+};
+
+modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-ambient-occlusion-wall-radius"] = {
+    "type": "number",
+    "default": 3,
+    "minimum": 0,
+    "units": "meters",
+    "doc": "Height in meters above the ground over which the darkening of the walls fades out.",
+    "transition": true,
+    "expression": {
+        "interpolated": true,
+        "parameters": [
+            "zoom"
+        ]
+    },
+    "property-type": "data-constant"
+};
+
 export default modifiedReferenceSpec;

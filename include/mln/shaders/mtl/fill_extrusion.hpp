@@ -56,10 +56,22 @@ struct alignas(16) FillExtrusionPropsUBO {
     /* 64 */ float fade;
     /* 68 */ float from_scale;
     /* 72 */ float to_scale;
-    /* 76 */ float pad2;
+    /* 76 */ float ambient_occlusion_wall_radius;
     /* 80 */
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "wrong size");
+
+// `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
+
+/// Ambient occlusion of a wall at `z` meters above the ground: 1 leaves the color as is, lower values darken it.
+/// Smooth, and fully faded out at `radius`.
+float wallAmbientOcclusion(float z, device const FillExtrusionPropsUBO& props) {
+    const float intensity = props.light_color_pad.w;
+    if (intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
+        return 1.0;
+    }
+    return 1.0 - intensity * (1.0 - smoothstep(0.0, props.ambient_occlusion_wall_radius, z));
+}
 
 )";
 
@@ -109,12 +121,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    const auto base   = max(props.light_position_base.w, 0.0);
 #else
     const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    const auto height = max(props.height, 0.0);
 #else
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
@@ -221,6 +233,8 @@ struct OutlineInstance {
 struct FragmentStage {
     float4 position [[position, invariant]];
     half4 color;
+    // Height above the ground in meters, for the ambient occlusion
+    float z;
 };
 
 struct FragmentOutput {
@@ -240,18 +254,19 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         return {
             .position = float4(0.0),
             .color    = half4(0.0),
+            .z        = 0.0,
         };
     }
 
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    const auto base   = max(props.light_position_base.w, 0.0);
 #else
     const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    const auto height = max(props.height, 0.0);
 #else
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
@@ -270,6 +285,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position = position,
         .color    = half4(1.0),
+        .z        = z,
     };
 #endif
 
@@ -317,11 +333,18 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position = position,
         .color    = half4(vcolor * props.opacity),
+        .z        = z,
     };
 }
 
-fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]]) {
-    return { in.color/*, in.position.z*/ };
+fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
+                                     device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]]) {
+#if defined(OVERDRAW_INSPECTOR)
+    return { half4(1.0) };
+#endif
+    // Darken the bottom of the walls. The color is premultiplied, so only scale its rgb.
+    const half occlusion = half(wallAmbientOcclusion(in.z, props));
+    return { half4(in.color.rgb * occlusion, in.color.a)/*, in.position.z*/ };
 }
 )";
 };
@@ -387,12 +410,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillExtrusionTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    const auto base   = max(props.light_position_base.w, 0.0);
 #else
     const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    const auto height = max(props.height, 0.0);
 #else
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
@@ -553,6 +576,8 @@ struct FragmentStage {
     float4 lighting;
     float2 pos_a;
     float2 pos_b;
+    // Height above the ground in meters, for the ambient occlusion
+    float z;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
     half4 pattern_from;
@@ -583,6 +608,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             .lighting       = float4(0.0),
             .pos_a          = float2(0.0),
             .pos_b          = float2(0.0),
+            .z              = 0.0,
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
             .pattern_from   = half4(0.0),
@@ -597,12 +623,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillExtrusionTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    const auto base   = max(props.light_position_base.w, 0.0);
 #else
     const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    const auto height = max(props.height, 0.0);
 #else
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
@@ -624,6 +650,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .lighting       = float4(1.0),
         .pos_a          = float2(1.0),
         .pos_b          = float2(1.0),
+        .z              = z,
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(1.0),
@@ -682,6 +709,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .lighting       = lighting,
         .pos_a          = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, pos),
         .pos_b          = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos),
+        .z              = z,
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),
@@ -728,7 +756,10 @@ fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
     const float2 pos2 = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
     const float4 color2 = image0.sample(image0_sampler, pos2);
 
-    return {half4(mix(color1, color2, props.fade) * in.lighting)/*, in.position.z*/};
+    // Darken the bottom of the walls. The color is premultiplied, so only scale its rgb.
+    const half4 color = half4(mix(color1, color2, props.fade) * in.lighting);
+    const half occlusion = half(wallAmbientOcclusion(in.z, props));
+    return {half4(color.rgb * occlusion, color.a)/*, in.position.z*/};
 }
 )";
 };

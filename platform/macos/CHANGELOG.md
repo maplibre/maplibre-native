@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+- Add `MLNFillExtrusionStyleLayer.fillExtrusionAmbientOcclusionWallIntensity` and `fillExtrusionAmbientOcclusionWallRadius`, with their transitions, for the new `fill-extrusion-ambient-occlusion-wall-intensity` and `fill-extrusion-ambient-occlusion-wall-radius` paint properties. They darken the bottom of fill-extrusion walls ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
 - 💥 Breaking: Replace the `Mapbox.h` umbrella header with `MapLibre.h`. `MapLibre.xcframework` no longer ships `Mapbox.h` ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
 
   <details>
