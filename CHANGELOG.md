@@ -5,9 +5,9 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
-- [core] Add the `fill-extrusion-ambient-occlusion-wall-intensity` and `fill-extrusion-ambient-occlusion-wall-radius` paint properties. They darken the bottom of fill-extrusion walls, fading out over the radius in meters above the ground. Supported on all render backends (Metal, Vulkan, WebGPU, OpenGL), including patterned extrusions (#TBD).
-- [android] Add `PropertyFactory.fillExtrusionAmbientOcclusionWallIntensity` / `fillExtrusionAmbientOcclusionWallRadius` and the matching `FillExtrusionLayer` getters and transition accessors (#TBD).
-- [ios] Add `MLNFillExtrusionStyleLayer.fillExtrusionAmbientOcclusionWallIntensity` / `fillExtrusionAmbientOcclusionWallRadius` and their transitions (#TBD).
+- [core] Add the `fill-extrusion-ambient-occlusion-wall-intensity` and `fill-extrusion-ambient-occlusion-wall-radius` paint properties. They darken the bottom of fill-extrusion walls, fading out over the radius in meters above the ground. Supported on all render backends (Metal, Vulkan, WebGPU, OpenGL), including patterned extrusions ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
+- [android] Add `PropertyFactory.fillExtrusionAmbientOcclusionWallIntensity` / `fillExtrusionAmbientOcclusionWallRadius` and the matching `FillExtrusionLayer` getters and transition accessors ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
+- [ios] Add `MLNFillExtrusionStyleLayer.fillExtrusionAmbientOcclusionWallIntensity` / `fillExtrusionAmbientOcclusionWallRadius` and their transitions ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
 - [core] Add support for colorizing SDF fill patterns with `fill-color` ([#4526](https://github.com/maplibre/maplibre-native/issues/4526)).
 - [core] Add support for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression and the root [`state`](https://maplibre.org/maplibre-style-spec/root/#state) style property in filters, layout properties, and paint properties, including the runtime API `style::Style::setGlobalStateProperty` / `style::Style::getGlobalState`. Calls to `setGlobalStateProperty` before the style has loaded are rejected, matching MapLibre GL JS ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
 - [core] Add `style::Style::isLoaded` to report whether style JSON has finished loading and parsing without waiting for source or sprite resources ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
@@ -38,7 +38,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
-- [core] Clamp constant negative `fill-extrusion-base` and `fill-extrusion-height` to 0 on Metal and Vulkan, as on the other backends. Walls were drawn below the ground (#TBD).
+- [core] Clamp constant negative `fill-extrusion-base` and `fill-extrusion-height` to 0 on Metal and Vulkan, as on the other backends. Walls were drawn below the ground ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
 - [core] Fix plugin layer filters ignoring the style's global state.
 - [core] Fix a crash in `RenderImageSource::update` when an image source's coordinates give an empty tile cover, such as an image wholly beyond the latitudes Web Mercator can show.
 - [OpenGL] Fix invisible raster layers on Adreno 3xx by avoiding an in-place alpha assignment in the fragment shader.
