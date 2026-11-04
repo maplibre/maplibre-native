@@ -65,7 +65,6 @@ public:
     static FillTriangleInstance triangleInstance(std::array<uint32_t, 3>& indices,
                                                  std::array<bool, 3>& enableRounding,
                                                  bool invertRounding) {
-        assert(indices.size() == 3 && enableRounding.size() == 3);
         return FillTriangleInstance{{indices[0] * 4 + (enableRounding[0] ? 1 : 0) * 2 + (invertRounding ? 1 : 0),
                                      indices[1] * 4 + (enableRounding[1] ? 1 : 0) * 2 + (invertRounding ? 1 : 0),
                                      indices[2] * 4 + (enableRounding[2] ? 1 : 0) * 2 + (invertRounding ? 1 : 0)}};
