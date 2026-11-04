@@ -421,7 +421,8 @@ void main() {
     }
 
     if (dTri * frag_data.triangle_discard_side > 0.0) {
-        discard;
+        out_color = vec4(0.0);
+        return;
     }
 #endif
 
@@ -933,7 +934,8 @@ void main() {
     }
 
     if (dTri * frag_data.triangle_discard_side > 0.0) {
-        discard;
+        out_color = vec4(0.0);
+        return;
     }
 #endif
 

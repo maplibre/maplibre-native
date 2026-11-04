@@ -464,7 +464,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     }
 
     if (dTri * in.triangle_discard_side > 0.0) {
-        discard_fragment();
+        return half4(0.0);
     }
 #endif
 
@@ -809,7 +809,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     }
 
     if (dTri * in.triangle_discard_side > 0.0) {
-        discard_fragment();
+        return half4(0.0);
     }
 #endif
 
