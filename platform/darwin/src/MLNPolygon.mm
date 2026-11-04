@@ -72,7 +72,10 @@
 
 - (CLLocationCoordinate2D)coordinate {
   // pole of inaccessibility
-  auto poi = mapbox::polylabel([self polygon]);
+  // Polylabel precision uses the input units. Coordinates here are degrees, for which upstream
+  // recommends 1e-6; the default precision of 1 degree is too coarse for geographic polygons.
+  constexpr double geographicCoordinatePrecision = 1e-6;
+  auto poi = mapbox::polylabel([self polygon], geographicCoordinatePrecision);
 
   return MLNLocationCoordinate2DFromPoint(poi);
 }
