@@ -217,7 +217,8 @@ public:
      */
     double getElevationForLatLng(const LatLng& latLng) const;
     /// As getElevationForLatLng, but empty where no loaded DEM tile covers the point (rather than 0).
-    std::optional<double> findElevationForLatLng(const LatLng& latLng) const;
+    /// `from`, if given, is set to the loaded tile the height was read from.
+    std::optional<double> findElevationForLatLng(const LatLng& latLng, UnwrappedTileID* from = nullptr) const;
 
     /**
      * @brief Get the terrain exaggeration multiplier

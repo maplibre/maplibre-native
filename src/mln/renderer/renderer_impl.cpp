@@ -59,6 +59,14 @@ RendererObserver& nullObserver() {
     return observer;
 }
 
+// Whether the position lies inside the tile.
+bool tileHolds(const UnwrappedTileID& tile, const LatLng& position) {
+    const auto at = Projection::project(position, tile.canonical.z);
+    return UnwrappedTileID(tile.canonical.z,
+                           static_cast<int64_t>(std::floor(at.x)),
+                           static_cast<int64_t>(std::floor(at.y))) == tile;
+}
+
 } // namespace
 
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
@@ -759,10 +767,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // the ground (the steeper the pitch, the less it sits above the center), and the map
         // lifts it out when it knows the height there.
         if (const auto eye = updateParameters->transformState.getFreeCameraOptions().getLocation()) {
-            if (const auto eyeElevation = terrain->findElevationForLatLng(eye->location)) {
+            UnwrappedTileID readFrom(0, 0, 0);
+            if (const auto eyeElevation = terrain->findElevationForLatLng(eye->location, &readFrom)) {
+                eyeElevationTile = readFrom;
                 if (std::isnan(lastReportedEyeElevation) || std::abs(*eyeElevation - lastReportedEyeElevation) > 0.25) {
                     lastReportedEyeElevation = *eyeElevation;
                     observer->onTerrainEyeElevationChanged(*eyeElevation);
+                }
+            } else if (eyeElevationTile && !tileHolds(*eyeElevationTile, eye->location)) {
+                // The eye left the tile its height came from and no loaded tile is under it yet (or
+                // ever): the old height is another place's, so the map is told it does not know.
+                eyeElevationTile.reset();
+                if (!std::isnan(lastReportedEyeElevation)) {
+                    lastReportedEyeElevation = std::numeric_limits<double>::quiet_NaN();
+                    observer->onTerrainEyeElevationChanged(lastReportedEyeElevation);
                 }
             }
         }

@@ -1355,3 +1355,115 @@ TEST(TerrainCamera, TheEyeIsLiftedWhenTheGroundUnderTheCenterIsAtSeaLevel) {
     ASSERT_GT(ground, 100.0) << "the eye is over the climb";
     EXPECT_GE(location->altitude, ground + 5.0) << "eye altitude " << location->altitude << " over ground " << ground;
 }
+
+namespace {
+
+// A camera over a high mountain with its eye height read, then thrown onto flat ground far away.
+// The ground under the new eye is a tile of its own, which the test holds back, or never sends.
+struct EyeLeavesTheMountain {
+    util::RunLoop loop;
+    std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(),
+                                                                                  ClientOptions());
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map;
+    std::optional<LatLng> newEyeGround;
+    enum class NewEyeTile {
+        Held,
+        Missing,
+        Sent
+    } newEyeTile = NewEyeTile::Held;
+    const std::string shelf = makeUniformDEMTile(2000.0);
+
+    EyeLeavesTheMountain()
+        : map(frontend,
+              MapObserver::nullObserver(),
+              fileSource,
+              MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize())) {
+        fileSource->tileResponse = [this](const Resource& resource) -> std::optional<Response> {
+            Response res;
+            if (newEyeGround && tileUrlCovers(resource.url, *newEyeGround)) {
+                if (newEyeTile == NewEyeTile::Held) {
+                    return std::nullopt;
+                }
+                if (newEyeTile == NewEyeTile::Missing) {
+                    res.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
+                    return res;
+                }
+                // Sent: 2,000 m ground under the eye.
+                res.data = std::make_shared<std::string>(shelf);
+                return res;
+            }
+            res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+            return res;
+        };
+        map.setCenterClampedToGround(true);
+        map.setBounds(BoundOptions().withMaxPitch(85.0));
+        map.getStyle().loadJSON(deepRampStyle);
+    }
+
+    // Continuous mode renders on its own as the loop runs; each step is a few milliseconds of it.
+    // Runs until the condition holds, or for as long as the steps last.
+    void render(int steps, const std::function<bool()>& done = nullptr) {
+        for (int i = 0; i < steps && !(done && done()); ++i) {
+            loop.runOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+    }
+
+    double centerAltitude() const { return map.getCameraOptions().centerAltitude.value_or(0.0); }
+    double eyeAltitude() const {
+        const auto eye = map.getFreeCameraOptions().getLocation();
+        return eye ? eye->altitude : 0.0;
+    }
+
+    // On the mountain: the eye a few kilometers up the slope behind the center, the camera lifted
+    // out of it, then flat ground 40 degrees of longitude east, where the eye is over ground that is
+    // not the mountain's. The center's own ground is never known there (the camera is too high over
+    // flat ground for the cover to take its tile), so it keeps the height it last had, 1,000 m.
+    void climbThenJump() {
+        map.jumpTo(CameraOptions().withCenter(LatLng{47.29, 11.4041}).withZoom(15.0).withPitch(85.0).withBearing(0.0));
+        render(1500, [&] { return centerAltitude() > 2500.0; });
+        const auto onMountain = map.getFreeCameraOptions().getLocation();
+        ASSERT_TRUE(onMountain.has_value());
+        ASSERT_GT(rampMeters(onMountain->location.latitude()), 2500.0) << "the eye starts inside the mountain";
+        ASSERT_GT(onMountain->altitude, 2500.0) << "and the camera is lifted out of it";
+
+        map.jumpTo(CameraOptions().withCenter(LatLng{47.60, 51.4041}));
+        const auto flat = map.getFreeCameraOptions().getLocation();
+        ASSERT_TRUE(flat.has_value());
+        ASSERT_EQ(rampMeters(flat->location.latitude()), 0.0) << "the new eye is over flat ground";
+        newEyeGround = flat->location;
+    }
+};
+
+} // namespace
+
+// After a jump from a mountain to flat ground, the height read under the old eye is not the height
+// under the new one. Where the new eye's tile never arrives, the eye is lifted by nothing: the camera
+// keeps the center's last height, 1,000 m, and the eye sits over that, not over the mountain's 2,800 m.
+TEST(TerrainCamera, EyeFarFromWhereItsHeightWasReadDoesNotKeepTheMountainClearance) {
+    EyeLeavesTheMountain test;
+    test.newEyeTile = EyeLeavesTheMountain::NewEyeTile::Missing;
+    test.climbThenJump();
+    test.render(400);
+
+    EXPECT_LT(test.centerAltitude(), 1050.0) << "center altitude " << test.centerAltitude();
+    EXPECT_LT(test.eyeAltitude(), 1300.0) << "eye altitude " << test.eyeAltitude() << " over flat ground";
+}
+
+// Until the tile under the new eye gives a height the eye's height is unknown, not the mountain's;
+// once it does, the eye clears that ground, here 2,000 m.
+TEST(TerrainCamera, EyeHeightIsUnknownUntilTheTileUnderTheNewEyeArrives) {
+    EyeLeavesTheMountain test;
+    test.climbThenJump();
+    test.render(400);
+
+    EXPECT_LT(test.centerAltitude(), 1050.0) << "center altitude " << test.centerAltitude();
+    EXPECT_LT(test.eyeAltitude(), 1300.0) << "eye altitude " << test.eyeAltitude() << " while its tile is on the way";
+
+    test.newEyeTile = EyeLeavesTheMountain::NewEyeTile::Sent;
+    test.render(1500, [&] { return test.eyeAltitude() >= 2005.0; });
+
+    EXPECT_GE(test.eyeAltitude(), 2005.0) << "eye altitude " << test.eyeAltitude() << " over ground 2000";
+    EXPECT_LT(test.eyeAltitude(), 2500.0) << "eye altitude " << test.eyeAltitude() << " over ground 2000";
+}

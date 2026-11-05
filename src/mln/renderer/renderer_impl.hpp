@@ -11,6 +11,7 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <mln/tile/tile_id.hpp>
 
@@ -109,6 +110,9 @@ private:
     /// post an observer message every frame. NaN until one is: ground at 0 m is a height too.
     double lastReportedCenterElevation = std::numeric_limits<double>::quiet_NaN();
     double lastReportedEyeElevation = std::numeric_limits<double>::quiet_NaN();
+    /// The loaded DEM tile the eye's height was last read from: once the eye is outside it with no
+    /// loaded tile under it, that height is not the ground under the eye any more.
+    std::optional<UnwrappedTileID> eyeElevationTile;
     double lastReportedTargetElevation = std::numeric_limits<double>::quiet_NaN();
 
     enum class RenderState {
