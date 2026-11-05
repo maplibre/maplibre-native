@@ -3240,6 +3240,23 @@ static void *windowScreenContext = &windowScreenContext;
   return _mbglMap->getTileLodZoomShift();
 }
 
+- (void)setTerrainHazeColor:(nullable UIColor *)terrainHazeColor {
+  _mbglMap->setTerrainHaze((terrainHazeColor ?: UIColor.clearColor).mgl_color,
+                           _mbglMap->getTerrainHazeRange());
+}
+
+- (UIColor *)terrainHazeColor {
+  return [UIColor mgl_colorWithColor:_mbglMap->getTerrainHazeColor()];
+}
+
+- (void)setTerrainHazeRange:(CGFloat)terrainHazeRange {
+  _mbglMap->setTerrainHaze(_mbglMap->getTerrainHazeColor(), static_cast<float>(terrainHazeRange));
+}
+
+- (CGFloat)terrainHazeRange {
+  return _mbglMap->getTerrainHazeRange();
+}
+
 - (void)setFrustumOffset:(UIEdgeInsets)frustumOffset {
   _mbglMap->setFrustumOffset(MLNEdgeInsetsFromNSEdgeInsets(frustumOffset));
 }

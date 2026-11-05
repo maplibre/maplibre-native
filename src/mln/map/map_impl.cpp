@@ -209,6 +209,8 @@ void Map::Impl::onUpdate() {
                                .tileLodMode = tileLodMode,
                                .terrainLoadMode = terrainLoadMode,
                                .terrainSkirtLength = terrainSkirtLength,
+                               .terrainHazeColor = terrainHazeColor,
+                               .terrainHazeRange = terrainHazeRange,
                                .debugAboveGroundLog = debugAboveGroundLog,
                                .transitionTargetCenter = centerClampedToGround && !transitionIsFling
                                                              ? transform.getTransitionTargetCenter()

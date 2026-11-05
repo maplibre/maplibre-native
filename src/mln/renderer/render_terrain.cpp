@@ -481,6 +481,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         tilesWithDrawables.clear();
     }
 
+    if (updateParameters) {
+        hazeColor = updateParameters->terrainHazeColor;
+        hazeRange = updateParameters->terrainHazeRange;
+    }
+
     // If we don't have a DEM source, we can't create terrain drawables
     if (!demSource) {
         return;
@@ -1636,7 +1641,11 @@ void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
                                                         .exaggeration = getExaggeration(),
                                                         .elevation_offset = elevationOffset,
                                                         .pad1 = 0.0f,
-                                                        .pad2 = 0.0f};
+                                                        .pad2 = 0.0f,
+                                                        .haze_color = {0.0f, 0.0f, 0.0f, 0.0f},
+                                                        .haze_ramp = {0.0f, 0.0f},
+                                                        .pad3 = 0.0f,
+                                                        .pad4 = 0.0f};
 
     depthLg->visitDrawables([&](gfx::Drawable& drawable) {
         auto& u = drawable.mutableUniformBuffers();

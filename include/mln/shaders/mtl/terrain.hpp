@@ -38,9 +38,13 @@ struct alignas(16) TerrainEvaluatedPropsUBO {
     /* 20 */ float elevation_offset;
     /* 24 */ float pad1;
     /* 28 */ float pad2;
-    /* 32 */
+    /* 32 */ float4 haze_color; // distance haze, premultiplied; clear when there is none
+    /* 48 */ float2 haze_ramp;  // haze = clamp(x - y / view depth, 0, 1)^2
+    /* 56 */ float pad3;
+    /* 60 */ float pad4;
+    /* 64 */
 };
-static_assert(sizeof(TerrainEvaluatedPropsUBO) == 32, "wrong size");
+static_assert(sizeof(TerrainEvaluatedPropsUBO) == 64, "wrong size");
 
 )";
 
@@ -65,6 +69,7 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 uv;
     float elevation;
+    float depth; // view depth, for the distance haze
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -98,6 +103,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position  = position,
         .uv        = uv,
         .elevation = elevation,
+        .depth     = position.w,
     };
 }
 
@@ -115,7 +121,15 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     // 1.0 - uv.y. Metal's NDC is Y-up, so the RTT is stored upright and the V must NOT
     // be flipped here - sampling 1.0 - uv.y flips the draped map vertically (north/south
     // swapped about the view). Sample uv.y directly on Metal.
-    return half4(mapTexture.sample(mapSampler, float2(in.uv.x, in.uv.y)));
+    float4 color = mapTexture.sample(mapSampler, float2(in.uv.x, in.uv.y));
+
+    // Distance haze: past where it begins the ground fades toward the haze color, as gl-js's terrain fog
+    // does, to the full color (its alpha) where it ends (the ramp is TerrainLayerTweaker's). A zero
+    // ramp leaves the drape as it is.
+    float haze = clamp(props.haze_ramp.x - props.haze_ramp.y / max(in.depth, 1e-6), 0.0, 1.0);
+    haze *= haze;
+    color.rgb = color.rgb * (1.0 - props.haze_color.a * haze) + props.haze_color.rgb * (color.a * haze);
+    return half4(color);
 }
 )";
 };

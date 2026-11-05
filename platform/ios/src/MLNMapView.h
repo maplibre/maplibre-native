@@ -533,6 +533,28 @@ MLN_EXPORT
 @property (nonatomic, assign) double tileLodZoomShift;
 
 /**
+ The color far 3D terrain fades toward: distance haze that blends the far edge of the terrain
+ into whatever is drawn behind the map, such as a sky the app paints under a transparent map
+ view.
+
+ The color's alpha is the most the ground is blended toward it. The haze shows only while
+ ``terrainHazeRange`` is above `1`. The default is `UIColor.clearColor`, no haze. Has no effect
+ when terrain is not enabled.
+ */
+@property (nonatomic, copy, null_resettable) UIColor *terrainHazeColor;
+
+/**
+ How far the distance haze reaches, in multiples of the map center's distance from the camera.
+
+ Ground that far away and beyond takes the full ``terrainHazeColor``; nearer ground fades toward
+ it as in maplibre-gl-js's terrain fog with a `fog-ground-blend` of `0.5`, so with `3` the haze
+ begins at one and a half times the center's distance. As in maplibre-gl-js, the haze fades in
+ between pitches of 60 and 70 degrees. A value of `1` or less turns the haze off, and one above
+ `1000` is held at `1000`; the default is `0`. Has no effect when terrain is not enabled.
+ */
+@property (nonatomic, assign) CGFloat terrainHazeRange;
+
+/**
  Frustum offset used to disable rendering of elements at the edge of the screen
 
  Offset applied to camera frustum and scissor rectangle. The camrea frustum is modified

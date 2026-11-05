@@ -124,6 +124,8 @@ public:
     TileLodMode tileLodMode = TileLodMode::Default;
     TerrainLoadMode terrainLoadMode = TerrainLoadMode::Quality;
     TerrainSkirtLength terrainSkirtLength = TerrainSkirtLength::Auto;
+    Color terrainHazeColor;
+    float terrainHazeRange = 0.0f;
     /// Off by default. Opt in with Map::setCenterClampedToGround. A gesture holds the center's
     /// height, and its end anchors the center on the ground keeping the view, the way GL JS's
     /// elevationFreeze and recalculateZoomAndCenter do.
