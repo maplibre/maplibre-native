@@ -46,6 +46,7 @@ PropertyExpressionBase::PropertyExpressionBase(PropertyExpressionBase&& other)
       globalStateRefs(std::move(other.globalStateRefs)),
       zoomCurve(std::move(other.zoomCurve)),
       useIntegerZoom_(other.useIntegerZoom_),
+      globalStatePinned_(other.globalStatePinned_),
       isZoomConstant_(other.isZoomConstant_),
       isFeatureConstant_(other.isFeatureConstant_),
       isRuntimeConstant_(other.isRuntimeConstant_),
@@ -59,6 +60,7 @@ PropertyExpressionBase& PropertyExpressionBase::operator=(PropertyExpressionBase
     globalStateRefs = std::move(other.globalStateRefs);
     zoomCurve = other.zoomCurve;
     useIntegerZoom_ = other.useIntegerZoom_;
+    globalStatePinned_ = other.globalStatePinned_;
     isZoomConstant_ = other.isZoomConstant_;
     isFeatureConstant_ = other.isFeatureConstant_;
     isRuntimeConstant_ = other.isRuntimeConstant_;

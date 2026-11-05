@@ -48,7 +48,10 @@ RenderHeatmapLayer::~RenderHeatmapLayer() = default;
 void RenderHeatmapLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     styleDependencies = unevaluated.getDependencies();
-    updateColorRamp();
+    // The ramp's value is unchanged by the global state; evaluate() rebuilds it where it reads a changed key.
+    if (!parameters.isGlobalStateOnly()) {
+        updateColorRamp();
+    }
 }
 
 void RenderHeatmapLayer::layerChanged(const TransitionParameters& parameters,
@@ -60,10 +63,8 @@ void RenderHeatmapLayer::layerChanged(const TransitionParameters& parameters,
 
 void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     if (colorRampGlobalState != parameters.globalState) {
-        const auto& rampValue = unevaluated.get<HeatmapColor>().getValue();
-        const bool rampAffected = (rampValue.getDependencies() & expression::Dependency::GlobalState) &&
-                                  expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
-                                                                       parameters.changedGlobalStateKeys.get());
+        const bool rampAffected = style::readsGlobalState(unevaluated.get<HeatmapColor>().getValue(),
+                                                          parameters.changedGlobalStateKeys.get());
         colorRampGlobalState = parameters.globalState;
         if (rampAffected) {
             updateColorRamp();

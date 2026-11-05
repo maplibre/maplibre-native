@@ -57,7 +57,10 @@ RenderLineLayer::~RenderLineLayer() = default;
 void RenderLineLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     styleDependencies = unevaluated.getDependencies();
-    updateColorRamp();
+    // The ramp's value is unchanged by the global state; evaluate() rebuilds it where it reads a changed key.
+    if (!parameters.isGlobalStateOnly()) {
+        updateColorRamp();
+    }
 
 #if MLN_RENDER_BACKEND_METAL
     if (auto* tweaker = static_cast<LineLayerTweaker*>(layerTweaker.get())) {
@@ -68,10 +71,8 @@ void RenderLineLayer::transition(const TransitionParameters& parameters) {
 
 void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     if (colorRampGlobalState != parameters.globalState) {
-        const auto& rampValue = unevaluated.get<LineGradient>().getValue();
-        const bool rampAffected = (rampValue.getDependencies() & style::expression::Dependency::GlobalState) &&
-                                  style::expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
-                                                                              parameters.changedGlobalStateKeys.get());
+        const bool rampAffected = style::readsGlobalState(unevaluated.get<LineGradient>().getValue(),
+                                                          parameters.changedGlobalStateKeys.get());
         colorRampGlobalState = parameters.globalState;
         if (rampAffected) {
             updateColorRamp();

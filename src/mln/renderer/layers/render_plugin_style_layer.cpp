@@ -56,6 +56,10 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
 }
 
 void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) {
+    // Plugin properties are evaluated without the global state, so its change has nothing to transition.
+    if (parameters.isGlobalStateOnly()) {
+        return;
+    }
     const auto& impl = pluginImpl(baseImpl);
     styleDependencies = impl.getDependencies();
     const auto& definitions = impl.registration->properties;

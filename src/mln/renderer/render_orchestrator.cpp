@@ -198,18 +198,28 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const TransitionOptions transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions
                                                                     : TransitionOptions();
 
-    const TransitionParameters transitionParameters{.now = updateParameters->timePoint,
-                                                    .transition = transitionOptions};
     const auto transitionDuration = transitionOptions.duration.value_or(
         isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero());
 
     const bool globalStateChanged = globalState != updateParameters->globalState;
     std::shared_ptr<const std::set<std::string>> changedGlobalStateKeys;
+    std::optional<GlobalStateChange> globalStateChange;
     if (globalStateChanged && globalState && updateParameters->globalState) {
         changedGlobalStateKeys = std::make_shared<const std::set<std::string>>(
             diffGlobalStateKeys(*globalState, *updateParameters->globalState));
+        globalStateChange = GlobalStateChange{.priorState = globalState, .changedKeys = changedGlobalStateKeys};
     }
     globalState = updateParameters->globalState;
+
+    const TransitionParameters transitionParameters{
+        .now = updateParameters->timePoint, .transition = transitionOptions, .globalStateChange = globalStateChange};
+
+    // Transitions the values that read a changed global-state key, where nothing else changed.
+    std::optional<TransitionParameters> globalStateTransitionParameters;
+    if (globalStateChange) {
+        globalStateTransitionParameters = transitionParameters;
+        globalStateTransitionParameters->globalStateChange->stateOnly = true;
+    }
 
     PropertyEvaluationParameters evaluationParameters{zoomHistory, updateParameters->timePoint, transitionDuration};
     evaluationParameters.zoomChanged = zoomChanged;
@@ -245,6 +255,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     if (lightChanged) {
         renderLight.impl = updateParameters->light;
         renderLight.transition(transitionParameters);
+    } else if (globalStateTransitionParameters) {
+        renderLight.transition(*globalStateTransitionParameters);
     }
 
     if (lightChanged || zoomChanged || globalStateChanged || renderLight.hasTransition()) {
@@ -296,11 +308,14 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
     }
 
-    // Create render layers for newly added layers.
+    // Create render layers for newly added layers. A layer added this frame has
+    // shown nothing yet, so a global-state change leaves it nothing to transition from.
+    const TransitionParameters addedLayerTransitionParameters{.now = updateParameters->timePoint,
+                                                              .transition = transitionOptions};
     for (const auto& entry : layerDiff.added) {
         MLN_TRACE_ZONE(add layer);
         auto renderLayer = LayerManager::get()->createRenderLayer(entry.second);
-        renderLayer->transition(transitionParameters);
+        renderLayer->transition(addedLayerTransitionParameters);
         renderLayers.emplace(entry.first, std::move(renderLayer));
     }
 
@@ -352,6 +367,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         // references the global state.
         const bool globalStateChangedAndMatters = globalStateChanged && !layerAddedOrChanged &&
                                                   (layer.getStyleDependencies() & Dependency::GlobalState);
+
+        // A running transition may read the changed state too, from a value the layer no longer has.
+        if (globalStateTransitionParameters && !layerAddedOrChanged &&
+            (globalStateChangedAndMatters || layer.hasTransition())) {
+            layer.transition(*globalStateTransitionParameters);
+        }
 
         if (layerAddedOrChanged || zoomChangedAndMatters || globalStateChangedAndMatters ||
             evaluationParameters.hasCrossfade || layer.hasTransition()) {

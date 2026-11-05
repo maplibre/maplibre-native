@@ -57,15 +57,16 @@ RenderColorReliefLayer::~RenderColorReliefLayer() = default;
 void RenderColorReliefLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     styleDependencies = unevaluated.getDependencies();
-    updateColorRamp();
+    // The ramp's value is unchanged by the global state; evaluate() rebuilds it where it reads a changed key.
+    if (!parameters.isGlobalStateOnly()) {
+        updateColorRamp();
+    }
 }
 
 void RenderColorReliefLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     if (colorRampGlobalState != parameters.globalState) {
-        const auto& rampValue = unevaluated.get<ColorReliefColor>().getValue();
-        const bool rampAffected = (rampValue.getDependencies() & style::expression::Dependency::GlobalState) &&
-                                  style::expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
-                                                                              parameters.changedGlobalStateKeys.get());
+        const bool rampAffected = style::readsGlobalState(unevaluated.get<ColorReliefColor>().getValue(),
+                                                          parameters.changedGlobalStateKeys.get());
         colorRampGlobalState = parameters.globalState;
         if (rampAffected) {
             updateColorRamp();
