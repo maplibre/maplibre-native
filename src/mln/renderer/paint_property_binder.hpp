@@ -401,7 +401,7 @@ public:
     SourceFunctionPaintPropertyBinder(style::PropertyExpression<T> expression_, T defaultValue_)
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)) {}
-    ~SourceFunctionPaintPropertyBinder() override {}
+    ~SourceFunctionPaintPropertyBinder() override = default;
 
 #if MLN_UBO_CONSOLIDATION
     bool contributesFeatureIndex() const override { return this->featureTable; }
@@ -565,7 +565,7 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
-    ~CompositeFunctionPaintPropertyBinder() override {}
+    ~CompositeFunctionPaintPropertyBinder() override = default;
 
 #if MLN_UBO_CONSOLIDATION
     bool contributesFeatureIndex() const override { return this->featureTable; }
@@ -749,7 +749,7 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
-    ~CompositeCrossFadedPaintPropertyBinder() override {}
+    ~CompositeCrossFadedPaintPropertyBinder() override = default;
 
 #if MLN_UBO_CONSOLIDATION
     bool contributesFeatureIndex() const override { return this->featureTable; }
@@ -1028,18 +1028,19 @@ public:
         }
 #endif
 
-        (([&] {
+        (
+            [&] {
 #if MLN_UBO_CONSOLIDATION
-             if constexpr (isFeatureTableProperty<Ps>) {
-                 binders.template get<Ps>()->enableFeatureTable(featureIndexVector);
-                 if (binders.template get<Ps>()->contributesFeatureIndex()) {
-                     featureIndexRequired = true;
-                 }
-             }
+                if constexpr (isFeatureTableProperty<Ps>) {
+                    binders.template get<Ps>()->enableFeatureTable(featureIndexVector);
+                    if (binders.template get<Ps>()->contributesFeatureIndex()) {
+                        featureIndexRequired = true;
+                    }
+                }
 #endif
-             binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
-         }()),
-         ...);
+                binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
+            }(),
+            ...);
     }
 
     PaintPropertyBinders(PaintPropertyBinders&& other) noexcept {
@@ -1057,10 +1058,11 @@ public:
         other.featureRecordsDirty = true;
 #endif
 
-        (([&] {
-             binders.template get<Ps>()->interleavedVertexBuffer = &interleavedVertexBuffer;
-         }()),
-         ...);
+        (
+            [&] {
+                binders.template get<Ps>()->interleavedVertexBuffer = &interleavedVertexBuffer;
+            }(),
+            ...);
     }
 
     PaintPropertyBinders(const PaintPropertyBinders&) = delete;

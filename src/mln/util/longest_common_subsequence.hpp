@@ -36,7 +36,7 @@ OutIt longest_common_subsequence(InIt a, InIt endA, InIt b, InIt endB, OutIt out
     std::vector<std::vector<std::ptrdiff_t>> vs;
 
     // Self-executing lambda to allow `return` to break from inner loop, and avoid shadowing `v`.
-    [&]() {
+    [&] {
         std::vector<std::ptrdiff_t> v;
         v.resize(2 * D + 1);
         v[1] = 0;

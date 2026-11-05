@@ -40,7 +40,8 @@ template <typename TIter, typename TKey = detail::TIterVal<TIter>, TKey factor =
 TKey order_independent_hash(std::remove_const_t<TIter> cur, const TIter end) noexcept {
     using Value = std::remove_cv_t<typename TIter::value_type>;
     if constexpr (std::is_integral_v<Value>) {
-        detail::TIterVal<TIter> sum = 0, product = 1;
+        detail::TIterVal<TIter> sum = 0;
+        detail::TIterVal<TIter> product = 1;
         for (; cur != end; ++cur) {
             const auto& value = *cur;
             sum += value;
@@ -48,7 +49,8 @@ TKey order_independent_hash(std::remove_const_t<TIter> cur, const TIter end) noe
         }
         return sum ^ product;
     } else {
-        TKey sum = 0, product = 1;
+        TKey sum = 0;
+        TKey product = 1;
         const std::hash<Value> hasher;
         for (; cur != end; ++cur) {
             const auto value = static_cast<TKey>(hasher(*cur));

@@ -190,13 +190,13 @@ public:
     }
 
     template <std::size_t I = 0, typename... Tp>
-    inline void set(std::size_t, std::tuple<Tp...>, std::size_t)
+    void set(std::size_t, std::tuple<Tp...>, std::size_t)
         requires(I == sizeof...(Tp))
     {}
 
     /// Set item value
     template <std::size_t I = 0, typename... Tp>
-    inline void set(std::size_t i, std::tuple<Tp...> tuple, std::size_t tupleIndex)
+    void set(std::size_t i, std::tuple<Tp...> tuple, std::size_t tupleIndex)
         requires(I < sizeof...(Tp))
     {
         if (tupleIndex == 0) {

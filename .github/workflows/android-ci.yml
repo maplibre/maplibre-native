@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   pre_job:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_modified != 'true' }}
     steps:
@@ -36,7 +36,7 @@ jobs:
           files_yaml_from_source_file: .github/changed-files.yml
 
   android-build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 240
     needs:
       - pre_job
@@ -198,7 +198,7 @@ jobs:
         run: sccache --show-stats
 
   android-build-cpp-test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
 
     needs:
@@ -247,7 +247,7 @@ jobs:
       matrix:
         flavor: [opengl, vulkan]
 
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 120
 
     needs:
@@ -274,7 +274,7 @@ jobs:
           flavor: ${{ matrix.flavor }}
 
   android-build-webgpu-dawn:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     needs:
       - pre_job
@@ -304,7 +304,7 @@ jobs:
         run: sccache --show-stats
 
   android-build-webgpu-wgpu:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     needs:
       - pre_job
@@ -370,7 +370,7 @@ jobs:
         run: sccache --show-stats
 
   android-ci-result:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       actions: write
       contents: write

@@ -65,7 +65,7 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
             // 1 grid unit. (with a 4px grid, this covers a 12px by 12px area)
             if (std::abs(thisTileSymbol.coord.x - scaledSymbolCoord.x) <= tolerance &&
                 std::abs(thisTileSymbol.coord.y - scaledSymbolCoord.y) <= tolerance &&
-                zoomCrossTileIDs.find(thisTileSymbol.crossTileID) == zoomCrossTileIDs.end()) {
+                !zoomCrossTileIDs.contains(thisTileSymbol.crossTileID)) {
                 // Once we've marked ourselves duplicate against this parent
                 // symbol, don't let any other symbols at the same zoom level
                 // duplicate against the same parent (see issue #10844)
@@ -257,7 +257,7 @@ void CrossTileSymbolIndex::pruneUnusedLayers(const std::set<std::string>& usedLa
     MLN_TRACE_FUNC();
 
     for (auto it = layerIndexes.begin(); it != layerIndexes.end();) {
-        if (usedLayers.find(it->first) == usedLayers.end()) {
+        if (!usedLayers.contains(it->first)) {
             it = layerIndexes.erase(it);
         } else {
             ++it;

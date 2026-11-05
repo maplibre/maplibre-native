@@ -20,7 +20,7 @@ using namespace mln;
 */
 
 TEST(BiDi, ArabicShaping) {
-    EXPECT_EQ(applyArabicShaping(u"اليَمَن‎‎"), u"ﺍﻟﻴﹷﻤﹷﻦ‎‎");
+    EXPECT_EQ(applyArabicShaping(u"اليَمَن\u200E\u200E"), u"ﺍﻟﻴﹷﻤﹷﻦ\u200E\u200E");
 }
 
 TEST(BiDi, Tashkeel) {
@@ -28,8 +28,8 @@ TEST(BiDi, Tashkeel) {
 }
 
 TEST(BiDi, MixedShaping) {
-    EXPECT_EQ(applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat al-Iskandarīyah"),
-              u"ﻣﻜﺘﺒﺔ ﺍﻹﺳﻜﻨﺪﺭﻳﺔ‎‎ Maktabat "
+    EXPECT_EQ(applyArabicShaping(u"مكتبة الإسكندرية\u200E\u200E Maktabat al-Iskandarīyah"),
+              u"ﻣﻜﺘﺒﺔ ﺍﻹﺳﻜﻨﺪﺭﻳﺔ\u200E\u200E Maktabat "
               u"al-Iskandarīyah");
 }
 
@@ -40,7 +40,7 @@ TEST(BiDi, ReverseArabic) {
 
 TEST(BiDi, ReverseMixed) {
     BiDi bidi;
-    EXPECT_EQ(bidi.processText(applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat "
+    EXPECT_EQ(bidi.processText(applyArabicShaping(u"مكتبة الإسكندرية\u200E\u200E Maktabat "
                                                   u"al-Iskandarīyah"),
                                {}),
               std::vector<std::u16string>{u" Maktabat al-Iskandarīyahﺔﻳﺭﺪﻨﻜﺳﻹﺍ ﺔﺒﺘﻜﻣ"});
@@ -52,7 +52,7 @@ TEST(BiDi, WithLineBreaks) {
     expected.emplace_back(u" ﺔﻳﺭﺪﻨﻜﺳﻹﺍ ﺔﺒﺘﻜﻣ");
     expected.emplace_back(u"Maktabat al-");
     expected.emplace_back(u"Iskandarīyah");
-    EXPECT_EQ(bidi.processText(applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat "
+    EXPECT_EQ(bidi.processText(applyArabicShaping(u"مكتبة الإسكندرية\u200E\u200E Maktabat "
                                                   u"al-Iskandarīyah"),
                                {18, 30}),
               expected);
@@ -63,14 +63,14 @@ TEST(BiDi, StyledText) {
     // styled blocks that are contiguous in the input
     BiDi bidi;
     std::vector<StyledText> expected;
-    StyledText input(applyArabicShaping(u"مكتبة الإسكندرية‎‎ Maktabat al-Iskandarīyah"),
+    StyledText input(applyArabicShaping(u"مكتبة الإسكندرية\u200E\u200E Maktabat al-Iskandarīyah"),
                      std::vector<uint8_t>{0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3,
                                           3, 3, 3, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7});
 
     expected.emplace_back(StyledText(u"ﺔﺒﺘﻜﻣ", std::vector<uint8_t>{0, 0, 0, 0, 0}));
     EXPECT_EQ(expected.rbegin()->first.size(), expected.rbegin()->second.size());
-    expected.emplace_back(StyledText(u" ‎‎ﺔﻳﺭﺪﻨﻜﺳﻹﺍ ",
-                                     std::vector<uint8_t>{2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1}));
+    expected.emplace_back(
+        StyledText(u" \u200E\u200Eﺔﻳﺭﺪﻨﻜﺳﻹﺍ ", std::vector<uint8_t>{2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1}));
     EXPECT_EQ(expected.rbegin()->first.size(), expected.rbegin()->second.size());
     expected.emplace_back(StyledText(u"Maktabat al-", std::vector<uint8_t>{2, 3, 3, 3, 3, 3, 4, 5, 5, 5, 5, 6}));
     EXPECT_EQ(expected.rbegin()->first.size(), expected.rbegin()->second.size());

@@ -161,6 +161,14 @@ if(MLN_WITH_OPENGL)
 endif()
 
 
+if(MLN_WITH_METAL)
+    target_sources(
+        mbgl-test
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/test/renderer/metal_renderable.test.cpp
+    )
+endif()
+
 if(MLN_WITH_VULKAN)
     target_sources(
         mbgl-test
