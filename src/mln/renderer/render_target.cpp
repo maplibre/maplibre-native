@@ -68,7 +68,7 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     parameters.renderPass = parameters.encoder->createRenderPass("render target",
                                                                  {.renderable = *offscreenTexture,
                                                                   .clearColor = Color{0.0f, 0.0f, 0.0f, 1.0f},
-                                                                  .clearDepth = {},
+                                                                  .clearDepth = 1.0f,
                                                                   .clearStencil = {}});
 #if MLN_RENDER_BACKEND_OPENGL
     parameters.updateStencilBufferAvailability();
