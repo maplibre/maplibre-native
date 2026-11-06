@@ -12,7 +12,17 @@ namespace mln {
 class BucketParameters;
 class RenderLineLayer;
 
-using LineBinders = PaintPropertyBinders<style::LinePaintProperties::DataDrivenProperties>;
+// Stored once per feature. Another layer opts in by passing its own list.
+using LineFeatureTableProperties = TypeList<style::LineBlur,
+                                            style::LineColor,
+                                            style::LineFloorWidth,
+                                            style::LineGapWidth,
+                                            style::LineOffset,
+                                            style::LineOpacity,
+                                            style::LinePattern,
+                                            style::LineWidth>;
+
+using LineBinders = PaintPropertyBinders<style::LinePaintProperties::DataDrivenProperties, LineFeatureTableProperties>;
 using LineLayoutVertex = gfx::Vertex<TypeList<attributes::pos_normal, attributes::data<uint8_t, 4>>>;
 
 class LineBucket final : public Bucket {

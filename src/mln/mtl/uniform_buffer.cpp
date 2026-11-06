@@ -45,9 +45,10 @@ void UniformBufferArray::bindMtl(RenderPass& renderPass) const noexcept {
         if (!uniformBuffer) continue;
         const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer);
         const auto& resource = buffer.getBufferResource();
-        if (id != shaders::idDrawableReservedFragmentOnlyUBO) {
-            renderPass.bindVertex(resource, 0, id);
-        }
+        // Fill and fill-extrusion store the per-feature table in the fragment-reserved
+        // slot and sample it from the vertex shader. Other layers keep a fragment-only
+        // buffer there; binding it on the vertex stage is unused.
+        renderPass.bindVertex(resource, 0, id);
         if (id != shaders::idDrawableReservedVertexOnlyUBO) {
             renderPass.bindFragment(resource, 0, id);
         }

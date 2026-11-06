@@ -1,5 +1,6 @@
 #import "MBXBenchViewController.h"
 #import "MBXBenchAppDelegate.h"
+#import "MLNLoggingConfiguration.h"
 #import "MLNMapView_Private.h"
 #import "MLNOfflineStorage_Private.h"
 #import "MLNSettings_Private.h"
@@ -7,12 +8,48 @@
 #include "BenchmarkAdvancedMetrics.h"
 #include "locations.hpp"
 
+#include <atomic>
 #include <chrono>
+#include <cstdint>
 
 #include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/map.hpp>
 #include <mln/style/style.hpp>
+
+namespace {
+
+std::atomic<uint64_t> cacheMisses{0};
+
+BOOL logMessageIsCacheMiss(NSString *message) {
+  if (message.length == 0) {
+    return NO;
+  }
+
+  static NSString *const responseMarker = @" returned responseCode: ";
+  NSRange responseRange = [message rangeOfString:responseMarker];
+  if (responseRange.location != NSNotFound) {
+    NSString *codeText = [[message substringFromIndex:NSMaxRange(responseRange)]
+        stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSCharacterSet *nonDigits = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
+    if (codeText.length == 0 ||
+        [codeText rangeOfCharacterFromSet:nonDigits].location != NSNotFound) {
+      return NO;
+    }
+    return codeText.integerValue != 304;
+  }
+
+  return [message hasPrefix:@"Requesting:"] && [message containsString:@" failed with error:"];
+}
+
+struct LocationResult {
+  std::string name;
+  double encodingTime = 0;
+  double renderingTime = 0;
+  uint64_t cacheMisses = 0;
+};
+
+}  // namespace
 
 @protocol BenchMapDelegate <NSObject>
 - (void)mapDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
@@ -51,6 +88,25 @@ protected:
 @end
 
 @implementation MBXBenchViewController
+
++ (void)installCacheMissLogger {
+#ifndef MLN_LOGGING_DISABLED
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    MLNLoggingConfiguration *configuration = [MLNLoggingConfiguration sharedConfiguration];
+    MLNLoggingBlockHandler previous = configuration.handler;
+    configuration.handler =
+        ^(MLNLoggingLevel level, NSString *filePath, NSUInteger line, NSString *message) {
+          if (logMessageIsCacheMiss(message)) {
+            cacheMisses.fetch_add(1, std::memory_order_relaxed);
+          }
+          if (previous) {
+            previous(level, filePath, line, message);
+          }
+        };
+  });
+#endif
+}
 
 // MARK: - Setup
 
@@ -186,7 +242,7 @@ double totalFrameEncodingTime = 0;
 double totalFrameRenderingTime = 0;
 BenchmarkAdvancedMetrics *advancedMetrics = nil;
 std::chrono::steady_clock::time_point started;
-std::vector<std::pair<std::string, std::pair<double, double>>> result;
+std::vector<LocationResult> result;
 
 static const int benchmarkDuration = 5;  // seconds
 
@@ -215,6 +271,7 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
 
 - (void)startBenchmarkIteration {
   if (mln::bench::locations.size() > idx) {
+    cacheMisses.store(0, std::memory_order_relaxed);
     if (advancedMetrics == nil) {
       advancedMetrics = [[BenchmarkAdvancedMetrics alloc] init];
       [advancedMetrics start:1];
@@ -245,16 +302,17 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
     NSLog(@"Result:");
     size_t colWidth = 0;
     for (const auto &row : result) {
-      colWidth = std::max(row.first.size(), colWidth);
+      colWidth = std::max(row.name.size(), colWidth);
     }
 
     double totalFrameEncodingTime = 0;
     double totalFrameRenderingTime = 0;
     for (const auto &row : result) {
-      NSLog(@"| %-*s | %4.2f ms | %4.2f ms |", int(colWidth), row.first.c_str(),
-            1e3 * row.second.first, 1e3 * row.second.second);
-      totalFrameEncodingTime += row.second.first;
-      totalFrameRenderingTime += row.second.second;
+      NSLog(@"| %-*s | %4.2f ms | %4.2f ms | %llu cache misses |", int(colWidth), row.name.c_str(),
+            1e3 * row.encodingTime, 1e3 * row.renderingTime,
+            static_cast<unsigned long long>(row.cacheMisses));
+      totalFrameEncodingTime += row.encodingTime;
+      totalFrameRenderingTime += row.renderingTime;
     }
 
     NSLog(@"Average frame encoding time: %4.2f ms", totalFrameEncodingTime * 1e3 / result.size());
@@ -315,10 +373,13 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
       // Report FPS
       const auto frameEncodingTime = static_cast<double>(totalFrameEncodingTime) / frames;
       const auto frameRenderingTime = static_cast<double>(totalFrameRenderingTime) / frames;
-      result.emplace_back(mln::bench::locations[idx].name,
-                          std::make_pair(frameEncodingTime, frameRenderingTime));
-      NSLog(@"- Frame encoding time: %.1f ms, Frame rendering time: %.1f ms (%d frames)",
-            frameEncodingTime * 1e3, frameRenderingTime * 1e3, frames);
+      const uint64_t misses = cacheMisses.load(std::memory_order_relaxed);
+      result.push_back(
+          {mln::bench::locations[idx].name, frameEncodingTime, frameRenderingTime, misses});
+      NSLog(@"- Frame encoding time: %.1f ms, Frame rendering time: %.1f ms (%d frames, %llu cache "
+            @"misses)",
+            frameEncodingTime * 1e3, frameRenderingTime * 1e3, frames,
+            static_cast<unsigned long long>(misses));
 
       // Start benchmarking the next location.
       idx++;

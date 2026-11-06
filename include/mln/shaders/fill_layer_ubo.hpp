@@ -14,7 +14,11 @@ struct alignas(16) FillDrawableUBO {
     // Interpolations
     /* 64 */ float color_t;
     /* 68 */ float opacity_t;
+#if MLN_UBO_CONSOLIDATION
+    /* 72 */ std::uint32_t feature_base;
+#else
     /* 72 */ float pad1;
+#endif
     /* 76 */ float pad2;
     /* 80 */
 };
@@ -29,7 +33,11 @@ struct alignas(16) FillOutlineDrawableUBO {
     // Interpolations
     /* 64 */ float outline_color_t;
     /* 68 */ float opacity_t;
+#if MLN_UBO_CONSOLIDATION
+    /* 72 */ std::uint32_t feature_base;
+#else
     /* 72 */ float pad1;
+#endif
     /* 76 */ float pad2;
     /* 80 */
 };
@@ -49,7 +57,11 @@ struct alignas(16) FillPatternDrawableUBO {
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
     /* 96 */ float color_t;
+#if MLN_UBO_CONSOLIDATION
+    /*100 */ std::uint32_t feature_base;
+#else
     /*100 */ float pad1;
+#endif
     /*104 */ float pad2;
     /*108 */ float pad3;
     /*112 */
@@ -80,7 +92,11 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
     /* 96 */ float color_t;
+#if MLN_UBO_CONSOLIDATION
+    /*100 */ std::uint32_t feature_base;
+#else
     /*100 */ float pad1;
+#endif
     /*104 */ float pad2;
     /*108 */ float pad3;
     /*112 */

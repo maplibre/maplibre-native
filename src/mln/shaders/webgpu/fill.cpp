@@ -10,10 +10,9 @@ namespace shaders {
 
 using FillShaderSource = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::WebGPU>;
 
-const std::array<AttributeInfo, 3> FillShaderSource::attributes = {
+const std::array<AttributeInfo, 2> FillShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float4, idFillColorVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::UInt, idFillColorVertexAttribute},
 };
 const std::array<TextureInfo, 0> FillShaderSource::textures = {};
 
@@ -22,10 +21,9 @@ const std::array<TextureInfo, 0> FillShaderSource::textures = {};
 
 using FillOutlineShaderSource = ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::WebGPU>;
 
-const std::array<AttributeInfo, 3> FillOutlineShaderSource::attributes = {
+const std::array<AttributeInfo, 2> FillOutlineShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float4, idFillOutlineColorVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::UInt, idFillColorVertexAttribute},
 };
 const std::array<TextureInfo, 0> FillOutlineShaderSource::textures = {};
 
@@ -34,12 +32,9 @@ const std::array<TextureInfo, 0> FillOutlineShaderSource::textures = {};
 
 using FillPatternShaderSource = ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::WebGPU>;
 
-const std::array<AttributeInfo, 5> FillPatternShaderSource::attributes = {
+const std::array<AttributeInfo, 2> FillPatternShaderSource::attributes = {
     AttributeInfo{4, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Float4, idFillColorVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::UShort4, idFillPatternFromVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::UInt, idFillColorVertexAttribute},
 };
 const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {TextureInfo{0, idFillImageTexture}};
 
@@ -48,12 +43,9 @@ const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {TextureInf
 
 using FillOutlinePatternShaderSource = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::WebGPU>;
 
-const std::array<AttributeInfo, 5> FillOutlinePatternShaderSource::attributes = {
+const std::array<AttributeInfo, 2> FillOutlinePatternShaderSource::attributes = {
     AttributeInfo{4, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Float4, idFillColorVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::UShort4, idFillPatternFromVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::UInt, idFillColorVertexAttribute},
 };
 const std::array<TextureInfo, 1> FillOutlinePatternShaderSource::textures = {TextureInfo{0, idFillImageTexture}};
 
