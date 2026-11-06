@@ -383,7 +383,7 @@ TEST(PluginPaintBinder, RetainedVectorViewsOutliveTileData) {
             util::read_file(std::string("test/fixtures/map/issue12432/0-0-0.") + (mlt ? "mlt" : "mvt")));
         std::unique_ptr<GeometryTileData> tile;
         if (mlt)
-            tile = std::make_unique<VectorMLTTileData>(bytes, false);
+            tile = std::make_unique<VectorMLTTileData>(bytes);
         else
             tile = std::make_unique<VectorMVTTileData>(bytes);
         auto layer = tile->getLayer("admin");
