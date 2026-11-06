@@ -111,6 +111,14 @@ public abstract class MapLibreAnimator<K> extends ValueAnimator implements Value
     return target;
   }
 
+  /**
+   * Whether this animator still delivers values to the given listener, and is either running or ended at its target.
+   * An animator that was canceled before reaching its target, or that was made invalid, returns false.
+   */
+  boolean isRunningOrFinishedFor(@NonNull AnimationsValueChangeListener<?> listener) {
+    return !invalid && updateListener == listener && (isStarted() || getAnimatedFraction() == 1f);
+  }
+
   abstract TypeEvaluator provideEvaluator();
 
   interface AnimationsValueChangeListener<K> {
