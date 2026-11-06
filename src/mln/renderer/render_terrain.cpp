@@ -890,7 +890,7 @@ double RenderTerrain::getElevationForLatLng(const LatLng& latLng) const {
     return getElevationWithExaggeration(sampleTile, localX, localY);
 }
 
-std::optional<double> RenderTerrain::findElevationForLatLng(const LatLng& latLng) const {
+std::optional<double> RenderTerrain::findElevationForLatLng(const LatLng& latLng, UnwrappedTileID* from) const {
     if (!demSource) {
         return std::nullopt;
     }
@@ -922,12 +922,15 @@ std::optional<double> RenderTerrain::findElevationForLatLng(const LatLng& latLng
     if (!normalizeTileCoordinates(covered, coveredX, coveredY)) {
         return std::nullopt;
     }
-    const bool found = std::any_of(renderTiles->begin(), renderTiles->end(), [&](const RenderTile& renderTile) {
+    const auto found = std::find_if(renderTiles->begin(), renderTiles->end(), [&](const RenderTile& renderTile) {
         return renderTile.getTile().kind == Tile::Kind::RasterDEM &&
                (renderTile.id == covered || covered.isChildOf(renderTile.id));
     });
-    if (!found) {
+    if (found == renderTiles->end()) {
         return std::nullopt;
+    }
+    if (from) {
+        *from = found->id;
     }
     return getElevationWithExaggeration(sampleTile, localX, localY);
 }

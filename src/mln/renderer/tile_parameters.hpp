@@ -3,6 +3,7 @@
 #include <mln/map/mode.hpp>
 #include <mln/actor/scheduler.hpp>
 #include <mln/util/feature.hpp>
+#include <mln/util/geo.hpp>
 
 #include <array>
 #include <memory>
@@ -63,6 +64,10 @@ public:
     /// Where coverTileLimit measures from (normalized web-mercator): the ground under the
     /// camera, RenderTerrain::meshTileCapOrigin, the same point the mesh-tile cap uses.
     std::array<double, 2> coverTileLimitOrigin{{0.0, 0.0}};
+    /// A position the source asks a tile for as well, wherever the view is: the ground under the
+    /// camera's eye, which is often behind or below the view and so outside the frustum the cover
+    /// is taken from. Nothing is asked for where the cover already holds a tile over it.
+    std::optional<LatLng> alsoCover = std::nullopt;
 };
 
 } // namespace mln

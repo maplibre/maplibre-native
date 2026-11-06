@@ -312,6 +312,15 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                                  : 0;
     tileParameters.coverTileLimitOrigin = RenderTerrain::meshTileCapOrigin(updateParameters->transformState);
 
+    // The ground under the camera's eye has to be known to keep the eye above it
+    // (Renderer::Impl::render), and its DEM tile lies outside the view's cover as often as not.
+    std::optional<LatLng> terrainEye;
+    if (terrainEnabled) {
+        if (const auto eye = updateParameters->transformState.getFreeCameraOptions().getLocation()) {
+            terrainEye = eye->location;
+        }
+    }
+
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;
 
@@ -540,6 +549,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             sourceNeedsRendering = true;
         }
         tileParameters.coverTileLimit = isDemSource ? 0 : coverTileLimit;
+        tileParameters.alsoCover = isDemSource ? terrainEye : std::nullopt;
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);

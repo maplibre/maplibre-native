@@ -6,6 +6,7 @@
 #include <mln/map/transform.hpp>
 #include <mln/math/clamp.hpp>
 #include <mln/actor/scheduler.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/tile_range.hpp>
 #include <mln/util/enum.hpp>
@@ -151,6 +152,21 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                               "Provided camera options returned " + std::to_string(idealTiles.size()) +
                                   " tiles, only " + util::toString(idealTiles[0]) + " is taken in Tile mode.");
             idealTiles = {idealTiles[0]};
+        }
+
+        // The tile over a position the cover leaves out, at the cover's finest zoom.
+        if (parameters.alsoCover) {
+            const auto at = Projection::project(*parameters.alsoCover, idealZoom);
+            const UnwrappedTileID unwrapped(static_cast<uint8_t>(idealZoom),
+                                            static_cast<int64_t>(std::floor(at.x)),
+                                            static_cast<int64_t>(std::floor(at.y)));
+            const OverscaledTileID extra(static_cast<uint8_t>(tileZoom), unwrapped.wrap, unwrapped.canonical);
+            if (std::none_of(idealTiles.begin(), idealTiles.end(), [&](const OverscaledTileID& tile) {
+                    return tile.wrap == extra.wrap &&
+                           (tile.canonical == extra.canonical || extra.canonical.isChildOf(tile.canonical));
+                })) {
+                idealTiles.push_back(extra);
+            }
         }
     }
 
