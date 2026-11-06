@@ -101,7 +101,6 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
         .withConstrainMode(ConstrainMode::HeightOnly)
         .withViewportMode(ViewportMode::Default)
         .withCrossSourceCollisions(NativeMapOptions::crossSourceCollisions(_env, jNativeMapOptions))
-        .withFastPFOREnabled(NativeMapOptions::fastPFOREnabled(_env, jNativeMapOptions))
         .withRenderedFeatureInfo(NativeMapOptions::featureInfoEnabled(_env, jNativeMapOptions));
 
     // Create the core map

@@ -226,9 +226,8 @@ private:
 
 class VectorMLTTileData::Impl {
 public:
-    Impl(std::shared_ptr<const std::string> data_, bool fastPFOREnabled_)
-        : data(std::move(data_)),
-          fastPFOREnabled(fastPFOREnabled_) {}
+    explicit Impl(std::shared_ptr<const std::string> data_)
+        : data(std::move(data_)) {}
 
     Impl(const Impl&) = default;
 
@@ -238,7 +237,7 @@ public:
         if (data && !tile) {
             try {
                 mlt::DataView tileData{data->data(), data->size()};
-                tile = std::make_shared<MapLibreTile>(mlt::Decoder(fastPFOREnabled).decode(tileData));
+                tile = std::make_shared<MapLibreTile>(mlt::Decoder().decode(tileData));
             } catch (const std::exception& ex) {
                 Log::Warning(Event::ParseTile, "MLT parse failed: " + std::string(ex.what()));
             }
@@ -270,11 +269,10 @@ public:
 private:
     mutable std::shared_ptr<const std::string> data;
     mutable std::shared_ptr<const MapLibreTile> tile;
-    bool fastPFOREnabled;
 };
 
-VectorMLTTileData::VectorMLTTileData(std::shared_ptr<const std::string> data, bool fastPFOREnabled)
-    : impl(std::make_unique<Impl>(std::move(data), fastPFOREnabled)) {}
+VectorMLTTileData::VectorMLTTileData(std::shared_ptr<const std::string> data)
+    : impl(std::make_unique<Impl>(std::move(data))) {}
 
 VectorMLTTileData::VectorMLTTileData(const VectorMLTTileData& other)
     : impl(other.impl ? std::make_unique<Impl>(*other.impl) : nullptr) {}
