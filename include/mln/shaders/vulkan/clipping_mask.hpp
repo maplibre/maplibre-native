@@ -42,7 +42,6 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan> {
             projection.tile_mercator_coords = tile_mercator_coords;
             projection.clipping_plane = clipping_plane;
             projection.projection_transition = transition.x;
-            projection.depth_offset = 0.0;
             projection.translate = vec2(0.0);
             gl_Position = projectTile(vec2(position), vec2(position), projection);
             gl_Position.y *= -1.0;

@@ -128,7 +128,7 @@ struct ProjectionUBO {
     vec4 tile_mercator_coords;
     vec4 clipping_plane;
     float projection_transition;
-    float depth_offset;
+    float pad1;
     vec2 translate;
 };
 
@@ -191,8 +191,8 @@ float globeComputeClippingZ(vec3 spherePos, ProjectionUBO projection) {
 vec4 interpolateProjection(vec2 posInTile, vec3 spherePos, float elevation, ProjectionUBO projection) {
     const vec3 elevatedPos = spherePos * (1.0 + elevation / GLOBE_RADIUS);
     vec4 globePosition = projection.matrix * vec4(elevatedPos, 1.0);
-    // Clip the far side of the globe through Z; the layer's depth shift keeps layer order.
-    globePosition.z = globeComputeClippingZ(elevatedPos, projection) * globePosition.w - projection.depth_offset;
+    // Layers on the globe draw in order without a depth test, so Z only has to clip the far side of the globe.
+    globePosition.z = globeComputeClippingZ(elevatedPos, projection) * globePosition.w;
 
     if (projection.projection_transition > 0.999) {
         return globePosition;

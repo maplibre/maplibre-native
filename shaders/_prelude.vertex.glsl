@@ -80,7 +80,7 @@ layout (std140) uniform ProjectionUBO {
     highp vec4 u_projection_tile_mercator_coords;
     highp vec4 u_projection_clipping_plane;
     highp float u_projection_transition;
-    highp float u_projection_depth_offset;
+    lowp float projection_pad1;
     highp vec2 u_projection_translate;
 };
 
@@ -144,8 +144,8 @@ float globeComputeClippingZ(vec3 spherePos) {
 vec4 interpolateProjection(vec2 posInTile, vec3 spherePos, float elevation) {
     vec3 elevatedPos = spherePos * (1.0 + elevation / GLOBE_RADIUS);
     vec4 globePosition = u_projection_matrix * vec4(elevatedPos, 1.0);
-    // Clip the far side of the globe through Z; the layer's depth shift keeps layer order.
-    globePosition.z = globeComputeClippingZ(elevatedPos) * globePosition.w - u_projection_depth_offset;
+    // Layers on the globe draw in order without a depth test, so Z only has to clip the far side of the globe.
+    globePosition.z = globeComputeClippingZ(elevatedPos) * globePosition.w;
 
     if (u_projection_transition > 0.999) {
         return globePosition;
