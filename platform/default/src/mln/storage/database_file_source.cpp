@@ -10,6 +10,7 @@
 #include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/platform.hpp>
+#include <mln/util/string.hpp>
 #include <mln/util/thread.hpp>
 
 #include <map>
@@ -18,9 +19,19 @@
 namespace mln {
 class DatabaseFileSourceThread {
 public:
-    DatabaseFileSourceThread(std::shared_ptr<FileSource> onlineFileSource_, const std::string& cachePath)
+    DatabaseFileSourceThread(std::shared_ptr<FileSource> onlineFileSource_,
+                             const std::string& cachePath,
+                             uint64_t maximumAmbientCacheSize)
         : db(std::make_unique<OfflineDatabase>(cachePath, onlineFileSource_->getResourceOptions().tileServerOptions())),
-          onlineFileSource(std::move(onlineFileSource_)) {}
+          onlineFileSource(std::move(onlineFileSource_)) {
+        if (maximumAmbientCacheSize != util::DEFAULT_MAX_CACHE_SIZE) {
+            if (auto error = db->setMaximumAmbientCacheSize(maximumAmbientCacheSize)) {
+                Log::Error(
+                    Event::Database,
+                    "Failed to apply maximum ambient cache size to " + util::toString(error) + " for " + cachePath);
+            }
+        }
+    }
 
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
         std::optional<Response> offlineResponse = (resource.storagePolicy != Resource::StoragePolicy::Volatile)
@@ -166,7 +177,8 @@ public:
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_DATABASE),
               "DatabaseFileSource",
               std::move(onlineFileSource),
-              resourceOptions_.cachePath())),
+              resourceOptions_.cachePath(),
+              resourceOptions_.maximumCacheSize())),
           resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
 
