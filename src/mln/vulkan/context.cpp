@@ -669,8 +669,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
     clipping.pipelineInfo.setScissorRect({.x = 0,
                                           .y = 0,
-                                          .width = clipping.pipelineInfo.viewExtent.width,
-                                          .height = clipping.pipelineInfo.viewExtent.height});
+                                          .width = static_cast<uint32_t>(clipping.pipelineInfo.viewport.width),
+                                          .height = static_cast<uint32_t>(clipping.pipelineInfo.viewport.height)});
     clipping.pipelineInfo.setDynamicValues(backend, commandBuffer);
 
     const std::array<vk::Buffer, 1> vertexBuffers = {clipping.vertexBuffer->getVulkanBuffer()};
@@ -775,10 +775,11 @@ bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
     const auto& pipeline = shaderImpl.getPipeline(globeClipping.pipelineInfo);
 
     commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
-    globeClipping.pipelineInfo.setScissorRect({.x = 0,
-                                               .y = 0,
-                                               .width = globeClipping.pipelineInfo.viewExtent.width,
-                                               .height = globeClipping.pipelineInfo.viewExtent.height});
+    globeClipping.pipelineInfo.setScissorRect(
+        {.x = 0,
+         .y = 0,
+         .width = static_cast<uint32_t>(globeClipping.pipelineInfo.viewport.width),
+         .height = static_cast<uint32_t>(globeClipping.pipelineInfo.viewport.height)});
     globeClipping.pipelineInfo.setDynamicValues(backend, commandBuffer);
 
     auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();

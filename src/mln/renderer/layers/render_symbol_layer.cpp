@@ -548,9 +548,6 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
     constexpr bool inViewportPixelUnits = false;
     constexpr bool nearClipped = false;
     constexpr bool aligned = false;
-    constexpr bool is3d = false;
-    constexpr bool enableDepth = true;
-    constexpr std::int32_t subLayerIndex = 1;
 
     const auto textTranslation = evaluated.get<TextTranslate>();
     const auto iconTranslation = evaluated.get<IconTranslate>();
@@ -577,13 +574,9 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         return LayerTweaker::getTileMatrix(tileID,
                                            state,
                                            transformParams,
-                                           layerIndex,
                                            translation,
                                            translationAnchor,
                                            origin,
-                                           is3d,
-                                           enableDepth,
-                                           subLayerIndex,
                                            nearClipped,
                                            inViewportPixelUnits,
                                            aligned);

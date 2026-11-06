@@ -67,13 +67,9 @@ public:
     static mat4 getTileMatrix(const UnwrappedTileID& tileID,
                               const TransformState& transformState,
                               const TransformParameters& transformParams,
-                              const uint32_t currentLayerIndex,
                               const std::array<float, 2>& translation,
                               style::TranslateAnchorType anchor,
                               const std::optional<mln::Point<double>>& origin,
-                              bool is3d,
-                              bool useDepth,
-                              std::int32_t subLayerIndex,
                               bool nearClipped,
                               bool inViewportPixelUnits,
                               bool aligned);
@@ -106,18 +102,9 @@ protected:
     gfx::UniformBufferPtr projectionUniformBuffer;
 #endif
 
-    /// Multiplies with the projection matrix (either default, near clipped or aligned) for the given drawable
-    static void multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
-                                             const PaintParameters& parameters,
-                                             const gfx::Drawable& drawable,
-                                             bool nearClipped,
-                                             bool aligned);
+    /// Multiplies with the projection matrix (either default, near clipped or aligned)
     static void multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
                                              const TransformParameters& transformParams,
-                                             const uint32_t currentLayerIndex,
-                                             bool is3d,
-                                             bool useDepth,
-                                             std::int32_t subLayerIndex,
                                              bool nearClipped,
                                              bool aligned);
 
