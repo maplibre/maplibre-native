@@ -4,6 +4,7 @@
 #include <mln/test/stub_map_observer.hpp>
 #include <mln/test/fixture_log_observer.hpp>
 #include <mln/test/sqlite3_test_fs.hpp>
+#include <mln/test/util.hpp>
 
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/storage/offline.hpp>
@@ -673,6 +674,395 @@ TEST(OfflineDownload, WithPreviouslyExistingTile) {
 
     test.loop.run();
 }
+
+class OfflineDownloadRevalidation : public testing::Test {
+protected:
+    OfflineTest test;
+    FakeFileSource fileSource;
+    const Resource style = Resource::style("http://127.0.0.1:3000/style.json");
+    const Resource tile = Resource::tile(
+        "http://127.0.0.1:3000/{z}-{x}-{y}.vector.pbf", 1, 0, 0, 0, Tileset::Scheme::XYZ);
+    const OfflineRegionDefinition definition = OfflineTilePyramidRegionDefinition(
+        style.url, LatLngBounds::world(), 0.0, 0.0, 1.0, false);
+    Response originalStyle;
+    Response originalTile;
+    std::optional<OfflineRegion> region;
+    std::unique_ptr<OfflineDownload> download;
+
+    void SetUp() override {
+        auto result = test.db.createRegion(definition, {1, 2, 3});
+        ASSERT_TRUE(result);
+        region.emplace(std::move(*result));
+        originalStyle = test.response("inline_source.style.json");
+        originalTile = test.response("0-0-0.vector.pbf");
+        originalStyle.etag = "style-1";
+        originalTile.etag = "tile-1";
+        originalStyle.modified = originalTile.modified = Timestamp(Seconds(1417392000));
+        originalStyle.expires = originalTile.expires = util::now() + std::chrono::hours(24);
+        originalStyle.mustRevalidate = originalTile.mustRevalidate = true;
+        test.db.putRegionResource(region->getID(), style, originalStyle);
+        test.db.putRegionResource(region->getID(), tile, originalTile);
+        download = std::make_unique<OfflineDownload>(region->getID(), definition, test.db, fileSource);
+    }
+
+    void start() {
+        download->setState(OfflineRegionDownloadState::Active);
+        test.loop.runOnce();
+    }
+
+    void invalidateTile() {
+        auto invalid = originalTile;
+        invalid.expires = Timestamp(Seconds(0));
+        test.db.putRegionResource(region->getID(), tile, invalid);
+    }
+
+    void expectRequest(const Resource& request, const Resource& resource, const Response& previous) {
+        EXPECT_EQ(resource.url, request.url);
+        EXPECT_EQ(Resource::Priority::Low, request.priority);
+        EXPECT_EQ(Resource::Usage::Offline, request.usage);
+        EXPECT_EQ(previous.etag, request.priorEtag);
+        // Compared with ==, not EXPECT_EQ: printing a failed time_point comparison uses std::format's
+        // floating-point formatter, which the iOS deployment target does not have.
+        EXPECT_TRUE(previous.modified == request.priorModified);
+        EXPECT_TRUE(std::optional<Timestamp>(Timestamp(Seconds(0))) == request.priorExpires);
+        ASSERT_TRUE(request.priorData);
+        EXPECT_EQ(*previous.data, *request.priorData);
+        if (resource.tileData) {
+            ASSERT_TRUE(request.tileData);
+            EXPECT_EQ(resource.tileData->urlTemplate, request.tileData->urlTemplate);
+            EXPECT_EQ(resource.tileData->pixelRatio, request.tileData->pixelRatio);
+            EXPECT_EQ(resource.tileData->x, request.tileData->x);
+            EXPECT_EQ(resource.tileData->y, request.tileData->y);
+            EXPECT_EQ(resource.tileData->z, request.tileData->z);
+        }
+    }
+
+    void expectRetainedTile() {
+        auto cached = test.db.get(tile);
+        ASSERT_TRUE(cached);
+        ASSERT_TRUE(cached->data);
+        EXPECT_EQ(*originalTile.data, *cached->data);
+        EXPECT_EQ(originalTile.etag, cached->etag);
+        EXPECT_FALSE(cached->isUsable());
+    }
+};
+
+TEST_F(OfflineDownloadRevalidation, InvalidatedRegionRevalidatesStyleAndTile) {
+    ASSERT_FALSE(test.db.invalidateRegion(region->getID()));
+    start();
+
+    ASSERT_EQ(1u, fileSource.requests.size());
+    expectRequest(fileSource.requests.front()->resource, style, originalStyle);
+    EXPECT_FALSE(download->getStatus().complete());
+    EXPECT_EQ(0u, download->getStatus().completedResourceCount);
+    expectRetainedTile();
+
+    auto updatedStyle = originalStyle;
+    updatedStyle.etag = "style-2";
+    ASSERT_TRUE(fileSource.respond(Resource::Kind::Style, updatedStyle));
+    test.loop.runOnce();
+
+    ASSERT_EQ(1u, fileSource.requests.size());
+    expectRequest(fileSource.requests.front()->resource, tile, originalTile);
+    EXPECT_FALSE(download->getStatus().complete());
+    EXPECT_EQ(0u, download->getStatus().completedTileCount);
+    expectRetainedTile();
+
+    auto updatedTile = originalTile;
+    updatedTile.data = std::make_shared<std::string>(*originalTile.data + "updated");
+    updatedTile.etag = "tile-2";
+    ASSERT_TRUE(fileSource.respond(Resource::Kind::Tile, updatedTile));
+
+    EXPECT_TRUE(fileSource.requests.empty());
+    EXPECT_TRUE(download->getStatus().complete());
+    EXPECT_EQ(2u, download->getStatus().completedResourceCount);
+    EXPECT_EQ(1u, download->getStatus().completedTileCount);
+    auto cached = test.db.get(tile);
+    ASSERT_TRUE(cached);
+    ASSERT_TRUE(cached->data);
+    EXPECT_EQ(*updatedTile.data, *cached->data);
+    EXPECT_EQ(updatedTile.etag, cached->etag);
+    EXPECT_TRUE(cached->isUsable());
+    auto storedRegion = test.db.getRegion(region->getID());
+    ASSERT_TRUE(storedRegion);
+    ASSERT_TRUE(*storedRegion);
+    EXPECT_EQ(region->getMetadata(), (*storedRegion)->getMetadata());
+}
+
+TEST_F(OfflineDownloadRevalidation, UsableCachedTileDoesNotRequestNetwork) {
+    start();
+
+    EXPECT_TRUE(fileSource.requests.empty());
+    EXPECT_TRUE(download->getStatus().complete());
+    EXPECT_EQ(1u, download->getStatus().completedTileCount);
+    EXPECT_EQ(test.size, download->getStatus().completedResourceSize);
+}
+
+TEST_F(OfflineDownloadRevalidation, StaleTileWithoutMustRevalidateDoesNotRequestNetwork) {
+    auto stale = originalTile;
+    stale.expires = Timestamp(Seconds(0));
+    stale.mustRevalidate = false;
+    test.db.putRegionResource(region->getID(), tile, stale);
+    start();
+
+    EXPECT_TRUE(fileSource.requests.empty());
+    EXPECT_TRUE(download->getStatus().complete());
+    EXPECT_EQ(1u, download->getStatus().completedTileCount);
+}
+
+TEST_F(OfflineDownloadRevalidation, UnusableSharedTileIsRevalidatedBeforeJoiningRegion) {
+    auto newRegion = test.db.createRegion(definition, {4, 5, 6});
+    ASSERT_TRUE(newRegion);
+    test.db.putRegionResource(newRegion->getID(), style, originalStyle);
+    invalidateTile();
+    download = std::make_unique<OfflineDownload>(newRegion->getID(), definition, test.db, fileSource);
+    start();
+
+    ASSERT_EQ(1u, fileSource.requests.size());
+    expectRequest(fileSource.requests.front()->resource, tile, originalTile);
+    auto before = test.db.getRegionCompletedStatus(newRegion->getID());
+    ASSERT_TRUE(before);
+    EXPECT_EQ(0u, before->completedTileCount);
+    expectRetainedTile();
+
+    ASSERT_TRUE(fileSource.respond(Resource::Kind::Tile, originalTile));
+    EXPECT_TRUE(download->getStatus().complete());
+    auto after = test.db.getRegionCompletedStatus(newRegion->getID());
+    ASSERT_TRUE(after);
+    EXPECT_EQ(1u, after->completedTileCount);
+}
+
+TEST_F(OfflineDownloadRevalidation, TileWithMustRevalidateAndNoExpirationRequestsNetwork) {
+    auto invalid = originalTile;
+    invalid.expires = std::nullopt;
+    test.db.putRegionResource(region->getID(), tile, invalid);
+    start();
+
+    ASSERT_EQ(1u, fileSource.requests.size());
+    EXPECT_EQ(tile.url, fileSource.requests.front()->resource.url);
+    EXPECT_FALSE(fileSource.requests.front()->resource.priorExpires);
+    EXPECT_EQ(originalTile.etag, fileSource.requests.front()->resource.priorEtag);
+    ASSERT_TRUE(fileSource.requests.front()->resource.priorData);
+    EXPECT_EQ(*originalTile.data, *fileSource.requests.front()->resource.priorData);
+    EXPECT_FALSE(download->getStatus().complete());
+    expectRetainedTile();
+    ASSERT_TRUE(fileSource.respond(Resource::Kind::Tile, originalTile));
+    EXPECT_TRUE(download->getStatus().complete());
+}
+
+TEST_F(OfflineDownloadRevalidation, CancelledRevalidationRetainsTileAndCanResume) {
+    invalidateTile();
+    start();
+    ASSERT_EQ(1u, fileSource.requests.size());
+    EXPECT_FALSE(download->getStatus().complete());
+
+    download->setState(OfflineRegionDownloadState::Inactive);
+    EXPECT_TRUE(fileSource.requests.empty());
+    expectRetainedTile();
+
+    start();
+    ASSERT_EQ(1u, fileSource.requests.size());
+    expectRequest(fileSource.requests.front()->resource, tile, originalTile);
+    ASSERT_TRUE(fileSource.respond(Resource::Kind::Tile, originalTile));
+    EXPECT_TRUE(download->getStatus().complete());
+    EXPECT_EQ(1u, download->getStatus().completedTileCount);
+    auto cached = test.db.get(tile);
+    ASSERT_TRUE(cached);
+    ASSERT_TRUE(cached->data);
+    EXPECT_EQ(*originalTile.data, *cached->data);
+    EXPECT_TRUE(cached->isUsable());
+}
+
+TEST_F(OfflineDownloadRevalidation, FailedRevalidationRetainsTileUntilSuccess) {
+    unsigned errors = 0;
+    auto observer = std::make_unique<MockObserver>();
+    observer->responseErrorFn = [&](Response::Error) {
+        ++errors;
+    };
+    download->setObserver(std::move(observer));
+    invalidateTile();
+    start();
+    ASSERT_EQ(1u, fileSource.requests.size());
+
+    for (auto reason : {Response::Error::Reason::Connection, Response::Error::Reason::Server}) {
+        Response failed;
+        failed.error = std::make_unique<Response::Error>(reason);
+        failed.data = std::make_shared<std::string>("error response");
+        ASSERT_TRUE(fileSource.respond(Resource::Kind::Tile, failed));
+        EXPECT_EQ(1u, fileSource.requests.size());
+        EXPECT_FALSE(download->getStatus().complete());
+        EXPECT_EQ(0u, download->getStatus().completedTileCount);
+        expectRetainedTile();
+    }
+    EXPECT_EQ(2u, errors);
+    ASSERT_TRUE(fileSource.respond(Resource::Kind::Tile, originalTile));
+    EXPECT_TRUE(download->getStatus().complete());
+    EXPECT_EQ(1u, download->getStatus().completedTileCount);
+}
+
+TEST(OfflineDownload, RevalidationAtTileLimitDoesNotConsumeNewTileQuota) {
+    OfflineTest test;
+    ASSERT_EQ(0u, test.db.getOfflineMapboxTileCount());
+    FakeFileSource fileSource(ResourceOptions().withTileServerOptions(TileServerOptions::MapTilerConfiguration()),
+                              ClientOptions());
+    const Resource style = Resource::style("http://127.0.0.1:3000/style.json");
+    const Resource tile = Resource::tile("maptiler://{z}-{x}-{y}.vector.pbf", 1, 0, 0, 0, Tileset::Scheme::XYZ);
+    const OfflineRegionDefinition definition = OfflineTilePyramidRegionDefinition(
+        style.url, LatLngBounds::world(), 0.0, 0.0, 1.0, false);
+    auto region = test.db.createRegion(definition, {});
+    ASSERT_TRUE(region);
+    test.db.putRegionResource(region->getID(), style, test.response("mapbox_source.style.json"));
+    auto cachedTile = test.response("0-0-0.vector.pbf");
+    cachedTile.etag = "tile-1";
+    cachedTile.expires = Timestamp(Seconds(0));
+    cachedTile.mustRevalidate = true;
+    test.db.putRegionResource(region->getID(), tile, cachedTile);
+    test.db.setOfflineMapboxTileCountLimit(1);
+    ASSERT_EQ(1u, test.db.getOfflineMapboxTileCount());
+    ASSERT_TRUE(test.db.offlineMapboxTileCountLimitExceeded());
+
+    OfflineDownload download(region->getID(), definition, test.db, fileSource);
+    unsigned quotaNotifications = 0;
+    auto observer = std::make_unique<MockObserver>();
+    observer->mapboxTileCountLimitExceededFn = [&](uint64_t) {
+        ++quotaNotifications;
+    };
+    download.setObserver(std::move(observer));
+    download.setState(OfflineRegionDownloadState::Active);
+    test.loop.runOnce();
+
+    ASSERT_EQ(1u, fileSource.requests.size());
+    EXPECT_EQ(tile.url, fileSource.requests.front()->resource.url);
+    EXPECT_EQ(cachedTile.etag, fileSource.requests.front()->resource.priorEtag);
+    EXPECT_FALSE(download.getStatus().complete());
+    cachedTile.expires = util::now() + std::chrono::hours(24);
+    ASSERT_TRUE(fileSource.respond(Resource::Kind::Tile, cachedTile));
+    EXPECT_TRUE(download.getStatus().complete());
+    EXPECT_EQ(1u, download.getStatus().completedTileCount);
+    EXPECT_EQ(1u, test.db.getOfflineMapboxTileCount());
+    EXPECT_EQ(0u, quotaNotifications);
+    auto cached = test.db.get(tile);
+    ASSERT_TRUE(cached);
+    ASSERT_TRUE(cached->data);
+    EXPECT_EQ(*cachedTile.data, *cached->data);
+    EXPECT_TRUE(cached->isUsable());
+}
+
+TEST(OfflineDownload, TEST_REQUIRES_SERVER(RevalidationNotModifiedRetainsTileDataAndSize)) {
+    OfflineTest test;
+    OnlineFileSource fileSource(ResourceOptions::Default(), ClientOptions());
+    const Resource style = Resource::style("http://127.0.0.1:3000/style.json");
+    const Resource tile = Resource::tile("http://127.0.0.1:3000/revalidate-same", 1, 0, 0, 0, Tileset::Scheme::XYZ);
+    const OfflineRegionDefinition definition = OfflineTilePyramidRegionDefinition(
+        style.url, LatLngBounds::world(), 0.0, 0.0, 1.0, false);
+    auto region = test.db.createRegion(definition, {});
+    ASSERT_TRUE(region);
+    Response cachedStyle;
+    cachedStyle.data = std::make_shared<std::string>(
+        R"({"version":8,"sources":{"tiles":{"type":"vector","tiles":["http://127.0.0.1:3000/revalidate-same"]}},"layers":[]})");
+    test.db.putRegionResource(region->getID(), style, cachedStyle);
+    auto cachedTile = test.response("0-0-0.vector.pbf");
+    cachedTile.etag = "snowfall";
+    cachedTile.modified = Timestamp(Seconds(1417392000));
+    cachedTile.expires = Timestamp(Seconds(0));
+    cachedTile.mustRevalidate = true;
+    const auto tileSize = test.db.putRegionResource(region->getID(), tile, cachedTile);
+    OfflineDownload download(region->getID(), definition, test.db, fileSource);
+    auto observer = std::make_unique<MockObserver>();
+    observer->statusChangedFn = [&](OfflineRegionStatus status) {
+        if (status.complete()) test.loop.stop();
+    };
+    download.setObserver(std::move(observer));
+    download.setState(OfflineRegionDownloadState::Active);
+    util::Timer timeout;
+    timeout.start(std::chrono::seconds(5), Duration::zero(), [&] {
+        ADD_FAILURE() << "Offline revalidation did not finish";
+        test.loop.stop();
+    });
+    test.loop.run();
+
+    auto cached = test.db.get(tile);
+    ASSERT_TRUE(cached);
+    ASSERT_TRUE(cached->data);
+    EXPECT_EQ(*cachedTile.data, *cached->data);
+    EXPECT_EQ(cachedTile.etag, cached->etag);
+    EXPECT_TRUE(cached->mustRevalidate);
+    ASSERT_TRUE(cached->expires);
+    EXPECT_TRUE(*cached->expires > *cachedTile.expires); // not EXPECT_GT: see expectRequest
+    EXPECT_EQ(tileSize, download.getStatus().completedTileSize);
+    EXPECT_EQ(1u, download.getStatus().completedTileCount);
+}
+
+#ifndef __QT__ // Needs a database file that a second connection can edit.
+// Resuming a region must not load or touch tiles that are still usable: only entries that are past `expires`
+// with `must_revalidate` set need the full read, which also bumps `accessed`.
+TEST(OfflineDownload, ResumeOnlyReadsTilesThatNeedRevalidation) {
+    deleteDatabaseFiles();
+    OfflineTest test{filename};
+    FakeFileSource fileSource;
+    const Resource style = Resource::style("http://127.0.0.1:3000/style.json");
+    const Resource tile = Resource::tile(
+        "http://127.0.0.1:3000/{z}-{x}-{y}.vector.pbf", 1, 0, 0, 0, Tileset::Scheme::XYZ);
+    const OfflineRegionDefinition definition = OfflineTilePyramidRegionDefinition(
+        style.url, LatLngBounds::world(), 0.0, 0.0, 1.0, false);
+    auto region = test.db.createRegion(definition, {});
+    ASSERT_TRUE(region);
+
+    auto cachedStyle = test.response("inline_source.style.json");
+    cachedStyle.expires = util::now() + std::chrono::hours(24);
+    cachedStyle.mustRevalidate = true;
+    test.db.putRegionResource(region->getID(), style, cachedStyle);
+    auto cachedTile = test.response("0-0-0.vector.pbf");
+    cachedTile.etag = "tile-1";
+    cachedTile.expires = util::now() + std::chrono::hours(24);
+    cachedTile.mustRevalidate = true;
+    test.db.putRegionResource(region->getID(), tile, cachedTile);
+
+    constexpr int64_t oldAccessed = 1000;
+    auto tileAccessed = [&](std::optional<int64_t> set = std::nullopt) {
+        mapbox::sqlite::Database db = mapbox::sqlite::Database::open(filename, mapbox::sqlite::ReadWriteCreate);
+        if (set) {
+            mapbox::sqlite::Statement update{db, "UPDATE tiles SET accessed = ?1"};
+            mapbox::sqlite::Query updateQuery{update};
+            updateQuery.bind(1, *set);
+            updateQuery.run();
+        }
+        mapbox::sqlite::Statement select{db, "SELECT accessed FROM tiles"};
+        mapbox::sqlite::Query selectQuery{select};
+        EXPECT_TRUE(selectQuery.run());
+        return selectQuery.get<int64_t>(0);
+    };
+
+    // A usable tile completes without a network request, a blob read or an `accessed` write.
+    ASSERT_EQ(oldAccessed, tileAccessed(oldAccessed));
+    {
+        OfflineDownload download(region->getID(), definition, test.db, fileSource);
+        download.setState(OfflineRegionDownloadState::Active);
+        test.loop.runOnce();
+        EXPECT_TRUE(fileSource.requests.empty());
+        EXPECT_TRUE(download.getStatus().complete());
+        EXPECT_EQ(1u, download.getStatus().completedTileCount);
+        EXPECT_EQ(oldAccessed, tileAccessed());
+    }
+
+    // An expired must-revalidate tile still gets the full read and is requested with its validators.
+    cachedTile.expires = Timestamp(Seconds(0));
+    test.db.putRegionResource(region->getID(), tile, cachedTile);
+    ASSERT_EQ(oldAccessed, tileAccessed(oldAccessed));
+    {
+        OfflineDownload download(region->getID(), definition, test.db, fileSource);
+        download.setState(OfflineRegionDownloadState::Active);
+        test.loop.runOnce();
+        ASSERT_EQ(1u, fileSource.requests.size());
+        EXPECT_EQ(tile.url, fileSource.requests.front()->resource.url);
+        EXPECT_EQ(cachedTile.etag, fileSource.requests.front()->resource.priorEtag);
+        ASSERT_TRUE(fileSource.requests.front()->resource.priorData);
+        EXPECT_EQ(*cachedTile.data, *fileSource.requests.front()->resource.priorData);
+        EXPECT_FALSE(download.getStatus().complete());
+        EXPECT_LT(oldAccessed, tileAccessed());
+    }
+}
+#endif // __QT__
 
 TEST(OfflineDownload, ReactivatePreviouslyCompletedDownload) {
     OfflineTest test;

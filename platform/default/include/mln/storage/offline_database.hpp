@@ -7,6 +7,7 @@
 #include <mln/util/constants.hpp>
 #include <mln/util/mapbox.hpp>
 #include <mln/util/expected.hpp>
+#include <mln/util/chrono.hpp>
 
 #include <list>
 #include <map>
@@ -35,6 +36,16 @@ struct IOException;
 struct MapboxTileLimitExceededException : util::Exception {
     MapboxTileLimitExceededException()
         : util::Exception("Mapbox tile limit exceeded") {}
+};
+
+// Size and validity metadata of a stored resource, read without loading its data.
+struct RegionResourceInfo {
+    uint64_t size = 0;
+    std::optional<Timestamp> expires;
+    bool mustRevalidate = false;
+
+    // Same rule as Response::isUsable().
+    bool isUsable() const { return !mustRevalidate || (expires && *expires > util::now()); }
 };
 
 class OfflineDatabase {
@@ -78,7 +89,9 @@ public:
 
     // Return value is (response, stored size)
     std::optional<std::pair<Response, uint64_t>> getRegionResource(const Resource&);
-    std::optional<int64_t> hasRegionResource(const Resource&);
+    // Cheap lookup that does not read the blob or update `accessed`. Returns the stored size and the
+    // validity metadata, so callers can tell whether the full response is needed.
+    std::optional<RegionResourceInfo> hasRegionResource(const Resource&);
     uint64_t putRegionResource(int64_t regionID, const Resource&, const Response&);
     void putRegionResources(int64_t regionID, const std::list<std::tuple<Resource, Response>>&, OfflineRegionStatus&);
 
@@ -123,17 +136,17 @@ private:
     mapbox::sqlite::Statement& getStatement(const char*);
 
     std::optional<std::pair<Response, uint64_t>> getTile(const Resource::TileData&);
-    std::optional<int64_t> hasTile(const Resource::TileData&);
+    std::optional<RegionResourceInfo> hasTile(const Resource::TileData&);
     bool putTile(const Resource::TileData&, const Response&, const std::string&, bool compressed);
 
     std::optional<std::pair<Response, uint64_t>> getResource(const Resource&);
-    std::optional<int64_t> hasResource(const Resource&);
+    std::optional<RegionResourceInfo> hasResource(const Resource&);
     bool putResource(const Resource&, const Response&, const std::string&, bool compressed);
 
     uint64_t putRegionResourceInternal(int64_t regionID, const Resource&, const Response&);
 
     std::optional<std::pair<Response, uint64_t>> getInternal(const Resource&);
-    std::optional<int64_t> hasInternal(const Resource&);
+    std::optional<RegionResourceInfo> hasInternal(const Resource&);
     std::pair<bool, uint64_t> putInternal(const Resource&, const Response&, bool evict);
 
     // Return value is true iff the resource was previously unused by any other regions.
