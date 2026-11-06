@@ -57,7 +57,7 @@ void Step::eachStop(const std::function<void(double, const Expression&)>& visit)
 bool Step::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Step) {
         auto rhs = static_cast<const Step*>(&e);
-        return *input == *(rhs->input) && Expression::childrenEqual(stops, rhs->stops);
+        return *input == *rhs->input && Expression::childrenEqual(stops, rhs->stops);
     }
     return false;
 }

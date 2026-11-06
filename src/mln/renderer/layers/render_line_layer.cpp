@@ -145,7 +145,8 @@ GeometryCollection offsetLine(const GeometryCollection& rings, double offset) {
             auto& p = *i;
 
             Point<double> aToB = i == ring.begin() ? zero : util::perp(util::unit(convertPoint<double>(p - *(i - 1))));
-            Point<double> bToC = i + 1 == ring.end() ? zero
+            // At the last vertex, use the incoming normal so the endpoint receives the full offset.
+            Point<double> bToC = i + 1 == ring.end() ? aToB
                                                      : util::perp(util::unit(convertPoint<double>(*(i + 1) - p)));
             Point<double> extrude = util::unit(aToB + bToC);
 
@@ -184,9 +185,6 @@ void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
     constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
     constexpr bool nearClipped = false;
     constexpr bool aligned = false;
-    constexpr bool is3d = false;
-    constexpr bool enableDepth = true;
-    constexpr std::int32_t subLayerIndex = 1;
     const auto translation = evaluated.get<LineTranslate>();
     const auto translationAnchor = evaluated.get<LineTranslateAnchor>();
     const std::optional<mln::Point<double>> origin = std::nullopt;
@@ -222,13 +220,9 @@ void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
             tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
                                                      state,
                                                      transformParams,
-                                                     layerIndex,
                                                      translation,
                                                      translationAnchor,
                                                      origin,
-                                                     is3d,
-                                                     enableDepth,
-                                                     subLayerIndex,
                                                      nearClipped,
                                                      inViewportPixelUnits,
                                                      aligned);
@@ -358,10 +352,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-            return true;
-        }
-        return false;
+        return drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID));
     });
 
     auto createLineBuilder = [&](const std::string& name,
@@ -448,11 +439,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         setRenderTileBucketID(tileID, bucket.getID());
 
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-            return true;
+            // A drawable produced on a previous style/bucket should not be updated.
+            return drawable.getLayerTweaker() == layerTweaker;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;

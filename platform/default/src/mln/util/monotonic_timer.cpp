@@ -2,20 +2,20 @@
 
 #include <cassert>
 #include <chrono>
+#include <type_traits>
 
 namespace mln {
 namespace util {
 
 // Prefer high resolution timer if it is monotonic
 namespace {
-template <typename T, std::enable_if_t<std::chrono::high_resolution_clock::is_steady, T>* = nullptr>
-T sample() {
-    return std::chrono::duration_cast<T>(std::chrono::high_resolution_clock::now().time_since_epoch());
-}
+using Clock = std::conditional_t<std::chrono::high_resolution_clock::is_steady,
+                                 std::chrono::high_resolution_clock,
+                                 std::chrono::steady_clock>;
 
-template <typename T, std::enable_if_t<!std::chrono::high_resolution_clock::is_steady, T>* = nullptr>
+template <typename T>
 T sample() {
-    return std::chrono::duration_cast<T>(std::chrono::steady_clock::now().time_since_epoch());
+    return std::chrono::duration_cast<T>(Clock::now().time_since_epoch());
 }
 } // namespace
 

@@ -92,7 +92,8 @@ void getTileSkewVectors(const TransformState& state, vec2& vecEast, vec2& vecSou
 }
 
 mat4 getTileSkewMatrix(const TransformState& state) {
-    vec2 vecEast, vecSouth;
+    vec2 vecEast;
+    vec2 vecSouth;
     getTileSkewVectors(state, vecEast, vecSouth);
     mat4 m;
     matrix::identity(m);

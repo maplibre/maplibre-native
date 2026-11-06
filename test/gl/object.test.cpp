@@ -11,7 +11,7 @@ using namespace mln;
 
 namespace {
 
-static bool getFlag = false;
+[[maybe_unused]] static bool getFlag = false;
 static bool setFlag = false;
 
 } // namespace

@@ -20,6 +20,10 @@ DescriptorSet::DescriptorSet(Context& context_, DescriptorSetType type_)
       type(type_) {}
 
 DescriptorSet::~DescriptorSet() {
+    if (descriptorPoolIndex < 0 || descriptorSets.empty()) {
+        return;
+    }
+
     context.enqueueDeletion(
         [type_ = type, poolIndex = descriptorPoolIndex, sets = std::move(descriptorSets)](auto& context_) mutable {
             auto& poolInfo = context_.getDescriptorPool(type_).pools[poolIndex];
@@ -47,16 +51,13 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
 
     std::vector<vk::DescriptorPoolSize> sizes;
     if (growablePool.descriptorStoragePerSet > 0) {
-        sizes.emplace_back(
-            vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorStoragePerSet));
+        sizes.emplace_back(vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorStoragePerSet);
     }
     if (growablePool.descriptorUniformsPerSet > 0) {
-        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer,
-                                                  maxSets * growablePool.descriptorUniformsPerSet));
+        sizes.emplace_back(vk::DescriptorType::eUniformBuffer, maxSets * growablePool.descriptorUniformsPerSet);
     }
     if (growablePool.descriptorTexturesPerSet > 0) {
-        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler,
-                                                  maxSets * growablePool.descriptorTexturesPerSet));
+        sizes.emplace_back(vk::DescriptorType::eCombinedImageSampler, maxSets * growablePool.descriptorTexturesPerSet);
     }
 
     const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(poolFlags).setPoolSizes(sizes).setMaxSets(maxSets);
@@ -106,8 +107,6 @@ void DescriptorSet::allocate() {
         }
     }
 
-    descriptorPoolIndex = growablePool.currentPoolIndex;
-
 #ifdef USE_DESCRIPTOR_POOL_RESET
     if (!growablePool.current().unusedSets.empty()) {
         descriptorSets = growablePool.current().unusedSets.front();
@@ -121,6 +120,7 @@ void DescriptorSet::allocate() {
         growablePool.current().remainingSets -= descriptorSets.size();
     }
 
+    descriptorPoolIndex = growablePool.currentPoolIndex;
     dirty = std::vector(descriptorSets.size(), true);
 }
 

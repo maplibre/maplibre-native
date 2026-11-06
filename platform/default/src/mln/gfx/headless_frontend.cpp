@@ -42,7 +42,7 @@ void HeadlessFrontend::reset() {
 }
 
 void HeadlessFrontend::update(std::shared_ptr<UpdateParameters> updateParameters_) {
-    updateParameters = updateParameters_;
+    updateParameters = std::move(updateParameters_);
     if (invalidateOnUpdate) {
         asyncInvalidate.send();
     }

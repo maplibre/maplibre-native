@@ -527,9 +527,6 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
     constexpr bool inViewportPixelUnits = false;
     constexpr bool nearClipped = false;
     constexpr bool aligned = false;
-    constexpr bool is3d = false;
-    constexpr bool enableDepth = true;
-    constexpr std::int32_t subLayerIndex = 1;
 
     const auto textTranslation = evaluated.get<TextTranslate>();
     const auto iconTranslation = evaluated.get<IconTranslate>();
@@ -556,13 +553,9 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         return LayerTweaker::getTileMatrix(tileID,
                                            state,
                                            transformParams,
-                                           layerIndex,
                                            translation,
                                            translationAnchor,
                                            origin,
-                                           is3d,
-                                           enableDepth,
-                                           subLayerIndex,
                                            nearClipped,
                                            inViewportPixelUnits,
                                            aligned);
@@ -824,19 +817,13 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-            return true;
-        }
-        return false;
+        return drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID));
     });
     if (collisionTileLayerGroup) {
         stats.drawablesRemoved += collisionTileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
             // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
             const auto& tileID = drawable.getTileID();
-            if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-                return true;
-            }
-            return false;
+            return drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID));
         });
     }
 

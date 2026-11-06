@@ -75,9 +75,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-24.04
+          - runs-on: ubuntu-26.04
             arch: x86_64
-          - runs-on: ubuntu-24.04-arm
+          - runs-on: ubuntu-26.04-arm
             arch: arm64
           - runs-on: macos-15-intel
             arch: x86_64
@@ -135,6 +135,8 @@ jobs:
             xvfb \
             libcurl4-openssl-dev \
             libglfw3-dev \
+            libgles-dev \
+            libopengl-dev \
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
@@ -281,27 +283,15 @@ jobs:
         working-directory: platform/node
         run: npm test
 
-      - name: Test (Windows x64)
-        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
         shell: pwsh
         working-directory: platform/node
         env:
           LIBGL_ALWAYS_SOFTWARE: true
           GALLIUM_DRIVER: llvmpipe
         run: |
-          (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-release-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
-          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v147 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
-          npm test
-
-      - name: Test (Windows ARM64)
-        if: runner.os == 'Windows' && matrix.arch == 'arm64'
-        shell: pwsh
-        working-directory: platform/node
-        env:
-          LIBGL_ALWAYS_SOFTWARE: true
-          GALLIUM_DRIVER: llvmpipe
-        run: |
-          (Invoke-WebRequest https://api.github.com/repos/mmozeiko/build-mesa/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa-llvmpipe-arm64-.+\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
+          (Invoke-WebRequest https://api.github.com/repos/mmozeiko/build-mesa/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa-llvmpipe-${{ matrix.arch == 'arm64' && 'arm64' || 'x64' }}-.+\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
           & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v147 .\mesa3d.7z opengl32.dll libGLESv2.dll
           npm test
       # On PRs make sure that the npm package can be packaged.
