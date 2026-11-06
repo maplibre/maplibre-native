@@ -81,8 +81,8 @@ TEST(VectorTileData, ParseResults) {
 }
 
 TEST(VectorTileData, MLTParseResults) {
-    for (const bool useFastPFOR : {false, true}) {
-        const auto path = "test/fixtures/map/issue12432/0-0-0" + std::string(useFastPFOR ? "-fastpfor.mlt" : ".mlt");
+    for (const auto* fixture : {"0-0-0.mlt", "0-0-0-fastpfor.mlt"}) {
+        const auto path = std::string("test/fixtures/map/issue12432/") + fixture;
         SCOPED_TRACE(path);
         VectorMLTTileData data(std::make_shared<std::string>(util::read_file(path)));
 
