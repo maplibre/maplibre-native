@@ -64,7 +64,7 @@ std::string encodePNG(const PremultipliedImage& pre) {
 
     // Assemble the PNG.
     std::string png;
-    png.reserve((8 /* preamble */) + (12 + 13 /* IHDR */) + (12 + idat.size() /* IDAT */) + (12 /* IEND */));
+    png.reserve(8 /* preamble */ + (12 + 13 /* IHDR */) + (12 + idat.size() /* IDAT */) + 12 /* IEND */);
     png.append(preamble, 8);
     addChunk(png, "IHDR", ihdr, 13);
     addChunk(png, "IDAT", idat.data(), static_cast<uint32_t>(idat.size()));

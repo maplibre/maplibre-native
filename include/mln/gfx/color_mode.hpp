@@ -57,13 +57,14 @@ public:
     }
 
     static ColorMode alphaBlended() {
-        return {.blendFunction = Add{ColorBlendFactorType::One, ColorBlendFactorType::OneMinusSrcAlpha},
+        return {.blendFunction = Add{.srcFactor = ColorBlendFactorType::One,
+                                     .dstFactor = ColorBlendFactorType::OneMinusSrcAlpha},
                 .blendColor = {},
                 .mask = {.r = true, .g = true, .b = true, .a = true}};
     }
 
     static ColorMode additive() {
-        return {.blendFunction = Add{ColorBlendFactorType::One, ColorBlendFactorType::One},
+        return {.blendFunction = Add{.srcFactor = ColorBlendFactorType::One, .dstFactor = ColorBlendFactorType::One},
                 .blendColor = {},
                 .mask = {.r = true, .g = true, .b = true, .a = true}};
     }

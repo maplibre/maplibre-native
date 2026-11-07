@@ -117,7 +117,7 @@ const Immutable<style::Image::Impl>* ImageManager::getSharedImage(const std::str
     std::scoped_lock readWriteLock(rwLock);
     const auto it = images.find(id);
     if (it != images.end()) {
-        return &(it->second);
+        return &it->second;
     }
     return nullptr;
 }

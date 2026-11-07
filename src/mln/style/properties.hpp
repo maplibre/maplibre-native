@@ -110,8 +110,7 @@ struct ConstantsMask<TypeList<Ps...>> {
         const auto result = std::apply(
             [](auto... v) { return (v | ...); },
             std::make_tuple(
-                0ul,
-                (((properties.template get<Ps>().isConstant()) ? (1ul << (TypeIndex<Ps, Ps...>::value)) : 0ul))...));
+                0ul, (properties.template get<Ps>().isConstant() ? (1ul << TypeIndex<Ps, Ps...>::value) : 0ul)...));
         return result;
     }
 };

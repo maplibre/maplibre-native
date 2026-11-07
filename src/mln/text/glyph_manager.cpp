@@ -90,7 +90,7 @@ void GlyphManager::requestRange(GlyphRequest& request,
             break;
         default: {
             std::string url = getFontFaceURL(range.type);
-            if (url.size()) {
+            if (!url.empty()) {
                 res = Resource::fontFace(url);
             } else {
                 Log::Error(Event::Style, "Try download a glyph doesn't in current faces");

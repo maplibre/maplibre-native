@@ -24,6 +24,8 @@ public:
                        TileObserver* observer = nullptr);
     ~CustomGeometryTile() override;
 
+    void cancel() override;
+
     void setTileData(const GeoJSON& geoJSON);
     void invalidateTileData();
 

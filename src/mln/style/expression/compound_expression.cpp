@@ -351,7 +351,7 @@ const auto& zoomCompoundExpression() {
                     "The 'zoom' expression is unavailable in the current "
                     "evaluation context."};
             }
-            return *(params.zoom);
+            return *params.zoom;
         },
         Dependency::Zoom);
     return signature;
@@ -365,7 +365,7 @@ const auto& heatmapDensityCompoundExpression() {
                                                               "The 'heatmap-density' expression is unavailable in the "
                                                               "current evaluation context."};
                                                       }
-                                                      return *(params.colorRampParameter);
+                                                      return *params.colorRampParameter;
                                                   });
     return signature;
 }
@@ -376,11 +376,11 @@ const auto& elevationCompoundExpression() {
         [](const EvaluationContext& params) -> Result<double> {
             // For color-relief, elevation is passed via colorRampParameter
             if (params.colorRampParameter) {
-                return *(params.colorRampParameter);
+                return *params.colorRampParameter;
             }
             // For 3D terrain, elevation is passed directly
             if (params.elevation) {
-                return static_cast<double>(*(params.elevation));
+                return static_cast<double>(*params.elevation);
             }
             // During parsing/validation, return a valid value to allow parsing to succeed
             // The Dependency::Elevation flag prevents this from being optimized to a constant
@@ -398,7 +398,7 @@ const auto& lineProgressCompoundExpression() {
                                                               "The 'line-progress' expression is unavailable in the "
                                                               "current evaluation context."};
                                                       }
-                                                      return *(params.colorRampParameter);
+                                                      return *params.colorRampParameter;
                                                   });
     return signature;
 }
@@ -1183,7 +1183,7 @@ std::string expectedTypesError(const Definitions& definitions, const std::vector
                     overload += toString(param);
                     first = false;
                 }
-                overload += ")";
+                overload += ')';
                 if (params.size() == args.size()) {
                     overloads.push_back(overload);
                 } else {
