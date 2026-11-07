@@ -129,6 +129,9 @@ public:
     bool centerClampedToGround = false;
     /// Terrain height under the centre, as the renderer last reported it (NaN until then).
     double terrainCenterElevation = std::numeric_limits<double>::quiet_NaN();
+    /// The renderer told the map the ground under the center is no longer known (NaN), as against
+    /// not having told it anything yet.
+    bool centerGroundLost = false;
     /// Terrain height under the camera's eye, as the renderer last reported it (NaN until then).
     double terrainEyeElevation = std::numeric_limits<double>::quiet_NaN();
     /// How far above the ground under it the eye is kept, in meters.

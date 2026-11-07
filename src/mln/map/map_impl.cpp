@@ -527,8 +527,17 @@ void Map::Impl::applyCenterClamp() {
         centerSettledBesideACliff = false;
         target = std::max(*gestureHeldCenterAltitude, eyeClearCenterAltitude());
     } else {
-        // The eye's height can be reported before the center's.
         if (std::isnan(terrainCenterElevation)) {
+            // The eye's height can be reported before the center's: leave the camera until then.
+            if (!centerGroundLost) {
+                return;
+            }
+            // The renderer lost the ground under the center (a jump far away): the height it had
+            // is another place's, and the new ground is not known to be anything but sea level, as
+            // for a camera that has not been told yet. Only the eye clearance lifts it from there.
+            if (clampCenterToTerrain(std::max(0.0, eyeClearCenterAltitude()))) {
+                onUpdate();
+            }
             return;
         }
         // A ground report can arrive before the update that follows the end of a gesture or a
@@ -581,6 +590,7 @@ void Map::Impl::applyCenterClamp() {
 
 void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
     terrainCenterElevation = elevationMeters;
+    centerGroundLost = std::isnan(elevationMeters);
     if (!centerClampedToGround) {
         return;
     }

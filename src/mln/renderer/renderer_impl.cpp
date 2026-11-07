@@ -755,12 +755,22 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // (Map::setCenterClampedToGround). Gated so a still map does not post a message a frame.
     // Only once a DEM tile covers the spot: ground not loaded yet is not sea level.
     if (auto* terrain = orchestrator.getRenderTerrain()) {
-        if (const auto centerElevation = terrain->findElevationForLatLng(
-                updateParameters->transformState.getLatLng())) {
+        const auto center = updateParameters->transformState.getLatLng();
+        UnwrappedTileID centerReadFrom(0, 0, 0);
+        if (const auto centerElevation = terrain->findElevationForLatLng(center, &centerReadFrom)) {
+            centerElevationTile = centerReadFrom;
             if (std::isnan(lastReportedCenterElevation) ||
                 std::abs(*centerElevation - lastReportedCenterElevation) > 0.25) {
                 lastReportedCenterElevation = *centerElevation;
                 observer->onTerrainCenterElevationChanged(*centerElevation);
+            }
+        } else if (centerElevationTile && !tileHolds(*centerElevationTile, center)) {
+            // The center left the tile its height came from and no loaded tile is under it yet (or
+            // ever): the old height is another place's, so the map is told it does not know.
+            centerElevationTile.reset();
+            if (!std::isnan(lastReportedCenterElevation)) {
+                lastReportedCenterElevation = std::numeric_limits<double>::quiet_NaN();
+                observer->onTerrainCenterElevationChanged(lastReportedCenterElevation);
             }
         }
         // And under the eye: a camera dragged towards a slope rising in front of it ends up under
