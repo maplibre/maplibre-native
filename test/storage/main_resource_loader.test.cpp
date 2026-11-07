@@ -857,3 +857,90 @@ TEST(MainResourceLoader, ResourceOptions) {
     EXPECT_EQ(updatedOptions.baseURL(), "updatedBaseURL");
     EXPECT_EQ(updatedOptions.uriSchemeAlias(), "updatedAlias");
 }
+
+// Headerless responses stay in the cache until the implicit lifetime elapses, so the next
+// request does not download them again. A distinct API key isolates this file source from
+// the shared default used by the other cache tests.
+TEST(MainResourceLoader, TEST_REQUIRES_SERVER(ImplicitCacheLifetime)) {
+    util::RunLoop loop;
+    const Duration lifetime = std::chrono::hours(24);
+    ResourceOptions options;
+    options.withApiKey("implicit-cache-lifetime").withImplicitCacheLifetime(lifetime);
+    MainResourceLoader fs(options, ClientOptions{});
+    EXPECT_EQ(lifetime, fs.getResourceOptions().implicitCacheLifetime());
+
+    const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/implicit-cache"};
+    std::unique_ptr<AsyncRequest> req;
+    util::Timer timer;
+    int callbacks = 0;
+
+    const auto before = util::now();
+    req = fs.request(resource, [&](Response res) {
+        const auto after = util::now();
+        EXPECT_EQ(nullptr, res.error);
+        ASSERT_TRUE(res.data);
+        const std::string cached = *res.data;
+        ASSERT_TRUE(res.expires);
+        const auto lifetimeSeconds = std::chrono::duration_cast<Seconds>(lifetime).count();
+        const auto expires = res.expires->time_since_epoch().count();
+        EXPECT_GE(expires, before.time_since_epoch().count() + lifetimeSeconds);
+        EXPECT_LE(expires, after.time_since_epoch().count() + lifetimeSeconds);
+
+        req = fs.request(resource, [&, cached, expires](Response res2) {
+            ++callbacks;
+            EXPECT_EQ(nullptr, res2.error);
+            ASSERT_TRUE(res2.data);
+            EXPECT_EQ(cached, *res2.data);
+            ASSERT_TRUE(res2.expires);
+            EXPECT_EQ(expires, res2.expires->time_since_epoch().count());
+        });
+
+        // Long enough to observe an immediate re-download, and far shorter than the lifetime.
+        timer.start(Milliseconds(1000), Duration::zero(), [&] {
+            EXPECT_EQ(1, callbacks);
+            req.reset();
+            loop.stop();
+        });
+    });
+
+    loop.run();
+}
+
+// With the default lifetime of zero, a stored response that has no explicit freshness is
+// downloaded again on the next request.
+TEST(MainResourceLoader, TEST_REQUIRES_SERVER(ImplicitCacheLifetimeUnset)) {
+    util::RunLoop loop;
+    ResourceOptions options;
+    options.withApiKey("implicit-cache-lifetime-none");
+    MainResourceLoader fs(options, ClientOptions{});
+    EXPECT_EQ(Duration::zero(), fs.getResourceOptions().implicitCacheLifetime());
+
+    const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/implicit-cache"};
+    std::unique_ptr<AsyncRequest> req;
+    util::Timer timer;
+
+    req = fs.request(resource, [&](Response res) {
+        EXPECT_EQ(nullptr, res.error);
+        ASSERT_TRUE(res.data);
+        EXPECT_FALSE(bool(res.expires));
+        const std::string first = *res.data;
+
+        req = fs.request(resource, [&, first](Response res2) {
+            if (!res2.data || *res2.data == first) {
+                return;
+            }
+            EXPECT_FALSE(bool(res2.expires));
+            timer.stop();
+            req.reset();
+            loop.stop();
+        });
+
+        timer.start(Seconds(3), Duration::zero(), [&] {
+            ADD_FAILURE() << "expected the resource to be downloaded again";
+            req.reset();
+            loop.stop();
+        });
+    });
+
+    loop.run();
+}

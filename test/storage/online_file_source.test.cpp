@@ -630,3 +630,159 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RequestSameUrlMultipleTimes)) {
 
     loop.run();
 }
+
+namespace {
+
+// `earliest` is sampled before the request is sent and `latest` after the response callback runs.
+void expectExpiresAfter(const Response& response, Timestamp earliest, Timestamp latest, Duration lifetime) {
+    ASSERT_TRUE(response.expires);
+    const auto lifetimeSeconds = std::chrono::duration_cast<Seconds>(lifetime).count();
+    const auto expires = response.expires->time_since_epoch().count();
+    EXPECT_GE(expires, earliest.time_since_epoch().count() + lifetimeSeconds);
+    EXPECT_LE(expires, latest.time_since_epoch().count() + lifetimeSeconds);
+}
+
+ResourceOptions withLifetime(Duration lifetime) {
+    ResourceOptions options = ResourceOptions::Default();
+    options.withImplicitCacheLifetime(lifetime);
+    return options;
+}
+
+} // namespace
+
+// A headerless response gets the configured lifetime. Updating the option changes later responses.
+TEST(OnlineFileSource, TEST_REQUIRES_SERVER(ImplicitCacheLifetime)) {
+    util::RunLoop loop;
+    const Duration lifetime = std::chrono::hours(24);
+    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(withLifetime(lifetime), ClientOptions());
+    const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test"};
+
+    const auto before = util::now();
+    std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
+        const auto after = util::now();
+        req.reset();
+        EXPECT_EQ(nullptr, res.error);
+        ASSERT_TRUE(res.data);
+        EXPECT_EQ("Hello World!", *res.data);
+        EXPECT_FALSE(res.mustRevalidate);
+        expectExpiresAfter(res, before, after, lifetime);
+
+        fs->setResourceOptions(withLifetime(Duration::zero()).clone());
+        req = fs->request(resource, [&](Response res2) {
+            req.reset();
+            EXPECT_EQ(nullptr, res2.error);
+            EXPECT_FALSE(bool(res2.expires));
+
+            fs->setResourceOptions(withLifetime(lifetime).clone());
+            const auto beforeAgain = util::now();
+            req = fs->request(resource, [&, beforeAgain](Response res3) {
+                const auto afterAgain = util::now();
+                req.reset();
+                EXPECT_EQ(nullptr, res3.error);
+                expectExpiresAfter(res3, beforeAgain, afterAgain, lifetime);
+                loop.stop();
+            });
+        });
+    });
+
+    loop.run();
+}
+
+// An Expires header or Cache-Control max-age is left unchanged.
+TEST(OnlineFileSource, TEST_REQUIRES_SERVER(ImplicitCacheLifetimeKeepsExplicitFreshness)) {
+    util::RunLoop loop;
+    const Duration lifetime = std::chrono::hours(24);
+    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(withLifetime(lifetime), ClientOptions());
+
+    const Timestamp past{Seconds(10000)};
+    const Timestamp future = util::now() + std::chrono::hours(2);
+    const std::string futureURL = "http://127.0.0.1:3000/test?expires=" +
+                                  std::to_string(future.time_since_epoch().count());
+
+    std::unique_ptr<AsyncRequest> req = fs->request(
+        {Resource::Unknown, "http://127.0.0.1:3000/test?expires=10000"}, [&](Response res) {
+            req.reset();
+            EXPECT_EQ(nullptr, res.error);
+            ASSERT_TRUE(res.expires);
+            EXPECT_TRUE(past == *res.expires);
+
+            req = fs->request({Resource::Unknown, futureURL}, [&](Response res2) {
+                req.reset();
+                EXPECT_EQ(nullptr, res2.error);
+                ASSERT_TRUE(res2.expires);
+                EXPECT_TRUE(future == *res2.expires);
+
+                const auto before = util::now();
+                req = fs->request({Resource::Unknown, "http://127.0.0.1:3000/explicit-max-age"},
+                                  [&, before](Response res3) {
+                                      const auto after = util::now();
+                                      req.reset();
+                                      EXPECT_EQ(nullptr, res3.error);
+                                      ASSERT_TRUE(res3.data);
+                                      EXPECT_EQ("Response", *res3.data);
+                                      EXPECT_FALSE(res3.mustRevalidate);
+                                      expectExpiresAfter(res3, before, after, Seconds(30));
+                                      loop.stop();
+                                  });
+            });
+        });
+
+    loop.run();
+}
+
+// Cache-Control: must-revalidate has no freshness lifetime, so the implicit one applies.
+TEST(OnlineFileSource, TEST_REQUIRES_SERVER(ImplicitCacheLifetimeMustRevalidate)) {
+    util::RunLoop loop;
+    const Duration lifetime = std::chrono::hours(24);
+    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(withLifetime(lifetime), ClientOptions());
+
+    const auto before = util::now();
+    std::unique_ptr<AsyncRequest> req = fs->request({Resource::Unknown, "http://127.0.0.1:3000/must-revalidate"},
+                                                    [&](Response res) {
+                                                        const auto after = util::now();
+                                                        req.reset();
+                                                        EXPECT_EQ(nullptr, res.error);
+                                                        ASSERT_TRUE(res.data);
+                                                        EXPECT_EQ("Response", *res.data);
+                                                        EXPECT_TRUE(res.mustRevalidate);
+                                                        expectExpiresAfter(res, before, after, lifetime);
+                                                        loop.stop();
+                                                    });
+
+    loop.run();
+}
+
+TEST(OnlineFileSource, TEST_REQUIRES_SERVER(ImplicitCacheLifetimeNegative)) {
+    util::RunLoop loop;
+    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(withLifetime(std::chrono::seconds(-30)),
+                                                                        ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = fs->request({Resource::Unknown, "http://127.0.0.1:3000/test"},
+                                                    [&](Response res) {
+                                                        req.reset();
+                                                        EXPECT_EQ(nullptr, res.error);
+                                                        ASSERT_TRUE(res.data);
+                                                        EXPECT_EQ("Hello World!", *res.data);
+                                                        EXPECT_FALSE(bool(res.expires));
+                                                        loop.stop();
+                                                    });
+
+    loop.run();
+}
+
+TEST(OnlineFileSource, TEST_REQUIRES_SERVER(ImplicitCacheLifetimeIgnoresErrors)) {
+    util::RunLoop loop;
+    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(withLifetime(std::chrono::hours(24)),
+                                                                        ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = fs->request({Resource::Unknown, "http://127.0.0.1:3000/permanent-error"},
+                                                    [&](Response res) {
+                                                        req.reset();
+                                                        ASSERT_NE(nullptr, res.error);
+                                                        EXPECT_EQ(Response::Error::Reason::Server, res.error->reason);
+                                                        EXPECT_FALSE(bool(res.expires));
+                                                        loop.stop();
+                                                    });
+
+    loop.run();
+}

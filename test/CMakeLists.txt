@@ -48,6 +48,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/storage/online_file_source.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/pmtiles_file_source.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/resource.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/storage/resource_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/sqlite.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/conversion_impl.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/function.test.cpp

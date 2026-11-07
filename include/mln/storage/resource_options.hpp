@@ -1,9 +1,11 @@
 #pragma once
 
+#include <mln/util/chrono.hpp>
+#include <mln/util/tile_server_options.hpp>
+
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <mln/util/tile_server_options.hpp>
 
 namespace mln {
 
@@ -100,6 +102,22 @@ public:
      * @return maximum allowed cache database size in bytes.
      */
     uint64_t maximumCacheSize() const;
+
+    /**
+     * @brief Sets a lifetime for responses that omit both `Cache-Control max-age`
+              and `Expires` headers.
+     *
+     * A stored response stays usable until this lifetime elapses, so a later
+     * request does not immediately download it again. An explicit freshness
+     * lifetime from the server is left unchanged. The default of zero
+     * re-validates those responses on every request.
+     */
+    ResourceOptions& withImplicitCacheLifetime(Duration lifetime);
+
+    /**
+     * @brief Gets the freshness lifetime used when a response has no explicit expiry.
+     */
+    Duration implicitCacheLifetime() const;
 
     /**
      * @brief Sets the platform context. A platform context is usually an object
