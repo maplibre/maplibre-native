@@ -6,6 +6,7 @@
 #include <mln/map/bound_options.hpp>
 #include <mln/map/camera.hpp>
 #include <mln/map/map_options.hpp>
+#include <mln/map/mode.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/terrain.hpp>
@@ -19,6 +20,8 @@
 #include <cstdio>
 #include <functional>
 #include <limits>
+#include <set>
+#include <string>
 #include <thread>
 
 using namespace mln;
@@ -1188,4 +1191,78 @@ TEST(TerrainCamera, AFlightEasesTheCenterHeightToTheGroundItIsHeadedFor) {
     EXPECT_NEAR(camera.center->longitude(), target.longitude(), 1e-3);
     EXPECT_NEAR(*camera.zoom, 14.0, 0.05) << "at the zoom asked for";
     EXPECT_NEAR(*camera.centerAltitude, 0.0, 30.0) << "with the center on the ground there";
+}
+
+namespace {
+
+// A DEM to zoom 17 under a zoom 13 view: the DEM source covers the ground to the horizon, while
+// the mesh keeps only the tiles nearest the camera, so the source holds tiles the mesh has no use for.
+const char* deepDEMStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 17,
+      "tileSize": 64
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": []
+})STYLE";
+
+} // namespace
+
+// A DEM texture is made, once, for a loaded tile related to the mesh tile set (a mesh tile, an
+// ancestor or a descendant of one), and not for the others. The DEM source's cover is not capped
+// where the mesh is, so a steep view loads DEM tiles the mesh has no use for.
+TEST(TerrainDEMTextures, ATextureIsMadeOnlyForTilesRelatedToTheMeshTileSet) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string tile = makeFlatDEMTile();
+    std::set<std::string> demTiles;
+    fileSource->tileResponse = [&](const Resource& resource) {
+        demTiles.insert(resource.url);
+        Response res;
+        res.data = std::make_shared<std::string>(tile);
+        return res;
+    };
+    HeadlessFrontend frontend{{1200, 800}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.getStyle().loadJSON(deepDEMStyle);
+    map.setTerrainLoadMode(TerrainLoadMode::Performance);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.2692, 11.4041}).withZoom(13.0).withPitch(75.0));
+
+    // Render until the DEM has stopped arriving and no frame makes a texture: the elevated cover
+    // shifts as the DEM lands, so a pause of a frame or two does not mean it is in.
+    constexpr int maxFrames = 200;
+    constexpr int quietFrames = 10;
+    gfx::RenderingStats stats;
+    std::size_t requested = 0;
+    int quiet = 0;
+    for (int frame = 0; frame < maxFrames && quiet < quietFrames; ++frame) {
+        loop.runOnce();
+        const int before = stats.numDEMTexturesCreated;
+        stats = frontend.render(map).stats;
+        quiet = demTiles.size() == requested && stats.numDEMTexturesCreated == before ? quiet + 1 : 0;
+        requested = demTiles.size();
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    ASSERT_EQ(quiet, quietFrames) << "tiles or DEM textures were still arriving after " << maxFrames << " frames";
+    const std::size_t cap = terrainLoadBudget(TerrainLoadMode::Performance).maxMeshTiles;
+    ASSERT_GT(demTiles.size(), 2 * cap)
+        << "the DEM source should hold more than twice the mesh limit, or the bound below proves nothing";
+
+    // In this view the tiles related to the mesh are its own, a texture each. The bound is a margin,
+    // not a rule: a mesh tile can have up to four loaded children, and a tile that leaves the related
+    // set and returns is made twice. It stays well below the tiles the source holds, which the guard
+    // above makes sure of.
+    EXPECT_GT(stats.numDEMTexturesCreated, 0) << "the mesh tiles have no DEM texture";
+    EXPECT_LE(stats.numDEMTexturesCreated, static_cast<int>(2 * cap))
+        << "a texture was made for a tile unrelated to the mesh";
 }

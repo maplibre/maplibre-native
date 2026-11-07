@@ -437,7 +437,32 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         return;
     }
 
-    // Decode and cache the DEM textures of loaded DEM tiles
+    // The mesh (and drape) tile set: an elevation-aware, LOD-based ideal cover
+    // taken straight from the view, not from the DEM source's loaded tiles - so a
+    // sparse DEM's low-zoom fallback tiles don't drag the drape resolution down
+    // (blurry roads) or leave uncovered areas as skirt. DEM/drape textures fall
+    // back to ancestors per tile below while exact tiles load. tileCover already
+    // limits to the frustum (elevation included), so no extra cull is needed.
+    // Use the cover Renderer::Impl already computed for this frame when available: it is
+    // the set the drape-target pool was built from (see setFrameMeshCover), and computing
+    // it again here would repeat the work.
+    // The cover is already capped per load mode (computeMeshCover).
+    std::set<UnwrappedTileID> meshTiles = frameMeshCover ? std::move(*frameMeshCover)
+                                                         : computeMeshCover(state, updateParameters);
+    frameMeshCover.reset();
+
+    // A loaded DEM tile worth a texture: a mesh tile itself; an ancestor of one, which the mesh
+    // falls back to while its own tile loads; or a descendant, which an elevated layer's tile
+    // deeper than the mesh tile samples (getTerrainData).
+    const auto relatedToMesh = [&](const UnwrappedTileID& id) {
+        return std::any_of(meshTiles.begin(), meshTiles.end(), [&](const UnwrappedTileID& mesh) {
+            return mesh == id || mesh.isChildOf(id) || id.isChildOf(mesh);
+        });
+    };
+
+    // Make a texture for each loaded DEM tile related to the mesh tile set; a loaded tile
+    // unrelated to it gets none. The DEM source's cover is not capped where the mesh is, so it
+    // holds such tiles.
     ++demUpdateCounter;
     for (const auto& renderTile : *renderTiles) {
         const auto& tile = renderTile.getTile();
@@ -454,31 +479,21 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             demDim = demData->dim;
             if (auto existing = demTextures.find(renderTile.id); existing != demTextures.end()) {
                 existing->second.lastUsed = demUpdateCounter;
-            } else if (auto texture = createDEMTexture(context, *demData)) {
-                // Keep the texture available for elevation sampling by non-draped layers
-                demTextures[renderTile.id] = {.texture = texture, .dim = demData->dim, .lastUsed = demUpdateCounter};
+            } else if (relatedToMesh(renderTile.id)) {
+                if (auto texture = createDEMTexture(context, *demData)) {
+                    context.renderingStats().numDEMTexturesCreated++;
+                    // Keep the texture available for elevation sampling by non-draped layers
+                    demTextures[renderTile.id] = {
+                        .texture = texture, .dim = demData->dim, .lastUsed = demUpdateCounter};
 #if MLN_RENDER_BACKEND_OPENGL
-                // Also pack this tile's DEM into the array for the (upcoming) instanced
-                // depth pass. Additive: the per-tile texture above is still the fallback.
-                packDEMArrayLayer(context, renderTile.id, *demData);
+                    // Also pack this tile's DEM into the array for the (upcoming) instanced
+                    // depth pass. Additive: the per-tile texture above is still the fallback.
+                    packDEMArrayLayer(context, renderTile.id, *demData);
 #endif
+                }
             }
         }
     }
-
-    // The mesh (and drape) tile set: an elevation-aware, LOD-based ideal cover
-    // taken straight from the view, not from the DEM source's loaded tiles - so a
-    // sparse DEM's low-zoom fallback tiles don't drag the drape resolution down
-    // (blurry roads) or leave uncovered areas as skirt. DEM/drape textures fall
-    // back to ancestors per tile below while exact tiles load. tileCover already
-    // limits to the frustum (elevation included), so no extra cull is needed.
-    // Use the cover Renderer::Impl already computed for this frame when available:
-    // recomputing here can yield a different set once demDim is known (see
-    // setFrameMeshCover), which would desync this mesh from the drape-target pool.
-    // The cover is already capped per load mode (computeMeshCover).
-    std::set<UnwrappedTileID> meshTiles = frameMeshCover ? std::move(*frameMeshCover)
-                                                         : computeMeshCover(state, updateParameters);
-    frameMeshCover.reset();
 
     // Drop drawables and cached DEM textures for tiles that left the mesh tile
     // set, keeping everything else intact between frames
@@ -508,15 +523,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // can serve as ancestor fallbacks while exact tiles load (as maplibre-gl-js
     // retains terrain tiles in its source cache); drop unrelated ones
     for (auto it = demTextures.begin(); it != demTextures.end();) {
-        bool related = false;
-        for (const auto& current : currentTiles) {
-            const UnwrappedTileID unwrapped = current.toUnwrapped();
-            if (unwrapped == it->first || unwrapped.isChildOf(it->first) || it->first.isChildOf(unwrapped)) {
-                related = true;
-                break;
-            }
-        }
-        if (related) {
+        if (relatedToMesh(it->first)) {
             it = std::next(it);
         } else {
 #if MLN_RENDER_BACKEND_OPENGL
