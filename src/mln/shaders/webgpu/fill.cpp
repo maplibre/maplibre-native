@@ -37,9 +37,9 @@ using FillPatternShaderSource = ShaderSource<BuiltIn::FillPatternShader, gfx::Ba
 const std::array<AttributeInfo, 5> FillPatternShaderSource::attributes = {
     AttributeInfo{4, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
     AttributeInfo{5, gfx::AttributeDataType::Float4, idFillColorVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::UShort4, idFillPatternFromVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::UShort4, idFillPatternFromVertexAttribute},
+    AttributeInfo{8, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
 };
 const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {TextureInfo{0, idFillImageTexture}};
 
@@ -51,9 +51,9 @@ using FillOutlinePatternShaderSource = ShaderSource<BuiltIn::FillOutlinePatternS
 const std::array<AttributeInfo, 5> FillOutlinePatternShaderSource::attributes = {
     AttributeInfo{4, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
     AttributeInfo{5, gfx::AttributeDataType::Float4, idFillColorVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::UShort4, idFillPatternFromVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::UShort4, idFillPatternFromVertexAttribute},
+    AttributeInfo{8, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
 };
 const std::array<TextureInfo, 1> FillOutlinePatternShaderSource::textures = {TextureInfo{0, idFillImageTexture}};
 

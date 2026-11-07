@@ -201,6 +201,26 @@ public class PropertyFactory {
   }
 
   /**
+   * The distance from the corner that will be cut and replaced with rounded corner.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillRoundedCornerDistance(Float value) {
+    return new PaintPropertyValue<>("fill-rounded-corner-distance", value);
+  }
+
+  /**
+   * The distance from the corner that will be cut and replaced with rounded corner.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillRoundedCornerDistance(Expression expression) {
+    return new PaintPropertyValue<>("fill-rounded-corner-distance", expression);
+  }
+
+  /**
    * The opacity at which the line will be drawn.
    *
    * @param value a Float value
