@@ -1,0 +1,18 @@
+{
+  "version": 8,
+  "sources": {
+    "inline": {
+      "type": "vector",
+      "encoding": "mlt",
+      "maxzoom": 15,
+      "minzoom": 0,
+      "tiles": [ "http://127.0.0.1:3000/{z}-{x}-{y}.mlt" ]
+    }
+  },
+  "layers": [{
+    "id": "fill",
+    "type": "fill",
+    "source": "inline",
+    "source-layer": "water"
+  }]
+}

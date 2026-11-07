@@ -170,3 +170,36 @@ test(`render does not report an error from rendering a previous style`, function
         });
     });
 });
+
+test(`request receives the accept header for MLT tiles only`, function(t) {
+    var acceptHeaders = {};
+    var map = new mbgl.Map({
+        request: function(req, callback) {
+            t.equal(typeof req.acceptHeader, 'string');
+            if (req.kind === mbgl.Resource.Tile) {
+                acceptHeaders[req.url] = req.acceptHeader;
+            }
+            callback();
+        }
+    });
+    map.load({
+        version: 8,
+        sources: {
+            mlt: { type: 'vector', tiles: ['http://example.com/mlt/{z}/{x}/{y}'], encoding: 'mlt' },
+            mvt: { type: 'vector', tiles: ['http://example.com/mvt/{z}/{x}/{y}'] }
+        },
+        layers: [
+            { id: 'mlt', type: 'fill', source: 'mlt', 'source-layer': 'layer' },
+            { id: 'mvt', type: 'fill', source: 'mvt', 'source-layer': 'layer' }
+        ]
+    });
+    map.render({ zoom: 0 }, function(err, pixels) {
+        t.error(err);
+        t.assert(pixels);
+        t.deepEqual(acceptHeaders, {
+            'http://example.com/mlt/0/0/0': 'application/vnd.maplibre-tile',
+            'http://example.com/mvt/0/0/0': ''
+        });
+        t.end();
+    });
+});

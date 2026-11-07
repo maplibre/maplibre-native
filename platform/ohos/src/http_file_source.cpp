@@ -372,6 +372,16 @@ public:
             return;
         }
 
+        if (!resource.acceptHeader.empty()) {
+            const std::string acceptHeader{resource.acceptHeader};
+            if (!setHeader(newHeaders, "Accept", acceptHeader.c_str())) {
+                OH_Http_DestroyHeaders(&newHeaders);
+                OH_Http_Destroy(&newRequest);
+                complete(nullptr, OH_HTTP_OUT_OF_MEMORY);
+                return;
+            }
+        }
+
         if (resource.dataRange) {
             const auto range = std::string{"bytes="} + util::toString(resource.dataRange->first) + "-" +
                                util::toString(resource.dataRange->second);

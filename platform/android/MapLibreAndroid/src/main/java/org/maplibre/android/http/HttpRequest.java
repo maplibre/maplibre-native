@@ -22,9 +22,11 @@ public interface HttpRequest {
    * @param etag         http header, identifier for a specific version of a resource
    * @param modified     http header, used to determine if a resource hasn't been modified since
    * @param offlineUsage flag to indicate a resource will be used for offline, appends offline=true as a query parameter
+   * @param acceptHeader the Accept header value to send with the request
    */
   void executeRequest(HttpResponder httpRequest, long nativePtr, String resourceUrl,
-                      String dataRange, String etag, String modified, boolean offlineUsage);
+                              String dataRange, String etag, String modified, boolean offlineUsage,
+                              String acceptHeader);
 
   /**
    * Cancels the request.

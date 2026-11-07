@@ -228,3 +228,20 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(Load)) {
 
     loop.run();
 }
+
+TEST(HTTPFileSource, TEST_REQUIRES_SERVER(AcceptHeader)) {
+    util::RunLoop loop;
+    HTTPFileSource fs(ResourceOptions::Default(), ClientOptions());
+
+    Resource resource(Resource::Unknown, "http://127.0.0.1:3000/test-accept");
+    resource.acceptHeader = "application/vnd.mapbox-vector-tile";
+
+    auto req = fs.request(resource, [&](Response res) {
+        EXPECT_EQ(nullptr, res.error);
+        ASSERT_TRUE(res.data.get());
+        EXPECT_EQ("application/vnd.mapbox-vector-tile", *res.data);
+        loop.stop();
+    });
+
+    loop.run();
+}
