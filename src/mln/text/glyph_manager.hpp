@@ -85,6 +85,7 @@ private:
 
     struct GlyphRequest {
         bool parsed = false;
+        bool failed = false;
         std::unique_ptr<AsyncRequest> req;
         std::unordered_map<GlyphRequestor *, std::shared_ptr<GlyphDependencies>> requestors;
     };
