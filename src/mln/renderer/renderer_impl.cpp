@@ -590,6 +590,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                     --drapeBudget;
                 } else if (res == RenderTarget::RenderResult::Deferred) {
                     drapeWorkDeferred = true;
+                    ++context.renderingStats().numDrapeTargetsDeferred;
                 }
             }
         });
@@ -737,6 +738,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         if (terrainCoverRetryFrames > 0) {
             --terrainCoverRetryFrames;
             terrainCoverPending = true;
+            ++context.renderingStats().numTerrainCoverPendingFrames;
         }
     } else {
         terrainCoverRetryFrames = 4;
