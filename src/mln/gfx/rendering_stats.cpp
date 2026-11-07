@@ -65,6 +65,7 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     stencilClears += r.stencilClears;
     stencilUpdates += r.stencilUpdates;
     numDrapeTargetsRendered += r.numDrapeTargetsRendered;
+    numMipmapChainsBuilt += r.numMipmapChainsBuilt;
     numDrapeCoverageScans += r.numDrapeCoverageScans;
     numDrapeMasksDrawn += r.numDrapeMasksDrawn;
     numDrapeMasksSkipped += r.numDrapeMasksSkipped;
@@ -124,6 +125,7 @@ std::string RenderingStats::toString(std::string_view sep) const {
     optionalStatLine(ss, stencilClears, "stencilClears", sep);
     optionalStatLine(ss, stencilUpdates, "stencilUpdates", sep);
     optionalStatLine(ss, numDrapeTargetsRendered, "numDrapeTargetsRendered", sep);
+    optionalStatLine(ss, numMipmapChainsBuilt, "numMipmapChainsBuilt", sep);
     optionalStatLine(ss, numDrapeCoverageScans, "numDrapeCoverageScans", sep);
     optionalStatLine(ss, numDrapeMasksDrawn, "numDrapeMasksDrawn", sep);
     optionalStatLine(ss, numDrapeMasksSkipped, "numDrapeMasksSkipped", sep);

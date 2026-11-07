@@ -34,6 +34,11 @@ void fetchDrapeStats(uint32_t& rendered, uint32_t& skipped) {
     gDrapeSkipped = 0;
 }
 
+namespace {
+/// Taps of the anisotropic filter that samples a drape target; 1 is trilinear alone
+constexpr uint8_t drapeMaxAnisotropy = 8;
+} // namespace
+
 RenderTarget::RenderTarget(gfx::Context& context_,
                            const Size size,
                            const gfx::TextureChannelDataType type,
@@ -94,6 +99,10 @@ void RenderTarget::upload(gfx::UploadPass& uploadPass) {
 
 void RenderTarget::setDrapeTileID(const UnwrappedTileID& id) {
     drapeTileID = id;
+    // The terrain pass samples this target on ground seen at an angle and from afar, where a texel is
+    // smaller than a pixel: without a mip chain a one-pixel line steps over whole texels and breaks
+    // into dashes. The chain is rebuilt only when the target is rendered (see present()).
+    offscreenTexture->setMipmapped(true, drapeMaxAnisotropy);
     const auto z = static_cast<float>(id.canonical.z);
     drapeTileValues = {z,
                        static_cast<float>(id.canonical.x) + static_cast<float>(id.wrap) * std::exp2(z),
