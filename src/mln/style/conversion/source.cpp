@@ -114,7 +114,7 @@ std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id
         }
     }
     const auto encodingValue = objectMember(value, "encoding");
-    auto encoding = Tileset::VectorEncoding::Mapbox;
+    std::optional<Tileset::VectorEncoding> encoding;
     if (encodingValue) {
         const auto encodingStr = toString(*encodingValue);
         if (encodingStr && encodingStr == "mvt") {

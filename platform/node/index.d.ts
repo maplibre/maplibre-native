@@ -36,7 +36,7 @@ declare module '@maplibre/maplibre-gl-native' {
      * Will be used during a `Map.render` call to request all necessary map resources (tiles, fonts...)
      */
     request?: (
-      request: { url: string; kind: ResourceKind },
+      request: { url: string; kind: ResourceKind; acceptHeader: string },
       callback: (error?: Error, response?: RequestResponse) => void,
     ) => void;
 

@@ -127,12 +127,13 @@ var map = new mbgl.Map({
 });
 ```
 
-If you omit the `request` method, the `map` object will use the default internal request handlers, which is ok for most cases. However, if you have specific needs, you can implement your own `request` handler. When a `request` method is provided, all `map` resources will be requested by calling the `request` method with two parameters, called `req` and `callback` respectively in this example. The `req` parameter has two properties:
+If you omit the `request` method, the `map` object will use the default internal request handlers, which is ok for most cases. However, if you have specific needs, you can implement your own `request` handler. When a `request` method is provided, all `map` resources will be requested by calling the `request` method with two parameters, called `req` and `callback` respectively in this example. The `req` parameter has three properties:
 
 ```json
 {
     "url": "http://example.com",
-    "kind": 1
+    "kind": 1,
+    "acceptHeader": ""
 }
 ```
 
@@ -151,6 +152,8 @@ The `kind` is an enum and defined in [`mbgl.Resource`](https://github.com/maplib
 ```
 
 The `kind` enum has no significance for anything but serves as a hint to your implemention as to what sort of resource to expect. E.g., your implementation could choose caching strategies based on the expected file type.
+
+The `acceptHeader` is the value your implementation should send as the `Accept` header of the request, or an empty string if no `Accept` header is needed. It is set when requesting MapLibre Tiles (`application/vnd.maplibre-tile`), so that a server can pick the right encoding.
 
 The `callback` parameter is a function that must be called with two parameters: an error message (if there are no errors, then you must pass `null`), and a response object:
 

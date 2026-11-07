@@ -85,7 +85,8 @@ int main(int argc, char* argv[]) {
                               .pixelRatio = 1,
                               .x = args::get(xValueFlag),
                               .y = args::get(yValueFlag),
-                              .z = static_cast<int8_t>(args::get(zValueFlag))}};
+                              .z = static_cast<int8_t>(args::get(zValueFlag)),
+                              .vectorEncoding = std::nullopt}};
     }
 
     mln::util::RunLoop loop;

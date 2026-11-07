@@ -5,7 +5,9 @@
 
 #include <atomic>
 #include <mutex>
+#include <optional>
 #include <shared_mutex>
+#include <string_view>
 
 namespace mln {
 
@@ -20,7 +22,12 @@ class TileLoader {
 public:
     TileLoader(const TileLoader&) = delete;
     TileLoader& operator=(const TileLoader&) = delete;
-    TileLoader(T&, const OverscaledTileID&, const TileParameters&, const Tileset&);
+    TileLoader(T&,
+               const OverscaledTileID&,
+               const TileParameters&,
+               const Tileset&,
+               std::string_view acceptHeader = {},
+               std::optional<Tileset::VectorEncoding> vectorEncoding = std::nullopt);
     ~TileLoader();
 
     void setNecessity(TileNecessity newNecessity);
