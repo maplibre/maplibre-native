@@ -109,6 +109,10 @@ struct RenderingStats {
     /// Number of CPU-side texture objects made for terrain DEM tiles (numCreatedTextures counts GPU
     /// allocations, which these are not); a still terrain scene should leave it unchanged
     int numDEMTexturesCreated = 0;
+    /// DEM textures sent to the GPU again because a neighbouring tile backfilled the tile's border
+    /// after the texture was made; a tile's edge reads that border, so a stale copy leaves a step
+    /// against the neighbour
+    int numDEMTexturesRefreshed = 0;
     /// Terrain depth passes (the symbol-occlusion depth texture) rendered; one per frame in
     /// which the camera or the mesh set changed, none for a still frame
     int numDepthPasses = 0;

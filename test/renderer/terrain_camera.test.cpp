@@ -2,6 +2,8 @@
 #include <mln/test/stub_file_source.hpp>
 #include <mln/test/map_adapter.hpp>
 
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/context.hpp>
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/bound_options.hpp>
 #include <mln/map/camera.hpp>
@@ -1265,4 +1267,73 @@ TEST(TerrainDEMTextures, ATextureIsMadeOnlyForTilesRelatedToTheMeshTileSet) {
     EXPECT_GT(stats.numDEMTexturesCreated, 0) << "the mesh tiles have no DEM texture";
     EXPECT_LE(stats.numDEMTexturesCreated, static_cast<int>(2 * cap))
         << "a texture was made for a tile unrelated to the mesh";
+}
+
+// A tile's edge vertices read the DEM's 2 px border, which the neighbouring tile backfills when it
+// loads (RenderRasterDEMSource::onTileChanged). A tile whose neighbour arrives after the tile's
+// texture was made must have that texture sent again, or its edge keeps the stand-in border (a copy
+// of its own last column) and steps against the neighbour, which the skirts show as a vertical riser.
+TEST(TerrainDEMTextures, ANeighbourLoadingLaterRefreshesTheTexturesOfTheTilesItBackfills) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string tile = makeFlatDEMTile();
+    // Tiles in odd columns are held back until released, so the tiles in even columns are loaded, and
+    // have their textures, before the neighbours that backfill them
+    bool holdOddColumns = true;
+    std::set<std::string> requestedOdd;
+    std::set<std::string> demTiles;
+    fileSource->tileResponse = [&](const Resource& resource) -> std::optional<Response> {
+        const auto lastDash = resource.url.rfind('-');
+        const auto firstDash = resource.url.rfind('-', lastDash - 1);
+        const int column = std::stoi(resource.url.substr(firstDash + 1, lastDash - firstDash - 1));
+        if (column % 2 == 1) {
+            requestedOdd.insert(resource.url);
+            if (holdOddColumns) {
+                return std::nullopt;
+            }
+        }
+        demTiles.insert(resource.url);
+        Response res;
+        res.data = std::make_shared<std::string>(tile);
+        return res;
+    };
+    HeadlessFrontend frontend{{512, 512}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize()));
+    map.getStyle().loadJSON(terrainStyle);
+    map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(2.5).withPitch(0.0));
+
+    // A Continuous map renders as tiles arrive (a still waits for every tile, so it could not show
+    // a tile that loads after the others), and the counters are read from the backend's context.
+    gfx::RenderingStats stats;
+    const auto renderUntilQuiet = [&] {
+        constexpr int maxFrames = 200;
+        constexpr int quietFrames = 10;
+        std::size_t seen = 0;
+        int quiet = 0;
+        for (int frame = 0; frame < maxFrames && quiet < quietFrames; ++frame) {
+            loop.runOnce();
+            const int before = stats.numDEMTexturesCreated;
+            {
+                gfx::BackendScope guard{*frontend.getBackend()};
+                stats = frontend.getBackend()->getContext().renderingStats();
+            }
+            quiet = demTiles.size() == seen && stats.numDEMTexturesCreated == before ? quiet + 1 : 0;
+            seen = demTiles.size();
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+        return quiet == quietFrames;
+    };
+
+    ASSERT_TRUE(renderUntilQuiet()) << "the even columns kept arriving";
+    ASSERT_GT(stats.numDEMTexturesCreated, 0) << "the tiles in the even columns have no texture";
+    ASSERT_FALSE(requestedOdd.empty()) << "the view has no tile in an odd column, so nothing backfills";
+    EXPECT_EQ(stats.numDEMTexturesRefreshed, 0) << "nothing has backfilled a border yet";
+
+    holdOddColumns = false;
+    ASSERT_TRUE(renderUntilQuiet()) << "the odd columns kept arriving";
+    EXPECT_GT(stats.numDEMTexturesRefreshed, 0)
+        << "a tile backfilled by a neighbour that loaded after its texture was made kept the stale texture";
 }
