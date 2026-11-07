@@ -23,6 +23,10 @@ struct PropertyDefinition {
     std::optional<float> minimum;
     std::optional<float> maximum;
     std::vector<std::string> enumValues;
+    // Layout properties are evaluated at layout time, per tile and per feature; they have no paint evaluation.
+    bool layout = false;
+    // For a RESOURCE property, the RESOURCES property its names are looked up in.
+    std::string resources;
     bool operator==(const PropertyDefinition&) const = default;
 };
 
@@ -72,7 +76,19 @@ struct ShaderDefinition {
     std::vector<ShaderAttribute> attributes;
     std::vector<UniformBlockDefinition> uniformBlocks;
     std::vector<ShaderPropertyBindingDefinition> propertyBindings;
+    bool tilePatternTexture = false;
+    bool instanced = false;
     bool operator==(const ShaderDefinition&) const = default;
+};
+
+struct DrawPass {
+    bool depthTest = true;
+    bool depthWrite = false;
+    bool colorWrite = true;
+    bool blend = true;
+    bool stencilDedup = false;
+    mln_plugin_cull_mode_v1 cull = MLN_PLUGIN_CULL_NONE;
+    bool operator==(const DrawPass&) const = default;
 };
 
 struct LayerType {
@@ -89,9 +105,17 @@ struct LayerType {
     mln_plugin_query_feature_fn queryFeature = nullptr;
     mln_plugin_query_radius_fn queryRadius = nullptr;
     mln_plugin_update_uniform_block_fn updateUniformBlock = nullptr;
-    bool enableStencilOverlapDedup = false;
+    bool replaceBuiltin = false;
+    bool is3D = false;
+    // Without declared draw passes there is one default pass, and each drawable's own depth, stencil and cull flags set
+    // the state it is drawn with.
+    bool explicitDrawPasses = false;
+    std::vector<DrawPass> drawPasses;
+    mln_plugin_evaluate_layer_fn evaluateLayer = nullptr;
     bool enableNearClippedMatrix = false;
     mln_plugin_should_animate_fn shouldAnimate = nullptr;
+    mln_plugin_create_resource_fn createResource = nullptr;
+    mln_plugin_destroy_resource_fn destroyResource = nullptr;
     bool operator==(const LayerType&) const = default;
 
     const PropertyDefinition* findProperty(const std::string& name) const;
@@ -104,7 +128,7 @@ struct RegisteredLayer final : LayerType {
         : LayerType(std::move(definition)),
           info{type.c_str(),
                style::LayerTypeInfo::Source::Required,
-               style::LayerTypeInfo::Pass3D::NotRequired,
+               is3D ? style::LayerTypeInfo::Pass3D::Required : style::LayerTypeInfo::Pass3D::NotRequired,
                style::LayerTypeInfo::Layout::Required,
                style::LayerTypeInfo::FadingTiles::NotRequired,
                style::LayerTypeInfo::CrossTileIndex::NotRequired,

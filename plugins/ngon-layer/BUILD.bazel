@@ -11,6 +11,8 @@ js_run_binary(
     name = "generated-shaders",
     stdout = "generated/ngon_shader_sources.hpp",
     tool = ":generate-shaders-script",
+    # Keep Node in the execution configuration when cross-compiling, e.g. for iOS.
+    use_execroot_entry_point = False,
 )
 
 cc_library(

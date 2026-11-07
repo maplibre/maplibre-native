@@ -3,6 +3,7 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
+#include <mln/style/rapidjson_conversion.hpp>
 #include <mln/tile/geojson_tile_data.hpp>
 #include <gtest/gtest.h>
 
@@ -47,8 +48,8 @@ struct LayoutData {
     std::string shaderID = "test-shader";
     mln_plugin_vertex_stream_v1 stream = {
         sizeof(stream), 0, reinterpret_cast<const uint8_t*>(vertices.data()), sizeof(vertices), 3, 2 * sizeof(int16_t)};
-    mln_plugin_attribute_binding_v1 attribute = {sizeof(attribute), 0, 0, 0};
-    mln_plugin_segment_v1 segment = {sizeof(segment), 0, 0, 3, 3};
+    mln_plugin_attribute_binding_v1 attribute = {sizeof(attribute), 0, 0, 0, 0};
+    mln_plugin_segment_v1 segment = {sizeof(segment), 0, 0, 3, 3, 0, 0};
     mln_plugin_drawable_descriptor_v1 drawable = {sizeof(drawable),
                                                   7,
                                                   {shaderID.data(), shaderID.size()},
@@ -62,12 +63,17 @@ struct LayoutData {
                                                   0,
                                                   0};
     mln_plugin_feature_vertex_range_v1 range = {sizeof(range), 0, 7, 0, 3};
+    std::array<mln_plugin_drawable_descriptor_v1, 2> drawables{};
+    std::array<mln_plugin_feature_vertex_range_v1, 2> ranges{};
+    mln_plugin_segment_v1 secondSegment{};
     // An independently allocated prefix makes premature reads visible to ASan.
     std::unique_ptr<uint32_t> shortSize = std::make_unique<uint32_t>(sizeof(uint32_t));
 };
 
 struct State {
     Output output = Output::Valid;
+    bool instanced = false, duplicateDrawable = false, differentFeature = false;
+    uint32_t elementOffset = 0, firstInstance = 0, instanceCount = 0;
     unsigned creates = 0, features = 0, finishes = 0, destroys = 0;
     // Fallback cleanup also keeps the pre-fix failure test from leaking.
     std::unique_ptr<LayoutData> instance;
@@ -100,6 +106,9 @@ mln_plugin_status finish(void* instance, mln_plugin_bucket_v1* output) {
     ++active->finishes;
     EXPECT_EQ(active->instance.get(), instance);
     auto& data = *static_cast<LayoutData*>(instance);
+    data.attribute.element_offset = active->elementOffset;
+    data.segment.first_instance = active->firstInstance;
+    data.segment.instance_count = active->instanceCount;
     *output = {sizeof(*output),
                &data.stream,
                1,
@@ -110,6 +119,21 @@ mln_plugin_status finish(void* instance, mln_plugin_bucket_v1* output) {
                12,
                &data.range,
                1};
+    if (active->duplicateDrawable) {
+        data.secondSegment = data.segment;
+        data.secondSegment.instance_count = 2;
+        data.drawables = {data.drawable, data.drawable};
+        data.drawables[1].drawable_key = 8;
+        data.drawables[1].shader_id = {"wall-shader", 11};
+        data.drawables[1].segments = &data.secondSegment;
+        data.ranges = {data.range, data.range};
+        data.ranges[1].drawable_key = 8;
+        if (active->differentFeature) data.ranges[1].feature_index = 1;
+        output->drawables = data.drawables.data();
+        output->drawable_count = data.drawables.size();
+        output->feature_vertex_ranges = data.ranges.data();
+        output->feature_vertex_range_count = data.ranges.size();
+    }
     switch (active->output) {
         case Output::FinishError:
             return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
@@ -197,14 +221,30 @@ std::shared_ptr<PluginBucket> build(State& state) {
     registration.destroyLayout = destroy;
     plugin::ShaderDefinition shader;
     shader.id = "test-shader";
+    shader.instanced = state.instanced;
+    if (state.duplicateDrawable) {
+        plugin::PropertyDefinition paint;
+        paint.name = "test-size";
+        paint.type = MLN_PLUGIN_VALUE_FLOAT;
+        paint.defaultValue = 1.0;
+        registration.properties.push_back(paint);
+        shader.propertyBindings.push_back({"test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4});
+        shader.attributes.push_back({1, 1, "a_size", MLN_PLUGIN_VERTEX_FLOAT_X2});
+    }
     shader.attributes.push_back({0, 0, "a_pos", MLN_PLUGIN_VERTEX_INT16_X2});
-    registration.shaders.push_back(std::move(shader));
+    registration.shaders.push_back(shader);
+    if (state.duplicateDrawable) {
+        shader.id = "wall-shader";
+        shader.instanced = true;
+        registration.shaders.push_back(shader);
+    }
     const auto shared = std::make_shared<const plugin::RegisteredLayer>(std::move(registration));
     auto impl = makeMutable<style::PluginStyleLayer::Impl>("test-layer", "points", shared);
     std::vector<Immutable<style::LayerProperties>> layers = {
         makeMutable<style::PluginStyleLayerProperties>(std::move(impl))};
     auto features = std::make_shared<mapbox::feature::feature_collection<int16_t>>();
     features->emplace_back(mapbox::geometry::point<int16_t>{10, 20});
+    if (state.differentFeature) features->emplace_back(mapbox::geometry::point<int16_t>{10, 20});
     auto featureIndex = std::make_unique<FeatureIndex>(std::make_unique<GeoJSONTileData>(*features));
     const BucketParameters parameters{OverscaledTileID{0, 0, {0, 0, 0}}, MapMode::Static, 1, &shared->info};
     PluginLayout layout(parameters, std::move(layers), std::make_unique<GeoJSONTileLayer>(features), shared);
@@ -281,4 +321,245 @@ TEST(PluginLayout, CopiesGeometryBeforeDestroyingLayout) {
     EXPECT_EQ(12.0f, bucket->queryRadius);
 }
 
+// What the layout callbacks saw of a string layout property.
+struct LayoutPropertyCapture {
+    std::string tile;
+    std::vector<std::string> features;
+    int instance = 0;
+};
+LayoutPropertyCapture* capture = nullptr;
+
+std::string onlyString(const mln_plugin_property_value_v1* properties, size_t count) {
+    if (count != 1 || properties[0].value.type != MLN_PLUGIN_VALUE_STRING) return "<missing>";
+    const auto& value = properties[0].value.data.string_value;
+    return std::string(value.data, value.size);
+}
+
+TEST(PluginLayout, EvaluatesLayoutPropertiesPerFeature) {
+    LayoutPropertyCapture state;
+    capture = &state;
+    plugin::LayerType registration;
+    registration.pluginID = "test.layout-properties";
+    registration.type = "test.layout-properties.layer";
+    registration.geometryTypeMask = MLN_PLUGIN_GEOMETRY_POINT;
+    registration.createLayout = [](const mln_plugin_layout_context_v1* context, void** instance) {
+        capture->tile = onlyString(context->properties, context->property_count);
+        *instance = &capture->instance;
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    registration.layoutFeature = [](void*, const mln_plugin_feature_v1* input) {
+        capture->features.push_back(onlyString(input->layout_properties, input->layout_property_count));
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    registration.finishLayout = [](void*, mln_plugin_bucket_v1* output) {
+        *output = {};
+        output->struct_size = sizeof(*output);
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    registration.destroyLayout = [](void*) {
+    };
+    plugin::PropertyDefinition kind;
+    kind.name = "test-kind";
+    kind.type = MLN_PLUGIN_VALUE_STRING;
+    kind.defaultValue = std::string("none");
+    kind.expressionCapabilities = MLN_PLUGIN_EXPRESSION_FEATURE;
+    kind.layout = true;
+    registration.properties.push_back(kind);
+    const auto shared = std::make_shared<const plugin::RegisteredLayer>(std::move(registration));
+
+    JSDocument document;
+    document.Parse(R"(["get", "kind"])");
+    const JSValue* json = &document;
+    style::conversion::Error error;
+    auto value = style::convertPluginPropertyValue(kind, style::conversion::Convertible(json), error);
+    ASSERT_TRUE(value) << error.message;
+    auto impl = makeMutable<style::PluginStyleLayer::Impl>("test-layer", "points", shared);
+    impl->pluginProperties.emplace(kind.name, std::move(*value));
+    std::vector<Immutable<style::LayerProperties>> layers = {
+        makeMutable<style::PluginStyleLayerProperties>(std::move(impl))};
+
+    auto features = std::make_shared<mapbox::feature::feature_collection<int16_t>>();
+    for (const auto* name : {"car", "truck"}) {
+        mapbox::feature::feature<int16_t> feature{mapbox::geometry::point<int16_t>(10, 20)};
+        feature.properties = {{"kind", std::string(name)}};
+        features->push_back(std::move(feature));
+    }
+    features->push_back(mapbox::feature::feature<int16_t>{mapbox::geometry::point<int16_t>(10, 20)});
+    auto featureIndex = std::make_unique<FeatureIndex>(std::make_unique<GeoJSONTileData>(*features));
+    const BucketParameters parameters{OverscaledTileID{0, 0, {0, 0, 0}}, MapMode::Static, 1, &shared->info};
+    PluginLayout layout(parameters, std::move(layers), std::make_unique<GeoJSONTileLayer>(features), shared);
+    mln::unordered_map<std::string, LayerRenderData> renderData;
+    layout.createBucket({}, featureIndex, renderData, false, false, parameters.tileID.canonical);
+    capture = nullptr;
+
+    // Without a feature the expression falls back to the default; each feature gets its own value, and a
+    // feature without the attribute gets an empty string, as `icon-image` does.
+    EXPECT_EQ("none", state.tile);
+    EXPECT_EQ((std::vector<std::string>{"car", "truck", ""}), state.features);
+}
+
+// What the resource callbacks were asked for and what layout_feature received.
+struct ResourceCapture {
+    std::vector<std::string> created;
+    int destroyed = 0;
+    std::vector<const void*> handles;
+    // What each handle held while layout_feature ran.
+    std::vector<std::string> contents;
+    int instance = 0;
+};
+ResourceCapture* resources = nullptr;
+
+TEST(PluginLayout, LoadsTheResourcesItsFeaturesName) {
+    ResourceCapture state;
+    resources = &state;
+    plugin::LayerType registration;
+    registration.pluginID = "test.layout-resources";
+    registration.type = "test.layout-resources.layer";
+    registration.geometryTypeMask = MLN_PLUGIN_GEOMETRY_POINT;
+    registration.createLayout = [](const mln_plugin_layout_context_v1*, void** instance) {
+        *instance = &resources->instance;
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    registration.layoutFeature = [](void*, const mln_plugin_feature_v1* input) {
+        EXPECT_EQ(1u, input->layout_property_count); // the RESOURCES property is left out
+        EXPECT_EQ(MLN_PLUGIN_VALUE_RESOURCE, input->layout_properties[0].value.type);
+        const auto* handle = input->layout_properties[0].value.data.resource_value.handle;
+        resources->handles.push_back(handle);
+        resources->contents.push_back(handle ? *static_cast<const std::string*>(handle) : std::string{});
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    registration.finishLayout = [](void*, mln_plugin_bucket_v1* output) {
+        *output = {};
+        output->struct_size = sizeof(*output);
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    registration.destroyLayout = [](void*) {
+    };
+    registration.createResource =
+        [](const mln_plugin_host_api_v1*, mln_plugin_string url, const uint8_t* data, size_t size, void** handle) {
+            resources->created.emplace_back(url.data, url.size);
+            *handle = new std::string(reinterpret_cast<const char*>(data), size);
+            return MLN_PLUGIN_STATUS_OK;
+        };
+    registration.destroyResource = [](void* handle) {
+        ++resources->destroyed;
+        delete static_cast<std::string*>(handle);
+    };
+    plugin::PropertyDefinition models;
+    models.name = "test-models";
+    models.type = MLN_PLUGIN_VALUE_RESOURCES;
+    models.defaultValue = std::string{};
+    models.layout = true;
+    plugin::PropertyDefinition model;
+    model.name = "test-model";
+    model.type = MLN_PLUGIN_VALUE_RESOURCE;
+    model.defaultValue = std::string{};
+    model.expressionCapabilities = MLN_PLUGIN_EXPRESSION_FEATURE;
+    model.layout = true;
+    model.resources = "test-models";
+    registration.properties = {models, model};
+    const auto shared = std::make_shared<const plugin::RegisteredLayer>(std::move(registration));
+
+    JSDocument document;
+    document.Parse(R"(["get", "kind"])");
+    const JSValue* json = &document;
+    style::conversion::Error error;
+    auto value = style::convertPluginPropertyValue(model, style::conversion::Convertible(json), error);
+    ASSERT_TRUE(value) << error.message;
+    auto impl = makeMutable<style::PluginStyleLayer::Impl>("test-layer", "points", shared);
+    impl->pluginProperties.emplace(model.name, std::move(*value));
+    impl->pluginResources[models.name] = {
+        {"car", "test://car.glb"}, {"truck", "test://truck.glb"}, {"boat", "test://boat.glb"}};
+    std::vector<Immutable<style::LayerProperties>> layers = {
+        makeMutable<style::PluginStyleLayerProperties>(std::move(impl))};
+
+    auto features = std::make_shared<mapbox::feature::feature_collection<int16_t>>();
+    for (const auto* kind : {"car", "truck", "car", "plane"}) {
+        mapbox::feature::feature<int16_t> feature{mapbox::geometry::point<int16_t>(10, 20)};
+        feature.properties = {{"kind", std::string(kind)}};
+        features->push_back(std::move(feature));
+    }
+    auto featureIndex = std::make_unique<FeatureIndex>(std::make_unique<GeoJSONTileData>(*features));
+    const BucketParameters parameters{OverscaledTileID{0, 0, {0, 0, 0}}, MapMode::Static, 1, &shared->info};
+    {
+        GlyphDependencies glyphDependencies;
+        ImageDependencies imageDependencies;
+        const std::set<std::string> availableImages;
+        LayoutResourceDependencies dependencies;
+        const LayoutParameters layoutParameters{
+            parameters, nullptr, glyphDependencies, imageDependencies, availableImages, dependencies};
+        PluginLayout layout(
+            parameters, std::move(layers), std::make_unique<GeoJSONTileLayer>(features), shared, &layoutParameters);
+
+        // Only the resources that features name are loaded; "boat" is never asked for.
+        EXPECT_EQ((LayoutResourceDependencies{"test://car.glb", "test://truck.glb"}), dependencies);
+        EXPECT_TRUE(layout.hasDependencies());
+
+        // "truck" failed to load.
+        layout.prepareResources(
+            {{"test://car.glb", std::make_shared<const LayoutResource>(std::make_shared<std::string>("car bytes"))},
+             {"test://truck.glb", std::make_shared<const LayoutResource>(nullptr)}});
+        mln::unordered_map<std::string, LayerRenderData> renderData;
+        layout.createBucket({}, featureIndex, renderData, false, false, parameters.tileID.canonical);
+    }
+    resources = nullptr;
+
+    // The car is created once and shared by both car features; the failed truck and the unknown plane get none.
+    EXPECT_EQ((std::vector<std::string>{"test://car.glb"}), state.created);
+    ASSERT_EQ(4u, state.handles.size());
+    ASSERT_NE(nullptr, state.handles[0]);
+    EXPECT_EQ("car bytes", state.contents[0]);
+    EXPECT_EQ(nullptr, state.handles[1]);
+    EXPECT_EQ(state.handles[0], state.handles[2]);
+    EXPECT_EQ(nullptr, state.handles[3]);
+    // Once nothing holds the resource any more, its handle is destroyed.
+    EXPECT_EQ(1, state.destroyed);
+}
+
+TEST(PluginLayout, ValidatesInstancingAndShiftedRecordBounds) {
+    State valid;
+    valid.instanced = true;
+    valid.elementOffset = 1;
+    valid.firstInstance = 1;
+    valid.instanceCount = 1;
+    const auto bucket = build(valid);
+    ASSERT_TRUE(bucket);
+    EXPECT_EQ(1u, bucket->drawables[0].attributes[0].elementOffset);
+    EXPECT_EQ(1u, bucket->drawables[0].segments[0].baseInstance);
+    EXPECT_EQ(1u, bucket->drawables[0].segments[0].instanceCount);
+    EXPECT_EQ(3u, bucket->drawables[0].vertexCount); // Includes unused sentinel records.
+    for (unsigned test = 0; test < 6; ++test) {
+        SCOPED_TRACE(test);
+        State invalid;
+        invalid.instanced = true;
+        invalid.instanceCount = 2;
+        if (test == 0) invalid.instanceCount = 0;
+        if (test == 1) invalid.firstInstance = UINT32_MAX;
+        if (test == 2) invalid.elementOffset = 3;
+        if (test == 3) invalid.elementOffset = 2;
+        if (test == 4) invalid.instanced = false;
+        if (test == 5) {
+            invalid.instanced = false;
+            invalid.instanceCount = 0;
+            invalid.firstInstance = 1;
+        }
+        EXPECT_FALSE(build(invalid));
+        EXPECT_EQ(1u, invalid.destroys);
+    }
+}
+
+TEST(PluginLayout, SharesPaintOnlyForIdenticalFeatureRecordsAcrossInputRates) {
+    for (bool different : {false, true}) {
+        State state;
+        state.duplicateDrawable = true;
+        state.differentFeature = different;
+        const auto bucket = build(state);
+        ASSERT_TRUE(bucket);
+        const auto* roof = bucket->paintBinders("test-layer", 7);
+        const auto* wall = bucket->paintBinders("test-layer", 8);
+        ASSERT_NE(nullptr, roof);
+        ASSERT_NE(nullptr, wall);
+        EXPECT_EQ(!different, roof == wall);
+    }
+}
 } // namespace

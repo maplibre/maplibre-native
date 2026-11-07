@@ -7,6 +7,7 @@
 #include <mln/text/glyph_manager.hpp>
 #include <mln/tile/tile.hpp>
 #include <mln/tile/geometry_tile_worker.hpp>
+#include <mln/tile/layout_resource_manager.hpp>
 #include <mln/util/feature.hpp>
 #include <mln/util/containers.hpp>
 
@@ -23,7 +24,7 @@ class SourceQueryOptions;
 class TileParameters;
 class TileAtlasTextures;
 
-class GeometryTile : public Tile, public GlyphRequestor, public ImageRequestor {
+class GeometryTile : public Tile, public GlyphRequestor, public ImageRequestor, public LayoutResourceRequestor {
 public:
     const std::thread::id renderThreadID = std::this_thread::get_id();
 
@@ -48,8 +49,11 @@ public:
     void onGlyphsAvailable(GlyphMap, HBShapeRequests) override;
     void onImagesAvailable(ImageMap, ImageMap, ImageVersionMap versionMap, uint64_t imageCorrelationID) override;
 
+    void onLayoutResourcesAvailable(LayoutResourceMap) override;
+
     void getGlyphs(GlyphDependencies);
     void getImages(ImageRequestPair);
+    void getLayoutResources(LayoutResourceDependencies);
 
     bool layerPropertiesUpdated(const Immutable<style::LayerProperties>&) override;
 
@@ -125,6 +129,7 @@ private:
     const std::shared_ptr<FileSource> fileSource;
     const std::shared_ptr<GlyphManager> glyphManager;
     const std::shared_ptr<ImageManager> imageManager;
+    const std::shared_ptr<LayoutResourceManager> layoutResourceManager;
 
     uint64_t correlationID = 0;
 

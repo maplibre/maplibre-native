@@ -1,0 +1,14 @@
+{
+  "base_test_path": "../../../metrics/integration",
+  "cache_path": "../../../metrics/cache-style.db",
+  "expectation_paths": [
+    "../../../metrics/expectations/platform-linux"
+  ],
+  "ignore_paths": [
+    "../../../metrics/ignores/platform-all.json",
+    "../../../metrics/ignores/platform-linux.json",
+    "../../../metrics/ignores/platform-linux-vulkan.json"
+  ],
+  "result_path": "results",
+  "filter": "/render-tests/fill-extrusion-pattern/"
+}

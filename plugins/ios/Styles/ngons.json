@@ -1,0 +1,12 @@
+{
+  "version": 8,
+  "name": "Plugin demo: n-gons",
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": { "background-color": "#F3F2ED" }
+    }
+  ]
+}

@@ -11,6 +11,7 @@
 #include <mln/geometry/feature_index.hpp>
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
+#include <mln/tile/layout_resource_manager.hpp>
 #include <mln/tile/tile.hpp>
 #include <mln/util/containers.hpp>
 
@@ -69,6 +70,8 @@ public:
                            ImageVersionMap versionMap,
                            uint64_t imageCorrelationID);
 
+    void onLayoutResourcesAvailable(LayoutResourceMap);
+
 private:
     void coalesced();
     void parse();
@@ -78,6 +81,7 @@ private:
 
     void requestNewGlyphs(const GlyphDependencies&);
     void requestNewImages(const ImageDependencies&);
+    void requestNewResources(const LayoutResourceDependencies&);
 
     void symbolDependenciesChanged();
     bool hasPendingDependencies() const;
@@ -121,10 +125,13 @@ private:
 
     GlyphDependencies pendingGlyphDependencies;
     ImageDependencies pendingImageDependencies;
+    LayoutResourceDependencies pendingResourceDependencies;
     GlyphMap glyphMap;
     ImageMap iconMap;
     ImageMap patternMap;
     ImageVersionMap versionMap;
+    // Every layout resource this tile has received, kept across parses like the glyphs.
+    LayoutResourceMap resourceMap;
     Immutable<std::set<std::string>> availableImages = makeMutable<std::set<std::string>>();
 
     bool showCollisionBoxes;
