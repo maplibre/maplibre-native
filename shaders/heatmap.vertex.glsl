@@ -1,5 +1,6 @@
 layout (location = 0) in vec2 a_pos;
 out vec2 v_extrude;
+out float v_visibility;
 
 layout (std140) uniform HeatmapDrawableUBO {
     highp mat4 u_matrix;
@@ -7,17 +8,18 @@ layout (std140) uniform HeatmapDrawableUBO {
     // Interpolations
     lowp float u_weight_t;
     lowp float u_radius_t;
-    lowp float drawable_pad1;
+    lowp float u_depth_enabled;
     // 3D terrain elevation
     highp vec4 u_dem_coords;
     highp vec4 u_dem_unpack;
     highp float u_dem_dim;
     highp float u_dem_exaggeration;
     lowp float u_dem_enabled;
-    lowp float drawable_pad2;
+    highp float u_units_to_pixels_y;
 };
 
 uniform sampler2D u_dem;
+uniform sampler2D u_depth;
 
 layout (std140) uniform HeatmapEvaluatedPropsUBO {
     highp float u_weight;
@@ -74,4 +76,7 @@ void main(void) {
     vec4 pos = vec4(center + extrude, ele, 1);
 
     gl_Position = u_matrix * pos;
+
+    // A kernel whose centre is behind terrain adds nothing to the density texture
+    v_visibility = calculate_visibility(u_matrix * vec4(center, ele, 1), u_depth, u_depth_enabled, u_units_to_pixels_y);
 }

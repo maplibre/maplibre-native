@@ -18,8 +18,9 @@ const std::array<AttributeInfo, 8> CircleShaderSource::attributes = {
     AttributeInfo{6, gfx::AttributeDataType::Float2, circleUBOCount + 1, idCircleStrokeWidthVertexAttribute},
     AttributeInfo{7, gfx::AttributeDataType::Float2, circleUBOCount + 1, idCircleStrokeOpacityVertexAttribute},
 };
-const std::array<TextureInfo, 1> CircleShaderSource::textures = {
+const std::array<TextureInfo, 2> CircleShaderSource::textures = {
     TextureInfo{0, idCircleDEMTexture},
+    TextureInfo{1, idCircleDepthTexture},
 };
 
 } // namespace shaders

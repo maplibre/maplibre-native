@@ -65,6 +65,7 @@ const std::vector<AttributeInfo> CircleShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> CircleShaderInfo::textures = {
     TextureInfo{"u_dem", idCircleDEMTexture},
+    TextureInfo{"u_depth", idCircleDepthTexture},
 };
 
 // Collision Box
@@ -253,6 +254,7 @@ const std::vector<AttributeInfo> HeatmapShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> HeatmapShaderInfo::textures = {
     TextureInfo{"u_dem", idHeatmapDEMTexture},
+    TextureInfo{"u_depth", idHeatmapDepthTexture},
 };
 
 // Heatmap Texture
