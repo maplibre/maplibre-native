@@ -12,6 +12,8 @@
 #include <mln/style/layers/background_layer_impl.hpp>
 #include <mln/style/layers/circle_layer.hpp>
 #include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/style/layers/fill_extrusion_layer.hpp>
+#include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mln/style/layers/fill_layer.hpp>
 #include <mln/style/layers/fill_layer_impl.hpp>
 #include <mln/style/layers/line_layer.hpp>
@@ -139,6 +141,14 @@ TEST(Layer, FillProperties) {
 
     layer->setFillTranslateAnchor(translateAnchor);
     EXPECT_EQ(layer->getFillTranslateAnchor(), translateAnchor);
+}
+
+TEST(Layer, FillExtrusionLayoutDifference) {
+    auto layer = std::make_unique<FillExtrusionLayer>("fill-extrusion", "source");
+    const Immutable<Layer::Impl> original = layer->baseImpl;
+
+    layer->setFillExtrusionRoundedCornerDistance(PropertyValue<float>(2.0f));
+    EXPECT_TRUE(layer->baseImpl->hasLayoutDifference(*original));
 }
 
 TEST(Layer, LineProperties) {
