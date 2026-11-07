@@ -15,7 +15,7 @@ namespace gl {
 class TileLayerGroupGL : public TileLayerGroup {
 public:
     TileLayerGroupGL(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain);
-    ~TileLayerGroupGL() override {}
+    ~TileLayerGroupGL() override = default;
 
     void upload(gfx::UploadPass&) override;
     void render(RenderOrchestrator&, PaintParameters&) override;
@@ -34,7 +34,7 @@ protected:
 class LayerGroupGL : public LayerGroup {
 public:
     LayerGroupGL(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain);
-    ~LayerGroupGL() override {}
+    ~LayerGroupGL() override = default;
 
     void upload(gfx::UploadPass&) override;
     void render(RenderOrchestrator&, PaintParameters&) override;

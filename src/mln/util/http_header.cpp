@@ -29,7 +29,7 @@ CacheControl CacheControl::parse(const std::string& value) {
     CacheControl result;
     qi::phrase_parse(value.begin(),
                      value.end(),
-                     ((qi::lit("must-revalidate")[phoenix::ref(result.mustRevalidate) = true]) |
+                     (qi::lit("must-revalidate")[phoenix::ref(result.mustRevalidate) = true] |
                       (qi::lit("max-age") >> '=' >> qi::ulong_long[phoenix::ref(result.maxAge) = qi::_1]) |
                       (*(('"' >> *(('\\' >> qi::char_) | (qi::char_ - '"')) >> '"') | (qi::char_ - '"' - ',')))) %
                          ',',

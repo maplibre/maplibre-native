@@ -79,10 +79,7 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         // LayerTweaker::getTileMatrix and clipMatrixForTile, which remap the draped / RTT
         // matrices for the same reason. Monotonic, so skirt-vs-surface depth ordering and
         // the packed depth texture used for symbol occlusion are preserved; GL unchanged.
-        matrix[2] = 0.5 * (matrix[2] + matrix[3]);
-        matrix[6] = 0.5 * (matrix[6] + matrix[7]);
-        matrix[10] = 0.5 * (matrix[10] + matrix[11]);
-        matrix[14] = 0.5 * (matrix[14] + matrix[15]);
+        matrix::remapClipZToUnitRange(matrix);
 #endif
 
 #if !MLN_UBO_CONSOLIDATION

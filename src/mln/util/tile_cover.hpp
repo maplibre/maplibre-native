@@ -61,9 +61,23 @@ struct TileCoverParameters {
     /// video sources. Only `TileLodMode::Adaptive` chooses a zoom per tile, so only it reads
     /// this.
     bool roundZoom = false;
+    /// Cover no more than this many tiles: the ones whose centers lie nearest `tileLimitOrigin`,
+    /// which come back in that order. The cover is walked nearest first and stops at the limit,
+    /// so its cost follows the limit and not the size of the view: a source whose minzoom is
+    /// deeper than the far field's zoom would otherwise enumerate (and sort) every tile out to the
+    /// horizon at a steep pitch, a couple of hundred thousand of them, to keep a few hundred.
+    /// 0 means no limit.
+    size_t tileLimit = 0;
+    /// Where `tileLimit` measures from (normalized web-mercator).
+    std::array<double, 2> tileLimitOrigin{{0.0, 0.0}};
     /// Optional; when null the cover is computed against the flat ground plane, as
     /// it was before terrain support.
     const TileElevationProvider* elevationProvider = nullptr;
+    /// Normalized web-mercator point the default (non-adaptive) level of detail measures its
+    /// distance from, in place of the map centre: tiles within `tileLodMinRadius` of it get the
+    /// finest zoom, and the zoom drops with distance from it. Unset (the default) measures from
+    /// the map centre. Only read once the pitch passes `tileLodPitchThreshold`.
+    std::optional<std::array<double, 2>> tileLodOrigin = std::nullopt;
 };
 
 int32_t coveringZoomLevel(double z, style::SourceType type, uint16_t tileSize) noexcept;

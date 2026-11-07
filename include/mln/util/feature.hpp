@@ -8,8 +8,8 @@
 
 namespace mln {
 
-using Value = mapbox::base::Value;
-using NullValue = mapbox::base::NullValue;
+using mapbox::base::NullValue;
+using mapbox::base::Value;
 using PropertyMap = mapbox::base::ValueObject;
 using FeatureIdentifier = mapbox::feature::identifier;
 using GeoJSONFeature = mapbox::feature::feature<double>;

@@ -91,15 +91,16 @@ public:
         auto fracPart = convertPoint<uint8_t>((p - intPart) * 128.0);
 
         return FillExtrusionLayoutVertex{
-            {static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
-            {// We pack a bool (`t`) indicating whether it is an upper or lower vertex
-             static_cast<uint16_t>((fracPart.x * 256 + fracPart.y) * 2 + t),
-             // The edgedistance attribute is used for wrapping fill_extrusion patterns
-             edgeDistance},
+            .a1 = {static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
+            .a2 =
+                {// We pack a bool (`t`) indicating whether it is an upper or lower vertex
+                 static_cast<uint16_t>((fracPart.x * 256 + fracPart.y) * 2 + t),
+                 // The edgedistance attribute is used for wrapping fill_extrusion patterns
+                 edgeDistance},
             // Multiply normal vector components in the 2D plane by 2^14 to pack them into integers
-            {static_cast<int16_t>(nx * factor), static_cast<int16_t>(ny * factor)},
+            .a3 = {static_cast<int16_t>(nx * factor), static_cast<int16_t>(ny * factor)},
             // Per-polygon centroid, so the extrusion is raised by one terrain elevation
-            {centroid.x, centroid.y}};
+            .a4 = {centroid.x, centroid.y}};
     }
 #endif
 

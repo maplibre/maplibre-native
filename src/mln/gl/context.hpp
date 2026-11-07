@@ -130,7 +130,7 @@ public:
 
     extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
 
-    bool getCleanupOnDestruction() { return cleanupOnDestruction; }
+    bool getCleanupOnDestruction() const { return cleanupOnDestruction; }
     void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;

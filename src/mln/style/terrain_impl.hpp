@@ -10,8 +10,7 @@ namespace style {
 class Terrain::Impl {
 public:
     Impl()
-        : sourceID(""),
-          exaggeration(1.0f) {}
+        : exaggeration(1.0f) {}
     Impl(const std::string& sourceID_, float exaggeration_)
         : sourceID(sourceID_),
           exaggeration(exaggeration_) {}

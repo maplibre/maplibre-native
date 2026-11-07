@@ -17,7 +17,7 @@ class Context;
 class LayerGroup : public mln::LayerGroup {
 public:
     LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain);
-    ~LayerGroup() override {}
+    ~LayerGroup() override = default;
 
     void upload(gfx::UploadPass&) override;
     void render(RenderOrchestrator&, PaintParameters&) override;

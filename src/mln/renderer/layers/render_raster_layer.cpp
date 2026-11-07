@@ -311,7 +311,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                     }
                 });
 
-                if (tileUpdateTime && (bucket.vertices.isModifiedAfter(*tileUpdateTime))) {
+                if (tileUpdateTime && bucket.vertices.isModifiedAfter(*tileUpdateTime)) {
                     removeTile(renderPass, tileID);
                     cleared = true;
                 }

@@ -24,7 +24,7 @@ struct HBShapeResult {
 
     std::shared_ptr<std::vector<HBShapeAdjust>> adjusts;
 
-    HBShapeResult() {}
+    HBShapeResult() = default;
 
     HBShapeResult(const std::u16string &str_, std::shared_ptr<std::vector<HBShapeAdjust>> adjusts_)
         : str(str_),
@@ -65,7 +65,7 @@ public:
 
     Immutable<Glyph> getGlyph(const FontStack &, GlyphID);
 
-    void setFontFaces(std::shared_ptr<FontFaces> faces) { fontFaces = faces; }
+    void setFontFaces(std::shared_ptr<FontFaces> faces) { fontFaces = std::move(faces); }
 
     std::shared_ptr<HBShaper> getHBShaper(FontStack, GlyphIDType);
 

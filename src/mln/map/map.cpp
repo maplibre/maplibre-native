@@ -154,6 +154,7 @@ void Map::jumpTo(const CameraOptions& camera) {
 
 void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->noteCameraSet();
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.easeTo(camera, animation);
     impl->onUpdate();
@@ -161,6 +162,7 @@ void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation)
 
 void Map::flyTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->noteCameraSet();
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.flyTo(camera, animation);
     impl->onUpdate();
@@ -168,6 +170,8 @@ void Map::flyTo(const CameraOptions& camera, const AnimationOptions& animation) 
 
 void Map::moveBy(const ScreenCoordinate& point, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    // An animated pan is how platforms carry a pan gesture's momentum on after the finger lifts.
+    impl->noteCameraSet(animation.duration && *animation.duration > Duration::zero());
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.moveBy(point, animation);
     impl->onUpdate();
@@ -184,6 +188,7 @@ void Map::scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, c
 
 void Map::rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->noteCameraSet();
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.rotateBy(first, second, animation);
     impl->onUpdate();
@@ -534,7 +539,9 @@ void Map::enableRenderingStatsView(bool value) {
 }
 
 void Map::setPrefetchZoomDelta(uint8_t delta) {
+    if (impl->prefetchZoomDelta == delta) return;
     impl->prefetchZoomDelta = delta;
+    impl->onUpdate();
 }
 
 uint8_t Map::getPrefetchZoomDelta() const {
@@ -567,7 +574,9 @@ FreeCameraOptions Map::getFreeCameraOptions() const {
 }
 
 void Map::setTileLodMinRadius(double radius) {
+    if (impl->tileLodMinRadius == radius) return;
     impl->tileLodMinRadius = radius;
+    impl->onUpdate();
 }
 
 double Map::getTileLodMinRadius() const {
@@ -575,7 +584,9 @@ double Map::getTileLodMinRadius() const {
 }
 
 void Map::setTileLodScale(double scale) {
+    if (impl->tileLodScale == scale) return;
     impl->tileLodScale = scale;
+    impl->onUpdate();
 }
 
 double Map::getTileLodScale() const {
@@ -583,7 +594,9 @@ double Map::getTileLodScale() const {
 }
 
 void Map::setTileLodPitchThreshold(double threshold) {
+    if (impl->tileLodPitchThreshold == threshold) return;
     impl->tileLodPitchThreshold = threshold;
+    impl->onUpdate();
 }
 
 double Map::getTileLodPitchThreshold() const {
@@ -591,7 +604,9 @@ double Map::getTileLodPitchThreshold() const {
 }
 
 void Map::setTileLodZoomShift(double shift) {
+    if (impl->tileLodZoomShift == shift) return;
     impl->tileLodZoomShift = shift;
+    impl->onUpdate();
 }
 
 double Map::getTileLodZoomShift() const {
@@ -599,7 +614,9 @@ double Map::getTileLodZoomShift() const {
 }
 
 void Map::setTileLodMode(TileLodMode mode) {
+    if (impl->tileLodMode == mode) return;
     impl->tileLodMode = mode;
+    impl->onUpdate();
 }
 
 TileLodMode Map::getTileLodMode() const {

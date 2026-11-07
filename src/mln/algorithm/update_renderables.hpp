@@ -4,8 +4,13 @@
 #include <mln/tile/tile_necessity.hpp>
 #include <mln/util/range.hpp>
 
-#include <unordered_set>
+#include <map>
 #include <optional>
+#include <tuple>
+#include <type_traits>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 namespace mln {
 namespace algorithm {
@@ -25,6 +30,38 @@ void updateRenderables(GetTileFn getTile,
                        const Range<uint8_t>& zoomRange,
                        const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt) {
     std::unordered_set<OverscaledTileID> checked;
+
+    // The renderable tiles of `prefetchedTiles` by the tiles they lie under, so that finding the
+    // ones under an ideal tile takes a lookup, not a walk of every tile there is. Built when a
+    // first ideal tile finds nothing else to draw: with an elevation source over steep ground, a
+    // few thousand ideal tiles are waiting to load against several thousand tiles held, and the
+    // walk per ideal tile was 90 s of one CPU core on the phone. Candidates stay in the order of
+    // the tile map, and a tile created during the update is added where it is renderable.
+    using PrefetchedTile =
+        std::remove_pointer_t<decltype(std::declval<const PrefetchedTileMap&>().begin()->second.get())>;
+    struct Prefetched {
+        OverscaledTileID id;
+        PrefetchedTile* tile;
+    };
+    using UnderKey = std::tuple<int16_t, uint8_t, uint32_t, uint32_t>;
+    std::map<UnderKey, std::vector<Prefetched>> prefetchedUnder;
+    bool prefetchedIndexed = false;
+    const auto indexPrefetched = [&](const OverscaledTileID& id, PrefetchedTile* tile) {
+        const auto& c = id.canonical;
+        if (!tile->isRenderable() || c.z > zoomRange.max) return;
+        // Under tile `a` at every zoom up to its own: it is a child of the tile at its own zoom
+        // when it is an overscaled one, and of every zoom-0 tile.
+        for (uint8_t a = 0; a <= c.z; ++a) {
+            const auto shift = static_cast<uint32_t>(c.z - a);
+            prefetchedUnder[{id.wrap, a, c.x >> shift, c.y >> shift}].push_back({id, tile});
+        }
+    };
+    const auto createAndIndex = [&](const OverscaledTileID& id) {
+        auto* created = createTile(id);
+        if (created && prefetchedIndexed) indexPrefetched(id, created);
+        return created;
+    };
+
     bool covered = false;
     bool parentOrChildTileFound = false;
     int32_t overscaledZ = 0;
@@ -38,7 +75,7 @@ void updateRenderables(GetTileFn getTile,
         const UnwrappedTileID idealRenderTileID = idealDataTileID.toUnwrapped();
         auto tile = getTile(idealDataTileID);
         if (!tile) {
-            tile = createTile(idealDataTileID);
+            tile = createAndIndex(idealDataTileID);
             // For source types where TileJSON.bounds is set, tiles outside the
             // bounds are not created
             if (tile == nullptr) {
@@ -111,7 +148,7 @@ void updateRenderables(GetTileFn getTile,
 
                     tile = getTile(parentDataTileID);
                     if (!tile && (parentHasTriedOptional || parentIsLoaded)) {
-                        tile = createTile(parentDataTileID);
+                        tile = createAndIndex(parentDataTileID);
                     }
 
                     if (tile) {
@@ -143,14 +180,24 @@ void updateRenderables(GetTileFn getTile,
 
                 if (!parentOrChildTileFound) {
                     // Reuse prefetched tiles in order to avoid empty screen
-                    for (auto& prefetchedTileEntry : prefetchedTiles) {
-                        const auto& prefetchedDataTileID = prefetchedTileEntry.first;
-                        const UnwrappedTileID prefetchedRenderTileID = prefetchedDataTileID.toUnwrapped();
-                        auto* prefetchedTile = prefetchedTileEntry.second.get();
-                        if (prefetchedTile->isRenderable() && prefetchedDataTileID.canonical.z <= zoomRange.max &&
-                            prefetchedDataTileID.isChildOf(idealDataTileID)) {
-                            retainTile(*prefetchedTile, TileNecessity::Optional);
-                            renderTile(prefetchedRenderTileID, *prefetchedTile);
+                    if (!prefetchedIndexed) {
+                        prefetchedIndexed = true;
+                        for (const auto& prefetchedTileEntry : prefetchedTiles) {
+                            indexPrefetched(prefetchedTileEntry.first, prefetchedTileEntry.second.get());
+                        }
+                    }
+                    const auto under = prefetchedUnder.find({idealDataTileID.wrap,
+                                                             idealDataTileID.canonical.z,
+                                                             idealDataTileID.canonical.x,
+                                                             idealDataTileID.canonical.y});
+                    if (under != prefetchedUnder.end()) {
+                        for (const auto& candidate : under->second) {
+                            const UnwrappedTileID prefetchedRenderTileID = candidate.id.toUnwrapped();
+                            if (candidate.tile->isRenderable() && candidate.id.canonical.z <= zoomRange.max &&
+                                candidate.id.isChildOf(idealDataTileID)) {
+                                retainTile(*candidate.tile, TileNecessity::Optional);
+                                renderTile(prefetchedRenderTileID, *candidate.tile);
+                            }
                         }
                     }
                 }

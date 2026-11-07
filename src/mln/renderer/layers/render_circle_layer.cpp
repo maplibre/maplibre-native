@@ -402,11 +402,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         // If there are already drawables for this tile, update their UBOs and move on to the next tile.
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-            return true;
+            // A drawable produced on a previous style/bucket should not be updated.
+            return drawable.getLayerTweaker() == layerTweaker;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;

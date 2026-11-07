@@ -7,6 +7,7 @@
 #include <mln/renderer/tile_parameters.hpp>
 
 #include <algorithm>
+#include <utility>
 
 namespace mln {
 
@@ -72,7 +73,7 @@ std::optional<Range<int32_t>> RenderRasterDEMSource::getElevationRange(const Can
     }
     // Ranges are only ever kept for tiles of the tileset's zoom range.
     const auto& zoomRange = getCachedTileset()->zoomRange;
-    for (int z = std::min(id.z, zoomRange.max); z >= zoomRange.min; --z) {
+    for (int z = std::min(id.z, zoomRange.max); std::cmp_greater_equal(z, zoomRange.min); --z) {
         const int dz = id.z - z;
         const auto it = elevationRanges.find(CanonicalTileID(static_cast<uint8_t>(z), id.x >> dz, id.y >> dz));
         if (it != elevationRanges.end()) {

@@ -390,7 +390,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 postion = float2(vertx.position);
 
     return {
-        .position       = drawable.matrix * float4(postion, 0, 1),
+        .position       = apply_drape_transform(drawable.matrix * float4(postion, 0, 1), drawable.matrix, paintParams.drape_tile),
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
 #if !defined(HAS_UNIFORM_u_color)

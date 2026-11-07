@@ -105,6 +105,10 @@ public:
     /// the ground under the camera (the map centre when the map is not tilted).
     static std::array<double, 2> meshTileCapOrigin(const TransformState& state);
 
+    /// The cover with a one-ring dilation: every 8-neighbour of a tile, at that tile's zoom,
+    /// except one that lies over, or under, a tile the cover already has (whatever its zoom).
+    static std::set<UnwrappedTileID> dilateCover(const std::set<UnwrappedTileID>& cover);
+
     /// The `maxTiles` tiles whose centres lie nearest `origin` (normalized web-mercator), or all
     /// of them when there are no more than that or `maxTiles` is 0. The mesh-tile cap
     /// (TerrainLoadBudget::maxMeshTiles) that computeMeshCover applies, after
@@ -212,6 +216,8 @@ public:
      * @return height in metres of the rendered surface, or 0 when no DEM covers it
      */
     double getElevationForLatLng(const LatLng& latLng) const;
+    /// As getElevationForLatLng, but empty where no loaded DEM tile covers the point (rather than 0).
+    std::optional<double> findElevationForLatLng(const LatLng& latLng) const;
 
     /**
      * @brief Get the terrain exaggeration multiplier

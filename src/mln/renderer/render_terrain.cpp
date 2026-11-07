@@ -57,6 +57,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 namespace mln {
 
@@ -81,9 +82,9 @@ double tileCentreDistance2(const UnwrappedTileID& id, const std::array<double, 2
 
 DEMSubTileOffset demSubTileOffset(const CanonicalTileID& child, const CanonicalTileID& ancestor) {
     const int dz = child.z - ancestor.z;
-    return {static_cast<float>(1u << dz),
-            static_cast<float>(child.x - (ancestor.x << dz)),
-            static_cast<float>(child.y - (ancestor.y << dz))};
+    return {.scale = static_cast<float>(1u << dz),
+            .dx = static_cast<float>(child.x - (ancestor.x << dz)),
+            .dy = static_cast<float>(child.y - (ancestor.y << dz))};
 }
 
 } // namespace
@@ -124,6 +125,10 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // selection every other source uses, so the near field drapes at a higher
     // zoom (smaller ground area per 1024 target = sharper draped content).
     util::TileCoverParameters coverParams{.transformState = state, .elevationProvider = &elevationProvider};
+    // The finest tiles go under the camera (where the screen is densest), as the mesh-tile cap below
+    // keeps the tiles nearest it; measured from the map centre, a steep pitch gives the ground at the
+    // bottom of the screen the coarsest tiles of the cover.
+    coverParams.tileLodOrigin = meshTileCapOrigin(state);
     double zoomShift = 0.0;
     if (updateParameters) {
         coverParams.tileLodMinRadius = updateParameters->tileLodMinRadius;
@@ -135,7 +140,7 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
 
     const double zoom = util::clamp<double>(state.getZoom() + zoomShift, state.getMinZoom(), state.getMaxZoom());
     const int32_t overscaledZoom = util::coveringZoomLevel(zoom, style::SourceType::RasterDEM, terrainCoverTileSize);
-    if (overscaledZoom < static_cast<int32_t>(zoomRange.min)) {
+    if (std::cmp_less(overscaledZoom, zoomRange.min)) {
         return out;
     }
     const int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
@@ -155,28 +160,7 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // this is correct for terrain above OR below sea level (bathymetry) without hardcoding
     // a direction; the frustum trim stops it from tripling the cover like a blind ring
     // would. Drop the frustumCull line to fall back to a pure uniform 1-ring dilation.
-    std::set<UnwrappedTileID> dilated = out;
-    for (const auto& id : out) {
-        const int32_t numTiles = 1 << id.canonical.z;
-        for (int dy = -1; dy <= 1; ++dy) {
-            for (int dx = -1; dx <= 1; ++dx) {
-                if (dx == 0 && dy == 0) continue;
-                const int ny = static_cast<int>(id.canonical.y) + dy;
-                if (ny < 0 || ny >= numTiles) continue; // nothing past the poles
-                int nx = static_cast<int>(id.canonical.x) + dx;
-                int nwrap = id.wrap;
-                if (nx < 0) {
-                    nx += numTiles;
-                    --nwrap;
-                } else if (nx >= numTiles) {
-                    nx -= numTiles;
-                    ++nwrap;
-                }
-                dilated.emplace(static_cast<int16_t>(nwrap),
-                                CanonicalTileID(id.canonical.z, static_cast<uint32_t>(nx), static_cast<uint32_t>(ny)));
-            }
-        }
-    }
+    std::set<UnwrappedTileID> dilated = dilateCover(out);
     if (dilated.size() != out.size()) {
         out = util::frustumCull(coverParams, dilated);
     }
@@ -207,6 +191,60 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
 std::array<float, 3> RenderTerrain::demTileMapping(const CanonicalTileID& tile, const CanonicalTileID& demTile) {
     const auto off = demSubTileOffset(tile, demTile);
     return {{1.0f / (util::EXTENT * off.scale), off.dx / off.scale, off.dy / off.scale}};
+}
+
+std::set<UnwrappedTileID> RenderTerrain::dilateCover(const std::set<UnwrappedTileID>& cover) {
+    std::set<UnwrappedTileID> dilated = cover;
+    // Every tile kept and every ancestor of one: a neighbour in this set lies over a tile kept.
+    std::set<UnwrappedTileID> overlapped;
+    const auto keep = [&](const UnwrappedTileID& id) {
+        for (int z = id.canonical.z; z >= 0; --z) {
+            overlapped.emplace(id.wrap, id.canonical.scaledTo(static_cast<uint8_t>(z)));
+        }
+    };
+    for (const auto& id : cover) keep(id);
+    // Whether a tile kept lies over this tile (an ancestor of it), or under it.
+    const auto coveredAlready = [&](const UnwrappedTileID& tile) {
+        if (overlapped.contains(tile)) return true;
+        for (int z = tile.canonical.z - 1; z >= 0; --z) {
+            if (dilated.contains(UnwrappedTileID(tile.wrap, tile.canonical.scaledTo(static_cast<uint8_t>(z))))) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    for (const auto& id : cover) {
+        const int32_t numTiles = 1 << id.canonical.z;
+        for (int dy = -1; dy <= 1; ++dy) {
+            for (int dx = -1; dx <= 1; ++dx) {
+                if (dx == 0 && dy == 0) continue;
+                const int ny = static_cast<int>(id.canonical.y) + dy;
+                if (ny < 0 || ny >= numTiles) continue; // nothing past the poles
+                int nx = static_cast<int>(id.canonical.x) + dx;
+                int nwrap = id.wrap;
+                if (nx < 0) {
+                    nx += numTiles;
+                    --nwrap;
+                } else if (nx >= numTiles) {
+                    nx -= numTiles;
+                    ++nwrap;
+                }
+                const UnwrappedTileID neighbour(
+                    static_cast<int16_t>(nwrap),
+                    CanonicalTileID(id.canonical.z, static_cast<uint32_t>(nx), static_cast<uint32_t>(ny)));
+                // The neighbour at this tile's zoom may sit over ground a tile of another zoom
+                // already covers (the cover mixes zooms, a finer tile beside a coarser one): meshing
+                // it would add a second surface over that ground, sampled from a coarser or finer
+                // DEM, and a drape target and 1024 px of texture to hold it. Only ground the cover
+                // leaves out is worth a tile.
+                if (coveredAlready(neighbour)) continue;
+                dilated.insert(neighbour);
+                keep(neighbour);
+            }
+        }
+    }
+    return dilated;
 }
 
 std::array<double, 2> RenderTerrain::meshTileCapOrigin(const TransformState& state) {
@@ -276,7 +314,7 @@ std::set<UnwrappedTileID> RenderTerrain::coarsenFarMeshTiles(std::set<UnwrappedT
         if (isReady == count.queued) {
             return;
         }
-        const Candidate candidate{tileCentreDistance2(id, origin), id};
+        const Candidate candidate{.dist2 = tileCentreDistance2(id, origin), .id = id};
         if (isReady) {
             ready.insert(candidate);
         } else {
@@ -291,7 +329,7 @@ std::set<UnwrappedTileID> RenderTerrain::coarsenFarMeshTiles(std::set<UnwrappedT
         if (tile.canonical.z <= minZoom) {
             return;
         }
-        for (int z = tile.canonical.z - 1; z >= minZoom; --z) {
+        for (int z = tile.canonical.z - 1; std::cmp_greater_equal(z, minZoom); --z) {
             const UnwrappedTileID parent(tile.wrap, tile.canonical.scaledTo(static_cast<uint8_t>(z)));
             Count& count = counts[parent];
             (z == tile.canonical.z - 1 ? count.children : count.deeper) += change;
@@ -418,7 +456,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 existing->second.lastUsed = demUpdateCounter;
             } else if (auto texture = createDEMTexture(context, *demData)) {
                 // Keep the texture available for elevation sampling by non-draped layers
-                demTextures[renderTile.id] = {texture, demData->dim, demUpdateCounter};
+                demTextures[renderTile.id] = {.texture = texture, .dim = demData->dim, .lastUsed = demUpdateCounter};
 #if MLN_RENDER_BACKEND_OPENGL
                 // Also pack this tile's DEM into the array for the (upcoming) instanced
                 // depth pass. Additive: the per-tile texture above is still the fallback.
@@ -552,7 +590,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             int bestZoom = -1;
             for (auto& [candidate, entry] : demTextures) {
                 if (candidate != unwrapped && unwrapped.isChildOf(candidate) &&
-                    static_cast<int>(candidate.canonical.z) > bestZoom) {
+                    std::cmp_greater(candidate.canonical.z, bestZoom)) {
                     bestZoom = candidate.canonical.z;
                     ancestorID = &candidate;
                     ancestorEntry = &entry;
@@ -581,7 +619,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         // z13 tile first built on a z6 ancestor renders flat until z12 replaces it) - then
         // replace it
         const terrain::DEMBinding binding{
-            demTier, static_cast<int8_t>(demTileUsed ? static_cast<int>(demTileUsed->canonical.z) : -1)};
+            .tier = demTier,
+            .demZoom = static_cast<int8_t>(demTileUsed ? static_cast<int>(demTileUsed->canonical.z) : -1)};
         if (const auto existing = tilesWithDrawables.find(tileID); existing != tilesWithDrawables.end()) {
             if (!terrain::shouldRebind(existing->second, binding)) {
                 continue;
@@ -765,8 +804,7 @@ float RenderTerrain::getElevation(const UnwrappedTileID& tileID_, float x, float
     int bestZoom = -1;
     for (const auto& renderTile : *renderTiles) {
         const UnwrappedTileID& candidate = renderTile.id;
-        if ((candidate == tileID || tileID.isChildOf(candidate)) &&
-            static_cast<int>(candidate.canonical.z) > bestZoom) {
+        if ((candidate == tileID || tileID.isChildOf(candidate)) && std::cmp_greater(candidate.canonical.z, bestZoom)) {
             bestZoom = candidate.canonical.z;
             demRenderTile = &renderTile;
         }
@@ -852,14 +890,55 @@ double RenderTerrain::getElevationForLatLng(const LatLng& latLng) const {
     return getElevationWithExaggeration(sampleTile, localX, localY);
 }
 
+std::optional<double> RenderTerrain::findElevationForLatLng(const LatLng& latLng) const {
+    if (!demSource) {
+        return std::nullopt;
+    }
+    int sampleZoom = -1;
+    const auto renderTiles = demSource->getRawRenderTiles();
+    for (const auto& renderTile : *renderTiles) {
+        if (renderTile.getTile().kind == Tile::Kind::RasterDEM) {
+            sampleZoom = std::max(sampleZoom, static_cast<int>(renderTile.id.canonical.z));
+        }
+    }
+    if (sampleZoom < 0) {
+        return std::nullopt;
+    }
+    const double n = std::pow(2.0, sampleZoom);
+    const auto point = Projection::project(latLng, sampleZoom);
+    const auto tx = static_cast<int64_t>(std::floor(point.x));
+    const auto ty = static_cast<int64_t>(std::floor(point.y));
+    if (ty < 0 || static_cast<double>(ty) >= n) {
+        return std::nullopt;
+    }
+    const UnwrappedTileID sampleTile(static_cast<uint8_t>(sampleZoom), tx, ty);
+    const auto localX = static_cast<float>((point.x - static_cast<double>(tx)) * util::EXTENT);
+    const auto localY = static_cast<float>((point.y - static_cast<double>(ty)) * util::EXTENT);
+
+    // A DEM tile has to cover the point: getElevation answers 0 where none does.
+    UnwrappedTileID covered = sampleTile;
+    float coveredX = localX;
+    float coveredY = localY;
+    if (!normalizeTileCoordinates(covered, coveredX, coveredY)) {
+        return std::nullopt;
+    }
+    const bool found = std::any_of(renderTiles->begin(), renderTiles->end(), [&](const RenderTile& renderTile) {
+        return renderTile.getTile().kind == Tile::Kind::RasterDEM &&
+               (renderTile.id == covered || covered.isChildOf(renderTile.id));
+    });
+    if (!found) {
+        return std::nullopt;
+    }
+    return getElevationWithExaggeration(sampleTile, localX, localY);
+}
+
 std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const UnwrappedTileID& tileID) const {
     // Find the DEM texture matching the requested tile, or its closest available ancestor
     const UnwrappedTileID* demTileID = nullptr;
     const DEMTextureEntry* entry = nullptr;
     int bestZoom = -1;
     for (const auto& [candidate, candidateEntry] : demTextures) {
-        if ((candidate == tileID || tileID.isChildOf(candidate)) &&
-            static_cast<int>(candidate.canonical.z) > bestZoom) {
+        if ((candidate == tileID || tileID.isChildOf(candidate)) && std::cmp_greater(candidate.canonical.z, bestZoom)) {
             bestZoom = candidate.canonical.z;
             demTileID = &candidate;
             entry = &candidateEntry;
@@ -1113,12 +1192,12 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
         }
     }
 
-    mesh = TerrainMesh{nullptr, // vertexBuffer - created when building the drawable
-                       nullptr, // indexBuffer - created when building the drawable
-                       vertices.size() / 4,
-                       indices.size(),
-                       std::move(vertices),
-                       std::move(indices)};
+    mesh = TerrainMesh{.vertexBuffer = nullptr, // created when building the drawable
+                       .indexBuffer = nullptr,  // created when building the drawable
+                       .vertexCount = vertices.size() / 4,
+                       .indexCount = indices.size(),
+                       .vertices = std::move(vertices),
+                       .indices = std::move(indices)};
 }
 
 std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& context, const DEMData& demData) {
@@ -1405,10 +1484,7 @@ void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
         const auto& inst = depthInstances[i];
         mat4 m = parameters.matrixForTile(inst.tileID.toUnwrapped());
 #if !MLN_RENDER_BACKEND_OPENGL
-        m[2] = 0.5 * (m[2] + m[3]);
-        m[6] = 0.5 * (m[6] + m[7]);
-        m[10] = 0.5 * (m[10] + m[11]);
-        m[14] = 0.5 * (m[14] + m[15]);
+        matrix::remapClipZToUnitRange(m);
 #endif
         arr[i].matrix = util::cast<float>(m);
         arr[i].dem_coords = inst.demCoords;

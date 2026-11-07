@@ -118,7 +118,7 @@ public:
     static_assert(std::is_nothrow_constructible_v<Variant>);
 
     template <typename U>
-    VARIANT_INLINE Result(U&& val)
+    VARIANT_INLINE Result(U&& val) // NOLINT(bugprone-forwarding-reference-overload)
         : Variant(std::forward<U>(val)) {}
 
     template <typename U>
@@ -317,13 +317,13 @@ protected:
                            const std::pair<T, std::unique_ptr<Expression>>& rhs) noexcept
         requires(std::is_scalar_v<T>)
     {
-        return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
+        return lhs.first == rhs.first && *lhs.second == *rhs.second;
     }
 
     template <typename T, typename = std::enable_if_t<std::is_scalar_v<T>>, typename = void>
     static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
                            const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept {
-        return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
+        return lhs.first == rhs.first && *lhs.second == *rhs.second;
     }
 
     template <typename T>
@@ -337,12 +337,12 @@ protected:
         bool (*equality_method)(const T&, const T&) noexcept = &std::operator==;
         static_assert(std::is_nothrow_invocable_v<decltype(equality_method), const T&, const T&>);
 #endif
-        return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
+        return lhs.first == rhs.first && *lhs.second == *rhs.second;
     }
 
     static bool childEqual(const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& lhs,
                            const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs) noexcept {
-        return *(lhs.first) == *(rhs.first) && *(lhs.second) == *(rhs.second);
+        return *lhs.first == *rhs.first && *lhs.second == *rhs.second;
     }
 
     static Dependency depsOf(const std::shared_ptr<Expression>& ex) { return ex ? ex->dependencies : Dependency::None; }

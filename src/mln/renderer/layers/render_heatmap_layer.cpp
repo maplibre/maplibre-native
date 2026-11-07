@@ -259,11 +259,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         setRenderTileBucketID(tileID, bucket.getID());
 
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-            return true;
+            // A drawable produced on a previous style/bucket should not be updated.
+            return drawable.getLayerTweaker() == layerTweaker;
         };
 
         if (updateTile(tileLayerGroup, renderPass, tileID, std::move(updateExisting))) {

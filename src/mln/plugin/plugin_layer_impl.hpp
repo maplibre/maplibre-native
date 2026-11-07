@@ -62,7 +62,7 @@ public:
     void setCurrentColorValue(mln::Color value);
 
     // Return this property as json
-    std::string asJSON();
+    std::string asJSON() const;
 
 private:
 };

@@ -95,12 +95,14 @@ struct TerrainLoadBudget {
 constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
     switch (mode) {
         case TerrainLoadMode::Balanced:
-            return {32, 16, 48, 15};
+            return {
+                .newTileBuildsPerFrame = 32, .drapeRerendersPerFrame = 16, .maxMeshTiles = 48, .meshTargetZoom = 15};
         case TerrainLoadMode::Performance:
-            return {8, 4, 24, 14};
+            return {.newTileBuildsPerFrame = 8, .drapeRerendersPerFrame = 4, .maxMeshTiles = 24, .meshTargetZoom = 14};
         case TerrainLoadMode::Quality:
         default:
-            return {0, 0, 64, 22}; // no per-frame budget, generous tile cap, mesh follows the view
+            // no per-frame budget, generous tile cap, mesh follows the view
+            return {.newTileBuildsPerFrame = 0, .drapeRerendersPerFrame = 0, .maxMeshTiles = 64, .meshTargetZoom = 22};
     }
 }
 

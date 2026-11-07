@@ -32,13 +32,13 @@ static const gfx::UniqueDrawable no_tile;
 
 std::size_t TileLayerGroup::getDrawableCount(mln::RenderPass pass, const OverscaledTileID& id) const {
     assert(drawablesByTile.size() == sortedDrawables.size());
-    const auto range = drawablesByTile.equal_range({pass, id});
+    const auto range = drawablesByTile.equal_range({.renderPass = pass, .tileID = id});
     return std::distance(range.first, range.second);
 }
 
 std::vector<gfx::UniqueDrawable> TileLayerGroup::removeDrawables(mln::RenderPass pass, const OverscaledTileID& id) {
     assert(drawablesByTile.size() == sortedDrawables.size());
-    const auto range = drawablesByTile.equal_range({pass, id});
+    const auto range = drawablesByTile.equal_range({.renderPass = pass, .tileID = id});
     std::vector<gfx::UniqueDrawable> result(std::distance(range.first, range.second));
     std::transform(
         std::make_move_iterator(range.first), std::make_move_iterator(range.second), result.begin(), [](auto&& pair) {
