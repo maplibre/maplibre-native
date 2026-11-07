@@ -199,3 +199,47 @@ TEST(PMTilesFileSource, UncompressedTile) {
 
     loop.run();
 }
+
+// A local archive replaced at the same path is read again when its TileJSON is next requested (a style
+// reload), instead of through the old file's cached header and directories until the process restarts.
+TEST(PMTilesFileSource, ReplacedLocalFileIsReadAgain) {
+    util::RunLoop loop;
+
+    const auto fixtures = std::filesystem::current_path() / "test/fixtures/storage/pmtiles";
+    const auto path = std::filesystem::temp_directory_path() / "mln-pmtiles-replaced.pmtiles";
+    std::filesystem::copy_file(
+        fixtures / "geography-class-png.pmtiles", path, std::filesystem::copy_options::overwrite_existing);
+    const std::string url = std::string(util::PMTILES_PROTOCOL) + util::FILE_PROTOCOL + path.string();
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req;
+    req = pmtiles.request({Resource::Source, url}, [&](Response before) {
+        ASSERT_EQ(nullptr, before.error);
+        EXPECT_NE(before.data->find("\"maxzoom\":1"), std::string::npos);
+
+        req = pmtiles.request(Resource::tile(url, 1.0, 0, 0, 0, Tileset::Scheme::XYZ), [&](Response oldTile) {
+            ASSERT_EQ(nullptr, oldTile.error);
+            ASSERT_TRUE(oldTile.data.get());
+
+            std::filesystem::remove(path);
+            std::filesystem::copy_file(fixtures / "uncompressed-tiles.pmtiles", path);
+
+            req = pmtiles.request({Resource::Source, url}, [&](Response after) {
+                ASSERT_EQ(nullptr, after.error);
+                EXPECT_NE(after.data->find("\"maxzoom\":0"), std::string::npos);
+
+                req = pmtiles.request(Resource::tile(url, 1.0, 0, 0, 0, Tileset::Scheme::XYZ), [&](Response newTile) {
+                    req.reset();
+                    EXPECT_EQ(nullptr, newTile.error);
+                    ASSERT_TRUE(newTile.data.get());
+                    EXPECT_EQ(std::string("\x89PNG\r\n\x1a\n", 8) + std::string(20, '\0'), *newTile.data);
+                    std::filesystem::remove(path);
+                    loop.stop();
+                });
+            });
+        });
+    });
+
+    loop.run();
+}
