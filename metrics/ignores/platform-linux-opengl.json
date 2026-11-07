@@ -1,0 +1,3 @@
+{
+  "render-tests/projection/globe/debug-tile-borders": "The tile border is a hardware wide line on OpenGL and an anti-aliased polyline in the Metal expectation."
+}

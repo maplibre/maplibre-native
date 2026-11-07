@@ -24,6 +24,7 @@ private:
     void evaluate(const PropertyEvaluationParameters &) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
+    bool needsGlobeDepth() const override { return true; }
     void markContextDestroyed() override;
     void prepare(const LayerPrepareParameters &) override;
 

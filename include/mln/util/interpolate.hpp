@@ -130,6 +130,22 @@ public:
 };
 
 template <>
+struct Interpolator<ProjectionDefinition> {
+public:
+    ProjectionDefinition operator()(const ProjectionDefinition& a,
+                                    const ProjectionDefinition& b,
+                                    const double t) const {
+        if (a.from == a.to && b.from == b.to) {
+            return {a.from, b.to, t};
+        }
+        // A stop that is already between two projections keeps its share of the globe.
+        return {ProjectionType::Mercator,
+                ProjectionType::VerticalPerspective,
+                interpolate(a.transitionState(), b.transitionState(), t)};
+    }
+};
+
+template <>
 struct Interpolator<Padding> {
 public:
     Padding operator()(const Padding& a, const Padding& b, const float t) const noexcept {

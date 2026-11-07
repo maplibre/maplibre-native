@@ -958,6 +958,12 @@ around the returned camera object if it were set as the receiver’s camera.
  panned so that the annotation and its callout are brought just onscreen. The
  annotation is *not* centered within the viewport.
 
+ On a globe, an ``MLNPointAnnotation`` behind the planet is selected once the map
+ has centered on it and the camera settles with it in view, after any other
+ camera change made meanwhile. Deselecting or removing it, selecting another
+ annotation, or clicking the map before then cancels the selection. Other
+ annotations behind the planet are not selected.
+
  @param annotation The annotation object to select.
  */
 - (void)selectAnnotation:(id<MLNAnnotation>)annotation;
@@ -1261,6 +1267,17 @@ around the returned camera object if it were set as the receiver’s camera.
  */
 - (NSPoint)convertCoordinate:(CLLocationCoordinate2D)coordinate
                toPointToView:(nullable NSView *)view;
+
+/**
+ Returns whether the globe hides a geographic coordinate from the camera, on the
+ far side of the planet. A view placed over the map with
+ `-convertCoordinate:toPointToView:` can be hidden while it does. A Mercator
+ map hides nothing.
+
+ @param coordinate The geographic coordinate to test.
+ @return `YES` if the globe hides the coordinate.
+ */
+- (BOOL)isCoordinateOccluded:(CLLocationCoordinate2D)coordinate;
 
 /**
  Converts a point in the given view’s coordinate system to a geographic

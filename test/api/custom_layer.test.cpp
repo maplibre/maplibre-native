@@ -11,8 +11,11 @@
 #include <mln/storage/resource_options.hpp>
 #include <mln/style/layers/fill_layer.hpp>
 #include <mln/style/style.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/mat4.hpp>
+
+#include <cmath>
 #include <mln/util/run_loop.hpp>
 
 #include <memory>
@@ -62,7 +65,20 @@ public:
         MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(GLfloat), triangle, GL_STATIC_DRAW));
     }
 
-    void render(const mln::style::CustomLayerRenderParameters&) override {
+    void render(const mln::style::CustomLayerRenderParameters& parameters) override {
+        // On Mercator the globe fields are inert: no globe, no transition, no clipping plane, and the globe matrix is
+        // the tile matrix of the world.
+        EXPECT_FALSE(parameters.globe);
+        EXPECT_EQ(0.0, parameters.projectionTransition);
+        EXPECT_EQ((std::array<double, 4>{0, 0, 0, 0}), parameters.globeClippingPlane);
+        const double worldSize = mln::util::tileSize_D * std::pow(2.0, parameters.zoom);
+        mln::mat4 world;
+        mln::matrix::identity(world);
+        mln::matrix::scale(world, world, worldSize / mln::util::EXTENT, worldSize / mln::util::EXTENT, 1);
+        mln::mat4 expected;
+        mln::matrix::multiply(expected, parameters.projectionMatrix, world);
+        EXPECT_EQ(expected, parameters.globeProjectionMatrix);
+
         MBGL_CHECK_ERROR(glUseProgram(program));
         MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, buffer));
         MBGL_CHECK_ERROR(glEnableVertexAttribArray(a_pos));

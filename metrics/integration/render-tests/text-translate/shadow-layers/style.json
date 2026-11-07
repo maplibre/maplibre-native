@@ -1,0 +1,162 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 256,
+      "height": 256
+    }
+  },
+  "center": [
+    0,
+    5
+  ],
+  "zoom": 1.5,
+  "pitch": 0,
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "line": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -40,
+              -10
+            ],
+            [
+              40,
+              10
+            ]
+          ]
+        }
+      }
+    },
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                25
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "line",
+      "type": "line",
+      "source": "line",
+      "paint": {
+        "line-color": "#88f"
+      }
+    },
+    {
+      "id": "line-shadow",
+      "type": "symbol",
+      "source": "line",
+      "layout": {
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16,
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "symbol-placement": "line",
+        "text-field": "SHADOWED"
+      },
+      "paint": {
+        "text-color": "#bbbbbb",
+        "text-translate": [
+          4,
+          4
+        ]
+      }
+    },
+    {
+      "id": "line-main",
+      "type": "symbol",
+      "source": "line",
+      "layout": {
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16,
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "symbol-placement": "line",
+        "text-field": "SHADOWED"
+      },
+      "paint": {
+        "text-color": "black"
+      }
+    },
+    {
+      "id": "point-shadow",
+      "type": "symbol",
+      "source": "points",
+      "layout": {
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16,
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "text-field": "POINT",
+        "text-variable-anchor": [
+          "center"
+        ]
+      },
+      "paint": {
+        "text-color": "#bbbbbb",
+        "text-translate": [
+          4,
+          4
+        ]
+      }
+    },
+    {
+      "id": "point-main",
+      "type": "symbol",
+      "source": "points",
+      "layout": {
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16,
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "text-field": "POINT",
+        "text-variable-anchor": [
+          "center"
+        ]
+      },
+      "paint": {
+        "text-color": "black"
+      }
+    }
+  ]
+}

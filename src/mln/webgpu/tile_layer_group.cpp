@@ -15,6 +15,7 @@
 #include <mln/util/logging.hpp>
 
 #include <optional>
+#include <unordered_map>
 
 namespace mln {
 namespace webgpu {
@@ -53,16 +54,22 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     std::optional<gfx::DepthMode> depthMode3d;
     std::optional<gfx::StencilMode> stencilMode3d;
 
-    if (stencilTiles && !stencilTiles->empty()) {
-        visitDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
-                features3d = true;
-                if (drawable.getEnableStencil()) {
-                    stencil3d = true;
+    // 3D features take the group-wide depth state, and a stencil value shared across the group when it has stencil
+    // tiles or their own when it does not
+    const bool hasStencilTiles = stencilTiles && !stencilTiles->empty();
+    std::unordered_map<const gfx::Drawable*, gfx::StencilMode> ownStencilModes;
+    visitDrawables([&](const gfx::Drawable& drawable) {
+        if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+            features3d = true;
+            if (drawable.getEnableStencil()) {
+                stencil3d = true;
+                if (!hasStencilTiles) {
+                    ownStencilModes.emplace(&drawable, gfx::StencilMode{});
                 }
             }
-        });
-    }
+        }
+    });
+    const bool ownStencilModesTaken = parameters.stencilModesFor3D(ownStencilModes);
 
 #if !defined(NDEBUG)
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
@@ -70,10 +77,10 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     if (features3d) {
         depthMode3d = parameters.depthModeFor3D();
-        if (stencil3d) {
+        if (stencil3d && hasStencilTiles) {
             stencilMode3d = parameters.stencilModeFor3D();
         }
-    } else if (stencilTiles && !stencilTiles->empty()) {
+    } else if (hasStencilTiles) {
         // Handle stencil tiles if present (2D stenciling)
         parameters.renderTileClippingMasks(stencilTiles);
     }
@@ -125,8 +132,19 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         if (features3d) {
             const auto depth = (drawable.getEnableDepth() && depthMode3d) ? *depthMode3d : gfx::DepthMode::disabled();
-            const auto stencil = (drawable.getEnableStencil() && stencilMode3d) ? *stencilMode3d
-                                                                                : gfx::StencilMode::disabled();
+            const auto own = ownStencilModes.find(&drawable);
+            if (own != ownStencilModes.end() && !ownStencilModesTaken) {
+                // A clear between two draws draws over the zoom 0 tile with buffers of its own.
+                const auto clears = parameters.context.renderingStats().stencilClears;
+                own->second = parameters.stencilModeFor3D();
+                if (parameters.context.renderingStats().stencilClears != clears) {
+                    static_cast<webgpu::UniformBufferArray&>(uniformBuffers).bindWebgpu(renderPass);
+                }
+            }
+            const auto stencil = !drawable.getEnableStencil()   ? gfx::StencilMode::disabled()
+                                 : own != ownStencilModes.end() ? own->second
+                                 : stencilMode3d                ? *stencilMode3d
+                                                                : gfx::StencilMode::disabled();
             drawableWebGPU.setDepthModeFor3D(depth);
             drawableWebGPU.setStencilModeFor3D(stencil);
         }

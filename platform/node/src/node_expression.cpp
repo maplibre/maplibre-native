@@ -2,6 +2,7 @@
 #include "node_expression.hpp"
 #include "node_feature.hpp"
 
+#include <mln/style/projection_definition.hpp>
 #include <mln/style/expression/parsing_context.hpp>
 #include <mln/style/expression/is_constant.hpp>
 #include <mln/style/conversion/function.hpp>
@@ -52,6 +53,7 @@ type::Type parseType(v8::Local<v8::Object> type) {
         {"number-format", type::String},
         {"resolvedImage", type::Image},
         {"variableAnchorOffsetCollection", type::VariableAnchorOffsetCollection},
+        {"projectionDefinition", type::ProjectionDefinition},
         {"numberArray", type::Array(type::Number)},
         {"colorArray", type::Array(type::Color)}};
 
@@ -239,6 +241,9 @@ struct ToValue {
     }
 
     v8::Local<v8::Value> operator()(const Image& image) { return toJS(image.toValue()); }
+    v8::Local<v8::Value> operator()(const mln::ProjectionDefinition& projection) {
+        return toJS(projection.serialize());
+    }
 
     v8::Local<v8::Value> operator()(const mln::VariableAnchorOffsetCollection& variableAnchorOffsets) {
         std::vector<Value> components;

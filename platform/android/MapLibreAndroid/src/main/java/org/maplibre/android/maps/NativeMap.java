@@ -54,6 +54,8 @@ interface NativeMap {
 
   void moveBy(double deltaX, double deltaY, long duration);
 
+  void moveBy(double deltaX, double deltaY, @NonNull PointF focalPoint);
+
   @NonNull
   CameraPosition getCameraPosition();
 
@@ -232,6 +234,8 @@ interface NativeMap {
 
   void pixelsForLatLngs(@NonNull double[] input, @NonNull double[] output);
 
+  boolean isLocationOccluded(@NonNull LatLng latLng);
+
   void getVisibleCoordinateBounds(@NonNull double[] output);
 
   LatLng latLngForPixel(@NonNull PointF pixel);
@@ -288,6 +292,8 @@ interface NativeMap {
   double getTileLodZoomShift();
 
   void setGestureInProgress(boolean inProgress);
+
+  void setGlobeFreeBearing(boolean freeBearing);
 
   float getPixelRatio();
 

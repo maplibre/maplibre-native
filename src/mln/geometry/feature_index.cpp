@@ -1,4 +1,5 @@
 #include <mln/geometry/feature_index.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/math/minmax.hpp>
 #include <mln/renderer/layers/render_symbol_layer.hpp>
 #include <mln/renderer/query.hpp>
@@ -25,9 +26,7 @@ mln::LatLng screenCoordinateToLatLng(mln::ScreenCoordinate point,
     return state.screenCoordinateToLatLng(point, wrapMode);
 }
 mln::Point<double> project(const mln::LatLng& coordinate, const mln::TransformState& state) {
-    mln::LatLng unwrappedLatLng = coordinate.wrapped();
-    unwrappedLatLng.unwrapForShortestPath(state.getLatLng(mln::LatLng::Wrapped));
-    return mln::Projection::project(unwrappedLatLng, state.getScale());
+    return mln::Projection::project(state.latLngNearCenter(coordinate), state.getScale());
 }
 } // namespace
 
@@ -152,7 +151,7 @@ void FeatureIndex::insert(const GeometryCollection& geometries,
 void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& result,
                          const GeometryCoordinates& queryGeometry,
                          const TransformState& transformState,
-                         const mat4& posMatrix,
+                         const TileProjector& projector,
                          const double tileSize,
                          const double scale,
                          const RenderedQueryOptions& queryOptions,
@@ -193,7 +192,7 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
                    queryGeometry,
                    transformState,
                    pixelsToTileUnits,
-                   posMatrix,
+                   projector,
                    &sourceFeatureState);
     }
 }
@@ -235,8 +234,9 @@ std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbol
         }
     });
 
+    const TransformState unusedState;
+    const TileProjector unusedProjector(unusedState, tileID.toUnwrapped(), {});
     for (const auto& symbolFeature : sortedFeatures) {
-        mat4 unusedMatrix;
         addFeature(result,
                    symbolFeature,
                    queryOptions,
@@ -244,9 +244,9 @@ std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbol
                    tileID.canonical,
                    layers,
                    GeometryCoordinates(),
-                   {},
+                   unusedState,
                    0,
-                   unusedMatrix,
+                   unusedProjector,
                    nullptr);
     }
     return result;
@@ -261,7 +261,7 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
                               const GeometryCoordinates& queryGeometry,
                               const TransformState& transformState,
                               const float pixelsToTileUnits,
-                              const mat4& posMatrix,
+                              const TileProjector& projector,
                               const SourceFeatureState* sourceFeatureState) const {
     // Lazily calculated.
     std::unique_ptr<GeometryTileLayer> sourceLayer;
@@ -294,7 +294,7 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
                                    style::LayerTypeInfo::CrossTileIndex::Required;
         if (!needsCrossTileIndex &&
             !renderLayer->queryIntersectsFeature(
-                queryGeometry, *geometryTileFeature, tileID.z, transformState, pixelsToTileUnits, posMatrix, state)) {
+                queryGeometry, *geometryTileFeature, tileID.z, transformState, pixelsToTileUnits, projector, state)) {
             continue;
         }
 

@@ -7,6 +7,7 @@
 #include <mln/gfx/render_pass.hpp>
 #include <mln/gfx/renderer_backend.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mln/renderer/image_manager.hpp>
 #include <mln/renderer/layer_group.hpp>
@@ -71,6 +72,11 @@ void RenderFillExtrusionLayer::captureRenderedFeatures(
     const std::optional<mln::Point<double>> origin = std::nullopt;
     const auto zoomFraction = state.getZoomFraction();
     std::optional<mat4> tileMatrix;
+    // On the globe the tile's projection stands in for the tile matrix, and takes the translation in tile units.
+    const auto projector = state.isGlobeRendering() ? std::make_optional<TileProjector>(state, tileID.toUnwrapped())
+                                                    : std::nullopt;
+    const auto tileTranslation = RenderTile::tileUnitTranslation(
+        tileID.toUnwrapped(), translation, translationAnchor, state);
 
     const auto& features = bucket.getRetainedFeatures();
     stats.renderedFeatures.reserve(features.size());
@@ -89,7 +95,7 @@ void RenderFillExtrusionLayer::captureRenderedFeatures(
         }
 
         // Compute the tile matrix once
-        if (!tileMatrix.has_value()) {
+        if (!projector && !tileMatrix.has_value()) {
             tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
                                                      state,
                                                      transformParams,
@@ -109,7 +115,9 @@ void RenderFillExtrusionLayer::captureRenderedFeatures(
             const auto z = (vi < vertexCount) ? base : height;
             return vec3{vertex[0] + 0.0, vertex[1] + 0.0, z};
         };
-        if (const auto bound = computeFeatureNDCBound(2 * vertexCount, *tileMatrix, getVertex)) {
+        if (const auto bound = projector
+                                   ? computeFeatureNDCBound(2 * vertexCount, *projector, tileTranslation, getVertex)
+                                   : computeFeatureNDCBound(2 * vertexCount, *tileMatrix, getVertex)) {
             stats.addRenderedFeature(featureID, *bound, {tileID});
         }
     }
@@ -162,7 +170,7 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
                                                       const float,
                                                       const TransformState& transformState,
                                                       const float pixelsToTileUnits,
-                                                      const mat4&,
+                                                      const TileProjector&,
                                                       const FeatureState&) const {
     const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
     auto translatedQueryGeometry = FeatureIndex::translateQueryGeometry(
@@ -183,6 +191,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       [[maybe_unused]] const PaintParameters& paintParameters,
                                       const RenderTree& renderTree,
                                       UniqueChangeRequestVec& changes) {
+    updateProjectionVariant(state);
     stats.renderedFeatures.clear();
 
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -322,7 +331,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             binders, evaluated, propertiesAsUniforms, idFillExtrusionBaseVertexAttribute);
 
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-            shaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+            shaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant));
         if (!shader) {
             continue;
         }
@@ -346,7 +355,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             binders, evaluated, instancePropertiesAsUniforms, idFillExtrusionBaseVertexAttribute);
 
         const auto instancedShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-            instancedShaderGroup->getOrCreateShader(context, instancePropertiesAsUniforms));
+            instancedShaderGroup->getOrCreateShader(context, instancePropertiesAsUniforms, projectionVariant));
         if (!instancedShader) {
             continue;
         }

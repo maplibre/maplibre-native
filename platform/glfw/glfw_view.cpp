@@ -16,6 +16,7 @@
 #include <mln/style/layers/fill_extrusion_layer.hpp>
 #include <mln/style/layers/fill_layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
+#include <mln/style/projection.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/style.hpp>
@@ -347,6 +348,7 @@ GLFWView::GLFWView(bool fullscreen_,
         "- Press `J` to take a snapshot of a current map with an extrusions "
         "overlay.\n");
     printf("- Press `Y` to start a camera fly-by demo\n");
+    printf("- Press `F9` to toggle between the globe and Mercator\n");
     printf("\n");
     printf(
         "- Press `1` through `6` to add increasing numbers of point "
@@ -392,6 +394,8 @@ void GLFWView::setMap(mln::Map *map_) {
 
     map = map_;
     map->addAnnotationImage(makeImage("default_marker", 22, 22, 1));
+    // The window always rotates (right drag), so drags and zooms on the globe turn the bearing with the planet.
+    map->setGlobeFreeBearing(true);
 }
 
 void GLFWView::setRenderFrontend(GLFWRendererFrontend *rendererFrontend_) {
@@ -669,6 +673,16 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
             } break;
             case GLFW_KEY_F8: {
                 tileLodZoomShift(*view->map, true);
+            } break;
+            case GLFW_KEY_F9: {
+                auto &style = view->map->getStyle();
+                const auto *current = style.getProjection();
+                const bool globe = current && current->getType().isConstant() &&
+                                   current->getType().asConstant().from == mln::ProjectionType::Globe;
+                auto projection = std::make_unique<mln::style::Projection>();
+                projection->setType(
+                    mln::ProjectionDefinition(globe ? mln::ProjectionType::Mercator : mln::ProjectionType::Globe));
+                style.setProjection(std::move(projection));
             } break;
         }
     }
@@ -1082,7 +1096,7 @@ void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
         const double dx = x - view->lastX;
         const double dy = y - view->lastY;
         if (dx || dy) {
-            view->map->moveBy(mln::ScreenCoordinate{dx, dy});
+            view->map->moveBy(mln::ScreenCoordinate{dx, dy}, mln::ScreenCoordinate{x, y});
         }
     } else if (view->rotating) {
         view->map->rotateBy({view->lastX, view->lastY}, {x, y});

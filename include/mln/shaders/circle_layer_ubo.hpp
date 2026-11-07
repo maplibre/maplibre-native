@@ -17,7 +17,7 @@ struct alignas(16) CircleDrawableUBO {
     /*  88 */ float stroke_color_t;
     /*  92 */ float stroke_width_t;
     /*  96 */ float stroke_opacity_t;
-    /* 100 */ float pad1;
+    /* 100 */ float globe_extrude_scale;
     /* 104 */ float pad2;
     /* 108 */ float pad3;
     /* 112 */
