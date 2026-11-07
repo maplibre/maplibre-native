@@ -112,6 +112,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_file_source.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_request.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_request.hpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/i18n.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/number_format.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/local_glyph_rasterizer.cpp
@@ -155,7 +156,6 @@ target_link_libraries(
         $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
         $<BUILD_INTERFACE:mlt-cpp>
         $<BUILD_INTERFACE:fastpfor-lib>
-        $<$<PLATFORM_ID:iOS>:$<BUILD_INTERFACE:mbgl-vendor-filesystem>>
         $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
         $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,$<BUILD_INTERFACE:mbgl-vendor-sqlite>,Qt${QT_VERSION_MAJOR}::Sql>
     PRIVATE
@@ -183,7 +183,6 @@ if(MLN_QT_HAS_PARENT)
         mbgl-vendor-csscolorparser
         mlt-cpp
         fastpfor-lib
-        $<$<PLATFORM_ID:iOS>:mbgl-vendor-filesystem>
         $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:mbgl-vendor-sqlite>
         $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>>:mbgl-vendor-icu>
         PARENT_SCOPE

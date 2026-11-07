@@ -32,8 +32,6 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/circle.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/clipping_mask.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/collision.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/custom_geometry.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/custom_symbol_icon.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/debug.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/fill.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/fill_extrusion.cpp
@@ -72,8 +70,6 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/clipping_mask.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/collision.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/common.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/custom_geometry.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/custom_symbol_icon.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/debug.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/fill.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/fill_extrusion.hpp

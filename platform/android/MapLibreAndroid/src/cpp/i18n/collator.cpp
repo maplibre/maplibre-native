@@ -1,5 +1,8 @@
 #include <mln/i18n/collator.hpp>
 #include <mln/text/language_tag.hpp>
+#include <mln/util/exception.hpp>
+
+#include <stdexcept>
 
 #include <jni/jni.hpp>
 
@@ -98,6 +101,19 @@ jni::Local<jni::Object<Locale>> Locale::New(jni::JNIEnv& env, const jni::String&
 
 namespace platform {
 
+namespace {
+
+// jni.hpp throws std::range_error for text that is not valid UTF-8.
+jni::Local<jni::String> makeJavaString(jni::JNIEnv& env, const std::string& value) {
+    try {
+        return jni::Make<jni::String>(env, value);
+    } catch (const std::range_error& error) {
+        throw util::LocaleException(error.what());
+    }
+}
+
+} // namespace
+
 class Collator::Impl {
 public:
     Impl(bool caseSensitive_, bool diacriticSensitive_, std::optional<std::string> locale_)
@@ -108,13 +124,12 @@ public:
         if (!languageTag.language) {
             locale = jni::NewGlobal(*env, android::Locale::getDefault(*env));
         } else if (!languageTag.region) {
-            locale = jni::NewGlobal(*env,
-                                    android::Locale::New(*env, jni::Make<jni::String>(*env, *languageTag.language)));
+            locale = jni::NewGlobal(*env, android::Locale::New(*env, makeJavaString(*env, *languageTag.language)));
         } else {
-            locale = jni::NewGlobal(*env,
-                                    android::Locale::New(*env,
-                                                         jni::Make<jni::String>(*env, *languageTag.language),
-                                                         jni::Make<jni::String>(*env, *languageTag.region)));
+            locale = jni::NewGlobal(
+                *env,
+                android::Locale::New(
+                    *env, makeJavaString(*env, *languageTag.language), makeJavaString(*env, *languageTag.region)));
         }
         collator = jni::NewGlobal(*env, android::Collator::getInstance(*env, locale));
         if (!diacriticSensitive && !caseSensitive) {
@@ -143,12 +158,10 @@ public:
         // logic. Because of the difference in locale-awareness, this means
         // turning on case-sensitivity can _potentially_ change compare results
         // for strings that don't actually have any case differences.
-        jni::Local<jni::String> jlhs = useUnaccent
-                                           ? android::StringUtils::unaccent(*env, jni::Make<jni::String>(*env, lhs))
-                                           : jni::Make<jni::String>(*env, lhs);
-        jni::Local<jni::String> jrhs = useUnaccent
-                                           ? android::StringUtils::unaccent(*env, jni::Make<jni::String>(*env, rhs))
-                                           : jni::Make<jni::String>(*env, rhs);
+        jni::Local<jni::String> jlhs = useUnaccent ? android::StringUtils::unaccent(*env, makeJavaString(*env, lhs))
+                                                   : makeJavaString(*env, lhs);
+        jni::Local<jni::String> jrhs = useUnaccent ? android::StringUtils::unaccent(*env, makeJavaString(*env, rhs))
+                                                   : makeJavaString(*env, rhs);
 
         jni::jint result = android::Collator::compare(*env, collator, jlhs, jrhs);
 

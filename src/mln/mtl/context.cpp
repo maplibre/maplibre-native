@@ -123,7 +123,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     auto options = NS::TransferPtr(MTL::CompileOptions::alloc()->init());
     options->setPreprocessorMacros(nsDefines);
     options->setFastMathEnabled(true);
-    options->setLanguageVersion(MTL::LanguageVersion2_1);
+    options->setLanguageVersion(MTL::LanguageVersion2_4);
 
     // TODO: Compile common code into a `LibraryTypeDynamic` to be used by other shaders
     // instead of duplicating that code in each and every shader compilation.
@@ -305,8 +305,8 @@ const auto clipMaskStencilMode = gfx::StencilMode{
     .depthFail = gfx::StencilOpType::Keep,
     .pass = gfx::StencilOpType::Replace,
 };
-const auto clipMaskDepthMode = gfx::DepthMode{.func = gfx::DepthFunctionType::Always,
-                                              .mask = gfx::DepthMaskType::ReadOnly};
+const auto clipMaskDepthMode = gfx::DepthMode{
+    .func = gfx::DepthFunctionType::Always, .mask = gfx::DepthMaskType::ReadOnly, .range = {0.0f, 1.0f}};
 } // namespace
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,

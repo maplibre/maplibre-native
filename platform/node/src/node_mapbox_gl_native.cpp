@@ -23,7 +23,10 @@ void SetBackendType(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     (void)backendName;
 }
 
-void RegisterModule(v8::Local<v8::Object> target, v8::Local<v8::Object> module) {
+// Matches node::addon_register_func, so NODE_MODULE doesn't need to cast it.
+void RegisterModule(v8::Local<v8::Object> target, v8::Local<v8::Value> moduleValue, void*) {
+    v8::Local<v8::Object> module = moduleValue.As<v8::Object>();
+
     // This has the effect of:
     //   a) Ensuring that the static local variable is initialized before any
     //   thread contention. b) unreffing an async handle, which otherwise would

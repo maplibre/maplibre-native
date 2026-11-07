@@ -6,10 +6,8 @@
 - (instancetype)init {
     if ((self = [super init])) {
         self.puckShadowOpacity = 0.25;
-        if (@available(iOS 14, *)) {
-            self.approximateHaloBorderWidth = 2.0;
-            self.approximateHaloOpacity = 0.15;
-        }
+        self.approximateHaloBorderWidth = 2.0;
+        self.approximateHaloOpacity = 0.15;
     }
     return self;
 }

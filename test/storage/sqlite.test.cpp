@@ -5,6 +5,15 @@
 
 using namespace mln;
 
+TEST(SQLite, InMemoryDatabaseFilename) {
+    for (const auto* path :
+         {"", ":memory:", "file::memory:", "file::memory:?cache=shared", "file:filename-test?mode=memory"}) {
+        SCOPED_TRACE(path);
+        auto db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadWriteCreate);
+        EXPECT_TRUE(db.getFilename().empty());
+    }
+}
+
 TEST(SQLite, Statement) {
     using namespace mln;
 

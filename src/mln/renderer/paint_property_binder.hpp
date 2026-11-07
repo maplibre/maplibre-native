@@ -15,7 +15,21 @@
 #include <mln/util/variant.hpp>
 #include <mln/util/vectors.hpp>
 
+#include <cstring>
+#include <type_traits>
+#include <variant>
+
 namespace mln {
+
+namespace detail {
+
+template <typename T, typename Variant>
+struct VariantContains : std::false_type {};
+
+template <typename T, typename... Ts>
+struct VariantContains<T, std::variant<Ts...>> : std::bool_constant<(std::is_same_v<T, Ts> || ...)> {};
+
+} // namespace detail
 
 // Maps vertex range to feature index
 struct FeatureVertexRange {
@@ -166,6 +180,28 @@ public:
 
     virtual std::tuple<ZoomInterpolatedVertexType<As>...> getVertexValue(std::size_t index) const = 0;
 
+    template <typename TAttribute, typename TVertexAttribute>
+    void applyPaintProperty(const std::size_t attrIndex, TVertexAttribute& attrib) const {
+        using Type = typename TAttribute::Type; // ::mln::gfx::AttributeType<type_, n_>
+        using InterpType = ZoomInterpolatedAttributeType<Type>;
+
+        if (interleavedVertexBuffer) {
+            const auto& interleavedSharedVector = interleavedVertexBuffer->sharedVertexVector;
+
+            const auto rawSize = static_cast<uint32_t>(interleavedVertexBuffer->stride);
+            const bool interpolated = isInterpolated();
+            const auto dataType = interpolated ? InterpType::DataType : Type::DataType;
+
+            assert(interleavedSharedVector->getRawCount() / interleavedVertexBuffer->stride == getVertexCount());
+            attrib.setSharedRawData(interleavedSharedVector, static_cast<uint32_t>(vertexOffset), 0, rawSize, dataType);
+        } else {
+            const auto vertexCount = getVertexCount();
+            for (std::size_t i = 0; i < vertexCount; ++i) {
+                attrib.set(i, getVertexValue(i), attrIndex);
+            }
+        }
+    }
+
     virtual std::size_t getVertexCount() const {
         return interleavedVertexBuffer ? interleavedVertexBuffer->vertexCount : 0;
     }
@@ -282,7 +318,7 @@ public:
     SourceFunctionPaintPropertyBinder(style::PropertyExpression<T> expression_, T defaultValue_)
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)) {}
-    ~SourceFunctionPaintPropertyBinder() override {}
+    ~SourceFunctionPaintPropertyBinder() override = default;
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -308,7 +344,8 @@ public:
         }
         std::optional<std::string> idStr = featureIDtoString(feature.getID());
         if (idStr) {
-            featureMap[*idStr].emplace_back(FeatureVertexRange{index, elements, length});
+            featureMap[*idStr].emplace_back(
+                FeatureVertexRange{.featureIndex = index, .start = elements, .end = length});
         }
     }
 
@@ -384,7 +421,7 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
-    ~CompositeFunctionPaintPropertyBinder() override {}
+    ~CompositeFunctionPaintPropertyBinder() override = default;
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -417,7 +454,8 @@ public:
             this->interleavedVertexBuffer->set(i, this->vertexOffset, Vertex{value});
         }
         if (auto idStr = featureIDtoString(feature.getID())) {
-            featureMap[*idStr].emplace_back(FeatureVertexRange{index, elements, length});
+            featureMap[*idStr].emplace_back(
+                FeatureVertexRange{.featureIndex = index, .start = elements, .end = length});
         }
     }
 
@@ -507,7 +545,7 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
-    ~CompositeCrossFadedPaintPropertyBinder() override {}
+    ~CompositeCrossFadedPaintPropertyBinder() override = default;
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -688,20 +726,22 @@ public:
         : binders(Binder<Ps>::create(properties.template get<Ps>(), z, Ps::defaultValue())...) {
         (void)z; // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56958
 
-        (([&] {
-             binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
-         }()),
-         ...);
+        (
+            [&] {
+                binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
+            }(),
+            ...);
     }
 
     PaintPropertyBinders(PaintPropertyBinders&& other) noexcept {
         binders = std::move(other.binders);
         interleavedVertexBuffer = std::move(other.interleavedVertexBuffer);
 
-        (([&] {
-             binders.template get<Ps>()->interleavedVertexBuffer = &interleavedVertexBuffer;
-         }()),
-         ...);
+        (
+            [&] {
+                binders.template get<Ps>()->interleavedVertexBuffer = &interleavedVertexBuffer;
+            }(),
+            ...);
     }
 
     PaintPropertyBinders(const PaintPropertyBinders&) = delete;
@@ -736,7 +776,6 @@ public:
                               const std::optional<ImagePosition>& posB,
                               const CrossfadeParameters& crossfade) {
         util::ignore({(binders.template get<Ps>()->setPatternParameters(posA, posB, crossfade), 0)...});
-        interleavedVertexBuffer.sharedVertexVector->updateModified(true);
     }
 
     template <class P>

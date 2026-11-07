@@ -1,5 +1,6 @@
 #pragma once
 #include <mln/tile/geometry_tile_data.hpp>
+#include <memory>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -13,10 +14,6 @@
 #endif
 
 #include <protozero/pbf_reader.hpp>
-
-#include <unordered_map>
-#include <functional>
-#include <utility>
 
 namespace mln {
 

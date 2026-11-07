@@ -303,9 +303,7 @@ void MLNMapViewWebGPUImpl::createView() {
   metalLayer.device = mtlDevice;
 #endif
 
-  if (@available(iOS 13.0, *)) {
-    metalLayer.presentsWithTransaction = impl->presentsWithTransaction;
-  }
+  metalLayer.presentsWithTransaction = impl->presentsWithTransaction;
 
   [mapView insertSubview:impl->webGPUView atIndex:0];
 
@@ -567,10 +565,8 @@ void MLNMapViewWebGPUImpl::setOpaque(const bool opaque) {
 void MLNMapViewWebGPUImpl::setPresentsWithTransaction(const bool value) {
   impl->presentsWithTransaction = value;
 
-  if (@available(iOS 13.0, *)) {
-    if (CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(impl->webGPUView.layer, CAMetalLayer)) {
-      metalLayer.presentsWithTransaction = value;
-    }
+  if (CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(impl->webGPUView.layer, CAMetalLayer)) {
+    metalLayer.presentsWithTransaction = value;
   }
 }
 

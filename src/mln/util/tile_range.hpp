@@ -37,7 +37,7 @@ public:
         return fromLatLngBounds(bounds, z, z);
     }
 
-    bool contains(const CanonicalTileID& tileID) noexcept {
+    bool contains(const CanonicalTileID& tileID) const noexcept {
         if (tileID.z <= zoomRange.max && tileID.z >= zoomRange.min) {
             if (tileID.z == 0) {
                 return true;

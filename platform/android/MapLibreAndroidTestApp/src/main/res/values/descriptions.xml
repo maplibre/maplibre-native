@@ -7,6 +7,7 @@
     <string name="description_map_fragment_support">Showcase SupportMapFragment</string>
     <string name="description_map_fragment_backstack">Showcase using a Map Fragment with a fragment backstack</string>
     <string name="description_long_running_maps">Showcase a long running scenario</string>
+    <string name="description_disappearing_route">Trim a GeoJSON route line as a simulated location moves</string>
     <string name="description_multimap">Activity with multiple maps on screen</string>
     <string name="description_press_for_marker">Add marker to map on long press</string>
     <string name="description_add_makers_by_json_api">Use JSON API to add markers</string>
@@ -51,6 +52,7 @@
     <string name="description_query_rendered_features_box_highlight">Highlight buildings in box</string>
     <string name="description_query_source_features">Query source for features</string>
     <string name="description_feature_state">Toggle feature state and style features interactively</string>
+    <string name="description_feature_state_vector">Toggle feature state on a vector tile source</string>
     <string name="description_simple_map">Shows a simple map</string>
     <string name="description_map_change">Logs map change events to Logcat</string>
     <string name="description_visibility_map">Changes visibility of map and view parent</string>

@@ -42,7 +42,7 @@ ios_application(
     infoplists = [
         "//render-test/ios:Info.plist",
     ],
-    minimum_os_version = "13.0",
+    minimum_os_version = "15.5",
     provisioning_profile = "//platform/ios:xcode_profile",
     visibility = [
         "//visibility:public",

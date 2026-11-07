@@ -37,6 +37,8 @@ MapLibre iOS is based in part of the work of the [FreeType](https://freetype.org
 - <doc:POIAlongRouteExample>
 - <doc:GeoJSON>
 - <doc:PMTiles>
+- <doc:FeatureStateExample>
+- <doc:FeatureStateVectorExample>
 
 ### Map Interaction
 
@@ -64,7 +66,7 @@ MapLibre iOS is based in part of the work of the [FreeType](https://freetype.org
 
 - <doc:CustomStyleLayerExample>
 - <doc:RenderingStatisticsHud>
-- <doc:PluginLayers>
+- <doc:PluginAPI>
 
 ### Other Articles
 

@@ -28,13 +28,15 @@ public:
             throw std::runtime_error("Failed to obtain a valid EGL display.\n");
         }
 
-        EGLint major, minor, numConfigs;
+        EGLint major;
+        EGLint minor;
+        EGLint numConfigs;
         if (!eglInitialize(display, &major, &minor)) {
             throw std::runtime_error("eglInitialize() failed.\n");
         }
 
         if (!eglBindAPI(EGL_OPENGL_ES_API)) {
-            mln::Log::Error(mln::Event::OpenGL,
+            mln::Log::Error(mln::Event::GraphicsBackend,
                             "eglBindAPI(EGL_OPENGL_ES_API) returned error " + std::to_string(eglGetError()));
             throw std::runtime_error("eglBindAPI() failed");
         }
@@ -59,7 +61,7 @@ public:
 
 public:
     EGLDisplay display = EGL_NO_DISPLAY;
-    EGLConfig config = 0;
+    EGLConfig config = nullptr;
 };
 
 class EGLBackendImpl final : public HeadlessBackend::Impl {
@@ -75,7 +77,7 @@ public:
         if (eglContext == EGL_NO_CONTEXT) {
             std::ostringstream logMsg;
             logMsg << "eglCreateContext() returned error 0x" << std::hex << eglGetError();
-            mln::Log::Error(mln::Event::OpenGL, logMsg.str());
+            mln::Log::Error(mln::Event::GraphicsBackend, logMsg.str());
 
             throw std::runtime_error("Error creating the EGL context object.\n");
         }
@@ -95,12 +97,12 @@ public:
     ~EGLBackendImpl() final {
         if (eglSurface != EGL_NO_SURFACE) {
             if (!eglDestroySurface(eglDisplay->display, eglSurface)) {
-                Log::Error(Event::OpenGL, "Failed to destroy EGL surface.");
+                Log::Error(Event::GraphicsBackend, "Failed to destroy EGL surface.");
             }
             eglSurface = EGL_NO_SURFACE;
         }
         if (!eglDestroyContext(eglDisplay->display, eglContext)) {
-            Log::Error(Event::OpenGL, "Failed to destroy EGL context.");
+            Log::Error(Event::GraphicsBackend, "Failed to destroy EGL context.");
         }
     }
 

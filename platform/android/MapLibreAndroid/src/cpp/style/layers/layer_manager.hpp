@@ -8,6 +8,7 @@
 
 #include <jni/jni.hpp>
 
+#include <map>
 #include <memory>
 #include <vector>
 

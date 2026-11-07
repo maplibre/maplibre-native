@@ -46,5 +46,11 @@ void attachThread() {}
 
 void detachThread() {}
 
+void runTask(const std::function<void()>& task) {
+  @autoreleasepool {
+    task();
+  }
+}
+
 }  // namespace platform
 }  // namespace mln

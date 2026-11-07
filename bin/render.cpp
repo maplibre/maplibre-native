@@ -19,8 +19,10 @@ int main(int argc, char* argv[]) {
 
     args::ValueFlag<std::string> backendValue(argumentParser, "Backend", "Rendering backend", {"backend"});
     args::ValueFlag<std::string> apikeyValue(argumentParser, "key", "API key", {'t', "apikey"});
-    args::ValueFlag<std::string> styleValue(argumentParser, "URL", "Map stylesheet", {'s', "style"});
-    args::ValueFlag<std::string> outputValue(argumentParser, "file", "Output file name", {'o', "output"});
+    args::ValueFlag<std::string> styleValue(
+        argumentParser, "URL|file|-", "Map stylesheet (use '-' for stdin)", {'s', "style"});
+    args::ValueFlag<std::string> outputValue(
+        argumentParser, "file|-", "Output file name (use '-' for stdout)", {'o', "output"});
     args::ValueFlag<std::string> cacheValue(argumentParser, "file", "Cache database file name", {'c', "cache"});
     args::ValueFlag<std::string> assetsValue(
         argumentParser, "file", "Directory to which asset:// URLs will resolve", {'a', "assets"});
@@ -90,6 +92,8 @@ int main(int argc, char* argv[]) {
     using namespace mln;
 
     auto mapTilerConfiguration = mln::TileServerOptions::MapTilerConfiguration();
+
+    std::string json;
     std::string style = styleValue ? args::get(styleValue) : mapTilerConfiguration.defaultStyles().at(0).getUrl();
 
     util::RunLoop loop;
@@ -115,11 +119,16 @@ int main(int argc, char* argv[]) {
             .withApiKey(apikey)
             .withTileServerOptions(mapTilerConfiguration));
 
-    if (style.find("://") == std::string::npos) {
-        style = std::string("file://") + style;
-    }
+    if (style == "-") {
+        json = std::string(std::istreambuf_iterator<char>(std::cin), std::istreambuf_iterator<char>());
+        map.getStyle().loadJSON(json);
+    } else {
+        if (style.find("://") == std::string::npos) {
+            style = std::string("file://") + style;
+        }
 
-    map.getStyle().loadURL(style);
+        map.getStyle().loadURL(style);
+    }
     std::vector<double> bounds = args::get(boundsValue);
     if (bounds.size() == 4) {
         LatLngBounds boundingBox = LatLngBounds::hull(LatLng(bounds[0], bounds[1]), LatLng(bounds[2], bounds[3]));
@@ -141,9 +150,14 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        std::ofstream out(output, std::ios::binary);
-        out << encodePNG(frontend.render(map).image);
-        out.close();
+        std::string png = encodePNG(frontend.render(map).image);
+        if (output == "-") {
+            std::cout.write(png.data(), png.size());
+        } else {
+            std::ofstream out(output, std::ios::binary);
+            out << png;
+            out.close();
+        }
     } catch (std::exception& e) {
         std::cout << "Error: " << e.what() << std::endl;
         exit(1);

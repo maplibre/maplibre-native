@@ -64,6 +64,15 @@ bool isRuntimeConstant(const Expression& expression) {
         return false;
     }
 
+    if (expression.getKind() == Kind::CompoundExpression) {
+        const auto* e = static_cast<const CompoundExpression*>(&expression);
+        if (e->getOperator() == "global-state") {
+            // The result depends on the style's global state, which can be
+            // changed at runtime, so the expression is not runtime constant.
+            return false;
+        }
+    }
+
     bool runtimeConstant = true;
     expression.eachChild([&](const Expression& e) {
         if (runtimeConstant && !isRuntimeConstant(e)) {

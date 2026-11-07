@@ -46,9 +46,9 @@ public:
 
     struct RenderFrameStatus {
         RenderMode mode;
-        bool needsRepaint; // In continuous mode, shows that there are ongoig transitions.
+        bool needsRepaint; // In continuous mode, shows that there are ongoing transitions.
         bool placementChanged;
-        gfx::RenderingStats renderingStats;
+        std::shared_ptr<gfx::RenderingStats> renderingStats;
     };
 
     virtual void onCameraWillChange(CameraChangeMode) {}
@@ -94,7 +94,7 @@ public:
     virtual void onRenderError(std::exception_ptr) {}
 
     /// Called with a description of a corrupted symbol detected by the symbol guard checks
-    /// (see `MLN_SYMBOL_GUARDS`), on the thread which detected it.
+    /// (enabled by the environment variable `MLN_SYMBOL_GUARDS=1`), on the thread which detected it.
     virtual void onSymbolError(const std::string&) {}
 };
 

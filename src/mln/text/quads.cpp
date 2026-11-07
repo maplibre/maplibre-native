@@ -52,7 +52,7 @@ struct Cut {
 using Cuts = std::vector<Cut>;
 
 Cuts stretchZonesToCuts(const ImageStretches& stretchZones, const float fixedSize, const float stretchSize) {
-    Cuts cuts{{-border, 0}};
+    Cuts cuts{{.fixed = -border, .stretch = 0}};
 
     for (auto& zone : stretchZones) {
         const auto c1 = zone.first;

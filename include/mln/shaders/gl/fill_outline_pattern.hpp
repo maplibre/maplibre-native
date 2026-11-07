@@ -29,13 +29,17 @@ layout (std140) uniform FillOutlinePatternDrawableUBO {
     highp float u_pattern_from_t;
     highp float u_pattern_to_t;
     highp float u_opacity_t;
+    highp float u_color_t;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+    lowp float drawable_pad3;
 };
 
 layout (std140) uniform FillOutlinePatternTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
     highp vec2 u_texsize;
-    lowp float tileprops_pad1;
+    lowp float u_sdf;
     lowp float tileprops_pad2;
 };
 
@@ -54,20 +58,29 @@ out vec2 v_pos_a;
 out vec2 v_pos_b;
 out vec2 v_pos;
 
+#ifndef HAS_UNIFORM_u_color
+layout (location = 1) in highp vec4 a_color;
+out highp vec4 color;
+#endif
 #ifndef HAS_UNIFORM_u_opacity
-layout (location = 1) in lowp vec2 a_opacity;
+layout (location = 2) in lowp vec2 a_opacity;
 out lowp float opacity;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-layout (location = 2) in lowp vec4 a_pattern_from;
+layout (location = 3) in lowp vec4 a_pattern_from;
 out lowp vec4 pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-layout (location = 3) in lowp vec4 a_pattern_to;
+layout (location = 4) in lowp vec4 a_pattern_to;
 out lowp vec4 pattern_to;
 #endif
 
 void main() {
+    #ifndef HAS_UNIFORM_u_color
+color = unpack_mix_color(a_color, u_color_t);
+#else
+highp vec4 color = u_color;
+#endif
     #ifndef HAS_UNIFORM_u_opacity
 opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
 #else
@@ -109,7 +122,7 @@ mediump vec4 pattern_to = u_pattern_to;
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
     highp vec2 u_texsize;
-    lowp float tileprops_pad1;
+    lowp float u_sdf;
     lowp float tileprops_pad2;
 };
 
@@ -128,6 +141,9 @@ in vec2 v_pos_a;
 in vec2 v_pos_b;
 in vec2 v_pos;
 
+#ifndef HAS_UNIFORM_u_color
+in highp vec4 color;
+#endif
 #ifndef HAS_UNIFORM_u_opacity
 in lowp float opacity;
 #endif
@@ -139,6 +155,9 @@ in lowp vec4 pattern_to;
 #endif
 
 void main() {
+    #ifdef HAS_UNIFORM_u_color
+highp vec4 color = u_color;
+#endif
     #ifdef HAS_UNIFORM_u_opacity
 lowp float opacity = u_opacity;
 #endif
@@ -168,7 +187,16 @@ mediump vec4 pattern_to = u_pattern_to;
     float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
 
-    fragColor = mix(color1, color2, u_fade) * alpha * opacity;
+    if (u_sdf > 0.5) {
+        highp float sdf_edge = (256.0 - 64.0) / 256.0;
+        highp float sdf_gamma_a = max(fwidth(color1.a) * 0.5, 1.0 / 255.0 / 16.0);
+        highp float sdf_gamma_b = max(fwidth(color2.a) * 0.5, 1.0 / 255.0 / 16.0);
+        float sdf_alpha_a = smoothstep(sdf_edge - sdf_gamma_a, sdf_edge + sdf_gamma_a, color1.a);
+        float sdf_alpha_b = smoothstep(sdf_edge - sdf_gamma_b, sdf_edge + sdf_gamma_b, color2.a);
+        fragColor = mix(color * sdf_alpha_a, color * sdf_alpha_b, u_fade) * alpha * opacity;
+    } else {
+        fragColor = mix(color1, color2, u_fade) * alpha * opacity;
+    }
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

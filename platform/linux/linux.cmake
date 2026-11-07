@@ -57,6 +57,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/filesystem.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/i18n.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/jpeg_reader.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/webp_reader.cpp
@@ -150,7 +151,7 @@ target_include_directories(
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 
-if(NOT ${ICUUC_FOUND} OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
+if(NOT ICUUC_FOUND OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
     message(STATUS "ICU not found, too old or MLN_USE_BUILTIN_ICU requestd, using builtin.")
 
     set(MLN_USE_BUILTIN_ICU TRUE)

@@ -2,6 +2,13 @@
 
 We make iOS releases to GitHub (a downloadable XCFramework), the [Swift Package Index](https://swiftpackageindex.com/maplibre/maplibre-gl-native-distribution) and [CocoaPods](https://cocoapods.org/). Everyone with write access to the repository is able to make releases using the instructions below.
 
+Each release is published to two Swift package repositories. The `ios-release.yml` workflow dispatches their `release.yml` workflows, which point the binary target at an XCFramework of the GitHub release:
+
+| Repository | XCFramework |
+| --- | --- |
+| [maplibre/maplibre-gl-native-distribution](https://github.com/maplibre/maplibre-gl-native-distribution) | `MapLibre.dynamic.xcframework.zip` |
+| [maplibre/maplibre-ios-with-plugin-api](https://github.com/maplibre/maplibre-ios-with-plugin-api) | `MapLibre.dynamic.plugins.xcframework.zip`, built with `--//:plugins=true` |
+
 Also see the current [release policy](../../release-policy.md).
 
 ## Making a release

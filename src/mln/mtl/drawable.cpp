@@ -250,13 +250,12 @@ void Drawable::draw(PaintParameters& parameters) const {
                 impl->depthStencilState.reset();
             }
         }
+        const auto depthMode = getEnableDepth() ? parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType())
+                                                : gfx::DepthMode::disabled();
         if (!impl->depthStencilState) {
             if (enableStencil && !newStencilMode) {
                 newStencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
             }
-            const auto depthMode = getEnableDepth()
-                                       ? parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType())
-                                       : gfx::DepthMode::disabled();
             const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
                                                    : gfx::StencilMode::disabled();
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
@@ -265,6 +264,9 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
         renderPass.setDepthStencilState(impl->depthStencilState);
         renderPass.setStencilReference(impl->previousStencilMode.ref);
+        renderPass.setDepthRange(depthMode.range);
+    } else {
+        renderPass.setDepthRange(parameters.depthModeFor3D().range);
     }
 
     for (const auto& seg_ : impl->segments) {
@@ -321,6 +323,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             }
 
             context.renderingStats().numDrawCalls++;
+            context.renderingStats().totalDrawCalls++;
         }
     }
 
@@ -465,6 +468,8 @@ MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) noexcept {
             return MTL::VertexFormatUChar3;
         case gfx::AttributeDataType::UByte4:
             return MTL::VertexFormatUChar4;
+        case gfx::AttributeDataType::UByte4Normalized:
+            return MTL::VertexFormatUChar4Normalized;
         case gfx::AttributeDataType::Short:
             return MTL::VertexFormatShort;
         case gfx::AttributeDataType::Short2:

@@ -9,6 +9,7 @@
 
 #include "../file_source.hpp"
 #include "../geometry/lat_lng_bounds.hpp"
+#include "../gson/json_object.hpp"
 #include "../map/camera_position.hpp"
 #include "../map/image.hpp"
 #include "../style/layers/layer.hpp"
@@ -66,6 +67,11 @@ public:
     void addImages(JNIEnv&, const jni::Array<jni::Object<mln::android::Image>>&);
     jni::Local<jni::Object<Layer>> getLayer(JNIEnv&, const jni::String&);
     jni::Local<jni::Object<Source>> getSource(JNIEnv&, const jni::String&);
+
+    jni::jboolean isStyleLoaded(JNIEnv&);
+
+    void setGlobalStateProperty(JNIEnv&, const jni::String& name, const jni::Object<gson::JsonElement>& value);
+    jni::Local<jni::Object<gson::JsonObject>> getGlobalState(JNIEnv&);
 
     // MapSnapshotterObserver overrides
     void onDidFailLoadingStyle(const std::string&) override;

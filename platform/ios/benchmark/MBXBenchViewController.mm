@@ -32,8 +32,8 @@ public:
 
     bool fullyRendered = status.mode == mln::MapObserver::RenderMode::Full;
     [mapDelegate mapDidFinishRenderingFrameFullyRendered:fullyRendered
-                                       frameEncodingTime:status.renderingStats.encodingTime
-                                      frameRenderingTime:status.renderingStats.renderingTime];
+                                       frameEncodingTime:status.renderingStats->encodingTime
+                                      frameRenderingTime:status.renderingStats->renderingTime];
   }
 
 protected:

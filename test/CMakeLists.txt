@@ -19,6 +19,9 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/math/wrap.test.cpp
     ${PROJECT_SOURCE_DIR}/test/platform/settings.test.cpp
     ${PROJECT_SOURCE_DIR}/test/plugin/plugin.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/dynamic_texture_atlas.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/fill_bucket.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/feature_tracking.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/renderable.test.cpp
@@ -58,6 +61,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/conversion/tileset.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/dependency.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/expression.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/expression/semiliteral.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/expression/global_state.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/util.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/utf8_op_helpers.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/filter.test.cpp
@@ -102,6 +107,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/http_timeout.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/image.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/mapbox.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/mat3.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/memory.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/merge_lines.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/number_conversions.test.cpp
@@ -123,6 +129,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/lru_cache.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/vectors.test.cpp
 )
 
 # MapSnapshotter uses headless backend that is rendering image on a background thread. QT / macOS adaptation for headless backend creates
@@ -141,7 +148,6 @@ if(MLN_WITH_OPENGL)
         mbgl-test
         PRIVATE
             ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/api/custom_drawable_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/bucket.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/enum.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
@@ -154,13 +160,21 @@ if(MLN_WITH_OPENGL)
 endif()
 
 
+if(MLN_WITH_METAL)
+    target_sources(
+        mbgl-test
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/test/renderer/metal_renderable.test.cpp
+    )
+endif()
+
 if(MLN_WITH_VULKAN)
     target_sources(
         mbgl-test
         PRIVATE
             ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/api/custom_drawable_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/renderer/vulkan_acquire.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )
 endif()
@@ -212,6 +226,16 @@ target_include_directories(
 
 include(${PROJECT_SOURCE_DIR}/vendor/cpp-httplib.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/googletest.cmake)
+
+if(MLN_WITH_PLUGINS)
+    target_sources(mbgl-test PRIVATE
+        plugin/api.test.cpp
+        plugin/layout.test.cpp
+        plugin/property_binding.test.cpp
+        plugin/registry.test.cpp
+        plugin/rendering.test.cpp
+    )
+endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set_target_properties(mbgl-test mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)

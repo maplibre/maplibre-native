@@ -72,6 +72,12 @@ public:
                            [](const T&) { return Dependency::None; },
                            [](const PropertyExpression<T>& ex) { return ex.getDependencies(); });
     }
+
+    const std::set<std::string>* getGlobalStateRefs() const noexcept {
+        return value.match([](const Undefined&) -> const std::set<std::string>* { return nullptr; },
+                           [](const T&) -> const std::set<std::string>* { return nullptr; },
+                           [](const PropertyExpression<T>& ex) { return ex.getGlobalStateRefs(); });
+    }
 };
 
 } // namespace style

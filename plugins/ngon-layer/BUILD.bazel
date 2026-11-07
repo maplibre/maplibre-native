@@ -1,0 +1,50 @@
+load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_run_binary")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//bazel:flags.bzl", "CPP_FLAGS")
+
+js_binary(
+    name = "generate-shaders-script",
+    entry_point = "scripts/generate-shaders.mjs",
+)
+
+js_run_binary(
+    name = "generated-shaders",
+    stdout = "generated/ngon_shader_sources.hpp",
+    tool = ":generate-shaders-script",
+)
+
+cc_library(
+    name = "ngon-layer",
+    srcs = [
+        "shared/cpp/ngon_layer.cpp",
+        ":generated-shaders",
+    ],
+    hdrs = ["shared/include/ngon_layer.hpp"],
+    copts = CPP_FLAGS,
+    includes = [
+        "generated",
+        "shared/include",
+    ],
+    target_compatible_with = select({
+        "//:plugins_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    visibility = ["//visibility:public"],
+    deps = ["//:mln-plugin-api"],
+)
+
+cc_test(
+    name = "unit-tests",
+    srcs = ["tests/ngon.test.cpp"],
+    copts = CPP_FLAGS,
+    deps = [":ngon-layer"],
+)
+
+filegroup(
+    name = "render-fixtures",
+    srcs = glob(
+        ["render-tests/**"],
+        exclude = ["render-tests/results/**"],
+    ) + ["render-tests/results/.gitkeep"],
+    visibility = ["//plugins:__pkg__"],
+)

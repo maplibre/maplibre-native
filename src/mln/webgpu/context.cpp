@@ -44,8 +44,8 @@ const auto clipMaskStencilMode = gfx::StencilMode{
     /*.depthFail=*/gfx::StencilOpType::Keep,
     /*.pass=*/gfx::StencilOpType::Replace,
 };
-const auto clipMaskDepthMode = gfx::DepthMode{.func = gfx::DepthFunctionType::Always,
-                                              .mask = gfx::DepthMaskType::ReadOnly};
+const auto clipMaskDepthMode = gfx::DepthMode{
+    .func = gfx::DepthFunctionType::Always, .mask = gfx::DepthMaskType::ReadOnly, .range = {0.0f, 1.0f}};
 } // namespace
 
 Context::Context(RendererBackend& backend_)
@@ -67,6 +67,8 @@ void Context::endFrame() {
 
 void Context::performCleanup() {
     backend.getThreadPool().runRenderJobs();
+    stats.numDrawCalls = 0;
+    stats.numFrames++;
 }
 
 void Context::reduceMemoryUsage() {
