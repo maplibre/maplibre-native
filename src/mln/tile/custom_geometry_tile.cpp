@@ -28,7 +28,7 @@ CustomGeometryTile::CustomGeometryTile(const OverscaledTileID& overscaledTileID,
       actorRef(*this, mailbox) {}
 
 CustomGeometryTile::~CustomGeometryTile() {
-    cancel();
+    CustomGeometryTile::cancel();
     loader.invoke(&style::CustomTileLoader::removeTile, id);
 }
 
