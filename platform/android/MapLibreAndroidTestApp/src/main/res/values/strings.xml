@@ -14,4 +14,7 @@
     <string name="rendering_engine_dialog_title">Select Rendering Engine</string>
     <string name="rendering_engine_current_label">%1$s (current)</string>
     <string name="cancel">Cancel</string>
+    <string name="reused_map_view_open_screen_without_map">Open screen without map</string>
+    <string name="reused_map_view_screen_without_map">This screen has no map</string>
+    <string name="reused_map_view_back_to_map">Back to map</string>
 </resources>
