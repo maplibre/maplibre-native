@@ -472,6 +472,9 @@ The load-mode budgets do **not** help on the device they were designed for:
 | balanced | 8.2 | 265/732/990 | 6.14 | 735/1297 |
 | performance | 8.2 | 270/701/865 | 6.23 | 698/1324 |
 
+(Measured when Balanced meshed to z15; it has since been changed to follow the view as
+Quality does, and the table was not re-run.)
+
 All three modes are within noise of each other, even though the per-mode tile
 cap meant Performance drew 24 mesh tiles against Quality's 64 - a 62% cut in
 terrain tiles for no measurable gain. Encode is 700-1350ms per frame and the
@@ -480,7 +483,8 @@ whole scene runs at ~8 fps (the Adreno 750 does ~105 fps on the same build).
 This is the experiment the `TerrainLoadMode` budgets existed to justify, and it
 says they do not work: the bottleneck on this hardware is not the number of
 terrain mesh tiles or how many drapes re-render per frame. Something else
-dominates - the drape targets, the DEM uploads, or the non-terrain
+dominates - the drape targets (1024x1024 for the nearest tiles, see "Drape target
+size"), the DEM uploads, or the non-terrain
 layers - and should be measured before any more tuning of the budgets. Consider
 whether Balanced/Performance earn their complexity at all in their current form.
 
@@ -885,7 +889,7 @@ per-map API knob, not a style property: `Map::setTerrainLoadMode` /
 unlimited** = the historical sharp snap-load, so nothing regresses; Balanced =
 32 tiles / 16 drapes per frame, Performance = 8 / 4. The mode also sets the mesh-tile
 cap (`maxMeshTiles`: 64 / 48 / 24) and how deep the mesh goes past a coarse DEM
-(`meshTargetZoom`: Quality follows the view as gl-js does; Balanced z15, Performance z14,
+(`meshTargetZoom`: Quality and Balanced follow the view as gl-js does; Performance z14,
 at most three levels past the DEM), so it changes the final image too: close-up
 sharpness, and detail in the distance in tilted views. Exposed on Android
 (`MapLibreMap.setTerrainLoadMode`, `TerrainLoadMode` enum). All five "3D Terrain"
@@ -1045,7 +1049,11 @@ This known issue is closed.
   1024 target can still be below screen resolution (softer, but no longer
   aliased); `drapeQualityFactor` is the single knob to raise it (each step is 4x
   GPU memory per target) or drop back to 1 on constrained devices. Was the
-  long-standing `// TODO: tile size`.
+  long-standing `// TODO: tile size`. Only the nearest tiles get that size now
+  (`RenderTerrain::fullSizeDrapeTilesOf`): the 16 tiles of the cover's finest zoom nearest the
+  ground under the camera, plus tiles that already had it, until 24 are full size (a still
+  takes the nearest 24 at once); every other tile's target is 512x512, a quarter of the memory,
+  and a tile that changes between the two gets a new target, paced by the drape re-render cap.
 - Camera-terrain collision: a collision-only fix was prototyped and reverted
   (felt worse - it corrected only after the gesture); the real fix is the
   terrain-anchored camera in Phase 4

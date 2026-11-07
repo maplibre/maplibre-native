@@ -119,13 +119,6 @@ public:
     /// so a burst of dirty drape targets is spread across frames rather than stalling one.
     RenderResult render(RenderOrchestrator&, const RenderTree&, PaintParameters&, bool canRerender = true);
 
-    /// Forget what this drape target baked, so its next render evaluates and bakes again. For a
-    /// render that threw part-way (out of GPU memory): the bake was recorded before it started.
-    void invalidateBake() {
-        bakedCoverage = {};
-        bakedSignature.reset();
-    }
-
 protected:
     void renderDrapedLayerGroups(RenderOrchestrator&, PaintParameters&);
 
