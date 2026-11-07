@@ -52,6 +52,11 @@ void rotate_z(mat4& out, const mat4& a, double rad);
 void scale(mat4& out, const mat4& a, double x, double y, double z);
 void multiply(mat4& out, const mat4& a, const mat4& b);
 
+// Remap clip z from the OpenGL range [-1, 1] to [0, 1] (z' = (z + w) / 2) for Vulkan, Metal and WebGPU.
+inline void remapClipZToUnitRange(mat4& m) {
+    for (std::size_t i = 2; i < 16; i += 4) m[i] = 0.5 * (m[i] + m[i + 1]);
+}
+
 // Transform a 4D vector by a 4x4 matrix (v * m).
 // The result and matrix must not be the same array.
 void transformMat4(vec4& out, const vec4& a, const mat4& m);

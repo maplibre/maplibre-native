@@ -47,9 +47,11 @@ Terrain rendering enables draping the map over 3D elevation data from Digital El
   decoded via the source's unpack vector like hillshade and color-relief
 - **Layer Draping**: background, fill, line, raster, hillshade, and color-relief
   layers render into per-tile render targets draped over the terrain mesh
-- **Elevated Layers**: symbol, circle, and fill-extrusion layers sample the DEM in
-  their vertex shaders and are displaced by the terrain elevation. **Caveat:
+- **Elevated Layers**: symbol, circle, heatmap, and fill-extrusion layers sample the
+  DEM in their vertex shaders and are displaced by the terrain elevation. **Caveat:
   fill-extrusion elevation is GL/WebGPU only** - see the backend parity section.
+  **Heatmap caveat:** kernels are elevated by their centre only, and the colour-ramp
+  composite is still a screen-space pass that draws over everything.
 - **Exaggeration**: styled vertical exaggeration multiplier (1.0 = true scale)
 - **Shared Elevation Function**: a `get_elevation()` helper in every backend's
   shader prelude
@@ -290,7 +292,7 @@ Implemented:
   `Frustum::intersectsElevated`), and the terrain mesh is frustum-culled so a
   sparse DEM's low-zoom ancestor tiles are not meshed off-screen.
 - Elevation for the non-draped layers: symbol (icon/SDF/text-and-icon), circle,
-  and fill-extrusion on all four backends, via the shared `get_elevation()`
+  heatmap, and fill-extrusion on all four backends, via the shared `get_elevation()`
   prelude helper and per-drawable DEM bindings
 - Style parsing of the `terrain` root property (`source`, `exaggeration`) per the
   style spec, with exaggeration applied as styled (1.0 = true scale)
@@ -333,7 +335,7 @@ filled in by @daviani on an iPhone 16 Pro Max / iOS 26.6, built for device with
 | builds | yes | yes | **yes** (bazel, for device) | yes (Dawn) |
 | terrain renders | yes | **yes, verified on device** | **yes, verified on device** | untested |
 | terrain off->on (all 3 load modes) | yes | **yes, verified** | **yes** (via style JSON; load modes not separated) | untested |
-| symbol occlusion | yes | looks correct on device | untested (code path is complete; see below) | untested |
+| symbol occlusion | yes | same scheme as GL and Metal ([#4559](https://github.com/maplibre/maplibre-native/pull/4559)); shaders compile to SPIR-V, not yet re-checked on a device. The earlier "looks correct on device" was with the gl-js ramp of 500, which cannot fire at native's 1 px near plane | verified on the iOS simulator (2026-09-05) after scaling the fade ramp to native's 1 px near plane and packing the depth as exact base-256 digits | same scheme as GL and Metal ([#4559](https://github.com/maplibre/maplibre-native/pull/4559)); untested |
 | **fill-extrusion elevation** | yes | **yes** (2026-08-01, render test pixel-matches the GL baseline) | **yes** (2026-08-02, shaders sample the DEM; CI confirmation pending) | yes |
 | instanced depth pass | yes (GL-only by design) | n/a (per-tile path) | n/a | n/a |
 
@@ -1077,6 +1079,12 @@ This known issue is closed.
     `projectedPoint` that does match. Verify the two depths agree (e.g. render
     the sampled depth as colour) *before* wiring the discard, and note the depth
     pass now packs clip-space NDC z with no `*2-1` remap.
+  - **Fixed (2026-10-17): it was the depth space.** With terrain on,
+    `FillExtrusionLayerTweaker` now projects extrusions the way the mesh is
+    projected (default near plane, and the same clip z remap to [0, 1] off GL), so
+    terrain in front of an extrusion hides it per fragment in the ordinary depth
+    test. `terrain/fill-extrusion-occluded` (a block behind a ridge) covers it,
+    graded against a linux-opengl baseline.
 - The terrain mesh/drape cover is now a direct elevation-aware ideal cover
   (`RenderTerrain::computeMeshCover`, see the tile-cover item above), but only
   *visibility* is elevation-aware. Native's tile LOD system
@@ -1332,7 +1340,9 @@ terrain during placement sees the previous frame's state - the same first-frame 
   render_terrain.cpp are one-time warning/error logs; terrain_layer_tweaker.cpp
   has no per-frame logging.
 - Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
-- Decide whether heatmap should be draped (gl-js does not drape it)
+- **(done)** Heatmap is elevated, not draped, as in gl-js (which does not drape it): each
+  kernel is lifted to the DEM height at its centre in the kernel vertex shader, and the
+  colour-ramp composite stays a screen-space pass.
 - Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing
@@ -1833,6 +1843,17 @@ describe a different view.
   }
 }
 ```
+
+### Custom layers
+
+Custom layers are not draped: `RenderCustomLayer` creates its layer group with render-to-terrain
+off, so the layer draws on screen in the main pass, after the terrain mesh (`TERRAIN_LAYER_INDEX`),
+with the mesh's depth in the attached depth buffer. A layer that sets its own depth test is hidden by
+the terrain in front of it. Its `projectionMatrix` is GL clip space; off GL the layer applies the
+mesh's remap, z' = (z + w) / 2, itself. `CustomLayerRenderParameters` carries the terrain
+exaggeration (0 with terrain off), and on Metal the packed depth texture `RenderTerrain::renderDepth`
+draws before the main pass (null until it has drawn); iOS hands them over as
+`MLNStyleLayerDrawingContext.terrainExaggeration` and `MLNCustomStyleLayer.terrainDepthTexture`.
 
 ## References
 

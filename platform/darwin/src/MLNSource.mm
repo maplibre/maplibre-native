@@ -113,6 +113,18 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
   return removed;
 }
 
+// MARK: - Caching
+
+- (BOOL)isVolatile {
+  MLNAssertStyleSourceIsValid();
+  return self.rawSource->isVolatile();
+}
+
+- (void)setVolatile:(BOOL)isVolatile {
+  MLNAssertStyleSourceIsValid();
+  self.rawSource->setVolatile(isVolatile);
+}
+
 // MARK: - Feature state
 
 /**

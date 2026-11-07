@@ -31,7 +31,9 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation_index.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_fill_pattern_drape.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_resolution.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_occlusion.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_drape.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/layer_min_zoom_tiles.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_cache_policy.test.cpp

@@ -1134,6 +1134,11 @@ void RenderTerrain::prepareDepthTarget(PaintParameters& parameters) {
         fresh = true;
         // Far plane everywhere the terrain does not cover (unpack_depth(1,1,1,1) ~ 1.0)
         depthRenderTarget->setClearColor(Color::white());
+        // The packed digits must not be filtered: blending neighbouring texels'
+        // channels decodes to garbage (offscreen textures default to Linear)
+        depthRenderTarget->getTexture()->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
+                                                                  .wrapU = gfx::TextureWrapType::Clamp,
+                                                                  .wrapV = gfx::TextureWrapType::Clamp});
     }
     // Attach the depth layer group once per target; it may not have existed yet when the
     // target was first created on an early frame. Attaching on every call marked the pass
@@ -1580,10 +1585,7 @@ void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
         const auto& inst = depthInstances[i];
         mat4 m = parameters.matrixForTile(inst.tileID.toUnwrapped());
 #if !MLN_RENDER_BACKEND_OPENGL
-        m[2] = 0.5 * (m[2] + m[3]);
-        m[6] = 0.5 * (m[6] + m[7]);
-        m[10] = 0.5 * (m[10] + m[11]);
-        m[14] = 0.5 * (m[14] + m[15]);
+        matrix::remapClipZToUnitRange(m);
 #endif
         arr[i].matrix = util::cast<float>(m);
         arr[i].dem_coords = inst.demCoords;

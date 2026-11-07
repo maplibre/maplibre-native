@@ -57,10 +57,7 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
         // drawables render with depth disabled, so the exact z is irrelevant beyond
         // being inside the clip volume. (element 10 is overwritten just below, but it
         // multiplies in_position.z = 0 and never affects the result.)
-        terrainRttPosMatrix[2] = 0.5 * (terrainRttPosMatrix[2] + terrainRttPosMatrix[3]);
-        terrainRttPosMatrix[6] = 0.5 * (terrainRttPosMatrix[6] + terrainRttPosMatrix[7]);
-        terrainRttPosMatrix[10] = 0.5 * (terrainRttPosMatrix[10] + terrainRttPosMatrix[11]);
-        terrainRttPosMatrix[14] = 0.5 * (terrainRttPosMatrix[14] + terrainRttPosMatrix[15]);
+        matrix::remapClipZToUnitRange(terrainRttPosMatrix);
 #endif
         // Draped 2D geometry multiplies vec4(x, y, 0, 1), so the matrix's third
         // column never contributes to the transform; carry the drawable's tile
