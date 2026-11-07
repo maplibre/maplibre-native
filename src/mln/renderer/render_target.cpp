@@ -350,7 +350,10 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
                 targetSignature = it->second;
             }
         }
-        if (bakedSignature && *bakedSignature == targetSignature) {
+        // Whether more content is on its way: a tile is loading, or the new-tile budget has put off
+        // building one. A decision to keep the bake (below) holds only while it is.
+        const bool contentComing = !renderTree.getParameters().loaded || context.newTileBuildWasDeferred();
+        if (bakedSignature && *bakedSignature == targetSignature && !(holdingForContent && !contentComing)) {
             return RenderResult::Skipped;
         }
 
@@ -368,6 +371,7 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // behaviour (render a terrain tile's texture only when its stack changes).
         if (coverage.sameContentAs(bakedCoverage)) {
             bakedSignature = targetSignature;
+            holdingForContent = false;
             return RenderResult::Skipped;
         }
 
@@ -377,14 +381,22 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // drops out of the render set (eviction, reload) and re-rendering would
         // flash the drape empty before it recovers. A genuine change - a tile's
         // drawable set changing (contentHash) or crossing an integer zoom - is not
-        // "worse" and falls through to re-render. The target's lifetime bounds
-        // staleness: when its terrain tile leaves the cover it is destroyed.
-        if (coverage.worseThan(bakedCoverage)) {
+        // "worse" and falls through to re-render. "Briefly" is while content is still
+        // coming. Once none is, what the layers draw is what they are going to draw, and
+        // a bake of tiles they no longer use is not a better picture to keep: after a
+        // zoom out the source holds the tiles of the level it left until the new level
+        // has loaded, the target bakes with them, and the new level's tiles, two levels
+        // above the target where those were one, then count as worse for good. The
+        // target's lifetime bounds staleness: when its terrain tile leaves the cover it
+        // is destroyed.
+        if (contentComing && coverage.worseThan(bakedCoverage)) {
             // Keeping the already-baked (better) content: record that at this
             // signature the decision was to hold, so future identical frames skip
-            // the scan too. A real change (drawable set, zoom, properties) moves the
-            // signature and re-opens evaluation, preserving the anti-flicker intent.
+            // the scan too, until the content has come (see above). A real change
+            // (drawable set, zoom, properties) moves the signature and re-opens
+            // evaluation, preserving the anti-flicker intent.
             bakedSignature = targetSignature;
+            holdingForContent = true;
             return RenderResult::Skipped;
         }
 
@@ -400,6 +412,7 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
 
         bakedCoverage = coverage;
         bakedSignature = targetSignature;
+        holdingForContent = false;
 
         // Committed to re-rendering this drape (a cache miss). Count it so the
         // measure-first overlay can show drape churn per frame.
