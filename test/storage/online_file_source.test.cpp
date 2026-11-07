@@ -11,6 +11,11 @@
 
 #include <gtest/gtest.h>
 
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 using namespace mln;
 
 #ifdef WIN32
@@ -547,6 +552,129 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequests)) {
     fs->resume();
     NetworkStatus::Set(NetworkStatus::Status::Online);
     loop.run();
+}
+
+// A high priority request is answered before the regular and low priority
+// requests queued before it and after it. High requests keep their order
+// among themselves, and a canceled one is never answered.
+TEST(OnlineFileSource, TEST_REQUIRES_SERVER(HighPriorityRequestsGoFirst)) {
+    util::RunLoop loop;
+    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::vector<std::string> order;
+    std::map<std::string, std::unique_ptr<AsyncRequest>> requests;
+
+    fs->setProperty(MAX_CONCURRENT_REQUESTS_KEY, 1u);
+    // Requests are only processed after resume(), so with the network online
+    // they all register in the order they were made.
+    fs->pause();
+
+    // The name is what the order records.
+    auto queue = [&](const std::string& name, const std::string& path, Resource::Priority priority) {
+        Resource resource{Resource::Unknown, "http://127.0.0.1:3000" + path};
+        resource.setPriority(priority);
+        requests[name] = fs->request(resource, [&, name](Response) {
+            if (name == "elevation-3") ADD_FAILURE() << "The canceled request was answered";
+            order.push_back(name);
+            if (order.size() == 6) loop.stop();
+        });
+    };
+    // The first request takes the one slot, and the test server holds its
+    // answer for 200 ms; the rest wait in the queue.
+    queue("regular-1", "/delayed", Resource::Priority::Regular);
+    queue("regular-2", "/load/2", Resource::Priority::Regular);
+    queue("low", "/load/3", Resource::Priority::Low);
+    queue("elevation", "/load/4", Resource::Priority::High);
+    queue("regular-3", "/load/5", Resource::Priority::Regular);
+    queue("elevation-2", "/load/6", Resource::Priority::High);
+    queue("elevation-3", "/load/7", Resource::Priority::High);
+
+    NetworkStatus::Set(NetworkStatus::Status::Online);
+    fs->resume();
+
+    // Canceled well inside those 200 ms, so it is certainly still queued.
+    util::Timer cancelTimer;
+    cancelTimer.start(Milliseconds(50), Duration::zero(), [&] { requests["elevation-3"].reset(); });
+    loop.run();
+
+    EXPECT_EQ(order,
+              (std::vector<std::string>{"regular-1", "elevation", "elevation-2", "regular-2", "regular-3", "low"}));
+}
+
+// Once 32 high priority requests are waiting, a further one waits as a regular
+// request, behind the regular request that was already queued.
+TEST(OnlineFileSource, TEST_REQUIRES_SERVER(HighPriorityRequestsAreBounded)) {
+    util::RunLoop loop;
+    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::vector<std::string> order;
+    std::vector<std::unique_ptr<AsyncRequest>> requests;
+
+    // The first request takes the one slot, the regular one waits, and 32 of
+    // the 33 high priority requests go ahead of it.
+    std::vector<std::string> expected{"first"};
+    for (int i = 1; i <= 32; ++i) expected.push_back("elevation-" + std::to_string(i));
+    expected.push_back("regular");
+    expected.push_back("elevation-33");
+
+    fs->setProperty(MAX_CONCURRENT_REQUESTS_KEY, 1u);
+    fs->pause();
+
+    auto queue = [&](const std::string& name, Resource::Priority priority) {
+        Resource resource{Resource::Unknown, "http://127.0.0.1:3000/load/" + std::to_string(requests.size())};
+        resource.setPriority(priority);
+        requests.push_back(fs->request(resource, [&, name](Response) {
+            order.push_back(name);
+            if (order.size() == expected.size()) loop.stop();
+        }));
+    };
+    queue("first", Resource::Priority::Regular);
+    queue("regular", Resource::Priority::Regular);
+    for (int i = 1; i <= 33; ++i) queue("elevation-" + std::to_string(i), Resource::Priority::High);
+
+    NetworkStatus::Set(NetworkStatus::Status::Online);
+    fs->resume();
+    loop.run();
+
+    EXPECT_EQ(order, expected);
+}
+
+// When the network is back, the requests that failed on a connection problem
+// are woken high priority first. With one slot, the one woken first is
+// answered first.
+TEST(OnlineFileSource, TEST_REQUIRES_SERVER(HighPriorityRequestsAreWokenFirstWhenReachableAgain)) {
+    util::RunLoop loop;
+    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::vector<std::string> order;
+    std::set<std::string> refused;
+    std::map<std::string, std::unique_ptr<AsyncRequest>> requests;
+
+    NetworkStatus::Set(NetworkStatus::Status::Online);
+    fs->setProperty(MAX_CONCURRENT_REQUESTS_KEY, 1u);
+    // Offline for this file source only. It refuses each request with a
+    // connection error, which tells the test the request is registered; under
+    // NetworkStatus::Offline a request is parked without any answer.
+    fs->setProperty("online-status", false);
+
+    auto queue = [&](const std::string& name, int number, Resource::Priority priority) {
+        Resource resource{Resource::Unknown, "http://127.0.0.1:3000/load/" + std::to_string(number)};
+        resource.setPriority(priority);
+        requests[name] = fs->request(resource, [&, name](Response response) {
+            if (response.error) {
+                // Once both have been refused, say the network is back.
+                if (refused.insert(name).second && refused.size() == 2) {
+                    fs->setProperty("online-status", true);
+                }
+                return;
+            }
+            order.push_back(name);
+            if (order.size() == 2) loop.stop();
+        });
+    };
+    queue("regular", 1, Resource::Priority::Regular);
+    queue("elevation", 2, Resource::Priority::High);
+
+    loop.run();
+
+    EXPECT_EQ(order, (std::vector<std::string>{"elevation", "regular"}));
 }
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequestsMany)) {
