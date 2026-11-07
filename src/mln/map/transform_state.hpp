@@ -132,6 +132,8 @@ public:
 
     // Matrix
     void matrixFor(mat4&, const UnwrappedTileID&) const;
+    /// The symbol occlusion ramp behind 3D terrain (calculate_visibility in the shader preludes)
+    /// is derived from this near plane of one pixel: change the default and rescale it there.
     void getProjMatrix(mat4& matrix, uint16_t nearZ = 1, bool aligned = false) const;
 
     // Dimensions
