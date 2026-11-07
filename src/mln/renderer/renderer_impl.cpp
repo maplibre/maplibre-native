@@ -687,11 +687,12 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         common3DPass();
         drawable3DPass();
     }
-    drawableTargetsPass();
-    // Terrain depth pass for symbol occlusion (sampled by calculate_visibility)
+    // Terrain depth pass for occlusion (sampled by calculate_visibility). It comes before the render
+    // targets because a heatmap kernel is drawn into one of them and hides itself behind terrain.
     if (auto* terrain = orchestrator.getRenderTerrain()) {
         terrain->renderDepth(orchestrator, renderTree, parameters);
     }
+    drawableTargetsPass();
     commonClearPass();
     context.bindGlobalUniformBuffers(*parameters.renderPass);
     drawableOpaquePass();

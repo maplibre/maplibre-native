@@ -92,6 +92,17 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
                 idHeatmapDEMTexture);
         }
 
+        // Kernels hidden behind terrain: packed terrain depth, read by calculate_visibility in the
+        // vertex shader as symbols and circles do. Only the backends whose heatmap shader reads it
+        // (OpenGL, Metal) bind it; Vulkan and WebGPU keep heatmaps unoccluded.
+        float depthEnabled = 0.0f;
+#if MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_METAL
+        if (terrainEnabled) {
+            drawable.setTexture(parameters.terrain->getDepthTexture(context), idHeatmapDepthTexture);
+            depthEnabled = 1.0f;
+        }
+#endif
+
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
 #else
@@ -102,7 +113,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
             .weight_t = std::get<0>(binders->get<HeatmapWeight>()->interpolationFactor(zoom)),
             .radius_t = std::get<0>(binders->get<HeatmapRadius>()->interpolationFactor(zoom)),
-            .pad1 = 0,
+            .depth_enabled = depthEnabled,
 
             .dem_coords = terrainData ? terrainData->demCoords : std::array<float, 4>{{0, 0, 0, 0}},
             .dem_unpack = terrainEnabled ? parameters.terrain->getDEMUnpackVector()
@@ -110,7 +121,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
             .dem_dim = terrainData ? terrainData->demDim : 0.0f,
             .dem_exaggeration = terrainEnabled ? parameters.terrain->getExaggeration() : 0.0f,
             .dem_enabled = terrainData ? 1.0f : 0.0f,
-            .pad2 = 0
+            .units_to_pixels_y = parameters.pixelsToGLUnits[1] != 0.0f ? 1.0f / parameters.pixelsToGLUnits[1] : 0.0f
         };
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);

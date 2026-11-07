@@ -52,6 +52,9 @@ Terrain rendering enables draping the map over 3D elevation data from Digital El
   fill-extrusion elevation is GL/WebGPU only** - see the backend parity section.
   **Heatmap caveat:** kernels are elevated by their centre only, and the colour-ramp
   composite is still a screen-space pass that draws over everything.
+  **Circle occlusion:** a circle whose centre is behind terrain is hidden, from the packed terrain
+  depth texture in the vertex shader (`calculate_visibility`, as for symbols and as maplibre-gl-js
+  does). OpenGL and Metal only; Vulkan and WebGPU still draw circles over terrain.
 - **Exaggeration**: styled vertical exaggeration multiplier (1.0 = true scale)
 - **Shared Elevation Function**: a `get_elevation()` helper in every backend's
   shader prelude
