@@ -227,6 +227,12 @@ void Drawable::draw(PaintParameters& parameters) const {
     renderPass.setScissorRect(getMetalScissorRect(parameters.scissorRect));
 
     if (!impl->pipelineState) {
+        if (!shaderMTL.isReady()) {
+            // The program's library is still compiling off the render thread
+            // (gfx::Context::setAsyncShaderCompilation); skip this drawable for the frame. The
+            // renderer keeps requesting frames while any compile is pending.
+            return;
+        }
         impl->pipelineState = shaderMTL.getRenderPipelineState(
             renderable, impl->vertexDesc, getColorMode(), mln::util::hash(getColorMode().hash(), impl->vertexDescHash));
     }
