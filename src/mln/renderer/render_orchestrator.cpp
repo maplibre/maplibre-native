@@ -403,6 +403,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         const bool layerAddedOrChanged = layerDiff.added.contains(id) || layerDiff.changed.contains(id);
         evaluationParameters.layerChanged = layerAddedOrChanged;
         evaluationParameters.hasCrossfade = layer.hasCrossfade();
+        // A layer drawn into a terrain drape keeps what it was drawn with until its tiles change, so a
+        // drape target drawn while a pattern cross-fades after a zoom level change would keep the
+        // half-faded pattern for good, finer than its neighbors'. Skip the fade there. Unlike
+        // hasCrossfade, which says a fade is still running, this ends it.
+        evaluationParameters.crossfadeSettled = layer.settlesCrossfade(terrainEnabled);
 
         // Only re-evaluate on change of zoom if the style has some reference to it
         using expression::Dependency;
