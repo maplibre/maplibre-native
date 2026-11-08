@@ -857,6 +857,7 @@ FeatureExtensionValue RenderOrchestrator::queryFeatureExtensions(
     return {};
 }
 
+// NOLINTNEXTLINE(readability-make-member-function-const): it changes the render source it points to
 void RenderOrchestrator::setFeatureState(const std::string& sourceID,
                                          const std::optional<std::string>& sourceLayerID,
                                          const std::string& featureID,
@@ -879,6 +880,7 @@ void RenderOrchestrator::getFeatureState(FeatureState& state,
     }
 }
 
+// NOLINTNEXTLINE(readability-make-member-function-const): it changes the render source it points to
 void RenderOrchestrator::removeFeatureState(const std::string& sourceID,
                                             const std::optional<std::string>& sourceLayerID,
                                             const std::optional<std::string>& featureID,
