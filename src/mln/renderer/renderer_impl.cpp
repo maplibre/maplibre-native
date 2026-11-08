@@ -746,8 +746,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // (Map::setCenterClampedToGround). Gated so a still map does not post a message a frame.
     // Only once a DEM tile covers the spot: ground not loaded yet is not sea level.
     if (auto* terrain = orchestrator.getRenderTerrain()) {
-        if (const auto centerElevation = terrain->getElevationForLatLng(
-                updateParameters->transformState.getLatLng())) {
+        if (const auto centerElevation = terrain->getElevationForLatLng(updateParameters->transformState.getLatLng())) {
             if (std::isnan(lastReportedCenterElevation) ||
                 std::abs(*centerElevation - lastReportedCenterElevation) > 0.25) {
                 lastReportedCenterElevation = *centerElevation;
