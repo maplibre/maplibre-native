@@ -2389,3 +2389,94 @@ TEST(Map, TileSelectionOptionsPublishUpdates) {
     check(&Map::setTileLodZoomShift, &UpdateParameters::tileLodZoomShift, 1.0);
     check(&Map::setTileLodMode, &UpdateParameters::tileLodMode, TileLodMode::Distance);
 }
+
+class ColorRampGlobalStateTest : public testing::TestWithParam<std::string> {};
+
+TEST_P(ColorRampGlobalStateTest, RendersCurrentStateAfterUnrelatedStateChange) {
+    const auto& type = GetParam();
+    const std::string rampProperty = type == "line" ? "line-gradient" : type + "-color";
+    const auto ramp = [&](const std::string& color) {
+        const std::string input = type == "line"      ? R"(["line-progress"], 0, )"
+                                  : type == "heatmap" ? R"(["heatmap-density"], 0, )"
+                                                      : R"(["elevation"], -20000, )";
+        const std::string end = type == "color-relief" ? ", 20000, " : ", 1, ";
+        return R"(["interpolate", ["linear"], )" + input + color + end + color + "]";
+    };
+    const std::string stateColor = R"(["global-state", "color"])";
+
+    MapTest<> test;
+    test.fileSource->tileResponse = [](const Resource&) {
+        // Opaque black decodes to an elevation of -10000 m.
+        PremultipliedImage dem({256, 256});
+        for (size_t i = 3; i < dem.bytes(); i += 4) {
+            dem.data[i] = 255;
+        }
+        Response response;
+        response.data = std::make_shared<std::string>(encodePNG(dem));
+        return response;
+    };
+    test.map.getStyle().loadJSON(R"({
+        "version": 8,
+        "state": {"color": {"default": "red"}, "unrelated": {"default": 0}},
+        "sources": {
+            "line": {
+                "type": "geojson",
+                "lineMetrics": true,
+                "data": {"type": "LineString", "coordinates": [[-20, 0], [20, 0]]}
+            },
+            "heatmap": {"type": "geojson", "data": {"type": "Point", "coordinates": [0, 0]}},
+            "color-relief": {"type": "raster-dem", "tiles": ["https://example.com/{z}/{x}/{y}.png"]}
+        },
+        "layers": [{"id": "background", "type": "background", "paint": {"background-color": "white"}}]
+    })");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(2.0));
+    test.frontend.render(test.map);
+
+    const auto expectCenter = [&](const Color& expected) {
+        const auto image = test.frontend.render(test.map).image;
+        const auto* pixel = image.data.get() + (image.size.height / 2) * image.stride() +
+                            (image.size.width / 2) * image.channels;
+        EXPECT_NEAR(pixel[0], expected.r * 255, 2);
+        EXPECT_NEAR(pixel[1], expected.g * 255, 2);
+        EXPECT_NEAR(pixel[2], expected.b * 255, 2);
+    };
+    const auto setRamp = [&](const std::string& color) {
+        JSDocument document;
+        document.Parse<0>(ramp(color).c_str());
+        const JSValue& value = document;
+        ASSERT_FALSE(document.HasParseError());
+        EXPECT_FALSE(test.map.getStyle().getLayer("ramp")->setProperty(rampProperty, conversion::Convertible(&value)));
+    };
+
+    const std::string extraPaint = type == "line"      ? R"(, "line-width": 16)"
+                                   : type == "heatmap" ? R"(, "heatmap-radius": 64)"
+                                                       : "";
+    const std::string layerJSON = R"({"id": "ramp", "type": ")" + type + R"(", "source": ")" + type +
+                                  R"(", "paint": {")" + rampProperty + R"(": )" + ramp(stateColor) + extraPaint + "}}";
+    conversion::Error error;
+    auto layer = conversion::convertJSON<std::unique_ptr<Layer>>(layerJSON, error);
+    ASSERT_TRUE(layer) << error.message;
+
+    // The layer joins the render tree in the same update as a write to a key its ramp does not read.
+    test.map.getStyle().setGlobalStateProperty("unrelated", 1.0);
+    test.map.getStyle().addLayer(std::move(*layer));
+    expectCenter(Color::red());
+
+    // While the ramp reads no state, the layer skips evaluation for state changes.
+    setRamp(R"("lime")");
+    expectCenter(Color(0, 1, 0, 1));
+    test.map.getStyle().setGlobalStateProperty("color", "blue"s);
+    expectCenter(Color(0, 1, 0, 1));
+
+    // The ramp reads the state again in the same update as another unrelated write.
+    test.map.getStyle().setGlobalStateProperty("unrelated", 2.0);
+    setRamp(stateColor);
+    expectCenter(Color::blue());
+}
+
+INSTANTIATE_TEST_SUITE_P(Rendering,
+                         ColorRampGlobalStateTest,
+                         testing::Values("line", "heatmap", "color-relief"),
+                         [](const testing::TestParamInfo<std::string>& paramInfo) {
+                             return paramInfo.param == "color-relief" ? "colorRelief"s : paramInfo.param;
+                         });
