@@ -2,6 +2,7 @@
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/expression/is_expression.hpp>
+#include <mln/style/expression/parsing_context.hpp>
 #include <mln/test/util.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/rapidjson.hpp>
@@ -30,6 +31,23 @@ TEST(Expression, IsExpression) {
 
         EXPECT_TRUE(expression::isExpression(conversion::Convertible(expression))) << name;
     }
+}
+
+TEST(Expression, NestedOverloadFailureParsesEachLevelOnce) {
+    const auto parses = [](const std::string& open, const std::string& inner, const std::string& close) {
+        std::string json = inner;
+        for (int i = 0; i < 64; ++i) {
+            json = open + json + close;
+        }
+        JSDocument document;
+        document.Parse<0>(json);
+        const JSValue* expression = &document;
+        expression::ParsingContext ctx;
+        return bool(ctx.parseExpression(conversion::Convertible(expression)));
+    };
+
+    EXPECT_FALSE(parses(R"(["-", )", R"("a")", ", 1]"));
+    EXPECT_FALSE(parses(R"(["filter-id-<", )", R"(["filter-id-<"])", "]"));
 }
 
 class ExpressionEqualityTest : public ::testing::TestWithParam<std::string> {};

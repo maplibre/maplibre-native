@@ -6,8 +6,8 @@
       "result": "error",
       "errors": [
         {
-          "key": "",
-          "error": "Expected arguments of type (array<string>, string), but found (array<number, 3>, string) instead."
+          "key": "[1]",
+          "error": "Expected array<string> but found array<number, 3> instead."
         }
       ]
     }
