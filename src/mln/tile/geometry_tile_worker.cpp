@@ -406,6 +406,8 @@ void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependen
     MLN_TRACE_FUNC();
 
     pendingImageDependencies = imageDependencies;
+    // An empty image name means no image, as in the style spec, so don't request it.
+    pendingImageDependencies.erase("");
 
     if (!pendingImageDependencies.empty()) {
         parent.invoke(&GeometryTile::getImages, std::make_pair(pendingImageDependencies, ++imageCorrelationID));

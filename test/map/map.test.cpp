@@ -1258,6 +1258,29 @@ TEST(Map, NoHangOnMissingImage) {
     test.frontend.render(test.map);
 }
 
+TEST(Map, EmptyImageNameIsNoImage) {
+    MapTest<> test;
+    std::vector<std::string> missing;
+    test.observer.onStyleImageMissingCallback = [&](const std::string& id) {
+        missing.push_back(id);
+    };
+
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {
+        "polygon": {"type": "geojson", "data": {"type": "Feature", "properties": {"image": ""},
+          "geometry": {"type": "Polygon", "coordinates": [[[-10, -10], [10, -10], [10, 10], [-10, 10], [-10, -10]]]}}}
+      },
+      "layers": [
+        {"id": "fill", "type": "fill", "source": "polygon", "paint": {"fill-pattern": ["get", "image"]}},
+        {"id": "symbol", "type": "symbol", "source": "polygon", "layout": {"icon-image": ["get", "image"]}}
+      ]
+    })STYLE");
+    test.frontend.render(test.map);
+
+    EXPECT_THAT(missing, testing::IsEmpty());
+}
+
 TEST(Map, PrefetchDeltaOverride) {
     MapTest<> test{1, MapMode::Continuous};
 
