@@ -755,7 +755,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // (Map::setCenterClampedToGround). Gated so a still map does not post a message a frame.
     // Only once a DEM tile covers the spot: ground not loaded yet is not sea level.
     if (auto* terrain = orchestrator.getRenderTerrain()) {
-        if (const auto centerElevation = terrain->findElevationForLatLng(
+        if (const auto centerElevation = terrain->getElevationForLatLng(
                 updateParameters->transformState.getLatLng())) {
             if (std::isnan(lastReportedCenterElevation) ||
                 std::abs(*centerElevation - lastReportedCenterElevation) > 0.25) {
@@ -768,7 +768,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // lifts it out when it knows the height there.
         if (const auto eye = updateParameters->transformState.getFreeCameraOptions().getLocation()) {
             UnwrappedTileID readFrom(0, 0, 0);
-            if (const auto eyeElevation = terrain->findElevationForLatLng(eye->location, &readFrom)) {
+            if (const auto eyeElevation = terrain->getElevationForLatLng(eye->location, &readFrom)) {
                 eyeElevationTile = readFrom;
                 if (std::isnan(lastReportedEyeElevation) || std::abs(*eyeElevation - lastReportedEyeElevation) > 0.25) {
                     lastReportedEyeElevation = *eyeElevation;
@@ -788,7 +788,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // to the ground there, as gl-js does, instead of arriving at the height it left. Only once a
         // DEM tile covers the spot: ground not loaded yet is not sea level.
         if (const auto& target = updateParameters->transitionTargetCenter) {
-            if (const auto targetElevation = terrain->findElevationForLatLng(*target)) {
+            if (const auto targetElevation = terrain->getElevationForLatLng(*target)) {
                 if (std::isnan(lastReportedTargetElevation) ||
                     std::abs(*targetElevation - lastReportedTargetElevation) > 0.25) {
                     lastReportedTargetElevation = *targetElevation;
@@ -797,6 +797,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             }
         } else {
             lastReportedTargetElevation = std::numeric_limits<double>::quiet_NaN();
+        }
+    }
+
+    // Hand the map side a fresh copy of the terrain heights whenever the loaded DEM tiles change
+    // (RenderTerrain::updateElevationIndex), and null when terrain goes away.
+    {
+        std::shared_ptr<const TerrainElevationIndex> elevationIndex;
+        if (auto* terrain = orchestrator.getRenderTerrain()) {
+            terrain->updateElevationIndex();
+            elevationIndex = terrain->getElevationIndex();
+        }
+        if (elevationIndex != reportedElevationIndex) {
+            reportedElevationIndex = elevationIndex;
+            observer->onTerrainElevationIndexChanged(std::move(elevationIndex));
         }
     }
 
