@@ -108,6 +108,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LineSDFShader,
+                  shaders::BuiltIn::LineGradientSDFShader,
                   shaders::BuiltIn::LinePatternShader,
                   shaders::BuiltIn::LocationIndicatorShader,
                   shaders::BuiltIn::LocationIndicatorTexturedShader,

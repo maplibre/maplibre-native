@@ -75,7 +75,7 @@ public:
     uint32_t getImageCount() const { return static_cast<uint32_t>(swapchainFramebuffers.size()); };
     uint32_t getAcquiredImageIndex() const { return acquiredImageIndex; };
     void setAcquiredImageIndex(uint32_t index) { acquiredImageIndex = index; };
-    const vk::Image getAcquiredImage() const;
+    vk::Image getAcquiredImage() const;
     const vk::Semaphore& getAcquireSemaphore() const;
     const vk::Semaphore& getPresentSemaphore() const;
 
@@ -89,7 +89,8 @@ public:
     int32_t getSurfaceTransformPollingInterval() const { return surfaceTransformPollingInterval; }
 
     void init(uint32_t w, uint32_t h);
-    void recreateSwapchain();
+    void recreateSwapchain(bool recreateSurface = false);
+    void destroyResources();
     void swap() override;
 
     void queueSurfaceRead();

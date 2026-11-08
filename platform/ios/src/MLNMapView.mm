@@ -44,7 +44,7 @@
 #import "MLNRendererFrontend.h"
 #import "MLNShape_Private.h"
 #import "MLNVectorTileSource_Private.h"
-#import "Mapbox.h"
+#import "MapLibre.h"
 
 #import "NSBundle+MLNAdditions.h"
 #import "NSDate+MLNAdditions.h"

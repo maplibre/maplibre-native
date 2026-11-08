@@ -22,10 +22,10 @@ rustup target add --toolchain stable-x86_64-unknown-linux-gnu aarch64-linux-andr
 
 See [Platform Support](https://doc.rust-lang.org/nightly/rustc/platform-support.html) in the Rust documentation for more details. You will get a descriptive error message when the correct toolchain is not available, so we don't list all possible combinations here.
 
-You also need to have cxxbridge installed:
+Rust 1.88 or newer is required. You also need to have the matching cxxbridge version installed:
 
 ```shell
-cargo install cxxbridge-cmd@1.0.157 --locked
+cargo install cxxbridge-cmd@1.0.202 --locked
 ```
 
 Set `-DMLN_USE_RUST=ON` when generating a configuration with CMake.

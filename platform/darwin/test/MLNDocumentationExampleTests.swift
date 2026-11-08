@@ -14,10 +14,8 @@ import XCTest
     ...
     //#-end-example-code
     ```
- 3. Insert an empty Swift code block inside the header file where you'd like the
-    example code to be inserted.
- 4. Run `make darwin-update-examples` to extract example code from the test
-    method below and insert it into the header.
+ 3. Copy the example code into a Swift code block in the documentation comment
+    of the corresponding header file.
  */
 class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
     var mapView: MLNMapView!

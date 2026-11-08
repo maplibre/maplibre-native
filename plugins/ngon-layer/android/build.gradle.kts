@@ -24,7 +24,8 @@ android {
     flavorDimensions += "renderer"
     productFlavors {
         listOf("opengl", "vulkan", "multiBackend").forEach { renderer ->
-            create(renderer) {
+            // Select the SDK flavor that exports the plugin API.
+            create("${renderer}WithPluginApi") {
                 dimension = "renderer"
                 buildConfigField("boolean", "MULTI_BACKEND", (renderer == "multiBackend").toString())
             }

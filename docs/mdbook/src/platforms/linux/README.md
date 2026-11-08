@@ -25,6 +25,10 @@ Optional: `libsqlite3-dev` (when not found will use SQLite as vendored dependenc
 
 When using Wayland (now default for `linux-opengl` preset): `libegl1-mesa-dev`.
 
+### Nix
+
+With [Nix](https://nixos.org) and flakes enabled, you can instead run `nix develop` in the root of the repository. This opens a shell with all of the tools and libraries above, ready for the CMake presets below.
+
 ## Build with CMake
 
 ```bash

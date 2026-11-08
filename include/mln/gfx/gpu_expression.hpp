@@ -52,8 +52,8 @@ public:
 
     /* 0 */ const GPUOutputType outputType;
     /* 2 */ const std::uint16_t stopCount;
-    /* 4 */ GPUOptions options;
-    /* 6 */ GPUInterpType interpolation;
+    /* 4 */ GPUOptions options = GPUOptions::None;
+    /* 6 */ GPUInterpType interpolation = GPUInterpType::Step;
 
     /* 8 */ union InterpOptions {
         struct Exponential {

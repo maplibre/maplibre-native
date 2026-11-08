@@ -80,5 +80,25 @@ const std::array<TextureInfo, 1> LineSDFShaderSource::textures = {
     TextureInfo{0, idLineImageTexture},
 };
 
+//
+// Line gradient SDF
+
+using LineGradientSDFShaderSource = ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::Vulkan>;
+
+const std::array<AttributeInfo, 8> LineGradientSDFShaderSource::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idLinePosNormalVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::UByte4, idLineDataVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float2, idLineBlurVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, idLineOpacityVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, idLineGapWidthVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float2, idLineOffsetVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idLineWidthVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::Float2, idLineFloorWidthVertexAttribute},
+};
+const std::array<TextureInfo, 2> LineGradientSDFShaderSource::textures = {
+    TextureInfo{0, idLineImageTexture},
+    TextureInfo{1, idLineDashTexture},
+};
+
 } // namespace shaders
 } // namespace mln

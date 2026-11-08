@@ -103,6 +103,7 @@ void FillExtrusionLayer::setFillExtrusionBaseTransition(const TransitionOptions&
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillExtrusionBase>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillExtrusionLayer::getFillExtrusionBaseTransition() const {
@@ -130,6 +131,7 @@ void FillExtrusionLayer::setFillExtrusionColorTransition(const TransitionOptions
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillExtrusionColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillExtrusionLayer::getFillExtrusionColorTransition() const {
@@ -157,6 +159,7 @@ void FillExtrusionLayer::setFillExtrusionHeightTransition(const TransitionOption
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillExtrusionHeight>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillExtrusionLayer::getFillExtrusionHeightTransition() const {
@@ -184,6 +187,7 @@ void FillExtrusionLayer::setFillExtrusionOpacityTransition(const TransitionOptio
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillExtrusionOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillExtrusionLayer::getFillExtrusionOpacityTransition() const {
@@ -211,6 +215,7 @@ void FillExtrusionLayer::setFillExtrusionPatternTransition(const TransitionOptio
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillExtrusionPattern>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillExtrusionLayer::getFillExtrusionPatternTransition() const {
@@ -238,6 +243,7 @@ void FillExtrusionLayer::setFillExtrusionTranslateTransition(const TransitionOpt
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillExtrusionTranslate>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillExtrusionLayer::getFillExtrusionTranslateTransition() const {
@@ -265,6 +271,7 @@ void FillExtrusionLayer::setFillExtrusionTranslateAnchorTransition(const Transit
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillExtrusionTranslateAnchor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillExtrusionLayer::getFillExtrusionTranslateAnchorTransition() const {
@@ -292,6 +299,7 @@ void FillExtrusionLayer::setFillExtrusionVerticalGradientTransition(const Transi
     auto impl_ = mutableImpl();
     impl_->paint.template get<FillExtrusionVerticalGradient>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions FillExtrusionLayer::getFillExtrusionVerticalGradientTransition() const {

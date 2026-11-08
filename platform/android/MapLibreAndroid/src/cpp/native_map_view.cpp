@@ -894,7 +894,7 @@ jni::Local<jni::Array<jlong>> NativeMapView::queryPointAnnotations(JNIEnv& env, 
     };
 
     // Assume only points for now
-    mln::AnnotationIDs ids = rendererFrontend->queryPointAnnotations(box, annotationRequestTimeout);
+    mln::AnnotationIDs ids = rendererFrontend->queryPointAnnotations(box);
 
     // Convert result
     std::vector<jlong> longIds(ids.begin(), ids.end());
@@ -914,7 +914,7 @@ jni::Local<jni::Array<jlong>> NativeMapView::queryShapeAnnotations(JNIEnv& env, 
         {RectF::getRight(env, rect), RectF::getBottom(env, rect)},
     };
 
-    mln::AnnotationIDs ids = rendererFrontend->queryShapeAnnotations(box, annotationRequestTimeout);
+    mln::AnnotationIDs ids = rendererFrontend->queryShapeAnnotations(box);
 
     // Convert result
     std::vector<jlong> longIds(ids.begin(), ids.end());

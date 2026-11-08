@@ -28,7 +28,15 @@ CustomGeometryTile::CustomGeometryTile(const OverscaledTileID& overscaledTileID,
       actorRef(*this, mailbox) {}
 
 CustomGeometryTile::~CustomGeometryTile() {
+    CustomGeometryTile::cancel();
     loader.invoke(&style::CustomTileLoader::removeTile, id);
+}
+
+void CustomGeometryTile::cancel() {
+    // GeometryTile has a separate mailbox. Close the loader mailbox before
+    // TileCache releases this tile on a worker thread.
+    mailbox->close();
+    GeometryTile::cancel();
 }
 
 void CustomGeometryTile::setTileData(const GeoJSON& geoJSON) {
@@ -72,8 +80,13 @@ void CustomGeometryTile::setNecessity(TileNecessity newNecessity) {
 void CustomGeometryTile::querySourceFeatures(std::vector<Feature>& result,
                                              const SourceQueryOptions& queryOptions,
                                              const GlobalStateMap* globalState) {
+    const auto* data = getData();
+    if (!data) {
+        return;
+    }
+
     // Ignore the sourceLayer, there is only one
-    auto layer = getData()->getLayer({});
+    auto layer = data->getLayer({});
 
     if (layer) {
         auto featureCount = layer->featureCount();

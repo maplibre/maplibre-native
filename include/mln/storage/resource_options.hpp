@@ -19,7 +19,7 @@ public:
     ~ResourceOptions();
 
     ResourceOptions(ResourceOptions&&) noexcept;
-    ResourceOptions& operator=(const ResourceOptions& options);
+    ResourceOptions& operator=(const ResourceOptions& other);
     ResourceOptions& operator=(ResourceOptions&& options);
 
     ResourceOptions clone() const;
@@ -53,7 +53,7 @@ public:
      *
      * @return const TileServerOptions tile server options.
      */
-    const TileServerOptions tileServerOptions() const;
+    TileServerOptions tileServerOptions() const;
 
     /**
      * @brief Sets the cache path.

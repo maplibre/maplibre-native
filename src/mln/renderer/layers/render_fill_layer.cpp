@@ -79,9 +79,9 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 
     passes = RenderPass::Translucent;
 
-    if (!(!unevaluated.get<style::FillPattern>().isUndefined() ||
-          evaluated.get<style::FillColor>().constantOr(Color()).a < 1.0f ||
-          evaluated.get<style::FillOpacity>().constantOr(0) < 1.0f)) {
+    if (unevaluated.get<style::FillPattern>().isUndefined() &&
+        evaluated.get<style::FillColor>().constantOr(Color()).a >= 1.0f &&
+        evaluated.get<style::FillOpacity>().constantOr(0) >= 1.0f) {
         // Supply both - evaluated based on opaquePassCutoff in render().
         passes |= RenderPass::Opaque;
     }
@@ -142,9 +142,6 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
     constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
     constexpr bool nearClipped = false;
     constexpr bool aligned = false;
-    constexpr bool is3d = false;
-    constexpr bool enableDepth = true;
-    constexpr std::int32_t subLayerIndex = 1;
     const auto translation = evaluated.get<FillTranslate>();
     const auto translationAnchor = evaluated.get<FillTranslateAnchor>();
     const std::optional<mln::Point<double>> origin = std::nullopt;
@@ -180,13 +177,9 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
             tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
                                                      state,
                                                      transformParams,
-                                                     layerIndex,
                                                      translation,
                                                      translationAnchor,
                                                      origin,
-                                                     is3d,
-                                                     enableDepth,
-                                                     subLayerIndex,
                                                      nearClipped,
                                                      inViewportPixelUnits,
                                                      aligned);
@@ -299,7 +292,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
 
         gfx::DrawableTweakerPtr atlasTweaker;
-        auto getAtlasTweaker = [&]() {
+        auto getAtlasTweaker = [&] {
             if (!atlasTweaker) {
                 if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
                     atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
@@ -316,12 +309,24 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return atlasTweaker;
         };
 
+        if (updateParameters->captureRenderedFeatures) {
+            const auto& params = renderTree.getParameters().transformParams;
+            captureRenderedFeatures(bucket, tile, binders, evaluated, state, params);
+        }
+
+        // Drawables' stored attributes point directly into the bucket's shared vectors;
+        // the backend upload guard fires automatically when those change.
+        auto updateExisting = [&](gfx::Drawable& drawable) {
+            return drawable.getLayerTweaker() == layerTweaker;
+        };
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
+            continue;
+        }
+
         propertiesAsUniforms.first.clear();
         propertiesAsUniforms.second.clear();
 
         // `Fill*Program` all use `style::FillPaintProperties`
-        // TODO: Only rebuild the vertex attributes when something has changed.
-        // TODO: Can we update them in-place instead of replacing?
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
@@ -334,11 +339,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const bool dataDrivenOutline = !evaluated.get<FillOutlineColor>().isConstant() ||
                                        !evaluated.get<FillOpacity>().isConstant();
 #endif
-
-        if (updateParameters->captureRenderedFeatures) {
-            const auto& params = renderTree.getParameters().transformParams;
-            captureRenderedFeatures(bucket, tile, binders, evaluated, state, params);
-        }
 
         const auto fillVertexCount = bucket.vertices.elements();
 
@@ -371,57 +371,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return attrs;
         };
 #endif
-
-        // If we already have drawables for this tile, update them.
-        auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-
-            switch (static_cast<FillVariant>(drawable.getType())) {
-                case FillVariant::Fill:
-                case FillVariant::FillPattern:
-                    drawable.updateVertexAttributes(vertexAttrs,
-                                                    fillVertexCount,
-                                                    gfx::Triangles(),
-                                                    bucket.sharedTriangles,
-                                                    bucket.triangleSegments.data(),
-                                                    bucket.triangleSegments.size());
-                    break;
-                case FillVariant::FillOutline:
-                case FillVariant::FillOutlinePattern:
-                    drawable.updateVertexAttributes(vertexAttrs,
-                                                    fillVertexCount,
-                                                    gfx::Lines(lineWidth),
-                                                    bucket.sharedBasicLineIndexes,
-                                                    bucket.basicLineSegments.data(),
-                                                    bucket.basicLineSegments.size());
-                    break;
-#if MLN_TRIANGULATE_FILL_OUTLINES
-                case FillVariant::FillOutlineTriangulated:
-                    if (const auto updated = drawable.getAttributeUpdateTime();
-                        !updated || bucket.lineVertices.getLastModified() > *updated) {
-                        drawable.updateVertexAttributes(getTriangulatedAttributes(),
-                                                        lineVertexCount,
-                                                        gfx::Triangles(),
-                                                        bucket.sharedLineIndexes,
-                                                        bucket.lineSegments.data(),
-                                                        bucket.lineSegments.size());
-                    }
-                    break;
-#endif
-                default:
-                    Log::Error(Event::General, "Invalid fill type " + util::toString(drawable.getType()));
-                    assert(false);
-                    return false;
-            }
-
-            return true;
-        };
-        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
-            continue;
-        }
 
         const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
             builder.flush(context);

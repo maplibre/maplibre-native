@@ -217,7 +217,8 @@ const args = parseArgs({
 
 
 // Generate shader source headers
-const root = path.dirname(import.meta.dirname);
+// Bazel supplies shader inputs in the target output tree, separate from host runfiles.
+const root = process.env.MLN_CODEGEN_ROOT ? path.resolve(process.env.MLN_CODEGEN_ROOT) : path.dirname(import.meta.dirname);
 const outLocation = args.out ? args.out : root;
 const shaderRoot = path.join(root, "shaders");
 const outputRoot = path.join(outLocation, "include/mln/shaders");

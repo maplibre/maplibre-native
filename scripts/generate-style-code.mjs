@@ -299,7 +299,8 @@ function defaultValue(property) {
 };
 
 console.log("Generating style code...");
-const root = path.join(import.meta.dirname, "..")
+// Bazel supplies templates in the target output tree; the tool itself runs from host runfiles.
+const root = process.env.MLN_CODEGEN_ROOT ? path.resolve(process.env.MLN_CODEGEN_ROOT) : path.join(import.meta.dirname, "..");
 const outLocation = args.out ? args.out : root;
 
 const layerHpp = readAndCompile(`include/mln/style/layers/layer.hpp.ejs`, root);

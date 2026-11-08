@@ -101,6 +101,7 @@ MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mln/shaders/gl/hillshade.hpp",
     "include/mln/shaders/gl/color_relief.hpp",
     "include/mln/shaders/gl/line_gradient.hpp",
+    "include/mln/shaders/gl/line_gradient_sdf.hpp",
     "include/mln/shaders/gl/line_pattern.hpp",
     "include/mln/shaders/gl/line_sdf.hpp",
     "include/mln/shaders/gl/line.hpp",

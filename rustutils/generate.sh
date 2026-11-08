@@ -2,7 +2,7 @@
 
 # Run this script from the repository root
 # Install cxxbridge with:
-# $ cargo install cxxbridge-cmd@1.0.157 --locked
+# $ cargo install cxxbridge-cmd@1.0.202 --locked
 
 set -e
 

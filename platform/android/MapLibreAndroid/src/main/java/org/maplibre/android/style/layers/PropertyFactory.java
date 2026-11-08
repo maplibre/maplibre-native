@@ -81,7 +81,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
    *
    * @param value a int color value
    * @return property wrapper around String color
@@ -91,7 +91,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
    *
    * @param value a String value
    * @return property wrapper around String
@@ -101,7 +101,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
