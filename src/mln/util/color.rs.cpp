@@ -21,8 +21,12 @@ std::optional<Color> Color::parse(const std::string& s) {
 }
 
 std::string Color::stringify() const {
-    std::array<double, 4> array = toArray();
-    return "rgba(" + util::toString(array[0]) + "," + util::toString(array[1]) + "," + util::toString(array[2]) + "," +
+    // Match GL JS's Color.toString: whole channels, alpha as is.
+    const auto array = toArray();
+    const auto channel = [](double value) {
+        return util::toString(std::floor(value + 0.5));
+    };
+    return "rgba(" + channel(array[0]) + "," + channel(array[1]) + "," + channel(array[2]) + "," +
            util::toString(array[3]) + ")";
 }
 
@@ -34,7 +38,7 @@ std::array<double, 4> Color::toArray() const {
             r * 255 / a,
             g * 255 / a,
             b * 255 / a,
-            floor(a * 100 + .5) / 100 // round to 2 decimal places
+            a,
         }};
     }
 }
