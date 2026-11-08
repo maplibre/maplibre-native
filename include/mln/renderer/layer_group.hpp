@@ -117,7 +117,7 @@ protected:
     int32_t layerIndex;
     std::vector<LayerTweakerWeakPtr> layerTweakers;
     std::string name;
-    gfx::ContextObserver* observer;
+    gfx::ContextObserver* observer = &gfx::Context::nullObserver;
 };
 
 /**
