@@ -13,6 +13,7 @@
 
 #include <cmath>
 #include <string>
+#include <utility>
 
 using namespace mln;
 
@@ -92,7 +93,8 @@ bool redNear(const PremultipliedImage& image, const ScreenCoordinate& point, int
         for (int dx = -radius; dx <= radius; ++dx) {
             const int x = static_cast<int>(std::lround(point.x)) + dx;
             const int y = static_cast<int>(std::lround(point.y)) + dy;
-            if (x < 0 || y < 0 || x >= static_cast<int>(image.size.width) || y >= static_cast<int>(image.size.height)) {
+            if (x < 0 || y < 0 || std::cmp_greater_equal(x, image.size.width) ||
+                std::cmp_greater_equal(y, image.size.height)) {
                 continue;
             }
             const uint8_t* px = image.data.get() + (static_cast<size_t>(y) * image.size.width + x) * 4;
