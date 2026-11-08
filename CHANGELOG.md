@@ -36,6 +36,7 @@
 
 - *...Add new stuff here...*
 - [core] Line labels with `text-keep-upright` keep their reading direction while the map rotates. A label now turns over only once it reads more than 20° past the vertical, and all copies of a label share that direction across tiles. Before, labels on lines close to the vertical of a rotating map, such as the road ahead in a map turned with the direction of travel, flipped back and forth from frame to frame.
+- [core] Stop custom geometry tile callbacks before cancelled tiles are released on a worker thread.
 - [core] Fix rendered-feature queries near the final endpoint of an offset line.
 - [core] Fix plugin layer filters ignoring the style's global state.
 - [core] Fix plugin layers with read-write depth drawables not depth testing when drawn above a `fill-extrusion` layer.
