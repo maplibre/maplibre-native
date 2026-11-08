@@ -102,15 +102,12 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         }
 
         // Circles hidden behind terrain: packed terrain depth, read by calculate_visibility in the
-        // vertex shader as symbols do (maplibre-gl-js does the same). Only the backends whose circle
-        // shader reads it (OpenGL, Metal) bind it; Vulkan and WebGPU keep circles unoccluded.
+        // vertex shader as symbols do (maplibre-gl-js does the same).
         float depthEnabled = 0.0f;
-#if MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_METAL
         if (terrainEnabled) {
             drawable.setTexture(parameters.terrain->getDepthTexture(context), idCircleDepthTexture);
             depthEnabled = 1.0f;
         }
-#endif
 
         // The terrain surface writes depth (so its skirts get occluded); circles
         // are elevated onto that surface and must not depth-test against it, or

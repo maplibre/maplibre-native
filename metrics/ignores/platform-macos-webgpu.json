@@ -12,6 +12,5 @@
     "render-tests/fill-extrusion-pattern/global-state": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
     "render-tests/fill-extrusion-pattern/literal": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
     "render-tests/fill-extrusion-pattern/opacity": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
-    "render-tests/fill-extrusion-pattern/tile-buffer": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
-    "render-tests/terrain/heatmap": "Heatmap kernels are not hidden behind terrain on WebGPU yet; the macOS expectation hides them, as Metal does"
+    "render-tests/fill-extrusion-pattern/tile-buffer": "https://github.com/mapbox/mapbox-gl-js/issues/3327"
 }

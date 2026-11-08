@@ -93,15 +93,12 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         }
 
         // Kernels hidden behind terrain: packed terrain depth, read by calculate_visibility in the
-        // vertex shader as symbols and circles do. Only the backends whose heatmap shader reads it
-        // (OpenGL, Metal) bind it; Vulkan and WebGPU keep heatmaps unoccluded.
+        // vertex shader as symbols and circles do.
         float depthEnabled = 0.0f;
-#if MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_METAL
         if (terrainEnabled) {
             drawable.setTexture(parameters.terrain->getDepthTexture(context), idHeatmapDepthTexture);
             depthEnabled = 1.0f;
         }
-#endif
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
