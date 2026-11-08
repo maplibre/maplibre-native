@@ -1,6 +1,7 @@
 #include <mln/storage/mbtiles_file_source.hpp>
 #include <mln/storage/resource.hpp>
 #include <mln/storage/resource_options.hpp>
+#include <mln/storage/sqlite3.hpp>
 #include <mln/util/platform.hpp>
 #include <mln/util/run_loop.hpp>
 
@@ -99,6 +100,32 @@ TEST(MBTilesFileSource, NotADatabase) {
         });
 
     loop.run();
+}
+
+// Metadata that does not parse raises error
+TEST(MBTilesFileSource, BadMetadata) {
+    util::RunLoop loop;
+
+    const auto path = std::filesystem::temp_directory_path() / "mbtiles_bad_metadata.mbtiles";
+    std::filesystem::remove(path);
+    mapbox::sqlite::Database::open(path.string(), mapbox::sqlite::ReadWriteCreate)
+        .exec(
+            "CREATE TABLE metadata (name TEXT, value TEXT); INSERT INTO metadata VALUES ('minzoom', 'zero'), "
+            "('maxzoom', '1');");
+
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = mbtiles.request(
+        {Resource::Unknown, "mbtiles://" + path.string()}, [&](Response res) {
+            req.reset();
+            ASSERT_NE(nullptr, res.error);
+            EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
+            ASSERT_FALSE(res.data.get());
+            loop.stop();
+        });
+
+    loop.run();
+    std::filesystem::remove(path);
 }
 
 // Existing mbtiles file default request returns TileJSON
