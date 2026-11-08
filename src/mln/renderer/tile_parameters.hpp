@@ -55,6 +55,12 @@ public:
     std::optional<std::array<double, 2>> tileLodOrigin = std::nullopt;
     bool isUpdateSynchronous = false;
     bool captureRenderedFeatures = false;
+    /// Keep ancestors of the ideal cover, up to this many zoom levels, that are already loaded
+    /// (in use or in the cache), never rendered and never requested. Used for the 3D-terrain DEM
+    /// source so layers drawn from shallower tiles (overzoomed low-maxzoom sources, far-field
+    /// distance LOD) can bind a DEM tile that covers them whole; where none has loaded,
+    /// RenderTerrain::elevationSampler reads the deeper tiles point by point.
+    uint8_t retainAncestorLevels = 0;
     /// With terrain on: the most tiles one source covers (ideal and prefetch covers each),
     /// keeping those nearest `coverTileLimitOrigin`. A source whose minzoom is deeper than the
     /// far field needs is covered at that minzoom to the horizon, thousands of tiles at a steep
