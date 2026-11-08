@@ -583,7 +583,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                                 entry.buffer = webgpuUniform->getBuffer();
                                 entry.offset = 0;
-                                entry.size = buffer->getSize();
+                                entry.size = webgpuUniform->getAllocatedSize();
                                 break;
                             }
                             case ShaderProgram::BindingType::Sampler: {
