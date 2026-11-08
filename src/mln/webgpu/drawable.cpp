@@ -193,13 +193,6 @@ Drawable::~Drawable() {
     // So we should NOT release it here
     impl->pipelineState = nullptr;
 
-    for (auto& record : impl->bindGroups) {
-        if (record.handle) {
-            wgpuBindGroupRelease(record.handle);
-        }
-    }
-    impl->bindGroups.clear();
-
     // Uniform buffers are managed by UniformBufferArray
     // Vertex and index buffers are now managed through attributeBindings and indexes
 }
@@ -298,6 +291,8 @@ void Drawable::setShader(gfx::ShaderProgramBasePtr value) {
     }
     shader = std::move(value);
     impl->pipelineState = nullptr; // Reset pipeline when shader changes
+    // The bind groups use the old shader's layouts.
+    impl->bindGroups.clear();
 }
 
 void Drawable::upload(gfx::UploadPass& uploadPass) {
@@ -496,24 +491,9 @@ void Drawable::draw(PaintParameters& parameters) const {
         if (webgpuShader) {
             WGPUDevice deviceHandle = static_cast<WGPUDevice>(backend.getDevice());
 
-            for (auto& record : impl->bindGroups) {
-                if (record.handle) {
-                    wgpuBindGroupRelease(record.handle);
-                }
-            }
-            impl->bindGroups.clear();
-
             if (deviceHandle) {
                 const auto& groupOrder = webgpuShader->getBindGroupOrder();
-                static bool loggedBindGroupOrder = false;
-                if (!loggedBindGroupOrder && getName().find("fill-outline") != std::string::npos) {
-                    std::string orderStr;
-                    for (size_t idx = 0; idx < groupOrder.size(); ++idx) {
-                        orderStr += std::to_string(groupOrder[idx]);
-                        if (idx + 1 < groupOrder.size()) orderStr += ",";
-                    }
-                    loggedBindGroupOrder = true;
-                }
+                impl->bindGroups.resize(groupOrder.size());
                 const auto* globalBuffers = webgpuRenderPass.getGlobalUniformBuffers();
 
                 const auto findTextureForBinding = [&](uint32_t binding, bool samplerBinding) -> Texture2D* {
@@ -543,13 +523,6 @@ void Drawable::draw(PaintParameters& parameters) const {
                     }
 
                     const auto& bindingInfos = webgpuShader->getBindingInfosForGroup(group);
-                    if (getName().find("fill-outline") != std::string::npos) {
-                        std::string infoStr;
-                        for (const auto& info : bindingInfos) {
-                            infoStr += "(binding=" + std::to_string(info.binding) +
-                                       ", type=" + std::to_string(static_cast<int>(info.type)) + ")";
-                        }
-                    }
                     std::vector<WGPUBindGroupEntry> entries;
                     entries.reserve(bindingInfos.size());
                     bool validBindings = true;
@@ -565,10 +538,15 @@ void Drawable::draw(PaintParameters& parameters) const {
                                 std::shared_ptr<gfx::UniformBuffer> buffer = impl->uniformBuffers.get(
                                     bindingInfo.binding);
                                 if (bindingInfo.binding == shaders::idGlobalUBOIndex) {
-                                    GlobalUBOIndexData indexData;
-                                    indexData.value = getUBOIndex();
-                                    context.emplaceOrUpdateUniformBuffer(
-                                        impl->uboIndexUniform, &indexData, sizeof(indexData), false);
+                                    // Write the index only when it changes.
+                                    const auto uboIndex = static_cast<uint32_t>(getUBOIndex());
+                                    if (!impl->uboIndexUniform || impl->uboIndexValue != uboIndex) {
+                                        GlobalUBOIndexData indexData;
+                                        indexData.value = uboIndex;
+                                        context.emplaceOrUpdateUniformBuffer(
+                                            impl->uboIndexUniform, &indexData, sizeof(indexData), false);
+                                        impl->uboIndexValue = uboIndex;
+                                    }
                                     if (impl->uboIndexUniform) {
                                         impl->uniformBuffers.set(bindingInfo.binding, impl->uboIndexUniform);
                                         buffer = impl->uboIndexUniform;
@@ -653,6 +631,12 @@ void Drawable::draw(PaintParameters& parameters) const {
                         return;
                     }
 
+                    // Reuse the bind group while it binds the same resources.
+                    auto& record = impl->bindGroups[slot];
+                    if (record.matches(layout, entries)) {
+                        continue;
+                    }
+
                     const std::string label = getName() + " bind-group " + std::to_string(group);
                     WGPUStringView labelView = {label.c_str(), label.length()};
 
@@ -664,9 +648,10 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                     WGPUBindGroup bindGroup = wgpuDeviceCreateBindGroup(deviceHandle, &descriptor);
                     if (!bindGroup) {
+                        record.reset();
                         return;
                     }
-                    impl->bindGroups.push_back({static_cast<uint32_t>(slot), group, bindGroup});
+                    record.assign(static_cast<uint32_t>(slot), group, layout, bindGroup, std::move(entries));
                 }
             }
         }
