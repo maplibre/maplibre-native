@@ -27,6 +27,13 @@ inline char toLowerHex(char c) {
     return '0' + c + (c > 9 ? 39 : 0);
 }
 
+inline int hexValue(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+
 } // namespace
 
 namespace mln {
@@ -51,17 +58,15 @@ std::string percentEncode(const std::string& input) {
 std::string percentDecode(const std::string& input) {
     std::string decoded;
 
-    auto it = input.begin();
-    const auto end = input.end();
-    char hex[3] = "00";
-
-    while (it != end) {
-        auto cur = std::find(it, end, '%');
-        decoded.append(it, cur);
-        it = cur;
-        if (cur != end) {
-            it += input.copy(hex, 2, cur - input.begin() + 1) + 1;
-            decoded += static_cast<char>(std::strtoul(hex, nullptr, 16));
+    for (std::size_t i = 0; i < input.size(); ++i) {
+        // A % that does not start two hex digits stays literal, as in the WHATWG URL Standard.
+        const int high = input[i] == '%' && i + 2 < input.size() ? hexValue(input[i + 1]) : -1;
+        const int low = high >= 0 ? hexValue(input[i + 2]) : -1;
+        if (low >= 0) {
+            decoded += static_cast<char>(high * 16 + low);
+            i += 2;
+        } else {
+            decoded += input[i];
         }
     }
 
