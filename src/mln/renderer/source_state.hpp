@@ -28,6 +28,8 @@ private:
     LayerFeatureStates currentStates;
     LayerFeatureStates stateChanges;
     LayerFeatureStates deletedStates;
+    // Bumped in each coalesceChanges call that has changes.
+    uint64_t version = 0;
 };
 
 } // namespace mln
