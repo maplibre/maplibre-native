@@ -19,6 +19,7 @@
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/tileset.hpp>
 
+#include <cmath>
 #include <set>
 
 namespace {
@@ -40,7 +41,10 @@ Range<uint8_t> coveringZoomRange(const RegionDefinition& definition,
                                  uint16_t tileSize,
                                  const Range<uint8_t>& zoomRange) {
     double minZ = std::max<double>(util::coveringZoomLevel(definition.minZoom, type, tileSize), zoomRange.min);
-    double maxZ = std::min<double>(util::coveringZoomLevel(definition.maxZoom, type, tileSize), zoomRange.max);
+    // Converting an infinite maxZoom to an integer is undefined.
+    double maxZ = std::isinf(definition.maxZoom)
+                      ? zoomRange.max
+                      : std::min<double>(util::coveringZoomLevel(definition.maxZoom, type, tileSize), zoomRange.max);
 
     assert(minZ >= 0);
     assert(maxZ >= 0);
