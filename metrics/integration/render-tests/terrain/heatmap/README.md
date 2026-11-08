@@ -19,10 +19,12 @@ ground position, off the slope it belongs to.
 
 Kernels whose centre is hidden behind a nearer ridge add nothing to the density,
 so only the kernels with a clear line of sight to the camera are drawn: the whole
-southwest cluster (on the slope facing the camera) and the northernmost kernel
-of the centre cluster (on the crest). The other kernels of the centre cluster and
-all of the northeast cluster stand behind a ridge about 250 to 530 m higher than
-the line of sight (checked by marching each point's sight line against the DEM
+southwest cluster (on the slope facing the camera) and the southernmost kernel
+of the centre cluster, 88 m north of the centre on the crest at about 2,800 m. It
+is drawn highest on screen because it stands highest. The other three kernels of
+the centre cluster, 220 to 330 m north of the centre and 430 to 600 m lower, and
+all of the northeast cluster have a line of sight that passes 256 to 537 m
+under the ridge (checked by marching each point's sight line against the DEM
 tiles), so they are not drawn.
 
 The points are **inline GeoJSON**, so the test needs no fixtures beyond the DEM
