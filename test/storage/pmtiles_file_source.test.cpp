@@ -39,7 +39,7 @@ TEST(PMTilesFileSource, NonExistentFile) {
             req.reset();
             ASSERT_NE(nullptr, res.error);
             EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
-            EXPECT_NE((res.error->message).find("path not found"), std::string::npos);
+            EXPECT_NE((res.error->message).find("Cannot find file"), std::string::npos);
             ASSERT_FALSE(res.data.get());
             loop.stop();
         });
