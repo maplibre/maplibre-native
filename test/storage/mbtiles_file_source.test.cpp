@@ -47,6 +47,23 @@ TEST(MBTilesFileSource, AbsolutePath) {
     loop.run();
 }
 
+// An empty path is not absolute
+TEST(MBTilesFileSource, EmptyPath) {
+    util::RunLoop loop;
+
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = mbtiles.request({Resource::Unknown, "mbtiles://"}, [&](Response res) {
+        req.reset();
+        ASSERT_NE(nullptr, res.error);
+        EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
+        EXPECT_NE((res.error->message).find("absolute"), std::string::npos);
+        loop.stop();
+    });
+
+    loop.run();
+}
+
 // Nonexistent mbtiles file raises error
 TEST(MBTilesFileSource, NonExistentFile) {
     util::RunLoop loop;
@@ -59,6 +76,24 @@ TEST(MBTilesFileSource, NonExistentFile) {
             ASSERT_NE(nullptr, res.error);
             EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
             EXPECT_NE((res.error->message).find("path not found"), std::string::npos);
+            ASSERT_FALSE(res.data.get());
+            loop.stop();
+        });
+
+    loop.run();
+}
+
+// A file that is not an mbtiles database raises error
+TEST(MBTilesFileSource, NotADatabase) {
+    util::RunLoop loop;
+
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = mbtiles.request(
+        {Resource::Unknown, toAbsoluteURL("../pmtiles/geography-class-png.pmtiles")}, [&](Response res) {
+            req.reset();
+            ASSERT_NE(nullptr, res.error);
+            EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
             ASSERT_FALSE(res.data.get());
             loop.stop();
         });
@@ -119,6 +154,25 @@ TEST(MBTilesFileSource, NonExistentTile) {
             EXPECT_EQ(nullptr, res.error);
             ASSERT_FALSE(res.data.get());
             ASSERT_EQ(res.noContent, true);
+            loop.stop();
+        });
+
+    loop.run();
+}
+
+// Tiles from a nonexistent mbtiles file raise errors
+TEST(MBTilesFileSource, NonExistentFileTile) {
+    util::RunLoop loop;
+
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = mbtiles.request(
+        Resource::tile(toAbsoluteURL("does_not_exist?file={z}/{x}/{y}.png"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response res) {
+            req.reset();
+            ASSERT_NE(nullptr, res.error);
+            EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
+            ASSERT_FALSE(res.data.get());
             loop.stop();
         });
 
