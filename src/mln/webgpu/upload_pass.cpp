@@ -133,7 +133,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
     const std::optional<std::chrono::duration<double>> lastUpdate,
-    /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& vertexBuffers) {
+    [[maybe_unused]] /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& vertexBuffers) {
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 
@@ -146,53 +146,18 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         if (!override_) {
             // No attribute was provided. WebGPU requires all vertex attributes to have buffers bound,
-            // so we create a dummy buffer with default values.
+            // so bind the context's shared buffer of default values.
             const auto stride = VertexAttribute::getStrideOf(defaultAttr.getDataType());
-            const auto bufferSize = stride * vertexCount;
-
-            // Create a buffer with appropriate default values
-            std::vector<uint8_t> dummyData(bufferSize);
-
-            // Fill with appropriate default values based on the attribute type
-            const auto dataType = defaultAttr.getDataType();
-            if (dataType == gfx::AttributeDataType::Float4) {
-                // For color attribute - default to white (1,1,1,1)
-                float* floatData = reinterpret_cast<float*>(dummyData.data());
-                for (size_t i = 0; i < vertexCount; ++i) {
-                    floatData[i * 4 + 0] = 1.0f; // R
-                    floatData[i * 4 + 1] = 1.0f; // G
-                    floatData[i * 4 + 2] = 1.0f; // B
-                    floatData[i * 4 + 3] = 1.0f; // A
-                }
-            } else if (dataType == gfx::AttributeDataType::Float2) {
-                // For opacity attribute - default to full opacity (1,1)
-                float* floatData = reinterpret_cast<float*>(dummyData.data());
-                for (size_t i = 0; i < vertexCount; ++i) {
-                    floatData[i * 2 + 0] = 1.0f;
-                    floatData[i * 2 + 1] = 1.0f;
-                }
-            } else {
-                // For other types, fill with zeros
-                std::fill(dummyData.begin(), dummyData.end(), 0);
-            }
-
-            // Create vertex buffer resource for the dummy data
-            auto dummyBuffer = createVertexBufferResource(dummyData.data(),
-                                                          bufferSize,
-                                                          usage,
-                                                          /*persistent=*/false);
+            auto& context = static_cast<Context&>(getContext());
+            const auto& defaultBuffer = context.getDefaultVertexBuffer(defaultAttr.getDataType(), stride * vertexCount);
 
             bindings[index] = {
                 /*.attribute = */ {defaultAttr.getDataType(), /*offset=*/0},
                 /*.vertexStride = */ static_cast<uint32_t>(stride),
-                /*.vertexBufferResource = */ dummyBuffer.get(),
+                /*.vertexBufferResource = */ &defaultBuffer,
                 /*.vertexOffset = */ 0,
                 /*.bufferIndex = */ 0,
             };
-
-            // Store the buffer so it doesn't get destroyed
-            vertexBuffers.push_back(std::move(dummyBuffer));
-
             return;
         }
 
