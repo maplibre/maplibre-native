@@ -96,8 +96,7 @@ public:
                               entries_.end(),
                               [](const WGPUBindGroupEntry& a, const WGPUBindGroupEntry& b) {
                                   return a.binding == b.binding && a.buffer == b.buffer && a.offset == b.offset &&
-                                         a.size == b.size && a.sampler == b.sampler &&
-                                         a.textureView == b.textureView;
+                                         a.size == b.size && a.sampler == b.sampler && a.textureView == b.textureView;
                               });
         }
 
