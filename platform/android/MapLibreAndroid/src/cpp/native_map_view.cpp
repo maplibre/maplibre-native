@@ -716,7 +716,10 @@ jni::Local<jni::Object<LatLng>> NativeMapView::latLngForProjectedMeters(JNIEnv& 
 }
 
 jni::Local<jni::Object<PointF>> NativeMapView::pixelForLatLng(JNIEnv& env, jdouble latitude, jdouble longitude) {
-    mln::ScreenCoordinate pixel = map->pixelForLatLng(mln::LatLng(latitude, longitude));
+    // With 3D terrain, onto the surface, so markers and view overlays sit on the ground they mark
+    // rather than at sea level. The heights are the map's own copy (Map::getTerrainElevation):
+    // no wait on the render thread.
+    const mln::ScreenCoordinate pixel = map->pixelForLatLngOnTerrain(mln::LatLng(latitude, longitude));
     return PointF::New(env, static_cast<float>(pixel.x), static_cast<float>(pixel.y));
 }
 
@@ -737,7 +740,7 @@ void NativeMapView::pixelsForLatLngs(JNIEnv& env,
 
     std::vector<jdouble> buffer;
     buffer.reserve(len);
-    std::vector<ScreenCoordinate> coordinates = map->pixelsForLatLngs(latLngs);
+    std::vector<ScreenCoordinate> coordinates = map->pixelsForLatLngsOnTerrain(latLngs);
     for (std::size_t i = 0; i < len / 2; i++) {
         buffer.push_back(coordinates[i].x * pixelRatio_);
         buffer.push_back(coordinates[i].y * pixelRatio_);
@@ -747,7 +750,14 @@ void NativeMapView::pixelsForLatLngs(JNIEnv& env,
 }
 
 jni::Local<jni::Object<LatLng>> NativeMapView::latLngForPixel(JNIEnv& env, jfloat x, jfloat y) {
-    return LatLng::New(env, map->latLngForPixel(mln::ScreenCoordinate(x, y)));
+    // With 3D terrain, the pixel's view ray meets the surface before sea level: pick the surface
+    // so taps land under the finger.
+    return LatLng::New(env, map->latLngForPixelOnTerrain(mln::ScreenCoordinate(x, y)));
+}
+
+jni::Local<jni::Object<LatLng>> NativeMapView::latLngForPixelAtCenterAltitude(JNIEnv& env, jfloat x, jfloat y) {
+    // For the SDK's camera code: a camera centre lies on the centre's own plane, not on the terrain
+    return LatLng::New(env, map->latLngForPixelAtCenterAltitude(mln::ScreenCoordinate(x, y)));
 }
 
 void NativeMapView::latLngsForPixels(JNIEnv& env,
@@ -767,7 +777,7 @@ void NativeMapView::latLngsForPixels(JNIEnv& env,
 
     std::vector<jdouble> buffer;
     buffer.reserve(len);
-    std::vector<mln::LatLng> latLngs = map->latLngsForPixels(coordinates);
+    std::vector<mln::LatLng> latLngs = map->latLngsForPixelsOnTerrain(coordinates);
     for (std::size_t i = 0; i < len / 2; i++) {
         buffer.push_back(latLngs[i].latitude());
         buffer.push_back(latLngs[i].longitude());
@@ -1500,6 +1510,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getVisibleCoordinateBounds, "nativeGetVisibleCoordinateBounds"),
         METHOD(&NativeMapView::latLngForProjectedMeters, "nativeLatLngForProjectedMeters"),
         METHOD(&NativeMapView::latLngForPixel, "nativeLatLngForPixel"),
+        METHOD(&NativeMapView::latLngForPixelAtCenterAltitude, "nativeLatLngForPixelAtCenterAltitude"),
         METHOD(&NativeMapView::latLngsForPixels, "nativeLatLngsForPixels"),
         METHOD(&NativeMapView::addPolylines, "nativeAddPolylines"),
         METHOD(&NativeMapView::addPolygons, "nativeAddPolygons"),
