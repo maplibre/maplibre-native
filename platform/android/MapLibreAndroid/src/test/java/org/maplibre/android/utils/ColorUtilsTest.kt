@@ -20,4 +20,11 @@ class ColorUtilsTest : BaseTest() {
         val result = ColorUtils.rgbaToColor(input)
         Assert.assertEquals(Color.argb(255, 128, 0, (0.7 * 255).toInt()), result)
     }
+
+    @Test
+    fun rgbaToColor_rgb() {
+        val input = "rgb(255,128,0)"
+        val result = ColorUtils.rgbaToColor(input)
+        Assert.assertEquals(Color.rgb(255, 128, 0), result)
+    }
 }

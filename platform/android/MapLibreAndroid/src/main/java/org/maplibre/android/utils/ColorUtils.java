@@ -129,10 +129,10 @@ public class ColorUtils {
     Pattern c = Pattern.compile("rgba?\\s*\\(\\s*(\\d+\\.?\\d*)\\s*,\\s*(\\d+\\.?\\d*)\\s*,\\s*(\\d+\\.?\\d*)\\s*,"
       + "?\\s*(\\d+\\.?\\d*)?\\s*\\)");
     Matcher m = c.matcher(value);
-    if (m.matches() && m.groupCount() == 3) {
+    if (m.matches() && m.group(4) == null) {
       return Color.rgb((int) Float.parseFloat(m.group(1)), (int) Float.parseFloat(m.group(2)),
         (int) Float.parseFloat(m.group(3)));
-    } else if (m.matches() && m.groupCount() == 4) {
+    } else if (m.matches()) {
       return Color.argb((int) (Float.parseFloat(m.group(4)) * 255), (int) Float.parseFloat(m.group(1)),
         (int) Float.parseFloat(m.group(2)), (int) Float.parseFloat(m.group(3)));
     } else {
