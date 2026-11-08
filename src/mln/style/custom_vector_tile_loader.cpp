@@ -37,8 +37,6 @@ void CustomVectorTileLoader::cancelTile(const OverscaledTileID& tileID) {
     if (tileCallbackMap.contains(tileID.canonical)) {
         invokeTileCancel(tileID.canonical);
         // Erase so a subsequent fetchTile for the same tile re-issues the fetch.
-        // Intentionally diverges from CustomTileLoader which omits this — that is a
-        // latent bug there that needs a separate cleanup.
         tileCallbackMap.erase(tileID.canonical);
     }
 }
@@ -81,7 +79,7 @@ void CustomVectorTileLoader::setTileError(const CanonicalTileID& tileID, std::ex
         auto actor = std::get<2>(tuple);
         actor.invoke(&CustomVectorTile::setTileError, error);
     }
-    tileCallbackMap.erase(iter);
+    // Keep the callbacks, so invalidating the failed tile fetches it again.
     dataCache.erase(tileID);
 }
 

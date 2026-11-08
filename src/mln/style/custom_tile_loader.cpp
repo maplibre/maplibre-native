@@ -38,6 +38,8 @@ void CustomTileLoader::cancelTile(const OverscaledTileID& tileID) {
     std::scoped_lock guard(dataMutex);
     if (tileCallbackMap.contains(tileID.canonical)) {
         invokeTileCancel(tileID.canonical);
+        // Erase so a subsequent fetchTile for the same tile re-issues the fetch.
+        tileCallbackMap.erase(tileID.canonical);
     }
 }
 

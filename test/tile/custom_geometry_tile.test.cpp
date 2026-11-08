@@ -107,6 +107,30 @@ TEST(CustomGeometryTile, InvokeCancelTile) {
     test.loop.run();
 }
 
+TEST(CustomGeometryTile, FetchCancelledTileAgain) {
+    CustomTileTest test;
+
+    int fetches = 0;
+    CustomTileLoader loader([&](const CanonicalTileID&) { fetches++; }, nullptr);
+    auto mb = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
+    ActorRef<CustomTileLoader> loaderActor(loader, mb);
+
+    CustomGeometryTile tile(OverscaledTileID(0, 0, 0),
+                            "source",
+                            test.tileParameters,
+                            makeMutable<CustomGeometrySource::TileOptions>(),
+                            loaderActor);
+
+    tile.setNecessity(TileNecessity::Required);
+    tile.setNecessity(TileNecessity::Optional);
+    test.loop.waitForEmpty();
+    ASSERT_EQ(1, fetches);
+
+    tile.setNecessity(TileNecessity::Required);
+    test.loop.waitForEmpty();
+    EXPECT_EQ(2, fetches);
+}
+
 TEST(CustomGeometryTile, InvokeTileChanged) {
     CustomTileTest test;
 

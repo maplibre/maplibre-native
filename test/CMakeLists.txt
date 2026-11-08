@@ -87,6 +87,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/text/shaping.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/tagged_string.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/custom_geometry_tile.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/tile/custom_vector_tile.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/geojson_tile.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/geometry_tile_data.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/raster_dem_tile.test.cpp
