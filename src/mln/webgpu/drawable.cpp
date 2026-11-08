@@ -51,9 +51,9 @@ struct alignas(16) GlobalUBOIndexData {
     uint32_t pad[3] = {0, 0, 0};
 };
 
+// Leaves out the reference, which draw() sets per draw rather than in the pipeline.
 std::size_t hashStencilMode(const gfx::StencilMode& mode) {
-    std::size_t hash = util::hash(static_cast<int>(mode.ref),
-                                  static_cast<uint32_t>(mode.mask),
+    std::size_t hash = util::hash(static_cast<uint32_t>(mode.mask),
                                   static_cast<int>(mode.fail),
                                   static_cast<int>(mode.depthFail),
                                   static_cast<int>(mode.pass));
@@ -282,9 +282,9 @@ void Drawable::setDepthModeFor3D(const gfx::DepthMode& value) {
 
 void Drawable::setStencilModeFor3D(const gfx::StencilMode& value) {
     const auto newHash = hashStencilMode(value);
-    if (!impl->stencilModeHashValid || impl->stencilModeHash != newHash || impl->stencilMode.ref != value.ref ||
-        impl->stencilMode.mask != value.mask || impl->stencilMode.fail != value.fail ||
-        impl->stencilMode.depthFail != value.depthFail || impl->stencilMode.pass != value.pass) {
+    if (!impl->stencilModeHashValid || impl->stencilModeHash != newHash || impl->stencilMode.mask != value.mask ||
+        impl->stencilMode.fail != value.fail || impl->stencilMode.depthFail != value.depthFail ||
+        impl->stencilMode.pass != value.pass) {
         impl->pipelineState = nullptr;
         impl->stencilModeHashValid = false;
     }
