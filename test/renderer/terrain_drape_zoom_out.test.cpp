@@ -133,7 +133,7 @@ std::string levelTile(int zoom) {
 
 int tileZoomOf(const std::string& url) {
     const auto at = url.find("/level/");
-    return at == std::string::npos ? -1 : std::atoi(url.c_str() + at + 7);
+    return at == std::string::npos ? -1 : std::stoi(url.substr(at + 7));
 }
 
 constexpr uint32_t viewSize = 256;
