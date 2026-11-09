@@ -67,3 +67,80 @@ TEST(TerrainCachePolicy, DifferentGroupSetsAreNotComparable) {
     renumbered[1].layerIndex = 7;
     EXPECT_FALSE(drapeFallbackStrictlyWorse(renumbered, groups({0, 0})));
 }
+
+namespace {
+// A z13 drape target over the Alps, its parent and one of its children
+const mln::UnwrappedTileID target{13, 4355, 2896};
+const mln::UnwrappedTileID parent{12, 2177, 1448};
+const mln::UnwrappedTileID child{14, 8710, 5792};
+
+std::vector<DrapeGroupFallback> fallbackOf(const DrapeGroupCoverage& group) {
+    return {group.fallback()};
+}
+} // namespace
+
+TEST(TerrainCachePolicy, DrapeGroupIgnoresTilesOutsideTheTarget) {
+    DrapeGroupCoverage group(target, 0);
+    group.addDrawn({13, 4356, 2896}, 1); // a neighbour
+    group.addDrawn({14, 8712, 5792}, 1); // a neighbour's child
+    group.addEmpty({12, 2178, 1448});    // a neighbour's parent
+    EXPECT_EQ(group.contentHash(), 0u);
+    EXPECT_EQ(group.fallback().deficit, -1);
+}
+
+TEST(TerrainCachePolicy, DrapeGroupFallsBackToItsDeepestAncestor) {
+    DrapeGroupCoverage group(target, 3);
+    group.addDrawn({11, 1088, 724}, 1);
+    group.addDrawn(parent, 1);
+    EXPECT_EQ(group.fallback().layerIndex, 3);
+    EXPECT_EQ(group.fallback().deficit, 1);
+    group.addDrawn(child, 1);
+    EXPECT_EQ(group.fallback().deficit, 0);
+}
+
+TEST(TerrainCachePolicy, DrapeContentDoesNotDependOnOrder) {
+    DrapeGroupCoverage forward(target, 0);
+    DrapeGroupCoverage backward(target, 0);
+    const auto children = target.children();
+    for (std::size_t i = 0; i < children.size(); ++i) {
+        forward.addDrawn(children[i], i + 1);
+        backward.addDrawn(children[children.size() - 1 - i], children.size() - i);
+    }
+    EXPECT_EQ(forward.contentHash(), backward.contentHash());
+}
+
+TEST(TerrainCachePolicy, NewDataUnderTheSameTilesIsNewContent) {
+    // The regression: a GeoJSON source updated with setGeoJson rebuilt its tiles from new buckets
+    // under the same tile ids, and the drape kept the old route until the next zoom level.
+    DrapeGroupCoverage before(target, 0);
+    DrapeGroupCoverage after(target, 0);
+    before.addDrawn(target, 1);
+    after.addDrawn(target, 2);
+    EXPECT_NE(after.contentHash(), before.contentHash());
+    EXPECT_FALSE(drapeFallbackStrictlyWorse(fallbackOf(after), fallbackOf(before)));
+}
+
+TEST(TerrainCachePolicy, AnEmptiedTileIsNewContentNotLostContent) {
+    // The regression: a route cleared from the map stayed drawn on the terrain. The layer has
+    // no data on the tile any more, which the drape must show.
+    DrapeGroupCoverage drawn(target, 0);
+    DrapeGroupCoverage emptied(target, 0);
+    drawn.addDrawn(target, 1);
+    emptied.addEmpty(target);
+    EXPECT_NE(emptied.contentHash(), drawn.contentHash());
+    EXPECT_FALSE(drapeFallbackStrictlyWorse(fallbackOf(emptied), fallbackOf(drawn)));
+
+    // And the same as long as it stays empty.
+    DrapeGroupCoverage stillEmpty(target, 0);
+    stillEmpty.addEmpty(target);
+    EXPECT_EQ(stillEmpty.contentHash(), emptied.contentHash());
+}
+
+TEST(TerrainCachePolicy, ATileWithoutDrawablesYetKeepsTheBake) {
+    // A tile still loading, or with its drawables deferred by the tile build budget, is neither
+    // drawn nor empty: the group lost its content, and the drape keeps what it baked.
+    DrapeGroupCoverage drawn(target, 0);
+    DrapeGroupCoverage pending(target, 0);
+    drawn.addDrawn(target, 1);
+    EXPECT_TRUE(drapeFallbackStrictlyWorse(fallbackOf(pending), fallbackOf(drawn)));
+}

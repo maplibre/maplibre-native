@@ -1749,6 +1749,11 @@ of north, the map will automatically snap to exact north.
  Converts a point in the given view’s coordinate system to a geographic
  coordinate.
 
+ With 3D terrain, the coordinate is where the point’s line of sight first meets the
+ terrain surface (the nearest surface, so a ridge in front wins), rather than the point
+ at sea level behind it. Without terrain, or where no terrain data has loaded yet, it is
+ the sea-level point.
+
  @param point The point to convert.
  @param view The view in whose coordinate system the point is expressed.
  @return The geographic coordinate at the given point.
@@ -1761,6 +1766,10 @@ of north, the map will automatically snap to exact north.
 /**
  Converts a geographic coordinate to a point in the given view’s coordinate
  system.
+
+ With 3D terrain, the point is where the coordinate appears on the terrain surface, at
+ its terrain height, rather than at sea level. Without terrain, or where no terrain data
+ has loaded yet, it is the sea-level point.
 
  @param coordinate The geographic coordinate to convert.
  @param view The view in whose coordinate system the returned point should be
