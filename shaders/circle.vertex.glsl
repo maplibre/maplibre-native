@@ -1,5 +1,6 @@
 layout (location = 0) in vec2 a_pos;
 out vec3 v_data;
+out float v_visibility;
 
 layout (std140) uniform GlobalPaintParamsUBO {
     highp vec2 u_pattern_atlas_texsize;
@@ -33,10 +34,11 @@ layout (std140) uniform CircleDrawableUBO {
     highp float u_dem_dim;
     highp float u_dem_exaggeration;
     lowp float u_dem_enabled;
-    lowp float drawable_pad4;
+    lowp float u_depth_enabled;
 };
 
 uniform sampler2D u_dem;
+uniform sampler2D u_depth;
 
 layout (std140) uniform CircleEvaluatedPropsUBO {
     highp vec4 u_color;
@@ -75,6 +77,8 @@ void main(void) {
     // in extrusion data
     vec2 circle_center = floor(a_pos * 0.5);
     float ele = get_elevation(circle_center, u_dem, u_dem_coords, u_dem_unpack, u_dem_dim, u_dem_exaggeration, u_dem_enabled);
+    // Hidden where the terrain covers the circle's centre, as maplibre-gl-js does (and as symbols are)
+    v_visibility = calculate_visibility(u_matrix * vec4(circle_center, ele, 1), u_depth, u_depth_enabled, u_units_to_pixels.y);
     if (u_pitch_with_map) {
         vec2 corner_position = circle_center;
         if (u_scale_with_map) {
