@@ -212,17 +212,10 @@ void expectOnlyTheNearPointIsDrawn(const std::string& layer) {
 
 } // namespace
 
-// Only the OpenGL and Metal circle and heatmap shaders read the terrain depth texture
 TEST(TerrainOcclusion, ACircleBehindARidgeIsHidden) {
-#if !(MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_METAL)
-    GTEST_SKIP() << "circles are not hidden behind terrain on this backend";
-#endif
     expectOnlyTheNearPointIsDrawn(circleLayer);
 }
 
 TEST(TerrainOcclusion, AHeatmapBehindARidgeIsHidden) {
-#if !(MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_METAL)
-    GTEST_SKIP() << "heatmaps are not hidden behind terrain on this backend";
-#endif
     expectOnlyTheNearPointIsDrawn(heatmapLayer);
 }
