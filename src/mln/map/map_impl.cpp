@@ -459,6 +459,8 @@ void Map::Impl::noteTerrainRemoval() {
     const bool hasTerrain = style->impl->getTerrain() != nullptr;
     if (hadTerrain && !hasTerrain) {
         centerAwaitingSeaLevel = true;
+        // A report that the ground under the center was lost belongs to the terrain that is gone
+        centerGroundLost = false;
     } else if (hasTerrain) {
         centerAwaitingSeaLevel = false;
     }

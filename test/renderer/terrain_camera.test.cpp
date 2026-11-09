@@ -1364,6 +1364,8 @@ namespace {
 struct InspectableMap : MapAdapter {
     using MapAdapter::MapAdapter;
     double reportedCenterGround() const { return impl->terrainCenterElevation; }
+    bool centerGroundLost() const { return impl->centerGroundLost; }
+    void removeTerrain() { getStyle().setTerrain(nullptr); }
 };
 
 struct EyeLeavesTheMountain {
@@ -1426,6 +1428,7 @@ struct EyeLeavesTheMountain {
     double centerAltitude() const { return map.getCameraOptions().centerAltitude.value_or(0.0); }
     // The ground height under the center the renderer last reported to the map; NaN is "not known".
     double reportedCenterGround() const { return map.reportedCenterGround(); }
+    bool centerGroundLost() const { return map.centerGroundLost(); }
     double eyeAltitude() const {
         const auto eye = map.getFreeCameraOptions().getLocation();
         return eye ? eye->altitude : 0.0;
@@ -1505,6 +1508,21 @@ TEST(TerrainCamera, CenterFarFromWhereItsHeightWasReadDoesNotKeepTheMountainHeig
 
     EXPECT_TRUE(std::isnan(test.reportedCenterGround())) << "reported center ground " << test.reportedCenterGround();
     EXPECT_LT(test.centerAltitude(), 100.0) << "center altitude " << test.centerAltitude() << " over unknown ground";
+}
+
+// A report that the ground under the center is lost belongs to the terrain it was reported for: with
+// the terrain removed it no longer holds, and it must not meet a new terrain that comes back.
+TEST(TerrainCamera, TheLostCenterGroundIsForgottenWhenTheTerrainIsRemoved) {
+    EyeLeavesTheMountain test;
+    test.newCenterGround = EyeLeavesTheMountain::flatCenter();
+    test.newCenterTile = EyeLeavesTheMountain::NewEyeTile::Missing;
+    test.climbThenJump(true);
+    test.render(400);
+    ASSERT_TRUE(test.centerGroundLost()) << "the renderer lost the ground under the center";
+
+    test.map.removeTerrain();
+    test.render(100);
+    EXPECT_FALSE(test.centerGroundLost()) << "still lost with no terrain";
 }
 
 // Until the tile under the new center gives a height the center's height is unknown, not the
