@@ -17,8 +17,15 @@ are not lifted by the DEM, they are projected as if the ground were at sea level
 so a blob at 2,400 m is drawn about a ridge-height lower on screen than its
 ground position, off the slope it belongs to.
 
-The heatmap's colour-ramp composite is a screen-space pass and still draws over
-the terrain, so this test does not look at occlusion by ridges.
+Kernels whose centre is hidden behind a nearer ridge add nothing to the density,
+so only the kernels with a clear line of sight to the camera are drawn: the whole
+southwest cluster (on the slope facing the camera) and the southernmost kernel
+of the centre cluster, 88 m north of the centre on the crest at about 2,800 m. It
+is drawn highest on screen because it stands highest. The other three kernels of
+the centre cluster, 220 to 330 m north of the centre and 430 to 600 m lower, and
+all of the northeast cluster have a line of sight that passes 256 to 537 m
+under the ridge (checked by marching each point's sight line against the DEM
+tiles), so they are not drawn.
 
 The points are **inline GeoJSON**, so the test needs no fixtures beyond the DEM
 (`local://tiles/terrain-shading/{z}-{x}-{y}.terrain.png`) and numbered raster
@@ -39,4 +46,5 @@ no maplibre-gl-js counterpart for a pitched native frame, so this baseline is
 native's own; like the other terrain tests it uses a sea-level centre, because
 the centre clamp is off in still renders. The committed image was rendered by the
 `linux-opengl` runner on Mesa llvmpipe (software GL) under `xvfb-run`: each
-four-point cluster draws as two or three blobs lifted onto the slope.
+four-point cluster draws as two or three blobs lifted onto the slope, minus the
+kernels hidden behind the ridge as described above.
