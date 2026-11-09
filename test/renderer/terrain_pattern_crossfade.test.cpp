@@ -13,9 +13,11 @@
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/layers/background_layer.hpp>
+#include <mln/style/layers/circle_layer.hpp>
 #include <mln/style/layers/fill_extrusion_layer.hpp>
 #include <mln/style/layers/fill_layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/transition_options.hpp>
 #include <mln/util/image.hpp>
@@ -200,23 +202,30 @@ TEST(TerrainDrape, APatternDrapedDuringAZoomLevelFadeSettlesOnTheFinalScale) {
     EXPECT_LT(differing(settled, crossed), compareArea / 20);
 }
 
-// With terrain on, a layer drawn into a drape has its fade settled, and one drawn into the main pass, where
-// the fade works, does not. Without terrain no layer does.
-TEST(TerrainDrape, OnlyALayerDrawnIntoTheDrapeSettlesItsCrossfade) {
+// With terrain on, every layer but the fill-extrusion has its fade settled, and the fill-extrusion, drawn into
+// the main pass where the fade works, does not. Without terrain no layer does. Circle and symbol layers have
+// no cross-fade, so the flag changes nothing for them.
+TEST(TerrainDrape, EveryLayerButTheExtrusionSettlesItsCrossfade) {
     const auto settles = [](const style::Layer& layer, bool terrainEnabled) {
         return LayerManager::get()->createRenderLayer(layer.baseImpl)->settlesCrossfade(terrainEnabled);
     };
     const style::FillLayer fill("fill", "source");
     const style::LineLayer line("line", "source");
     const style::BackgroundLayer background("background");
+    const style::CircleLayer circle("circle", "source");
+    const style::SymbolLayer symbol("symbol", "source");
     const style::FillExtrusionLayer extrusion("extrusion", "source");
     EXPECT_TRUE(settles(fill, true));
     EXPECT_TRUE(settles(line, true));
     EXPECT_TRUE(settles(background, true));
+    EXPECT_TRUE(settles(circle, true));
+    EXPECT_TRUE(settles(symbol, true));
     EXPECT_FALSE(settles(extrusion, true));
     EXPECT_FALSE(settles(fill, false));
     EXPECT_FALSE(settles(line, false));
     EXPECT_FALSE(settles(background, false));
+    EXPECT_FALSE(settles(circle, false));
+    EXPECT_FALSE(settles(symbol, false));
     EXPECT_FALSE(settles(extrusion, false));
 }
 
