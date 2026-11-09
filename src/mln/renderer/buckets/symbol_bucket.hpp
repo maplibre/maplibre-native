@@ -15,6 +15,7 @@
 #include <vector>
 
 namespace mln {
+class RenderTerrain;
 
 namespace style {
 
@@ -278,10 +279,16 @@ public:
     void upload(gfx::UploadPass&) override;
     bool hasData() const override;
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
-    std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&, const RenderTile&) override;
+    std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&,
+                                                       const RenderTile&,
+                                                       const SymbolElevationFn* getElevation) override;
     void place(Placement&, const BucketPlacementData&, std::set<uint32_t>&) override;
-    void updateVertices(
-        const Placement&, bool updateOpacities, const TransformState&, const RenderTile&, std::set<uint32_t>&) override;
+    void updateVertices(const Placement&,
+                        bool updateOpacities,
+                        const TransformState&,
+                        const RenderTile&,
+                        std::set<uint32_t>&,
+                        const RenderTerrain* terrain = nullptr) override;
     bool hasTextData() const;
     bool hasIconData() const;
     bool hasSdfIconData() const;

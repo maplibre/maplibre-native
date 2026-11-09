@@ -476,6 +476,10 @@ void Map::Impl::settleCenterAwaitingSeaLevel() {
     }
 }
 
+void Map::Impl::onTerrainElevationIndexChanged(std::shared_ptr<const TerrainElevationIndex> index) {
+    terrainElevationIndex = std::move(index);
+}
+
 double Map::Impl::eyeClearCenterAltitude() const {
     if (std::isnan(terrainEyeElevation)) {
         return -std::numeric_limits<double>::infinity();
