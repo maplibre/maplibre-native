@@ -936,7 +936,8 @@ terrain (`calculate_visibility`), so labels no longer show through mountains.
 - `TerrainDepthShader` re-renders the terrain meshes (same DEM displacement as
   the terrain shader, sharing its UBO layout) into a viewport-sized target,
   packing the fragment depth into RGBA8. It is driven by
-  `RenderTerrain::renderDepth` after the drape targets, from a depth twin of
+  `RenderTerrain::renderDepth` before the render targets, so a heatmap kernel
+  can read it, from a depth twin of
   each mesh drawable held in a separate layer group; the existing terrain
   tweaker fills both groups' UBOs.
 - `RenderTerrain::getDepthTexture` hands symbol tweakers the packed texture, or
