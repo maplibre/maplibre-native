@@ -42,9 +42,6 @@ public:
     gfx::AttributeBindingArray attributeBindings;
     gfx::AttributeBindingArray instanceBindings;
 
-    // Store dummy vertex buffers to keep them alive
-    std::vector<std::unique_ptr<gfx::VertexBufferResource>> dummyVertexBuffers;
-
     UniformBufferArray uniformBuffers;
     gfx::UniformBufferPtr uboIndexUniform;
 

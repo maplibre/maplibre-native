@@ -361,8 +361,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
             impl->attributeBindings = std::move(attributeBindings_);
             impl->vertexDescHash = 0;      // Reset hash when bindings change
             impl->pipelineState = nullptr; // Reset pipeline state when attribute bindings change
-            // Store the dummy vertex buffers to keep them alive
-            impl->dummyVertexBuffers = std::move(vertexBuffers);
         }
     }
 
@@ -386,12 +384,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
             impl->pipelineState = nullptr; // Reset pipeline state when instance bindings change
-            // Store the dummy instance buffers to keep them alive
-            if (!instanceBuffers.empty()) {
-                impl->dummyVertexBuffers.insert(impl->dummyVertexBuffers.end(),
-                                                std::make_move_iterator(instanceBuffers.begin()),
-                                                std::make_move_iterator(instanceBuffers.end()));
-            }
         }
     }
 
