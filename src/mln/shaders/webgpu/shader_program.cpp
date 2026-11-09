@@ -17,6 +17,7 @@
 #include <fstream>
 #include <map>
 #include <type_traits>
+#include <utility>
 #include <mln/util/variant.hpp>
 
 namespace mln {
@@ -190,9 +191,12 @@ ShaderProgram::ShaderProgram(std::string name,
 }
 
 // Minimal constructor for Context::createShader compatibility
-ShaderProgram::ShaderProgram(Context& context, const std::string& vertexSource, const std::string& fragmentSource)
+ShaderProgram::ShaderProgram(Context& context,
+                             const std::string& vertexSource,
+                             const std::string& fragmentSource,
+                             std::string name)
     : ShaderProgramBase(),
-      shaderName("ContextShader"),
+      shaderName(std::move(name)),
       backend(static_cast<RendererBackend&>(context.getBackend())) {
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (!device) return;

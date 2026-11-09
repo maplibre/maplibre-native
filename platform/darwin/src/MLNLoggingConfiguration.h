@@ -93,8 +93,6 @@ MLN_EXPORT
  */
 @property (class, nonatomic, readonly) MLNLoggingConfiguration *sharedConfiguration;
 
-- (MLNLoggingBlockHandler)handler UNAVAILABLE_ATTRIBUTE;
-
 @end
 
 NS_ASSUME_NONNULL_END

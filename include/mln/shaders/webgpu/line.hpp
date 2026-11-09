@@ -10,19 +10,16 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineShader";
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(4) pos_normal: vec2<i32>,  // packed position and normal
     @location(5) data: vec4<u32>,        // extrude, direction, linesofar
-    @location(6) color: vec4<f32>,
-    @location(7) blur: vec2<f32>,
-    @location(8) opacity: vec2<f32>,
-    @location(9) gapwidth: vec2<f32>,
-    @location(10) offset: vec2<f32>,
-    @location(11) width: vec2<f32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(6) feature_index: u32,
+#endif
 };
 
 struct VertexOutput {
@@ -44,7 +41,7 @@ struct LineDrawableUBO {
     gapwidth_t: f32,
     offset_t: f32,
     width_t: f32,
-    pad1: f32,
+    feature_base: u32,
 };
 
 struct LineEvaluatedPropsUBO {
@@ -84,7 +81,10 @@ struct LineDrawableEntry {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineDrawableEntry>;
-@group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(4) var<storage, read> features: array<f32>;
+#endif
+@group(0) @binding(5) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -106,39 +106,39 @@ fn main(in: VertexInput) -> VertexOutput {
     var color: vec4<f32>;
     color = props.color;
 #ifndef HAS_UNIFORM_u_color
-    color = unpack_mix_color(in.color, drawable.color_t);
+    color = unpack_mix_color(featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
     var blur: f32;
     blur = props.blur;
 #ifndef HAS_UNIFORM_u_blur
-    blur = unpack_mix_float(in.blur, drawable.blur_t);
+    blur = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
     var opacity: f32;
     opacity = props.opacity;
 #ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     var gapwidth: f32;
     gapwidth = props.gapwidth;
 #ifndef HAS_UNIFORM_u_gapwidth
-    gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
+    gapwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
 #endif
     gapwidth = gapwidth / 2.0;
 
     var offset: f32;
     offset = props.offset;
 #ifndef HAS_UNIFORM_u_offset
-    offset = unpack_mix_float(in.offset, drawable.offset_t);
+    offset = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
 #endif
     offset = -offset;
 
     var width: f32;
     width = props.width;
 #ifndef HAS_UNIFORM_u_width
-    width = unpack_mix_float(in.width, drawable.width_t);
+    width = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
     let halfwidth = width * 0.5;
@@ -221,7 +221,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineGradientShader";
-    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -229,11 +229,9 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::WebGPU> {
 struct VertexInput {
     @location(4) pos_normal: vec2<i32>,
     @location(5) data: vec4<u32>,
-    @location(6) blur: vec2<f32>,
-    @location(7) opacity: vec2<f32>,
-    @location(8) gapwidth: vec2<f32>,
-    @location(9) offset: vec2<f32>,
-    @location(10) width: vec2<f32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(6) feature_index: u32,
+#endif
 };
 
 struct VertexOutput {
@@ -254,17 +252,9 @@ struct LineGradientDrawableUBO {
     gapwidth_t: f32,
     offset_t: f32,
     width_t: f32,
-    pad1: f32,
+    feature_base: u32,
     pad2: f32,
 };
-
-const LINE_EXPRESSION_COLOR: u32 = 1u << 0u;
-const LINE_EXPRESSION_OPACITY: u32 = 1u << 1u;
-const LINE_EXPRESSION_BLUR: u32 = 1u << 2u;
-const LINE_EXPRESSION_WIDTH: u32 = 1u << 3u;
-const LINE_EXPRESSION_GAPWIDTH: u32 = 1u << 4u;
-const LINE_EXPRESSION_FLOORWIDTH: u32 = 1u << 5u;
-const LINE_EXPRESSION_OFFSET: u32 = 1u << 6u;
 
 struct LineEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -303,14 +293,16 @@ struct LineGradientDrawableEntry {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineGradientDrawableEntry>;
-@group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(4) var<storage, read> features: array<f32>;
+#endif
+@group(0) @binding(5) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let drawable = drawableVector[globalIndex.value].data;
-    let mask = props.expressionMask;
 
     // Constants
     let pixel_ratio = max(paintParams.pixel_ratio, 1e-6);
@@ -328,32 +320,32 @@ fn main(in: VertexInput) -> VertexOutput {
     let v_normal = vec2<f32>(normal.x, normal.y * 2.0 - 1.0);
 
     // Unpack attributes using helper functions
-    var blur = unpack_mix_float(in.blur, drawable.blur_t);
-    if ((mask & LINE_EXPRESSION_BLUR) != 0u) {
-        blur = props.blur;
-    }
+    var blur = props.blur;
+#ifndef HAS_UNIFORM_u_blur
+    blur = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
+#endif
 
-    var opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    if ((mask & LINE_EXPRESSION_OPACITY) != 0u) {
-        opacity = props.opacity;
-    }
+    var opacity = props.opacity;
+#ifndef HAS_UNIFORM_u_opacity
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
+#endif
 
-    var gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
-    if ((mask & LINE_EXPRESSION_GAPWIDTH) != 0u) {
-        gapwidth = props.gapwidth;
-    }
+    var gapwidth = props.gapwidth;
+#ifndef HAS_UNIFORM_u_gapwidth
+    gapwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
+#endif
     gapwidth = gapwidth / 2.0;
 
-    var offset = unpack_mix_float(in.offset, drawable.offset_t);
-    if ((mask & LINE_EXPRESSION_OFFSET) != 0u) {
-        offset = props.offset;
-    }
+    var offset = props.offset;
+#ifndef HAS_UNIFORM_u_offset
+    offset = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
+#endif
     offset = -offset;
 
-    var width = unpack_mix_float(in.width, drawable.width_t);
-    if ((mask & LINE_EXPRESSION_WIDTH) != 0u) {
-        width = props.width;
-    }
+    var width = props.width;
+#ifndef HAS_UNIFORM_u_width
+    width = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
+#endif
 
     let halfwidth = width / 2.0;
     let inset = gapwidth + select(0.0, antialiasing, gapwidth > 0.0);
@@ -434,7 +426,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LinePatternShader";
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -442,13 +434,9 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::WebGPU> {
 struct VertexInput {
     @location(4) pos_normal: vec2<i32>,
     @location(5) data: vec4<u32>,
-    @location(6) blur: vec2<f32>,
-    @location(7) opacity: vec2<f32>,
-    @location(8) gapwidth: vec2<f32>,
-    @location(9) offset: vec2<f32>,
-    @location(10) width: vec2<f32>,
-    @location(11) pattern_from: vec4<u32>,
-    @location(12) pattern_to: vec4<u32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(6) feature_index: u32,
+#endif
 };
 
 struct VertexOutput {
@@ -459,8 +447,8 @@ struct VertexOutput {
     @location(3) v_linesofar: f32,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
-    @location(6) v_pattern_from: vec4<f32>,
-    @location(7) v_pattern_to: vec4<f32>,
+    @location(6) @interpolate(flat) v_pattern_from: vec4<f32>,
+    @location(7) @interpolate(flat) v_pattern_to: vec4<f32>,
     @location(8) v_floorwidth: f32,
 };
 
@@ -475,7 +463,7 @@ struct LinePatternDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     floorwidth_t: f32,
-    pad1: f32,
+    feature_base: u32,
     pad2: f32,
     pad3: f32,
 };
@@ -530,7 +518,10 @@ struct LinePatternTilePropsEntry {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LinePatternDrawableEntry>;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LinePatternTilePropsEntry>;
-@group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(4) var<storage, read> features: array<f32>;
+#endif
+@group(0) @binding(5) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -555,43 +546,43 @@ fn main(in: VertexInput) -> VertexOutput {
 
     var blur = props.blur;
 #ifndef HAS_UNIFORM_u_blur
-    blur = unpack_mix_float(in.blur, drawable.blur_t);
+    blur = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
 #endif
 
     var opacity = props.opacity;
 #ifndef HAS_UNIFORM_u_opacity
-    opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     var gapwidth = props.gapwidth;
 #ifndef HAS_UNIFORM_u_gapwidth
-    gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
+    gapwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
 #endif
     gapwidth = gapwidth * 0.5;
 
     var offset = props.offset;
 #ifndef HAS_UNIFORM_u_offset
-    offset = unpack_mix_float(in.offset, drawable.offset_t);
+    offset = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
 #endif
     offset = -offset;
 
     var width = props.width;
 #ifndef HAS_UNIFORM_u_width
-    width = unpack_mix_float(in.width, drawable.width_t);
+    width = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
 #endif
 
     var floorwidth = props.floorwidth;
-#ifndef HAS_UNIFORM_u_width
-    floorwidth = unpack_mix_float(in.width, drawable.floorwidth_t);
+#ifndef HAS_UNIFORM_u_floorwidth
+    floorwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
 #endif
 
     var pattern_from = tileProps.pattern_from;
 #ifndef HAS_UNIFORM_u_pattern_from
-    pattern_from = vec4<f32>(in.pattern_from);
+    pattern_from = featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_from);
 #endif
     var pattern_to = tileProps.pattern_to;
 #ifndef HAS_UNIFORM_u_pattern_to
-    pattern_to = vec4<f32>(in.pattern_to);
+    pattern_to = featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_to);
 #endif
 
     let halfwidth = width * 0.5;
@@ -634,8 +625,8 @@ struct FragmentInput {
     @location(3) v_linesofar: f32,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
-    @location(6) v_pattern_from: vec4<f32>,
-    @location(7) v_pattern_to: vec4<f32>,
+    @location(6) @interpolate(flat) v_pattern_from: vec4<f32>,
+    @location(7) @interpolate(flat) v_pattern_to: vec4<f32>,
     @location(8) v_floorwidth: f32,
 };
 
@@ -745,7 +736,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineSDFShader";
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -753,13 +744,9 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::WebGPU> {
 struct VertexInput {
     @location(4) pos_normal: vec2<i32>,
     @location(5) data: vec4<u32>,
-    @location(6) color: vec4<f32>,
-    @location(7) blur: vec2<f32>,
-    @location(8) opacity: vec2<f32>,
-    @location(9) gapwidth: vec2<f32>,
-    @location(10) offset: vec2<f32>,
-    @location(11) width: vec2<f32>,
-    @location(12) floorwidth: vec2<f32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(6) feature_index: u32,
+#endif
 };
 
 struct VertexOutput {
@@ -789,17 +776,9 @@ struct LineSDFDrawableUBO {
     offset_t: f32,
     width_t: f32,
     floorwidth_t: f32,
-    pad1: f32,
+    feature_base: u32,
     pad2: f32,
 };
-
-const LINE_EXPRESSION_COLOR: u32 = 1u << 0u;
-const LINE_EXPRESSION_OPACITY: u32 = 1u << 1u;
-const LINE_EXPRESSION_BLUR: u32 = 1u << 2u;
-const LINE_EXPRESSION_WIDTH: u32 = 1u << 3u;
-const LINE_EXPRESSION_GAPWIDTH: u32 = 1u << 4u;
-const LINE_EXPRESSION_FLOORWIDTH: u32 = 1u << 5u;
-const LINE_EXPRESSION_OFFSET: u32 = 1u << 6u;
 
 struct LineSDFTilePropsUBO {
     sdfgamma: f32,
@@ -851,7 +830,10 @@ struct LineSDFTilePropsEntry {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineSDFDrawableEntry>;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LineSDFTilePropsEntry>;
-@group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(4) var<storage, read> features: array<f32>;
+#endif
+@group(0) @binding(5) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -860,7 +842,6 @@ fn main(in: VertexInput) -> VertexOutput {
     let index = globalIndex.value;
     let drawable = drawableVector[index].data;
     let tileProps = tilePropsVector[index].data;
-    let mask = props.expressionMask;
 
     // Constants
     let LINE_DISTANCE_SCALE = 2.0;
@@ -876,42 +857,42 @@ fn main(in: VertexInput) -> VertexOutput {
     let v_normal = vec2<f32>(normal.x, normal.y * 2.0 - 1.0);
 
     // Unpack attributes using helper functions
-    var color = unpack_mix_color(in.color, drawable.color_t);
-    if ((mask & LINE_EXPRESSION_COLOR) != 0u) {
-        color = props.color;
-    }
+    var color = props.color;
+#ifndef HAS_UNIFORM_u_color
+    color = unpack_mix_color(featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_color), drawable.color_t);
+#endif
 
-    var blur = unpack_mix_float(in.blur, drawable.blur_t);
-    if ((mask & LINE_EXPRESSION_BLUR) != 0u) {
-        blur = props.blur;
-    }
+    var blur = props.blur;
+#ifndef HAS_UNIFORM_u_blur
+    blur = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
+#endif
 
-    var opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    if ((mask & LINE_EXPRESSION_OPACITY) != 0u) {
-        opacity = props.opacity;
-    }
+    var opacity = props.opacity;
+#ifndef HAS_UNIFORM_u_opacity
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
+#endif
 
-    var gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
-    if ((mask & LINE_EXPRESSION_GAPWIDTH) != 0u) {
-        gapwidth = props.gapwidth;
-    }
+    var gapwidth = props.gapwidth;
+#ifndef HAS_UNIFORM_u_gapwidth
+    gapwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
+#endif
     gapwidth = gapwidth / 2.0;
 
-    var offset = unpack_mix_float(in.offset, drawable.offset_t);
-    if ((mask & LINE_EXPRESSION_OFFSET) != 0u) {
-        offset = props.offset;
-    }
+    var offset = props.offset;
+#ifndef HAS_UNIFORM_u_offset
+    offset = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
+#endif
     offset = -offset;
 
-    var width = unpack_mix_float(in.width, drawable.width_t);
-    if ((mask & LINE_EXPRESSION_WIDTH) != 0u) {
-        width = props.width;
-    }
+    var width = props.width;
+#ifndef HAS_UNIFORM_u_width
+    width = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
+#endif
 
-    var floorwidth = unpack_mix_float(in.floorwidth, drawable.floorwidth_t);
-    if ((mask & LINE_EXPRESSION_FLOORWIDTH) != 0u) {
-        floorwidth = props.floorwidth;
-    }
+    var floorwidth = props.floorwidth;
+#ifndef HAS_UNIFORM_u_floorwidth
+    floorwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
+#endif
 
     let pixel_ratio = max(paintParams.pixel_ratio, 1e-6);
     let antialiasing = 0.5 / pixel_ratio;
@@ -1039,7 +1020,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineGradientSDFShader";
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
@@ -1047,12 +1028,9 @@ struct ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::WebGPU> 
 struct VertexInput {
     @location(4) pos_normal: vec2<i32>,
     @location(5) data: vec4<u32>,
-    @location(6) blur: vec2<f32>,
-    @location(7) opacity: vec2<f32>,
-    @location(8) gapwidth: vec2<f32>,
-    @location(9) offset: vec2<f32>,
-    @location(10) width: vec2<f32>,
-    @location(11) floorwidth: vec2<f32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(6) feature_index: u32,
+#endif
 };
 
 struct VertexOutput {
@@ -1082,17 +1060,9 @@ struct LineSDFDrawableUBO {
     offset_t: f32,
     width_t: f32,
     floorwidth_t: f32,
-    pad1: f32,
+    feature_base: u32,
     pad2: f32,
 };
-
-const LINE_EXPRESSION_COLOR: u32 = 1u << 0u;
-const LINE_EXPRESSION_OPACITY: u32 = 1u << 1u;
-const LINE_EXPRESSION_BLUR: u32 = 1u << 2u;
-const LINE_EXPRESSION_WIDTH: u32 = 1u << 3u;
-const LINE_EXPRESSION_GAPWIDTH: u32 = 1u << 4u;
-const LINE_EXPRESSION_FLOORWIDTH: u32 = 1u << 5u;
-const LINE_EXPRESSION_OFFSET: u32 = 1u << 6u;
 
 struct LineEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -1129,7 +1099,10 @@ struct LineSDFDrawableEntry {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineSDFDrawableEntry>;
-@group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(4) var<storage, read> features: array<f32>;
+#endif
+@group(0) @binding(5) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -1137,7 +1110,6 @@ fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let index = globalIndex.value;
     let drawable = drawableVector[index].data;
-    let mask = props.expressionMask;
 
     // Constants
     let LINE_DISTANCE_SCALE = 2.0;
@@ -1155,37 +1127,37 @@ fn main(in: VertexInput) -> VertexOutput {
     let v_normal = vec2<f32>(normal.x, normal.y * 2.0 - 1.0);
 
     // Unpack attributes using helper functions
-    var blur = unpack_mix_float(in.blur, drawable.blur_t);
-    if ((mask & LINE_EXPRESSION_BLUR) != 0u) {
-        blur = props.blur;
-    }
+    var blur = props.blur;
+#ifndef HAS_UNIFORM_u_blur
+    blur = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_blur), drawable.blur_t);
+#endif
 
-    var opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    if ((mask & LINE_EXPRESSION_OPACITY) != 0u) {
-        opacity = props.opacity;
-    }
+    var opacity = props.opacity;
+#ifndef HAS_UNIFORM_u_opacity
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
+#endif
 
-    var gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
-    if ((mask & LINE_EXPRESSION_GAPWIDTH) != 0u) {
-        gapwidth = props.gapwidth;
-    }
+    var gapwidth = props.gapwidth;
+#ifndef HAS_UNIFORM_u_gapwidth
+    gapwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_gapwidth), drawable.gapwidth_t);
+#endif
     gapwidth = gapwidth / 2.0;
 
-    var offset = unpack_mix_float(in.offset, drawable.offset_t);
-    if ((mask & LINE_EXPRESSION_OFFSET) != 0u) {
-        offset = props.offset;
-    }
+    var offset = props.offset;
+#ifndef HAS_UNIFORM_u_offset
+    offset = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_offset), drawable.offset_t);
+#endif
     offset = -offset;
 
-    var width = unpack_mix_float(in.width, drawable.width_t);
-    if ((mask & LINE_EXPRESSION_WIDTH) != 0u) {
-        width = props.width;
-    }
+    var width = props.width;
+#ifndef HAS_UNIFORM_u_width
+    width = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_width), drawable.width_t);
+#endif
 
-    var floorwidth = unpack_mix_float(in.floorwidth, drawable.floorwidth_t);
-    if ((mask & LINE_EXPRESSION_FLOORWIDTH) != 0u) {
-        floorwidth = props.floorwidth;
-    }
+    var floorwidth = props.floorwidth;
+#ifndef HAS_UNIFORM_u_floorwidth
+    floorwidth = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_floorwidth), drawable.floorwidth_t);
+#endif
 
     let pixel_ratio = max(paintParams.pixel_ratio, 1e-6);
     let antialiasing = 0.5 / pixel_ratio;

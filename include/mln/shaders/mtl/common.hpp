@@ -237,6 +237,19 @@ enum {
     drawableReservedUBOCount
 };
 
+#ifdef MLN_FEATURE_INDEX
+// `MLN_FEATURE_STRIDE` and `MLN_FEATURE_<name>` are variant constants. The record is a
+// tightly packed float array. Only data-driven fields are present.
+float2 featureFloat2(device const float* features, uint base, uint index, uint offset) {
+    uint i = (base + index) * MLN_FEATURE_STRIDE + offset;
+    return float2(features[i], features[i + 1]);
+}
+float4 featureFloat4(device const float* features, uint base, uint index, uint offset) {
+    uint i = (base + index) * MLN_FEATURE_STRIDE + offset;
+    return float4(features[i], features[i + 1], features[i + 2], features[i + 3]);
+}
+#endif
+
 )";
 
 }

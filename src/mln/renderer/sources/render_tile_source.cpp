@@ -130,7 +130,11 @@ public:
                 .gapwidth_t = 0.f,
                 .offset_t = 0.f,
                 .width_t = 0.f,
+#if MLN_UBO_CONSOLIDATION
+                .feature_base = 0
+#else
                 .pad1 = 0
+#endif
             };
 
 #if MLN_UBO_CONSOLIDATION

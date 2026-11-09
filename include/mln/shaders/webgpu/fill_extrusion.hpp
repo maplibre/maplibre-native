@@ -10,7 +10,7 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionShader";
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -19,14 +19,8 @@ struct VertexInput {
     @location(3) position: vec2<i32>,
     @location(4) decimals_ed: vec2<u32>,
     @location(5) normal2d: vec2<i32>,
-#ifndef HAS_UNIFORM_u_color
-    @location(6) color: vec4<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_base
-    @location(7) base: vec2<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_height
-    @location(8) height: vec2<f32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(6) feature_index: u32,
 #endif
 };
 
@@ -46,7 +40,7 @@ struct FillExtrusionDrawableUBO {
     color_t: f32,
     pattern_from_t: f32,
     pattern_to_t: f32,
-    pad1: f32,
+    feature_base: u32,
 };
 
 struct FillExtrusionPropsUBO {
@@ -69,6 +63,9 @@ struct GlobalIndexUBO {
 };
 
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionDrawableUBO>;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(3) var<storage, read> features: array<f32>;
+#endif
 @group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
@@ -78,13 +75,13 @@ fn main(in: VertexInput) -> VertexOutput {
     let drawable = drawableVector[globalIndex.value];
 
 #ifndef HAS_UNIFORM_u_base
-    let baseValue = max(unpack_mix_float(in.base, drawable.base_t), 0.0);
+    let baseValue = max(unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_base), drawable.base_t), 0.0);
 #else
     let baseValue = max(props.light_position_base.w, 0.0);
 #endif
 
 #ifndef HAS_UNIFORM_u_height
-    let heightValue = max(unpack_mix_float(in.height, drawable.height_t), 0.0);
+    let heightValue = max(unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_height), drawable.height_t), 0.0);
 #else
     let heightValue = max(props.height, 0.0);
 #endif
@@ -103,7 +100,7 @@ fn main(in: VertexInput) -> VertexOutput {
 #endif
 
 #ifndef HAS_UNIFORM_u_color
-    var color = unpack_mix_color(in.color, drawable.color_t);
+    var color = unpack_mix_color(featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_color), drawable.color_t);
 #else
     var color = props.color;
 #endif
@@ -148,7 +145,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionPatternShader";
-    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -157,17 +154,8 @@ struct VertexInput {
     @location(3) position: vec2<i32>,
     @location(4) decimals_ed: vec2<u32>,
     @location(5) normal2d: vec2<i32>,
-#ifndef HAS_UNIFORM_u_base
-    @location(6) base: vec2<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_height
-    @location(7) height: vec2<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_pattern_from
-    @location(8) pattern_from: vec4<u32>,
-#endif
-#ifndef HAS_UNIFORM_u_pattern_to
-    @location(9) pattern_to: vec4<u32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(6) feature_index: u32,
 #endif
 };
 
@@ -195,7 +183,7 @@ struct FillExtrusionPatternDrawableUBO {
     color_t: f32,
     pattern_from_t: f32,
     pattern_to_t: f32,
-    pad1: f32,
+    feature_base: u32,
 };
 
 struct FillExtrusionPatternTilePropsUBO {
@@ -231,6 +219,9 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionPatternDrawableUBO>;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(3) var<storage, read> features: array<f32>;
+#endif
 @group(0) @binding(4) var<storage, read> tilePropsVector: array<FillExtrusionPatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
@@ -242,13 +233,13 @@ fn main(in: VertexInput) -> VertexOutput {
     let drawable = drawableVector[index];
 
 #ifndef HAS_UNIFORM_u_base
-    let baseValue = max(unpack_mix_float(in.base, drawable.base_t), 0.0);
+    let baseValue = max(unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_base), drawable.base_t), 0.0);
 #else
     let baseValue = max(props.light_position_base.w, 0.0);
 #endif
 
 #ifndef HAS_UNIFORM_u_height
-    let heightValue = max(unpack_mix_float(in.height, drawable.height_t), 0.0);
+    let heightValue = max(unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_height), drawable.height_t), 0.0);
 #else
     let heightValue = max(props.height, 0.0);
 #endif
@@ -277,14 +268,14 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifdef HAS_UNIFORM_u_pattern_from
     let patternFrom = tilePropsVector[index].pattern_from;
 #else
-    let patternFrom = vec4<f32>(in.pattern_from);
+    let patternFrom = featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_from);
     out.pattern_from = patternFrom;
 #endif
 
 #ifdef HAS_UNIFORM_u_pattern_to
     let patternTo = tilePropsVector[index].pattern_to;
 #else
-    let patternTo = vec4<f32>(in.pattern_to);
+    let patternTo = featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_to);
     out.pattern_to = patternTo;
 #endif
 

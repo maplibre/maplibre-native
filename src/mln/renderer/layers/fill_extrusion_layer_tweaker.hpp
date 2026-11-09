@@ -4,6 +4,11 @@
 
 #include <string>
 
+#if MLN_UBO_CONSOLIDATION
+#include <mln/util/identity.hpp>
+#include <vector>
+#endif
+
 namespace mln {
 
 /**
@@ -25,6 +30,8 @@ protected:
 #if MLN_UBO_CONSOLIDATION
     gfx::UniformBufferPtr drawableUniformBuffer;
     gfx::UniformBufferPtr tilePropsUniformBuffer;
+    gfx::UniformBufferPtr featureUniformBuffer;
+    std::vector<util::SimpleIdentity> featureBinderOrder;
 #endif
 };
 
