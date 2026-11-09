@@ -221,6 +221,8 @@ public:
 
     jni::Local<jni::Object<LatLng>> latLngForPixel(JNIEnv&, jfloat, jfloat);
 
+    jni::Local<jni::Object<LatLng>> latLngForPixelAtCenterAltitude(JNIEnv&, jfloat, jfloat);
+
     void latLngsForPixels(JNIEnv&, const jni::Array<jdouble>&, jni::Array<jdouble>&, jfloat);
 
     jni::Local<jni::Array<jlong>> addPolylines(JNIEnv&, const jni::Array<jni::Object<Polyline>>&);
