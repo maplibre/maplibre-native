@@ -12,7 +12,7 @@ struct alignas(16) HeatmapDrawableUBO {
     // Interpolations
     /* 68 */ float weight_t;
     /* 72 */ float radius_t;
-    /* 76 */ float pad1;
+    /* 76 */ float depth_enabled; // 1 when the terrain depth texture is bound (occlusion behind terrain)
 
     // 3D terrain elevation; see RenderTerrain::getTerrainData
     /*  80 */ std::array<float, 4> dem_coords; // scale, x offset, y offset into the DEM tile, unused
@@ -20,7 +20,7 @@ struct alignas(16) HeatmapDrawableUBO {
     /* 112 */ float dem_dim;
     /* 116 */ float dem_exaggeration;
     /* 120 */ float dem_enabled;
-    /* 124 */ float pad2;
+    /* 124 */ float units_to_pixels_y; // GlobalPaintParamsUBO.units_to_pixels.y, scales the depth ramp
     /* 128 */
 };
 static_assert(sizeof(HeatmapDrawableUBO) == 8 * 16);
