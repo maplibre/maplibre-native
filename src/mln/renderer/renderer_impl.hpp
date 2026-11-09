@@ -58,7 +58,8 @@ private:
     /// textures they sample. Rebuilding the pool per frame would reallocate every
     /// tile-sized target every frame - churning GPU memory and discarding the
     /// baked content that suppresses drape flicker.
-    // Drape target resolution = base tile size x qualityFactor. maplibre-gl-js renders
+    // Drape target resolution = base tile size x qualityFactor, for the finest tiles of the cover;
+    // the coarser ones get the base tile size (Renderer::Impl::render). maplibre-gl-js renders
     // its render-to-texture tiles at tileSize * qualityFactor (qualityFactor = 2, i.e.
     // 1024x1024) precisely so draped content - thin lines especially - is not pixelated
     // or aliased when the terrain mesh magnifies it onto the screen. Its own words

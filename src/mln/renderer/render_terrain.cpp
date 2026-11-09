@@ -174,8 +174,8 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // elevation-aware ideal cover from the view, not the DEM's loaded tile set.
     const uint16_t terrainCoverTileSize = demSource->getTileSize();
     // Deeper than the DEM goes, as maplibre-gl-js does: a tile past its maxzoom samples its DEM
-    // ancestor through a sub-tile offset (the ancestor fallback in update()), and its 1024 px
-    // drape target covers a smaller area. Capped at the DEM's maxzoom, a close-up at z16 over a
+    // ancestor through a sub-tile offset (the ancestor fallback in update()), and its drape
+    // target covers a smaller area. Capped at the DEM's maxzoom, a close-up at z16 over a
     // z12 DEM stretched each target 8x (dotted roads, blocky imagery). How deep depends on the
     // load mode (meshMaxZoom): Quality follows the view as gl-js does; Balanced and Performance
     // stop sooner, since each level deeper adds tiles, and drape memory with them.
@@ -184,7 +184,7 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
 
     // LOD parameters from the frame drive the same near-high/far-low zoom
     // selection every other source uses, so the near field drapes at a higher
-    // zoom (smaller ground area per 1024 target = sharper draped content).
+    // zoom (smaller ground area per drape target = sharper draped content).
     util::TileCoverParameters coverParams{.transformState = state, .elevationProvider = &elevationProvider};
     // The finest tiles go under the camera (where the screen is densest), as the mesh-tile cap below
     // keeps the tiles nearest it; measured from the map centre, a steep pitch gives the ground at the
@@ -233,7 +233,7 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // them as streaks. Per-mode cap (TerrainLoadBudget::maxMeshTiles): Quality keeps
     // a generous cap so terrain render distance stays long; Balanced/Performance trade distance
     // for frame time. It caps the cover, not just the mesh: the drape-target pool allocates a
-    // 1024 px target per cover tile, so a cap on the mesh alone still allocated one for every
+    // drape target per cover tile, so a cap on the mesh alone still allocated one for every
     // tile it dropped.
     // Before the cap drops any tile, the farthest tiles past the DEM's maxzoom go back to their
     // parents (coarsenFarMeshTiles): the deeper mesh (meshMaxZoom) then costs detail in the
@@ -297,7 +297,7 @@ std::set<UnwrappedTileID> RenderTerrain::dilateCover(const std::set<UnwrappedTil
                 // The neighbour at this tile's zoom may sit over ground a tile of another zoom
                 // already covers (the cover mixes zooms, a finer tile beside a coarser one): meshing
                 // it would add a second surface over that ground, sampled from a coarser or finer
-                // DEM, and a drape target and 1024 px of texture to hold it. Only ground the cover
+                // DEM, and a drape target and its texture to hold it. Only ground the cover
                 // leaves out is worth a tile.
                 if (coveredAlready(neighbour)) continue;
                 dilated.insert(neighbour);

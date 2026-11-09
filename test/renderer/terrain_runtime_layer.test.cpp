@@ -112,9 +112,8 @@ public:
 
 } // namespace
 
-// An app adds its route once the map is up. The drapes rendered before it must take it in: the
-// fork used to drop every drape target when a layer or source was added, and the route then never
-// reached the terrain.
+// An app adds its route once the map is up. The drapes rendered before it must take it in, or the
+// route never reaches the terrain.
 TEST(TerrainDrape, ALineAddedAfterTheFirstFrameIsDraped) {
     for (const auto loadMode : {TerrainLoadMode::Quality, TerrainLoadMode::Balanced}) {
         int expected = 0;

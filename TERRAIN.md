@@ -480,7 +480,7 @@ whole scene runs at ~8 fps (the Adreno 750 does ~105 fps on the same build).
 This is the experiment the `TerrainLoadMode` budgets existed to justify, and it
 says they do not work: the bottleneck on this hardware is not the number of
 terrain mesh tiles or how many drapes re-render per frame. Something else
-dominates - the 1024x1024 drape targets, the DEM uploads, or the non-terrain
+dominates - the drape targets, the DEM uploads, or the non-terrain
 layers - and should be measured before any more tuning of the budgets. Consider
 whether Balanced/Performance earn their complexity at all in their current form.
 
@@ -1033,8 +1033,8 @@ This known issue is closed.
 ### Phase 3 - Seams and quality
 
 - **Drape target size** (`Renderer::Impl::texturePool`). Now `drapeTileSize *
-  drapeQualityFactor` = 512 * 2 = **1024x1024**, matching maplibre-gl-js, which
-  renders its render-to-texture tiles at `tileSize * qualityFactor` (a fixed
+  drapeQualityFactor` = 512 * 2 = **1024x1024** for the finest tiles of the cover and 512x512 for the rest.
+  maplibre-gl-js renders its render-to-texture tiles at `tileSize * qualityFactor` (a fixed
   `qualityFactor = 2`) *specifically* so draped thin lines are not pixelated/
   aliased when the mesh magnifies them (`src/render/terrain.ts`,
   `src/webgl/render_to_texture.ts` `rttSize`). This was the fix for draped roads

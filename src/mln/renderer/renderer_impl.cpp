@@ -616,6 +616,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                     res = renderTarget.render(orchestrator, renderTree, parameters, /*canRerender=*/drapeBudget > 0);
                 } catch (const std::bad_alloc&) {
                     Log::Warning(Event::Render, "Terrain: out of memory for a drape target; skipped this frame");
+                    // render() recorded the bake before it threw: forget it, or the fast path skips
+                    // this target until its content changes, and it stays blank
+                    renderTarget.invalidateBake();
                     drapeWorkDeferred = true;
                     return;
                 }
