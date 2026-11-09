@@ -19,6 +19,7 @@ namespace mln {
 class RendererObserver;
 class RenderStaticData;
 class RenderTree;
+class TerrainElevationIndex;
 
 namespace gfx {
 class RendererBackend;
@@ -110,6 +111,10 @@ private:
     double lastReportedCenterElevation = 0.0;
     double lastReportedEyeElevation = std::numeric_limits<double>::quiet_NaN();
     double lastReportedTargetElevation = std::numeric_limits<double>::quiet_NaN();
+
+    /// The terrain height copy last handed to the observer (null: none, or terrain off), so it
+    /// is sent once per change rather than once per frame.
+    std::shared_ptr<const TerrainElevationIndex> reportedElevationIndex;
 
     enum class RenderState {
         Never,
