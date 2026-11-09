@@ -122,12 +122,16 @@ std::vector<double> rowDarkness(const PremultipliedImage& image) {
 
 } // namespace
 
+// Only the OpenGL and Metal drape targets build a mip chain.
 // Lines one pixel wide every 33 m, draped on flat ground seen at 84 degrees: far off, a row of the
 // view spans many lines and a line is much thinner than a row. Sampled from the target's base level
 // alone, the terrain pass steps over most of them: rows alternate between catching a line and seeing
 // bare ground, which shows as dashes and moire. Sampled from a mip chain every row averages the lines
 // it spans, so the darkness changes smoothly from row to row.
 TEST(TerrainDrapeMipmaps, ThinLinesDoNotAliasFarAcrossSteepGround) {
+#if !(MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_METAL)
+    GTEST_SKIP() << "drape targets have no mip chain on this backend";
+#endif
     const std::vector<double> rows = rowDarkness(renderLine(84.0).image);
 
     // The far ground: the 64 rows below the horizon, past its first few, where a row of the view
@@ -152,6 +156,9 @@ TEST(TerrainDrapeMipmaps, ThinLinesDoNotAliasFarAcrossSteepGround) {
 // The chain is rebuilt from a drape target's base level each time the target is rendered, and not
 // otherwise: a view that stays put re-renders no target, so it rebuilds no chain.
 TEST(TerrainDrapeMipmaps, ChainsAreRebuiltOnlyWhenATargetIsRendered) {
+#if !(MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_METAL)
+    GTEST_SKIP() << "drape targets have no mip chain on this backend";
+#endif
     const Rendered rendered = renderLine(84.0);
     EXPECT_GT(rendered.stats.numDrapeTargetsRendered, 0);
     EXPECT_GT(rendered.stats.numMipmapChainsBuilt, 0);
