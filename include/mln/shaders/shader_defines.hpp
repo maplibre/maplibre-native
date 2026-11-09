@@ -313,6 +313,7 @@ enum {
 
 enum {
     idCircleDEMTexture,
+    idCircleDepthTexture,
     circleTextureCount
 };
 
@@ -344,6 +345,7 @@ enum {
     idHeatmapImageTexture,
     idHeatmapColorRampTexture,
     idHeatmapDEMTexture,
+    idHeatmapDepthTexture,
     heatmapTextureCount
 };
 
