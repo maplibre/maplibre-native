@@ -6,6 +6,7 @@
 #include <mln/util/geometry.hpp>
 #include <mln/util/mat4.hpp>
 
+#include <functional>
 #include <map>
 #include <set>
 #include <vector>
@@ -18,7 +19,11 @@ namespace mln {
 
 class SymbolInstance;
 class RenderLayer;
+class RenderTerrain;
 class SymbolBucket;
+
+/// Tile-local point -> terrain elevation (exaggerated metres), as for the collision index.
+using SymbolElevationFn = std::function<float(const Point<float>&)>;
 
 class IndexedSymbolInstance {
 public:
@@ -49,7 +54,12 @@ public:
 class CrossTileSymbolLayerIndex {
 public:
     CrossTileSymbolLayerIndex(uint32_t& maxCrossTileID);
-    bool addBucket(const OverscaledTileID&, const mat4& tileMatrix, SymbolBucket&);
+    /// `getElevation` lifts the anchors onto the terrain for the viewport test of an overscaled
+    /// tile; null tests them at sea level.
+    bool addBucket(const OverscaledTileID&,
+                   const mat4& tileMatrix,
+                   SymbolBucket&,
+                   const SymbolElevationFn* getElevation = nullptr);
     bool removeStaleBuckets(const std::unordered_set<uint32_t>& currentIDs);
     void handleWrapJump(float newLng);
 
@@ -72,7 +82,9 @@ public:
         BucketsRemoved = 1 << 1
     };
 
-    AddLayerResult addLayer(const RenderLayer& layer, float lng);
+    /// With terrain, the symbols of overscaled tiles are tested against the viewport at the
+    /// terrain's height under them.
+    AddLayerResult addLayer(const RenderLayer& layer, float lng, const RenderTerrain* terrain = nullptr);
     void pruneUnusedLayers(const std::set<std::string>&);
 
     void reset();

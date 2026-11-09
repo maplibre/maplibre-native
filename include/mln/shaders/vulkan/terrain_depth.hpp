@@ -69,14 +69,18 @@ void main() {
 layout(location = 0) out vec4 out_color;
 
 void main() {
-    // Pack the fragment depth into RGBA8, matching the maplibre-gl-js
-    // terrain_depth shader; unpacked by unpack_depth() for calculate_visibility()
-    const float depth = gl_FragCoord.z;
-    const vec4 bit_shift = vec4(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);
-    const vec4 bit_mask = vec4(0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0);
-    vec4 res = fract(depth * bit_shift);
-    res -= res.xxyz * bit_mask;
-    out_color = res;
+    // Pack the window depth into RGBA8 as four base-256 digits, each written as k / 255 so the
+    // unorm8 target stores it exactly (the gl-js fract/bit_mask scheme stores k / 256 and loses
+    // up to 0.002 to unorm rounding). Decoded by unpack_depth() for calculate_visibility().
+    float r = min(gl_FragCoord.z, 0.99999994) * 256.0;
+    const float d0 = floor(r);
+    r = (r - d0) * 256.0;
+    const float d1 = floor(r);
+    r = (r - d1) * 256.0;
+    const float d2 = floor(r);
+    r = (r - d2) * 256.0;
+    const float d3 = floor(r);
+    out_color = vec4(d0, d1, d2, d3) / 255.0;
 }
 )";
 };

@@ -132,6 +132,8 @@ public:
 
     // Matrix
     void matrixFor(mat4&, const UnwrappedTileID&) const;
+    /// The symbol occlusion ramp behind 3D terrain (calculate_visibility in the shader preludes)
+    /// is derived from this near plane of one pixel: change the default and rescale it there.
     void getProjMatrix(mat4& matrix, uint16_t nearZ = 1, bool aligned = false) const;
 
     // Dimensions
@@ -229,6 +231,10 @@ public:
     // Conversion
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&, vec4&) const;
+    /// Projects a point that sits `elevationMeters` above sea level (e.g. on draped 3D terrain,
+    /// exaggeration already applied). The camera matrix scales z from metres to pixels, so this
+    /// lands where the terrain mesh and elevated symbols draw that location.
+    ScreenCoordinate latLngToScreenCoordinate(const LatLng&, double elevationMeters, vec4&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Unwrapped) const;
     /// Unprojects onto the plane `elevationMeters` above sea level (metres, terrain
     /// exaggeration applied) instead of sea level.
