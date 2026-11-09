@@ -1,5 +1,13 @@
 # Changelog MapLibre Native for Android
 
+## 13.5.4
+
+### 🐞 Bug fixes
+
+- core: Fix a race condition when releasing unused dynamic textures, so the last reference is always dropped on the render thread ([#4817](https://github.com/maplibre/maplibre-native/pull/4817)).
+- core: Skip the cleanup of Vulkan descriptor sets that were never allocated, and record the descriptor pool index only after allocation succeeds ([#4818](https://github.com/maplibre/maplibre-native/pull/4818)).
+- core: Back Vulkan vertex attributes that a shader reads but that have no data with a zero-stride dummy buffer, instead of leaving them unbound ([#4788](https://github.com/maplibre/maplibre-native/pull/4788)).
+
 ## 13.5.3
 
 ### 🐞 Bug fixes
