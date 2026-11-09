@@ -278,7 +278,7 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // Whether more content is on its way: a tile is loading, or the new-tile budget has put off
         // building one. A decision to keep the bake (below) holds only while it is.
         const bool contentComing = !renderTree.getParameters().loaded || context.newTileBuildWasDeferred();
-        if (bakedSignature && *bakedSignature == targetSignature && !(holdingForContent && !contentComing)) {
+        if (bakedSignature && *bakedSignature == targetSignature && (!holdingForContent || contentComing)) {
             return RenderResult::Skipped;
         }
 
