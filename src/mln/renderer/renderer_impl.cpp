@@ -389,18 +389,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                     util::hash_combine(h, tile.canonical.z);
                     util::hash_combine(h, tile.canonical.x);
                     util::hash_combine(h, tile.canonical.y);
-                    // Fold the source bucket's identity so an in-place content upgrade - a drape
-                    // built from an over-zoomed ancestor bucket, then the tile's own native bucket
-                    // loads under the same covering-tile id - re-renders the drape instead of
-                    // serving the stale low-detail bake until the next zoom. Keyed on the bucket id
-                    // (stable across paint/fade), not the drawable id (which churns every frame).
-                    // Excluded for hillshade: its drape samples a separate DEM "prepare" target with
-                    // its own render lifecycle, and folding its bucket here broke it on initial load.
-                    if (drawable.getName() != "hillshade") {
-                        if (const auto& bucket = drawable.getBucket()) {
-                            util::hash_combine(h, bucket->getID().id());
-                        }
-                    }
+                    // Fold the identity of the drawn data so new data under the same covering-tile
+                    // id re-renders the drape instead of serving the stale bake until the next zoom.
+                    util::hash_combine(h, RenderTarget::drapedDataID(drawable));
                     util::hash_combine(signature, h);
                     drapedTiles.emplace_back(tile, h);
                 });
@@ -757,7 +748,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     if (auto* terrain = orchestrator.getRenderTerrain()) {
         const auto center = updateParameters->transformState.getLatLng();
         UnwrappedTileID centerReadFrom(0, 0, 0);
-        if (const auto centerElevation = terrain->findElevationForLatLng(center, &centerReadFrom)) {
+        if (const auto centerElevation = terrain->getElevationForLatLng(center, &centerReadFrom)) {
             centerElevationTile = centerReadFrom;
             if (std::isnan(lastReportedCenterElevation) ||
                 std::abs(*centerElevation - lastReportedCenterElevation) > 0.25) {
@@ -778,7 +769,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // lifts it out when it knows the height there.
         if (const auto eye = updateParameters->transformState.getFreeCameraOptions().getLocation()) {
             UnwrappedTileID readFrom(0, 0, 0);
-            if (const auto eyeElevation = terrain->findElevationForLatLng(eye->location, &readFrom)) {
+            if (const auto eyeElevation = terrain->getElevationForLatLng(eye->location, &readFrom)) {
                 eyeElevationTile = readFrom;
                 if (std::isnan(lastReportedEyeElevation) || std::abs(*eyeElevation - lastReportedEyeElevation) > 0.25) {
                     lastReportedEyeElevation = *eyeElevation;
@@ -798,7 +789,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // to the ground there, as gl-js does, instead of arriving at the height it left. Only once a
         // DEM tile covers the spot: ground not loaded yet is not sea level.
         if (const auto& target = updateParameters->transitionTargetCenter) {
-            if (const auto targetElevation = terrain->findElevationForLatLng(*target)) {
+            if (const auto targetElevation = terrain->getElevationForLatLng(*target)) {
                 if (std::isnan(lastReportedTargetElevation) ||
                     std::abs(*targetElevation - lastReportedTargetElevation) > 0.25) {
                     lastReportedTargetElevation = *targetElevation;
@@ -807,6 +798,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             }
         } else {
             lastReportedTargetElevation = std::numeric_limits<double>::quiet_NaN();
+        }
+    }
+
+    // Hand the map side a fresh copy of the terrain heights whenever the loaded DEM tiles change
+    // (RenderTerrain::updateElevationIndex), and null when terrain goes away.
+    {
+        std::shared_ptr<const TerrainElevationIndex> elevationIndex;
+        if (auto* terrain = orchestrator.getRenderTerrain()) {
+            terrain->updateElevationIndex();
+            elevationIndex = terrain->getElevationIndex();
+        }
+        if (elevationIndex != reportedElevationIndex) {
+            reportedElevationIndex = elevationIndex;
+            observer->onTerrainElevationIndexChanged(std::move(elevationIndex));
         }
     }
 

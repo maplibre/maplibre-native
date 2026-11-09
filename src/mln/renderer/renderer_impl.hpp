@@ -20,6 +20,7 @@ namespace mln {
 class RendererObserver;
 class RenderStaticData;
 class RenderTree;
+class TerrainElevationIndex;
 
 namespace gfx {
 class RendererBackend;
@@ -117,6 +118,10 @@ private:
     /// loaded tile under it, that height is not the ground under the eye any more.
     std::optional<UnwrappedTileID> eyeElevationTile;
     double lastReportedTargetElevation = std::numeric_limits<double>::quiet_NaN();
+
+    /// The terrain height copy last handed to the observer (null: none, or terrain off), so it
+    /// is sent once per change rather than once per frame.
+    std::shared_ptr<const TerrainElevationIndex> reportedElevationIndex;
 
     enum class RenderState {
         Never,

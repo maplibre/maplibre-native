@@ -212,7 +212,7 @@ void main() {
     frag_opacity = unpack_mix_float(dataInstanceVector.instance[instance].opacity, drawable.opacity_t) * fade_opacity;
 #endif
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    frag_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled);
+    frag_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
 }
 )";
 
@@ -503,7 +503,7 @@ void main() {
     frag_tex = a_tex / drawable.texsize;
     frag_fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    frag_fade_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled);
+    frag_fade_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
     frag_font_scale = fontScale;
     frag_gamma_scale = gl_Position.w;
 
@@ -882,7 +882,7 @@ void main() {
 	frag_tex = a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize);
     frag_fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    frag_fade_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled);
+    frag_fade_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
     frag_font_scale = fontScale;
     frag_gamma_scale = gl_Position.w;
 
