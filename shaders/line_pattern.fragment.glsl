@@ -1,3 +1,7 @@
+#ifdef GL_ES
+precision highp float;
+#endif
+
 layout (std140) uniform LinePatternTilePropsUBO {
     lowp vec4 u_pattern_from;
     lowp vec4 u_pattern_to;

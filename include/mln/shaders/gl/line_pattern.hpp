@@ -197,7 +197,11 @@ mediump vec4 pattern_to = u_pattern_to;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform LinePatternTilePropsUBO {
+    static constexpr const char* fragment = R"(#ifdef GL_ES
+precision highp float;
+#endif
+
+layout (std140) uniform LinePatternTilePropsUBO {
     lowp vec4 u_pattern_from;
     lowp vec4 u_pattern_to;
     mediump vec4 u_scale;
