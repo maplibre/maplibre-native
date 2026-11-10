@@ -7,6 +7,7 @@
 #include <mln/webgpu/vertex_buffer_resource.hpp>
 #include <mln/util/geometry.hpp>
 #include <mln/gfx/color_mode.hpp>
+#include <algorithm>
 #include <array>
 #include <mln/gfx/depth_mode.hpp>
 #include <mln/webgpu/command_encoder.hpp>
@@ -229,6 +230,24 @@ const BufferResource& Context::getTileVertexBuffer() {
         tileVertexBuffer = createBuffer(vertices.data(), vertices.bytes(), usage, false, true);
     }
     return *tileVertexBuffer;
+}
+
+const VertexBufferResource& Context::getDefaultVertexBuffer(gfx::AttributeDataType type, std::size_t size) {
+    auto& buffers = defaultVertexBuffers[type];
+    if (!buffers.empty() && buffers.back()->getSizeInBytes() >= size) {
+        return *buffers.back();
+    }
+
+    // Grow geometrically, so few of these are created.
+    const std::size_t previous = buffers.empty() ? 0 : buffers.back()->getSizeInBytes();
+    const std::size_t capacity = std::max({size, previous * 2, std::size_t{256}});
+
+    // Colors and opacities default to 1, everything else to 0.
+    const bool ones = type == gfx::AttributeDataType::Float4 || type == gfx::AttributeDataType::Float2;
+    const std::vector<float> data((capacity + sizeof(float) - 1) / sizeof(float), ones ? 1.0f : 0.0f);
+    buffers.push_back(std::make_unique<VertexBufferResource>(
+        createBuffer(data.data(), data.size() * sizeof(float), WGPUBufferUsage_Vertex, false, true)));
+    return *buffers.back();
 }
 
 // Get reusable tile index buffer (aligned with Metal)

@@ -99,6 +99,10 @@ public:
     const BufferResource& getTileVertexBuffer();
     const BufferResource& getTileIndexBuffer();
 
+    /// A shared vertex buffer of at least `size` bytes holding the default value of `type`,
+    /// for attributes a drawable doesn't provide
+    const VertexBufferResource& getDefaultVertexBuffer(gfx::AttributeDataType type, std::size_t size);
+
     // Tile clipping mask rendering
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
@@ -131,6 +135,9 @@ private:
     // Cached buffers (aligned with Metal)
     std::optional<BufferResource> tileVertexBuffer;
     std::optional<BufferResource> tileIndexBuffer;
+
+    // Default attribute buffers by type, largest last. Bindings may still point at the smaller ones.
+    std::map<gfx::AttributeDataType, std::vector<std::unique_ptr<VertexBufferResource>>> defaultVertexBuffers;
 
     // Cached clipping resources
     gfx::ShaderProgramBasePtr clipMaskShader;
