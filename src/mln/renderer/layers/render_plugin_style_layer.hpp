@@ -7,6 +7,8 @@
 
 namespace mln {
 
+struct PluginLayerSnapshot;
+
 class RenderPluginStyleLayer final : public RenderLayer {
 public:
     explicit RenderPluginStyleLayer(Immutable<style::PluginStyleLayer::Impl>);
@@ -40,7 +42,7 @@ private:
 
     std::map<std::string, style::PluginTransitioningPropertyValue> transitioningPaintProperties;
     style::PluginPropertyMap evaluatedPluginProperties;
-    std::shared_ptr<const style::PluginPropertyMap> evaluatedPaintSnapshot;
+    std::shared_ptr<const PluginLayerSnapshot> propertiesSnapshot;
     std::map<std::string, gfx::ShaderGroupPtr> shaderGroups;
     /// True while the layer reports an active animation.
     bool animated = false;

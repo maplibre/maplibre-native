@@ -477,10 +477,11 @@ void PluginBucket::update(const FeatureStates& states,
     }
     if (changed) {
         uploaded = false;
-        const auto properties = latestPaintProperties.find(layerID);
+        const auto properties = latestProperties.find(layerID);
         const auto zoom = latestZoom.find(layerID);
-        if (properties != latestPaintProperties.end() && zoom != latestZoom.end()) {
-            updateQueryRadius(layerID, *properties->second, zoom->second);
+        if (properties != latestProperties.end() && zoom != latestZoom.end()) {
+            const auto& snapshot = *properties->second;
+            updateQueryRadius(layerID, snapshot.layer->pluginProperties, snapshot.paint, zoom->second);
         }
     }
 }
@@ -491,19 +492,19 @@ float PluginBucket::getQueryRadius(const RenderLayer& layer) const {
 }
 
 bool PluginBucket::synchronizePaint(const std::string& layerID,
-                                    const std::shared_ptr<const style::PluginPropertyMap>& properties,
+                                    const std::shared_ptr<const PluginLayerSnapshot>& properties,
                                     float zoom) {
     assert(properties);
-    const auto priorProperties = latestPaintProperties.find(layerID);
+    const auto priorProperties = latestProperties.find(layerID);
     const auto priorZoom = latestZoom.find(layerID);
-    const bool propertiesChanged = priorProperties == latestPaintProperties.end() ||
-                                   priorProperties->second != properties;
+    const bool propertiesChanged = priorProperties == latestProperties.end() || priorProperties->second != properties;
     const bool queryRadiusChanged = propertiesChanged || priorZoom == latestZoom.end() || priorZoom->second != zoom;
-    if (propertiesChanged) latestPaintProperties.insert_or_assign(layerID, properties);
+    if (propertiesChanged) latestProperties.insert_or_assign(layerID, properties);
     if (queryRadiusChanged) latestZoom.insert_or_assign(layerID, zoom);
     const auto it = paintPropertyBinders.find(layerID);
     if (it == paintPropertyBinders.end()) {
-        if (queryRadiusChanged) updateQueryRadius(layerID, *properties, zoom);
+        if (queryRadiusChanged)
+            updateQueryRadius(layerID, properties->layer->pluginProperties, properties->paint, zoom);
         return false;
     }
     bool rebuildDrawable = false;
@@ -512,16 +513,17 @@ bool PluginBucket::synchronizePaint(const std::string& layerID,
         for (auto& [key, binders] : it->second) {
             (void)key;
             if (updated.insert(binders.get()).second)
-                rebuildDrawable = binders->synchronize(*properties) || rebuildDrawable;
+                rebuildDrawable = binders->synchronize(properties->paint) || rebuildDrawable;
         }
     }
     if (rebuildDrawable) uploaded = false;
-    if (queryRadiusChanged) updateQueryRadius(layerID, *properties, zoom);
+    if (queryRadiusChanged) updateQueryRadius(layerID, properties->layer->pluginProperties, properties->paint, zoom);
     return rebuildDrawable;
 }
 
 void PluginBucket::updateQueryRadius(const std::string& layerID,
-                                     const style::PluginPropertyMap& properties,
+                                     const style::PluginPropertyMap& layerProperties,
+                                     const style::PluginPropertyMap& paint,
                                      float zoom) {
     if (!registration->queryRadius) return;
     std::map<std::string, std::pair<mln_plugin_value, mln_plugin_value>> values;
@@ -544,11 +546,11 @@ void PluginBucket::updateQueryRadius(const std::string& layerID,
     cameraProperties.reserve(definitions.size());
     for (std::size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
-        const auto current = style::pluginPropertyValue(definition, properties);
+        const auto current = style::pluginPropertyValue(definition, definition.isLayout ? layerProperties : paint);
         cameraProperties.push_back({sizeof(mln_plugin_property_value_v1),
                                     {definition.name.data(), definition.name.size()},
                                     current.evaluate(zoom, definition, storage[i]),
-                                    properties.find(definition.name) != properties.end()});
+                                    layerProperties.contains(definition.name)});
     }
     const auto radius = registration->queryRadius(
         statistics.data(), statistics.size(), cameraProperties.data(), cameraProperties.size());

@@ -1,5 +1,6 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/layers/render_plugin_style_layer.hpp>
+#include <mln/map/transform_state.hpp>
 #include <mln/renderer/transition_parameters.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/tile/geojson_tile_data.hpp>
@@ -57,23 +58,25 @@ TEST(PluginPaintBinder, BucketRetainsImmutablePaintSnapshotAndRefreshesZoom) {
     };
     const auto shared = std::make_shared<const plugin::RegisteredLayer>(std::move(registration));
     PluginBucket first(shared), second(shared);
-    auto snapshot = std::make_shared<const style::PluginPropertyMap>();
+    const Immutable<style::PluginStyleLayer::Impl> layer = makeMutable<style::PluginStyleLayer::Impl>(
+        "layer", "source", shared);
+    auto snapshot = std::make_shared<const PluginLayerSnapshot>(PluginLayerSnapshot{layer, {}});
     EXPECT_FALSE(first.synchronizePaint("layer", snapshot, 10));
     EXPECT_FALSE(second.synchronizePaint("layer", snapshot, 10));
     EXPECT_EQ(2u, radiusCalls);
-    EXPECT_EQ(snapshot, first.latestPaintProperties.at("layer"));
-    EXPECT_EQ(snapshot, second.latestPaintProperties.at("layer"));
+    EXPECT_EQ(snapshot, first.latestProperties.at("layer"));
+    EXPECT_EQ(snapshot, second.latestProperties.at("layer"));
     for (unsigned frame = 0; frame < 100; ++frame) {
         EXPECT_FALSE(first.synchronizePaint("layer", snapshot, 10));
     }
     EXPECT_EQ(2u, radiusCalls);
     EXPECT_FALSE(first.synchronizePaint("layer", snapshot, 10.5));
     EXPECT_EQ(3u, radiusCalls);
-    EXPECT_EQ(snapshot, first.latestPaintProperties.at("layer"));
-    auto next = std::make_shared<const style::PluginPropertyMap>();
+    EXPECT_EQ(snapshot, first.latestProperties.at("layer"));
+    auto next = std::make_shared<const PluginLayerSnapshot>(PluginLayerSnapshot{layer, {}});
     EXPECT_FALSE(first.synchronizePaint("layer", next, 10.5));
     EXPECT_EQ(4u, radiusCalls);
-    std::weak_ptr<const style::PluginPropertyMap> retained = snapshot;
+    std::weak_ptr<const PluginLayerSnapshot> retained = snapshot;
     snapshot.reset();
     EXPECT_FALSE(retained.expired()); // The other tile still owns the old snapshot.
     second.synchronizePaint("layer", next, 10.5);
@@ -109,7 +112,80 @@ plugin::PropertyDefinition numberDefinition() {
                                         MLN_PLUGIN_EXPRESSION_COMPOSITE | MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
     return definition;
 }
+
+// The value of each property that a query callback got last, and whether the style sets it.
+std::map<std::string, std::pair<float, bool>> queriedProperties;
+
+void receiveQueryProperties(const mln_plugin_property_value_v1* properties, size_t count) {
+    queriedProperties.clear();
+    for (size_t i = 0; i < count; ++i) {
+        queriedProperties[std::string(properties[i].name.data, properties[i].name.size)] = {
+            properties[i].value.data.float_value, properties[i].explicitly_set != 0};
+    }
+}
+
+plugin::PropertyDefinition layoutDefinition() {
+    auto definition = numberDefinition();
+    definition.name = "test-layout";
+    definition.isLayout = true;
+    definition.expressionCapabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    return definition;
+}
 } // namespace
+
+TEST(PluginPaintBinder, QueryRadiusGetsLayoutValuesAndWhichPropertiesTheStyleSets) {
+    const auto paint = numberDefinition();
+    auto unset = numberDefinition();
+    unset.name = "test-unset";
+    const auto layout = layoutDefinition();
+    plugin::LayerType registration;
+    registration.properties = {paint, unset, layout};
+    registration.queryRadius = [](const mln_plugin_property_statistics_v1*,
+                                  size_t,
+                                  const mln_plugin_property_value_v1* properties,
+                                  size_t count) -> float {
+        receiveQueryProperties(properties, count);
+        return 0;
+    };
+    const auto shared = std::make_shared<const plugin::RegisteredLayer>(std::move(registration));
+    auto layer = makeMutable<style::PluginStyleLayer::Impl>("layer", "points", shared);
+    layer->pluginProperties.emplace(paint.name, expression(paint, "3"));
+    layer->pluginProperties.emplace(layout.name, expression(layout, "7"));
+    // The evaluated paint values hold every paint property, those that the style leaves unset at their default.
+    style::PluginPropertyMap evaluated{{paint.name, expression(paint, "4")}, {unset.name, expression(unset, "5")}};
+    PluginBucket bucket(shared);
+    bucket.synchronizePaint(
+        "layer", std::make_shared<const PluginLayerSnapshot>(PluginLayerSnapshot{std::move(layer), evaluated}), 10);
+    EXPECT_EQ((std::pair{4.0f, true}), queriedProperties.at(paint.name));
+    EXPECT_EQ((std::pair{5.0f, false}), queriedProperties.at(unset.name));
+    EXPECT_EQ((std::pair{7.0f, true}), queriedProperties.at(layout.name));
+}
+
+TEST(PluginProperties, QueryFeatureGetsLayoutValues) {
+    const auto paint = numberDefinition();
+    const auto layout = layoutDefinition();
+    plugin::LayerType registration;
+    registration.properties = {paint, layout};
+    registration.queryFeature = [](const mln_plugin_feature_v1*,
+                                   const mln_plugin_tile_point_v1*,
+                                   size_t,
+                                   const mln_plugin_query_context_v1*,
+                                   const mln_plugin_property_value_v1* properties,
+                                   size_t count) -> uint8_t {
+        receiveQueryProperties(properties, count);
+        return 1;
+    };
+    auto layer = makeMutable<style::PluginStyleLayer::Impl>(
+        "layer", "points", std::make_shared<const plugin::RegisteredLayer>(std::move(registration)));
+    layer->pluginProperties.emplace(layout.name, expression(layout, "7"));
+    RenderPluginStyleLayer renderLayer(std::move(layer));
+    RenderLayer& base = renderLayer;
+    base.evaluate(PropertyEvaluationParameters(10));
+    const auto feature = source().getFeature(0);
+    EXPECT_TRUE(base.queryIntersectsFeature({{10, 20}}, *feature, 10, TransformState{}, 1, mat4{}, FeatureState{}));
+    EXPECT_EQ((std::pair{5.0f, false}), queriedProperties.at(paint.name));
+    EXPECT_EQ((std::pair{7.0f, true}), queriedProperties.at(layout.name));
+}
 
 TEST(PluginProperties, DefaultColorsMatchStyleParsedColors) {
     plugin::PropertyDefinition definition;

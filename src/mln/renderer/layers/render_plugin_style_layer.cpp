@@ -95,7 +95,8 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
         transitioningPaintProperties.emplace(definition.name, style::PluginTransitioningPropertyValue{value});
         evaluatedPluginProperties.emplace(definition.name, std::move(value));
     }
-    evaluatedPaintSnapshot = std::make_shared<const style::PluginPropertyMap>(evaluatedPluginProperties);
+    propertiesSnapshot = std::make_shared<const PluginLayerSnapshot>(
+        PluginLayerSnapshot{staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties});
     passes = RenderPass::Translucent;
     styleDependencies = layerImpl.getDependencies();
 }
@@ -149,17 +150,19 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
                                               style::pluginPropertyValue(definition, impl.pluginProperties));
         }
     }
-    if (*evaluatedPaintSnapshot != evaluatedPluginProperties) {
-        evaluatedPaintSnapshot = std::make_shared<const style::PluginPropertyMap>(evaluatedPluginProperties);
+    const auto layer = staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl);
+    if (propertiesSnapshot->layer != layer || propertiesSnapshot->paint != evaluatedPluginProperties) {
+        propertiesSnapshot = std::make_shared<const PluginLayerSnapshot>(
+            PluginLayerSnapshot{layer, evaluatedPluginProperties});
     }
     // The paint property values at the camera for a callback; data-driven ones evaluate without a feature. The values
     // borrow `storage` until the next call.
     std::vector<style::PluginPropertyValue::EvaluationStorage> storage;
     const auto cameraValues = [&](bool withDataDriven) {
+        storage.resize(definitions.size());
         std::vector<mln_plugin_property_value_v1> values;
         values.reserve(definitions.size());
         for (size_t i = 0; i < definitions.size(); ++i) {
-        storage.resize(definitions.size());
             const auto& definition = definitions[i];
             if (definition.isLayout) continue;
             const auto& value = evaluatedPluginProperties.at(definition.name);
@@ -177,8 +180,7 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     } else {
         animated = false;
     }
-    auto properties = makeMutable<style::PluginStyleLayerProperties>(
-        staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties);
+    auto properties = makeMutable<style::PluginStyleLayerProperties>(layer, evaluatedPluginProperties);
     properties->crossfade = parameters.getCrossfadeParameters();
     const uint32_t allPasses = registration->drawPasses.size() == 32
                                    ? 0xffffffffu
@@ -277,7 +279,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
         auto& bucket = static_cast<PluginBucket&>(*renderData->bucket);
-        if (bucket.synchronizePaint(getID(), evaluatedPaintSnapshot, static_cast<float>(state.getZoom()))) {
+        if (bucket.synchronizePaint(getID(), propertiesSnapshot, static_cast<float>(state.getZoom()))) {
             removeTile(renderPass, tileID);
         }
         const auto previousBucket = getRenderTileBucketID(tileID);
@@ -399,7 +401,8 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     properties.reserve(definitions.size());
     for (size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
-        const auto value = style::pluginPropertyValue(definition, evaluatedPluginProperties);
+        const auto value = style::pluginPropertyValue(
+            definition, definition.isLayout ? impl.pluginProperties : evaluatedPluginProperties);
         mln_plugin_property_value_v1 property{};
         property.struct_size = sizeof(property);
         property.name = {definition.name.data(), definition.name.size()};

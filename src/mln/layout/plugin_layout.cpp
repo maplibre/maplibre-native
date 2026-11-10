@@ -331,7 +331,7 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
             }
             layerBinders.emplace(drawable.key, std::move(binders));
         }
-        bucket->updateQueryRadius(impl.id, impl.pluginProperties, zoom);
+        bucket->updateQueryRadius(impl.id, impl.pluginProperties, impl.pluginProperties, zoom);
     }
     if (!bucket->hasData()) return;
 

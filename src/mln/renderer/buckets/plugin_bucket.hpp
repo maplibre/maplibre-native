@@ -7,6 +7,7 @@
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/paint_property_binder.hpp>
 #include <mln/shaders/segment.hpp>
+#include <mln/style/layers/plugin_style_layer.hpp>
 #include <mln/style/plugin_property.hpp>
 
 #include <map>
@@ -216,6 +217,13 @@ struct PluginDrawableDefinition {
     bool cullBackFaces = false;
 };
 
+// The properties of a layer that the callbacks of its plugin get: those of the layer, which hold its layout values and
+// say which properties the style sets, and its evaluated paint values.
+struct PluginLayerSnapshot {
+    Immutable<style::PluginStyleLayer::Impl> layer;
+    style::PluginPropertyMap paint;
+};
+
 class PluginBucket final : public Bucket {
 public:
     explicit PluginBucket(plugin::RegisteredLayerPtr registration_)
@@ -227,12 +235,14 @@ public:
     float getQueryRadius(const RenderLayer&) const override;
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
-    // The render layer retains one immutable snapshot until its evaluated paint
+    // The render layer retains one immutable snapshot until the layer or its evaluated paint
     // changes. Tiles compare identity instead of copying/comparing every property.
-    bool synchronizePaint(const std::string& layerID,
-                          const std::shared_ptr<const style::PluginPropertyMap>&,
-                          float zoom);
-    void updateQueryRadius(const std::string& layerID, const style::PluginPropertyMap&, float zoom);
+    bool synchronizePaint(const std::string& layerID, const std::shared_ptr<const PluginLayerSnapshot>&, float zoom);
+    // `layerProperties` holds the properties of the layer, and `paint` its paint values.
+    void updateQueryRadius(const std::string& layerID,
+                           const style::PluginPropertyMap& layerProperties,
+                           const style::PluginPropertyMap& paint,
+                           float zoom);
     PluginPaintPropertyBinders* paintBinders(const std::string& layerID, uint64_t drawableKey);
 
     plugin::RegisteredLayerPtr registration;
@@ -241,7 +251,7 @@ public:
     std::vector<PluginDrawableDefinition> drawables;
     std::vector<PluginFeatureVertexRange> featureVertexRanges;
     std::map<std::string, std::map<uint64_t, std::shared_ptr<PluginPaintPropertyBinders>>> paintPropertyBinders;
-    std::map<std::string, std::shared_ptr<const style::PluginPropertyMap>> latestPaintProperties;
+    std::map<std::string, std::shared_ptr<const PluginLayerSnapshot>> latestProperties;
     std::map<std::string, float> latestZoom;
     float queryRadius = 0.0f;
     std::map<std::string, float> queryRadii;
