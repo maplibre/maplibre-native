@@ -14,7 +14,6 @@ pkg_search_module(WEBP libwebp REQUIRED)
 pkg_search_module(LIBUV libuv REQUIRED)
 pkg_search_module(ICUUC icu-uc)
 pkg_search_module(ICUI18N icu-i18n)
-find_program(ARMERGE NAMES armerge)
 
 if(MLN_WITH_WAYLAND AND NOT MLN_WITH_VULKAN)
     # See https://github.com/maplibre/maplibre-native/pull/2022
@@ -181,61 +180,6 @@ target_link_libraries(
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
 )
-
-if(MLN_CREATE_AMALGAMATION)
-    if(NOT ARMERGE)
-        message(FATAL_ERROR "armerge required when MLN_CREATE_AMALGAMATION=ON")
-    endif()
-    message(STATUS "Found armerge: ${ARMERGE}")
-    include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
-    set(STATIC_LIBS "")
-
-    find_static_library(STATIC_LIBS NAMES png)
-    find_static_library(STATIC_LIBS NAMES z)
-    find_static_library(STATIC_LIBS NAMES jpeg)
-    find_static_library(STATIC_LIBS NAMES webp)
-    find_static_library(STATIC_LIBS NAMES uv uv_a)
-    find_static_library(STATIC_LIBS NAMES ssl)
-    find_static_library(STATIC_LIBS NAMES crypto)
-    find_static_library(STATIC_LIBS NAMES bz2 bzip2)
-
-    if(MLN_WITH_VULKAN)
-        find_static_library(STATIC_LIBS NAMES glslang)
-        find_static_library(STATIC_LIBS NAMES glslang-default-resource-limits)
-        find_static_library(STATIC_LIBS NAMES SPIRV)
-        find_static_library(STATIC_LIBS NAMES SPIRV-Tools)
-        find_static_library(STATIC_LIBS NAMES SPIRV-Tools-opt)
-        find_static_library(STATIC_LIBS NAMES MachineIndependent)
-        find_static_library(STATIC_LIBS NAMES GenericCodeGen)
-    endif()
-
-    if(MLN_WITH_WEBGPU AND MLN_WEBGPU_IMPL_WGPU)
-        if(NOT WGPU_STATIC_LIBRARY)
-            message(FATAL_ERROR "Linux WebGPU amalgamation requires WGPU_STATIC_LIBRARY")
-        endif()
-        list(APPEND STATIC_LIBS "${WGPU_STATIC_LIBRARY}")
-    endif()
-
-    add_custom_command(
-        TARGET mbgl-core
-        POST_BUILD
-        COMMAND ${ARMERGE} --keep-symbols 'mln.*' --output libmbgl-core-amalgam.a
-            $<TARGET_FILE:mbgl-core>
-            $<TARGET_FILE:mbgl-freetype>
-            $<TARGET_FILE:mbgl-vendor-csscolorparser>
-            $<TARGET_FILE:mbgl-harfbuzz>
-            $<TARGET_FILE:mbgl-vendor-nunicode>
-            $<TARGET_FILE:mbgl-vendor-sqlite>
-            $<TARGET_FILE:mbgl-vendor-parsedate>
-            $<TARGET_FILE:mlt-cpp>
-            $<TARGET_FILE:fastpfor-lib>
-            ${ICUUC_LIBRARY_DIRS}/libicuuc.a
-            ${ICUUC_LIBRARY_DIRS}/libicudata.a
-            ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
-            ${STATIC_LIBS}
-    )
-
-endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)

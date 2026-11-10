@@ -418,21 +418,6 @@
   ],
   "buildPresets": [
     {
-      "name": "macos-core",
-      "configurePreset": "macos",
-      "targets": ["mbgl-core"]
-    },
-    {
-      "name": "linux-opengl-core",
-      "configurePreset": "linux-opengl",
-      "targets": ["mbgl-core"]
-    },
-    {
-      "name": "linux-vulkan-core",
-      "configurePreset": "linux-vulkan",
-      "targets": ["mbgl-core"]
-    },
-    {
       "name": "harmonyos-build",
       "hidden": true,
       "condition": {
@@ -451,21 +436,6 @@
       "name": "harmonyos-vulkan",
       "inherits": "harmonyos-build",
       "configurePreset": "harmonyos-vulkan",
-      "targets": ["mbgl-core"]
-    },
-    {
-      "name": "windows-opengl-core",
-      "configurePreset": "windows-opengl",
-      "targets": ["mbgl-core"]
-    },
-    {
-      "name": "windows-egl-core",
-      "configurePreset": "windows-egl",
-      "targets": ["mbgl-core"]
-    },
-    {
-      "name": "windows-vulkan-core",
-      "configurePreset": "windows-vulkan",
       "targets": ["mbgl-core"]
     }
   ]

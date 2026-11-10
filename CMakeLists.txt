@@ -21,7 +21,6 @@ option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
 option(MLN_USE_RUST "Use components in Rust" OFF)
 option(MLN_TEXT_SHAPING_HARFBUZZ "Use haffbuzz to shape complex text" ON)
 option(MLN_CREATE_AUTORELEASEPOOL "Create autoreleasepool in render loop" OFF)
-option(MLN_CREATE_AMALGAMATION "Create static amalgamation of core (requires amerge)" OFF)
 
 include(cmake/validate-backend-options.cmake)
 include(cmake/clang-tidy.cmake)
@@ -155,13 +154,6 @@ else()
 endif()
 
 include(cmake/plugins.cmake)
-
-# Override visibility for mbgl-core when building amalgamation
-if(MLN_CREATE_AMALGAMATION)
-    target_compile_options(mbgl-core PRIVATE
-        -fvisibility=default
-    )
-endif()
 
 list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/context.hpp
