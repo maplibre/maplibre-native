@@ -38,11 +38,11 @@ struct MapboxTileLimitExceededException : util::Exception {
         : util::Exception("Mapbox tile limit exceeded") {}
 };
 
-// Size and validity metadata of a stored resource, read without loading its data.
+// Size and validity metadata of a stored resource.
 struct RegionResourceInfo {
-    uint64_t size = 0;
-    std::optional<Timestamp> expires;
-    bool mustRevalidate = false;
+    const uint64_t size;
+    const std::optional<Timestamp> expires;
+    const bool mustRevalidate;
 
     // Same rule as Response::isUsable().
     bool isUsable() const { return !mustRevalidate || (expires && *expires > util::now()); }
@@ -89,8 +89,7 @@ public:
 
     // Return value is (response, stored size)
     std::optional<std::pair<Response, uint64_t>> getRegionResource(const Resource&);
-    // Cheap lookup that does not read the blob or update `accessed`. Returns the stored size and the
-    // validity metadata, so callers can tell whether the full response is needed.
+    // Return value is the stored size and validity metadata
     std::optional<RegionResourceInfo> hasRegionResource(const Resource&);
     uint64_t putRegionResource(int64_t regionID, const Resource&, const Response&);
     void putRegionResources(int64_t regionID, const std::list<std::tuple<Resource, Response>>&, OfflineRegionStatus&);
