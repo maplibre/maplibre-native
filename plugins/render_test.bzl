@@ -20,7 +20,7 @@ def plugin_render_test(name, data):
         srcs = ["//plugins:render_test.cpp"],
         args = ["--plugin-directory", native.package_name()],
         copts = CPP_FLAGS + MAPLIBRE_FLAGS,
-        data = data + [":plugin.json"],
+        data = data,
         local_defines = ["MLN_PLUGIN_HEADER=\\\"%s.hpp\\\"" % snake, "MLN_PLUGIN_REGISTER=mln_%s_register" % snake],
         tags = ["no-sandbox"],
         # Bazel builds the OpenGL (drawable) and Metal renderers.

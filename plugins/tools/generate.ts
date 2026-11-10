@@ -78,11 +78,7 @@ async function render(platform: (typeof platforms)[number], plugins: Plugin[]): 
   const supported = plugins.filter((plugin) => plugin.backends.some((backend) => platform.backends.includes(backend)));
   const files: Files = new Map();
   for (const template of await loadTemplates(platform.name)) {
-    if (template.scope === 'plugins') {
-      files.set(template.path(supported), template.default(supported));
-    } else {
-      for (const plugin of supported) files.set(template.path(plugin), template.default(plugin));
-    }
+    for (const plugin of supported) files.set(template.path(plugin), template.default(plugin));
   }
   return files;
 }

@@ -1,6 +1,6 @@
 import { code } from '../../code.ts';
 import { androidNamespace } from '../names.ts';
-import { ndkVersion } from '../versions.ts';
+import { cmakeVersion, ndkVersion } from '../versions.ts';
 import type { Plugin } from '../values.ts';
 
 // The path of the file in plugins/android.
@@ -49,7 +49,7 @@ android {
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.24.0+"
+            version = "${cmakeVersion()}"
         }
     }
     compileOptions {

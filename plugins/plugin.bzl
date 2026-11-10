@@ -21,11 +21,6 @@ def mln_plugin():
         srcs = native.glob(["shared/cpp/*.cpp", "shared/cpp/*.hpp", "vendor/**/*.hpp"], allow_empty = True),
         hdrs = native.glob(["shared/include/*.hpp"]),
         copts = CPP_FLAGS,
-        # A plugin may include its Metal shaders only in a Metal build: MLN_<ID>_METAL.
-        defines = select({
-            "//:metal_renderer": ["MLN_%s_METAL=1" % id.replace("-", "_").upper()],
-            "//conditions:default": [],
-        }),
         includes = ["shared/include"] + (["vendor"] if native.glob(["vendor/**"], allow_empty = True) else []),
         target_compatible_with = only_with_plugins,
         # The plugin itself has no renderer dependency: all interaction is C ABI.

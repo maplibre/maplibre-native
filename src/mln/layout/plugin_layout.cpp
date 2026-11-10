@@ -8,6 +8,7 @@
 #include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <limits>
@@ -48,20 +49,19 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                     layoutParameters->imageDependencies.emplace(
                         std::string(image.data.string_value.data, image.data.string_value.size), ImageType::Pattern);
             };
-            for (float z : {zoom - 1, zoom, zoom + 1}) {
-                if (!value.isDataDriven())
+            if (!value.isDataDriven()) {
+                for (float z : {zoom - 1, zoom, zoom + 1})
                     add(value.evaluate(z, definition, storage, &layoutParameters->availableImages));
-                else
-                    for (size_t i = 0; i < sourceLayer->featureCount(); ++i) {
-                        const auto feature = sourceLayer->getFeature(i);
-                        if (feature)
-                            add(value.evaluate(z + (value.isZoomConstant() ? 0 : 1),
-                                               *feature,
-                                               {},
-                                               definition,
-                                               storage,
-                                               &layoutParameters->availableImages));
-                    }
+                continue;
+            }
+            const std::array<float, 3> zooms{zoom, zoom + 1.0f, zoom + 2.0f};
+            const size_t zoomCount = value.isZoomConstant() ? 1 : zooms.size();
+            for (size_t i = 0; i < sourceLayer->featureCount(); ++i) {
+                const auto feature = sourceLayer->getFeature(i);
+                if (!feature) continue;
+                for (size_t z = 0; z < zoomCount; ++z)
+                    add(value.evaluate(
+                        zooms[z], *feature, {}, definition, storage, &layoutParameters->availableImages));
             }
         }
     }
@@ -86,13 +86,11 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
     for (size_t i = 0; i < registration->properties.size(); ++i) {
         const auto& definition = registration->properties[i];
         if (!definition.isLayout) continue;
-        const auto it = leader.pluginProperties.find(definition.name);
-        const auto value = it == leader.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                               : it->second;
+        const auto value = style::pluginPropertyValue(definition, leader.pluginProperties);
         layoutProperties.push_back({sizeof(mln_plugin_property_value_v1),
                                     {definition.name.data(), definition.name.size()},
                                     value.evaluate(zoom, definition, storage[i]),
-                                    static_cast<uint8_t>(it != leader.pluginProperties.end())});
+                                    static_cast<uint8_t>(leader.pluginProperties.contains(definition.name))});
     }
     context.properties = layoutProperties.data();
     context.property_count = layoutProperties.size();

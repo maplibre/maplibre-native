@@ -91,9 +91,7 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
     const auto& layerImpl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
         if (definition.isLayout) continue;
-        const auto property = layerImpl.pluginProperties.find(definition.name);
-        auto value = property == layerImpl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                                  : property->second;
+        auto value = style::pluginPropertyValue(definition, layerImpl.pluginProperties);
         transitioningPaintProperties.emplace(definition.name, style::PluginTransitioningPropertyValue{value});
         evaluatedPluginProperties.emplace(definition.name, std::move(value));
     }
@@ -108,9 +106,7 @@ void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) 
     const auto& definitions = impl.registration->properties;
     for (const auto& definition : definitions) {
         if (definition.isLayout) continue;
-        const auto property = impl.pluginProperties.find(definition.name);
-        auto value = property == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                             : property->second;
+        auto value = style::pluginPropertyValue(definition, impl.pluginProperties);
         if (!definition.supportsTransitions) {
             transitioningPaintProperties.insert_or_assign(definition.name,
                                                           style::PluginTransitioningPropertyValue{std::move(value)});
@@ -149,35 +145,35 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
                     definition,
                     parameters.now));
         } else {
-            const auto property = impl.pluginProperties.find(definition.name);
             evaluatedPluginProperties.emplace(definition.name,
-                                              property == impl.pluginProperties.end()
-                                                  ? style::defaultPluginPropertyValue(definition)
-                                                  : property->second);
+                                              style::pluginPropertyValue(definition, impl.pluginProperties));
         }
     }
     if (*evaluatedPaintSnapshot != evaluatedPluginProperties) {
         evaluatedPaintSnapshot = std::make_shared<const style::PluginPropertyMap>(evaluatedPluginProperties);
     }
-    if (registration->shouldAnimate) {
-        std::vector<style::PluginPropertyValue::EvaluationStorage> storage(definitions.size());
-        std::vector<mln_plugin_property_value_v1> animationProperties;
-        animationProperties.reserve(definitions.size());
-        auto storageIt = storage.begin();
-        for (const auto& definition : definitions) {
+    // The paint property values at the camera for a callback; data-driven ones evaluate without a feature. The values
+    // borrow `storage` until the next call.
+    std::vector<style::PluginPropertyValue::EvaluationStorage> storage;
+    const auto cameraValues = [&](bool withDataDriven) {
+        std::vector<mln_plugin_property_value_v1> values;
+        values.reserve(definitions.size());
+        for (size_t i = 0; i < definitions.size(); ++i) {
+        storage.resize(definitions.size());
+            const auto& definition = definitions[i];
             if (definition.isLayout) continue;
-            const auto propertyIt = evaluatedPluginProperties.find(definition.name);
-            const auto value = propertyIt == evaluatedPluginProperties.end()
-                                   ? style::defaultPluginPropertyValue(definition)
-                                   : propertyIt->second;
-            mln_plugin_property_value_v1 property{};
-            property.struct_size = sizeof(property);
-            property.name = {definition.name.data(), definition.name.size()};
-            property.value = value.evaluate(parameters.z, definition, *storageIt++);
-            property.explicitly_set = impl.pluginProperties.contains(definition.name);
-            animationProperties.push_back(property);
+            const auto& value = evaluatedPluginProperties.at(definition.name);
+            if (!withDataDriven && value.isDataDriven()) continue;
+            values.push_back({sizeof(mln_plugin_property_value_v1),
+                              {definition.name.data(), definition.name.size()},
+                              value.evaluate(parameters.z, definition, storage[i]),
+                              static_cast<uint8_t>(impl.pluginProperties.contains(definition.name))});
         }
-        animated = registration->shouldAnimate(animationProperties.data(), animationProperties.size()) != 0;
+        return values;
+    };
+    if (registration->shouldAnimate) {
+        const auto values = cameraValues(true);
+        animated = registration->shouldAnimate(values.data(), values.size()) != 0;
     } else {
         animated = false;
     }
@@ -189,20 +185,8 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
                                    : (uint32_t{1} << registration->drawPasses.size()) - 1;
     properties->rendering.enabled_passes = allPasses;
     if (registration->evaluateLayer) {
-        std::vector<mln_plugin_property_value_v1> cameraProperties;
-        std::vector<style::PluginPropertyValue::EvaluationStorage> storage(definitions.size());
-        for (size_t i = 0; i < definitions.size(); ++i) {
-            const auto& definition = definitions[i];
-            if (definition.isLayout) continue;
-            const auto& value = evaluatedPluginProperties.at(definition.name);
-            if (value.isDataDriven()) continue;
-            cameraProperties.push_back({sizeof(mln_plugin_property_value_v1),
-                                        {definition.name.data(), definition.name.size()},
-                                        value.evaluate(parameters.z, definition, storage[i]),
-                                        static_cast<uint8_t>(impl.pluginProperties.contains(definition.name))});
-        }
-        const auto status = registration->evaluateLayer(
-            cameraProperties.data(), cameraProperties.size(), &properties->rendering);
+        const auto values = cameraValues(false);
+        const auto status = registration->evaluateLayer(values.data(), values.size(), &properties->rendering);
         const auto& rendering = properties->rendering;
         if (status != MLN_PLUGIN_STATUS_OK || rendering.struct_size != sizeof(rendering) ||
             (rendering.enabled_passes & ~allPasses) || rendering.translation_anchor_viewport > 1 ||
@@ -322,7 +306,6 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                     continue;
                 }
 
-                std::size_t vertexCount = 0;
                 gfx::AttributeDataType firstType = gfx::AttributeDataType::Invalid;
                 for (const auto& binding : definition.attributes) {
                     const auto stream = bucket.vertexStreams.find(binding.streamID);
@@ -335,10 +318,9 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                                                stream->second->getRawSize(),
                                                type);
                     }
-                    vertexCount = std::max(vertexCount, stream->second->getRawCount());
                     if (firstType == gfx::AttributeDataType::Invalid) firstType = type;
                 }
-                if (!vertexCount || firstType == gfx::AttributeDataType::Invalid) continue;
+                if (firstType == gfx::AttributeDataType::Invalid) continue;
 
                 auto builder = context.createDrawableBuilder("plugin/" + registration->type);
                 builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
@@ -417,9 +399,7 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     properties.reserve(definitions.size());
     for (size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
-        const auto propertyIt = evaluatedPluginProperties.find(definition.name);
-        const auto value = propertyIt == evaluatedPluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                                         : propertyIt->second;
+        const auto value = style::pluginPropertyValue(definition, evaluatedPluginProperties);
         mln_plugin_property_value_v1 property{};
         property.struct_size = sizeof(property);
         property.name = {definition.name.data(), definition.name.size()};

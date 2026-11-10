@@ -13,7 +13,6 @@ struct DrawableData final : gfx::DrawableData {
           passIndex(passIndex_) {}
     std::string shaderID;
     uint32_t passIndex;
-    bool uniformFailed = false;
     struct UniformData {
         std::vector<uint8_t> scratch;
         std::vector<uint8_t> uploaded;

@@ -1,5 +1,6 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 
+#include <mln/plugin/plugin_conversion.hpp>
 #include <mln/plugin/plugin_registry.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/plugin_property.hpp>
@@ -14,29 +15,6 @@
 
 namespace mln {
 namespace {
-
-style::PluginPropertyValue propertyValue(const plugin::PropertyDefinition& definition,
-                                         const style::PluginPropertyMap& properties) {
-    const auto it = properties.find(definition.name);
-    return it == properties.end() ? style::defaultPluginPropertyValue(definition) : it->second;
-}
-
-std::size_t componentCount(mln_plugin_property_encoding_v1 encoding) {
-    switch (encoding) {
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
-        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
-        case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
-            return 1;
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
-            return 2;
-        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
-        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
-        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
-        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
-            return 4;
-    }
-    return 0;
-}
 
 void encodedValue(const mln_plugin_value& value,
                   mln_plugin_property_encoding_v1 encoding,
@@ -227,28 +205,12 @@ PluginPaintPropertyBinder::PluginPaintPropertyBinder(plugin::PropertyDefinition 
 }
 
 gfx::AttributeDataType PluginPaintPropertyBinder::attributeType() const noexcept {
-    if (binding.minimumAttributeID == binding.maximumAttributeID) {
-        return componentCount() == 1 ? gfx::AttributeDataType::Float2 : gfx::AttributeDataType::Float4;
-    }
-    switch (binding.encoding) {
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
-        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
-        case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
-            return gfx::AttributeDataType::Float;
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
-            return gfx::AttributeDataType::Float2;
-        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
-        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
-        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
-            return gfx::AttributeDataType::Float4;
-        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
-            return gfx::AttributeDataType::UByte4Normalized;
-    }
-    return gfx::AttributeDataType::Invalid;
+    return plugin::attributeType(
+        plugin::propertyAttributeType(binding.encoding, binding.minimumAttributeID == binding.maximumAttributeID));
 }
 
 std::size_t PluginPaintPropertyBinder::componentCount() const noexcept {
-    return mln::componentCount(binding.encoding);
+    return plugin::propertyEncodingSize(binding.encoding) / sizeof(float);
 }
 
 float PluginPaintPropertyBinder::interpolationFactor(float zoom) const noexcept {
@@ -426,7 +388,7 @@ PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::RegisteredL
         if (definition == definitions.end()) continue;
         binders.emplace_back(*definition,
                              binding,
-                             propertyValue(*definition, properties),
+                             style::pluginPropertyValue(*definition, properties),
                              bucketZoom,
                              drawableKey,
                              vertexCount,
@@ -476,7 +438,7 @@ void PluginPaintPropertyBinders::writeUniforms(float zoom,
 bool PluginPaintPropertyBinders::synchronize(const style::PluginPropertyMap& properties) {
     bool rebuildDrawable = false;
     for (auto& binder : binders) {
-        const auto replacement = propertyValue(binder.getDefinition(), properties);
+        const auto replacement = style::pluginPropertyValue(binder.getDefinition(), properties);
         rebuildDrawable = binder.synchronize(replacement) || rebuildDrawable;
     }
     return rebuildDrawable;
@@ -582,7 +544,7 @@ void PluginBucket::updateQueryRadius(const std::string& layerID,
     cameraProperties.reserve(definitions.size());
     for (std::size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
-        const auto current = propertyValue(definition, properties);
+        const auto current = style::pluginPropertyValue(definition, properties);
         cameraProperties.push_back({sizeof(mln_plugin_property_value_v1),
                                     {definition.name.data(), definition.name.size()},
                                     current.evaluate(zoom, definition, storage[i]),

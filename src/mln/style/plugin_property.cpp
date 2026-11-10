@@ -303,6 +303,12 @@ PluginPropertyValue defaultPluginPropertyValue(const plugin::PropertyDefinition&
     });
 }
 
+PluginPropertyValue pluginPropertyValue(const plugin::PropertyDefinition& definition,
+                                        const PluginPropertyMap& properties) {
+    const auto it = properties.find(definition.name);
+    return it == properties.end() ? defaultPluginPropertyValue(definition) : it->second;
+}
+
 std::optional<PluginPropertyValue> convertPluginPropertyValue(const plugin::PropertyDefinition& definition,
                                                               const conversion::Convertible& value,
                                                               conversion::Error& error) {

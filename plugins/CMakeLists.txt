@@ -16,7 +16,6 @@ foreach(manifest ${plugin_manifests})
     get_filename_component(directory ${manifest} DIRECTORY)
     get_filename_component(id ${directory} NAME)
     string(REPLACE "-" "_" snake ${id})
-    string(TOUPPER ${snake} upper)
 
     file(GLOB sources CONFIGURE_DEPENDS ${directory}/shared/cpp/*.cpp)
     add_library(mln-${id} STATIC ${sources})
@@ -24,10 +23,6 @@ foreach(manifest ${plugin_manifests})
     set_target_properties(mln-${id} PROPERTIES POSITION_INDEPENDENT_CODE ON)
     target_include_directories(mln-${id} PUBLIC ${directory}/shared/include PRIVATE ${directory}/vendor)
     target_link_libraries(mln-${id} PUBLIC mbgl-core)
-    if(MLN_WITH_METAL)
-        # A plugin may include its Metal shaders only in a Metal build.
-        target_compile_definitions(mln-${id} PRIVATE MLN_${upper}_METAL=1)
-    endif()
 
     file(GLOB tests CONFIGURE_DEPENDS ${directory}/tests/*.test.cpp)
     if(MLN_WITH_VULKAN)

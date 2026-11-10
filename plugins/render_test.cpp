@@ -8,7 +8,7 @@
 //     layer type <type>. A new test of the layer needs no change to the plugin. render-tests/ignores.json leaves out
 //     tests, as the ignore files of the platforms do: {"render-tests/<test>": "reason"}.
 //
-// The runner does nothing when the `backends` of the plugin.json do not have the renderer of this build.
+// The runner does nothing when no layer type of the plugin supports the renderer of this build.
 #include <mln/render_test.hpp>
 
 #include MLN_PLUGIN_HEADER
@@ -18,12 +18,12 @@
 #include <rapidjson/writer.h>
 
 #include <cctype>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <iterator>
 #include <map>
-#include <regex>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -33,19 +33,29 @@ namespace {
 namespace fs = std::filesystem;
 
 #if MLN_RENDER_BACKEND_METAL
-constexpr auto backend = "metal";
+constexpr uint32_t backend = MLN_PLUGIN_BACKEND_METAL;
 constexpr auto repositoryManifest = "metrics/ios-metal-render-test-runner-style.json";
 #elif MLN_RENDER_BACKEND_VULKAN
-constexpr auto backend = "vulkan";
+constexpr uint32_t backend = MLN_PLUGIN_BACKEND_VULKAN;
 constexpr auto repositoryManifest = "metrics/linux-vulkan.json";
 #else
-constexpr auto backend = "opengl";
+constexpr uint32_t backend = MLN_PLUGIN_BACKEND_OPENGL;
 constexpr auto repositoryManifest = "metrics/linux-opengl.json";
 #endif
 
 std::string readFile(const fs::path& path) {
     std::ifstream file(path, std::ios::binary);
     return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+}
+
+// The JSON object in the file at `path`. A file that cannot be read, or that holds no object, ends the run.
+rapidjson::Document readJson(const fs::path& path) {
+    rapidjson::Document document;
+    if (!fs::is_regular_file(path) || document.Parse(readFile(path).c_str()).HasParseError() || !document.IsObject()) {
+        std::cerr << "Cannot read a JSON object from " << path << '\n';
+        std::exit(1);
+    }
+    return document;
 }
 
 std::string escape(const std::string& text) {
@@ -57,37 +67,29 @@ std::string escape(const std::string& text) {
     return result;
 }
 
-// The value of `--name value`, `--name=value` or `-p value` in `args`; the flag is removed from `args` when `remove`.
-std::string flag(std::vector<std::string>& args, const std::string& name, const std::string& shortName, bool remove) {
+// Removes `--name value` or `--name=value` from `args` and returns the value.
+std::string takeFlag(std::vector<std::string>& args, const std::string& name) {
     for (size_t i = 0; i < args.size(); ++i) {
-        const auto& arg = args[i];
-        if (arg == name || (!shortName.empty() && arg == shortName)) {
-            if (i + 1 == args.size()) return {};
+        if (args[i] == name && i + 1 < args.size()) {
             auto value = args[i + 1];
-            if (remove) args.erase(args.begin() + i, args.begin() + i + 2);
+            args.erase(args.begin() + i, args.begin() + i + 2);
             return value;
         }
-        if (arg.rfind(name + "=", 0) == 0) {
-            auto value = arg.substr(name.size() + 1);
-            if (remove) args.erase(args.begin() + i);
+        if (args[i].starts_with(name + "=")) {
+            auto value = args[i].substr(name.size() + 1);
+            args.erase(args.begin() + i);
             return value;
         }
     }
     return {};
 }
 
-std::string manifestValue(const std::string& manifest, const std::string& key) {
-    std::smatch match;
-    std::regex pattern("\"" + key + "\"\\s*:\\s*\"([^\"]*)\"");
-    return std::regex_search(manifest, match, pattern) ? match[1].str() : std::string{};
-}
-
 std::map<std::string, std::string> ignoredTests(const fs::path& path) {
     std::map<std::string, std::string> ignored;
-    const auto text = readFile(path);
-    const std::regex entry("\"([^\"]+)\"\\s*:\\s*\"([^\"]*)\"");
-    for (auto it = std::sregex_iterator(text.begin(), text.end(), entry); it != std::sregex_iterator(); ++it) {
-        ignored.emplace((*it)[1].str(), (*it)[2].str());
+    if (!fs::exists(path)) return ignored;
+    const auto json = readJson(path);
+    for (const auto& entry : json.GetObject()) {
+        if (entry.value.IsString()) ignored.emplace(entry.name.GetString(), entry.value.GetString());
     }
     return ignored;
 }
@@ -130,8 +132,12 @@ std::string replaceLayerTypes(const std::string& style, const std::map<std::stri
 std::string filterForLayerTypes(const fs::path& manifestPath,
                                 const std::map<std::string, std::string>& layerTypes,
                                 const std::map<std::string, std::string>& ignored) {
-    const auto base =
-        (manifestPath.parent_path() / manifestValue(readFile(manifestPath), "base_test_path")).lexically_normal();
+    const auto manifest = readJson(manifestPath);
+    if (!manifest.HasMember("base_test_path") || !manifest["base_test_path"].IsString()) {
+        std::cerr << manifestPath << " has no base_test_path\n";
+        std::exit(1);
+    }
+    const auto base = (manifestPath.parent_path() / manifest["base_test_path"].GetString()).lexically_normal();
     std::vector<std::string> tests;
     for (const auto& entry : fs::recursive_directory_iterator(base)) {
         if (entry.path().filename() != "style.json") continue;
@@ -152,33 +158,27 @@ std::string filterForLayerTypes(const fs::path& manifestPath,
     return filter + ")/style\\.json$";
 }
 
-std::vector<std::string> registeredLayerTypes;
+// The layer types of the plugin that support the renderer of this build.
+std::vector<std::string> supportedLayerTypes;
 
 // The built-in layer types that the plugin implements, each with the layer type of the plugin that implements it.
 std::map<std::string, std::string> implementedLayerTypes() {
     constexpr std::string_view prefix = "org.maplibre.";
     std::map<std::string, std::string> types;
-    for (const auto& type : registeredLayerTypes) {
+    for (const auto& type : supportedLayerTypes) {
         if (type.starts_with(prefix)) types.emplace(type.substr(prefix.size()), type);
     }
     return types;
 }
 
-// Collects the layer types of the plugin instead of registering it.
+// Collects the layer types of the plugin that support the renderer of this build instead of registering it.
 mln_plugin_status collectLayerTypes(const mln_plugin_descriptor_v1* descriptor, char*, size_t) {
     for (size_t i = 0; i < descriptor->layer_type_count; ++i) {
-        const auto& type = descriptor->layer_types[i].layer_type;
-        registeredLayerTypes.emplace_back(type.data, type.size);
+        const auto& layerType = descriptor->layer_types[i];
+        if (layerType.backend_mask & backend)
+            supportedLayerTypes.emplace_back(layerType.layer_type.data, layerType.layer_type.size);
     }
     return MLN_PLUGIN_STATUS_OK;
-}
-
-// Whether the plugin.json in `directory` has no `backends`, or the backend of this build among them.
-bool hasBackend(const fs::path& directory) {
-    const auto json = readFile(directory / "plugin.json");
-    std::smatch backends;
-    if (!std::regex_search(json, backends, std::regex("\"backends\"\\s*:\\s*\\[([^\\]]*)\\]"))) return true;
-    return backends[1].str().find(std::string("\"") + backend + "\"") != std::string::npos;
 }
 
 } // namespace
@@ -194,10 +194,10 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> args(argv, argv + argc);
     mln::TestStyleTransform transformStyle;
-    const fs::path directory = flag(args, "--plugin-directory", "", true);
+    const fs::path directory = takeFlag(args, "--plugin-directory");
     if (!directory.empty()) {
-        if (!hasBackend(directory)) {
-            std::cout << "* skipped: " << directory << " has no " << backend << " backend\n";
+        if (supportedLayerTypes.empty()) {
+            std::cout << "* skipped: " << directory << " does not support the renderer of this build\n";
             return 0;
         }
         if (fs::exists(directory / "render-tests/manifest.json")) {

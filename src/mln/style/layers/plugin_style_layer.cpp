@@ -19,6 +19,11 @@ std::optional<std::string> pluginTransitionPropertyName(const plugin::LayerType&
     return definition && definition->supportsTransitions ? std::optional<std::string>{std::move(propertyName)}
                                                          : std::nullopt;
 }
+
+// Whether the property changes the layout of the layer: layout properties, and images, which the layout requests.
+bool affectsLayout(const plugin::PropertyDefinition& definition) {
+    return definition.isLayout || definition.type == MLN_PLUGIN_VALUE_IMAGE;
+}
 } // namespace
 
 PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, plugin::RegisteredLayerPtr registration_)
@@ -30,11 +35,9 @@ bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const
     if (filter != other.filter || visibility != other.visibility) return true;
     const auto& rhs = static_cast<const Impl&>(other);
     for (const auto& definition : registration->properties) {
-        if (!definition.isLayout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
-        const auto a = pluginProperties.find(definition.name), b = rhs.pluginProperties.find(definition.name);
-        const auto av = a == pluginProperties.end() ? defaultPluginPropertyValue(definition) : a->second;
-        const auto bv = b == rhs.pluginProperties.end() ? defaultPluginPropertyValue(definition) : b->second;
-        if (av != bv) return true;
+        if (affectsLayout(definition) &&
+            pluginPropertyValue(definition, pluginProperties) != pluginPropertyValue(definition, rhs.pluginProperties))
+            return true;
     }
     return false;
 }
@@ -42,11 +45,9 @@ bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const
 void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
     writer.StartObject();
     for (const auto& definition : registration->properties) {
-        if (!definition.isLayout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
-        const auto it = pluginProperties.find(definition.name);
-        const auto value = it == pluginProperties.end() ? defaultPluginPropertyValue(definition) : it->second;
+        if (!affectsLayout(definition)) continue;
         writer.String(definition.name);
-        conversion::stringify(writer, value.toStyleProperty().getValue());
+        conversion::stringify(writer, pluginPropertyValue(definition, pluginProperties).toStyleProperty().getValue());
     }
     writer.EndObject();
 }
@@ -93,12 +94,8 @@ StyleProperty PluginStyleLayer::getProperty(const std::string& name) const {
                    ? StyleProperty{TransitionOptions{}.serialize(), StyleProperty::Kind::Transition}
                    : StyleProperty{transition->second.serialize(), StyleProperty::Kind::Transition};
     }
-    const auto value = impl().pluginProperties.find(name);
-    if (value != impl().pluginProperties.end()) {
-        return value->second.toStyleProperty();
-    }
     const auto definition = impl().registration->findProperty(name);
-    return definition ? defaultPluginPropertyValue(*definition).toStyleProperty() : StyleProperty{};
+    return definition ? pluginPropertyValue(*definition, impl().pluginProperties).toStyleProperty() : StyleProperty{};
 }
 
 std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::string& name,

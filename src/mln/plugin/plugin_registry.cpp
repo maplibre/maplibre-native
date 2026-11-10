@@ -1,4 +1,5 @@
 #include <mln/plugin/plugin_registry.hpp>
+#include <mln/plugin/plugin_conversion.hpp>
 #include <mln/plugin/plugin_style_layer_factory.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 
@@ -57,23 +58,6 @@ bool validVertexType(mln_plugin_vertex_attribute_type type) {
     return type >= MLN_PLUGIN_VERTEX_INT16 && type <= MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED;
 }
 
-uint32_t propertyEncodingSize(mln_plugin_property_encoding_v1 encoding) {
-    switch (encoding) {
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
-        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
-        case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
-            return 4;
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
-            return 8;
-        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
-        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
-        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
-        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
-            return 16;
-    }
-    return 0;
-}
-
 uint32_t propertyEncodingAlignment(mln_plugin_property_encoding_v1 encoding) {
     switch (encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
@@ -89,24 +73,6 @@ uint32_t propertyEncodingAlignment(mln_plugin_property_encoding_v1 encoding) {
             return 4 * alignof(float);
     }
     return 0;
-}
-
-mln_plugin_vertex_attribute_type propertyAttributeType(mln_plugin_property_encoding_v1 encoding) {
-    switch (encoding) {
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
-        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
-        case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
-            return MLN_PLUGIN_VERTEX_FLOAT;
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
-            return MLN_PLUGIN_VERTEX_FLOAT_X2;
-        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
-        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
-        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
-            return MLN_PLUGIN_VERTEX_FLOAT_X4;
-        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
-            return MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED;
-    }
-    return static_cast<mln_plugin_vertex_attribute_type>(0);
 }
 
 bool appendShaders(const std::string& pluginID,
@@ -271,9 +237,7 @@ bool appendShaders(const std::string& pluginID,
             const auto encodingSize = propertyEncodingSize(binding.encoding);
             const auto encodingAlignment = propertyEncodingAlignment(binding.encoding);
             const bool packed = binding.minimum_attribute_id == binding.maximum_attribute_id;
-            const auto attributeType = packed ? (encodingSize == 4 ? MLN_PLUGIN_VERTEX_FLOAT_X2
-                                                                   : MLN_PLUGIN_VERTEX_FLOAT_X4)
-                                              : propertyAttributeType(binding.encoding);
+            const auto attributeType = propertyAttributeType(binding.encoding, packed);
             const auto uniform = std::find_if(
                 shader.uniformBlocks.begin(), shader.uniformBlocks.end(), [&](const auto& candidate) {
                     return candidate.id == binding.uniform_id;

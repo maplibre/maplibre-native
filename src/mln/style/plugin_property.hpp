@@ -101,6 +101,8 @@ private:
 using PluginPropertyMap = std::map<std::string, PluginPropertyValue>;
 
 PluginPropertyValue defaultPluginPropertyValue(const plugin::PropertyDefinition&);
+// The value of the property in `properties`, or its default.
+PluginPropertyValue pluginPropertyValue(const plugin::PropertyDefinition&, const PluginPropertyMap& properties);
 std::optional<PluginPropertyValue> convertPluginPropertyValue(const plugin::PropertyDefinition&,
                                                               const conversion::Convertible&,
                                                               conversion::Error&);

@@ -10,18 +10,9 @@ export interface Plugin {
   includeDirectories: string[];
 }
 
-// A template module in templates/<platform>: where its file goes relative to plugins/<platform>, and what is in it.
-// The file is a wrapper of each plugin, or with `scope = 'plugins'` one file for all the plugins of the platform.
-interface PluginTemplate {
-  scope?: 'plugin';
+// A template module in templates/<platform>: where the file of a plugin's wrapper goes relative to plugins/<platform>,
+// and what is in it.
+export interface Template {
   path: (plugin: Plugin) => string;
   default: (plugin: Plugin) => string;
 }
-
-interface PluginsTemplate {
-  scope: 'plugins';
-  path: (plugins: Plugin[]) => string;
-  default: (plugins: Plugin[]) => string;
-}
-
-export type Template = PluginTemplate | PluginsTemplate;
