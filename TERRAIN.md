@@ -52,6 +52,10 @@ Terrain rendering enables draping the map over 3D elevation data from Digital El
   fill-extrusion elevation is GL/WebGPU only** - see the backend parity section.
   **Heatmap caveat:** kernels are elevated by their centre only, and the colour-ramp
   composite is still a screen-space pass that draws over everything.
+  **Circle and heatmap occlusion:** a circle or heatmap kernel whose centre is behind terrain is
+  hidden, from the packed terrain depth texture in the vertex shader (`calculate_visibility`, as
+  for symbols). maplibre-gl-js does this for circles but not for heatmap kernels, so the heatmap
+  half goes past GL JS. All four backends.
 - **Exaggeration**: styled vertical exaggeration multiplier (1.0 = true scale)
 - **Shared Elevation Function**: a `get_elevation()` helper in every backend's
   shader prelude
@@ -932,7 +936,8 @@ terrain (`calculate_visibility`), so labels no longer show through mountains.
 - `TerrainDepthShader` re-renders the terrain meshes (same DEM displacement as
   the terrain shader, sharing its UBO layout) into a viewport-sized target,
   packing the fragment depth into RGBA8. It is driven by
-  `RenderTerrain::renderDepth` after the drape targets, from a depth twin of
+  `RenderTerrain::renderDepth` before the render targets, so a heatmap kernel
+  can read it, from a depth twin of
   each mesh drawable held in a separate layer group; the existing terrain
   tweaker fills both groups' UBOs.
 - `RenderTerrain::getDepthTexture` hands symbol tweakers the packed texture, or
