@@ -124,9 +124,10 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
 
         if (features3d) {
-            const auto depth = (drawable.getEnableDepth() && depthMode3d) ? *depthMode3d : gfx::DepthMode::disabled();
+            auto depth = (drawable.getEnableDepth() && depthMode3d) ? *depthMode3d : gfx::DepthMode::disabled();
             const auto stencil = (drawable.getEnableStencil() && stencilMode3d) ? *stencilMode3d
                                                                                 : gfx::StencilMode::disabled();
+            if (drawable.getEnableDepth() && drawable.getDepthMaskFor3D()) depth.mask = *drawable.getDepthMaskFor3D();
             drawableWebGPU.setDepthModeFor3D(depth);
             drawableWebGPU.setStencilModeFor3D(stencil);
         }
