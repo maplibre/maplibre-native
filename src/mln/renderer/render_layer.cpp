@@ -34,6 +34,10 @@ void RenderLayer::transition(const TransitionParameters& parameters, Immutable<s
     transition(parameters);
 }
 
+bool RenderLayer::settlesCrossfade(bool terrainEnabled) const {
+    return terrainEnabled && !is3D();
+}
+
 bool RenderLayer::needsPlacement() const {
     return baseImpl->getTypeInfo()->crossTileIndex == style::LayerTypeInfo::CrossTileIndex::Required &&
            !placementData.empty();

@@ -1000,7 +1000,7 @@ bool RenderTerrain::updateElevationIndex() {
     return true;
 }
 
-std::optional<double> RenderTerrain::getElevationForLatLng(const LatLng& latLng) const {
+std::optional<double> RenderTerrain::getElevationForLatLng(const LatLng& latLng, UnwrappedTileID* from) const {
     if (!demSource || !isEnabled()) {
         return std::nullopt;
     }
@@ -1029,6 +1029,9 @@ std::optional<double> RenderTerrain::getElevationForLatLng(const LatLng& latLng)
     }
     if (!best) {
         return std::nullopt;
+    }
+    if (from) {
+        *from = best->id;
     }
     // Sample the tile just found; getElevation would search the DEM tiles for it again
     return static_cast<double>(sampleDEM(*best->data,

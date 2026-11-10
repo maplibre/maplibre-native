@@ -315,6 +315,15 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                                  : 0;
     tileParameters.coverTileLimitOrigin = RenderTerrain::meshTileCapOrigin(updateParameters->transformState);
 
+    // The ground under the camera's eye has to be known to keep the eye above it
+    // (Renderer::Impl::render), and its DEM tile lies outside the view's cover as often as not.
+    std::optional<LatLng> terrainEye;
+    if (terrainEnabled) {
+        if (const auto eye = updateParameters->transformState.getFreeCameraOptions().getLocation()) {
+            terrainEye = eye->location;
+        }
+    }
+
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;
 
@@ -406,6 +415,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         const bool layerAddedOrChanged = layerDiff.added.contains(id) || layerDiff.changed.contains(id);
         evaluationParameters.layerChanged = layerAddedOrChanged;
         evaluationParameters.hasCrossfade = layer.hasCrossfade();
+        // A layer drawn into a terrain drape keeps what it was drawn with until its tiles change, so a
+        // drape target drawn while a pattern cross-fades after a zoom level change would keep the
+        // half-faded pattern for good, finer than its neighbors'. Skip the fade there. Unlike
+        // hasCrossfade, which says a fade is still running, this ends it.
+        evaluationParameters.crossfadeSettled = layer.settlesCrossfade(terrainEnabled);
 
         // Only re-evaluate on change of zoom if the style has some reference to it
         using expression::Dependency;
@@ -543,6 +557,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             sourceNeedsRendering = true;
         }
         tileParameters.coverTileLimit = isDemSource ? 0 : coverTileLimit;
+        tileParameters.alsoCover = isDemSource ? terrainEye : std::nullopt;
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
         // The DEM source additionally keeps the coarser ancestors of its cover that are already
