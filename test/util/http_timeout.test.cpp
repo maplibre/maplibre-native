@@ -38,6 +38,9 @@ TEST(HttpRetry, RateLimit) {
 
     // Default
     ASSERT_EQ(Seconds(5), errorRetryTimeout(Response::Error::Reason::RateLimit, 1, {}));
+
+    // A retry time that has already passed retries at once
+    ASSERT_EQ(Duration::zero(), errorRetryTimeout(Response::Error::Reason::RateLimit, 1, {util::now() - Seconds(1)}));
 }
 
 TEST(HttpRetry, ExpiredInitial) {
