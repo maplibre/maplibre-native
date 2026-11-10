@@ -15,8 +15,10 @@
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/util/mat4.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace mln {
@@ -40,9 +42,6 @@ public:
     gfx::AttributeBindingArray attributeBindings;
     gfx::AttributeBindingArray instanceBindings;
 
-    // Store dummy vertex buffers to keep them alive
-    std::vector<std::unique_ptr<gfx::VertexBufferResource>> dummyVertexBuffers;
-
     UniformBufferArray uniformBuffers;
     gfx::UniformBufferPtr uboIndexUniform;
 
@@ -63,11 +62,84 @@ public:
     WGPUDepthStencilState depthStencilState = {};
     gfx::StencilMode previousStencilMode;
 
-    // WebGPU-specific resources needed for rendering
+    // The UBO index that uboIndexUniform holds.
+    uint32_t uboIndexValue = 0;
+
+    // A bind group and the layout and entries it was built from. It holds a
+    // reference on each entry's resource, so a handle it compares can't be
+    // freed and reused for another object.
     struct BindGroupRecord {
         uint32_t slot = 0;
         uint32_t group = 0;
+        WGPUBindGroupLayout layout = nullptr;
         WGPUBindGroup handle = nullptr;
+        std::vector<WGPUBindGroupEntry> entries;
+
+        BindGroupRecord() = default;
+        BindGroupRecord(BindGroupRecord&& other) noexcept
+            : slot(other.slot),
+              group(other.group),
+              layout(other.layout),
+              handle(std::exchange(other.handle, nullptr)),
+              entries(std::exchange(other.entries, {})) {}
+        BindGroupRecord& operator=(BindGroupRecord&&) = delete;
+        ~BindGroupRecord() { reset(); }
+
+        bool matches(WGPUBindGroupLayout layout_, const std::vector<WGPUBindGroupEntry>& entries_) const {
+            return handle && layout == layout_ &&
+                   std::equal(entries.begin(),
+                              entries.end(),
+                              entries_.begin(),
+                              entries_.end(),
+                              [](const WGPUBindGroupEntry& a, const WGPUBindGroupEntry& b) {
+                                  return a.binding == b.binding && a.buffer == b.buffer && a.offset == b.offset &&
+                                         a.size == b.size && a.sampler == b.sampler && a.textureView == b.textureView;
+                              });
+        }
+
+        void assign(uint32_t slot_,
+                    uint32_t group_,
+                    WGPUBindGroupLayout layout_,
+                    WGPUBindGroup handle_,
+                    std::vector<WGPUBindGroupEntry> entries_) {
+            reset();
+            slot = slot_;
+            group = group_;
+            layout = layout_;
+            handle = handle_;
+            entries = std::move(entries_);
+            for (const auto& entry : entries) {
+                if (entry.buffer) {
+                    wgpuBufferAddRef(entry.buffer);
+                }
+                if (entry.sampler) {
+                    wgpuSamplerAddRef(entry.sampler);
+                }
+                if (entry.textureView) {
+                    wgpuTextureViewAddRef(entry.textureView);
+                }
+            }
+        }
+
+        void reset() {
+            for (const auto& entry : entries) {
+                if (entry.buffer) {
+                    wgpuBufferRelease(entry.buffer);
+                }
+                if (entry.sampler) {
+                    wgpuSamplerRelease(entry.sampler);
+                }
+                if (entry.textureView) {
+                    wgpuTextureViewRelease(entry.textureView);
+                }
+            }
+            entries.clear();
+            if (handle) {
+                wgpuBindGroupRelease(handle);
+                handle = nullptr;
+            }
+            layout = nullptr;
+        }
     };
     std::vector<BindGroupRecord> bindGroups;
 };

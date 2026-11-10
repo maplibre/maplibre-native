@@ -77,6 +77,10 @@ gfx::Texture2D& Texture2D::setSamplerConfiguration(const gfx::Texture2D::Sampler
     if (safeState.maxAnisotropy < 1) {
         safeState.maxAnisotropy = 1;
     }
+    // Tweakers set the same state every frame, and a new sampler means new bind groups.
+    if (sampler && safeState == samplerState) {
+        return *this;
+    }
     samplerState = safeState;
 
     // Release old sampler if it exists
