@@ -57,4 +57,6 @@ TEST(HttpRetry, ExpiredSubsequent) {
 TEST(HttpRetry, ExpiredNotSet) {
     // No expires header set
     ASSERT_EQ(Duration::max(), expirationTimeout({}, 0));
+    // Never expires
+    ASSERT_EQ(Duration::max(), expirationTimeout({Timestamp::max()}, 0));
 }
