@@ -151,6 +151,7 @@ public:
     /// Set sub-layer index
     virtual void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
+    /// Depth writability for 3D drawables, in place of that of the 3D depth mode
     std::optional<DepthMaskType> getDepthMaskFor3D() const { return depthMaskFor3D; }
     void setDepthMaskFor3D(DepthMaskType value) { depthMaskFor3D = value; }
 
