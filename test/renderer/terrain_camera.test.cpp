@@ -704,6 +704,25 @@ TEST(TerrainCamera, ClampDoesNotApplyAfterTerrainRemoval) {
     EXPECT_NEAR(test.altitude(), 0.0, 0.001);
 }
 
+// A style loaded over a draped map takes the terrain away, and an app sets it back from the load
+// callback, before a frame is drawn without it. The map brought its centre back to sea level when
+// the terrain went. The renderer never saw it go: it had reported the height under that centre
+// already and said nothing more, so the centre stayed at sea level, the camera inside the ground
+// with nothing in view, until the view moved. A terrain that is set again is told its heights again.
+TEST(TerrainCamera, ATerrainSetAgainBeforeTheNextFrameClampsAgain) {
+    TerrainTransitionTest test;
+    ASSERT_TRUE(test.settleOnPlateau());
+    const auto camera = test.map.getCameraOptions({});
+
+    test.map.getStyle().setTerrain(nullptr);
+    test.map.getStyle().setTerrain(std::make_unique<style::Terrain>("dem", 1.0f));
+    // The app puts the camera back where it was; the centre's height is not its to set.
+    test.map.jumpTo(CameraOptions().withCenter(camera.center).withZoom(camera.zoom));
+    ASSERT_NEAR(test.altitude(), 0.0, 0.001);
+
+    EXPECT_TRUE(test.settleOnPlateau());
+}
+
 // A drape target is drawn into only by the source tiles that overlap its own tile, so the
 // masks it draws follow those tiles and not every tile the source covers.
 TEST(TerrainDrape, MasksAreDrawnOnlyForTilesOverlappingTheTarget) {
