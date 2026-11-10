@@ -153,3 +153,69 @@ TEST(TerrainOcclusion, AnIconBehindARidgeIsHidden) {
     EXPECT_TRUE(redNear(image, front, 4)) << "the icon in front of the ridge is drawn";
     EXPECT_FALSE(redNear(image, behind, 4)) << "the icon behind the ridge is hidden";
 }
+
+namespace {
+
+// The same two points drawn as red circles ...
+const std::string circleLayer = R"({"id": "icons", "type": "circle", "source": "icons",
+     "paint": {"circle-color": "#ff0000", "circle-radius": 6, "circle-opacity": 1}})";
+
+// ... and as a heatmap: a kernel behind the ridge must not add to the density that is drawn
+const std::string heatmapLayer = R"JSON({"id": "icons", "type": "heatmap", "source": "icons",
+     "paint": {"heatmap-radius": 12, "heatmap-intensity": 8, "heatmap-opacity": 1,
+               "heatmap-color": ["interpolate", ["linear"], ["heatmap-density"],
+                                 0, "rgba(255,0,0,0)", 0.3, "rgb(255,0,0)", 1, "rgb(255,0,0)"]}})JSON";
+
+// Renders the scene above with `layer` in place of the symbol layer and checks the near point is drawn and the far
+// one hidden
+void expectOnlyTheNearPointIsDrawn(const std::string& layer) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRidgeTile({static_cast<uint8_t>(resource.tileData->z),
+                                                                static_cast<uint32_t>(resource.tileData->x),
+                                                                static_cast<uint32_t>(resource.tileData->y)}));
+        return res;
+    };
+    HeadlessFrontend frontend{{512, 512}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+
+    std::string style = occlusionStyle;
+    const size_t layerStart = style.find(R"({"id": "icons")");
+    const size_t layerEnd = style.find("}}\n  ]", layerStart);
+    ASSERT_NE(layerStart, std::string::npos);
+    ASSERT_NE(layerEnd, std::string::npos);
+    style.replace(layerStart, layerEnd + 2 - layerStart, layer);
+    style.replace(style.find("BEHIND_LAT"), std::string("BEHIND_LAT").size(), std::to_string(behindLat));
+    map.getStyle().loadJSON(style);
+    map.jumpTo(
+        CameraOptions().withCenter(LatLng{centreLat, centreLon}).withZoom(12.0).withPitch(60.0).withBearing(0.0));
+
+    PremultipliedImage image;
+    for (int i = 0; i < 4; ++i) {
+        loop.runOnce();
+        image = frontend.render(map).image;
+    }
+
+    const ScreenCoordinate front = map.pixelForLatLng(LatLng{centreLat, centreLon});
+    const ScreenCoordinate behind = map.pixelForLatLng(LatLng{behindLat, centreLon});
+    ASSERT_GT(front.y - behind.y, 20.0);
+    ASSERT_GT(behind.y, 10.0);
+
+    EXPECT_TRUE(redNear(image, front, 4)) << "the point in front of the ridge is drawn";
+    EXPECT_FALSE(redNear(image, behind, 4)) << "the point behind the ridge is hidden";
+}
+
+} // namespace
+
+TEST(TerrainOcclusion, ACircleBehindARidgeIsHidden) {
+    expectOnlyTheNearPointIsDrawn(circleLayer);
+}
+
+TEST(TerrainOcclusion, AHeatmapBehindARidgeIsHidden) {
+    expectOnlyTheNearPointIsDrawn(heatmapLayer);
+}
