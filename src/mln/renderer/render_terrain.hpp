@@ -216,9 +216,10 @@ public:
      * still reads its height. Render-thread only.
      *
      * @param latLng the position to sample
+     * @param from if given, set to the loaded DEM tile the height was read from
      * @return nullopt when terrain is off or no loaded DEM tile covers the point yet
      */
-    std::optional<double> getElevationForLatLng(const LatLng& latLng) const;
+    std::optional<double> getElevationForLatLng(const LatLng& latLng, UnwrappedTileID* from = nullptr) const;
 
     /**
      * @brief Coordinate of the draped surface under a screen pixel (y-down view pixels, as
