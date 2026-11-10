@@ -66,7 +66,10 @@ typedef enum mln_plugin_value_type {
     MLN_PLUGIN_VALUE_COLOR = 3,
     MLN_PLUGIN_VALUE_STRING = 4,
     MLN_PLUGIN_VALUE_BOOLEAN = 5,
-    /* Sprite image identifier, represented by data.string_value. */
+    /* Sprite image identifier, represented by data.string_value. An image
+     * property cannot depend on feature state: a tile requests the images of
+     * its features when it is laid out, and feature state changes without a
+     * new layout. */
     MLN_PLUGIN_VALUE_IMAGE = 6,
 } mln_plugin_value_type;
 

@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdlib>
+#include <cstring>
 #include <memory>
 
 using namespace mln;
@@ -383,6 +384,20 @@ TEST(PluginApi, BooleanDefaultsAndShaderEncodingAreValidated) {
     input.expectRejected();
     input.binding.encoding = MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT;
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+}
+
+TEST(PluginApi, ImagePropertiesCannotDependOnFeatureState) {
+    Descriptor input("test.image-feature-state");
+    input.property.type = MLN_PLUGIN_VALUE_IMAGE;
+    input.property.default_value.type = MLN_PLUGIN_VALUE_IMAGE;
+    input.property.enum_value_count = 0;
+    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
+    input.shader.property_binding_count = 0;
+    char error[256]{};
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&input.descriptor, error, sizeof(error)));
+    EXPECT_NE(nullptr, std::strstr(error, "feature state")) << error;
+    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, error, sizeof(error))) << error;
 }
 
 TEST(PluginApi, LayoutPropertiesValidateScopeSerializeAndInvalidateGeometry) {

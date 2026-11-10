@@ -333,6 +333,11 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
             error = "plugin layout properties support only camera expressions and cannot transition";
             return false;
         }
+        if (property.type == MLN_PLUGIN_VALUE_IMAGE &&
+            (property.expression_capabilities & MLN_PLUGIN_EXPRESSION_FEATURE_STATE)) {
+            error = "plugin image properties cannot depend on feature state";
+            return false;
+        }
         const bool transitionableType = property.type == MLN_PLUGIN_VALUE_FLOAT ||
                                         property.type == MLN_PLUGIN_VALUE_FLOAT2 ||
                                         property.type == MLN_PLUGIN_VALUE_COLOR ||

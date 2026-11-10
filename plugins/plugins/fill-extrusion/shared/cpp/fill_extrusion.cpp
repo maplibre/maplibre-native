@@ -408,9 +408,9 @@ constexpr mln_plugin_property_descriptor_v1 paint(mln_plugin_string name, mln_pl
     p.type = value.type;
     p.default_value = value;
     p.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
-    if (data)
-        p.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_COMPOSITE |
-                                     MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
+    if (data) p.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_COMPOSITE;
+    // The host rejects an image property that depends on feature state.
+    if (data && value.type != MLN_PLUGIN_VALUE_IMAGE) p.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
     p.supports_transitions = value.type != MLN_PLUGIN_VALUE_BOOLEAN && value.type != MLN_PLUGIN_VALUE_STRING;
     if (value.type == MLN_PLUGIN_VALUE_STRING) {
         p.enum_values = anchors;
