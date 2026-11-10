@@ -573,9 +573,9 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
     auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
     auto& context = const_cast<Context&>(*this);
 
-    // Offscreen render targets (e.g. the terrain drape targets) are not surface
-    // renderables and have no swapchain or surface transform
-    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<RenderableResource>();
+    // The rotation is the swapchain's even in a pass that draws into an offscreen render target: these
+    // passes come first in a frame, and the terrain depth target they draw and read is in swapchain space.
+    auto& renderableResource = backend.getDefaultRenderable().getResource<RenderableResource>();
     if (renderableResource.isSurface()) {
         auto& surfaceResource = static_cast<SurfaceRenderableResource&>(renderableResource);
         if (surfaceResource.hasSurfaceTransformSupport()) {

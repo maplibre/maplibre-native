@@ -22,7 +22,7 @@ struct alignas(16) HeatmapDrawableUBO {
     // Interpolations
     /* 68 */ float weight_t;
     /* 72 */ float radius_t;
-    /* 76 */ float pad1;
+    /* 76 */ float depth_enabled;
 
     // 3D terrain elevation
     /*  80 */ float4 dem_coords;
@@ -30,7 +30,7 @@ struct alignas(16) HeatmapDrawableUBO {
     /* 112 */ float dem_dim;
     /* 116 */ float dem_exaggeration;
     /* 120 */ float dem_enabled;
-    /* 124 */ float pad2;
+    /* 124 */ float units_to_pixels_y;
     /* 128 */
 };
 static_assert(sizeof(HeatmapDrawableUBO) == 8 * 16, "wrong size");
@@ -55,7 +55,7 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
 
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = heatmapShaderPrelude;
     static constexpr auto source = R"(
@@ -75,6 +75,7 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float weight;
     float2 extrude;
+    float visibility;
 };
 
 // Effective "0" in the kernel density texture to adjust the kernel size to;
@@ -90,7 +91,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const HeatmapDrawableUBO* drawableVector [[buffer(idHeatmapDrawableUBO)]],
                                 device const HeatmapEvaluatedPropsUBO& props [[buffer(idHeatmapEvaluatedPropsUBO)]],
                                 texture2d<float, access::sample> demTexture [[texture(0)]],
-                                sampler demSampler [[sampler(0)]]) {
+                                sampler demSampler [[sampler(0)]],
+                                texture2d<float, access::sample> depthTexture [[texture(1)]],
+                                sampler depthSampler [[sampler(1)]]) {
 
     device const HeatmapDrawableUBO& drawable = drawableVector[uboIndex];
 
@@ -144,10 +147,18 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float4 pos = float4(center + scaled_extrude, ele, 1);
 
+    // A kernel whose centre is behind terrain adds nothing to the density texture
+    const float visibility = calculate_visibility(drawable.matrix * float4(center, ele, 1),
+                                                  depthTexture,
+                                                  depthSampler,
+                                                  drawable.depth_enabled,
+                                                  drawable.units_to_pixels_y);
+
     return {
         .position    = drawable.matrix * pos,
         .weight      = weight,
         .extrude     = extrude,
+        .visibility  = visibility,
     };
 }
 
@@ -159,7 +170,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // Kernel density estimation with a Gaussian kernel of size 5x5
     const float d = -0.5 * 3.0 * 3.0 * dot(in.extrude, in.extrude);
-    const float val = in.weight * props.intensity * GAUSS_COEF * exp(d);
+    const float val = in.weight * props.intensity * GAUSS_COEF * exp(d) * in.visibility;
 
     return half4(val, 1.0, 1.0, 1.0);
 }
