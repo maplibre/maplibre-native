@@ -13,8 +13,9 @@ const std::array<AttributeInfo, 3> HeatmapShaderSource::attributes = {
     AttributeInfo{1, gfx::AttributeDataType::Float2, heatmapUBOCount + 1, idHeatmapWeightVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Float2, heatmapUBOCount + 1, idHeatmapRadiusVertexAttribute},
 };
-const std::array<TextureInfo, 1> HeatmapShaderSource::textures = {
+const std::array<TextureInfo, 2> HeatmapShaderSource::textures = {
     TextureInfo{0, idHeatmapDEMTexture},
+    TextureInfo{1, idHeatmapDepthTexture},
 };
 
 } // namespace shaders

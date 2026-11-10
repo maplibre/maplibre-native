@@ -202,6 +202,13 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
             tweaker->execute(drawable, parameters);
         }
 
+        // A 3D drawable leaves the stencil to its layer group, and a plain group has no
+        // tile clipping, so without this the terrain surface tests against the stencil
+        // mode of whatever was drawn last.
+        if (drawable.getIs3D()) {
+            context.setStencilMode(gfx::StencilMode::disabled());
+        }
+
         drawable.draw(parameters);
     });
 
