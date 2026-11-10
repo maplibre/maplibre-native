@@ -11,6 +11,15 @@ get_target_property(test_libraries mbgl-core LINK_LIBRARIES)
 #   tests/host/*.test.cpp                      tests with the host's renderer, which compare it with a built-in layer,
 #                                              only built with Vulkan
 #   render-tests                               see render_test.cpp
+# The manifest of the repository's render tests for the renderer of the build.
+if(MLN_WITH_VULKAN)
+    set(repository_manifest metrics/linux-vulkan.json)
+elseif(MLN_WITH_METAL)
+    set(repository_manifest metrics/ios-metal-render-test-runner-style.json)
+else()
+    set(repository_manifest metrics/linux-opengl.json)
+endif()
+
 file(GLOB plugin_manifests CONFIGURE_DEPENDS plugins/*/plugin.json)
 foreach(manifest ${plugin_manifests})
     get_filename_component(directory ${manifest} DIRECTORY)
@@ -42,7 +51,9 @@ foreach(manifest ${plugin_manifests})
         MLN_PLUGIN_HEADER="${snake}.hpp" MLN_PLUGIN_REGISTER=mln_${snake}_register)
     target_link_libraries(mln-${id}-render-test PRIVATE mln-${id} mbgl-render-test)
     add_dependencies(mln-plugin-tests mln-${id}-render-test)
-    add_test(NAME mln-${id}-render-test COMMAND mln-${id}-render-test --plugin-directory plugins/plugins/${id}
+    add_test(NAME mln-${id}-render-test
+             COMMAND mln-${id}-render-test --plugin-directory plugins/plugins/${id}
+                     --repository-manifest ${repository_manifest}
              WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endforeach()
 

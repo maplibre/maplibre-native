@@ -18,7 +18,10 @@ def plugin_render_test(name, data):
         name = name,
         timeout = "long",
         srcs = ["//plugins:render_test.cpp"],
-        args = ["--plugin-directory", native.package_name()],
+        args = ["--plugin-directory", native.package_name(), "--repository-manifest"] + select({
+            "//:metal_renderer": ["metrics/ios-metal-render-test-runner-style.json"],
+            "//conditions:default": ["metrics/linux-opengl.json"],
+        }),
         copts = CPP_FLAGS + MAPLIBRE_FLAGS,
         data = data,
         local_defines = ["MLN_PLUGIN_HEADER=\\\"%s.hpp\\\"" % snake, "MLN_PLUGIN_REGISTER=mln_%s_register" % snake],

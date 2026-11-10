@@ -1,9 +1,10 @@
 // The render-test runner of a plugin. A build defines MLN_PLUGIN_HEADER and MLN_PLUGIN_REGISTER for the plugin it
-// tests, and `--plugin-directory <directory>` names the plugin in plugins/plugins. The tests are
+// tests, `--plugin-directory <directory>` names the plugin in plugins/plugins, and `--repository-manifest <path>` the
+// manifest of the repository for the renderer of the build. The tests are
 //
 //   - the plugin's own, when it has render-tests/manifest.json, or else
-//   - the tests of the manifest of the repository for the renderer of this build whose style has a layer of a built-in
-//     type that the plugin implements, run with the plugin's layer type in place of the built-in one, so that they
+//   - the tests of the repository's manifest whose style has a layer of a built-in type that the plugin implements,
+//     run with the plugin's layer type in place of the built-in one, so that they
 //     check that the plugin renders like the built-in layer. A layer type org.maplibre.<type> implements the built-in
 //     layer type <type>. A new test of the layer needs no change to the plugin. render-tests/ignores.json leaves out
 //     tests, as the ignore files of the platforms do: {"render-tests/<test>": "reason"}.
@@ -34,13 +35,10 @@ namespace fs = std::filesystem;
 
 #if MLN_RENDER_BACKEND_METAL
 constexpr uint32_t backend = MLN_PLUGIN_BACKEND_METAL;
-constexpr auto repositoryManifest = "metrics/ios-metal-render-test-runner-style.json";
 #elif MLN_RENDER_BACKEND_VULKAN
 constexpr uint32_t backend = MLN_PLUGIN_BACKEND_VULKAN;
-constexpr auto repositoryManifest = "metrics/linux-vulkan.json";
 #else
 constexpr uint32_t backend = MLN_PLUGIN_BACKEND_OPENGL;
-constexpr auto repositoryManifest = "metrics/linux-opengl.json";
 #endif
 
 std::string readFile(const fs::path& path) {
@@ -195,6 +193,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> args(argv, argv + argc);
     mln::TestStyleTransform transformStyle;
     const fs::path directory = takeFlag(args, "--plugin-directory");
+    const fs::path repositoryManifest = takeFlag(args, "--repository-manifest");
     if (!directory.empty()) {
         if (supportedLayerTypes.empty()) {
             std::cout << "* skipped: " << directory << " does not support the renderer of this build\n";
@@ -203,6 +202,10 @@ int main(int argc, char** argv) {
         if (fs::exists(directory / "render-tests/manifest.json")) {
             args.insert(args.end(), {"--manifestPath", (directory / "render-tests/manifest.json").string()});
         } else {
+            if (repositoryManifest.empty()) {
+                std::cerr << directory << " has no render-tests/manifest.json, and no --repository-manifest is given\n";
+                return 1;
+            }
             const auto layerTypes = implementedLayerTypes();
             const auto filter = filterForLayerTypes(
                 repositoryManifest, layerTypes, ignoredTests(directory / "render-tests/ignores.json"));
@@ -211,7 +214,7 @@ int main(int argc, char** argv) {
                           << " has a layer of a built-in type that the plugin implements\n";
                 return 1;
             }
-            args.insert(args.end(), {"--manifestPath", repositoryManifest, "--filter=" + filter});
+            args.insert(args.end(), {"--manifestPath", repositoryManifest.string(), "--filter=" + filter});
             transformStyle = [layerTypes](const std::string& style) {
                 return replaceLayerTypes(style, layerTypes);
             };
