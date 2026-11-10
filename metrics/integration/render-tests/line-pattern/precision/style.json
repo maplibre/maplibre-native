@@ -1,0 +1,57 @@
+{
+  "version": 8,
+  "metadata": {
+    "description": "Tests that the float precision is enough to overzoom the line pattern: z14 data shown at z22, far from the start of the line.",
+    "test": {
+      "width": 256,
+      "height": 128
+    }
+  },
+  "zoom": 22,
+  "center": [
+    0.0065918,
+    -0.0065918
+  ],
+  "sources": {
+    "path": {
+      "type": "geojson",
+      "maxzoom": 14,
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -0.0373535,
+              -0.0065918
+            ],
+            [
+              0.0505371,
+              -0.0065918
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "sprite": "local://sprites/emerald",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "path",
+      "type": "line",
+      "source": "path",
+      "paint": {
+        "line-width": 20,
+        "line-pattern": "generic_icon"
+      }
+    }
+  ]
+}
