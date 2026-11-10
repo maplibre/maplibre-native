@@ -399,7 +399,7 @@
     },
     {
       "id": "ngons",
-      "type": "ngon",
+      "type": "org.maplibre.ngon",
       "source": "shapes",
       "paint": {
         "ngon-radius": [

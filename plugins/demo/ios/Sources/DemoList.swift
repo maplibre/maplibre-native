@@ -37,7 +37,7 @@ struct Demo: Identifiable, Hashable {
         Demo(
             id: "ngons",
             title: "N-gons",
-            layerType: "ngon",
+            layerType: "org.maplibre.ngon",
             summary: "A regular polygon drawn by a shader the plugin ships, with its properties to edit or randomize.",
             systemImage: "hexagon.fill",
             register: NgonLayerPlugin.registerPlugin
@@ -46,8 +46,7 @@ struct Demo: Identifiable, Hashable {
 }
 
 /// Registers a demo's plugin before the demo creates its map: a style that names an unregistered layer type drops the
-/// layer. A plugin registers for the rest of the process, so a plugin that replaces a built-in layer keeps replacing
-/// it in the demos opened afterwards.
+/// layer. A plugin registers for the rest of the process.
 private struct RegisteredDemo<Content: View>: View {
     let title: String
     let register: () throws -> Void

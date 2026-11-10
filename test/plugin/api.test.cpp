@@ -234,6 +234,9 @@ TEST(PluginApi, RegistrationIsAtomicAndCopiesAllMetadata) {
         layers[1] = input.layer;
         layers[1].layer_type = view(other.type);
         input.expectRejected(MLN_PLUGIN_STATUS_CONFLICT);
+        // So does a later type with the name of a built-in layer, which a plugin cannot replace.
+        layers[1].layer_type = {"circle", 6};
+        input.expectRejected(MLN_PLUGIN_STATUS_CONFLICT);
         input.descriptor.layer_types = &input.layer;
         input.descriptor.layer_type_count = 1;
         ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));

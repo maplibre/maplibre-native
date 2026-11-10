@@ -536,8 +536,9 @@ typedef mln_plugin_status (*mln_plugin_evaluate_layer_fn)(const mln_plugin_prope
  * maps. */
 typedef uint8_t (*mln_plugin_should_animate_fn)(const mln_plugin_property_value_v1* properties, size_t property_count);
 
-/* A layer type with the name of a built-in layer replaces it: styles that use the name get the plugin's layer. Existing
- * objects keep their implementation identity. A plugin never replaces another plugin. */
+/* The name of a layer type cannot be the name of a built-in layer type or of a layer type of another plugin, which
+ * registration rejects with MLN_PLUGIN_STATUS_CONFLICT. A reverse domain name prefix, as in org.maplibre.circle, keeps
+ * it unique. */
 typedef struct mln_plugin_layer_type_v1 {
     uint32_t struct_size;
     mln_plugin_string layer_type;

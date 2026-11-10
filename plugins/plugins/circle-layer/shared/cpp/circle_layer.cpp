@@ -445,7 +445,7 @@ const mln_plugin_shader_descriptor_v1 shader = {
 const mln_plugin_layer_type_v1 layerType = [] {
     mln_plugin_layer_type_v1 v{};
     v.struct_size = sizeof(v);
-    v.layer_type = str("circle");
+    v.layer_type = str("org.maplibre.circle");
     // The built-in circle layer uses the unaligned projection, and a plugin only gets that with this flag.
     v.enable_near_clipped_matrix = 1;
     v.backend_mask = MLN_PLUGIN_BACKEND_OPENGL | MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL;

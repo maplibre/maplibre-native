@@ -1,4 +1,4 @@
 {
-  "description": "Replaces the built-in fill-extrusion style layer",
+  "description": "The built-in fill-extrusion style layer as the plugin layer type org.maplibre.fill-extrusion",
   "backends": ["vulkan", "metal"]
 }

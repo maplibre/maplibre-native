@@ -603,7 +603,7 @@ constexpr mln_plugin_draw_pass_v1 passes[] = {
 const mln_plugin_layer_type_v1 layer = [] {
     mln_plugin_layer_type_v1 l{};
     l.struct_size = sizeof(l);
-    l.layer_type = str("fill-extrusion");
+    l.layer_type = str("org.maplibre.fill-extrusion");
 #if MLN_FILL_EXTRUSION_METAL
     l.backend_mask = MLN_PLUGIN_BACKEND_METAL;
 #else

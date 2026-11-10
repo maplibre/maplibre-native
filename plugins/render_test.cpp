@@ -2,14 +2,20 @@
 // tests, and `--plugin-directory <directory>` names the plugin in plugins/plugins. The tests are
 //
 //   - the plugin's own, when it has render-tests/manifest.json, or else
-//   - the tests of the manifest of the repository for the renderer of this build whose style has a layer of a type that
-//     the plugin registers, so a new test of the layer needs no change to the plugin. render-tests/ignores.json leaves
-//     out tests, as the ignore files of the platforms do: {"render-tests/<test>": "reason"}.
+//   - the tests of the manifest of the repository for the renderer of this build whose style has a layer of a built-in
+//     type that the plugin implements, run with the plugin's layer type in place of the built-in one, so that they
+//     check that the plugin renders like the built-in layer. A layer type org.maplibre.<type> implements the built-in
+//     layer type <type>. A new test of the layer needs no change to the plugin. render-tests/ignores.json leaves out
+//     tests, as the ignore files of the platforms do: {"render-tests/<test>": "reason"}.
 //
 // The runner does nothing when the `backends` of the plugin.json do not have the renderer of this build.
 #include <mln/render_test.hpp>
 
 #include MLN_PLUGIN_HEADER
+
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <cctype>
 #include <filesystem>
@@ -19,6 +25,7 @@
 #include <map>
 #include <regex>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace {
@@ -85,19 +92,52 @@ std::map<std::string, std::string> ignoredTests(const fs::path& path) {
     return ignored;
 }
 
-// A `--filter` regex that matches the style of every test with a layer of one of `layerTypes`, except the ignored ones.
+// Gives every layer in `value` with a type that is a key of `layerTypes` the type it maps to, and returns how many it
+// changed. An object with an `id` and a `type` is a layer: those of the style, and those that the operations of a test
+// add or set with a style.
+size_t replaceLayerTypes(rapidjson::Value& value,
+                         const std::map<std::string, std::string>& layerTypes,
+                         rapidjson::Document::AllocatorType& allocator) {
+    size_t replaced = 0;
+    if (value.IsArray()) {
+        for (auto& element : value.GetArray()) replaced += replaceLayerTypes(element, layerTypes, allocator);
+    } else if (value.IsObject()) {
+        const auto type = value.FindMember("type");
+        if (value.HasMember("id") && type != value.MemberEnd() && type->value.IsString()) {
+            const auto replacement = layerTypes.find(type->value.GetString());
+            if (replacement != layerTypes.end()) {
+                type->value.SetString(replacement->second.c_str(), allocator);
+                ++replaced;
+            }
+        }
+        for (auto& member : value.GetObject()) replaced += replaceLayerTypes(member.value, layerTypes, allocator);
+    }
+    return replaced;
+}
+
+std::string replaceLayerTypes(const std::string& style, const std::map<std::string, std::string>& layerTypes) {
+    rapidjson::Document document;
+    document.Parse(style.c_str());
+    replaceLayerTypes(document, layerTypes, document.GetAllocator());
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    document.Accept(writer);
+    return buffer.GetString();
+}
+
+// A `--filter` regex that matches the style of every test with a layer of one of the keys of `layerTypes`, except the
+// ignored ones. The layers are found as replaceLayerTypes finds them, so that every test it matches runs the plugin.
 std::string filterForLayerTypes(const fs::path& manifestPath,
-                                const std::vector<std::string>& layerTypes,
+                                const std::map<std::string, std::string>& layerTypes,
                                 const std::map<std::string, std::string>& ignored) {
     const auto base =
         (manifestPath.parent_path() / manifestValue(readFile(manifestPath), "base_test_path")).lexically_normal();
-    std::string alternatives;
-    for (size_t i = 0; i < layerTypes.size(); ++i) alternatives += (i ? "|" : "") + layerTypes[i];
-    const std::regex layer("\"type\"\\s*:\\s*\"(" + alternatives + ")\"");
     std::vector<std::string> tests;
     for (const auto& entry : fs::recursive_directory_iterator(base)) {
         if (entry.path().filename() != "style.json") continue;
-        if (!std::regex_search(readFile(entry.path()), layer)) continue;
+        rapidjson::Document style;
+        style.Parse(readFile(entry.path()).c_str());
+        if (style.HasParseError() || !replaceLayerTypes(style, layerTypes, style.GetAllocator())) continue;
         const auto test = entry.path().parent_path().lexically_relative(base).generic_string();
         const auto skip = ignored.find(test);
         if (skip != ignored.end()) {
@@ -113,6 +153,16 @@ std::string filterForLayerTypes(const fs::path& manifestPath,
 }
 
 std::vector<std::string> registeredLayerTypes;
+
+// The built-in layer types that the plugin implements, each with the layer type of the plugin that implements it.
+std::map<std::string, std::string> implementedLayerTypes() {
+    constexpr std::string_view prefix = "org.maplibre.";
+    std::map<std::string, std::string> types;
+    for (const auto& type : registeredLayerTypes) {
+        if (type.starts_with(prefix)) types.emplace(type.substr(prefix.size()), type);
+    }
+    return types;
+}
 
 // Collects the layer types of the plugin instead of registering it.
 mln_plugin_status collectLayerTypes(const mln_plugin_descriptor_v1* descriptor, char*, size_t) {
@@ -143,6 +193,7 @@ int main(int argc, char** argv) {
     }
 
     std::vector<std::string> args(argv, argv + argc);
+    mln::TestStyleTransform transformStyle;
     const fs::path directory = flag(args, "--plugin-directory", "", true);
     if (!directory.empty()) {
         if (!hasBackend(directory)) {
@@ -152,17 +203,22 @@ int main(int argc, char** argv) {
         if (fs::exists(directory / "render-tests/manifest.json")) {
             args.insert(args.end(), {"--manifestPath", (directory / "render-tests/manifest.json").string()});
         } else {
+            const auto layerTypes = implementedLayerTypes();
             const auto filter = filterForLayerTypes(
-                repositoryManifest, registeredLayerTypes, ignoredTests(directory / "render-tests/ignores.json"));
+                repositoryManifest, layerTypes, ignoredTests(directory / "render-tests/ignores.json"));
             if (filter.empty()) {
-                std::cerr << "No test of " << repositoryManifest << " has a layer of a type of the plugin\n";
+                std::cerr << "No test of " << repositoryManifest
+                          << " has a layer of a built-in type that the plugin implements\n";
                 return 1;
             }
             args.insert(args.end(), {"--manifestPath", repositoryManifest, "--filter=" + filter});
+            transformStyle = [layerTypes](const std::string& style) {
+                return replaceLayerTypes(style, layerTypes);
+            };
         }
     }
     std::vector<char*> pointers;
     for (auto& arg : args) pointers.push_back(arg.data());
     pointers.push_back(nullptr);
-    return mln::runRenderTests(static_cast<int>(args.size()), pointers.data(), {});
+    return mln::runRenderTests(static_cast<int>(args.size()), pointers.data(), {}, transformStyle);
 }

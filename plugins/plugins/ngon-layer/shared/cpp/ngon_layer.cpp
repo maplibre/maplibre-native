@@ -435,7 +435,7 @@ const mln_plugin_draw_pass_v1 drawPass = {sizeof(mln_plugin_draw_pass_v1), 1, 0,
 const mln_plugin_layer_type_v1 layerType = [] {
     mln_plugin_layer_type_v1 v{};
     v.struct_size = sizeof(v);
-    v.layer_type = str("ngon");
+    v.layer_type = str("org.maplibre.ngon");
     v.draw_passes = &drawPass;
     v.draw_pass_count = 1;
     v.backend_mask = MLN_PLUGIN_BACKEND_OPENGL | MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL;

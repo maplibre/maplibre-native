@@ -4,7 +4,7 @@
 
     The plugin API is experimental and does not yet have stability guarantees.
 
-MapLibre Native has a C plugin API for adding style layer types implemented in native code. After a plugin registers its layer types, styles can use them like the built-in layer types, for example `"type": "ngon"`. The API is defined in [`plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h).
+MapLibre Native has a C plugin API for adding style layer types implemented in native code. After a plugin registers its layer types, styles can use them like the built-in layer types, for example `"type": "org.maplibre.ngon"`. The API is defined in [`plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h).
 
 ## Artifacts
 

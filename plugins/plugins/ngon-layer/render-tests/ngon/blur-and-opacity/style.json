@@ -77,7 +77,7 @@
     },
     {
       "id": "points",
-      "type": "ngon",
+      "type": "org.maplibre.ngon",
       "source": "points",
       "paint": {
         "ngon-radius": 30,

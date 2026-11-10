@@ -80,10 +80,11 @@ struct Scene {
         if (plugin) {
             style::conversion::Error error;
             auto parsed = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
-                R"({"id":"extrusion","source":"s","type":"fill-extrusion"})", error);
+                R"({"id":"extrusion","source":"s","type":"org.maplibre.fill-extrusion"})", error);
             EXPECT_TRUE(parsed) << error.message;
             extrusion = std::move(*parsed);
-            EXPECT_EQ(extrusion->getTypeInfo(), &plugin::PluginRegistry::get().findLayerType("fill-extrusion")->info);
+            EXPECT_EQ(extrusion->getTypeInfo(),
+                      &plugin::PluginRegistry::get().findLayerType("org.maplibre.fill-extrusion")->info);
         } else
             extrusion = std::make_unique<style::FillExtrusionLayer>("extrusion", "s");
         layer = extrusion.get();
@@ -112,10 +113,10 @@ void compare(Scene& builtin, Scene& plugin) {
     EXPECT_LE(different, size_t(65));
 }
 
-TEST(FillExtrusionPlugin, ReplacementAndDynamicParity) {
+TEST(FillExtrusionPlugin, DynamicParity) {
     util::RunLoop loop;
     // Construct and render a built-in object before registration; it must also
-    // survive subsequent property updates after the name has been replaced.
+    // survive subsequent property updates after the plugin has been registered.
     Scene builtin(false);
     builtin.set("fill-extrusion-height", "100");
     builtin.frontend.render(builtin.map);
