@@ -145,27 +145,17 @@ jobs:
       #- name: Running iOS UI tests (Thread Sanitizer)
       #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
 
-      # https://github.com/maplibre/maplibre-native/issues/3642
-      # - name: Running iOS UI tests (Address+UB Sanitizer)
-      #   run: |
-      #     retry_count=0
-      #     max_retries=5
-      #     while [ $retry_count -le $max_retries ]; do
-      #       bazel test //platform/ios/iosapp-UITests:uitest \
-      #         --test_output=errors \
-      #         --//:renderer=metal \
-      #         --features=include_clang_rt \
-      #         --copt=-fsanitize=undefined \
-      #         --linkopt=-fsanitize=undefined \
-      #         --copt=-fsanitize-recover=null \
-      #         --linkopt=-fsanitize-recover=null && break
-      #       retry_count=$((retry_count+1))
-      #       if [ $retry_count -eq $max_retries ]; then
-      #         echo "::error::Failed to run iOS UI tests after $max_retries attempts"
-      #         exit 1
-      #       fi
-      #       echo "Attempt $retry_count failed. Retrying..."
-      #     done
+      - name: Running iOS UI tests (UB Sanitizer)
+        run: |
+          bazel test //platform/ios/iosapp-UITests:uitest \
+            --test_output=errors \
+            --flaky_test_attempts=5 \
+            --//:renderer=metal \
+            --features=include_clang_rt \
+            --copt=-fsanitize=undefined \
+            --linkopt=-fsanitize=undefined \
+            --copt=-fsanitize-recover=null \
+            --linkopt=-fsanitize-recover=null
 
       # C++ unit tests
 
@@ -257,7 +247,7 @@ jobs:
 
   ios-build-cmake:
     needs: pre_job
-    runs-on: macos-14
+    runs-on: macos-26
     timeout-minutes: 60
     if: needs.pre_job.outputs.should_skip != 'true'
     steps:

@@ -58,7 +58,7 @@ public:
     bool operator==(const Expression& e) const noexcept override {
         if (e.getKind() == Kind::Interpolate) {
             const auto* rhs = static_cast<const Interpolate*>(&e);
-            if (interpolator != rhs->interpolator || colorSpace != rhs->colorSpace || *input != *(rhs->input) ||
+            if (interpolator != rhs->interpolator || colorSpace != rhs->colorSpace || *input != *rhs->input ||
                 stops.size() != rhs->stops.size()) {
                 return false;
             }

@@ -29,16 +29,16 @@ std::string rfc1123(Timestamp timestamp) {
     // there is compiler warning complaining about the buffer size might be too
     // small. Increasing the buffer to 32 fixes the warning.
     char buffer[32];
-    snprintf(buffer,
-             32,
-             "%s, %02d %s %4d %02d:%02d:%02d GMT",
-             week[info.tm_wday],
-             info.tm_mday,
-             months[info.tm_mon],
-             1900 + info.tm_year,
-             info.tm_hour,
-             info.tm_min,
-             info.tm_sec);
+    (void)snprintf(buffer,
+                   32,
+                   "%s, %02d %s %4d %02d:%02d:%02d GMT",
+                   week[info.tm_wday],
+                   info.tm_mday,
+                   months[info.tm_mon],
+                   1900 + info.tm_year,
+                   info.tm_hour,
+                   info.tm_min,
+                   info.tm_sec);
     return buffer;
 }
 
@@ -48,7 +48,7 @@ std::string iso8601(Timestamp timestamp) {
     _gmtime(&time, &info);
     char buffer[30];
     // %F and %T are not supported in MinGW (https://sourceforge.net/p/mingw-w64/bugs/793/)
-    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &info);
+    (void)std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &info);
     return buffer;
 }
 
@@ -64,7 +64,7 @@ std::string iso8601(std::chrono::time_point<std::chrono::system_clock, Milliseco
     char buffer[sizeof("yyyy-mm-ddThh:mm:ss.000Z")];
     // %F and %T are not supported in MinGW (https://sourceforge.net/p/mingw-w64/bugs/793/)
     const std::size_t offset = std::strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%S", &info);
-    snprintf(buffer + offset, sizeof(buffer) - offset, ".%03lldZ", ms);
+    (void)snprintf(buffer + offset, sizeof(buffer) - offset, ".%03lldZ", ms);
 
     return buffer;
 }

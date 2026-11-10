@@ -7,6 +7,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/api/annotations.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/api_misuse.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/custom_geometry_source.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/api/location_indicator.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/query.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/recycle_map.cpp
     ${PROJECT_SOURCE_DIR}/test/geometry/dem_data.test.cpp
@@ -159,6 +160,14 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
+
+if(MLN_WITH_METAL)
+    target_sources(
+        mbgl-test
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/test/renderer/metal_renderable.test.cpp
+    )
+endif()
 
 if(MLN_WITH_VULKAN)
     target_sources(

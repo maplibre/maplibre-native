@@ -146,7 +146,7 @@ public:
                 observer->onRenderError(std::current_exception());
             }
         }
-        if (drawablesFailed.size() > 0) {
+        if (!drawablesFailed.empty()) {
             removeDrawablesIf([&](gfx::Drawable& drawable) { return drawablesFailed.contains(&drawable); });
         }
         return sortedDrawables.size();
@@ -175,7 +175,7 @@ public:
     std::size_t visitDrawables(mln::RenderPass pass, const OverscaledTileID& tileID, Func f) {
         assert(drawablesByTile.size() == sortedDrawables.size());
         unordered_set<gfx::Drawable*> drawablesFailed;
-        auto range = drawablesByTile.equal_range({pass, tileID});
+        auto range = drawablesByTile.equal_range({.renderPass = pass, .tileID = tileID});
         std::for_each(range.first, range.second, [&f, &drawablesFailed, this](const auto& pair) {
             try {
                 f(*pair.second);
@@ -184,9 +184,9 @@ public:
                 observer->onRenderError(std::current_exception());
             }
         });
-        if (drawablesFailed.size() > 0) {
+        if (!drawablesFailed.empty()) {
             removeDrawablesIf([&](gfx::Drawable& drawable) { return drawablesFailed.contains(&drawable); });
-            range = drawablesByTile.equal_range({pass, tileID});
+            range = drawablesByTile.equal_range({.renderPass = pass, .tileID = tileID});
         }
         return std::distance(range.first, range.second);
     }
@@ -250,7 +250,7 @@ public:
                 }
             }
         }
-        if (drawablesFailed.size() > 0) {
+        if (!drawablesFailed.empty()) {
             removeDrawablesIf([&](gfx::Drawable& drawable) { return drawablesFailed.contains(&drawable); });
         }
         return drawables.size();

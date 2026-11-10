@@ -57,7 +57,7 @@ Drawable::Drawable(std::string name_)
     : gfx::Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
 
-Drawable::~Drawable() {}
+Drawable::~Drawable() = default;
 
 void Drawable::setEnableColor(bool value) {
     gfx::Drawable::setEnableColor(value);
@@ -313,6 +313,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         &uboIndex,
         dispatcher);
 
+    impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
+
     if (enableDepth) {
         if (impl->depthFor3D.has_value()) {
             impl->pipelineInfo.setDepthMode(impl->depthFor3D.value());
@@ -340,8 +342,6 @@ void Drawable::draw(PaintParameters& parameters) const {
     } else {
         impl->pipelineInfo.setStencilMode(gfx::StencilMode::disabled());
     }
-
-    impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
 
     for (const auto& seg : impl->segments) {
         const auto& segment = seg->getSegment();

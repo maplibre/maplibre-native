@@ -28,10 +28,11 @@ public:
         : value(std::move(value_)) {}
 
     Transitioning(Value value_, Transitioning<Value> prior_, const TransitionOptions& transition, TimePoint now)
-        : begin(now + transition.delay.value_or(Duration::zero())),
-          end(begin + transition.duration.value_or(Duration::zero())),
-          value(std::move(value_)) {
-        if (transition.isDefined()) {
+        : value(std::move(value_)) {
+        // Still modes render at TimePoint::max(): nothing to transition, and the sums below would overflow.
+        if (transition.isDefined() && now != TimePoint::max()) {
+            begin = now + transition.delay.value_or(Duration::zero());
+            end = begin + transition.duration.value_or(Duration::zero());
             prior = {std::move(prior_)};
         }
     }
@@ -110,8 +111,7 @@ struct ConstantsMask<TypeList<Ps...>> {
         const auto result = std::apply(
             [](auto... v) { return (v | ...); },
             std::make_tuple(
-                0ul,
-                (((properties.template get<Ps>().isConstant()) ? (1ul << (TypeIndex<Ps, Ps...>::value)) : 0ul))...));
+                0ul, (properties.template get<Ps>().isConstant() ? (1ul << TypeIndex<Ps, Ps...>::value) : 0ul)...));
         return result;
     }
 };
