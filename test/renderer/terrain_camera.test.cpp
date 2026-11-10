@@ -11,6 +11,7 @@
 #include <mln/map/mode.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/style/layers/fill_layer.hpp>
+#include <mln/style/layers/raster_layer.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/terrain.hpp>
@@ -735,6 +736,55 @@ TEST(TerrainDrape, FlatTerrainLooksLikeTheFlatMap) {
     }
     // Only pixels on a colour edge may differ.
     EXPECT_GT(same, pixels * 95 / 100) << same << " of " << pixels << " pixels match";
+}
+
+// A paint change runs as a transition on a continuous map, 300 ms unless the style says otherwise.
+// A drape was baked on the frame of the change, where the transition starts, and not again: a
+// basemap dimmed by its raster paint (the same tiles, another look) stayed as bright as it was
+// until the view moved. The drape ends on the paint the transition ends on.
+TEST(TerrainDrape, APaintTransitionEndsOnTheNewPaint) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string demTile = makeSeaLevelDEMTile();
+    const std::string quadrantsTile = makeQuadrantsTile();
+    fileSource->tileResponse = [&](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(resource.url.find("/dem/") != std::string::npos ? demTile
+                                                                                                 : quadrantsTile);
+        return res;
+    };
+    HeadlessFrontend frontend{{256, 256}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize()));
+    map.getStyle().loadJSON(drapedRasterStyle);
+    map.jumpTo(CameraOptions().withCenter(LatLng{46.0, 10.0}).withZoom(8.6).withPitch(0.0));
+
+    // Renders until the frame is on the side asked for, bright or dark, for ten seconds at most.
+    // Three quarters of a quadrants tile are red, green or both, so the mean of each pixel's
+    // brighter channel is about 190 as served, and 0 with the brightness turned all the way down.
+    const auto renderUntil = [&](bool bright) {
+        double mean = bright ? 0.0 : 255.0;
+        const auto deadline = Clock::now() + Seconds(10);
+        while ((mean > 128.0) != bright && Clock::now() < deadline) {
+            loop.runOnce();
+            frontend.renderFrame();
+            gfx::BackendScope guard{*frontend.getBackend()};
+            const PremultipliedImage image = frontend.readStillImage();
+            const size_t pixels = static_cast<size_t>(image.size.width) * image.size.height;
+            uint64_t sum = 0;
+            for (size_t i = 0; i < pixels; ++i) {
+                sum += std::max(image.data[i * 4], image.data[i * 4 + 1]);
+            }
+            mean = pixels > 0 ? static_cast<double>(sum) / static_cast<double>(pixels) : mean;
+        }
+        return mean;
+    };
+    ASSERT_GT(renderUntil(true), 128.0) << "the raster is draped";
+
+    static_cast<style::RasterLayer*>(map.getStyle().getLayer("quadrants"))->setRasterBrightnessMax(0.0f);
+    EXPECT_LT(renderUntil(false), 128.0) << "the raster is dark once the transition has ended";
 }
 
 // The depth pass (the symbol-occlusion depth texture) is a function of the camera and the mesh
