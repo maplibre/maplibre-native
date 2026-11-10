@@ -9,7 +9,7 @@
     if (![scene isKindOfClass:[UIWindowScene class]]) {
         return;
     }
-    
+
     UIWindowScene *windowScene = (UIWindowScene *)scene;
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     UIViewController *viewController = [storyboard instantiateInitialViewController];
