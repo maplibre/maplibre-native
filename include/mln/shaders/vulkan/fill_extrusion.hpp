@@ -417,8 +417,8 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
 } props;
 
 layout(location = 0) out mediump vec4 frag_lighting;
-layout(location = 1) out mediump vec2 frag_pos_a;
-layout(location = 2) out mediump vec2 frag_pos_b;
+layout(location = 1) out vec2 frag_pos_a;
+layout(location = 2) out vec2 frag_pos_b;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
 layout(location = 3) out mediump vec4 frag_pattern_from;
@@ -523,8 +523,8 @@ void main() {
     static constexpr auto fragment = R"(
 
 layout(location = 0) in mediump vec4 frag_lighting;
-layout(location = 1) in mediump vec2 frag_pos_a;
-layout(location = 2) in mediump vec2 frag_pos_b;
+layout(location = 1) in vec2 frag_pos_a;
+layout(location = 2) in vec2 frag_pos_b;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
 layout(location = 3) in mediump vec4 frag_pattern_from;
@@ -694,8 +694,8 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
 } props;
 
 layout(location = 0) out mediump vec4 frag_lighting;
-layout(location = 1) out mediump vec2 frag_pos_a;
-layout(location = 2) out mediump vec2 frag_pos_b;
+layout(location = 1) out vec2 frag_pos_a;
+layout(location = 2) out vec2 frag_pos_b;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
 layout(location = 3) out mediump vec4 frag_pattern_from;
@@ -816,8 +816,8 @@ void main() {
     static constexpr auto fragment = R"(
 
 layout(location = 0) in mediump vec4 frag_lighting;
-layout(location = 1) in mediump vec2 frag_pos_a;
-layout(location = 2) in mediump vec2 frag_pos_b;
+layout(location = 1) in vec2 frag_pos_a;
+layout(location = 2) in vec2 frag_pos_b;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
 layout(location = 3) in mediump vec4 frag_pattern_from;

@@ -7,7 +7,7 @@
 ### 🐞 Bug fixes
 
 - `raster` and `raster-dem` sources loaded from a `url` take the style's inline `minzoom` and `maxzoom` over the TileJSON's, as `vector` sources and maplibre-gl-js already do. A `raster-dem` source with an invalid `encoding`, `minzoom` or `maxzoom`, or a `raster` source with an invalid `minzoom` or `maxzoom`, is now rejected with an error, as a `vector` source is. Before, such a `raster-dem` source still loaded, decoded as Mapbox whatever its `encoding` ([#4557](https://github.com/maplibre/maplibre-native/pull/4557)).
-- Fix `fill-pattern`, `line-pattern` and `fill-extrusion-pattern` images breaking up with OpenGL ES when zoomed far past a source's `maxzoom`, on GPUs with 16-bit `mediump` floats such as Mali: they repeated in bands and showed pieces of other images. The pattern fragment shaders now use `highp`, as in MapLibre GL JS ([#4951](https://github.com/maplibre/maplibre-native/pull/4951)).
+- Fix `fill-pattern`, `line-pattern` and `fill-extrusion-pattern` images breaking up with OpenGL ES when zoomed far past a source's `maxzoom`, on GPUs with 16-bit `mediump` floats such as Mali: they repeated in bands and showed pieces of other images. The OpenGL ES pattern fragment shaders now use `highp`, as in MapLibre GL JS. With Vulkan, `fill-extrusion-pattern` had the same problem and its pattern coordinates are no longer `mediump` ([#4951](https://github.com/maplibre/maplibre-native/pull/4951)).
 
 ## 13.7.1
 
