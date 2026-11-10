@@ -185,7 +185,10 @@ void runWithAlternateSources(TestRunner& runner, TestMetadata& metadata, bool& e
 } // namespace
 namespace mln {
 
-int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testStatus) {
+int runRenderTests(int argc,
+                   char** argv,
+                   std::function<void(TestStatus)> testStatus,
+                   TestStyleTransform transformStyle) {
     int returnCode = 0;
     bool recycleMap;
     bool shuffle;
@@ -230,7 +233,7 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
     uint32_t completedTests = 0;
 
     for (auto& testPath : testPaths) {
-        TestMetadata metadata = parseTestMetadata(testPath);
+        TestMetadata metadata = parseTestMetadata(testPath, transformStyle);
 
         if (!recycleMap) {
             runner.reset();
