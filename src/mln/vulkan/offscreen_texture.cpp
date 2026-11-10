@@ -178,7 +178,7 @@ public:
                                  .setColorAttachments(colorAttachmentRef)
                                  .setPDepthStencilAttachment(&depthAttachmentRef);
 
-        const std::array<vk::SubpassDependency, 2> dependencies = {
+        const std::array<vk::SubpassDependency, 3> dependencies = {
             vk::SubpassDependency()
                 .setSrcSubpass(VK_SUBPASS_EXTERNAL)
                 .setDstSubpass(0)
@@ -197,7 +197,17 @@ public:
                                  vk::PipelineStageFlagBits::eLateFragmentTests)
                 .setSrcAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
                 .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
-                .setDependencyFlags(vk::DependencyFlagBits::eByRegion)};
+                .setDependencyFlags(vk::DependencyFlagBits::eByRegion),
+
+            // A later pass samples the color attachment, and the terrain depth target is read in vertex
+            // shaders. A tiler runs those vertices alongside this pass's fragments unless told to wait.
+            vk::SubpassDependency()
+                .setSrcSubpass(0)
+                .setDstSubpass(VK_SUBPASS_EXTERNAL)
+                .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                .setDstStageMask(vk::PipelineStageFlagBits::eVertexShader | vk::PipelineStageFlagBits::eFragmentShader)
+                .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+                .setDstAccessMask(vk::AccessFlagBits::eShaderRead)};
 
         const auto renderPassCreateInfo =
             vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(dependencies);

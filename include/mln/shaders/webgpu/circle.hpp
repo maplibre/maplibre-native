@@ -13,7 +13,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::WebGPU> {
 
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = R"(
 struct CircleDrawableUBO {
@@ -34,7 +34,7 @@ struct CircleDrawableUBO {
     dem_dim: f32,
     dem_exaggeration: f32,
     dem_enabled: f32,
-    pad4: f32,
+    depth_enabled: f32,
 };
 
 struct CircleEvaluatedPropsUBO {
@@ -73,6 +73,8 @@ struct GlobalIndexUBO {
 @group(0) @binding(2) var<storage, read> drawableVector: array<CircleDrawableUBO>;
 @group(1) @binding(0) var dem_sampler: sampler;
 @group(1) @binding(1) var dem_texture: texture_2d<f32>;
+@group(1) @binding(2) var depth_sampler: sampler;
+@group(1) @binding(3) var depth_texture: texture_2d<f32>;
 
 @group(0) @binding(4) var<uniform> props: CircleEvaluatedPropsUBO;
 )";
@@ -96,6 +98,7 @@ struct VertexOutput {
     @location(2) color: vec4<f32>,
     @location(3) stroke_color: vec4<f32>,
     @location(4) stroke_data: vec2<f32>,
+    @location(5) visibility: f32,
 };
 
 @vertex
@@ -178,6 +181,8 @@ fn main(in: VertexInput) -> VertexOutput {
     out.color = color;
     out.stroke_color = stroke_color;
     out.stroke_data = vec2<f32>(stroke_width, stroke_opacity);
+    // Hidden where the terrain covers the circle's centre, as maplibre-gl-js does (and as symbols are)
+    out.visibility = calculate_visibility(drawable.matrix * vec4<f32>(circle_center, ele, 1.0), depth_texture, depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
 
     return out;
 }
@@ -190,6 +195,7 @@ struct FragmentInput {
     @location(2) color: vec4<f32>,
     @location(3) stroke_color: vec4<f32>,
     @location(4) stroke_data: vec2<f32>,
+    @location(5) visibility: f32,
 };
 
 @fragment
@@ -213,7 +219,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     }
 
     let final_color = mix(in.color * opacity, in.stroke_color * stroke_opacity, color_t);
-    return opacity_t * final_color;
+    return in.visibility * opacity_t * final_color;
 }
 )";
 };
