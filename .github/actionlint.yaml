@@ -1,8 +1,6 @@
 self-hosted-runner:
   # Labels of self-hosted runner in array of strings.
   labels:
-    - windows-11-arm  # can be removed once actionlint is updated
-    - macos-15-intel  # can be removed once actionlint is updated
     - ubuntu-26.04  # can be removed once actionlint is updated
     - ubuntu-26.04-arm  # can be removed once actionlint is updated
 # Configuration variables in array of strings defined in your repository or
