@@ -38,7 +38,9 @@ Duration expirationTimeout(std::optional<Timestamp> expires, uint32_t expiredReq
         return Seconds(1u << std::min(expiredRequests - 1, 31u));
     }
     if (expires) {
-        return std::max(Seconds::zero(), *expires - util::now());
+        const Seconds remaining = std::max(Seconds::zero(), *expires - util::now());
+        // An expiry too far off for Duration's nanoseconds, such as Timestamp::max(), never comes.
+        return remaining < std::chrono::floor<Seconds>(Duration::max()) ? Duration(remaining) : Duration::max();
     }
     return Duration::max();
 }
