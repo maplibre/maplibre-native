@@ -25,9 +25,13 @@ public:
 
     WGPUBuffer getBuffer() const { return buffer; }
 
+    /// getSize() rounded up to the uniform buffer alignment
+    std::size_t getAllocatedSize() const { return allocatedSize; }
+
 private:
     Context& context;
     WGPUBuffer buffer = nullptr;
+    std::size_t allocatedSize = 0;
 };
 
 /// Stores a collection of uniform buffers by name
