@@ -64,7 +64,6 @@ jobs:
             rust: false
           - renderer: opengl
             rust: true
-            sanitizer: undefined
     runs-on: ubuntu-26.04
     timeout-minutes: 240
     steps:
@@ -126,7 +125,7 @@ jobs:
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
             -DMLN_WITH_COVERAGE=ON \
-            -DMLN_WITH_SANITIZER=${{ matrix.variant.sanitizer }}
+            -DMLN_WITH_SANITIZER=${{ matrix.variant.renderer == 'vulkan' && 'undefined' || 'OFF' }}
           cmake --build build-linux-${{ matrix.variant.renderer }} --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # mbgl-render (used for size test) & mbgl-benchmark-runner
@@ -168,7 +167,6 @@ jobs:
       - run: chmod +x build-linux-${{ matrix.variant.renderer }}/mbgl-test-runner
 
       - name: Run C++ tests
-        continue-on-error: ${{ matrix.variant.renderer == 'vulkan' }}
         run: xvfb-run -a build-linux-${{ matrix.variant.renderer }}/mbgl-test-runner
 
       # render tests
