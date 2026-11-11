@@ -239,8 +239,12 @@ TEST(CustomGeometryTile, CancelOneInstanceKeepsOtherRegistered) {
     StubTileObserver observer;
     Immutable<CustomGeometrySource::TileOptions> options = makeMutable<CustomGeometrySource::TileOptions>();
     CustomGeometryTile first(OverscaledTileID(0, 0, 0), "source", test.tileParameters, options, loaderActor, &observer);
-    CustomGeometryTile second(
-        OverscaledTileID(0, 1, CanonicalTileID(0, 0, 0)), "source", test.tileParameters, options, loaderActor, &observer);
+    CustomGeometryTile second(OverscaledTileID(0, 1, CanonicalTileID(0, 0, 0)),
+                              "source",
+                              test.tileParameters,
+                              options,
+                              loaderActor,
+                              &observer);
 
     first.setNecessity(TileNecessity::Required);
     second.setNecessity(TileNecessity::Required);
