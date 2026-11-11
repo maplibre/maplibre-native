@@ -144,14 +144,25 @@ public class MapLibreConstants {
   public static final float MINIMUM_PITCH = 0.0f;
 
   /**
-   * The currently supported maximum pitch level.
+   * The default maximum pitch level. A map can allow more, up to {@link #MAXIMUM_PITCH_LIMIT},
+   * with {@code MapLibreMap.setMaxPitchPreference()} or {@code MapLibreMapOptions.maxPitchPreference()}.
    */
   public static final float MAXIMUM_PITCH = 60.0f;
 
   /**
-   * The currently supported maximum tilt value.
+   * The highest maximum pitch level a map can be set to, as in MapLibre GL JS.
+   */
+  public static final float MAXIMUM_PITCH_LIMIT = 85.0f;
+
+  /**
+   * The default maximum tilt value; see {@link #MAXIMUM_PITCH}.
    */
   public static final double MAXIMUM_TILT = 60;
+
+  /**
+   * The highest tilt value a map can be set to; see {@link #MAXIMUM_PITCH_LIMIT}.
+   */
+  public static final double MAXIMUM_TILT_LIMIT = 85;
 
   /**
    * The currently supported minimum tilt value.

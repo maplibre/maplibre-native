@@ -371,14 +371,15 @@ class CameraPosition
          * Set the tilt of the camera in degrees
          *
          *
-         * value is clamped to [MapLibreConstants.MINIMUM_TILT] and [MapLibreConstants.MAXIMUM_TILT].
+         * value is clamped to [MapLibreConstants.MINIMUM_TILT] and [MapLibreConstants.MAXIMUM_TILT_LIMIT];
+         * the map then limits it to its own minimum and maximum pitch.
          *
          *
          * @param tilt Tilt value of the camera
          * @return this
          */
-        fun tilt(@FloatRange(from = MapLibreConstants.MINIMUM_TILT, to = MapLibreConstants.MAXIMUM_TILT) tilt: Double): Builder {
-            this.tilt = MathUtils.clamp(tilt, MapLibreConstants.MINIMUM_TILT, MapLibreConstants.MAXIMUM_TILT)
+        fun tilt(@FloatRange(from = MapLibreConstants.MINIMUM_TILT, to = MapLibreConstants.MAXIMUM_TILT_LIMIT) tilt: Double): Builder {
+            this.tilt = MathUtils.clamp(tilt, MapLibreConstants.MINIMUM_TILT, MapLibreConstants.MAXIMUM_TILT_LIMIT)
             return this
         }
 

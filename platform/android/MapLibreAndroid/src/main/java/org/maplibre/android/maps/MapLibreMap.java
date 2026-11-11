@@ -537,7 +537,7 @@ public final class MapLibreMap {
    * @param minPitch The new minimum Pitch.
    */
   public void setMinPitchPreference(
-    @FloatRange(from = MapLibreConstants.MINIMUM_PITCH, to = MapLibreConstants.MAXIMUM_PITCH) double minPitch) {
+    @FloatRange(from = MapLibreConstants.MINIMUM_PITCH, to = MapLibreConstants.MAXIMUM_PITCH_LIMIT) double minPitch) {
     transform.setMinPitch(minPitch);
   }
 
@@ -567,7 +567,7 @@ public final class MapLibreMap {
    * @param maxPitch The new maximum Pitch.
    */
   public void setMaxPitchPreference(@FloatRange(from = MapLibreConstants.MINIMUM_PITCH,
-    to = MapLibreConstants.MAXIMUM_PITCH) double maxPitch) {
+    to = MapLibreConstants.MAXIMUM_PITCH_LIMIT) double maxPitch) {
     transform.setMaxPitch(maxPitch);
   }
 
@@ -1752,7 +1752,7 @@ public final class MapLibreMap {
                                                  @FloatRange(from = MapLibreConstants.MINIMUM_DIRECTION,
                                                    to = MapLibreConstants.MAXIMUM_DIRECTION) double bearing,
                                                  @FloatRange(from = MapLibreConstants.MINIMUM_TILT,
-                                                   to = MapLibreConstants.MAXIMUM_TILT) double tilt) {
+                                                   to = MapLibreConstants.MAXIMUM_TILT_LIMIT) double tilt) {
     return getCameraForLatLngBounds(latLngBounds, new int[] {0, 0, 0, 0}, bearing, tilt);
   }
 
@@ -1772,7 +1772,7 @@ public final class MapLibreMap {
                                                  @FloatRange(from = MapLibreConstants.MINIMUM_DIRECTION,
                                                    to = MapLibreConstants.MAXIMUM_DIRECTION) double bearing,
                                                  @FloatRange(from = MapLibreConstants.MINIMUM_TILT,
-                                                   to = MapLibreConstants.MAXIMUM_TILT) double tilt) {
+                                                   to = MapLibreConstants.MAXIMUM_TILT_LIMIT) double tilt) {
     return nativeMapView.getCameraForLatLngBounds(latLngBounds, padding, bearing, tilt);
   }
 
@@ -1815,7 +1815,7 @@ public final class MapLibreMap {
                                              @FloatRange(from = MapLibreConstants.MINIMUM_DIRECTION,
                                                to = MapLibreConstants.MAXIMUM_DIRECTION) double bearing,
                                              @FloatRange(from = MapLibreConstants.MINIMUM_TILT,
-                                               to = MapLibreConstants.MAXIMUM_TILT) double tilt) {
+                                               to = MapLibreConstants.MAXIMUM_TILT_LIMIT) double tilt) {
     return getCameraForGeometry(geometry, new int[] {0, 0, 0, 0}, bearing, tilt);
   }
 
@@ -1834,7 +1834,7 @@ public final class MapLibreMap {
                                              @FloatRange(from = MapLibreConstants.MINIMUM_DIRECTION,
                                                to = MapLibreConstants.MAXIMUM_DIRECTION) double bearing,
                                              @FloatRange(from = MapLibreConstants.MINIMUM_TILT,
-                                               to = MapLibreConstants.MAXIMUM_TILT) double tilt) {
+                                               to = MapLibreConstants.MAXIMUM_TILT_LIMIT) double tilt) {
     return nativeMapView.getCameraForGeometry(geometry, padding, bearing, tilt);
   }
 
