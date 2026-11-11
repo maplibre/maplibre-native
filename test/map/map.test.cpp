@@ -1302,6 +1302,11 @@ TEST(Map, EmptyImageNameIsNoImage) {
     test.observer.onStyleImageMissingCallback = [&](const std::string& id) {
         missing.push_back(id);
     };
+    test.fileSource->glyphsResponse = [](const Resource&) {
+        Response response;
+        response.noContent = true;
+        return response;
+    };
 
     test.map.getStyle().loadJSON(R"STYLE({
       "version": 8,
@@ -1311,7 +1316,8 @@ TEST(Map, EmptyImageNameIsNoImage) {
       },
       "layers": [
         {"id": "fill", "type": "fill", "source": "polygon", "paint": {"fill-pattern": ["get", "image"]}},
-        {"id": "symbol", "type": "symbol", "source": "polygon", "layout": {"icon-image": ["get", "image"]}}
+        {"id": "symbol", "type": "symbol", "source": "polygon", "layout": {"icon-image": ["get", "image"]}},
+        {"id": "text", "type": "symbol", "source": "polygon", "layout": {"text-field": [["a"], [["image", ""]]]}}
       ]
     })STYLE");
     test.frontend.render(test.map);

@@ -282,7 +282,10 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                         continue; // skip section
                     }
                 } else {
-                    layoutParameters.imageDependencies.emplace(section.image->id(), ImageType::Icon);
+                    // An empty image name means no image, so it is not an image dependency.
+                    if (!section.image->id().empty()) {
+                        layoutParameters.imageDependencies.emplace(section.image->id(), ImageType::Icon);
+                    }
                     ft.formattedText->addImageSection(section.image->id());
                 }
             }
