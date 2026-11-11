@@ -15,7 +15,7 @@ import org.maplibre.android.utils.ColorUtils.rgbaToColor
  * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-fill)
  */
 @UiThread
-class FillLayer : Layer {
+open class FillLayer : Layer {
 
     /**
      * Creates a FillLayer.
@@ -36,12 +36,12 @@ class FillLayer : Layer {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?, sourceId: String?)
+    protected open external fun initialize(layerId: String?, sourceId: String?)
 
     /**
      * The source layer.
      */
-    var sourceLayer: String?
+    open var sourceLayer: String?
         get() {
             checkThread()
             return nativeGetSourceLayer()
@@ -57,7 +57,7 @@ class FillLayer : Layer {
      * @param sourceLayer the source layer to set
      * @return This
      */
-    fun withSourceLayer(sourceLayer: String?): FillLayer {
+    open fun withSourceLayer(sourceLayer: String?): FillLayer {
         this.sourceLayer = sourceLayer
         return this
     }
@@ -65,7 +65,7 @@ class FillLayer : Layer {
     /**
      * The id of the source.
      */
-    val sourceId: String
+    open val sourceId: String
         get() {
             checkThread()
             return nativeGetSourceId()
@@ -76,7 +76,7 @@ class FillLayer : Layer {
      *
      * @param filter the expression filter to set
      */
-    fun setFilter(filter: Expression) {
+    open fun setFilter(filter: Expression) {
         checkThread()
         nativeSetFilter(filter.toArray())
     }
@@ -87,7 +87,7 @@ class FillLayer : Layer {
      * @param filter the expression filter to set
      * @return This
      */
-    fun withFilter(filter: Expression): FillLayer {
+    open fun withFilter(filter: Expression): FillLayer {
         setFilter(filter)
         return this
     }
@@ -97,7 +97,7 @@ class FillLayer : Layer {
      *
      * Use [setFilter] to set the filter.
      */
-    val filter: Expression?
+    open val filter: Expression?
         get() {
             checkThread()
             val jsonElement = nativeGetFilter()
@@ -114,7 +114,7 @@ class FillLayer : Layer {
      * @param properties the var-args properties
      * @return This
      */
-    fun withProperties(vararg properties: PropertyValue<*>): FillLayer {
+    open fun withProperties(vararg properties: PropertyValue<*>): FillLayer {
         setProperties(*properties)
         return this
     }
@@ -127,7 +127,7 @@ class FillLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val fillSortKey: PropertyValue<Float>
+    open val fillSortKey: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-sort-key", nativeGetFillSortKey())
@@ -140,7 +140,7 @@ class FillLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val fillAntialias: PropertyValue<Boolean>
+    open val fillAntialias: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-antialias", nativeGetFillAntialias())
@@ -153,7 +153,7 @@ class FillLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val fillOpacity: PropertyValue<Float>
+    open val fillOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-opacity", nativeGetFillOpacity())
@@ -163,7 +163,7 @@ class FillLayer : Layer {
     /**
      * The FillOpacity property transition options
      */
-    var fillOpacityTransition: TransitionOptions
+    open var fillOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillOpacityTransition()
@@ -179,7 +179,7 @@ class FillLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val fillColor: PropertyValue<String>
+    open val fillColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-color", nativeGetFillColor())
@@ -193,7 +193,7 @@ class FillLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getFillColorAsInt(): Int {
+    open fun getFillColorAsInt(): Int {
         checkThread()
         val value = fillColor
         if (value.isValue()) {
@@ -206,7 +206,7 @@ class FillLayer : Layer {
     /**
      * The FillColor property transition options
      */
-    var fillColorTransition: TransitionOptions
+    open var fillColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillColorTransition()
@@ -222,7 +222,7 @@ class FillLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val fillOutlineColor: PropertyValue<String>
+    open val fillOutlineColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-outline-color", nativeGetFillOutlineColor())
@@ -236,7 +236,7 @@ class FillLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getFillOutlineColorAsInt(): Int {
+    open fun getFillOutlineColorAsInt(): Int {
         checkThread()
         val value = fillOutlineColor
         if (value.isValue()) {
@@ -249,7 +249,7 @@ class FillLayer : Layer {
     /**
      * The FillOutlineColor property transition options
      */
-    var fillOutlineColorTransition: TransitionOptions
+    open var fillOutlineColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillOutlineColorTransition()
@@ -265,7 +265,7 @@ class FillLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val fillTranslate: PropertyValue<Array<Float>>
+    open val fillTranslate: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-translate", nativeGetFillTranslate())
@@ -275,7 +275,7 @@ class FillLayer : Layer {
     /**
      * The FillTranslate property transition options
      */
-    var fillTranslateTransition: TransitionOptions
+    open var fillTranslateTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillTranslateTransition()
@@ -291,7 +291,7 @@ class FillLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val fillTranslateAnchor: PropertyValue<String>
+    open val fillTranslateAnchor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-translate-anchor", nativeGetFillTranslateAnchor())
@@ -304,7 +304,7 @@ class FillLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val fillPattern: PropertyValue<String>
+    open val fillPattern: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-pattern", nativeGetFillPattern())
@@ -314,7 +314,7 @@ class FillLayer : Layer {
     /**
      * The FillPattern property transition options
      */
-    var fillPatternTransition: TransitionOptions
+    open var fillPatternTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillPatternTransition()

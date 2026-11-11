@@ -59,8 +59,8 @@ open class MapView :
      *
      * The type of the returned view is either a SurfaceView or a TextureView.
      */
-    lateinit var renderView: View
-        private set
+    open lateinit var renderView: View
+        protected set
 
     private var attributionClickListener: AttributionClickListener? = null
 
@@ -210,7 +210,14 @@ open class MapView :
         mapCallback.initialised()
     }
 
-    internal open fun initialiseCompassView(): CompassView {
+    // Kotlin's protected has no package scope; UiSettings reaches the overridable factories through these.
+    internal fun createCompassView(): CompassView = initialiseCompassView()
+
+    internal fun createAttributionView(): ImageView = initialiseAttributionView()
+
+    internal fun createLogoView(): ImageView = initialiseLogoView()
+
+    protected open fun initialiseCompassView(): CompassView {
         val view = CompassView(this.context)
         compassView = view
         addView(view)
@@ -223,7 +230,7 @@ open class MapView :
         return view
     }
 
-    internal open fun initialiseAttributionView(): ImageView {
+    protected open fun initialiseAttributionView(): ImageView {
         val attrView = ImageView(this.context)
         addView(attrView)
         attrView.tag = "attrView"
@@ -241,7 +248,7 @@ open class MapView :
         return attrView
     }
 
-    internal open fun initialiseLogoView(): ImageView {
+    protected open fun initialiseLogoView(): ImageView {
         val logoView = ImageView(this.context)
         addView(logoView)
         logoView.tag = "logoView"
@@ -304,7 +311,7 @@ open class MapView :
      * @see MapLibre.getInstance
      */
     @UiThread
-    fun onCreate(savedInstanceState: Bundle?) {
+    open fun onCreate(savedInstanceState: Bundle?) {
         if (savedInstanceState != null && savedInstanceState.getBoolean(MapLibreConstants.STATE_HAS_SAVED_STATE)) {
             this.savedInstanceState = savedInstanceState
         }
@@ -338,7 +345,7 @@ open class MapView :
      * @param outState Pass in the parent's outState.
      */
     @UiThread
-    fun onSaveInstanceState(outState: Bundle) {
+    open fun onSaveInstanceState(outState: Bundle) {
         maplibreMap?.let {
             outState.putBoolean(MapLibreConstants.STATE_HAS_SAVED_STATE, true)
             it.onSaveInstanceState(outState)
@@ -349,7 +356,7 @@ open class MapView :
      * You must call this method from the parent's Activity#onStart() or Fragment#onStart()
      */
     @UiThread
-    fun onStart() {
+    open fun onStart() {
         if (!isStarted) {
             ConnectivityReceiver.instance(context).activate()
             FileSource.getInstance(context).activate()
@@ -363,7 +370,7 @@ open class MapView :
      * You must call this method from the parent's Activity#onResume() or Fragment#onResume().
      */
     @UiThread
-    fun onResume() {
+    open fun onResume() {
         mapRenderer?.onResume()
     }
 
@@ -371,7 +378,7 @@ open class MapView :
      * You must call this method from the parent's Activity#onPause() or Fragment#onPause().
      */
     @UiThread
-    fun onPause() {
+    open fun onPause() {
         mapRenderer?.onPause()
     }
 
@@ -379,7 +386,7 @@ open class MapView :
      * You must call this method from the parent's Activity#onStop() or Fragment#onStop().
      */
     @UiThread
-    fun onStop() {
+    open fun onStop() {
         attributionClickListener?.onStop()
 
         maplibreMap?.let {
@@ -401,7 +408,7 @@ open class MapView :
      * You must call this method from the parent's Activity#onDestroy() or Fragment#onDestroyView().
      */
     @UiThread
-    fun onDestroy() {
+    open fun onDestroy() {
         destroyed = true
         mapChangeReceiver.clear()
         mapCallback.onDestroy()
@@ -424,7 +431,7 @@ open class MapView :
      *
      * @param runnable the runnable to queue
      */
-    fun queueEvent(runnable: Runnable) {
+    open fun queueEvent(runnable: Runnable) {
         val renderer =
             mapRenderer ?: throw IllegalStateException(
                 "Calling MapView#queueEvent before mapRenderer is created.",
@@ -438,7 +445,7 @@ open class MapView :
      *
      * @param maximumFps Can be set to arbitrary integer values.
      */
-    fun setMaximumFps(maximumFps: Int) {
+    open fun setMaximumFps(maximumFps: Int) {
         val renderer =
             mapRenderer ?: throw IllegalStateException(
                 "Calling MapView#setMaximumFps before mapRenderer is created.",
@@ -467,7 +474,7 @@ open class MapView :
      * @return one of the MapRenderer.RenderingRefreshMode modes
      * @see setRenderingRefreshMode
      */
-    fun getRenderingRefreshMode(): MapRenderer.RenderingRefreshMode {
+    open fun getRenderingRefreshMode(): MapRenderer.RenderingRefreshMode {
         val renderer =
             mapRenderer ?: throw IllegalStateException(
                 "Calling MapView#getRenderingRefreshMode before mapRenderer is created.",
@@ -483,7 +490,7 @@ open class MapView :
      * @return true, if the map has been destroyed
      */
     @get:UiThread
-    val isDestroyed: Boolean
+    open val isDestroyed: Boolean
         get() = destroyed
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -529,7 +536,7 @@ open class MapView :
      * You must call this method from the parent's Activity#onLowMemory() or Fragment#onLowMemory().
      */
     @UiThread
-    fun onLowMemory() {
+    open fun onLowMemory() {
         val nativeMap = nativeMapView
         if (nativeMap != null && maplibreMap != null && !destroyed) {
             nativeMap.onLowMemory()
@@ -558,7 +565,7 @@ open class MapView :
      *
      * @return the current map pixel ratio
      */
-    fun getPixelRatio(): Float {
+    open fun getPixelRatio(): Float {
         // check is user defined his own pixel ratio value
         val pixelRatio = maplibreMapOptions.pixelRatio
         // if not, get the one defined by the system
@@ -1553,7 +1560,7 @@ open class MapView :
      * @param callback The callback object that will be triggered when the map is ready to be used.
      */
     @UiThread
-    fun getMapAsync(callback: OnMapReadyCallback) {
+    open fun getMapAsync(callback: OnMapReadyCallback) {
         val map = maplibreMap
         if (map == null) {
             // Add callback to the list only if the style hasn't loaded, or the drawing surface isn't ready

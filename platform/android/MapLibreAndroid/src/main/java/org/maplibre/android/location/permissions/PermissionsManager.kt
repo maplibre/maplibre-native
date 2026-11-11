@@ -12,12 +12,12 @@ import androidx.core.content.ContextCompat
 /**
  * Helps request permissions at runtime.
  */
-class PermissionsManager(
-    var listener: PermissionsListener?,
+open class PermissionsManager(
+    open var listener: PermissionsListener?,
 ) {
     private val requestPermissionsCode = 0
 
-    fun requestLocationPermissions(activity: Activity) {
+    open fun requestLocationPermissions(activity: Activity) {
         try {
             val packageInfo =
                 activity.packageManager.getPackageInfo(
@@ -92,7 +92,7 @@ class PermissionsManager(
      * @param grantResults The grant results for the corresponding permissions which is either
      *                     PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
      */
-    fun onRequestPermissionsResult(
+    open fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray,

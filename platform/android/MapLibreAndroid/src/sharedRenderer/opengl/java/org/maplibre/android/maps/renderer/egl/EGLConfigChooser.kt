@@ -28,7 +28,7 @@ import javax.microedition.khronos.egl.EGLDisplay
 /**
  * Selects the right EGLConfig needed for `mapbox-gl-native`
  */
-class EGLConfigChooser
+open class EGLConfigChooser
     @JvmOverloads
     constructor(
         private val translucentSurface: Boolean = false,

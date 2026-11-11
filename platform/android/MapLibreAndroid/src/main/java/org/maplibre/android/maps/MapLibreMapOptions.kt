@@ -44,16 +44,16 @@ open class MapLibreMapOptions
          *
          * @return True indicates debug is enabled.
          */
-        var debugActive = false
-            private set
+        open var debugActive = false
+            protected set
 
         /**
          * Get the current configured visibility state for maplibre_compass_icon for a map view.
          *
          * @return Visibility state of the maplibre_compass_icon
          */
-        var compassEnabled = true
-            private set
+        open var compassEnabled = true
+            protected set
         private var fadeCompassFacingNorth = true
 
         /**
@@ -61,48 +61,48 @@ open class MapLibreMapOptions
          *
          * @return Gravity state of the maplibre_compass_icon
          */
-        var compassGravity = Gravity.TOP or Gravity.END
-            private set
+        open var compassGravity = Gravity.TOP or Gravity.END
+            protected set
 
         /**
          * Get the current configured margins for maplibre_compass_icon for a map view.
          *
          * @return Margins state of the maplibre_compass_icon
          */
-        var compassMargins: IntArray? = null
-            private set
+        open var compassMargins: IntArray? = null
+            protected set
 
         /**
          * Get the current configured CompassView image.
          *
          * @return the drawable used as compass image
          */
-        var compassImage: Drawable? = null
-            private set
+        open var compassImage: Drawable? = null
+            protected set
 
         /**
          * Get the current configured visibility state for maplibre_compass_icon for a map view.
          *
          * @return Visibility state of the maplibre_compass_icon
          */
-        var logoEnabled = true
-            private set
+        open var logoEnabled = true
+            protected set
 
         /**
          * Get the current configured gravity state for logo for a map view.
          *
          * @return Gravity state of the logo
          */
-        var logoGravity = Gravity.BOTTOM or Gravity.START
-            private set
+        open var logoGravity = Gravity.BOTTOM or Gravity.START
+            protected set
 
         /**
          * Get the current configured margins for logo for a map view.
          *
          * @return Margins state of the logo
          */
-        var logoMargins: IntArray? = null
-            private set
+        open var logoMargins: IntArray? = null
+            protected set
 
         /**
          * Get the current configured tint color for attribution for a map view.
@@ -110,32 +110,32 @@ open class MapLibreMapOptions
          * @return the tint color
          */
         @get:ColorInt
-        var attributionTintColor = UNDEFINED_COLOR
-            private set
+        open var attributionTintColor = UNDEFINED_COLOR
+            protected set
 
         /**
          * Get the current configured visibility state for attribution for a map view.
          *
          * @return Visibility state of the attribution
          */
-        var attributionEnabled = true
-            private set
+        open var attributionEnabled = true
+            protected set
 
         /**
          * Get the current configured gravity state for attribution for a map view.
          *
          * @return Gravity state of the logo
          */
-        var attributionGravity = Gravity.BOTTOM or Gravity.START
-            private set
+        open var attributionGravity = Gravity.BOTTOM or Gravity.START
+            protected set
 
         /**
          * Get the current configured margins for attribution for a map view.
          *
          * @return Margins state of the logo
          */
-        var attributionMargins: IntArray? = null
-            private set
+        open var attributionMargins: IntArray? = null
+            protected set
 
         private var minZoom: Double = MapLibreConstants.MINIMUM_ZOOM.toDouble()
         private var maxZoom: Double = MapLibreConstants.MAXIMUM_ZOOM.toDouble()
@@ -147,56 +147,56 @@ open class MapLibreMapOptions
          *
          * @return True indicates gesture is enabled
          */
-        var rotateGesturesEnabled = true
-            private set
+        open var rotateGesturesEnabled = true
+            protected set
 
         /**
          * Get the current configured scroll gesture state for a map view.
          *
          * @return True indicates gesture is enabled
          */
-        var scrollGesturesEnabled = true
-            private set
+        open var scrollGesturesEnabled = true
+            protected set
 
         /**
          * Get the current configured horizontal scroll gesture state for a map view.
          *
          * @return True indicates horizontal scroll gesture is enabled
          */
-        var horizontalScrollGesturesEnabled = true
-            private set
+        open var horizontalScrollGesturesEnabled = true
+            protected set
 
         /**
          * Get the current configured tilt gesture state for a map view.
          *
          * @return True indicates gesture is enabled
          */
-        var tiltGesturesEnabled = true
-            private set
+        open var tiltGesturesEnabled = true
+            protected set
 
         /**
          * Get the current configured zoom gesture state for a map view.
          *
          * @return True indicates gesture is enabled
          */
-        var zoomGesturesEnabled = true
-            private set
+        open var zoomGesturesEnabled = true
+            protected set
 
         /**
          * Get the current configured double tap gesture state for a map view.
          *
          * @return True indicates gesture is enabled
          */
-        var doubleTapGesturesEnabled = true
-            private set
+        open var doubleTapGesturesEnabled = true
+            protected set
 
         /**
          * Get whether the user may zoom the map by tapping twice, holding and moving the pointer up and down.
          *
          * @return True indicates gesture is enabled
          */
-        var quickZoomGesturesEnabled = true
-            private set
+        open var quickZoomGesturesEnabled = true
+            protected set
 
         /**
          * Check whether tile pre-fetching is enabled.
@@ -205,8 +205,8 @@ open class MapLibreMapOptions
          * @deprecated Use [getPrefetchZoomDelta] instead.
          */
         @Deprecated("Use getPrefetchZoomDelta() instead.", ReplaceWith("getPrefetchZoomDelta()"))
-        var prefetchesTiles = true
-            private set
+        open var prefetchesTiles = true
+            protected set
 
         /**
          * Check current pre-fetching zoom delta.
@@ -214,8 +214,8 @@ open class MapLibreMapOptions
          * @return current zoom delta.
          */
         @get:IntRange(from = 0)
-        var prefetchZoomDelta = 4
-            private set
+        open var prefetchZoomDelta = 4
+            protected set
         private var zMediaOverlay = false
 
         private var localIdeographFontFamilyEnabled = true
@@ -228,9 +228,9 @@ open class MapLibreMapOptions
          *
          * @return Local ideograph font family name.
          */
-        var localIdeographFontFamily: String? = null
+        open var localIdeographFontFamily: String? = null
             get() = if (localIdeographFontFamilyEnabled) field else null
-            private set
+            protected set
 
         private var localIdeographFontFamilies: Array<String>? = null
 
@@ -239,24 +239,24 @@ open class MapLibreMapOptions
          *
          * @return Base URI to be used API endpoint.
          */
-        var apiBaseUri: String? = null
-            private set
+        open var apiBaseUri: String? = null
+            protected set
 
         /**
          * Returns true if TextureView is being used the render view.
          *
          * @return True if TextureView is used.
          */
-        var textureMode = false
-            private set
+        open var textureMode = false
+            protected set
 
         /**
          * Returns true if TextureView supports a translucent surface
          *
          * @return True if translucent surface is active
          */
-        var translucentTextureSurface = false
-            private set
+        open var translucentTextureSurface = false
+            protected set
 
         /**
          * Returns the current configured foreground color that is used during map creation.
@@ -264,40 +264,40 @@ open class MapLibreMapOptions
          * @return the load color
          */
         @get:ColorInt
-        var foregroundLoadColor = 0
-            private set
+        open var foregroundLoadColor = 0
+            protected set
 
         /**
          * Return the custom configured pixel ratio, returns 0 if not configured.
          *
          * @return the pixel ratio used by the map under construction
          */
-        var pixelRatio = 0f
-            private set
+        open var pixelRatio = 0f
+            protected set
 
         /**
          * Check whether cross-source symbol collision detection is enabled.
          *
          * @return true if enabled
          */
-        var crossSourceCollisions = true
-            private set
+        open var crossSourceCollisions = true
+            protected set
 
         /**
          * Check whether action journal logging is enabled.
          *
          * @return true if enabled
          */
-        var actionJournalEnabled = false
-            private set
+        open var actionJournalEnabled = false
+            protected set
 
         /**
          * Get the current configured action journal log path.
          *
          * @return log file path
          */
-        var actionJournalPath = ""
-            private set
+        open var actionJournalPath = ""
+            protected set
 
         /**
          * Get the current configured action journal log file size.
@@ -305,8 +305,8 @@ open class MapLibreMapOptions
          *
          * @return maximum file size
          */
-        var actionJournalLogFileSize = (1024 * 1024).toLong()
-            private set
+        open var actionJournalLogFileSize = (1024 * 1024).toLong()
+            protected set
 
         /**
          * Get the current configured action journal log file count.
@@ -314,40 +314,40 @@ open class MapLibreMapOptions
          *
          * @return maximum log files used
          */
-        var actionJournalLogFileCount = 5L
-            private set
+        open var actionJournalLogFileCount = 5L
+            protected set
 
         /**
          * Get the current configured action journal rendering stats report time interval.
          *
          * @return time interval in seconds
          */
-        var actionJournalRenderingReportInterval = 60
-            private set
+        open var actionJournalRenderingReportInterval = 60
+            protected set
 
         /**
          * Check whether the renderer backend is async
          *
          * @return true if async
          */
-        var asyncRendererCleanup = false
-            private set
+        open var asyncRendererCleanup = false
+            protected set
 
         /**
          * Check whether FastPFOR decompression is enabled for vector tiles.
          *
          * @return true if enabled
          */
-        var fastPFOREnabled = false
-            private set
+        open var fastPFOREnabled = false
+            protected set
 
         /**
          * Check whether feature info recording is enabled
          *
          * @return true if enabled
          */
-        var featureInfoEnabled = false
-            private set
+        open var featureInfoEnabled = false
+            protected set
 
         @Suppress("DEPRECATION", "LongMethod")
         private constructor(parcel: Parcel) : this() {
@@ -419,7 +419,7 @@ open class MapLibreMapOptions
          * @deprecated use [apiBaseUri] instead
          */
         @Deprecated("use apiBaseUri instead", ReplaceWith("apiBaseUri(apiBaseUrl)"))
-        fun apiBaseUrl(apiBaseUrl: String?): MapLibreMapOptions {
+        open fun apiBaseUrl(apiBaseUrl: String?): MapLibreMapOptions {
             apiBaseUri = apiBaseUrl
             return this
         }
@@ -430,7 +430,7 @@ open class MapLibreMapOptions
          * @param apiBaseUri The base of our API endpoint
          * @return This
          */
-        fun apiBaseUri(apiBaseUri: String?): MapLibreMapOptions {
+        open fun apiBaseUri(apiBaseUri: String?): MapLibreMapOptions {
             this.apiBaseUri = apiBaseUri
             return this
         }
@@ -441,7 +441,7 @@ open class MapLibreMapOptions
          * @param cameraPosition Inital camera position
          * @return This
          */
-        fun camera(cameraPosition: CameraPosition?): MapLibreMapOptions {
+        open fun camera(cameraPosition: CameraPosition?): MapLibreMapOptions {
             this.cameraPosition = cameraPosition
             return this
         }
@@ -452,7 +452,7 @@ open class MapLibreMapOptions
          * @param enabled True is debug is enabled
          * @return This
          */
-        fun debugActive(enabled: Boolean): MapLibreMapOptions {
+        open fun debugActive(enabled: Boolean): MapLibreMapOptions {
             debugActive = enabled
             return this
         }
@@ -463,7 +463,7 @@ open class MapLibreMapOptions
          * @param minZoom Zoom level to be used
          * @return This
          */
-        fun minZoomPreference(minZoom: Double): MapLibreMapOptions {
+        open fun minZoomPreference(minZoom: Double): MapLibreMapOptions {
             this.minZoom = minZoom
             return this
         }
@@ -474,7 +474,7 @@ open class MapLibreMapOptions
          * @param maxZoom Zoom level to be used
          * @return This
          */
-        fun maxZoomPreference(maxZoom: Double): MapLibreMapOptions {
+        open fun maxZoomPreference(maxZoom: Double): MapLibreMapOptions {
             this.maxZoom = maxZoom
             return this
         }
@@ -485,7 +485,7 @@ open class MapLibreMapOptions
          * @param minPitch Pitch to be used
          * @return This
          */
-        fun minPitchPreference(minPitch: Double): MapLibreMapOptions {
+        open fun minPitchPreference(minPitch: Double): MapLibreMapOptions {
             this.minPitch = minPitch
             return this
         }
@@ -496,7 +496,7 @@ open class MapLibreMapOptions
          * @param maxPitch Pitch to be used
          * @return This
          */
-        fun maxPitchPreference(maxPitch: Double): MapLibreMapOptions {
+        open fun maxPitchPreference(maxPitch: Double): MapLibreMapOptions {
             this.maxPitch = maxPitch
             return this
         }
@@ -507,7 +507,7 @@ open class MapLibreMapOptions
          * @param enabled True and maplibre_compass_icon is shown
          * @return This
          */
-        fun compassEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun compassEnabled(enabled: Boolean): MapLibreMapOptions {
             compassEnabled = enabled
             return this
         }
@@ -518,7 +518,7 @@ open class MapLibreMapOptions
          * @param gravity Android SDK Gravity.
          * @return This
          */
-        fun compassGravity(gravity: Int): MapLibreMapOptions {
+        open fun compassGravity(gravity: Int): MapLibreMapOptions {
             compassGravity = gravity
             return this
         }
@@ -529,7 +529,7 @@ open class MapLibreMapOptions
          * @param margins 4 long array for LTRB margins
          * @return This
          */
-        fun compassMargins(margins: IntArray?): MapLibreMapOptions {
+        open fun compassMargins(margins: IntArray?): MapLibreMapOptions {
             compassMargins = margins
             return this
         }
@@ -542,7 +542,7 @@ open class MapLibreMapOptions
          * @param compassFadeWhenFacingNorth true is maplibre_compass_icon fades to invisble
          * @return This
          */
-        fun compassFadesWhenFacingNorth(compassFadeWhenFacingNorth: Boolean): MapLibreMapOptions {
+        open fun compassFadesWhenFacingNorth(compassFadeWhenFacingNorth: Boolean): MapLibreMapOptions {
             fadeCompassFacingNorth = compassFadeWhenFacingNorth
             return this
         }
@@ -555,7 +555,7 @@ open class MapLibreMapOptions
          * @param compass the drawable to show as image compass
          * @return This
          */
-        fun compassImage(compass: Drawable?): MapLibreMapOptions {
+        open fun compassImage(compass: Drawable?): MapLibreMapOptions {
             compassImage = compass
             return this
         }
@@ -566,7 +566,7 @@ open class MapLibreMapOptions
          * @param enabled True and logo is shown
          * @return This
          */
-        fun logoEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun logoEnabled(enabled: Boolean): MapLibreMapOptions {
             logoEnabled = enabled
             return this
         }
@@ -577,7 +577,7 @@ open class MapLibreMapOptions
          * @param gravity Android SDK Gravity.
          * @return This
          */
-        fun logoGravity(gravity: Int): MapLibreMapOptions {
+        open fun logoGravity(gravity: Int): MapLibreMapOptions {
             logoGravity = gravity
             return this
         }
@@ -588,7 +588,7 @@ open class MapLibreMapOptions
          * @param margins 4 long array for LTRB margins
          * @return This
          */
-        fun logoMargins(margins: IntArray?): MapLibreMapOptions {
+        open fun logoMargins(margins: IntArray?): MapLibreMapOptions {
             logoMargins = margins
             return this
         }
@@ -599,7 +599,7 @@ open class MapLibreMapOptions
          * @param enabled True and attribution is shown
          * @return This
          */
-        fun attributionEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun attributionEnabled(enabled: Boolean): MapLibreMapOptions {
             attributionEnabled = enabled
             return this
         }
@@ -610,7 +610,7 @@ open class MapLibreMapOptions
          * @param gravity Android SDK Gravity.
          * @return This
          */
-        fun attributionGravity(gravity: Int): MapLibreMapOptions {
+        open fun attributionGravity(gravity: Int): MapLibreMapOptions {
             attributionGravity = gravity
             return this
         }
@@ -621,7 +621,7 @@ open class MapLibreMapOptions
          * @param margins 4 long array for LTRB margins
          * @return This
          */
-        fun attributionMargins(margins: IntArray?): MapLibreMapOptions {
+        open fun attributionMargins(margins: IntArray?): MapLibreMapOptions {
             attributionMargins = margins
             return this
         }
@@ -632,7 +632,7 @@ open class MapLibreMapOptions
          * @param color integer resembling a color
          * @return This
          */
-        fun attributionTintColor(
+        open fun attributionTintColor(
             @ColorInt color: Int,
         ): MapLibreMapOptions {
             attributionTintColor = color
@@ -645,7 +645,7 @@ open class MapLibreMapOptions
          * @param enabled True and gesture will be enabled
          * @return This
          */
-        fun rotateGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun rotateGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
             rotateGesturesEnabled = enabled
             return this
         }
@@ -656,7 +656,7 @@ open class MapLibreMapOptions
          * @param enabled True and gesture will be enabled
          * @return This
          */
-        fun scrollGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun scrollGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
             scrollGesturesEnabled = enabled
             return this
         }
@@ -667,7 +667,7 @@ open class MapLibreMapOptions
          * @param enabled True and gesture will be enabled
          * @return This
          */
-        fun horizontalScrollGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun horizontalScrollGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
             horizontalScrollGesturesEnabled = enabled
             return this
         }
@@ -678,7 +678,7 @@ open class MapLibreMapOptions
          * @param enabled True and gesture will be enabled
          * @return This
          */
-        fun tiltGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun tiltGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
             tiltGesturesEnabled = enabled
             return this
         }
@@ -689,7 +689,7 @@ open class MapLibreMapOptions
          * @param enabled True and gesture will be enabled
          * @return This
          */
-        fun zoomGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun zoomGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
             zoomGesturesEnabled = enabled
             return this
         }
@@ -700,7 +700,7 @@ open class MapLibreMapOptions
          * @param enabled True and gesture will be enabled
          * @return This
          */
-        fun doubleTapGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun doubleTapGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
             doubleTapGesturesEnabled = enabled
             return this
         }
@@ -711,7 +711,7 @@ open class MapLibreMapOptions
          * @param enabled True and gesture will be enabled
          * @return This
          */
-        fun quickZoomGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun quickZoomGesturesEnabled(enabled: Boolean): MapLibreMapOptions {
             quickZoomGesturesEnabled = enabled
             return this
         }
@@ -728,12 +728,12 @@ open class MapLibreMapOptions
          * @param textureMode True to enable texture mode
          * @return This
          */
-        fun textureMode(textureMode: Boolean): MapLibreMapOptions {
+        open fun textureMode(textureMode: Boolean): MapLibreMapOptions {
             this.textureMode = textureMode
             return this
         }
 
-        fun translucentTextureSurface(translucentTextureSurface: Boolean): MapLibreMapOptions {
+        open fun translucentTextureSurface(translucentTextureSurface: Boolean): MapLibreMapOptions {
             this.translucentTextureSurface = translucentTextureSurface
             return this
         }
@@ -744,7 +744,7 @@ open class MapLibreMapOptions
          * @param loadColor the color to show during map creation
          * @return This
          */
-        fun foregroundLoadColor(
+        open fun foregroundLoadColor(
             @ColorInt loadColor: Int,
         ): MapLibreMapOptions {
             foregroundLoadColor = loadColor
@@ -761,7 +761,7 @@ open class MapLibreMapOptions
          * @deprecated Use [setPrefetchZoomDelta] instead.
          */
         @Deprecated("Use setPrefetchZoomDelta(int) instead.")
-        fun setPrefetchesTiles(enable: Boolean): MapLibreMapOptions {
+        open fun setPrefetchesTiles(enable: Boolean): MapLibreMapOptions {
             prefetchesTiles = enable
             return this
         }
@@ -777,7 +777,7 @@ open class MapLibreMapOptions
          * @param delta zoom delta
          * @return This
          */
-        fun setPrefetchZoomDelta(
+        open fun setPrefetchZoomDelta(
             @IntRange(from = 0) delta: Int,
         ): MapLibreMapOptions {
             prefetchZoomDelta = delta
@@ -793,7 +793,7 @@ open class MapLibreMapOptions
          * @param crossSourceCollisions true to enable, false to disable
          * @return This
          */
-        fun crossSourceCollisions(crossSourceCollisions: Boolean): MapLibreMapOptions {
+        open fun crossSourceCollisions(crossSourceCollisions: Boolean): MapLibreMapOptions {
             this.crossSourceCollisions = crossSourceCollisions
             return this
         }
@@ -806,7 +806,7 @@ open class MapLibreMapOptions
          * @param actionJournalEnabled true to enable, false to disable
          * @return This
          */
-        fun actionJournalEnabled(actionJournalEnabled: Boolean): MapLibreMapOptions {
+        open fun actionJournalEnabled(actionJournalEnabled: Boolean): MapLibreMapOptions {
             this.actionJournalEnabled = actionJournalEnabled
             return this
         }
@@ -817,7 +817,7 @@ open class MapLibreMapOptions
          * @param actionJournalPath Path to be used
          * @return This
          */
-        fun actionJournalPath(actionJournalPath: String): MapLibreMapOptions {
+        open fun actionJournalPath(actionJournalPath: String): MapLibreMapOptions {
             this.actionJournalPath = actionJournalPath
             return this
         }
@@ -831,7 +831,7 @@ open class MapLibreMapOptions
          * @param actionJournalLogFileSize maximum log file size
          * @return This
          */
-        fun actionJournalLogFileSize(actionJournalLogFileSize: Long): MapLibreMapOptions {
+        open fun actionJournalLogFileSize(actionJournalLogFileSize: Long): MapLibreMapOptions {
             this.actionJournalLogFileSize = actionJournalLogFileSize
             return this
         }
@@ -845,7 +845,7 @@ open class MapLibreMapOptions
          * @param actionJournalLogFileCount maximum number of log files
          * @return This
          */
-        fun actionJournalLogFileCount(actionJournalLogFileCount: Long): MapLibreMapOptions {
+        open fun actionJournalLogFileCount(actionJournalLogFileCount: Long): MapLibreMapOptions {
             this.actionJournalLogFileCount = actionJournalLogFileCount
             return this
         }
@@ -856,7 +856,7 @@ open class MapLibreMapOptions
          * @param actionJournalRenderingReportInterval time interval in seconds
          * @return This
          */
-        fun actionJournalRenderingReportInterval(actionJournalRenderingReportInterval: Int): MapLibreMapOptions {
+        open fun actionJournalRenderingReportInterval(actionJournalRenderingReportInterval: Int): MapLibreMapOptions {
             this.actionJournalRenderingReportInterval = actionJournalRenderingReportInterval
             return this
         }
@@ -871,7 +871,7 @@ open class MapLibreMapOptions
          * @param asyncRendererCleanup true to enable, false to disable
          * @return This
          */
-        fun asyncRendererCleanup(asyncRendererCleanup: Boolean): MapLibreMapOptions {
+        open fun asyncRendererCleanup(asyncRendererCleanup: Boolean): MapLibreMapOptions {
             this.asyncRendererCleanup = asyncRendererCleanup
             return this
         }
@@ -882,7 +882,7 @@ open class MapLibreMapOptions
          * @param enable true to enable, false to disable
          * @return This
          */
-        fun fastPFOREnabled(enable: Boolean): MapLibreMapOptions {
+        open fun fastPFOREnabled(enable: Boolean): MapLibreMapOptions {
             fastPFOREnabled = enable
             return this
         }
@@ -893,7 +893,7 @@ open class MapLibreMapOptions
          * @param enable true to enable, false to disable
          * @return This
          */
-        fun featureInfoEnabled(enable: Boolean): MapLibreMapOptions {
+        open fun featureInfoEnabled(enable: Boolean): MapLibreMapOptions {
             featureInfoEnabled = enable
             return this
         }
@@ -904,7 +904,7 @@ open class MapLibreMapOptions
          * @param enabled true to enable, false to disable
          * @return This
          */
-        fun localIdeographFontFamilyEnabled(enabled: Boolean): MapLibreMapOptions {
+        open fun localIdeographFontFamilyEnabled(enabled: Boolean): MapLibreMapOptions {
             localIdeographFontFamilyEnabled = enabled
             return this
         }
@@ -920,7 +920,7 @@ open class MapLibreMapOptions
          * @param fontFamily font family for local ideograph generation.
          * @return This
          */
-        fun localIdeographFontFamily(fontFamily: String?): MapLibreMapOptions {
+        open fun localIdeographFontFamily(fontFamily: String?): MapLibreMapOptions {
             localIdeographFontFamily = FontUtils.extractValidFont(fontFamily)
             return this
         }
@@ -937,7 +937,7 @@ open class MapLibreMapOptions
          * @param fontFamilies an array of font families for local ideograph generation.
          * @return This
          */
-        fun localIdeographFontFamily(vararg fontFamilies: String?): MapLibreMapOptions {
+        open fun localIdeographFontFamily(vararg fontFamilies: String?): MapLibreMapOptions {
             localIdeographFontFamily = FontUtils.extractValidFont(*fontFamilies)
             return this
         }
@@ -949,7 +949,7 @@ open class MapLibreMapOptions
          * @param pixelRatio the custom pixel ratio of the map under construction
          * @return This
          */
-        fun pixelRatio(pixelRatio: Float): MapLibreMapOptions {
+        open fun pixelRatio(pixelRatio: Float): MapLibreMapOptions {
             this.pixelRatio = pixelRatio
             return this
         }
@@ -959,7 +959,7 @@ open class MapLibreMapOptions
          *
          * @param renderOnTop true if this map is shown on top of another one, false if bottom.
          */
-        fun renderSurfaceOnTop(renderOnTop: Boolean) {
+        open fun renderSurfaceOnTop(renderOnTop: Boolean) {
             zMediaOverlay = renderOnTop
         }
 
@@ -968,7 +968,7 @@ open class MapLibreMapOptions
          *
          * @return true if this map is
          */
-        val renderSurfaceOnTop: Boolean get() = zMediaOverlay
+        open val renderSurfaceOnTop: Boolean get() = zMediaOverlay
 
         /**
          * Get the current configured API endpoint base URL.
@@ -977,56 +977,56 @@ open class MapLibreMapOptions
          * @deprecated use [getApiBaseUri] instead
          */
         @Deprecated("use getApiBaseUri() instead", ReplaceWith("getApiBaseUri()"))
-        val apiBaseUrl: String? get() = apiBaseUri
+        open val apiBaseUrl: String? get() = apiBaseUri
 
         /**
          * Get the current configured initial camera position for a map view.
          *
          * @return CameraPosition to be initially used.
          */
-        val camera: CameraPosition? get() = cameraPosition
+        open val camera: CameraPosition? get() = cameraPosition
 
         /**
          * Get the current configured min zoom for a map view.
          *
          * @return Mininum zoom level to be used.
          */
-        val minZoomPreference: Double get() = minZoom
+        open val minZoomPreference: Double get() = minZoom
 
         /**
          * Get the current configured maximum zoom for a map view.
          *
          * @return Maximum zoom to be used.
          */
-        val maxZoomPreference: Double get() = maxZoom
+        open val maxZoomPreference: Double get() = maxZoom
 
         /**
          * Get the current configured min pitch for a map view.
          *
          * @return Mininum pitch to be used.
          */
-        val minPitchPreference: Double get() = minPitch
+        open val minPitchPreference: Double get() = minPitch
 
         /**
          * Get the current configured maximum pitch for a map view.
          *
          * @return Maximum pitch to be used.
          */
-        val maxPitchPreference: Double get() = maxPitch
+        open val maxPitchPreference: Double get() = maxPitch
 
         /**
          * Get the current configured state for fading the maplibre_compass_icon when facing north.
          *
          * @return True if maplibre_compass_icon fades to invisible when facing north
          */
-        val compassFadeFacingNorth: Boolean get() = fadeCompassFacingNorth
+        open val compassFadeFacingNorth: Boolean get() = fadeCompassFacingNorth
 
         /**
          * Returns true if local ideograph font family is enabled, defaults to true.
          *
          * @return True if local ideograph font family is enabled
          */
-        fun isLocalIdeographFontFamilyEnabled(): Boolean = localIdeographFontFamilyEnabled
+        open fun isLocalIdeographFontFamilyEnabled(): Boolean = localIdeographFontFamilyEnabled
 
         override fun describeContents(): Int = 0
 

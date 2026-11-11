@@ -14,7 +14,7 @@ import org.maplibre.android.maps.MapView
  * @see Icon
  * @see Marker
  */
-class IconBitmapChangedException :
+open class IconBitmapChangedException :
     RuntimeException(
         "The added Marker has an Icon with a bitmap that has been modified. An Icon cannot be modified" +
             "after it has been added to the map in a Marker.",

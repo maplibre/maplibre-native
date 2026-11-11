@@ -63,7 +63,7 @@ open class AttributionDialogManager(
         showMapAttributionWebPage(which)
     }
 
-    fun onStop() {
+    open fun onStop() {
         dialog?.takeIf { it.isShowing }?.dismiss()
     }
 

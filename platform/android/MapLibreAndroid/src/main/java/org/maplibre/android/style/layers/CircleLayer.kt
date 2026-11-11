@@ -15,7 +15,7 @@ import org.maplibre.android.utils.ColorUtils.rgbaToColor
  * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-circle)
  */
 @UiThread
-class CircleLayer : Layer {
+open class CircleLayer : Layer {
 
     /**
      * Creates a CircleLayer.
@@ -36,12 +36,12 @@ class CircleLayer : Layer {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?, sourceId: String?)
+    protected open external fun initialize(layerId: String?, sourceId: String?)
 
     /**
      * The source layer.
      */
-    var sourceLayer: String?
+    open var sourceLayer: String?
         get() {
             checkThread()
             return nativeGetSourceLayer()
@@ -57,7 +57,7 @@ class CircleLayer : Layer {
      * @param sourceLayer the source layer to set
      * @return This
      */
-    fun withSourceLayer(sourceLayer: String?): CircleLayer {
+    open fun withSourceLayer(sourceLayer: String?): CircleLayer {
         this.sourceLayer = sourceLayer
         return this
     }
@@ -65,7 +65,7 @@ class CircleLayer : Layer {
     /**
      * The id of the source.
      */
-    val sourceId: String
+    open val sourceId: String
         get() {
             checkThread()
             return nativeGetSourceId()
@@ -76,7 +76,7 @@ class CircleLayer : Layer {
      *
      * @param filter the expression filter to set
      */
-    fun setFilter(filter: Expression) {
+    open fun setFilter(filter: Expression) {
         checkThread()
         nativeSetFilter(filter.toArray())
     }
@@ -87,7 +87,7 @@ class CircleLayer : Layer {
      * @param filter the expression filter to set
      * @return This
      */
-    fun withFilter(filter: Expression): CircleLayer {
+    open fun withFilter(filter: Expression): CircleLayer {
         setFilter(filter)
         return this
     }
@@ -97,7 +97,7 @@ class CircleLayer : Layer {
      *
      * Use [setFilter] to set the filter.
      */
-    val filter: Expression?
+    open val filter: Expression?
         get() {
             checkThread()
             val jsonElement = nativeGetFilter()
@@ -114,7 +114,7 @@ class CircleLayer : Layer {
      * @param properties the var-args properties
      * @return This
      */
-    fun withProperties(vararg properties: PropertyValue<*>): CircleLayer {
+    open fun withProperties(vararg properties: PropertyValue<*>): CircleLayer {
         setProperties(*properties)
         return this
     }
@@ -127,7 +127,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val circleSortKey: PropertyValue<Float>
+    open val circleSortKey: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-sort-key", nativeGetCircleSortKey())
@@ -140,7 +140,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val circleRadius: PropertyValue<Float>
+    open val circleRadius: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-radius", nativeGetCircleRadius())
@@ -150,7 +150,7 @@ class CircleLayer : Layer {
     /**
      * The CircleRadius property transition options
      */
-    var circleRadiusTransition: TransitionOptions
+    open var circleRadiusTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetCircleRadiusTransition()
@@ -166,7 +166,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val circleColor: PropertyValue<String>
+    open val circleColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-color", nativeGetCircleColor())
@@ -180,7 +180,7 @@ class CircleLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getCircleColorAsInt(): Int {
+    open fun getCircleColorAsInt(): Int {
         checkThread()
         val value = circleColor
         if (value.isValue()) {
@@ -193,7 +193,7 @@ class CircleLayer : Layer {
     /**
      * The CircleColor property transition options
      */
-    var circleColorTransition: TransitionOptions
+    open var circleColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetCircleColorTransition()
@@ -209,7 +209,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val circleBlur: PropertyValue<Float>
+    open val circleBlur: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-blur", nativeGetCircleBlur())
@@ -219,7 +219,7 @@ class CircleLayer : Layer {
     /**
      * The CircleBlur property transition options
      */
-    var circleBlurTransition: TransitionOptions
+    open var circleBlurTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetCircleBlurTransition()
@@ -235,7 +235,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val circleOpacity: PropertyValue<Float>
+    open val circleOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-opacity", nativeGetCircleOpacity())
@@ -245,7 +245,7 @@ class CircleLayer : Layer {
     /**
      * The CircleOpacity property transition options
      */
-    var circleOpacityTransition: TransitionOptions
+    open var circleOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetCircleOpacityTransition()
@@ -261,7 +261,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val circleTranslate: PropertyValue<Array<Float>>
+    open val circleTranslate: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-translate", nativeGetCircleTranslate())
@@ -271,7 +271,7 @@ class CircleLayer : Layer {
     /**
      * The CircleTranslate property transition options
      */
-    var circleTranslateTransition: TransitionOptions
+    open var circleTranslateTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetCircleTranslateTransition()
@@ -287,7 +287,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val circleTranslateAnchor: PropertyValue<String>
+    open val circleTranslateAnchor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-translate-anchor", nativeGetCircleTranslateAnchor())
@@ -300,7 +300,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val circlePitchScale: PropertyValue<String>
+    open val circlePitchScale: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-pitch-scale", nativeGetCirclePitchScale())
@@ -313,7 +313,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val circlePitchAlignment: PropertyValue<String>
+    open val circlePitchAlignment: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-pitch-alignment", nativeGetCirclePitchAlignment())
@@ -326,7 +326,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val circleStrokeWidth: PropertyValue<Float>
+    open val circleStrokeWidth: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-stroke-width", nativeGetCircleStrokeWidth())
@@ -336,7 +336,7 @@ class CircleLayer : Layer {
     /**
      * The CircleStrokeWidth property transition options
      */
-    var circleStrokeWidthTransition: TransitionOptions
+    open var circleStrokeWidthTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetCircleStrokeWidthTransition()
@@ -352,7 +352,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val circleStrokeColor: PropertyValue<String>
+    open val circleStrokeColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-stroke-color", nativeGetCircleStrokeColor())
@@ -366,7 +366,7 @@ class CircleLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getCircleStrokeColorAsInt(): Int {
+    open fun getCircleStrokeColorAsInt(): Int {
         checkThread()
         val value = circleStrokeColor
         if (value.isValue()) {
@@ -379,7 +379,7 @@ class CircleLayer : Layer {
     /**
      * The CircleStrokeColor property transition options
      */
-    var circleStrokeColorTransition: TransitionOptions
+    open var circleStrokeColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetCircleStrokeColorTransition()
@@ -395,7 +395,7 @@ class CircleLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val circleStrokeOpacity: PropertyValue<Float>
+    open val circleStrokeOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("circle-stroke-opacity", nativeGetCircleStrokeOpacity())
@@ -405,7 +405,7 @@ class CircleLayer : Layer {
     /**
      * The CircleStrokeOpacity property transition options
      */
-    var circleStrokeOpacityTransition: TransitionOptions
+    open var circleStrokeOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetCircleStrokeOpacityTransition()

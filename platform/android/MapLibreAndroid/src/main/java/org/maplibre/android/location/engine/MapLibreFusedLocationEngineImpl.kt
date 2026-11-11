@@ -16,7 +16,7 @@ import timber.log.Timber
  *
  * Note: fusion will not work in background mode.
  */
-class MapLibreFusedLocationEngineImpl(
+open class MapLibreFusedLocationEngineImpl(
     context: Context,
 ) : AndroidLocationEngineImpl(context) {
     override fun createListener(callback: LocationEngineCallback<LocationEngineResult>): LocationListener =

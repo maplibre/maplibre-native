@@ -15,7 +15,7 @@ import org.maplibre.android.utils.ColorUtils.rgbaToColor
  * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-heatmap)
  */
 @UiThread
-class HeatmapLayer : Layer {
+open class HeatmapLayer : Layer {
 
     /**
      * Creates a HeatmapLayer.
@@ -36,12 +36,12 @@ class HeatmapLayer : Layer {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?, sourceId: String?)
+    protected open external fun initialize(layerId: String?, sourceId: String?)
 
     /**
      * The source layer.
      */
-    var sourceLayer: String?
+    open var sourceLayer: String?
         get() {
             checkThread()
             return nativeGetSourceLayer()
@@ -57,7 +57,7 @@ class HeatmapLayer : Layer {
      * @param sourceLayer the source layer to set
      * @return This
      */
-    fun withSourceLayer(sourceLayer: String?): HeatmapLayer {
+    open fun withSourceLayer(sourceLayer: String?): HeatmapLayer {
         this.sourceLayer = sourceLayer
         return this
     }
@@ -65,7 +65,7 @@ class HeatmapLayer : Layer {
     /**
      * The id of the source.
      */
-    val sourceId: String
+    open val sourceId: String
         get() {
             checkThread()
             return nativeGetSourceId()
@@ -76,7 +76,7 @@ class HeatmapLayer : Layer {
      *
      * @param filter the expression filter to set
      */
-    fun setFilter(filter: Expression) {
+    open fun setFilter(filter: Expression) {
         checkThread()
         nativeSetFilter(filter.toArray())
     }
@@ -87,7 +87,7 @@ class HeatmapLayer : Layer {
      * @param filter the expression filter to set
      * @return This
      */
-    fun withFilter(filter: Expression): HeatmapLayer {
+    open fun withFilter(filter: Expression): HeatmapLayer {
         setFilter(filter)
         return this
     }
@@ -97,7 +97,7 @@ class HeatmapLayer : Layer {
      *
      * Use [setFilter] to set the filter.
      */
-    val filter: Expression?
+    open val filter: Expression?
         get() {
             checkThread()
             val jsonElement = nativeGetFilter()
@@ -114,7 +114,7 @@ class HeatmapLayer : Layer {
      * @param properties the var-args properties
      * @return This
      */
-    fun withProperties(vararg properties: PropertyValue<*>): HeatmapLayer {
+    open fun withProperties(vararg properties: PropertyValue<*>): HeatmapLayer {
         setProperties(*properties)
         return this
     }
@@ -127,7 +127,7 @@ class HeatmapLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val heatmapRadius: PropertyValue<Float>
+    open val heatmapRadius: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("heatmap-radius", nativeGetHeatmapRadius())
@@ -137,7 +137,7 @@ class HeatmapLayer : Layer {
     /**
      * The HeatmapRadius property transition options
      */
-    var heatmapRadiusTransition: TransitionOptions
+    open var heatmapRadiusTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetHeatmapRadiusTransition()
@@ -153,7 +153,7 @@ class HeatmapLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val heatmapWeight: PropertyValue<Float>
+    open val heatmapWeight: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("heatmap-weight", nativeGetHeatmapWeight())
@@ -166,7 +166,7 @@ class HeatmapLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val heatmapIntensity: PropertyValue<Float>
+    open val heatmapIntensity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("heatmap-intensity", nativeGetHeatmapIntensity())
@@ -176,7 +176,7 @@ class HeatmapLayer : Layer {
     /**
      * The HeatmapIntensity property transition options
      */
-    var heatmapIntensityTransition: TransitionOptions
+    open var heatmapIntensityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetHeatmapIntensityTransition()
@@ -192,7 +192,7 @@ class HeatmapLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val heatmapColor: PropertyValue<String>
+    open val heatmapColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("heatmap-color", nativeGetHeatmapColor())
@@ -206,7 +206,7 @@ class HeatmapLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getHeatmapColorAsInt(): Int {
+    open fun getHeatmapColorAsInt(): Int {
         checkThread()
         val value = heatmapColor
         if (value.isValue()) {
@@ -222,7 +222,7 @@ class HeatmapLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val heatmapOpacity: PropertyValue<Float>
+    open val heatmapOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("heatmap-opacity", nativeGetHeatmapOpacity())
@@ -232,7 +232,7 @@ class HeatmapLayer : Layer {
     /**
      * The HeatmapOpacity property transition options
      */
-    var heatmapOpacityTransition: TransitionOptions
+    open var heatmapOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetHeatmapOpacityTransition()

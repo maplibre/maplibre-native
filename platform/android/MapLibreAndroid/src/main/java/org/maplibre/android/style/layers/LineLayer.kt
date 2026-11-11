@@ -15,7 +15,7 @@ import org.maplibre.android.utils.ColorUtils.rgbaToColor
  * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-line)
  */
 @UiThread
-class LineLayer : Layer {
+open class LineLayer : Layer {
 
     /**
      * Creates a LineLayer.
@@ -36,12 +36,12 @@ class LineLayer : Layer {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?, sourceId: String?)
+    protected open external fun initialize(layerId: String?, sourceId: String?)
 
     /**
      * The source layer.
      */
-    var sourceLayer: String?
+    open var sourceLayer: String?
         get() {
             checkThread()
             return nativeGetSourceLayer()
@@ -57,7 +57,7 @@ class LineLayer : Layer {
      * @param sourceLayer the source layer to set
      * @return This
      */
-    fun withSourceLayer(sourceLayer: String?): LineLayer {
+    open fun withSourceLayer(sourceLayer: String?): LineLayer {
         this.sourceLayer = sourceLayer
         return this
     }
@@ -65,7 +65,7 @@ class LineLayer : Layer {
     /**
      * The id of the source.
      */
-    val sourceId: String
+    open val sourceId: String
         get() {
             checkThread()
             return nativeGetSourceId()
@@ -76,7 +76,7 @@ class LineLayer : Layer {
      *
      * @param filter the expression filter to set
      */
-    fun setFilter(filter: Expression) {
+    open fun setFilter(filter: Expression) {
         checkThread()
         nativeSetFilter(filter.toArray())
     }
@@ -87,7 +87,7 @@ class LineLayer : Layer {
      * @param filter the expression filter to set
      * @return This
      */
-    fun withFilter(filter: Expression): LineLayer {
+    open fun withFilter(filter: Expression): LineLayer {
         setFilter(filter)
         return this
     }
@@ -97,7 +97,7 @@ class LineLayer : Layer {
      *
      * Use [setFilter] to set the filter.
      */
-    val filter: Expression?
+    open val filter: Expression?
         get() {
             checkThread()
             val jsonElement = nativeGetFilter()
@@ -114,7 +114,7 @@ class LineLayer : Layer {
      * @param properties the var-args properties
      * @return This
      */
-    fun withProperties(vararg properties: PropertyValue<*>): LineLayer {
+    open fun withProperties(vararg properties: PropertyValue<*>): LineLayer {
         setProperties(*properties)
         return this
     }
@@ -127,7 +127,7 @@ class LineLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val lineCap: PropertyValue<String>
+    open val lineCap: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-cap", nativeGetLineCap())
@@ -140,7 +140,7 @@ class LineLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val lineJoin: PropertyValue<String>
+    open val lineJoin: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-join", nativeGetLineJoin())
@@ -153,7 +153,7 @@ class LineLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val lineMiterLimit: PropertyValue<Float>
+    open val lineMiterLimit: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-miter-limit", nativeGetLineMiterLimit())
@@ -166,7 +166,7 @@ class LineLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val lineRoundLimit: PropertyValue<Float>
+    open val lineRoundLimit: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-round-limit", nativeGetLineRoundLimit())
@@ -179,7 +179,7 @@ class LineLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val lineSortKey: PropertyValue<Float>
+    open val lineSortKey: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-sort-key", nativeGetLineSortKey())
@@ -192,7 +192,7 @@ class LineLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val lineOpacity: PropertyValue<Float>
+    open val lineOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-opacity", nativeGetLineOpacity())
@@ -202,7 +202,7 @@ class LineLayer : Layer {
     /**
      * The LineOpacity property transition options
      */
-    var lineOpacityTransition: TransitionOptions
+    open var lineOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetLineOpacityTransition()
@@ -218,7 +218,7 @@ class LineLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val lineColor: PropertyValue<String>
+    open val lineColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-color", nativeGetLineColor())
@@ -232,7 +232,7 @@ class LineLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getLineColorAsInt(): Int {
+    open fun getLineColorAsInt(): Int {
         checkThread()
         val value = lineColor
         if (value.isValue()) {
@@ -245,7 +245,7 @@ class LineLayer : Layer {
     /**
      * The LineColor property transition options
      */
-    var lineColorTransition: TransitionOptions
+    open var lineColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetLineColorTransition()
@@ -261,7 +261,7 @@ class LineLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val lineTranslate: PropertyValue<Array<Float>>
+    open val lineTranslate: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-translate", nativeGetLineTranslate())
@@ -271,7 +271,7 @@ class LineLayer : Layer {
     /**
      * The LineTranslate property transition options
      */
-    var lineTranslateTransition: TransitionOptions
+    open var lineTranslateTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetLineTranslateTransition()
@@ -287,7 +287,7 @@ class LineLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val lineTranslateAnchor: PropertyValue<String>
+    open val lineTranslateAnchor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-translate-anchor", nativeGetLineTranslateAnchor())
@@ -300,7 +300,7 @@ class LineLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val lineWidth: PropertyValue<Float>
+    open val lineWidth: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-width", nativeGetLineWidth())
@@ -310,7 +310,7 @@ class LineLayer : Layer {
     /**
      * The LineWidth property transition options
      */
-    var lineWidthTransition: TransitionOptions
+    open var lineWidthTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetLineWidthTransition()
@@ -326,7 +326,7 @@ class LineLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val lineGapWidth: PropertyValue<Float>
+    open val lineGapWidth: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-gap-width", nativeGetLineGapWidth())
@@ -336,7 +336,7 @@ class LineLayer : Layer {
     /**
      * The LineGapWidth property transition options
      */
-    var lineGapWidthTransition: TransitionOptions
+    open var lineGapWidthTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetLineGapWidthTransition()
@@ -352,7 +352,7 @@ class LineLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val lineOffset: PropertyValue<Float>
+    open val lineOffset: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-offset", nativeGetLineOffset())
@@ -362,7 +362,7 @@ class LineLayer : Layer {
     /**
      * The LineOffset property transition options
      */
-    var lineOffsetTransition: TransitionOptions
+    open var lineOffsetTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetLineOffsetTransition()
@@ -378,7 +378,7 @@ class LineLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val lineBlur: PropertyValue<Float>
+    open val lineBlur: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-blur", nativeGetLineBlur())
@@ -388,7 +388,7 @@ class LineLayer : Layer {
     /**
      * The LineBlur property transition options
      */
-    var lineBlurTransition: TransitionOptions
+    open var lineBlurTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetLineBlurTransition()
@@ -404,7 +404,7 @@ class LineLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val lineDasharray: PropertyValue<Array<Float>>
+    open val lineDasharray: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-dasharray", nativeGetLineDasharray())
@@ -414,7 +414,7 @@ class LineLayer : Layer {
     /**
      * The LineDasharray property transition options
      */
-    var lineDasharrayTransition: TransitionOptions
+    open var lineDasharrayTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetLineDasharrayTransition()
@@ -430,7 +430,7 @@ class LineLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val linePattern: PropertyValue<String>
+    open val linePattern: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-pattern", nativeGetLinePattern())
@@ -440,7 +440,7 @@ class LineLayer : Layer {
     /**
      * The LinePattern property transition options
      */
-    var linePatternTransition: TransitionOptions
+    open var linePatternTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetLinePatternTransition()
@@ -456,7 +456,7 @@ class LineLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val lineGradient: PropertyValue<String>
+    open val lineGradient: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("line-gradient", nativeGetLineGradient())
@@ -470,7 +470,7 @@ class LineLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getLineGradientAsInt(): Int {
+    open fun getLineGradientAsInt(): Int {
         checkThread()
         val value = lineGradient
         if (value.isValue()) {

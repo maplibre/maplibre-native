@@ -796,7 +796,7 @@ class Style private constructor(
         }
 
         for (image in builder.imageList) {
-            addImage(image.id, image.bitmap, image.sdf)
+            addImage(image.id, image.bitmap, image.isSdf)
         }
 
         builder.transition?.let { transition = it }
@@ -830,7 +830,7 @@ class Style private constructor(
      * Builder for composing a style object.
      */
     @Suppress("TooManyFunctions")
-    class Builder {
+    open class Builder {
         internal val sourceList = mutableListOf<Source>()
         internal val layerList = mutableListOf<LayerWrapper>()
         internal val imageList = mutableListOf<ImageWrapper>()
@@ -866,7 +866,7 @@ class Style private constructor(
          * @deprecated use [fromUri] instead
          */
         @Deprecated("use fromUri(String) instead", ReplaceWith("fromUri(url)"))
-        fun fromUrl(url: String): Builder {
+        open fun fromUrl(url: String): Builder {
             styleUri = url
             return this
         }
@@ -895,7 +895,7 @@ class Style private constructor(
          * @return this
          * @see Style
          */
-        fun fromUri(uri: String): Builder {
+        open fun fromUri(uri: String): Builder {
             styleUri = uri
             return this
         }
@@ -909,7 +909,7 @@ class Style private constructor(
          *
          * @return this
          */
-        fun fromJson(styleJson: String): Builder {
+        open fun fromJson(styleJson: String): Builder {
             this.styleJson = styleJson
             return this
         }
@@ -920,7 +920,7 @@ class Style private constructor(
          * @param source the source to add
          * @return this
          */
-        fun withSource(source: Source): Builder {
+        open fun withSource(source: Source): Builder {
             sourceList.add(source)
             return this
         }
@@ -931,7 +931,7 @@ class Style private constructor(
          * @param sources the sources to add
          * @return this
          */
-        fun withSources(vararg sources: Source): Builder {
+        open fun withSources(vararg sources: Source): Builder {
             sourceList.addAll(sources)
             return this
         }
@@ -942,7 +942,7 @@ class Style private constructor(
          * @param layer the layer to be added
          * @return this
          */
-        fun withLayer(layer: Layer): Builder {
+        open fun withLayer(layer: Layer): Builder {
             layerList.add(LayerWrapper(layer))
             return this
         }
@@ -953,7 +953,7 @@ class Style private constructor(
          * @param layers the layers to be added
          * @return this
          */
-        fun withLayers(vararg layers: Layer): Builder {
+        open fun withLayers(vararg layers: Layer): Builder {
             for (layer in layers) {
                 layerList.add(LayerWrapper(layer))
             }
@@ -966,7 +966,7 @@ class Style private constructor(
          * @param layer the layer to be added
          * @return this
          */
-        fun withLayerAt(
+        open fun withLayerAt(
             layer: Layer,
             index: Int,
         ): Builder {
@@ -980,7 +980,7 @@ class Style private constructor(
          * @param layer the layer to be added
          * @return this
          */
-        fun withLayerAbove(
+        open fun withLayerAbove(
             layer: Layer,
             aboveLayerId: String,
         ): Builder {
@@ -994,7 +994,7 @@ class Style private constructor(
          * @param layer the layer to be added
          * @return this
          */
-        fun withLayerBelow(
+        open fun withLayerBelow(
             layer: Layer,
             belowLayerId: String,
         ): Builder {
@@ -1008,7 +1008,7 @@ class Style private constructor(
          * @param transition the transition to be added
          * @return this
          */
-        fun withTransition(transition: TransitionOptions): Builder {
+        open fun withTransition(transition: TransitionOptions): Builder {
             this.transition = transition
             return this
         }
@@ -1020,7 +1020,7 @@ class Style private constructor(
          * @param drawable the drawable to be converted and added
          * @return this
          */
-        fun withImage(
+        open fun withImage(
             id: String,
             drawable: Drawable,
         ): Builder = withImage(id, drawable, false)
@@ -1035,7 +1035,7 @@ class Style private constructor(
          * @param content  image content for text to fit
          * @return this
          */
-        fun withImage(
+        open fun withImage(
             id: String,
             drawable: Drawable,
             stretchX: List<ImageStretches>,
@@ -1049,7 +1049,7 @@ class Style private constructor(
          * @param values pairs, where first is the id for te image and second is the drawable
          * @return this
          */
-        fun withDrawableImages(vararg values: Pair<String, Drawable>): Builder = withDrawableImages(false, *values)
+        open fun withDrawableImages(vararg values: Pair<String, Drawable>): Builder = withDrawableImages(false, *values)
 
         /**
          * Will add the image when the map style has loaded.
@@ -1058,7 +1058,7 @@ class Style private constructor(
          * @param image the image to be added
          * @return this
          */
-        fun withImage(
+        open fun withImage(
             id: String,
             image: Bitmap,
         ): Builder = withImage(id, image, false)
@@ -1073,7 +1073,7 @@ class Style private constructor(
          * @param content  image content for text to fit
          * @return this
          */
-        fun withImage(
+        open fun withImage(
             id: String,
             image: Bitmap,
             stretchX: List<ImageStretches>,
@@ -1087,7 +1087,7 @@ class Style private constructor(
          * @param values pairs, where first is the id for te image and second is the bitmap
          * @return this
          */
-        fun withBitmapImages(vararg values: Pair<String, Bitmap>): Builder {
+        open fun withBitmapImages(vararg values: Pair<String, Bitmap>): Builder {
             for (value in values) {
                 withImage(value.first, value.second, false)
             }
@@ -1102,7 +1102,7 @@ class Style private constructor(
          * @param sdf      the flag indicating image is an SDF or template image
          * @return this
          */
-        fun withImage(
+        open fun withImage(
             id: String,
             drawable: Drawable,
             sdf: Boolean,
@@ -1125,7 +1125,7 @@ class Style private constructor(
          * @return this
          */
         @Suppress("LongParameterList")
-        fun withImage(
+        open fun withImage(
             id: String,
             drawable: Drawable,
             sdf: Boolean,
@@ -1146,7 +1146,7 @@ class Style private constructor(
          * @param values pairs, where first is the id for te image and second is the drawable
          * @return this
          */
-        fun withDrawableImages(
+        open fun withDrawableImages(
             sdf: Boolean,
             vararg values: Pair<String, Drawable>,
         ): Builder {
@@ -1167,7 +1167,7 @@ class Style private constructor(
          * @param sdf   the flag indicating image is an SDF or template image
          * @return this
          */
-        fun withImage(
+        open fun withImage(
             id: String,
             image: Bitmap,
             sdf: Boolean,
@@ -1188,7 +1188,7 @@ class Style private constructor(
          * @return this
          */
         @Suppress("LongParameterList")
-        fun withImage(
+        open fun withImage(
             id: String,
             image: Bitmap,
             sdf: Boolean,
@@ -1207,7 +1207,7 @@ class Style private constructor(
          * @param values pairs, where first is the id for te image and second is the bitmap
          * @return this
          */
-        fun withBitmapImages(
+        open fun withBitmapImages(
             sdf: Boolean,
             vararg values: Pair<String, Bitmap>,
         ): Builder {
@@ -1217,15 +1217,15 @@ class Style private constructor(
             return this
         }
 
-        val uri: String? get() = styleUri
+        open val uri: String? get() = styleUri
 
-        val json: String? get() = styleJson
+        open val json: String? get() = styleJson
 
-        val sources: List<Source> get() = sourceList
+        open val sources: List<Source> get() = sourceList
 
-        val layers: List<LayerWrapper> get() = layerList
+        open val layers: List<LayerWrapper> get() = layerList
 
-        val images: List<ImageWrapper> get() = imageList
+        open val images: List<ImageWrapper> get() = imageList
 
         internal val transitionOptions: TransitionOptions? get() = transition
 
@@ -1234,15 +1234,15 @@ class Style private constructor(
          */
         internal fun build(nativeMap: NativeMap): Style = Style(this, nativeMap)
 
-        class ImageWrapper
+        open class ImageWrapper
             @JvmOverloads
             constructor(
-                val id: String,
-                val bitmap: Bitmap,
-                @get:JvmName("isSdf") val sdf: Boolean,
-                val stretchX: List<ImageStretches>? = null,
-                val stretchY: List<ImageStretches>? = null,
-                val content: ImageContent? = null,
+                open val id: String,
+                open val bitmap: Bitmap,
+                open val isSdf: Boolean,
+                open val stretchX: List<ImageStretches>? = null,
+                open val stretchY: List<ImageStretches>? = null,
+                open val content: ImageContent? = null,
             ) {
                 companion object {
                     @JvmStatic
@@ -1358,14 +1358,14 @@ class Style private constructor(
                     imageWrapper.id,
                     bitmap.width,
                     bitmap.height,
-                    imageWrapper.sdf,
+                    imageWrapper.isSdf,
                     arrayX,
                     arrayY,
                     imageWrapper.content?.contentArray,
                 )
             }
 
-            return Image(buffer.array(), pixelRatio, imageWrapper.id, bitmap.width, bitmap.height, imageWrapper.sdf)
+            return Image(buffer.array(), pixelRatio, imageWrapper.id, bitmap.width, bitmap.height, imageWrapper.isSdf)
         }
 
         //

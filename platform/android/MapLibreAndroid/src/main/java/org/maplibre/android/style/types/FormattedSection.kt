@@ -24,7 +24,7 @@ import java.util.Arrays
  *                  [the documentation](https://docs.mapbox.com/mapbox-gl-js/style-spec/#types-color).
  */
 @Keep
-class FormattedSection(
+open class FormattedSection(
     private val text: String,
     private var fontScale: Number?,
     private var fontStack: Array<String>?,
@@ -78,35 +78,35 @@ class FormattedSection(
      *
      * @return text
      */
-    fun getText(): String = text
+    open fun getText(): String = text
 
     /**
      * Returns displayed text's font scale.
      *
      * @return font scale
      */
-    fun getFontScale(): Number? = fontScale
+    open fun getFontScale(): Number? = fontScale
 
     /**
      * Returns the font stack with main and fallback fonts.
      *
      * @return font stack
      */
-    fun getFontStack(): Array<String>? = fontStack
+    open fun getFontStack(): Array<String>? = fontStack
 
     /**
      * Returns the text color.
      *
      * @return text color
      */
-    fun getTextColor(): String? = textColor
+    open fun getTextColor(): String? = textColor
 
     /**
      * Set font scale. Setting to null will fall back to style's default settings.
      *
      * @param fontScale fontScale
      */
-    fun setFontScale(fontScale: Number?) {
+    open fun setFontScale(fontScale: Number?) {
         // called from JNI
         this.fontScale = fontScale
     }
@@ -120,7 +120,7 @@ class FormattedSection(
      *
      * @param fontStack fontStack
      */
-    fun setFontStack(fontStack: Array<String>?) {
+    open fun setFontStack(fontStack: Array<String>?) {
         // called from JNI
         this.fontStack = fontStack
     }
@@ -135,7 +135,7 @@ class FormattedSection(
      *
      * @param textColor text color
      */
-    fun setTextColor(textColor: String?) {
+    open fun setTextColor(textColor: String?) {
         this.textColor = textColor
     }
 
@@ -144,7 +144,7 @@ class FormattedSection(
      *
      * @param textColor text color.
      */
-    fun setTextColor(
+    open fun setTextColor(
         @ColorInt textColor: Int,
     ) {
         this.textColor = ColorUtils.colorToRgbaString(textColor)

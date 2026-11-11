@@ -10,7 +10,7 @@ private fun Any.monitorNotifyAll() = (this as java.lang.Object).notifyAll()
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 private fun Any.monitorWait() = (this as java.lang.Object).wait()
 
-class VulkanTextureViewRenderThread
+open class VulkanTextureViewRenderThread
     @UiThread
     constructor(
         textureView: TextureView,

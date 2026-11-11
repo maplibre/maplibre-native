@@ -99,7 +99,7 @@ class LocationComponentActivationOptions private constructor(
      * context and a fully-loaded map [Style] object, which is why the two are in this
      * constructor.
      */
-    class Builder(
+    open class Builder(
         private val context: Context,
         private val style: Style,
     ) {
@@ -128,7 +128,7 @@ class LocationComponentActivationOptions private constructor(
          * @param locationEngine a [LocationEngine] object
          * @return the [Builder] object being constructed
          */
-        fun locationEngine(locationEngine: LocationEngine?): Builder {
+        open fun locationEngine(locationEngine: LocationEngine?): Builder {
             this.locationEngine = locationEngine
             return this
         }
@@ -137,7 +137,7 @@ class LocationComponentActivationOptions private constructor(
          * @param locationEngineRequest the location request which the [LocationComponent] should use
          * @return the [Builder] object being constructed
          */
-        fun locationEngineRequest(locationEngineRequest: LocationEngineRequest?): Builder {
+        open fun locationEngineRequest(locationEngineRequest: LocationEngineRequest?): Builder {
             this.locationEngineRequest = locationEngineRequest
             return this
         }
@@ -147,7 +147,7 @@ class LocationComponentActivationOptions private constructor(
          *                                 which holds the various [LocationComponent] styling options
          * @return the [Builder] object being constructed
          */
-        fun locationComponentOptions(locationComponentOptions: LocationComponentOptions?): Builder {
+        open fun locationComponentOptions(locationComponentOptions: LocationComponentOptions?): Builder {
             this.locationComponentOptions = locationComponentOptions
             return this
         }
@@ -156,7 +156,7 @@ class LocationComponentActivationOptions private constructor(
          * @param styleRes the LocationComponent style resource (e.g. R.style.style_name)
          * @return the [Builder] object being constructed
          */
-        fun styleRes(styleRes: Int): Builder {
+        open fun styleRes(styleRes: Int): Builder {
             this.styleRes = styleRes
             return this
         }
@@ -169,7 +169,7 @@ class LocationComponentActivationOptions private constructor(
          *                                 for [locationEngine].
          * @return the [Builder] object being constructed
          */
-        fun useDefaultLocationEngine(useDefaultLocationEngine: Boolean): Builder {
+        open fun useDefaultLocationEngine(useDefaultLocationEngine: Boolean): Builder {
             this.useDefaultLocationEngine = useDefaultLocationEngine
             return this
         }
@@ -195,7 +195,7 @@ class LocationComponentActivationOptions private constructor(
          *                                    specialized location layer. Defaults to false.
          * @return the [Builder] object being constructed
          */
-        fun useSpecializedLocationLayer(useSpecializedLocationLayer: Boolean): Builder {
+        open fun useSpecializedLocationLayer(useSpecializedLocationLayer: Boolean): Builder {
             this.useSpecializedLocationLayer = useSpecializedLocationLayer
             return this
         }
@@ -206,7 +206,7 @@ class LocationComponentActivationOptions private constructor(
          *
          * @return a built [LocationComponentActivationOptions] object
          */
-        fun build(): LocationComponentActivationOptions {
+        open fun build(): LocationComponentActivationOptions {
             require(styleRes == 0 || locationComponentOptions == null) {
                 "You've provided both a style resource and a LocationComponentOptions object to the " +
                     "LocationComponentActivationOptions builder. You can't use both and " +

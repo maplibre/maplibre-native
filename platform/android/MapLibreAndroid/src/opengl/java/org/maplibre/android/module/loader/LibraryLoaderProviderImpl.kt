@@ -6,7 +6,7 @@ import org.maplibre.android.LibraryLoaderProvider
 /**
  * OpenGL flavor: loads the single-backend libmaplibre.so via System.loadLibrary.
  */
-class LibraryLoaderProviderImpl : LibraryLoaderProvider {
+open class LibraryLoaderProviderImpl : LibraryLoaderProvider {
     override fun getDefaultLibraryLoader(): LibraryLoader = SystemLibraryLoader()
 
     private class SystemLibraryLoader : LibraryLoader() {

@@ -108,7 +108,7 @@ abstract class MapLibreAnimator<K> :
         fun onNewAnimationValue(value: K)
     }
 
-    fun makeInvalid() {
+    open fun makeInvalid() {
         invalid = true
     }
 

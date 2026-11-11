@@ -5,7 +5,7 @@ package org.maplibre.android.maps
  *
  * The fields of this class are read from the native peer, they must not be renamed.
  */
-class NativeMapOptions {
+open class NativeMapOptions {
     private val pixelRatio: Float
     private val crossSourceCollisions: Boolean
 
@@ -47,23 +47,23 @@ class NativeMapOptions {
         featureInfoEnabled = false
     }
 
-    fun pixelRatio(): Float = pixelRatio
+    open fun pixelRatio(): Float = pixelRatio
 
-    fun crossSourceCollisions(): Boolean = crossSourceCollisions
+    open fun crossSourceCollisions(): Boolean = crossSourceCollisions
 
-    fun actionJournalEnabled(): Boolean = actionJournalEnabled
+    open fun actionJournalEnabled(): Boolean = actionJournalEnabled
 
-    fun actionJournalPath(): String = actionJournalPath
+    open fun actionJournalPath(): String = actionJournalPath
 
-    fun actionJournalLogFileSize(): Long = actionJournalLogFileSize
+    open fun actionJournalLogFileSize(): Long = actionJournalLogFileSize
 
-    fun actionJournalLogFileCount(): Long = actionJournalLogFileCount
+    open fun actionJournalLogFileCount(): Long = actionJournalLogFileCount
 
-    fun actionJournalRenderingReportInterval(): Int = actionJournalRenderingReportInterval
+    open fun actionJournalRenderingReportInterval(): Int = actionJournalRenderingReportInterval
 
-    fun asyncRendererCleanup(): Boolean = asyncRendererCleanup
+    open fun asyncRendererCleanup(): Boolean = asyncRendererCleanup
 
-    fun fastPFOREnabled(): Boolean = fastPFOREnabled
+    open fun fastPFOREnabled(): Boolean = fastPFOREnabled
 
-    fun featureInfoEnabled(): Boolean = featureInfoEnabled
+    open fun featureInfoEnabled(): Boolean = featureInfoEnabled
 }

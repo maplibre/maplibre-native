@@ -121,7 +121,7 @@ open class BubbleLayout
          *
          * @return the width of the arrow
          */
-        fun getArrowWidth(): Float = arrowWidth
+        open fun getArrowWidth(): Float = arrowWidth
 
         /**
          * Set the arrow width.
@@ -129,7 +129,7 @@ open class BubbleLayout
          * @param arrowWidth The width of the arrow
          * @return this
          */
-        fun setArrowWidth(arrowWidth: Float): BubbleLayout {
+        open fun setArrowWidth(arrowWidth: Float): BubbleLayout {
             resetPadding()
             this.arrowWidth = arrowWidth
             initPadding()
@@ -141,7 +141,7 @@ open class BubbleLayout
          *
          * @return the height of the arrow
          */
-        fun getArrowHeight(): Float = arrowHeight
+        open fun getArrowHeight(): Float = arrowHeight
 
         /**
          * Set the arrow height.
@@ -149,7 +149,7 @@ open class BubbleLayout
          * @param arrowHeight The height of the arrow
          * @return this
          */
-        fun setArrowHeight(arrowHeight: Float): BubbleLayout {
+        open fun setArrowHeight(arrowHeight: Float): BubbleLayout {
             resetPadding()
             this.arrowHeight = arrowHeight
             initPadding()
@@ -161,7 +161,7 @@ open class BubbleLayout
          *
          * @return the arrow position
          */
-        fun getArrowPosition(): Float = arrowPosition
+        open fun getArrowPosition(): Float = arrowPosition
 
         /**
          * Get the arrow position.
@@ -169,7 +169,7 @@ open class BubbleLayout
          * @param arrowPosition The arrow position
          * @return this
          */
-        fun setArrowPosition(arrowPosition: Float): BubbleLayout {
+        open fun setArrowPosition(arrowPosition: Float): BubbleLayout {
             resetPadding()
             this.arrowPosition = arrowPosition
             initPadding()
@@ -181,7 +181,7 @@ open class BubbleLayout
          *
          * @return the corner radius
          */
-        fun getCornersRadius(): Float = cornersRadius
+        open fun getCornersRadius(): Float = cornersRadius
 
         /**
          * Set the corner radius
@@ -189,7 +189,7 @@ open class BubbleLayout
          * @param cornersRadius The corner radius
          * @return this
          */
-        fun setCornersRadius(cornersRadius: Float): BubbleLayout {
+        open fun setCornersRadius(cornersRadius: Float): BubbleLayout {
             this.cornersRadius = cornersRadius
             requestLayout()
             return this
@@ -200,7 +200,7 @@ open class BubbleLayout
          *
          * @return the bubble color
          */
-        fun getBubbleColor(): Int = bubbleColor
+        open fun getBubbleColor(): Int = bubbleColor
 
         /**
          * Set the bubble color.
@@ -208,7 +208,7 @@ open class BubbleLayout
          * @param bubbleColor The buble color
          * @return this
          */
-        fun setBubbleColor(bubbleColor: Int): BubbleLayout {
+        open fun setBubbleColor(bubbleColor: Int): BubbleLayout {
             this.bubbleColor = bubbleColor
             requestLayout()
             return this
@@ -219,7 +219,7 @@ open class BubbleLayout
          *
          * @return the stroke width
          */
-        fun getStrokeWidth(): Float = strokeWidth
+        open fun getStrokeWidth(): Float = strokeWidth
 
         /**
          * Set the stroke width.
@@ -227,7 +227,7 @@ open class BubbleLayout
          * @param strokeWidth The stroke width
          * @return this
          */
-        fun setStrokeWidth(strokeWidth: Float): BubbleLayout {
+        open fun setStrokeWidth(strokeWidth: Float): BubbleLayout {
             resetPadding()
             this.strokeWidth = strokeWidth
             initPadding()
@@ -239,7 +239,7 @@ open class BubbleLayout
          *
          * @return the stroke color
          */
-        fun getStrokeColor(): Int = strokeColor
+        open fun getStrokeColor(): Int = strokeColor
 
         /**
          * Set the stroke color.
@@ -247,7 +247,7 @@ open class BubbleLayout
          * @param strokeColor The stroke color
          * @return this
          */
-        fun setStrokeColor(strokeColor: Int): BubbleLayout {
+        open fun setStrokeColor(strokeColor: Int): BubbleLayout {
             this.strokeColor = strokeColor
             requestLayout()
             return this

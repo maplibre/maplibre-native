@@ -179,7 +179,7 @@ class UiSettings internal constructor(
         resources: Resources,
     ) {
         isCompassInitialized = true
-        compassView = mapView.initialiseCompassView()
+        compassView = mapView.createCompassView()
         isCompassEnabled = options.compassEnabled
         compassGravity = options.compassGravity
         val compassMargins = options.compassMargins
@@ -213,7 +213,7 @@ class UiSettings internal constructor(
     private fun restoreCompass(savedInstanceState: Bundle) {
         val compassEnabled = savedInstanceState.getBoolean(MapLibreConstants.STATE_COMPASS_ENABLED)
         if (compassEnabled && !isCompassInitialized) {
-            compassView = mapView.initialiseCompassView()
+            compassView = mapView.createCompassView()
             isCompassInitialized = true
         }
         isCompassEnabled = savedInstanceState.getBoolean(MapLibreConstants.STATE_COMPASS_ENABLED)
@@ -239,7 +239,7 @@ class UiSettings internal constructor(
         resources: Resources,
     ) {
         isLogoInitialized = true
-        logoView = mapView.initialiseLogoView()
+        logoView = mapView.createLogoView()
         isLogoEnabled = options.logoEnabled
         logoGravity = options.logoGravity
         setLogoMargins(resources, options.logoMargins)
@@ -270,7 +270,7 @@ class UiSettings internal constructor(
     private fun restoreLogo(savedInstanceState: Bundle) {
         val logoEnabled = savedInstanceState.getBoolean(MapLibreConstants.STATE_LOGO_ENABLED)
         if (logoEnabled && !isLogoInitialized) {
-            logoView = mapView.initialiseLogoView()
+            logoView = mapView.createLogoView()
             isLogoInitialized = true
         }
         isLogoEnabled = savedInstanceState.getBoolean(MapLibreConstants.STATE_LOGO_ENABLED)
@@ -288,7 +288,7 @@ class UiSettings internal constructor(
         options: MapLibreMapOptions,
     ) {
         isAttributionInitialized = true
-        attributionsView = mapView.initialiseAttributionView()
+        attributionsView = mapView.createAttributionView()
         isAttributionEnabled = options.attributionEnabled
         attributionGravity = options.attributionGravity
         setAttributionMargins(context, options.attributionMargins)
@@ -330,7 +330,7 @@ class UiSettings internal constructor(
     private fun restoreAttribution(savedInstanceState: Bundle) {
         val attributionEnabled = savedInstanceState.getBoolean(MapLibreConstants.STATE_ATTRIBUTION_ENABLED)
         if (attributionEnabled && !isAttributionInitialized) {
-            attributionsView = mapView.initialiseAttributionView()
+            attributionsView = mapView.createAttributionView()
             isAttributionInitialized = true
         }
         isAttributionEnabled = savedInstanceState.getBoolean(MapLibreConstants.STATE_ATTRIBUTION_ENABLED)

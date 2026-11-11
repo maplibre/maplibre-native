@@ -10,5 +10,5 @@ import org.maplibre.android.annotations.IconFactory
  *
  * @see IconFactory
  */
-class TooManyIconsException :
+open class TooManyIconsException :
     RuntimeException("Cannot create an Icon because there are already too many. Try reusing Icon objects whenever possible.")

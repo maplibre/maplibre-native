@@ -152,7 +152,7 @@ class AttributionMeasure internal constructor(
     private val maxSizeShort: Float
         get() = snapshot.width.toFloat()
 
-    class Builder {
+    open class Builder {
         private var snapshot: Bitmap? = null
         private var logo: Bitmap? = null
         private var logoSmall: Bitmap? = null
@@ -160,37 +160,37 @@ class AttributionMeasure internal constructor(
         private var textViewShort: TextView? = null
         private var marginPadding = 0f
 
-        fun setSnapshot(snapshot: Bitmap): Builder {
+        open fun setSnapshot(snapshot: Bitmap): Builder {
             this.snapshot = snapshot
             return this
         }
 
-        fun setLogo(logo: Bitmap): Builder {
+        open fun setLogo(logo: Bitmap): Builder {
             this.logo = logo
             return this
         }
 
-        fun setLogoSmall(logoSmall: Bitmap): Builder {
+        open fun setLogoSmall(logoSmall: Bitmap): Builder {
             this.logoSmall = logoSmall
             return this
         }
 
-        fun setTextView(textView: TextView): Builder {
+        open fun setTextView(textView: TextView): Builder {
             this.textView = textView
             return this
         }
 
-        fun setTextViewShort(textViewShort: TextView): Builder {
+        open fun setTextViewShort(textViewShort: TextView): Builder {
             this.textViewShort = textViewShort
             return this
         }
 
-        fun setMarginPadding(marginPadding: Float): Builder {
+        open fun setMarginPadding(marginPadding: Float): Builder {
             this.marginPadding = marginPadding
             return this
         }
 
-        fun build(): AttributionMeasure =
+        open fun build(): AttributionMeasure =
             AttributionMeasure(
                 snapshot!!,
                 logo!!,

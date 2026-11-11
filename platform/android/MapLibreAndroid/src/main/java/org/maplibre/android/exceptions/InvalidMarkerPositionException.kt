@@ -5,7 +5,7 @@ package org.maplibre.android.exceptions
  *
  * Creates a invalid marker position exception thrown when a Marker object is created with an invalid LatLng position.
  */
-class InvalidMarkerPositionException :
+open class InvalidMarkerPositionException :
     RuntimeException(
         "Adding an invalid Marker to a Map. " +
             "Missing the required position field. " +

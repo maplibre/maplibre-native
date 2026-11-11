@@ -31,7 +31,7 @@ import java.util.Arrays
  * settings. Once your modifications have been made, you'll need to pass it back into the location
  * component using [LocationComponent.applyStyle].
  */
-class LocationComponentOptions : Parcelable {
+open class LocationComponentOptions : Parcelable {
     private val accuracyAlpha: Float
     private val accuracyColor: Int
     private val backgroundDrawableStale: Int
@@ -220,7 +220,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return the builder which contains the values defined in this current instance as defaults.
      */
-    fun toBuilder(): Builder = Builder(this)
+    open fun toBuilder(): Builder = Builder(this)
 
     /**
      * Set the opacity of the accuracy view to a value from 0 to 1, where 0 means the accuracy view is
@@ -229,7 +229,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return the opacity of the accuracy view
      */
-    fun accuracyAlpha(): Float = accuracyAlpha
+    open fun accuracyAlpha(): Float = accuracyAlpha
 
     /**
      * Solid color to use as the accuracy view color property.
@@ -238,7 +238,7 @@ class LocationComponentOptions : Parcelable {
      * @return the color of the accuracy view
      */
     @ColorInt
-    fun accuracyColor(): Int = accuracyColor
+    open fun accuracyColor(): Int = accuracyColor
 
     /**
      * Defines the drawable used for the stale background icon.
@@ -247,7 +247,7 @@ class LocationComponentOptions : Parcelable {
      * @return the drawable resource ID
      */
     @DrawableRes
-    fun backgroundDrawableStale(): Int = backgroundDrawableStale
+    open fun backgroundDrawableStale(): Int = backgroundDrawableStale
 
     /**
      * String image name, identical to one used in
@@ -259,7 +259,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return String icon or maki-icon name
      */
-    fun backgroundStaleName(): String? = backgroundStaleName
+    open fun backgroundStaleName(): String? = backgroundStaleName
 
     /**
      * Defines the drawable used for the stale foreground icon.
@@ -268,7 +268,7 @@ class LocationComponentOptions : Parcelable {
      * @return the drawable resource ID
      */
     @DrawableRes
-    fun foregroundDrawableStale(): Int = foregroundDrawableStale
+    open fun foregroundDrawableStale(): Int = foregroundDrawableStale
 
     /**
      * String image name, identical to one used in
@@ -280,7 +280,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return String icon or maki-icon name
      */
-    fun foregroundStaleName(): String? = foregroundStaleName
+    open fun foregroundStaleName(): String? = foregroundStaleName
 
     /**
      * Defines the drawable used for the navigation state icon.
@@ -289,7 +289,7 @@ class LocationComponentOptions : Parcelable {
      * @return the drawable resource ID
      */
     @DrawableRes
-    fun gpsDrawable(): Int = gpsDrawable
+    open fun gpsDrawable(): Int = gpsDrawable
 
     /**
      * String image name, identical to one used in
@@ -301,7 +301,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return String icon or maki-icon name
      */
-    fun gpsName(): String? = gpsName
+    open fun gpsName(): String? = gpsName
 
     /**
      * Supply a Drawable that is to be rendered on top of all of the content in the Location LayerComponent layer stack.
@@ -310,7 +310,7 @@ class LocationComponentOptions : Parcelable {
      * @return the drawable resource used for the foreground layer
      */
     @DrawableRes
-    fun foregroundDrawable(): Int = foregroundDrawable
+    open fun foregroundDrawable(): Int = foregroundDrawable
 
     /**
      * String image name, identical to one used in
@@ -322,7 +322,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return String icon or maki-icon name
      */
-    fun foregroundName(): String? = foregroundName
+    open fun foregroundName(): String? = foregroundName
 
     /**
      * Defines the drawable used for the background state icon.
@@ -331,7 +331,7 @@ class LocationComponentOptions : Parcelable {
      * @return the drawable resource ID
      */
     @DrawableRes
-    fun backgroundDrawable(): Int = backgroundDrawable
+    open fun backgroundDrawable(): Int = backgroundDrawable
 
     /**
      * String image name, identical to one used in
@@ -343,7 +343,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return String icon or maki-icon name
      */
-    fun backgroundName(): String? = backgroundName
+    open fun backgroundName(): String? = backgroundName
 
     /**
      * Defines the drawable used for the bearing icon.
@@ -352,7 +352,7 @@ class LocationComponentOptions : Parcelable {
      * @return the drawable resource ID
      */
     @DrawableRes
-    fun bearingDrawable(): Int = bearingDrawable
+    open fun bearingDrawable(): Int = bearingDrawable
 
     /**
      * String image name, identical to one used in
@@ -364,7 +364,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return String icon or maki-icon name
      */
-    fun bearingName(): String? = bearingName
+    open fun bearingName(): String? = bearingName
 
     /**
      * Defines the bearing icon color as an integer.
@@ -373,7 +373,7 @@ class LocationComponentOptions : Parcelable {
      * @return the color integer resource
      */
     @ColorInt
-    fun bearingTintColor(): Int? = bearingTintColor
+    open fun bearingTintColor(): Int? = bearingTintColor
 
     /**
      * Defines the foreground color as an integer.
@@ -382,7 +382,7 @@ class LocationComponentOptions : Parcelable {
      * @return the color integer resource
      */
     @ColorInt
-    fun foregroundTintColor(): Int? = foregroundTintColor
+    open fun foregroundTintColor(): Int? = foregroundTintColor
 
     /**
      * Defines the background color as an integer.
@@ -391,7 +391,7 @@ class LocationComponentOptions : Parcelable {
      * @return the color integer resource
      */
     @ColorInt
-    fun backgroundTintColor(): Int? = backgroundTintColor
+    open fun backgroundTintColor(): Int? = backgroundTintColor
 
     /**
      * Defines the foreground stale color as an integer.
@@ -400,7 +400,7 @@ class LocationComponentOptions : Parcelable {
      * @return the color integer resource
      */
     @ColorInt
-    fun foregroundStaleTintColor(): Int? = foregroundStaleTintColor
+    open fun foregroundStaleTintColor(): Int? = foregroundStaleTintColor
 
     /**
      * Defines the background stale color as an integer.
@@ -409,7 +409,7 @@ class LocationComponentOptions : Parcelable {
      * @return the color integer resource
      */
     @ColorInt
-    fun backgroundStaleTintColor(): Int? = backgroundStaleTintColor
+    open fun backgroundStaleTintColor(): Int? = backgroundStaleTintColor
 
     /**
      * Sets the base elevation of this view, in pixels. To turn off the shadow that appears under
@@ -419,7 +419,7 @@ class LocationComponentOptions : Parcelable {
      * @return the elevation currently set for the location component icon
      */
     @Dimension
-    fun elevation(): Float = elevation
+    open fun elevation(): Float = elevation
 
     /**
      * Enable or disable to stale state mode. This mode indicates to the user that the location being
@@ -428,7 +428,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return whether the stale state mode is enabled or not
      */
-    fun enableStaleState(): Boolean = enableStaleState
+    open fun enableStaleState(): Boolean = enableStaleState
 
     /**
      * Set the delay before the location icon becomes stale. The timer begins approximately when a new
@@ -439,7 +439,7 @@ class LocationComponentOptions : Parcelable {
      * @return the duration in milliseconds which it should take before the location is
      * considered stale
      */
-    fun staleStateTimeout(): Long = staleStateTimeout
+    open fun staleStateTimeout(): Long = staleStateTimeout
 
     /**
      * Sets the distance from the edges of the map view’s frame to the edges of the map
@@ -453,7 +453,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return integer array of padding values
      */
-    fun padding(): IntArray? = padding
+    open fun padding(): IntArray? = padding
 
     /**
      * The scale factor of the location icon when the map is zoomed in.
@@ -461,7 +461,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return icon scale factor
      */
-    fun maxZoomIconScale(): Float = maxZoomIconScale
+    open fun maxZoomIconScale(): Float = maxZoomIconScale
 
     /**
      * The scale factor of the location icon when the map is zoomed out.
@@ -469,7 +469,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return icon scale factor
      */
-    fun minZoomIconScale(): Float = minZoomIconScale
+    open fun minZoomIconScale(): Float = minZoomIconScale
 
     /**
      * Returns whether gesture threshold should be adjusted when camera is in one of the tracking modes.
@@ -485,21 +485,21 @@ class LocationComponentOptions : Parcelable {
      * @see Builder.trackingMultiFingerMoveThreshold
      * @see Builder.trackingMultiFingerProtectedMoveArea
      */
-    fun trackingGesturesManagement(): Boolean = trackingGesturesManagement
+    open fun trackingGesturesManagement(): Boolean = trackingGesturesManagement
 
     /**
      * Minimum single pointer movement in pixels required to break camera tracking.
      *
      * @return the minimum movement
      */
-    fun trackingInitialMoveThreshold(): Float = trackingInitialMoveThreshold
+    open fun trackingInitialMoveThreshold(): Float = trackingInitialMoveThreshold
 
     /**
      * Minimum multi pointer movement in pixels required to break camera tracking (for example during scale gesture).
      *
      * @return the minimum movement
      */
-    fun trackingMultiFingerMoveThreshold(): Float = trackingMultiFingerMoveThreshold
+    open fun trackingMultiFingerMoveThreshold(): Float = trackingMultiFingerMoveThreshold
 
     /**
      * Protected multi pointer gesture area. When the camera is in a tracking mode, any multi finger gesture with focal
@@ -510,7 +510,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return the protected multi finger area while camera is tracking
      */
-    fun trackingMultiFingerProtectedMoveArea(): RectF? = trackingMultiFingerProtectedMoveArea
+    open fun trackingMultiFingerProtectedMoveArea(): RectF? = trackingMultiFingerProtectedMoveArea
 
     /**
      * Gets the id of the layer that's referenced when placing the component on the map using
@@ -520,7 +520,7 @@ class LocationComponentOptions : Parcelable {
      *
      * @return layerAbove the id of the layer the component is going to placed directly above.
      */
-    fun layerAbove(): String? = layerAbove
+    open fun layerAbove(): String? = layerAbove
 
     /**
      * Gets the id of the layer that's referenced when placing the component on the map using
@@ -530,21 +530,21 @@ class LocationComponentOptions : Parcelable {
      *
      * @return layerBelow the id of the layer the component is going to placed directly below.
      */
-    fun layerBelow(): String? = layerBelow
+    open fun layerBelow(): String? = layerBelow
 
     /**
      * Whether the bearing icon is rendered on top of the foreground icon in the location layer stack.
      *
      * @return true if the bearing icon is rendered above the foreground icon, false otherwise.
      */
-    fun bearingOnTop(): Boolean = bearingOnTop
+    open fun bearingOnTop(): Boolean = bearingOnTop
 
     /**
      * Get the tracking animation duration multiplier.
      *
      * @return tracking animation duration multiplier
      */
-    fun trackingAnimationDurationMultiplier(): Float = trackingAnimationDurationMultiplier
+    open fun trackingAnimationDurationMultiplier(): Float = trackingAnimationDurationMultiplier
 
     /**
      * Enable or disable smooth animation of compass values for [org.maplibre.android.location.modes.CameraMode]
@@ -552,21 +552,21 @@ class LocationComponentOptions : Parcelable {
      *
      * @return whether smooth compass animation is enabled
      */
-    fun compassAnimationEnabled(): Boolean = compassAnimationEnabled
+    open fun compassAnimationEnabled(): Boolean = compassAnimationEnabled
 
     /**
      * Enable or disable smooth animation of the accuracy circle around the user's position.
      *
      * @return whether smooth animation of the accuracy circle is enabled
      */
-    fun accuracyAnimationEnabled(): Boolean = accuracyAnimationEnabled
+    open fun accuracyAnimationEnabled(): Boolean = accuracyAnimationEnabled
 
     /**
      * Enable or disable the LocationComponent's pulsing circle.
      *
      * @return whether the LocationComponent's pulsing circle is enabled
      */
-    fun pulseEnabled(): Boolean? = pulseEnabled
+    open fun pulseEnabled(): Boolean? = pulseEnabled
 
     /**
      * Enable or disable fading of the LocationComponent's pulsing circle. If it fades, the circle's
@@ -574,28 +574,28 @@ class LocationComponentOptions : Parcelable {
      *
      * @return whether fading of the LocationComponent's pulsing circle is enabled
      */
-    fun pulseFadeEnabled(): Boolean? = pulseFadeEnabled
+    open fun pulseFadeEnabled(): Boolean? = pulseFadeEnabled
 
     /**
      * Color of the LocationComponent's pulsing circle as it pulses.
      *
      * @return the current set color of the circle
      */
-    fun pulseColor(): Int? = pulseColor
+    open fun pulseColor(): Int? = pulseColor
 
     /**
      * The number of milliseconds it takes for a single pulse of the LocationComponent's pulsing circle.
      *
      * @return the current set length of time for a single pulse
      */
-    fun pulseSingleDuration(): Float = pulseSingleDuration
+    open fun pulseSingleDuration(): Float = pulseSingleDuration
 
     /**
      * The maximum radius that a single pulse should expand the LocationComponent's pulsing circle to.
      *
      * @return the maximum radius that the pulsing circle will expand to.
      */
-    fun pulseMaxRadius(): Float = pulseMaxRadius
+    open fun pulseMaxRadius(): Float = pulseMaxRadius
 
     /**
      * The opacity of the LocationComponent's circle as it pulses. The expected range is
@@ -603,14 +603,14 @@ class LocationComponentOptions : Parcelable {
      *
      * @return the current opacity of the LocationComponent's pulsing circle
      */
-    fun pulseAlpha(): Float = pulseAlpha
+    open fun pulseAlpha(): Float = pulseAlpha
 
     /**
      * The interpolator type of animation for the movement of the LocationComponent's circle
      *
      * @return the current set type of animation interpolator for the pulsing circle
      */
-    fun pulseInterpolator(): Interpolator? = pulseInterpolator
+    open fun pulseInterpolator(): Interpolator? = pulseInterpolator
 
     override fun toString(): String =
         "LocationComponentOptions{" +

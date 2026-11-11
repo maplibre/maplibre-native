@@ -7,7 +7,7 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
 import javax.microedition.khronos.egl.EGLDisplay
 
-class EGLContextFactory : GLSurfaceView.EGLContextFactory {
+open class EGLContextFactory : GLSurfaceView.EGLContextFactory {
     override fun createContext(
         egl: EGL10,
         display: EGLDisplay?,

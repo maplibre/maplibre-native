@@ -150,7 +150,7 @@ class AttributionParser internal constructor(
      * the underlying AttributionParser. Other properties include trimming the copyright sign, hiding
      * attribution as improve this map and MapLibre.
      */
-    class Options(
+    open class Options(
         context: Context,
     ) {
         private val context: WeakReference<Context> = WeakReference(context)
@@ -159,27 +159,27 @@ class AttributionParser internal constructor(
         private var withMapboxAttribution = true
         private var attributionDataStringArray: Array<out String>? = null
 
-        fun withAttributionData(vararg attributionData: String): Options {
+        open fun withAttributionData(vararg attributionData: String): Options {
             this.attributionDataStringArray = attributionData
             return this
         }
 
-        fun withImproveMap(withImproveMap: Boolean): Options {
+        open fun withImproveMap(withImproveMap: Boolean): Options {
             this.withImproveMap = withImproveMap
             return this
         }
 
-        fun withCopyrightSign(withCopyrightSign: Boolean): Options {
+        open fun withCopyrightSign(withCopyrightSign: Boolean): Options {
             this.withCopyrightSign = withCopyrightSign
             return this
         }
 
-        fun withMapboxAttribution(withMapboxAttribution: Boolean): Options {
+        open fun withMapboxAttribution(withMapboxAttribution: Boolean): Options {
             this.withMapboxAttribution = withMapboxAttribution
             return this
         }
 
-        fun build(): AttributionParser {
+        open fun build(): AttributionParser {
             val attributionData =
                 attributionDataStringArray
                     ?: throw IllegalStateException("Using builder without providing attribution data")

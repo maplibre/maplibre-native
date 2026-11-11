@@ -11,19 +11,19 @@ import androidx.annotation.Keep
  * @param name    style name
  * @param version style version
  */
-class DefaultStyle
+open class DefaultStyle
     @Keep
     constructor(
-        @field:Keep var url: String?,
-        @field:Keep var name: String?,
-        @field:Keep var version: Int,
+        @field:Keep open var url: String?,
+        @field:Keep open var name: String?,
+        @field:Keep open var version: Int,
     ) : Parcelable {
         /**
          * Constructs a new default style tuple given a parcel.
          *
          * @param parcel the parcel containing the default style values
          */
-        private constructor(parcel: Parcel) : this(
+        protected constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),
             parcel.readInt(),

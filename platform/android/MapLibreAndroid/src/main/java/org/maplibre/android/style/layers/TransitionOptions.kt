@@ -12,15 +12,15 @@ import androidx.annotation.Keep
  * @param enablePlacementTransitions the flag that describes whether the fade in/out symbol placement transition
  * should be enabled. Defaults to true.
  */
-class TransitionOptions(
+open class TransitionOptions(
     /**
      * The transition duration.
      */
-    @field:Keep val duration: Long,
+    open @field:Keep val duration: Long,
     /**
      * The transition delay.
      */
-    @field:Keep val delay: Long,
+    open @field:Keep val delay: Long,
     @field:Keep private val enablePlacementTransitions: Boolean,
 ) {
     /**
@@ -36,7 +36,7 @@ class TransitionOptions(
      *
      * True if the fade in/out symbol placement transition should be enabled, false otherwise.
      */
-    val isEnablePlacementTransitions: Boolean
+    open val isEnablePlacementTransitions: Boolean
         get() = enablePlacementTransitions
 
     override fun equals(other: Any?): Boolean {

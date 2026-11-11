@@ -10,7 +10,7 @@ import org.maplibre.android.MapLibre
  *
  * @see MapLibre.getInstance
  */
-class MapLibreConfigurationException : RuntimeException {
+open class MapLibreConfigurationException : RuntimeException {
     /**
      * Creates a MapLibre configuration exception thrown by MapLibreMap when the SDK hasn't been properly initialised.
      */

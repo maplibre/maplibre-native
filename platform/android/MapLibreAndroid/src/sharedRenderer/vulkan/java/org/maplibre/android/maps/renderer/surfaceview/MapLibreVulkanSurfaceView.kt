@@ -11,7 +11,7 @@ private fun Any.monitorNotifyAll() = (this as java.lang.Object).notifyAll()
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 private fun Any.monitorWait() = (this as java.lang.Object).wait()
 
-class MapLibreVulkanSurfaceView : MapLibreSurfaceView {
+open class MapLibreVulkanSurfaceView : MapLibreSurfaceView {
     private val viewWeakReference = WeakReference(this)
 
     constructor(context: Context) : super(context)

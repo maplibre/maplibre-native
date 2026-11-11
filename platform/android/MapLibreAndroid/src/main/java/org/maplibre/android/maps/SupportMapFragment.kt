@@ -174,7 +174,7 @@ open class SupportMapFragment :
      *
      * @param onMapReadyCallback The callback to be invoked.
      */
-    fun getMapAsync(onMapReadyCallback: OnMapReadyCallback) {
+    open fun getMapAsync(onMapReadyCallback: OnMapReadyCallback) {
         val map = maplibreMap
         if (map == null) {
             mapReadyCallbackList.add(onMapReadyCallback)

@@ -15,7 +15,7 @@ import androidx.annotation.Keep
  * Bugs in your drawing code can break rendering or crash the app, and keeping it
  * working with future versions of MapLibre Native is up to you.
  */
-class CustomLayer : Layer {
+open class CustomLayer : Layer {
     constructor(id: String?, host: Long) {
         initialize(id, host)
     }
@@ -28,11 +28,11 @@ class CustomLayer : Layer {
      */
     @Deprecated("Use MapLibreMap.triggerRepaint() instead.")
     @Keep
-    fun update() {
+    open fun update() {
     }
 
     @Keep
-    protected external fun initialize(
+    protected open external fun initialize(
         id: String?,
         host: Long,
     )

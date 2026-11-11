@@ -17,8 +17,8 @@ abstract class Layer {
      * @return the native peer pointer
      */
     @Keep
-    var nativePtr: Long = 0
-        private set
+    open var nativePtr: Long = 0
+        protected set
 
     @Keep
     @Suppress("unused")
@@ -43,7 +43,7 @@ abstract class Layer {
         ThreadUtils.checkThread(TAG)
     }
 
-    fun setProperties(vararg properties: PropertyValue<*>) {
+    open fun setProperties(vararg properties: PropertyValue<*>) {
         if (detached) {
             return
         }
@@ -63,7 +63,7 @@ abstract class Layer {
         }
     }
 
-    val id: String
+    open val id: String
         get() {
             checkThread()
             return nativeGetId()
@@ -72,7 +72,7 @@ abstract class Layer {
     /**
      * When the visibility was set as an expression, this returns the current evaluated value.
      */
-    val visibility: PropertyValue<String>
+    open val visibility: PropertyValue<String>
         get() {
             checkThread()
             return PaintPropertyValue("visibility", nativeGetVisibility() as String)
@@ -81,7 +81,7 @@ abstract class Layer {
     /**
      * The visibility of this layer as an expression, or null when the visibility is a constant value.
      */
-    val visibilityExpression: Expression?
+    open val visibilityExpression: Expression?
         get() {
             checkThread()
             val jsonElement = nativeGetVisibilityExpression()
@@ -92,7 +92,7 @@ abstract class Layer {
             }
         }
 
-    var minZoom: Float
+    open var minZoom: Float
         get() {
             checkThread()
             return nativeGetMinZoom()
@@ -102,7 +102,7 @@ abstract class Layer {
             nativeSetMinZoom(zoom)
         }
 
-    var maxZoom: Float
+    open var maxZoom: Float
         get() {
             checkThread()
             return nativeGetMaxZoom()
@@ -117,52 +117,52 @@ abstract class Layer {
     protected open external fun finalize()
 
     @Keep
-    protected external fun nativeGetId(): String
+    protected open external fun nativeGetId(): String
 
     @Keep
-    protected external fun nativeGetVisibility(): Any
+    protected open external fun nativeGetVisibility(): Any
 
     @Keep
     private external fun nativeGetVisibilityExpression(): JsonElement?
 
     @Keep
-    protected external fun nativeSetLayoutProperty(
+    protected open external fun nativeSetLayoutProperty(
         name: String?,
         value: Any?,
     )
 
     @Keep
-    protected external fun nativeSetPaintProperty(
+    protected open external fun nativeSetPaintProperty(
         name: String?,
         value: Any?,
     )
 
     @Keep
-    protected external fun nativeSetFilter(filter: Array<Any?>?)
+    protected open external fun nativeSetFilter(filter: Array<Any?>?)
 
     @Keep
-    protected external fun nativeGetFilter(): JsonElement?
+    protected open external fun nativeGetFilter(): JsonElement?
 
     @Keep
-    protected external fun nativeSetSourceLayer(sourceLayer: String?)
+    protected open external fun nativeSetSourceLayer(sourceLayer: String?)
 
     @Keep
-    protected external fun nativeGetSourceLayer(): String
+    protected open external fun nativeGetSourceLayer(): String
 
     @Keep
-    protected external fun nativeGetSourceId(): String
+    protected open external fun nativeGetSourceId(): String
 
     @Keep
-    protected external fun nativeGetMinZoom(): Float
+    protected open external fun nativeGetMinZoom(): Float
 
     @Keep
-    protected external fun nativeGetMaxZoom(): Float
+    protected open external fun nativeGetMaxZoom(): Float
 
     @Keep
-    protected external fun nativeSetMinZoom(zoom: Float)
+    protected open external fun nativeSetMinZoom(zoom: Float)
 
     @Keep
-    protected external fun nativeSetMaxZoom(zoom: Float)
+    protected open external fun nativeSetMaxZoom(zoom: Float)
 
     private fun convertValue(value: Any?): Any? =
         when (value) {
@@ -171,11 +171,11 @@ abstract class Layer {
             else -> value
         }
 
-    fun setDetached() {
+    open fun setDetached() {
         detached = true
     }
 
-    fun isDetached(): Boolean = detached
+    open fun isDetached(): Boolean = detached
 
     private companion object {
         const val TAG = "Mbgl-Layer"

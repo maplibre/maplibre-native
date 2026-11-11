@@ -814,7 +814,7 @@ open class MapSnapshotter(
                     }
                 }
                 for (image in builder.images) {
-                    addImage(image.id, image.bitmap, image.sdf)
+                    addImage(image.id, image.bitmap, image.isSdf)
                 }
             }
         }

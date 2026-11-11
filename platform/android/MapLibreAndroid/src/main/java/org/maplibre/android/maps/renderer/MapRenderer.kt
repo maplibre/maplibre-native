@@ -122,7 +122,7 @@ abstract class MapRenderer(
         }
     }
 
-    fun setSwapBehaviorFlush(flush: Boolean) {
+    open fun setSwapBehaviorFlush(flush: Boolean) {
         nativeSetSwapBehaviorFlush(flush)
     }
 
@@ -149,7 +149,7 @@ abstract class MapRenderer(
 
     @CallSuper
     @Suppress("unused")
-    protected external fun finalize()
+    protected open external fun finalize()
 
     private external fun nativeOnSurfaceCreated(surface: Surface?)
 
@@ -160,7 +160,7 @@ abstract class MapRenderer(
 
     private external fun nativeOnSurfaceDestroyed()
 
-    protected external fun nativeReset()
+    protected open external fun nativeReset()
 
     private external fun nativeRender()
 
@@ -181,7 +181,7 @@ abstract class MapRenderer(
      *
      * @param maximumFps Can be set to arbitrary integer values.
      */
-    fun setMaximumFps(maximumFps: Int) {
+    open fun setMaximumFps(maximumFps: Int) {
         if (maximumFps <= 0) {
             // Not valid, just return
             return

@@ -15,7 +15,7 @@ import org.maplibre.android.utils.ColorUtils.rgbaToColor
  * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-fill-extrusion)
  */
 @UiThread
-class FillExtrusionLayer : Layer {
+open class FillExtrusionLayer : Layer {
 
     /**
      * Creates a FillExtrusionLayer.
@@ -36,12 +36,12 @@ class FillExtrusionLayer : Layer {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?, sourceId: String?)
+    protected open external fun initialize(layerId: String?, sourceId: String?)
 
     /**
      * The source layer.
      */
-    var sourceLayer: String?
+    open var sourceLayer: String?
         get() {
             checkThread()
             return nativeGetSourceLayer()
@@ -57,7 +57,7 @@ class FillExtrusionLayer : Layer {
      * @param sourceLayer the source layer to set
      * @return This
      */
-    fun withSourceLayer(sourceLayer: String?): FillExtrusionLayer {
+    open fun withSourceLayer(sourceLayer: String?): FillExtrusionLayer {
         this.sourceLayer = sourceLayer
         return this
     }
@@ -65,7 +65,7 @@ class FillExtrusionLayer : Layer {
     /**
      * The id of the source.
      */
-    val sourceId: String
+    open val sourceId: String
         get() {
             checkThread()
             return nativeGetSourceId()
@@ -76,7 +76,7 @@ class FillExtrusionLayer : Layer {
      *
      * @param filter the expression filter to set
      */
-    fun setFilter(filter: Expression) {
+    open fun setFilter(filter: Expression) {
         checkThread()
         nativeSetFilter(filter.toArray())
     }
@@ -87,7 +87,7 @@ class FillExtrusionLayer : Layer {
      * @param filter the expression filter to set
      * @return This
      */
-    fun withFilter(filter: Expression): FillExtrusionLayer {
+    open fun withFilter(filter: Expression): FillExtrusionLayer {
         setFilter(filter)
         return this
     }
@@ -97,7 +97,7 @@ class FillExtrusionLayer : Layer {
      *
      * Use [setFilter] to set the filter.
      */
-    val filter: Expression?
+    open val filter: Expression?
         get() {
             checkThread()
             val jsonElement = nativeGetFilter()
@@ -114,7 +114,7 @@ class FillExtrusionLayer : Layer {
      * @param properties the var-args properties
      * @return This
      */
-    fun withProperties(vararg properties: PropertyValue<*>): FillExtrusionLayer {
+    open fun withProperties(vararg properties: PropertyValue<*>): FillExtrusionLayer {
         setProperties(*properties)
         return this
     }
@@ -127,7 +127,7 @@ class FillExtrusionLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val fillExtrusionRoundedCornerDistance: PropertyValue<Float>
+    open val fillExtrusionRoundedCornerDistance: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-extrusion-rounded-corner-distance", nativeGetFillExtrusionRoundedCornerDistance())
@@ -140,7 +140,7 @@ class FillExtrusionLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val fillExtrusionOpacity: PropertyValue<Float>
+    open val fillExtrusionOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-extrusion-opacity", nativeGetFillExtrusionOpacity())
@@ -150,7 +150,7 @@ class FillExtrusionLayer : Layer {
     /**
      * The FillExtrusionOpacity property transition options
      */
-    var fillExtrusionOpacityTransition: TransitionOptions
+    open var fillExtrusionOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillExtrusionOpacityTransition()
@@ -166,7 +166,7 @@ class FillExtrusionLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val fillExtrusionColor: PropertyValue<String>
+    open val fillExtrusionColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-extrusion-color", nativeGetFillExtrusionColor())
@@ -180,7 +180,7 @@ class FillExtrusionLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getFillExtrusionColorAsInt(): Int {
+    open fun getFillExtrusionColorAsInt(): Int {
         checkThread()
         val value = fillExtrusionColor
         if (value.isValue()) {
@@ -193,7 +193,7 @@ class FillExtrusionLayer : Layer {
     /**
      * The FillExtrusionColor property transition options
      */
-    var fillExtrusionColorTransition: TransitionOptions
+    open var fillExtrusionColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillExtrusionColorTransition()
@@ -209,7 +209,7 @@ class FillExtrusionLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val fillExtrusionTranslate: PropertyValue<Array<Float>>
+    open val fillExtrusionTranslate: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-extrusion-translate", nativeGetFillExtrusionTranslate())
@@ -219,7 +219,7 @@ class FillExtrusionLayer : Layer {
     /**
      * The FillExtrusionTranslate property transition options
      */
-    var fillExtrusionTranslateTransition: TransitionOptions
+    open var fillExtrusionTranslateTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillExtrusionTranslateTransition()
@@ -235,7 +235,7 @@ class FillExtrusionLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val fillExtrusionTranslateAnchor: PropertyValue<String>
+    open val fillExtrusionTranslateAnchor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-extrusion-translate-anchor", nativeGetFillExtrusionTranslateAnchor())
@@ -248,7 +248,7 @@ class FillExtrusionLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val fillExtrusionPattern: PropertyValue<String>
+    open val fillExtrusionPattern: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-extrusion-pattern", nativeGetFillExtrusionPattern())
@@ -258,7 +258,7 @@ class FillExtrusionLayer : Layer {
     /**
      * The FillExtrusionPattern property transition options
      */
-    var fillExtrusionPatternTransition: TransitionOptions
+    open var fillExtrusionPatternTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillExtrusionPatternTransition()
@@ -274,7 +274,7 @@ class FillExtrusionLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val fillExtrusionHeight: PropertyValue<Float>
+    open val fillExtrusionHeight: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-extrusion-height", nativeGetFillExtrusionHeight())
@@ -284,7 +284,7 @@ class FillExtrusionLayer : Layer {
     /**
      * The FillExtrusionHeight property transition options
      */
-    var fillExtrusionHeightTransition: TransitionOptions
+    open var fillExtrusionHeightTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillExtrusionHeightTransition()
@@ -300,7 +300,7 @@ class FillExtrusionLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val fillExtrusionBase: PropertyValue<Float>
+    open val fillExtrusionBase: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-extrusion-base", nativeGetFillExtrusionBase())
@@ -310,7 +310,7 @@ class FillExtrusionLayer : Layer {
     /**
      * The FillExtrusionBase property transition options
      */
-    var fillExtrusionBaseTransition: TransitionOptions
+    open var fillExtrusionBaseTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetFillExtrusionBaseTransition()
@@ -326,7 +326,7 @@ class FillExtrusionLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val fillExtrusionVerticalGradient: PropertyValue<Boolean>
+    open val fillExtrusionVerticalGradient: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("fill-extrusion-vertical-gradient", nativeGetFillExtrusionVerticalGradient())

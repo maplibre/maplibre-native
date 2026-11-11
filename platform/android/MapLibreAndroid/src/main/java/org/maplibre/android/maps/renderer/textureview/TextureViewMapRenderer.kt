@@ -21,11 +21,11 @@ open class TextureViewMapRenderer(
     context: Context,
     private val textureView: TextureView,
     localIdeographFontFamily: String?,
-    val isTranslucentSurface: Boolean,
+    open val isTranslucentSurface: Boolean,
 ) : MapRenderer(context, localIdeographFontFamily) {
     private lateinit var renderThread: TextureViewRenderThread
 
-    fun setRenderThread(thread: TextureViewRenderThread) {
+    open fun setRenderThread(thread: TextureViewRenderThread) {
         renderThread = thread
         renderThread.name = "TextureViewRenderer"
         renderThread.start()

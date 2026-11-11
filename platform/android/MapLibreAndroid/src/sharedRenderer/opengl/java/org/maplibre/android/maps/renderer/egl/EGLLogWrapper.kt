@@ -13,7 +13,7 @@ import javax.microedition.khronos.egl.EGLDisplay
 import javax.microedition.khronos.egl.EGLSurface
 
 @Suppress("TooManyFunctions")
-class EGLLogWrapper(
+open class EGLLogWrapper(
     egl: EGL,
     configFlags: Int,
     log: Writer?,

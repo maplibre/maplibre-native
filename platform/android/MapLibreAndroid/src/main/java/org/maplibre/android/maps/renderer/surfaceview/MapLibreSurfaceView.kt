@@ -62,7 +62,7 @@ abstract class MapLibreSurfaceView :
     }
 
     @Suppress("unused")
-    protected fun finalize() {
+    protected open fun finalize() {
         val thread = renderThread
         if (thread != null && thread.isAlive) {
             // thread may still be running if this view was never
@@ -259,7 +259,7 @@ abstract class MapLibreSurfaceView :
 
     protected abstract fun createRenderThread()
 
-    protected fun checkRenderThreadState() {
+    protected open fun checkRenderThreadState() {
         check(renderThread == null) { "setRenderer has already been called for this instance." }
     }
 
@@ -527,7 +527,7 @@ abstract class MapLibreSurfaceView :
         }
     }
 
-    class RenderThreadManager {
+    open class RenderThreadManager {
         @Synchronized
         internal fun threadExiting(thread: RenderThread) {
             thread.exited = true

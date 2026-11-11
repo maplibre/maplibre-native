@@ -19,7 +19,7 @@ import androidx.annotation.Keep
  * @param azimuthalAngle the position of the light relative to 0&#xB0;
  * @param polarAngle the height of the light
  */
-class Position(
+open class Position(
     @field:Keep private val radialCoordinate: Float,
     @field:Keep private val azimuthalAngle: Float,
     @field:Keep private val polarAngle: Float,

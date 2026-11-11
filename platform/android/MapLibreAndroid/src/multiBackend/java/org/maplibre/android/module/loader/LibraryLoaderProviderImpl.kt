@@ -10,7 +10,7 @@ import org.maplibre.android.RenderingEngine
  * [RenderingEngine.getCurrentType]. Any other library name is loaded
  * verbatim.
  */
-class LibraryLoaderProviderImpl : LibraryLoaderProvider {
+open class LibraryLoaderProviderImpl : LibraryLoaderProvider {
     override fun getDefaultLibraryLoader(): LibraryLoader = MultiBackendLibraryLoader()
 
     private class MultiBackendLibraryLoader : LibraryLoader() {

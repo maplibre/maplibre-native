@@ -7,7 +7,7 @@ import org.maplibre.android.LibraryLoaderProvider
  * Vulkan and WebGPU flavors: loads the single-backend libmaplibre.so via
  * System.loadLibrary.
  */
-class LibraryLoaderProviderImpl : LibraryLoaderProvider {
+open class LibraryLoaderProviderImpl : LibraryLoaderProvider {
     override fun getDefaultLibraryLoader(): LibraryLoader = SystemLibraryLoader()
 
     private class SystemLibraryLoader : LibraryLoader() {

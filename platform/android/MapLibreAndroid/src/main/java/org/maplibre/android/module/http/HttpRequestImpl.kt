@@ -27,7 +27,7 @@ import java.net.SocketException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLException
 
-class HttpRequestImpl : HttpRequest {
+open class HttpRequestImpl : HttpRequest {
     private var call: Call? = null
 
     override fun executeRequest(

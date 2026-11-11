@@ -15,7 +15,7 @@ import org.maplibre.android.utils.ColorUtils.rgbaToColor
  * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-background)
  */
 @UiThread
-class BackgroundLayer : Layer {
+open class BackgroundLayer : Layer {
 
     /**
      * Creates a BackgroundLayer.
@@ -35,7 +35,7 @@ class BackgroundLayer : Layer {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?)
+    protected open external fun initialize(layerId: String?)
 
     /**
      * Set a property or properties.
@@ -43,7 +43,7 @@ class BackgroundLayer : Layer {
      * @param properties the var-args properties
      * @return This
      */
-    fun withProperties(vararg properties: PropertyValue<*>): BackgroundLayer {
+    open fun withProperties(vararg properties: PropertyValue<*>): BackgroundLayer {
         setProperties(*properties)
         return this
     }
@@ -56,7 +56,7 @@ class BackgroundLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val backgroundColor: PropertyValue<String>
+    open val backgroundColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("background-color", nativeGetBackgroundColor())
@@ -70,7 +70,7 @@ class BackgroundLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getBackgroundColorAsInt(): Int {
+    open fun getBackgroundColorAsInt(): Int {
         checkThread()
         val value = backgroundColor
         if (value.isValue()) {
@@ -83,7 +83,7 @@ class BackgroundLayer : Layer {
     /**
      * The BackgroundColor property transition options
      */
-    var backgroundColorTransition: TransitionOptions
+    open var backgroundColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetBackgroundColorTransition()
@@ -99,7 +99,7 @@ class BackgroundLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val backgroundPattern: PropertyValue<String>
+    open val backgroundPattern: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("background-pattern", nativeGetBackgroundPattern())
@@ -109,7 +109,7 @@ class BackgroundLayer : Layer {
     /**
      * The BackgroundPattern property transition options
      */
-    var backgroundPatternTransition: TransitionOptions
+    open var backgroundPatternTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetBackgroundPatternTransition()
@@ -125,7 +125,7 @@ class BackgroundLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val backgroundOpacity: PropertyValue<Float>
+    open val backgroundOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("background-opacity", nativeGetBackgroundOpacity())
@@ -135,7 +135,7 @@ class BackgroundLayer : Layer {
     /**
      * The BackgroundOpacity property transition options
      */
-    var backgroundOpacityTransition: TransitionOptions
+    open var backgroundOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetBackgroundOpacityTransition()

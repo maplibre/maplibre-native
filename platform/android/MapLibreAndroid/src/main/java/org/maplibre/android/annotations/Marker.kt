@@ -26,7 +26,7 @@ open class Marker internal constructor() : Annotation() {
      * The position of the marker.
      */
     @field:Keep
-    var position: LatLng? = null
+    open var position: LatLng? = null
         set(value) {
             field = value
             getMapLibreMap()?.updateMarker(this)
@@ -35,7 +35,7 @@ open class Marker internal constructor() : Annotation() {
     /**
      * The snippet of the marker. If `null`, the snippet is cleared.
      */
-    var snippet: String? = null
+    open var snippet: String? = null
         set(value) {
             field = value
             refreshInfoWindowContent()
@@ -44,7 +44,7 @@ open class Marker internal constructor() : Annotation() {
     /**
      * The title of the marker. If `null`, the title is cleared.
      */
-    var title: String? = null
+    open var title: String? = null
         set(value) {
             field = value
             refreshInfoWindowContent()
@@ -54,7 +54,7 @@ open class Marker internal constructor() : Annotation() {
      * The [Icon] currently used for the marker. If no Icon was set for the marker, the
      * default icon will be returned.
      */
-    var icon: Icon? = null
+    open var icon: Icon? = null
         set(value) {
             field = value
             iconId = value?.id
@@ -69,16 +69,16 @@ open class Marker internal constructor() : Annotation() {
      * The [InfoWindow] the marker is using. If the marker hasn't had an info window
      * defined, this will be `null`.
      */
-    var infoWindow: InfoWindow? = null
-        private set
+    open var infoWindow: InfoWindow? = null
+        protected set
 
     /**
      * Do not use this property, used internally by the SDK.
      *
      * `true` if the infoWindow is shown.
      */
-    var isInfoWindowShown: Boolean = false
-        private set
+    open var isInfoWindowShown: Boolean = false
+        protected set
 
     private var topOffsetPixels = 0
     private var rightOffsetPixels = 0
@@ -105,7 +105,7 @@ open class Marker internal constructor() : Annotation() {
     /**
      * Do not use this method, used internally by the SDK.
      */
-    fun hideInfoWindow() {
+    open fun hideInfoWindow() {
         infoWindow?.close()
         isInfoWindowShown = false
     }
@@ -179,7 +179,7 @@ open class Marker internal constructor() : Annotation() {
      *
      * @param topOffsetPixels the top offset pixels.
      */
-    fun setTopOffsetPixels(topOffsetPixels: Int) {
+    open fun setTopOffsetPixels(topOffsetPixels: Int) {
         this.topOffsetPixels = topOffsetPixels
     }
 
@@ -188,7 +188,7 @@ open class Marker internal constructor() : Annotation() {
      *
      * @param rightOffsetPixels the right offset pixels.
      */
-    fun setRightOffsetPixels(rightOffsetPixels: Int) {
+    open fun setRightOffsetPixels(rightOffsetPixels: Int) {
         this.rightOffsetPixels = rightOffsetPixels
     }
 

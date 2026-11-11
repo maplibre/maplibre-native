@@ -34,7 +34,7 @@ abstract class BaseMarkerOptions<U : Marker?, T : BaseMarkerOptions<U, T>?> : Pa
      * @param position the location to position the [Marker].
      * @return the object for which the method was called.
      */
-    fun position(position: LatLng?): T {
+    open fun position(position: LatLng?): T {
         this.position = position
         return getThis()
     }
@@ -45,7 +45,7 @@ abstract class BaseMarkerOptions<U : Marker?, T : BaseMarkerOptions<U, T>?> : Pa
      * @param snippet the snippet of the [Marker].
      * @return the object for which the method was called.
      */
-    fun snippet(snippet: String?): T {
+    open fun snippet(snippet: String?): T {
         this.snippet = snippet
         return getThis()
     }
@@ -56,7 +56,7 @@ abstract class BaseMarkerOptions<U : Marker?, T : BaseMarkerOptions<U, T>?> : Pa
      * @param title the title of the [Marker].
      * @return the object for which the method was called.
      */
-    fun title(title: String?): T {
+    open fun title(title: String?): T {
         this.title = title
         return getThis()
     }
@@ -67,7 +67,7 @@ abstract class BaseMarkerOptions<U : Marker?, T : BaseMarkerOptions<U, T>?> : Pa
      * @param icon the icon of the [Marker].
      * @return the object for which the method was called.
      */
-    fun icon(icon: Icon?): T {
+    open fun icon(icon: Icon?): T {
         this.icon = icon
         return getThis()
     }
@@ -78,7 +78,7 @@ abstract class BaseMarkerOptions<U : Marker?, T : BaseMarkerOptions<U, T>?> : Pa
      * @param icon the icon of the [Marker].
      * @return the object for which the method was called.
      */
-    fun setIcon(icon: Icon?): T = icon(icon)
+    open fun setIcon(icon: Icon?): T = icon(icon)
 
     /**
      * Set the geographical location of the Marker.
@@ -86,7 +86,7 @@ abstract class BaseMarkerOptions<U : Marker?, T : BaseMarkerOptions<U, T>?> : Pa
      * @param position the location to position the [Marker].
      * @return the object for which the method was called.
      */
-    fun setPosition(position: LatLng?): T = position(position)
+    open fun setPosition(position: LatLng?): T = position(position)
 
     /**
      * Set the snippet of the Marker.
@@ -94,7 +94,7 @@ abstract class BaseMarkerOptions<U : Marker?, T : BaseMarkerOptions<U, T>?> : Pa
      * @param snippet the snippet of the [Marker].
      * @return the object for which the method was called.
      */
-    fun setSnippet(snippet: String?): T = snippet(snippet)
+    open fun setSnippet(snippet: String?): T = snippet(snippet)
 
     /**
      * Set the title of the Marker.
@@ -102,7 +102,7 @@ abstract class BaseMarkerOptions<U : Marker?, T : BaseMarkerOptions<U, T>?> : Pa
      * @param title the title of the [Marker].
      * @return the object for which the method was called.
      */
-    fun setTitle(title: String?): T = title(title)
+    open fun setTitle(title: String?): T = title(title)
 
     /**
      * Get the instance of the object for which this method was called.

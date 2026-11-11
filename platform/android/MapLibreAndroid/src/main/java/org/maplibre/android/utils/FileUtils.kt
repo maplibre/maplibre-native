@@ -14,7 +14,7 @@ object FileUtils {
      * so it needs to be wrapped in a weak reference or released on the client side if necessary.
      */
     @Suppress("DEPRECATION")
-    class CheckFileReadPermissionTask(
+    open class CheckFileReadPermissionTask(
         private val listener: OnCheckFileReadPermissionListener,
     ) : AsyncTask<File, Void, Boolean>() {
         override fun doInBackground(vararg files: File): Boolean =
@@ -28,8 +28,8 @@ object FileUtils {
             listener.onError()
         }
 
-        override fun onPostExecute(result: Boolean) {
-            if (result) {
+        override fun onPostExecute(result: Boolean?) {
+            if (result == true) {
                 listener.onReadPermissionGranted()
             } else {
                 listener.onError()
@@ -59,7 +59,7 @@ object FileUtils {
      * so it needs to be wrapped in a weak reference or released on the client side if necessary.
      */
     @Suppress("DEPRECATION")
-    class CheckFileWritePermissionTask(
+    open class CheckFileWritePermissionTask(
         private val listener: OnCheckFileWritePermissionListener,
     ) : AsyncTask<File, Void, Boolean>() {
         override fun doInBackground(vararg files: File): Boolean =
@@ -73,8 +73,8 @@ object FileUtils {
             listener.onError()
         }
 
-        override fun onPostExecute(result: Boolean) {
-            if (result) {
+        override fun onPostExecute(result: Boolean?) {
+            if (result == true) {
                 listener.onWritePermissionGranted()
             } else {
                 listener.onError()

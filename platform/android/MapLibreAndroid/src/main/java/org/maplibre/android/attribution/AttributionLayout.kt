@@ -3,10 +3,10 @@ package org.maplibre.android.attribution
 import android.graphics.Bitmap
 import android.graphics.PointF
 
-class AttributionLayout(
-    val logo: Bitmap?,
-    val anchorPoint: PointF?,
-    val isShortText: Boolean,
+open class AttributionLayout(
+    open val logo: Bitmap?,
+    open val anchorPoint: PointF?,
+    open val isShortText: Boolean,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) {

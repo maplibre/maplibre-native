@@ -27,14 +27,14 @@ open class PropertyValue<T>(
      *
      * @return true if this is null, false if not
      */
-    fun isNull(): Boolean = value == null
+    open fun isNull(): Boolean = value == null
 
     /**
      * Returns if this is a expression.
      *
      * @return true if this is a expression, false if not
      */
-    val isExpression: Boolean
+    open val isExpression: Boolean
         get() = !isNull() && (value is JsonArray || value is Expression)
 
     /**
@@ -42,7 +42,7 @@ open class PropertyValue<T>(
      *
      * @return the property expression
      */
-    val expression: Expression?
+    open val expression: Expression?
         get() =
             if (isExpression) {
                 if (value is JsonArray) Expression.Converter.convert(value) else value as Expression
@@ -56,14 +56,14 @@ open class PropertyValue<T>(
      *
      * @return true if is a value, false if not
      */
-    fun isValue(): Boolean = !isNull() && !isExpression
+    open fun isValue(): Boolean = !isNull() && !isExpression
 
     /**
      * Get the value of the property.
      *
      * @return the property value
      */
-    fun getValue(): T? =
+    open fun getValue(): T? =
         if (isValue()) {
             value
         } else {
@@ -77,7 +77,7 @@ open class PropertyValue<T>(
      * @return the color int value of the property, null if not a color value
      */
     @ColorInt
-    fun getColorInt(): Int? {
+    open fun getColorInt(): Int? {
         if (!isValue() || value !is String) {
             Logger.e(TAG, String.format("%s is not a String value and can not be converted to a color it", name))
             return null

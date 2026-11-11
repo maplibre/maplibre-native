@@ -27,7 +27,7 @@ private fun Any.monitorWait() = (this as java.lang.Object).wait()
  * @param textureView the TextureView
  * @param mapRenderer the MapRenderer
  */
-class GLTextureViewRenderThread
+open class GLTextureViewRenderThread
     @UiThread
     constructor(
         textureView: TextureView,

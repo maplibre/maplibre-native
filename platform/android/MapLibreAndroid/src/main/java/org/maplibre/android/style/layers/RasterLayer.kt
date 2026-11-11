@@ -15,7 +15,7 @@ import org.maplibre.android.utils.ColorUtils.rgbaToColor
  * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-raster)
  */
 @UiThread
-class RasterLayer : Layer {
+open class RasterLayer : Layer {
 
     /**
      * Creates a RasterLayer.
@@ -36,14 +36,14 @@ class RasterLayer : Layer {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?, sourceId: String?)
+    protected open external fun initialize(layerId: String?, sourceId: String?)
 
     /**
      * Set the source layer.
      *
      * @param sourceLayer the source layer to set
      */
-    fun setSourceLayer(sourceLayer: String?) {
+    open fun setSourceLayer(sourceLayer: String?) {
         checkThread()
         nativeSetSourceLayer(sourceLayer)
     }
@@ -54,7 +54,7 @@ class RasterLayer : Layer {
      * @param sourceLayer the source layer to set
      * @return This
      */
-    fun withSourceLayer(sourceLayer: String?): RasterLayer {
+    open fun withSourceLayer(sourceLayer: String?): RasterLayer {
         setSourceLayer(sourceLayer)
         return this
     }
@@ -62,7 +62,7 @@ class RasterLayer : Layer {
     /**
      * The id of the source.
      */
-    val sourceId: String
+    open val sourceId: String
         get() {
             checkThread()
             return nativeGetSourceId()
@@ -74,7 +74,7 @@ class RasterLayer : Layer {
      * @param properties the var-args properties
      * @return This
      */
-    fun withProperties(vararg properties: PropertyValue<*>): RasterLayer {
+    open fun withProperties(vararg properties: PropertyValue<*>): RasterLayer {
         setProperties(*properties)
         return this
     }
@@ -87,7 +87,7 @@ class RasterLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val rasterOpacity: PropertyValue<Float>
+    open val rasterOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("raster-opacity", nativeGetRasterOpacity())
@@ -97,7 +97,7 @@ class RasterLayer : Layer {
     /**
      * The RasterOpacity property transition options
      */
-    var rasterOpacityTransition: TransitionOptions
+    open var rasterOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetRasterOpacityTransition()
@@ -113,7 +113,7 @@ class RasterLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val rasterHueRotate: PropertyValue<Float>
+    open val rasterHueRotate: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("raster-hue-rotate", nativeGetRasterHueRotate())
@@ -123,7 +123,7 @@ class RasterLayer : Layer {
     /**
      * The RasterHueRotate property transition options
      */
-    var rasterHueRotateTransition: TransitionOptions
+    open var rasterHueRotateTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetRasterHueRotateTransition()
@@ -139,7 +139,7 @@ class RasterLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val rasterBrightnessMin: PropertyValue<Float>
+    open val rasterBrightnessMin: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("raster-brightness-min", nativeGetRasterBrightnessMin())
@@ -149,7 +149,7 @@ class RasterLayer : Layer {
     /**
      * The RasterBrightnessMin property transition options
      */
-    var rasterBrightnessMinTransition: TransitionOptions
+    open var rasterBrightnessMinTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetRasterBrightnessMinTransition()
@@ -165,7 +165,7 @@ class RasterLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val rasterBrightnessMax: PropertyValue<Float>
+    open val rasterBrightnessMax: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("raster-brightness-max", nativeGetRasterBrightnessMax())
@@ -175,7 +175,7 @@ class RasterLayer : Layer {
     /**
      * The RasterBrightnessMax property transition options
      */
-    var rasterBrightnessMaxTransition: TransitionOptions
+    open var rasterBrightnessMaxTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetRasterBrightnessMaxTransition()
@@ -191,7 +191,7 @@ class RasterLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val rasterSaturation: PropertyValue<Float>
+    open val rasterSaturation: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("raster-saturation", nativeGetRasterSaturation())
@@ -201,7 +201,7 @@ class RasterLayer : Layer {
     /**
      * The RasterSaturation property transition options
      */
-    var rasterSaturationTransition: TransitionOptions
+    open var rasterSaturationTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetRasterSaturationTransition()
@@ -217,7 +217,7 @@ class RasterLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val rasterContrast: PropertyValue<Float>
+    open val rasterContrast: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("raster-contrast", nativeGetRasterContrast())
@@ -227,7 +227,7 @@ class RasterLayer : Layer {
     /**
      * The RasterContrast property transition options
      */
-    var rasterContrastTransition: TransitionOptions
+    open var rasterContrastTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetRasterContrastTransition()
@@ -243,7 +243,7 @@ class RasterLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val rasterResampling: PropertyValue<String>
+    open val rasterResampling: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("raster-resampling", nativeGetRasterResampling())
@@ -256,7 +256,7 @@ class RasterLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val rasterFadeDuration: PropertyValue<Float>
+    open val rasterFadeDuration: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("raster-fade-duration", nativeGetRasterFadeDuration())

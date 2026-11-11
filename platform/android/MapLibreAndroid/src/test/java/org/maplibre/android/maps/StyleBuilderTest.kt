@@ -107,7 +107,7 @@ class StyleBuilderTest : BaseTest() {
         builder.withImage("id", bitmap)
         assertEquals(bitmap, builder.images[0].bitmap)
         assertEquals("id", builder.images[0].id)
-        assertEquals(false, builder.images[0].sdf)
+        assertEquals(false, builder.images[0].isSdf)
     }
 
     @Test
@@ -118,10 +118,10 @@ class StyleBuilderTest : BaseTest() {
         builder.withBitmapImages(Pair("id1", bitmap1), Pair("id2", bitmap2))
         assertEquals(bitmap1, builder.images[0].bitmap)
         assertEquals("id1", builder.images[0].id)
-        assertEquals(false, builder.images[0].sdf)
+        assertEquals(false, builder.images[0].isSdf)
         assertEquals(bitmap2, builder.images[1].bitmap)
         assertEquals("id2", builder.images[1].id)
-        assertEquals(false, builder.images[1].sdf)
+        assertEquals(false, builder.images[1].isSdf)
     }
 
     @Test
@@ -131,7 +131,7 @@ class StyleBuilderTest : BaseTest() {
         builder.withImage("id", bitmap, true)
         assertEquals(bitmap, builder.images[0].bitmap)
         assertEquals("id", builder.images[0].id)
-        assertEquals(true, builder.images[0].sdf)
+        assertEquals(true, builder.images[0].isSdf)
     }
 
     @Test
@@ -142,10 +142,10 @@ class StyleBuilderTest : BaseTest() {
         builder.withBitmapImages(true, Pair("id1", bitmap1), Pair("id2", bitmap2))
         assertEquals(bitmap1, builder.images[0].bitmap)
         assertEquals("id1", builder.images[0].id)
-        assertEquals(true, builder.images[0].sdf)
+        assertEquals(true, builder.images[0].isSdf)
         assertEquals(bitmap2, builder.images[1].bitmap)
         assertEquals("id2", builder.images[1].id)
-        assertEquals(true, builder.images[1].sdf)
+        assertEquals(true, builder.images[1].isSdf)
     }
 
     @Test
@@ -162,7 +162,7 @@ class StyleBuilderTest : BaseTest() {
             ),
         )
         assertEquals("id", builder.images[0].id)
-        assertEquals(false, builder.images[0].sdf)
+        assertEquals(false, builder.images[0].isSdf)
     }
 
     @Test
@@ -179,7 +179,7 @@ class StyleBuilderTest : BaseTest() {
             ),
         )
         assertEquals("id", builder.images[0].id)
-        assertEquals(true, builder.images[0].sdf)
+        assertEquals(true, builder.images[0].isSdf)
     }
 
     @Test
@@ -199,7 +199,7 @@ class StyleBuilderTest : BaseTest() {
             ),
         )
         assertEquals("id1", builder.images[0].id)
-        assertEquals(false, builder.images[0].sdf)
+        assertEquals(false, builder.images[0].isSdf)
         assertTrue(
             BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable2)!!,
@@ -207,7 +207,7 @@ class StyleBuilderTest : BaseTest() {
             ),
         )
         assertEquals("id2", builder.images[1].id)
-        assertEquals(false, builder.images[1].sdf)
+        assertEquals(false, builder.images[1].isSdf)
     }
 
     @Test
@@ -227,7 +227,7 @@ class StyleBuilderTest : BaseTest() {
             ),
         )
         assertEquals("id1", builder.images[0].id)
-        assertEquals(true, builder.images[0].sdf)
+        assertEquals(true, builder.images[0].isSdf)
         assertTrue(
             BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable2)!!,
@@ -235,7 +235,7 @@ class StyleBuilderTest : BaseTest() {
             ),
         )
         assertEquals("id2", builder.images[1].id)
-        assertEquals(true, builder.images[1].sdf)
+        assertEquals(true, builder.images[1].isSdf)
     }
 
     @Test

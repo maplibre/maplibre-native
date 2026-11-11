@@ -7,7 +7,7 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLDisplay
 import javax.microedition.khronos.egl.EGLSurface
 
-class EGLWindowSurfaceFactory : GLSurfaceView.EGLWindowSurfaceFactory {
+open class EGLWindowSurfaceFactory : GLSurfaceView.EGLWindowSurfaceFactory {
     override fun createWindowSurface(
         egl: EGL10,
         display: EGLDisplay?,

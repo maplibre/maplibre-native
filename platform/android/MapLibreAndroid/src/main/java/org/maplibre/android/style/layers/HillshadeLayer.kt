@@ -15,7 +15,7 @@ import org.maplibre.android.utils.ColorUtils.rgbaToColor
  * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-hillshade)
  */
 @UiThread
-class HillshadeLayer : Layer {
+open class HillshadeLayer : Layer {
 
     /**
      * Creates a HillshadeLayer.
@@ -36,14 +36,14 @@ class HillshadeLayer : Layer {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?, sourceId: String?)
+    protected open external fun initialize(layerId: String?, sourceId: String?)
 
     /**
      * Set the source layer.
      *
      * @param sourceLayer the source layer to set
      */
-    fun setSourceLayer(sourceLayer: String?) {
+    open fun setSourceLayer(sourceLayer: String?) {
         checkThread()
         nativeSetSourceLayer(sourceLayer)
     }
@@ -54,7 +54,7 @@ class HillshadeLayer : Layer {
      * @param sourceLayer the source layer to set
      * @return This
      */
-    fun withSourceLayer(sourceLayer: String?): HillshadeLayer {
+    open fun withSourceLayer(sourceLayer: String?): HillshadeLayer {
         setSourceLayer(sourceLayer)
         return this
     }
@@ -62,7 +62,7 @@ class HillshadeLayer : Layer {
     /**
      * The id of the source.
      */
-    val sourceId: String
+    open val sourceId: String
         get() {
             checkThread()
             return nativeGetSourceId()
@@ -74,7 +74,7 @@ class HillshadeLayer : Layer {
      * @param properties the var-args properties
      * @return This
      */
-    fun withProperties(vararg properties: PropertyValue<*>): HillshadeLayer {
+    open fun withProperties(vararg properties: PropertyValue<*>): HillshadeLayer {
         setProperties(*properties)
         return this
     }
@@ -87,7 +87,7 @@ class HillshadeLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val hillshadeIlluminationDirection: PropertyValue<Array<Float>>
+    open val hillshadeIlluminationDirection: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("hillshade-illumination-direction", nativeGetHillshadeIlluminationDirection())
@@ -100,7 +100,7 @@ class HillshadeLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val hillshadeIlluminationAltitude: PropertyValue<Array<Float>>
+    open val hillshadeIlluminationAltitude: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("hillshade-illumination-altitude", nativeGetHillshadeIlluminationAltitude())
@@ -113,7 +113,7 @@ class HillshadeLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val hillshadeIlluminationAnchor: PropertyValue<String>
+    open val hillshadeIlluminationAnchor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("hillshade-illumination-anchor", nativeGetHillshadeIlluminationAnchor())
@@ -126,7 +126,7 @@ class HillshadeLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val hillshadeExaggeration: PropertyValue<Float>
+    open val hillshadeExaggeration: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("hillshade-exaggeration", nativeGetHillshadeExaggeration())
@@ -136,7 +136,7 @@ class HillshadeLayer : Layer {
     /**
      * The HillshadeExaggeration property transition options
      */
-    var hillshadeExaggerationTransition: TransitionOptions
+    open var hillshadeExaggerationTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetHillshadeExaggerationTransition()
@@ -152,7 +152,7 @@ class HillshadeLayer : Layer {
      * @return property wrapper value around Array<String>
      */
     @Suppress("UNCHECKED_CAST")
-    val hillshadeShadowColor: PropertyValue<Array<String>>
+    open val hillshadeShadowColor: PropertyValue<Array<String>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("hillshade-shadow-color", nativeGetHillshadeShadowColor())
@@ -162,7 +162,7 @@ class HillshadeLayer : Layer {
     /**
      * The HillshadeShadowColor property transition options
      */
-    var hillshadeShadowColorTransition: TransitionOptions
+    open var hillshadeShadowColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetHillshadeShadowColorTransition()
@@ -178,7 +178,7 @@ class HillshadeLayer : Layer {
      * @return property wrapper value around Array<String>
      */
     @Suppress("UNCHECKED_CAST")
-    val hillshadeHighlightColor: PropertyValue<Array<String>>
+    open val hillshadeHighlightColor: PropertyValue<Array<String>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("hillshade-highlight-color", nativeGetHillshadeHighlightColor())
@@ -188,7 +188,7 @@ class HillshadeLayer : Layer {
     /**
      * The HillshadeHighlightColor property transition options
      */
-    var hillshadeHighlightColorTransition: TransitionOptions
+    open var hillshadeHighlightColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetHillshadeHighlightColorTransition()
@@ -204,7 +204,7 @@ class HillshadeLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val hillshadeAccentColor: PropertyValue<String>
+    open val hillshadeAccentColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("hillshade-accent-color", nativeGetHillshadeAccentColor())
@@ -218,7 +218,7 @@ class HillshadeLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getHillshadeAccentColorAsInt(): Int {
+    open fun getHillshadeAccentColorAsInt(): Int {
         checkThread()
         val value = hillshadeAccentColor
         if (value.isValue()) {
@@ -231,7 +231,7 @@ class HillshadeLayer : Layer {
     /**
      * The HillshadeAccentColor property transition options
      */
-    var hillshadeAccentColorTransition: TransitionOptions
+    open var hillshadeAccentColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetHillshadeAccentColorTransition()
@@ -247,7 +247,7 @@ class HillshadeLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val hillshadeMethod: PropertyValue<String>
+    open val hillshadeMethod: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("hillshade-method", nativeGetHillshadeMethod())

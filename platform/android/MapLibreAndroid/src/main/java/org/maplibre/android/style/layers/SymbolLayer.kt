@@ -16,7 +16,7 @@ import org.maplibre.android.utils.ColorUtils.rgbaToColor
  * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-symbol)
  */
 @UiThread
-class SymbolLayer : Layer {
+open class SymbolLayer : Layer {
 
     /**
      * Creates a SymbolLayer.
@@ -37,12 +37,12 @@ class SymbolLayer : Layer {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?, sourceId: String?)
+    protected open external fun initialize(layerId: String?, sourceId: String?)
 
     /**
      * The source layer.
      */
-    var sourceLayer: String?
+    open var sourceLayer: String?
         get() {
             checkThread()
             return nativeGetSourceLayer()
@@ -58,7 +58,7 @@ class SymbolLayer : Layer {
      * @param sourceLayer the source layer to set
      * @return This
      */
-    fun withSourceLayer(sourceLayer: String?): SymbolLayer {
+    open fun withSourceLayer(sourceLayer: String?): SymbolLayer {
         this.sourceLayer = sourceLayer
         return this
     }
@@ -66,7 +66,7 @@ class SymbolLayer : Layer {
     /**
      * The id of the source.
      */
-    val sourceId: String
+    open val sourceId: String
         get() {
             checkThread()
             return nativeGetSourceId()
@@ -77,7 +77,7 @@ class SymbolLayer : Layer {
      *
      * @param filter the expression filter to set
      */
-    fun setFilter(filter: Expression) {
+    open fun setFilter(filter: Expression) {
         checkThread()
         nativeSetFilter(filter.toArray())
     }
@@ -88,7 +88,7 @@ class SymbolLayer : Layer {
      * @param filter the expression filter to set
      * @return This
      */
-    fun withFilter(filter: Expression): SymbolLayer {
+    open fun withFilter(filter: Expression): SymbolLayer {
         setFilter(filter)
         return this
     }
@@ -98,7 +98,7 @@ class SymbolLayer : Layer {
      *
      * Use [setFilter] to set the filter.
      */
-    val filter: Expression?
+    open val filter: Expression?
         get() {
             checkThread()
             val jsonElement = nativeGetFilter()
@@ -115,7 +115,7 @@ class SymbolLayer : Layer {
      * @param properties the var-args properties
      * @return This
      */
-    fun withProperties(vararg properties: PropertyValue<*>): SymbolLayer {
+    open fun withProperties(vararg properties: PropertyValue<*>): SymbolLayer {
         setProperties(*properties)
         return this
     }
@@ -128,7 +128,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val symbolPlacement: PropertyValue<String>
+    open val symbolPlacement: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("symbol-placement", nativeGetSymbolPlacement())
@@ -141,7 +141,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val symbolSpacing: PropertyValue<Float>
+    open val symbolSpacing: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("symbol-spacing", nativeGetSymbolSpacing())
@@ -154,7 +154,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val symbolAvoidEdges: PropertyValue<Boolean>
+    open val symbolAvoidEdges: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("symbol-avoid-edges", nativeGetSymbolAvoidEdges())
@@ -167,7 +167,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val symbolSortKey: PropertyValue<Float>
+    open val symbolSortKey: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("symbol-sort-key", nativeGetSymbolSortKey())
@@ -180,7 +180,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val symbolZOrder: PropertyValue<String>
+    open val symbolZOrder: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("symbol-z-order", nativeGetSymbolZOrder())
@@ -193,7 +193,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val iconAllowOverlap: PropertyValue<Boolean>
+    open val iconAllowOverlap: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-allow-overlap", nativeGetIconAllowOverlap())
@@ -206,7 +206,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val iconIgnorePlacement: PropertyValue<Boolean>
+    open val iconIgnorePlacement: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-ignore-placement", nativeGetIconIgnorePlacement())
@@ -219,7 +219,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val iconOptional: PropertyValue<Boolean>
+    open val iconOptional: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-optional", nativeGetIconOptional())
@@ -232,7 +232,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val iconRotationAlignment: PropertyValue<String>
+    open val iconRotationAlignment: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-rotation-alignment", nativeGetIconRotationAlignment())
@@ -245,7 +245,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val iconSize: PropertyValue<Float>
+    open val iconSize: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-size", nativeGetIconSize())
@@ -258,7 +258,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val iconTextFit: PropertyValue<String>
+    open val iconTextFit: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-text-fit", nativeGetIconTextFit())
@@ -271,7 +271,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val iconTextFitPadding: PropertyValue<Array<Float>>
+    open val iconTextFitPadding: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-text-fit-padding", nativeGetIconTextFitPadding())
@@ -284,7 +284,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val iconImage: PropertyValue<String>
+    open val iconImage: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-image", nativeGetIconImage())
@@ -297,7 +297,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val iconRotate: PropertyValue<Float>
+    open val iconRotate: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-rotate", nativeGetIconRotate())
@@ -310,7 +310,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val iconPadding: PropertyValue<Array<Float>>
+    open val iconPadding: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-padding", nativeGetIconPadding())
@@ -323,7 +323,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val iconKeepUpright: PropertyValue<Boolean>
+    open val iconKeepUpright: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-keep-upright", nativeGetIconKeepUpright())
@@ -336,7 +336,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val iconOffset: PropertyValue<Array<Float>>
+    open val iconOffset: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-offset", nativeGetIconOffset())
@@ -349,7 +349,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val iconAnchor: PropertyValue<String>
+    open val iconAnchor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-anchor", nativeGetIconAnchor())
@@ -362,7 +362,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val iconPitchAlignment: PropertyValue<String>
+    open val iconPitchAlignment: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-pitch-alignment", nativeGetIconPitchAlignment())
@@ -375,7 +375,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val textPitchAlignment: PropertyValue<String>
+    open val textPitchAlignment: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-pitch-alignment", nativeGetTextPitchAlignment())
@@ -388,7 +388,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val textRotationAlignment: PropertyValue<String>
+    open val textRotationAlignment: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-rotation-alignment", nativeGetTextRotationAlignment())
@@ -401,7 +401,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Formatted
      */
     @Suppress("UNCHECKED_CAST")
-    val textField: PropertyValue<Formatted>
+    open val textField: PropertyValue<Formatted>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-field", nativeGetTextField())
@@ -414,7 +414,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Array<String>
      */
     @Suppress("UNCHECKED_CAST")
-    val textFont: PropertyValue<Array<String>>
+    open val textFont: PropertyValue<Array<String>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-font", nativeGetTextFont())
@@ -427,7 +427,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textSize: PropertyValue<Float>
+    open val textSize: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-size", nativeGetTextSize())
@@ -440,7 +440,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textMaxWidth: PropertyValue<Float>
+    open val textMaxWidth: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-max-width", nativeGetTextMaxWidth())
@@ -453,7 +453,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textLineHeight: PropertyValue<Float>
+    open val textLineHeight: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-line-height", nativeGetTextLineHeight())
@@ -466,7 +466,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textLetterSpacing: PropertyValue<Float>
+    open val textLetterSpacing: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-letter-spacing", nativeGetTextLetterSpacing())
@@ -479,7 +479,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val textJustify: PropertyValue<String>
+    open val textJustify: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-justify", nativeGetTextJustify())
@@ -492,7 +492,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textRadialOffset: PropertyValue<Float>
+    open val textRadialOffset: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-radial-offset", nativeGetTextRadialOffset())
@@ -505,7 +505,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Array<String>
      */
     @Suppress("UNCHECKED_CAST")
-    val textVariableAnchor: PropertyValue<Array<String>>
+    open val textVariableAnchor: PropertyValue<Array<String>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-variable-anchor", nativeGetTextVariableAnchor())
@@ -518,7 +518,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Array<Any>
      */
     @Suppress("UNCHECKED_CAST")
-    val textVariableAnchorOffset: PropertyValue<Array<Any>>
+    open val textVariableAnchorOffset: PropertyValue<Array<Any>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-variable-anchor-offset", nativeGetTextVariableAnchorOffset())
@@ -531,7 +531,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val textAnchor: PropertyValue<String>
+    open val textAnchor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-anchor", nativeGetTextAnchor())
@@ -544,7 +544,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textMaxAngle: PropertyValue<Float>
+    open val textMaxAngle: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-max-angle", nativeGetTextMaxAngle())
@@ -557,7 +557,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Array<String>
      */
     @Suppress("UNCHECKED_CAST")
-    val textWritingMode: PropertyValue<Array<String>>
+    open val textWritingMode: PropertyValue<Array<String>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-writing-mode", nativeGetTextWritingMode())
@@ -570,7 +570,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textRotate: PropertyValue<Float>
+    open val textRotate: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-rotate", nativeGetTextRotate())
@@ -583,7 +583,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textPadding: PropertyValue<Float>
+    open val textPadding: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-padding", nativeGetTextPadding())
@@ -596,7 +596,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val textKeepUpright: PropertyValue<Boolean>
+    open val textKeepUpright: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-keep-upright", nativeGetTextKeepUpright())
@@ -609,7 +609,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val textTransform: PropertyValue<String>
+    open val textTransform: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-transform", nativeGetTextTransform())
@@ -622,7 +622,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val textOffset: PropertyValue<Array<Float>>
+    open val textOffset: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-offset", nativeGetTextOffset())
@@ -635,7 +635,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val textAllowOverlap: PropertyValue<Boolean>
+    open val textAllowOverlap: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-allow-overlap", nativeGetTextAllowOverlap())
@@ -648,7 +648,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val textIgnorePlacement: PropertyValue<Boolean>
+    open val textIgnorePlacement: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-ignore-placement", nativeGetTextIgnorePlacement())
@@ -661,7 +661,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val textOptional: PropertyValue<Boolean>
+    open val textOptional: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-optional", nativeGetTextOptional())
@@ -674,7 +674,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Boolean
      */
     @Suppress("UNCHECKED_CAST")
-    val symbolScreenSpace: PropertyValue<Boolean>
+    open val symbolScreenSpace: PropertyValue<Boolean>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("symbol-screen-space", nativeGetSymbolScreenSpace())
@@ -687,7 +687,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val iconOpacity: PropertyValue<Float>
+    open val iconOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-opacity", nativeGetIconOpacity())
@@ -697,7 +697,7 @@ class SymbolLayer : Layer {
     /**
      * The IconOpacity property transition options
      */
-    var iconOpacityTransition: TransitionOptions
+    open var iconOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetIconOpacityTransition()
@@ -713,7 +713,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val iconColor: PropertyValue<String>
+    open val iconColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-color", nativeGetIconColor())
@@ -727,7 +727,7 @@ class SymbolLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getIconColorAsInt(): Int {
+    open fun getIconColorAsInt(): Int {
         checkThread()
         val value = iconColor
         if (value.isValue()) {
@@ -740,7 +740,7 @@ class SymbolLayer : Layer {
     /**
      * The IconColor property transition options
      */
-    var iconColorTransition: TransitionOptions
+    open var iconColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetIconColorTransition()
@@ -756,7 +756,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val iconHaloColor: PropertyValue<String>
+    open val iconHaloColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-halo-color", nativeGetIconHaloColor())
@@ -770,7 +770,7 @@ class SymbolLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getIconHaloColorAsInt(): Int {
+    open fun getIconHaloColorAsInt(): Int {
         checkThread()
         val value = iconHaloColor
         if (value.isValue()) {
@@ -783,7 +783,7 @@ class SymbolLayer : Layer {
     /**
      * The IconHaloColor property transition options
      */
-    var iconHaloColorTransition: TransitionOptions
+    open var iconHaloColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetIconHaloColorTransition()
@@ -799,7 +799,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val iconHaloWidth: PropertyValue<Float>
+    open val iconHaloWidth: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-halo-width", nativeGetIconHaloWidth())
@@ -809,7 +809,7 @@ class SymbolLayer : Layer {
     /**
      * The IconHaloWidth property transition options
      */
-    var iconHaloWidthTransition: TransitionOptions
+    open var iconHaloWidthTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetIconHaloWidthTransition()
@@ -825,7 +825,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val iconHaloBlur: PropertyValue<Float>
+    open val iconHaloBlur: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-halo-blur", nativeGetIconHaloBlur())
@@ -835,7 +835,7 @@ class SymbolLayer : Layer {
     /**
      * The IconHaloBlur property transition options
      */
-    var iconHaloBlurTransition: TransitionOptions
+    open var iconHaloBlurTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetIconHaloBlurTransition()
@@ -851,7 +851,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val iconTranslate: PropertyValue<Array<Float>>
+    open val iconTranslate: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-translate", nativeGetIconTranslate())
@@ -861,7 +861,7 @@ class SymbolLayer : Layer {
     /**
      * The IconTranslate property transition options
      */
-    var iconTranslateTransition: TransitionOptions
+    open var iconTranslateTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetIconTranslateTransition()
@@ -877,7 +877,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val iconTranslateAnchor: PropertyValue<String>
+    open val iconTranslateAnchor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("icon-translate-anchor", nativeGetIconTranslateAnchor())
@@ -890,7 +890,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textOpacity: PropertyValue<Float>
+    open val textOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-opacity", nativeGetTextOpacity())
@@ -900,7 +900,7 @@ class SymbolLayer : Layer {
     /**
      * The TextOpacity property transition options
      */
-    var textOpacityTransition: TransitionOptions
+    open var textOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetTextOpacityTransition()
@@ -916,7 +916,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val textColor: PropertyValue<String>
+    open val textColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-color", nativeGetTextColor())
@@ -930,7 +930,7 @@ class SymbolLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getTextColorAsInt(): Int {
+    open fun getTextColorAsInt(): Int {
         checkThread()
         val value = textColor
         if (value.isValue()) {
@@ -943,7 +943,7 @@ class SymbolLayer : Layer {
     /**
      * The TextColor property transition options
      */
-    var textColorTransition: TransitionOptions
+    open var textColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetTextColorTransition()
@@ -959,7 +959,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val textHaloColor: PropertyValue<String>
+    open val textHaloColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-halo-color", nativeGetTextHaloColor())
@@ -973,7 +973,7 @@ class SymbolLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getTextHaloColorAsInt(): Int {
+    open fun getTextHaloColorAsInt(): Int {
         checkThread()
         val value = textHaloColor
         if (value.isValue()) {
@@ -986,7 +986,7 @@ class SymbolLayer : Layer {
     /**
      * The TextHaloColor property transition options
      */
-    var textHaloColorTransition: TransitionOptions
+    open var textHaloColorTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetTextHaloColorTransition()
@@ -1002,7 +1002,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textHaloWidth: PropertyValue<Float>
+    open val textHaloWidth: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-halo-width", nativeGetTextHaloWidth())
@@ -1012,7 +1012,7 @@ class SymbolLayer : Layer {
     /**
      * The TextHaloWidth property transition options
      */
-    var textHaloWidthTransition: TransitionOptions
+    open var textHaloWidthTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetTextHaloWidthTransition()
@@ -1028,7 +1028,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val textHaloBlur: PropertyValue<Float>
+    open val textHaloBlur: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-halo-blur", nativeGetTextHaloBlur())
@@ -1038,7 +1038,7 @@ class SymbolLayer : Layer {
     /**
      * The TextHaloBlur property transition options
      */
-    var textHaloBlurTransition: TransitionOptions
+    open var textHaloBlurTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetTextHaloBlurTransition()
@@ -1054,7 +1054,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around Array<Float>
      */
     @Suppress("UNCHECKED_CAST")
-    val textTranslate: PropertyValue<Array<Float>>
+    open val textTranslate: PropertyValue<Array<Float>>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-translate", nativeGetTextTranslate())
@@ -1064,7 +1064,7 @@ class SymbolLayer : Layer {
     /**
      * The TextTranslate property transition options
      */
-    var textTranslateTransition: TransitionOptions
+    open var textTranslateTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetTextTranslateTransition()
@@ -1080,7 +1080,7 @@ class SymbolLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val textTranslateAnchor: PropertyValue<String>
+    open val textTranslateAnchor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("text-translate-anchor", nativeGetTextTranslateAnchor())

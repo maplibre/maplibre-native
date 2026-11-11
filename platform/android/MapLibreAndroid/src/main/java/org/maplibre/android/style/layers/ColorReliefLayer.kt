@@ -15,7 +15,7 @@ import org.maplibre.android.utils.ColorUtils.rgbaToColor
  * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-color-relief)
  */
 @UiThread
-class ColorReliefLayer : Layer {
+open class ColorReliefLayer : Layer {
 
     /**
      * Creates a ColorReliefLayer.
@@ -36,12 +36,12 @@ class ColorReliefLayer : Layer {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?, sourceId: String?)
+    protected open external fun initialize(layerId: String?, sourceId: String?)
 
     /**
      * The source layer.
      */
-    var sourceLayer: String?
+    open var sourceLayer: String?
         get() {
             checkThread()
             return nativeGetSourceLayer()
@@ -57,7 +57,7 @@ class ColorReliefLayer : Layer {
      * @param sourceLayer the source layer to set
      * @return This
      */
-    fun withSourceLayer(sourceLayer: String?): ColorReliefLayer {
+    open fun withSourceLayer(sourceLayer: String?): ColorReliefLayer {
         this.sourceLayer = sourceLayer
         return this
     }
@@ -65,7 +65,7 @@ class ColorReliefLayer : Layer {
     /**
      * The id of the source.
      */
-    val sourceId: String
+    open val sourceId: String
         get() {
             checkThread()
             return nativeGetSourceId()
@@ -76,7 +76,7 @@ class ColorReliefLayer : Layer {
      *
      * @param filter the expression filter to set
      */
-    fun setFilter(filter: Expression) {
+    open fun setFilter(filter: Expression) {
         checkThread()
         nativeSetFilter(filter.toArray())
     }
@@ -87,7 +87,7 @@ class ColorReliefLayer : Layer {
      * @param filter the expression filter to set
      * @return This
      */
-    fun withFilter(filter: Expression): ColorReliefLayer {
+    open fun withFilter(filter: Expression): ColorReliefLayer {
         setFilter(filter)
         return this
     }
@@ -97,7 +97,7 @@ class ColorReliefLayer : Layer {
      *
      * Use [setFilter] to set the filter.
      */
-    val filter: Expression?
+    open val filter: Expression?
         get() {
             checkThread()
             val jsonElement = nativeGetFilter()
@@ -114,7 +114,7 @@ class ColorReliefLayer : Layer {
      * @param properties the var-args properties
      * @return This
      */
-    fun withProperties(vararg properties: PropertyValue<*>): ColorReliefLayer {
+    open fun withProperties(vararg properties: PropertyValue<*>): ColorReliefLayer {
         setProperties(*properties)
         return this
     }
@@ -127,7 +127,7 @@ class ColorReliefLayer : Layer {
      * @return property wrapper value around Float
      */
     @Suppress("UNCHECKED_CAST")
-    val colorReliefOpacity: PropertyValue<Float>
+    open val colorReliefOpacity: PropertyValue<Float>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("color-relief-opacity", nativeGetColorReliefOpacity())
@@ -137,7 +137,7 @@ class ColorReliefLayer : Layer {
     /**
      * The ColorReliefOpacity property transition options
      */
-    var colorReliefOpacityTransition: TransitionOptions
+    open var colorReliefOpacityTransition: TransitionOptions
         get() {
             checkThread()
             return nativeGetColorReliefOpacityTransition()
@@ -153,7 +153,7 @@ class ColorReliefLayer : Layer {
      * @return property wrapper value around String
      */
     @Suppress("UNCHECKED_CAST")
-    val colorReliefColor: PropertyValue<String>
+    open val colorReliefColor: PropertyValue<String>
         get() {
             checkThread()
             val value = PropertyValue<Any?>("color-relief-color", nativeGetColorReliefColor())
@@ -167,7 +167,7 @@ class ColorReliefLayer : Layer {
      * @throws RuntimeException thrown if property isn't a value
      */
     @ColorInt
-    fun getColorReliefColorAsInt(): Int {
+    open fun getColorReliefColorAsInt(): Int {
         checkThread()
         val value = colorReliefColor
         if (value.isValue()) {

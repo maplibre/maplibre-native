@@ -30,37 +30,37 @@ import org.maplibre.android.WellKnownTileServer
  * @param defaultStyle         the name of the default style
  * @param defaultStyles        the list of default styles
  */
-class TileServerOptions
+open class TileServerOptions
     @Keep
     constructor(
-        @field:Keep var baseURL: String?,
-        @field:Keep var uriSchemeAlias: String?,
-        @field:Keep var sourceTemplate: String?,
-        @field:Keep var sourceDomainName: String?,
-        @field:Keep var sourceVersionPrefix: String?,
-        @field:Keep var styleTemplate: String?,
-        @field:Keep var styleDomainName: String?,
-        @field:Keep var styleVersionPrefix: String?,
-        @field:Keep var spritesTemplate: String?,
-        @field:Keep var spritesDomainName: String?,
-        @field:Keep var spritesVersionPrefix: String?,
-        @field:Keep var glyphsTemplate: String?,
-        @field:Keep var glyphsDomainName: String?,
-        @field:Keep var glyphsVersionPrefix: String?,
-        @field:Keep var tileTemplate: String?,
-        @field:Keep var tileDomainName: String?,
-        @field:Keep var tileVersionPrefix: String?,
-        @field:Keep var apiKeyParameterName: String?,
-        @field:Keep var apiKeyRequired: Boolean,
-        @field:Keep var defaultStyle: String?,
-        @field:Keep var defaultStyles: Array<DefaultStyle>,
+        @field:Keep open var baseURL: String?,
+        @field:Keep open var uriSchemeAlias: String?,
+        @field:Keep open var sourceTemplate: String?,
+        @field:Keep open var sourceDomainName: String?,
+        @field:Keep open var sourceVersionPrefix: String?,
+        @field:Keep open var styleTemplate: String?,
+        @field:Keep open var styleDomainName: String?,
+        @field:Keep open var styleVersionPrefix: String?,
+        @field:Keep open var spritesTemplate: String?,
+        @field:Keep open var spritesDomainName: String?,
+        @field:Keep open var spritesVersionPrefix: String?,
+        @field:Keep open var glyphsTemplate: String?,
+        @field:Keep open var glyphsDomainName: String?,
+        @field:Keep open var glyphsVersionPrefix: String?,
+        @field:Keep open var tileTemplate: String?,
+        @field:Keep open var tileDomainName: String?,
+        @field:Keep open var tileVersionPrefix: String?,
+        @field:Keep open var apiKeyParameterName: String?,
+        @field:Keep open var apiKeyRequired: Boolean,
+        @field:Keep open var defaultStyle: String?,
+        @field:Keep open var defaultStyles: Array<DefaultStyle>,
     ) : Parcelable {
         /**
          * Constructs a new tile server options tuple given a parcel.
          *
          * @param parcel the parcel containing the tile server options values
          */
-        private constructor(parcel: Parcel) : this(
+        protected constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),
             parcel.readString(),

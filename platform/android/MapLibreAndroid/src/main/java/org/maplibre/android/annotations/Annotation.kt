@@ -24,7 +24,7 @@ abstract class Annotation protected constructor() : Comparable<Annotation> {
      *
      * Internal C++ id is stored as unsigned int.
      */
-    var id: Long = -1
+    open var id: Long = -1
 
     @JvmField
     protected var maplibreMap: MapLibreMap? = null
@@ -35,7 +35,7 @@ abstract class Annotation protected constructor() : Comparable<Annotation> {
     /**
      * Do not use this method, used internally by the SDK.
      */
-    fun remove() {
+    open fun remove() {
         maplibreMap?.removeAnnotation(this)
     }
 
@@ -44,7 +44,7 @@ abstract class Annotation protected constructor() : Comparable<Annotation> {
      *
      * @param maplibreMap the hosting MapLibreMap
      */
-    fun setMapLibreMap(maplibreMap: MapLibreMap?) {
+    open fun setMapLibreMap(maplibreMap: MapLibreMap?) {
         this.maplibreMap = maplibreMap
     }
 
@@ -53,14 +53,14 @@ abstract class Annotation protected constructor() : Comparable<Annotation> {
      *
      * @return the MapLibreMap
      */
-    protected fun getMapLibreMap(): MapLibreMap? = maplibreMap
+    protected open fun getMapLibreMap(): MapLibreMap? = maplibreMap
 
     /**
      * Do not use this method, used internally by the SDK.
      *
      * @param mapView the hosting map view
      */
-    fun setMapView(mapView: MapView?) {
+    open fun setMapView(mapView: MapView?) {
         this.mapView = mapView
     }
 
@@ -69,7 +69,7 @@ abstract class Annotation protected constructor() : Comparable<Annotation> {
      *
      * @return The MapView
      */
-    protected fun getMapView(): MapView? = mapView
+    protected open fun getMapView(): MapView? = mapView
 
     /**
      * Compares this Annotation object with another Annotation.

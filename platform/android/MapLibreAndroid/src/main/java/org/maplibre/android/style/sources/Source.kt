@@ -15,8 +15,8 @@ abstract class Source {
      * @return the native peer pointer
      */
     @Keep
-    var nativePtr: Long = 0
-        private set
+    open var nativePtr: Long = 0
+        protected set
 
     protected var detached = false
 
@@ -47,7 +47,7 @@ abstract class Source {
      *
      * @return the source id
      */
-    val id: String
+    open val id: String
         get() {
             checkThread()
             return nativeGetId()
@@ -60,7 +60,7 @@ abstract class Source {
      *
      * @return the string representation of the attribution in html format
      */
-    val attribution: String
+    open val attribution: String
         get() {
             checkThread()
             return nativeGetAttribution()
@@ -72,7 +72,7 @@ abstract class Source {
      * expense of a little bandwidth.
      * If delta has not been set or set to null, it will use the value in MapLibreMap instance.
      */
-    var prefetchZoomDelta: Int?
+    open var prefetchZoomDelta: Int?
         get() = nativeGetPrefetchZoomDelta()
         set(delta) {
             nativeSetPrefetchZoomDelta(delta)
@@ -85,7 +85,7 @@ abstract class Source {
      * for raster tiles that are overscaled multiple times. This is the maximum
      * limit for how much a parent tile can be overscaled.
      */
-    var maxOverscaleFactorForParentTiles: Int?
+    open var maxOverscaleFactorForParentTiles: Int?
         get() = nativeGetMaxOverscaleFactorForParentTiles()
         set(maxOverscaleFactor) {
             nativeSetMaxOverscaleFactorForParentTiles(maxOverscaleFactor)
@@ -96,7 +96,7 @@ abstract class Source {
      *
      * True if tiles are volatile, false if they will be stored in local cache. Default value is false.
      */
-    var isVolatile: Boolean?
+    open var isVolatile: Boolean?
         get() = nativeIsVolatile()
         set(value) {
             nativeSetVolatile(value)
@@ -106,63 +106,63 @@ abstract class Source {
      * The minimum tile update interval in milliseconds, which is used to throttle the tile update
      * network requests. The default value is 0.
      */
-    var minimumTileUpdateInterval: Long?
+    open var minimumTileUpdateInterval: Long?
         get() = nativeGetMinimumTileUpdateInterval()
         set(interval) {
             nativeSetMinimumTileUpdateInterval(interval)
         }
 
     @Keep
-    protected external fun nativeGetId(): String
+    protected open external fun nativeGetId(): String
 
     @Keep
-    protected external fun nativeGetAttribution(): String
+    protected open external fun nativeGetAttribution(): String
 
     @Keep
-    protected external fun nativeGetPrefetchZoomDelta(): Int?
+    protected open external fun nativeGetPrefetchZoomDelta(): Int?
 
     @Keep
-    protected external fun nativeSetPrefetchZoomDelta(delta: Int?)
+    protected open external fun nativeSetPrefetchZoomDelta(delta: Int?)
 
     @Keep
-    protected external fun nativeSetMaxOverscaleFactorForParentTiles(maxOverscaleFactor: Int?)
+    protected open external fun nativeSetMaxOverscaleFactorForParentTiles(maxOverscaleFactor: Int?)
 
     @Keep
-    protected external fun nativeGetMaxOverscaleFactorForParentTiles(): Int?
+    protected open external fun nativeGetMaxOverscaleFactorForParentTiles(): Int?
 
     @Keep
-    protected external fun nativeIsVolatile(): Boolean?
+    protected open external fun nativeIsVolatile(): Boolean?
 
     @Keep
-    protected external fun nativeSetVolatile(value: Boolean?)
+    protected open external fun nativeSetVolatile(value: Boolean?)
 
     @Keep
-    protected external fun nativeSetMinimumTileUpdateInterval(interval: Long?)
+    protected open external fun nativeSetMinimumTileUpdateInterval(interval: Long?)
 
     @Keep
-    protected external fun nativeGetMinimumTileUpdateInterval(): Long?
+    protected open external fun nativeGetMinimumTileUpdateInterval(): Long?
 
     @Keep
-    protected external fun nativeSetFeatureState(
+    protected open external fun nativeSetFeatureState(
         sourceLayerId: String?,
         featureId: String,
         state: JsonObject,
     ): Boolean
 
     @Keep
-    protected external fun nativeGetFeatureState(
+    protected open external fun nativeGetFeatureState(
         sourceLayerId: String?,
         featureId: String,
     ): JsonObject?
 
     @Keep
-    protected external fun nativeRemoveFeatureState(
+    protected open external fun nativeRemoveFeatureState(
         sourceLayerId: String?,
         featureId: String?,
         stateKey: String?,
     ): Boolean
 
-    fun setDetached() {
+    open fun setDetached() {
         detached = true
     }
 

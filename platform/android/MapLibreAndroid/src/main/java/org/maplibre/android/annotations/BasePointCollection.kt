@@ -18,7 +18,7 @@ abstract class BasePointCollection protected constructor() : Annotation() {
      * mutations to the provided list will have no effect on this annotation.
      */
     @field:Keep
-    var points: List<LatLng> = ArrayList()
+    open var points: List<LatLng> = ArrayList()
         get() = ArrayList(field)
         set(value) {
             field = ArrayList(value)
@@ -29,7 +29,7 @@ abstract class BasePointCollection protected constructor() : Annotation() {
      * Value between 0 and 1 defining the polyline alpha.
      */
     @field:Keep
-    var alpha: Float = 1.0f
+    open var alpha: Float = 1.0f
         set(value) {
             field = value
             update()
@@ -40,7 +40,7 @@ abstract class BasePointCollection protected constructor() : Annotation() {
      *
      * @param point A [LatLng] point to be added.
      */
-    fun addPoint(point: LatLng) {
+    open fun addPoint(point: LatLng) {
         points = points + point
     }
 

@@ -5,7 +5,7 @@ package org.maplibre.android.maps
  *
  * The fields of this class are populated by the native peer, they must not be renamed.
  */
-class RenderingStats {
+open class RenderingStats {
     /** Frame CPU encoding time (seconds) */
     @JvmField
     var encodingTime = 0.0
@@ -134,20 +134,20 @@ class RenderingStats {
     var renderedFeatures: Map<SourceLayerID, List<FeatureInfo>> = emptyMap()
         private set
 
-    class NDCBound(
+    open class NDCBound(
         @JvmField val minX: Double,
         @JvmField val maxX: Double,
         @JvmField val minY: Double,
         @JvmField val maxY: Double,
     ) {
-        val midX: Double
+        open val midX: Double
             get() = (minX + maxX) / 2.0
 
-        val midY: Double
+        open val midY: Double
             get() = (minY + maxY) / 2.0
     }
 
-    class TileID(
+    open class TileID(
         @JvmField val z: Int,
         @JvmField val x: Int,
         @JvmField val y: Int,
@@ -155,13 +155,13 @@ class RenderingStats {
         @JvmField val wrap: Int,
     )
 
-    class FeatureInfo(
+    open class FeatureInfo(
         @JvmField val featureID: String,
         @JvmField val ndcBound: NDCBound,
         @JvmField val tileIDs: Set<TileID>,
     )
 
-    class SourceLayerID(
+    open class SourceLayerID(
         @JvmField val sourceID: String,
         @JvmField val layerID: String,
     ) {

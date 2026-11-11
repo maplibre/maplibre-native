@@ -20,7 +20,7 @@ private fun Any.monitorNotifyAll() = (this as java.lang.Object).notifyAll()
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 private fun Any.monitorWait() = (this as java.lang.Object).wait()
 
-class MapLibreGLSurfaceView : MapLibreSurfaceView {
+open class MapLibreGLSurfaceView : MapLibreSurfaceView {
     private val viewWeakReference = WeakReference(this)
 
     private var eglConfigChooser: GLSurfaceView.EGLConfigChooser? = null
@@ -44,7 +44,7 @@ class MapLibreGLSurfaceView : MapLibreSurfaceView {
      *
      * The default is false.
      */
-    var preserveEGLContextOnPause: Boolean = false
+    open var preserveEGLContextOnPause: Boolean = false
 
     constructor(context: Context) : super(context)
 
