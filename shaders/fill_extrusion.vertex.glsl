@@ -4,6 +4,8 @@ layout (location = 2) in vec2 a_normal2d;
 out vec4 v_color;
 // Height of walls above the ground in meters, for the ambient occlusion. Negative on roofs.
 out highp float v_wall_z;
+// The lit color without the ambient part of the lighting, for the ambient occlusion
+out vec3 v_color_without_ambient;
 
 layout (std140) uniform FillExtrusionDrawableUBO {
     highp mat4 u_matrix;
@@ -84,13 +86,15 @@ void main() {
     directional = mix((1.0 - u_lightintensity), max((1.0 - colorvalue + u_lightintensity), 1.0), directional);
 
     // Add gradient along z axis of side surfaces
+    float gradient = 1.0;
     if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
         // and otherwise calculates the gradient based on base + height
         float fMin = mix(0.7, 0.98, 1.0 - u_lightintensity);
         float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - u_vertical_gradient) + (u_vertical_gradient * factor);
+        gradient = (1.0 - u_vertical_gradient) + (u_vertical_gradient * factor);
     }
+    directional *= gradient;
 
     // Assign final color based on surface + ambient light color, diffuse light directional, and light color
     // with lower bounds adjusted to hue of light
@@ -99,4 +103,8 @@ void main() {
     v_color.g += clamp(color.g * directional * u_lightcolor.g, mix(0.0, 0.3, 1.0 - u_lightcolor.g), 1.0);
     v_color.b += clamp(color.b * directional * u_lightcolor.b, mix(0.0, 0.3, 1.0 - u_lightcolor.b), 1.0);
     v_color *= u_opacity;
+
+    // The same without the ambient part of the lighting, 1 - u_lightintensity, which the ambient occlusion takes away
+    float directionalWithoutAmbient = directional - (1.0 - u_lightintensity) * gradient;
+    v_color_without_ambient = clamp(color.rgb * directionalWithoutAmbient * u_lightcolor, mix(vec3(0.0), vec3(0.3), 1.0 - u_lightcolor), vec3(1.0)) * u_opacity;
 }

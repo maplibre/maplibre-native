@@ -199,8 +199,8 @@ modifiedReferenceSpec["layout_symbol"]["symbol-screen-space"] = {
 };
 
 // Ambient occlusion of fill-extrusions, see
-// https://github.com/maplibre/maplibre-style-spec/issues/1796#issuecomment-6194201898. Darkens the
-// walls near the ground; extrusions standing on other extrusions are not occluded. Both are
+// https://github.com/maplibre/maplibre-style-spec/issues/1796#issuecomment-6194201898. Takes ambient
+// light away from the walls near the ground; extrusions standing on other extrusions are not occluded. Both are
 // `data-constant` and live in per-layer uniform buffers.
 // Not in the published spec yet.
 modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-ambient-occlusion-wall-intensity"] = {
@@ -208,7 +208,7 @@ modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-ambient-occlusion-
     "default": 0,
     "minimum": 0,
     "maximum": 1,
-    "doc": "How much the bottom of the extrusion's walls is darkened, where they meet the ground. A value of `0` disables the effect. Walls of parts that do not reach the ground, i.e. with a `fill-extrusion-base` above the radius, are not darkened.",
+    "doc": "How much of the ambient light is taken away from the bottom of the extrusion's walls, where they meet the ground. At `1`, the bottom of the walls gets only the directional light. The ambient part of the lighting is `1` minus the light's `intensity`, so the effect is stronger with a weaker light and disappears at an intensity of `1`. A value of `0` disables the effect. Walls of parts that do not reach the ground, i.e. with a `fill-extrusion-base` above the radius, are not occluded.",
     "transition": true,
     "expression": {
         "interpolated": true,
@@ -224,7 +224,7 @@ modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-ambient-occlusion-
     "default": 3,
     "minimum": 0,
     "units": "meters",
-    "doc": "Height in meters above the ground over which the darkening of the walls fades out.",
+    "doc": "Height in meters above the ground over which the ambient occlusion of the walls fades out.",
     "transition": true,
     "expression": {
         "interpolated": true,

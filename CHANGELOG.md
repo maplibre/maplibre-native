@@ -5,7 +5,7 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
-- [core] Add the `fill-extrusion-ambient-occlusion-wall-intensity` and `fill-extrusion-ambient-occlusion-wall-radius` paint properties. They darken the bottom of fill-extrusion walls, fading out over the radius in meters above the ground. Supported on all render backends (Metal, Vulkan, WebGPU, OpenGL), including patterned extrusions ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
+- [core] Add the `fill-extrusion-ambient-occlusion-wall-intensity` and `fill-extrusion-ambient-occlusion-wall-radius` paint properties. They take ambient light away from the bottom of fill-extrusion walls, fading out over the radius in meters above the ground. Supported on all render backends (Metal, Vulkan, WebGPU, OpenGL), including patterned extrusions ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
 - [android] Add `PropertyFactory.fillExtrusionAmbientOcclusionWallIntensity` / `fillExtrusionAmbientOcclusionWallRadius` and the matching `FillExtrusionLayer` getters and transition accessors ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
 - [ios] Add `MLNFillExtrusionStyleLayer.fillExtrusionAmbientOcclusionWallIntensity` / `fillExtrusionAmbientOcclusionWallRadius` and their transitions ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
 - [core] Add support for colorizing SDF fill patterns with `fill-color` ([#4526](https://github.com/maplibre/maplibre-native/issues/4526)).

@@ -6,7 +6,7 @@ Darken the bottom of the walls of a fill extrusion layer, and adjust it with sli
 
 This example loads a style with 3D buildings and sets ``MLNFillExtrusionStyleLayer/fillExtrusionAmbientOcclusionWallIntensity`` and ``MLNFillExtrusionStyleLayer/fillExtrusionAmbientOcclusionWallRadius`` on every ``MLNFillExtrusionStyleLayer`` in the style.
 
-The intensity controls how dark the walls get where they meet the ground, and the radius is the height in meters over which the darkening fades out. A switch turns the effect off by setting the intensity to 0.
+The intensity controls how much of the ambient light the walls lose where they meet the ground, and the radius is the height in meters over which the effect fades out. Walls facing away from the light get darker than sunlit ones. A switch turns the effect off by setting the intensity to 0.
 
 <!-- include-example(AmbientOcclusionExample) -->
 

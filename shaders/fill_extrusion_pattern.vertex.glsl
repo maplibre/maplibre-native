@@ -7,6 +7,8 @@ out vec2 v_pos_b;
 out vec4 v_lighting;
 // Height of walls above the ground in meters, for the ambient occlusion. Negative on roofs.
 out highp float v_wall_z;
+// The lighting without its ambient part, for the ambient occlusion
+out vec3 v_lighting_without_ambient;
 
 layout (std140) uniform GlobalPaintParamsUBO {
     highp vec2 u_pattern_atlas_texsize;
@@ -106,14 +108,20 @@ void main() {
     float directional = clamp(dot(normal, u_lightpos), 0.0, 1.0);
     directional = mix((1.0 - u_lightintensity), max((0.5 + u_lightintensity), 1.0), directional);
 
+    float gradient = 1.0;
     if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
         // and otherwise calculates the gradient based on base + height
         float fMin = mix(0.7, 0.98, 1.0 - u_lightintensity);
         float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - u_vertical_gradient) + (u_vertical_gradient * factor);
+        gradient = (1.0 - u_vertical_gradient) + (u_vertical_gradient * factor);
     }
+    directional *= gradient;
 
     v_lighting.rgb += clamp(directional * u_lightcolor, mix(vec3(0.0), vec3(0.3), 1.0 - u_lightcolor), vec3(1.0));
     v_lighting *= u_opacity;
+
+    // The same without the ambient part of the lighting, 1 - u_lightintensity, which the ambient occlusion takes away
+    float directionalWithoutAmbient = directional - (1.0 - u_lightintensity) * gradient;
+    v_lighting_without_ambient = clamp(directionalWithoutAmbient * u_lightcolor, mix(vec3(0.0), vec3(0.3), 1.0 - u_lightcolor), vec3(1.0)) * u_opacity;
 }
