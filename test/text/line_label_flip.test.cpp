@@ -155,15 +155,29 @@ SymbolInstance makeLineLabel(uint32_t crossTileID) {
 enum class Line {
     Up,
     Down,
-    Across
+    Across,
+    // Two vertices at the same place: no direction at the anchor.
+    Point
 };
 
 // A text (three glyphs) or an icon (one) along a line through the middle of its tile: straight up the
-// tile, down, or across to the right.
+// tile, down, across to the right, or a point.
 PlacedSymbol makePlacedSymbol(std::vector<float> glyphOffsets, Line direction = Line::Up) {
-    const GeometryCoordinates line = direction == Line::Up     ? GeometryCoordinates{{4096, 7000}, {4096, 1000}}
-                                     : direction == Line::Down ? GeometryCoordinates{{4096, 1000}, {4096, 7000}}
-                                                               : GeometryCoordinates{{1000, 4000}, {7000, 4000}};
+    GeometryCoordinates line;
+    switch (direction) {
+        case Line::Up:
+            line = {{4096, 7000}, {4096, 1000}};
+            break;
+        case Line::Down:
+            line = {{4096, 1000}, {4096, 7000}};
+            break;
+        case Line::Across:
+            line = {{1000, 4000}, {7000, 4000}};
+            break;
+        case Line::Point:
+            line = {{4096, 4000}, {4096, 4000}};
+            break;
+    }
     const Anchor anchor(4096.0f, 4000.0f, 0.0f, 0u);
     PlacedSymbol placed(anchor.point,
                         0,
@@ -548,4 +562,23 @@ TEST(LineLabelFlip, ACopyWhoseLineCrossesTheOthersStartsAfresh) {
     textDirection(*across) = false;
     frame.sync(placement, {across.get(), drawn.get()});
     EXPECT_FALSE(textDirection(*across).has_value());
+}
+
+TEST(LineLabelFlip, ACopyDrawnWithoutALineDirectionPassesNothingOn) {
+    // A drawn copy whose line has no direction at its anchor cannot tell which way the label reads: the
+    // previous placement's direction is used instead.
+    Frame frame;
+    auto previousCopy = makeBucket({1});
+    textDirection(*previousCopy) = true;
+    const Immutable<TestPlacement> previous = makeMutable<TestPlacement>(margin);
+    frame.sync(*previous, {previousCopy.get()});
+
+    TestPlacement placement(margin);
+    placement.setPrevious(previous);
+    auto drawn = makeBucket({1}, Line::Point);
+    textDirection(*drawn) = false;
+    auto duplicate = makeBucket({1});
+    duplicate->text.placedSymbols.at(0).hidden = true;
+    frame.sync(placement, {drawn.get(), duplicate.get()});
+    EXPECT_EQ(textDirection(*duplicate), true);
 }
