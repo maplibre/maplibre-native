@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.FloatRange;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -795,15 +796,17 @@ public class MapLibreMapOptions implements Parcelable {
    * </p>
    * <p>
    * It applies to text placed along lines with text-keep-upright and text-rotation-alignment map.
-   * Icons, icon-keep-upright included, are not affected.
+   * Icons, icon-keep-upright included, still turn over as before, and so does the background of an
+   * icon-text-fit icon: while a line is within the margin of the vertical, a label and its icon can
+   * face opposite ways.
    * </p>
    *
-   * @param keepUprightMargin the margin in degrees, from 0 to 90; values outside that range are
-   *                          clamped by the map
+   * @param keepUprightMargin the margin in degrees, from 0 to 45; the map clamps values outside that
+   *                          range and ignores NaN
    * @return This
    */
   @NonNull
-  public MapLibreMapOptions keepUprightMargin(float keepUprightMargin) {
+  public MapLibreMapOptions keepUprightMargin(@FloatRange(from = 0.0, to = 45.0) float keepUprightMargin) {
     this.keepUprightMargin = keepUprightMargin;
     return this;
   }
@@ -1604,7 +1607,7 @@ public class MapLibreMapOptions implements Parcelable {
       return false;
     }
 
-    if (keepUprightMargin != options.keepUprightMargin) {
+    if (Float.compare(keepUprightMargin, options.keepUprightMargin) != 0) {
       return false;
     }
 
