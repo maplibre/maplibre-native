@@ -103,6 +103,7 @@ public:
 class TestPlacement : public Placement {
 public:
     explicit TestPlacement(float keepUprightMargin_) { keepUprightMargin = keepUprightMargin_; }
+    void setPrevious(Immutable<Placement> previous) { prevPlacement = std::move(previous); }
     using Placement::syncLineLabelDirections;
     using Placement::updateBucketDynamicAttributeData;
 };
@@ -151,9 +152,18 @@ SymbolInstance makeLineLabel(uint32_t crossTileID) {
     return symbol;
 }
 
-// A text (three glyphs) or an icon (one) along a line that runs straight up its tile.
-PlacedSymbol makePlacedSymbol(std::vector<float> glyphOffsets) {
-    const GeometryCoordinates line{{4096, 7000}, {4096, 1000}};
+enum class Line {
+    Up,
+    Down,
+    Across
+};
+
+// A text (three glyphs) or an icon (one) along a line through the middle of its tile: straight up the
+// tile, down, or across to the right.
+PlacedSymbol makePlacedSymbol(std::vector<float> glyphOffsets, Line direction = Line::Up) {
+    const GeometryCoordinates line = direction == Line::Up     ? GeometryCoordinates{{4096, 7000}, {4096, 1000}}
+                                     : direction == Line::Down ? GeometryCoordinates{{4096, 1000}, {4096, 7000}}
+                                                               : GeometryCoordinates{{1000, 4000}, {7000, 4000}};
     const Anchor anchor(4096.0f, 4000.0f, 0.0f, 0u);
     PlacedSymbol placed(anchor.point,
                         0,
@@ -171,7 +181,7 @@ PlacedSymbol makePlacedSymbol(std::vector<float> glyphOffsets) {
 // A bucket of a layer of line labels kept upright and rotated with the map: one label per cross
 // tile id, each with its text and an icon (an arrow along the line, kept upright as well), and one
 // SDF icon along the same line.
-std::unique_ptr<SymbolBucket> makeBucket(const std::vector<uint32_t>& crossTileIDs) {
+std::unique_ptr<SymbolBucket> makeBucket(const std::vector<uint32_t>& crossTileIDs, Line line = Line::Up) {
     auto layout = makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>();
     layout->get<style::SymbolPlacement>() = style::SymbolPlacementType::Line;
     layout->get<style::TextRotationAlignment>() = style::AlignmentType::Map;
@@ -203,7 +213,7 @@ std::unique_ptr<SymbolBucket> makeBucket(const std::vector<uint32_t>& crossTileI
     bucket->sdfIcon.segments.emplace_back(0, 0);
     bucket->sdfIcon.placedSymbols.push_back(makePlacedSymbol({0.0f}));
     for (std::size_t i = 0; i < bucket->symbolInstances.size(); ++i) {
-        bucket->text.placedSymbols.push_back(makePlacedSymbol({-30.0f, 0.0f, 30.0f}));
+        bucket->text.placedSymbols.push_back(makePlacedSymbol({-30.0f, 0.0f, 30.0f}, line));
         bucket->symbolInstances[i].setPlacedRightTextIndex(i);
         bucket->icon.placedSymbols.push_back(makePlacedSymbol({0.0f}));
         bucket->symbolInstances[i].refPlacedIconIndex() = i;
@@ -257,8 +267,10 @@ public:
                 .sdfIcon = bucket.sdfIcon.dynamicAttributeData().at(0).a1[2]};
     }
 
-    // What Placement does with a layer once per placement or change of tiles.
-    void sync(const TestPlacement& placement, const std::vector<SymbolBucket*>& buckets) {
+    // What Placement does with a layer whenever it updates the opacities.
+    void sync(const TestPlacement& placement,
+              const std::vector<SymbolBucket*>& buckets,
+              const std::string& layerID = "layer") {
         LayerPlacementData data;
         for (SymbolBucket* bucket : buckets) {
             data.push_back({.bucket = *bucket,
@@ -267,7 +279,7 @@ public:
                             .sourceId = "source",
                             .sortKeyRange = std::nullopt});
         }
-        placement.syncLineLabelDirections(data);
+        placement.syncLineLabelDirections(layerID, data);
     }
 
     FakeTile tile;
@@ -427,19 +439,113 @@ TEST(LineLabelFlip, IconsAreNotSynced) {
     EXPECT_EQ(iconDirection(*drawn), false);
 }
 
-TEST(LineLabelFlip, ThePreviousPlacementFillsInForALabelNotDrawnNow) {
-    auto drawn = makeBucket({1});
-    textDirection(*drawn) = true;
-    LineLabelDirections previous;
-    previous.remember(*drawn);
+TEST(LineLabelFlip, ThePreviousPlacementFillsInButTheCurrentOneComesFirst) {
+    Frame frame;
+    // The previous placement saw the label drawn flipped.
+    auto previousCopy = makeBucket({1});
+    textDirection(*previousCopy) = true;
+    const Immutable<TestPlacement> previous = makeMutable<TestPlacement>(margin);
+    frame.sync(*previous, {previousCopy.get()});
 
-    // Now its only copy is hidden: the direction comes from the previous placement, if any.
+    // Now its only copy is hidden: it reads the way the previous placement saw it.
+    TestPlacement placement(margin);
+    placement.setPrevious(previous);
     auto hidden = makeBucket({1});
     hidden->text.placedSymbols.at(0).hidden = true;
-    LineLabelDirections current;
-    current.remember(*hidden);
-    current.restore(*hidden, &previous);
+    frame.sync(placement, {hidden.get()});
     EXPECT_EQ(textDirection(*hidden), true);
-    current.restore(*hidden, nullptr);
-    EXPECT_FALSE(textDirection(*hidden).has_value());
+
+    // A copy drawn the other way since then: the current placement's direction wins, otherwise the
+    // label would turn back at every placement while the map is within the margin.
+    TestPlacement next(margin);
+    next.setPrevious(previous);
+    auto drawn = makeBucket({1});
+    textDirection(*drawn) = false;
+    auto duplicate = makeBucket({1});
+    duplicate->text.placedSymbols.at(0).hidden = true;
+    frame.sync(next, {duplicate.get(), drawn.get()});
+    EXPECT_EQ(textDirection(*drawn), false);
+    EXPECT_EQ(textDirection(*duplicate), false);
+}
+
+TEST(LineLabelFlip, SyncsOnlyWhenThePlacementOrTheBucketsChange) {
+    // The opacities can be updated on every frame (a bucket of an overscaled tile with symbols out of
+    // view is registered again on every frame), the sync only runs when what it depends on changes.
+    const TestPlacement placement(margin);
+    Frame frame;
+    auto drawn = makeBucket({1});
+    textDirection(*drawn) = true;
+    auto duplicate = makeBucket({1});
+    duplicate->text.placedSymbols.at(0).hidden = true;
+    frame.sync(placement, {drawn.get(), duplicate.get()});
+    EXPECT_EQ(textDirection(*duplicate), true);
+
+    // The same buckets, in any order: nothing to do, so the hidden copy keeps what it holds.
+    textDirection(*duplicate) = false;
+    frame.sync(placement, {duplicate.get(), drawn.get()});
+    EXPECT_EQ(textDirection(*duplicate), false);
+
+    // Another layer is synced on its own.
+    auto other = makeBucket({2});
+    other->lineLabelDirectionsStale = true;
+    frame.sync(placement, {other.get()}, "other");
+    EXPECT_FALSE(other->lineLabelDirectionsStale);
+    frame.sync(placement, {duplicate.get(), drawn.get()});
+    EXPECT_EQ(textDirection(*duplicate), false);
+
+    // The same buckets enter the cross tile index again (the layer was hidden and shown).
+    duplicate->lineLabelDirectionsStale = true;
+    frame.sync(placement, {duplicate.get(), drawn.get()});
+    EXPECT_EQ(textDirection(*duplicate), true);
+
+    // A bucket enters the cross tile index.
+    auto entered = makeBucket({1});
+    entered->lineLabelDirectionsStale = true;
+    frame.sync(placement, {drawn.get(), duplicate.get(), entered.get()});
+    EXPECT_EQ(textDirection(*duplicate), true);
+    EXPECT_EQ(textDirection(*entered), true);
+
+    // A bucket leaves.
+    textDirection(*duplicate) = false;
+    frame.sync(placement, {drawn.get(), duplicate.get()});
+    EXPECT_EQ(textDirection(*duplicate), true);
+
+    // A new placement.
+    textDirection(*duplicate) = false;
+    const TestPlacement next(margin);
+    frame.sync(next, {drawn.get(), duplicate.get()});
+    EXPECT_EQ(textDirection(*duplicate), true);
+}
+
+TEST(LineLabelFlip, CopiesWhoseLinesRunOppositeWaysReadTheSameWay) {
+    // Two tiles can hold the same road as lines running opposite ways: the copies share the way the
+    // label reads, not the flag, which is relative to each copy's line.
+    Frame frame;
+    frame.setBearing(6.0);
+    for (const bool flipped : {false, true}) {
+        const TestPlacement placement(margin);
+        auto drawn = makeBucket({1});
+        textDirection(*drawn) = flipped;
+        const float drawnAngle = frame.draw(placement, *drawn).text;
+        ASSERT_EQ(textDirection(*drawn), flipped) << "within the margin, either way is kept";
+
+        auto opposite = makeBucket({1}, Line::Down);
+        opposite->lineLabelDirectionsStale = true;
+        frame.sync(placement, {opposite.get(), drawn.get()});
+        EXPECT_EQ(textDirection(*opposite), !flipped) << flipped;
+        EXPECT_FALSE(turnedOver(drawnAngle, frame.draw(placement, *opposite).text)) << flipped;
+    }
+}
+
+TEST(LineLabelFlip, ACopyWhoseLineCrossesTheOthersStartsAfresh) {
+    // Which way it would read cannot be told from a line at right angles: decided anew.
+    const TestPlacement placement(margin);
+    Frame frame;
+    auto drawn = makeBucket({1});
+    textDirection(*drawn) = true;
+    auto across = makeBucket({1}, Line::Across);
+    across->lineLabelDirectionsStale = true;
+    textDirection(*across) = false;
+    frame.sync(placement, {across.get(), drawn.get()});
+    EXPECT_FALSE(textDirection(*across).has_value());
 }
