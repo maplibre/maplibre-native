@@ -545,9 +545,10 @@ TEST(Map, DefaultMapOptions) {
 
 TEST(Map, KeepUprightMargin) {
     EXPECT_EQ(MapOptions().withKeepUprightMargin(20.0f).keepUprightMargin(), 20.0f);
-    // Clamped to 0 to 90 degrees; NaN leaves it as it was.
+    // Clamped to 0 to 45 degrees; NaN leaves it as it was.
     EXPECT_EQ(MapOptions().withKeepUprightMargin(-5.0f).keepUprightMargin(), 0.0f);
-    EXPECT_EQ(MapOptions().withKeepUprightMargin(120.0f).keepUprightMargin(), 90.0f);
+    EXPECT_EQ(MapOptions().withKeepUprightMargin(45.0f).keepUprightMargin(), 45.0f);
+    EXPECT_EQ(MapOptions().withKeepUprightMargin(60.0f).keepUprightMargin(), 45.0f);
     EXPECT_EQ(MapOptions()
                   .withKeepUprightMargin(20.0f)
                   .withKeepUprightMargin(std::numeric_limits<float>::quiet_NaN())

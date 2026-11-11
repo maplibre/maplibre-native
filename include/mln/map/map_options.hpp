@@ -101,9 +101,12 @@ public:
      *
      * It applies to text placed along lines (`symbol-placement` `line` or `line-center`) with
      * `text-keep-upright` and `text-rotation-alignment` `map`, in MapMode::Continuous only. Icons,
-     * `icon-keep-upright` included, are not affected.
+     * `icon-keep-upright` included, still turn over as before, and so does the background of an
+     * `icon-text-fit` icon: while a line is within the margin of the vertical, a label and its icon
+     * can face opposite ways.
      *
-     * @param degrees The margin, from 0 to 90. Values outside that range are clamped, NaN is ignored.
+     * @param degrees The margin, from 0 to 45. Values outside that range are clamped, NaN is ignored.
+     * Past 45, labels could stay drawn more upside down than upright.
      * @return MapOptions for chaining options together.
      */
     MapOptions& withKeepUprightMargin(float degrees);

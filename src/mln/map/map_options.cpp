@@ -63,7 +63,7 @@ bool MapOptions::crossSourceCollisions() const {
 
 MapOptions& MapOptions::withKeepUprightMargin(float degrees) {
     if (!std::isnan(degrees)) {
-        impl_->keepUprightMargin = util::clamp(degrees, 0.0f, 90.0f);
+        impl_->keepUprightMargin = util::clamp(degrees, 0.0f, 45.0f);
     }
     return *this;
 }
