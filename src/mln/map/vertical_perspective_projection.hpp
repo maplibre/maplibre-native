@@ -49,6 +49,10 @@ public:
     /// The unit-sphere position of a point in tile units.
     static vec3 tileCoordinatesToSphere(const Point<double>& tilePoint, const UnwrappedTileID&);
 
+    /// The projection part of `globeViewProjectionMatrix`, from view space in pixels to clip space: GL JS's
+    /// `projectionMatrix` for the globe.
+    static mat4 globeProjectionMatrix(const TransformState&, double radius);
+
     /// The view-projection matrix that takes unit-sphere positions to clip space.
     static mat4 globeViewProjectionMatrix(const TransformState&, double radius);
 

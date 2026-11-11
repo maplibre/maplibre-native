@@ -20,18 +20,24 @@ enum {
 };
 
 struct alignas(16) SkyPropsUBO {
+    float4x4 inv_projection;
     float4 sky_color;
     float4 horizon_color;
+    float4 globe;
     float2 horizon;
     float2 horizon_normal;
     float2 viewport_size;
     float sky_horizon_blend;
     float sky_blend;
+    float camera_to_center_distance;
+    float pixel_ratio;
+    float atmosphere_blend;
+    float atmosphere_height;
 };
 
 struct alignas(16) AtmospherePropsUBO {
-    float4x4 inv_view_projection;
-    float4 camera_position;
+    float4x4 inv_projection;
+    float4 globe;
     float4 sun_position;
 };
 
@@ -57,32 +63,54 @@ struct SkyVertexStage {
 struct SkyFragmentStage {
     float4 position [[position, invariant]];
     float2 pos;
+    float3 view_direction;
 };
 
-SkyFragmentStage vertex vertexMain(SkyVertexStage in [[stage_in]]) {
+SkyFragmentStage vertex vertexMain(SkyVertexStage in [[stage_in]],
+                                   device const SkyPropsUBO& sky [[buffer(idSkyPropsUBO)]]) {
     const float2 pos = float2(in.position);
     return {
         .position = float4(pos, 1.0, 1.0),
         .pos = pos,
+        .view_direction = (sky.inv_projection * float4(pos, 0.0, 1.0)).xyz,
     };
 }
 
 half4 fragment fragmentMain(SkyFragmentStage in [[stage_in]],
                             device const SkyPropsUBO& sky [[buffer(idSkyPropsUBO)]]) {
     const float2 pixel = (in.pos * 0.5 + 0.5) * sky.viewport_size;
-    const float distanceToHorizon = dot(pixel - sky.horizon, sky.horizon_normal);
-    float4 color = float4(0.0);
+    float blend = dot(pixel - sky.horizon, sky.horizon_normal);
+    float opacity = 1.0;
+    if (sky.sky_blend > 0.0) {
+        const float3 ray = normalize(in.view_direction);
+        const float3 globePosition = sky.globe.xyz;
+        const float globeRadius = sky.globe.w;
+        const float globeDistance = length(globePosition);
+        const float angleToGlobeCenter = acos(clamp(dot(ray, globePosition) / globeDistance, -1.0, 1.0));
+        const float horizonAngle = asin(min(globeRadius / globeDistance, 1.0));
+        blend = mix(blend, ((angleToGlobeCenter - horizonAngle) * sky.camera_to_center_distance + 1.0) * sky.pixel_ratio,
+                    sky.sky_blend);
+        const float closestApproach = max(dot(ray, globePosition), 0.0);
+        const float lowestAltitude =
+            sqrt(max(globeDistance * globeDistance - closestApproach * closestApproach, 0.0)) - globeRadius;
+        const float atmosphereHeight = sky.atmosphere_height;
+        const float insideAtmosphere =
+            1.0 - smoothstep(atmosphereHeight, 10.0 * atmosphereHeight, globeDistance - globeRadius);
+        const float throughAtmosphere = 1.0 - smoothstep(0.0, atmosphereHeight, lowestAltitude);
+        opacity = insideAtmosphere * throughAtmosphere * (1.0 - sky.atmosphere_blend);
+    }
 
-    if (distanceToHorizon > 0.0) {
-        if (sky.sky_horizon_blend > 0.0 && distanceToHorizon < sky.sky_horizon_blend) {
-            const float blend = 1.0 - distanceToHorizon / sky.sky_horizon_blend;
-            color = mix(sky.sky_color, sky.horizon_color, blend * blend);
+    float4 color = float4(0.0);
+    if (blend > 0.0) {
+        if (blend < sky.sky_horizon_blend) {
+            const float t = 1.0 - blend / sky.sky_horizon_blend;
+            color = mix(sky.sky_color, sky.horizon_color, t * t);
         } else {
             color = sky.sky_color;
         }
     }
 
-    return half4(color * (1.0 - sky.sky_blend));
+    return half4(color * mix(1.0, opacity, sky.sky_blend));
 }
 )";
 };
@@ -113,12 +141,11 @@ AtmosphereFragmentStage vertex vertexMain(
     AtmosphereVertexStage in [[stage_in]],
     device const AtmospherePropsUBO& atmosphere [[buffer(idAtmospherePropsUBO)]]) {
     const float2 pos = float2(in.position);
-    const float4 target = atmosphere.inv_view_projection * float4(pos, 0.0, 1.0);
     return {
         // Metal uses a zero-to-one NDC depth range, so 0.5 matches WebGL's
         // framebuffer depth for clip-space z=0.
         .position = float4(pos, 0.5, 1.0),
-        .view_direction = target.xyz / target.w - atmosphere.camera_position.xyz,
+        .view_direction = (atmosphere.inv_projection * float4(pos, 0.0, 1.0)).xyz,
     };
 }
 
@@ -213,7 +240,7 @@ float4 atmosphereScatter(float3 direction, float3 origin, float3 sun) {
 half4 fragment fragmentMain(
     AtmosphereFragmentStage in [[stage_in]],
     device const AtmospherePropsUBO& atmosphere [[buffer(idAtmospherePropsUBO)]]) {
-    const float3 camera = atmosphere.camera_position.xyz * EarthRadius;
+    const float3 camera = -atmosphere.globe.xyz * EarthRadius / atmosphere.globe.w;
     float4 color = atmosphereScatter(in.view_direction, camera, atmosphere.sun_position.xyz);
     color.rgb = 1.0 - exp(-color.rgb);
     color = pow(color, float4(1.0 / 2.2));

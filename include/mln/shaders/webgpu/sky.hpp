@@ -21,7 +21,26 @@ struct VertexInput {
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) pos: vec2<f32>,
+    @location(1) view_direction: vec3<f32>,
 };
+
+struct SkyPropsUBO {
+    inv_projection: mat4x4<f32>,
+    sky_color: vec4<f32>,
+    horizon_color: vec4<f32>,
+    globe: vec4<f32>,
+    horizon: vec2<f32>,
+    horizon_normal: vec2<f32>,
+    viewport_size: vec2<f32>,
+    sky_horizon_blend: f32,
+    sky_blend: f32,
+    camera_to_center_distance: f32,
+    pixel_ratio: f32,
+    atmosphere_blend: f32,
+    atmosphere_height: f32,
+};
+
+@group(0) @binding(5) var<uniform> sky: SkyPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -29,6 +48,7 @@ fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     out.position = vec4<f32>(pos, 1.0, 1.0);
     out.pos = pos;
+    out.view_direction = (sky.inv_projection * vec4<f32>(pos, 0.0, 1.0)).xyz;
     return out;
 }
 )";
@@ -36,16 +56,23 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) pos: vec2<f32>,
+    @location(1) view_direction: vec3<f32>,
 };
 
 struct SkyPropsUBO {
+    inv_projection: mat4x4<f32>,
     sky_color: vec4<f32>,
     horizon_color: vec4<f32>,
+    globe: vec4<f32>,
     horizon: vec2<f32>,
     horizon_normal: vec2<f32>,
     viewport_size: vec2<f32>,
     sky_horizon_blend: f32,
     sky_blend: f32,
+    camera_to_center_distance: f32,
+    pixel_ratio: f32,
+    atmosphere_blend: f32,
+    atmosphere_height: f32,
 };
 
 @group(0) @binding(5) var<uniform> sky: SkyPropsUBO;
@@ -53,17 +80,34 @@ struct SkyPropsUBO {
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let pixel = (in.pos * 0.5 + 0.5) * sky.viewport_size;
-    let distance_to_horizon = dot(pixel - sky.horizon, sky.horizon_normal);
+    var blend = dot(pixel - sky.horizon, sky.horizon_normal);
+    var opacity: f32 = 1.0;
+    if (sky.sky_blend > 0.0) {
+        let ray = normalize(in.view_direction);
+        let globe_position = sky.globe.xyz;
+        let globe_radius = sky.globe.w;
+        let globe_distance = length(globe_position);
+        let angle_to_globe_center = acos(clamp(dot(ray, globe_position) / globe_distance, -1.0, 1.0));
+        let horizon_angle = asin(min(globe_radius / globe_distance, 1.0));
+        blend = mix(blend, ((angle_to_globe_center - horizon_angle) * sky.camera_to_center_distance + 1.0) * sky.pixel_ratio, sky.sky_blend);
+        let closest_approach = max(dot(ray, globe_position), 0.0);
+        let lowest_altitude = sqrt(max(globe_distance * globe_distance - closest_approach * closest_approach, 0.0)) - globe_radius;
+        let atmosphere_height = sky.atmosphere_height;
+        let inside_atmosphere = 1.0 - smoothstep(atmosphere_height, 10.0 * atmosphere_height, globe_distance - globe_radius);
+        let through_atmosphere = 1.0 - smoothstep(0.0, atmosphere_height, lowest_altitude);
+        opacity = inside_atmosphere * through_atmosphere * (1.0 - sky.atmosphere_blend);
+    }
+
     var color = vec4<f32>(0.0);
-    if (distance_to_horizon > 0.0) {
-        if (sky.sky_horizon_blend > 0.0 && distance_to_horizon < sky.sky_horizon_blend) {
-            let blend = 1.0 - distance_to_horizon / sky.sky_horizon_blend;
-            color = mix(sky.sky_color, sky.horizon_color, blend * blend);
+    if (blend > 0.0) {
+        if (blend < sky.sky_horizon_blend) {
+            let t = 1.0 - blend / sky.sky_horizon_blend;
+            color = mix(sky.sky_color, sky.horizon_color, t * t);
         } else {
             color = sky.sky_color;
         }
     }
-    return color * (1.0 - sky.sky_blend);
+    return color * mix(1.0, opacity, sky.sky_blend);
 }
 )";
 };
@@ -86,8 +130,8 @@ struct VertexOutput {
 };
 
 struct AtmospherePropsUBO {
-    inv_view_projection: mat4x4<f32>,
-    camera_position: vec4<f32>,
+    inv_projection: mat4x4<f32>,
+    globe: vec4<f32>,
     sun_position: vec4<f32>,
 };
 
@@ -96,12 +140,11 @@ struct AtmospherePropsUBO {
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let view_position = atmosphere.inv_view_projection * vec4<f32>(pos, 0.0, 1.0);
     var out: VertexOutput;
     // WebGPU uses a zero-to-one NDC depth range, so 0.5 matches WebGL's
     // framebuffer depth for clip-space z=0.
     out.position = vec4<f32>(pos, 0.5, 1.0);
-    out.view_direction = view_position.xyz / view_position.w - atmosphere.camera_position.xyz;
+    out.view_direction = (atmosphere.inv_projection * vec4<f32>(pos, 0.0, 1.0)).xyz;
     return out;
 }
 )";
@@ -112,8 +155,8 @@ struct FragmentInput {
 };
 
 struct AtmospherePropsUBO {
-    inv_view_projection: mat4x4<f32>,
-    camera_position: vec4<f32>,
+    inv_projection: mat4x4<f32>,
+    globe: vec4<f32>,
     sun_position: vec4<f32>,
 };
 
@@ -204,7 +247,7 @@ fn scatter(direction: vec3<f32>, origin: vec3<f32>, sun: vec3<f32>) -> vec4<f32>
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    let camera = atmosphere.camera_position.xyz * EARTH_RADIUS;
+    let camera = -atmosphere.globe.xyz * EARTH_RADIUS / atmosphere.globe.w;
     var color = scatter(in.view_direction, camera, atmosphere.sun_position.xyz);
     color = vec4<f32>(1.0 - exp(-color.rgb), color.a);
     color = pow(color, vec4<f32>(1.0 / 2.2));

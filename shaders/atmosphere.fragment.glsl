@@ -5,8 +5,8 @@ precision highp float;
 in vec3 v_view_direction;
 
 layout(std140) uniform AtmospherePropsUBO {
-    mat4 inv_view_projection;
-    vec4 camera_position;
+    mat4 inv_projection;
+    vec4 globe;
     vec4 sun_position;
 } atmosphere;
 
@@ -100,7 +100,7 @@ vec4 scatter(vec3 direction, vec3 origin, vec3 sun) {
 }
 
 void main() {
-    vec3 camera = atmosphere.camera_position.xyz * EARTH_RADIUS;
+    vec3 camera = -atmosphere.globe.xyz * EARTH_RADIUS / atmosphere.globe.w;
     vec4 color = scatter(v_view_direction, camera, atmosphere.sun_position.xyz);
     color.rgb = 1.0 - exp(-color.rgb);
     color = pow(color, vec4(1.0 / 2.2));

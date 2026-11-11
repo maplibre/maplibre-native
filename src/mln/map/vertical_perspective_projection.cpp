@@ -183,21 +183,26 @@ vec3 VerticalPerspectiveProjection::tileCoordinatesToSphere(const Point<double>&
     return {{std::sin(sphericalX) * cosY, sinY, std::cos(sphericalX) * cosY}};
 }
 
-mat4 VerticalPerspectiveProjection::globeViewProjectionMatrix(const TransformState& state, double radius) {
+mat4 VerticalPerspectiveProjection::globeProjectionMatrix(const TransformState& state, double radius) {
     const Size size = state.getSize();
-    const double cameraToCenterDistance = state.getCameraToCenterDistance();
-    const LatLng center = state.getLatLng();
-
     mat4 matrix;
     matrix::perspective(matrix,
                         state.getFieldOfView(),
                         static_cast<double>(size.width) / size.height,
                         0.5,
-                        cameraToCenterDistance + radius * 2.0);
+                        state.getCameraToCenterDistance() + radius * 2.0);
 
     const ScreenCoordinate offset = state.getCenterOffset();
     matrix[8] = -offset.x * 2.0 / size.width;
     matrix[9] = offset.y * 2.0 / size.height;
+    return matrix;
+}
+
+mat4 VerticalPerspectiveProjection::globeViewProjectionMatrix(const TransformState& state, double radius) {
+    const double cameraToCenterDistance = state.getCameraToCenterDistance();
+    const LatLng center = state.getLatLng();
+
+    mat4 matrix = globeProjectionMatrix(state, radius);
 
     if (state.getNorthOrientation() != NorthOrientation::Upwards) {
         matrix::rotate_z(matrix, matrix, -state.getNorthOrientationAngle());
