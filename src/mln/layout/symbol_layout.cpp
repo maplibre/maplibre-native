@@ -316,8 +316,12 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         }
 
         if (hasIcon) {
-            ft.icon = layout->evaluate<IconImage>(zoom, ft, layoutParameters.availableImages, canonicalID);
-            layoutParameters.imageDependencies.emplace(ft.icon->id(), ImageType::Icon);
+            auto icon = layout->evaluate<IconImage>(zoom, ft, layoutParameters.availableImages, canonicalID);
+            // An empty icon name means no icon, so it is not an image dependency.
+            if (!icon.empty()) {
+                layoutParameters.imageDependencies.emplace(icon.id(), ImageType::Icon);
+                ft.icon = std::move(icon);
+            }
         }
 
         if (ft.formattedText || ft.icon) {
