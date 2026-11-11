@@ -25,9 +25,17 @@ uint32_t imageVersion(const ImageVersionMap& versionMap, const std::string& id) 
 
 // Equal IDs share an atlas bin, so updated images need a distinct ID. Otherwise
 // a layout can reuse a bin that still holds the previous image's pixels.
+//
+// The version is added after the lossy hash-to-ID reduction, scaled by an odd
+// constant. Multiplying by an odd number is a bijection modulo 2^31, so two
+// versions of the same image can never share an ID (unlike folding the version
+// into the hash, where adjacent versions differ only in low bits that the
+// sqrt() below discards). The result stays non-negative, so it never equals
+// the shelf packer's "generate an ID" sentinel (-1).
 int32_t imageUniqueId(const style::Image::Impl& image, uint32_t version) {
-    const auto imageHash = version ? util::hash(image.id, version) : util::hash(image.id);
-    return static_cast<int32_t>(sqrt(imageHash) / 2 + image.image.size.area());
+    constexpr uint32_t versionStride = 0x9E3779B1u; // odd
+    const auto base = static_cast<uint32_t>(sqrt(util::hash(image.id)) / 2 + image.image.size.area());
+    return static_cast<int32_t>((base + version * versionStride) & 0x7FFFFFFFu);
 }
 } // namespace
 

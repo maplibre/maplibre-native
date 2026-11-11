@@ -6,6 +6,9 @@
 #include <mln/style/image_impl.hpp>
 #include <mln/util/image.hpp>
 
+#include <set>
+#include <vector>
+
 using namespace mln;
 
 namespace {
@@ -41,7 +44,41 @@ TEST(DynamicTextureAtlas, UpdatedImageGetsSeparateRegion) {
     EXPECT_FALSE(original.textureHandles[0] == updated.textureHandles[0]);
     EXPECT_EQ(1u, updated.iconPositions.at("marker").version);
 
+    // A second update while version 1 is still live must not alias it either.
+    auto updatedAgain = atlas.uploadIconsAndPatterns(makeIcon(3), {}, {{"marker", 2}});
+    ASSERT_EQ(1u, updatedAgain.textureHandles.size());
+    EXPECT_FALSE(updated.textureHandles[0] == updatedAgain.textureHandles[0]);
+    EXPECT_FALSE(original.textureHandles[0] == updatedAgain.textureHandles[0]);
+
     atlas.removeTextures(original.textureHandles, original.dynamicTexture);
     atlas.removeTextures(shared.textureHandles, shared.dynamicTexture);
     atlas.removeTextures(updated.textureHandles, updated.dynamicTexture);
+    atlas.removeTextures(updatedAgain.textureHandles, updatedAgain.dynamicTexture);
+}
+
+TEST(DynamicTextureAtlas, ManyLiveVersionsGetSeparateRegions) {
+    auto backend = gfx::HeadlessBackend::Create();
+    auto& rendererBackend = *backend->getRendererBackend();
+    gfx::BackendScope scope{rendererBackend};
+    gfx::DynamicTextureAtlas atlas(rendererBackend.getContext());
+
+    // Every version still referenced by a layout needs its own region.
+    constexpr uint32_t versions = 64;
+    std::vector<gfx::ImageAtlas> atlases;
+    for (uint32_t version = 0; version < versions; ++version) {
+        ImageVersionMap versionMap;
+        if (version) versionMap.emplace("marker", version);
+        atlases.push_back(atlas.uploadIconsAndPatterns(makeIcon(static_cast<uint8_t>(version)), {}, versionMap));
+        ASSERT_EQ(1u, atlases.back().textureHandles.size());
+    }
+
+    std::set<int32_t> ids;
+    for (const auto& imageAtlas : atlases) {
+        ids.insert(imageAtlas.textureHandles[0].getId());
+    }
+    EXPECT_EQ(versions, ids.size());
+
+    for (auto& imageAtlas : atlases) {
+        atlas.removeTextures(imageAtlas.textureHandles, imageAtlas.dynamicTexture);
+    }
 }
