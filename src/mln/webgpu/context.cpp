@@ -53,7 +53,8 @@ const auto clipMaskDepthMode = gfx::DepthMode{
 Context::Context(RendererBackend& backend_)
     : gfx::Context(gfx::Context::minimumRequiredVertexBindingCount),
       backend(backend_),
-      globalUniformBuffers(std::make_unique<UniformBufferArray>()) {}
+      globalUniformBuffers(std::make_unique<UniformBufferArray>()),
+      bufferUploader(backend_) {}
 
 Context::~Context() {
     backend.getThreadPool().runRenderJobs(true /* closeQueue */);

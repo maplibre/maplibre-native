@@ -4,6 +4,7 @@
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/webgpu/renderer_backend.hpp>
 #include <mln/webgpu/buffer_resource.hpp>
+#include <mln/webgpu/buffer_uploader.hpp>
 #include <map>
 #include <memory>
 #include <optional>
@@ -114,6 +115,9 @@ public:
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
 
+    /// Buffer writes go through here so that a frame's writes are uploaded together
+    BufferUploader& getBufferUploader() { return bufferUploader; }
+
     // Command encoder tracking
     class CommandEncoder* getCurrentCommandEncoder() const { return currentCommandEncoder; }
     void setCurrentCommandEncoder(class CommandEncoder* encoder) { currentCommandEncoder = encoder; }
@@ -137,6 +141,7 @@ private:
     RendererBackend& backend;
     std::unique_ptr<gfx::UniformBufferArray> globalUniformBuffers;
     class CommandEncoder* currentCommandEncoder = nullptr;
+    BufferUploader bufferUploader;
 
     // Cached buffers (aligned with Metal)
     std::optional<BufferResource> tileVertexBuffer;
