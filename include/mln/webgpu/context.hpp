@@ -133,8 +133,15 @@ private:
     gfx::ShaderProgramBasePtr clipMaskShader;
     const gfx::Renderable* clipMaskRenderable = nullptr;
     std::optional<std::size_t> clipMaskPipelineHash;
-    std::vector<BufferResource> clipMaskUniformBuffers;
-    std::vector<WGPUBindGroup> clipMaskActiveBindGroups;
+    // One uniform slot per tile, at an offset every bind group can use
+    static constexpr std::size_t clipMaskSlotStride = 256;
+    std::optional<BufferResource> clipMaskUniformBuffer;
+    std::vector<WGPUBindGroup> clipMaskBindGroups;
+    WGPUBindGroupLayout clipMaskBindGroupLayout = nullptr;
+    std::size_t clipMaskSlotsUsed = 0;
+    std::vector<std::uint8_t> clipMaskSlotData;
+
+    void releaseClipMaskBindGroups();
 };
 
 } // namespace webgpu
