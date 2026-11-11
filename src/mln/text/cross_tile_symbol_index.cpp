@@ -139,6 +139,11 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
         }
     }
 
+    if (previousIndex == thisZoomIndexes.end() || previousIndex->second.bucketInstanceId != bucket.bucketInstanceId) {
+        // New to the index, not just updated: a new bucket, or its tile back from the cache.
+        bucket.lineLabelDirectionsStale = true;
+    }
+
     bucket.hasUninitializedSymbols = false;
 
     if (tileID.overscaleFactor() > 1u) {

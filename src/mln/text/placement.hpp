@@ -92,6 +92,32 @@ private:
     bool crossSourceCollisions;
 };
 
+/**
+ * @brief The reading direction of line labels kept upright, by cross tile id, used with a keep-upright
+ * margin (MapOptions::withKeepUprightMargin) so that every copy of a label (tiles of two zoom levels,
+ * a tile back from the cache) reads the way the label was last drawn.
+ *
+ * Between two syncs, each copy keeps its own direction from frame to frame
+ * (PlacedSymbol::keepUprightFlipped). Placement syncs them when the placement or the set of tiles
+ * changes, not on every frame: first remember() for every bucket of a layer, then restore() for every
+ * bucket of it. Only text is synced, icons are never read nor written.
+ */
+class LineLabelDirections {
+public:
+    /// Records the direction of each label of the bucket that has been drawn since the last sync: not
+    /// hidden, in a bucket that is not new to the cross tile index (SymbolBucket::lineLabelDirectionsStale).
+    void remember(const SymbolBucket&);
+    /// Sets the direction of each label of the bucket, drawn or not, to the recorded one, or else to the
+    /// one recorded in `older` (the previous placement's), or unsets it: such a label is decided as if it
+    /// were drawn for the first time. Clears SymbolBucket::lineLabelDirectionsStale.
+    void restore(SymbolBucket&, const LineLabelDirections* older) const;
+
+    std::optional<bool> flipped(uint32_t crossTileID) const;
+
+private:
+    std::unordered_map<uint32_t, bool> directions;
+};
+
 class Placement;
 class PlacementContext;
 class PlacementController {
@@ -178,8 +204,9 @@ protected:
                                const SymbolInstance&,
                                style::TextWritingModeType orientation) const;
     void markUsedOrientation(SymbolBucket&, style::TextWritingModeType, const SymbolInstance&) const;
-    void restoreLineLabelDirections(SymbolBucket&) const;
-    void rememberLineLabelDirections(const SymbolBucket&) const;
+    // With a keep-upright margin, syncs the reading directions of the line labels of one layer (see
+    // LineLabelDirections); without one, does nothing.
+    void syncLineLabelDirections(const LayerPlacementData&) const;
     const Placement* getPrevPlacement() const { return prevPlacement ? prevPlacement->get() : nullptr; }
     bool isTiltedView() const;
 
@@ -197,10 +224,10 @@ protected:
     std::unordered_map<uint32_t, JointOpacityState> opacities;
     std::unordered_map<uint32_t, VariableOffset> variableOffsets;
     std::unordered_map<uint32_t, style::TextWritingModeType> placedOrientations;
-    // Whether a line label kept upright was last drawn flipped, by cross tile id: every copy of the
-    // label (tiles of two zoom levels, a tile back from the cache) reads one way. Written on each
-    // drawing, like the label's vertices.
-    mutable std::unordered_map<uint32_t, bool> lineLabelsFlipped;
+    // MapOptions::withKeepUprightMargin, in degrees; 0 (the default) outside MapMode::Continuous.
+    float keepUprightMargin = 0.0f;
+    // Synced in updateLayerBuckets(), next to the opacities it depends on; unused without a margin.
+    mutable LineLabelDirections lineLabelDirections;
 
     std::unordered_map<uint32_t, RetainedQueryData> retainedQueryData;
     CollisionGroups collisionGroups;

@@ -405,6 +405,7 @@ MapOptions Map::getMapOptions() const {
                          .withConstrainMode(impl->transform.getConstrainMode())
                          .withViewportMode(impl->transform.getViewportMode())
                          .withCrossSourceCollisions(impl->crossSourceCollisions)
+                         .withKeepUprightMargin(impl->keepUprightMargin)
                          .withNorthOrientation(impl->transform.getNorthOrientation())
                          .withSize(impl->transform.getState().getSize())
                          .withPixelRatio(impl->pixelRatio));

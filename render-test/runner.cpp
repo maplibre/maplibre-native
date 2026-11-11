@@ -703,7 +703,8 @@ TestRunner::Impl::Impl(const TestMetadata& metadata,
               .withMapMode(metadata.mapMode)
               .withSize(metadata.size)
               .withPixelRatio(metadata.pixelRatio)
-              .withCrossSourceCollisions(metadata.crossSourceCollisions),
+              .withCrossSourceCollisions(metadata.crossSourceCollisions)
+              .withKeepUprightMargin(metadata.keepUprightMargin),
           resourceOptions,
           clientOptions) {
     if (metadata.maxPitch) {
@@ -754,7 +755,8 @@ void TestRunner::run(TestMetadata& metadata) {
     }
 
     std::string key = mln::util::toString(uint32_t(metadata.mapMode)) + "/" + mln::util::toString(metadata.pixelRatio) +
-                      "/" + mln::util::toString(uint32_t(metadata.crossSourceCollisions));
+                      "/" + mln::util::toString(uint32_t(metadata.crossSourceCollisions)) + "/" +
+                      mln::util::toString(metadata.keepUprightMargin);
 
     if (!maps.contains(key)) {
         maps[key] = std::make_unique<TestRunner::Impl>(

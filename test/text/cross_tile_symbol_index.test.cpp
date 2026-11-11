@@ -441,3 +441,51 @@ TEST(CrossTileSymbolLayerIndex, offscreenSymbols) {
     EXPECT_EQ(symbolBucket.symbolInstances.at(0).getCrossTileID(), 1u);
     EXPECT_EQ(symbolBucket.symbolInstances.at(1).getCrossTileID(), 2u);
 }
+
+TEST(CrossTileSymbolLayerIndex, lineLabelDirectionsStale) {
+    // A bucket new to the index (a new one, or its tile back from the cache) may hold out of date
+    // reading directions of its line labels; one that stays in the index, even updated, does not.
+    uint32_t maxCrossTileID = 0;
+    CrossTileSymbolLayerIndex index(maxCrossTileID);
+
+    Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout =
+        makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>();
+    OverscaledTileID tileId(7, 0, 6, 18, 24);
+    std::vector<SymbolInstance> instances;
+    instances.push_back(makeSymbolInstance(1000, 1000, u"Washington"));
+    std::vector<SortKeyRange> ranges;
+    SymbolBucket bucket{layout,
+                        {},
+                        16.0f,
+                        1.0f,
+                        0,
+                        false,
+                        false,
+                        "test",
+                        std::move(instances),
+                        std::move(ranges),
+                        1.0f,
+                        false,
+                        {},
+                        false /*iconsInText*/};
+    EXPECT_FALSE(bucket.lineLabelDirectionsStale);
+
+    // New, with its symbol out of view.
+    mat4 posMatrix;
+    populatePosMatrix(posMatrix, tileId, 60.0, 25.0, 7.0);
+    EXPECT_TRUE(index.addBucket(tileId, posMatrix, bucket));
+    EXPECT_TRUE(bucket.lineLabelDirectionsStale);
+    bucket.lineLabelDirectionsStale = false; // as Placement does once it has synced them
+
+    // Updated in place as its symbol comes into view, then unchanged.
+    populatePosMatrix(posMatrix, tileId, 39.0, -76.0, 7.0);
+    EXPECT_TRUE(index.addBucket(tileId, posMatrix, bucket));
+    EXPECT_FALSE(bucket.lineLabelDirectionsStale);
+    EXPECT_FALSE(index.addBucket(tileId, posMatrix, bucket));
+    EXPECT_FALSE(bucket.lineLabelDirectionsStale);
+
+    // Out of view, then back from the cache.
+    index.removeStaleBuckets({});
+    EXPECT_TRUE(index.addBucket(tileId, posMatrix, bucket));
+    EXPECT_TRUE(bucket.lineLabelDirectionsStale);
+}

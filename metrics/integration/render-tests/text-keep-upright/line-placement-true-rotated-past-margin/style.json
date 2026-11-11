@@ -4,6 +4,7 @@
     "test": {
       "mapMode": "continuous",
       "outputsImage": true,
+      "keepUprightMargin": 20,
       "width": 128,
       "height": 256,
       "operations": [

@@ -88,6 +88,34 @@ public:
     bool crossSourceCollisions() const;
 
     /**
+     * @brief Sets how far past the vertical a line label kept upright may read before it is turned
+     * over, in degrees. By default, it is set to 0: a label is turned over as soon as it would read
+     * from right to left, decided anew on every frame, as in MapLibre GL JS.
+     *
+     * With a margin, a label keeps the reading direction it was last drawn with until that direction
+     * is more than the margin past the vertical of the screen, and all copies of a label (tiles of two
+     * zoom levels, a tile back from the cache) share it. This keeps labels on lines close to the
+     * vertical, such as the road ahead in a map rotated with the direction of travel, from turning
+     * over and back as the map rotates. A label drawn for the first time is decided as without the
+     * margin, so a still map looks the same.
+     *
+     * It applies to text placed along lines (`symbol-placement` `line` or `line-center`) with
+     * `text-keep-upright` and `text-rotation-alignment` `map`, in MapMode::Continuous only. Icons,
+     * `icon-keep-upright` included, are not affected.
+     *
+     * @param degrees The margin, from 0 to 90. Values outside that range are clamped, NaN is ignored.
+     * @return MapOptions for chaining options together.
+     */
+    MapOptions& withKeepUprightMargin(float degrees);
+
+    /**
+     * @brief Gets the previously set (or default) keep-upright margin.
+     *
+     * @return The margin in degrees, 0 by default.
+     */
+    float keepUprightMargin() const;
+
+    /**
      * @brief Sets the orientation of the Map. By default, it is set to
      * Upwards.
      *

@@ -1,0 +1,89 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "mapMode": "continuous",
+      "outputsImage": true,
+      "width": 128,
+      "height": 256,
+      "operations": [
+        [
+          "setBearing",
+          -6
+        ],
+        [
+          "wait"
+        ],
+        [
+          "setBearing",
+          6
+        ],
+        [
+          "wait"
+        ]
+      ]
+    }
+  },
+  "center": [
+    10,
+    20
+  ],
+  "zoom": 3,
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              10,
+              5
+            ],
+            [
+              10,
+              35
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "line",
+      "type": "line",
+      "source": "geojson",
+      "paint": {
+        "line-color": "#ccc",
+        "line-width": 8
+      }
+    },
+    {
+      "id": "label",
+      "type": "symbol",
+      "source": "geojson",
+      "layout": {
+        "symbol-placement": "line-center",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "text-field": "Main Street",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-keep-upright": true
+      }
+    }
+  ]
+}

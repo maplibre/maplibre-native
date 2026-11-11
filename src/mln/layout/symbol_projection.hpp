@@ -48,27 +48,29 @@ mat4 getGlCoordMatrix(
 using PointAndCameraDistance = std::pair<Point<float>, float>;
 PointAndCameraDistance project(const Point<float>& point, const mat4& matrix);
 
-/// How far past the vertical the reading direction of a line label kept upright has to turn before
-/// the label is turned over, in degrees.
-constexpr float lineLabelFlipMarginDegrees = 20.0f;
-
 /// Whether a horizontal line label kept upright has to be drawn flipped, given where its first and
-/// last glyph project (gl coordinates) when it is drawn unflipped. A label drawn for the first time
-/// (`wasFlipped` unset) is flipped when it runs right to left. After that it keeps the direction it
-/// was drawn with until that direction is more than lineLabelFlipMarginDegrees past the vertical:
-/// without this margin a label on a line close to the vertical of a rotating map turned over and
-/// back at every small rotation.
+/// last glyph project (gl coordinates) when it is drawn unflipped. Without a keep-upright margin
+/// (`keepUprightMargin` 0, the default), or when it is drawn for the first time (`wasFlipped` unset),
+/// it is flipped when it runs right to left. With a margin, in degrees (see
+/// MapOptions::withKeepUprightMargin), it keeps the direction it was drawn with until that direction
+/// is more than the margin past the vertical: without it a label on a line close to the vertical of
+/// a rotating map turns over and back at every small rotation.
 bool lineLabelNeedsFlip(const Point<float>& firstPoint,
                         const Point<float>& lastPoint,
                         float aspectRatio,
-                        std::optional<bool> wasFlipped);
+                        std::optional<bool> wasFlipped,
+                        float keepUprightMargin);
 
+/// With a `keepUprightMargin` above 0 (degrees, text only), each drawn symbol remembers the direction
+/// it was drawn with in PlacedSymbol::keepUprightFlipped and keeps it, see lineLabelNeedsFlip(). With
+/// 0, nothing is remembered or read.
 void reprojectLineLabels(SymbolBucket::DynamicAttributeVector&,
                          std::vector<PlacedSymbol>&,
                          const mat4& posMatrix,
                          bool pitchWithMap,
                          bool rotateWithMap,
                          bool keepUpright,
+                         float keepUprightMargin,
                          const RenderTile&,
                          const SymbolSizeBinder& sizeBinder,
                          const TransformState&);

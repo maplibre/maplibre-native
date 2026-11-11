@@ -184,6 +184,7 @@ Placement::Placement(std::shared_ptr<const UpdateParameters> updateParameters_,
       transitionOptions(updateParameters->transitionOptions),
       commitTime(updateParameters->timePoint),
       placementZoom(static_cast<float>(updateParameters->transformState.getZoom())),
+      keepUprightMargin(updateParameters->mode == MapMode::Continuous ? updateParameters->keepUprightMargin : 0.0f),
       collisionGroups(updateParameters->crossSourceCollisions),
       prevPlacement(std::move(prevPlacement_)),
       showCollisionBoxes(updateParameters->debugOptions & MapDebugOptions::Collision) {
@@ -750,6 +751,10 @@ void Placement::commit() {
 }
 
 void Placement::updateLayerBuckets(const RenderLayer& layer, const TransformState& state, bool updateOpacities) const {
+    if (updateOpacities) {
+        // Once per placement or change of tiles, before the opacities change which copy is drawn.
+        syncLineLabelDirections(layer.getPlacementData());
+    }
     std::set<uint32_t> seenCrossTileIDs;
     for (const auto& item : layer.getPlacementData()) {
         if (!item.sortKeyRange || item.sortKeyRange->isFirstRange()) {
@@ -784,39 +789,75 @@ void forEachPlacedLineText(const SymbolInstance& symbol, std::size_t placedSymbo
         }
     }
 }
+
+// Whether the bucket's text is placed along lines, rotated with the map and kept upright: the labels
+// that reprojectLineLabels() turns over.
+bool hasLineLabelsKeptUpright(const SymbolBucket& bucket) {
+    const auto& layout = *bucket.layout;
+    return bucket.hasTextData() && layout.get<style::SymbolPlacement>() != style::SymbolPlacementType::Point &&
+           layout.get<style::TextRotationAlignment>() == style::AlignmentType::Map &&
+           layout.get<style::TextKeepUpright>();
+}
 } // namespace
 
-void Placement::restoreLineLabelDirections(SymbolBucket& bucket) const {
-    const Placement* prev = getPrevPlacement();
+void LineLabelDirections::remember(const SymbolBucket& bucket) {
+    if (bucket.lineLabelDirectionsStale) return;
     for (const SymbolInstance& symbol : bucket.symbolInstances) {
         const uint32_t crossTileID = symbol.getCrossTileID();
         if (crossTileID == SymbolInstance::invalidCrossTileID) continue;
-        std::optional<bool> flipped;
-        if (auto found = lineLabelsFlipped.find(crossTileID); found != lineLabelsFlipped.end()) {
-            flipped = found->second;
-        } else if (prev) {
-            if (auto older = prev->lineLabelsFlipped.find(crossTileID); older != prev->lineLabelsFlipped.end()) {
-                flipped = older->second;
-            }
-        }
-        // Overwritten even when the placed symbol remembers a direction: a tile drawn again after
-        // a while (back from the cache at another zoom) would bring back an old one.
         forEachPlacedLineText(symbol, bucket.text.placedSymbols.size(), [&](std::size_t index) {
-            bucket.text.placedSymbols[index].keepUprightFlipped = flipped;
+            const PlacedSymbol& placed = bucket.text.placedSymbols[index];
+            // A hidden copy is not drawn, so its direction may be out of date (one copy at most is not
+            // hidden: the others are duplicates, see Placement::updateBucketOpacities).
+            if (!placed.hidden && placed.keepUprightFlipped) {
+                directions[crossTileID] = *placed.keepUprightFlipped;
+            }
         });
     }
 }
 
-void Placement::rememberLineLabelDirections(const SymbolBucket& bucket) const {
+void LineLabelDirections::restore(SymbolBucket& bucket, const LineLabelDirections* older) const {
     for (const SymbolInstance& symbol : bucket.symbolInstances) {
         const uint32_t crossTileID = symbol.getCrossTileID();
         if (crossTileID == SymbolInstance::invalidCrossTileID) continue;
+        std::optional<bool> direction = flipped(crossTileID);
+        if (!direction && older) {
+            direction = older->flipped(crossTileID);
+        }
+        // Overwritten even when the placed symbol has a direction of its own: a copy that was not drawn
+        // (hidden, or its tile back from the cache) would bring back an old one.
         forEachPlacedLineText(symbol, bucket.text.placedSymbols.size(), [&](std::size_t index) {
-            if (const auto& flipped = bucket.text.placedSymbols[index].keepUprightFlipped) {
-                lineLabelsFlipped[crossTileID] = *flipped;
-            }
+            bucket.text.placedSymbols[index].keepUprightFlipped = direction;
         });
     }
+    bucket.lineLabelDirectionsStale = false;
+}
+
+std::optional<bool> LineLabelDirections::flipped(uint32_t crossTileID) const {
+    if (auto found = directions.find(crossTileID); found != directions.end()) {
+        return found->second;
+    }
+    return std::nullopt;
+}
+
+void Placement::syncLineLabelDirections(const LayerPlacementData& placementData) const {
+    if (keepUprightMargin <= 0.0f) return;
+    // All copies of a label are in the same layer, but in any order: first remember the directions
+    // of the copies that were drawn, then hand them to all copies.
+    const auto forEachBucket = [&placementData](auto&& f) {
+        for (const auto& item : placementData) {
+            // A bucket is listed once per sort key range; placement data only holds symbol buckets.
+            if (item.sortKeyRange && !item.sortKeyRange->isFirstRange()) continue;
+            auto& bucket = static_cast<SymbolBucket&>(item.bucket.get());
+            if (hasLineLabelsKeptUpright(bucket)) {
+                f(bucket);
+            }
+        }
+    };
+    forEachBucket([this](const SymbolBucket& bucket) { lineLabelDirections.remember(bucket); });
+    const Placement* prev = getPrevPlacement();
+    const LineLabelDirections* older = prev ? &prev->lineLabelDirections : nullptr;
+    forEachBucket([this, older](SymbolBucket& bucket) { lineLabelDirections.restore(bucket, older); });
 }
 
 bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
@@ -842,6 +883,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     pitchWithMap,
                                     true /*rotateWithMap*/,
                                     keepUpright,
+                                    0.0f /*keepUprightMargin: text only*/,
                                     tile,
                                     *bucket.iconSizeBinder,
                                     state);
@@ -854,6 +896,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     pitchWithMap,
                                     true /*rotateWithMap*/,
                                     keepUpright,
+                                    0.0f /*keepUprightMargin: text only*/,
                                     tile,
                                     *bucket.iconSizeBinder,
                                     state);
@@ -864,23 +907,16 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         if (bucket.hasTextData() && layout.get<TextRotationAlignment>() == AlignmentType::Map) {
             const bool pitchWithMap = layout.get<style::TextPitchAlignment>() == style::AlignmentType::Map;
             const bool keepUpright = layout.get<style::TextKeepUpright>();
-            if (keepUpright) {
-                // Every copy of a label (tiles of two zoom levels, a tile back from the cache)
-                // reads the way the label was last drawn.
-                restoreLineLabelDirections(bucket);
-            }
             reprojectLineLabels(bucket.text.dynamicAttributeData(),
                                 bucket.text.placedSymbols,
                                 tile.matrix,
                                 pitchWithMap,
                                 true /*rotateWithMap*/,
                                 keepUpright,
+                                keepUprightMargin,
                                 tile,
                                 *bucket.textSizeBinder,
                                 state);
-            if (keepUpright) {
-                rememberLineLabelDirections(bucket);
-            }
             result = true;
         }
     } else if (hasVariableAnchors) {

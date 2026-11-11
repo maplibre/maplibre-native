@@ -537,9 +537,27 @@ TEST(Map, DefaultMapOptions) {
     EXPECT_EQ(options.constrainMode(), ConstrainMode::HeightOnly);
     EXPECT_EQ(options.northOrientation(), NorthOrientation::Upwards);
     EXPECT_TRUE(options.crossSourceCollisions());
+    EXPECT_EQ(options.keepUprightMargin(), 0.0f);
     EXPECT_EQ(options.size().width, 256);
     EXPECT_EQ(options.size().height, 256);
     EXPECT_EQ(options.pixelRatio(), 1);
+}
+
+TEST(Map, KeepUprightMargin) {
+    EXPECT_EQ(MapOptions().withKeepUprightMargin(20.0f).keepUprightMargin(), 20.0f);
+    // Clamped to 0 to 90 degrees; NaN leaves it as it was.
+    EXPECT_EQ(MapOptions().withKeepUprightMargin(-5.0f).keepUprightMargin(), 0.0f);
+    EXPECT_EQ(MapOptions().withKeepUprightMargin(120.0f).keepUprightMargin(), 90.0f);
+    EXPECT_EQ(MapOptions()
+                  .withKeepUprightMargin(20.0f)
+                  .withKeepUprightMargin(std::numeric_limits<float>::quiet_NaN())
+                  .keepUprightMargin(),
+              20.0f);
+
+    MapOptions options;
+    options.withMapMode(MapMode::Continuous).withKeepUprightMargin(20.0f);
+    MapTest<> test(std::move(options));
+    EXPECT_EQ(test.map.getMapOptions().keepUprightMargin(), 20.0f);
 }
 
 TEST(Map, SetStyleInvalidJSON) {

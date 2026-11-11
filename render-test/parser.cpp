@@ -557,6 +557,11 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
         metadata.crossSourceCollisions = testValue["crossSourceCollisions"].GetBool();
     }
 
+    if (testValue.HasMember("keepUprightMargin")) {
+        assert(testValue["keepUprightMargin"].IsNumber());
+        metadata.keepUprightMargin = testValue["keepUprightMargin"].GetFloat();
+    }
+
     if (testValue.HasMember("axonometric")) {
         assert(testValue["axonometric"].IsBool());
         metadata.axonometric = testValue["axonometric"].GetBool();

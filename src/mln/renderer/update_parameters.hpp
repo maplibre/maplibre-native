@@ -52,6 +52,9 @@ public:
 
     const bool crossSourceCollisions;
 
+    // MapOptions::withKeepUprightMargin, in degrees.
+    const float keepUprightMargin = 0.0f;
+
     const bool fastPFOREnabled = false;
 
     const bool captureRenderedFeatures = false;
