@@ -146,13 +146,10 @@ public:
     void prepareSource(class RenderOrchestrator& orchestrator);
 
     /// Cache the mesh cover Renderer::Impl computed for this frame, so update()
-    /// meshes exactly the tile set the drape-target pool was built from.
-    /// computeMeshCover() is not stable within a frame: it derives its tile size
-    /// from `demDim`, which is 0 until the first DEM decodes and only then takes
-    /// the source's real value. For a 256px DEM the pre-pool call therefore falls
-    /// back to 512 and covers a different (shallower) tile set than the in-update
-    /// call, so every getRenderTarget() lookup missed and no terrain drawable was
-    /// ever created - the map rendered empty.
+    /// meshes exactly the tile set the drape-target pool was built from, and does
+    /// not compute it again. A set that differed from the pool's would miss the
+    /// getRenderTarget() lookup for each tile the pool lacks, and those tiles
+    /// would get no terrain drawable.
     void setFrameMeshCover(std::set<UnwrappedTileID> cover) { frameMeshCover = std::move(cover); }
 
     /**
@@ -216,9 +213,10 @@ public:
      * still reads its height. Render-thread only.
      *
      * @param latLng the position to sample
+     * @param from if given, set to the loaded DEM tile the height was read from
      * @return nullopt when terrain is off or no loaded DEM tile covers the point yet
      */
-    std::optional<double> getElevationForLatLng(const LatLng& latLng) const;
+    std::optional<double> getElevationForLatLng(const LatLng& latLng, UnwrappedTileID* from = nullptr) const;
 
     /**
      * @brief Coordinate of the draped surface under a screen pixel (y-down view pixels, as

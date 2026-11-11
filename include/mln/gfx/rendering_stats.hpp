@@ -110,6 +110,9 @@ struct RenderingStats {
     /// not with the tiles of the source
     int numDrapeMasksDrawn = 0;
     int numDrapeMasksSkipped = 0;
+    /// Number of CPU-side texture objects made for terrain DEM tiles (numCreatedTextures counts GPU
+    /// allocations, which these are not); a still terrain scene should leave it unchanged
+    int numDEMTexturesCreated = 0;
     /// Terrain depth passes (the symbol-occlusion depth texture) rendered; one per frame in
     /// which the camera or the mesh set changed, none for a still frame
     int numDepthPasses = 0;

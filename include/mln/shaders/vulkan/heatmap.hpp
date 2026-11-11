@@ -19,7 +19,7 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Vulkan> {
 
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = heatmapShaderPrelude;
     static constexpr auto vertex = R"(
@@ -52,14 +52,14 @@ struct HeatmapDrawableUBO {
     // Interpolations
     float weight_t;
     float radius_t;
-    float pad1;
+    float depth_enabled;
     // 3D terrain elevation
     vec4 dem_coords;
     vec4 dem_unpack;
     float dem_dim;
     float dem_exaggeration;
     float dem_enabled;
-    float pad2;
+    float units_to_pixels_y;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idHeatmapDrawableUBO) readonly buffer HeatmapDrawableUBOVector {
@@ -67,8 +67,9 @@ layout(std140, set = LAYER_SET_INDEX, binding = idHeatmapDrawableUBO) readonly b
 } drawableVector;
 
 // The Vulkan drawable binds textures by their texture-id enum value, so the
-// binding must equal idHeatmapDEMTexture (= 2)
+// bindings must equal idHeatmapDEMTexture (= 2) and idHeatmapDepthTexture (= 3)
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 3) uniform sampler2D depth_sampler;
 
 layout(set = LAYER_SET_INDEX, binding = idHeatmapEvaluatedPropsUBO) uniform HeatmapEvaluatedPropsUBO {
     float weight;
@@ -79,6 +80,7 @@ layout(set = LAYER_SET_INDEX, binding = idHeatmapEvaluatedPropsUBO) uniform Heat
 
 layout(location = 0) out float frag_weight;
 layout(location = 1) out lowp vec2 frag_extrude;
+layout(location = 2) out lowp float frag_visibility;
 
 void main() {
     const HeatmapDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
@@ -128,6 +130,10 @@ void main() {
     gl_Position = drawable.matrix * vec4(center + scaled_extrude, ele, 1);
     gl_Position.y *= -1.0;
 
+    // A kernel whose centre is behind terrain adds nothing to the density texture. The depth pass
+    // rendered to the screen through the surface transform, so look it up in that clip space.
+    frag_visibility = calculate_visibility(surface_transformed(drawable.matrix * vec4(center, ele, 1)), depth_sampler, drawable.depth_enabled, drawable.units_to_pixels_y);
+
     frag_weight = weight;
     frag_extrude = extrude;
 }
@@ -140,6 +146,7 @@ void main() {
 
 layout(location = 0) in float frag_weight;
 layout(location = 1) in lowp vec2 frag_extrude;
+layout(location = 2) in lowp float frag_visibility;
 
 layout(location = 0) out vec4 out_color;
 
@@ -159,7 +166,7 @@ void main() {
 
     // Kernel density estimation with a Gaussian kernel of size 5x5
     const float d = -0.5 * 3.0 * 3.0 * dot(frag_extrude, frag_extrude);
-    const float val = frag_weight * props.intensity * GAUSS_COEF * exp(d);
+    const float val = frag_weight * props.intensity * GAUSS_COEF * exp(d) * frag_visibility;
 
     out_color = vec4(val, 1.0, 1.0, 1.0);
 }
