@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <cstring>
+#include <iterator>
 
 namespace {
 
@@ -25,6 +26,13 @@ inline bool isSchemeCharacter(char c) {
 inline char toLowerHex(char c) {
     c &= 0x0F;
     return '0' + c + (c > 9 ? 39 : 0);
+}
+
+inline int hexValue(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
 }
 
 } // namespace
@@ -53,15 +61,22 @@ std::string percentDecode(const std::string& input) {
 
     auto it = input.begin();
     const auto end = input.end();
-    char hex[3] = "00";
 
     while (it != end) {
         auto cur = std::find(it, end, '%');
         decoded.append(it, cur);
         it = cur;
-        if (cur != end) {
-            it += input.copy(hex, 2, cur - input.begin() + 1) + 1;
-            decoded += static_cast<char>(std::strtoul(hex, nullptr, 16));
+        if (cur == end) break;
+
+        // A % that does not start two hex digits stays literal, as in the WHATWG URL Standard.
+        const auto digits = std::next(cur);
+        const int high = digits != end ? hexValue(*digits) : -1;
+        const int low = high >= 0 && std::next(digits) != end ? hexValue(*std::next(digits)) : -1;
+        if (low >= 0) {
+            decoded += static_cast<char>(high * 16 + low);
+            it += 3;
+        } else {
+            decoded += *it++;
         }
     }
 
