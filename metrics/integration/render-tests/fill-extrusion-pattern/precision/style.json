@@ -1,7 +1,7 @@
 {
   "version": 8,
   "metadata": {
-    "description": "Tests that the float precision is enough to overzoom the fill-extrusion pattern: z14 data shown at z22.",
+    "description": "Tests that the float precision is enough to overzoom the fill-extrusion pattern: z14 data shown at z22. The extrusion has no height, so the pattern is drawn 1:1 to pixels as in the fill-pattern tests.",
     "test": {
       "width": 128,
       "height": 128
@@ -56,7 +56,7 @@
       "type": "fill-extrusion",
       "source": "building",
       "paint": {
-        "fill-extrusion-height": 1,
+        "fill-extrusion-height": 0,
         "fill-extrusion-pattern": "generic_icon"
       }
     }
