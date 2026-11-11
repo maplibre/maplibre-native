@@ -65,6 +65,14 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             tweaker->execute(drawable, parameters);
         }
 
+        if (drawable.getIs3D()) {
+            auto& drawableVulkan = static_cast<Drawable&>(drawable);
+            drawableVulkan.setDepthModeFor3D(drawable.getEnableDepth()
+                                                 ? parameters.depthModeFor3D(drawable.getDepthType())
+                                                 : gfx::DepthMode::disabled());
+            drawableVulkan.setStencilModeFor3D(gfx::StencilMode::disabled());
+        }
+
         drawable.draw(parameters);
     });
 }

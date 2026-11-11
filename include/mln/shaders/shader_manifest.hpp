@@ -7,6 +7,8 @@
 #include <mln/shaders/gl/clipping_mask.hpp>
 #include <mln/shaders/gl/background.hpp>
 #include <mln/shaders/gl/background_pattern.hpp>
+#include <mln/shaders/gl/sky.hpp>
+#include <mln/shaders/gl/atmosphere.hpp>
 #include <mln/shaders/gl/circle.hpp>
 #include <mln/shaders/gl/collision_box.hpp>
 #include <mln/shaders/gl/collision_circle.hpp>

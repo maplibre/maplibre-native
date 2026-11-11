@@ -24,6 +24,7 @@
 #include "map/camera_position.hpp"
 #include "map/image.hpp"
 #include "style/light.hpp"
+#include "style/sky.hpp"
 #include "native_map_options.hpp"
 #include "bitmap.hpp"
 
@@ -287,6 +288,9 @@ public:
     jni::Local<jni::Object<gson::JsonObject>> getGlobalState(JNIEnv&);
 
     jni::Local<jni::Object<Light>> getLight(JNIEnv&);
+
+    jni::Local<jni::Object<Sky>> getSky(JNIEnv&);
+    void setSky(JNIEnv&, const jni::Object<Sky>&);
 
     jni::Local<jni::Array<jni::Object<Layer>>> getLayers(JNIEnv&);
 

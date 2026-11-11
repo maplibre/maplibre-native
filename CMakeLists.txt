@@ -302,6 +302,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/renderer/renderer_state.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/renderer/renderer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/shaders/program_parameters.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/shaders/sky_ubo.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/shaders/shader_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/storage/database_file_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/storage/file_source_manager.hpp
@@ -327,6 +328,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/get_json_type.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/light.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/sky.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/position.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/property_value.hpp
@@ -394,6 +396,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/layers/raster_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/layers/symbol_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/light.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/sky.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/position.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/projection_definition.hpp
@@ -652,6 +655,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_light.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_light.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_sky.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_sky.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/sky_pass.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/sky_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_orchestrator.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_orchestrator.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_pass.hpp
@@ -731,6 +738,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/json.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/light.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/sky.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/position.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/projection.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/property_value.cpp
@@ -850,6 +858,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/light_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/light_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/light_observer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/sky.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/sky_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/sky_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/sky_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/paint_property.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/parser.cpp

@@ -52,6 +52,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/line.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/raster.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/sky.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/symbol.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/widevector.hpp
 )
@@ -97,6 +98,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/line.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/raster.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/sky.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/symbol.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/widevector.cpp
 )

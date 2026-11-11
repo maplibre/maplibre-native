@@ -27,6 +27,7 @@ MLN_PUBLIC_GENERATED_STYLE_HEADERS = [
     "include/mln/style/layers/background_layer.hpp",
     "include/mln/style/layers/location_indicator_layer.hpp",
     "include/mln/style/light.hpp",
+    "include/mln/style/sky.hpp",
 ]
 
 MLN_PRIVATE_GENERATED_STYLE_HEADERS = [
@@ -67,6 +68,7 @@ MLN_GENERATED_STYLE_SOURCE = [
     "src/mln/style/layers/location_indicator_layer_properties.cpp",
     "src/mln/style/layers/location_indicator_layer.cpp",
     "src/mln/style/light.cpp",
+    "src/mln/style/sky.cpp",
 ]
 
 MLN_GENERATED_SHADER_HEADERS = [
@@ -79,6 +81,7 @@ MLN_GENERATED_SHADER_SOURCE = [
 ]
 
 MLN_GENERATED_OPENGL_SHADER_HEADERS = [
+    "include/mln/shaders/gl/atmosphere.hpp",
     "include/mln/shaders/gl/background.hpp",
     "include/mln/shaders/gl/background_pattern.hpp",
     "include/mln/shaders/gl/circle.hpp",
@@ -109,6 +112,7 @@ MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mln/shaders/gl/location_indicator.hpp",
     "include/mln/shaders/gl/location_indicator_textured.hpp",
     "include/mln/shaders/gl/raster.hpp",
+    "include/mln/shaders/gl/sky.hpp",
     "include/mln/shaders/gl/symbol_icon.hpp",
     "include/mln/shaders/gl/symbol_sdf.hpp",
     "include/mln/shaders/gl/symbol_text_and_icon.hpp",
@@ -280,6 +284,10 @@ MLN_CORE_SOURCE = [
     "src/mln/renderer/render_layer.hpp",
     "src/mln/renderer/render_light.cpp",
     "src/mln/renderer/render_light.hpp",
+    "src/mln/renderer/render_sky.cpp",
+    "src/mln/renderer/render_sky.hpp",
+    "src/mln/renderer/sky_pass.cpp",
+    "src/mln/renderer/sky_pass.hpp",
     "src/mln/renderer/render_orchestrator.cpp",
     "src/mln/renderer/render_orchestrator.hpp",
     "src/mln/renderer/render_pass.hpp",
@@ -358,6 +366,7 @@ MLN_CORE_SOURCE = [
     "src/mln/style/conversion/json.hpp",
     "src/mln/style/conversion/layer.cpp",
     "src/mln/style/conversion/light.cpp",
+    "src/mln/style/conversion/sky.cpp",
     "src/mln/style/conversion/position.cpp",
     "src/mln/style/conversion/projection.cpp",
     "src/mln/style/conversion/property_value.cpp",
@@ -454,6 +463,9 @@ MLN_CORE_SOURCE = [
     "src/mln/style/light_impl.cpp",
     "src/mln/style/light_impl.hpp",
     "src/mln/style/light_observer.hpp",
+    "src/mln/style/sky_impl.cpp",
+    "src/mln/style/sky_impl.hpp",
+    "src/mln/style/sky_observer.hpp",
     "src/mln/style/observer.hpp",
     "src/mln/style/paint_property.hpp",
     "src/mln/style/parser.cpp",
@@ -756,6 +768,7 @@ MLN_CORE_HEADERS = [
     "include/mln/style/conversion/get_json_type.hpp",
     "include/mln/style/conversion/layer.hpp",
     "include/mln/style/conversion/light.hpp",
+    "include/mln/style/conversion/sky.hpp",
     "include/mln/style/conversion/position.hpp",
     "include/mln/style/conversion/projection.hpp",
     "include/mln/style/conversion/property_value.hpp",
@@ -1053,6 +1066,7 @@ MLN_DRAWABLES_HEADERS = [
     "include/mln/shaders/raster_layer_ubo.hpp",
     "include/mln/shaders/shader_defines.hpp",
     "include/mln/shaders/shader_program_base.hpp",
+    "include/mln/shaders/sky_ubo.hpp",
     "include/mln/shaders/symbol_layer_ubo.hpp",
     "include/mln/shaders/widevector_ubo.hpp",
     "include/mln/util/suppress_copies.hpp",
@@ -1108,6 +1122,7 @@ MLN_DRAWABLES_MTL_SOURCE = [
     "src/mln/mtl/vertex_buffer_resource.cpp",
     "src/mln/shaders/mtl/shader_program.cpp",
     "src/mln/shaders/mtl/background.cpp",
+    "src/mln/shaders/mtl/sky.cpp",
     "src/mln/shaders/mtl/circle.cpp",
     "src/mln/shaders/mtl/collision.cpp",
     "src/mln/shaders/mtl/clipping_mask.cpp",
@@ -1149,6 +1164,7 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mln/mtl/vertex_attribute.hpp",
     "include/mln/mtl/vertex_buffer_resource.hpp",
     "include/mln/shaders/mtl/background.hpp",
+    "include/mln/shaders/mtl/sky.hpp",
     "include/mln/shaders/mtl/circle.hpp",
     "include/mln/shaders/mtl/clipping_mask.hpp",
     "include/mln/shaders/mtl/collision.hpp",
@@ -1195,6 +1211,7 @@ MLN_DRAWABLES_WEBGPU_SOURCE = [
     "src/mln/shaders/webgpu/shader_program.cpp",
     "src/mln/shaders/webgpu/wgsl_preprocessor.cpp",
     "src/mln/shaders/webgpu/background.cpp",
+    "src/mln/shaders/webgpu/sky.cpp",
     "src/mln/shaders/webgpu/circle.cpp",
     "src/mln/shaders/webgpu/clipping_mask.cpp",
     "src/mln/shaders/webgpu/collision.cpp",
@@ -1236,6 +1253,7 @@ MLN_DRAWABLES_WEBGPU_HEADERS = [
     "include/mln/webgpu/vertex_buffer_resource.hpp",
     "include/mln/webgpu/wgpu_cpp_compat.hpp",
     "include/mln/shaders/webgpu/background.hpp",
+    "include/mln/shaders/webgpu/sky.hpp",
     "include/mln/shaders/webgpu/circle.hpp",
     "include/mln/shaders/webgpu/clipping_mask.hpp",
     "include/mln/shaders/webgpu/collision.hpp",

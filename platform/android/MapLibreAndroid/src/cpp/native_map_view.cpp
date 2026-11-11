@@ -38,6 +38,7 @@
 #include "map/camera_position.hpp"
 #include "map/image.hpp"
 #include "style/light.hpp"
+#include "style/sky.hpp"
 #include "tile/tile_operation.hpp"
 
 #include <jni/jni.hpp>
@@ -1052,6 +1053,25 @@ jni::Local<jni::Object<Light>> NativeMapView::getLight(JNIEnv& env) {
     }
 }
 
+jni::Local<jni::Object<Sky>> NativeMapView::getSky(JNIEnv& env) {
+    const mln::style::Sky* sky = map->getStyle().getSky();
+    return sky ? Sky::createJavaSkyPeer(env, *sky) : jni::Local<jni::Object<Sky>>();
+}
+
+void NativeMapView::setSky(JNIEnv& env, const jni::Object<Sky>& javaSky) {
+    if (!javaSky) {
+        map->getStyle().setSky(nullptr);
+    } else {
+        const auto* skyPeer = Sky::getNativePeer(env, javaSky);
+        if (!skyPeer) {
+            jni::ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "invalid Sky native peer");
+            return;
+        }
+        map->getStyle().setSky(std::make_unique<mln::style::Sky>(skyPeer->getSky().impl));
+    }
+    map->triggerRepaint();
+}
+
 jni::Local<jni::Array<jni::Object<Layer>>> NativeMapView::getLayers(JNIEnv& env) {
     // Get the core layers
     std::vector<style::Layer*> layers = map->getStyle().getLayers();
@@ -1474,6 +1494,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setGlobalStateProperty, "nativeSetGlobalStateProperty"),
         METHOD(&NativeMapView::getGlobalState, "nativeGetGlobalState"),
         METHOD(&NativeMapView::getLight, "nativeGetLight"),
+        METHOD(&NativeMapView::getSky, "nativeGetSky"),
+        METHOD(&NativeMapView::setSky, "nativeSetSky"),
         METHOD(&NativeMapView::getLayers, "nativeGetLayers"),
         METHOD(&NativeMapView::getLayer, "nativeGetLayer"),
         METHOD(&NativeMapView::addLayer, "nativeAddLayer"),

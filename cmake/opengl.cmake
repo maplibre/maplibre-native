@@ -19,6 +19,8 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/prelude.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/background.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/background_pattern.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/sky.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/atmosphere.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/circle.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/clipping_mask.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/collision_box.hpp

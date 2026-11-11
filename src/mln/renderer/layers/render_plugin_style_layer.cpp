@@ -160,6 +160,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                                     const RenderTree&,
                                     UniqueChangeRequestVec& changes) {
     const auto& registration = pluginImpl(baseImpl).registration;
+    updateProjectionVariant(state);
     readWriteDepth = false;
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
