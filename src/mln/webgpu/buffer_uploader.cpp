@@ -3,9 +3,11 @@
 #include <mln/util/logging.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstring>
 #include <string>
+#include <utility>
 
 namespace mln {
 namespace webgpu {
@@ -60,8 +62,7 @@ BufferUploader::~BufferUploader() {
     // A buffer still being mapped may never get its callback once nothing processes events for this
     // device, so release it here. Its callback, if it runs, sees the pool released and does nothing.
     pool->released = true;
-    const auto mapping = std::move(pool->mapping);
-    for (auto buffer : mapping) {
+    for (auto buffer : std::exchange(pool->mapping, {})) {
         wgpuBufferRelease(buffer);
     }
 }
@@ -189,16 +190,15 @@ void BufferUploader::submit(WGPUCommandBuffer commands) {
     }
 
     if (queue) {
-        WGPUCommandBuffer buffers[2];
-        std::uint32_t count = 0;
-        if (uploadCommands) {
-            buffers[count++] = uploadCommands;
-        }
-        if (commands) {
-            buffers[count++] = commands;
+        std::array<WGPUCommandBuffer, 2> buffers{};
+        std::size_t count = 0;
+        for (auto buffer : {uploadCommands, commands}) {
+            if (buffer) {
+                buffers[count++] = buffer;
+            }
         }
         if (count > 0) {
-            wgpuQueueSubmit(queue, count, buffers);
+            wgpuQueueSubmit(queue, count, buffers.data());
         }
     }
     if (uploadCommands) {
@@ -224,7 +224,8 @@ void BufferUploader::recycle(StagingBuffer& staging) {
         return;
     }
 
-    auto* pending = new PendingMap{pool, staging};
+    // The callback takes ownership
+    auto* pending = std::make_unique<PendingMap>(PendingMap{pool, staging}).release();
     WGPUBufferMapCallbackInfo callbackInfo = {};
     callbackInfo.mode = WGPUCallbackMode_AllowProcessEvents;
     callbackInfo.callback = onStagingMapped;
