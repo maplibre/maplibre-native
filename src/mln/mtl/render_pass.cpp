@@ -86,6 +86,7 @@ void RenderPass::resetState() {
     currentCullMode = MTL::CullModeNone;
     currentWinding = MTL::WindingClockwise;
     currentScissorRect = {.x = 0, .y = 0, .width = 0, .height = 0};
+    currentDepthRange.reset();
 }
 
 namespace {
@@ -255,6 +256,18 @@ void RenderPass::setScissorRect(MTL::ScissorRect rect) {
         }
         encoder->setScissorRect(rect);
         currentScissorRect = rect;
+    }
+}
+
+void RenderPass::setDepthRange(const Range<float>& range) {
+    if (range != currentDepthRange) {
+        encoder->setViewport({.originX = 0.0,
+                              .originY = 0.0,
+                              .width = static_cast<double>(width),
+                              .height = static_cast<double>(height),
+                              .znear = range.min,
+                              .zfar = range.max});
+        currentDepthRange = range;
     }
 }
 
