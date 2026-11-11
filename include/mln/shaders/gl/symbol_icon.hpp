@@ -114,6 +114,13 @@ lowp float opacity = u_opacity;
 
     vec2 translated_a_pos = a_pos + u_translation;
     vec4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0);
+#ifdef PROJECTION_GLOBE
+    // Screen-space labels keep clip Z 0, out of the horizon plane's reach, so they are hidden here behind the planet.
+    if (!u_pitch_with_map && projectedPoint.z > projectedPoint.w) {
+        gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
+        return;
+    }
+#endif
     highp float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     highp float distance_ratio = u_pitch_with_map ?

@@ -1523,6 +1523,59 @@ TEST(Map, GlobeTileDrawnForItsChildrenMeetsFinerTilesWithoutAGap) {
     EXPECT_EQ(0u, background);
 }
 
+TEST(Map, GlobeHidesAScreenAlignedIconOnceItsAnchorIsBehindThePlanet) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.frontend.setSize({256, 256});
+    test.map.setSize({256, 256});
+    test.map.getStyle().loadJSON(
+        R"STYLE({"version": 8, "projection": {"type": "vertical-perspective"},
+                 "sources": {"point": {"type": "geojson", "data": {"type": "Point", "coordinates": [30, 0]}}},
+                 "layers": [{"id": "background", "type": "background", "paint": {"background-color": "white"}},
+                            {"id": "icon", "type": "symbol", "source": "point",
+                             "layout": {"icon-image": "square", "icon-allow-overlap": true}}]})STYLE");
+    constexpr uint32_t side = 24;
+    PremultipliedImage square({side, side});
+    for (std::size_t i = 0; i < square.bytes(); i += 4) {
+        square.data[i] = 255;
+        square.data[i + 1] = 0;
+        square.data[i + 2] = 0;
+        square.data[i + 3] = 255;
+    }
+    test.map.getStyle().addImage(std::make_unique<style::Image>("square", std::move(square), 1.0f));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(1));
+
+    const auto redPixels = [&] {
+        const auto image = [&] {
+            gfx::BackendScope scope{*test.frontend.getBackend()};
+            return test.frontend.readStillImage();
+        }();
+        std::size_t red = 0;
+        for (std::size_t i = 0; i < image.bytes(); i += 4) {
+            if (image.data[i] > 200 && image.data[i + 1] < 60 && image.data[i + 2] < 60) {
+                red++;
+            }
+        }
+        return red;
+    };
+
+    test.observer.didBecomeIdleCallback = [&] {
+        test.runLoop.stop();
+    };
+    test.runLoop.run();
+    test.observer.didBecomeIdleCallback = nullptr;
+    ASSERT_GT(redPixels(), side * side / 2);
+
+    // Turn the planet so the icon's anchor is 130 degrees from the center. A long fade keeps placement showing it at
+    // full opacity on the next frame, so only the horizon test in the shader can hide it there.
+    test.map.getStyle().setTransitionOptions(style::TransitionOptions{Seconds(30)});
+    test.observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus) {
+        test.runLoop.stop();
+    };
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, -100}));
+    test.runLoop.run();
+    EXPECT_EQ(0u, redPixels());
+}
+
 // Test that custom source's tile pyramid is reset
 // if there is a significant change.
 TEST(Map, PrefetchDeltaOverrideCustomSource) {

@@ -205,6 +205,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 translated_a_pos = a_pos + drawable.translation;
     const float4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
+#if defined(PROJECTION_GLOBE)
+    if (!drawable.pitch_with_map && projectedPoint.z > projectedPoint.w) {
+        return {
+            .position = float4(c_offscreen_degenerate_triangle_location,
+                               c_offscreen_degenerate_triangle_location,
+                               c_offscreen_degenerate_triangle_location, 1.0),
+        };
+    }
+#endif
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = drawable.pitch_with_map ?
@@ -436,6 +445,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 translated_a_pos = a_pos + drawable.translation;
     const float4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
+#if defined(PROJECTION_GLOBE)
+    if (!drawable.pitch_with_map && projectedPoint.z > projectedPoint.w) {
+        return {
+            .position = float4(c_offscreen_degenerate_triangle_location,
+                               c_offscreen_degenerate_triangle_location,
+                               c_offscreen_degenerate_triangle_location, 1.0),
+        };
+    }
+#endif
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -732,6 +750,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 translated_a_pos = a_pos + drawable.translation;
     const float4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
+#if defined(PROJECTION_GLOBE)
+    if (!drawable.pitch_with_map && projectedPoint.z > projectedPoint.w) {
+        return {
+            .position = float4(c_offscreen_degenerate_triangle_location,
+                               c_offscreen_degenerate_triangle_location,
+                               c_offscreen_degenerate_triangle_location, 1.0),
+        };
+    }
+#endif
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.

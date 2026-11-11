@@ -177,6 +177,14 @@ fn main(in: VertexInput) -> VertexOutput {
     let projection = projectionVector[globalIndex.value];
     let translated_a_pos = a_pos + drawable.translation;
     let projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map == 0u && projectedPoint.z > projectedPoint.w) {
+        out.position = vec4<f32>(c_offscreen_degenerate_triangle_location,
+                                 c_offscreen_degenerate_triangle_location,
+                                 c_offscreen_degenerate_triangle_location, 1.0);
+        return out;
+    }
+#endif
     let camera_to_anchor_distance = projectedPoint.w;
     let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
@@ -373,6 +381,14 @@ fn main(in: VertexInput) -> VertexOutput {
     let projection = projectionVector[globalIndex.value];
     let translated_a_pos = a_pos + drawable.translation;
     let projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map == 0u && projectedPoint.z > projectedPoint.w) {
+        out.position = vec4<f32>(c_offscreen_degenerate_triangle_location,
+                                 c_offscreen_degenerate_triangle_location,
+                                 c_offscreen_degenerate_triangle_location, 1.0);
+        return out;
+    }
+#endif
     let camera_to_anchor_distance = projectedPoint.w;
     let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
@@ -645,6 +661,14 @@ fn main(in: VertexInput) -> VertexOutput {
     let projection = projectionVector[globalIndex.value];
     let translated_a_pos = a_pos + drawable.translation;
     let projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map == 0u && projectedPoint.z > projectedPoint.w) {
+        out.position = vec4<f32>(c_offscreen_degenerate_triangle_location,
+                                 c_offscreen_degenerate_triangle_location,
+                                 c_offscreen_degenerate_triangle_location, 1.0);
+        return out;
+    }
+#endif
     let camera_to_anchor_distance = projectedPoint.w;
     let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(

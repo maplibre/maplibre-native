@@ -159,6 +159,12 @@ void main() {
 
     const vec2 translated_a_pos = a_pos + drawable.translation;
     const vec4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
+#ifdef PROJECTION_GLOBE
+    if (!drawable.pitch_with_map && projectedPoint.z > projectedPoint.w) {
+        gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
+        return;
+    }
+#endif
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = drawable.pitch_with_map ?
@@ -461,6 +467,12 @@ void main() {
 
     const vec2 translated_a_pos = a_pos + drawable.translation;
     const vec4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
+#ifdef PROJECTION_GLOBE
+    if (!drawable.pitch_with_map && projectedPoint.z > projectedPoint.w) {
+        gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
+        return;
+    }
+#endif
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -849,6 +861,12 @@ void main() {
 
     const vec2 translated_a_pos = a_pos + drawable.translation;
     const vec4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
+#ifdef PROJECTION_GLOBE
+    if (!drawable.pitch_with_map && projectedPoint.z > projectedPoint.w) {
+        gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
+        return;
+    }
+#endif
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
