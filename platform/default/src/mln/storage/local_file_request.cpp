@@ -23,8 +23,12 @@ void requestLocalFile(const std::string& path,
     const bool notFound = status.type() == std::filesystem::file_type::not_found;
     const bool isDirectory = std::filesystem::is_directory(status);
 
-    if (notFound || isDirectory) {
-        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
+    if (notFound) {
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                           std::string("Cannot find file ") + path);
+    } else if (isDirectory) {
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                           std::string("Cannot read directory ") + path);
     } else {
         auto data = util::readFile(path, dataRange);
         if (!data) {
