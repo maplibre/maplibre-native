@@ -1,10 +1,12 @@
 #include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
-#include <mln/renderer/bucket_parameters.hpp>
-#include <mln/style/layers/fill_extrusion_layer_impl.hpp>
-#include <mln/renderer/layers/render_fill_extrusion_layer.hpp>
+
 #include <mln/map/transform_state.hpp>
-#include <mln/util/math.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
+#include <mln/renderer/layers/render_fill_extrusion_layer.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mln/util/constants.hpp>
+#include <mln/util/math.hpp>
 
 #include <variant>
 
@@ -55,7 +57,7 @@ FillExtrusionBucket::FillExtrusionBucket(
     const FillExtrusionBucket::PossiblyEvaluatedLayoutProperties& layout_,
     const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
     const float zoom,
-    const uint32_t)
+    const uint32_t /* overscaling */)
     : layout(std::move(layout_)) {
     for (const auto& pair : layerPaintProperties) {
         paintPropertyBinders.emplace(
@@ -75,6 +77,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                                      const PatternLayerMap& patternDependencies,
                                      std::size_t index,
                                      const CanonicalTileID& canonical) {
+    const auto vertexOffset = vertices.elements();
+
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
@@ -201,6 +205,11 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         triangleSegment.vertexLength += totalVertices;
         triangleSegment.indexLength += nIndices;
+
+        if (instanceSegments.empty()) {
+            instanceSegments.emplace_back(RenderStaticData::fillExtrusionSegment());
+        }
+        instanceSegments.back().instanceCount += totalVertices;
     }
 
     for (auto& pair : paintPropertyBinders) {
@@ -212,10 +221,27 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
             pair.second.populateVertexVectors(feature, vertices.elements(), index, patternPositions, {}, canonical);
         }
     }
+
+    if (retainFeaturesById) {
+        const auto vertexCount = vertices.elements() - vertexOffset;
+        if (vertexCount > 0) {
+            retainFeature(feature, vertexOffset, vertexCount);
+        }
+    }
 }
 
 void FillExtrusionBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     uploaded = true;
+    // Layout is final: once these are in GPU buffers the CPU copies are dropped, unless the map
+    // reads them back to report rendered features.
+    if (retainFeaturesById) {
+        return;
+    }
+    sharedVertices->release();
+    sharedTriangles->release();
+    for (auto& pair : paintPropertyBinders) {
+        pair.second.release();
+    }
 }
 
 bool FillExtrusionBucket::hasData() const {

@@ -2,6 +2,10 @@
 
 #include <mln/shaders/layer_ubo.hpp>
 
+#if MLN_WITH_PLUGINS
+#include <mln/plugin/plugin_api.h>
+#endif
+
 #include <algorithm>
 
 namespace mln {
@@ -163,15 +167,26 @@ static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(
 
 enum {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-    idFillExtrusionInstanced = getEnumValue(fillExtrusionLayerUBOCount, drawableSSBOStartId),
+    idFillExtrusionInstancedDrawableUBO = getEnumValue(fillExtrusionLayerUBOCount, drawableSSBOStartId),
 #endif
     fillExtrusionDrawableSSBOCount
 };
 
+enum {
+#if MLN_USE_SYMBOL_INSTANCING
+    idSymbolInstancedDrawableUBO = getEnumValue(symbolLayerUBOCount, drawableSSBOStartId),
+    idSymbolDynamicInstancedDrawableUBO,
+    idSymbolOpacityInstancedDrawableUBO,
+    idSymbolDataInstancedDrawableUBO,
+#endif
+    symbolDrawableSSBOCount
+};
+
 // drawable UBOs
 
-static constexpr uint32_t drawableUBOStartId = std::max(
-    {static_cast<uint32_t>(drawableSSBOStartId), static_cast<uint32_t>(fillExtrusionDrawableSSBOCount)});
+static constexpr uint32_t drawableUBOStartId = std::max({static_cast<uint32_t>(drawableSSBOStartId),
+                                                         static_cast<uint32_t>(fillExtrusionDrawableSSBOCount),
+                                                         static_cast<uint32_t>(symbolDrawableSSBOCount)});
 
 enum {
     backgroundUBOCount = getEnumValue(backgroundLayerUBOCount, drawableUBOStartId)
@@ -194,16 +209,6 @@ enum {
 
 enum {
     colorReliefUBOCount = getEnumValue(colorReliefLayerUBOCount, drawableUBOStartId)
-};
-
-enum {
-    idCustomGeometryDrawableUBO = getEnumValue(drawableReservedUBOCount, drawableUBOStartId), // UBO
-    customGeometryUBOCount
-};
-
-enum {
-    idCustomSymbolDrawableUBO = getEnumValue(idDrawableReservedVertexOnlyUBO, drawableUBOStartId), // UBO
-    customSymbolUBOCount = getEnumValue(drawableReservedUBOCount, idCustomSymbolDrawableUBO + 1)
 };
 
 enum {
@@ -263,7 +268,6 @@ static constexpr uint32_t maxUBOCountPerShader = std::max({static_cast<uint32_t>
                                                            static_cast<uint32_t>(clippingMaskUBOCount),
                                                            static_cast<uint32_t>(collisionUBOCount),
                                                            static_cast<uint32_t>(colorReliefUBOCount),
-                                                           static_cast<uint32_t>(customGeometryUBOCount),
                                                            static_cast<uint32_t>(debugUBOCount),
                                                            static_cast<uint32_t>(fillUBOCount),
                                                            static_cast<uint32_t>(fillExtrusionUBOCount),
@@ -299,16 +303,6 @@ enum {
 
 enum {
     collisionTextureCount
-};
-
-enum {
-    idCustomGeometryTexture,
-    customGeometryTextureCount
-};
-
-enum {
-    idCustomSymbolImageTexture,
-    customSymbolTextureCount
 };
 
 enum {
@@ -351,6 +345,7 @@ enum {
 
 enum {
     idLineImageTexture,
+    idLineDashTexture,
     lineTextureCount
 };
 
@@ -370,8 +365,6 @@ static constexpr uint32_t maxTextureCountPerShader = std::max({static_cast<uint3
                                                                static_cast<uint32_t>(circleTextureCount),
                                                                static_cast<uint32_t>(clippingMaskTextureCount),
                                                                static_cast<uint32_t>(collisionTextureCount),
-                                                               static_cast<uint32_t>(customGeometryTextureCount),
-                                                               static_cast<uint32_t>(customSymbolTextureCount),
                                                                static_cast<uint32_t>(debugTextureCount),
                                                                static_cast<uint32_t>(fillTextureCount),
                                                                static_cast<uint32_t>(fillExtrusionTextureCount),
@@ -416,18 +409,6 @@ enum {
     idCollisionPlacedVertexAttribute,
     idCollisionShiftVertexAttribute,
     collisionVertexAttributeCount
-};
-
-enum {
-    idCustomGeometryPosVertexAttribute,
-    idCustomGeometryTexVertexAttribute,
-    customGeometryVertexAttributeCount
-};
-
-enum {
-    idCustomSymbolPosVertexAttribute,
-    idCustomSymbolTexVertexAttribute,
-    customSymbolVertexAttributeCount
 };
 
 enum {
@@ -521,20 +502,34 @@ enum {
 };
 
 enum {
-    idSymbolPosOffsetVertexAttribute,
-    idSymbolDataVertexAttribute,
-    idSymbolPixelOffsetVertexAttribute,
-    idSymbolProjectedPosVertexAttribute,
-    idSymbolFadeOpacityVertexAttribute,
+#if MLN_USE_SYMBOL_INSTANCING
+    idSymbolPosAttribute,
+
+    idSymbolSortedInstanceAttribute,
+
+    idSymbolPosScaleAttribute,
+    idSymbolOffsetTlTrAttribute,
+    idSymbolOffsetBlBrAttribute,
+    idSymbolTextureRectAttribute,
+    idSymbolPixelOffsetAttribute,
+    idSymbolSizeSdfAttribute,
+#else
+    idSymbolPosOffsetAttribute,
+    idSymbolDataAttribute,
+    idSymbolPixelOffsetAttribute,
+#endif
+
+    idSymbolProjectedPosAttribute,
+    idSymbolFadeOpacityAttribute,
 
     // Data driven
-    idSymbolOpacityVertexAttribute,
-    idSymbolColorVertexAttribute,
-    idSymbolHaloColorVertexAttribute,
-    idSymbolHaloWidthVertexAttribute,
-    idSymbolHaloBlurVertexAttribute,
+    idSymbolOpacityAttribute,
+    idSymbolColorAttribute,
+    idSymbolHaloColorAttribute,
+    idSymbolHaloWidthAttribute,
+    idSymbolHaloBlurAttribute,
 
-    symbolVertexAttributeCount
+    symbolAttributeCount
 };
 
 enum {
@@ -554,13 +549,14 @@ enum {
     wideVectorInstanceAttributeCount
 };
 
-static constexpr uint32_t maxVertexAttributeCountPerShader = std::max({
+static constexpr uint32_t maxAttributeCountPerShader = std::max({
+#if MLN_WITH_PLUGINS
+    static_cast<uint32_t>(MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES),
+#endif
     static_cast<uint32_t>(backgroundVertexAttributeCount),
     static_cast<uint32_t>(circleVertexAttributeCount),
     static_cast<uint32_t>(clippingMaskVertexAttributeCount),
     static_cast<uint32_t>(collisionVertexAttributeCount),
-    static_cast<uint32_t>(customGeometryVertexAttributeCount),
-    static_cast<uint32_t>(customSymbolVertexAttributeCount),
     static_cast<uint32_t>(debugVertexAttributeCount),
     static_cast<uint32_t>(fillVertexAttributeCount),
     static_cast<uint32_t>(fillExtrusionVertexAttributeCount),
@@ -570,7 +566,7 @@ static constexpr uint32_t maxVertexAttributeCountPerShader = std::max({
     static_cast<uint32_t>(lineVertexAttributeCount),
     static_cast<uint32_t>(locationIndicatorVertexAttributeCount),
     static_cast<uint32_t>(rasterVertexAttributeCount),
-    static_cast<uint32_t>(symbolVertexAttributeCount),
+    static_cast<uint32_t>(symbolAttributeCount),
     static_cast<uint32_t>(wideVectorAttributeCount),
     static_cast<uint32_t>(wideVectorInstanceAttributeCount),
 });

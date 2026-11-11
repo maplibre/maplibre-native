@@ -139,7 +139,8 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
 }
 
 void MLNMapViewMetalImpl::drawableSizeChanged(CGSize drawableSize) {
-  size = {static_cast<uint32_t>(drawableSize.width), static_cast<uint32_t>(drawableSize.height)};
+  setRenderableSize(
+      {static_cast<uint32_t>(drawableSize.width), static_cast<uint32_t>(drawableSize.height)});
 }
 
 MLNMapViewMetalImpl::~MLNMapViewMetalImpl() = default;

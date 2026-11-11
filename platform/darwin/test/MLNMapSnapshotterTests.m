@@ -1,4 +1,4 @@
-#import <Mapbox.h>
+#import <MapLibre.h>
 #import <XCTest/XCTest.h>
 
 MLNImage *MLNNormalizedImage(MLNImage *sourceImage) {
@@ -72,6 +72,26 @@ MLNImage *MLNImageFromCurrentContext(void) {
     self.styleLoadingExpectation = nil;
     self.runtimeStylingActions = nil;
     [super tearDown];
+}
+
+- (void)testSettingGlobalStateBeforeStyleLoadsRaisesException {
+    NSURL *styleURL = [NSURL URLWithString:@"https://example.invalid/style.json"];
+    MLNMapSnapshotOptions *options = [[MLNMapSnapshotOptions alloc]
+        initWithStyleURL:styleURL
+                  camera:[MLNMapCamera camera]
+                    size:CGSizeMake(64, 64)];
+    MLNMapSnapshotter *snapshotter = [[MLNMapSnapshotter alloc] initWithOptions:options];
+
+    [snapshotter startWithCompletionHandler:^(__unused MLNMapSnapshot *snapshot,
+                                               __unused NSError *error) {
+    }];
+
+    MLNStyle *style = snapshotter.style;
+    XCTAssertNotNil(style);
+    XCTAssertThrowsSpecificNamed([style setGlobalStateValue:@YES forProperty:@"showLabels"],
+                                 NSException, NSInternalInconsistencyException);
+
+    [snapshotter cancel];
 }
 
 - (void)testOverlayHandler {

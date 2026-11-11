@@ -3,7 +3,6 @@
 #include <mln/gfx/shader_group.hpp>
 
 #include <memory>
-#include <mutex>
 #include <shared_mutex>
 #include <string>
 #include <unordered_map>
@@ -46,7 +45,7 @@ public:
     /// @param shaderGroupName Unique name to register the shader group under.
     /// @return True if a match was found and the shader group was replaced, false
     /// otherwise.
-    [[nodiscard]] virtual bool replaceShader(ShaderGroupPtr&& shaderGroup, const std::string& shaderName) noexcept;
+    [[nodiscard]] virtual bool replaceShader(ShaderGroupPtr&& shader, const std::string& shaderGroupName) noexcept;
 
     /// @brief Register a new shader group with the registry for the given name.
     /// If a shader group is present in the registry with a conflicting name,

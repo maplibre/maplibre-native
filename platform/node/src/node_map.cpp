@@ -117,6 +117,8 @@ ParseError)JS")
     Nan::SetPrototypeMethod(tpl, "setFeatureState", SetFeatureState);
     Nan::SetPrototypeMethod(tpl, "getFeatureState", GetFeatureState);
     Nan::SetPrototypeMethod(tpl, "removeFeatureState", RemoveFeatureState);
+    Nan::SetPrototypeMethod(tpl, "setGlobalStateProperty", SetGlobalStateProperty);
+    Nan::SetPrototypeMethod(tpl, "getGlobalState", GetGlobalState);
 
     Nan::SetPrototypeMethod(tpl, "dumpDebugLogs", DumpDebugLogs);
     Nan::SetPrototypeMethod(tpl, "queryRenderedFeatures", QueryRenderedFeatures);
@@ -1389,6 +1391,67 @@ void NodeMap::RemoveFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& inf
     }
 
     info.GetReturnValue().SetUndefined();
+}
+
+namespace {
+
+// Deep conversion of a JS value to an mln::Value (unlike conversion::toValue,
+// which only handles scalar values).
+mln::Value toGlobalStateValue(const mln::style::conversion::Convertible& value) {
+    using namespace mln::style::conversion;
+
+    if (isArray(value)) {
+        mapbox::base::ValueArray array;
+        const std::size_t length = arrayLength(value);
+        array.reserve(length);
+        for (std::size_t i = 0; i < length; ++i) {
+            array.push_back(toGlobalStateValue(arrayMember(value, i)));
+        }
+        return array;
+    }
+    if (isObject(value)) {
+        mapbox::base::ValueObject object;
+        eachMember(
+            value,
+            [&](const std::string& key, const Convertible& member) -> std::optional<mln::style::conversion::Error> {
+                object.emplace(key, toGlobalStateValue(member));
+                return std::nullopt;
+            });
+        return object;
+    }
+    return toValue(value).value_or(mln::Value());
+}
+
+} // namespace
+
+void NodeMap::SetGlobalStateProperty(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+    using namespace mln::style::conversion;
+
+    auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
+    if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
+
+    if (info.Length() < 2) {
+        return Nan::ThrowTypeError("Two arguments required");
+    }
+    if (!info[0]->IsString()) {
+        return Nan::ThrowTypeError("First argument must be a string");
+    }
+
+    try {
+        nodeMap->map->getStyle().setGlobalStateProperty(*Nan::Utf8String(info[0]),
+                                                        toGlobalStateValue(Convertible(info[1])));
+    } catch (const std::exception& ex) {
+        return Nan::ThrowError(ex.what());
+    }
+
+    info.GetReturnValue().SetUndefined();
+}
+
+void NodeMap::GetGlobalState(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+    auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
+    if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
+
+    info.GetReturnValue().Set(toJS(nodeMap->map->getStyle().getGlobalState()));
 }
 
 void NodeMap::DumpDebugLogs(const Nan::FunctionCallbackInfo<v8::Value>& info) {

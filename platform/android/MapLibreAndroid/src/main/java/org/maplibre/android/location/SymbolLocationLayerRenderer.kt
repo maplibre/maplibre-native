@@ -356,7 +356,7 @@ internal class SymbolLocationLayerRenderer(
     private fun setLocationPoint(locationPoint: Point) {
         val properties = locationFeature.properties()
         if (properties != null) {
-            locationFeature = Feature.fromGeometry(locationPoint, properties)
+            locationFeature = Feature.fromGeometry(locationPoint, properties, LayerFeatureProvider.featureId, null)
             refreshSource()
         }
     }

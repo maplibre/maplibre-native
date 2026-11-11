@@ -479,7 +479,7 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
     assert(resource.usage == Resource::Usage::Offline);
 
     auto workRequestsIt = requests.insert(requests.begin(), nullptr);
-    *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=, this]() {
+    *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=, this] {
         requests.erase(workRequestsIt);
         const auto resourceKind = resource.kind;
         auto getResourceSizeInDatabase = [&]() -> std::optional<int64_t> {

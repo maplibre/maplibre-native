@@ -16,7 +16,9 @@ ClientOptions::ClientOptions(ClientOptions&&) noexcept = default;
 ClientOptions::ClientOptions(const ClientOptions& other)
     : impl_(std::make_unique<Impl>(*other.impl_)) {}
 ClientOptions& ClientOptions::operator=(const ClientOptions& other) {
-    impl_ = std::make_unique<Impl>(*other.impl_);
+    if (this != &other) {
+        impl_ = std::make_unique<Impl>(*other.impl_);
+    }
     return *this;
 }
 ClientOptions& ClientOptions::operator=(ClientOptions&& options) {

@@ -52,6 +52,19 @@ MLN_EXPORT
 @property (nonatomic, assign, getter=isVisible) BOOL visible;
 
 /**
+ The layer's visibility, specified as an expression that evaluates to `visible`
+ or `none`. Per the style specification, visibility expressions may only use
+ the `global-state` expression (`mgl_globalState:`); passing any other data
+ dependency raises an `NSInvalidArgumentException`.
+
+ The expression is re-evaluated whenever the global state changes; the current
+ evaluated value is available through the `visible` property. Setting `visible`
+ removes the expression, and setting this property to `nil` resets the layer to
+ visible.
+ */
+@property (nonatomic, nullable) NSExpression *visibilityExpression;
+
+/**
  The maximum zoom level at which the layer gets parsed and appears. This value is a floating-point
  number.
  */

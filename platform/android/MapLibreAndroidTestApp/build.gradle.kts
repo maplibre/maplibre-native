@@ -183,6 +183,7 @@ dependencies {
     implementation(libs.supportRecyclerView)
     implementation(libs.supportPrint)
     implementation(libs.supportDesign)
+    implementation(libs.supportAppcompat)
     implementation(libs.supportConstraintLayout)
     implementation(libs.kotlinxSerializationJson)
 

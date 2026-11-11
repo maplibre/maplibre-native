@@ -33,6 +33,14 @@ expression::Dependency RasterLayerProperties::getDependencies() const noexcept {
     return layerImpl().paint.getDependencies();
 }
 
+expression::Dependency RasterLayerProperties::getEvaluatedDependencies() const noexcept {
+    return evaluated.getDependencies();
+}
+
+void RasterLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

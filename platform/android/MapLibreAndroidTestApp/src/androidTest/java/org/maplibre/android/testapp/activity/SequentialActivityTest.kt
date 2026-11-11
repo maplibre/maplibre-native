@@ -24,6 +24,7 @@ class SequentialActivityTest(
                 org.maplibre.android.testapp.activity.benchmark.BenchmarkActivity::class.java,
                 org.maplibre.android.testapp.activity.telemetry.PerformanceMeasurementActivity::class.java,
                 org.maplibre.android.testapp.activity.stability.LongRunningActivity::class.java,
+                org.maplibre.android.testapp.activity.stability.DisappearingRouteActivity::class.java,
                 org.maplibre.android.testapp.activity.stability.UserMapActivity::class.java,
                 org.maplibre.android.testapp.activity.stability.NavigationMapActivity::class.java,
                 // need style updates

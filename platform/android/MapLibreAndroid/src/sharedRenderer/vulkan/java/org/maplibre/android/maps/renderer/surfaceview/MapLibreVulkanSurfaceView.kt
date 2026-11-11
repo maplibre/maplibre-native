@@ -167,6 +167,23 @@ class MapLibreVulkanSurfaceView : MapLibreSurfaceView {
             }
         }
 
+        override fun onWindowResize(
+            w: Int,
+            h: Int,
+        ) {
+            synchronized(renderThreadManager) {
+                width = w
+                height = h
+                sizeChanged = true
+                requestRender = true
+                renderComplete = false
+
+                // Don't wait for a frame at the new size, the swapchain is recreated asynchronously
+                // and compositor sync is handled by surfaceRedrawNeededAsync
+                renderThreadManager.monitorNotifyAll()
+            }
+        }
+
         override fun ableToDraw(): Boolean = graphicsSurfaceCreated && readyToDraw()
     }
 }

@@ -33,7 +33,7 @@ public:
         }
 
         context.activeTextureUnit = 0;
-        context.scissorTest = {0, 0, 0, 0};
+        context.scissorTest = {.x = 0, .y = 0, .width = 0, .height = 0};
         context.viewport = {.x = 0, .y = 0, .size = size};
     }
 
@@ -57,7 +57,7 @@ private:
 };
 
 OffscreenTexture::OffscreenTexture(gl::Context& context, const Size size_, const gfx::TextureChannelDataType type)
-    : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context, size_, type)) {}
+    : gfx::OffscreenTexture(size_, std::make_unique<OffscreenTextureResource>(context, size_, type)) {}
 
 bool OffscreenTexture::isRenderable() {
     try {

@@ -119,18 +119,48 @@ android {
                 }
             }
         }
+        // The same as the flavor they are named after, but exporting the experimental C plugin API
+        // (include/mln/plugin/plugin_api.h). The plugin API supports OpenGL ES and Vulkan, but not WebGPU.
+        listOf("opengl", "vulkan", "multiBackend").forEach { renderer ->
+            val rendererCmake = getByName(renderer).externalNativeBuild.cmake
+            create("${renderer}WithPluginApi") {
+                dimension = "renderer"
+                externalNativeBuild {
+                    cmake {
+                        arguments += rendererCmake.arguments + "-DMLN_WITH_PLUGINS=ON"
+                        targets += rendererCmake.targets
+                    }
+                }
+            }
+        }
     }
 
     sourceSets {
         // The sharedRenderer directories hold Kotlin sources, so they have to be registered with
         // the Kotlin source set as well: java.srcDirs() alone is not picked up by the Kotlin compiler.
-        getByName("opengl") {
-            java.srcDirs("src/opengl/java/", "src/sharedRenderer/opengl/java/")
-            kotlin.srcDirs("src/opengl/java/", "src/sharedRenderer/opengl/java/")
-        }
-        getByName("vulkan") {
-            java.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
-            kotlin.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
+        listOf("", "WithPluginApi").forEach { suffix ->
+            getByName("opengl$suffix") {
+                java.srcDirs("src/opengl/java/", "src/sharedRenderer/opengl/java/")
+                kotlin.srcDirs("src/opengl/java/", "src/sharedRenderer/opengl/java/")
+            }
+            getByName("vulkan$suffix") {
+                java.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
+                kotlin.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
+                manifest.srcFile("src/vulkan/AndroidManifest.xml")
+            }
+            getByName("multiBackend$suffix") {
+                java.srcDirs(
+                    "src/multiBackend/java/",
+                    "src/sharedRenderer/opengl/java/",
+                    "src/sharedRenderer/vulkan/java/"
+                )
+                kotlin.srcDirs(
+                    "src/multiBackend/java/",
+                    "src/sharedRenderer/opengl/java/",
+                    "src/sharedRenderer/vulkan/java/"
+                )
+                manifest.srcFile("src/multiBackend/AndroidManifest.xml")
+            }
         }
         listOf("webgpuDawn", "webgpuWgpu").forEach {
             getByName(it) {
@@ -138,19 +168,6 @@ android {
                 kotlin.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
                 manifest.srcFile("src/vulkan/AndroidManifest.xml")
             }
-        }
-        getByName("multiBackend") {
-            java.srcDirs(
-                "src/multiBackend/java/",
-                "src/sharedRenderer/opengl/java/",
-                "src/sharedRenderer/vulkan/java/"
-            )
-            kotlin.srcDirs(
-                "src/multiBackend/java/",
-                "src/sharedRenderer/opengl/java/",
-                "src/sharedRenderer/vulkan/java/"
-            )
-            manifest.srcFile("src/multiBackend/AndroidManifest.xml")
         }
     }
 
@@ -240,6 +257,7 @@ val syncPrefabHeaders by tasks.registering(Sync::class) {
         include("mln/style/layers/custom_layer_render_parameters.hpp")
         include("mln/style/layers/vulkan/custom_layer_init_parameters.hpp")
         include("mln/style/layers/vulkan/custom_layer_render_parameters.hpp")
+        include("mln/plugin/plugin_api.h")
     }
     into(project.rootDir.resolve("prefab-headers"))
 }

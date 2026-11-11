@@ -203,7 +203,7 @@ std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetColl
 
         auto anchorType = anchor.value();
         auto offset = std::array<float, 2>{xOffset.value(), yOffset.value()};
-        collection.push_back(AnchorOffsetPair{anchorType, offset});
+        collection.emplace_back(anchorType, offset);
     }
 
     return VariableAnchorOffsetCollection(std::move(collection));

@@ -10,16 +10,27 @@ namespace shaders {
 
 using SymbolIconShaderSource = ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<AttributeInfo, 6> SymbolIconShaderSource::attributes = {
+const std::array<AttributeInfo, 1> SymbolIconShaderSource::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idSymbolPosAttribute},
+};
+const std::array<AttributeInfo, 10> SymbolIconShaderSource::instanceAttributes = {
     // always attributes
-    AttributeInfo{0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Short4, idSymbolPixelOffsetVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::UShort, idSymbolSortedInstanceAttribute},
+
+    AttributeInfo{2, gfx::AttributeDataType::Short4, idSymbolPosScaleAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{3, gfx::AttributeDataType::Short4, idSymbolOffsetTlTrAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{4, gfx::AttributeDataType::Short4, idSymbolOffsetBlBrAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{5, gfx::AttributeDataType::UShort4, idSymbolTextureRectAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{6, gfx::AttributeDataType::Short4, idSymbolPixelOffsetAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{7, gfx::AttributeDataType::UShort4, idSymbolSizeSdfAttribute, idSymbolInstancedDrawableUBO},
+
+    AttributeInfo{
+        8, gfx::AttributeDataType::Float3, idSymbolProjectedPosAttribute, idSymbolDynamicInstancedDrawableUBO},
+
+    AttributeInfo{9, gfx::AttributeDataType::Float, idSymbolFadeOpacityAttribute, idSymbolOpacityInstancedDrawableUBO},
 
     // sometimes uniforms
-    AttributeInfo{5, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
+    AttributeInfo{10, gfx::AttributeDataType::Float2, idSymbolOpacityAttribute, idSymbolDataInstancedDrawableUBO},
 };
 const std::array<TextureInfo, 1> SymbolIconShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
@@ -30,20 +41,32 @@ const std::array<TextureInfo, 1> SymbolIconShaderSource::textures = {
 
 using SymbolSDFShaderSource = ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<AttributeInfo, 10> SymbolSDFShaderSource::attributes = {
+const std::array<AttributeInfo, 1> SymbolSDFShaderSource::attributes = {
     // always attributes
-    AttributeInfo{0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Short4, idSymbolPixelOffsetVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idSymbolPosAttribute},
+};
+const std::array<AttributeInfo, 14> SymbolSDFShaderSource::instanceAttributes = {
+    // always attributes
+    AttributeInfo{1, gfx::AttributeDataType::UShort, idSymbolSortedInstanceAttribute},
+
+    AttributeInfo{2, gfx::AttributeDataType::Short4, idSymbolPosScaleAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{3, gfx::AttributeDataType::Short4, idSymbolOffsetTlTrAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{4, gfx::AttributeDataType::Short4, idSymbolOffsetBlBrAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{5, gfx::AttributeDataType::UShort4, idSymbolTextureRectAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{6, gfx::AttributeDataType::Short4, idSymbolPixelOffsetAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{7, gfx::AttributeDataType::UShort4, idSymbolSizeSdfAttribute, idSymbolInstancedDrawableUBO},
+
+    AttributeInfo{
+        8, gfx::AttributeDataType::Float3, idSymbolProjectedPosAttribute, idSymbolDynamicInstancedDrawableUBO},
+
+    AttributeInfo{9, gfx::AttributeDataType::Float, idSymbolFadeOpacityAttribute, idSymbolOpacityInstancedDrawableUBO},
 
     // sometimes uniforms
-    AttributeInfo{5, gfx::AttributeDataType::Float4, idSymbolColorVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::Float4, idSymbolHaloColorVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float, idSymbolHaloWidthVertexAttribute},
-    AttributeInfo{9, gfx::AttributeDataType::Float, idSymbolHaloBlurVertexAttribute},
+    AttributeInfo{10, gfx::AttributeDataType::Float2, idSymbolOpacityAttribute, idSymbolDataInstancedDrawableUBO},
+    AttributeInfo{11, gfx::AttributeDataType::Float4, idSymbolColorAttribute, idSymbolDataInstancedDrawableUBO},
+    AttributeInfo{12, gfx::AttributeDataType::Float4, idSymbolHaloColorAttribute, idSymbolDataInstancedDrawableUBO},
+    AttributeInfo{13, gfx::AttributeDataType::Float2, idSymbolHaloWidthAttribute, idSymbolDataInstancedDrawableUBO},
+    AttributeInfo{14, gfx::AttributeDataType::Float2, idSymbolHaloBlurAttribute, idSymbolDataInstancedDrawableUBO},
 };
 const std::array<TextureInfo, 1> SymbolSDFShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
@@ -54,19 +77,32 @@ const std::array<TextureInfo, 1> SymbolSDFShaderSource::textures = {
 
 using SymbolTextAndIconShaderSource = ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<AttributeInfo, 9> SymbolTextAndIconShaderSource::attributes = {
+const std::array<AttributeInfo, 1> SymbolTextAndIconShaderSource::attributes = {
     // always attributes
-    AttributeInfo{0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idSymbolPosAttribute},
+};
+const std::array<AttributeInfo, 14> SymbolTextAndIconShaderSource::instanceAttributes = {
+    // always attributes
+    AttributeInfo{1, gfx::AttributeDataType::UShort, idSymbolSortedInstanceAttribute},
+
+    AttributeInfo{2, gfx::AttributeDataType::Short4, idSymbolPosScaleAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{3, gfx::AttributeDataType::Short4, idSymbolOffsetTlTrAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{4, gfx::AttributeDataType::Short4, idSymbolOffsetBlBrAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{5, gfx::AttributeDataType::UShort4, idSymbolTextureRectAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{6, gfx::AttributeDataType::Short4, idSymbolPixelOffsetAttribute, idSymbolInstancedDrawableUBO},
+    AttributeInfo{7, gfx::AttributeDataType::UShort4, idSymbolSizeSdfAttribute, idSymbolInstancedDrawableUBO},
+
+    AttributeInfo{
+        8, gfx::AttributeDataType::Float3, idSymbolProjectedPosAttribute, idSymbolDynamicInstancedDrawableUBO},
+
+    AttributeInfo{9, gfx::AttributeDataType::Float, idSymbolFadeOpacityAttribute, idSymbolOpacityInstancedDrawableUBO},
 
     // sometimes uniforms
-    AttributeInfo{4, gfx::AttributeDataType::Float4, idSymbolColorVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Float4, idSymbolHaloColorVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::Float, idSymbolHaloWidthVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float, idSymbolHaloBlurVertexAttribute},
+    AttributeInfo{10, gfx::AttributeDataType::Float2, idSymbolOpacityAttribute, idSymbolDataInstancedDrawableUBO},
+    AttributeInfo{11, gfx::AttributeDataType::Float4, idSymbolColorAttribute, idSymbolDataInstancedDrawableUBO},
+    AttributeInfo{12, gfx::AttributeDataType::Float4, idSymbolHaloColorAttribute, idSymbolDataInstancedDrawableUBO},
+    AttributeInfo{13, gfx::AttributeDataType::Float2, idSymbolHaloWidthAttribute, idSymbolDataInstancedDrawableUBO},
+    AttributeInfo{14, gfx::AttributeDataType::Float2, idSymbolHaloBlurAttribute, idSymbolDataInstancedDrawableUBO},
 };
 const std::array<TextureInfo, 2> SymbolTextAndIconShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},

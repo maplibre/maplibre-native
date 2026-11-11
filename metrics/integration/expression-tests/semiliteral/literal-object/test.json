@@ -1,0 +1,14 @@
+{
+  "expression": ["semiliteral", {"x": ["get", "x"]}],
+  "inputs": [[{}, {"properties": {"x": 3}}]],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": true,
+      "isZoomConstant": true,
+      "type": "object"
+    },
+    "outputs": [{"x": ["get", "x"]}],
+    "serialized": ["literal", {"x": ["get", "x"]}]
+  }
+}

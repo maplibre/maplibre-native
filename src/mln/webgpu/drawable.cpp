@@ -51,9 +51,9 @@ struct alignas(16) GlobalUBOIndexData {
     uint32_t pad[3] = {0, 0, 0};
 };
 
+// Leaves out the reference, which draw() sets per draw rather than in the pipeline.
 std::size_t hashStencilMode(const gfx::StencilMode& mode) {
-    std::size_t hash = util::hash(static_cast<int>(mode.ref),
-                                  static_cast<uint32_t>(mode.mask),
+    std::size_t hash = util::hash(static_cast<uint32_t>(mode.mask),
                                   static_cast<int>(mode.fail),
                                   static_cast<int>(mode.depthFail),
                                   static_cast<int>(mode.pass));
@@ -129,6 +129,8 @@ WGPUVertexFormat wgpuVertexFormatOf(gfx::AttributeDataType type) {
             return WGPUVertexFormat_Uint8x2;
         case gfx::AttributeDataType::UByte4:
             return WGPUVertexFormat_Uint8x4;
+        case gfx::AttributeDataType::UByte4Normalized:
+            return WGPUVertexFormat_Unorm8x4;
         case gfx::AttributeDataType::Short:
             return WGPUVertexFormat_Sint16;
         case gfx::AttributeDataType::Short2:
@@ -190,13 +192,6 @@ Drawable::~Drawable() {
     // Note: We don't own the pipeline - it's owned by the shader program
     // So we should NOT release it here
     impl->pipelineState = nullptr;
-
-    for (auto& record : impl->bindGroups) {
-        if (record.handle) {
-            wgpuBindGroupRelease(record.handle);
-        }
-    }
-    impl->bindGroups.clear();
 
     // Uniform buffers are managed by UniformBufferArray
     // Vertex and index buffers are now managed through attributeBindings and indexes
@@ -280,9 +275,9 @@ void Drawable::setDepthModeFor3D(const gfx::DepthMode& value) {
 
 void Drawable::setStencilModeFor3D(const gfx::StencilMode& value) {
     const auto newHash = hashStencilMode(value);
-    if (!impl->stencilModeHashValid || impl->stencilModeHash != newHash || impl->stencilMode.ref != value.ref ||
-        impl->stencilMode.mask != value.mask || impl->stencilMode.fail != value.fail ||
-        impl->stencilMode.depthFail != value.depthFail || impl->stencilMode.pass != value.pass) {
+    if (!impl->stencilModeHashValid || impl->stencilModeHash != newHash || impl->stencilMode.mask != value.mask ||
+        impl->stencilMode.fail != value.fail || impl->stencilMode.depthFail != value.depthFail ||
+        impl->stencilMode.pass != value.pass) {
         impl->pipelineState = nullptr;
         impl->stencilModeHashValid = false;
     }
@@ -296,6 +291,8 @@ void Drawable::setShader(gfx::ShaderProgramBasePtr value) {
     }
     shader = std::move(value);
     impl->pipelineState = nullptr; // Reset pipeline when shader changes
+    // The bind groups use the old shader's layouts.
+    impl->bindGroups.clear();
 }
 
 void Drawable::upload(gfx::UploadPass& uploadPass) {
@@ -364,8 +361,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
             impl->attributeBindings = std::move(attributeBindings_);
             impl->vertexDescHash = 0;      // Reset hash when bindings change
             impl->pipelineState = nullptr; // Reset pipeline state when attribute bindings change
-            // Store the dummy vertex buffers to keep them alive
-            impl->dummyVertexBuffers = std::move(vertexBuffers);
         }
     }
 
@@ -389,12 +384,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
             impl->pipelineState = nullptr; // Reset pipeline state when instance bindings change
-            // Store the dummy instance buffers to keep them alive
-            if (!instanceBuffers.empty()) {
-                impl->dummyVertexBuffers.insert(impl->dummyVertexBuffers.end(),
-                                                std::make_move_iterator(instanceBuffers.begin()),
-                                                std::make_move_iterator(instanceBuffers.end()));
-            }
         }
     }
 
@@ -494,24 +483,9 @@ void Drawable::draw(PaintParameters& parameters) const {
         if (webgpuShader) {
             WGPUDevice deviceHandle = static_cast<WGPUDevice>(backend.getDevice());
 
-            for (auto& record : impl->bindGroups) {
-                if (record.handle) {
-                    wgpuBindGroupRelease(record.handle);
-                }
-            }
-            impl->bindGroups.clear();
-
             if (deviceHandle) {
                 const auto& groupOrder = webgpuShader->getBindGroupOrder();
-                static bool loggedBindGroupOrder = false;
-                if (!loggedBindGroupOrder && getName().find("fill-outline") != std::string::npos) {
-                    std::string orderStr;
-                    for (size_t idx = 0; idx < groupOrder.size(); ++idx) {
-                        orderStr += std::to_string(groupOrder[idx]);
-                        if (idx + 1 < groupOrder.size()) orderStr += ",";
-                    }
-                    loggedBindGroupOrder = true;
-                }
+                impl->bindGroups.resize(groupOrder.size());
                 const auto* globalBuffers = webgpuRenderPass.getGlobalUniformBuffers();
 
                 const auto findTextureForBinding = [&](uint32_t binding, bool samplerBinding) -> Texture2D* {
@@ -537,17 +511,10 @@ void Drawable::draw(PaintParameters& parameters) const {
                         Log::Warning(Event::Render,
                                      "WebGPU: missing bind group layout for group " + std::to_string(group) +
                                          " in shader '" + shaderName + "'");
-                        continue;
+                        return;
                     }
 
                     const auto& bindingInfos = webgpuShader->getBindingInfosForGroup(group);
-                    if (getName().find("fill-outline") != std::string::npos) {
-                        std::string infoStr;
-                        for (const auto& info : bindingInfos) {
-                            infoStr += "(binding=" + std::to_string(info.binding) +
-                                       ", type=" + std::to_string(static_cast<int>(info.type)) + ")";
-                        }
-                    }
                     std::vector<WGPUBindGroupEntry> entries;
                     entries.reserve(bindingInfos.size());
                     bool validBindings = true;
@@ -563,10 +530,15 @@ void Drawable::draw(PaintParameters& parameters) const {
                                 std::shared_ptr<gfx::UniformBuffer> buffer = impl->uniformBuffers.get(
                                     bindingInfo.binding);
                                 if (bindingInfo.binding == shaders::idGlobalUBOIndex) {
-                                    GlobalUBOIndexData indexData;
-                                    indexData.value = getUBOIndex();
-                                    context.emplaceOrUpdateUniformBuffer(
-                                        impl->uboIndexUniform, &indexData, sizeof(indexData), false);
+                                    // Write the index only when it changes.
+                                    const auto uboIndex = static_cast<uint32_t>(getUBOIndex());
+                                    if (!impl->uboIndexUniform || impl->uboIndexValue != uboIndex) {
+                                        GlobalUBOIndexData indexData;
+                                        indexData.value = uboIndex;
+                                        context.emplaceOrUpdateUniformBuffer(
+                                            impl->uboIndexUniform, &indexData, sizeof(indexData), false);
+                                        impl->uboIndexValue = uboIndex;
+                                    }
                                     if (impl->uboIndexUniform) {
                                         impl->uniformBuffers.set(bindingInfo.binding, impl->uboIndexUniform);
                                         buffer = impl->uboIndexUniform;
@@ -603,7 +575,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                                 entry.buffer = webgpuUniform->getBuffer();
                                 entry.offset = 0;
-                                entry.size = buffer->getSize();
+                                entry.size = webgpuUniform->getAllocatedSize();
                                 break;
                             }
                             case ShaderProgram::BindingType::Sampler: {
@@ -648,6 +620,12 @@ void Drawable::draw(PaintParameters& parameters) const {
                         Log::Warning(Event::Render,
                                      "WebGPU: invalid bindings for drawable '" + getName() +
                                          "' (group=" + std::to_string(group) + ", slot=" + std::to_string(slot) + ")");
+                        return;
+                    }
+
+                    // Reuse the bind group while it binds the same resources.
+                    auto& record = impl->bindGroups[slot];
+                    if (record.matches(layout, entries)) {
                         continue;
                     }
 
@@ -661,7 +639,11 @@ void Drawable::draw(PaintParameters& parameters) const {
                     descriptor.entries = entries.data();
 
                     WGPUBindGroup bindGroup = wgpuDeviceCreateBindGroup(deviceHandle, &descriptor);
-                    impl->bindGroups.push_back({static_cast<uint32_t>(slot), group, bindGroup});
+                    if (!bindGroup) {
+                        record.reset();
+                        return;
+                    }
+                    record.assign(static_cast<uint32_t>(slot), group, layout, bindGroup, std::move(entries));
                 }
             }
         }
@@ -833,7 +815,18 @@ void Drawable::draw(PaintParameters& parameters) const {
             Log::Error(Event::Render, "renderPassEncoder is null!");
             return;
         }
+
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipelineState);
+
+        const auto size = webgpuRenderPass.getDescriptor().renderable.getSize();
+        wgpuRenderPassEncoderSetViewport(renderPassEncoder,
+                                         0.0f,
+                                         0.0f,
+                                         static_cast<float>(size.width),
+                                         static_cast<float>(size.height),
+                                         depthMode.range.min,
+                                         depthMode.range.max);
+
         if (getEnableStencil()) {
             wgpuRenderPassEncoderSetStencilReference(renderPassEncoder, static_cast<uint32_t>(stencilMode.ref));
         }
@@ -970,6 +963,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                                              baseInstance);                                // firstInstance
 
             context.renderingStats().numDrawCalls++;
+            context.renderingStats().totalDrawCalls++;
         }
     }
 }
@@ -1029,8 +1023,14 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
         drawSegs.reserve(segmentCount);
         for (std::size_t i = 0; i < segmentCount; ++i) {
             const auto& seg = segments[i];
-            drawSegs.push_back(std::make_unique<DrawSegment>(
-                mode, SegmentBase{seg.vertexOffset, seg.indexOffset, seg.vertexLength, seg.indexLength, seg.sortKey}));
+            drawSegs.push_back(std::make_unique<DrawSegment>(mode,
+                                                             SegmentBase{seg.vertexOffset,
+                                                                         seg.indexOffset,
+                                                                         seg.vertexLength,
+                                                                         seg.indexLength,
+                                                                         seg.baseInstance,
+                                                                         seg.instanceCount,
+                                                                         seg.sortKey}));
         }
     }
 

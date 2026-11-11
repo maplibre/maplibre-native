@@ -24,6 +24,18 @@ object PropertyFactory {
     fun visibility(@Property.VISIBILITY value: String?): PropertyValue<String> = LayoutPropertyValue("visibility", value)
 
     /**
+     * Set the property visibility as an expression. Per the style specification,
+     * visibility expressions may only use the
+     * [global-state](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression
+     * and must evaluate to `"visible"` or `"none"`.
+     *
+     * @param expression the visibility expression
+     * @return property wrapper around visibility
+     */
+    @JvmStatic
+    fun visibility(expression: Expression): PropertyValue<Expression> = LayoutPropertyValue("visibility", expression)
+
+    /**
      * Whether or not the fill should be antialiased.
      *
      * @param value a Boolean value
@@ -64,7 +76,7 @@ object PropertyFactory {
         PaintPropertyValue("fill-opacity", expression)
 
     /**
-     * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+     * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
      *
      * @param value a int color value
      * @return property wrapper around String color
@@ -74,7 +86,7 @@ object PropertyFactory {
         PaintPropertyValue("fill-color", colorToRgbaString(value))
 
     /**
-     * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+     * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
      *
      * @param value a String value
      * @return property wrapper around String
@@ -84,7 +96,7 @@ object PropertyFactory {
         PaintPropertyValue("fill-color", value)
 
     /**
-     * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+     * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
      *
      * @param expression an expression statement
      * @return property wrapper around an expression statement

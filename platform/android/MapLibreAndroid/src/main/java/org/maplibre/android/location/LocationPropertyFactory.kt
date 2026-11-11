@@ -28,6 +28,18 @@ internal object LocationPropertyFactory {
     fun visibility(@Property.VISIBILITY value: String?): PropertyValue<String> = LayoutPropertyValue("visibility", value)
 
     /**
+     * Set the property visibility as an expression. Per the style specification,
+     * visibility expressions may only use the
+     * [global-state](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression
+     * and must evaluate to `"visible"` or `"none"`.
+     *
+     * @param expression the visibility expression
+     * @return property wrapper around visibility
+     */
+    @JvmStatic
+    fun visibility(expression: Expression): PropertyValue<Expression> = LayoutPropertyValue("visibility", expression)
+
+    /**
      * The amount of the perspective compensation, between 0 and 1. A value of 1 produces a location indicator of constant width across the screen. A value of 0 makes it scale naturally according to the viewing projection.
      *
      * @param value a Float value

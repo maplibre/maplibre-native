@@ -52,11 +52,13 @@ std::unordered_map<std::string, std::vector<Feature>> RenderAnnotationSource::qu
     const TransformState& transformState,
     const std::unordered_map<std::string, const RenderLayer*>& layers,
     const RenderedQueryOptions& options,
+    const GlobalStateMap* globalState,
     const mat4& projMatrix) const {
-    return tilePyramid.queryRenderedFeatures(geometry, transformState, layers, options, projMatrix, {});
+    return tilePyramid.queryRenderedFeatures(geometry, transformState, layers, options, globalState, projMatrix, {});
 }
 
-std::vector<Feature> RenderAnnotationSource::querySourceFeatures(const SourceQueryOptions&) const {
+std::vector<Feature> RenderAnnotationSource::querySourceFeatures(const SourceQueryOptions&,
+                                                                 const GlobalStateMap*) const {
     return {};
 }
 

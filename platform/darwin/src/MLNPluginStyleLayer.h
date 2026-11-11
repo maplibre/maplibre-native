@@ -4,6 +4,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MLNPluginLayer;
 
+MLN_EXPORT
 @interface MLNPluginStyleLayer : MLNStyleLayer
 
 - (MLNPluginLayer *)pluginLayer;

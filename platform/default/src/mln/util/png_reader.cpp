@@ -5,6 +5,7 @@
 
 #include <istream>
 #include <sstream>
+#include <utility>
 
 extern "C" {
 #include <png.h>
@@ -19,7 +20,7 @@ std::string sprintf(const char* msg, Args... args) {
 }
 } // namespace
 
-const static bool png_version_check [[maybe_unused]] = []() {
+const static bool png_version_check [[maybe_unused]] = [] {
     const png_uint_32 version = png_access_version_number();
     if (version / 100 != PNG_LIBPNG_VER / 100) {
         throw std::runtime_error(
@@ -50,7 +51,7 @@ void png_read_data(png_structp png_ptr, png_bytep data, png_size_t length) {
     auto* fin = reinterpret_cast<std::istream*>(png_get_io_ptr(png_ptr));
     fin->read(reinterpret_cast<char*>(data), length);
     std::streamsize read_count = fin->gcount();
-    if (read_count < 0 || static_cast<png_size_t>(read_count) != length) {
+    if (read_count < 0 || std::cmp_not_equal(read_count, length)) {
         png_error(png_ptr, "Read Error");
     }
 }

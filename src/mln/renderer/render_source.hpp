@@ -54,6 +54,8 @@ public:
     static std::unique_ptr<RenderSource> create(const Immutable<style::Source::Impl>&, const TaggedScheduler&);
     ~RenderSource() override;
 
+    const std::string& getId() const;
+
     bool isEnabled() const;
     virtual bool isLoaded() const = 0;
 
@@ -85,9 +87,10 @@ public:
         const TransformState& transformState,
         const std::unordered_map<std::string, const RenderLayer*>& layers,
         const RenderedQueryOptions& options,
+        const GlobalStateMap* globalState,
         const mat4& projMatrix) const = 0;
 
-    virtual std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const = 0;
+    virtual std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const = 0;
 
     virtual FeatureExtensionValue queryFeatureExtensions(const Feature&,
                                                          const std::string&,

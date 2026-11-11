@@ -13,7 +13,6 @@
 #include <mln/layermanager/raster_layer_factory.hpp>
 #include <mln/layermanager/symbol_layer_factory.hpp>
 #include <mln/util/logging.hpp>
-#include <mln/layermanager/custom_drawable_layer_factory.hpp>
 
 #include <map>
 #include <memory>
@@ -87,15 +86,12 @@ LayerManagerDefault::LayerManagerDefault() {
 #if !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
     addLayerType(std::make_unique<LocationIndicatorLayerFactory>());
 #endif
-#if !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
-    addLayerType(std::make_unique<CustomDrawableLayerFactory>());
-#endif
 }
 
 void LayerManagerDefault::addLayerType(std::unique_ptr<LayerFactory> factory) {
     std::string type{factory->getTypeInfo()->type};
     if (!type.empty()) {
-        typeToFactory.emplace(std::make_pair(std::move(type), factory.get()));
+        typeToFactory.emplace(std::move(type), factory.get());
     } else {
         Log::Warning(Event::Setup,
                      "Failure adding layer factory. getTypeInfo() returned an empty "

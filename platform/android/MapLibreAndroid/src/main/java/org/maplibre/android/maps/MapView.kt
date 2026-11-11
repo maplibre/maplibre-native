@@ -990,7 +990,7 @@ open class MapView :
     }
 
     /**
-     * Remove's a callback that's invoked after a tile action occurs.
+     * Removes a callback that's invoked after a tile action occurs.
      *
      * @param callback The callback that's invoked after a tile action occurs
      */
@@ -1076,6 +1076,8 @@ open class MapView :
 
     /**
      * Set a callback that's invoked after a corrupted symbol is detected
+     *
+     * Only called when the environment variable `MLN_SYMBOL_GUARDS` is `1` before the first map loads.
      *
      * @param callback The callback that's invoked
      */

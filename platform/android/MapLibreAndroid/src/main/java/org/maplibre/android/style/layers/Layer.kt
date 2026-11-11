@@ -69,10 +69,27 @@ abstract class Layer {
             return nativeGetId()
         }
 
+    /**
+     * When the visibility was set as an expression, this returns the current evaluated value.
+     */
     val visibility: PropertyValue<String>
         get() {
             checkThread()
             return PaintPropertyValue("visibility", nativeGetVisibility() as String)
+        }
+
+    /**
+     * The visibility of this layer as an expression, or null when the visibility is a constant value.
+     */
+    val visibilityExpression: Expression?
+        get() {
+            checkThread()
+            val jsonElement = nativeGetVisibilityExpression()
+            return if (jsonElement != null) {
+                Expression.Converter.convert(jsonElement)
+            } else {
+                null
+            }
         }
 
     var minZoom: Float
@@ -104,6 +121,9 @@ abstract class Layer {
 
     @Keep
     protected external fun nativeGetVisibility(): Any
+
+    @Keep
+    private external fun nativeGetVisibilityExpression(): JsonElement?
 
     @Keep
     protected external fun nativeSetLayoutProperty(

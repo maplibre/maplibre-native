@@ -25,9 +25,7 @@ mln::LatLng screenCoordinateToLatLng(mln::ScreenCoordinate point,
     return state.screenCoordinateToLatLng(point, wrapMode);
 }
 mln::Point<double> project(const mln::LatLng& coordinate, const mln::TransformState& state) {
-    mln::LatLng unwrappedLatLng = coordinate.wrapped();
-    unwrappedLatLng.unwrapForShortestPath(state.getLatLng(mln::LatLng::Wrapped));
-    return mln::Projection::project(unwrappedLatLng, state.getScale());
+    return mln::Projection::project(state.latLngNearCenter(coordinate), state.getScale());
 }
 } // namespace
 
@@ -94,6 +92,9 @@ IndexedSubfeature::IndexedSubfeature(std::size_t index_,
       bucketLeaderIDCopy(std::move(bucketName_)) {}
 
 IndexedSubfeature& IndexedSubfeature::operator=(const IndexedSubfeature& other) {
+    if (this == &other) {
+        return *this;
+    }
     index = other.index;
     sourceLayerName = sourceLayerNameCopy;
     bucketLeaderID = bucketLeaderIDCopy;
@@ -153,6 +154,7 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
                          const double tileSize,
                          const double scale,
                          const RenderedQueryOptions& queryOptions,
+                         const GlobalStateMap* globalState,
                          const UnwrappedTileID& tileID,
                          const std::unordered_map<std::string, const RenderLayer*>& layers,
                          const float additionalQueryPadding,
@@ -183,6 +185,7 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
         addFeature(result,
                    indexedFeature,
                    queryOptions,
+                   globalState,
                    tileID.canonical,
                    layers,
                    queryGeometry,
@@ -196,6 +199,7 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
 std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbolFeatures(
     const std::vector<IndexedSubfeature>& symbolFeatures,
     const RenderedQueryOptions& queryOptions,
+    const GlobalStateMap* globalState,
     const std::unordered_map<std::string, const RenderLayer*>& layers,
     const OverscaledTileID& tileID,
     const FeatureSortOrder& featureSortOrder) const {
@@ -234,6 +238,7 @@ std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbol
         addFeature(result,
                    symbolFeature,
                    queryOptions,
+                   globalState,
                    tileID.canonical,
                    layers,
                    GeometryCoordinates(),
@@ -248,6 +253,7 @@ std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbol
 void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Feature>>& result,
                               const RefIndexedSubfeature& indexedFeature,
                               const RenderedQueryOptions& options,
+                              const GlobalStateMap* globalState,
                               const CanonicalTileID& tileID,
                               const std::unordered_map<std::string, const RenderLayer*>& layers,
                               const GeometryCoordinates& queryGeometry,
@@ -291,7 +297,8 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
         }
 
         if (options.filter && !(*options.filter)(style::expression::EvaluationContext{static_cast<float>(tileID.z),
-                                                                                      geometryTileFeature.get()})) {
+                                                                                      geometryTileFeature.get()}
+                                                     .withGlobalState(globalState))) {
             continue;
         }
 
@@ -363,7 +370,7 @@ void DynamicFeatureIndex::query(std::unordered_map<std::string, std::vector<Feat
 
 void DynamicFeatureIndex::insert(std::shared_ptr<Feature> feature,
                                  std::shared_ptr<mapbox::geometry::polygon<int64_t>> envelope) {
-    features.push_back({std::move(feature), std::move(envelope)});
+    features.push_back({.feature = std::move(feature), .envelope = std::move(envelope)});
 }
 
 } // namespace mln

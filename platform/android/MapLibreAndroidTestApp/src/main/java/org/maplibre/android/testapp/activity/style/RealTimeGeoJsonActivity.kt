@@ -14,6 +14,7 @@ import org.maplibre.android.style.layers.*
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
+import org.maplibre.android.testapp.utils.EdgeToEdgeActivity
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.Point
 import timber.log.Timber
@@ -43,7 +44,8 @@ fun calculateRotationAngle(
  */
 class RealTimeGeoJsonActivity :
     AppCompatActivity(),
-    OnMapReadyCallback {
+    OnMapReadyCallback,
+    EdgeToEdgeActivity {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private var handler: Handler? = null

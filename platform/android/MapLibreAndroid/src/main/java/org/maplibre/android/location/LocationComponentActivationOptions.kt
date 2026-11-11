@@ -178,8 +178,8 @@ class LocationComponentActivationOptions private constructor(
          * True if you want to initialize and use the specialized location layer to render the location puck.
          *
          * The specialized layer is not based on runtime styling. This brings significant performance improvements,
-         * but since it's not based on the runtime styling,
-         * it's not fully compatible with the traditional implementation. The incompatibilities are:
+         * but since it's not based on the runtime styling, it's not fully compatible with the traditional implementation.
+         * The incompatibilities are:
          *
          *  - Constants like [LocationComponentConstants.BACKGROUND_LAYER], [LocationComponentConstants.ACCURACY_LAYER]
          *    or [LocationComponentConstants.LOCATION_SOURCE] are ignored.
@@ -189,8 +189,7 @@ class LocationComponentActivationOptions private constructor(
          *    Use [LocationComponentOptions.foregroundDrawable] to alter the image rendered as the puck.
          *  - The LocationComponent's pulsing effect. Any of the [LocationComponentOptions]'
          *    pulsing methods such as [LocationComponentOptions.pulseEnabled] or
-         *    [LocationComponentOptions.pulseColor], are useless when using the
-         *    the specialized location layer.
+         *    [LocationComponentOptions.pulseColor], are useless when using the specialized location layer.
          *
          * @param useSpecializedLocationLayer true if you want to initialize and use the
          *                                    specialized location layer. Defaults to false.

@@ -62,7 +62,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                 std::function<void()> tasklet;
                 {
                     std::scoped_lock lock(q->lock);
-                    if (q->queue.size()) {
+                    if (!q->queue.empty()) {
                         q->runningCount++;
                         tasklet = std::move(q->queue.front());
                         q->queue.pop();
@@ -74,7 +74,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                 taskCount--;
 
                 try {
-                    tasklet();
+                    platform::runTask(tasklet);
                     tasklet = {}; // destroy the function and release its captures before unblocking `waitForEmpty`
 
                     if (!--q->runningCount) {

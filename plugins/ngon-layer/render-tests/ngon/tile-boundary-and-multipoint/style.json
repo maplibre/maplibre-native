@@ -1,0 +1,77 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 384,
+      "height": 256,
+      "description": "tile-boundary-and-multipoint"
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 10,
+  "sources": {
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": 1,
+            "properties": {},
+            "geometry": {
+              "type": "MultiPoint",
+              "coordinates": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  -0.07,
+                  0
+                ],
+                [
+                  0.07,
+                  0
+                ],
+                [
+                  0,
+                  0.06
+                ],
+                [
+                  0,
+                  -0.06
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#eef2f7"
+      }
+    },
+    {
+      "id": "points",
+      "type": "ngon",
+      "source": "points",
+      "paint": {
+        "ngon-radius": 28,
+        "ngon-corners": 4,
+        "ngon-rotate": 45,
+        "ngon-color": "#2563eb",
+        "ngon-opacity": 0.5,
+        "ngon-stroke-width": 4
+      }
+    }
+  ]
+}

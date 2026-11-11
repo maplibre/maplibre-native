@@ -129,4 +129,55 @@ class RenderingStats {
     /** Number of stencil buffer updates */
     @JvmField
     var stencilUpdates = 0
+
+    /** Features rendered in the frame, populated by the native peer when feature info is enabled */
+    var renderedFeatures: Map<SourceLayerID, List<FeatureInfo>> = emptyMap()
+        private set
+
+    class NDCBound(
+        @JvmField val minX: Double,
+        @JvmField val maxX: Double,
+        @JvmField val minY: Double,
+        @JvmField val maxY: Double,
+    ) {
+        val midX: Double
+            get() = (minX + maxX) / 2.0
+
+        val midY: Double
+            get() = (minY + maxY) / 2.0
+    }
+
+    class TileID(
+        @JvmField val z: Int,
+        @JvmField val x: Int,
+        @JvmField val y: Int,
+        @JvmField val overscaledZ: Int,
+        @JvmField val wrap: Int,
+    )
+
+    class FeatureInfo(
+        @JvmField val featureID: String,
+        @JvmField val ndcBound: NDCBound,
+        @JvmField val tileIDs: Set<TileID>,
+    )
+
+    class SourceLayerID(
+        @JvmField val sourceID: String,
+        @JvmField val layerID: String,
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
+                return true
+            }
+            if (other == null || javaClass != other.javaClass) {
+                return false
+            }
+            other as SourceLayerID
+            return sourceID == other.sourceID && layerID == other.layerID
+        }
+
+        override fun hashCode(): Int = 31 * sourceID.hashCode() + layerID.hashCode()
+
+        override fun toString(): String = "$sourceID/$layerID"
+    }
 }

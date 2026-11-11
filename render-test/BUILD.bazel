@@ -30,6 +30,7 @@ cc_library(
         "include",
     ],
     visibility = [
+        "//plugins:__pkg__",
         "//render-test/ios:__pkg__",
     ],
     deps = [
@@ -38,6 +39,11 @@ cc_library(
     ] + select({
         "@platforms//os:ios": ["//platform:ios-sdk"],
         "@platforms//os:linux": ["//platform/linux:impl"],
+        "@platforms//os:macos": [
+            "//platform/darwin:darwin-objcpp",
+            "//platform/default:mbgl-default",
+            "//platform/default:standalone-layer-manager",
+        ],
         "//conditions:default": [],
     }),
 )

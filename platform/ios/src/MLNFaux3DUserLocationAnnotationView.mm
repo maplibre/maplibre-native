@@ -54,19 +54,12 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
   }
 
   if (CLLocationCoordinate2DIsValid(self.userLocation.coordinate)) {
-    if (@available(iOS 14, *)) {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
-      if (![self.mapView.locationManager respondsToSelector:@selector(accuracyAuthorization)] ||
-          self.mapView.locationManager.accuracyAuthorization ==
-              CLAccuracyAuthorizationFullAccuracy) {
-        [self drawPreciseLocationPuck];
-      } else {
-        [self drawApproximate];
-        [self updatePitch];
-      }
-#endif
-    } else {
+    if (![self.mapView.locationManager respondsToSelector:@selector(accuracyAuthorization)] ||
+        self.mapView.locationManager.accuracyAuthorization == CLAccuracyAuthorizationFullAccuracy) {
       [self drawPreciseLocationPuck];
+    } else {
+      [self drawApproximate];
+      [self updatePitch];
     }
   }
 }
@@ -103,10 +96,8 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 
     puckArrowFillColor = style.puckArrowFillColor ? style.puckArrowFillColor : puckArrowFillColor;
 
-    if (@available(iOS 14, *)) {
-      approximateFillColor =
-          style.approximateHaloFillColor ? style.approximateHaloFillColor : approximateFillColor;
-    }
+    approximateFillColor =
+        style.approximateHaloFillColor ? style.approximateHaloFillColor : approximateFillColor;
 
     haloFillColor = style.haloFillColor ? style.haloFillColor : haloFillColor;
     dotFillColor = style.puckFillColor ? style.puckFillColor : dotFillColor;
@@ -517,14 +508,11 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
           respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
     MLNUserLocationAnnotationViewStyle *style =
         [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
-    if (@available(iOS 14, *)) {
-      backgroundColor =
-          style.approximateHaloFillColor ? style.approximateHaloFillColor : backgroundColor;
-      strokeColor =
-          style.approximateHaloBorderColor ? style.approximateHaloBorderColor : strokeColor;
-      opacity = style.approximateHaloOpacity;
-      borderSize = style.approximateHaloBorderWidth;
-    }
+    backgroundColor =
+        style.approximateHaloFillColor ? style.approximateHaloFillColor : backgroundColor;
+    strokeColor = style.approximateHaloBorderColor ? style.approximateHaloBorderColor : strokeColor;
+    opacity = style.approximateHaloOpacity;
+    borderSize = style.approximateHaloBorderWidth;
   }
 
   // approximate ring

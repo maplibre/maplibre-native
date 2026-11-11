@@ -351,7 +351,7 @@ const auto& zoomCompoundExpression() {
                     "The 'zoom' expression is unavailable in the current "
                     "evaluation context."};
             }
-            return *(params.zoom);
+            return *params.zoom;
         },
         Dependency::Zoom);
     return signature;
@@ -365,7 +365,7 @@ const auto& heatmapDensityCompoundExpression() {
                                                               "The 'heatmap-density' expression is unavailable in the "
                                                               "current evaluation context."};
                                                       }
-                                                      return *(params.colorRampParameter);
+                                                      return *params.colorRampParameter;
                                                   });
     return signature;
 }
@@ -376,11 +376,11 @@ const auto& elevationCompoundExpression() {
         [](const EvaluationContext& params) -> Result<double> {
             // For color-relief, elevation is passed via colorRampParameter
             if (params.colorRampParameter) {
-                return *(params.colorRampParameter);
+                return *params.colorRampParameter;
             }
             // For 3D terrain, elevation is passed directly
             if (params.elevation) {
-                return static_cast<double>(*(params.elevation));
+                return static_cast<double>(*params.elevation);
             }
             // During parsing/validation, return a valid value to allow parsing to succeed
             // The Dependency::Elevation flag prevents this from being optimized to a constant
@@ -398,7 +398,7 @@ const auto& lineProgressCompoundExpression() {
                                                               "The 'line-progress' expression is unavailable in the "
                                                               "current evaluation context."};
                                                       }
-                                                      return *(params.colorRampParameter);
+                                                      return *params.colorRampParameter;
                                                   });
     return signature;
 }
@@ -436,7 +436,7 @@ const auto& hasObjectCompoundExpression() {
     static auto signature = detail::makeSignature(
         "has",
         [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<bool> {
-            return object.find(key) != object.end();
+            return object.contains(key);
         },
         Dependency::Feature);
     return signature;
@@ -466,7 +466,7 @@ const auto& getObjectCompoundExpression() {
     static auto signature = detail::makeSignature(
         "get",
         [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<Value> {
-            if (object.find(key) == object.end()) {
+            if (!object.contains(key)) {
                 return Null;
             }
             return object.at(key);
@@ -783,6 +783,23 @@ const auto& featureStateCompoundExpression() {
             return toExpressionValue(state);
         },
         Dependency::Feature);
+    return signature;
+}
+
+const auto& globalStateCompoundExpression() {
+    static auto signature = detail::makeSignature(
+        "global-state",
+        [](const EvaluationContext& params, const std::string& key) -> Result<Value> {
+            mln::Value state;
+            if (params.globalState != nullptr) {
+                auto it = params.globalState->find(key);
+                if (it != params.globalState->end()) {
+                    state = mln::Value(it->second);
+                }
+            }
+            return toExpressionValue(state);
+        },
+        Dependency::GlobalState);
     return signature;
 }
 
@@ -1110,6 +1127,7 @@ constexpr const auto compoundExpressionRegistry =
         {"resolved-locale", resolvedLocaleCompoundExpression},
         {"error", errorCompoundExpression},
         {"feature-state", featureStateCompoundExpression},
+        {"global-state", globalStateCompoundExpression},
         // Legacy Filters
         {"filter-==", filterEqualsCompoundExpression},
         {"filter-id-==", filterIdEqualsCompoundExpression},
@@ -1165,7 +1183,7 @@ std::string expectedTypesError(const Definitions& definitions, const std::vector
                     overload += toString(param);
                     first = false;
                 }
-                overload += ")";
+                overload += ')';
                 if (params.size() == args.size()) {
                     overloads.push_back(overload);
                 } else {
@@ -1249,6 +1267,13 @@ ParseResult parseCompoundExpression(const std::string& name, const Convertible& 
     }
 
     auto length = arrayLength(value);
+
+    // Per the style specification, the "global-state" property name must be a
+    // string literal, not the result of a sub-expression.
+    if (name == "global-state" && length == 2 && !toString(arrayMember(value, 1))) {
+        ctx.error("Global state property must be a string literal.", 1);
+        return ParseResult();
+    }
 
     for (auto it = definitions.first; it != definitions.second; ++it) {
         const auto& signature = it->second();

@@ -135,7 +135,8 @@ mln::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::Drawa
     // get center
     constexpr double maxd = std::numeric_limits<double>::max();
     constexpr double mind = std::numeric_limits<double>::min();
-    Point<double> minPoint{maxd, maxd}, maxPoint{mind, mind};
+    Point<double> minPoint{maxd, maxd};
+    Point<double> maxPoint{mind, mind};
     for (const auto& coord : coordinates) {
         auto merc = Projection::project(LatLng(coord.y, coord.x), zoom);
         Point<double> pSource{merc.x * mln::util::EXTENT, merc.y * mln::util::EXTENT};
@@ -204,7 +205,7 @@ void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::Draw
 
     // segments
     SegmentVector triangleSegments;
-    triangleSegments.emplace_back(0, 0, 12, 18);
+    triangleSegments.emplace_back(0, 0, 12, 18, 0, sharedInstanceData->elements());
 
     // add to builder
     {

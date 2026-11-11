@@ -15,7 +15,7 @@ public:
         MLN_TRACE_FUNC();
 
         backend.setFramebufferBinding(0);
-        backend.setViewport(0, 0, backend.getSize());
+        backend.setViewport(0, 0, backend.getFramebufferSize());
     }
 
     void swap() override {
@@ -72,15 +72,15 @@ void GLFWGLBackend::updateAssumedState() {
     MLN_TRACE_FUNC();
 
     assumeFramebufferBinding(0);
-    setViewport(0, 0, size);
+    setViewport(0, 0, getSize());
 }
 
-mln::Size GLFWGLBackend::getSize() const {
-    return size;
+mln::Size GLFWGLBackend::getFramebufferSize() const {
+    return getSize();
 }
 
-void GLFWGLBackend::setSize(const mln::Size newSize) {
-    size = newSize;
+void GLFWGLBackend::setFramebufferSize(const mln::Size newSize) {
+    setRenderableSize(newSize);
 }
 
 void GLFWGLBackend::swap() {

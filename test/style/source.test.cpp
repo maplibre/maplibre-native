@@ -13,6 +13,7 @@
 #include <mln/style/layers/raster_layer.hpp>
 #include <mln/style/layers/raster_layer_impl.hpp>
 #include <mln/style/source_impl.hpp>
+#include <mln/style/sources/tile_source_impl.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/sources/image_source.hpp>
@@ -665,6 +666,88 @@ TEST(Source, RasterDEMTileAttribution) {
     test.run();
 }
 
+TEST(Source, RasterDEMInlineZoomOverridesTileJSON) {
+    SourceTest test;
+
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
+        EXPECT_EQ("url", resource.url);
+        Response response;
+        response.data = std::make_unique<std::string>(
+            R"TILEJSON({ "tilejson": "2.1.0", "tiles": [ "tiles" ], "minzoom": 4, "maxzoom": 12 })TILEJSON");
+        return response;
+    };
+
+    test.styleObserver.sourceLoaded = [&](Source& source) {
+        const auto& tileset = static_cast<const TileSource::Impl&>(*source.baseImpl).tileset;
+        ASSERT_TRUE(tileset);
+        // The inline maxzoom wins over the TileJSON's; minzoom was not given inline, so the
+        // TileJSON value is kept.
+        EXPECT_EQ(4, tileset->zoomRange.min);
+        EXPECT_EQ(15, tileset->zoomRange.max);
+        EXPECT_EQ(Tileset::RasterEncoding::Terrarium, tileset->rasterEncoding);
+        test.end();
+    };
+
+    RasterDEMSource source(
+        "source", "url", 512, SourceOptions{.rasterEncoding = Tileset::RasterEncoding::Terrarium, .maxzoom = 15});
+    source.setObserver(&test.styleObserver);
+    source.loadDescription(*test.fileSource);
+
+    test.run();
+}
+
+TEST(Source, RasterInlineZoomOverridesTileJSON) {
+    SourceTest test;
+
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
+        EXPECT_EQ("url", resource.url);
+        Response response;
+        response.data = std::make_unique<std::string>(
+            R"TILEJSON({ "tilejson": "2.1.0", "tiles": [ "tiles" ], "minzoom": 4, "maxzoom": 12 })TILEJSON");
+        return response;
+    };
+
+    test.styleObserver.sourceLoaded = [&](Source& source) {
+        const auto& tileset = static_cast<const TileSource::Impl&>(*source.baseImpl).tileset;
+        ASSERT_TRUE(tileset);
+        // The inline maxzoom wins; minzoom was not given inline, so the TileJSON's is kept.
+        EXPECT_EQ(4, tileset->zoomRange.min);
+        EXPECT_EQ(16, tileset->zoomRange.max);
+        test.end();
+    };
+
+    RasterSource source("source", "url", 512, SourceType::Raster, std::nullopt, 16);
+    source.setObserver(&test.styleObserver);
+    source.loadDescription(*test.fileSource);
+
+    test.run();
+}
+
+TEST(Source, RasterDEMTileJSONZoomKeptWithoutInlineOverride) {
+    SourceTest test;
+
+    test.fileSource->sourceResponse = [&](const Resource&) {
+        Response response;
+        response.data = std::make_unique<std::string>(
+            R"TILEJSON({ "tilejson": "2.1.0", "tiles": [ "tiles" ], "minzoom": 4, "maxzoom": 12 })TILEJSON");
+        return response;
+    };
+
+    test.styleObserver.sourceLoaded = [&](Source& source) {
+        const auto& tileset = static_cast<const TileSource::Impl&>(*source.baseImpl).tileset;
+        ASSERT_TRUE(tileset);
+        EXPECT_EQ(4, tileset->zoomRange.min);
+        EXPECT_EQ(12, tileset->zoomRange.max);
+        test.end();
+    };
+
+    RasterDEMSource source("source", "url", 512);
+    source.setObserver(&test.styleObserver);
+    source.loadDescription(*test.fileSource);
+
+    test.run();
+}
+
 TEST(Source, GeoJSonSourceUrlUpdate) {
     SourceTest test;
 
@@ -1061,4 +1144,43 @@ TEST(Source, SetMaxParentOverscaleFactor) {
         log.count(
             {EventSeverity::Warning, Event::Style, -1, "Parent tile overscale factor will cap prefetch delta to 3"}));
     EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+TEST(Source, RasterDEMTileRoundsCoveringZoom) {
+    SourceTest test;
+    test.transform.jumpTo(CameraOptions().withCenter(LatLng()).withZoom(4.6));
+    test.transformState = test.transform.getState();
+
+    std::vector<uint8_t> requestedZooms;
+    test.fileSource->tileResponse = [&](const Resource& res) {
+        requestedZooms.push_back(res.tileData->z);
+        Response response;
+        response.noContent = true;
+        return response;
+    };
+
+    HillshadeLayer layer("id", "source");
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
+
+    Tileset tileset;
+    tileset.tiles = {"tiles"};
+
+    RasterDEMSource source("source", tileset, 512);
+    source.loadDescription(*test.fileSource);
+
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
+    renderSource->setObserver(&test.renderSourceObserver);
+    renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
+
+    test.renderSourceObserver.tileChanged = [&](RenderSource&, const OverscaledTileID&) {
+        test.end();
+    };
+    test.run();
+
+    ASSERT_FALSE(requestedZooms.empty());
+    for (const auto z : requestedZooms) {
+        EXPECT_EQ(5, z);
+    }
 }

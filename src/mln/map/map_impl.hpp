@@ -60,7 +60,7 @@ public:
     void onInvalidate() final;
     void onResourceError(std::exception_ptr) final;
     void onWillStartRenderingFrame() final;
-    void onDidFinishRenderingFrame(RenderMode, bool, bool, const gfx::RenderingStats&) final;
+    void onDidFinishRenderingFrame(RenderMode, bool, bool, std::shared_ptr<gfx::RenderingStats>) final;
     void onWillStartRenderingMap() final;
     void onDidFinishRenderingMap() final;
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
@@ -93,9 +93,11 @@ public:
     const float pixelRatio;
     const bool crossSourceCollisions;
     const bool fastPFOREnabled;
+    const bool captureRenderedFeatures;
 
     MapDebugOptions debugOptions{MapDebugOptions::NoDebug};
     std::unique_ptr<gfx::RenderingStatsView> renderingStatsView;
+    std::shared_ptr<gfx::RenderingStats> lastFrameStats;
 
     std::shared_ptr<FileSource> fileSource;
 

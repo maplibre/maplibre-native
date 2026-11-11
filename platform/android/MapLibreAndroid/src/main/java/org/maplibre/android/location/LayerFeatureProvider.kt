@@ -11,10 +11,15 @@ internal class LayerFeatureProvider {
         if (locationFeature != null) {
             return locationFeature
         }
-        val feature = Feature.fromGeometry(Point.fromLngLat(0.0, 0.0))
+        val feature = Feature.fromGeometry(Point.fromLngLat(0.0, 0.0), null, featureId, null)
         feature.addNumberProperty(LocationComponentConstants.PROPERTY_GPS_BEARING, 0f)
         feature.addNumberProperty(LocationComponentConstants.PROPERTY_COMPASS_BEARING, 0f)
         feature.addBooleanProperty(LocationComponentConstants.PROPERTY_LOCATION_STALE, isStale)
         return feature
+    }
+
+    companion object {
+        @Suppress("ktlint:standard:property-naming")
+        const val featureId: String = "maplibre:location-component"
     }
 }

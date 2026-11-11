@@ -14,8 +14,8 @@ public:
   GLFWMetalBackend(GLFWwindow *window_, const bool capFrameRate);
   ~GLFWMetalBackend() = default;
   mln::gfx::RendererBackend &getRendererBackend() override;
-  void setSize(mln::Size) override;
-  mln::Size getSize() const override;
+  void setFramebufferSize(mln::Size) override;
+  mln::Size getFramebufferSize() const override;
 
 private:
   NSWindow *window;

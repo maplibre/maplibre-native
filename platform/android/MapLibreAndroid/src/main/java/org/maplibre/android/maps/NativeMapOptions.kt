@@ -15,8 +15,8 @@ class NativeMapOptions {
     private val actionJournalLogFileCount: Long
     private val actionJournalRenderingReportInterval: Int
     private val asyncRendererCleanup: Boolean
-
     private val fastPFOREnabled: Boolean
+    private val featureInfoEnabled: Boolean
 
     constructor(options: MapLibreMapOptions) {
         pixelRatio = options.pixelRatio
@@ -29,6 +29,7 @@ class NativeMapOptions {
         actionJournalRenderingReportInterval = options.actionJournalRenderingReportInterval
         asyncRendererCleanup = options.asyncRendererCleanup
         fastPFOREnabled = options.fastPFOREnabled
+        featureInfoEnabled = options.featureInfoEnabled
     }
 
     constructor(pixelRatio: Float, crossSourceCollisions: Boolean) {
@@ -43,6 +44,7 @@ class NativeMapOptions {
 
         asyncRendererCleanup = false
         fastPFOREnabled = false
+        featureInfoEnabled = false
     }
 
     fun pixelRatio(): Float = pixelRatio
@@ -62,4 +64,6 @@ class NativeMapOptions {
     fun asyncRendererCleanup(): Boolean = asyncRendererCleanup
 
     fun fastPFOREnabled(): Boolean = fastPFOREnabled
+
+    fun featureInfoEnabled(): Boolean = featureInfoEnabled
 }

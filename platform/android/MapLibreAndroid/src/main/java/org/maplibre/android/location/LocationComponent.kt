@@ -14,6 +14,7 @@ import androidx.annotation.StyleRes
 import androidx.annotation.VisibleForTesting
 import org.maplibre.android.R
 import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.LocationComponentConstants.DEFAULT_FASTEST_INTERVAL_MILLIS
 import org.maplibre.android.location.LocationComponentConstants.DEFAULT_INTERVAL_MILLIS
 import org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_PADDING_ANIM_DURATION
@@ -977,6 +978,44 @@ class LocationComponent {
             }
             internalCompassEngine = value
             updateCompassListenerState(true)
+        }
+
+    /**
+     * The puck's current position, including an in-progress animation.
+     *
+     * [lastKnownLocation] is the latest sample, which the puck may still be moving
+     * toward. This is the position both the indicator and symbol renderers draw. It is `null`
+     * until the first location update. The returned point is a copy.
+     */
+    val userLocation: LatLng?
+        get() {
+            checkActivationState()
+            return locationAnimatorCoordinator.userLocation
+        }
+
+    /**
+     * Elapsed realtime, from [android.os.SystemClock.elapsedRealtime], when the latest
+     * user-location animation started, in milliseconds.
+     *
+     * Other graphics can share this clock with the puck. The value stays `0` until the first
+     * location update.
+     */
+    val userLocationAnimationReferenceTime: Long
+        get() {
+            checkActivationState()
+            return locationAnimatorCoordinator.userLocationAnimationReferenceTime
+        }
+
+    /**
+     * Duration of the latest user-location animation, in milliseconds.
+     *
+     * This is the duration passed to the puck and tracking-camera animators, including the tracking
+     * duration multiplier and the maximum animation duration. It is `0` when the update snaps.
+     */
+    val userLocationAnimationDuration: Long
+        get() {
+            checkActivationState()
+            return locationAnimatorCoordinator.userLocationAnimationDuration
         }
 
     /**

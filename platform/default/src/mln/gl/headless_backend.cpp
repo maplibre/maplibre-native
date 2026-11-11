@@ -24,8 +24,8 @@ public:
 
     void bind() override {
         context.bindFramebuffer = framebuffer.framebuffer;
-        context.scissorTest = {0, 0, 0, 0};
-        context.viewport = {0, 0, framebuffer.size};
+        context.scissorTest = {.x = 0, .y = 0, .width = 0, .height = 0};
+        context.viewport = {.x = 0, .y = 0, .size = framebuffer.size};
     }
 
     void swap() override {
@@ -97,7 +97,8 @@ gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
     MLN_TRACE_FUNC();
 
     if (!resource) {
-        resource = std::make_unique<HeadlessRenderableResource>(*this, static_cast<gl::Context&>(getContext()), size);
+        resource = std::make_unique<HeadlessRenderableResource>(
+            *this, static_cast<gl::Context&>(getContext()), getSize());
     }
     return *this;
 }
@@ -115,7 +116,7 @@ void HeadlessBackend::updateAssumedState() {
 PremultipliedImage HeadlessBackend::readStillImage() {
     MLN_TRACE_FUNC();
 
-    return static_cast<gl::Context&>(getContext()).readFramebuffer<PremultipliedImage>(size);
+    return static_cast<gl::Context&>(getContext()).readFramebuffer<PremultipliedImage>(getSize());
 }
 
 RendererBackend* HeadlessBackend::getRendererBackend() {

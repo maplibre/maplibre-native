@@ -156,12 +156,12 @@ GLFWVulkanBackend::GLFWVulkanBackend(GLFWwindow* window_, const bool capFrameRat
 
 GLFWVulkanBackend::~GLFWVulkanBackend() {}
 
-mln::Size GLFWVulkanBackend::getSize() const {
-    return size;
+mln::Size GLFWVulkanBackend::getFramebufferSize() const {
+    return getSize();
 }
 
-void GLFWVulkanBackend::setSize(const mln::Size newSize) {
-    size = newSize;
+void GLFWVulkanBackend::setFramebufferSize(const mln::Size newSize) {
+    setRenderableSize(newSize);
 
     auto& contextImpl = static_cast<mln::vulkan::Context&>(*context);
     contextImpl.requestSurfaceUpdate();

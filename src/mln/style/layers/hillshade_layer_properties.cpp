@@ -33,6 +33,14 @@ expression::Dependency HillshadeLayerProperties::getDependencies() const noexcep
     return layerImpl().paint.getDependencies();
 }
 
+expression::Dependency HillshadeLayerProperties::getEvaluatedDependencies() const noexcept {
+    return evaluated.getDependencies();
+}
+
+void HillshadeLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

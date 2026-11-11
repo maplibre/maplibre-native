@@ -42,6 +42,18 @@ object PropertyFactory {
     @JvmStatic
     fun visibility(@Property.VISIBILITY value: String?): PropertyValue<String> = LayoutPropertyValue("visibility", value)
 
+    /**
+     * Set the property visibility as an expression. Per the style specification,
+     * visibility expressions may only use the
+     * [global-state](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression
+     * and must evaluate to `"visible"` or `"none"`.
+     *
+     * @param expression the visibility expression
+     * @return property wrapper around visibility
+     */
+    @JvmStatic
+    fun visibility(expression: Expression): PropertyValue<Expression> = LayoutPropertyValue("visibility", expression)
+
 <% for (const property of paintProperties) { -%>
 <% if (property.type == 'color') { -%>
     /**

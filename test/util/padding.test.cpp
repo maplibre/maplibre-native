@@ -7,6 +7,7 @@
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/property_expression.hpp>
+#include <mln/util/vectors.hpp>
 
 #include <mln/style/conversion/function.hpp>
 #include <mln/style/conversion/property_value.hpp>

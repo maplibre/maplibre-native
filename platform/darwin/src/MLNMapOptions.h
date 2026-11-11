@@ -40,7 +40,12 @@ MLN_EXPORT
 /**
     Enable FastPFOR decoding for vector tiles. Defaults to `NO`.
  */
-@property bool fastPFOREnabled;
+@property (nonatomic) bool fastPFOREnabled;
+
+/**
+    Enable reporting of rendered feature IDs and bounds through frame statistics
+ */
+@property (nonatomic) bool featureInfoEnabled;
 
 @end
 

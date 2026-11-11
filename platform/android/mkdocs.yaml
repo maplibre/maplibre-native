@@ -74,6 +74,9 @@ plugins:
   - social:
       cards_layout_options:
         background_color: '#295DAA'
+  - redirects:
+      redirect_maps:
+        data/rendering-engine.md: artifacts.md
 validation:
   omitted_files: warn
   absolute_links: warn

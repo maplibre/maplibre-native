@@ -42,6 +42,17 @@ internal class LocationAnimatorCoordinator(
     private var compassAnimationEnabled = false
     private var accuracyAnimationEnabled = false
 
+    /**
+     * [SystemClock.elapsedRealtime] when the latest user-location animation started.
+     * `0` until the first location update.
+     */
+    var userLocationAnimationReferenceTime = 0L
+        private set
+
+    /** Duration in milliseconds of the latest user-location animation. */
+    var userLocationAnimationDuration = 0L
+        private set
+
     @VisibleForTesting
     var maxAnimationFps = Int.MAX_VALUE
         set(value) {
@@ -137,6 +148,10 @@ internal class LocationAnimatorCoordinator(
 
             animationDuration = min(animationDuration, MAX_ANIMATION_DURATION_MS)
         }
+
+        // Sample the clock immediately before the animators start so other graphics can share it.
+        userLocationAnimationReferenceTime = SystemClock.elapsedRealtime()
+        userLocationAnimationDuration = animationDuration
 
         playAnimators(
             animationDuration,
@@ -631,6 +646,19 @@ internal class LocationAnimatorCoordinator(
     fun setTrackingAnimationDurationMultiplier(trackingAnimationDurationMultiplier: Float) {
         durationMultiplier = trackingAnimationDurationMultiplier
     }
+
+    /**
+     * The puck's current position. `null` until the first location update.
+     */
+    val userLocation: LatLng?
+        get() {
+            val value = animatorArray.get(MapLibreAnimator.ANIMATOR_LAYER_LATLNG)?.animatedValue
+            if (value is LatLng) {
+                // Return a copy, don't expose the reused private instance in LatLngEvaluator
+                return LatLng(value)
+            }
+            return previousLocation?.let { LatLng(it) }
+        }
 
     fun setCompassAnimationEnabled(compassAnimationEnabled: Boolean) {
         this.compassAnimationEnabled = compassAnimationEnabled

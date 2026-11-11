@@ -341,6 +341,14 @@ open class MapLibreMapOptions
         var fastPFOREnabled = false
             private set
 
+        /**
+         * Check whether feature info recording is enabled
+         *
+         * @return true if enabled
+         */
+        var featureInfoEnabled = false
+            private set
+
         @Suppress("DEPRECATION", "LongMethod")
         private constructor(parcel: Parcel) : this() {
             cameraPosition = parcel.readParcelable(CameraPosition::class.java.classLoader)
@@ -400,6 +408,7 @@ open class MapLibreMapOptions
             asyncRendererCleanup = parcel.readBooleanByte()
 
             fastPFOREnabled = parcel.readBooleanByte()
+            featureInfoEnabled = parcel.readBooleanByte()
         }
 
         /**
@@ -879,6 +888,17 @@ open class MapLibreMapOptions
         }
 
         /**
+         * Enable recording the rendered features in each frame
+         *
+         * @param enable true to enable, false to disable
+         * @return This
+         */
+        fun featureInfoEnabled(enable: Boolean): MapLibreMapOptions {
+            featureInfoEnabled = enable
+            return this
+        }
+
+        /**
          * Enable local ideograph font family, defaults to true.
          *
          * @param enabled true to enable, false to disable
@@ -1068,6 +1088,7 @@ open class MapLibreMapOptions
             dest.writeBooleanByte(asyncRendererCleanup)
 
             dest.writeBooleanByte(fastPFOREnabled)
+            dest.writeBooleanByte(featureInfoEnabled)
         }
 
         @Suppress("CyclomaticComplexMethod", "LongMethod", "ReturnCount", "EqualsAlwaysReturnsTrueOrFalse")
@@ -1557,6 +1578,9 @@ open class MapLibreMapOptions
 
                     maplibreMapOptions.fastPFOREnabled(
                         typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_fastPFOREnabled, false),
+                    )
+                    maplibreMapOptions.featureInfoEnabled(
+                        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_featureInfoEnabled, false),
                     )
                 } finally {
                     typedArray.recycle()

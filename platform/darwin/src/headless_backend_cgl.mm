@@ -51,7 +51,7 @@ public:
   ~CGLDisplayConfig() {
     const CGLError error = CGLDestroyPixelFormat(pixelFormat);
     if (error != kCGLNoError) {
-      Log::Error(Event::OpenGL,
+      Log::Error(Event::GraphicsBackend,
                  std::string("Error destroying pixel format:") + CGLErrorString(error));
     }
   }

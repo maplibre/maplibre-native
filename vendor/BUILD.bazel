@@ -44,18 +44,6 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "ghc_filesystem",
-    hdrs = glob([
-        "filesystem/include/ghc/*.hpp",
-    ]),
-    copts = CPP_FLAGS,
-    includes = [
-        "filesystem/include",
-    ],
-    visibility = ["//visibility:public"],
-)
-
 # vendor/args
 cc_library(
     name = "args",
@@ -714,6 +702,13 @@ cc_library(
         "freetype/include/freetype/*",
         "freetype/include/freetype/config/*",
     ]),
+    # Keep bundled HarfBuzz symbols private so they do not interpose symbols from
+    # app dependencies. See https://github.com/maplibre/maplibre-native/issues/3777.
+    copts = select({
+        "@platforms//os:ios": ["-fvisibility=hidden"],
+        "@platforms//os:macos": ["-fvisibility=hidden"],
+        "//conditions:default": [],
+    }),
     defines = [
         "HAVE_OT",
         "HAVE_FREETYPE",
@@ -722,13 +717,6 @@ cc_library(
         # "HB_NO_WIN1256",
         "HB_TINY",
     ],
-    # Keep bundled HarfBuzz symbols private so they do not interpose symbols from
-    # app dependencies. See https://github.com/maplibre/maplibre-native/issues/3777.
-    copts = select({
-        "@platforms//os:ios": ["-fvisibility=hidden"],
-        "@platforms//os:macos": ["-fvisibility=hidden"],
-        "//conditions:default": [],
-    }),
     includes = [
         "freetype/include",
         "harfbuzz/src",

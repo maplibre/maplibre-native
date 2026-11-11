@@ -12,8 +12,6 @@
 #import "MLNRasterStyleLayer_Private.h"
 #import "MLNSymbolStyleLayer_Private.h"
 
-#import "MLNCustomDrawableStyleLayer_Private.h"
-
 #include <vector>
 
 namespace mln {
@@ -74,12 +72,6 @@ LayerManagerDarwin::LayerManagerDarwin() {
 #elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
   addLayerType(std::make_unique<CustomStyleLayerPeerFactory>());
 #endif
-
-#if defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_RUNTIME)
-  addLayerTypeCoreOnly(std::make_unique<CustomDrawableLayerFactory>());
-#elif !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
-  addLayerType(std::make_unique<CustomDrawableStyleLayerPeerFactory>());
-#endif
 }
 
 LayerManagerDarwin::~LayerManagerDarwin() = default;
@@ -88,6 +80,14 @@ MLNStyleLayer* LayerManagerDarwin::createPeer(style::Layer* layer) {
   if (auto* factory = getPeerFactory(layer->getTypeInfo())) {
     return factory->createPeer(layer);
   }
+#if MLN_WITH_PLUGINS
+  // Runtime plugins register core factories through the C API, without an
+  // Objective-C peer factory. Give them the common style-layer interface so
+  // style enumeration (including accessibility) never inserts a nil peer.
+  if (!getFactory(layer->getTypeInfo()) && hasLayerType(layer->getTypeInfo()->type)) {
+    return [[MLNStyleLayer alloc] initWithRawLayer:layer];
+  }
+#endif
   return nullptr;
 }
 

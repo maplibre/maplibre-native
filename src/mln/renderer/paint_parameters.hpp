@@ -12,11 +12,7 @@
 #include <mln/util/mat4.hpp>
 
 #include <array>
-#include <functional>
-#include <iterator>
 #include <map>
-#include <set>
-#include <vector>
 
 namespace mln {
 
@@ -63,7 +59,9 @@ public:
                     double tileLodScale,
                     double tileLodPitchThreshold,
                     TileLodMode tileLodMode,
-                    const gfx::ScissorRect&);
+                    Size renderableSize,
+                    const gfx::ScissorRect&,
+                    bool captureRenderedFeatures);
     ~PaintParameters();
 
     gfx::Context& context;
@@ -85,6 +83,7 @@ public:
     TimePoint timePoint;
 
     float pixelRatio;
+    const Size renderableSize;
     std::array<float, 2> pixelsToGLUnits;
 
     gfx::ShaderRegistry& shaders;
@@ -137,17 +136,13 @@ private:
 
 public:
     uint32_t currentLayer;
-    float depthRangeSize;
+    float depthRangeSize = 1.0f;
     uint32_t opaquePassCutoff = 0;
     float symbolFadeChange;
     const uint64_t frameCount;
 
     static constexpr int numSublayers = 3;
-#if MLN_RENDER_BACKEND_OPENGL
     static constexpr float depthEpsilon = 1.0f / (1 << 16);
-#else
-    static constexpr float depthEpsilon = 1.0f / (1 << 11);
-#endif
     static constexpr int maxStencilValue = 255;
 
     double tileLodMinRadius;
@@ -156,6 +151,8 @@ public:
     TileLodMode tileLodMode;
 
     gfx::ScissorRect scissorRect;
+
+    bool captureRenderedFeatures = false;
 };
 
 } // namespace mln

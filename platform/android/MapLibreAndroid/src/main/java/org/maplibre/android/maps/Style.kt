@@ -6,6 +6,8 @@ import android.os.AsyncTask
 import android.util.DisplayMetrics
 import android.util.Pair
 import androidx.annotation.IntRange
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import org.maplibre.android.MapLibre
 import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.log.Logger
@@ -683,6 +685,39 @@ class Style private constructor(
         }
 
     //
+    // Global state
+    //
+
+    /**
+     * Set a global state property, used by the
+     * [global-state](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.
+     *
+     * Setting a `null` value (or [com.google.gson.JsonNull]) resets the property to the default
+     * defined in the style's root `state` property, or to null if there is none.
+     *
+     * @param name  the name of the state property
+     * @param value the new value of the state property
+     */
+    fun setGlobalStateProperty(
+        name: String,
+        value: JsonElement?,
+    ) {
+        validateState("setGlobalStateProperty")
+        nativeMap.setGlobalStateProperty(name, value)
+    }
+
+    /**
+     * Get a snapshot of the map's current global state, used by the
+     * [global-state](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.
+     *
+     * @return the current global state
+     */
+    fun getGlobalState(): JsonObject {
+        validateState("getGlobalState")
+        return nativeMap.getGlobalState()
+    }
+
+    //
     // Light
     //
 
@@ -812,6 +847,8 @@ class Style private constructor(
          *  - `http://...` or `https://...`: loads the style over the Internet from any web server.
          *  - `asset://...`: loads the style from the APK `assets/` directory.
          *    This is used to load a style bundled with your app.
+         *  - `file:///android_asset/...`: same as `asset://`, using the Android WebView-style asset URI
+         *    (also produced by Compose Multiplatform `Res.getUri()`).
          *  - `file://...`: loads the style from a file path. This is used to load a style from disk.
          *
          * This method is asynchronous and will return before the style finishes loading.
@@ -842,6 +879,8 @@ class Style private constructor(
          *  - `http://...` or `https://...`: loads the style over the Internet from any web server.
          *  - `asset://...`: loads the style from the APK `assets/` directory.
          *    This is used to load a style bundled with your app.
+         *  - `file:///android_asset/...`: same as `asset://`, using the Android WebView-style asset URI
+         *    (also produced by Compose Multiplatform `Res.getUri()`).
          *  - `file://...`: loads the style from a file path. This is used to load a style from disk.
          *
          * This method is asynchronous and will return before the style finishes loading.

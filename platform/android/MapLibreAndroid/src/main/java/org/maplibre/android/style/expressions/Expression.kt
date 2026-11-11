@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.annotation.ColorInt
 import androidx.annotation.Size
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
@@ -526,7 +527,31 @@ open class Expression {
      * Converts a JsonArray or a raw expression to a Java expression.
      */
     object Converter {
-        private val gson = Gson()
+        internal val gson: Gson = GsonBuilder().serializeNulls().create()
+
+        internal fun convertLiteralValue(value: JsonElement): Any? =
+            when {
+                value.isJsonNull -> {
+                    null
+                }
+
+                value.isJsonArray -> {
+                    val array = value.asJsonArray
+                    kotlin.Array(array.size()) { i -> convertLiteralValue(array.get(i)) }
+                }
+
+                value.isJsonObject -> {
+                    val result: MutableMap<String, Any?> = HashMap()
+                    for (key in value.asJsonObject.keySet()) {
+                        result[key] = convertLiteralValue(value.asJsonObject.get(key))
+                    }
+                    result
+                }
+
+                else -> {
+                    convertToValue(value.asJsonPrimitive)
+                }
+            }
 
         /**
          * Converts a JsonArray to an expression
@@ -547,20 +572,29 @@ open class Expression {
             } else if (operator == "distance") {
                 return distance(GeometryGeoJson.fromJson(jsonArray.get(1).toString()))
             }
+            if (operator == "semiliteral") {
+                if (jsonArray.size() != 2) {
+                    throw IllegalArgumentException("'semiliteral' expression requires exactly one argument.")
+                }
+                val value = jsonArray.get(1)
+                if (value.isJsonArray) {
+                    val array = value.asJsonArray
+                    val elements =
+                        kotlin.Array(array.size()) { i ->
+                            val element = array.get(i)
+                            if (element.isJsonNull) ExpressionJsonValue(element) else convert(element)
+                        }
+                    return semiliteral(*elements)
+                }
+                return Expression(operator, ExpressionJsonValue(value))
+            }
             for (i in 1 until jsonArray.size()) {
                 val jsonElement = jsonArray.get(i)
                 if (operator == "literal" && jsonElement is JsonArray) {
-                    val array = arrayOfNulls<Any>(jsonElement.size())
-                    for (j in 0 until jsonElement.size()) {
-                        val element = jsonElement.get(j)
-                        if (element is JsonPrimitive) {
-                            array[j] = convertToValue(element)
-                        } else {
-                            throw IllegalArgumentException("Nested literal arrays are not supported.")
-                        }
-                    }
-
-                    arguments.add(ExpressionLiteralArray(array))
+                    @Suppress("UNCHECKED_CAST")
+                    arguments.add(ExpressionLiteralArray(convertLiteralValue(jsonElement) as kotlin.Array<Any?>))
+                } else if (operator == "literal" && (jsonElement.isJsonObject || jsonElement.isJsonNull)) {
+                    arguments.add(ExpressionJsonValue(jsonElement))
                 } else {
                     arguments.add(convert(jsonElement))
                 }
@@ -641,6 +675,48 @@ open class Expression {
     }
 
     /**
+     * Preserves literal JSON without interpreting nested arrays as expressions.
+     */
+    @Suppress("EXPOSED_SUPER_INTERFACE")
+    private class ExpressionJsonValue(
+        value: JsonElement,
+    ) : Expression(),
+        ValueExpression {
+        private val value: JsonElement = value.deepCopy()
+
+        override fun toValue(): Any? = Converter.convertLiteralValue(value)
+
+        override fun toString(): String = value.toString()
+
+        override fun equals(other: Any?): Boolean = other is ExpressionJsonValue && value == other.value
+
+        override fun hashCode(): Int = value.hashCode()
+    }
+
+    /**
+     * An unquoted array whose elements are expressions.
+     */
+    @Suppress("EXPOSED_SUPER_INTERFACE")
+    private class ExpressionArray(
+        elements: kotlin.Array<out Expression>,
+    ) : Expression(),
+        ValueExpression {
+        private val elements: kotlin.Array<out Expression> = elements.clone()
+
+        override fun toValue(): Any =
+            kotlin.Array<Any?>(elements.size) { i ->
+                val element = elements[i]
+                if (element is ValueExpression) element.toValue() else element.toArray()
+            }
+
+        override fun toString(): String = Converter.gson.toJson(toValue())
+
+        override fun equals(other: Any?): Boolean = other is ExpressionArray && elements.contentEquals(other.elements)
+
+        override fun hashCode(): Int = elements.contentHashCode()
+    }
+
+    /**
      * Expression to wrap Object[] as a literal
      *
      * @constructor Create an expression literal.
@@ -659,10 +735,10 @@ open class Expression {
             val builder = StringBuilder("[")
             for (i in array.indices) {
                 val argument = array[i]
-                if (argument is String) {
-                    builder.append("\"").append(argument).append("\"")
+                if (argument is kotlin.Array<*>) {
+                    builder.append(ExpressionLiteralArray(argument))
                 } else {
-                    builder.append(argument)
+                    builder.append(Converter.gson.toJson(argument))
                 }
 
                 if (i != array.size - 1) {
@@ -683,10 +759,10 @@ open class Expression {
 
             val that = other as ExpressionLiteralArray
 
-            return Arrays.equals(this.literal as kotlin.Array<*>, that.literal as kotlin.Array<*>)
+            return Arrays.deepEquals(this.literal as kotlin.Array<*>, that.literal as kotlin.Array<*>)
         }
 
-        override fun hashCode(): Int = super.hashCode()
+        override fun hashCode(): Int = Arrays.deepHashCode(literal as kotlin.Array<*>)
     }
 
     /**
@@ -753,7 +829,7 @@ open class Expression {
      * Interface used to describe expressions that hold a Java value.
      */
     private interface ValueExpression {
-        fun toValue(): Any
+        fun toValue(): Any?
     }
 
     companion object {
@@ -835,6 +911,20 @@ open class Expression {
          */
         @JvmStatic
         fun literal(array: kotlin.Array<out Any?>): Expression = Expression("literal", ExpressionLiteralArray(array))
+
+        /**
+         * Creates an array by evaluating each element expression.
+         * Use [literal] for an array whose elements remain literal.
+         *
+         * ```kotlin
+         * semiliteral(number(get("x")), number(get("y")))
+         * ```
+         *
+         * @param elements expressions producing the array elements
+         * @return an array expression
+         */
+        @JvmStatic
+        fun semiliteral(vararg elements: Expression): Expression = Expression("semiliteral", ExpressionArray(elements))
 
         /**
          * Expression literal utility method to convert a color int to an color expression
@@ -2018,6 +2108,29 @@ open class Expression {
          */
         @JvmStatic
         fun geometryType(): Expression = Expression("geometry-type")
+
+        /**
+         * Gets a property value from the map's global state.
+         * Returns null if the requested property is not present in the global state.
+         *
+         * The global state can be set with [org.maplibre.android.maps.Style.setGlobalStateProperty] and defaults
+         * can be defined with the style's root `state` property.
+         *
+         * Example usage:
+         *
+         * ```kotlin
+         * val circleLayer = CircleLayer("layer-id", "source-id")
+         * circleLayer.setFilter(
+         *     eq(get("charger-type"), globalState("chargerType"))
+         * )
+         * ```
+         *
+         * @param property the name of the global state property
+         * @return expression
+         * @see [Style specification](https://maplibre.org/maplibre-style-spec/expressions/#global-state)
+         */
+        @JvmStatic
+        fun globalState(property: String): Expression = Expression("global-state", literal(property))
 
         /**
          * Gets the feature's id, if it has one.

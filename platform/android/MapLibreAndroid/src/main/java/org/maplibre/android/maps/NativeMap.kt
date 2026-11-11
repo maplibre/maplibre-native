@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.PointF
 import android.graphics.RectF
 import androidx.annotation.IntRange
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.Polygon
@@ -243,6 +244,13 @@ internal interface NativeMap {
         filter: Expression?,
     ): List<Feature>
 
+    fun getRenderedFeatureCount(
+        featureId: String?,
+        layerId: String?,
+        sourceId: String?,
+    ): Int
+
+    // Feature State
     fun setFeatureState(
         sourceId: String,
         sourceLayerId: String?,
@@ -262,6 +270,13 @@ internal interface NativeMap {
         featureId: String?,
         stateKey: String?,
     )
+
+    fun setGlobalStateProperty(
+        name: String,
+        value: JsonElement?,
+    )
+
+    fun getGlobalState(): JsonObject
 
     //
     // Projection API

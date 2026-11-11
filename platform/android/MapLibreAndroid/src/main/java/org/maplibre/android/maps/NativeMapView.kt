@@ -9,6 +9,7 @@ import android.os.Looper
 import android.text.TextUtils
 import androidx.annotation.IntRange
 import androidx.annotation.Keep
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.maplibre.android.LibraryLoader
 import org.maplibre.android.MapStrictMode
@@ -1128,6 +1129,19 @@ internal class NativeMapView(
         return features?.asList() ?: ArrayList()
     }
 
+    override fun getRenderedFeatureCount(
+        featureId: String?,
+        layerId: String?,
+        sourceId: String?,
+    ): Int {
+        if (checkState("getRenderedFeatureCount")) {
+            return 0
+        }
+        return nativeGetRenderedFeatureCount(featureId, layerId, sourceId)
+    }
+
+    // Feature State
+
     override fun setFeatureState(
         sourceId: String,
         sourceLayerId: String?,
@@ -1161,6 +1175,23 @@ internal class NativeMapView(
             return
         }
         nativeRemoveFeatureState(sourceId, sourceLayerId, featureId, stateKey)
+    }
+
+    override fun setGlobalStateProperty(
+        name: String,
+        value: JsonElement?,
+    ) {
+        if (checkState("setGlobalStateProperty")) {
+            return
+        }
+        nativeSetGlobalStateProperty(name, value)
+    }
+
+    override fun getGlobalState(): JsonObject {
+        if (checkState("getGlobalState")) {
+            return JsonObject()
+        }
+        return nativeGetGlobalState()
     }
 
     override fun setApiBaseUrl(baseUrl: String) {
@@ -1864,6 +1895,13 @@ internal class NativeMapView(
     ): Array<Feature>?
 
     @Keep
+    private external fun nativeGetRenderedFeatureCount(
+        feature: String?,
+        layer: String?,
+        source: String?,
+    ): Int
+
+    @Keep
     private external fun nativeSetFeatureState(
         sourceId: String,
         sourceLayerId: String?,
@@ -1885,6 +1923,15 @@ internal class NativeMapView(
         featureId: String?,
         stateKey: String?,
     )
+
+    @Keep
+    private external fun nativeSetGlobalStateProperty(
+        name: String,
+        value: JsonElement?,
+    )
+
+    @Keep
+    private external fun nativeGetGlobalState(): JsonObject
 
     @Keep
     private external fun nativeGetLight(): Light

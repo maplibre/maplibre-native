@@ -15,7 +15,7 @@ To follow this example from scratch, in Android Studio create a new "Empty Views
 
    A newly-created app will likely already have `mavenCentral()` in a top-level `settings.gradle` file, and you won't need to add it.
 
-2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Replace `<version>` with the [latest MapLibre Android version](https://github.com/maplibre/maplibre-native/releases?q=android-v11&expanded=true) (e.g.: `org.maplibre.gl:android-sdk:11.8.0`):
+2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Replace `<version>` with the [latest MapLibre Android version](https://github.com/maplibre/maplibre-native/releases?q=android&expanded=true) (e.g.: `org.maplibre.gl:android-sdk:11.8.0`). See [Artifacts](artifacts.md) for the artifacts with other rendering backends or the plugin API:
 
     ```gradle
     dependencies {
