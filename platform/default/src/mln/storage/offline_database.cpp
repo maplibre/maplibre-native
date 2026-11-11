@@ -425,9 +425,9 @@ std::optional<RegionResourceInfo> OfflineDatabase::hasResource(const Resource& r
         return std::nullopt;
     }
 
-    return RegionResourceInfo{static_cast<uint64_t>(query.get<std::optional<int64_t>>(0).value_or(0)),
-                              query.get<std::optional<Timestamp>>(1),
-                              query.get<bool>(2)};
+    return RegionResourceInfo{.size = static_cast<uint64_t>(query.get<std::optional<int64_t>>(0).value_or(0)),
+                              .expires = query.get<std::optional<Timestamp>>(1),
+                              .mustRevalidate = query.get<bool>(2)};
 }
 
 bool OfflineDatabase::putResource(const Resource& resource,
@@ -616,9 +616,9 @@ std::optional<RegionResourceInfo> OfflineDatabase::hasTile(const Resource::TileD
         return std::nullopt;
     }
 
-    return RegionResourceInfo{static_cast<uint64_t>(query.get<std::optional<int64_t>>(0).value_or(0)),
-                              query.get<std::optional<Timestamp>>(1),
-                              query.get<bool>(2)};
+    return RegionResourceInfo{.size = static_cast<uint64_t>(query.get<std::optional<int64_t>>(0).value_or(0)),
+                              .expires = query.get<std::optional<Timestamp>>(1),
+                              .mustRevalidate = query.get<bool>(2)};
 }
 
 bool OfflineDatabase::putTile(const Resource::TileData& tile,
