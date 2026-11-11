@@ -116,27 +116,25 @@ public class ColorUtils {
   /**
    * Convert an rgba string to a Color int.
    * <p>
+   * Only the {@code rgba(r, g, b, a)} form is supported; {@code rgb(r, g, b)} is not and is rejected.
    * R, G, B color components have to be in the [0-255] range, while alpha has to be in the [0.0-1.0] range.
    * For example: "rgba(255, 128, 0, 0.7)".
    *
    * @param value the String representation of rgba
    * @return the int representation of rgba
-   * @throws ConversionException on illegal input
+   * @throws ConversionException on illegal input, including {@code rgb()} colors and colors without alpha
    */
   @ColorInt
   public static int rgbaToColor(@NonNull String value) {
     // we need to accept and floor float values as well, as those can come from core
-    Pattern c = Pattern.compile("rgba?\\s*\\(\\s*(\\d+\\.?\\d*)\\s*,\\s*(\\d+\\.?\\d*)\\s*,\\s*(\\d+\\.?\\d*)\\s*,"
-      + "?\\s*(\\d+\\.?\\d*)?\\s*\\)");
+    Pattern c = Pattern.compile("rgba\\s*\\(\\s*(\\d+\\.?\\d*)\\s*,\\s*(\\d+\\.?\\d*)\\s*,\\s*(\\d+\\.?\\d*)\\s*,"
+      + "\\s*(\\d+\\.?\\d*)\\s*\\)");
     Matcher m = c.matcher(value);
-    if (m.matches() && m.group(4) == null) {
-      return Color.rgb((int) Float.parseFloat(m.group(1)), (int) Float.parseFloat(m.group(2)),
-        (int) Float.parseFloat(m.group(3)));
-    } else if (m.matches()) {
+    if (m.matches()) {
       return Color.argb((int) (Float.parseFloat(m.group(4)) * 255), (int) Float.parseFloat(m.group(1)),
         (int) Float.parseFloat(m.group(2)), (int) Float.parseFloat(m.group(3)));
     } else {
-      throw new ConversionException("Not a valid rgb/rgba value");
+      throw new ConversionException("Not a valid rgba value");
     }
   }
 

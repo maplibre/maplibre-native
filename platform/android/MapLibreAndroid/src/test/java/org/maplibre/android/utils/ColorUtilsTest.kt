@@ -4,6 +4,7 @@ import android.graphics.Color
 import org.junit.Assert
 import org.junit.Test
 import org.maplibre.android.BaseTest
+import org.maplibre.android.exceptions.ConversionException
 
 class ColorUtilsTest : BaseTest() {
 
@@ -21,10 +22,13 @@ class ColorUtilsTest : BaseTest() {
         Assert.assertEquals(Color.argb(255, 128, 0, (0.7 * 255).toInt()), result)
     }
 
-    @Test
-    fun rgbaToColor_rgb() {
-        val input = "rgb(255,128,0)"
-        val result = ColorUtils.rgbaToColor(input)
-        Assert.assertEquals(Color.rgb(255, 128, 0), result)
+    @Test(expected = ConversionException::class)
+    fun rgbaToColor_rgb_throws() {
+        ColorUtils.rgbaToColor("rgb(255,128,0)")
+    }
+
+    @Test(expected = ConversionException::class)
+    fun rgbaToColor_missingAlpha_throws() {
+        ColorUtils.rgbaToColor("rgba(255,128,0)")
     }
 }
