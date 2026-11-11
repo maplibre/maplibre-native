@@ -26,6 +26,7 @@ env:
   EGL_PLATFORM: surfaceless
   # Mesa 26's gfxstream ICD leaks a pthread key per vkCreateInstance, which exhausts glibc's 1024 keys in the Vulkan render tests.
   VK_DRIVER_FILES: /usr/share/vulkan/icd.d/lvp_icd.json
+  UBSAN_OPTIONS: print_stacktrace=1
 
 jobs:
   pre_job:
@@ -123,7 +124,8 @@ jobs:
             -DCLANG_TIDY_COMMAND=/usr/local/bin/ctcache/clang-tidy \
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
-            -DMLN_WITH_COVERAGE=ON
+            -DMLN_WITH_COVERAGE=ON \
+            -DMLN_WITH_SANITIZER=${{ matrix.variant.renderer == 'vulkan' && 'undefined' || 'OFF' }}
           cmake --build build-linux-${{ matrix.variant.renderer }} --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # mbgl-render (used for size test) & mbgl-benchmark-runner
@@ -165,7 +167,6 @@ jobs:
       - run: chmod +x build-linux-${{ matrix.variant.renderer }}/mbgl-test-runner
 
       - name: Run C++ tests
-        continue-on-error: ${{ matrix.variant.renderer == 'vulkan' }}
         run: xvfb-run -a build-linux-${{ matrix.variant.renderer }}/mbgl-test-runner
 
       # render tests

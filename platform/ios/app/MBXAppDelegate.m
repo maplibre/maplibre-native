@@ -4,6 +4,8 @@
 #import "MBXViewController.h"
 
 #if __has_feature(undefined_behavior_sanitizer) || defined(__SANITIZE_UNDEFINED_BEHAVIOR__)
+// Xcode 16's ubsan_interface.h uses SANITIZER_CDECL without defining it.
+#import "sanitizer/common_interface_defs.h"
 #import "sanitizer/ubsan_interface.h"
 const char* __ubsan_default_options(void) {
     static char default_opts[2 * PATH_MAX];
