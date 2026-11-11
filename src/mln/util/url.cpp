@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <cstring>
+#include <iterator>
 
 namespace {
 
@@ -58,15 +59,24 @@ std::string percentEncode(const std::string& input) {
 std::string percentDecode(const std::string& input) {
     std::string decoded;
 
-    for (std::size_t i = 0; i < input.size(); ++i) {
+    auto it = input.begin();
+    const auto end = input.end();
+
+    while (it != end) {
+        auto cur = std::find(it, end, '%');
+        decoded.append(it, cur);
+        it = cur;
+        if (cur == end) break;
+
         // A % that does not start two hex digits stays literal, as in the WHATWG URL Standard.
-        const int high = input[i] == '%' && i + 2 < input.size() ? hexValue(input[i + 1]) : -1;
-        const int low = high >= 0 ? hexValue(input[i + 2]) : -1;
+        const auto digits = std::next(cur);
+        const int high = digits != end ? hexValue(*digits) : -1;
+        const int low = high >= 0 && std::next(digits) != end ? hexValue(*std::next(digits)) : -1;
         if (low >= 0) {
             decoded += static_cast<char>(high * 16 + low);
-            i += 2;
+            it += 3;
         } else {
-            decoded += input[i];
+            decoded += *it++;
         }
     }
 
