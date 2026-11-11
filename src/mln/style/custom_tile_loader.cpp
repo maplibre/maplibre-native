@@ -51,7 +51,9 @@ void CustomTileLoader::cancelTile(const OverscaledTileID& tileID) {
     if (callbacks.empty()) {
         invokeTileCancel(tileID.canonical);
         // Erase so a subsequent fetchTile for the same tile re-issues the fetch.
+        // Without a registration nothing would evict the cached data later.
         tileCallbackMap.erase(tileCallbacks);
+        dataCache.erase(tileID.canonical);
     }
 }
 
@@ -68,6 +70,7 @@ void CustomTileLoader::removeTile(const OverscaledTileID& tileID) {
     }
     if (tileCallbacks->second.empty()) {
         tileCallbackMap.erase(tileCallbacks);
+        dataCache.erase(tileID.canonical);
     }
 }
 

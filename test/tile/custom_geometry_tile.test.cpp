@@ -260,3 +260,35 @@ TEST(CustomGeometryTile, CancelOneInstanceKeepsOtherRegistered) {
     test.loop.waitForEmpty();
     EXPECT_EQ(initialFetches + 1, fetches);
 }
+
+// Data handed back before a tile is parsed must not outlive the tile's last
+// registration, or the next tile at that position is served stale data.
+TEST(CustomGeometryTile, CancelDiscardsCachedData) {
+    CustomTileTest test;
+
+    int fetches = 0;
+    CustomTileLoader loader([&](const CanonicalTileID&) { fetches++; }, nullptr);
+    auto mb = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
+    ActorRef<CustomTileLoader> loaderActor(loader, mb);
+
+    const OverscaledTileID id(0, 0, 0);
+    Immutable<CustomGeometrySource::TileOptions> options = makeMutable<CustomGeometrySource::TileOptions>();
+    {
+        CustomGeometryTile tile(id, "source", test.tileParameters, options, loaderActor);
+        tile.setNecessity(TileNecessity::Required);
+        test.loop.waitForEmpty();
+        ASSERT_EQ(1, fetches);
+
+        // Cached, but the tile is not renderable until it has been parsed.
+        loader.setTileData(id.canonical, GeoJSON{FeatureCollection{}});
+        ASSERT_FALSE(tile.isRenderable());
+        tile.setNecessity(TileNecessity::Optional);
+        test.loop.waitForEmpty();
+    }
+    test.loop.waitForEmpty();
+
+    CustomGeometryTile next(id, "source", test.tileParameters, options, loaderActor);
+    next.setNecessity(TileNecessity::Required);
+    test.loop.waitForEmpty();
+    EXPECT_EQ(2, fetches);
+}
