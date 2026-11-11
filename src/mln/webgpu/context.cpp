@@ -6,8 +6,8 @@
 #include <mln/util/geometry.hpp>
 #include <mln/gfx/color_mode.hpp>
 #include <algorithm>
-#include <cstring>
 #include <array>
+#include <ranges>
 #include <mln/gfx/depth_mode.hpp>
 #include <mln/webgpu/command_encoder.hpp>
 #include <mln/webgpu/drawable_builder.hpp>
@@ -48,6 +48,11 @@ const auto clipMaskStencilMode = gfx::StencilMode{
 };
 const auto clipMaskDepthMode = gfx::DepthMode{
     .func = gfx::DepthFunctionType::Always, .mask = gfx::DepthMaskType::ReadOnly, .range = {0.0f, 1.0f}};
+
+// One tile's clipping mask uniforms, padded to an offset that any bind group can use
+struct alignas(256) ClipMaskSlot {
+    shaders::ClipUBO ubo;
+};
 } // namespace
 
 Context::Context(RendererBackend& backend_)
@@ -396,7 +401,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         // Draws already recorded keep the old buffer and bind groups alive
         releaseClipMaskBindGroups();
         clipMaskUniformBuffer.emplace(
-            createBuffer(nullptr, slotCount * clipMaskSlotStride, WGPUBufferUsage_Uniform, false, false));
+            createBuffer(nullptr, slotCount * sizeof(ClipMaskSlot), WGPUBufferUsage_Uniform, false, false));
         if (!clipMaskUniformBuffer->getBuffer()) {
             Log::Error(Event::Render, "WebGPU: Failed to allocate uniform buffer for clipping masks");
             clipMaskUniformBuffer.reset();
@@ -405,11 +410,11 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
         clipMaskBindGroupLayout = layout;
         clipMaskBindGroups.reserve(slotCount);
-        for (std::size_t slot = 0; slot < slotCount; ++slot) {
+        for (const auto slot : std::views::iota(std::size_t{0}, slotCount)) {
             WGPUBindGroupEntry entry{};
             entry.binding = uniformBinding;
             entry.buffer = clipMaskUniformBuffer->getBuffer();
-            entry.offset = slot * clipMaskSlotStride;
+            entry.offset = slot * sizeof(ClipMaskSlot);
             entry.size = sizeof(shaders::ClipUBO);
 
             WGPUBindGroupDescriptor descriptor{};
@@ -427,16 +432,17 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         }
     }
 
-    clipMaskSlotData.assign(tileUBOs.size() * clipMaskSlotStride, 0);
-    for (std::size_t i = 0; i < tileUBOs.size(); ++i) {
-        std::memcpy(clipMaskSlotData.data() + i * clipMaskSlotStride, &tileUBOs[i], sizeof(shaders::ClipUBO));
+    std::vector<ClipMaskSlot> slots;
+    slots.reserve(tileUBOs.size());
+    for (const auto& ubo : tileUBOs) {
+        slots.push_back({ubo});
     }
-    clipMaskUniformBuffer->update(clipMaskSlotData.data(), clipMaskSlotData.size(), firstSlot * clipMaskSlotStride);
+    clipMaskUniformBuffer->update(slots.data(), slots.size() * sizeof(ClipMaskSlot), firstSlot * sizeof(ClipMaskSlot));
     clipMaskSlotsUsed = slotsNeeded;
 
-    for (std::size_t i = 0; i < tileUBOs.size(); ++i) {
-        wgpuRenderPassEncoderSetBindGroup(encoder, bindGroupIndex, clipMaskBindGroups[firstSlot + i], 0, nullptr);
-        wgpuRenderPassEncoderSetStencilReference(encoder, tileUBOs[i].stencil_ref);
+    for (auto slot = firstSlot; const auto& ubo : tileUBOs) {
+        wgpuRenderPassEncoderSetBindGroup(encoder, bindGroupIndex, clipMaskBindGroups[slot++], 0, nullptr);
+        wgpuRenderPassEncoderSetStencilReference(encoder, ubo.stencil_ref);
 
         wgpuRenderPassEncoderDrawIndexed(encoder,
                                          /*indexCount=*/6,

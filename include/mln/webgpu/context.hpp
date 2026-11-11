@@ -133,13 +133,11 @@ private:
     gfx::ShaderProgramBasePtr clipMaskShader;
     const gfx::Renderable* clipMaskRenderable = nullptr;
     std::optional<std::size_t> clipMaskPipelineHash;
-    // One uniform slot per tile, at an offset every bind group can use
-    static constexpr std::size_t clipMaskSlotStride = 256;
+    // One uniform slot and bind group per tile, reused across frames
     std::optional<BufferResource> clipMaskUniformBuffer;
     std::vector<WGPUBindGroup> clipMaskBindGroups;
     WGPUBindGroupLayout clipMaskBindGroupLayout = nullptr;
     std::size_t clipMaskSlotsUsed = 0;
-    std::vector<std::uint8_t> clipMaskSlotData;
 
     void releaseClipMaskBindGroups();
 };
