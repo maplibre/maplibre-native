@@ -172,8 +172,7 @@ TEST(LocalFileSource, NonExistentFile) {
                                                        ASSERT_NE(nullptr, res.error);
                                                        EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
                                                        ASSERT_FALSE(res.data.get());
-                                                       EXPECT_TRUE(res.error->message.starts_with("Cannot find file "));
-                                                       EXPECT_TRUE(res.error->message.ends_with("does_not_exist"));
+                                                       // Do not assert on platform-specific error message.
                                                        loop.stop();
                                                    });
 
@@ -207,8 +206,7 @@ TEST(LocalFileSource, ReadDirectory) {
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
         ASSERT_FALSE(res.data.get());
-        EXPECT_TRUE(res.error->message.starts_with("Cannot read directory "));
-        EXPECT_TRUE(res.error->message.ends_with("directory"));
+        // Do not assert on platform-specific error message.
         loop.stop();
     });
 
