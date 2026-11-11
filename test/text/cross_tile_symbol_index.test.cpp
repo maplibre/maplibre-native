@@ -489,3 +489,49 @@ TEST(CrossTileSymbolLayerIndex, lineLabelDirectionsStale) {
     EXPECT_TRUE(index.addBucket(tileId, posMatrix, bucket));
     EXPECT_TRUE(bucket.lineLabelDirectionsStale);
 }
+
+TEST(CrossTileSymbolLayerIndex, crossTileIDsReassigned) {
+    // An overscaled tile's symbols out of view have no id; one that comes back into view gets an id
+    // again, maybe the id of a copy in another tile.
+    uint32_t maxCrossTileID = 0;
+    CrossTileSymbolLayerIndex index(maxCrossTileID);
+
+    Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout =
+        makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>();
+    OverscaledTileID tileId(7, 0, 6, 18, 24);
+    std::vector<SymbolInstance> instances;
+    instances.push_back(makeSymbolInstance(1000, 1000, u"Washington"));
+    std::vector<SortKeyRange> ranges;
+    SymbolBucket bucket{layout,
+                        {},
+                        16.0f,
+                        1.0f,
+                        0,
+                        false,
+                        false,
+                        "test",
+                        std::move(instances),
+                        std::move(ranges),
+                        1.0f,
+                        false,
+                        {},
+                        false /*iconsInText*/};
+
+    // New, out of view: not reassigned (a new bucket is marked as such).
+    mat4 posMatrix;
+    populatePosMatrix(posMatrix, tileId, 60.0, 25.0, 7.0);
+    index.addBucket(tileId, posMatrix, bucket);
+    EXPECT_FALSE(bucket.crossTileIDsReassigned);
+    bucket.lineLabelDirectionsStale = false;
+
+    // Updated, still out of view.
+    index.addBucket(tileId, posMatrix, bucket);
+    EXPECT_FALSE(bucket.crossTileIDsReassigned);
+
+    // Back in view.
+    populatePosMatrix(posMatrix, tileId, 39.0, -76.0, 7.0);
+    index.addBucket(tileId, posMatrix, bucket);
+    EXPECT_NE(bucket.symbolInstances.at(0).getCrossTileID(), SymbolInstance::invalidCrossTileID);
+    EXPECT_TRUE(bucket.crossTileIDsReassigned);
+    EXPECT_FALSE(bucket.lineLabelDirectionsStale);
+}

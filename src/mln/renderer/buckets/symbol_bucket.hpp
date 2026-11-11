@@ -405,6 +405,10 @@ public:
     // directions they were last drawn with may be out of date, so they are not passed on to other
     // copies of the labels (see LineLabelDirections).
     bool lineLabelDirectionsStale : 1;
+    // Set when a symbol of this bucket that was out of view (overscaled tile) gets a cross tile id
+    // again, and cleared once Placement has synced the reading directions of its line labels: the
+    // symbol may now be a copy of a label drawn elsewhere in the meantime (see LineLabelDirections).
+    bool crossTileIDsReassigned : 1;
 
     std::vector<SymbolInstance> symbolInstances;
     const std::vector<SortKeyRange> sortKeyRanges;

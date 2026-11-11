@@ -856,6 +856,7 @@ void LineLabelDirections::restore(SymbolBucket& bucket, const LineLabelDirection
         });
     }
     bucket.lineLabelDirectionsStale = false;
+    bucket.crossTileIDsReassigned = false;
 }
 
 std::optional<Point<float>> LineLabelDirections::readingDirection(uint32_t crossTileID) const {
@@ -880,14 +881,14 @@ void Placement::syncLineLabelDirections(const std::string& layerID, const LayerP
     // Which copy of a label is drawn only changes with the placement or the buckets: skip the layer
     // when neither has changed since its last sync.
     std::vector<uint32_t> buckets;
-    bool bucketEntered = false;
+    bool idsChanged = false;
     forEachBucket([&](const SymbolBucket& bucket) {
         buckets.push_back(bucket.bucketInstanceId);
-        bucketEntered = bucketEntered || bucket.lineLabelDirectionsStale;
+        idsChanged = idsChanged || bucket.lineLabelDirectionsStale || bucket.crossTileIDsReassigned;
     });
     std::sort(buckets.begin(), buckets.end());
     if (auto synced = lineLabelSyncedBuckets.find(layerID);
-        synced != lineLabelSyncedBuckets.end() && !bucketEntered && synced->second == buckets) {
+        synced != lineLabelSyncedBuckets.end() && !idsChanged && synced->second == buckets) {
         return;
     }
     lineLabelSyncedBuckets[layerID] = std::move(buckets);

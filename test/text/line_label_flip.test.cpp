@@ -582,3 +582,24 @@ TEST(LineLabelFlip, ACopyDrawnWithoutALineDirectionPassesNothingOn) {
     frame.sync(placement, {drawn.get(), duplicate.get()});
     EXPECT_EQ(textDirection(*duplicate), true);
 }
+
+TEST(LineLabelFlip, ASymbolBackInViewTakesTheDirectionOfItsLabel) {
+    // A symbol of an overscaled tile was out of view (no cross tile id) while the copy of its label in
+    // another tile turned over. Back in view, it gets that copy's id in the same bucket: synced, even
+    // though no bucket entered or left.
+    const TestPlacement placement(margin);
+    Frame frame;
+    auto overscaled = makeBucket({SymbolInstance::invalidCrossTileID});
+    textDirection(*overscaled) = false;
+    overscaled->text.placedSymbols.at(0).hidden = true;
+    auto other = makeBucket({1});
+    textDirection(*other) = true;
+    frame.sync(placement, {overscaled.get(), other.get()});
+    EXPECT_EQ(textDirection(*overscaled), false);
+
+    overscaled->symbolInstances.at(0).setCrossTileID(1);
+    overscaled->crossTileIDsReassigned = true;
+    frame.sync(placement, {overscaled.get(), other.get()});
+    EXPECT_EQ(textDirection(*overscaled), true);
+    EXPECT_FALSE(overscaled->crossTileIDsReassigned);
+}

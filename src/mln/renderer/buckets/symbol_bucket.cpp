@@ -64,6 +64,7 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
       hasVariablePlacement(false),
       hasUninitializedSymbols(false),
       lineLabelDirectionsStale(false),
+      crossTileIDsReassigned(false),
       symbolInstances(symbolInstances_),
       sortKeyRanges(sortKeyRanges_),
       textSizeBinder(SymbolSizeBinder::create(zoom, textSize, TextSize::defaultValue())),
