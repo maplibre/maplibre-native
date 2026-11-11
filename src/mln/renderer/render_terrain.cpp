@@ -516,8 +516,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // falls back to while its own tile loads; or a descendant, which an elevated layer's tile
     // deeper than the mesh tile samples (getTerrainData).
     const auto relatedToMesh = [&](const UnwrappedTileID& id) {
-        return std::any_of(meshTiles.begin(), meshTiles.end(), [&](const UnwrappedTileID& mesh) {
-            return mesh == id || mesh.isChildOf(id) || id.isChildOf(mesh);
+        return std::any_of(meshTiles.begin(), meshTiles.end(), [&](const UnwrappedTileID& meshTile) {
+            return meshTile == id || meshTile.isChildOf(id) || id.isChildOf(meshTile);
         });
     };
 
