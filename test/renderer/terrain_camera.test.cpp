@@ -6,12 +6,14 @@
 #include <mln/map/bound_options.hpp>
 #include <mln/map/camera.hpp>
 #include <mln/map/map_options.hpp>
+#include <mln/map/mode.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/terrain.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/image.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/util/run_loop.hpp>
 
 #include <algorithm>
@@ -20,7 +22,11 @@
 #include <cstdio>
 #include <functional>
 #include <limits>
+#include <optional>
+#include <set>
+#include <string>
 #include <thread>
+#include <vector>
 
 using namespace mln;
 
@@ -1189,6 +1195,354 @@ TEST(TerrainCamera, AFlightEasesTheCenterHeightToTheGroundItIsHeadedFor) {
     EXPECT_NEAR(camera.center->longitude(), target.longitude(), 1e-3);
     EXPECT_NEAR(*camera.zoom, 14.0, 0.05) << "at the zoom asked for";
     EXPECT_NEAR(*camera.centerAltitude, 0.0, 30.0) << "with the center on the ground there";
+}
+
+namespace {
+
+// A DEM tile of one height everywhere, in Terrain-RGB: -10000 + (R * 65536 + G * 256 + B) * 0.1.
+std::string makeUniformDEMTile(double meters) {
+    const auto encoded = static_cast<uint32_t>(std::lround((meters + 10000.0) * 10.0));
+    PremultipliedImage image({demTileSize, demTileSize});
+    for (uint32_t i = 0; i < demTileSize * demTileSize; ++i) {
+        uint8_t* px = image.data.get() + i * 4;
+        px[0] = static_cast<uint8_t>(encoded >> 16);
+        px[1] = static_cast<uint8_t>((encoded >> 8) & 0xFF);
+        px[2] = static_cast<uint8_t>(encoded & 0xFF);
+        px[3] = 255;
+    }
+    return encodePNG(image);
+}
+
+// ".../{z}-{x}-{y}.png" holds the position, at its zoom, the tile covers.
+bool tileUrlCovers(const std::string& url, const LatLng& position) {
+    int z = 0, x = 0, y = 0;
+    const auto name = url.substr(url.rfind('/') + 1);
+    if (std::sscanf(name.c_str(), "%d-%d-%d.png", &z, &x, &y) != 3) {
+        return false;
+    }
+    const auto at = Projection::project(position, z);
+    return std::floor(at.x) == x && std::floor(at.y) == y;
+}
+
+// The ramp's ground again, with tiles fine enough that the one under a camera a few kilometers
+// from the center is not the center's.
+const char* deepRampStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 14,
+      "tileSize": 64
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": []
+})STYLE";
+
+} // namespace
+
+// Ground that has not loaded is not sea level. Close to the ground in a basin below sea level
+// (the Dead Sea, -430 m), the eye check read the DEM tile under the eye that had not arrived as
+// 0 m, took the ground to be 430 m higher than it is, and lifted the camera to 10 m over it.
+TEST(TerrainCamera, EyeOverUnloadedGroundBelowSeaLevelIsNotLifted) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string basin = makeUniformDEMTile(-430.0);
+    std::optional<LatLng> eyeGround;
+    // The server has no DEM tile for the ground under the eye, of any zoom: nothing covers it.
+    fileSource->tileResponse = [&](const Resource& resource) {
+        Response res;
+        if (eyeGround && tileUrlCovers(resource.url, *eyeGround)) {
+            res.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
+        } else {
+            res.data = std::make_shared<std::string>(basin);
+        }
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(deepRampStyle);
+    // Looking north from close to the water: the eye sits a couple of hundred meters above the
+    // center and a few kilometers south of it.
+    map.jumpTo(CameraOptions().withCenter(LatLng{31.5, 35.5}).withZoom(15.0).withPitch(85.0).withBearing(0.0));
+    const auto start = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(start.has_value());
+    eyeGround = start->location;
+
+    for (int i = 0; i < 24; ++i) {
+        loop.runOnce();
+        frontend.render(map);
+    }
+
+    ASSERT_NEAR(*map.getCameraOptions().centerAltitude, -430.0, 1.0) << "the center is on the basin floor";
+    const auto eye = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(eye.has_value());
+    EXPECT_LT(eye->altitude, 0.0) << "the eye was lifted over ground that is not known";
+}
+
+// The ground under the eye is often outside the view, behind or below it: the tile cover drops its
+// tile once the DEM is known to lie below the frustum, and a camera backed towards a mountain behind
+// it ended up inside it. The tile under the eye is always asked for, and the eye clears the ground
+// it holds.
+TEST(TerrainCamera, TheTileUnderTheEyeKeepsTheEyeOutOfTheMountainBehind) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(deepRampStyle);
+    // Looking north from the foot of the climb, which rises to the south, behind the camera: the
+    // center is on ground 1,000 m high and the eye a few kilometers up the slope behind it.
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.29, 11.4041}).withZoom(14.0).withPitch(85.0).withBearing(0.0));
+    const auto start = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(start.has_value());
+    ASSERT_GT(rampMeters(start->location.latitude()), 3000.0) << "the eye starts well inside the mountain";
+
+    for (int i = 0; i < 24; ++i) {
+        loop.runOnce();
+        frontend.render(map);
+    }
+
+    const auto eye = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(eye.has_value());
+    const double ground = rampMeters(eye->location.latitude());
+    EXPECT_GE(eye->altitude, ground + 5.0) << "eye altitude " << eye->altitude << " over ground " << ground;
+}
+
+// A center on ground at exactly 0 m is ground like any other: the renderer's last reported height
+// started at 0, so the height under the center was never reported, the clamp never ran, and the
+// eye check with it.
+TEST(TerrainCamera, TheEyeIsLiftedWhenTheGroundUnderTheCenterIsAtSeaLevel) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(rampStyle);
+    // The center on the flat ground north of the ridge line, the climb behind the camera.
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.34, 11.4041}).withZoom(12.0).withPitch(80.0).withBearing(0.0));
+
+    for (int i = 0; i < 24; ++i) {
+        loop.runOnce();
+        frontend.render(map);
+    }
+
+    const auto location = map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(location.has_value());
+    const double ground = rampMeters(location->location.latitude());
+    ASSERT_GT(ground, 100.0) << "the eye is over the climb";
+    EXPECT_GE(location->altitude, ground + 5.0) << "eye altitude " << location->altitude << " over ground " << ground;
+}
+
+namespace {
+
+// A camera over a high mountain with its eye height read, then thrown onto flat ground far away.
+// The ground under the new eye is a tile of its own, which the test holds back, or never sends.
+struct EyeLeavesTheMountain {
+    util::RunLoop loop;
+    std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(),
+                                                                                  ClientOptions());
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map;
+    std::optional<LatLng> newEyeGround;
+    enum class NewEyeTile {
+        Held,
+        Missing,
+        Sent
+    } newEyeTile = NewEyeTile::Held;
+    const std::string shelf = makeUniformDEMTile(2000.0);
+
+    EyeLeavesTheMountain()
+        : map(frontend,
+              MapObserver::nullObserver(),
+              fileSource,
+              MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize())) {
+        fileSource->tileResponse = [this](const Resource& resource) -> std::optional<Response> {
+            Response res;
+            if (newEyeGround && tileUrlCovers(resource.url, *newEyeGround)) {
+                if (newEyeTile == NewEyeTile::Held) {
+                    return std::nullopt;
+                }
+                if (newEyeTile == NewEyeTile::Missing) {
+                    res.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
+                    return res;
+                }
+                // Sent: 2,000 m ground under the eye.
+                res.data = std::make_shared<std::string>(shelf);
+                return res;
+            }
+            res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+            return res;
+        };
+        map.setCenterClampedToGround(true);
+        map.setBounds(BoundOptions().withMaxPitch(85.0));
+        map.getStyle().loadJSON(deepRampStyle);
+    }
+
+    // Continuous mode renders on its own as the loop runs; each step is a few milliseconds of it.
+    // Runs until the condition holds, or for as long as the steps last.
+    void render(int steps, const std::function<bool()>& done = nullptr) {
+        for (int i = 0; i < steps && !(done && done()); ++i) {
+            loop.runOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+    }
+
+    double centerAltitude() const { return map.getCameraOptions().centerAltitude.value_or(0.0); }
+    double eyeAltitude() const {
+        const auto eye = map.getFreeCameraOptions().getLocation();
+        return eye ? eye->altitude : 0.0;
+    }
+
+    // On the mountain: the eye a few kilometers up the slope behind the center, the camera lifted
+    // out of it, then flat ground 40 degrees of longitude east, where the eye is over ground that is
+    // not the mountain's. The center's own ground is never known there (the camera is too high over
+    // flat ground for the cover to take its tile), so it keeps the height it last had, 1,000 m.
+    void climbThenJump() {
+        map.jumpTo(CameraOptions().withCenter(LatLng{47.29, 11.4041}).withZoom(15.0).withPitch(85.0).withBearing(0.0));
+        render(1500, [&] { return centerAltitude() > 2500.0; });
+        const auto onMountain = map.getFreeCameraOptions().getLocation();
+        ASSERT_TRUE(onMountain.has_value());
+        ASSERT_GT(rampMeters(onMountain->location.latitude()), 2500.0) << "the eye starts inside the mountain";
+        ASSERT_GT(onMountain->altitude, 2500.0) << "and the camera is lifted out of it";
+
+        map.jumpTo(CameraOptions().withCenter(LatLng{47.60, 51.4041}));
+        const auto flat = map.getFreeCameraOptions().getLocation();
+        ASSERT_TRUE(flat.has_value());
+        ASSERT_EQ(rampMeters(flat->location.latitude()), 0.0) << "the new eye is over flat ground";
+        newEyeGround = flat->location;
+    }
+};
+
+} // namespace
+
+// After a jump from a mountain to flat ground, the height read under the old eye is not the height
+// under the new one. Where the new eye's tile never arrives, the eye is lifted by nothing: the camera
+// keeps the center's last height, 1,000 m, and the eye sits over that, not over the mountain's 2,800 m.
+TEST(TerrainCamera, EyeFarFromWhereItsHeightWasReadDoesNotKeepTheMountainClearance) {
+    EyeLeavesTheMountain test;
+    test.newEyeTile = EyeLeavesTheMountain::NewEyeTile::Missing;
+    test.climbThenJump();
+    test.render(400);
+
+    EXPECT_LT(test.centerAltitude(), 1050.0) << "center altitude " << test.centerAltitude();
+    EXPECT_LT(test.eyeAltitude(), 1300.0) << "eye altitude " << test.eyeAltitude() << " over flat ground";
+}
+
+// Until the tile under the new eye gives a height the eye's height is unknown, not the mountain's;
+// once it does, the eye clears that ground, here 2,000 m.
+TEST(TerrainCamera, EyeHeightIsUnknownUntilTheTileUnderTheNewEyeArrives) {
+    EyeLeavesTheMountain test;
+    test.climbThenJump();
+    test.render(400);
+
+    EXPECT_LT(test.centerAltitude(), 1050.0) << "center altitude " << test.centerAltitude();
+    EXPECT_LT(test.eyeAltitude(), 1300.0) << "eye altitude " << test.eyeAltitude() << " while its tile is on the way";
+
+    test.newEyeTile = EyeLeavesTheMountain::NewEyeTile::Sent;
+    test.render(1500, [&] { return test.eyeAltitude() >= 2005.0; });
+
+    EXPECT_GE(test.eyeAltitude(), 2005.0) << "eye altitude " << test.eyeAltitude() << " over ground 2000";
+    EXPECT_LT(test.eyeAltitude(), 2500.0) << "eye altitude " << test.eyeAltitude() << " over ground 2000";
+}
+
+namespace {
+
+// A DEM to zoom 17 under a zoom 13 view: the DEM source covers the ground to the horizon, while
+// the mesh keeps only the tiles nearest the camera, so the source holds tiles the mesh has no use for.
+const char* deepDEMStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 17,
+      "tileSize": 64
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": []
+})STYLE";
+
+} // namespace
+
+// A DEM texture is made, once, for a loaded tile related to the mesh tile set (a mesh tile, an
+// ancestor or a descendant of one), and not for the others. The DEM source's cover is not capped
+// where the mesh is, so a steep view loads DEM tiles the mesh has no use for.
+TEST(TerrainDEMTextures, ATextureIsMadeOnlyForTilesRelatedToTheMeshTileSet) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string tile = makeFlatDEMTile();
+    std::set<std::string> demTiles;
+    fileSource->tileResponse = [&](const Resource& resource) {
+        demTiles.insert(resource.url);
+        Response res;
+        res.data = std::make_shared<std::string>(tile);
+        return res;
+    };
+    HeadlessFrontend frontend{{1200, 800}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.getStyle().loadJSON(deepDEMStyle);
+    map.setTerrainLoadMode(TerrainLoadMode::Performance);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.2692, 11.4041}).withZoom(13.0).withPitch(75.0));
+
+    // Render until the DEM has stopped arriving and no frame makes a texture: the elevated cover
+    // shifts as the DEM lands, so a pause of a frame or two does not mean it is in.
+    constexpr int maxFrames = 200;
+    constexpr int quietFrames = 10;
+    gfx::RenderingStats stats;
+    std::size_t requested = 0;
+    int quiet = 0;
+    for (int frame = 0; frame < maxFrames && quiet < quietFrames; ++frame) {
+        loop.runOnce();
+        const int before = stats.numDEMTexturesCreated;
+        stats = frontend.render(map).stats;
+        quiet = demTiles.size() == requested && stats.numDEMTexturesCreated == before ? quiet + 1 : 0;
+        requested = demTiles.size();
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    ASSERT_EQ(quiet, quietFrames) << "tiles or DEM textures were still arriving after " << maxFrames << " frames";
+    const std::size_t cap = terrainLoadBudget(TerrainLoadMode::Performance).maxMeshTiles;
+    ASSERT_GT(demTiles.size(), 2 * cap)
+        << "the DEM source should hold more than twice the mesh limit, or the bound below proves nothing";
+
+    // In this view the tiles related to the mesh are its own, a texture each. The bound is a margin,
+    // not a rule: a mesh tile can have up to four loaded children, and a tile that leaves the related
+    // set and returns is made twice. It stays well below the tiles the source holds, which the guard
+    // above makes sure of.
+    EXPECT_GT(stats.numDEMTexturesCreated, 0) << "the mesh tiles have no DEM texture";
+    EXPECT_LE(stats.numDEMTexturesCreated, static_cast<int>(2 * cap))
+        << "a texture was made for a tile unrelated to the mesh";
 }
 
 namespace {

@@ -27,7 +27,7 @@ struct alignas(16) CircleDrawableUBO {
     /* 144 */ float dem_dim;
     /* 148 */ float dem_exaggeration;
     /* 152 */ float dem_enabled;
-    /* 156 */ float pad4;
+    /* 156 */ float depth_enabled; // 1 when the terrain depth texture is bound (occlusion behind terrain)
     /* 160 */
 };
 static_assert(sizeof(CircleDrawableUBO) == 10 * 16);

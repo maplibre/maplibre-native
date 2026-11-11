@@ -68,6 +68,7 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     numDrapeCoverageScans += r.numDrapeCoverageScans;
     numDrapeMasksDrawn += r.numDrapeMasksDrawn;
     numDrapeMasksSkipped += r.numDrapeMasksSkipped;
+    numDEMTexturesCreated += r.numDEMTexturesCreated;
     numDepthPasses += r.numDepthPasses;
     terrainUpdateTime += r.terrainUpdateTime;
     terrainTweakerTime += r.terrainTweakerTime;
@@ -127,6 +128,7 @@ std::string RenderingStats::toString(std::string_view sep) const {
     optionalStatLine(ss, numDrapeCoverageScans, "numDrapeCoverageScans", sep);
     optionalStatLine(ss, numDrapeMasksDrawn, "numDrapeMasksDrawn", sep);
     optionalStatLine(ss, numDrapeMasksSkipped, "numDrapeMasksSkipped", sep);
+    optionalStatLine(ss, numDEMTexturesCreated, "numDEMTexturesCreated", sep);
     optionalStatLine(ss, numDepthPasses, "numDepthPasses", sep);
     optionalStatLine(ss, terrainUpdateTime, "terrainUpdateTime", sep);
     optionalStatLine(ss, terrainTweakerTime, "terrainTweakerTime", sep);
