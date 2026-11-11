@@ -224,3 +224,39 @@ TEST(CustomGeometryTile, CancellationDiscardsLateInvalidation) {
 
     EXPECT_EQ(changes, 0u);
 }
+
+// Two tiles of one canonical tile (here the same tile in two world copies)
+// share its loader entry. Releasing one must not drop the other's registration.
+TEST(CustomGeometryTile, CancelOneInstanceKeepsOtherRegistered) {
+    CustomTileTest test;
+
+    int fetches = 0;
+    int cancels = 0;
+    CustomTileLoader loader([&](const CanonicalTileID&) { fetches++; }, [&](const CanonicalTileID&) { cancels++; });
+    auto mb = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
+    ActorRef<CustomTileLoader> loaderActor(loader, mb);
+
+    StubTileObserver observer;
+    Immutable<CustomGeometrySource::TileOptions> options = makeMutable<CustomGeometrySource::TileOptions>();
+    CustomGeometryTile first(OverscaledTileID(0, 0, 0), "source", test.tileParameters, options, loaderActor, &observer);
+    CustomGeometryTile second(
+        OverscaledTileID(0, 1, CanonicalTileID(0, 0, 0)), "source", test.tileParameters, options, loaderActor, &observer);
+
+    first.setNecessity(TileNecessity::Required);
+    second.setNecessity(TileNecessity::Required);
+    test.loop.waitForEmpty();
+    const int initialFetches = fetches;
+    ASSERT_GT(initialFetches, 0);
+
+    first.setNecessity(TileNecessity::Optional);
+    test.loop.waitForEmpty();
+    // The other tile still needs the fetch.
+    EXPECT_EQ(0, cancels);
+
+    // The remaining tile must still be invalidated, and fetched again.
+    loader.invalidateTile(CanonicalTileID(0, 0, 0));
+    test.loop.waitForEmpty();
+    second.setNecessity(TileNecessity::Required);
+    test.loop.waitForEmpty();
+    EXPECT_EQ(initialFetches + 1, fetches);
+}

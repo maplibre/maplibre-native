@@ -2,6 +2,8 @@
 #include <mln/tile/custom_geometry_tile.hpp>
 #include <mln/util/tile_range.hpp>
 
+#include <algorithm>
+
 namespace mln {
 namespace style {
 
@@ -36,10 +38,20 @@ void CustomTileLoader::fetchTile(const OverscaledTileID& tileID, const ActorRef<
 
 void CustomTileLoader::cancelTile(const OverscaledTileID& tileID) {
     std::scoped_lock guard(dataMutex);
-    if (tileCallbackMap.contains(tileID.canonical)) {
+    auto tileCallbacks = tileCallbackMap.find(tileID.canonical);
+    if (tileCallbacks == tileCallbackMap.end()) return;
+    // Wrapped and overscaled tiles share one canonical tile. Drop only this
+    // tile's registration; the others still need the data.
+    auto& callbacks = tileCallbacks->second;
+    auto registration = std::find_if(callbacks.begin(), callbacks.end(), [&](const auto& iter) {
+        return std::get<0>(iter) == tileID.overscaledZ && std::get<1>(iter) == tileID.wrap;
+    });
+    if (registration == callbacks.end()) return;
+    callbacks.erase(registration);
+    if (callbacks.empty()) {
         invokeTileCancel(tileID.canonical);
         // Erase so a subsequent fetchTile for the same tile re-issues the fetch.
-        tileCallbackMap.erase(tileID.canonical);
+        tileCallbackMap.erase(tileCallbacks);
     }
 }
 
@@ -56,7 +68,6 @@ void CustomTileLoader::removeTile(const OverscaledTileID& tileID) {
     }
     if (tileCallbacks->second.empty()) {
         tileCallbackMap.erase(tileCallbacks);
-        dataCache.erase(tileID.canonical);
     }
 }
 
