@@ -11,9 +11,7 @@ namespace vulkan {
 class VertexBufferResource : public gfx::VertexBufferResource {
 public:
     VertexBufferResource(BufferResource&& ptr) noexcept;
-    VertexBufferResource(VertexBufferResource&& other) noexcept
-        : buffer(std::move(other.buffer)),
-          lastUpdated(other.lastUpdated) {}
+    VertexBufferResource(VertexBufferResource&&) noexcept = default;
     ~VertexBufferResource() noexcept override;
 
     std::size_t getSizeInBytes() const noexcept { return buffer.getSizeInBytes(); }
