@@ -500,7 +500,8 @@ TEST(CrossTileSymbolLayerIndex, crossTileIDsReassigned) {
         makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>();
     OverscaledTileID tileId(7, 0, 6, 18, 24);
     std::vector<SymbolInstance> instances;
-    instances.push_back(makeSymbolInstance(1000, 1000, u"Washington"));
+    instances.push_back(makeSymbolInstance(100, 4096, u"West"));
+    instances.push_back(makeSymbolInstance(8100, 4096, u"East"));
     std::vector<SortKeyRange> ranges;
     SymbolBucket bucket{layout,
                         {},
@@ -517,21 +518,24 @@ TEST(CrossTileSymbolLayerIndex, crossTileIDsReassigned) {
                         {},
                         false /*iconsInText*/};
 
-    // New, out of view: not reassigned (a new bucket is marked as such).
+    // New, with the view left of the tile: West in view, East out of it. A new bucket is marked as
+    // such, not as reassigned.
     mat4 posMatrix;
-    populatePosMatrix(posMatrix, tileId, 60.0, 25.0, 7.0);
+    populatePosMatrix(posMatrix, tileId, 38.82, -80.12, 7.0);
     index.addBucket(tileId, posMatrix, bucket);
+    ASSERT_NE(bucket.symbolInstances.at(0).getCrossTileID(), SymbolInstance::invalidCrossTileID);
+    ASSERT_EQ(bucket.symbolInstances.at(1).getCrossTileID(), SymbolInstance::invalidCrossTileID);
     EXPECT_FALSE(bucket.crossTileIDsReassigned);
     bucket.lineLabelDirectionsStale = false;
 
-    // Updated, still out of view.
+    // Updated (East still out of view): West keeping its id is no reason to sync.
     index.addBucket(tileId, posMatrix, bucket);
     EXPECT_FALSE(bucket.crossTileIDsReassigned);
 
-    // Back in view.
+    // East back in view.
     populatePosMatrix(posMatrix, tileId, 39.0, -76.0, 7.0);
     index.addBucket(tileId, posMatrix, bucket);
-    EXPECT_NE(bucket.symbolInstances.at(0).getCrossTileID(), SymbolInstance::invalidCrossTileID);
+    EXPECT_NE(bucket.symbolInstances.at(1).getCrossTileID(), SymbolInstance::invalidCrossTileID);
     EXPECT_TRUE(bucket.crossTileIDsReassigned);
     EXPECT_FALSE(bucket.lineLabelDirectionsStale);
 }
