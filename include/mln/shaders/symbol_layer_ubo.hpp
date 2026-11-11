@@ -29,9 +29,10 @@ struct alignas(16) SymbolDrawableUBO {
     /* 248 */ float opacity_t;
     /* 252 */ float halo_width_t;
     /* 256 */ float halo_blur_t;
-    /* 260 */ float pad1;
-    /* 264 */ float pad2;
-    /* 268 */ float pad3;
+    // The distance haze over the terrain (Map::setTerrainHaze), as the terrain layer takes it
+    // (TerrainEvaluatedPropsUBO): a symbol over ground the haze has taken fades with that ground.
+    /* 260 */ float haze_alpha;               // the haze color's alpha; 0 when there is no haze
+    /* 264 */ std::array<float, 2> haze_ramp; // haze = clamp(x - y / view depth, 0, 1)^2
 
     // 3D terrain elevation; see RenderTerrain::getTerrainData
     /* 272 */ std::array<float, 4> dem_coords; // scale, x offset, y offset into the DEM tile, unused

@@ -52,9 +52,8 @@ struct SymbolDrawableUBO {
     opacity_t: f32,
     halo_width_t: f32,
     halo_blur_t: f32,
-    pad1: f32,
-    pad2: f32,
-    pad3: f32,
+    haze_alpha: f32,
+    haze_ramp: vec2<f32>,
     // 3D terrain elevation
     dem_coords: vec4<f32>,
     dem_unpack: vec4<f32>,
@@ -224,6 +223,9 @@ fn main(in: VertexInput) -> VertexOutput {
     out.fade_opacity = out.fade_opacity * calculate_visibility(projectedPoint, depth_texture, depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
 #ifndef HAS_UNIFORM_u_opacity
     out.opacity = final_opacity;
+    // Over ground the distance haze has taken, the symbol goes with the ground
+    let haze = clamp(drawable.haze_ramp.x - drawable.haze_ramp.y / max(projectedPoint.w, 1e-6), 0.0, 1.0);
+    out.fade_opacity = out.fade_opacity * (1.0 - drawable.haze_alpha * haze * haze);
 #endif
 
     return out;
@@ -409,6 +411,9 @@ fn main(in: VertexInput) -> VertexOutput {
     out.fade_opacity = out.fade_opacity * calculate_visibility(projectedPoint, depth_texture, depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
 #ifndef HAS_UNIFORM_u_fill_color
     out.fill_color = unpack_mix_color(in.fill_color, drawable.fill_color_t);
+    // Over ground the distance haze has taken, the symbol goes with the ground
+    let haze = clamp(drawable.haze_ramp.x - drawable.haze_ramp.y / max(projectedPoint.w, 1e-6), 0.0, 1.0);
+    out.fade_opacity = out.fade_opacity * (1.0 - drawable.haze_alpha * haze * haze);
 #endif
 #ifndef HAS_UNIFORM_u_halo_color
     out.halo_color = unpack_mix_color(in.halo_color, drawable.halo_color_t);
@@ -670,6 +675,9 @@ fn main(in: VertexInput) -> VertexOutput {
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
     out.fade_opacity = out.fade_opacity * calculate_visibility(projectedPoint, depth_texture, depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
     out.is_icon = is_icon;
+    // Over ground the distance haze has taken, the symbol goes with the ground
+    let haze = clamp(drawable.haze_ramp.x - drawable.haze_ramp.y / max(projectedPoint.w, 1e-6), 0.0, 1.0);
+    out.fade_opacity = out.fade_opacity * (1.0 - drawable.haze_alpha * haze * haze);
 
 #ifndef HAS_UNIFORM_u_fill_color
     out.fill_color = unpack_mix_color(in.fill_color, drawable.fill_color_t);

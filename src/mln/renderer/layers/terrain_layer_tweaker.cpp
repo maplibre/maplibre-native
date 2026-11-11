@@ -43,22 +43,7 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     const auto zoom = std::max(parameters.state.getZoom(), 0.0);
     const float elevationOffset = static_cast<float>(util::M2PI * util::EARTH_RADIUS_M / std::pow(2.0, zoom) / 5.0);
 
-    // Distance haze (Map::setTerrainHaze), as maplibre-gl-js's terrain fog with fog-ground-blend 0.5, its
-    // near plane at n, the camera-to-center distance, and its far plane where the haze is to be full,
-    // `range` times n. (gl-js puts its fog near plane at the sea-level point under the center; the center
-    // itself keeps the reach the same multiple of n over high ground.) gl-js's fog depth at view depth d,
-    // far / (far - n) * (1 - n / d), is clear up to 0.5 and full at 1; the shader takes the haze as
-    // clamp(a - b / d, 0, 1) squared, with a = (far + n) / (far - n) and b = 2 far n / (far - n). As in
-    // gl-js it fades in between pitches of 60 and 70 degrees. Off, a and b are 0 and the color is clear.
-    const auto& state = parameters.state;
-    const double hazeNear = state.getCameraToCenterDistance();
-    const double hazeFar = hazeNear * terrain->getHazeRange();
-    const double hazeFade = std::clamp((state.getPitch() - util::deg2rad(60.0)) / util::deg2rad(10.0), 0.0, 1.0);
-    const bool hazy = hazeFar > hazeNear && hazeFade > 0.0;
-    const Color hazeColor = hazy ? terrain->getHazeColor() * static_cast<float>(hazeFade) : Color{};
-    const double hazeSpan = hazeFar - hazeNear;
-    const std::array<float, 2> hazeRamp{hazy ? static_cast<float>((hazeFar + hazeNear) / hazeSpan) : 0.0f,
-                                        hazy ? static_cast<float>(2.0 * hazeFar * hazeNear / hazeSpan) : 0.0f};
+    const RenderTerrain::Haze haze = terrain->getHaze(parameters.state);
 
     // Populate layer-level UBO with terrain properties
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
@@ -67,8 +52,8 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
                                                .elevation_offset = elevationOffset,
                                                .pad1 = 0.0f,
                                                .pad2 = 0.0f,
-                                               .haze_color = {hazeColor.r, hazeColor.g, hazeColor.b, hazeColor.a},
-                                               .haze_ramp = hazeRamp,
+                                               .haze_color = {haze.color.r, haze.color.g, haze.color.b, haze.color.a},
+                                               .haze_ramp = haze.ramp,
                                                .pad3 = 0.0f,
                                                .pad4 = 0.0f};
     layerUniforms.createOrUpdate(idTerrainEvaluatedPropsUBO, &propsUBO, context);
