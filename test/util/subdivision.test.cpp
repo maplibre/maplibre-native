@@ -236,6 +236,15 @@ TEST(Subdivision, Granularity) {
     EXPECT_EQ(1u, SubdivisionGranularityExpression(0, 0).getGranularityForZoomLevel(3));
 }
 
+TEST(Subdivision, GranularityKeepsTheSurfaceGranularity) {
+    const SubdivisionGranularityExpression fill{128, 2, 64};
+    std::vector<uint32_t> granularities;
+    for (uint8_t zoom = 0; zoom <= 12; ++zoom) {
+        granularities.push_back(fill.getGranularityForZoomLevel(zoom));
+    }
+    EXPECT_EQ((std::vector<uint32_t>{128, 64, 32, 32, 16, 16, 8, 8, 4, 4, 2, 2, 2}), granularities);
+}
+
 TEST(Subdivision, NoSubdivisionKeepsTriangles) {
     // GL JS "Polygon is unchanged when granularity=1".
     const auto result = subdividePolygon(square(0, 0, 20000, 20000), CanonicalTileID(3, 1, 1), 1);

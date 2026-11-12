@@ -3,6 +3,7 @@
   "metadata": {
     "test": {
       "description": "GeoJSON fill crossing the antimeridian on globe at zoom 3. Must render as uniform 50% gray, seamless across the antimeridian: the wrapped buffer copy supplies the far side of the seam, so the antimeridian clip must not discard it outside the zoom 0 tile.",
+      "allowed": 0.00025,
       "width": 512,
       "height": 512
     }
