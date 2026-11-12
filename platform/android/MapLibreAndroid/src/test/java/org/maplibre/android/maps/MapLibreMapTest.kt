@@ -106,6 +106,7 @@ class MapLibreMapTest : BaseTest() {
     @Test
     fun testScrollBy() {
         maplibreMap.scrollBy(100f, 200f)
+        verify { nativeMapView.cancelTransitions() }
         verify { nativeMapView.moveBy(100.0, 200.0, 0) }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
@@ -120,6 +121,7 @@ class MapLibreMapTest : BaseTest() {
     @Test
     fun testFocalBearing() {
         maplibreMap.setFocalBearing(35.0, 100f, 200f, 1000)
+        verify { nativeMapView.cancelTransitions() }
         verify { transform.setBearing(35.0, 100f, 200f, 1000) }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
@@ -259,6 +261,7 @@ class MapLibreMapTest : BaseTest() {
         val target = PointF(100f, 100f)
         maplibreMap.setZoom(2.0, target, 0)
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
+        verify { nativeMapView.cancelTransitions() }
         verify { nativeMapView.setZoom(2.0, target, 0) }
     }
 
