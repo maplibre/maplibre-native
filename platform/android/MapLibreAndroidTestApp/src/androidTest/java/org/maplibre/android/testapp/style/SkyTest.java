@@ -34,11 +34,11 @@ public class SkyTest extends BaseTest {
       TransitionOptions transition = new TransitionOptions(300, 100);
 
       sky.setAtmosphereBlend(0.75f);
-      sky.setFogColor("rgba(240,245,255,1)");
+      sky.setFogColor("rgba(176,191,255,1)");
       sky.setFogGroundBlend(0.25f);
-      sky.setHorizonColor("rgba(150,180,210,1)");
+      sky.setHorizonColor("rgba(150,180,191,1)");
       sky.setHorizonFogBlend(0.5f);
-      sky.setSkyColor("rgba(25,158,243,1)");
+      sky.setSkyColor("rgba(23,158,255,1)");
       sky.setSkyHorizonBlend(0.6f);
       sky.setAtmosphereBlendTransition(transition);
       sky.setFogColorTransition(transition);
@@ -52,11 +52,11 @@ public class SkyTest extends BaseTest {
       Sky applied = maplibreMap.getStyle().getSky();
       assertNotNull(applied);
       assertEquals(0.75f, applied.getAtmosphereBlend().getValue(), 0f);
-      assertEquals("rgba(240,245,255,1)", applied.getFogColor().getValue());
+      assertEquals("rgba(176,191,255,1)", applied.getFogColor().getValue());
       assertEquals(0.25f, applied.getFogGroundBlend().getValue(), 0f);
-      assertEquals("rgba(150,180,210,1)", applied.getHorizonColor().getValue());
+      assertEquals("rgba(150,180,191,1)", applied.getHorizonColor().getValue());
       assertEquals(0.5f, applied.getHorizonFogBlend().getValue(), 0f);
-      assertEquals("rgba(25,158,243,1)", applied.getSkyColor().getValue());
+      assertEquals("rgba(23,158,255,1)", applied.getSkyColor().getValue());
       assertEquals(0.6f, applied.getSkyHorizonBlend().getValue(), 0f);
       assertEquals(transition, applied.getAtmosphereBlendTransition());
       assertEquals(transition, applied.getFogColorTransition());
@@ -70,7 +70,7 @@ public class SkyTest extends BaseTest {
       Expression skyColor = interpolate(
         linear(),
         zoom(),
-        stop(0, rgba(25, 158, 243, 1f)),
+        stop(0, rgba(23, 158, 255, 1f)),
         stop(12, rgba(0, 0, 40, 1f))
       );
       applied.setAtmosphereBlend(atmosphere);
