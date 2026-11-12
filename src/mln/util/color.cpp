@@ -255,7 +255,7 @@ std::optional<double> readOklchArgument(std::string_view input, std::size_t& pos
         for (const auto& [unit, degrees] : units) {
             if (input.substr(pos, unit.size()) == unit) {
                 pos += unit.size();
-                value *= degrees;
+                value = std::fmod(value, 360.0 / degrees) * degrees;
                 break;
             }
         }

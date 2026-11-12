@@ -127,6 +127,12 @@ TEST(ColorParse, OklchClampsAndReadsNoneAsZero) {
     expectColor(Color::parse("oklch(0.6 0.1 90 / none)").value(), 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
+TEST(ColorParse, OklchWrapsAHugeHueAngleBeforeConvertingIt) {
+    const Color zeroHue = Color::parse("oklch(0.6 0.1 0)").value();
+    expectColor(Color::parse("oklch(0.6 0.1 1e306turn)").value(), zeroHue.r, zeroHue.g, zeroHue.b, zeroHue.a);
+    EXPECT_TRUE(Color::parse("oklch(0.6 0.1 1e307rad)"));
+}
+
 TEST(ColorParse, OklchOutsideSrgbIsClipped) {
     expectColor(Color::parse("oklch(0.7 0.3 140)").value(), 0.0f, 0.7715854f, 0.0f, 1.0f);
     expectColor(Color::parse("oklch(0.9 0.3 300)").value(), 1.0f, 0.6255093f, 1.0f, 1.0f);
