@@ -46,6 +46,21 @@ app.get('/cache', function(req, res) {
     res.send('Response ' + (++cacheCounter));
 });
 
+var implicitCacheCounter = 0;
+app.get('/implicit-cache', function(req, res) {
+    res.send('Response ' + (++implicitCacheCounter));
+});
+
+app.get('/must-revalidate', function(req, res) {
+    res.setHeader('Cache-Control', 'must-revalidate');
+    res.status(200).send('Response');
+});
+
+app.get('/explicit-max-age', function(req, res) {
+    res.setHeader('Cache-Control', 'max-age=30');
+    res.status(200).send('Response');
+});
+
 app.get('/revalidate-same', function(req, res) {
     if (req.headers['if-none-match'] == 'snowfall') {
         // Second request can be cached for 1 second.
