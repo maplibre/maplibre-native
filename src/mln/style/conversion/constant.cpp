@@ -80,6 +80,7 @@ template std::optional<HillshadeIlluminationAnchorType> Converter<HillshadeIllum
     const Convertible&, Error&) const;
 template std::optional<HillshadeMethodType> Converter<HillshadeMethodType>::operator()(const Convertible&,
                                                                                        Error&) const;
+template std::optional<IconOverlapType> Converter<IconOverlapType>::operator()(const Convertible&, Error&) const;
 template std::optional<IconTextFitType> Converter<IconTextFitType>::operator()(const Convertible&, Error&) const;
 template std::optional<LightAnchorType> Converter<LightAnchorType>::operator()(const Convertible&, Error&) const;
 template std::optional<LineCapType> Converter<LineCapType>::operator()(const Convertible&, Error&) const;

@@ -3,6 +3,7 @@
 #include <mln/geometry/feature_index.hpp>
 
 #include <mln/text/collision_feature.hpp>
+#include <mln/text/overlap_mode.hpp>
 #include <mln/util/grid_index.hpp>
 #include <mln/map/transform_state.hpp>
 
@@ -44,7 +45,7 @@ public:
         const PlacedSymbol& symbol,
         float scale,
         float fontSize,
-        bool allowOverlap,
+        OverlapMode overlapMode,
         bool pitchWithMap,
         bool collisionDebug,
         const std::optional<CollisionBoundaries>& avoidEdges,
@@ -54,6 +55,7 @@ public:
 
     void insertFeature(const CollisionFeature& feature,
                        const std::vector<ProjectedCollisionBox>&,
+                       OverlapMode overlapMode,
                        bool ignorePlacement,
                        uint32_t bucketInstanceId,
                        uint16_t collisionGroupId);
@@ -80,13 +82,21 @@ private:
         const PlacedSymbol& symbol,
         float scale,
         float fontSize,
-        bool allowOverlap,
+        OverlapMode overlapMode,
         bool pitchWithMap,
         bool collisionDebug,
         const std::optional<CollisionBoundaries>& avoidEdges,
         const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
         std::vector<ProjectedCollisionBox>& /*out*/
     );
+
+    // Cooperative symbols may overlap `always`/`cooperative` placements, but not `never` ones.
+    bool collides(OverlapMode,
+                  const CollisionGrid::BBox&,
+                  const std::optional<std::function<bool(const RefIndexedSubfeature&)>>&) const;
+    bool collides(OverlapMode,
+                  const CollisionGrid::BCircle&,
+                  const std::optional<std::function<bool(const RefIndexedSubfeature&)>>&) const;
 
     float approximateTileDistance(const TileDistance& tileDistance,
                                   float lastSegmentAngle,
@@ -108,6 +118,7 @@ private:
     const float viewportPadding;
     CollisionGrid collisionGrid;
     CollisionGrid ignoredGrid;
+    CollisionGrid neverGrid;
 
     const float screenRightBoundary;
     const float screenBottomBoundary;

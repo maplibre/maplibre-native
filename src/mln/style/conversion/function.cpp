@@ -121,6 +121,8 @@ template std::optional<PropertyExpression<CirclePitchScaleType>> convertFunction
 template std::optional<PropertyExpression<float>> convertFunctionToExpression<float>(const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<HillshadeIlluminationAnchorType>>
 convertFunctionToExpression<HillshadeIlluminationAnchorType>(const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<IconOverlapType>> convertFunctionToExpression<IconOverlapType>(
+    const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<IconTextFitType>> convertFunctionToExpression<IconTextFitType>(
     const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<LightAnchorType>> convertFunctionToExpression<LightAnchorType>(

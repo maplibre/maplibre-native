@@ -53,6 +53,10 @@ public:
     const PropertyValue<bool>& getIconOptional() const;
     void setIconOptional(const PropertyValue<bool>&);
 
+    static PropertyValue<IconOverlapType> getDefaultIconOverlap();
+    const PropertyValue<IconOverlapType>& getIconOverlap() const;
+    void setIconOverlap(const PropertyValue<IconOverlapType>&);
+
     static PropertyValue<Padding> getDefaultIconPadding();
     const PropertyValue<Padding>& getIconPadding() const;
     void setIconPadding(const PropertyValue<Padding>&);
@@ -156,6 +160,10 @@ public:
     static PropertyValue<bool> getDefaultTextOptional();
     const PropertyValue<bool>& getTextOptional() const;
     void setTextOptional(const PropertyValue<bool>&);
+
+    static PropertyValue<TextOverlapType> getDefaultTextOverlap();
+    const PropertyValue<TextOverlapType>& getTextOverlap() const;
+    void setTextOverlap(const PropertyValue<TextOverlapType>&);
 
     static PropertyValue<float> getDefaultTextPadding();
     const PropertyValue<float>& getTextPadding() const;
