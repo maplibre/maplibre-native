@@ -1020,6 +1020,33 @@ TEST(Source, RenderTileSetSourceUpdate) {
     renderSource->update(uninitialized.baseImpl, layers, true, true, test.tileParameters());
 }
 
+TEST(Source, EmptyTileset) {
+    SourceTest test;
+    VectorSource source("source", Tileset{});
+    source.loadDescription(*test.fileSource);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
+
+    LineLayer layer("id", "source");
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
+
+    ASSERT_NO_THROW(renderSource->update(source.baseImpl, layers, true, true, test.tileParameters()));
+    EXPECT_TRUE(renderSource->isLoaded());
+
+    source.setTiles({"tiles"});
+    renderSource->update(source.baseImpl, layers, true, false, test.tileParameters());
+    EXPECT_FALSE(renderSource->isLoaded());
+
+    source.setTiles({});
+    ASSERT_NO_THROW(renderSource->update(source.baseImpl, layers, true, false, test.tileParameters()));
+    EXPECT_TRUE(renderSource->isLoaded());
+
+    source.setTiles({"tiles"});
+    renderSource->update(source.baseImpl, layers, true, false, test.tileParameters());
+    EXPECT_FALSE(renderSource->isLoaded());
+}
+
 TEST(Source, VectorSourceSetTiles) {
     SourceTest test;
     test.styleObserver.sourceChanged = [&](Source& source) {
