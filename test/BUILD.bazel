@@ -58,9 +58,15 @@ cc_library(
         [
             "**/*.test.cpp",
         ],
-        exclude = ["renderer/wgsl_preprocessor.test.cpp"] + PLUGIN_API_TESTS,
+        exclude = [
+            "renderer/webgpu_layer_group.test.cpp",
+            "renderer/wgsl_preprocessor.test.cpp",
+        ] + PLUGIN_API_TESTS,
     ) + select({
-        "//:webgpu_renderer": ["renderer/wgsl_preprocessor.test.cpp"],
+        "//:webgpu_renderer": [
+            "renderer/webgpu_layer_group.test.cpp",
+            "renderer/wgsl_preprocessor.test.cpp",
+        ],
         "//conditions:default": [],
     }) + select({
         "//:plugins_enabled": PLUGIN_API_TESTS,
