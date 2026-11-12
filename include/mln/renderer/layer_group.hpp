@@ -202,11 +202,11 @@ public:
     void setStencilTiles(RenderTiles);
     const RenderTiles& getStencilTiles() const { return stencilTiles; }
 
-    /// The tiles the layer covers (its render tiles), with drawables or not. A covering tile
-    /// without drawables has no content for the layer there, such as a GeoJSON tile emptied by
-    /// a data update, which a drape must show too: see RenderTarget::computeDrapeCoverage.
-    void setCoverTileIDs(std::vector<UnwrappedTileID> ids) { coverTileIDs = std::move(ids); }
-    const std::vector<UnwrappedTileID>& getCoverTileIDs() const { return coverTileIDs; }
+    /// With terrain on, the tiles of a draped layer that have no data for it, such as a GeoJSON
+    /// tile emptied by a data update: the drape shows them as empty instead of keeping what it
+    /// drew there (see terrain::DrapeGroupCoverage)
+    void setEmptyTileIDs(std::vector<UnwrappedTileID> ids) { emptyTileIDs = std::move(ids); }
+    const std::vector<UnwrappedTileID>& getEmptyTileIDs() const { return emptyTileIDs; }
 
     void updateLayerIndex(int32_t value) override { layerIndex = value; }
 
@@ -215,7 +215,7 @@ protected:
     // of tile IDs that need to be rendered to the stencil buffer.
     RenderTiles stencilTiles;
 
-    std::vector<UnwrappedTileID> coverTileIDs;
+    std::vector<UnwrappedTileID> emptyTileIDs;
 
     struct TileLayerGroupTileKey {
         mln::RenderPass renderPass;

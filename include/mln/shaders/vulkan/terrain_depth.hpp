@@ -45,6 +45,8 @@ layout(set = LAYER_SET_INDEX, binding = idTerrainEvaluatedPropsUBO) uniform Terr
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D dem_sampler;
 
+layout(location = 0) out vec2 frag_depth_zw;
+
 void main() {
     const TerrainDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
@@ -61,22 +63,32 @@ void main() {
     // Must match the transform the symbol pass applies, so the depth texture
     // and the symbols it occludes share one clip space
     applySurfaceTransform();
+    frag_depth_zw = gl_Position.zw;
 }
 )";
 
     static constexpr auto fragment = R"(
 
+layout(location = 0) in vec2 frag_depth_zw;
 layout(location = 0) out vec4 out_color;
 
 void main() {
-    // Pack the fragment depth into RGBA8, matching the maplibre-gl-js
-    // terrain_depth shader; unpacked by unpack_depth() for calculate_visibility()
-    const float depth = gl_FragCoord.z;
-    const vec4 bit_shift = vec4(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);
-    const vec4 bit_mask = vec4(0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0);
-    vec4 res = fract(depth * bit_shift);
-    res -= res.xxyz * bit_mask;
-    out_color = res;
+    // The fragment's z / w, which is its window depth over a [0, 1] viewport depth range. Not
+    // gl_FragCoord.z: a 3D drawable is drawn with a narrower range (depthModeFor3D), and the
+    // occlusion test compares against the depth the clip-space position gives.
+    const float depth = frag_depth_zw.x / frag_depth_zw.y;
+    // Pack it into RGBA8 as four base-256 digits, each written as k / 255 so the unorm8 target
+    // stores it exactly (the gl-js fract/bit_mask scheme stores k / 256 and loses up to 0.002 to
+    // unorm rounding). Decoded by unpack_depth() for calculate_visibility().
+    float r = clamp(depth, 0.0, 0.99999994) * 256.0;
+    const float d0 = floor(r);
+    r = (r - d0) * 256.0;
+    const float d1 = floor(r);
+    r = (r - d1) * 256.0;
+    const float d2 = floor(r);
+    r = (r - d2) * 256.0;
+    const float d3 = floor(r);
+    out_color = vec4(d0, d1, d2, d3) / 255.0;
 }
 )";
 };

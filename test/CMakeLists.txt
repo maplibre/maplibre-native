@@ -7,6 +7,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/api/annotations.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/api_misuse.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/custom_geometry_source.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/api/location_indicator.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/query.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/recycle_map.cpp
     ${PROJECT_SOURCE_DIR}/test/geometry/dem_data.test.cpp
@@ -28,9 +29,14 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/color_relief.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/dem_elevation_provider.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_camera.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation_index.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_fill_pattern_drape.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_pattern_crossfade.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_resolution.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_zoom_out.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_occlusion.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_drape.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/layer_min_zoom_tiles.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_cache_policy.test.cpp

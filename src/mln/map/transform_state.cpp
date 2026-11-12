@@ -505,6 +505,14 @@ LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
     return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * pi), -x / Bc, wrapMode};
 }
 
+LatLng TransformState::latLngNearCenter(const LatLng& latLng) const {
+    const LatLng center = getLatLng();
+    const LatLng wrappedCenter = center.wrapped();
+    LatLng nearest = latLng.wrapped();
+    nearest.unwrapForShortestPath(wrappedCenter);
+    return {nearest.latitude(), nearest.longitude() + center.longitude() - wrappedCenter.longitude()};
+}
+
 double TransformState::getCenterAltitude() const {
     return altitudeMeters;
 }
@@ -783,12 +791,16 @@ ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng) 
 }
 
 ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng, vec4& p) const {
+    return latLngToScreenCoordinate(latLng, 0.0, p);
+}
+
+ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng, double elevationMeters, vec4& p) const {
     if (size.isEmpty()) {
         return {};
     }
 
     Point<double> pt = Projection::project(latLng, scale) / util::tileSize_D;
-    vec4 c = {{pt.x, pt.y, 0, 1}};
+    vec4 c = {{pt.x, pt.y, elevationMeters, 1}};
     matrix::transformMat4(p, c, getCoordMatrix());
     return {p[0] / p[3], size.height - p[1] / p[3]};
 }

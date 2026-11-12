@@ -320,6 +320,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         &pushData,
         dispatcher);
 
+    impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
+
     if (enableDepth) {
         if (impl->depthFor3D.has_value()) {
             impl->pipelineInfo.setDepthMode(impl->depthFor3D.value());
@@ -345,8 +347,6 @@ void Drawable::draw(PaintParameters& parameters) const {
     } else {
         impl->pipelineInfo.setStencilMode(gfx::StencilMode::disabled());
     }
-
-    impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
 
     for (const auto& seg : impl->segments) {
         const auto& segment = seg->getSegment();

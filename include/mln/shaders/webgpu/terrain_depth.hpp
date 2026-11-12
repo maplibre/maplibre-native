@@ -21,6 +21,7 @@ struct VertexInput {
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
+    @location(0) depth_zw: vec2<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -62,6 +63,7 @@ fn main(in: VertexInput) -> VertexOutput {
     // Skirt vertices drop below the surface by elevation_offset (gl-js u_ele_delta)
     let ele_delta = select(0.0, props.elevation_offset, in.position.z == 1);
     out.position = drawable.matrix * vec4<f32>(pos.x, pos.y, elevation - ele_delta, 1.0);
+    out.depth_zw = out.position.zw;
     return out;
 }
 )";
@@ -69,18 +71,27 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @builtin(position) position: vec4<f32>,
+    @location(0) depth_zw: vec2<f32>,
 };
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    // Pack the fragment depth into RGBA8, matching the maplibre-gl-js
-    // terrain_depth shader; unpacked by unpack_depth() for calculate_visibility()
-    let depth = in.position.z;
-    let bit_shift = vec4<f32>(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);
-    let bit_mask = vec4<f32>(0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0);
-    var res = fract(depth * bit_shift);
-    res = res - res.xxyz * bit_mask;
-    return res;
+    // The fragment's z / w, which is its window depth over a [0, 1] viewport depth range. Not
+    // in.position.z: a 3D drawable can be drawn with a narrower range (depthModeFor3D), and the
+    // occlusion test compares against the depth the clip-space position gives.
+    let depth = in.depth_zw.x / in.depth_zw.y;
+    // Pack it into RGBA8 as four base-256 digits, each written as k / 255 so the unorm8 target
+    // stores it exactly (the gl-js fract/bit_mask scheme stores k / 256 and loses up to 0.002 to
+    // unorm rounding). Decoded by unpack_depth() for calculate_visibility().
+    var r = clamp(depth, 0.0, 0.99999994) * 256.0;
+    let d0 = floor(r);
+    r = (r - d0) * 256.0;
+    let d1 = floor(r);
+    r = (r - d1) * 256.0;
+    let d2 = floor(r);
+    r = (r - d2) * 256.0;
+    let d3 = floor(r);
+    return vec4<f32>(d0, d1, d2, d3) / 255.0;
 }
 )";
 };

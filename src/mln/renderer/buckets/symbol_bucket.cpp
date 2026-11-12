@@ -113,6 +113,18 @@ void SymbolBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     placementChangesUploaded = true;
     dynamicUploaded = true;
     sortUploaded = true;
+    // Static layout is final; placement only rewrites the dynamic and opacity data. The CPU copy is
+    // dropped unless the map reads it back to report rendered features.
+    if (retainFeaturesById) {
+        return;
+    }
+    text.sharedAttributeData->release();
+    icon.sharedAttributeData->release();
+    sdfIcon.sharedAttributeData->release();
+    for (auto& pair : paintProperties) {
+        pair.second.iconBinders.release();
+        pair.second.textBinders.release();
+    }
 }
 
 bool SymbolBucket::hasData() const {
@@ -336,8 +348,9 @@ bool SymbolBucket::hasVariableTextAnchors() const {
 }
 
 std::pair<uint32_t, bool> SymbolBucket::registerAtCrossTileIndex(CrossTileSymbolLayerIndex& index,
-                                                                 const RenderTile& renderTile) {
-    bool firstTimeAdded = index.addBucket(renderTile.getOverscaledTileID(), renderTile.matrix, *this);
+                                                                 const RenderTile& renderTile,
+                                                                 const SymbolElevationFn* getElevation) {
+    bool firstTimeAdded = index.addBucket(renderTile.getOverscaledTileID(), renderTile.matrix, *this, getElevation);
     return std::make_pair(bucketInstanceId, firstTimeAdded);
 }
 
@@ -349,14 +362,15 @@ void SymbolBucket::updateVertices(const Placement& placement,
                                   bool updateOpacities,
                                   const TransformState& state,
                                   const RenderTile& tile,
-                                  std::set<uint32_t>& seenIds) {
+                                  std::set<uint32_t>& seenIds,
+                                  const RenderTerrain* terrain) {
     if (updateOpacities) {
         placement.updateBucketOpacities(*this, state, seenIds);
         placementChangesUploaded = false;
         uploaded = false;
     }
 
-    if (placement.updateBucketDynamicAttributeData(*this, state, tile)) {
+    if (placement.updateBucketDynamicAttributeData(*this, state, tile, terrain)) {
         dynamicUploaded = false;
         uploaded = false;
     }
