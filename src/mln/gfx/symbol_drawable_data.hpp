@@ -20,7 +20,9 @@ struct SymbolDrawableData : public DrawableData {
                        const style::AlignmentType rotationAlignment_,
                        const style::SymbolPlacementType placement_,
                        const style::IconTextFitType textFit_,
-                       const bool isOffset_)
+                       const bool isOffset_,
+                       const std::size_t opacityVertexOffset_,
+                       const std::size_t opacityVertexCount_)
         : isHalo(isHalo_),
           bucketVariablePlacement(bucketVariablePlacement_),
           symbolType(symbolType_),
@@ -28,7 +30,9 @@ struct SymbolDrawableData : public DrawableData {
           rotationAlignment(rotationAlignment_),
           placement(placement_),
           textFit(textFit_),
-          isOffset(isOffset_) {}
+          isOffset(isOffset_),
+          opacityVertexOffset(opacityVertexOffset_),
+          opacityVertexCount(opacityVertexCount_) {}
     ~SymbolDrawableData() override = default;
 
     const bool isHalo;
@@ -39,6 +43,8 @@ struct SymbolDrawableData : public DrawableData {
     const style::SymbolPlacementType placement;
     const style::IconTextFitType textFit;
     const bool isOffset;
+    const std::size_t opacityVertexOffset;
+    const std::size_t opacityVertexCount;
 };
 
 using UniqueSymbolDrawableData = std::unique_ptr<SymbolDrawableData>;

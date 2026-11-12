@@ -17,6 +17,7 @@
 
 #include <sstream>
 #include <optional>
+#include <algorithm>
 
 using namespace mln;
 
@@ -154,9 +155,60 @@ static void API_renderStill_multiple_sources(::benchmark::State& state) {
     }
 }
 
+namespace {
+
+void API_renderStill_colliding_symbols(::benchmark::State& state) {
+    RenderBenchmark bench;
+    HeadlessFrontend frontend{Size{256, 256}, pixelRatio};
+    Map map{frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+            ResourceOptions()};
+
+    std::ostringstream json;
+    json << R"({"version":8,"sources":{"points":{"type":"geojson","maxzoom":0,"data":{
+        "type":"FeatureCollection","features":[)";
+    for (int64_t i = 0; i < state.range(0); ++i) {
+        if (i) json << ',';
+        json << R"({"type":"Feature","properties":{"rank":)" << i
+             << R"(},"geometry":{"type":"Point","coordinates":[5,5]}})";
+    }
+    json << R"(]}}},"layers":[{"id":"symbols","type":"symbol","source":"points","layout":{
+        "icon-image":"marker","symbol-sort-key":["get","rank"],"icon-allow-overlap":)"
+         << (state.range(1) ? "true" : "false") << R"(}}]})";
+    map.getStyle().loadJSON(json.str());
+    PremultipliedImage marker({16, 16});
+    std::fill_n(marker.data.get(), marker.bytes(), uint8_t{255});
+    map.getStyle().addImage(std::make_unique<style::Image>("marker", std::move(marker), 1.0f));
+    map.jumpTo(CameraOptions().withCenter(LatLng{5, 5}).withZoom(4));
+    frontend.render(map);
+
+    double encodingTime = 0;
+    int drawCalls = 0;
+    for ([[maybe_unused]] auto _ : state) {
+        const auto result = frontend.render(map);
+        encodingTime += result.stats.encodingTime;
+        drawCalls = result.stats.numDrawCalls;
+        benchmark::DoNotOptimize(result.image.data.get());
+    }
+    state.counters["draw_calls"] = drawCalls;
+    state.counters["encoding_ms"] = encodingTime * 1000 / static_cast<double>(state.iterations());
+}
+
+} // namespace
+
 BENCHMARK(API_renderStill_reuse_map)->Unit(benchmark::kMillisecond)->Iterations(50);
 BENCHMARK(API_renderStill_reuse_map_formatted_labels)->Unit(benchmark::kMillisecond)->Iterations(50);
 BENCHMARK(API_renderStill_reuse_map_switch_styles)->Unit(benchmark::kMillisecond)->Iterations(50);
 BENCHMARK(API_renderStill_recreate_map)->Unit(benchmark::kMillisecond)->Iterations(50);
 BENCHMARK(API_renderStill_recreate_map_2)->Unit(benchmark::kMillisecond)->Iterations(50);
 BENCHMARK(API_renderStill_multiple_sources)->Unit(benchmark::kMillisecond)->Iterations(50);
+BENCHMARK(API_renderStill_colliding_symbols)
+    ->Args({1, 0})
+    ->Args({256, 0})
+    ->Args({1024, 0})
+    ->Args({1024, 1})
+    ->ArgNames({"features", "overlap"})
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(50)
+    ->UseRealTime();
