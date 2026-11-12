@@ -205,6 +205,13 @@ private:
     friend struct OnlineFileRequest;
 
     void networkIsReachableAgain() {
+        // Notify high priority requests.
+        for (auto& req : allRequests) {
+            if (req->resource.priority == Resource::Priority::High) {
+                req->networkIsReachableAgain();
+            }
+        }
+
         // Notify regular priority requests.
         for (auto& req : allRequests) {
             if (req->resource.priority == Resource::Priority::Regular) {
@@ -221,17 +228,26 @@ private:
     }
 
     // Using Pending Requests as an priority queue which processes
-    // file requests in a FIFO manner but prefers regular requests
-    // over offline requests with a low priority such that low priority
-    // requests do not throttle regular requests.
+    // file requests in a FIFO manner within each priority: High first,
+    // then Regular, then Low, such that low priority requests (offline
+    // downloads) do not throttle regular requests.
     //
     // The order of a queue is therefore:
     //
-    // hi0 -- hi1 -- hi2 -- hi3 -- lo0 -- lo1 --lo2
-    //                              ^
-    //                              firstLowPriorityRequest
+    // h0 -- h1 -- r0 -- r1 -- r2 -- lo0 -- lo1
+    //                               ^
+    //                               firstLowPriorityRequest
 
     struct PendingRequests {
+        // The most requests that wait in the High class; a further High request
+        // is queued as Regular. A strict High class would let a burst of
+        // elevation requests bury the Regular requests already waiting (style,
+        // sprite, glyph and TileJSON among them); this holds that to 32 ahead
+        // of them. It does not interleave: a request that arrives after the
+        // burst waits behind all of it. 32 is about a batch and a half of the
+        // 20 request slots.
+        static constexpr std::size_t maximumHighPriorityRequests = 32;
+
         PendingRequests()
             : firstLowPriorityRequest(queue.begin()) {}
 
@@ -249,7 +265,21 @@ private:
         }
 
         void insert(OnlineFileRequest* request) {
-            if (request->resource.priority == Resource::Priority::Regular) {
+            auto priority = request->resource.priority;
+            if (priority == Resource::Priority::High) {
+                auto it = queue.begin();
+                std::size_t waiting = 0;
+                while (it != queue.end() && (*it)->resource.priority == Resource::Priority::High) {
+                    ++it;
+                    ++waiting;
+                }
+                if (waiting < maximumHighPriorityRequests) {
+                    queue.insert(it, request);
+                    return;
+                }
+                priority = Resource::Priority::Regular;
+            }
+            if (priority == Resource::Priority::Regular) {
                 firstLowPriorityRequest = queue.insert(firstLowPriorityRequest, request);
                 firstLowPriorityRequest++;
             } else {
