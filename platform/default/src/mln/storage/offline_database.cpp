@@ -317,6 +317,11 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
         return {false, 0};
     }
 
+    // An ambient cache with no room can't store anything, so skip compressing.
+    if (evict_ && maximumAmbientCacheSize == 0) {
+        return {false, 0};
+    }
+
     std::string compressedData;
     bool compressed = false;
     uint64_t size = 0;
