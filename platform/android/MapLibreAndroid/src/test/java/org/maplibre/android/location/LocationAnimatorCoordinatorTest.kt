@@ -19,7 +19,9 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.shadows.ShadowLooper
 import org.robolectric.shadows.ShadowSystemClock
+import java.util.concurrent.TimeUnit
 import java.time.Duration
 import org.maplibre.android.BaseTest
 import org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_PADDING_ANIM_DURATION
@@ -831,12 +833,350 @@ class LocationAnimatorCoordinatorTest : BaseTest() {
     }
 
     @Test
+    fun feedNewLocation_unchangedLocationAfterAnimationEnded_noNewAnimation() {
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0, bearing = 30f), cameraPosition, false)
+        endAllAnimators()
+        val animators = locationAnimators()
+
+        // same position and bearing, other values such as accuracy and altitude differ
+        val sameLocation = location(51.0, 17.0, bearing = 30f)
+        sameLocation.accuracy = 25f
+        sameLocation.altitude = 100.0
+        locationAnimatorCoordinator.feedNewLocation(sameLocation, cameraPosition, false)
+
+        assertEquals(animators, locationAnimators())
+        verify(exactly = 1) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewLocation_unchangedLocationWhileAnimating_animationContinues() {
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+        val animators = locationAnimators()
+
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+
+        assertEquals(animators, locationAnimators())
+        animators.forEach { assertTrue(it.isStarted) }
+    }
+
+    @Test
+    fun feedNewLocation_unchangedLocationAfterCancel_animatesAgain() {
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+        val animators = locationAnimators()
+        locationAnimatorCoordinator.cancelAllAnimations()
+
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+
+        locationAnimators().zip(animators).forEach { (new, old) -> assertNotSame(old, new) }
+        verify(exactly = 2) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewLocation_changedLocation_animates() {
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+        endAllAnimators()
+        val animators = locationAnimators()
+
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.00001), cameraPosition, false)
+
+        locationAnimators().zip(animators).forEach { (new, old) -> assertNotSame(old, new) }
+        val layerLatLngTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_LATLNG]?.target as LatLng
+        assertEquals(17.00001, layerLatLngTarget.longitude, 0.0)
+    }
+
+    @Test
+    fun feedNewLocation_unchangedPositionChangedBearing_animatesShownBearing() {
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0, bearing = 30f), cameraPosition, false)
+        endAllAnimators()
+
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0, bearing = 40f), cameraPosition, false)
+
+        val layerBearingTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_GPS_BEARING]?.target as Float
+        assertEquals(40f, layerBearingTarget)
+        verify(exactly = 2) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewLocation_unchangedPositionChangedBearing_noAnimationWhenBearingNotShown() {
+        // e.g. RenderMode.NORMAL without camera tracking
+        locationAnimatorCoordinator.updateAnimatorListenerHolders(
+            getListenerHoldersSet(ANIMATOR_LAYER_LATLNG, ANIMATOR_LAYER_ACCURACY)
+        )
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0, bearing = 30f), cameraPosition, false)
+        endAllAnimators()
+        val layerLatLngAnimator = locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_LATLNG]
+
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0, bearing = 40f), cameraPosition, false)
+
+        assertSame(layerLatLngAnimator, locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_LATLNG])
+        verify(exactly = 1) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewLocation_newListener_animatesAgain() {
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+        endAllAnimators()
+        val layerLatLngAnimator = locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_LATLNG]
+        locationAnimatorCoordinator.updateAnimatorListenerHolders(getListenerHoldersSet(ANIMATOR_LAYER_LATLNG))
+
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+
+        assertNotSame(layerLatLngAnimator, locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_LATLNG])
+    }
+
+    @Test
+    fun feedNewLocation_reusedLocationObject_animates() {
+        val location = location(51.0, 17.0)
+        locationAnimatorCoordinator.feedNewLocation(location, cameraPosition, false)
+        endAllAnimators()
+
+        location.longitude = 17.001
+        locationAnimatorCoordinator.feedNewLocation(location, cameraPosition, false)
+
+        val layerLatLngTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_LATLNG]?.target as LatLng
+        assertEquals(17.001, layerLatLngTarget.longitude, 0.0)
+    }
+
+    @Test
+    fun feedNewLocation_cameraResetTowardsOldLocation_cameraFollowsUnchangedLocation() {
+        // tracking at the first location, tracking off, move and stop, tracking on again
+        val layerHolder = listenerHolder(ANIMATOR_LAYER_LATLNG)
+        val cameraHolder = listenerHolder(ANIMATOR_CAMERA_LATLNG)
+        locationAnimatorCoordinator.updateAnimatorListenerHolders(setOf(layerHolder, cameraHolder))
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+        endAllAnimators()
+        locationAnimatorCoordinator.updateAnimatorListenerHolders(setOf(layerHolder))
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.001), cameraPosition, false)
+        endAllAnimators()
+        locationAnimatorCoordinator.updateAnimatorListenerHolders(setOf(layerHolder, cameraHolder))
+        // the reset camera animation heads towards the location from before tracking was turned off
+        locationAnimatorCoordinator.resetAllCameraAnimations(cameraPosition, false)
+
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.001), cameraPosition, false)
+
+        val cameraLatLngTarget = locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_LATLNG]?.target as LatLng
+        assertEquals(17.001, cameraLatLngTarget.longitude, 0.0)
+    }
+
+    @Test
+    fun feedNewLocation_cameraBearingResetTowardsNorth_cameraFollowsUnchangedBearing() {
+        // CameraMode.TRACKING_GPS_NORTH, then TRACKING_GPS while the location doesn't change
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0, bearing = 90f), cameraPosition, true)
+        endAllAnimators()
+        locationAnimatorCoordinator.resetAllCameraAnimations(cameraPosition, false)
+
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0, bearing = 90f), cameraPosition, false)
+
+        val cameraBearingAnimator = locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_GPS_BEARING]
+        assertEquals(90f, cameraBearingAnimator.target as Float, 0.001f)
+    }
+
+    @Test
+    fun feedNewLocation_unchangedLocation_withAnimatorSet() {
+        every { projection.getMetersPerPixelAtLatitude(any()) } answers { 10_000.0 } // disable snap
+        val coordinator = LocationAnimatorCoordinator(
+            projection,
+            MapLibreAnimatorSetProvider.getInstance(),
+            animatorProvider
+        )
+        coordinator.updateAnimatorListenerHolders(getListenerHoldersSet(ANIMATOR_LAYER_LATLNG))
+        coordinator.setTrackingAnimationDurationMultiplier(1f)
+        coordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+        val animator = coordinator.animatorArray[ANIMATOR_LAYER_LATLNG]
+        assertTrue(animator.isStarted)
+
+        coordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+        assertSame(animator, coordinator.animatorArray[ANIMATOR_LAYER_LATLNG])
+
+        ShadowLooper.idleMainLooper(2, TimeUnit.SECONDS)
+        assertFalse(animator.isStarted)
+        coordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+        assertSame(animator, coordinator.animatorArray[ANIMATOR_LAYER_LATLNG])
+
+        coordinator.feedNewLocation(location(51.0, 17.001), cameraPosition, false)
+        assertNotSame(animator, coordinator.animatorArray[ANIMATOR_LAYER_LATLNG])
+    }
+
+    @Test
+    fun feedNewLocation_unchangedLocation_nextMoveAnimatesOverFixInterval() {
+        // avoid snapping from the default camera position
+        every { projection.getMetersPerPixelAtLatitude(any()) } answers { 10_000.0 }
+        locationAnimatorCoordinator.setTrackingAnimationDurationMultiplier(1f)
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+        endAllAnimators()
+
+        ShadowSystemClock.advanceBy(Duration.ofMillis(1000))
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.0), cameraPosition, false)
+        ShadowSystemClock.advanceBy(Duration.ofMillis(1000))
+        locationAnimatorCoordinator.feedNewLocation(location(51.0, 17.001), cameraPosition, false)
+
+        assertEquals(1000L, locationAnimatorCoordinator.userLocationAnimationDuration)
+    }
+
+    @Test
+    fun feedNewAccuracyRadius_unchangedRadius_noNewAnimation() {
+        locationAnimatorCoordinator.setAccuracyAnimationEnabled(true)
+        locationAnimatorCoordinator.feedNewAccuracyRadius(150f, false)
+        val animator = locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_ACCURACY]
+
+        // while animating
+        locationAnimatorCoordinator.feedNewAccuracyRadius(150f, false)
+        assertSame(animator, locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_ACCURACY])
+
+        // after the animation ended
+        animator.end()
+        locationAnimatorCoordinator.feedNewAccuracyRadius(150f, false)
+        assertSame(animator, locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_ACCURACY])
+        verify(exactly = 1) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewAccuracyRadius_changedRadius_animates() {
+        locationAnimatorCoordinator.setAccuracyAnimationEnabled(true)
+        locationAnimatorCoordinator.feedNewAccuracyRadius(150f, false)
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_ACCURACY].end()
+
+        locationAnimatorCoordinator.feedNewAccuracyRadius(160f, false)
+
+        assertEquals(160f, locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_ACCURACY].target)
+        verify(exactly = 2) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewAccuracyRadius_unchangedRadiusWithoutAnimation_isApplied() {
+        locationAnimatorCoordinator.feedNewAccuracyRadius(150f, false)
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_ACCURACY].end()
+
+        locationAnimatorCoordinator.feedNewAccuracyRadius(150f, true)
+
+        verify(exactly = 2) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewAccuracyRadius_listenerRemovedAndRestored_isApplied() {
+        // e.g. RenderMode.GPS and back, which removes the accuracy listener and adds the same instance again
+        val latLngHolder = listenerHolder(ANIMATOR_LAYER_LATLNG)
+        val accuracyHolder = listenerHolder(ANIMATOR_LAYER_ACCURACY)
+        locationAnimatorCoordinator.updateAnimatorListenerHolders(setOf(latLngHolder, accuracyHolder))
+        locationAnimatorCoordinator.feedNewAccuracyRadius(150f, false)
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_ACCURACY].end()
+        locationAnimatorCoordinator.updateAnimatorListenerHolders(setOf(latLngHolder))
+        locationAnimatorCoordinator.updateAnimatorListenerHolders(setOf(latLngHolder, accuracyHolder))
+
+        locationAnimatorCoordinator.feedNewAccuracyRadius(150f, false)
+
+        verify(exactly = 2) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewAccuracyRadius_otherListener_isApplied() {
+        locationAnimatorCoordinator.feedNewAccuracyRadius(150f, false)
+        locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_ACCURACY].end()
+        locationAnimatorCoordinator.updateAnimatorListenerHolders(getListenerHoldersSet(ANIMATOR_LAYER_ACCURACY))
+
+        locationAnimatorCoordinator.feedNewAccuracyRadius(150f, false)
+
+        verify(exactly = 2) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewCompassBearing_sensorNoise_noNewAnimation() {
+        locationAnimatorCoordinator.feedNewCompassBearing(77f, cameraPosition)
+        val animators = compassAnimators()
+
+        // while animating
+        locationAnimatorCoordinator.feedNewCompassBearing(77.05f, cameraPosition)
+        assertEquals(animators, compassAnimators())
+
+        // after the animation ended
+        endAllAnimators()
+        locationAnimatorCoordinator.feedNewCompassBearing(76.95f, cameraPosition)
+        assertEquals(animators, compassAnimators())
+        verify(exactly = 1) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewCompassBearing_changedHeading_animates() {
+        locationAnimatorCoordinator.feedNewCompassBearing(77f, cameraPosition)
+        endAllAnimators()
+
+        locationAnimatorCoordinator.feedNewCompassBearing(77.2f, cameraPosition)
+
+        assertEquals(77.2f, locationAnimatorCoordinator.animatorArray[ANIMATOR_LAYER_COMPASS_BEARING].target)
+        verify(exactly = 2) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewCompassBearing_slowDrift_animatesOnceChangeIsLargeEnough() {
+        locationAnimatorCoordinator.feedNewCompassBearing(77f, cameraPosition)
+        endAllAnimators()
+
+        // compared with the last animated heading, so small steps add up
+        locationAnimatorCoordinator.feedNewCompassBearing(77.06f, cameraPosition)
+        verify(exactly = 1) { animatorSetProvider.startAnimation(any(), any(), any()) }
+        locationAnimatorCoordinator.feedNewCompassBearing(77.12f, cameraPosition)
+        verify(exactly = 2) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewCompassBearing_sensorNoiseAcrossNorth_noNewAnimation() {
+        locationAnimatorCoordinator.feedNewCompassBearing(179.98f, cameraPosition)
+        endAllAnimators()
+
+        locationAnimatorCoordinator.feedNewCompassBearing(-179.98f, cameraPosition)
+
+        verify(exactly = 1) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
+    fun feedNewCompassBearing_unchangedHeadingAfterCancel_animatesAgain() {
+        locationAnimatorCoordinator.feedNewCompassBearing(77f, cameraPosition)
+        locationAnimatorCoordinator.cancelAllAnimations()
+
+        locationAnimatorCoordinator.feedNewCompassBearing(77f, cameraPosition)
+
+        verify(exactly = 2) { animatorSetProvider.startAnimation(any(), any(), any()) }
+    }
+
+    @Test
     fun remove_gps_animator() {
         val animator = mockk<MapLibreFloatAnimator>(relaxed = true)
         locationAnimatorCoordinator.animatorArray.put(ANIMATOR_LAYER_GPS_BEARING, animator)
 
         locationAnimatorCoordinator.cancelAndRemoveGpsBearingAnimation()
         assertTrue(locationAnimatorCoordinator.animatorArray.get(ANIMATOR_LAYER_GPS_BEARING) == null)
+    }
+
+    private fun location(latitude: Double, longitude: Double, bearing: Float = 0f): Location {
+        return Location("").also {
+            it.latitude = latitude
+            it.longitude = longitude
+            it.bearing = bearing
+        }
+    }
+
+    private fun locationAnimators(): List<MapLibreAnimator<*>> {
+        return listOf(
+            ANIMATOR_LAYER_LATLNG,
+            ANIMATOR_LAYER_GPS_BEARING,
+            ANIMATOR_CAMERA_LATLNG,
+            ANIMATOR_CAMERA_GPS_BEARING
+        ).map { locationAnimatorCoordinator.animatorArray[it] }
+    }
+
+    private fun compassAnimators(): List<MapLibreAnimator<*>> {
+        return listOf(ANIMATOR_LAYER_COMPASS_BEARING, ANIMATOR_CAMERA_COMPASS_BEARING)
+            .map { locationAnimatorCoordinator.animatorArray[it] }
+    }
+
+    private fun endAllAnimators() {
+        for (i in 0 until locationAnimatorCoordinator.animatorArray.size()) {
+            locationAnimatorCoordinator.animatorArray.valueAt(i).end()
+        }
+    }
+
+    private fun listenerHolder(animatorType: Int): AnimatorListenerHolder {
+        return AnimatorListenerHolder(animatorType, mockk(relaxUnitFun = true))
     }
 
     private fun getListenerHoldersSet(vararg animatorTypes: Int): Set<AnimatorListenerHolder> {

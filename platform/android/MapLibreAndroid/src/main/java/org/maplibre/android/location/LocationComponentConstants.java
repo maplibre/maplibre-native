@@ -8,6 +8,10 @@ public final class LocationComponentConstants {
   // Controls the compass update rate in milliseconds
   static final long COMPASS_UPDATE_RATE_MS = 500;
 
+  // Compass heading changes smaller than this, in degrees, are not animated. Sensor noise of a device lying still is
+  // around 0.01 degrees per update, far below compass accuracy and not visible.
+  static final float COMPASS_MIN_ANIMATED_CHANGE_DEGREES = 0.1f;
+
   // Sets the transition animation duration when switching camera modes.
   static final long TRANSITION_ANIMATION_DURATION_MS = 750;
 
