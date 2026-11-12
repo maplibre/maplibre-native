@@ -125,3 +125,16 @@ TEST(ColorInterpolate, RgbIsTheExistingInterpolation) {
     const Color mixed = Color::interpolate(red, Color::blue(), 0.5, ColorSpace::RGB);
     expectColor(mixed, 0.25f, 0.0f, 0.5f, 0.75f);
 }
+
+TEST(Color, ToArrayKeepsAlpha) {
+    const auto color = Color::parse("#ff000080");
+    ASSERT_TRUE(color.has_value());
+    EXPECT_DOUBLE_EQ(128.0f / 255, color->toArray()[3]);
+}
+
+// Expected strings come from GL JS's Color.toString (maplibre-gl-style-spec).
+TEST(Color, Stringify) {
+    EXPECT_EQ("rgba(255,0,0,0.125)", Color::parse("rgba(255,0,0,0.125)")->stringify());
+    EXPECT_EQ("rgba(128,0,0,1)", Color(0.5f, 0.0f, 0.0f, 1.0f).stringify());
+    EXPECT_EQ("rgba(0,0,0,0)", Color(0.0f, 0.0f, 0.0f, 0.0f).stringify());
+}

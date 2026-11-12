@@ -126,8 +126,9 @@ public class ColorUtils {
   @ColorInt
   public static int rgbaToColor(@NonNull String value) {
     // we need to accept and floor float values as well, as those can come from core
+    // Core writes a tiny alpha in exponent notation, such as 1e-07.
     Pattern c = Pattern.compile("rgba?\\s*\\(\\s*(\\d+\\.?\\d*)\\s*,\\s*(\\d+\\.?\\d*)\\s*,\\s*(\\d+\\.?\\d*)\\s*,"
-      + "?\\s*(\\d+\\.?\\d*)?\\s*\\)");
+      + "?\\s*(\\d+\\.?\\d*(?:[eE][-+]?\\d+)?)?\\s*\\)");
     Matcher m = c.matcher(value);
     if (m.matches() && m.groupCount() == 3) {
       return Color.rgb((int) Float.parseFloat(m.group(1)), (int) Float.parseFloat(m.group(2)),
