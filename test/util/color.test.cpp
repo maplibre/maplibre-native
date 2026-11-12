@@ -112,22 +112,27 @@ TEST(ColorParse, Oklch) {
 }
 
 TEST(ColorParse, OklchClampsAndReadsNoneAsZero) {
-    expectColor(Color::parse("oklch(1.2 0.1 30)").value(), 1.0f, 1.0f, 1.0f, 1.0f);
-    expectColor(Color::parse("oklch(-0.1 0.1 30)").value(), 0.0f, 0.0f, 0.0f, 1.0f);
+    const Color lightest = Color::parse("oklch(1 0.1 30)").value();
+    const Color darkest = Color::parse("oklch(0 0.1 30)").value();
+    expectColor(Color::parse("oklch(1.2 0.1 30)").value(), lightest.r, lightest.g, lightest.b, lightest.a);
+    expectColor(Color::parse("oklch(-0.1 0.1 30)").value(), darkest.r, darkest.g, darkest.b, darkest.a);
     expectColor(Color::parse("oklch(0.6 -0.1 30)").value(), 0.5021107f, 0.5021107f, 0.5021107f, 1.0f);
     expectColor(Color::parse("oklch(0.6 0.1 90 / 1.5)").value(), 0.5937185f, 0.4908275f, 0.1901161f, 1.0f);
     expectColor(Color::parse("oklch(0.6 0.1 90 / -1)").value(), 0.0f, 0.0f, 0.0f, 0.0f);
-    expectColor(Color::parse("oklch(none 0.1 90)").value(), 0.0f, 0.0f, 0.0f, 1.0f);
+    const Color zeroLightness = Color::parse("oklch(0 0.1 90)").value();
+    expectColor(
+        Color::parse("oklch(none 0.1 90)").value(), zeroLightness.r, zeroLightness.g, zeroLightness.b, zeroLightness.a);
     expectColor(Color::parse("oklch(0.6 none 90)").value(), 0.5021107f, 0.5021107f, 0.5021107f, 1.0f);
     expectColor(Color::parse("oklch(0.6 0.1 none)").value(), 0.692324f, 0.3988401f, 0.4927913f, 1.0f);
     expectColor(Color::parse("oklch(0.6 0.1 90 / none)").value(), 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-// https://drafts.csswg.org/css-color-4/#binary-search-gamut-map-with-local-minde
-TEST(ColorParse, OklchOutsideSrgbIsGamutMapped) {
-    expectColor(Color::parse("oklch(0.7 0.3 140)").value(), 0.08054936f, 0.7540014f, 0.0f, 1.0f);
-    expectColor(Color::parse("oklch(0.9 0.3 300)").value(), 0.9017518f, 0.8250165f, 1.0f, 1.0f);
-    expectColor(Color::parse("oklch(0.3 0.25 30)").value(), 0.3882661f, 0.0f, 0.0f, 1.0f);
+TEST(ColorParse, OklchOutsideSrgbIsClipped) {
+    expectColor(Color::parse("oklch(0.7 0.3 140)").value(), 0.0f, 0.7715854f, 0.0f, 1.0f);
+    expectColor(Color::parse("oklch(0.9 0.3 300)").value(), 1.0f, 0.6255093f, 1.0f, 1.0f);
+    expectColor(Color::parse("oklch(0.3 0.25 30)").value(), 0.5091695f, 0.0f, 0.0f, 1.0f);
+    // A huge chroma converts as chroma 1e6, which stays finite.
+    expectColor(Color::parse("oklch(0.6 1e110 90)").value(), 0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 TEST(ColorParse, OklchInvalid) {
@@ -159,9 +164,9 @@ TEST(ColorParse, OklchInvalid) {
 TEST(ColorInterpolate, Oklch) {
     const Color blue = Color::blue();
     const Color green = Color::parse("rgba(0,255,0,.6)").value();
-    expectColor(Color::interpolate(blue, green, 0.25, ColorSpace::OKLCH), 0.0f, 0.4069478f, 0.59637f, 0.9f);
-    expectColor(Color::interpolate(blue, green, 0.5, ColorSpace::OKLCH), 0.0f, 0.4728649f, 0.5117998f, 0.8f);
-    expectColor(Color::interpolate(blue, green, 0.75, ColorSpace::OKLCH), 0.0f, 0.5356278f, 0.4234648f, 0.7f);
+    expectColor(Color::interpolate(blue, green, 0.25, ColorSpace::OKLCH), 0.0f, 0.3866815f, 0.8861813f, 0.9f);
+    expectColor(Color::interpolate(blue, green, 0.5, ColorSpace::OKLCH), 0.0f, 0.5325832f, 0.6610553f, 0.8f);
+    expectColor(Color::interpolate(blue, green, 0.75, ColorSpace::OKLCH), 0.0f, 0.5941883f, 0.3981223f, 0.7f);
     // The hue takes the short way round, across 0.
     expectColor(Color::interpolate(Color::parse("oklch(0.6 0.15 350)").value(),
                                    Color::parse("oklch(0.7 0.12 20)").value(),

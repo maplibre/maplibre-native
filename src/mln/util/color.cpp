@@ -154,6 +154,8 @@ constexpr double radToDeg = 180.0 / std::numbers::pi;
 constexpr double powerlessHueEpsilon = 0.000004;
 // The chroma of 100% in oklch(): https://drafts.csswg.org/css-color-4/#specifying-oklab-oklch
 constexpr double chromaPercentReference = 0.4;
+// Keeps the conversion finite: past this chroma, the clipped color stops changing.
+constexpr double maxChroma = 1e6;
 
 struct Oklch {
     double l, c, h, alpha;
@@ -192,69 +194,15 @@ Oklch rgbToOklch(const Rgb& rgb) {
     return {.l = lab[0], .c = c, .h = constrainAngle(std::atan2(lab[2], lab[1]) * radToDeg), .alpha = rgb.a};
 }
 
-bool isInSrgbGamut(const Vec3& rgb) {
-    return std::ranges::all_of(rgb, [](double x) { return x >= 0.0 && x <= 1.0; });
-}
-
-Vec3 clipToSrgbGamut(const Vec3& rgb) {
-    return {std::clamp(rgb[0], 0.0, 1.0), std::clamp(rgb[1], 0.0, 1.0), std::clamp(rgb[2], 0.0, 1.0)};
-}
-
-// Maps a color outside sRGB to a lower chroma at the same lightness and hue,
-// https://drafts.csswg.org/css-color-4/#binary-search-gamut-map-with-local-minde
+// Clips a color outside sRGB channel by channel, as browsers draw one.
 Rgb oklchToRgb(const Oklch& color) {
-    if (color.l >= 1.0) {
-        return {.r = 1.0, .g = 1.0, .b = 1.0, .a = color.alpha};
-    }
-    if (color.l <= 0.0) {
-        return {.r = 0.0, .g = 0.0, .b = 0.0, .a = color.alpha};
-    }
     const double hue = std::isnan(color.h) ? 0.0 : color.h * degToRad;
-    const double cosHue = std::cos(hue);
-    const double sinHue = std::sin(hue);
-    const auto toSrgb = [&](double chroma) {
-        return oklabToSrgb({color.l, chroma * cosHue, chroma * sinHue});
-    };
-    const auto deltaEOK = [&](const Vec3& rgb, double chroma) {
-        const Vec3 lab = srgbToOklab(rgb);
-        const double dl = color.l - lab[0];
-        const double da = chroma * cosHue - lab[1];
-        const double db = chroma * sinHue - lab[2];
-        return std::sqrt(dl * dl + da * da + db * db);
-    };
-    constexpr double jnd = 0.02;
-    constexpr double epsilon = 0.0001;
-
-    const Vec3 rgb = toSrgb(color.c);
-    if (isInSrgbGamut(rgb)) {
-        return {.r = rgb[0], .g = rgb[1], .b = rgb[2], .a = color.alpha};
-    }
-    Vec3 clipped = clipToSrgbGamut(rgb);
-    if (deltaEOK(clipped, color.c) >= jnd) {
-        double min = 0.0;
-        double max = color.c;
-        bool minInGamut = true;
-        while (max - min > epsilon) {
-            const double chroma = (min + max) / 2.0;
-            const Vec3 current = toSrgb(chroma);
-            if (minInGamut && isInSrgbGamut(current)) {
-                min = chroma;
-                continue;
-            }
-            clipped = clipToSrgbGamut(current);
-            const double e = deltaEOK(clipped, chroma);
-            if (e < jnd) {
-                if (jnd - e < epsilon) {
-                    break;
-                }
-                minInGamut = false;
-                min = chroma;
-            } else {
-                max = chroma;
-            }
-        }
-    }
-    return {.r = clipped[0], .g = clipped[1], .b = clipped[2], .a = color.alpha};
+    const double chroma = std::min(color.c, maxChroma);
+    const Vec3 rgb = oklabToSrgb({color.l, chroma * std::cos(hue), chroma * std::sin(hue)});
+    return {.r = std::clamp(rgb[0], 0.0, 1.0),
+            .g = std::clamp(rgb[1], 0.0, 1.0),
+            .b = std::clamp(rgb[2], 0.0, 1.0),
+            .a = color.alpha};
 }
 
 bool isCssWhitespace(char c) {
