@@ -47,7 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Options from MLNMapOptions, which cannot be provided when initializing an
 // MLNMapView from IB.  Changing these after initialization has no effect.
-@property (nonatomic) IBInspectable BOOL fastPFOREnabled;
+@property (nonatomic) IBInspectable BOOL fastPFOREnabled
+    __attribute__((deprecated("FastPFOR decoding is always enabled.")));
 @property (nonatomic) IBInspectable BOOL featureInfoEnabled;
 
 @end

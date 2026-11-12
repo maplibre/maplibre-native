@@ -11,19 +11,12 @@ class TileParameters;
 
 class VectorMLTTile final : public VectorTile {
 public:
-    VectorMLTTile(const OverscaledTileID&,
-                  std::string sourceID,
-                  const TileParameters&,
-                  const Tileset&,
-                  TileObserver* observer,
-                  bool fastPFOREnabled);
+    VectorMLTTile(
+        const OverscaledTileID&, std::string sourceID, const TileParameters&, const Tileset&, TileObserver* observer);
 
     ~VectorMLTTile() override;
 
     void setData(const std::shared_ptr<const std::string>& data) override;
-
-private:
-    bool fastPFOREnabled;
 };
 
 } // namespace mln
