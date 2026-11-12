@@ -28,6 +28,7 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+    float2 depth_zw;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -48,18 +49,25 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // Skirt vertices drop below the surface by elevation_offset (gl-js u_ele_delta)
     const float ele_delta = (float(vertx.pos.z) == 1.0) ? props.elevation_offset : 0.0;
+    const float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
     return {
-        .position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0),
+        .position = position,
+        .depth_zw = position.zw,
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]]) {
-    // Pack the window depth into RGBA8 as four base-256 digits, each written as
-    // k / 255 so it survives the unorm8 target exactly (the gl-js fract/bit_mask
-    // scheme stores k / 256, which unorm8 rounds by up to 0.002 - at native's near
-    // plane of 1 px that is 20x the depth difference the occlusion test looks
-    // for). Decoded by unpack_depth() for calculate_visibility().
-    float r = min(in.position.z, 0.99999994) * 256.0;
+    // The fragment's z / w, which is its window depth over a [0, 1] viewport depth
+    // range. Not in.position.z: a 3D drawable is drawn with a narrower range
+    // (depthModeFor3D), and the occlusion test compares against the depth the
+    // clip-space position gives.
+    const float depth = in.depth_zw.x / in.depth_zw.y;
+    // Pack it into RGBA8 as four base-256 digits, each written as k / 255 so it
+    // survives the unorm8 target exactly (the gl-js fract/bit_mask scheme stores
+    // k / 256, which unorm8 rounds by up to 0.002 - at native's near plane of 1 px
+    // that is 20x the depth difference the occlusion test looks for). Decoded by
+    // unpack_depth() for calculate_visibility().
+    float r = clamp(depth, 0.0, 0.99999994) * 256.0;
     const float d0 = floor(r);
     r = (r - d0) * 256.0;
     const float d1 = floor(r);
