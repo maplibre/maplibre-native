@@ -8,6 +8,6 @@ bool mln::util::is_absolute_path(std::string path) {
 }
 #else
 bool mln::util::is_absolute_path(std::string path) {
-    return path.at(0) == '/';
+    return !path.empty() && path[0] == '/';
 }
 #endif
