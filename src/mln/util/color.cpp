@@ -284,7 +284,7 @@ std::optional<Oklch> parseOklch(std::string_view text) {
     }
     std::string input(first, last);
     std::ranges::transform(input, input.begin(), toLowerAscii);
-    if (!input.ends_with(")")) {
+    if (!input.ends_with(')')) {
         return std::nullopt;
     }
     const std::string_view inside = std::string_view(input).substr(prefix.size(), input.size() - prefix.size() - 1);

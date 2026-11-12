@@ -123,7 +123,8 @@ TEST(ColorParse, OklchClampsAndReadsNoneAsZero) {
     expectColor(
         Color::parse("oklch(none 0.1 90)").value(), zeroLightness.r, zeroLightness.g, zeroLightness.b, zeroLightness.a);
     expectColor(Color::parse("oklch(0.6 none 90)").value(), 0.5021107f, 0.5021107f, 0.5021107f, 1.0f);
-    expectColor(Color::parse("oklch(0.6 0.1 none)").value(), 0.692324f, 0.3988401f, 0.4927913f, 1.0f);
+    const Color zeroHue = Color::parse("oklch(0.6 0.1 0)").value();
+    expectColor(Color::parse("oklch(0.6 0.1 none)").value(), zeroHue.r, zeroHue.g, zeroHue.b, zeroHue.a);
     expectColor(Color::parse("oklch(0.6 0.1 90 / none)").value(), 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
