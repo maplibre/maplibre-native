@@ -110,6 +110,20 @@ public:
     Size offscreenTextureSize;
 };
 
+namespace {
+// Drop a handle. Dawn's handles release their object when reset, while webgpu.hpp handles
+// (used with wgpu-native) don't own theirs, so release it explicitly.
+template <typename Handle>
+void releaseHandle(Handle& handle) {
+#if MLN_WEBGPU_IMPL_WGPU
+    if (handle) {
+        handle.release();
+    }
+#endif
+    handle = nullptr;
+}
+} // namespace
+
 HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::ContextMode mode)
     : webgpu::RendererBackend(mode),
       gfx::HeadlessBackend(size_),
@@ -204,15 +218,20 @@ HeadlessBackend::~HeadlessBackend() {
 
     if (impl) {
         // Clean up textures
-        impl->offscreenTextureView = nullptr;
-        impl->offscreenTexture = nullptr;
-        impl->depthTextureView = nullptr;
-        impl->depthTexture = nullptr;
+        releaseHandle(impl->offscreenTextureView);
+        releaseHandle(impl->offscreenTexture);
+        releaseHandle(impl->depthTextureView);
+        releaseHandle(impl->depthTexture);
 
         // Clean up device and queue
-        impl->queue = nullptr;
-        impl->device = nullptr;
+        releaseHandle(impl->queue);
+        releaseHandle(impl->device);
+#if MLN_WEBGPU_IMPL_WGPU
+        releaseHandle(impl->adapter);
+        releaseHandle(impl->instance);
+#else
         impl->instance = nullptr;
+#endif
     }
 }
 
@@ -223,10 +242,10 @@ void HeadlessBackend::createOffscreenTextures() {
     impl->offscreenTextureSize = renderableSize;
 
     // Release old textures if they exist
-    impl->offscreenTextureView = nullptr;
-    impl->offscreenTexture = nullptr;
-    impl->depthTextureView = nullptr;
-    impl->depthTexture = nullptr;
+    releaseHandle(impl->offscreenTextureView);
+    releaseHandle(impl->offscreenTexture);
+    releaseHandle(impl->depthTextureView);
+    releaseHandle(impl->depthTexture);
 
     // Create offscreen color texture
     wgpu::TextureDescriptor colorDesc = {};
