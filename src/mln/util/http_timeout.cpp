@@ -22,7 +22,7 @@ Duration errorRetryTimeout(Response::Error::Reason failedRequestReason,
         return Seconds(1u << std::min(failedRequests - 1, 31u));
     } else if (failedRequestReason == Response::Error::Reason::RateLimit) {
         if (retryAfter) {
-            return *retryAfter - util::now();
+            return std::max(Seconds::zero(), *retryAfter - util::now());
         } else {
             // Default
             return Seconds(util::DEFAULT_RATE_LIMIT_TIMEOUT);

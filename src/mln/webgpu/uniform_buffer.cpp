@@ -81,11 +81,7 @@ UniformBuffer::~UniformBuffer() {
 
 void UniformBuffer::update(const void* data, std::size_t dataSize) {
     if (data && dataSize > 0 && buffer) {
-        auto& backend = static_cast<RendererBackend&>(context.getBackend());
-        WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
-        if (queue) {
-            wgpuQueueWriteBuffer(queue, buffer, 0, data, dataSize);
-        }
+        context.getBufferUploader().write(buffer, 0, data, dataSize);
     }
 }
 
