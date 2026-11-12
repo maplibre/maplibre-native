@@ -49,6 +49,8 @@
 #include <mln/util/run_loop.hpp>
 #include <mln/util/timer.hpp>
 
+#include <algorithm>
+#include <array>
 #include <atomic>
 
 using namespace mln;
@@ -2426,4 +2428,98 @@ TEST(Map, TileSelectionOptionsPublishUpdates) {
     check(&Map::setTileLodPitchThreshold, &UpdateParameters::tileLodPitchThreshold, 0.5);
     check(&Map::setTileLodZoomShift, &UpdateParameters::tileLodZoomShift, 1.0);
     check(&Map::setTileLodMode, &UpdateParameters::tileLodMode, TileLodMode::Distance);
+}
+
+namespace {
+
+using RGBA = std::array<int, 4>;
+
+constexpr RGBA red{255, 0, 0, 255};
+constexpr RGBA green{0, 255, 0, 255};
+constexpr RGBA blue{0, 0, 255, 255};
+
+constexpr auto iconStyle = R"STYLE({
+  "version": 8,
+  "sources": {"point": {"type": "geojson", "data": {"type": "Point", "coordinates": [0, 0]}}},
+  "layers": [
+    {"id": "background", "type": "background", "paint": {"background-color": "white"}},
+    {"id": "icon", "type": "symbol", "source": "point",
+     "layout": {"icon-image": "icon", "icon-size": 4, "icon-allow-overlap": true, "icon-ignore-placement": true}}
+  ]
+})STYLE";
+
+std::unique_ptr<style::Image> solidImage(Size size, const RGBA& color) {
+    PremultipliedImage image(size);
+    for (std::size_t i = 0; i < image.bytes(); i += image.channels) {
+        std::copy(color.begin(), color.end(), image.data.get() + i);
+    }
+    return std::make_unique<style::Image>("icon", std::move(image), 1.0f);
+}
+
+bool sameColor(const RGBA& actual, const RGBA& expected) {
+    return std::ranges::equal(actual, expected, [](int a, int b) { return std::abs(a - b) <= 2; });
+}
+
+// Renders frames until every tile is laid out and nothing is left to animate.
+template <typename Test>
+bool renderUntilIdle(Test& test) {
+    bool idle = false;
+    util::Timer timeout;
+    timeout.start(std::chrono::seconds(5), Duration::zero(), [&] { test.runLoop.stop(); });
+    test.observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus status) {
+        if (status.mode == MapObserver::RenderMode::Full && !status.needsRepaint) {
+            idle = true;
+            test.runLoop.stop();
+        }
+    };
+    test.runLoop.run();
+    test.observer.didFinishRenderingFrameCallback = {};
+    return idle;
+}
+
+template <typename Test>
+RGBA centerPixel(Test& test) {
+    gfx::BackendScope scope{*test.frontend.getBackend()};
+    const auto image = test.frontend.readStillImage();
+    const auto* pixel = image.data.get() + (image.size.height / 2) * image.stride() +
+                        (image.size.width / 2) * image.channels;
+    return {pixel[0], pixel[1], pixel[2], pixel[3]};
+}
+
+} // namespace
+
+// `renderFrame()` renders without running the run loop, so a tile keeps its current
+// layout until `renderUntilIdle()` lets the relayout land.
+
+TEST(Map, ImageUpdatedAgainBeforeResizeRelayout) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(iconStyle);
+    test.map.getStyle().addImage(solidImage({10, 10}, red));
+    ASSERT_TRUE(renderUntilIdle(test));
+
+    // The old layout must not receive pixels of a size it has no room for.
+    test.map.getStyle().addImage(solidImage({20, 20}, blue));
+    ASSERT_NO_THROW(test.frontend.renderFrame());
+    test.map.getStyle().addImage(solidImage({20, 20}, green));
+    ASSERT_NO_THROW(test.frontend.renderFrame());
+
+    ASSERT_TRUE(renderUntilIdle(test));
+    EXPECT_PRED2(sameColor, centerPixel(test), green);
+}
+
+TEST(Map, ImageReaddedBeforeRelayout) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(iconStyle);
+    test.map.getStyle().addImage(solidImage({10, 10}, red));
+    ASSERT_TRUE(renderUntilIdle(test));
+
+    // The relayout must show the re-added pixels, although the old layout still holds the
+    // texture of the removed image when the relayout reserves its own.
+    test.map.getStyle().removeImage("icon");
+    test.frontend.renderFrame();
+    test.map.getStyle().addImage(solidImage({10, 10}, blue));
+    test.frontend.renderFrame();
+
+    ASSERT_TRUE(renderUntilIdle(test));
+    EXPECT_PRED2(sameColor, centerPixel(test), blue);
 }

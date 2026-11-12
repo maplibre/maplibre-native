@@ -60,14 +60,28 @@ TEST_F(DynamicTextureAtlasTest, ReplacedSameImageGetsSameAllocation) {
 }
 
 TEST_F(DynamicTextureAtlasTest, IconAndPatternUsageDoNotShareAllocation) {
-    const auto icon = makeImage("icon", false);
-    const auto pattern = makeImage("pattern", false);
+    // Icons are padded with transparent pixels and patterns with their wrapped edges, so one
+    // image used both ways needs two allocations.
+    const auto image = makeImage("image", false);
 
-    atlases.push_back(dynTexAtlas.uploadIconsAndPatterns({{icon->id, icon}}, {{pattern->id, pattern}}, {}));
+    atlases.push_back(dynTexAtlas.uploadIconsAndPatterns({{image->id, image}}, {{image->id, image}}, {}));
     const auto& imageAtlas = atlases.back();
 
     ASSERT_EQ(2u, imageAtlas.textureHandles.size());
     EXPECT_NE(imageAtlas.textureHandles[0].getRectangle(), imageAtlas.textureHandles[1].getRectangle());
+}
+
+TEST_F(DynamicTextureAtlasTest, ResizedImageWithSameAreaGetsItsOwnShape) {
+    const auto tall = makeImage("image", false, {10, 20});
+    const auto wide = makeImage("image", false, {20, 10});
+
+    // The layout of the tall image still holds its allocation while the wide one is laid out.
+    atlases.push_back(dynTexAtlas.uploadIconsAndPatterns({{tall->id, tall}}, {}, {}));
+    atlases.push_back(dynTexAtlas.uploadIconsAndPatterns({{wide->id, wide}}, {}, {}));
+
+    const auto& position = atlases.back().iconPositions.at("image");
+    EXPECT_EQ(wide->image.size.width, position.paddedRect.w - 2u * ImagePosition::padding);
+    EXPECT_EQ(wide->image.size.height, position.paddedRect.h - 2u * ImagePosition::padding);
 }
 
 TEST_F(DynamicTextureAtlasTest, ReleasedRevisionGetsSameAllocation) {
