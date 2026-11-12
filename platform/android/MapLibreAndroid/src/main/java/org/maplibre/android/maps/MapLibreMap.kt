@@ -531,16 +531,38 @@ class MapLibreMap internal constructor(
      * The move is instantaneous, and a subsequent [cameraPosition] read will reflect the new position.
      * See CameraUpdateFactory for a set of updates.
      *
+     * @param update The change that should be applied to the camera.
+     */
+    fun moveCamera(update: CameraUpdate) {
+        moveCamera(update, null)
+    }
+
+    /**
+     * Repositions the camera according to the instructions defined in the update.
+     * The move is instantaneous, and a subsequent [cameraPosition] read will reflect the new position.
+     * See CameraUpdateFactory for a set of updates.
+     *
      * @param update   The change that should be applied to the camera
      * @param callback the callback to be invoked when an animation finishes or is canceled
      */
-    @JvmOverloads
     fun moveCamera(
         update: CameraUpdate,
-        callback: CancelableCallback? = null,
+        callback: CancelableCallback?,
     ) {
         notifyDeveloperAnimationListeners()
         transform.moveCamera(this, update, callback)
+    }
+
+    /**
+     * Gradually move the camera by the default duration, zoom will not be affected unless specified
+     * within [CameraUpdate]. If [cameraPosition] is read during the animation,
+     * it will return the current location of the camera in flight.
+     *
+     * @param update The change that should be applied to the camera.
+     * @see CameraUpdateFactory for a set of updates.
+     */
+    fun easeCamera(update: CameraUpdate) {
+        easeCamera(update, MapLibreConstants.ANIMATION_DURATION)
     }
 
     /**
@@ -556,12 +578,30 @@ class MapLibreMap internal constructor(
      *                 Do not update or ease the camera from within onCancel().
      * @see CameraUpdateFactory for a set of updates.
      */
-    @JvmOverloads
     fun easeCamera(
         update: CameraUpdate,
-        callback: CancelableCallback? = null,
+        callback: CancelableCallback?,
     ) {
         easeCamera(update, MapLibreConstants.ANIMATION_DURATION, callback)
+    }
+
+    /**
+     * Gradually move the camera by a specified duration in milliseconds, zoom will not be affected
+     * unless specified within [CameraUpdate]. If [cameraPosition] is read during the animation, it
+     * will return the current location of the camera in flight.
+     *
+     * Note that this will cancel location tracking mode if enabled.
+     *
+     * @param update     The change that should be applied to the camera.
+     * @param durationMs The duration of the animation in milliseconds. This must be strictly
+     *                   positive, otherwise an IllegalArgumentException will be thrown.
+     * @see CameraUpdateFactory for a set of updates.
+     */
+    fun easeCamera(
+        update: CameraUpdate,
+        durationMs: Int,
+    ) {
+        easeCamera(update, durationMs, null)
     }
 
     /**
@@ -582,13 +622,30 @@ class MapLibreMap internal constructor(
      *                   Do not update or ease the camera from within onCancel().
      * @see CameraUpdateFactory for a set of updates.
      */
-    @JvmOverloads
     fun easeCamera(
         update: CameraUpdate,
         durationMs: Int,
-        callback: CancelableCallback? = null,
+        callback: CancelableCallback?,
     ) {
         easeCamera(update, durationMs, true, callback)
+    }
+
+    /**
+     * Gradually move the camera by a specified duration in milliseconds, zoom will not be affected
+     * unless specified within [CameraUpdate]. If [cameraPosition] is read during the animation, it
+     * will return the current location of the camera in flight.
+     *
+     * @param update             The change that should be applied to the camera.
+     * @param durationMs         The duration of the animation in milliseconds. This must be strictly
+     *                           positive, otherwise an IllegalArgumentException will be thrown.
+     * @param easingInterpolator True for easing interpolator, false for linear.
+     */
+    fun easeCamera(
+        update: CameraUpdate,
+        durationMs: Int,
+        easingInterpolator: Boolean,
+    ) {
+        easeCamera(update, durationMs, easingInterpolator, null)
     }
 
     /**
@@ -607,12 +664,11 @@ class MapLibreMap internal constructor(
      *                           by a later camera movement or a user gesture, onCancel() will be called.
      *                           Do not update or ease the camera from within onCancel().
      */
-    @JvmOverloads
     fun easeCamera(
         update: CameraUpdate,
         durationMs: Int,
         easingInterpolator: Boolean,
-        callback: CancelableCallback? = null,
+        callback: CancelableCallback?,
     ) {
         require(durationMs > 0) { "Null duration passed into easeCamera" }
         notifyDeveloperAnimationListeners()
@@ -631,12 +687,42 @@ class MapLibreMap internal constructor(
      *                 called. Do not update or animate the camera from within onCancel().
      * @see CameraUpdateFactory for a set of updates.
      */
-    @JvmOverloads
     fun animateCamera(
         update: CameraUpdate,
-        callback: CancelableCallback? = null,
+        callback: CancelableCallback?,
     ) {
         animateCamera(update, MapLibreConstants.ANIMATION_DURATION, callback)
+    }
+
+    /**
+     * Animate the camera to a new location defined within [CameraUpdate] using a transition
+     * animation that evokes powered flight. The animation will last the default amount of time.
+     * During the animation, a read of [cameraPosition] returns an intermediate location of the
+     * camera in flight.
+     *
+     * @param update The change that should be applied to the camera.
+     * @see CameraUpdateFactory for a set of updates.
+     */
+    fun animateCamera(update: CameraUpdate) {
+        animateCamera(update, MapLibreConstants.ANIMATION_DURATION, null)
+    }
+
+    /**
+     * Animate the camera to a new location defined within [CameraUpdate] using a transition
+     * animation that evokes powered flight. The animation will last a specified amount of time
+     * given in milliseconds. During the animation, a read of [cameraPosition] returns an
+     * intermediate location of the camera in flight.
+     *
+     * @param update     The change that should be applied to the camera.
+     * @param durationMs The duration of the animation in milliseconds. This must be strictly
+     *                   positive, otherwise an IllegalArgumentException will be thrown.
+     * @see CameraUpdateFactory for a set of updates.
+     */
+    fun animateCamera(
+        update: CameraUpdate,
+        durationMs: Int,
+    ) {
+        animateCamera(update, durationMs, null)
     }
 
     /**
@@ -657,11 +743,10 @@ class MapLibreMap internal constructor(
      *                   isn't required, leave it as null.
      * @see CameraUpdateFactory for a set of updates.
      */
-    @JvmOverloads
     fun animateCamera(
         update: CameraUpdate,
         durationMs: Int,
-        callback: CancelableCallback? = null,
+        callback: CancelableCallback?,
     ) {
         require(durationMs > 0) { "Null duration passed into animateCamera" }
         notifyDeveloperAnimationListeners()
