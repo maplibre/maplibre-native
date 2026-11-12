@@ -38,7 +38,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
-- [core] Clamp constant negative `fill-extrusion-base` and `fill-extrusion-height` to 0 on Metal and Vulkan, as on the other backends. Walls were drawn below the ground ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
+- [core] Stop custom geometry tile callbacks before cancelled tiles are released on a worker thread.
 - [core] Fix rendered-feature queries near the final endpoint of an offset line.
 - [core] Fix plugin layer filters ignoring the style's global state.
 - [core] Fix plugin layers with read-write depth drawables not depth testing when drawn above a `fill-extrusion` layer.
