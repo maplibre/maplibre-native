@@ -137,6 +137,8 @@ public:
     virtual void performedFadePlacement() {}
 
     virtual void setFeatureState(const LayerFeatureStates&) {}
+    // The SourceFeatureState version this tile's buckets hold; 0: none (new buckets).
+    uint64_t featureStateVersion = 0;
 
     void dumpDebugLogs() const;
 
