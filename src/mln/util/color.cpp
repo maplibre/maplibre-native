@@ -160,19 +160,13 @@ Vec3 multiply(const Mat3& m, const Vec3& v) {
             m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2]};
 }
 
-double srgbToLinear(double x) {
-    const double magnitude = std::abs(x);
-    return magnitude <= 0.04045 ? x / 12.92 : std::copysign(std::pow((magnitude + 0.055) / 1.055, 2.4), x);
-}
-
 double linearToSrgb(double x) {
     const double magnitude = std::abs(x);
     return magnitude > 0.0031308 ? std::copysign(1.055 * std::pow(magnitude, 1.0 / 2.4) - 0.055, x) : 12.92 * x;
 }
 
 Vec3 srgbToOklab(const Vec3& rgb) {
-    const Vec3 lms = multiply(
-        xyzToLms, multiply(linearSrgbToXyz, {srgbToLinear(rgb[0]), srgbToLinear(rgb[1]), srgbToLinear(rgb[2])}));
+    const Vec3 lms = multiply(xyzToLms, multiply(linearSrgbToXyz, {rgb2xyz(rgb[0]), rgb2xyz(rgb[1]), rgb2xyz(rgb[2])}));
     return multiply(lmsToOklab, {std::cbrt(lms[0]), std::cbrt(lms[1]), std::cbrt(lms[2])});
 }
 
