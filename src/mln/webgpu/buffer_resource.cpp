@@ -46,27 +46,7 @@ BufferResource::BufferResource(
     buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
 
     if (buffer && data) {
-        // Upload initial data via queue write
-        WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
-        if (queue) {
-            if (paddedSize == size) {
-                wgpuQueueWriteBuffer(queue, buffer, 0, data, size);
-            } else {
-                std::vector<std::uint8_t> padded(paddedSize, 0);
-                std::memcpy(padded.data(), data, size);
-                wgpuQueueWriteBuffer(queue, buffer, 0, padded.data(), paddedSize);
-            }
-        } else {
-            // Fallback to mapping when queue is unavailable (should be rare)
-            void* mapped = wgpuBufferGetMappedRange(buffer, 0, paddedSize);
-            if (mapped) {
-                std::memcpy(mapped, data, size);
-                if (paddedSize > size) {
-                    std::memset(static_cast<std::uint8_t*>(mapped) + size, 0, paddedSize - size);
-                }
-                wgpuBufferUnmap(buffer);
-            }
-        }
+        context.getBufferUploader().write(buffer, 0, data, size);
     }
 }
 
@@ -128,13 +108,7 @@ void BufferResource::update(const void* data, std::size_t updateSize, std::size_
 
     // Update GPU buffer if we have one
     if (buffer) {
-        // Get the queue from backend
-        auto& backend = static_cast<RendererBackend&>(context.getBackend());
-        WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
-        if (queue) {
-            // Write data to buffer using queue
-            wgpuQueueWriteBuffer(queue, buffer, offset, data, updateSize);
-        }
+        context.getBufferUploader().write(buffer, offset, data, updateSize);
     }
 
     // Increment version to indicate change
