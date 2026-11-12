@@ -150,6 +150,11 @@ constexpr Mat3 lmsToXyz = {{{1.2268798758459243, -0.5578149944602171, 0.28139104
 constexpr double degToRad = std::numbers::pi / 180.0;
 constexpr double radToDeg = 180.0 / std::numbers::pi;
 
+// https://drafts.csswg.org/css-color-4/#powerless
+constexpr double powerlessHueEpsilon = 0.000004;
+// The chroma of 100% in oklch(): https://drafts.csswg.org/css-color-4/#specifying-oklab-oklch
+constexpr double chromaPercentReference = 0.4;
+
 struct Oklch {
     double l, c, h, alpha;
 };
@@ -181,8 +186,7 @@ Vec3 oklabToSrgb(const Vec3& lab) {
 Oklch rgbToOklch(const Rgb& rgb) {
     const Vec3 lab = srgbToOklab({rgb.r, rgb.g, rgb.b});
     const double c = std::sqrt(lab[1] * lab[1] + lab[2] * lab[2]);
-    // https://drafts.csswg.org/css-color-4/#powerless
-    if (c <= 0.000004) {
+    if (c <= powerlessHueEpsilon) {
         return {.l = lab[0], .c = 0.0, .h = nan, .alpha = rgb.a};
     }
     return {.l = lab[0], .c = c, .h = constrainAngle(std::atan2(lab[2], lab[1]) * radToDeg), .alpha = rgb.a};
@@ -350,7 +354,7 @@ std::optional<Oklch> parseOklch(std::string_view text) {
     if (!l || !skipWhitespace()) {
         return std::nullopt;
     }
-    const auto c = readOklchArgument(inside, pos, 0.4, false);
+    const auto c = readOklchArgument(inside, pos, chromaPercentReference, false);
     if (!c || !skipWhitespace()) {
         return std::nullopt;
     }
