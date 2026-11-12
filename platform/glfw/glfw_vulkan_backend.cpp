@@ -164,7 +164,8 @@ void GLFWVulkanBackend::setFramebufferSize(const mln::Size newSize) {
     setRenderableSize(newSize);
 
     auto& contextImpl = static_cast<mln::vulkan::Context&>(*context);
-    contextImpl.requestSurfaceUpdate();
+    // A resize may schedule only one frame, so apply it before that frame renders.
+    contextImpl.requestSurfaceUpdate(false);
 }
 
 std::vector<const char*> GLFWVulkanBackend::getInstanceExtensions() {
