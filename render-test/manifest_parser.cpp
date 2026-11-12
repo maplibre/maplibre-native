@@ -275,9 +275,10 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
     auto& path = manifest.testRootPath;
     auto& testPaths = manifest.testPaths;
 
+    const std::regex filterRegex(testFilter);
     for (auto& testPath : mln::filesystem::recursive_directory_iterator(path)) {
         // Skip paths that fail regexp search.
-        if (!testFilter.empty() && !std::regex_search(testPath.path().generic_string(), std::regex(testFilter))) {
+        if (!testFilter.empty() && !std::regex_search(testPath.path().generic_string(), filterRegex)) {
             continue;
         }
 
