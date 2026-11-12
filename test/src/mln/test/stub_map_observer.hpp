@@ -88,6 +88,12 @@ public:
         }
     }
 
+    void onStyleImageMissing(const std::string& id) final {
+        if (onStyleImageMissingCallback) {
+            onStyleImageMissingCallback(id);
+        }
+    }
+
     void onTileAction(TileOperation op, const OverscaledTileID& id, const std::string& sourceID) final {
         if (onTileActionCallback) {
             onTileActionCallback(op, id, sourceID);
@@ -107,6 +113,7 @@ public:
     std::function<void(const FontStack&, const GlyphRange&)> onGlyphsLoadedCallback;
     std::function<void(const FontStack&, const GlyphRange&, std::exception_ptr)> onGlyphsErrorCallback;
     std::function<void(const FontStack&, const GlyphRange&)> onGlyphsRequestedCallback;
+    std::function<void(const std::string&)> onStyleImageMissingCallback;
     std::function<void(TileOperation, const OverscaledTileID&, const std::string&)> onTileActionCallback;
 };
 

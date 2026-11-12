@@ -162,9 +162,12 @@ public:
                                                                       parameters.tileID.canonical,
                                                                       PatternPropertyType::defaultValue());
 
-                            layoutParameters.imageDependencies.emplace(min.to.id(), ImageType::Pattern);
-                            layoutParameters.imageDependencies.emplace(mid.to.id(), ImageType::Pattern);
-                            layoutParameters.imageDependencies.emplace(max.to.id(), ImageType::Pattern);
+                            // An empty pattern name means no pattern, so it is not an image dependency.
+                            for (const auto* pattern : {&min, &mid, &max}) {
+                                if (!pattern->to.id().empty()) {
+                                    layoutParameters.imageDependencies.emplace(pattern->to.id(), ImageType::Pattern);
+                                }
+                            }
                             patternDependencyMap.emplace(layerId,
                                                          PatternDependency{min.to.id(), mid.to.id(), max.to.id()});
                         }
