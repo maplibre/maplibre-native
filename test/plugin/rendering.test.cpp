@@ -221,10 +221,16 @@ void registerTriangles(const std::string& pluginID,
             *instance = new (std::nothrow) int(0);
             return *instance ? MLN_PLUGIN_STATUS_OK : MLN_PLUGIN_STATUS_CALLBACK_ERROR;
         };
-        layer.layout_feature = [](void*, const mln_plugin_feature_v1*) {
+        layer.layout_feature = [](void* instance, const mln_plugin_feature_v1*) {
+            ++*static_cast<int*>(instance);
             return MLN_PLUGIN_STATUS_OK;
         };
-        layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
+        layer.finish_layout = [](void* instance, mln_plugin_bucket_v1* output) {
+            if (*static_cast<int*>(instance) == 0) {
+                *output = {};
+                output->struct_size = sizeof(*output);
+                return MLN_PLUGIN_STATUS_OK;
+            }
             *output = {sizeof(*output), &stream, 1, indices, 3, &drawable, 1, 0, &range, 1};
             return MLN_PLUGIN_STATUS_OK;
         };
@@ -281,6 +287,26 @@ TEST(PluginRendering, LayerLocalShaderIDsProduceDifferentPrograms) {
     registerTriangles("test.shader-identity");
     RenderTest test;
     test.expectTriangles("test.shader-identity");
+}
+
+TEST(PluginRendering, FilterUsesGlobalStateDefaultsAndUpdates) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.global-state-filter"));
+    RenderTest test;
+    auto& style = test.map.getStyle();
+    style.loadJSON(R"({"version":8,"state":{"show":{"default":true}},"sources":{"points":{"type":"geojson","data":{
+        "type":"Point","coordinates":[0,0]}}},"layers":[{"id":"left","type":"test.global-state-filter.left",
+        "source":"points","filter":["==",["global-state","show"],true]}]})");
+    const auto expectVisible = [&](bool visible) {
+        const auto result = test.frontend.render(test.map);
+        const auto* pixel = result.image.data.get() + (32 * 64 + 16) * 4;
+        EXPECT_EQ(visible ? 255 : 0, pixel[0]);
+        EXPECT_EQ(visible ? 255 : 0, pixel[3]);
+    };
+    expectVisible(true);
+    style.setGlobalStateProperty("show", false);
+    expectVisible(false);
+    style.setGlobalStateProperty("show", NullValue());
+    expectVisible(true);
 }
 
 TEST(PluginRendering, DoesNotGenerateUnusedStencilMasks) {

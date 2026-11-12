@@ -11,7 +11,7 @@ namespace gl {
 Texture2D::Texture2D(gl::Context& context_)
     : context(context_) {}
 
-Texture2D::~Texture2D() {}
+Texture2D::~Texture2D() = default;
 
 Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
     samplerState = samplerState_;
@@ -191,7 +191,7 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
                                      pixelData));
 
     context.renderingStats().numTextureUpdates++;
-    context.renderingStats().textureUpdateBytes += static_cast<size_t>(getPixelStride() * size_.width * size_.height);
+    context.renderingStats().textureUpdateBytes += (getPixelStride() * size_.width * size_.height);
 }
 
 void Texture2D::upload() {

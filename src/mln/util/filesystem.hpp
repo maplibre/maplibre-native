@@ -15,6 +15,8 @@ inline std::filesystem::path pathFromUTF8(const std::string& path) {
 }
 #else
 inline const std::string& pathFromUTF8(const std::string& path) {
+    // Callers use the result within the same full-expression as the argument.
+    // NOLINTNEXTLINE(bugprone-return-const-ref-from-parameter)
     return path;
 }
 #endif

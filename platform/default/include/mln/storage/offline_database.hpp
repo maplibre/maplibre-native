@@ -87,7 +87,7 @@ public:
 
     std::exception_ptr setMaximumAmbientCacheSize(uint64_t);
     void setOfflineMapboxTileCountLimit(uint64_t);
-    uint64_t getOfflineMapboxTileCountLimit();
+    uint64_t getOfflineMapboxTileCountLimit() const;
     bool offlineMapboxTileCountLimitExceeded();
     uint64_t getOfflineMapboxTileCount();
     bool exceedsOfflineMapboxTileCountLimit(const Resource&);
@@ -118,7 +118,7 @@ private:
     void cleanup();
     bool disabled();
     void vacuum();
-    void checkFlags();
+    void checkFlags() const;
 
     mapbox::sqlite::Statement& getStatement(const char*);
 

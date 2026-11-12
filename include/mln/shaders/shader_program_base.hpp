@@ -12,7 +12,7 @@ namespace gfx {
 
 class ShaderProgramBase : public gfx::Shader {
 protected:
-    ShaderProgramBase() {}
+    ShaderProgramBase() = default;
     ShaderProgramBase(ShaderProgramBase&&) {}
     ~ShaderProgramBase() noexcept override = default;
 

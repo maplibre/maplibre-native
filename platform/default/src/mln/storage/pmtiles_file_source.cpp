@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <sstream>
 #include <map>
 
@@ -19,6 +20,7 @@
 #include <mln/util/filesystem.hpp>
 
 #include <pmtiles.hpp>
+#include <utility>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -97,7 +99,8 @@ public:
 
             pmtiles::headerv3 header = header_cache.at(url);
 
-            if (resource.tileData->z < header.min_zoom || resource.tileData->z > header.max_zoom) {
+            if (std::cmp_less(resource.tileData->z, header.min_zoom) ||
+                std::cmp_greater(resource.tileData->z, header.max_zoom)) {
                 Response response;
                 response.noContent = true;
                 ref.invoke(&FileSourceRequest::setResponse, response);
@@ -107,9 +110,12 @@ public:
             uint64_t tileID;
 
             try {
-                tileID = pmtiles::zxy_to_tileid(static_cast<uint8_t>(resource.tileData->z),
-                                                static_cast<uint32_t>(resource.tileData->x),
-                                                static_cast<uint32_t>(resource.tileData->y));
+                // pmtiles::zxy_to_tileid shifts by -1 for the z0 tile: https://github.com/protomaps/PMTiles/pull/687
+                tileID = resource.tileData->z == 0
+                             ? 0
+                             : pmtiles::zxy_to_tileid(static_cast<uint8_t>(resource.tileData->z),
+                                                      static_cast<uint32_t>(resource.tileData->x),
+                                                      static_cast<uint32_t>(resource.tileData->y));
             } catch (const std::exception& e) {
                 Response response;
                 response.noContent = true;
@@ -200,7 +206,7 @@ public:
 
     void setResourceOptions(ResourceOptions options) {
         std::scoped_lock lock(resourceOptionsMutex);
-        resourceOptions = options;
+        resourceOptions = std::move(options);
     }
 
     ResourceOptions getResourceOptions() {
@@ -210,7 +216,7 @@ public:
 
     void setClientOptions(ClientOptions options) {
         std::scoped_lock lock(clientOptionsMutex);
-        clientOptions = options;
+        clientOptions = std::move(options);
     }
 
     ClientOptions getClientOptions() {
@@ -249,8 +255,8 @@ private:
         Resource resource(Resource::Kind::Source, url);
         resource.loadingMethod = Resource::LoadingMethod::All;
 
-        resource.dataRange = std::make_pair<uint64_t, uint64_t>(pmtilesHeaderOffset,
-                                                                pmtilesHeaderOffset + pmtilesHeaderLength - 1);
+        resource.dataRange = std::pair<uint64_t, uint64_t>(pmtilesHeaderOffset,
+                                                           pmtilesHeaderOffset + pmtilesHeaderLength - 1);
 
         tasks[req] = getFileSource()->request(
             resource, [=, this](const Response& response) { // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
@@ -387,7 +393,7 @@ private:
                     auto& minzoom = doc["minzoom"];
 
                     if (minzoom.IsString()) {
-                        minzoom.SetInt(std::atoi(minzoom.GetString()));
+                        minzoom.SetInt(static_cast<int>(std::strtol(minzoom.GetString(), nullptr, 10)));
                     }
 
                     if (!minzoom.IsNumber()) {
@@ -403,7 +409,7 @@ private:
                     auto& maxzoom = doc["maxzoom"];
 
                     if (maxzoom.IsString()) {
-                        maxzoom.SetInt(std::atoi(maxzoom.GetString()));
+                        maxzoom.SetInt(static_cast<int>(std::strtol(maxzoom.GetString(), nullptr, 10)));
                     }
 
                     if (!maxzoom.IsNumber()) {
@@ -573,7 +579,7 @@ private:
                         uint32_t directoryDepth,
                         AsyncTileCallback callback) {
         if (directoryDepth > 3) {
-            callback(std::make_pair<uint64_t, uint32_t>(0, 0),
+            callback(std::pair<uint64_t, uint32_t>(0, 0),
                      std::make_unique<Response::Error>(
                          Response::Error::Reason::Other,
                          std::string("Error fetching PMTiles tile address: Maximum directory depth exceeded")));

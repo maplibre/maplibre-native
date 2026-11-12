@@ -305,8 +305,8 @@ const auto clipMaskStencilMode = gfx::StencilMode{
     .depthFail = gfx::StencilOpType::Keep,
     .pass = gfx::StencilOpType::Replace,
 };
-const auto clipMaskDepthMode = gfx::DepthMode{.func = gfx::DepthFunctionType::Always,
-                                              .mask = gfx::DepthMaskType::ReadOnly};
+const auto clipMaskDepthMode = gfx::DepthMode{
+    .func = gfx::DepthFunctionType::Always, .mask = gfx::DepthMaskType::ReadOnly, .range = {0.0f, 1.0f}};
 } // namespace
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
@@ -438,7 +438,10 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()));
 #else
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
-        encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
+        // Through the render pass so its cached reference value stays in step with the encoder;
+        // writing the encoder directly left the cache stale, and the next drawable whose
+        // reference equalled the stale value was drawn against the last mask's ID instead.
+        mtlRenderPass.setStencilReference(static_cast<int32_t>(tileUBOs[ii].stencil_ref));
         mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, shaders::idClippingMaskUBO, /*size=*/uboSize);
         encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                        indexCount,

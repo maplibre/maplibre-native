@@ -23,7 +23,7 @@ private:
     std::shared_ptr<const std::set<std::string>> globalStateRefs;
 
     friend bool operator==(const ColorRampPropertyValue& lhs, const ColorRampPropertyValue& rhs) noexcept {
-        return (lhs.isUndefined() && rhs.isUndefined()) || (lhs.value && rhs.value && *(lhs.value) == *(rhs.value));
+        return (lhs.isUndefined() && rhs.isUndefined()) || (lhs.value && rhs.value && *lhs.value == *rhs.value);
     }
 
     friend bool operator!=(const ColorRampPropertyValue& lhs, const ColorRampPropertyValue& rhs) noexcept {

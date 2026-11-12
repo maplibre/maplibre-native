@@ -101,6 +101,7 @@ MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mln/shaders/gl/hillshade.hpp",
     "include/mln/shaders/gl/color_relief.hpp",
     "include/mln/shaders/gl/line_gradient.hpp",
+    "include/mln/shaders/gl/line_gradient_sdf.hpp",
     "include/mln/shaders/gl/line_pattern.hpp",
     "include/mln/shaders/gl/line_sdf.hpp",
     "include/mln/shaders/gl/line.hpp",
@@ -1144,6 +1145,7 @@ MLN_DRAWABLES_MTL_HEADERS = [
 
 MLN_DRAWABLES_WEBGPU_SOURCE = [
     "src/mln/webgpu/buffer_resource.cpp",
+    "src/mln/webgpu/buffer_uploader.cpp",
     "src/mln/webgpu/command_encoder.cpp",
     "src/mln/webgpu/context.cpp",
     "src/mln/webgpu/draw_scope_resource.cpp",
@@ -1185,6 +1187,7 @@ MLN_DRAWABLES_WEBGPU_SOURCE = [
 
 MLN_DRAWABLES_WEBGPU_HEADERS = [
     "include/mln/webgpu/buffer_resource.hpp",
+    "include/mln/webgpu/buffer_uploader.hpp",
     "include/mln/webgpu/command_encoder.hpp",
     "include/mln/webgpu/context.hpp",
     "include/mln/webgpu/draw_scope_resource.hpp",

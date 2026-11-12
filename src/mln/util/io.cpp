@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <system_error>
 
 #if defined(__GNUC__) && !defined(WIN32)
 #define MBGL_FOPEN_MODE_WBE "wbe"
@@ -19,7 +20,7 @@ namespace mln {
 namespace util {
 
 IOException::IOException(int err, const std::string &msg)
-    : std::runtime_error(msg + ": " + std::strerror(errno)),
+    : std::runtime_error(msg + ": " + std::generic_category().message(err)),
       code(err) {}
 
 void write_file(const std::string &filename, const std::string &data) {
@@ -27,8 +28,11 @@ void write_file(const std::string &filename, const std::string &data) {
 
     FILE *fd = fopen(filename.c_str(), MBGL_FOPEN_MODE_WBE);
     if (fd) {
-        fwrite(data.data(), sizeof(std::string::value_type), data.size(), fd);
-        fclose(fd);
+        const bool written = fwrite(data.data(), sizeof(std::string::value_type), data.size(), fd) == data.size();
+        const bool closed = fclose(fd) == 0;
+        if (!written || !closed) {
+            throw std::runtime_error(std::string("Failed to write file ") + filename);
+        }
     } else {
         throw std::runtime_error(std::string("Failed to open file ") + filename);
     }

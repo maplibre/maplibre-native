@@ -113,6 +113,18 @@ void SymbolBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     placementChangesUploaded = true;
     dynamicUploaded = true;
     sortUploaded = true;
+    // Static layout is final; placement only rewrites the dynamic and opacity data. The CPU copy is
+    // dropped unless the map reads it back to report rendered features.
+    if (retainFeaturesById) {
+        return;
+    }
+    text.sharedAttributeData->release();
+    icon.sharedAttributeData->release();
+    sdfIcon.sharedAttributeData->release();
+    for (auto& pair : paintProperties) {
+        pair.second.iconBinders.release();
+        pair.second.textBinders.release();
+    }
 }
 
 bool SymbolBucket::hasData() const {
@@ -300,6 +312,8 @@ bool SymbolBucket::check(source_location source) {
         // This bucket was left in a partial state and it cannot be used
         return false;
     }
+
+    if (!SymbolInstance::guardsEnabled()) return true;
 
     for (std::size_t i = 0; i < symbolInstances.size(); ++i) {
         if (!symbolInstances[i].check(source)) {

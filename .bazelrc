@@ -7,6 +7,10 @@ coverage --experimental_ui_max_stdouterr_bytes=10485760
 
 common:macos --linkopt=-L/opt/homebrew/lib
 
+# Sandboxed Objective-C(++) compiles start with an empty Clang module cache (-fmodules) and rebuild
+# every system module for each file. Unsandboxed, they share one cache.
+build:macos --strategy=ObjcCompile=local
+
 # Ensure GCC is used consistently for toolchain detection and compilation on Linux.
 # This prevents a mismatch where local_config_cc detects one GCC version but compilation
 # pulls headers from another, causing "absolute path inclusion" errors in Bazel's

@@ -132,7 +132,7 @@ bool GeoJSONSource::isUpdateSynchronous() const noexcept {
     return baseImpl->isUpdateSynchronous();
 }
 
-void GeoJSONSource::setOverrideSynchronousUpdate(bool value) noexcept {
+void GeoJSONSource::setOverrideSynchronousUpdate(bool value) const noexcept {
     impl().setOverrideSynchronousUpdate(value);
 }
 

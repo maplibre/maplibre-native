@@ -29,14 +29,21 @@ public:
         : v(std::move(other.v)),
           buffer(std::move(other.buffer)),
           dirty(other.dirty),
-          released(other.released) {}
+          released(other.released),
+          freedCount(other.freedCount) {}
     virtual ~IndexVectorBase() = default;
 
     IndexBufferBase* getBuffer() const { return buffer.get(); }
     void setBuffer(std::unique_ptr<IndexBufferBase>&& value) { buffer = std::move(value); }
 
     bool getDirty() const { return dirty; }
-    void setDirty(bool value = true) { dirty = value; }
+    void setDirty(bool value = true) {
+        dirty = value;
+        // Clean and uploaded: a released vector will not be modified or re-uploaded.
+        if (!dirty && released && buffer) {
+            freeRawData();
+        }
+    }
 
     bool isReleased() const { return released; }
 
@@ -59,25 +66,26 @@ public:
         return v.at(n);
     }
 
-    std::size_t elements() const { return v.size(); }
+    std::size_t elements() const { return v.size() + freedCount; }
 
-    std::size_t bytes() const { return v.size() * sizeof(uint16_t); }
+    std::size_t bytes() const { return elements() * sizeof(uint16_t); }
 
-    bool empty() const { return v.empty(); }
+    bool empty() const { return elements() == 0; }
 
     void clear() {
         dirty = true;
         v.clear();
+        freedCount = 0;
         buffer.reset();
     }
 
     /// Indicate that this shared index vector will no longer be updated.
     void release() {
-        // If we've already created a buffer, we don't need the raw data any more.
-        if (buffer) {
-            v.clear();
-        }
         released = true;
+        // If we've already created a buffer, we don't need the raw data any more.
+        if (buffer && !dirty) {
+            freeRawData();
+        }
     }
 
     const uint16_t* data() const { return v.data(); }
@@ -85,9 +93,15 @@ public:
     const std::vector<uint16_t>& vector() const { return v; }
 
 protected:
+    void freeRawData() {
+        freedCount += v.size();
+        std::vector<uint16_t>().swap(v);
+    }
+
     std::unique_ptr<IndexBufferBase> buffer;
     bool dirty = true;
     bool released = false;
+    std::size_t freedCount = 0;
 };
 
 using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;

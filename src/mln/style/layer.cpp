@@ -191,7 +191,7 @@ Value Layer::serialize() const {
 
 void Layer::serializeProperty(Value& out, const StyleProperty& property, const char* propertyName, bool isPaint) const {
     assert(out.getObject());
-    auto& object = *(out.getObject());
+    auto& object = *out.getObject();
     std::string propertyType = isPaint ? "paint" : "layout";
     auto it = object.find(propertyType);
     auto pair = std::make_pair(std::string(propertyName), Value{property.getValue()});

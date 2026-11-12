@@ -11,7 +11,7 @@
 namespace mln {
 
 #if defined(__cpp_lib_source_location) && __cpp_lib_source_location >= 201907L
-using source_location = std::source_location;
+using std::source_location;
 #define MLN_CURRENT_SOURCE_LOCATION ::mln::source_location::current()
 #else
 class source_location final {
