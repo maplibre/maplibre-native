@@ -48,7 +48,6 @@ RenderHeatmapLayer::~RenderHeatmapLayer() = default;
 void RenderHeatmapLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     styleDependencies = unevaluated.getDependencies();
-    updateColorRamp();
 }
 
 void RenderHeatmapLayer::layerChanged(const TransitionParameters& parameters,
@@ -59,15 +58,17 @@ void RenderHeatmapLayer::layerChanged(const TransitionParameters& parameters,
 }
 
 void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    if (colorRampGlobalState != parameters.globalState) {
-        const auto& rampValue = unevaluated.get<HeatmapColor>().getValue();
-        const bool rampAffected = (rampValue.getDependencies() & expression::Dependency::GlobalState) &&
-                                  expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
-                                                                       parameters.changedGlobalStateKeys.get());
-        colorRampGlobalState = parameters.globalState;
-        if (rampAffected) {
-            updateColorRamp();
-        }
+    // Build the ramp here rather than in transition(), which has no global state. A new or changed layer always
+    // needs one; otherwise only a change to a state key that the ramp reads does.
+    const auto& rampValue = unevaluated.get<HeatmapColor>().getValue();
+    const bool rampAffected = parameters.layerChanged ||
+                              (colorRampGlobalState != parameters.globalState &&
+                               (rampValue.getDependencies() & expression::Dependency::GlobalState) &&
+                               expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
+                                                                    parameters.changedGlobalStateKeys.get()));
+    colorRampGlobalState = parameters.globalState;
+    if (rampAffected) {
+        updateColorRamp();
     }
 
     const auto previousProperties = staticImmutableCast<HeatmapLayerProperties>(evaluatedProperties);

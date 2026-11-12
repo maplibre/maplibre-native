@@ -57,19 +57,20 @@ RenderColorReliefLayer::~RenderColorReliefLayer() = default;
 void RenderColorReliefLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     styleDependencies = unevaluated.getDependencies();
-    updateColorRamp();
 }
 
 void RenderColorReliefLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    if (colorRampGlobalState != parameters.globalState) {
-        const auto& rampValue = unevaluated.get<ColorReliefColor>().getValue();
-        const bool rampAffected = (rampValue.getDependencies() & style::expression::Dependency::GlobalState) &&
-                                  style::expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
-                                                                              parameters.changedGlobalStateKeys.get());
-        colorRampGlobalState = parameters.globalState;
-        if (rampAffected) {
-            updateColorRamp();
-        }
+    // Build the ramp here rather than in transition(), which has no global state. A new or changed layer always
+    // needs one; otherwise only a change to a state key that the ramp reads does.
+    const auto& rampValue = unevaluated.get<ColorReliefColor>().getValue();
+    const bool rampAffected = parameters.layerChanged ||
+                              (colorRampGlobalState != parameters.globalState &&
+                               (rampValue.getDependencies() & style::expression::Dependency::GlobalState) &&
+                               style::expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
+                                                                           parameters.changedGlobalStateKeys.get()));
+    colorRampGlobalState = parameters.globalState;
+    if (rampAffected) {
+        updateColorRamp();
     }
 
     const auto previousProperties = staticImmutableCast<ColorReliefLayerProperties>(evaluatedProperties);
