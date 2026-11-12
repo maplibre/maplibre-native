@@ -100,9 +100,10 @@ ParseResult parseInterpolate(const Convertible& value, ParsingContext& ctx) {
     }
 
     const std::optional<std::string> op = toString(arrayMember(value, 0));
-    const ColorSpace colorSpace = op == "interpolate-lab"   ? ColorSpace::LAB
-                                  : op == "interpolate-hcl" ? ColorSpace::HCL
-                                                            : ColorSpace::RGB;
+    const ColorSpace colorSpace = op == "interpolate-lab"     ? ColorSpace::LAB
+                                  : op == "interpolate-hcl"   ? ColorSpace::HCL
+                                  : op == "interpolate-oklch" ? ColorSpace::OKLCH
+                                                              : ColorSpace::RGB;
 
     std::optional<Interpolator> interpolator;
 
@@ -292,6 +293,8 @@ std::string Interpolate::getOperator() const {
             return "interpolate-lab";
         case ColorSpace::HCL:
             return "interpolate-hcl";
+        case ColorSpace::OKLCH:
+            return "interpolate-oklch";
         case ColorSpace::RGB:
             break;
     }
