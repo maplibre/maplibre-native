@@ -47,7 +47,7 @@ public:
     // False when rendering into an offscreen target with no stencil attachment (e.g. the
     // terrain drape RTT, which has depth but no stencil); stencil test/write must be off.
     bool renderPassHasStencil = true;
-    vk::Extent2D viewExtent{};
+    vk::Viewport viewport{};
     vk::Rect2D scissorRect{};
 
     // dynamic values (not part of the pipeline/ignored in hash)

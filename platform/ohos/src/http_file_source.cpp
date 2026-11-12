@@ -212,7 +212,7 @@ void applyCacheHeaders(Response& response, Http_Headers* headers) {
     }
 }
 
-Response makeResponse(const Resource& resource, Http_Response* httpResponse, uint32_t errCode) {
+Response makeResponse(const Resource& resource, Http_Response* httpResponse, uint32_t errCode, std::string body) {
     if (errCode != OH_HTTP_RESULT_OK) {
         return makeNetworkError(errCode);
     }
@@ -228,11 +228,7 @@ Response makeResponse(const Resource& resource, Http_Response* httpResponse, uin
 
     const int code = static_cast<int>(httpResponse->responseCode);
     if (code == 200 || code == 206) {
-        if (httpResponse->body.buffer && httpResponse->body.length > 0) {
-            response.data = std::make_shared<std::string>(httpResponse->body.buffer, httpResponse->body.length);
-        } else {
-            response.data = std::make_shared<std::string>();
-        }
+        response.data = std::make_shared<std::string>(std::move(body));
     } else if (code == 204 || (code == 404 && resource.kind == Resource::Kind::Tile)) {
         response.noContent = true;
     } else if (code == 304) {
@@ -262,8 +258,10 @@ public:
     static void release(std::size_t token, const RequestState* state);
     static void handleResponse(std::size_t token, Http_Response* response, uint32_t errCode);
     static void handleCanceled(std::size_t token);
+    static void handleData(std::size_t token, const char* data, std::size_t length);
     static Http_ResponseCallback responseCallback(std::size_t token);
     static Http_OnVoidCallback canceledCallback(std::size_t token);
+    static Http_OnDataReceiveCallback dataReceiveCallback(std::size_t token);
 
 private:
     struct Slot {
@@ -291,6 +289,11 @@ void canceledThunk() {
     SlotPool::handleCanceled(Token);
 }
 
+template <std::size_t Token>
+void dataReceiveThunk(const char* data, std::size_t length) {
+    SlotPool::handleData(Token, data, length);
+}
+
 template <std::size_t... Tokens>
 constexpr auto makeResponseCallbacks(std::index_sequence<Tokens...>) {
     return std::array<Http_ResponseCallback, sizeof...(Tokens)>{&responseThunk<Tokens>...};
@@ -301,8 +304,14 @@ constexpr auto makeCanceledCallbacks(std::index_sequence<Tokens...>) {
     return std::array<Http_OnVoidCallback, sizeof...(Tokens)>{&canceledThunk<Tokens>...};
 }
 
+template <std::size_t... Tokens>
+constexpr auto makeDataReceiveCallbacks(std::index_sequence<Tokens...>) {
+    return std::array<Http_OnDataReceiveCallback, sizeof...(Tokens)>{&dataReceiveThunk<Tokens>...};
+}
+
 constexpr auto responseCallbacks = makeResponseCallbacks(std::make_index_sequence<kCallbackTokens>{});
 constexpr auto canceledCallbacks = makeCanceledCallbacks(std::make_index_sequence<kCallbackTokens>{});
+constexpr auto dataReceiveCallbacks = makeDataReceiveCallbacks(std::make_index_sequence<kCallbackTokens>{});
 
 class RequestState : public std::enable_shared_from_this<RequestState> {
 public:
@@ -402,6 +411,10 @@ public:
 
         Http_EventsHandler handler{};
         handler.onCanceled = SlotPool::canceledCallback(*activeToken);
+        // Since OpenHarmony 7.0, the response's body is a strdup copy, which
+        // ends at the body's first NUL byte but keeps the body's full length.
+        // This callback passes each received chunk with its length.
+        handler.onDataReceive = SlotPool::dataReceiveCallback(*activeToken);
 
         {
             std::scoped_lock lock(mutex);
@@ -500,8 +513,18 @@ public:
         }
     }
 
+    void appendBody(const char* data, std::size_t length) {
+        std::scoped_lock lock(mutex);
+        body.append(data, length);
+    }
+
     void complete(Http_Response* httpResponse, uint32_t errCode) {
-        auto response = makeResponse(resource, httpResponse, errCode);
+        std::string receivedBody;
+        {
+            std::scoped_lock lock(mutex);
+            receivedBody = std::move(body);
+        }
+        auto response = makeResponse(resource, httpResponse, errCode, std::move(receivedBody));
         destroyResponse(httpResponse);
         finish(std::move(response));
     }
@@ -623,6 +646,7 @@ private:
     std::optional<std::size_t> token;
     Http_Request* request = nullptr;
     Http_Headers* headers = nullptr;
+    std::string body;
     Http_RequestOptions options{};
     Http_Proxy proxy{};
     bool canceled = false;
@@ -742,12 +766,27 @@ void SlotPool::handleCanceled(std::size_t token) {
     state->completeCanceled();
 }
 
+void SlotPool::handleData(std::size_t token, const char* data, std::size_t length) {
+    if (!data || length == 0) {
+        return;
+    }
+    auto state = stateForToken(token);
+    if (!state) {
+        return;
+    }
+    state->appendBody(data, length);
+}
+
 Http_ResponseCallback SlotPool::responseCallback(std::size_t token) {
     return token < responseCallbacks.size() ? responseCallbacks[token] : nullptr;
 }
 
 Http_OnVoidCallback SlotPool::canceledCallback(std::size_t token) {
     return token < canceledCallbacks.size() ? canceledCallbacks[token] : nullptr;
+}
+
+Http_OnDataReceiveCallback SlotPool::dataReceiveCallback(std::size_t token) {
+    return token < dataReceiveCallbacks.size() ? dataReceiveCallbacks[token] : nullptr;
 }
 
 class HTTPRequest final : public AsyncRequest {
