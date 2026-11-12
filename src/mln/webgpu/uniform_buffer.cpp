@@ -21,10 +21,13 @@ constexpr std::size_t alignedUniformSize(std::size_t size) {
 }
 } // namespace
 
+// getSize() is the requested size, which UniformBufferArray::createOrUpdate() compares
+// to update in place. Only the GPU buffer is rounded up.
 UniformBuffer::UniformBuffer(Context& context_, const void* data, std::size_t size_)
-    : gfx::UniformBuffer(alignedUniformSize(size_)),
-      context(context_) {
-    const std::size_t alignedSize = getSize();
+    : gfx::UniformBuffer(size_),
+      context(context_),
+      allocatedSize(alignedUniformSize(size_)) {
+    const std::size_t alignedSize = allocatedSize;
 
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
@@ -64,7 +67,8 @@ UniformBuffer UniformBuffer::clone() const {
 UniformBuffer::UniformBuffer(UniformBuffer&& other) noexcept
     : gfx::UniformBuffer(std::move(other)),
       context(other.context),
-      buffer(other.buffer) {
+      buffer(other.buffer),
+      allocatedSize(other.allocatedSize) {
     other.buffer = nullptr;
 }
 
@@ -77,11 +81,7 @@ UniformBuffer::~UniformBuffer() {
 
 void UniformBuffer::update(const void* data, std::size_t dataSize) {
     if (data && dataSize > 0 && buffer) {
-        auto& backend = static_cast<RendererBackend&>(context.getBackend());
-        WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
-        if (queue) {
-            wgpuQueueWriteBuffer(queue, buffer, 0, data, dataSize);
-        }
+        context.getBufferUploader().write(buffer, 0, data, dataSize);
     }
 }
 

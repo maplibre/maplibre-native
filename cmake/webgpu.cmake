@@ -18,6 +18,7 @@ target_include_directories(
 list(APPEND
         SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mln/webgpu/buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/buffer_uploader.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/webgpu/context.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/webgpu/command_encoder.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/webgpu/renderer_backend.cpp
@@ -56,6 +57,7 @@ list(APPEND
 list(APPEND
         INCLUDE_FILES
         ${PROJECT_SOURCE_DIR}/include/mln/webgpu/buffer_resource.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/buffer_uploader.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/webgpu/command_encoder.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/webgpu/context.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/webgpu/drawable.hpp
