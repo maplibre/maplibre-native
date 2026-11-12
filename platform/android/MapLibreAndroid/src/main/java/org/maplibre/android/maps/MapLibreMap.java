@@ -561,7 +561,13 @@ public final class MapLibreMap {
    * Sets the maximum Pitch the map can be displayed at.
    * </p>
    * <p>
-   * The default and upper bound for maximum Pitch is 60.
+   * The default maximum Pitch is {@link MapLibreConstants#MAXIMUM_PITCH} (60); it can be raised
+   * up to {@link MapLibreConstants#MAXIMUM_PITCH_LIMIT} (85).
+   * </p>
+   * <p>
+   * With top padding (for example from {@link CameraPosition.Builder#padding}), the map lowers
+   * the pitch it draws so that the area above the shifted center stays within the field of view;
+   * a camera at a steep maximum pitch with top padding is drawn at a lower pitch than requested.
    * </p>
    *
    * @param maxPitch The new maximum Pitch.
