@@ -158,6 +158,14 @@ void addSubdividedPolygon(const util::SubdivisionResult& subdivided,
         &lines);
 }
 
+util::SubdivisionResult subdivideWithBorderStrips(const GeometryCollection& polygon,
+                                                  const CanonicalTileID& canonical,
+                                                  uint32_t granularity) {
+    auto subdivided = util::subdividePolygon(polygon, canonical, granularity, /*generateOutlineLines=*/true);
+    util::addTileBorderStrips(subdivided, canonical, util::TILE_BORDER_STRIP_WIDTH);
+    return subdivided;
+}
+
 } // namespace
 
 void generateFillBuffers(const GeometryCollection& geometry,
@@ -193,10 +201,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         limitHoles(polygon, 500);
 
         if (util::GLOBE_ENABLED && subdivisionGranularity >= 2) {
-            addSubdividedPolygon(util::subdividePolygon(polygon,
-                                                        canonical,
-                                                        subdivisionGranularity,
-                                                        /*generateOutlineLines=*/true),
+            addSubdividedPolygon(subdivideWithBorderStrips(polygon, canonical, subdivisionGranularity),
                                  vertices,
                                  fillIndexes,
                                  fillSegments,
@@ -305,10 +310,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                 canonical,
                                 lineOptions);
             }
-            addSubdividedPolygon(util::subdividePolygon(polygon,
-                                                        canonical,
-                                                        subdivisionGranularity,
-                                                        /*generateOutlineLines=*/true),
+            addSubdividedPolygon(subdivideWithBorderStrips(polygon, canonical, subdivisionGranularity),
                                  fillVertices,
                                  fillIndexes,
                                  fillSegments,

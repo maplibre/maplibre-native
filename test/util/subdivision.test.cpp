@@ -225,6 +225,26 @@ uint32_t roofGranularity(const FillExtrusionBucket& bucket,
     return 0;
 }
 
+std::size_t verticesOutsideBorder(const SubdivisionResult& r, int16_t distance) {
+    std::size_t count = 0;
+    for (std::size_t i = 0; i + 1 < r.vertices.size(); i += 2) {
+        const int16_t x = r.vertices[i];
+        const int16_t y = r.vertices[i + 1];
+        if (x == -distance || x == EXTENT + distance || y == -distance || y == EXTENT + distance) {
+            count++;
+        }
+    }
+    return count;
+}
+
+std::set<int16_t> yCoordinates(const SubdivisionResult& r) {
+    std::set<int16_t> ys;
+    for (std::size_t i = 1; i < r.vertices.size(); i += 2) {
+        ys.insert(r.vertices[i]);
+    }
+    return ys;
+}
+
 } // namespace
 
 TEST(Subdivision, Granularity) {
@@ -281,6 +301,64 @@ TEST(Subdivision, SplitsOnCellBoundariesAndKeepsArea) {
     ASSERT_EQ(1u, result.lineIndexLists.size());
     EXPECT_EQ(16u * 2u, result.lineIndexLists[0].size());
     expectSoundMesh(result);
+}
+
+TEST(Subdivision, StripsExtendEachEdgeOfAFillThatEndsAtTheTileBorder) {
+    const CanonicalTileID tileID(9, 255, 149);
+    auto result = subdividePolygon(square(0, 0, EXTENT, EXTENT), tileID, 4);
+    addTileBorderStrips(result, tileID, TILE_BORDER_STRIP_WIDTH);
+
+    // The 4x4 grid's 32 triangles, two more for each of its 16 cell edges on the border, five outer vertices per side.
+    EXPECT_EQ(64u, result.triangleIndices.size() / 3);
+    EXPECT_EQ(20u, verticesOutsideBorder(result, TILE_BORDER_STRIP_WIDTH));
+    EXPECT_DOUBLE_EQ(static_cast<double>(EXTENT) * EXTENT + 4.0 * EXTENT * TILE_BORDER_STRIP_WIDTH, totalArea(result));
+    for (std::size_t i = 0; i + 2 < result.triangleIndices.size(); i += 3) {
+        EXPECT_LT(signedArea(result.vertices,
+                             result.triangleIndices[i],
+                             result.triangleIndices[i + 1],
+                             result.triangleIndices[i + 2]),
+                  0.0);
+    }
+}
+
+TEST(Subdivision, NoStripsWhereTheFillContinuesPastTheTileBorder) {
+    const CanonicalTileID tileID(9, 255, 149);
+    auto result = subdividePolygon(square(-128, -128, EXTENT + 128, EXTENT + 128), tileID, 4);
+    const std::size_t indexCount = result.triangleIndices.size();
+    addTileBorderStrips(result, tileID, TILE_BORDER_STRIP_WIDTH);
+
+    EXPECT_EQ(indexCount, result.triangleIndices.size());
+}
+
+TEST(Subdivision, NoStripsForAFillThatStaysInsideTheTile) {
+    const CanonicalTileID tileID(9, 255, 149);
+    auto result = subdividePolygon(square(1000, 1000, 3000, 3000), tileID, 4);
+    const std::size_t indexCount = result.triangleIndices.size();
+    addTileBorderStrips(result, tileID, TILE_BORDER_STRIP_WIDTH);
+
+    EXPECT_EQ(indexCount, result.triangleIndices.size());
+}
+
+TEST(Subdivision, NoStripsOnThePoleBorderOfAPoleTile) {
+    const CanonicalTileID northPoleTile(1, 0, 0);
+    auto north = subdividePolygon(square(0, 0, EXTENT, EXTENT), northPoleTile, 4);
+    addTileBorderStrips(north, northPoleTile, TILE_BORDER_STRIP_WIDTH);
+    const CanonicalTileID southPoleTile(1, 1, 1);
+    auto south = subdividePolygon(square(0, 0, EXTENT, EXTENT), southPoleTile, 4);
+    addTileBorderStrips(south, southPoleTile, TILE_BORDER_STRIP_WIDTH);
+
+    EXPECT_FALSE(yCoordinates(north).contains(-TILE_BORDER_STRIP_WIDTH));
+    EXPECT_TRUE(yCoordinates(north).contains(EXTENT + TILE_BORDER_STRIP_WIDTH));
+    EXPECT_FALSE(yCoordinates(south).contains(EXTENT + TILE_BORDER_STRIP_WIDTH));
+    EXPECT_TRUE(yCoordinates(south).contains(-TILE_BORDER_STRIP_WIDTH));
+}
+
+TEST(Subdivision, NoStripsOnTheZoomZeroTileWhoseEdgesAreTheAntimeridianAndThePoles) {
+    const CanonicalTileID worldTile(0, 0, 0);
+    auto result = subdividePolygon(square(0, 0, EXTENT, EXTENT), worldTile, 4);
+    addTileBorderStrips(result, worldTile, TILE_BORDER_STRIP_WIDTH);
+
+    EXPECT_EQ(0u, verticesOutsideBorder(result, TILE_BORDER_STRIP_WIDTH));
 }
 
 TEST(Subdivision, PoleTilesGetPoleQuads) {

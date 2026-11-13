@@ -2,6 +2,7 @@
 
 #include <mln/tile/tile_id.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
+#include <mln/util/constants.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -28,6 +29,17 @@ SubdivisionResult subdividePolygon(const GeometryCollection& polygon,
                                    const CanonicalTileID& canonical,
                                    uint32_t granularity,
                                    bool generateOutlineLines = true);
+
+/// How far past the tile border `addTileBorderStrips` reaches: several times the widest sliver between the meshes of
+/// neighboring zoom levels (about 2π units with the globe's granularities), and inside the stencil masks' border.
+constexpr int16_t TILE_BORDER_STRIP_WIDTH = EXTENT / 256;
+
+/// Extends every triangle edge that lies on the tile border with nothing beyond it by a strip `width` units outside
+/// the tile. Tiles of neighboring zoom levels split their shared edge at different points, and the slivers between
+/// the two meshes are covered only by the stencil masks' borders; the strip lets a fill that ends exactly at the tile
+/// border reach them, as the geometry of a tile with a buffer does. An edge with triangles on both sides of the border
+/// belongs to a tile with a buffer and gets none, and neither do pole borders or the zoom 0 tile's antimeridian edges.
+void addTileBorderStrips(SubdivisionResult& result, const CanonicalTileID& canonical, int16_t width);
 
 /// Inserts a vertex wherever the line crosses a cell boundary; `isRing` closes the line first.
 GeometryCoordinates subdivideVertexLine(const GeometryCoordinates& line, uint32_t granularity, bool isRing = false);

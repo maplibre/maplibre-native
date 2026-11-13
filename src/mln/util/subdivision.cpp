@@ -409,6 +409,76 @@ SubdivisionResult subdividePolygon(const GeometryCollection& polygon,
     return Subdivider(granularity, canonical).subdivide(polygon, generateOutlineLines);
 }
 
+void addTileBorderStrips(SubdivisionResult& result, const CanonicalTileID& canonical, int16_t width) {
+    auto& vertices = result.vertices;
+    const auto coordinate = [&](uint32_t index, bool y) {
+        return static_cast<int32_t>(vertices[index * 2 + (y ? 1 : 0)]);
+    };
+    const bool northPoleTile = canonical.y == 0;
+    const bool southPoleTile = canonical.y == (1u << canonical.z) - 1;
+    const bool wrapsX = canonical.z == 0;
+
+    struct BorderEdge {
+        uint32_t a;
+        uint32_t b;
+        int16_t dx;
+        int16_t dy;
+        int uses;
+    };
+    std::vector<BorderEdge> edges;
+    std::unordered_map<uint64_t, std::size_t> edgeIndices;
+    const auto& triangles = result.triangleIndices;
+    for (std::size_t i = 0; i + 2 < triangles.size(); i += 3) {
+        for (std::size_t e = 0; e < 3; e++) {
+            const uint32_t a = triangles[i + e];
+            const uint32_t b = triangles[i + (e + 1) % 3];
+            int16_t dx = 0;
+            int16_t dy = 0;
+            if (coordinate(a, false) == coordinate(b, false) && !wrapsX) {
+                if (coordinate(a, false) == 0) dx = -1;
+                if (coordinate(a, false) == util::EXTENT) dx = 1;
+            }
+            if (coordinate(a, true) == coordinate(b, true)) {
+                if (coordinate(a, true) == 0 && !northPoleTile) dy = -1;
+                if (coordinate(a, true) == util::EXTENT && !southPoleTile) dy = 1;
+            }
+            if (dx == 0 && dy == 0) {
+                continue;
+            }
+            const uint64_t key = (static_cast<uint64_t>(std::min(a, b)) << 32) | std::max(a, b);
+            const auto [it, inserted] = edgeIndices.try_emplace(key, edges.size());
+            if (inserted) {
+                edges.push_back({.a = a, .b = b, .dx = dx, .dy = dy, .uses = 0});
+            }
+            edges[it->second].uses++;
+        }
+    }
+
+    std::unordered_map<uint64_t, uint32_t> outerVertices;
+    const auto outer = [&](uint32_t index, int16_t dx, int16_t dy) {
+        const uint64_t key = (static_cast<uint64_t>(index) << 4) | static_cast<uint64_t>((dx + 1) * 3 + (dy + 1));
+        if (const auto it = outerVertices.find(key); it != outerVertices.end()) {
+            return it->second;
+        }
+        const auto outerIndex = static_cast<uint32_t>(vertices.size() / 2);
+        vertices.push_back(static_cast<int16_t>(coordinate(index, false) + dx * width));
+        vertices.push_back(static_cast<int16_t>(coordinate(index, true) + dy * width));
+        outerVertices.emplace(key, outerIndex);
+        return outerIndex;
+    };
+    std::vector<uint32_t> strips;
+    for (const auto& edge : edges) {
+        if (edge.uses != 1) {
+            continue;
+        }
+        const uint32_t outerA = outer(edge.a, edge.dx, edge.dy);
+        const uint32_t outerB = outer(edge.b, edge.dx, edge.dy);
+        strips.insert(strips.end(), {edge.a, edge.b, outerB, edge.a, outerB, outerA});
+    }
+    const std::vector<uint32_t> oriented = fixWindingOrder(vertices, strips);
+    result.triangleIndices.insert(result.triangleIndices.end(), oriented.begin(), oriented.end());
+}
+
 GeometryCoordinates subdivideVertexLine(const GeometryCoordinates& line, uint32_t granularity, bool isRing) {
     if (line.size() < 2) {
         return {};

@@ -198,7 +198,8 @@ TEST(FillGenerator, GlobeSubdividedPolygonBeyondTheIndexLimitKeepsItsGranularity
                                       tile,
                                       128);
 
-    const auto full = util::subdividePolygon(polygon, tile, 128, true);
+    auto full = util::subdividePolygon(polygon, tile, 128, true);
+    util::addTileBorderStrips(full, tile, util::TILE_BORDER_STRIP_WIDTH);
     EXPECT_GT(full.vertices.size() / 2, maxSegmentVertices);
     EXPECT_GT(fillSegments.size(), 1u);
     const auto expectedTriangles = meshTriangles(full);
