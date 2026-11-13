@@ -34,6 +34,10 @@ void RenderLayer::transition(const TransitionParameters& parameters, Immutable<s
     transition(parameters);
 }
 
+bool RenderLayer::settlesCrossfade(bool terrainEnabled) const {
+    return terrainEnabled && !is3D();
+}
+
 bool RenderLayer::needsPlacement() const {
     return baseImpl->getTypeInfo()->crossTileIndex == style::LayerTypeInfo::CrossTileIndex::Required &&
            !placementData.empty();
@@ -102,7 +106,7 @@ void RenderLayer::updateEmptyTileIDs(const LayerPrepareParameters& params) {
 
 bool RenderLayer::supportsZoom(float zoom) const {
     // TODO: shall we use rounding or epsilon comparisons?
-    return baseImpl->minZoom <= zoom && baseImpl->maxZoom >= zoom;
+    return baseImpl->minZoom <= zoom && zoom < baseImpl->maxZoom;
 }
 
 void RenderLayer::prepare(const LayerPrepareParameters& params) {

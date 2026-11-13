@@ -46,7 +46,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     auto& context = static_cast<Context&>(parameters.context);
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
-    const auto& encoder = renderPass.getMetalEncoder();
     const auto& renderable = renderPass.getDescriptor().renderable;
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
@@ -116,7 +115,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         if (stencil3d) {
             stencilMode3d = parameters.stencilModeFor3D();
-            encoder->setStencilReferenceValue(stencilMode3d.ref);
+            renderPass.setStencilReference(stencilMode3d.ref);
         }
     } else if (stencilTiles && !stencilTiles->empty()) {
         parameters.renderTileClippingMasks(stencilTiles);

@@ -573,9 +573,9 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
     auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
     auto& context = const_cast<Context&>(*this);
 
-    // Offscreen render targets (e.g. the terrain drape targets) are not surface
-    // renderables and have no swapchain or surface transform
-    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<RenderableResource>();
+    // The rotation is the swapchain's even in a pass that draws into an offscreen render target: these
+    // passes come first in a frame, and the terrain depth target they draw and read is in swapchain space.
+    auto& renderableResource = backend.getDefaultRenderable().getResource<RenderableResource>();
     if (renderableResource.isSurface()) {
         auto& surfaceResource = static_cast<SurfaceRenderableResource&>(renderableResource);
         if (surfaceResource.hasSurfaceTransformSupport()) {
@@ -667,8 +667,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
     clipping.pipelineInfo.setScissorRect({.x = 0,
                                           .y = 0,
-                                          .width = clipping.pipelineInfo.viewExtent.width,
-                                          .height = clipping.pipelineInfo.viewExtent.height});
+                                          .width = static_cast<uint32_t>(clipping.pipelineInfo.viewport.width),
+                                          .height = static_cast<uint32_t>(clipping.pipelineInfo.viewport.height)});
     clipping.pipelineInfo.setDynamicValues(backend, commandBuffer);
 
     const std::array<vk::Buffer, 1> vertexBuffers = {clipping.vertexBuffer->getVulkanBuffer()};

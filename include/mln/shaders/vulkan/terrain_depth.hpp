@@ -45,6 +45,8 @@ layout(set = LAYER_SET_INDEX, binding = idTerrainEvaluatedPropsUBO) uniform Terr
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D dem_sampler;
 
+layout(location = 0) out vec2 frag_depth_zw;
+
 void main() {
     const TerrainDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
@@ -61,18 +63,24 @@ void main() {
     // Must match the transform the symbol pass applies, so the depth texture
     // and the symbols it occludes share one clip space
     applySurfaceTransform();
+    frag_depth_zw = gl_Position.zw;
 }
 )";
 
     static constexpr auto fragment = R"(
 
+layout(location = 0) in vec2 frag_depth_zw;
 layout(location = 0) out vec4 out_color;
 
 void main() {
-    // Pack the window depth into RGBA8 as four base-256 digits, each written as k / 255 so the
-    // unorm8 target stores it exactly (the gl-js fract/bit_mask scheme stores k / 256 and loses
-    // up to 0.002 to unorm rounding). Decoded by unpack_depth() for calculate_visibility().
-    float r = min(gl_FragCoord.z, 0.99999994) * 256.0;
+    // The fragment's z / w, which is its window depth over a [0, 1] viewport depth range. Not
+    // gl_FragCoord.z: a 3D drawable is drawn with a narrower range (depthModeFor3D), and the
+    // occlusion test compares against the depth the clip-space position gives.
+    const float depth = frag_depth_zw.x / frag_depth_zw.y;
+    // Pack it into RGBA8 as four base-256 digits, each written as k / 255 so the unorm8 target
+    // stores it exactly (the gl-js fract/bit_mask scheme stores k / 256 and loses up to 0.002 to
+    // unorm rounding). Decoded by unpack_depth() for calculate_visibility().
+    float r = clamp(depth, 0.0, 0.99999994) * 256.0;
     const float d0 = floor(r);
     r = (r - d0) * 256.0;
     const float d1 = floor(r);

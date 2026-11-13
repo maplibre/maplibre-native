@@ -6,6 +6,7 @@
 #include <mln/gfx/upload_pass.hpp>
 #include <mln/layout/pattern_layout.hpp>
 #include <mln/shaders/attributes.hpp>
+#include <mln/style/expression/expression.hpp>
 #include <mln/renderer/cross_faded_property_evaluator.hpp>
 #include <mln/renderer/paint_property_statistics.hpp>
 #include <mln/renderer/possibly_evaluated_property_value.hpp>
@@ -29,6 +30,14 @@ struct VariantContains : std::false_type {};
 template <typename T, typename... Ts>
 struct VariantContains<T, std::variant<Ts...>> : std::bool_constant<(std::is_same_v<T, Ts> || ...)> {};
 
+inline bool usesFeatureState(const style::expression::Expression& expression) {
+    if (expression.getOperator() == "feature-state") {
+        return true;
+    }
+    bool found = false;
+    expression.eachChild([&](const style::expression::Expression& child) { found = found || usesFeatureState(child); });
+    return found;
+}
 } // namespace detail
 
 // Maps vertex range to feature index
@@ -165,6 +174,9 @@ public:
                                       const style::expression::Value&) = 0;
 
     virtual void updateVertexVectors(const FeatureStates&, const GeometryTileLayer&, const ImagePositions&) {}
+
+    /// True if a feature state change rewrites this binder's vertex data.
+    virtual bool dependsOnFeatureState() const { return false; }
 
     virtual void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) = 0;
 
@@ -349,6 +361,8 @@ public:
         }
     }
 
+    bool dependsOnFeatureState() const override { return detail::usesFeatureState(expression.getExpression()); }
+
     void updateVertexVectors(const FeatureStates& states,
                              const GeometryTileLayer& layer,
                              const ImagePositions&) override {
@@ -458,6 +472,8 @@ public:
                 FeatureVertexRange{.featureIndex = index, .start = elements, .end = length});
         }
     }
+
+    bool dependsOnFeatureState() const override { return detail::usesFeatureState(expression.getExpression()); }
 
     void updateVertexVectors(const FeatureStates& states,
                              const GeometryTileLayer& layer,
@@ -765,9 +781,19 @@ public:
         interleavedVertexBuffer.sharedVertexVector->updateModified(true);
     }
 
+    /// Drop the CPU copy of the vertex data once it is in a GPU buffer, unless feature state can still rewrite it.
+    void release() {
+        if (!(false || ... || binders.template get<Ps>()->dependsOnFeatureState())) {
+            interleavedVertexBuffer.sharedVertexVector->release();
+        }
+    }
+
     void updateVertexVectors(const FeatureStates& states,
                              const GeometryTileLayer& layer,
                              const ImagePositions& imagePositions) {
+        if (!interleavedVertexBuffer.sharedVertexVector->hasRawData()) {
+            return;
+        }
         util::ignore({(binders.template get<Ps>()->updateVertexVectors(states, layer, imagePositions), 0)...});
         interleavedVertexBuffer.sharedVertexVector->updateModified(true);
     }

@@ -19,7 +19,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan> {
 
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = circleShaderPrelude;
     static constexpr auto vertex = R"(
@@ -78,14 +78,16 @@ struct CircleDrawableUBO {
     float dem_dim;
     float dem_exaggeration;
     float dem_enabled;
-    float pad4;
+    float depth_enabled;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idCircleDrawableUBO) readonly buffer CircleDrawableUBOVector {
     CircleDrawableUBO drawable_ubo[];
 } drawableVector;
 
+// Bindings match the texture enum ids (idCircleDEMTexture=0, idCircleDepthTexture=1)
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D depth_sampler;
 
 
 layout(set = LAYER_SET_INDEX, binding = idCircleEvaluatedPropsUBO) uniform CircleEvaluatedPropsUBO {
@@ -132,6 +134,8 @@ layout(location = 7) out mediump float frag_stroke_width;
 layout(location = 8) out lowp float frag_stroke_opacity;
 #endif
 
+layout(location = 9) out lowp float frag_visibility;
+
 void main() {
     const CircleDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
@@ -177,6 +181,9 @@ void main() {
     }
 
     applySurfaceTransform();
+
+    // Hidden where the terrain covers the circle's centre, as maplibre-gl-js does (and as symbols are)
+    frag_visibility = calculate_visibility(surface_transformed(drawable.matrix * vec4(circle_center, ele, 1)), depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
 
     // This is a minimum blur distance that serves as a faux-antialiasing for
     // the circle. since blur is a ratio of the circle's size and the intent is
@@ -248,6 +255,8 @@ layout(location = 7) in mediump float frag_stroke_width;
 layout(location = 8) in lowp float frag_stroke_opacity;
 #endif
 
+layout(location = 9) in lowp float frag_visibility;
+
 layout(location = 0) out vec4 out_color;
 
 layout(set = LAYER_SET_INDEX, binding = idCircleEvaluatedPropsUBO) uniform CircleEvaluatedPropsUBO {
@@ -312,7 +321,7 @@ void main() {
     const float color_t = (stroke_width < 0.01) ? 0.0 :
         smoothstep(antialiased_blur, 0.0, extrude_length - radius / (radius + stroke_width));
 
-    out_color = opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t);
+    out_color = frag_visibility * opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t);
 }
 )";
 };

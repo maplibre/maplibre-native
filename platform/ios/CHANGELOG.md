@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 - With 3D terrain on, an `MLNShapeSource` given a new shape or emptied of its features shows the change on the terrain at once, instead of keeping its old content until the next zoom level ([#4816](https://github.com/maplibre/maplibre-native/pull/4816)).
@@ -11,6 +12,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - Add `MLNMapView.centerAltitude` and `-[MLNMapView setCenterAltitudeKeepingView:]`. With 3D terrain, a center coordinate and zoom level describe the same view only at the same center altitude, so save the altitude with a camera and restore it before setting the camera back ([#4712](https://github.com/maplibre/maplibre-native/pull/4712)).
 - With 3D terrain on and the centre clamp enabled, the clamp no longer cancels a running camera animation; the camera is anchored to the ground once the animation ends ([#4768](https://github.com/maplibre/maplibre-native/pull/4768)).
 - With 3D terrain, annotation views, the user location view, callouts, line-placed labels and the collision index sit on the terrain surface instead of at sea level, so labels show, hide and overlap where they are drawn and pins on slopes can be selected. `-convertCoordinate:toPointToView:` and `-convertPoint:toCoordinateFromView:` answer on the terrain surface, from a copy of the terrain heights kept on the map side ([#4558](https://github.com/maplibre/maplibre-native/pull/4558)).
+- An `MLNColor` passed into a style value or an expression is written with whole-number channels, as MapLibre GL JS prints colors, so a fractional channel rounds to the nearest of 0-255 ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
 
 ## 7.0.0
 
@@ -69,6 +71,7 @@ We welcome ideas for extending the plugin API.
 
 ### Bug fixes
 
+- `raster` and `raster-dem` sources loaded from a `url` take the style's inline `minzoom` and `maxzoom` over the TileJSON's, as `vector` sources and maplibre-gl-js already do. A `raster-dem` source with an invalid `encoding`, `minzoom` or `maxzoom`, or a `raster` source with an invalid `minzoom` or `maxzoom`, is now rejected with an error, as a `vector` source is. Before, such a `raster-dem` source still loaded, decoded as Mapbox whatever its `encoding` ([#4557](https://github.com/maplibre/maplibre-native/pull/4557)).
 - Size `line-pattern` images like MapLibre GL JS. They were drawn about 1.7× bigger and stretched along the line ([#4726](https://github.com/maplibre/maplibre-native/pull/4726)).
 - Load `raster-dem` tiles at the rounded zoom level, like raster sources and MapLibre GL JS ([#4650](https://github.com/maplibre/maplibre-native/pull/4650)).
 - Fix `line-gradient` being drawn as `line-color` when combined with `line-dasharray` ([#4725](https://github.com/maplibre/maplibre-native/pull/4725)).
