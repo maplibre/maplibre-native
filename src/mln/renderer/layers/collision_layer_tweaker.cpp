@@ -15,6 +15,7 @@
 #include <mln/util/convert.hpp>
 #include <mln/util/std.hpp>
 #include <mln/util/logging.hpp>
+#include <mln/util/mat4.hpp>
 
 namespace mln {
 
@@ -48,8 +49,10 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         const auto anchor = data.translateAnchor;
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+        auto matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+        if (data.heightOffset != 0.0f) {
+            matrix::translate(matrix, matrix, 0, 0, data.heightOffset);
+        }
 
         // extrude scale
         const auto pixelRatio = tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));

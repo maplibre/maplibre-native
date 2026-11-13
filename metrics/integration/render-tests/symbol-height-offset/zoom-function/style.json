@@ -1,0 +1,91 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 256,
+      "height": 256
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 16,
+  "pitch": 60,
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "geometry": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "label": "60 m"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                0
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "ground",
+      "type": "circle",
+      "source": "geometry",
+      "paint": {
+        "circle-radius": 4,
+        "circle-color": "#00c"
+      }
+    },
+    {
+      "id": "elevated",
+      "type": "symbol",
+      "source": "geometry",
+      "layout": {
+        "symbol-placement": "point",
+        "text-field": [
+          "get",
+          "label"
+        ],
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16,
+        "text-allow-overlap": true,
+        "symbol-height-offset": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          15,
+          0,
+          17,
+          120
+        ]
+      },
+      "paint": {
+        "text-color": "#000"
+      }
+    }
+  ]
+}
