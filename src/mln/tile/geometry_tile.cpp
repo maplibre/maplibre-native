@@ -234,6 +234,10 @@ void GeometryTile::markObsolete() {
 
 void GeometryTile::setError(std::exception_ptr err) {
     loaded = true;
+    // Without data, the worker has nothing to parse, so the tile is complete.
+    if (!hasData) {
+        pending = false;
+    }
     observer->onTileError(*this, std::move(err));
 }
 
@@ -251,6 +255,7 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
     // Mark the tile as pending again if it was complete before to prevent
     // signaling a complete state despite pending parse operations.
     pending = true;
+    hasData = true;
 
     ++correlationID;
     worker.self().invoke(
@@ -270,6 +275,7 @@ void GeometryTile::reset() {
     // Reset the tile to an unloaded state to avoid signaling completion
     // after clearing the tile's pending status.
     loaded = false;
+    hasData = false;
 
     // Reset the worker to the `NeedsParse` state.
     ++correlationID;
@@ -287,8 +293,9 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
     MLN_TRACE_FUNC();
 
     // Mark the tile as pending again if it was complete before to prevent
-    // signaling a complete state despite pending parse operations.
-    if (!pending) {
+    // signaling a complete state despite pending parse operations. A tile
+    // whose data failed to load has nothing to parse.
+    if (!pending && (hasData || !loaded)) {
         pending = true;
         observer->onTileAction(id, sourceID, TileOperation::StartParse);
     }

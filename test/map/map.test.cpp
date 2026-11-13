@@ -1802,6 +1802,37 @@ TEST(Map, ResourceError) {
     }
 }
 
+TEST(Map, StillImageAfterTileError) {
+    MapTest<> test;
+    test.fileSource->tileResponse = [&](const Resource&) {
+        Response response;
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Server, "Tile failed");
+        return response;
+    };
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {
+        "mapbox": {"type": "vector", "tiles": ["http://example.com/{z}-{x}-{y}.vector.pbf"]}
+      },
+      "layers": [{"id": "water", "type": "fill", "source": "mapbox", "source-layer": "water"}]
+    })STYLE");
+    EXPECT_THROW(test.frontend.render(test.map), std::runtime_error);
+
+    // The errored tile stays complete, even when a new layer relays it out, so the next still image finishes, as it
+    // does over an errored raster tile.
+    test.map.getStyle().addLayer(std::make_unique<LineLayer>("line", "mapbox"));
+    std::optional<std::exception_ptr> result;
+    util::Timer timeout;
+    timeout.start(std::chrono::seconds(5), Duration::zero(), [&] { test.runLoop.stop(); });
+    test.map.renderStill([&](const std::exception_ptr& error) {
+        result = error;
+        test.runLoop.stop();
+    });
+    test.runLoop.run();
+    ASSERT_TRUE(result) << "The still image did not finish";
+    EXPECT_EQ(nullptr, *result);
+}
+
 TEST(Map, StencilOverflow) {
     MapTest<> test;
 
