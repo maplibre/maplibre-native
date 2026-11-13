@@ -123,6 +123,10 @@ public:
     /// where it is, as gl-js's Camera._updateElevation does when the ground under the target
     /// becomes known. Inert without such a transition, or when its camera set the center altitude.
     void retargetTransitionCenterAltitude(double altitudeMeters);
+    /// Raises the center altitude of the frame in flight to `altitudeMeters`, keeping the running
+    /// transition: the next frame's ease writes its own altitude, so the caller lifts again after
+    /// each frame. Inert outside a transition, or when the center is already that high.
+    bool liftTransitionCenterAltitude(double altitudeMeters);
 
     // Gesture
     void setGestureInProgress(bool);
