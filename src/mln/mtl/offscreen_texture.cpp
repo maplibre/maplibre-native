@@ -123,13 +123,17 @@ public:
             }
         }
         commandBuffer->commit();
-        commandBuffer->waitUntilCompleted();
         commandBuffer.reset();
         renderPassDescriptor.reset();
     }
 
     PremultipliedImage readStillImage() {
         assert(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
+
+        // The queue runs command buffers in order, so an empty one completes after every pass committed so far.
+        const auto fence = NS::RetainPtr(context.getBackend().getCommandQueue()->commandBuffer());
+        fence->commit();
+        fence->waitUntilCompleted();
 
         auto data = std::make_unique<uint8_t[]>(colorTexture->getDataSize());
         MTL::Region region = MTL::Region::Make2D(0, 0, size.width, size.height);

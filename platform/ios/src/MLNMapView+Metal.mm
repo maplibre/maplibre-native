@@ -41,7 +41,7 @@ public:
 
   void bind() override {
     if (!commandQueue) {
-      commandQueue = [mtlView.device newCommandQueue];
+      commandQueue = (__bridge id<MTLCommandQueue>)backend.getCommandQueue().get();
     }
 
     if (!commandBuffer) {
@@ -74,7 +74,7 @@ public:
     if (currentDrawable) {
       if (presentsWithTransaction) {
         [commandBuffer commit];
-        [commandBuffer waitUntilCompleted];
+        [commandBuffer waitUntilScheduled];
         [currentDrawable present];
       } else {
         [commandBuffer presentDrawable:currentDrawable];
