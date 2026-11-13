@@ -548,6 +548,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     const auto drawable3DPass = [&] {
         const auto debugGroup(parameters.encoder->createDebugGroup("drawables-3d"));
         assert(parameters.pass == RenderPass::Pass3D);
+        // `depthModeFor3D` uses this, and the 3D pass runs before the opaque pass sets it
+        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
+                                            PaintParameters::depthEpsilon;
 
         // draw layer groups, 3D pass
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
@@ -589,6 +592,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                     --drapeBudget;
                 } else if (res == RenderTarget::RenderResult::Deferred) {
                     drapeWorkDeferred = true;
+                    ++context.renderingStats().numDrapeTargetsDeferred;
                 }
             }
         });
@@ -737,6 +741,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         if (terrainCoverRetryFrames > 0) {
             --terrainCoverRetryFrames;
             terrainCoverPending = true;
+            ++context.renderingStats().numTerrainCoverPendingFrames;
         }
     } else {
         terrainCoverRetryFrames = 4;

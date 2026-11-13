@@ -20,7 +20,18 @@ RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_,
                              const Tileset& tileset,
                              TileObserver* observer_)
     : Tile(Kind::RasterDEM, id_, std::move(sourceID_), observer_),
-      loader(*this, id_, parameters, tileset),
+      // With terrain on (the elevation provider is set only then) the mesh and
+      // every draped layer wait for the terrain's elevation tiles, while the
+      // overlays' far field puts hundreds of requests in the same queue after
+      // each camera move, so these are requested ahead of them. The gate is
+      // terrain being on, not this tile belonging to the terrain's source: any
+      // raster-dem source asks the same then. Without terrain (a hillshade
+      // layer alone) nothing waits for them.
+      loader(*this,
+             id_,
+             parameters,
+             tileset,
+             parameters.elevationProvider ? Resource::Priority::High : Resource::Priority::Regular),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(parameters.threadPool, ActorRef<RasterDEMTile>(*this, mailbox)) {

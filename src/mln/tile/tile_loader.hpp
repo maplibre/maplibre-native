@@ -20,7 +20,12 @@ class TileLoader {
 public:
     TileLoader(const TileLoader&) = delete;
     TileLoader& operator=(const TileLoader&) = delete;
-    TileLoader(T&, const OverscaledTileID&, const TileParameters&, const Tileset&);
+    // `priority` is that of this tile's requests until it has data to show.
+    TileLoader(T&,
+               const OverscaledTileID&,
+               const TileParameters&,
+               const Tileset&,
+               Resource::Priority priority = Resource::Priority::Regular);
     ~TileLoader();
 
     void setNecessity(TileNecessity newNecessity);

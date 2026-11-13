@@ -106,9 +106,28 @@ struct RenderingStats {
     /// not with the tiles of the source
     int numDrapeMasksDrawn = 0;
     int numDrapeMasksSkipped = 0;
+    /// Number of CPU-side texture objects made for terrain DEM tiles (numCreatedTextures counts GPU
+    /// allocations, which these are not); a still terrain scene should leave it unchanged
+    int numDEMTexturesCreated = 0;
     /// Terrain depth passes (the symbol-occlusion depth texture) rendered; one per frame in
     /// which the camera or the mesh set changed, none for a still frame
     int numDepthPasses = 0;
+
+    // Why frames asked for a follow-up frame, totaled over all the frames. A frame's status
+    // (MapObserver::RenderFrameStatus::needsRepaint) says whether it asked for one, not why.
+    // Three causes are counted: drape re-renders and new tile builds the terrain load budget
+    // deferred, and an empty terrain drape cover. Other causes, such as a running transition
+    // or a fade, are not counted.
+    /// Terrain drape targets whose re-render the per-frame load budget deferred, counted for
+    /// each frame a target is deferred (five frames adds 5). An idle map that keeps adding to
+    /// this never catches up
+    int numDrapeTargetsDeferred = 0;
+    /// New tile builds the load budget deferred, counted for each frame a tile is deferred, and
+    /// once however many layers are refused it (with terrain off too, in a budgeted load mode)
+    int numNewTileBuildsDeferred = 0;
+    /// Frames that asked for a follow-up frame because the terrain drape cover was empty; the
+    /// retry is bounded (4 in a row today), so a missing DEM source reads 4 and stops
+    int numTerrainCoverPendingFrames = 0;
 
     /// Per-phase CPU time of the terrain path this frame (seconds), for profiling
     /// where the terrain overhead goes when nothing re-renders
