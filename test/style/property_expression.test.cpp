@@ -81,6 +81,7 @@ TEST(PropertyExpression, OnlyRGBColorCurvesGoToTheGPU) {
     EXPECT_FALSE(colorCurve(ColorSpace::LAB).isGPUCapable());
     EXPECT_FALSE(colorCurve(ColorSpace::HCL).isGPUCapable());
     EXPECT_FALSE(colorCurve(ColorSpace::OKLCH).isGPUCapable());
+    EXPECT_FALSE(colorCurve(ColorSpace::OKLAB).isGPUCapable());
 }
 
 TEST(PropertyExpression, Defaults) {

@@ -168,6 +168,65 @@ TEST(ColorParse, OklchInvalid) {
     }
 }
 
+TEST(ColorParse, Oklab) {
+    expectColor(Color::parse("oklab(70% 0.1 0.05)").value(), 0.8600103f, 0.5100676f, 0.4739938f, 1.0f);
+    expectColor(Color::parse("oklab(0.8 -0.04 0.02 / 0.75)").value(), 0.4958492f, 0.5841786f, 0.5192557f, 0.75f);
+    for (const auto* input : {"oklab(0.6 0.1 0.1)",
+                              "oklab(60% 25% 25%)",
+                              "OKLAB(60% 0.1 0.1)",
+                              "oklab(6e-1 1E-1 +1e-1)",
+                              "oklab(+.6 .1 .1 / 1)",
+                              " oklab(  0.6\t0.1\n0.1  /  100% ) "}) {
+        SCOPED_TRACE(input);
+        expectColor(Color::parse(input).value(), 0.7646601f, 0.3764679f, 0.1815436f, 1.0f);
+    }
+    expectColor(Color::parse("oklab(0.6 -25% 25%)").value(), 0.3483465f, 0.5729275f, 0.1985555f, 1.0f);
+    expectColor(Color::parse("oklab(0.6 0.1 0.1 / 50%)").value(), 0.3823301f, 0.188234f, 0.09077179f, 0.5f);
+}
+
+TEST(ColorParse, OklabClampsAndReadsNoneAsZero) {
+    expectColor(Color::parse("oklab(1.2 0.1 0)").value(), 1.0f, 0.8913625f, 0.9894156f, 1.0f);
+    const Color darkest = Color::parse("oklab(0 0.1 0.1)").value();
+    expectColor(darkest, 0.004430535f, 0.007690759f, 0.0f, 1.0f);
+    expectColor(Color::parse("oklab(-0.1 0.1 0.1)").value(), darkest.r, darkest.g, darkest.b, darkest.a);
+    expectColor(Color::parse("oklab(none 0.1 0.1)").value(), darkest.r, darkest.g, darkest.b, darkest.a);
+    expectColor(Color::parse("oklab(0.6 none none)").value(), 0.5021107f, 0.5021107f, 0.5021107f, 1.0f);
+    expectColor(Color::parse("oklab(0.6 0.1 0.1 / 1.5)").value(), 0.7646601f, 0.3764679f, 0.1815436f, 1.0f);
+    expectColor(Color::parse("oklab(0.6 0.1 0.1 / -1)").value(), 0.0f, 0.0f, 0.0f, 0.0f);
+    expectColor(Color::parse("oklab(0.6 0.1 0.1 / none)").value(), 0.0f, 0.0f, 0.0f, 0.0f);
+}
+
+TEST(ColorParse, OklabOutsideSrgbIsClipped) {
+    expectColor(Color::parse("oklab(0.7 -0.3 0.3)").value(), 0.0f, 0.7911692f, 0.0f, 1.0f);
+    expectColor(Color::parse("oklab(0.4 0.1 -0.3)").value(), 0.3460255f, 0.0f, 0.8846979f, 1.0f);
+    // A huge a and b convert as chroma 1e6 in their direction, which stays finite.
+    expectColor(Color::parse("oklab(0.6 0 1e110)").value(), 0.0f, 1.0f, 0.0f, 1.0f);
+    expectColor(Color::parse("oklab(0.6 -1e300 -1e300)").value(), 0.0f, 0.0f, 1.0f, 1.0f);
+}
+
+TEST(ColorParse, OklabInvalid) {
+    for (const auto* input : {"oklab(0.6, 0.1, 0.1)",
+                              "oklab()",
+                              "oklab(0.6 0.1)",
+                              "oklab(0.6 0.1 0.1 0.5)",
+                              "oklab(0.6 0.1 0.1 /)",
+                              "oklab(0.6 0.1 0.1 / 0.5 / 0.5)",
+                              "oklab(0.6 0.1 0.1deg)",
+                              "oklab(0.6deg 0.1 0.1)",
+                              "oklab(0.6 none% 0.1)",
+                              "oklab(1. 0.1 0.1)",
+                              "oklab(0.6 --0.1 0.1)",
+                              "oklab(0.6 0.1 9e)",
+                              "oklab(0.6 1e999 0.1)",
+                              "oklab (0.6 0.1 0.1)",
+                              "oklab(0.6 0.1 0.1",
+                              "oklab(0.6 0.1 0.1))",
+                              "oklab(a b c)"}) {
+        SCOPED_TRACE(input);
+        EXPECT_FALSE(Color::parse(input).has_value());
+    }
+}
+
 TEST(ColorInterpolate, Oklch) {
     const Color blue = Color::blue();
     const Color green = Color::parse("rgba(0,255,0,.6)").value();
@@ -207,6 +266,36 @@ TEST(ColorInterpolate, OklchPremultipliesLightnessAndChroma) {
                 0.2453651f,
                 0.5f);
     expectColor(Color::interpolate(Color(), Color(), 0.5, ColorSpace::OKLCH), 0.0f, 0.0f, 0.0f, 0.0f);
+}
+
+TEST(ColorInterpolate, Oklab) {
+    const Color blue = Color::blue();
+    const Color green = Color::parse("rgba(0,255,0,.6)").value();
+    expectColor(Color::interpolate(blue, green, 0.25, ColorSpace::OKLAB), 0.0f, 0.3353049f, 0.8340296f, 0.9f);
+    expectColor(Color::interpolate(blue, green, 0.5, ColorSpace::OKLAB), 0.0f, 0.4552392f, 0.6574173f, 0.8f);
+    expectColor(Color::interpolate(blue, green, 0.75, ColorSpace::OKLAB), 0.0f, 0.5368223f, 0.4533104f, 0.7f);
+    expectColor(Color::interpolate(Color::red(), Color::blue(), 0.5, ColorSpace::OKLAB),
+                0.5504411f,
+                0.3256207f,
+                0.6365007f,
+                1.0f);
+}
+
+TEST(ColorInterpolate, OklabPremultipliesLightnessAAndB) {
+    expectColor(Color::interpolate(Color::parse("oklab(0.7 0.1 0.05 / 0.2)").value(),
+                                   Color::parse("oklab(0.5 -0.05 -0.1)").value(),
+                                   0.5,
+                                   ColorSpace::OKLAB),
+                0.172782f,
+                0.2625925f,
+                0.360832f,
+                0.6f);
+    expectColor(Color::interpolate(Color(), Color::parse("oklab(0.7 -0.1 0.05)").value(), 0.5, ColorSpace::OKLAB),
+                0.193221f,
+                0.3503176f,
+                0.2459645f,
+                0.5f);
+    expectColor(Color::interpolate(Color(), Color(), 0.5, ColorSpace::OKLAB), 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 // Expected values come from GL JS's Color.interpolate (maplibre-gl-style-spec), premultiplied.

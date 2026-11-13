@@ -154,11 +154,17 @@ constexpr double radToDeg = 180.0 / std::numbers::pi;
 constexpr double powerlessHueEpsilon = 0.000004;
 // The chroma of 100% in oklch(): https://drafts.csswg.org/css-color-4/#specifying-oklab-oklch
 constexpr double chromaPercentReference = 0.4;
+// The a and b of 100% in oklab(), the same as oklch()'s chroma.
+constexpr double abPercentReference = chromaPercentReference;
 // Keeps the conversion finite: past this chroma, the clipped color stops changing.
 constexpr double maxChroma = 1e6;
 
 struct Oklch {
     double l, c, h, alpha;
+};
+
+struct Oklab {
+    double l, a, b, alpha;
 };
 
 Vec3 multiply(const Mat3& m, const Vec3& v) {
@@ -205,6 +211,18 @@ Rgb oklchToRgb(const Oklch& color) {
             .a = color.alpha};
 }
 
+Oklab rgbToOklab(const Rgb& rgb) {
+    const Vec3 lab = srgbToOklab({rgb.r, rgb.g, rgb.b});
+    return {.l = lab[0], .a = lab[1], .b = lab[2], .alpha = rgb.a};
+}
+
+Rgb oklabToRgb(const Oklab& color) {
+    return oklchToRgb({.l = color.l,
+                       .c = std::hypot(color.a, color.b),
+                       .h = std::atan2(color.b, color.a) * radToDeg,
+                       .alpha = color.alpha});
+}
+
 bool isCssWhitespace(char c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
@@ -215,7 +233,7 @@ bool isDigit(char c) {
 
 // Reads `none` as 0, or a CSS <number> followed by a `%` that makes 100% `percentReference` or, for a hue, by an
 // angle unit, in degrees.
-std::optional<double> readOklchArgument(std::string_view input, std::size_t& pos, double percentReference, bool hue) {
+std::optional<double> readOkArgument(std::string_view input, std::size_t& pos, double percentReference, bool hue) {
     if (input.substr(pos, 4) == "none") {
         pos += 4;
         return 0.0;
@@ -273,9 +291,12 @@ char toLowerAscii(char c) {
     return c >= 'A' && c <= 'Z' ? static_cast<char>(c - 'A' + 'a') : c;
 }
 
+// Reads the three components and the alpha of `prefix ... )`, the last component a hue when `lastIsHue`:
 // https://drafts.csswg.org/css-color-4/#specifying-oklab-oklch
-std::optional<Oklch> parseOklch(std::string_view text) {
-    constexpr std::string_view prefix = "oklch(";
+std::optional<std::array<double, 4>> parseOkFunction(std::string_view text,
+                                                     std::string_view prefix,
+                                                     const std::array<double, 3>& percentReferences,
+                                                     bool lastIsHue) {
     const auto first = std::ranges::find_if_not(text, isCssWhitespace);
     const auto last = std::ranges::find_if_not(text | std::views::reverse, isCssWhitespace).base();
     if (last - first <= static_cast<std::ptrdiff_t>(prefix.size()) ||
@@ -297,34 +318,53 @@ std::optional<Oklch> parseOklch(std::string_view text) {
         return pos > from;
     };
 
+    std::array<double, 4> components{};
     skipWhitespace();
-    const auto l = readOklchArgument(inside, pos, 1.0, false);
-    if (!l || !skipWhitespace()) {
-        return std::nullopt;
-    }
-    const auto c = readOklchArgument(inside, pos, chromaPercentReference, false);
-    if (!c || !skipWhitespace()) {
-        return std::nullopt;
-    }
-    const auto h = readOklchArgument(inside, pos, 1.0, true);
-    if (!h) {
-        return std::nullopt;
+    for (std::size_t i = 0; i < percentReferences.size(); ++i) {
+        if (i > 0 && !skipWhitespace()) {
+            return std::nullopt;
+        }
+        const auto component = readOkArgument(
+            inside, pos, percentReferences[i], lastIsHue && i + 1 == percentReferences.size());
+        if (!component) {
+            return std::nullopt;
+        }
+        components[i] = *component;
     }
     skipWhitespace();
     std::optional<double> alpha = 1.0;
     if (pos < inside.size() && inside[pos] == '/') {
         ++pos;
         skipWhitespace();
-        alpha = readOklchArgument(inside, pos, 1.0, false);
+        alpha = readOkArgument(inside, pos, 1.0, false);
         skipWhitespace();
     }
     if (!alpha || pos != inside.size()) {
         return std::nullopt;
     }
-    return Oklch{.l = std::clamp(*l, 0.0, 1.0),
-                 .c = std::max(*c, 0.0),
-                 .h = std::fmod(*h, 360.0),
-                 .alpha = std::clamp(*alpha, 0.0, 1.0)};
+    components[3] = *alpha;
+    return components;
+}
+
+std::optional<Oklch> parseOklch(std::string_view text) {
+    const auto components = parseOkFunction(text, "oklch(", {1.0, chromaPercentReference, 1.0}, true);
+    if (!components) {
+        return std::nullopt;
+    }
+    const auto [l, c, h, alpha] = *components;
+    return Oklch{.l = std::clamp(l, 0.0, 1.0),
+                 .c = std::max(c, 0.0),
+                 .h = std::fmod(h, 360.0),
+                 .alpha = std::clamp(alpha, 0.0, 1.0)};
+}
+
+std::optional<Oklab> parseOklab(std::string_view text) {
+    const auto components = parseOkFunction(text, "oklab(", {1.0, abPercentReference, abPercentReference}, false);
+    if (!components) {
+        return std::nullopt;
+    }
+    const auto [l, a, b, alpha] = *components;
+    return Oklab{.l = std::clamp(l, 0.0, 1.0), .a = a, .b = b, .alpha = std::clamp(alpha, 0.0, 1.0)};
 }
 
 } // namespace
@@ -384,6 +424,17 @@ Color Color::interpolate(const Color& from, const Color& to, const double t, con
                                              .h = lerp(hueA, hueB, t),
                                              .alpha = alpha}));
         }
+        case ColorSpace::OKLAB: {
+            // https://drafts.csswg.org/css-color-4/#interpolation
+            const Oklab a = rgbToOklab(straight(from));
+            const Oklab b = rgbToOklab(straight(to));
+            const double alpha = lerp(a.alpha, b.alpha, t);
+            const double divisor = alpha == 0.0 ? 1.0 : alpha;
+            return premultiplied(oklabToRgb({.l = lerp(a.l * a.alpha, b.l * b.alpha, t) / divisor,
+                                             .a = lerp(a.a * a.alpha, b.a * b.alpha, t) / divisor,
+                                             .b = lerp(a.b * a.alpha, b.b * b.alpha, t) / divisor,
+                                             .alpha = alpha}));
+        }
     }
     assert(false);
     return from;
@@ -392,6 +443,9 @@ Color Color::interpolate(const Color& from, const Color& to, const double t, con
 std::optional<Color> Color::parse(const std::string& s) {
     if (const auto oklch = parseOklch(s)) {
         return premultiplied(oklchToRgb(*oklch));
+    }
+    if (const auto oklab = parseOklab(s)) {
+        return premultiplied(oklabToRgb(*oklab));
     }
 
     const auto css_color = CSSColorParser::parse(s);
