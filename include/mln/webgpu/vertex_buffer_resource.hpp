@@ -14,8 +14,7 @@ class Context;
 class VertexBufferResource : public gfx::VertexBufferResource {
 public:
     VertexBufferResource(BufferResource&&) noexcept;
-    VertexBufferResource(VertexBufferResource&& other) noexcept
-        : buffer(std::move(other.buffer)) {}
+    VertexBufferResource(VertexBufferResource&&) noexcept = default;
     ~VertexBufferResource() noexcept override;
 
     std::size_t getSizeInBytes() const noexcept { return buffer.getSizeInBytes(); }
@@ -35,7 +34,8 @@ public:
 
 protected:
     BufferResource buffer;
-    std::chrono::duration<double> lastUpdated;
+    // Zero until the first update, so comparing it with the source's modification time is defined
+    std::chrono::duration<double> lastUpdated{};
 };
 
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
