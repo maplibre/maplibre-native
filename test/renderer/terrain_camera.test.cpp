@@ -1172,7 +1172,8 @@ TEST(TerrainCamera, AnAnimatedZoomDoesNotCarryTheEyeUnderTheGround) {
     const auto clearance = [&] {
         const auto location = map.getFreeCameraOptions().getLocation();
         EXPECT_TRUE(location.has_value());
-        return location ? location->altitude - rampMeters(location->location.latitude()) : 0.0;
+        const auto ground = location ? map.getTerrainElevation(location->location) : std::nullopt;
+        return ground ? location->altitude - *ground : -std::numeric_limits<double>::infinity();
     };
 
     // The center on the ridge line looking north, the climb behind the camera, the eye settled over it.
