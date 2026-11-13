@@ -55,7 +55,7 @@ struct SubdivisionGranularitySetting {
 
     /// GL JS's globe values.
     static constexpr SubdivisionGranularitySetting globe() {
-        return {.fill = {128, 2, 64}, .line = {512, 0}, .tile = {128, 32}, .stencil = {128, 1, 64}, .circle = 3};
+        return {.fill = {128, 2, 32}, .line = {512, 0}, .tile = {128, 32}, .stencil = {128, 1, 32}, .circle = 3};
     }
 };
 
