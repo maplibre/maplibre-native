@@ -1,6 +1,7 @@
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_impl.hpp>
 #include <mln/math/wrap.hpp>
+#include <mln/renderer/terrain_elevation_index.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source.hpp>
 #include <mln/style/style_impl.hpp>
@@ -122,6 +123,24 @@ void Map::Impl::onUpdate() {
     TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
     transform.updateTransitions(timePoint);
+
+    // A running animation that is not a fling (a pinch's drift, a zoom, a recenter) owns the camera,
+    // so the clamp does not jump it (applyCenterClamp); but its eased height ignores the ground under
+    // the eye, which a zoom out up a slope runs into. Keep the eye over the ground after every frame,
+    // by the ground the map holds for where the eye is now, not the height the renderer last reported
+    // for where it was.
+    if (centerClampedToGround && !transitionIsFling && transform.inTransition() && terrainElevationIndex &&
+        style->impl->getTerrain()) {
+        const TransformState& state = transform.getState();
+        if (const auto eye = state.getFreeCameraOptions().getLocation()) {
+            if (const auto ground = terrainElevationIndex->getElevation(eye->location);
+                ground && eye->altitude < *ground + eyeClearanceMeters &&
+                transform.liftTransitionCenterAltitude(state.getCenterAltitude() + *ground + eyeClearanceMeters -
+                                                       eye->altitude)) {
+                centerAwaitingTerrainAnchor = true;
+            }
+        }
+    }
 
     // Terrain removed: a centre that gestures anchored on it (or the clamp held there) would stay
     // up to kilometres above the now flat map, and pans, tile cover and label placement would
