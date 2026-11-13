@@ -54,6 +54,18 @@ public:
         }
 #endif
 
+        // Depth and stencil are cleared when a pass loads them and never stored, so a tile-based GPU needs no
+        // memory behind them.
+        if (context.getBackend().isMemorylessTextureSupported()) {
+            for (const auto& texture : {depthTexture, stencilTexture}) {
+                if (texture) {
+                    auto& attachment = static_cast<Texture2D&>(*texture);
+                    attachment.setUsage(MTL::TextureUsageRenderTarget);
+                    attachment.setStorageMode(MTL::StorageModeMemoryless);
+                }
+            }
+        }
+
         context.renderingStats().numFrameBuffers++;
     }
 
