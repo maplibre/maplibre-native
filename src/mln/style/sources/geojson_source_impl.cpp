@@ -158,7 +158,7 @@ std::weak_ptr<GeoJSONData> GeoJSONSource::Impl::getData() const {
 }
 
 std::optional<std::string> GeoJSONSource::Impl::getAttribution() const {
-    return {};
+    return options->attribution;
 }
 
 bool GeoJSONSource::Impl::isUpdateSynchronous() const {

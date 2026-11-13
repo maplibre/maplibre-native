@@ -111,6 +111,16 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
         }
     }
 
+    const auto attributionValue = objectMember(value, "attribution");
+    if (attributionValue) {
+        if (toString(*attributionValue)) {
+            options.attribution = *toString(*attributionValue);
+        } else {
+            error.message = "GeoJSON source attribution value must be a string";
+            return std::nullopt;
+        }
+    }
+
     const auto clusterProperties = objectMember(value, "clusterProperties");
     if (clusterProperties) {
         if (!isObject(*clusterProperties)) {
