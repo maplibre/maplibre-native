@@ -743,6 +743,68 @@ TEST(OfflineDownload, ReactivatePreviouslyCompletedDownload) {
     EXPECT_EQ(2u, statusesAfterReactivate[2].completedResourceCount);
 }
 
+TEST(OfflineDownload, RevalidatesInvalidatedRegion) {
+    OfflineTest test;
+    auto region = test.createRegion();
+    ASSERT_TRUE(region);
+    OfflineDownload download(region->getID(),
+                             OfflineTilePyramidRegionDefinition(
+                                 "http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+                             test.db,
+                             test.fileSource);
+
+    const Resource tileResource = Resource::tile(
+        "http://127.0.0.1:3000/{z}-{x}-{y}.vector.pbf", 1, 0, 0, 0, Tileset::Scheme::XYZ);
+    Response style = test.response("inline_source.style.json");
+    style.etag = "style";
+    Response tile = test.response("0-0-0.vector.pbf");
+    tile.etag = "tile";
+    test.db.putRegionResource(region->getID(), Resource::style("http://127.0.0.1:3000/style.json"), style);
+    test.db.putRegionResource(region->getID(), tileResource, tile);
+    ASSERT_FALSE(test.invalidateRegion(region->getID()));
+
+    // The server answers 304 Not Modified to both.
+    const Timestamp expires = util::now() + std::chrono::hours(1);
+    int requests = 0;
+    test.fileSource.styleResponse = [&](const Resource& resource) {
+        requests++;
+        EXPECT_EQ("style", resource.priorEtag);
+        // The online file source responds to a 304 with the prior data.
+        Response response;
+        response.data = resource.priorData;
+        response.expires = expires;
+        return response;
+    };
+    test.fileSource.tileResponse = [&](const Resource& resource) {
+        requests++;
+        EXPECT_EQ("tile", resource.priorEtag);
+        Response response;
+        response.notModified = true;
+        response.expires = expires;
+        return response;
+    };
+
+    auto observer = std::make_unique<MockObserver>();
+    observer->statusChangedFn = [&](OfflineRegionStatus status) {
+        if (status.complete()) {
+            EXPECT_EQ(2u, status.completedResourceCount);
+            EXPECT_EQ(test.size, status.completedResourceSize);
+            test.loop.stop();
+        }
+    };
+
+    download.setObserver(std::move(observer));
+    download.setState(OfflineRegionDownloadState::Active);
+
+    test.loop.run();
+
+    EXPECT_EQ(2, requests);
+    std::optional<Response> stored = test.db.get(tileResource);
+    ASSERT_TRUE(stored && stored->data);
+    EXPECT_TRUE(stored->isUsable());
+    EXPECT_EQ(*tile.data, *stored->data);
+}
+
 TEST(OfflineDownload, Deactivate) {
     OfflineTest test;
     auto region = test.createRegion();
