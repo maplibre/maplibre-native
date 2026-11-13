@@ -54,8 +54,8 @@ public:
         }
 #endif
 
-        // Depth and stencil are cleared when a pass loads them and never stored, so a tile-based GPU needs no
-        // memory behind them.
+        // Neither depth nor stencil is loaded from or stored to memory: depth is cleared when a pass begins and
+        // the stencil starts undefined until the clip masks write it. A tile-based GPU needs no memory behind them.
         if (context.getBackend().isMemorylessTextureSupported()) {
             for (const auto& texture : {depthTexture, stencilTexture}) {
                 if (texture) {
