@@ -198,4 +198,74 @@ modifiedReferenceSpec["layout_symbol"]["symbol-screen-space"] = {
     "doc": "Internal use only"
 };
 
+// Ambient occlusion of fill-extrusions, see
+// https://github.com/maplibre/maplibre-style-spec/issues/1796#issuecomment-6194201898. Takes ambient
+// light away from the walls near the ground and darkens the ground around the footprints; extrusions
+// standing on other extrusions are not occluded. All four are `data-constant` and live in per-layer
+// uniform buffers.
+// Not in the published spec yet.
+modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-ambient-occlusion-wall-intensity"] = {
+    "type": "number",
+    "default": 0,
+    "minimum": 0,
+    "maximum": 1,
+    "doc": "How much of the ambient light is taken away from the bottom of the extrusion's walls, where they meet the ground. At `1`, the bottom of the walls gets only the directional light. The ambient part of the lighting is `1` minus the light's `intensity`, so the effect is stronger with a weaker light and disappears at an intensity of `1`. A value of `0` disables the effect. Walls of parts that do not reach the ground, i.e. with a `fill-extrusion-base` above the radius, are not occluded.",
+    "transition": true,
+    "expression": {
+        "interpolated": true,
+        "parameters": [
+            "zoom"
+        ]
+    },
+    "property-type": "data-constant"
+};
+
+modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-ambient-occlusion-wall-radius"] = {
+    "type": "number",
+    "default": 3,
+    "minimum": 0,
+    "units": "meters",
+    "doc": "Height in meters above the ground over which the ambient occlusion of the walls fades out.",
+    "transition": true,
+    "expression": {
+        "interpolated": true,
+        "parameters": [
+            "zoom"
+        ]
+    },
+    "property-type": "data-constant"
+};
+
+modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-ambient-occlusion-ground-intensity"] = {
+    "type": "number",
+    "default": 0,
+    "minimum": 0,
+    "maximum": 1,
+    "doc": "How much the ground is darkened around the footprint of the extrusions. A value of `0` disables the effect. Only parts that stand on the ground darken it. Needs an opaque `background` layer at the bottom of the style, and has no effect without one. Not supported by the OpenGL renderer, which leaves the ground as is.",
+    "transition": true,
+    "expression": {
+        "interpolated": true,
+        "parameters": [
+            "zoom"
+        ]
+    },
+    "property-type": "data-constant"
+};
+
+modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-ambient-occlusion-ground-radius"] = {
+    "type": "number",
+    "default": 3,
+    "minimum": 0,
+    "units": "meters",
+    "doc": "Distance in meters from the walls over which the darkening of the ground fades out.",
+    "transition": true,
+    "expression": {
+        "interpolated": true,
+        "parameters": [
+            "zoom"
+        ]
+    },
+    "property-type": "data-constant"
+};
+
 export default modifiedReferenceSpec;

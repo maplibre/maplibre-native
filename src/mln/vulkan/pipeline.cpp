@@ -135,6 +135,10 @@ vk::BlendOp PipelineInfo::vulkanBlendOp(const gfx::ColorBlendEquationType& value
             return vk::BlendOp::eSubtract;
         case gfx::ColorBlendEquationType::ReverseSubtract:
             return vk::BlendOp::eReverseSubtract;
+        case gfx::ColorBlendEquationType::Min:
+            return vk::BlendOp::eMin;
+        case gfx::ColorBlendEquationType::Max:
+            return vk::BlendOp::eMax;
     }
 }
 

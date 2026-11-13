@@ -426,4 +426,104 @@ public class FillExtrusionLayerTest extends BaseLayerTest {
     layer.setProperties(fillExtrusionVerticalGradient(propertyValue));
     assertEquals(layer.getFillExtrusionVerticalGradient().getValue(), propertyValue);
   }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionAmbientOcclusionWallIntensityTransition() {
+    Timber.i("fill-extrusion-ambient-occlusion-wall-intensityTransitionOptions");
+    assertNotNull(layer);
+
+    // Set and Get
+    TransitionOptions options = new TransitionOptions(300, 100);
+    layer.setFillExtrusionAmbientOcclusionWallIntensityTransition(options);
+    assertEquals(layer.getFillExtrusionAmbientOcclusionWallIntensityTransition(), options);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionAmbientOcclusionWallIntensityAsConstant() {
+    Timber.i("fill-extrusion-ambient-occlusion-wall-intensity");
+    assertNotNull(layer);
+    assertNull(layer.getFillExtrusionAmbientOcclusionWallIntensity().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillExtrusionAmbientOcclusionWallIntensity(propertyValue));
+    assertEquals(layer.getFillExtrusionAmbientOcclusionWallIntensity().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionAmbientOcclusionWallRadiusTransition() {
+    Timber.i("fill-extrusion-ambient-occlusion-wall-radiusTransitionOptions");
+    assertNotNull(layer);
+
+    // Set and Get
+    TransitionOptions options = new TransitionOptions(300, 100);
+    layer.setFillExtrusionAmbientOcclusionWallRadiusTransition(options);
+    assertEquals(layer.getFillExtrusionAmbientOcclusionWallRadiusTransition(), options);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionAmbientOcclusionWallRadiusAsConstant() {
+    Timber.i("fill-extrusion-ambient-occlusion-wall-radius");
+    assertNotNull(layer);
+    assertNull(layer.getFillExtrusionAmbientOcclusionWallRadius().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillExtrusionAmbientOcclusionWallRadius(propertyValue));
+    assertEquals(layer.getFillExtrusionAmbientOcclusionWallRadius().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionAmbientOcclusionGroundIntensityTransition() {
+    Timber.i("fill-extrusion-ambient-occlusion-ground-intensityTransitionOptions");
+    assertNotNull(layer);
+
+    // Set and Get
+    TransitionOptions options = new TransitionOptions(300, 100);
+    layer.setFillExtrusionAmbientOcclusionGroundIntensityTransition(options);
+    assertEquals(layer.getFillExtrusionAmbientOcclusionGroundIntensityTransition(), options);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionAmbientOcclusionGroundIntensityAsConstant() {
+    Timber.i("fill-extrusion-ambient-occlusion-ground-intensity");
+    assertNotNull(layer);
+    assertNull(layer.getFillExtrusionAmbientOcclusionGroundIntensity().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillExtrusionAmbientOcclusionGroundIntensity(propertyValue));
+    assertEquals(layer.getFillExtrusionAmbientOcclusionGroundIntensity().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionAmbientOcclusionGroundRadiusTransition() {
+    Timber.i("fill-extrusion-ambient-occlusion-ground-radiusTransitionOptions");
+    assertNotNull(layer);
+
+    // Set and Get
+    TransitionOptions options = new TransitionOptions(300, 100);
+    layer.setFillExtrusionAmbientOcclusionGroundRadiusTransition(options);
+    assertEquals(layer.getFillExtrusionAmbientOcclusionGroundRadiusTransition(), options);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionAmbientOcclusionGroundRadiusAsConstant() {
+    Timber.i("fill-extrusion-ambient-occlusion-ground-radius");
+    assertNotNull(layer);
+    assertNull(layer.getFillExtrusionAmbientOcclusionGroundRadius().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillExtrusionAmbientOcclusionGroundRadius(propertyValue));
+    assertEquals(layer.getFillExtrusionAmbientOcclusionGroundRadius().getValue(), propertyValue);
+  }
 }

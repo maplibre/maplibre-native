@@ -1,0 +1,10 @@
+{
+    "render-tests/fill-extrusion-ambient-occlusion/ground": "Ground ambient occlusion is not implemented in the OpenGL backend",
+    "render-tests/fill-extrusion-ambient-occlusion/ground-enable": "Ground ambient occlusion is not implemented in the OpenGL backend",
+    "render-tests/fill-extrusion-ambient-occlusion/ground-off-on": "Ground ambient occlusion is not implemented in the OpenGL backend",
+    "render-tests/fill-extrusion-ambient-occlusion/ground-zoom-function": "Ground ambient occlusion is not implemented in the OpenGL backend",
+    "render-tests/fill-extrusion-ambient-occlusion/many-layers-below": "Ground ambient occlusion is not implemented in the OpenGL backend",
+    "render-tests/fill-extrusion-ambient-occlusion/wall-and-ground": "Ground ambient occlusion is not implemented in the OpenGL backend",
+    "render-tests/fill-extrusion-ambient-occlusion/ground-zoom-height": "Ground ambient occlusion is not implemented in the OpenGL backend",
+    "render-tests/fill-extrusion-ambient-occlusion/ground-opacity": "Ground ambient occlusion is not implemented in the OpenGL backend"
+}

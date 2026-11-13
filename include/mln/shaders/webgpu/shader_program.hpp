@@ -84,11 +84,12 @@ public:
 
     ShaderProgram(Context& context, const std::string& vertexSource, const std::string& fragmentSource);
 
-    template <size_t N, size_t M>
+    template <size_t N, size_t I, size_t M>
     ShaderProgram(Context& context,
                   const std::string& vertexSource,
                   const std::string& fragmentSource,
                   const std::array<shaders::AttributeInfo, N>& attrs,
+                  const std::array<shaders::AttributeInfo, I>& instanceAttrs,
                   const std::array<shaders::TextureInfo, M>& texts,
                   const std::string& name = "ShaderProgram")
         : ShaderProgram(context, vertexSource, fragmentSource) {
@@ -98,6 +99,10 @@ public:
 
         for (const auto& attr : attrs) {
             initAttribute(attr);
+        }
+
+        for (const auto& attr : instanceAttrs) {
+            initInstanceAttribute(attr);
         }
 
         for (const auto& tex : texts) {

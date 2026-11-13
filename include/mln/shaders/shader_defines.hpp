@@ -50,6 +50,11 @@ enum {
 };
 
 enum {
+    idFillExtrusionGroundOcclusionDrawableUBO = idDrawableReservedVertexOnlyUBO, // SSBO
+    fillExtrusionGroundOcclusionLayerSSBOCount = drawableReservedUBOCount
+};
+
+enum {
     idHeatmapDrawableUBO = idDrawableReservedVertexOnlyUBO, // SSBO
     heatmapLayerSSBOCount = drawableReservedUBOCount
 };
@@ -83,6 +88,7 @@ static constexpr uint32_t layerUBOStartId = std::max({static_cast<uint32_t>(draw
                                                       static_cast<uint32_t>(circleLayerSSBOCount),
                                                       static_cast<uint32_t>(fillLayerSSBOCount),
                                                       static_cast<uint32_t>(fillExtrusionLayerSSBOCount),
+                                                      static_cast<uint32_t>(fillExtrusionGroundOcclusionLayerSSBOCount),
                                                       static_cast<uint32_t>(heatmapLayerSSBOCount),
                                                       static_cast<uint32_t>(hillshadeLayerSSBOCount),
                                                       static_cast<uint32_t>(colorReliefLayerSSBOCount),
@@ -122,6 +128,11 @@ enum {
 };
 
 enum {
+    idFillExtrusionGroundOcclusionPropsUBO = getEnumValue(fillExtrusionGroundOcclusionLayerSSBOCount, layerUBOStartId),
+    fillExtrusionGroundOcclusionLayerUBOCount
+};
+
+enum {
     idHeatmapEvaluatedPropsUBO = getEnumValue(heatmapLayerSSBOCount, layerUBOStartId),
     heatmapLayerUBOCount
 };
@@ -154,22 +165,32 @@ enum {
 
 // drawable SSBOs
 
-static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(backgroundLayerUBOCount),
-                                                          static_cast<uint32_t>(circleLayerUBOCount),
-                                                          static_cast<uint32_t>(colorReliefLayerUBOCount),
-                                                          static_cast<uint32_t>(fillLayerUBOCount),
-                                                          static_cast<uint32_t>(fillExtrusionLayerUBOCount),
-                                                          static_cast<uint32_t>(heatmapLayerUBOCount),
-                                                          static_cast<uint32_t>(hillshadeLayerUBOCount),
-                                                          static_cast<uint32_t>(lineLayerUBOCount),
-                                                          static_cast<uint32_t>(rasterLayerUBOCount),
-                                                          static_cast<uint32_t>(symbolLayerUBOCount)});
+static constexpr uint32_t drawableSSBOStartId = std::max(
+    {static_cast<uint32_t>(backgroundLayerUBOCount),
+     static_cast<uint32_t>(circleLayerUBOCount),
+     static_cast<uint32_t>(colorReliefLayerUBOCount),
+     static_cast<uint32_t>(fillLayerUBOCount),
+     static_cast<uint32_t>(fillExtrusionLayerUBOCount),
+     static_cast<uint32_t>(fillExtrusionGroundOcclusionLayerUBOCount),
+     static_cast<uint32_t>(heatmapLayerUBOCount),
+     static_cast<uint32_t>(hillshadeLayerUBOCount),
+     static_cast<uint32_t>(lineLayerUBOCount),
+     static_cast<uint32_t>(rasterLayerUBOCount),
+     static_cast<uint32_t>(symbolLayerUBOCount)});
 
 enum {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
     idFillExtrusionInstancedDrawableUBO = getEnumValue(fillExtrusionLayerUBOCount, drawableSSBOStartId),
 #endif
     fillExtrusionDrawableSSBOCount
+};
+
+enum {
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+    idFillExtrusionGroundOcclusionInstancedDrawableUBO = getEnumValue(fillExtrusionGroundOcclusionLayerUBOCount,
+                                                                      drawableSSBOStartId),
+#endif
+    fillExtrusionGroundOcclusionDrawableSSBOCount
 };
 
 enum {
@@ -184,9 +205,11 @@ enum {
 
 // drawable UBOs
 
-static constexpr uint32_t drawableUBOStartId = std::max({static_cast<uint32_t>(drawableSSBOStartId),
-                                                         static_cast<uint32_t>(fillExtrusionDrawableSSBOCount),
-                                                         static_cast<uint32_t>(symbolDrawableSSBOCount)});
+static constexpr uint32_t drawableUBOStartId = std::max(
+    {static_cast<uint32_t>(drawableSSBOStartId),
+     static_cast<uint32_t>(fillExtrusionDrawableSSBOCount),
+     static_cast<uint32_t>(fillExtrusionGroundOcclusionDrawableSSBOCount),
+     static_cast<uint32_t>(symbolDrawableSSBOCount)});
 
 enum {
     backgroundUBOCount = getEnumValue(backgroundLayerUBOCount, drawableUBOStartId)
@@ -222,6 +245,10 @@ enum {
 
 enum {
     fillExtrusionUBOCount = getEnumValue(fillExtrusionLayerUBOCount, drawableUBOStartId)
+};
+
+enum {
+    fillExtrusionGroundOcclusionUBOCount = getEnumValue(fillExtrusionGroundOcclusionLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
@@ -271,6 +298,7 @@ static constexpr uint32_t maxUBOCountPerShader = std::max({static_cast<uint32_t>
                                                            static_cast<uint32_t>(debugUBOCount),
                                                            static_cast<uint32_t>(fillUBOCount),
                                                            static_cast<uint32_t>(fillExtrusionUBOCount),
+                                                           static_cast<uint32_t>(fillExtrusionGroundOcclusionUBOCount),
                                                            static_cast<uint32_t>(heatmapTextureUBOCount),
                                                            static_cast<uint32_t>(heatmapUBOCount),
                                                            static_cast<uint32_t>(hillshadePrepareUBOCount),
@@ -450,6 +478,25 @@ enum {
 };
 
 enum {
+    idFillExtrusionGroundOcclusionPosVertexAttribute,
+    idFillExtrusionGroundOcclusionDecimalsEdAttribute,
+    idFillExtrusionGroundOcclusionOutlinePosAttribute,
+    // Backends without fill-extrusion instancing read each edge from two consecutive vertices of
+    // the bucket's mesh: a roof vertex and the first wall vertex after it
+    idFillExtrusionGroundOcclusionNormal2DAttribute,
+    idFillExtrusionGroundOcclusionNextPosAttribute,
+    idFillExtrusionGroundOcclusionNextDecimalsEdAttribute,
+    idFillExtrusionGroundOcclusionNextNormal2DAttribute,
+
+    // Data driven. The order here must match the template pack passed to
+    // readDataDrivenPaintProperties, which assigns ids sequentially from the first one.
+    idFillExtrusionGroundOcclusionBaseVertexAttribute,
+    idFillExtrusionGroundOcclusionHeightVertexAttribute,
+
+    fillExtrusionGroundOcclusionVertexAttributeCount
+};
+
+enum {
     idHeatmapPosVertexAttribute,
 
     // Data driven
@@ -560,6 +607,7 @@ static constexpr uint32_t maxAttributeCountPerShader = std::max({
     static_cast<uint32_t>(debugVertexAttributeCount),
     static_cast<uint32_t>(fillVertexAttributeCount),
     static_cast<uint32_t>(fillExtrusionVertexAttributeCount),
+    static_cast<uint32_t>(fillExtrusionGroundOcclusionVertexAttributeCount),
     static_cast<uint32_t>(heatmapVertexAttributeCount),
     static_cast<uint32_t>(hillshadeVertexAttributeCount),
     static_cast<uint32_t>(colorReliefVertexAttributeCount),

@@ -75,6 +75,15 @@ fn unpack_mix_color(packedColors: vec4<f32>, t: f32) -> vec4<f32> {
     return mix(minColor, maxColor, t);
 }
 
+// Ambient occlusion where a wall meets the ground: the share of the ambient light taken away at a distance `s` from
+// the corner, in units of the radius, 1 at the corner and 0 from the radius on. (1 - s)^1.5 follows the share of the
+// rays that hit the other surface within the radius. The corner looks the same from both sides, so the walls and the
+// ground around them use the same curve.
+fn ambientOcclusionFalloff(s: f32) -> f32 {
+    let t = 1.0 - clamp(s, 0.0, 1.0);
+    return t * sqrt(t);
+}
+
 // Get pattern position for texture atlas lookups
 fn get_pattern_pos(pixel_coord_upper: vec2<f32>, pixel_coord_lower: vec2<f32>,
                    pattern_size: vec2<f32>, tile_units_to_pixels: f32, pos: vec2<f32>) -> vec2<f32> {

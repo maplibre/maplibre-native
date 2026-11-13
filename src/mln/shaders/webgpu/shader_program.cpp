@@ -47,6 +47,10 @@ WGPUBlendOperation webgpuBlendOperation(const gfx::ColorBlendEquationType& equat
             return WGPUBlendOperation_Subtract;
         case gfx::ColorBlendEquationType::ReverseSubtract:
             return WGPUBlendOperation_ReverseSubtract;
+        case gfx::ColorBlendEquationType::Min:
+            return WGPUBlendOperation_Min;
+        case gfx::ColorBlendEquationType::Max:
+            return WGPUBlendOperation_Max;
         default:
             return WGPUBlendOperation_Add;
     }

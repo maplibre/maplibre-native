@@ -89,6 +89,15 @@ ForwardIt upper_bound(ForwardIt first, ForwardIt last, thread const T& value)
     return first;
 }
 
+// Ambient occlusion where a wall meets the ground: the share of the ambient light taken away at a distance `s` from
+// the corner, in units of the radius, 1 at the corner and 0 from the radius on. (1 - s)^1.5 follows the share of the
+// rays that hit the other surface within the radius. The corner looks the same from both sides, so the walls and the
+// ground around them use the same curve.
+float ambientOcclusionFalloff(float s) {
+    const float t = 1.0 - saturate(s);
+    return t * sqrt(t);
+}
+
 float interpolationFactor(float base, float rangeMin, float rangeMax, float z) {
     const float zoomDiff = rangeMax - rangeMin;
     const float zoomProgress = z - rangeMin;

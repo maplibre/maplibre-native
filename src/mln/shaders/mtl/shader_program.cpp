@@ -32,6 +32,10 @@ MTL::BlendOperation metalBlendOperation(const gfx::ColorBlendEquationType& color
             return MTL::BlendOperationSubtract;
         case gfx::ColorBlendEquationType::ReverseSubtract:
             return MTL::BlendOperationReverseSubtract;
+        case gfx::ColorBlendEquationType::Min:
+            return MTL::BlendOperationMin;
+        case gfx::ColorBlendEquationType::Max:
+            return MTL::BlendOperationMax;
     }
 }
 

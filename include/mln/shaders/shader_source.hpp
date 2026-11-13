@@ -26,6 +26,8 @@ enum class BuiltIn {
     FillExtrusionInstancedShader,
     FillExtrusionPatternShader,
     FillExtrusionPatternInstancedShader,
+    FillExtrusionGroundOcclusionShader,
+    FillExtrusionGroundOcclusionResolveShader,
     HeatmapShader,
     HeatmapTextureShader,
     HillshadePrepareShader,

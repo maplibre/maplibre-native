@@ -80,7 +80,12 @@ std::size_t VertexAttribute::getStrideOf(gfx::AttributeDataType type) {
 }
 
 std::size_t VertexAttribute::getCount() const {
-    return sharedRawData ? sharedRawData->getRawCount() : items.size();
+    if (sharedRawData) {
+        // The elements before the vertex offset are not part of the attribute
+        const auto count = sharedRawData->getRawCount();
+        return count > sharedVertexOffset ? count - sharedVertexOffset : 0;
+    }
+    return items.size();
 }
 
 const std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref;

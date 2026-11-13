@@ -33,6 +33,10 @@ struct VertexInput {
 struct VertexOutput {
     @builtin(position) @invariant position: vec4<f32>,
     @location(0) color: vec4<f32>,
+    // Height of walls above the ground in meters, for the ambient occlusion. Negative on roofs.
+    @location(1) wall_z: f32,
+    // The color without the ambient part of the lighting, for the ambient occlusion
+    @location(2) color_without_ambient: vec3<f32>,
 };
 
 struct FillExtrusionDrawableUBO {
@@ -60,7 +64,7 @@ struct FillExtrusionPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad2: f32,
+    ambient_occlusion_wall_radius: f32,
 };
 
 struct GlobalIndexUBO {
@@ -96,6 +100,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
 
     out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
+    out.wall_z = select(-1.0, z, normal.z == 0.0);
 
 #ifdef OVERDRAW_INSPECTOR
     out.color = vec4<f32>(1.0, 1.0, 1.0, 1.0);
@@ -115,11 +120,13 @@ fn main(in: VertexInput) -> VertexOutput {
     let maxDirectional = max(1.0 - luminance + props.light_intensity, 1.0);
     var directional = mix(minDirectional, maxDirectional, directionalFraction);
 
+    var gradient = 1.0;
     if (normal.z == 0.0) {
         let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         let factor = clamp((t + baseValue) * pow(heightValue / 150.0, 0.5), gradientMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + props.vertical_gradient * factor;
+        gradient = (1.0 - props.vertical_gradient) + props.vertical_gradient * factor;
     }
+    directional *= gradient;
 
     let lightColor = props.light_color_pad.xyz;
     let minLight = mix(vec3<f32>(0.0), vec3<f32>(0.3), 1.0 - lightColor);
@@ -129,6 +136,10 @@ fn main(in: VertexInput) -> VertexOutput {
     vcolor += vec4<f32>(lit, 0.0);
 
     out.color = vcolor * props.opacity;
+
+    // The same without the ambient part of the lighting, 1 - light_intensity, which the ambient occlusion takes away
+    let directionalWithoutAmbient = directional - (1.0 - props.light_intensity) * gradient;
+    out.color_without_ambient = clamp(color.rgb * directionalWithoutAmbient * lightColor, minLight, vec3<f32>(1.0)) * props.opacity;
     return out;
 }
 )";
@@ -136,11 +147,44 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) color: vec4<f32>,
+    @location(1) wall_z: f32,
+    @location(2) color_without_ambient: vec3<f32>,
 };
+
+struct FillExtrusionPropsUBO {
+    color: vec4<f32>,
+    light_color_pad: vec4<f32>,
+    light_position_base: vec4<f32>,
+    height: f32,
+    light_intensity: f32,
+    vertical_gradient: f32,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+    ambient_occlusion_wall_radius: f32,
+};
+
+@group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
+
+// Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
+// 0 leaves the color as is. Roofs are left alone. `light_color_pad.w` holds
+// fill-extrusion-ambient-occlusion-wall-intensity.
+fn wallAmbientOcclusion(z: f32) -> f32 {
+    let intensity = props.light_color_pad.w;
+    if (z < 0.0 || intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
+        return 0.0;
+    }
+    return intensity * ambientOcclusionFalloff(z / props.ambient_occlusion_wall_radius);
+}
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+#ifdef OVERDRAW_INSPECTOR
     return in.color;
+#endif
+    // Take ambient light away from the bottom of the walls. Both colors are premultiplied.
+    return vec4<f32>(mix(in.color.rgb, in.color_without_ambient, wallAmbientOcclusion(in.wall_z)), in.color.a);
 }
 )";
 };
@@ -182,6 +226,10 @@ struct VertexOutput {
 #ifndef HAS_UNIFORM_u_pattern_to
     @location(4) pattern_to: vec4<f32>,
 #endif
+    // Height of walls above the ground in meters, for the ambient occlusion. Negative on roofs.
+    @location(5) wall_z: f32,
+    // The lighting without its ambient part, for the ambient occlusion
+    @location(6) lighting_without_ambient: vec3<f32>,
 };
 
 struct FillExtrusionPatternDrawableUBO {
@@ -217,7 +265,7 @@ struct FillExtrusionPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad2: f32,
+    ambient_occlusion_wall_radius: f32,
 };
 
 struct GlobalPaintParamsUBO {
@@ -261,6 +309,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
 
     out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
+    out.wall_z = select(-1.0, z, normal.z == 0.0);
 
     var patternPos: vec2<f32>;
     if (normal.z == 1.0) {
@@ -302,11 +351,13 @@ fn main(in: VertexInput) -> VertexOutput {
     var directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix(1.0 - props.light_intensity, max(0.5 + props.light_intensity, 1.0), directional);
 
+    var gradient = 1.0;
     if (normal.z == 0.0) {
         let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         let factor = clamp((t + baseValue) * pow(heightValue / 150.0, 0.5), gradientMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + props.vertical_gradient * factor;
+        gradient = (1.0 - props.vertical_gradient) + props.vertical_gradient * factor;
     }
+    directional *= gradient;
 
     let lightColor = props.light_color_pad.xyz;
     let lit = clamp(directional * lightColor,
@@ -314,6 +365,12 @@ fn main(in: VertexInput) -> VertexOutput {
                     vec3<f32>(1.0));
     lighting = vec4<f32>(lighting.rgb + lit, lighting.a);
     lighting *= props.opacity;
+
+    // The same without the ambient part of the lighting, 1 - light_intensity, which the ambient occlusion takes away
+    let directionalWithoutAmbient = directional - (1.0 - props.light_intensity) * gradient;
+    out.lighting_without_ambient = clamp(directionalWithoutAmbient * lightColor,
+                                         mix(vec3<f32>(0.0), vec3<f32>(0.3), 1.0 - lightColor),
+                                         vec3<f32>(1.0)) * props.opacity;
 
     out.lighting = lighting;
     out.pos_a = get_pattern_pos(drawable.pixel_coord_upper,
@@ -342,6 +399,8 @@ struct FragmentInput {
 #ifndef HAS_UNIFORM_u_pattern_to
     @location(4) pattern_to: vec4<f32>,
 #endif
+    @location(5) wall_z: f32,
+    @location(6) lighting_without_ambient: vec3<f32>,
 };
 
 struct FillExtrusionPatternTilePropsUBO {
@@ -363,7 +422,7 @@ struct FillExtrusionPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad2: f32,
+    ambient_occlusion_wall_radius: f32,
 };
 
 struct GlobalIndexUBO {
@@ -376,6 +435,17 @@ struct GlobalIndexUBO {
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
+
+// Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
+// 0 leaves the color as is. Roofs are left alone. `light_color_pad.w` holds
+// fill-extrusion-ambient-occlusion-wall-intensity.
+fn wallAmbientOcclusion(z: f32) -> f32 {
+    let intensity = props.light_color_pad.w;
+    if (z < 0.0 || intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
+        return 0.0;
+    }
+    return intensity * ambientOcclusionFalloff(z / props.ambient_occlusion_wall_radius);
+}
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
@@ -407,7 +477,9 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let color_b = textureSample(pattern_texture, texture_sampler, pos_b);
 
     let pattern_color = mix(color_a, color_b, props.fade);
-    return pattern_color * in.lighting;
+    // Take ambient light away from the bottom of the walls. Both are premultiplied.
+    let lighting = vec4<f32>(mix(in.lighting.rgb, in.lighting_without_ambient, wallAmbientOcclusion(in.wall_z)), in.lighting.a);
+    return pattern_color * lighting;
 }
 )";
 };
