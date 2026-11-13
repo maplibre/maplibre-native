@@ -19,11 +19,6 @@ Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
 }
 } // namespace
 
-int32_t GlyphAtlas::generateUniqueId(const FontStackHash& fontStack, const GlyphID& glyphId) const {
-    int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyphId.hash);
-    return uniqueId;
-}
-
 void GlyphAtlas::uploadGlyph(const Immutable<Glyph>& glyph, TextureHandle& texHandle) {
     const auto& rect = texHandle.getRectangle();
     AlphaImage paddedImage(Size{rect.w, rect.h});
@@ -111,7 +106,9 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
                 const auto& glyph = glyphEntry.second;
 
                 if (glyph.has_value() && glyph.value()->bitmap.valid()) {
-                    int32_t uniqueId = glyphAtlas.generateUniqueId(fontStack, glyph.value()->id);
+                    // Each glyph of each font stack gets an id of its own, so only uses of the same glyph share a bin.
+                    const auto nextId = static_cast<int32_t>(glyphIds.size());
+                    int32_t uniqueId = glyphIds.try_emplace({fontStack, glyph.value()->id}, nextId).first->second;
                     const auto size = Size(glyph.value()->bitmap.size.width + 2 * padding,
                                            glyph.value()->bitmap.size.height + 2 * padding);
                     const auto& texHandle = glyphAtlas.dynamicTexture->reserveSize(size, uniqueId);

@@ -5,6 +5,7 @@
 #include <mln/style/image_impl.hpp>
 #include <mln/util/hash.hpp>
 
+#include <map>
 #include <unordered_map>
 
 namespace mln {
@@ -18,8 +19,6 @@ public:
     GlyphPositions glyphPositions;
     std::vector<TextureHandle> textureHandles;
     DynamicTexturePtr dynamicTexture;
-
-    int32_t generateUniqueId(const FontStackHash& fontStack, const GlyphID& glyphId) const;
 
     void uploadGlyph(const Immutable<Glyph>& glyph, TextureHandle& texHandle);
 };
@@ -55,6 +54,7 @@ private:
     Context& context;
     std::vector<DynamicTexturePtr> dynamicTextures;
     std::unordered_map<TexturePixelType, DynamicTexturePtr> dummyDynamicTexture;
+    std::map<std::pair<FontStackHash, GlyphID>, int32_t> glyphIds;
     std::mutex mutex;
 };
 
