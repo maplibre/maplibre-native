@@ -4,6 +4,7 @@
 
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 - Support `oklch()` colors and the `interpolate-oklch` expression. There is no `Expression` builder for `interpolate-oklch` yet; use it in style JSON or with `Expression.raw()` ([#4970](https://github.com/maplibre/maplibre-native/pull/4970)).
+- Support `oklab()` colors and the `interpolate-oklab` expression. There is no `Expression` builder for `interpolate-oklab` yet; use it in style JSON or with `Expression.raw()` ([#5000](https://github.com/maplibre/maplibre-native/pull/5000)).
 
 ### 🐞 Bug fixes
 
