@@ -86,7 +86,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                 const gfx::ImageDrawableData& imageData = static_cast<const gfx::ImageDrawableData&>(*data);
                 matrix = imageData.matrix;
                 multiplyWithProjectionMatrix(
-                    /*in-out*/ matrix, parameters, drawable, /*nearClipped*/ false, /*aligned*/ true);
+                    /*in-out*/ matrix, parameters.transformParams, /*nearClipped*/ false, /*aligned*/ true);
             } else {
                 Log::Error(Event::General, "Invalid raster layer drawable: neither tile id nor image data is set.");
                 return;

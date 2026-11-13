@@ -143,6 +143,16 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
 
 void LineBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     uploaded = true;
+    // Layout is final: once these are in GPU buffers the CPU copies are dropped, unless the map
+    // reads them back to report rendered features.
+    if (retainFeaturesById) {
+        return;
+    }
+    sharedVertices->release();
+    sharedTriangles->release();
+    for (auto& pair : paintPropertyBinders) {
+        pair.second.release();
+    }
 }
 
 bool LineBucket::hasData() const {

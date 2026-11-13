@@ -10,6 +10,7 @@
 #include <mln/map/map_options.hpp>
 #include <mln/map/mode.hpp>
 #include <mln/math/angles.hpp>
+#include <mln/style/layers/fill_layer.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/terrain.hpp>
@@ -17,6 +18,8 @@
 #include <mln/util/image.hpp>
 #include <mln/util/projection.hpp>
 #include <mln/util/run_loop.hpp>
+
+#include <mapbox/geojson.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -1475,6 +1478,57 @@ TEST(TerrainCamera, EyeHeightIsUnknownUntilTheTileUnderTheNewEyeArrives) {
 
 namespace {
 
+// What loadBudgetStats renders: a fill over a large area, under terrain in the given load mode.
+struct LoadBudgetScene {
+    TerrainLoadMode mode;
+    int fillLayers = 1;       // fill layers stacked on the area
+    bool replaceArea = false; // a second still follows a change of the area's shape
+};
+
+// The counters after the still(s) of the scene (they accumulate over frames). The changed area
+// gives the drape targets under the tiles it rebuilds new content to bake.
+gfx::RenderingStats loadBudgetStats(const LoadBudgetScene& scene) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string tile = makeFlatDEMTile();
+    fileSource->tileResponse = [&](const Resource&) {
+        Response res;
+        res.data = std::make_shared<std::string>(tile);
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    map.getStyle().loadJSON(drapedFillStyle);
+    for (int i = 1; i < scene.fillLayers; ++i) {
+        map.getStyle().addLayer(std::make_unique<style::FillLayer>("area" + std::to_string(i), "area"));
+    }
+    map.setTerrainLoadMode(scene.mode);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.jumpTo(CameraOptions().withCenter(LatLng{47.2692, 11.4041}).withZoom(5.0).withPitch(80.0));
+
+    auto stats = frontend.render(map).stats;
+    if (scene.replaceArea) {
+        static_cast<style::GeoJSONSource*>(map.getStyle().getSource("area"))->setGeoJSON(mapbox::geojson::parse(R"({
+                "type": "Feature",
+                "properties": {},
+                "geometry": {"type": "Polygon", "coordinates": [[[-60, 11], [80, 11], [80, 75], [-60, 75], [-60, 11]]]}
+            })"));
+        stats = frontend.render(map).stats;
+    }
+    return stats;
+}
+
+// A terrain whose DEM source does not exist: the drape cover stays empty.
+const char* terrainWithoutDEMStyle = R"STYLE({
+  "version": 8,
+  "sources": {},
+  "terrain": {"source": "missing", "exaggeration": 1.0},
+  "layers": []
+})STYLE";
+
 // A DEM to zoom 17 under a zoom 13 view: the DEM source covers the ground to the horizon, while
 // the mesh keeps only the tiles nearest the camera, so the source holds tiles the mesh has no use for.
 const char* deepDEMStyle = R"STYLE({
@@ -1493,6 +1547,44 @@ const char* deepDEMStyle = R"STYLE({
 })STYLE";
 
 } // namespace
+
+// The tests read the counters of a still, not a second frame: a Static map ignores the request
+// for a follow-up frame (Map::Impl::onDidFinishRenderingFrame acts on it only in Continuous).
+// So the request itself, and the recount of deferred tiles each frame, are not tested.
+
+// The load budget defers new tile builds in the modes that have one, and the count is of
+// tiles: a second layer of the same tiles is refused the same builds and adds none.
+TEST(TerrainLoadBudget, DeferredNewTileBuildsAreCountedOncePerTile) {
+    const auto performance = TerrainLoadMode::Performance;
+    const int deferred = loadBudgetStats({.mode = performance}).numNewTileBuildsDeferred;
+    EXPECT_GT(deferred, 0) << "Performance deferred no new tile build";
+    const int deferredTwoLayers = loadBudgetStats({.mode = performance, .fillLayers = 2}).numNewTileBuildsDeferred;
+    EXPECT_EQ(deferred, deferredTwoLayers) << "a second layer of the same tiles changed the count of deferred tiles";
+    EXPECT_EQ(0, loadBudgetStats({.mode = TerrainLoadMode::Quality}).numNewTileBuildsDeferred)
+        << "Quality has no budget to defer by";
+}
+
+// Drape targets that already hold a texture are re-rendered only up to the budget when their
+// content changes; the rest wait for a later frame and are counted.
+TEST(TerrainLoadBudget, DeferredDrapeTargetsAreCounted) {
+    const auto performance = TerrainLoadMode::Performance;
+    EXPECT_GT(loadBudgetStats({.mode = performance, .replaceArea = true}).numDrapeTargetsDeferred, 0)
+        << "Performance deferred no drape re-render after the area changed";
+    EXPECT_EQ(0, loadBudgetStats({.mode = TerrainLoadMode::Quality, .replaceArea = true}).numDrapeTargetsDeferred)
+        << "Quality has no budget to defer by";
+}
+
+// The retry for an empty drape cover is bounded, so a cover that never fills counts four
+// follow-up frames and no more.
+TEST(TerrainLoadBudget, AnEmptyDrapeCoverIsCountedUpToItsRetryBound) {
+    TerrainCameraTest test;
+    test.map.getStyle().loadJSON(terrainWithoutDEMStyle);
+    gfx::RenderingStats stats;
+    for (int i = 0; i < 6; ++i) {
+        stats = test.frontend.render(test.map).stats;
+    }
+    EXPECT_EQ(4, stats.numTerrainCoverPendingFrames) << "after 6 stills of a terrain without a DEM source";
+}
 
 // A DEM texture is made, once, for a loaded tile related to the mesh tile set (a mesh tile, an
 // ancestor or a descendant of one), and not for the others. The DEM source's cover is not capped

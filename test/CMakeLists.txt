@@ -7,6 +7,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/api/annotations.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/api_misuse.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/custom_geometry_source.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/api/location_indicator.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/query.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/recycle_map.cpp
     ${PROJECT_SOURCE_DIR}/test/geometry/dem_data.test.cpp
@@ -40,6 +41,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/layer_min_zoom_tiles.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_cache_policy.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_mesh_cover.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_edges.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_source_cover.test.cpp
     $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
