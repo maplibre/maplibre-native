@@ -23,7 +23,7 @@ brew install \
   libuv
 ```
 
-#### Linux (Ubuntu)
+#### Linux (Ubuntu 24.04+)
 
 ```bash
 sudo apt-get install -y \
@@ -40,9 +40,71 @@ sudo apt-get install -y \
   libicu-dev \
   libjpeg-turbo8-dev \
   libwebp-dev \
-  xvfb
+  xwayland-run \
+  weston
 /usr/sbin/update-ccache-symlinks
 ```
+
+`xwayland-run` provides `xwfb-run`, the headless test wrapper; `weston` is the
+compositor selected by the test command.
+
+#### Linux (Debian 13)
+
+```bash
+sudo apt-get install -y \
+  build-essential \
+  ca-certificates \
+  clang \
+  cmake \
+  ccache \
+  ninja-build \
+  pkg-config \
+  libcurl4-openssl-dev \
+  libglfw3-dev \
+  libuv1-dev \
+  libpng-dev \
+  libicu-dev \
+  libjpeg62-turbo-dev \
+  libwebp-dev \
+  xwayland-run \
+  weston
+```
+
+#### Linux (Enterprise Linux 9 / 10)
+
+Rocky Linux 9 and 10 are representative Enterprise Linux distributions. Enable
+the Rocky CRB repository before installing build dependencies:
+
+```bash
+sudo dnf install -y dnf-plugins-core epel-release
+sudo dnf config-manager --set-enabled crb
+```
+
+```bash
+sudo dnf install -y \
+  gcc \
+  gcc-c++ \
+  ca-certificates \
+  clang \
+  cmake \
+  ccache \
+  git \
+  ninja-build \
+  pkgconf-pkg-config \
+  libcurl-devel \
+  libuv-devel \
+  libpng-devel \
+  libicu-devel \
+  libjpeg-turbo-devel \
+  libwebp-devel \
+  libX11-devel \
+  mesa-libGL-devel \
+  xwayland-run \
+  weston
+```
+
+Other Enterprise Linux distributions may use different repository configuration
+procedures.
 
 ### Compiling
 
@@ -57,7 +119,7 @@ cmake . -B build -G Ninja -DMLN_WITH_NODE=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccach
 #### Linux
 
 ```bash
-cmake . -B build -G Ninja -DMLN_WITH_NODE=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-12 -DCMAKE_CXX_COMPILER=g++-12
+cmake . -B build -G Ninja -DMLN_WITH_NODE=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Release
 ```
 
 ### Building
