@@ -6,6 +6,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 - Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
+- Support `oklch()` colors and the `interpolate-oklch` expression ([#4970](https://github.com/maplibre/maplibre-native/pull/4970)).
+- Support `oklab()` colors and the `interpolate-oklab` expression ([#5000](https://github.com/maplibre/maplibre-native/pull/5000)).
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 - An `MLNColor` passed into a style value or an expression is written with whole-number channels, as MapLibre GL JS prints colors, so a fractional channel rounds to the nearest of 0-255 ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
 

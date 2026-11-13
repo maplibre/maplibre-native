@@ -1,0 +1,61 @@
+{
+  "expression": {
+    "type": "exponential",
+    "property": "p",
+    "colorSpace": "oklab",
+    "stops": [
+      [{"zoom": 0, "value": 0}, "red"],
+      [{"zoom": 0, "value": 10}, "blue"],
+      [{"zoom": 10, "value": 0}, "blue"],
+      [{"zoom": 10, "value": 10}, "blue"]
+    ]
+  },
+  "propertySpec": {
+    "type": "color",
+    "property-type": "data-driven",
+    "expression": {"interpolated": true, "parameters": ["zoom", "feature"]}
+  },
+  "inputs": [
+    [{"zoom": 0}, {"properties": {"p": 5}}],
+    [{"zoom": 5}, {"properties": {"p": 0}}],
+    [{"zoom": 10}, {"properties": {"p": 10}}]
+  ],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": false,
+      "isZoomConstant": false,
+      "type": "color"
+    },
+    "outputs": [
+      [0.550441, 0.32562, 0.6365, 1],
+      [0.550441, 0.32562, 0.6365, 1],
+      [0, 0, 1, 1]
+    ],
+    "serialized": [
+      "interpolate-oklab",
+      ["linear"],
+      ["zoom"],
+      0,
+      [
+        "interpolate-oklab",
+        ["linear"],
+        ["number", ["get", "p"]],
+        0,
+        ["rgba", 255, 0, 0, 1],
+        10,
+        ["rgba", 0, 0, 255, 1]
+      ],
+      10,
+      [
+        "interpolate-oklab",
+        ["linear"],
+        ["number", ["get", "p"]],
+        0,
+        ["rgba", 0, 0, 255, 1],
+        10,
+        ["rgba", 0, 0, 255, 1]
+      ]
+    ]
+  }
+}
