@@ -381,6 +381,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     bool invert_rounding = false;
     for (int i = 0; i < 3; i++) {
         bool enable_rounding = (vertx.triangle_indices[i] % 4) >> 1;
+        invert_rounding = invert_rounding || (vertx.triangle_indices[i] % 2);
+
         if (!enable_rounding || props.rounded_corner_distance <= 0.0) {
             triangle_vertex_pos[i] = float2(0.0);
             polygon_prev_vertex[i] = float2(0.0);
@@ -388,6 +390,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             triangle_vertex_radius[i] = 0.0;
             continue;
         }
+
         uint triangle_index = vertx.triangle_indices[i] >> 2;
         uint polygon_prev_index = triangle_index + neighbor[triangle_index].prev_offset;
         uint polygon_next_index = triangle_index + neighbor[triangle_index].next_offset;
@@ -400,8 +403,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                                   triangle_vertex_pos[i],
                                                   polygon_next_vertex[i],
                                                   props.rounded_corner_distance);
-
-        invert_rounding = invert_rounding || (vertx.triangle_indices[i] % 2);
     }
 #endif
 
@@ -682,6 +683,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     bool invert_rounding = false;
     for (int i = 0; i < 3; i++) {
         bool enable_rounding = (vertx.triangle_indices[i] % 4) >> 1;
+        invert_rounding = invert_rounding || (vertx.triangle_indices[i] % 2);
+
         if (!enable_rounding || props.rounded_corner_distance <= 0.0) {
             triangle_vertex_pos[i] = float2(0.0);
             polygon_prev_vertex[i] = float2(0.0);
@@ -689,6 +692,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             triangle_vertex_radius[i] = 0.0;
             continue;
         }
+
         uint triangle_index = vertx.triangle_indices[i] >> 2;
         uint polygon_prev_index = triangle_index + neighbor[triangle_index].prev_offset;
         uint polygon_next_index = triangle_index + neighbor[triangle_index].next_offset;
@@ -701,8 +705,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                                   triangle_vertex_pos[i],
                                                   polygon_next_vertex[i],
                                                   props.rounded_corner_distance);
-
-        invert_rounding = invert_rounding || (vertx.triangle_indices[i] % 2);
     }
 #endif
 
