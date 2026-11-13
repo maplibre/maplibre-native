@@ -147,6 +147,24 @@ public:
     }
 };
 
+/// `fill-extrusion-vertical-gradient` is declared `"transition": false` and
+/// `"interpolated": false` in the style spec, so this is never reached through a transition
+/// or an `interpolate` expression. `PaintProperty<T>` still instantiates an interpolator for
+/// every type, though, so provide a step: hold the start value until the very end. Blending
+/// the two would be meaningless anyway, since `referenceHeight` selects between two different
+/// shading models rather than naming a point on a continuum.
+template <>
+struct Interpolator<VerticalGradient> {
+public:
+    VerticalGradient operator()(const VerticalGradient& a, const VerticalGradient& b, const float t) const noexcept {
+        return t < 1.0f ? a : b;
+    }
+
+    VerticalGradient operator()(const VerticalGradient& a, const VerticalGradient& b, const double t) const noexcept {
+        return t < 1.0 ? a : b;
+    }
+};
+
 template <>
 struct Interpolator<VariableAnchorOffsetCollection> {
 public:

@@ -422,8 +422,13 @@ public class FillExtrusionLayerTest extends BaseLayerTest {
     assertNull(layer.getFillExtrusionVerticalGradient().getValue());
 
     // Set and Get
-    Boolean propertyValue = true;
+    Object[] propertyValue = new Object[] {0.5f, 0f};
     layer.setProperties(fillExtrusionVerticalGradient(propertyValue));
-    assertEquals(layer.getFillExtrusionVerticalGradient().getValue(), propertyValue);
+    assertArrayEquals(layer.getFillExtrusionVerticalGradient().getValue(), propertyValue);
+    // Boolean form is still accepted for backward compatibility and normalizes to [depth, referenceHeight]
+    layer.setProperties(fillExtrusionVerticalGradient(true));
+    assertArrayEquals(layer.getFillExtrusionVerticalGradient().getValue(), new Float[]{0.5f, 150f});
+    layer.setProperties(fillExtrusionVerticalGradient(false));
+    assertArrayEquals(layer.getFillExtrusionVerticalGradient().getValue(), new Float[]{0f, 0f});
   }
 }

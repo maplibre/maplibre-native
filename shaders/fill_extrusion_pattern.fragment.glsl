@@ -18,12 +18,12 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_base;
     highp float u_height;
     highp float u_lightintensity;
-    highp float u_vertical_gradient;
+    highp float u_gradient_depth;
     highp float u_opacity;
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad2;
+    highp float u_gradient_reference_height_inv;
 };
 
 uniform sampler2D u_image;
