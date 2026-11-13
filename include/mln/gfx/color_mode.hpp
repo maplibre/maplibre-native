@@ -77,9 +77,7 @@ public:
         // Render pipelines are cached by this hash, so it has to tell apart the same blend function
         // with different factors
         const auto [equation, srcFactor, dstFactor] = apply_visitor(
-            [](const auto& function) {
-                return std::tuple{function.equation, function.srcFactor, function.dstFactor};
-            },
+            [](const auto& function) { return std::tuple{function.equation, function.srcFactor, function.dstFactor}; },
             blendFunction);
         return mln::util::hash(blendFunction.which(),
                                equation,
