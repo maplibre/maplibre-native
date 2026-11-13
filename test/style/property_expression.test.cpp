@@ -3,6 +3,8 @@
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/expression/find_zoom_curve.hpp>
 #include <mln/style/expression/format_section_override.hpp>
+#include <mln/style/expression/interpolate.hpp>
+#include <mln/style/expression/parsing_context.hpp>
 #include <mln/style/property_expression.hpp>
 #include <mln/test/stub_geometry_tile_feature.hpp>
 #include <mln/test/util.hpp>
@@ -64,6 +66,21 @@ TEST(PropertyExpression, Expression) {
     EXPECT_EQ(0.0, evaluate(expression, 0.0));
     EXPECT_EQ(0.5, evaluate(expression, 0.5));
     EXPECT_EQ(Dependency::Zoom, expression.getDependencies());
+}
+
+TEST(PropertyExpression, OnlyRGBColorCurvesGoToTheGPU) {
+    const auto colorCurve = [](ColorSpace colorSpace) {
+        std::map<double, std::unique_ptr<Expression>> stops;
+        stops.emplace(0.0, toColor(literal("red")));
+        stops.emplace(10.0, toColor(literal("blue")));
+        ParsingContext ctx;
+        auto curve = createInterpolate(type::Color, linear(), colorSpace, zoom(), std::move(stops), ctx);
+        return PropertyExpression<Color>(std::move(*curve));
+    };
+    EXPECT_TRUE(colorCurve(ColorSpace::RGB).isGPUCapable());
+    EXPECT_FALSE(colorCurve(ColorSpace::LAB).isGPUCapable());
+    EXPECT_FALSE(colorCurve(ColorSpace::HCL).isGPUCapable());
+    EXPECT_FALSE(colorCurve(ColorSpace::OKLCH).isGPUCapable());
 }
 
 TEST(PropertyExpression, Defaults) {
