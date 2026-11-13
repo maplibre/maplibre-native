@@ -14,7 +14,7 @@ class MetalRenderableResource final : public mtl::RenderableResource {
 public:
   MetalRenderableResource(MetalBackend& backend)
       : rendererBackend(backend),
-        commandQueue(NS::TransferPtr(backend.getDevice()->newCommandQueue())),
+        commandQueue(backend.getCommandQueue()),
         swapchain(NS::TransferPtr(CA::MetalLayer::layer())) {
     swapchain->setDevice(backend.getDevice().get());
   }

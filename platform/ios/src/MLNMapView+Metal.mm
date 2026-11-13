@@ -41,7 +41,7 @@ public:
 
   void bind() override {
     if (!commandQueue) {
-      commandQueue = [mtlView.device newCommandQueue];
+      commandQueue = (__bridge id<MTLCommandQueue>)backend.getCommandQueue().get();
     }
 
     if (!commandBuffer) {
