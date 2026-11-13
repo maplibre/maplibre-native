@@ -3,8 +3,8 @@ import SwiftUI
 import UIKit
 
 // #-example-code(AmbientOcclusionExample)
-/// Fill-extrusion ambient occlusion: darkens the base of the walls. Every fill-extrusion layer in
-/// the style gets the values of the sliders.
+/// Fill-extrusion ambient occlusion: darkens the base of the walls and the ground around the
+/// buildings. Every fill-extrusion layer in the style gets the values of the sliders.
 class AmbientOcclusionExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
@@ -24,6 +24,12 @@ class AmbientOcclusionExample: UIViewController, MLNMapViewDelegate {
         },
         Control(title: "Wall radius", range: 0 ... 20, initial: 4, format: "%.1f m", isIntensity: false) {
             $0.fillExtrusionAmbientOcclusionWallRadius = $1
+        },
+        Control(title: "Ground intensity", range: 0 ... 1, initial: 0.6, format: "%.2f", isIntensity: true) {
+            $0.fillExtrusionAmbientOcclusionGroundIntensity = $1
+        },
+        Control(title: "Ground radius", range: 0 ... 30, initial: 8, format: "%.1f m", isIntensity: false) {
+            $0.fillExtrusionAmbientOcclusionGroundRadius = $1
         },
     ]
 

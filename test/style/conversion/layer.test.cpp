@@ -170,9 +170,11 @@ TEST(StyleConversion, SetGenericProperties) {
 // replaces that file wholesale from the npm package. This test references the generated symbols by
 // name, so it stops compiling if the properties are ever dropped from the spec or the generator.
 TEST(StyleConversion, FillExtrusionAmbientOcclusion) {
-    // Off by default, with a 3 m radius
+    // Off by default, with a 3 m radius for both the walls and the ground
     EXPECT_EQ(PropertyValue<float>(0.0f), FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionWallIntensity());
     EXPECT_EQ(PropertyValue<float>(3.0f), FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionWallRadius());
+    EXPECT_EQ(PropertyValue<float>(0.0f), FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionGroundIntensity());
+    EXPECT_EQ(PropertyValue<float>(3.0f), FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionGroundRadius());
 
     auto layer = parseLayer(R"JSON({
         "type": "fill-extrusion",
@@ -180,24 +182,28 @@ TEST(StyleConversion, FillExtrusionAmbientOcclusion) {
         "source": "composite",
         "paint": {
             "fill-extrusion-ambient-occlusion-wall-intensity": 0.5,
-            "fill-extrusion-ambient-occlusion-wall-radius": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 4]
+            "fill-extrusion-ambient-occlusion-wall-radius": 4,
+            "fill-extrusion-ambient-occlusion-ground-intensity": 0.3,
+            "fill-extrusion-ambient-occlusion-ground-radius": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 4]
         }
     })JSON");
     ASSERT_NE(nullptr, layer);
     const auto* fillExtrusion = static_cast<const FillExtrusionLayer*>(layer.get());
     EXPECT_EQ(PropertyValue<float>(0.5f), fillExtrusion->getFillExtrusionAmbientOcclusionWallIntensity());
-    // A taller radius when zoomed out
-    EXPECT_TRUE(fillExtrusion->getFillExtrusionAmbientOcclusionWallRadius().isExpression());
+    EXPECT_EQ(PropertyValue<float>(4.0f), fillExtrusion->getFillExtrusionAmbientOcclusionWallRadius());
+    EXPECT_EQ(PropertyValue<float>(0.3f), fillExtrusion->getFillExtrusionAmbientOcclusionGroundIntensity());
+    // A wider ground radius when zoomed out
+    EXPECT_TRUE(fillExtrusion->getFillExtrusionAmbientOcclusionGroundRadius().isExpression());
 
-    // Both survive a serialize/parse round trip
+    // All four survive a serialize/parse round trip
     auto value = layer->serialize();
     ASSERT_NE(nullptr, value.getObject());
-    EXPECT_EQ(2u, value.getObject()->at("paint").getObject()->size());
+    EXPECT_EQ(4u, value.getObject()->at("paint").getObject()->size());
     auto roundTripped = parseLayer(stringifyLayer(value));
     ASSERT_NE(nullptr, roundTripped);
     const auto* roundTrippedFillExtrusion = static_cast<const FillExtrusionLayer*>(roundTripped.get());
-    EXPECT_EQ(fillExtrusion->getFillExtrusionAmbientOcclusionWallIntensity(),
-              roundTrippedFillExtrusion->getFillExtrusionAmbientOcclusionWallIntensity());
     EXPECT_EQ(fillExtrusion->getFillExtrusionAmbientOcclusionWallRadius(),
               roundTrippedFillExtrusion->getFillExtrusionAmbientOcclusionWallRadius());
+    EXPECT_EQ(fillExtrusion->getFillExtrusionAmbientOcclusionGroundRadius(),
+              roundTrippedFillExtrusion->getFillExtrusionAmbientOcclusionGroundRadius());
 }

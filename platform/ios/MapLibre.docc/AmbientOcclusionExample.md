@@ -1,18 +1,18 @@
 # Fill Extrusion Ambient Occlusion
 
-Darken the bottom of the walls of a fill extrusion layer, and adjust it with sliders.
+Darken the bottom of the walls of a fill extrusion layer and the ground around it, and adjust it with sliders.
 
 > Note: This example uses UIKit.
 
-This example loads a style with 3D buildings and sets ``MLNFillExtrusionStyleLayer/fillExtrusionAmbientOcclusionWallIntensity`` and ``MLNFillExtrusionStyleLayer/fillExtrusionAmbientOcclusionWallRadius`` on every ``MLNFillExtrusionStyleLayer`` in the style.
+This example loads a style with 3D buildings and sets ``MLNFillExtrusionStyleLayer/fillExtrusionAmbientOcclusionWallIntensity``, ``MLNFillExtrusionStyleLayer/fillExtrusionAmbientOcclusionWallRadius``, ``MLNFillExtrusionStyleLayer/fillExtrusionAmbientOcclusionGroundIntensity`` and ``MLNFillExtrusionStyleLayer/fillExtrusionAmbientOcclusionGroundRadius`` on every ``MLNFillExtrusionStyleLayer`` in the style.
 
-The intensity controls how much of the ambient light the walls lose where they meet the ground, and the radius is the height in meters over which the effect fades out. Walls facing away from the light get darker than sunlit ones. A switch turns the effect off by setting the intensity to 0.
+The intensity controls how much of the ambient light the walls lose where they meet the ground, and the radius is the height in meters over which the effect fades out. Walls facing away from the light get darker than sunlit ones. The ground intensity and radius do the same for the ground around the footprints, which needs an opaque background layer. A switch turns the effect off by setting both intensities to 0.
 
 <!-- include-example(AmbientOcclusionExample) -->
 
 ```swift
-/// Fill-extrusion ambient occlusion: darkens the base of the walls. Every fill-extrusion layer in
-/// the style gets the values of the sliders.
+/// Fill-extrusion ambient occlusion: darkens the base of the walls and the ground around the
+/// buildings. Every fill-extrusion layer in the style gets the values of the sliders.
 class AmbientOcclusionExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
@@ -32,6 +32,12 @@ class AmbientOcclusionExample: UIViewController, MLNMapViewDelegate {
         },
         Control(title: "Wall radius", range: 0 ... 20, initial: 4, format: "%.1f m", isIntensity: false) {
             $0.fillExtrusionAmbientOcclusionWallRadius = $1
+        },
+        Control(title: "Ground intensity", range: 0 ... 1, initial: 0.6, format: "%.2f", isIntensity: true) {
+            $0.fillExtrusionAmbientOcclusionGroundIntensity = $1
+        },
+        Control(title: "Ground radius", range: 0 ... 30, initial: 8, format: "%.1f m", isIntensity: false) {
+            $0.fillExtrusionAmbientOcclusionGroundRadius = $1
         },
     ]
 

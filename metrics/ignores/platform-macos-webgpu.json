@@ -14,5 +14,5 @@
     "render-tests/fill-extrusion-pattern/opacity": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
     "render-tests/fill-extrusion-pattern/tile-buffer": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
     "render-tests/fill-extrusion-ambient-occlusion/wall-pattern": "https://github.com/mapbox/mapbox-gl-js/issues/3327",
-    "render-tests/fill-extrusion-ambient-occlusion/wall-opacity": "Translucent extrusions render differently: https://github.com/mapbox/mapbox-gl-js/pull/9202"
+    "render-tests/fill-extrusion-ambient-occlusion/ground-opacity": "Translucent extrusions render differently: https://github.com/mapbox/mapbox-gl-js/pull/9202"
 }

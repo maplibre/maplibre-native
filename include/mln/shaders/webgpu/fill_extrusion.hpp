@@ -168,16 +168,14 @@ struct FillExtrusionPropsUBO {
 @group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
 
 // Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
-// 0 leaves the color as is. (1 - s)^1.5, with s the height over the radius, follows the share of the rays that hit
-// the ground within the radius. Roofs are left alone. `light_color_pad.w` holds
+// 0 leaves the color as is. Roofs are left alone. `light_color_pad.w` holds
 // fill-extrusion-ambient-occlusion-wall-intensity.
 fn wallAmbientOcclusion(z: f32) -> f32 {
     let intensity = props.light_color_pad.w;
     if (z < 0.0 || intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
         return 0.0;
     }
-    let s = clamp(z / props.ambient_occlusion_wall_radius, 0.0, 1.0);
-    return intensity * (1.0 - s) * sqrt(1.0 - s);
+    return intensity * ambientOcclusionFalloff(z / props.ambient_occlusion_wall_radius);
 }
 
 @fragment
@@ -439,16 +437,14 @@ struct GlobalIndexUBO {
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
 
 // Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
-// 0 leaves the color as is. (1 - s)^1.5, with s the height over the radius, follows the share of the rays that hit
-// the ground within the radius. Roofs are left alone. `light_color_pad.w` holds
+// 0 leaves the color as is. Roofs are left alone. `light_color_pad.w` holds
 // fill-extrusion-ambient-occlusion-wall-intensity.
 fn wallAmbientOcclusion(z: f32) -> f32 {
     let intensity = props.light_color_pad.w;
     if (z < 0.0 || intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
         return 0.0;
     }
-    let s = clamp(z / props.ambient_occlusion_wall_radius, 0.0, 1.0);
-    return intensity * (1.0 - s) * sqrt(1.0 - s);
+    return intensity * ambientOcclusionFalloff(z / props.ambient_occlusion_wall_radius);
 }
 
 @fragment

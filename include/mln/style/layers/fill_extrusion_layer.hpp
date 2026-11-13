@@ -27,6 +27,18 @@ public:
 
     // Paint properties
 
+    static PropertyValue<float> getDefaultFillExtrusionAmbientOcclusionGroundIntensity();
+    const PropertyValue<float>& getFillExtrusionAmbientOcclusionGroundIntensity() const;
+    void setFillExtrusionAmbientOcclusionGroundIntensity(const PropertyValue<float>&);
+    void setFillExtrusionAmbientOcclusionGroundIntensityTransition(const TransitionOptions&);
+    TransitionOptions getFillExtrusionAmbientOcclusionGroundIntensityTransition() const;
+
+    static PropertyValue<float> getDefaultFillExtrusionAmbientOcclusionGroundRadius();
+    const PropertyValue<float>& getFillExtrusionAmbientOcclusionGroundRadius() const;
+    void setFillExtrusionAmbientOcclusionGroundRadius(const PropertyValue<float>&);
+    void setFillExtrusionAmbientOcclusionGroundRadiusTransition(const TransitionOptions&);
+    TransitionOptions getFillExtrusionAmbientOcclusionGroundRadiusTransition() const;
+
     static PropertyValue<float> getDefaultFillExtrusionAmbientOcclusionWallIntensity();
     const PropertyValue<float>& getFillExtrusionAmbientOcclusionWallIntensity() const;
     void setFillExtrusionAmbientOcclusionWallIntensity(const PropertyValue<float>&);

@@ -369,9 +369,10 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         (instanceAttributes && (!attributeUpdateTime || instanceAttributes->isModifiedAfter(*attributeUpdateTime)));
 
     if (buildInstanceBuffer) {
-        // Apply instance values to shader defaults (matching Metal's approach)
+        // Apply instance values to shader defaults (matching Metal's approach). The buffers made for
+        // the attributes left out hold one value per instance, as many as the draw below uses.
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
-        auto instanceBindings_ = webgpuUploadPass.buildAttributeBindings(impl->vertexCount,
+        auto instanceBindings_ = webgpuUploadPass.buildAttributeBindings(instanceAttributes->getMinCount(),
                                                                          impl->vertexType,
                                                                          /*vertexAttributeIndex=*/-1,
                                                                          /*vertexData=*/{},
@@ -710,9 +711,11 @@ void Drawable::draw(PaintParameters& parameters) const {
 
             const uint64_t bindingByteOffset = static_cast<uint64_t>(binding->vertexOffset) * binding->vertexStride;
 
+            // Attributes at another vertex offset of the same buffer get their own binding, as an
+            // attribute's offset within a binding must stay below the stride
             auto it = std::find_if(out.begin(), out.end(), [&](const UniqueBinding& entry) {
                 return entry.vertexResource == vertexBufferRes && entry.stride == binding->vertexStride &&
-                       entry.stepMode == stepMode;
+                       entry.stepMode == stepMode && entry.baseOffset == bindingByteOffset;
             });
 
             if (it == out.end()) {

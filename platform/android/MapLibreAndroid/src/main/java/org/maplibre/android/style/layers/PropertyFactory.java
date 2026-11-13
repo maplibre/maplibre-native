@@ -1325,6 +1325,46 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
+   * How much the ground is darkened around the footprint of the extrusions. A value of `0` disables the effect. Only parts that stand on the ground darken it. Needs an opaque `background` layer at the bottom of the style, and has no effect without one. Not supported by the OpenGL renderer, which leaves the ground as is.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionAmbientOcclusionGroundIntensity(Float value) {
+    return new PaintPropertyValue<>("fill-extrusion-ambient-occlusion-ground-intensity", value);
+  }
+
+  /**
+   * How much the ground is darkened around the footprint of the extrusions. A value of `0` disables the effect. Only parts that stand on the ground darken it. Needs an opaque `background` layer at the bottom of the style, and has no effect without one. Not supported by the OpenGL renderer, which leaves the ground as is.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionAmbientOcclusionGroundIntensity(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-ambient-occlusion-ground-intensity", expression);
+  }
+
+  /**
+   * Distance in meters from the walls over which the darkening of the ground fades out.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionAmbientOcclusionGroundRadius(Float value) {
+    return new PaintPropertyValue<>("fill-extrusion-ambient-occlusion-ground-radius", value);
+  }
+
+  /**
+   * Distance in meters from the walls over which the darkening of the ground fades out.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionAmbientOcclusionGroundRadius(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-ambient-occlusion-ground-radius", expression);
+  }
+
+  /**
    * The opacity at which the image will be drawn.
    *
    * @param value a Float value

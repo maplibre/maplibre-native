@@ -64,15 +64,13 @@ static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "wrong size");
 // `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
 
 /// Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
-/// 0 leaves the color as is. (1 - s)^1.5, with s the height over the radius, follows the share of the rays that
-/// hit the ground within the radius.
+/// 0 leaves the color as is.
 float wallAmbientOcclusion(float z, device const FillExtrusionPropsUBO& props) {
     const float intensity = props.light_color_pad.w;
     if (intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
         return 0.0;
     }
-    const float s = clamp(z / props.ambient_occlusion_wall_radius, 0.0, 1.0);
-    return intensity * (1.0 - s) * sqrt(1.0 - s);
+    return intensity * ambientOcclusionFalloff(z / props.ambient_occlusion_wall_radius);
 }
 
 )";

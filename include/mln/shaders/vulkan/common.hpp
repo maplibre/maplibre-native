@@ -68,6 +68,15 @@ vec4 unpack_mix_color(const vec4 packedColors, const float t) {
     return mix(minColor, maxColor, t);
 }
 
+// Ambient occlusion where a wall meets the ground: the share of the ambient light taken away at a distance `s` from
+// the corner, in units of the radius, 1 at the corner and 0 from the radius on. (1 - s)^1.5 follows the share of the
+// rays that hit the other surface within the radius. The corner looks the same from both sides, so the walls and the
+// ground around them use the same curve.
+float ambientOcclusionFalloff(float s) {
+    const float t = 1.0 - clamp(s, 0.0, 1.0);
+    return t * sqrt(t);
+}
+
 // unpack pattern position
 vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
                         const vec2 pattern_size, const float tile_units_to_pixels, const vec2 pos) {
@@ -168,6 +177,15 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
 
 // using lod bias variant for sampling as a workaround for Adreno 600 series
 #define texture(sampler, uv)    texture(sampler, uv, 0.0)
+
+// Ambient occlusion where a wall meets the ground: the share of the ambient light taken away at a distance `s` from
+// the corner, in units of the radius, 1 at the corner and 0 from the radius on. (1 - s)^1.5 follows the share of the
+// rays that hit the other surface within the radius. The corner looks the same from both sides, so the walls and the
+// ground around them use the same curve.
+float ambientOcclusionFalloff(float s) {
+    const float t = 1.0 - clamp(s, 0.0, 1.0);
+    return t * sqrt(t);
+}
 
 )";
 };

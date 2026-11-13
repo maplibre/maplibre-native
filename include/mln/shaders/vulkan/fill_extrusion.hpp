@@ -361,15 +361,13 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
 } props;
 
 // Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
-// 0 leaves the color as is. (1 - s)^1.5, with s the height over the radius, follows the share of the rays that hit
-// the ground within the radius. `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
+// 0 leaves the color as is. `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
 float wallAmbientOcclusion(float z) {
     const float intensity = props.light_color_pad.w;
     if (intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
         return 0.0;
     }
-    const float s = clamp(z / props.ambient_occlusion_wall_radius, 0.0, 1.0);
-    return intensity * (1.0 - s) * sqrt(1.0 - s);
+    return intensity * ambientOcclusionFalloff(z / props.ambient_occlusion_wall_radius);
 }
 
 void main() {
@@ -927,15 +925,13 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 // Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
-// 0 leaves the color as is. (1 - s)^1.5, with s the height over the radius, follows the share of the rays that hit
-// the ground within the radius. `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
+// 0 leaves the color as is. `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
 float wallAmbientOcclusion(float z) {
     const float intensity = props.light_color_pad.w;
     if (intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
         return 0.0;
     }
-    const float s = clamp(z / props.ambient_occlusion_wall_radius, 0.0, 1.0);
-    return intensity * (1.0 - s) * sqrt(1.0 - s);
+    return intensity * ambientOcclusionFalloff(z / props.ambient_occlusion_wall_radius);
 }
 
 void main() {

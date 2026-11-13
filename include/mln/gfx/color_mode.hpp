@@ -5,6 +5,8 @@
 #include <mln/util/color.hpp>
 #include <mln/util/hash.hpp>
 
+#include <tuple>
+
 namespace mln {
 namespace gfx {
 
@@ -33,8 +35,10 @@ public:
     using Add = LinearBlend<ColorBlendEquationType::Add>;
     using Subtract = LinearBlend<ColorBlendEquationType::Subtract>;
     using ReverseSubtract = LinearBlend<ColorBlendEquationType::ReverseSubtract>;
+    using Min = ConstantBlend<ColorBlendEquationType::Min>;
+    using Max = ConstantBlend<ColorBlendEquationType::Max>;
 
-    using BlendFunction = variant<Replace, Add, Subtract, ReverseSubtract>;
+    using BlendFunction = variant<Replace, Add, Subtract, ReverseSubtract, Min, Max>;
 
     BlendFunction blendFunction;
     Color blendColor;
@@ -70,7 +74,17 @@ public:
     }
 
     std::size_t hash() const {
+        // Render pipelines are cached by this hash, so it has to tell apart the same blend function
+        // with different factors
+        const auto [equation, srcFactor, dstFactor] = apply_visitor(
+            [](const auto& function) {
+                return std::tuple{function.equation, function.srcFactor, function.dstFactor};
+            },
+            blendFunction);
         return mln::util::hash(blendFunction.which(),
+                               equation,
+                               srcFactor,
+                               dstFactor,
                                blendColor.r,
                                blendColor.g,
                                blendColor.b,
