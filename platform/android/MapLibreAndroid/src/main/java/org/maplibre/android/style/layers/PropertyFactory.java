@@ -1285,6 +1285,46 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
+   * How much of the ambient light is taken away from the bottom of the extrusion's walls, where they meet the ground. At `1`, the bottom of the walls gets only the directional light. The ambient part of the lighting is `1` minus the light's {@link PropertyFactory#intensity}, so the effect is stronger with a weaker light and disappears at an intensity of `1`. A value of `0` disables the effect. Walls of parts that do not reach the ground, i.e. with a {@link PropertyFactory#fillExtrusionBase} above the radius, are not occluded.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionAmbientOcclusionWallIntensity(Float value) {
+    return new PaintPropertyValue<>("fill-extrusion-ambient-occlusion-wall-intensity", value);
+  }
+
+  /**
+   * How much of the ambient light is taken away from the bottom of the extrusion's walls, where they meet the ground. At `1`, the bottom of the walls gets only the directional light. The ambient part of the lighting is `1` minus the light's {@link PropertyFactory#intensity}, so the effect is stronger with a weaker light and disappears at an intensity of `1`. A value of `0` disables the effect. Walls of parts that do not reach the ground, i.e. with a {@link PropertyFactory#fillExtrusionBase} above the radius, are not occluded.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionAmbientOcclusionWallIntensity(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-ambient-occlusion-wall-intensity", expression);
+  }
+
+  /**
+   * Height in meters above the ground over which the ambient occlusion of the walls fades out.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionAmbientOcclusionWallRadius(Float value) {
+    return new PaintPropertyValue<>("fill-extrusion-ambient-occlusion-wall-radius", value);
+  }
+
+  /**
+   * Height in meters above the ground over which the ambient occlusion of the walls fades out.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionAmbientOcclusionWallRadius(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-ambient-occlusion-wall-radius", expression);
+  }
+
+  /**
    * The opacity at which the image will be drawn.
    *
    * @param value a Float value
