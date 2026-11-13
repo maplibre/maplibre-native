@@ -13,7 +13,7 @@
 
 - With 3D terrain on, a `GeoJsonSource` updated with `setGeoJson` or emptied of its features shows the change on the terrain at once, instead of keeping its old content until the next zoom level ([#4816](https://github.com/maplibre/maplibre-native/pull/4816)).
 - With 3D terrain on and the centre clamp enabled, the clamp no longer cancels a running camera animation; the camera is anchored to the ground once the animation ends ([#4768](https://github.com/maplibre/maplibre-native/pull/4768)).
-- With 3D terrain, each height of the DEM stands at the centre of its pixel, where a hillshade or color-relief layer of the same source draws it, as in maplibre-gl-js. The terrain stood half a DEM pixel north-west of its data (about 6 m with 512 px tiles at zoom 12), so the shading of a hillshade did not line up with the slopes it shades.
+- With 3D terrain, each height of the DEM stands at the centre of its pixel, where a hillshade or color-relief layer of the same source draws it, as in maplibre-gl-js. The terrain stood half a DEM pixel north-west of its data (about 6 m with 512 px tiles at zoom 12), so the shading of a hillshade did not line up with the slopes it shades ([#4971](https://github.com/maplibre/maplibre-native/pull/4971)).
 
 ### 🐞 Bug fixes
 
