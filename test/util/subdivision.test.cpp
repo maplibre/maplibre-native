@@ -118,7 +118,7 @@ void expectSoundMesh(const SubdivisionResult& r, bool clippedAtZoomZero = false)
             const double cross = (bx - ax) * (py - ay) - (by - ay) * (px - ax);
             if (cross != 0) continue;
             const double dot = (px - ax) * (bx - ax) + (py - ay) * (by - ay);
-            const double len2 = (bx - ax) * (bx - ax) + (py - ay) * (by - ay);
+            const double len2 = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
             if (dot > 0 && dot < len2) {
                 tJunctions++;
                 break;
