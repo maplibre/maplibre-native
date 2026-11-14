@@ -75,6 +75,16 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 
+int unpack_low_int(int value) {
+    const int low = (value << 16) >> 16;
+    return low;
+}
+
+int unpack_high_int(int value) {
+    const int high = value >> 16;
+    return high;
+}
+
 vec2 unpack_int(int value) {
     const int low  = (value << 16) >> 16;
     const int high = value >> 16;

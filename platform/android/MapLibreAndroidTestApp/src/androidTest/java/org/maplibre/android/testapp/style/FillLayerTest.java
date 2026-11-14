@@ -425,4 +425,17 @@ public class FillLayerTest extends BaseLayerTest {
     layer.setProperties(fillPattern(expression));
     assertEquals(layer.getFillPattern().getExpression(), expression);
   }
+
+  @Test
+  @UiThreadTest
+  public void testFillRoundedCornerDistanceAsConstant() {
+    Timber.i("fill-rounded-corner-distance");
+    assertNotNull(layer);
+    assertNull(layer.getFillRoundedCornerDistance().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillRoundedCornerDistance(propertyValue));
+    assertEquals(layer.getFillRoundedCornerDistance().getValue(), propertyValue);
+  }
 }

@@ -216,6 +216,16 @@ void FillLayer::setFillPatternTransition(jni::JNIEnv&, jlong duration, jlong del
     toFillLayer(*layer).setFillPatternTransition(options);
 }
 
+jni::Local<jni::Object<>> FillLayer::getFillRoundedCornerDistance(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::FillLayer::getDefaultFillRoundedCornerDistance()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillLayer(*layer).getFillRoundedCornerDistance()));
+}
+
 // FillJavaLayerPeerFactory
 
 FillJavaLayerPeerFactory::~FillJavaLayerPeerFactory() = default;
@@ -273,7 +283,8 @@ void FillJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&FillLayer::getFillTranslateAnchor, "nativeGetFillTranslateAnchor"),
         METHOD(&FillLayer::getFillPatternTransition, "nativeGetFillPatternTransition"),
         METHOD(&FillLayer::setFillPatternTransition, "nativeSetFillPatternTransition"),
-        METHOD(&FillLayer::getFillPattern, "nativeGetFillPattern"));
+        METHOD(&FillLayer::getFillPattern, "nativeGetFillPattern"),
+        METHOD(&FillLayer::getFillRoundedCornerDistance, "nativeGetFillRoundedCornerDistance"));
 }
 
 } // namespace android
