@@ -1,4 +1,7 @@
 #include <mln/map/map_options.hpp>
+#include <mln/math/clamp.hpp>
+
+#include <cmath>
 
 namespace mln {
 
@@ -9,6 +12,7 @@ public:
     ViewportMode viewportMode = ViewportMode::Default;
     NorthOrientation orientation = NorthOrientation::Upwards;
     bool crossSourceCollisions = true;
+    float keepUprightMargin = 0.0f;
     bool captureRenderedFeatures = false;
     Size size = {64, 64};
     float pixelRatio = 1.0;
@@ -55,6 +59,17 @@ MapOptions& MapOptions::withCrossSourceCollisions(bool enableCollisions) {
 
 bool MapOptions::crossSourceCollisions() const {
     return impl_->crossSourceCollisions;
+}
+
+MapOptions& MapOptions::withKeepUprightMargin(float degrees) {
+    if (!std::isnan(degrees)) {
+        impl_->keepUprightMargin = util::clamp(degrees, 0.0f, 45.0f);
+    }
+    return *this;
+}
+
+float MapOptions::keepUprightMargin() const {
+    return impl_->keepUprightMargin;
 }
 
 MapOptions& MapOptions::withNorthOrientation(NorthOrientation orientation) {

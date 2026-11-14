@@ -41,6 +41,12 @@ bool NativeMapOptions::crossSourceCollisions(jni::JNIEnv &env, const jni::Object
     return obj.Get(env, crossSourceCollisionsField);
 }
 
+float NativeMapOptions::keepUprightMargin(jni::JNIEnv &env, const jni::Object<NativeMapOptions> &obj) {
+    auto &javaClass = jni::Class<NativeMapOptions>::Singleton(env);
+    auto keepUprightMarginField = javaClass.GetField<float>(env, "keepUprightMargin");
+    return obj.Get(env, keepUprightMarginField);
+}
+
 bool NativeMapOptions::asyncRendererCleanup(jni::JNIEnv &env, const jni::Object<NativeMapOptions> &obj) {
     auto &javaClass = jni::Class<NativeMapOptions>::Singleton(env);
     auto asyncRendererCleanupField = javaClass.GetField<jni::jboolean>(env, "asyncRendererCleanup");

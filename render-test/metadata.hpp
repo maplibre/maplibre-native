@@ -163,6 +163,7 @@ struct TestMetadata {
     mln::MapMode mapMode = mln::MapMode::Static;
     mln::MapDebugOptions debug = mln::MapDebugOptions::NoDebug;
     bool crossSourceCollisions = true;
+    float keepUprightMargin = 0.0f;
     bool axonometric = false;
     double xSkew = 0.0;
     double ySkew = 1.0;

@@ -92,6 +92,7 @@ public:
     const MapMode mode;
     const float pixelRatio;
     const bool crossSourceCollisions;
+    const float keepUprightMargin;
     const bool fastPFOREnabled;
     const bool captureRenderedFeatures;
 

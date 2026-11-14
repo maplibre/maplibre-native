@@ -245,6 +245,12 @@ public:
     // support placement for orientation variants.
     std::optional<style::TextWritingModeType> placedOrientation;
     float angle = 0;
+    // For a line label kept upright, with a keep-upright margin (MapOptions::withKeepUprightMargin):
+    // whether it was last drawn flipped (from its last glyph to its first); unset until it is drawn,
+    // and always without a margin. It lets the label keep its reading direction while the map rotates
+    // close to the vertical of its line, see lineLabelNeedsFlip(). Placement syncs it between the
+    // copies of a label (LineLabelDirections).
+    std::optional<bool> keepUprightFlipped;
 
     // Reference to placed icon, only applicable for text symbols.
     std::optional<size_t> placedIconIndex;
@@ -394,6 +400,15 @@ public:
     mutable bool justReloaded : 1;
     bool hasVariablePlacement : 1;
     bool hasUninitializedSymbols : 1;
+    // Set when the bucket enters the cross tile index (a new bucket, or its tile back from the cache)
+    // and cleared once Placement has synced the reading directions of its line labels: until then the
+    // directions they were last drawn with may be out of date, so they are not passed on to other
+    // copies of the labels (see LineLabelDirections).
+    bool lineLabelDirectionsStale : 1;
+    // Set when a symbol of this bucket that was out of view (overscaled tile) gets a cross tile id
+    // again, and cleared once Placement has synced the reading directions of its line labels: the
+    // symbol may now be a copy of a label drawn elsewhere in the meantime (see LineLabelDirections).
+    bool crossTileIDsReassigned : 1;
 
     std::vector<SymbolInstance> symbolInstances;
     const std::vector<SortKeyRange> sortKeyRanges;

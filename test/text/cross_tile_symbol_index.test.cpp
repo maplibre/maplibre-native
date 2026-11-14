@@ -441,3 +441,101 @@ TEST(CrossTileSymbolLayerIndex, offscreenSymbols) {
     EXPECT_EQ(symbolBucket.symbolInstances.at(0).getCrossTileID(), 1u);
     EXPECT_EQ(symbolBucket.symbolInstances.at(1).getCrossTileID(), 2u);
 }
+
+TEST(CrossTileSymbolLayerIndex, lineLabelDirectionsStale) {
+    // A bucket new to the index (a new one, or its tile back from the cache) may hold out of date
+    // reading directions of its line labels; one that stays in the index, even updated, does not.
+    uint32_t maxCrossTileID = 0;
+    CrossTileSymbolLayerIndex index(maxCrossTileID);
+
+    Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout =
+        makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>();
+    OverscaledTileID tileId(7, 0, 6, 18, 24);
+    std::vector<SymbolInstance> instances;
+    instances.push_back(makeSymbolInstance(1000, 1000, u"Washington"));
+    std::vector<SortKeyRange> ranges;
+    SymbolBucket bucket{layout,
+                        {},
+                        16.0f,
+                        1.0f,
+                        0,
+                        false,
+                        false,
+                        "test",
+                        std::move(instances),
+                        std::move(ranges),
+                        1.0f,
+                        false,
+                        {},
+                        false /*iconsInText*/};
+    EXPECT_FALSE(bucket.lineLabelDirectionsStale);
+
+    // New, with its symbol out of view.
+    mat4 posMatrix;
+    populatePosMatrix(posMatrix, tileId, 60.0, 25.0, 7.0);
+    EXPECT_TRUE(index.addBucket(tileId, posMatrix, bucket));
+    EXPECT_TRUE(bucket.lineLabelDirectionsStale);
+    bucket.lineLabelDirectionsStale = false; // as Placement does once it has synced them
+
+    // Updated in place as its symbol comes into view, then unchanged.
+    populatePosMatrix(posMatrix, tileId, 39.0, -76.0, 7.0);
+    EXPECT_TRUE(index.addBucket(tileId, posMatrix, bucket));
+    EXPECT_FALSE(bucket.lineLabelDirectionsStale);
+    EXPECT_FALSE(index.addBucket(tileId, posMatrix, bucket));
+    EXPECT_FALSE(bucket.lineLabelDirectionsStale);
+
+    // Out of view, then back from the cache.
+    index.removeStaleBuckets({});
+    EXPECT_TRUE(index.addBucket(tileId, posMatrix, bucket));
+    EXPECT_TRUE(bucket.lineLabelDirectionsStale);
+}
+
+TEST(CrossTileSymbolLayerIndex, crossTileIDsReassigned) {
+    // An overscaled tile's symbols out of view have no id; one that comes back into view gets an id
+    // again, maybe the id of a copy in another tile.
+    uint32_t maxCrossTileID = 0;
+    CrossTileSymbolLayerIndex index(maxCrossTileID);
+
+    Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout =
+        makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>();
+    OverscaledTileID tileId(7, 0, 6, 18, 24);
+    std::vector<SymbolInstance> instances;
+    instances.push_back(makeSymbolInstance(100, 4096, u"West"));
+    instances.push_back(makeSymbolInstance(8100, 4096, u"East"));
+    std::vector<SortKeyRange> ranges;
+    SymbolBucket bucket{layout,
+                        {},
+                        16.0f,
+                        1.0f,
+                        0,
+                        false,
+                        false,
+                        "test",
+                        std::move(instances),
+                        std::move(ranges),
+                        1.0f,
+                        false,
+                        {},
+                        false /*iconsInText*/};
+
+    // New, with the view left of the tile: West in view, East out of it. A new bucket is marked as
+    // such, not as reassigned.
+    mat4 posMatrix;
+    populatePosMatrix(posMatrix, tileId, 38.82, -80.12, 7.0);
+    index.addBucket(tileId, posMatrix, bucket);
+    ASSERT_NE(bucket.symbolInstances.at(0).getCrossTileID(), SymbolInstance::invalidCrossTileID);
+    ASSERT_EQ(bucket.symbolInstances.at(1).getCrossTileID(), SymbolInstance::invalidCrossTileID);
+    EXPECT_FALSE(bucket.crossTileIDsReassigned);
+    bucket.lineLabelDirectionsStale = false;
+
+    // Updated (East still out of view): West keeping its id is no reason to sync.
+    index.addBucket(tileId, posMatrix, bucket);
+    EXPECT_FALSE(bucket.crossTileIDsReassigned);
+
+    // East back in view.
+    populatePosMatrix(posMatrix, tileId, 39.0, -76.0, 7.0);
+    index.addBucket(tileId, posMatrix, bucket);
+    EXPECT_NE(bucket.symbolInstances.at(1).getCrossTileID(), SymbolInstance::invalidCrossTileID);
+    EXPECT_TRUE(bucket.crossTileIDsReassigned);
+    EXPECT_FALSE(bucket.lineLabelDirectionsStale);
+}

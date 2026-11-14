@@ -92,6 +92,43 @@ private:
     bool crossSourceCollisions;
 };
 
+/**
+ * @brief The reading direction of line labels kept upright, by cross tile id, used with a keep-upright
+ * margin (MapOptions::withKeepUprightMargin) so that every copy of a label (tiles of two zoom levels,
+ * a tile back from the cache) reads the way the label was last drawn.
+ *
+ * Between two syncs, each copy keeps its own direction from frame to frame
+ * (PlacedSymbol::keepUprightFlipped). Placement syncs a layer when a new placement draws it for the
+ * first time, when one of its buckets has just entered the cross tile index or has given a symbol back
+ * in view an id again, or when its set of buckets changes (see Placement::syncLineLabelDirections), not
+ * on every frame: first remember() for every bucket of the layer, then restore() for every bucket of it.
+ * Only text is synced, icons are never read nor written.
+ *
+ * What is shared is the reading direction on the map, not the flag: the copies of a label are matched
+ * by text and position only, and the line of one copy may run the other way than the line of another
+ * (tiles merge or cut lines differently), so the same reading direction can be drawn flipped in one
+ * copy and unflipped in the other.
+ */
+class LineLabelDirections {
+public:
+    /// Records the reading direction of each label of the bucket that has been drawn since the last
+    /// sync: not hidden, in a bucket that is not new to the cross tile index
+    /// (SymbolBucket::lineLabelDirectionsStale).
+    void remember(const SymbolBucket&);
+    /// Sets the direction of each label of the bucket, drawn or not, to the recorded one, or else to the
+    /// one recorded in `older` (the previous placement's), or unsets it: such a label is decided as if it
+    /// were drawn for the first time. Clears SymbolBucket::lineLabelDirectionsStale and
+    /// SymbolBucket::crossTileIDsReassigned.
+    void restore(SymbolBucket&, const LineLabelDirections* older) const;
+
+    /// The direction in which the label reads, in tile coordinates (the axes are the same in the tiles of
+    /// every zoom level); its length has no meaning.
+    std::optional<Point<float>> readingDirection(uint32_t crossTileID) const;
+
+private:
+    std::unordered_map<uint32_t, Point<float>> directions;
+};
+
 class Placement;
 class PlacementContext;
 class PlacementController {
@@ -178,6 +215,13 @@ protected:
                                const SymbolInstance&,
                                style::TextWritingModeType orientation) const;
     void markUsedOrientation(SymbolBucket&, style::TextWritingModeType, const SymbolInstance&) const;
+    // With a keep-upright margin, syncs the reading directions of the line labels of one layer (see
+    // LineLabelDirections) if this placement has not synced it yet, if one of its buckets has just
+    // entered the cross tile index or has given a symbol back in view an id again, or if its set of
+    // buckets has changed since; otherwise, and without a margin, does nothing. Called whenever the opacities are
+    // updated, which can be on every frame: a bucket of an overscaled tile with symbols out of view is registered again
+    // on every frame.
+    void syncLineLabelDirections(const std::string& layerID, const LayerPlacementData&) const;
     const Placement* getPrevPlacement() const { return prevPlacement ? prevPlacement->get() : nullptr; }
     bool isTiltedView() const;
 
@@ -195,6 +239,12 @@ protected:
     std::unordered_map<uint32_t, JointOpacityState> opacities;
     std::unordered_map<uint32_t, VariableOffset> variableOffsets;
     std::unordered_map<uint32_t, style::TextWritingModeType> placedOrientations;
+    // MapOptions::withKeepUprightMargin, in degrees; 0 (the default) outside MapMode::Continuous.
+    float keepUprightMargin = 0.0f;
+    // Synced in updateLayerBuckets(), next to the opacities it depends on; unused without a margin.
+    mutable LineLabelDirections lineLabelDirections;
+    // The buckets of each layer (bucket instance ids, sorted) when this placement last synced it.
+    mutable std::unordered_map<std::string, std::vector<uint32_t>> lineLabelSyncedBuckets;
 
     std::unordered_map<uint32_t, RetainedQueryData> retainedQueryData;
     CollisionGroups collisionGroups;

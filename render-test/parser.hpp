@@ -27,6 +27,9 @@ TestMetrics readExpectedMetrics(const mln::filesystem::path& path);
 TestMetadata parseTestMetadata(const TestPaths& paths);
 TestOperations parseTestOperations(TestMetadata& metadata);
 
+// Continuous mode: renders frames until the map is idle (no still image can be requested in that mode).
+bool renderUntilIdle(TestContext& ctx);
+
 std::string createResultPage(const TestStatistics&, const std::vector<TestMetadata>&, bool shuffle, uint32_t seed);
 
 std::string toJSON(const mln::Value& value, unsigned indent, bool singleLine);

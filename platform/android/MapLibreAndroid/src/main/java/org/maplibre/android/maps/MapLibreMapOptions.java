@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.FloatRange;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -93,6 +94,7 @@ public class MapLibreMapOptions implements Parcelable {
   private float pixelRatio;
 
   private boolean crossSourceCollisions = true;
+  private float keepUprightMargin = 0f;
 
   private boolean actionJournalEnabled = false;
   private String actionJournalPath = "";
@@ -161,6 +163,7 @@ public class MapLibreMapOptions implements Parcelable {
     pixelRatio = in.readFloat();
     foregroundLoadColor = in.readInt();
     crossSourceCollisions = in.readByte() != 0;
+    keepUprightMargin = in.readFloat();
 
     actionJournalEnabled = in.readByte() != 0;
     actionJournalPath = in.readString();
@@ -327,6 +330,9 @@ public class MapLibreMapOptions implements Parcelable {
       );
       maplibreMapOptions.crossSourceCollisions(
         typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_cross_source_collisions, true)
+      );
+      maplibreMapOptions.keepUprightMargin(
+        typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_keepUprightMargin, 0f)
       );
 
       maplibreMapOptions.actionJournalEnabled(
@@ -778,6 +784,34 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
+   * Set how far past the vertical a line label kept upright may read before it is turned over, in
+   * degrees. Defaults to 0: a label is turned over as soon as it would read from right to left,
+   * decided anew on every frame, as in MapLibre GL JS.
+   * <p>
+   * With a margin, a label keeps the reading direction it was last drawn with until that direction
+   * is more than the margin past the vertical of the screen, and all copies of a label share it.
+   * This keeps labels on lines close to the vertical, such as the road ahead in a map rotated with
+   * the direction of travel, from turning over and back as the map rotates. A label drawn for the
+   * first time is decided as without the margin.
+   * </p>
+   * <p>
+   * It applies to text placed along lines with text-keep-upright and text-rotation-alignment map.
+   * Icons, icon-keep-upright included, still turn over as before, and so does the background of an
+   * icon-text-fit icon: while a line is within the margin of the vertical, a label and its icon can
+   * face opposite ways.
+   * </p>
+   *
+   * @param keepUprightMargin the margin in degrees, from 0 to 45; the map clamps values outside that
+   *                          range and ignores NaN
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions keepUprightMargin(@FloatRange(from = 0.0, to = 45.0) float keepUprightMargin) {
+    this.keepUprightMargin = keepUprightMargin;
+    return this;
+  }
+
+  /**
    * Enable action journal event logging, defaults to false.
    * <p>
    * If set to true, enables map event file logging (obtainable via MapView#getActionJournalLog)
@@ -973,6 +1007,15 @@ public class MapLibreMapOptions implements Parcelable {
    */
   public boolean getCrossSourceCollisions() {
     return crossSourceCollisions;
+  }
+
+  /**
+   * Get how far past the vertical a line label kept upright may read before it is turned over.
+   *
+   * @return the margin in degrees, 0 by default
+   */
+  public float getKeepUprightMargin() {
+    return keepUprightMargin;
   }
 
   /**
@@ -1433,6 +1476,7 @@ public class MapLibreMapOptions implements Parcelable {
     dest.writeFloat(pixelRatio);
     dest.writeInt(foregroundLoadColor);
     dest.writeByte((byte) (crossSourceCollisions ? 1 : 0));
+    dest.writeFloat(keepUprightMargin);
 
     dest.writeByte((byte) (actionJournalEnabled ? 1 : 0));
     dest.writeString(actionJournalPath);
@@ -1563,6 +1607,10 @@ public class MapLibreMapOptions implements Parcelable {
       return false;
     }
 
+    if (Float.compare(keepUprightMargin, options.keepUprightMargin) != 0) {
+      return false;
+    }
+
     if (actionJournalEnabled != options.actionJournalEnabled) {
       return false;
     }
@@ -1638,6 +1686,7 @@ public class MapLibreMapOptions implements Parcelable {
     result = 31 * result + Arrays.hashCode(localIdeographFontFamilies);
     result = 31 * result + (int) pixelRatio;
     result = 31 * result + (crossSourceCollisions ? 1 : 0);
+    result = 31 * result + Float.floatToIntBits(keepUprightMargin);
     result = 31 * result + (actionJournalEnabled ? 1 : 0);
     result = 31 * result + (actionJournalPath != null ? actionJournalPath.hashCode() : 0);
     result = 31 * result + (int) actionJournalLogFileSize;

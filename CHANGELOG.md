@@ -5,6 +5,7 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+- [core] Add `MapOptions::withKeepUprightMargin`, off by default: with a margin in degrees, a line label with `text-keep-upright` keeps the reading direction it was drawn with until it reads more than the margin past the vertical, and all copies of the label share that direction. It stops labels on lines close to the vertical of a rotating map, such as the road ahead in a map turned with the direction of travel, from flipping back and forth. Icons are not affected ([#4904](https://github.com/maplibre/maplibre-native/pull/4904)).
 - [core] Add support for colorizing SDF fill patterns with `fill-color` ([#4526](https://github.com/maplibre/maplibre-native/issues/4526)).
 - [core] Add support for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression and the root [`state`](https://maplibre.org/maplibre-style-spec/root/#state) style property in filters, layout properties, and paint properties, including the runtime API `style::Style::setGlobalStateProperty` / `style::Style::getGlobalState`. Calls to `setGlobalStateProperty` before the style has loaded are rejected, matching MapLibre GL JS ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
 - [core] Add `style::Style::isLoaded` to report whether style JSON has finished loading and parsing without waiting for source or sprite resources ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).

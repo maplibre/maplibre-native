@@ -316,6 +316,15 @@ class MapLibreMapOptionsTest : BaseTest() {
     }
 
     @Test
+    fun testKeepUprightMargin() {
+        // Default value
+        Assert.assertEquals(0f, MapLibreMapOptions().keepUprightMargin, 0f)
+
+        // check mutations
+        Assert.assertEquals(20f, MapLibreMapOptions().keepUprightMargin(20f).keepUprightMargin, 0f)
+    }
+
+    @Test
     fun testLocalIdeographFontFamily_enabledByDefault() {
         val options = MapLibreMapOptions.createFromAttributes(RuntimeEnvironment.application, null)
         Assert.assertEquals(
