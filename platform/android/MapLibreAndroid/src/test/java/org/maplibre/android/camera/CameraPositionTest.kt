@@ -5,6 +5,7 @@ import android.os.Parcel
 import org.maplibre.android.R
 import org.maplibre.android.camera.CameraUpdateFactory.ZoomUpdate
 import org.maplibre.android.camera.CameraUpdateFactory.zoomTo
+import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.geometry.LatLng
 import org.junit.Assert
 import org.junit.Test
@@ -176,6 +177,23 @@ class CameraPositionTest : BaseTest() {
         parcel.setDataPosition(0)
         val cameraPosition2 = CameraPosition.CREATOR.createFromParcel(parcel)
         Assert.assertEquals("Parcel should match original object", cameraPosition1, cameraPosition2)
+    }
+
+    @Test
+    fun testTiltAboveDefaultMaximumIsKept() {
+        val cameraPosition = CameraPosition.Builder().tilt(75.0).build()
+        Assert.assertEquals("tilt up to the limit should be kept", 75.0, cameraPosition.tilt, DELTA)
+    }
+
+    @Test
+    fun testTiltClampedToLimit() {
+        val cameraPosition = CameraPosition.Builder().tilt(90.0).build()
+        Assert.assertEquals(
+            "tilt should be clamped to the limit",
+            MapLibreConstants.MAXIMUM_TILT_LIMIT,
+            cameraPosition.tilt,
+            DELTA
+        )
     }
 
     companion object {

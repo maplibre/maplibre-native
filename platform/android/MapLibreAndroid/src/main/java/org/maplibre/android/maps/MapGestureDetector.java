@@ -864,7 +864,7 @@ final class MapGestureDetector {
       // Get tilt value (scale and clamp)
       double pitch = transform.getTilt();
       pitch -= MapLibreConstants.SHOVE_PIXEL_CHANGE_FACTOR * deltaPixelsSinceLast;
-      pitch = MathUtils.clamp(pitch, MapLibreConstants.MINIMUM_TILT, MapLibreConstants.MAXIMUM_TILT);
+      pitch = MathUtils.clamp(pitch, transform.getMinPitch(), transform.getMaxPitch());
 
       // Tilt the map
       transform.setTilt(pitch);

@@ -2,6 +2,10 @@
 
 ## main
 
+### ✨ Features and improvements
+
+- Allow a maximum pitch up to 85° (`MapLibreConstants.MAXIMUM_PITCH_LIMIT`), as in MapLibre GL JS. `setMaxPitchPreference()` and `MapLibreMapOptions.maxPitchPreference()` now accept values above 60°, `CameraPosition.Builder.tilt()` no longer clamps them to 60°, and the tilt gesture follows the map's minimum and maximum pitch. The default maximum stays 60°. With top padding the map draws a lower pitch than the maximum, as before ([#1909](https://github.com/maplibre/maplibre-native/issues/1909), [#4530](https://github.com/maplibre/maplibre-native/issues/4530)).
+
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 
 ### 🐞 Bug fixes

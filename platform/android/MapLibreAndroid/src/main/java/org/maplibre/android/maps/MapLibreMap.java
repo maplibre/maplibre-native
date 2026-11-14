@@ -537,7 +537,7 @@ public final class MapLibreMap {
    * @param minPitch The new minimum Pitch.
    */
   public void setMinPitchPreference(
-    @FloatRange(from = MapLibreConstants.MINIMUM_PITCH, to = MapLibreConstants.MAXIMUM_PITCH) double minPitch) {
+    @FloatRange(from = MapLibreConstants.MINIMUM_PITCH, to = MapLibreConstants.MAXIMUM_PITCH_LIMIT) double minPitch) {
     transform.setMinPitch(minPitch);
   }
 
@@ -561,13 +561,19 @@ public final class MapLibreMap {
    * Sets the maximum Pitch the map can be displayed at.
    * </p>
    * <p>
-   * The default and upper bound for maximum Pitch is 60.
+   * The default maximum Pitch is {@link MapLibreConstants#MAXIMUM_PITCH} (60); it can be raised
+   * up to {@link MapLibreConstants#MAXIMUM_PITCH_LIMIT} (85).
+   * </p>
+   * <p>
+   * With top padding (for example from {@link CameraPosition.Builder#padding}), the map lowers
+   * the pitch it draws so that the area above the shifted center stays within the field of view;
+   * a camera at a steep maximum pitch with top padding is drawn at a lower pitch than requested.
    * </p>
    *
    * @param maxPitch The new maximum Pitch.
    */
   public void setMaxPitchPreference(@FloatRange(from = MapLibreConstants.MINIMUM_PITCH,
-    to = MapLibreConstants.MAXIMUM_PITCH) double maxPitch) {
+    to = MapLibreConstants.MAXIMUM_PITCH_LIMIT) double maxPitch) {
     transform.setMaxPitch(maxPitch);
   }
 
@@ -1752,7 +1758,7 @@ public final class MapLibreMap {
                                                  @FloatRange(from = MapLibreConstants.MINIMUM_DIRECTION,
                                                    to = MapLibreConstants.MAXIMUM_DIRECTION) double bearing,
                                                  @FloatRange(from = MapLibreConstants.MINIMUM_TILT,
-                                                   to = MapLibreConstants.MAXIMUM_TILT) double tilt) {
+                                                   to = MapLibreConstants.MAXIMUM_TILT_LIMIT) double tilt) {
     return getCameraForLatLngBounds(latLngBounds, new int[] {0, 0, 0, 0}, bearing, tilt);
   }
 
@@ -1772,7 +1778,7 @@ public final class MapLibreMap {
                                                  @FloatRange(from = MapLibreConstants.MINIMUM_DIRECTION,
                                                    to = MapLibreConstants.MAXIMUM_DIRECTION) double bearing,
                                                  @FloatRange(from = MapLibreConstants.MINIMUM_TILT,
-                                                   to = MapLibreConstants.MAXIMUM_TILT) double tilt) {
+                                                   to = MapLibreConstants.MAXIMUM_TILT_LIMIT) double tilt) {
     return nativeMapView.getCameraForLatLngBounds(latLngBounds, padding, bearing, tilt);
   }
 
@@ -1815,7 +1821,7 @@ public final class MapLibreMap {
                                              @FloatRange(from = MapLibreConstants.MINIMUM_DIRECTION,
                                                to = MapLibreConstants.MAXIMUM_DIRECTION) double bearing,
                                              @FloatRange(from = MapLibreConstants.MINIMUM_TILT,
-                                               to = MapLibreConstants.MAXIMUM_TILT) double tilt) {
+                                               to = MapLibreConstants.MAXIMUM_TILT_LIMIT) double tilt) {
     return getCameraForGeometry(geometry, new int[] {0, 0, 0, 0}, bearing, tilt);
   }
 
@@ -1834,7 +1840,7 @@ public final class MapLibreMap {
                                              @FloatRange(from = MapLibreConstants.MINIMUM_DIRECTION,
                                                to = MapLibreConstants.MAXIMUM_DIRECTION) double bearing,
                                              @FloatRange(from = MapLibreConstants.MINIMUM_TILT,
-                                               to = MapLibreConstants.MAXIMUM_TILT) double tilt) {
+                                               to = MapLibreConstants.MAXIMUM_TILT_LIMIT) double tilt) {
     return nativeMapView.getCameraForGeometry(geometry, padding, bearing, tilt);
   }
 
