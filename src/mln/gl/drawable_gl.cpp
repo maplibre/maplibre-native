@@ -10,6 +10,8 @@
 #include <mln/util/instrumentation.hpp>
 #include <mln/util/logging.hpp>
 
+#include <atomic>
+
 namespace mln {
 namespace gl {
 
@@ -141,6 +143,12 @@ struct IndexBufferGL : public gfx::IndexBufferBase {
     ~IndexBufferGL() override = default;
 
     std::unique_ptr<mln::gfx::IndexBuffer> buffer;
+
+    // Tells this buffer apart from one it replaced, whose GL name it may reuse.
+    const std::uint64_t serial = nextSerial++;
+
+private:
+    static inline std::atomic<std::uint64_t> nextSerial{1};
 };
 
 void DrawableGL::upload(gfx::UploadPass& uploadPass) {
@@ -219,13 +227,20 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
             }
         }
 
-        if (!glSeg.getVertexArray().isValid() && impl->indexes) {
+        if (!impl->indexes) {
+            continue;
+        }
+
+        // The vertex array keeps the index buffer it was bound with, so bind a new one when
+        // the index vector has replaced its buffer, as a symbol bucket does when it sorts.
+        const auto& indexBuffer = static_cast<IndexBufferGL&>(*impl->indexes->getBuffer());
+        if (!glSeg.getVertexArray().isValid() || glSeg.getIndexBufferSerial() != indexBuffer.serial) {
             auto vertexArray = glContext.createVertexArray();
-            const auto& indexBuffer = static_cast<IndexBufferGL&>(*impl->indexes->getBuffer());
             vertexArray.bind(glContext, *indexBuffer.buffer, impl->attributeBindings);
             assert(vertexArray.isValid());
             if (vertexArray.isValid()) {
                 glSeg.setVertexArray(std::move(vertexArray));
+                glSeg.setIndexBufferSerial(indexBuffer.serial);
             }
         }
     }

@@ -152,6 +152,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/test/gl/bucket.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/enum.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/gl/drawable.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/gl_functions.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/object.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/resource_pool.test.cpp
