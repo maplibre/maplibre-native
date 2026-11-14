@@ -4,6 +4,7 @@
 
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
+- core: fix renders that hang when retried after a glyph range fails to load ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)) (by [@johncarmack1984](https://github.com/johncarmack1984))
 
 ## 6.5.0-pre.1
 ### ✨ Features and improvements
