@@ -135,8 +135,8 @@ layout (std140) uniform FillEvaluatedPropsUBO {
 
 uniform sampler2D u_image;
 
-in vec2 v_pos_a;
-in vec2 v_pos_b;
+in highp vec2 v_pos_a;
+in highp vec2 v_pos_b;
 
 #ifndef HAS_UNIFORM_u_color
 in highp vec4 color;
