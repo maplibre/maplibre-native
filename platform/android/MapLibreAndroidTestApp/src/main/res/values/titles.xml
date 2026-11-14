@@ -3,6 +3,7 @@
     <string name="activity_map_fragment_support">Support Map Fragment</string>
     <string name="activity_map_fragment">Map Fragment</string>
     <string name="activity_map_fragment_backstack">Backstack Map Fragment</string>
+    <string name="activity_reused_map_view">Reused MapView</string>
     <string name="activity_multimap">Multiple Maps on Screen</string>
     <string name="activity_long_running_maps">Long running Maps</string>
     <string name="activity_disappearing_route">Disappearing Route</string>
