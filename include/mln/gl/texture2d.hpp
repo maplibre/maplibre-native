@@ -61,6 +61,10 @@ public:
     /// @brief Unbind the texture, if it was bound
     void unbind() noexcept;
 
+    /// @brief Build the mip chain from the base level, for a texture that has just been rendered to.
+    /// The texture is sampled with the chain from the next bind on, if its sampler is mipmapped.
+    void generateMipmaps() noexcept;
+
 private:
     void allocateTexture();
     void updateTextureData(const void* data = nullptr) noexcept;
@@ -77,6 +81,9 @@ private:
     Size size{0, 0};
     bool samplerStateDirty{false};
     bool storageDirty{false};
+    /// The texture's levels below the base one hold a chain built from the current base level.
+    /// Sampling a mip filter from an incomplete chain gives black, so none is used until then.
+    bool mipChainBuilt{false};
 
     int32_t boundTextureUnit{-1};
     int32_t boundLocation{-1};

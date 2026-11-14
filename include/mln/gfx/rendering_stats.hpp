@@ -96,6 +96,10 @@ struct RenderingStats {
     /// misses); panning a static terrain scene should keep this at 0
     int numDrapeTargetsRendered = 0;
 
+    /// Number of mip chains rebuilt for a mipmapped render target (a terrain drape target),
+    /// one each time it is rendered: still frames and pans that re-render nothing leave it alone
+    int numMipmapChainsBuilt = 0;
+
     /// Number of terrain drape targets that ran the full per-target coverage scan
     /// this frame (i.e. did not hit the global-signature fast path). Should be ~0
     /// on a static scene; if it stays high, the short-circuit is not engaging
