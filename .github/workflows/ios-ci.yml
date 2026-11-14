@@ -321,7 +321,6 @@ jobs:
           key: ${{ steps.dawn-sources.outputs.cache-primary-key }}
 
       - name: Build mbgl-core and iOS SDK
-        continue-on-error: true
         run: cmake --build build-ios-webgpu-dawn --target mbgl-core ios-sdk-static
 
       - name: Show sccache stats
@@ -370,7 +369,6 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Build mbgl-core and iOS SDK
-        continue-on-error: true
         run: RUSTC_WRAPPER=sccache cmake --build build-ios-webgpu-wgpu --target mbgl-core ios-sdk-static
 
       - name: Show sccache stats
