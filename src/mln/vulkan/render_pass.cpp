@@ -56,6 +56,13 @@ void RenderPass::endEncoding() {
 
 void RenderPass::clearStencil(uint32_t value) const {
     const auto& resource = descriptor.renderable.getResource<RenderableResource>();
+
+    // Offscreen targets (e.g. the terrain drape RTT) have no stencil attachment;
+    // clearing it would be invalid, so there is nothing to do.
+    if (!resource.hasStencilAttachment()) {
+        return;
+    }
+
     const auto& extent = resource.getExtent();
 
     const auto attach = vk::ClearAttachment()

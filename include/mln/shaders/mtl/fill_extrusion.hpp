@@ -30,9 +30,17 @@ struct alignas(16) FillExtrusionDrawableUBO {
     /* 100 */ float pattern_from_t;
     /* 104 */ float pattern_to_t;
     /* 108 */ float pad1;
-    /* 112 */
+
+    // 3D terrain elevation
+    /* 112 */ float4 dem_coords;
+    /* 128 */ float4 dem_unpack;
+    /* 144 */ float dem_dim;
+    /* 148 */ float dem_exaggeration;
+    /* 152 */ float dem_enabled;
+    /* 156 */ float pad2;
+    /* 160 */
 };
-static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16, "wrong size");
+static_assert(sizeof(FillExtrusionDrawableUBO) == 10 * 16, "wrong size");
 
 struct alignas(16) FillExtrusionTilePropsUBO {
     /*  0 */ float4 pattern_from;
@@ -69,9 +77,9 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto source = R"(
@@ -89,6 +97,9 @@ struct VertexStage {
 #if !defined(HAS_UNIFORM_u_height)
     float2 height [[attribute(4)]];
 #endif
+
+    // Polygon centroid, for the terrain elevation lookup
+    short2 centroid [[attribute(5)]];
 };
 
 struct FragmentStage {
@@ -104,20 +115,32 @@ struct FragmentOutput {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
-                                device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]]) {
+                                device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
+                                texture2d<float, access::sample> demTexture [[texture(0)]],
+                                sampler demSampler [[sampler(0)]]) {
 
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    auto base   = props.light_position_base.w;
 #else
-    const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
+    auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    auto height = props.height;
 #else
-    const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
+    auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
+
+    // Raise the whole extrusion by the terrain elevation sampled once at the
+    // polygon centroid (so it doesn't shear across a slope), and drop
+    // ground-level floors slightly so buildings don't hang off a slope
+    // (mirrors the GL fill_extrusion.vertex.glsl / maplibre-gl-js)
+    const float ele = get_elevation(float2(vertx.centroid), demTexture, demSampler, drawable.dem_coords,
+                                    drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration,
+                                    drawable.dem_enabled);
+    base += ele - (base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+    height += ele;
 
     const float3 normal = float3(0.0, 0.0, 1.0);
     const float t = 1.0;
@@ -194,7 +217,7 @@ struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::M
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 5> instanceAttributes;
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto source = R"(
@@ -213,9 +236,14 @@ struct VertexStage {
 #endif
 };
 
+// Aliases the 12-byte FillExtrusionLayoutVertex (shared vertex buffer used as
+// the instance buffer); centroid_pos is the polygon centroid for terrain
+// elevation. Keep the layout in sync with the C++ struct and the Vulkan
+// OutlineInstance.
 struct OutlineInstance {
     short2 pos;
     ushort2 decimals_ed;
+    short2 centroid_pos;
 };
 
 struct FragmentStage {
@@ -233,7 +261,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
                                 uint instanceID [[ instance_id ]],
-                                device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]]) {
+                                device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]],
+                                texture2d<float, access::sample> demTexture [[texture(0)]],
+                                sampler demSampler [[sampler(0)]]) {
 
     bool isDiscarded = glMod(float(outline[instanceID].decimals_ed.x), 2.0) > 0.0;
     if (isDiscarded) {
@@ -246,15 +276,24 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    auto base   = props.light_position_base.w;
 #else
-    const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
+    auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    auto height = props.height;
 #else
-    const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
+    auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
+
+    // Same rigid whole-building lift as the roof shader: elevation at the
+    // polygon centroid (from the aliased instance record), so walls and roof
+    // stay attached on a slope
+    const float ele = get_elevation(float2(outline[instanceID].centroid_pos), demTexture, demSampler,
+                                    drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim,
+                                    drawable.dem_exaggeration, drawable.dem_enabled);
+    base += ele - (base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+    height += ele;
 
     const float2 p1 = float2(outline[instanceID + 0].pos) + unpack_float(float(outline[instanceID + 0].decimals_ed.x / 2)) / 128.0;
     const float2 p2 = float2(outline[instanceID + 1].pos) + unpack_float(float(outline[instanceID + 1].decimals_ed.x / 2)) / 128.0;
@@ -543,9 +582,14 @@ struct VertexStage {
 #endif
 };
 
+// Aliases the 12-byte FillExtrusionLayoutVertex (shared vertex buffer used as
+// the instance buffer); centroid_pos is the polygon centroid for terrain
+// elevation. Keep the layout in sync with the C++ struct and the Vulkan
+// OutlineInstance.
 struct OutlineInstance {
     short2 pos;
     ushort2 decimals_ed;
+    short2 centroid_pos;
 };
 
 struct FragmentStage {

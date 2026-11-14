@@ -132,6 +132,8 @@ public:
 
     // Matrix
     void matrixFor(mat4&, const UnwrappedTileID&) const;
+    /// The symbol occlusion ramp behind 3D terrain (calculate_visibility in the shader preludes)
+    /// is derived from this near plane of one pixel: change the default and rescale it there.
     void getProjMatrix(mat4& matrix, uint16_t nearZ = 1, bool aligned = false) const;
 
     // Dimensions
@@ -231,9 +233,22 @@ public:
     // Conversion
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&, vec4&) const;
+    /// Projects a point that sits `elevationMeters` above sea level (e.g. on draped 3D terrain,
+    /// exaggeration already applied). The camera matrix scales z from metres to pixels, so this
+    /// lands where the terrain mesh and elevated symbols draw that location.
+    ScreenCoordinate latLngToScreenCoordinate(const LatLng&, double elevationMeters, vec4&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Unwrapped) const;
+    /// Unprojects onto the plane `elevationMeters` above sea level (metres, terrain
+    /// exaggeration applied) instead of sea level.
+    LatLng screenCoordinateToLatLng(const ScreenCoordinate&,
+                                    double elevationMeters,
+                                    LatLng::WrapMode = LatLng::Unwrapped) const;
     // Implements mapbox-gl-js pointCoordinate() : MercatorCoordinate.
-    TileCoordinate screenCoordinateToTileCoordinate(const ScreenCoordinate&, uint8_t atZoom) const;
+    // `targetZ` is the world z (metres above sea level, terrain exaggeration applied) of the
+    // plane the screen point is unprojected onto; 0 = sea level.
+    TileCoordinate screenCoordinateToTileCoordinate(const ScreenCoordinate&,
+                                                    uint8_t atZoom,
+                                                    double targetZ = 0.0) const;
 
     double zoomScale(double zoom) const;
     double scaleZoom(double scale) const;
@@ -312,6 +327,9 @@ private:
 
     // map position
     double x = 0, y = 0, z = 0;
+    /// The centre's altitude over sea level; `z` is the same in pixels at the current zoom.
+    double altitudeMeters = 0;
+    void updateZ();
     double bearing = 0;
     double scale = 1;
     double fov = util::DEFAULT_FOV;

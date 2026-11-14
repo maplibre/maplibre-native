@@ -91,21 +91,35 @@ public:
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
-    TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
+    TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,
+                                           std::size_t initialCapacity,
+                                           std::string name,
+                                           bool renderToTerrain) override;
 
-    LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
+    LayerGroupPtr createLayerGroup(int32_t layerIndex,
+                                   std::size_t initialCapacity,
+                                   std::string name,
+                                   bool renderToTerrain) override;
 
     gfx::Texture2DPtr createTexture2D() override;
 
+    /// A 1x1 texture for a sampler slot a shader declares but a drawable leaves empty, such as the
+    /// terrain DEM and depth samplers with terrain off (Drawable::bindTextures). Metal's API
+    /// validation aborts on a missing binding; Vulkan and WebGPU bind a dummy the same way.
+    const gfx::Texture2DPtr& getDummyTexture();
+
     gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
 
-    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
+    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type, bool stencil) override;
 
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
 
     void setDirtyState() override;
 
-    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size,
+                                                                  gfx::TextureChannelDataType,
+                                                                  bool,
+                                                                  bool) override;
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
@@ -166,6 +180,8 @@ private:
     std::optional<BufferResource> tileIndexBuffer;
 
     UniqueVertexBufferResource emptyVertexBuffer;
+
+    gfx::Texture2DPtr dummyTexture;
 
     gfx::ShaderProgramBasePtr clipMaskShader;
     MTLDepthStencilStatePtr clipMaskDepthStencilState;

@@ -1,0 +1,100 @@
+#pragma once
+
+#include <mln/shaders/shader_source.hpp>
+#include <mln/shaders/webgpu/shader_program.hpp>
+#include <mln/shaders/terrain_layer_ubo.hpp>
+
+namespace mln {
+namespace shaders {
+
+template <>
+struct ShaderSource<BuiltIn::TerrainDepthShader, gfx::Backend::Type::WebGPU> {
+    static constexpr const char* name = "TerrainDepthShader";
+    static const std::array<AttributeInfo, 1> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 1> textures;
+
+    static constexpr auto vertex = R"(
+struct VertexInput {
+    @location(5) position: vec4<i32>, // xy = tile position, z = skirt flag (1 = skirt)
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) depth_zw: vec2<f32>,
+};
+
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
+struct TerrainDrawableUBO {
+    matrix: mat4x4<f32>,
+    dem_coords: vec4<f32>,
+};
+
+struct TerrainEvaluatedPropsUBO {
+    unpack: vec4<f32>,
+    exaggeration: f32,
+    elevation_offset: f32,
+    pad1: f32,
+    pad2: f32,
+};
+
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<TerrainDrawableUBO>;
+@group(0) @binding(4) var<uniform> props: TerrainEvaluatedPropsUBO;
+@group(1) @binding(0) var texture_sampler: sampler;
+@group(1) @binding(1) var dem_texture: texture_2d<f32>;
+
+@vertex
+fn main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    let drawable = drawableVector[globalIndex.value];
+
+    // Same elevation displacement as the terrain shader (webgpu/terrain.hpp),
+    // rendering only depth for the symbol occlusion pass
+    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+
+    let elevation = get_elevation(pos, dem_texture, texture_sampler, drawable.dem_coords, props.unpack,
+                                  drawable.dem_coords.w, props.exaggeration, 1.0);
+
+    // Skirt vertices drop below the surface by elevation_offset (gl-js u_ele_delta)
+    let ele_delta = select(0.0, props.elevation_offset, in.position.z == 1);
+    out.position = drawable.matrix * vec4<f32>(pos.x, pos.y, elevation - ele_delta, 1.0);
+    out.depth_zw = out.position.zw;
+    return out;
+}
+)";
+
+    static constexpr auto fragment = R"(
+struct FragmentInput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) depth_zw: vec2<f32>,
+};
+
+@fragment
+fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+    // The fragment's z / w, which is its window depth over a [0, 1] viewport depth range. Not
+    // in.position.z: a 3D drawable can be drawn with a narrower range (depthModeFor3D), and the
+    // occlusion test compares against the depth the clip-space position gives.
+    let depth = in.depth_zw.x / in.depth_zw.y;
+    // Pack it into RGBA8 as four base-256 digits, each written as k / 255 so the unorm8 target
+    // stores it exactly (the gl-js fract/bit_mask scheme stores k / 256 and loses up to 0.002 to
+    // unorm rounding). Decoded by unpack_depth() for calculate_visibility().
+    var r = clamp(depth, 0.0, 0.99999994) * 256.0;
+    let d0 = floor(r);
+    r = (r - d0) * 256.0;
+    let d1 = floor(r);
+    r = (r - d1) * 256.0;
+    let d2 = floor(r);
+    r = (r - d2) * 256.0;
+    let d3 = floor(r);
+    return vec4<f32>(d0, d1, d2, d3) / 255.0;
+}
+)";
+};
+
+} // namespace shaders
+} // namespace mln

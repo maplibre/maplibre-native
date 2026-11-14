@@ -7,6 +7,7 @@
 #include <mln/style/source_observer.hpp>
 #include <mln/style/layer_observer.hpp>
 #include <mln/style/light_observer.hpp>
+#include <mln/style/terrain_observer.hpp>
 #include <mln/sprite/sprite_loader_observer.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/source.hpp>
@@ -38,6 +39,7 @@ class Style::Impl : public SpriteLoaderObserver,
                     public SourceObserver,
                     public LayerObserver,
                     public LightObserver,
+                    public TerrainObserver,
                     public util::noncopyable {
 public:
     Impl(std::shared_ptr<FileSource>, float pixelRatio, const TaggedScheduler& threadPool_);
@@ -86,6 +88,8 @@ public:
     void setLight(std::unique_ptr<Light>);
     Light* getLight() const;
 
+    void setTerrain(std::unique_ptr<Terrain>);
+    Terrain* getTerrain() const;
     /// Set a global state property. A null value resets the property to the
     /// default defined in the style's root "state" property (or null).
     void setGlobalStateProperty(const std::string& property, const Value& value);
@@ -132,6 +136,7 @@ private:
     Collection<Layer> layers;
     TransitionOptions transitionOptions;
     std::unique_ptr<Light> light;
+    std::unique_ptr<Terrain> terrain;
     std::unordered_map<std::string, bool> spritesLoadingStatus;
 
     // Global state for the "global-state" expression. The map itself is
@@ -160,6 +165,9 @@ private:
 
     // LightObserver implementation.
     void onLightChanged(const Light&) override;
+
+    // TerrainObserver implementation.
+    void onTerrainChanged(const Terrain&) override;
 
     Observer nullObserver;
     Observer* observer = &nullObserver;

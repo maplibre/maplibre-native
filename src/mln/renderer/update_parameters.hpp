@@ -3,15 +3,18 @@
 #include <mln/map/mode.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/style/light.hpp>
+#include <mln/style/terrain.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/layer.hpp>
 #include <mln/text/glyph.hpp>
 #include <mln/util/chrono.hpp>
 #include <mln/util/feature.hpp>
+#include <mln/util/geo.hpp>
 #include <mln/util/immutable.hpp>
 
 #include <numbers>
+#include <optional>
 #include <vector>
 
 #include <mapbox/std/weak.hpp>
@@ -35,6 +38,7 @@ public:
     const bool spriteLoaded;
     const style::TransitionOptions transitionOptions;
     const Immutable<style::Light::Impl> light;
+    const std::optional<Immutable<style::Terrain::Impl>> terrain;
     const Immutable<std::vector<Immutable<style::Image::Impl>>> images;
     const Immutable<std::vector<Immutable<style::Source::Impl>>> sources;
     const Immutable<std::vector<Immutable<style::Layer::Impl>>> layers;
@@ -61,6 +65,15 @@ public:
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
+    TerrainLoadMode terrainLoadMode = TerrainLoadMode::Quality;
+    TerrainSkirtLength terrainSkirtLength = TerrainSkirtLength::Auto;
+    // Debug: when set, RenderTerrain logs the camera eye's clearance over the terrain
+    // (ABOVE-GROUND ...). Off by default; the per-frame elevation sampling is skipped entirely
+    // when off, so it has no cost unless explicitly enabled (Map::setDebugAboveGroundLog).
+    bool debugAboveGroundLog = false;
+    // The center a running camera animation is headed for (Transform::getTransitionTargetCenter):
+    // the renderer reports the ground there so the map can ease the center's height to it.
+    std::optional<LatLng> transitionTargetCenter;
 };
 
 } // namespace mln

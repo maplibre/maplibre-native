@@ -30,9 +30,17 @@ struct alignas(16) CircleDrawableUBO {
     /* 100 */ float pad1;
     /* 104 */ float pad2;
     /* 108 */ float pad3;
-    /* 112 */
+
+    // 3D terrain elevation
+    /* 112 */ float4 dem_coords;
+    /* 128 */ float4 dem_unpack;
+    /* 144 */ float dem_dim;
+    /* 148 */ float dem_exaggeration;
+    /* 152 */ float dem_enabled;
+    /* 156 */ float depth_enabled;
+    /* 160 */
 };
-static_assert(sizeof(CircleDrawableUBO) == 7 * 16, "wrong size");
+static_assert(sizeof(CircleDrawableUBO) == 10 * 16, "wrong size");
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) CircleEvaluatedPropsUBO {
@@ -50,6 +58,7 @@ struct alignas(16) CircleEvaluatedPropsUBO {
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) == 4 * 16, "wrong size");
 
+
 )";
 
 template <>
@@ -60,7 +69,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
 
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = circleShaderPrelude;
     static constexpr auto source = R"(
@@ -95,6 +104,7 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 extrude;
     float antialiasblur;
+    float visibility;
 
 #if !defined(HAS_UNIFORM_u_color)
     half4 color;
@@ -123,7 +133,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const CircleDrawableUBO* drawableVector [[buffer(idCircleDrawableUBO)]],
-                                device const CircleEvaluatedPropsUBO& props [[buffer(idCircleEvaluatedPropsUBO)]]) {
+                                device const CircleEvaluatedPropsUBO& props [[buffer(idCircleEvaluatedPropsUBO)]],
+                                texture2d<float, access::sample> demTexture [[texture(0)]],
+                                sampler demSampler [[sampler(0)]],
+                                texture2d<float, access::sample> depthTexture [[texture(1)]],
+                                sampler depthSampler [[sampler(1)]]) {
 
     device const CircleDrawableUBO& drawable = drawableVector[uboIndex];
 
@@ -145,6 +159,21 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak in extrusion data
     const float2 circle_center = floor(float2(vertx.position) * 0.5);
+    const float ele = get_elevation(circle_center,
+                                    demTexture,
+                                    demSampler,
+                                    drawable.dem_coords,
+                                    drawable.dem_unpack,
+                                    drawable.dem_dim,
+                                    drawable.dem_exaggeration,
+                                    drawable.dem_enabled);
+
+    // Hidden where the terrain covers the circle's centre, as maplibre-gl-js does (and as symbols are)
+    const float visibility = calculate_visibility(drawable.matrix * float4(circle_center, ele, 1),
+                                                  depthTexture,
+                                                  depthSampler,
+                                                  drawable.depth_enabled,
+                                                  paintParams.units_to_pixels.y);
 
     float4 position;
     if (props.pitch_with_map) {
@@ -155,14 +184,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             // Pitching the circle with the map effectively scales it with the map
             // To counteract the effect for pitch-scale: viewport, we rescale the
             // whole circle based on the pitch scaling effect at its central point
-            const float4 projected_center = drawable.matrix * float4(circle_center, 0, 1);
+            const float4 projected_center = drawable.matrix * float4(circle_center, ele, 1);
             corner_position += scaled_extrude * (radius + stroke_width) *
                                (projected_center.w / paintParams.camera_to_center_distance);
         }
 
-        position = drawable.matrix * float4(corner_position, 0, 1);
+        position = drawable.matrix * float4(corner_position, ele, 1);
     } else {
-        position = drawable.matrix * float4(circle_center, 0, 1);
+        position = drawable.matrix * float4(circle_center, ele, 1);
 
         const float factor = props.scale_with_map ? paintParams.camera_to_center_distance : position.w;
         position.xy += scaled_extrude * (radius + stroke_width) * factor;
@@ -177,6 +206,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position       = position,
         .extrude        = extrude,
         .antialiasblur  = antialiasblur,
+        .visibility     = visibility,
 
 #if !defined(HAS_UNIFORM_u_color)
         .color          = half4(unpack_mix_color(vertx.color, drawable.color_t)),
@@ -250,7 +280,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float color_t = (stroke_width < 0.01) ? 0.0 :
         smoothstep(antialiased_blur, 0.0, extrude_length - radius / (radius + stroke_width));
 
-    return half4(opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t));
+    return half4(in.visibility * opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t));
 }
 )";
 };

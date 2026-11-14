@@ -19,7 +19,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan> {
 
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = circleShaderPrelude;
     static constexpr auto vertex = R"(
@@ -72,11 +72,23 @@ struct CircleDrawableUBO {
     float pad1;
     float pad2;
     float pad3;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float depth_enabled;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idCircleDrawableUBO) readonly buffer CircleDrawableUBOVector {
     CircleDrawableUBO drawable_ubo[];
 } drawableVector;
+
+// Bindings match the texture enum ids (idCircleDEMTexture=0, idCircleDepthTexture=1)
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D depth_sampler;
+
 
 layout(set = LAYER_SET_INDEX, binding = idCircleEvaluatedPropsUBO) uniform CircleEvaluatedPropsUBO {
     vec4 color;
@@ -122,6 +134,8 @@ layout(location = 7) out mediump float frag_stroke_width;
 layout(location = 8) out lowp float frag_stroke_opacity;
 #endif
 
+layout(location = 9) out lowp float frag_visibility;
+
 void main() {
     const CircleDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
@@ -143,6 +157,7 @@ void main() {
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak in extrusion data
     const vec2 circle_center = floor(in_position * 0.5);
+    const float ele = get_elevation(circle_center, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
 
     if (props.pitch_with_map) {
         vec2 corner_position = circle_center;
@@ -152,20 +167,23 @@ void main() {
             // Pitching the circle with the map effectively scales it with the map
             // To counteract the effect for pitch-scale: viewport, we rescale the
             // whole circle based on the pitch scaling effect at its central point
-            const vec4 projected_center = drawable.matrix * vec4(circle_center, 0, 1);
+            const vec4 projected_center = drawable.matrix * vec4(circle_center, ele, 1);
             corner_position += scaled_extrude * (radius + stroke_width) *
                                (projected_center.w / paintParams.camera_to_center_distance);
         }
 
-        gl_Position = drawable.matrix * vec4(corner_position, 0, 1);
+        gl_Position = drawable.matrix * vec4(corner_position, ele, 1);
     } else {
-        gl_Position = drawable.matrix * vec4(circle_center, 0, 1);
+        gl_Position = drawable.matrix * vec4(circle_center, ele, 1);
 
         const float factor = props.scale_with_map ? paintParams.camera_to_center_distance : gl_Position.w;
         gl_Position.xy += scaled_extrude * (radius + stroke_width) * factor;
     }
 
     applySurfaceTransform();
+
+    // Hidden where the terrain covers the circle's centre, as maplibre-gl-js does (and as symbols are)
+    frag_visibility = calculate_visibility(surface_transformed(drawable.matrix * vec4(circle_center, ele, 1)), depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
 
     // This is a minimum blur distance that serves as a faux-antialiasing for
     // the circle. since blur is a ratio of the circle's size and the intent is
@@ -237,6 +255,8 @@ layout(location = 7) in mediump float frag_stroke_width;
 layout(location = 8) in lowp float frag_stroke_opacity;
 #endif
 
+layout(location = 9) in lowp float frag_visibility;
+
 layout(location = 0) out vec4 out_color;
 
 layout(set = LAYER_SET_INDEX, binding = idCircleEvaluatedPropsUBO) uniform CircleEvaluatedPropsUBO {
@@ -301,7 +321,7 @@ void main() {
     const float color_t = (stroke_width < 0.01) ? 0.0 :
         smoothstep(antialiased_blur, 0.0, extrude_length - radius / (radius + stroke_width));
 
-    out_color = opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t);
+    out_color = frag_visibility * opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t);
 }
 )";
 };

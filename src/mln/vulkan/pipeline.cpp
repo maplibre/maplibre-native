@@ -351,6 +351,7 @@ void PipelineInfo::setRenderable(const gfx::Renderable& value) {
     const auto& renderableResource = value.getResource<RenderableResource>();
 
     renderPass = renderableResource.getRenderPass().get();
+    renderPassHasStencil = renderableResource.hasStencilAttachment();
 
     const auto extent = renderableResource.getExtent();
 
@@ -429,7 +430,7 @@ void PipelineInfo::setDynamicValues(const RendererBackend& backend, const vk::Un
         buffer->setBlendConstants(dynamicValues.blendConstants.value().data(), dispatcher);
     }
 
-    if (stencilTest) {
+    if (stencilTest && renderPassHasStencil) {
         buffer->setStencilWriteMask(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilWriteMask, dispatcher);
         buffer->setStencilCompareMask(
             vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilCompareMask, dispatcher);
@@ -451,7 +452,7 @@ std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBacke
         dynamicStates.push_back(vk::DynamicState::eBlendConstants);
     }
 
-    if (stencilTest) {
+    if (stencilTest && renderPassHasStencil) {
         dynamicStates.push_back(vk::DynamicState::eStencilCompareMask);
         dynamicStates.push_back(vk::DynamicState::eStencilWriteMask);
         dynamicStates.push_back(vk::DynamicState::eStencilReference);

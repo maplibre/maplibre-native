@@ -1,6 +1,10 @@
 #include <mln/renderer/render_layer.hpp>
 
+#include <algorithm>
+#include <cmath>
+
 #include <mln/gfx/context.hpp>
+#include <mln/renderer/bucket.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_source.hpp>
@@ -30,6 +34,10 @@ void RenderLayer::transition(const TransitionParameters& parameters, Immutable<s
     transition(parameters);
 }
 
+bool RenderLayer::settlesCrossfade(bool terrainEnabled) const {
+    return terrainEnabled && !is3D();
+}
+
 bool RenderLayer::needsPlacement() const {
     return baseImpl->getTypeInfo()->crossTileIndex == style::LayerTypeInfo::CrossTileIndex::Required &&
            !placementData.empty();
@@ -51,6 +59,51 @@ bool RenderLayer::needsRendering() const {
     return passes != RenderPass::None && baseImpl->visibility != style::VisibilityType::None;
 }
 
+bool tileZoomReachesLayerMinZoom(uint8_t tileOverscaledZoom, float layerMinZoom) {
+    if (!(layerMinZoom > 0.0f)) return true;
+    return static_cast<float>(tileOverscaledZoom) >= std::floor(layerMinZoom);
+}
+
+void RenderLayer::dropTilesBelowMinZoom(const LayerPrepareParameters& params) {
+    if (!params.terrain || !renderTiles) return;
+    const float minZoom = baseImpl->minZoom;
+    if (!(minZoom > 0.0f)) return;
+    const auto fits = [minZoom](const RenderTile& tile) {
+        return tileZoomReachesLayerMinZoom(tile.getOverscaledTileID().overscaledZ, minZoom);
+    };
+    if (std::all_of(renderTiles->begin(), renderTiles->end(), [&](const RenderTile& tile) { return fits(tile); })) {
+        return;
+    }
+    auto kept = std::make_shared<std::vector<std::reference_wrapper<const RenderTile>>>();
+    kept->reserve(renderTiles->size());
+    for (const RenderTile& tile : *renderTiles) {
+        if (fits(tile)) kept->emplace_back(tile);
+    }
+    renderTiles = std::move(kept);
+}
+
+void RenderLayer::updateEmptyTileIDs(const LayerPrepareParameters& params) {
+    if (!layerGroup || layerGroup->getType() != LayerGroupBase::Type::TileLayerGroup ||
+        !layerGroup->shouldRenderToTerrain()) {
+        return;
+    }
+    auto& tileGroup = static_cast<TileLayerGroup&>(*layerGroup);
+    std::vector<UnwrappedTileID> emptyTileIDs;
+    if (params.terrain && renderTiles) {
+        for (const RenderTile& tile : *renderTiles) {
+            // Only a tile whose data has none for the layer: one whose drawables are merely not
+            // built yet (the tile build budget) must not clear the drape.
+            const Bucket* bucket = tile.getBucket(*baseImpl);
+            if (!bucket || !bucket->hasData()) {
+                emptyTileIDs.push_back(tile.getOverscaledTileID().toUnwrapped());
+            }
+        }
+    }
+    if (!emptyTileIDs.empty() || !tileGroup.getEmptyTileIDs().empty()) {
+        tileGroup.setEmptyTileIDs(std::move(emptyTileIDs));
+    }
+}
+
 bool RenderLayer::supportsZoom(float zoom) const {
     // TODO: shall we use rounding or epsilon comparisons?
     return baseImpl->minZoom <= zoom && zoom < baseImpl->maxZoom;
@@ -67,6 +120,7 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     addRenderPassesFromTiles();
 
     updateRenderTileIDs();
+    updateEmptyTileIDs(params);
 }
 
 std::optional<Color> RenderLayer::getSolidBackground() const {

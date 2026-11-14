@@ -76,8 +76,8 @@ struct RenderingStats {
     /// Sum of uniform buffers update sizes
     std::size_t uniformUpdateBytes = 0;
 
-    /// Total texture memory
-    int memTextures = 0;
+    /// Total texture memory (int64_t: terrain scenes can track more than 2GB)
+    int64_t memTextures = 0;
     /// Total buffer memory
     int memBuffers = 0;
     /// Total index buffer memory
@@ -92,6 +92,48 @@ struct RenderingStats {
     /// Number of stencil buffer updates
     int stencilUpdates = 0;
 
+    /// Number of terrain drape targets actually re-rendered this frame (cache
+    /// misses); panning a static terrain scene should keep this at 0
+    int numDrapeTargetsRendered = 0;
+
+    /// Number of terrain drape targets that ran the full per-target coverage scan
+    /// this frame (i.e. did not hit the global-signature fast path). Should be ~0
+    /// on a static scene; if it stays high, the short-circuit is not engaging
+    int numDrapeCoverageScans = 0;
+
+    /// Tile clipping masks drawn inside terrain drape targets, and masks skipped because the
+    /// tile does not overlap the target. Drawn masks scale with the tiles overlapping a target,
+    /// not with the tiles of the source
+    int numDrapeMasksDrawn = 0;
+    int numDrapeMasksSkipped = 0;
+    /// Number of CPU-side texture objects made for terrain DEM tiles (numCreatedTextures counts GPU
+    /// allocations, which these are not); a still terrain scene should leave it unchanged
+    int numDEMTexturesCreated = 0;
+    /// Terrain depth passes (the symbol-occlusion depth texture) rendered; one per frame in
+    /// which the camera or the mesh set changed, none for a still frame
+    int numDepthPasses = 0;
+
+    // Why frames asked for a follow-up frame, totaled over all the frames. A frame's status
+    // (MapObserver::RenderFrameStatus::needsRepaint) says whether it asked for one, not why.
+    // Three causes are counted: drape re-renders and new tile builds the terrain load budget
+    // deferred, and an empty terrain drape cover. Other causes, such as a running transition
+    // or a fade, are not counted.
+    /// Terrain drape targets whose re-render the per-frame load budget deferred, counted for
+    /// each frame a target is deferred (five frames adds 5). An idle map that keeps adding to
+    /// this never catches up
+    int numDrapeTargetsDeferred = 0;
+    /// New tile builds the load budget deferred, counted for each frame a tile is deferred, and
+    /// once however many layers are refused it (with terrain off too, in a budgeted load mode)
+    int numNewTileBuildsDeferred = 0;
+    /// Frames that asked for a follow-up frame because the terrain drape cover was empty; the
+    /// retry is bounded (4 in a row today), so a missing DEM source reads 4 and stops
+    int numTerrainCoverPendingFrames = 0;
+
+    /// Per-phase CPU time of the terrain path this frame (seconds), for profiling
+    /// where the terrain overhead goes when nothing re-renders
+    double terrainUpdateTime = 0.0;  ///< RenderTerrain::update (tile/DEM/drawable management)
+    double terrainTweakerTime = 0.0; ///< terrain layer tweaker (surface + depth groups)
+    double terrainDepthTime = 0.0;   ///< terrain depth pass render
     struct NDCBound {
         // NDC positive is up/right
         double minX = std::numeric_limits<double>::max();
@@ -156,6 +198,11 @@ public:
         bool verbose = false;
         Color textColor = Color::red();
         float textSize = 4.0f;
+        // A rendered frame slower than this counts as "jank". 1/60 s: a frame that missed the
+        // 60 Hz budget is a perceptible hitch even on a faster display. Used for the worst-frame
+        // / jank lines that expose the frame-time spikes an average FPS hides (e.g. the
+        // per-frame loading spikes the terrain load-mode budgets trade against).
+        double jankThreshold = 1.0 / 60.0;
     };
 
     RenderingStatsView() = default;
@@ -180,6 +227,15 @@ protected:
     uint32_t frameCount = 0;
     double encodingTime = 0.0;
     double renderingTime = 0.0;
+
+    // Per-frame wall-clock timing, aggregated over the refresh interval, for the worst-frame /
+    // jank lines. lastFrameTime is the previous frame's timestamp; maxFrameTime is the slowest
+    // frame this interval; jankFrames counts frames over Options::jankThreshold; maxEncodingTime
+    // is the largest single-frame CPU encode cost (the work the load-mode budgets throttle).
+    double lastFrameTime = 0.0;
+    double maxFrameTime = 0.0;
+    uint32_t jankFrames = 0;
+    double maxEncodingTime = 0.0;
 };
 
 } // namespace gfx

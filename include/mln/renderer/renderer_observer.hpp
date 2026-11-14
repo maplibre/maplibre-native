@@ -12,9 +12,12 @@
 #include <cstdint>
 #include <exception>
 #include <functional>
+#include <memory>
 #include <string>
 
 namespace mln {
+
+class TerrainElevationIndex;
 
 namespace gfx {
 class ShaderRegistry;
@@ -69,6 +72,28 @@ public:
 
     /// Final frame
     virtual void onDidFinishRenderingMap() {}
+
+    /// The rendered terrain height under the map centre changed. Only the render side knows
+    /// it - the DEM lives there - so a map that wants its centre to ride the terrain
+    /// (Map::setCenterClampedToGround) learns of it here, one frame behind.
+    virtual void onTerrainCenterElevationChanged(double /*elevationMeters*/) {}
+
+    /// The renderer's set of loaded terrain heights changed: tiles loaded or evicted, the
+    /// exaggeration changed, or terrain went on or off (null). The map answers height questions
+    /// (Map::getTerrainElevation, the terrain pick, pixelForLatLng over terrain) from this copy
+    /// instead of asking the render side. Observers that forward to another thread must forward
+    /// this too, or the map there never gets terrain heights.
+    virtual void onTerrainElevationIndexChanged(std::shared_ptr<const TerrainElevationIndex> /*index*/) {}
+
+    /// The rendered terrain height under the camera's eye changed (one frame behind, like the
+    /// center's). A map that keeps its eye above the ground (Map::setCenterClampedToGround)
+    /// learns of it here: at a steep pitch the eye sits only a little above the center, so a
+    /// slope rising towards the camera puts the eye under the ground.
+    virtual void onTerrainEyeElevationChanged(double /*elevationMeters*/) {}
+
+    /// The terrain height at the center a running camera animation is headed for, once a DEM tile
+    /// covers it (UpdateParameters::transitionTargetCenter), and whenever a finer one changes it.
+    virtual void onTerrainTransitionTargetElevationChanged(double /*elevationMeters*/) {}
 
     /// Style is missing an image
     using StyleImageMissingCallback = std::function<void()>;

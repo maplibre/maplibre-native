@@ -8,6 +8,7 @@
 #include <mln/math/log2.hpp>
 #include <mln/renderer/renderer_frontend.hpp>
 #include <mln/renderer/renderer_observer.hpp>
+#include <mln/renderer/terrain_elevation_index.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source_manager.hpp>
 #include <mln/storage/resource.hpp>
@@ -86,6 +87,7 @@ void Map::renderStill(StillImageCallback callback) {
 void Map::renderStill(const CameraOptions& camera, MapDebugOptions debugOptions, StillImageCallback callback) {
     impl->cameraMutated = true;
     impl->debugOptions = debugOptions;
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.jumpTo(camera);
     renderStill(std::move(callback));
 }
@@ -153,18 +155,25 @@ void Map::jumpTo(const CameraOptions& camera) {
 
 void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->noteCameraSet();
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.easeTo(camera, animation);
     impl->onUpdate();
 }
 
 void Map::flyTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->noteCameraSet();
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.flyTo(camera, animation);
     impl->onUpdate();
 }
 
 void Map::moveBy(const ScreenCoordinate& point, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    // An animated pan is how platforms carry a pan gesture's momentum on after the finger lifts.
+    impl->noteCameraSet(animation.duration && *animation.duration > Duration::zero());
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.moveBy(point, animation);
     impl->onUpdate();
 }
@@ -180,6 +189,8 @@ void Map::scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, c
 
 void Map::rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    impl->noteCameraSet();
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.rotateBy(first, second, animation);
     impl->onUpdate();
 }
@@ -427,8 +438,22 @@ ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {
     return impl->transform.latLngToScreenCoordinate(impl->transform.getState().latLngNearCenter(latLng));
 }
 
+ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng, double elevationMeters) const {
+    LatLng unwrappedLatLng = latLng.wrapped();
+    unwrappedLatLng.unwrapForShortestPath(impl->transform.getLatLng());
+    return impl->transform.latLngToScreenCoordinate(unwrappedLatLng, elevationMeters);
+}
+
 LatLng Map::latLngForPixel(const ScreenCoordinate& pixel, LatLng::WrapMode wrapMode) const {
     return impl->transform.screenCoordinateToLatLng(pixel, wrapMode);
+}
+
+LatLng Map::latLngForPixel(const ScreenCoordinate& pixel, double elevationMeters) const {
+    return impl->transform.screenCoordinateToLatLng(pixel, elevationMeters);
+}
+
+LatLng Map::latLngForPixelAtCenterAltitude(const ScreenCoordinate& pixel) const {
+    return latLngForPixel(pixel, impl->transform.getState().getCenterAltitude());
 }
 
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {
@@ -446,6 +471,56 @@ std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& s
     ret.reserve(screenCoords.size());
     for (const auto& point : screenCoords) {
         ret.emplace_back(latLngForPixel(point, wrapMode));
+    }
+    return ret;
+}
+
+std::optional<double> Map::getTerrainElevation(const LatLng& latLng) const {
+    if (!impl->terrainElevationIndex) {
+        return std::nullopt;
+    }
+    return impl->terrainElevationIndex->getElevation(latLng);
+}
+
+ScreenCoordinate Map::pixelForLatLngOnTerrain(const LatLng& latLng) const {
+    // Look the height up at the longitude pixelForLatLng projects, unwrapped for the shortest path
+    // to the centre: near the antimeridian the drawn DEM tiles have wrap != 0, and the index keys
+    // them by unwrapped x
+    LatLng unwrapped = latLng.wrapped();
+    unwrapped.unwrapForShortestPath(impl->transform.getLatLng());
+    if (const auto elevation = getTerrainElevation(unwrapped)) {
+        return pixelForLatLng(unwrapped, *elevation);
+    }
+    return pixelForLatLng(latLng);
+}
+
+LatLng Map::latLngForPixelOnTerrain(const ScreenCoordinate& pixel) const {
+    if (const auto& index = impl->terrainElevationIndex) {
+        if (const auto surface = pickTerrainSurface(
+                impl->transform.getState(),
+                pixel,
+                [&](const LatLng& latLng) { return index->getElevation(latLng); },
+                index->getMaxElevation())) {
+            return *surface;
+        }
+    }
+    return latLngForPixel(pixel);
+}
+
+std::vector<ScreenCoordinate> Map::pixelsForLatLngsOnTerrain(const std::vector<LatLng>& latLngs) const {
+    std::vector<ScreenCoordinate> ret;
+    ret.reserve(latLngs.size());
+    for (const auto& latLng : latLngs) {
+        ret.emplace_back(pixelForLatLngOnTerrain(latLng));
+    }
+    return ret;
+}
+
+std::vector<LatLng> Map::latLngsForPixelsOnTerrain(const std::vector<ScreenCoordinate>& screenCoords) const {
+    std::vector<LatLng> ret;
+    ret.reserve(screenCoords.size());
+    for (const auto& point : screenCoords) {
+        ret.emplace_back(latLngForPixelOnTerrain(point));
     }
     return ret;
 }
@@ -548,6 +623,7 @@ void Map::dumpDebugLogs() const {
 }
 
 void Map::setFreeCameraOptions(const FreeCameraOptions& camera) {
+    impl->settleCenterAwaitingSeaLevel();
     impl->transform.setFreeCameraOptions(camera);
     impl->cameraMutated = true;
     impl->onUpdate();
@@ -605,6 +681,54 @@ void Map::setTileLodMode(TileLodMode mode) {
 
 TileLodMode Map::getTileLodMode() const {
     return impl->tileLodMode;
+}
+
+void Map::setTerrainLoadMode(TerrainLoadMode mode) {
+    impl->terrainLoadMode = mode;
+}
+
+TerrainLoadMode Map::getTerrainLoadMode() const {
+    return impl->terrainLoadMode;
+}
+
+void Map::setTerrainSkirtLength(TerrainSkirtLength length) {
+    impl->terrainSkirtLength = length;
+}
+
+TerrainSkirtLength Map::getTerrainSkirtLength() const {
+    return impl->terrainSkirtLength;
+}
+
+void Map::anchorCenterOnTerrain() {
+    impl->anchorCenterOnTerrain();
+}
+
+bool Map::setCenterAltitudeKeepingView(double altitudeMeters) {
+    // Like every camera entry point, run a return to sea level that is still waiting first:
+    // run later, it would move the camera this sets.
+    impl->settleCenterAwaitingSeaLevel();
+    const bool moved = impl->setCenterAltitudeKeepingView(altitudeMeters);
+    if (moved) {
+        impl->cameraMutated = true;
+    }
+    impl->onUpdate();
+    return moved;
+}
+
+void Map::setCenterClampedToGround(bool clamped) {
+    impl->centerClampedToGround = clamped;
+}
+
+bool Map::getCenterClampedToGround() const {
+    return impl->centerClampedToGround;
+}
+
+void Map::setDebugAboveGroundLog(bool enabled) {
+    impl->debugAboveGroundLog = enabled;
+}
+
+bool Map::getDebugAboveGroundLog() const {
+    return impl->debugAboveGroundLog;
 }
 
 ClientOptions Map::getClientOptions() const {

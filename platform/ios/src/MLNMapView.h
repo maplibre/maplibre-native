@@ -542,6 +542,19 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) UIEdgeInsets frustumOffset;
 
+/**
+ Whether the map centre rides the 3D terrain surface rather than sea level.
+
+ When this is `YES`, the altitude of the map centre follows the rendered terrain
+ height under it, so pitching over tall ground keeps the camera above the ground
+ instead of sinking into it. Has no effect when terrain is not enabled.
+
+ The default value of this property is `NO`.
+
+ This property is experimental and subject to change.
+ */
+@property (nonatomic, assign, getter=isCenterClampedToGround) BOOL centerClampedToGround;
+
 // MARK: Displaying the User’s Location
 
 /**
@@ -1058,6 +1071,36 @@ of north, the map will automatically snap to exact north.
     zoom level immediately.
  */
 - (void)setZoomLevel:(double)zoomLevel animated:(BOOL)animated;
+
+/**
+ The altitude of the map's center above sea level, in meters.
+
+ With 3D terrain on, a pan, pinch, rotate or tilt gesture moves the center up
+ onto the terrain under it, and removing the terrain brings it back down. The
+ style's root `centerAltitude` and `-setCenterAltitudeKeepingView:` set it too.
+ Moving the center this way does not change the view, but `centerCoordinate`
+ and `zoomLevel` do. A center coordinate and zoom level describe the same view
+ only at the same center altitude, so save this with them, and restore it with
+ `-setCenterAltitudeKeepingView:` before setting them.
+ */
+@property (nonatomic, readonly) CLLocationDistance centerAltitude;
+
+/**
+ Moves the map's center along the line of sight to the given altitude without
+ moving the camera.
+
+ Nothing on screen moves; `centerCoordinate` and `zoomLevel` change to describe
+ the same view from the new center. Pass 0 to put the center back at sea level.
+
+ @param altitude The new center altitude above sea level, in meters, with the
+    terrain exaggeration applied.
+ @return `NO` if nothing moved: the center is already at that altitude, the line
+    of sight nearly grazes the ground at that altitude (a pitch over about 84
+    degrees) or meets it at (or nearly at) the camera, or the minimum or maximum
+    zoom level or the camera bounds would cut the move short.
+ */
+- (BOOL)setCenterAltitudeKeepingView:(CLLocationDistance)altitude
+    NS_SWIFT_NAME(setCenterAltitudeKeepingView(_:));
 
 /**
  * The minimum zoom level at which the map can be shown.
@@ -1706,6 +1749,11 @@ of north, the map will automatically snap to exact north.
  Converts a point in the given view’s coordinate system to a geographic
  coordinate.
 
+ With 3D terrain, the coordinate is where the point’s line of sight first meets the
+ terrain surface (the nearest surface, so a ridge in front wins), rather than the point
+ at sea level behind it. Without terrain, or where no terrain data has loaded yet, it is
+ the sea-level point.
+
  @param point The point to convert.
  @param view The view in whose coordinate system the point is expressed.
  @return The geographic coordinate at the given point.
@@ -1718,6 +1766,10 @@ of north, the map will automatically snap to exact north.
 /**
  Converts a geographic coordinate to a point in the given view’s coordinate
  system.
+
+ With 3D terrain, the point is where the coordinate appears on the terrain surface, at
+ its terrain height, rather than at sea level. Without terrain, or where no terrain data
+ has loaded yet, it is the sea-level point.
 
  @param coordinate The geographic coordinate to convert.
  @param view The view in whose coordinate system the returned point should be

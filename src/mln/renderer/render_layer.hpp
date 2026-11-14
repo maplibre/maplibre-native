@@ -82,7 +82,16 @@ public:
     PatternAtlas& patternAtlas;
     LineAtlas& lineAtlas;
     const TransformState& state;
+    // Terrain is on: the tile cover coarsens distant tiles.
+    bool terrain = false;
 };
+
+/// Whether a tile of this zoom builds a layer whose minzoom is `layerMinZoom`. A layer's
+/// minzoom is the camera zoom the layer starts at, and with terrain on the cover also
+/// holds tiles coarser than the camera's (distance level of detail); gl-js builds no
+/// bucket for such a tile (WorkerTile: `zoom < Math.floor(layer.minzoom)`), and this
+/// is the same test.
+bool tileZoomReachesLayerMinZoom(uint8_t tileOverscaledZoom, float layerMinZoom);
 
 class RenderLayer {
 protected:
@@ -111,6 +120,12 @@ public:
 
     /// Returns true if layer writes to depth buffer by drawing using PaintParameters::depthModeFor3D().
     virtual bool is3D() const { return false; }
+
+    /// Returns true if the layer's cross-fades are to be evaluated as over already: with terrain on, for every
+    /// layer but the fill-extrusion, the only layer that is 3D and the one drawn into the main pass for sure,
+    /// so is3D() stands for "not drawn into the terrain overlay" here. A layer with no cross-fade (circle,
+    /// symbol and so on) is unaffected either way.
+    bool settlesCrossfade(bool terrainEnabled) const;
 
     /// Returns true is the layer is subject to placement.
     bool needsPlacement() const;
@@ -201,6 +216,15 @@ protected:
     void checkRenderability(const PaintParameters&, uint32_t activeBindingCount);
 
     void addRenderPassesFromTiles();
+
+    /// With terrain on, drops the render tiles coarser than the layer's minzoom, so the
+    /// far field the level of detail coarsened neither draws nor places this layer.
+    void dropTilesBelowMinZoom(const LayerPrepareParameters&);
+
+    /// With terrain on, tells a draped layer group which render tiles have no data for the layer
+    /// (see TileLayerGroup::setEmptyTileIDs). Called by the vector layers and the raster layer;
+    /// the DEM layers (hillshade, color-relief) keep the hold for their tiles.
+    void updateEmptyTileIDs(const LayerPrepareParameters&);
 
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
 
