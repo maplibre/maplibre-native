@@ -137,7 +137,9 @@ jobs:
         with:
           token: ${{ steps.generate_token.outputs.token }}
           details_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          status: in_progress
+          # a skipped test completes its check here, since reading a check back a second after creating it can 404
+          status: ${{ env.run_device_test == 'true' && 'in_progress' || 'completed' }}
+          conclusion: ${{ env.run_device_test != 'true' && 'success' || '' }}
           name: ${{ matrix.test.name }}
           sha: ${{ github.event.workflow_run.head_sha }}
 
@@ -208,7 +210,7 @@ jobs:
           path: test_artifacts.zip
 
       - name: Generate another token (previous one could have expired)
-        if: always()
+        if: always() && env.run_device_test == 'true'
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         id: generate_token_2
         with:
@@ -216,7 +218,7 @@ jobs:
           private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
       - uses: LouisBrunner/checks-action@937cbbcde3259005b50746dc91cde29098aac2ff # v3.1.0
-        if: always()
+        if: always() && env.run_device_test == 'true'
         with:
           token: ${{ steps.generate_token_2.outputs.token }}
           check_id: ${{ steps.create_check.outputs.check_id }}
