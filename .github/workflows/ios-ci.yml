@@ -98,12 +98,14 @@ jobs:
           repository-cache: true
           cache-save: ${{ github.event_name != 'pull_request' }}
 
+      - name: Generate Xcode project
+        run: bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+
       # render test
 
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
@@ -162,7 +164,6 @@ jobs:
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
@@ -321,7 +322,6 @@ jobs:
           key: ${{ steps.dawn-sources.outputs.cache-primary-key }}
 
       - name: Build mbgl-core and iOS SDK
-        continue-on-error: true
         run: cmake --build build-ios-webgpu-dawn --target mbgl-core ios-sdk-static
 
       - name: Show sccache stats
@@ -370,7 +370,6 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Build mbgl-core and iOS SDK
-        continue-on-error: true
         run: RUSTC_WRAPPER=sccache cmake --build build-ios-webgpu-wgpu --target mbgl-core ios-sdk-static
 
       - name: Show sccache stats
