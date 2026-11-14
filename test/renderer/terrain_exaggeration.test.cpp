@@ -140,6 +140,12 @@ struct RidgeMap {
     MapAdapter map;
 };
 
+// Each map owns a run loop and a thread takes one at a time, so this one is gone on return.
+PremultipliedImage loadedFrame(float exaggeration) {
+    RidgeMap fresh(exaggeration);
+    return std::move(fresh.settle().image);
+}
+
 size_t differingPixels(const PremultipliedImage& a, const PremultipliedImage& b) {
     size_t count = 0;
     for (size_t i = 0; i < a.bytes(); i += 4) {
@@ -176,8 +182,7 @@ bool redNear(const PremultipliedImage& image, const ScreenCoordinate& point) {
 // value is taken as it is: nothing is built again, and the frame is the one a map loaded with that
 // value draws.
 TEST(TerrainExaggeration, AChangeKeepsWhatTheTerrainBuilt) {
-    RidgeMap fresh(1.0f);
-    const PremultipliedImage expected = fresh.settle().image;
+    const PremultipliedImage expected = loadedFrame(1.0f);
 
     RidgeMap changed(0.2f);
     const auto low = changed.settle();
@@ -191,8 +196,7 @@ TEST(TerrainExaggeration, AChangeKeepsWhatTheTerrainBuilt) {
 
 // Stepping the exaggeration up frame by frame, as a rise out of the flat map does, ends on the same frame.
 TEST(TerrainExaggeration, ARiseInStepsEndsWhereAJumpDoes) {
-    RidgeMap fresh(1.0f);
-    const PremultipliedImage expected = fresh.settle().image;
+    const PremultipliedImage expected = loadedFrame(1.0f);
 
     RidgeMap rising(0.0f);
     const auto flat = rising.settle();
@@ -220,8 +224,7 @@ TEST(TerrainExaggeration, ANewExaggerationHidesWhatTheGroundNowCovers) {
 // A source put in under the same name is another DEM. Its tiles may be encoded differently, so nothing
 // built from the old one may stay.
 TEST(TerrainExaggeration, ASourceSwappedInUnderTheSameNameStartsAgain) {
-    RidgeMap fresh(1.0f, "mapbox");
-    const PremultipliedImage expected = fresh.settle().image;
+    const PremultipliedImage expected = loadedFrame(1.0f);
 
     RidgeMap swapped(1.0f, "terrarium");
     ASSERT_LT(differingPixels(swapped.settle().image, expected), 50u) << "both encodings carry the same ridge";
