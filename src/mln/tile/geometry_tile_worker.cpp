@@ -376,6 +376,15 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
     symbolDependenciesChanged();
 }
 
+void GeometryTileWorker::onLayoutResourcesAvailable(LayoutResourceMap resources) {
+    MLN_TRACE_FUNC();
+
+    for (auto& [url, resource] : resources) {
+        if (pendingResourceDependencies.erase(url) != 0) resourceMap.insert_or_assign(url, std::move(resource));
+    }
+    symbolDependenciesChanged();
+}
+
 void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependencies) {
     MLN_TRACE_FUNC();
 
@@ -412,6 +421,20 @@ void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependen
     }
 }
 
+void GeometryTileWorker::requestNewResources(const LayoutResourceDependencies& resourceDependencies) {
+    MLN_TRACE_FUNC();
+
+    LayoutResourceDependencies missing;
+    for (const auto& url : resourceDependencies) {
+        if (resourceMap.find(url) == resourceMap.end() && pendingResourceDependencies.insert(url).second) {
+            missing.insert(url);
+        }
+    }
+    if (!missing.empty()) {
+        parent.invoke(&GeometryTile::getLayoutResources, std::move(missing));
+    }
+}
+
 void GeometryTileWorker::setObserver(TileObserver* observer_) {
     observer = observer_;
 }
@@ -443,6 +466,7 @@ void GeometryTileWorker::parse() {
 
     GlyphDependencies glyphDependencies;
     ImageDependencies imageDependencies;
+    LayoutResourceDependencies resourceDependencies;
 
     // Create render layers and group by layout
     GroupMap groupMap = groupLayers(*layers);
@@ -485,13 +509,15 @@ void GeometryTileWorker::parse() {
         // images/glyphs are used, or the Layout is stored until the
         // images/glyphs are available to add the features to the buckets.
         if (leaderImpl.getTypeInfo()->layout == LayerTypeInfo::Layout::Required) {
-            std::unique_ptr<Layout> layout = LayerManager::get()->createLayout({.bucketParameters = parameters,
-                                                                                .fontFaces = fontFaces,
-                                                                                .glyphDependencies = glyphDependencies,
-                                                                                .imageDependencies = imageDependencies,
-                                                                                .availableImages = *availableImages},
-                                                                               std::move(geometryLayer),
-                                                                               group);
+            std::unique_ptr<Layout> layout = LayerManager::get()->createLayout(
+                {.bucketParameters = parameters,
+                 .fontFaces = fontFaces,
+                 .glyphDependencies = glyphDependencies,
+                 .imageDependencies = imageDependencies,
+                 .availableImages = *availableImages,
+                 .resourceDependencies = resourceDependencies},
+                std::move(geometryLayer),
+                group);
             if (layout->hasDependencies()) {
                 layouts.push_back(std::move(layout));
             } else {
@@ -532,6 +558,7 @@ void GeometryTileWorker::parse() {
 
     requestNewGlyphs(glyphDependencies);
     requestNewImages(imageDependencies);
+    requestNewResources(resourceDependencies);
 
     MBGL_TIMING_FINISH(watch,
                        " Action: " << "Parsing,"
@@ -547,7 +574,7 @@ bool GeometryTileWorker::hasPendingDependencies() const {
             return true;
         }
     }
-    return !pendingImageDependencies.empty();
+    return !pendingImageDependencies.empty() || !pendingResourceDependencies.empty();
 }
 
 bool GeometryTileWorker::hasPendingParseResult() const {
@@ -584,6 +611,7 @@ void GeometryTileWorker::finalizeLayout() {
             }
 
             layout->prepareSymbols(glyphMap, glyphAtlas.glyphPositions, iconMap, imageAtlas.iconPositions);
+            layout->prepareResources(resourceMap);
 
             if (!layout->hasSymbolInstances()) {
                 continue;

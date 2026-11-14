@@ -65,6 +65,18 @@ typedef enum mln_plugin_value_type {
     MLN_PLUGIN_VALUE_FLOAT2 = 2,
     MLN_PLUGIN_VALUE_COLOR = 3,
     MLN_PLUGIN_VALUE_STRING = 4,
+    MLN_PLUGIN_VALUE_BOOLEAN = 5,
+    /* Sprite image identifier, represented by data.string_value. */
+    MLN_PLUGIN_VALUE_IMAGE = 6,
+    /* Layout only, no expressions. In the style, an object mapping names to the
+     * URLs of resources the layer may use, e.g. {"car": "asset://car.glb"}. The
+     * host loads the ones that RESOURCE properties name; plugins never receive
+     * this value itself. */
+    MLN_PLUGIN_VALUE_RESOURCES = 7,
+    /* Layout only. A name in the RESOURCES property that the descriptor's
+     * `resources` field names; may be a feature expression. layout_feature
+     * receives the resource already loaded (see mln_plugin_resource_value). */
+    MLN_PLUGIN_VALUE_RESOURCE = 8,
 } mln_plugin_value_type;
 
 /* Expression dependencies accepted by a plugin property. */
@@ -104,11 +116,23 @@ typedef struct mln_plugin_color {
     float a;
 } mln_plugin_color;
 
+/* A RESOURCE value. name comes first, so it shares its layout with string_value. */
+typedef struct mln_plugin_resource_value {
+    mln_plugin_string name;
+    /* What create_resource returned for the resource the name maps to. Null when
+     * the name is not in the layer's resources, the resource failed to load or to
+     * be created, or outside layout_feature. */
+    void* handle;
+} mln_plugin_resource_value;
+
 typedef union mln_plugin_value_data {
     float float_value;
+    /* Must be 0 or 1. */
+    uint8_t boolean_value;
     mln_plugin_float2 float2_value;
     mln_plugin_color color_value;
     mln_plugin_string string_value;
+    mln_plugin_resource_value resource_value;
 } mln_plugin_value_data;
 
 typedef struct mln_plugin_value {
@@ -116,6 +140,12 @@ typedef struct mln_plugin_value {
     mln_plugin_value_type type;
     mln_plugin_value_data data;
 } mln_plugin_value;
+
+/* Zero (a zero-initialized descriptor) means paint. */
+typedef enum mln_plugin_property_scope {
+    MLN_PLUGIN_PROPERTY_PAINT = 1,
+    MLN_PLUGIN_PROPERTY_LAYOUT = 2
+} mln_plugin_property_scope;
 
 typedef struct mln_plugin_property_descriptor_v1 {
     uint32_t struct_size;
@@ -133,6 +163,14 @@ typedef struct mln_plugin_property_descriptor_v1 {
     /* Optional allowed string values. */
     const mln_plugin_string* enum_values;
     size_t enum_value_count;
+    /* Layout properties are evaluated at layout time, once per tile and once per
+     * feature (see mln_plugin_feature_v1::layout_properties); changing one lays the
+     * tiles out again. They may use camera and feature expressions, but not
+     * feature state or transitions, and they have no binders. */
+    mln_plugin_property_scope scope;
+    /* For a RESOURCE property: the name of the layer type's RESOURCES property
+     * that its values are looked up in. Empty otherwise. */
+    mln_plugin_string resources;
 } mln_plugin_property_descriptor_v1;
 
 typedef struct mln_plugin_property_value_v1 {
@@ -223,7 +261,17 @@ typedef enum mln_plugin_property_encoding_v1 {
     MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2 = 2,
     MLN_PLUGIN_PROPERTY_ENCODING_COLOR = 3,
     /* Zero-based index into the property descriptor enum_values. */
-    MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT = 4
+    MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT = 4,
+    MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT = 5,
+    /* Atlas rectangles (float4). FROM minimum/maximum are the zoom-in/out
+     * endpoints; TO has equal endpoints. Composite images use native
+     * Faded<Image>::to sampling (one zoom higher). The host resolves sprite
+     * dependencies; undefined and explicitly empty images stay distinct. */
+    MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM = 6,
+    MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO = 7,
+    /* Color samples use floor(clamp(component, 0, 1) * 255) in two distinct
+     * UINT8_X4_NORMALIZED attributes. Uniform colors remain float4. */
+    MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8 = 8
 } mln_plugin_property_encoding_v1;
 
 /*
@@ -258,6 +306,12 @@ typedef struct mln_plugin_shader_descriptor_v1 {
     size_t uniform_block_count;
     const mln_plugin_shader_property_binding_v1* property_bindings;
     size_t property_binding_count;
+    /* Tile sprite/pattern atlas, at sampler binding 0. Vulkan only. */
+    uint8_t tile_pattern_texture;
+    /* Vulkan only: all attributes, including paint bindings, advance per
+     * instance. The vertex shader generates primitive corners using
+     * gl_VertexIndex. Zero retains ordinary indexed vertex attributes. */
+    uint8_t instanced;
 } mln_plugin_shader_descriptor_v1;
 
 /* Borrowed render-thread inputs for a host-owned plugin uniform block. */
@@ -271,6 +325,20 @@ typedef struct mln_plugin_uniform_context_v1 {
     float pixels_to_tile_units;
     float camera_to_center_distance;
     float pixel_ratio;
+    /* World pixels (the xy unit of tile_matrix) per meter at the map center's latitude. The projection takes a
+     * vertex z in meters and scales it by this, so geometry that must keep its proportions across
+     * zoom levels divides its height in pixels by it. */
+    float pixels_per_meter;
+    float light_color[3];
+    float light_intensity;
+    /* Cartesian style-light position, rotated for a viewport anchor. */
+    float light_direction[3];
+    float zoom;
+    uint32_t tile_x, tile_y;
+    uint8_t tile_z;
+    int32_t tile_wrap;
+    float crossfade_from_scale, crossfade_to_scale, crossfade_t;
+    float pattern_texture_size[2];
 } mln_plugin_uniform_context_v1;
 
 /* output is host-owned writable storage of output_size bytes, borrowed only
@@ -295,13 +363,34 @@ typedef struct mln_plugin_feature_v1 {
     /* path_offsets has path_count + 1 entries and ends at point_count. */
     const uint32_t* path_offsets;
     size_t path_count;
+    /* The layout-scope properties evaluated for this feature, in registration
+     * order, RESOURCES properties left out. RESOURCE values carry their loaded
+     * handle. Populated for layout_feature only, empty otherwise. Borrowed and
+     * valid only during the callback. */
+    const mln_plugin_property_value_v1* layout_properties;
+    size_t layout_property_count;
 } mln_plugin_feature_v1;
+
+/* Services the host offers to plugin callbacks. Borrowed for the duration of
+ * the callback that receives it. */
+typedef struct mln_plugin_host_api_v1 {
+    uint32_t struct_size;
+    uint32_t abi_version;
+    /* severity: 1 info, 2 warning, 3 error. */
+    void (*log)(int32_t severity, mln_plugin_string message);
+} mln_plugin_host_api_v1;
 
 /* Worker-thread input. Paint evaluation is owned by the host binders. */
 typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
+    /* The layout-scope properties evaluated at the tile's zoom without a feature,
+     * in registration order, RESOURCES properties left out. A feature expression
+     * yields its default here, and a RESOURCE value has a null handle. */
+    const mln_plugin_property_value_v1* properties;
+    size_t property_count;
+    const mln_plugin_host_api_v1* host;
 } mln_plugin_layout_context_v1;
 
 /* Returned bytes remain valid until destroy_layout. The host copies them after
@@ -311,6 +400,8 @@ typedef struct mln_plugin_vertex_stream_v1 {
     uint32_t stream_id;
     const uint8_t* data;
     size_t data_size;
+    /* Input records; instances for an instanced shader. Streams bound to one
+     * drawable must have equal counts before element_offset is applied. */
     uint32_t vertex_count;
     uint32_t stride;
 } mln_plugin_vertex_stream_v1;
@@ -320,28 +411,40 @@ typedef struct mln_plugin_attribute_binding_v1 {
     uint32_t attribute_id;
     uint32_t stream_id;
     uint32_t byte_offset;
-    /* Type comes from the shader's attribute declaration. */
+    /* Type comes from the shader's attribute declaration. Starting record in
+     * the stream, before vertex_offset or first_instance is applied. */
+    uint32_t element_offset;
 } mln_plugin_attribute_binding_v1;
 
 typedef struct mln_plugin_segment_v1 {
     uint32_t struct_size;
+    /* For instanced shaders these describe generated primitive corners,
+     * independently of the instance record range below. */
     uint32_t vertex_offset;
     uint32_t index_offset;
     uint32_t vertex_length;
     uint32_t index_length;
+    /* Both zero for ordinary draws. Instanced shaders require a positive count. */
+    uint32_t first_instance;
+    uint32_t instance_count;
 } mln_plugin_segment_v1;
 
 typedef enum mln_plugin_drawable_depth_mode_v1 {
+    /* No depth test: drawn over everything beneath the layer in the layer order. */
     MLN_PLUGIN_DRAWABLE_DEPTH_DISABLED = 0,
+    /* Layer order decides what is in front, as for the host's 2D layers. 3D geometry (fill extrusions) in layers
+     * beneath this one does not hide it. */
     MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY = 1,
+    /* Depth tested and written like the host's 3D layers: hidden by 3D geometry, such as a fill extrusion, that is
+     * in front of it, whatever the layer order. */
     MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE = 2
 } mln_plugin_drawable_depth_mode_v1;
 
 typedef struct mln_plugin_drawable_descriptor_v1 {
-    /* Indexed triangles in the translucent pass, premultiplied-alpha blending by
-     * default. depth_mode, enable_stencil_overlap, and cull_back_faces select the
-     * host depth/stencil/cull state for this drawable. blend_mode and reserved are
-     * unused; set them to zero. */
+    /* Indexed triangles. A layer type with draw passes has every drawable drawn once for each enabled pass, and the
+     * passes set the depth, stencil, cull and blend state. Any other layer type has them drawn in the translucent
+     * pass with premultiplied-alpha blending, and depth_mode, enable_stencil_overlap, and cull_back_faces select the
+     * host depth/stencil/cull state for the drawable. blend_mode and reserved are unused; set them to zero. */
     uint32_t struct_size;
     uint64_t drawable_key;
     mln_plugin_string shader_id;
@@ -356,6 +459,8 @@ typedef struct mln_plugin_drawable_descriptor_v1 {
     uint8_t reserved;
 } mln_plugin_drawable_descriptor_v1;
 
+/* For an instanced shader these ranges address input records (instances),
+ * including unused sentinel records, rather than generated primitive corners. */
 typedef struct mln_plugin_feature_vertex_range_v1 {
     uint32_t struct_size;
     uint64_t feature_index;
@@ -438,6 +543,43 @@ typedef float (*mln_plugin_query_radius_fn)(const mln_plugin_property_statistics
                                             const mln_plugin_property_value_v1* camera_properties,
                                             size_t camera_property_count);
 
+/* Passes run in array order across ALL tiles in the layer. Depth-only passes
+ * can precede color passes. A zero pass count selects one default 2D pass:
+ * depth test, read-only depth, color writes, premultiplied blending, no culling.
+ * Stencil deduplication shares one reference across the layer and requires 3D.
+ * All boolean flags must be 0 or 1. */
+typedef enum mln_plugin_cull_mode_v1 {
+    MLN_PLUGIN_CULL_NONE = 0,
+    MLN_PLUGIN_CULL_BACK_CCW = 1
+} mln_plugin_cull_mode_v1;
+
+typedef struct mln_plugin_draw_pass_v1 {
+    uint32_t struct_size;
+    uint8_t depth_test;
+    uint8_t depth_write;
+    uint8_t color_write;
+    uint8_t blend;
+    uint8_t stencil_dedup;
+    mln_plugin_cull_mode_v1 cull;
+} mln_plugin_draw_pass_v1;
+
+typedef struct mln_plugin_layer_evaluation_v1 {
+    uint32_t struct_size;
+    /* Bit i enables descriptor i, at most 32 passes. Initially all enabled. */
+    uint32_t enabled_passes;
+    mln_plugin_float2 translation;
+    /* 0 = map, 1 = viewport. */
+    uint8_t translation_anchor_viewport;
+} mln_plugin_layer_evaluation_v1;
+
+/* Render-thread callback after camera property evaluation, BEFORE orchestration.
+ * Properties and output are borrowed. Output starts with all passes enabled and
+ * zero translation. Failure or invalid output suppresses rendering for this
+ * evaluation. Geometry and feature paint bindings are unaffected. */
+typedef mln_plugin_status (*mln_plugin_evaluate_layer_fn)(const mln_plugin_property_value_v1* camera_properties,
+                                                          size_t property_count,
+                                                          mln_plugin_layer_evaluation_v1* output);
+
 /* Optional animation signal, consulted on the render thread during layer
  * evaluation with the camera-evaluated paint property values (the same array
  * shape as query_feature; feature-dependent properties evaluate without a
@@ -447,6 +589,21 @@ typedef float (*mln_plugin_query_radius_fn)(const mln_plugin_property_statistics
  * the layer never animates. It must support concurrent calls for different
  * maps. */
 typedef uint8_t (*mln_plugin_should_animate_fn)(const mln_plugin_property_value_v1* properties, size_t property_count);
+
+/*
+ * Resources named by RESOURCE properties. The host loads each URL once per map
+ * through its file source (cache, URL transformation, asset://, file://) and
+ * lays out a tile only after the resources its features name have arrived. It
+ * then calls create_resource once per loaded resource and layer type, on a tile
+ * worker; url, data and host are borrowed for the call. The returned handle
+ * reaches layout_feature through RESOURCE values, possibly on several workers at
+ * once, so what it points to must not change. destroy_resource runs exactly once
+ * per non-null handle, on any thread, when no tile uses the resource any more.
+ * A failed creation must leave *handle null; it is not retried for that load.
+ */
+typedef mln_plugin_status (*mln_plugin_create_resource_fn)(
+    const mln_plugin_host_api_v1* host, mln_plugin_string url, const uint8_t* data, size_t data_size, void** handle);
+typedef void (*mln_plugin_destroy_resource_fn)(void* handle);
 
 typedef struct mln_plugin_layer_type_v1 {
     uint32_t struct_size;
@@ -464,25 +621,19 @@ typedef struct mln_plugin_layer_type_v1 {
     mln_plugin_query_feature_fn query_feature;
     mln_plugin_update_uniform_block_fn update_uniform_block;
     mln_plugin_query_radius_fn get_query_radius;
-    /*
-     * Off (0, the default for a zero-initialized struct) keeps every drawable
-     * translucent-only with read-only depth and no stencil, as before.
-     *
-     * When nonzero, every drawable in this layer instead gets is3D + stencil
-     * test/write and no depth test, and the layer's one TileLayerGroup shares
-     * a single stencil ref for the pass.
-     */
-    uint8_t enable_stencil_overlap_dedup;
-    /*
-     * Off (0, the default) matches every existing plugin's current tile
-     * matrix: a pixel-snapped (aligned) projection with no near-clip
-     * adjustment.
-     *
-     * When nonzero, this layer's per-tile matrix instead uses the
-     * non-pixel-snapped, near-clipped projection.
-     */
+    /* Explicitly opt into replacing a built-in STYLE name. Existing objects
+     * keep their implementation identity. Does not replace another plugin. */
+    uint8_t replace_builtin;
+    uint8_t is_3d;
+    const mln_plugin_draw_pass_v1* draw_passes;
+    size_t draw_pass_count;
+    mln_plugin_evaluate_layer_fn evaluate_layer;
+    /* Unaligned projection with near-clip adjustment; translation is host-owned. */
     uint8_t enable_near_clipped_matrix;
     mln_plugin_should_animate_fn should_animate;
+    /* Required when a property is a RESOURCE. */
+    mln_plugin_create_resource_fn create_resource;
+    mln_plugin_destroy_resource_fn destroy_resource;
 } mln_plugin_layer_type_v1;
 
 typedef struct mln_plugin_descriptor_v1 {

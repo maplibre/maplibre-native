@@ -30,6 +30,7 @@ private:
     std::optional<conversion::Error> setPluginProperty(const std::string&,
                                                        const conversion::Convertible&,
                                                        std::optional<PropertyScope> = std::nullopt);
+    std::optional<conversion::Error> setPluginResources(const std::string&, const conversion::Convertible&);
     std::optional<conversion::Error> setPluginTransition(const std::string&,
                                                          const conversion::Convertible&,
                                                          std::optional<PropertyScope> = std::nullopt);
@@ -51,6 +52,8 @@ public:
 
     std::map<std::string, PluginPropertyValue> pluginProperties;
     std::map<std::string, TransitionOptions> pluginPropertyTransitions;
+    // RESOURCES properties: for each, its names and the URLs they stand for.
+    std::map<std::string, std::map<std::string, std::string>> pluginResources;
     plugin::RegisteredLayerPtr registration;
 };
 
@@ -65,6 +68,8 @@ public:
 
     expression::Dependency getDependencies() const noexcept override { return baseImpl->getDependencies(); }
 
+    mln_plugin_layer_evaluation_v1 rendering{sizeof(mln_plugin_layer_evaluation_v1), 0xffffffffu, {}, 0};
+    CrossfadeParameters crossfade{1, 1, 1};
     PluginPropertyMap evaluatedPaintProperties;
 };
 
