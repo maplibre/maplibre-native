@@ -47,6 +47,7 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     baseVertexInstanceDrawingSupported = true;
 #else
     baseVertexInstanceDrawingSupported = device->supportsFamily(MTL::GPUFamilyApple3);
+    memorylessTextureSupported = device->supportsFamily(MTL::GPUFamilyApple2);
 #endif
 }
 
