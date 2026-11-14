@@ -124,3 +124,50 @@ TEST(MBTilesFileSource, NonExistentTile) {
 
     loop.run();
 }
+
+// Tiles requested again with their etag are not modified
+TEST(MBTilesFileSource, TileNotModified) {
+    util::RunLoop loop;
+
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
+
+    Resource resource = Resource::tile(
+        toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
+
+    std::unique_ptr<AsyncRequest> req = mbtiles.request(resource, [&](Response res) {
+        req.reset();
+        ASSERT_TRUE(res.data.get());
+        ASSERT_TRUE(res.etag);
+        resource.priorEtag = res.etag;
+        req = mbtiles.request(resource, [&](Response again) {
+            req.reset();
+            EXPECT_EQ(nullptr, again.error);
+            EXPECT_TRUE(again.notModified);
+            EXPECT_FALSE(again.data.get());
+            loop.stop();
+        });
+    });
+
+    loop.run();
+}
+
+// Tiles requested with a different etag return tile data
+TEST(MBTilesFileSource, TileOtherEtag) {
+    util::RunLoop loop;
+
+    MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
+
+    Resource resource = Resource::tile(
+        toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
+    resource.priorEtag = std::string("another etag");
+
+    std::unique_ptr<AsyncRequest> req = mbtiles.request(resource, [&](Response res) {
+        req.reset();
+        EXPECT_EQ(nullptr, res.error);
+        EXPECT_FALSE(res.notModified);
+        ASSERT_TRUE(res.data.get());
+        loop.stop();
+    });
+
+    loop.run();
+}
