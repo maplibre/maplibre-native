@@ -1348,7 +1348,6 @@ terrain during placement sees the previous frame's state - the same first-frame 
 - **(done)** Heatmap is elevated, not draped, as in gl-js (which does not drape it): each
   kernel is lifted to the DEM height at its centre in the kernel vertex shader, and the
   colour-ramp composite stays a screen-space pass.
-- Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing
 
@@ -1813,6 +1812,20 @@ style.setTerrain(Terrain("terrain-source", exaggeration = 1.0f))
 val terrain = style.getTerrain() // null when terrain is not enabled
 style.setTerrain(null)           // disable terrain
 ```
+
+### iOS and macOS API
+
+```swift
+// Requires a raster-dem source in the style
+style.addSource(MLNRasterDEMSource(identifier: "terrain-dem", tileURLTemplates: urls, options: nil))
+style.terrain = MLNTerrain(sourceIdentifier: "terrain-dem", exaggeration: 1.0)
+
+let terrain = style.terrain // nil when terrain is not enabled
+style.terrain = nil         // disable terrain
+```
+
+Set it after the style has loaded (`mapView(_:didFinishLoading:)`); loading a style replaces the
+terrain. A style whose JSON has a `terrain` object starts with it set.
 
 ### Saving and restoring the camera
 
