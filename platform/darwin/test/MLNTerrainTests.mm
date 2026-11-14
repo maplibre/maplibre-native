@@ -214,4 +214,37 @@ static NSString *const MLNTerrainTestStyleWithoutTerrain =
   XCTAssertNil(warning);
 }
 
+- (void)testTerrainLoadModeDefaultsToQualityAndRoundTrips {
+  XCTAssertEqual(self.mapView.terrainLoadMode, MLNTerrainLoadModeQuality);
+
+  self.mapView.terrainLoadMode = MLNTerrainLoadModeBalanced;
+  XCTAssertEqual(self.mapView.terrainLoadMode, MLNTerrainLoadModeBalanced);
+
+  self.mapView.terrainLoadMode = MLNTerrainLoadModePerformance;
+  XCTAssertEqual(self.mapView.terrainLoadMode, MLNTerrainLoadModePerformance);
+
+  self.mapView.terrainLoadMode = MLNTerrainLoadModeQuality;
+  XCTAssertEqual(self.mapView.terrainLoadMode, MLNTerrainLoadModeQuality);
+}
+
+- (void)testTerrainSkirtLengthDefaultsToAutoAndRoundTrips {
+  XCTAssertEqual(self.mapView.terrainSkirtLength, MLNTerrainSkirtLengthAuto);
+
+  self.mapView.terrainSkirtLength = MLNTerrainSkirtLengthNone;
+  XCTAssertEqual(self.mapView.terrainSkirtLength, MLNTerrainSkirtLengthNone);
+
+  self.mapView.terrainSkirtLength = MLNTerrainSkirtLengthAuto;
+  XCTAssertEqual(self.mapView.terrainSkirtLength, MLNTerrainSkirtLengthAuto);
+}
+
+- (void)testTerrainOptionsSurviveLoadingAStyle {
+  self.mapView.terrainLoadMode = MLNTerrainLoadModePerformance;
+  self.mapView.terrainSkirtLength = MLNTerrainSkirtLengthNone;
+
+  [self loadStyleJSON:MLNTerrainTestStyleWithTerrain];
+
+  XCTAssertEqual(self.mapView.terrainLoadMode, MLNTerrainLoadModePerformance);
+  XCTAssertEqual(self.mapView.terrainSkirtLength, MLNTerrainSkirtLengthNone);
+}
+
 @end

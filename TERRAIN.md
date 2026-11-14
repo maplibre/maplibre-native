@@ -310,7 +310,8 @@ Implemented:
   levels. The skirt flag rides in the mesh vertex's z (native analog of gl-js
   `a_pos3d.z`); the terrain depth pass drops the skirts too so they occlude
   correctly. Skirts can be turned off per map with `Map::setTerrainSkirtLength`
-  (`TerrainSkirtLength::Auto` / `None`; Android `MapLibreMap.setTerrainSkirtLength`),
+  (`TerrainSkirtLength::Auto` / `None`; Android `MapLibreMap.setTerrainSkirtLength`,
+  iOS and macOS `MLNMapView.terrainSkirtLength`),
   matching gl-js's `MapOptions.terrainSkirtLength`. `None` suits a transparent
   background, where the skirts would otherwise show as vertical artifacts, at the
   cost of visible stitches; it builds the bare grid rather than shortening the
@@ -894,7 +895,8 @@ switches load mode, toggles the built-in rendering-stats HUD (FPS + frame
 timings + counts), and toggles an above-ground-margin debug log (off by default,
 gated so the sampling does not cost anything when unused); the same controls are
 driveable over adb (`am broadcast ... --es cmd terrain_toggle`, plus launch
-extras) for on-device testing. Not yet exposed on iOS/macOS.
+extras) for on-device testing. On iOS and macOS it is `MLNMapView.terrainLoadMode`
+(`MLNTerrainLoadMode`).
 
 **Fixed - runtime terrain re-enable left the map blank until panned.** Toggling
 `style.setTerrain(null)` then back on over an otherwise static map left the map
@@ -1822,6 +1824,9 @@ style.terrain = MLNTerrain(sourceIdentifier: "terrain-dem", exaggeration: 1.0)
 
 let terrain = style.terrain // nil when terrain is not enabled
 style.terrain = nil         // disable terrain
+
+mapView.terrainLoadMode = .balanced    // per-frame loading budget, .quality by default
+mapView.terrainSkirtLength = .none     // no skirts, for a transparent background
 ```
 
 Set it after the style has loaded (`mapView(_:didFinishLoading:)`); loading a style replaces the
