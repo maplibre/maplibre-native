@@ -12,7 +12,10 @@
 
 #include <mln/renderer/buckets/symbol_bucket.hpp> // For PlacedSymbol: pull out to another location
 
+#include <algorithm>
 #include <cmath>
+#include <limits>
+#include <numbers>
 
 namespace mln {
 
@@ -148,7 +151,7 @@ IntersectStatus CollisionIndex::intersectsTileEdges(const CollisionBox& box,
 
 std::pair<bool, bool> CollisionIndex::placeFeature(
     const CollisionFeature& feature,
-    Point<float> shift,
+    std::optional<Point<float>> shift,
     const mat4& posMatrix,
     const mat4& labelPlaneMatrix,
     const float textPixelRatio,
@@ -157,6 +160,7 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
     const float fontSize,
     const bool allowOverlap,
     const bool pitchWithMap,
+    const bool rotateWithMap,
     const bool collisionDebug,
     const std::optional<CollisionBoundaries>& avoidEdges,
     const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
@@ -164,7 +168,11 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
     assert(projectedBoxes.empty());
     if (!feature.alongLine) {
         const CollisionBox& box = feature.boxes.front();
-        auto collisionBoundaries = getProjectedCollisionBoundaries(posMatrix, shift, textPixelRatio, box);
+        // A label pitched or rotated with the map turns and foreshortens with it, so its box is projected.
+        const auto collisionBoundaries =
+            (pitchWithMap || rotateWithMap)
+                ? projectCollisionBox(box, posMatrix, textPixelRatio, scale, pitchWithMap, rotateWithMap, shift)
+                : getProjectedCollisionBoundaries(posMatrix, shift.value_or(Point<float>{}), textPixelRatio, box);
         projectedBoxes.emplace_back(
             collisionBoundaries[0], collisionBoundaries[1], collisionBoundaries[2], collisionBoundaries[3]);
         if ((avoidEdges && !isInsideTile(collisionBoundaries, *avoidEdges)) || !isInsideGrid(collisionBoundaries) ||
@@ -462,6 +470,88 @@ CollisionBoundaries CollisionIndex::getProjectedCollisionBoundaries(const mat4& 
         (box.x2 + shift.x) * tileToViewport + projectedPoint.first.x,
         (box.y2 + shift.y) * tileToViewport + projectedPoint.first.y,
     }};
+}
+
+CollisionBoundaries CollisionIndex::projectCollisionBox(const CollisionBox& box,
+                                                        const mat4& posMatrix,
+                                                        const float textPixelRatio,
+                                                        const float scale,
+                                                        const bool pitchWithMap,
+                                                        const bool rotateWithMap,
+                                                        const std::optional<Point<float>> shift) const {
+    const auto projectedAnchor = projectAndGetPerspectiveRatio(posMatrix, box.anchor);
+    // These axes hold for labels aligned with the viewport and for pitched labels aligned with the map.
+    Point<float> vecEast{1, 0};
+    Point<float> vecSouth{0, 1};
+    if (rotateWithMap && !pitchWithMap) {
+        // Labels that stay east-west aligned on the screen.
+        const Point<float> projectedEast = projectPoint(posMatrix, {box.anchor.x + 1, box.anchor.y});
+        const float toEastX = projectedEast.x - projectedAnchor.first.x;
+        const float toEastY = projectedEast.y - projectedAnchor.first.y;
+        const float angle = std::atan(toEastY / toEastX) + (toEastX < 0 ? std::numbers::pi_v<float> : 0.f);
+        vecEast = {std::cos(angle), std::sin(angle)};
+        vecSouth = {-std::sin(angle), std::cos(angle)};
+    } else if (!rotateWithMap && pitchWithMap) {
+        // Pitched labels that stay aligned with the viewport's x axis.
+        vec2 east;
+        vec2 south;
+        getTileSkewVectors(transformState, east, south);
+        vecEast = {static_cast<float>(east[0]), static_cast<float>(east[1])};
+        vecSouth = {static_cast<float>(south[0]), static_cast<float>(south[1])};
+    }
+
+    // Boxes aligned with the viewport are built in pixels around the projected anchor, pitched ones in tile units.
+    Point<float> basePoint = projectedAnchor.first;
+    float distanceMultiplier = textPixelRatio * projectedAnchor.second;
+    if (pitchWithMap) {
+        basePoint = box.anchor;
+        distanceMultiplier = 1.0f / scale;
+        // The shader scales a pitched label by its distance from the camera, unless it sits on a variable anchor.
+        if (!shift) {
+            const float distanceRatio = projectAnchor(posMatrix, box.anchor).second /
+                                        transformState.getCameraToCenterDistance();
+            distanceMultiplier *= std::clamp(0.5f + 0.5f * distanceRatio, 0.0f, 4.0f);
+        }
+    }
+    if (shift) {
+        basePoint += vecEast * (shift->x * distanceMultiplier) + vecSouth * (shift->y * distanceMultiplier);
+    }
+
+    const float xMin = box.x1 * distanceMultiplier;
+    const float xMax = box.x2 * distanceMultiplier;
+    const float xHalf = (xMin + xMax) / 2;
+    const float yMin = box.y1 * distanceMultiplier;
+    const float yMax = box.y2 * distanceMultiplier;
+    const float yHalf = (yMin + yMax) / 2;
+
+    // 0--1--2
+    // |     |
+    // 7     3
+    // |     |
+    // 6--5--4
+    const std::array<Point<float>, 8> offsets = {{{xMin, yMin},
+                                                  {xHalf, yMin},
+                                                  {xMax, yMin},
+                                                  {xMax, yHalf},
+                                                  {xMax, yMax},
+                                                  {xHalf, yMax},
+                                                  {xMin, yMax},
+                                                  {xMin, yHalf}}};
+    CollisionBoundaries bounds = {{std::numeric_limits<float>::infinity(),
+                                   std::numeric_limits<float>::infinity(),
+                                   -std::numeric_limits<float>::infinity(),
+                                   -std::numeric_limits<float>::infinity()}};
+    for (const auto& offset : offsets) {
+        Point<float> point = basePoint + vecEast * offset.x + vecSouth * offset.y;
+        if (pitchWithMap) {
+            point = projectPoint(posMatrix, point);
+        }
+        bounds[0] = std::min(bounds[0], point.x);
+        bounds[1] = std::min(bounds[1], point.y);
+        bounds[2] = std::max(bounds[2], point.x);
+        bounds[3] = std::max(bounds[3], point.y);
+    }
+    return bounds;
 }
 
 } // namespace mln
