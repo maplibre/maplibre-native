@@ -50,6 +50,7 @@
 
 #include <gmock/gmock.h>
 
+#include <future>
 #include <optional>
 
 using namespace mln;
@@ -1095,6 +1096,45 @@ TEST(Source, GeoJSONSourceTilesAfterDataReset) {
     static_cast<RenderSource&>(renderSource)
         .update(source.baseImpl, layers, true, true, test.tileParameters(MapMode::Static));
     EXPECT_TRUE(renderSource.isLoaded()); // Tiles are reset in static mode.
+}
+
+TEST(Source, GeoJSONSourceDropsReplacedURLData) {
+    SourceTest test;
+    StubFileSource fileSource(StubFileSource::ResponseType::Manual);
+    std::promise<void> responseReleased;
+    fileSource.sourceResponse = [&](const Resource&) {
+        responseReleased = {};
+        Response response;
+        // The source builds the response's data in the background and releases
+        // the response once it has queued the result on the run loop.
+        response.data = std::shared_ptr<const std::string>(
+            new std::string(R"({"type": "Point", "coordinates": [1.1, 1.1]})"), [&](const std::string* data) {
+                delete data;
+                responseReleased.set_value();
+            });
+        return response;
+    };
+
+    GeoJSONSource source("source");
+    source.setObserver(&test.styleObserver);
+    // Let the URL's data start building in the background, replace it, then let
+    // the build finish and reply.
+    const auto replaceURLData = [&](const auto& replace) {
+        source.loadDescription(fileSource);
+        fileSource.respondToAll();
+        replace();
+        responseReleased.get_future().wait();
+        test.loop.waitForEmpty();
+    };
+
+    source.setURL("http://old.ext");
+    replaceURLData([&] { source.setURL("http://new.ext"); });
+    EXPECT_FALSE(source.loaded);
+
+    auto data = GeoJSONData::create(mapbox::geojson::parse(R"({"type": "Point", "coordinates": [0, 0]})"),
+                                    Scheduler::GetSequenced());
+    replaceURLData([&] { source.setGeoJSONData(data); });
+    EXPECT_EQ(data, source.impl().getData().lock());
 }
 
 TEST(Source, SetMaxParentOverscaleFactor) {

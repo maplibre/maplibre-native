@@ -3,6 +3,9 @@
 #include <mln/util/async_request.hpp>
 #include <mln/util/client_options.hpp>
 
+#include <ranges>
+#include <vector>
+
 namespace mln {
 
 using namespace std::chrono_literals;
@@ -82,12 +85,19 @@ void StubFileSource::respondToAll() {
     if (type != ResponseType::Manual) {
         throw std::runtime_error("this method can only be called with ResponseType::Manual");
     }
-    for (const auto& [key, value] : pending) {
-        auto& [resource, responseFunction, callback] = value;
+    // A callback can cancel or start requests, so take each pending request out
+    // of the map before responding to it.
+    const auto keys = std::views::keys(pending);
+    const std::vector<AsyncRequest*> requests(keys.begin(), keys.end());
+    for (AsyncRequest* request : requests) {
+        auto node = pending.extract(request);
+        if (node.empty()) {
+            continue;
+        }
+        auto& [resource, responseFunction, callback] = node.mapped();
         if (const std::optional<Response> res = responseFunction(resource)) {
             callback(*res);
         }
-        pending.erase(key);
     }
 }
 
