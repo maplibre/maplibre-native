@@ -279,7 +279,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getInternal(const 
     }
 }
 
-std::optional<int64_t> OfflineDatabase::hasInternal(const Resource& resource) {
+std::optional<RegionResourceInfo> OfflineDatabase::hasInternal(const Resource& resource) {
     if (resource.kind == Resource::Kind::Tile) {
         assert(resource.tileData);
         return hasTile(*resource.tileData);
@@ -417,14 +417,17 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
     return std::make_pair(response, size);
 }
 
-std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
-    mapbox::sqlite::Query query{getStatement("SELECT length(data) FROM resources WHERE url = ?")};
+std::optional<RegionResourceInfo> OfflineDatabase::hasResource(const Resource& resource) {
+    mapbox::sqlite::Query query{
+        getStatement("SELECT length(data), expires, must_revalidate FROM resources WHERE url = ?")};
     query.bind(1, cacheKey(resource));
     if (!query.run()) {
         return std::nullopt;
     }
 
-    return query.get<std::optional<int64_t>>(0);
+    return RegionResourceInfo{.size = static_cast<uint64_t>(query.get<std::optional<int64_t>>(0).value_or(0)),
+                              .expires = query.get<std::optional<Timestamp>>(1),
+                              .mustRevalidate = query.get<bool>(2)};
 }
 
 bool OfflineDatabase::putResource(const Resource& resource,
@@ -591,10 +594,10 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
     return std::make_pair(response, size);
 }
 
-std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) {
+std::optional<RegionResourceInfo> OfflineDatabase::hasTile(const Resource::TileData& tile) {
     // clang-format off
-    mapbox::sqlite::Query size{ getStatement(
-        "SELECT length(data) "
+    mapbox::sqlite::Query query{ getStatement(
+        "SELECT length(data), expires, must_revalidate "
         "FROM tiles "
         "WHERE url_template = ?1 "
         "  AND pixel_ratio  = ?2 "
@@ -603,17 +606,19 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
         "  AND z            = ?5 ") };
     // clang-format on
 
-    size.bind(1, tile.urlTemplate);
-    size.bind(2, tile.pixelRatio);
-    size.bind(3, tile.x);
-    size.bind(4, tile.y);
-    size.bind(5, tile.z);
+    query.bind(1, tile.urlTemplate);
+    query.bind(2, tile.pixelRatio);
+    query.bind(3, tile.x);
+    query.bind(4, tile.y);
+    query.bind(5, tile.z);
 
-    if (!size.run()) {
+    if (!query.run()) {
         return std::nullopt;
     }
 
-    return size.get<std::optional<int64_t>>(0);
+    return RegionResourceInfo{.size = static_cast<uint64_t>(query.get<std::optional<int64_t>>(0).value_or(0)),
+                              .expires = query.get<std::optional<Timestamp>>(1),
+                              .mustRevalidate = query.get<bool>(2)};
 }
 
 bool OfflineDatabase::putTile(const Resource::TileData& tile,
@@ -1018,7 +1023,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getRegionResource(
     return std::nullopt;
 }
 
-std::optional<int64_t> OfflineDatabase::hasRegionResource(const Resource& resource) try {
+std::optional<RegionResourceInfo> OfflineDatabase::hasRegionResource(const Resource& resource) try {
     return hasInternal(resource);
 } catch (...) {
     handleError("query region resource");

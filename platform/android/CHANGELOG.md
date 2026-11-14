@@ -6,6 +6,7 @@
 
 ### 🐞 Bug fixes
 
+- Revalidate unusable cached resources when resuming an offline download ([#410](https://github.com/maplibre/maplibre-native/issues/410)).
 - `raster` and `raster-dem` sources loaded from a `url` take the style's inline `minzoom` and `maxzoom` over the TileJSON's, as `vector` sources and maplibre-gl-js already do. A `raster-dem` source with an invalid `encoding`, `minzoom` or `maxzoom`, or a `raster` source with an invalid `minzoom` or `maxzoom`, is now rejected with an error, as a `vector` source is. Before, such a `raster-dem` source still loaded, decoded as Mapbox whatever its `encoding` ([#4557](https://github.com/maplibre/maplibre-native/pull/4557)).
 - Color property getters return whole-number channels, as MapLibre GL JS prints colors: a color set to `rgba(240,245,255,1)` reads back as set instead of `rgba(240.00001525878906,245.00001525878906,255,1)` ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
 
