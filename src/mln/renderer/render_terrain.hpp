@@ -331,6 +331,12 @@ public:
      * @brief Get the terrain implementation
      */
     const Immutable<style::Terrain::Impl>& getImpl() const { return impl; }
+    void setImpl(Immutable<style::Terrain::Impl> impl_) {
+        impl = std::move(impl_);
+        depthDirty = true;
+    }
+    /// Whether anything is held that was built from DEM tiles
+    bool holdsDEMData() const { return !demTextures.empty() || !elevationGrids.empty(); }
 
     /**
      * @brief Get the terrain mesh for a specific tile
@@ -484,6 +490,8 @@ private:
         std::shared_ptr<gfx::Texture2D> texture;
         int32_t dim;
         uint64_t lastUsed = 0;
+        // DEMData::getBorderRevision() of the image the texture holds
+        uint32_t borderRevision = 0;
     };
     std::map<UnwrappedTileID, DEMTextureEntry> demTextures;
     // Retention cap for demTextures (~1MB per 514x514 DEM texture); entries not

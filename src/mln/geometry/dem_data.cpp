@@ -76,6 +76,7 @@ DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _enco
 // tile boundaries.
 void DEMData::backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy) {
     auto& o = borderTileData;
+    ++borderRevision;
 
     // Tiles from the same source should always be of the same dimensions.
     assert(dim == o.dim);
