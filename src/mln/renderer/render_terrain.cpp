@@ -486,11 +486,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         return;
     }
 
-    // Get tiles from the DEM source
-    auto renderTiles = demSource->getRawRenderTiles();
-    if (renderTiles->empty()) {
-        return;
-    }
+    // A DEM source with no tile loaded yet is no reason to draw nothing: the mesh tiles below
+    // fall back to the flat placeholder until their elevation arrives.
 
     // Cast to LayerGroup for addDrawable
     auto* lg = static_cast<LayerGroup*>(layerGroup.get());
