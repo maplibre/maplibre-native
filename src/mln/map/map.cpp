@@ -155,6 +155,10 @@ void Map::jumpTo(const CameraOptions& camera) {
 
 void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    // A gesture's step is a non-animated one; an animation goes somewhere else.
+    if (animation.duration && *animation.duration > Duration::zero()) {
+        impl->forgetEyeElevation();
+    }
     impl->noteCameraSet();
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.easeTo(camera, animation);
@@ -163,6 +167,10 @@ void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation)
 
 void Map::flyTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    // A gesture's step is a non-animated one; an animation goes somewhere else.
+    if (animation.duration && *animation.duration > Duration::zero()) {
+        impl->forgetEyeElevation();
+    }
     impl->noteCameraSet();
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.flyTo(camera, animation);
@@ -717,6 +725,7 @@ bool Map::setCenterAltitudeKeepingView(double altitudeMeters) {
 
 void Map::setCenterClampedToGround(bool clamped) {
     impl->centerClampedToGround = clamped;
+    impl->forgetEyeElevation();
 }
 
 bool Map::getCenterClampedToGround() const {

@@ -27,6 +27,7 @@
 #include <cstdio>
 #include <functional>
 #include <limits>
+#include <map>
 #include <optional>
 #include <set>
 #include <string>
@@ -1199,6 +1200,147 @@ TEST(TerrainCamera, AnAnimatedZoomDoesNotCarryTheEyeUnderTheGround) {
     });
     ASSERT_TRUE(finished);
     EXPECT_GE(lowest, 0.0) << "the eye was " << -lowest << " m under the ground during the animation";
+}
+
+namespace {
+
+// The ramp's DEM at a fine zoom, so the ground the map holds under the eye is within a few tens of meters
+// of the ramp's height (at the coarse zoom of rampStyle a texel is nearly a kilometer).
+const char* fineRampStyle = R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 14,
+      "tileSize": 64
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": []
+})STYLE";
+
+// A continuous map over the ramp with the clamp on, at pitch 85 looking north. The center starts over
+// the flat ground north of the ridge line with the eye over it too; moving the center south puts the eye,
+// a few kilometers behind it, over the climb. Tiles requested once `tileDelay` is set are sent that long
+// after they were first asked for, as on a slow link.
+struct FrameCounter final : MapObserver {
+    void onDidFinishRenderingFrame(const RenderFrameStatus&) override { ++frames; }
+    long frames = 0;
+};
+
+struct EyeOverTheClimb {
+    util::RunLoop loop;
+    FrameCounter frameCounter;
+    std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(),
+                                                                                   ClientOptions());
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map;
+    std::map<std::string, std::chrono::steady_clock::time_point> askedFor;
+    std::chrono::milliseconds tileDelay{0};
+
+    EyeOverTheClimb()
+        : map(frontend,
+              frameCounter,
+              fileSource,
+              MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize())) {
+        fileSource->tileResponse = [this](const Resource& resource) -> std::optional<Response> {
+            const auto now = std::chrono::steady_clock::now();
+            if (now - askedFor.emplace(resource.url, now).first->second < tileDelay) {
+                return std::nullopt;
+            }
+            Response res;
+            res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+            return res;
+        };
+        map.setCenterClampedToGround(true);
+        map.setBounds(BoundOptions().withMaxPitch(85.0));
+        map.getStyle().loadJSON(fineRampStyle);
+        map.jumpTo(CameraOptions().withCenter(LatLng{47.34, 11.4041}).withZoom(14.0).withPitch(85.0).withBearing(0.0));
+        pump(std::chrono::milliseconds(30000), [&] { return groundUnderTheEyeIsKnown(); });
+        pump(std::chrono::milliseconds(1000));
+    }
+
+    void pump(std::chrono::milliseconds duration, const std::function<bool()>& done = nullptr) {
+        const auto end = std::chrono::steady_clock::now() + duration;
+        while (std::chrono::steady_clock::now() < end && !(done && done())) {
+            loop.runOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(8));
+        }
+    }
+
+    // Until the map has drawn `count` more frames, as a phone draws one between two steps of a finger.
+    void drawFrames(long count) {
+        const long target = frameCounter.frames + count;
+        const auto end = std::chrono::steady_clock::now() + std::chrono::seconds(60);
+        while (frameCounter.frames < target && std::chrono::steady_clock::now() < end) {
+            loop.runOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
+    }
+
+    // The center near the ridge line, the eye lifted onto the climb behind it. With the center between
+    // 47.301 and 47.316 the eye is over the same DEM tile, so a test that stays in that range does not
+    // depend on a tile arriving.
+    void settleOnTheClimb(double latitude = 47.30) {
+        map.jumpTo(CameraOptions().withCenter(LatLng{latitude, 11.4041}));
+        pump(std::chrono::milliseconds(30000), [&] { return groundUnderTheEyeIsKnown(); });
+        pump(std::chrono::milliseconds(2000));
+    }
+
+    // How far the eye is over the ground right now, without a frame in between.
+    double clearance() const {
+        const auto location = map.getFreeCameraOptions().getLocation();
+        EXPECT_TRUE(location.has_value());
+        return location ? location->altitude - rampMeters(location->location.latitude()) : 0.0;
+    }
+
+    // Whether the map holds the ground under the eye.
+    bool groundUnderTheEyeIsKnown() const {
+        const auto location = map.getFreeCameraOptions().getLocation();
+        return location && map.getTerrainElevation(location->location).has_value();
+    }
+};
+
+} // namespace
+
+// A pan up a climb on a slow link carries the eye into ground whose tile is still on the way. The
+// ground under the eye is not known there, and the camera was let down from the height the climb had
+// lifted it to onto the ground under the center: the eye sat inside the mountain, by kilometers, until
+// the tile arrived. Not knowing the ground under the eye leaves the camera where it is.
+TEST(TerrainCamera, APanIntoGroundThatIsStillLoadingDoesNotLetTheCameraDownIntoIt) {
+    EyeOverTheClimb rig;
+    rig.settleOnTheClimb();
+    ASSERT_GT(rig.clearance(), 0.0) << "the eye starts over the climb";
+    ASSERT_TRUE(rig.groundUnderTheEyeIsKnown());
+
+    rig.tileDelay = std::chrono::seconds(60);
+    rig.map.setGestureInProgress(true);
+    double centerAltitudeWhenKnown = *rig.map.getCameraOptions().centerAltitude;
+    int unknown = 0;
+    double lowestCenterWhileUnknown = std::numeric_limits<double>::infinity();
+    for (int i = 0; i < 40; ++i) {
+        rig.map.moveBy({0, -4});
+        rig.drawFrames(1);
+        if (rig.groundUnderTheEyeIsKnown()) {
+            centerAltitudeWhenKnown = *rig.map.getCameraOptions().centerAltitude;
+        } else {
+            ++unknown;
+            lowestCenterWhileUnknown = std::min(lowestCenterWhileUnknown, *rig.map.getCameraOptions().centerAltitude);
+        }
+    }
+    ASSERT_GT(unknown, 0) << "the pan reached ground that has not loaded";
+    // The lift lags the ground by a frame, so a step's worth of climb is allowed; the camera let down onto the
+    // ground under the center is over a thousand meters.
+    EXPECT_GE(lowestCenterWhileUnknown, centerAltitudeWhenKnown - 150.0)
+        << "the camera was let down " << centerAltitudeWhenKnown - lowestCenterWhileUnknown << " m over unknown ground";
+
+    // The tiles arrive, and the camera clears the ground they show.
+    rig.tileDelay = std::chrono::milliseconds(0);
+    rig.map.setGestureInProgress(false);
+    rig.pump(std::chrono::milliseconds(30000), [&] { return rig.groundUnderTheEyeIsKnown() && rig.clearance() > 0.0; });
+    EXPECT_GT(rig.clearance(), 0.0);
 }
 
 // A camera animation the app asks for (a recenter on the user, a flight to a place) from high

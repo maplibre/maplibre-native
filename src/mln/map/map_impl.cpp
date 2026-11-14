@@ -478,6 +478,7 @@ void Map::Impl::noteTerrainRemoval() {
     const bool hasTerrain = style->impl->getTerrain() != nullptr;
     if (hadTerrain && !hasTerrain) {
         centerAwaitingSeaLevel = true;
+        forgetEyeElevation();
     } else if (hasTerrain) {
         centerAwaitingSeaLevel = false;
     }
@@ -500,7 +501,8 @@ void Map::Impl::onTerrainElevationIndexChanged(std::shared_ptr<const TerrainElev
 }
 
 double Map::Impl::eyeClearCenterAltitude() const {
-    if (std::isnan(terrainEyeElevation)) {
+    const double ground = std::isnan(terrainEyeElevation) ? lastKnownEyeElevation : terrainEyeElevation;
+    if (std::isnan(ground)) {
         return -std::numeric_limits<double>::infinity();
     }
     // The eye sits this far above the center's height, along the line of sight.
@@ -508,7 +510,7 @@ double Map::Impl::eyeClearCenterAltitude() const {
     const double metresPerPixel = Projection::getMetersPerPixelAtLatitude(state.getLatLng().latitude(),
                                                                           state.getZoom());
     const double eyeAboveCenter = state.getCameraToCenterDistance() * metresPerPixel * std::cos(state.getPitch());
-    return terrainEyeElevation + eyeClearanceMeters - eyeAboveCenter;
+    return ground + eyeClearanceMeters - eyeAboveCenter;
 }
 
 double Map::Impl::clampedCenterAltitude() const {
@@ -622,6 +624,9 @@ void Map::Impl::onTerrainTransitionTargetElevationChanged(double elevationMeters
 
 void Map::Impl::onTerrainEyeElevationChanged(double elevationMeters) {
     terrainEyeElevation = elevationMeters;
+    if (!std::isnan(elevationMeters)) {
+        lastKnownEyeElevation = elevationMeters;
+    }
     if (!centerClampedToGround) {
         return;
     }
@@ -641,8 +646,13 @@ bool Map::Impl::clampCenterToTerrain(double elevationMeters) {
     return true;
 }
 
+void Map::Impl::forgetEyeElevation() {
+    lastKnownEyeElevation = std::numeric_limits<double>::quiet_NaN();
+}
+
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
+    forgetEyeElevation();
     noteCameraSet();
     settleCenterAwaitingSeaLevel();
     transform.jumpTo(camera);
