@@ -3,7 +3,6 @@ package org.maplibre.android.maps
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.TypedArray
-import org.maplibre.android.R
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -12,11 +11,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.BaseTest
+import org.maplibre.android.R
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class MapLibreMapOptionsAttrsTest : BaseTest() {
-
     @RelaxedMockK
     private lateinit var options: MapLibreMapOptions
 

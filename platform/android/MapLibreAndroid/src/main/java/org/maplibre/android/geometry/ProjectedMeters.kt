@@ -77,7 +77,10 @@ class ProjectedMeters : Parcelable {
             return false
         }
         val projectedMeters = other as ProjectedMeters
-        return (java.lang.Double.compare(projectedMeters.easting, easting) == 0 && java.lang.Double.compare(projectedMeters.northing, northing) == 0)
+        return (
+            java.lang.Double.compare(projectedMeters.easting, easting) == 0 &&
+                java.lang.Double.compare(projectedMeters.northing, northing) == 0
+        )
     }
 
     /**
@@ -100,18 +103,14 @@ class ProjectedMeters : Parcelable {
      *
      * @return the string representation of this
      */
-    override fun toString(): String {
-        return "ProjectedMeters [northing=$northing, easting=$easting]"
-    }
+    override fun toString(): String = "ProjectedMeters [northing=$northing, easting=$easting]"
 
     /**
      * Describe the kinds of special objects contained in this Parcelable instance's marshaled representation.
      *
      * @return a bitmask indicating the set of special object types marshaled by this Parcelable object instance.
      */
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents(): Int = 0
 
     /**
      * Flatten this object in to a Parcel.
@@ -119,7 +118,10 @@ class ProjectedMeters : Parcelable {
      * @param out   The Parcel in which the object should be written.
      * @param flags Additional flags about how the object should be written
      */
-    override fun writeToParcel(out: Parcel, flags: Int) {
+    override fun writeToParcel(
+        out: Parcel,
+        flags: Int,
+    ) {
         out.writeDouble(northing)
         out.writeDouble(easting)
     }
@@ -129,14 +131,11 @@ class ProjectedMeters : Parcelable {
          * Inner class responsible for recreating Parcels into objects.
          */
         @JvmField
-        val CREATOR: Parcelable.Creator<ProjectedMeters> = object : Parcelable.Creator<ProjectedMeters> {
-            override fun createFromParcel(parcel: Parcel): ProjectedMeters {
-                return ProjectedMeters(parcel)
-            }
+        val CREATOR: Parcelable.Creator<ProjectedMeters> =
+            object : Parcelable.Creator<ProjectedMeters> {
+                override fun createFromParcel(parcel: Parcel): ProjectedMeters = ProjectedMeters(parcel)
 
-            override fun newArray(size: Int): Array<ProjectedMeters?> {
-                return arrayOfNulls(size)
+                override fun newArray(size: Int): Array<ProjectedMeters?> = arrayOfNulls(size)
             }
-        }
     }
 }

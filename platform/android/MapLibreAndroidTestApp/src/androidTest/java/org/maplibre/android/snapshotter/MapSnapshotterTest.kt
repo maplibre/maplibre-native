@@ -3,18 +3,18 @@ package org.maplibre.android.snapshotter
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import com.google.gson.JsonPrimitive
-import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.Style
-import org.maplibre.android.style.layers.BackgroundLayer
-import org.maplibre.android.style.layers.PropertyFactory
-import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import org.junit.Assert
 import org.junit.Assert.assertNotNull
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.BackgroundLayer
+import org.maplibre.android.style.layers.PropertyFactory
+import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import org.maplibre.android.testapp.styles.TestStyles
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException
  */
 @RunWith(AndroidJUnit4ClassRunner::class)
 class MapSnapshotterTest {
-
     @Rule
     @JvmField
     var rule = ActivityTestRule(FeatureOverviewActivity::class.java)
@@ -38,18 +37,22 @@ class MapSnapshotterTest {
         rule.activity.runOnUiThread {
             val bg = BackgroundLayer("rand_tint")
             bg.setProperties(PropertyFactory.backgroundColor("rgba(255,128,0,0.7)"))
-            val options = MapSnapshotter.Options(512, 512)
-                .withPixelRatio(1.0f)
-                .withStyleBuilder(
-                    Style.Builder().fromUri(TestStyles.OPENFREEMAP_BRIGHT)
-                        .withLayerAbove(bg, "country-label")
-                )
-                .withCameraPosition(
-                    CameraPosition.Builder()
-                        .zoom(12.0)
-                        .target(LatLng(51.145495, 5.742234))
-                        .build()
-                )
+            val options =
+                MapSnapshotter
+                    .Options(512, 512)
+                    .withPixelRatio(1.0f)
+                    .withStyleBuilder(
+                        Style
+                            .Builder()
+                            .fromUri(TestStyles.OPENFREEMAP_BRIGHT)
+                            .withLayerAbove(bg, "country-label"),
+                    ).withCameraPosition(
+                        CameraPosition
+                            .Builder()
+                            .zoom(12.0)
+                            .target(LatLng(51.145495, 5.742234))
+                            .build(),
+                    )
             mapSnapshotter = MapSnapshotter(rule.activity, options)
             mapSnapshotter!!.start(
                 {
@@ -59,7 +62,7 @@ class MapSnapshotterTest {
                 },
                 {
                     Assert.fail(it)
-                }
+                },
             )
         }
         if (!countDownLatch.await(30, TimeUnit.SECONDS)) {
@@ -71,41 +74,46 @@ class MapSnapshotterTest {
     fun mapSnapshotterStyleReloadResetsGlobalState() {
         var mapSnapshotter: MapSnapshotter?
         rule.activity.runOnUiThread {
-            val styleJson = """
+            val styleJson =
+                """
                 {
                     "version": 8,
                     "state": {"showLabels": {"default": true}},
                     "sources": {},
                     "layers": []
                 }
-            """.trimIndent()
-            val options = MapSnapshotter.Options(64, 64)
-                .withPixelRatio(1.0f)
-                .withStyleBuilder(Style.Builder().fromJson(styleJson))
+                """.trimIndent()
+            val options =
+                MapSnapshotter
+                    .Options(64, 64)
+                    .withPixelRatio(1.0f)
+                    .withStyleBuilder(Style.Builder().fromJson(styleJson))
             mapSnapshotter = MapSnapshotter(rule.activity, options)
             mapSnapshotter!!.start(
                 {
                     Assert.assertEquals(
                         JsonPrimitive(true),
-                        mapSnapshotter!!.getGlobalState().get("showLabels")
+                        mapSnapshotter!!.getGlobalState().get("showLabels"),
                     )
 
-                    mapSnapshotter!!.setObserver(object : MapSnapshotter.Observer {
-                        override fun onDidFinishLoadingStyle() {
-                            Assert.assertEquals(
-                                JsonPrimitive(true),
-                                mapSnapshotter!!.getGlobalState().get("reloadState")
-                            )
-                            mapSnapshotter!!.setGlobalStateProperty("reloadState", JsonPrimitive(false))
-                            Assert.assertEquals(
-                                JsonPrimitive(false),
-                                mapSnapshotter!!.getGlobalState().get("reloadState")
-                            )
-                            countDownLatch.countDown()
-                        }
+                    mapSnapshotter!!.setObserver(
+                        object : MapSnapshotter.Observer {
+                            override fun onDidFinishLoadingStyle() {
+                                Assert.assertEquals(
+                                    JsonPrimitive(true),
+                                    mapSnapshotter!!.getGlobalState().get("reloadState"),
+                                )
+                                mapSnapshotter!!.setGlobalStateProperty("reloadState", JsonPrimitive(false))
+                                Assert.assertEquals(
+                                    JsonPrimitive(false),
+                                    mapSnapshotter!!.getGlobalState().get("reloadState"),
+                                )
+                                countDownLatch.countDown()
+                            }
 
-                        override fun onStyleImageMissing(imageName: String) {}
-                    })
+                            override fun onStyleImageMissing(imageName: String) {}
+                        },
+                    )
                     mapSnapshotter!!.setStyleUrl("asset://snapshotter_global_state_style.json")
                     // The previous style's state must not be visible, whether
                     // the asset finished loading synchronously or not.
@@ -113,7 +121,7 @@ class MapSnapshotterTest {
                 },
                 {
                     Assert.fail(it)
-                }
+                },
             )
         }
         if (!countDownLatch.await(30, TimeUnit.SECONDS)) {
@@ -125,17 +133,20 @@ class MapSnapshotterTest {
     fun mapSnapshotterGlobalState() {
         var mapSnapshotter: MapSnapshotter?
         rule.activity.runOnUiThread {
-            val styleJson = """
+            val styleJson =
+                """
                 {
                     "version": 8,
                     "state": {"showLabels": {"default": true}},
                     "sources": {},
                     "layers": []
                 }
-            """.trimIndent()
-            val options = MapSnapshotter.Options(64, 64)
-                .withPixelRatio(1.0f)
-                .withStyleBuilder(Style.Builder().fromJson(styleJson))
+                """.trimIndent()
+            val options =
+                MapSnapshotter
+                    .Options(64, 64)
+                    .withPixelRatio(1.0f)
+                    .withStyleBuilder(Style.Builder().fromJson(styleJson))
             mapSnapshotter = MapSnapshotter(rule.activity, options)
             mapSnapshotter!!.start(
                 {
@@ -143,19 +154,19 @@ class MapSnapshotterTest {
                     // the default from the style's root "state" property applies.
                     Assert.assertEquals(
                         JsonPrimitive(true),
-                        mapSnapshotter!!.getGlobalState().get("showLabels")
+                        mapSnapshotter!!.getGlobalState().get("showLabels"),
                     )
 
                     mapSnapshotter!!.setGlobalStateProperty("showLabels", JsonPrimitive(false))
                     Assert.assertEquals(
                         JsonPrimitive(false),
-                        mapSnapshotter!!.getGlobalState().get("showLabels")
+                        mapSnapshotter!!.getGlobalState().get("showLabels"),
                     )
                     countDownLatch.countDown()
                 },
                 {
                     Assert.fail(it)
-                }
+                },
             )
         }
         if (!countDownLatch.await(30, TimeUnit.SECONDS)) {

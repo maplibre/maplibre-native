@@ -24,15 +24,15 @@ class LocationEngineTest : BaseTest() {
     @Mock
     private val locationEngineImpl: LocationEngineImpl<LocationListener>? = null
     private var engine: LocationEngine? = null
+
     @Before
     fun setUp() {
-        engine = LocationEngineProxy(locationEngineImpl)
+        engine = LocationEngineProxy(locationEngineImpl!!)
     }
 
-    //@get:Throws(InterruptedException::class)
+    // @get:Throws(InterruptedException::class)
     @Test
-    fun getLastLocation ()
-    {
+    fun getLastLocation() {
         val latch = CountDownLatch(1)
         val resultRef = AtomicReference<LocationEngineResult>()
         val callback = getCallback(resultRef, latch)
@@ -48,7 +48,7 @@ class LocationEngineTest : BaseTest() {
 
     // J2K: // TODO: this becomes unreachable, validate necessity of test
     @Test(expected = NullPointerException::class)
-    fun getLastLocationNullCallback () {
+    fun getLastLocationNullCallback() {
         engine!!.getLastLocation(null!!)
     }
 
@@ -86,21 +86,20 @@ class LocationEngineTest : BaseTest() {
         private const val LATITUDE = 37.7749
         private const val LONGITUDE = 122.4194
         private const val INTERVAL = 1000L
-        private fun setupDoAnswer(expectedResult: LocationEngineResult): Stubber {
-            return doAnswer { invocation ->
+
+        private fun setupDoAnswer(expectedResult: LocationEngineResult): Stubber =
+            doAnswer { invocation ->
                 val callback = invocation.getArgument<LocationEngineCallback<LocationEngineResult>>(0)
                 callback.onSuccess(expectedResult)
                 null
             }
-        }
 
-        private fun getRequest(interval: Long): LocationEngineRequest {
-            return LocationEngineRequest.Builder(interval).build()
-        }
+        private fun getRequest(interval: Long): LocationEngineRequest = LocationEngineRequest.Builder(interval).build()
 
         private fun getCallback(
-                resultRef: AtomicReference<LocationEngineResult>,
-                latch: CountDownLatch): LocationEngineCallback<LocationEngineResult> {
+            resultRef: AtomicReference<LocationEngineResult>,
+            latch: CountDownLatch,
+        ): LocationEngineCallback<LocationEngineResult> {
             // J2K: remove ?
             return object : LocationEngineCallback<LocationEngineResult> {
                 override fun onSuccess(result: LocationEngineResult) {
@@ -114,11 +113,12 @@ class LocationEngineTest : BaseTest() {
             }
         }
 
-        private fun getMockEngineResult(location: Location): LocationEngineResult {
-            return LocationEngineResult.create(location)
-        }
+        private fun getMockEngineResult(location: Location): LocationEngineResult = LocationEngineResult.create(location)
 
-        private fun getMockLocation(lat: Double, lon: Double): Location {
+        private fun getMockLocation(
+            lat: Double,
+            lon: Double,
+        ): Location {
             val location = mock(Location::class.java)
             location.latitude = lat
             location.longitude = lon

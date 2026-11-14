@@ -2,8 +2,10 @@ package org.maplibre.android.testapp.style
 
 import android.view.View
 import androidx.test.espresso.UiController
-import org.maplibre.android.maps.MapView
+import org.junit.Assert
+import org.junit.Test
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.RasterLayer
 import org.maplibre.android.style.sources.RasterSource
@@ -12,8 +14,6 @@ import org.maplibre.android.testapp.action.MapLibreMapAction
 import org.maplibre.android.testapp.activity.EspressoTest
 import org.maplibre.android.testapp.utils.ResourceUtils.readRawResource
 import org.maplibre.android.testapp.utils.TestingAsyncUtils
-import org.junit.Assert
-import org.junit.Test
 import java.io.IOException
 
 /**
@@ -24,13 +24,13 @@ class StyleLoaderTest : EspressoTest() {
     fun testSetGetStyleJsonString() {
         validateTestSetup()
         MapLibreMapAction.invoke(
-            maplibreMap
+            maplibreMap,
         ) { uiController: UiController?, maplibreMap: MapLibreMap ->
             try {
                 val expected =
                     readRawResource(
                         rule.activity,
-                        R.raw.local_style
+                        R.raw.local_style,
                     )
                 maplibreMap.setStyle(Style.Builder().fromJson(expected))
                 val actual = maplibreMap.style!!.json
@@ -45,13 +45,13 @@ class StyleLoaderTest : EspressoTest() {
     fun testDefaultStyleLoadWithActivityLifecycleChange() {
         validateTestSetup()
         MapLibreMapAction.invoke(
-            maplibreMap
+            maplibreMap,
         ) { uiController: UiController?, maplibreMap: MapLibreMap ->
             try {
                 val expected =
                     readRawResource(
                         rule.activity,
-                        R.raw.local_style
+                        R.raw.local_style,
                     )
                 maplibreMap.setStyle(Style.Builder().fromJson(expected))
 
@@ -66,7 +66,7 @@ class StyleLoaderTest : EspressoTest() {
                 Assert.assertEquals(
                     "Style URL should be empty",
                     "",
-                    maplibreMap.style!!.uri
+                    maplibreMap.style!!.uri,
                 )
                 Assert.assertEquals("Style json should match", expected, actual)
             } catch (exception: IOException) {
@@ -79,9 +79,13 @@ class StyleLoaderTest : EspressoTest() {
     fun testLoadStyleFromAndroidAssetFileUri() {
         validateTestSetup()
         MapLibreMapAction.invoke(
-            maplibreMap
+            maplibreMap,
         ) { uiController: UiController, maplibreMap: MapLibreMap ->
-            val expected = rule.activity.assets.open("fill_color_style.json").bufferedReader().use { it.readText() }
+            val expected =
+                rule.activity.assets
+                    .open("fill_color_style.json")
+                    .bufferedReader()
+                    .use { it.readText() }
             val uri = "file:///android_asset/fill_color_style.json"
             maplibreMap.setStyle(Style.Builder().fromUri(uri))
             TestingAsyncUtils.waitForLayer(uiController, mapView)
@@ -94,7 +98,7 @@ class StyleLoaderTest : EspressoTest() {
     fun testRasterSourceFromPMTilesAsset() {
         validateTestSetup()
         MapLibreMapAction.invoke(
-            maplibreMap
+            maplibreMap,
         ) { uiController: UiController, maplibreMap: MapLibreMap ->
             val mapView = rule.activity.findViewById<View>(R.id.mapView) as MapView
             val loadedSources = mutableSetOf<String>()

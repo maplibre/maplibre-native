@@ -5,9 +5,11 @@ import androidx.annotation.Size
 
 internal class PaddingEvaluator : TypeEvaluator<DoubleArray> {
     private val padding = DoubleArray(4)
+
     override fun evaluate(
-        fraction: Float, @Size(min = 4) startValue: DoubleArray,
-        @Size(min = 4) endValue: DoubleArray
+        fraction: Float,
+        @Size(min = 4) startValue: DoubleArray,
+        @Size(min = 4) endValue: DoubleArray,
     ): DoubleArray {
         padding[0] = startValue[0] + (endValue[0] - startValue[0]) * fraction
         padding[1] = startValue[1] + (endValue[1] - startValue[1]) * fraction

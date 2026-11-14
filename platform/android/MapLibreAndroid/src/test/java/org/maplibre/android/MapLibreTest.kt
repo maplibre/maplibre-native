@@ -27,6 +27,7 @@ class MapLibreTest : BaseTest() {
     @Rule
     @JvmField // J2K: https://stackoverflow.com/a/33449455
     var expectedException = ExpectedException.none()
+
     @Before
     fun before() {
         context = Mockito.mock(Context::class.java)
@@ -73,14 +74,25 @@ class MapLibreTest : BaseTest() {
         Mockito.`when`(resources.displayMetrics).thenReturn(displayMetrics)
         Mockito.`when`(context!!.resources).thenReturn(resources)
         Mockito.`when`(context!!.filesDir).thenReturn(files)
-        val typedArray = Mockito.mock(TypedArray::class.java)
-        Mockito.`when`(context!!.obtainStyledAttributes(ArgumentMatchers.nullable(AttributeSet::class.java), ArgumentMatchers.any(IntArray::class.java), ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt()))
-                .thenReturn(typedArray)
-        expectedException.expect(MapLibreConfigurationException::class.java)
-        expectedException.expectMessage("""
+        Mockito.`when`(files!!.absolutePath).thenReturn("")
 
-    Using MapView requires calling MapLibre.getInstance(Context context, String apiKey, WellKnownTileServer wellKnownTileServer) before inflating or creating the view.
-    """.trimIndent())
+        val typedArray = Mockito.mock(TypedArray::class.java)
+        Mockito
+            .`when`(
+                context!!.obtainStyledAttributes(
+                    ArgumentMatchers.nullable(AttributeSet::class.java),
+                    ArgumentMatchers.any(IntArray::class.java),
+                    ArgumentMatchers.anyInt(),
+                    ArgumentMatchers.anyInt(),
+                ),
+            ).thenReturn(typedArray)
+        expectedException.expect(MapLibreConfigurationException::class.java)
+        expectedException.expectMessage(
+            """
+
+            Using MapView requires calling MapLibre.getInstance(Context context, String apiKey, WellKnownTileServer wellKnownTileServer) before inflating or creating the view.
+            """.trimIndent(),
+        )
         MapView(context!!)
     }
 

@@ -10,17 +10,12 @@ import org.maplibre.android.maps.Style
  * for the test to keep running.
  */
 class StyleChangeIdlingResource : IdlingResource {
-
     private var callback: IdlingResource.ResourceCallback? = null
     private var isIdle = true
 
-    override fun getName(): String {
-        return javaClass.simpleName
-    }
+    override fun getName(): String = javaClass.simpleName
 
-    override fun isIdleNow(): Boolean {
-        return isIdle
-    }
+    override fun isIdleNow(): Boolean = isIdle
 
     override fun registerIdleTransitionCallback(callback: IdlingResource.ResourceCallback?) {
         this.callback = callback
@@ -31,7 +26,10 @@ class StyleChangeIdlingResource : IdlingResource {
         callback?.onTransitionToIdle()
     }
 
-    fun waitForStyle(maplibreMap: MapLibreMap, styleUrl: String) {
+    fun waitForStyle(
+        maplibreMap: MapLibreMap,
+        styleUrl: String,
+    ) {
         isIdle = false
         maplibreMap.setStyle(Style.Builder().fromUri(styleUrl)) {
             setIdle()

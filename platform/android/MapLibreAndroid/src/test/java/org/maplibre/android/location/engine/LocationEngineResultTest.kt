@@ -13,7 +13,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import java.util.Collections
 
 @RunWith(MockitoJUnitRunner::class)
-class LocationEngineResultTest : BaseTest(){
+class LocationEngineResultTest : BaseTest() {
     @Test
     fun checkNullIntent() {
         val result = LocationEngineResult.extractResult(null)
@@ -87,15 +87,17 @@ class LocationEngineResultTest : BaseTest(){
 
     companion object {
         private const val TEST_LAT_LNG = 1.0
+
         // J2K: IDE suggestion to use ArrayList<Location?>
         private val locationsWithNulls: ArrayList<Location?>
-            private get() = object : ArrayList<Location?>() {
-                init {
-                    add(null)
-                    add(validLocation)
-                    add(null)
+            private get() =
+                object : ArrayList<Location?>() {
+                    init {
+                        add(null)
+                        add(validLocation)
+                        add(null)
+                    }
                 }
-            }
         private val validLocation: Location
             private get() {
                 val location = mock(Location::class.java)

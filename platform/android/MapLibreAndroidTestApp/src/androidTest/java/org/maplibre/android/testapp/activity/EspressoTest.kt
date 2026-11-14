@@ -14,9 +14,7 @@ import org.maplibre.android.testapp.styles.TestStyles
  *
  */
 open class EspressoTest : BaseTest() {
-    override fun getActivityClass(): Class<*> {
-        return EspressoTestActivity::class.java
-    }
+    override fun getActivityClass(): Class<*> = EspressoTestActivity::class.java
 
     @UiThread
     override fun initMap(maplibreMap: MapLibreMap) {

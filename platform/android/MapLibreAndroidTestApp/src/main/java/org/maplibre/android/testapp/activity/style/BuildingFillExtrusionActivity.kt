@@ -6,8 +6,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -31,6 +31,7 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
     private var isLowIntensityLight = false
     private var isRedColor = false
     private var isInitPosition = false
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_building_layer)
@@ -45,7 +46,7 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
                     setupBuildings(style)
                     setupLight()
                 }
-            }
+            },
         )
     }
 
@@ -56,15 +57,15 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
         fillExtrusionLayer.setFilter(
             Expression.all(
                 Expression.has("render_height"),
-                Expression.has("render_min_height")
-            )
+                Expression.has("render_min_height"),
+            ),
         )
         fillExtrusionLayer.minZoom = 15f
         fillExtrusionLayer.setProperties(
             PropertyFactory.fillExtrusionColor(Color.LTGRAY),
             PropertyFactory.fillExtrusionHeight(Expression.get("render_height")),
             PropertyFactory.fillExtrusionBase(Expression.get("render_min_height")),
-            PropertyFactory.fillExtrusionOpacity(0.9f)
+            PropertyFactory.fillExtrusionOpacity(0.9f),
         )
         style.addLayer(fillExtrusionLayer)
         // --8<-- [end:setupBuildings]
@@ -85,7 +86,7 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
         findViewById<View>(R.id.fabLightColor).setOnClickListener { v: View? ->
             // --8<-- [start:lightColor]
             isRedColor = !isRedColor
-            light!!.setColor(ColorUtils.colorToRgbaString(if (isRedColor) Color.RED else Color.BLUE))
+            light!!.color = ColorUtils.colorToRgbaString(if (isRedColor) Color.RED else Color.BLUE)
             // --8<-- [end:lightColor]
         }
     }

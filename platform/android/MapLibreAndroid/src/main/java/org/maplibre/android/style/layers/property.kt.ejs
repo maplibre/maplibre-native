@@ -1,0 +1,56 @@
+<%
+  const properties = locals.properties;
+-%>
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
+
+package org.maplibre.android.style.layers
+
+import androidx.annotation.StringDef
+
+/**
+ * Paint/Layout properties for Layer
+ */
+object Property {
+
+    // VISIBILITY: Whether this layer is displayed.
+
+    /**
+     * The layer is shown.
+     */
+    const val VISIBLE = "visible"
+
+    /**
+     * The layer is hidden.
+     */
+    const val NONE = "none"
+
+    @StringDef(
+        VISIBLE,
+        NONE
+    )
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class VISIBILITY
+
+<% for (const property of properties) { -%>
+    // <%- snakeCaseUpper(property.name) %>: <%- property.doc %>
+
+<% for (const value in property.values) { -%>
+    /**
+     * <%- kotlinDoc(propertyValueDoc(property, value)) %>
+     */
+    const val <%- snakeCaseUpper(property.name) %>_<%- snakeCaseUpper(value) %> = "<%- value %>"
+
+<% } -%>
+    /**
+     * <%- kotlinDoc(property.doc) %>
+     */
+    @StringDef(
+<% for (const value of Object.keys(property.values)) { -%>
+        <%- snakeCaseUpper(property.name) %>_<%- snakeCaseUpper(value) %>,
+<% } -%>
+    )
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class <%- snakeCaseUpper(property.name) %>
+
+<% } -%>
+}

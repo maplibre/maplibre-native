@@ -54,7 +54,8 @@ class SurfaceViewDetachQueryTest : SurfaceViewDetachTestBase() {
             Runnable {
                 Assert.assertNotNull(maplibreMap.queryRenderedFeatures(PointF(10f, 10f)))
                 Assert.assertNotNull(maplibreMap.queryRenderedFeatures(RectF(0f, 0f, 50f, 50f)))
-            })
+            },
+        )
     }
 
     @Test
@@ -69,10 +70,11 @@ class SurfaceViewDetachQueryTest : SurfaceViewDetachTestBase() {
             SurfaceViewDetachTestBase.Companion.QUERY_TIMEOUT_MS,
             "tile cache API after detach",
             Runnable {
-                maplibreMap.setTileCacheEnabled(false)
-                maplibreMap.getTileCacheEnabled()
-                maplibreMap.setTileCacheEnabled(true)
-            })
+                maplibreMap.tileCacheEnabled = false
+                maplibreMap.tileCacheEnabled
+                maplibreMap.tileCacheEnabled = true
+            },
+        )
     }
 
     @Test
@@ -84,8 +86,10 @@ class SurfaceViewDetachQueryTest : SurfaceViewDetachTestBase() {
         // Reaches Renderer::reduceMemoryUse through the frontend actor. Listed in #4549 as one of the
         // reachable call sites, and the one an app hits without any user interaction at all.
         runOnUiThreadWithin(
-            SurfaceViewDetachTestBase.Companion.QUERY_TIMEOUT_MS, "onLowMemory after detach",
-            Runnable { mapView.onLowMemory() })
+            SurfaceViewDetachTestBase.Companion.QUERY_TIMEOUT_MS,
+            "onLowMemory after detach",
+            Runnable { mapView.onLowMemory() },
+        )
     }
 
     @Test
@@ -98,8 +102,9 @@ class SurfaceViewDetachQueryTest : SurfaceViewDetachTestBase() {
             "adding the test source",
             Runnable {
                 val source: GeoJsonSource = GeoJsonSource(SOURCE_ID, FEATURE_COLLECTION)
-                maplibreMap.getStyle()!!.addSource(source)
-            })
+                maplibreMap.style!!.addSource(source)
+            },
+        )
 
         detachMapView()
 
@@ -109,7 +114,7 @@ class SurfaceViewDetachQueryTest : SurfaceViewDetachTestBase() {
             SurfaceViewDetachTestBase.Companion.QUERY_TIMEOUT_MS,
             "source queries after detach",
             Runnable {
-                val source = maplibreMap.getStyle()!!.getSource(SOURCE_ID) as GeoJsonSource?
+                val source = maplibreMap.style!!.getSource(SOURCE_ID) as GeoJsonSource?
                 Assert.assertNotNull("The test source disappeared from the style", source)
 
                 Assert.assertNotNull(source!!.querySourceFeatures(null))
@@ -118,7 +123,8 @@ class SurfaceViewDetachQueryTest : SurfaceViewDetachTestBase() {
                 state.addProperty("hovered", true)
                 source.setFeatureState(FEATURE_ID, state)
                 source.getFeatureState(FEATURE_ID)
-            })
+            },
+        )
     }
 
     @Test
@@ -132,7 +138,8 @@ class SurfaceViewDetachQueryTest : SurfaceViewDetachTestBase() {
         runOnUiThreadWithin(
             SurfaceViewDetachTestBase.Companion.QUERY_TIMEOUT_MS,
             "requesting a snapshot after detach",
-            Runnable { maplibreMap.snapshot(MapLibreMap.SnapshotReadyCallback { snapshot: Bitmap? -> }) })
+            Runnable { maplibreMap.snapshot(MapLibreMap.SnapshotReadyCallback { snapshot: Bitmap? -> }) },
+        )
     }
 
     @Test
@@ -142,8 +149,10 @@ class SurfaceViewDetachQueryTest : SurfaceViewDetachTestBase() {
 
         detachMapView()
         runOnUiThreadWithin(
-            SurfaceViewDetachTestBase.Companion.QUERY_TIMEOUT_MS, "querying while detached",
-            Runnable { Assert.assertNotNull(maplibreMap.queryRenderedFeatures(PointF(10f, 10f))) })
+            SurfaceViewDetachTestBase.Companion.QUERY_TIMEOUT_MS,
+            "querying while detached",
+            Runnable { Assert.assertNotNull(maplibreMap.queryRenderedFeatures(PointF(10f, 10f))) },
+        )
 
         attachMapView()
 
@@ -157,15 +166,18 @@ class SurfaceViewDetachQueryTest : SurfaceViewDetachTestBase() {
             "querying after re-attach",
             Runnable {
                 Assert.assertNotNull(maplibreMap.queryRenderedFeatures(PointF(10f, 10f)))
-                maplibreMap.getTileCacheEnabled()
-            })
+                maplibreMap.tileCacheEnabled
+            },
+        )
     }
 
     companion object {
         private const val SOURCE_ID = "detach-test-source"
         private const val FEATURE_ID = "detach-test-feature"
-        private val FEATURE_COLLECTION = ("{\"type\":\"FeatureCollection\",\"features\":["
-                + "{\"type\":\"Feature\",\"id\":\"" + FEATURE_ID + "\",\"properties\":{},"
-                + "\"geometry\":{\"type\":\"Point\",\"coordinates\":[0.0,0.0]}}]}")
+        private val FEATURE_COLLECTION = (
+            "{\"type\":\"FeatureCollection\",\"features\":[" +
+                "{\"type\":\"Feature\",\"id\":\"" + FEATURE_ID + "\",\"properties\":{}," +
+                "\"geometry\":{\"type\":\"Point\",\"coordinates\":[0.0,0.0]}}]}"
+        )
     }
 }

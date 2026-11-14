@@ -9,7 +9,14 @@ object ExampleVulkanCustomLayer {
     }
 
     external fun createContext(): Long
-    external fun setColor(red: Float, green: Float, blue: Float, alpha: Float)
+
+    external fun setColor(
+        red: Float,
+        green: Float,
+        blue: Float,
+        alpha: Float,
+    )
+
     var InitializeFunction: Long = 0
     var RenderFunction: Long = 0
     var ContextLostFunction: Long = 0

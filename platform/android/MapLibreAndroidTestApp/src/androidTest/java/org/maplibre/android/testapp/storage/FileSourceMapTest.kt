@@ -3,9 +3,6 @@ package org.maplibre.android.testapp.storage
 import androidx.test.annotation.UiThreadTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
-import org.maplibre.android.AppCenter
-import org.maplibre.android.storage.FileSource
-import org.maplibre.android.testapp.activity.espresso.EspressoTestActivity
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -13,11 +10,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
+import org.maplibre.android.AppCenter
+import org.maplibre.android.storage.FileSource
+import org.maplibre.android.testapp.activity.espresso.EspressoTestActivity
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 open class FileSourceMapTest : AppCenter() {
-
     private lateinit var fileSourceTestUtils: FileSourceTestUtils
 
     @get:Rule
@@ -48,7 +47,7 @@ open class FileSourceMapTest : AppCenter() {
                     override fun onError(message: String) {
                         Assert.fail("Resources path can be changed while the map is running")
                     }
-                }
+                },
             )
         }
         latch.await()

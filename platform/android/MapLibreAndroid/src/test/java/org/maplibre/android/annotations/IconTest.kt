@@ -22,7 +22,7 @@ class IconTest : BaseTest() {
     @Test
     fun testId() {
         val id = "test"
-        val icon = IconFactory.recreate(id, Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8))
+        val icon = IconFactory.recreate(id, bitmap!!)
         Assert.assertEquals("id should match", id, icon.id)
     }
 
@@ -41,7 +41,7 @@ class IconTest : BaseTest() {
 
     @Test
     fun testEqualsObject() {
-        val icon = IconFactory.recreate("test", Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8))
+        val icon = IconFactory.recreate("test", bitmap!!)
         Assert.assertNotSame("icon should not match", Any(), icon)
     }
 

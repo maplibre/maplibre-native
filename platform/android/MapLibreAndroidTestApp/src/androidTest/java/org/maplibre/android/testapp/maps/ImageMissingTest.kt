@@ -2,23 +2,22 @@ package org.maplibre.android.testapp.maps
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
-import org.maplibre.android.AppCenter
-import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.Style
-import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.activity.espresso.EspressoTestActivity
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.AppCenter
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.Style
+import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.activity.espresso.EspressoTestActivity
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class ImageMissingTest : AppCenter() {
-
     @Rule
     @JvmField
     var rule = ActivityTestRule(EspressoTestActivity::class.java)

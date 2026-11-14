@@ -3,7 +3,9 @@ package org.maplibre.android.maps
 import org.maplibre.android.annotations.Icon
 import timber.log.Timber
 
-class IconManagerResolver(maplibreMap: MapLibreMap?) {
+class IconManagerResolver(
+    maplibreMap: MapLibreMap?,
+) {
     private var iconManager: IconManager? = null
 
     init {

@@ -7,8 +7,8 @@ import timber.log.Timber
 import java.lang.Exception
 
 object OfflineUtils {
-    fun convertRegionName(metadata: ByteArray): String {
-        return try {
+    fun convertRegionName(metadata: ByteArray): String =
+        try {
             val json = String(metadata, OfflineActivity.JSON_CHARSET)
             val jsonObject = Gson().fromJson(json, JsonObject::class.java)
             val name = jsonObject[OfflineActivity.JSON_FIELD_REGION_NAME].asString
@@ -16,7 +16,6 @@ object OfflineUtils {
         } catch (exception: Exception) {
             ""
         }
-    }
 
     @JvmStatic
     fun convertRegionName(regionName: String?): ByteArray? {

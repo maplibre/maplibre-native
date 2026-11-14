@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.lifecycleScope
+import io.sentry.Sentry
 import kotlinx.coroutines.launch
 import org.maplibre.android.annotations.IconFactory
 import org.maplibre.android.annotations.MarkerOptions
@@ -27,9 +28,10 @@ import java.lang.reflect.Field
 import java.util.logging.Logger
 import kotlin.math.min
 import kotlin.random.Random
-import io.sentry.Sentry
 
-class UserMap : SupportMapFragment(), MapView.OnSymbolErrorListener {
+class UserMap :
+    SupportMapFragment(),
+    MapView.OnSymbolErrorListener {
     private lateinit var map: MapLibreMap
     private lateinit var mapView: MapView
     private lateinit var bitmapDrawables: List<Drawable>
@@ -39,75 +41,90 @@ class UserMap : SupportMapFragment(), MapView.OnSymbolErrorListener {
         private const val RANDOM_SEED = 42
         private val RANDOM = Random(RANDOM_SEED)
 
-        private val STYLES = arrayListOf(
-            TestStyles.DEMOTILES,
-            TestStyles.AMERICANA,
-            TestStyles.OPENFREEMAP_LIBERTY,
-            TestStyles.OPENFREEMAP_BRIGHT,
-            TestStyles.PROTOMAPS_LIGHT,
-            TestStyles.PROTOMAPS_DARK,
-            TestStyles.PROTOMAPS_GRAYSCALE,
-            TestStyles.PROTOMAPS_WHITE,
-            TestStyles.PROTOMAPS_BLACK,
-        )
+        private val STYLES =
+            arrayListOf(
+                TestStyles.DEMOTILES,
+                TestStyles.AMERICANA,
+                TestStyles.OPENFREEMAP_LIBERTY,
+                TestStyles.OPENFREEMAP_BRIGHT,
+                TestStyles.PROTOMAPS_LIGHT,
+                TestStyles.PROTOMAPS_DARK,
+                TestStyles.PROTOMAPS_GRAYSCALE,
+                TestStyles.PROTOMAPS_WHITE,
+                TestStyles.PROTOMAPS_BLACK,
+            )
 
-        private val PLACES = arrayListOf(
-            LatLng(37.7749, -122.4194), // SF
-            LatLng(38.9072, -77.0369), // DC
-            LatLng(52.3702, 4.8952), // AMS
-            LatLng(60.1699, 24.9384), // HEL
-            LatLng(-13.1639, -74.2236), // AYA
-            LatLng(52.5200, 13.4050), // BER
-            LatLng(12.9716, 77.5946), // BAN
-            LatLng(31.2304, 121.4737), // SHA
-        )
+        private val PLACES =
+            arrayListOf(
+                LatLng(37.7749, -122.4194), // SF
+                LatLng(38.9072, -77.0369), // DC
+                LatLng(52.3702, 4.8952), // AMS
+                LatLng(60.1699, 24.9384), // HEL
+                LatLng(-13.1639, -74.2236), // AYA
+                LatLng(52.5200, 13.4050), // BER
+                LatLng(12.9716, 77.5946), // BAN
+                LatLng(31.2304, 121.4737), // SHA
+            )
 
         // controls the list of icons available
         // false -> use `ICONS` list
         // true -> use all bitmap drawables in `org.maplibre.android.R.drawable.*`
         private const val USE_ALL_DRAWABLES = false
-        private val ICONS = arrayListOf(
-            org.maplibre.android.R.drawable.maplibre_info_icon_default,
-            org.maplibre.android.R.drawable.maplibre_user_icon,
-            org.maplibre.android.R.drawable.maplibre_marker_icon_default,
-            org.maplibre.android.R.drawable.maplibre_compass_icon,
-            org.maplibre.android.R.drawable.maplibre_user_puck_icon,
-        )
+        private val ICONS =
+            arrayListOf(
+                org.maplibre.android.R.drawable.maplibre_info_icon_default,
+                org.maplibre.android.R.drawable.maplibre_user_icon,
+                org.maplibre.android.R.drawable.maplibre_marker_icon_default,
+                org.maplibre.android.R.drawable.maplibre_compass_icon,
+                org.maplibre.android.R.drawable.maplibre_user_puck_icon,
+            )
 
-        private fun random(min: Double, max: Double): Double = min + RANDOM.nextDouble() * (max - min)
-        private fun random(min: Int, max: Int): Int = RANDOM.nextInt(min, max)
+        private fun random(
+            min: Double,
+            max: Double,
+        ): Double = min + RANDOM.nextDouble() * (max - min)
+
+        private fun random(
+            min: Int,
+            max: Int,
+        ): Int = RANDOM.nextInt(min, max)
 
         private fun <T> weightedRandom(values: List<Pair<T, Double>>): T {
             val cumulativeWeights = values.scan(0.0) { acc, value -> acc + value.second }
             var index =
                 cumulativeWeights.binarySearch(random(0.00001, cumulativeWeights.last()))
 
-            if (index < 0)
+            if (index < 0) {
                 index = -index - 1
+            }
 
             return values[index - 1].first
         }
 
         private fun randomSlowDuration(): Int = random(3000, 5000)
+
         private fun randomFastDuration(): Int = random(500, 1000)
 
         private fun randomPlacePoints(): Int = random(10, 20)
+
         private fun randomPlaceActions(): Int = random(10, 20)
 
         private fun randomLatLng(bounds: LatLngBounds): LatLng =
             LatLng(
                 random(bounds.latitudeSouth, bounds.latitudeNorth),
-                random(bounds.longitudeWest, bounds.longitudeEast)
+                random(bounds.longitudeWest, bounds.longitudeEast),
             )
 
-        private fun randomLatLng(map: MapLibreMap): LatLng =
-            randomLatLng(map.projection.visibleRegion.latLngBounds)
+        private fun randomLatLng(map: MapLibreMap): LatLng = randomLatLng(map.projection.visibleRegion.latLngBounds)
 
         private fun randomZoom(): Double = random(14.0, 20.0)
+
         private fun randomTilt(): Double = random(0.0, 60.0)
+
         private fun randomBearing(): Double = random(0.0, 360.0)
 
         private fun randomAnnotationRemove(): Int = random(4, 8)
+
         private fun randomAnnotationAdd(): Int = random(2, 4)
 
         private fun randomPolyPoints(bounds: LatLngBounds): List<LatLng> {
@@ -120,7 +137,7 @@ class UserMap : SupportMapFragment(), MapView.OnSymbolErrorListener {
             return List(random(3, 15)) {
                 LatLng(
                     lat + random(-latRange, latRange),
-                    lng + random(-lngRange, lngRange)
+                    lng + random(-lngRange, lngRange),
                 )
             }
         }
@@ -132,7 +149,7 @@ class UserMap : SupportMapFragment(), MapView.OnSymbolErrorListener {
                 RANDOM.nextInt(127, 256),
                 RANDOM.nextInt(256),
                 RANDOM.nextInt(256),
-                RANDOM.nextInt(256)
+                RANDOM.nextInt(256),
             )
     }
 
@@ -150,21 +167,23 @@ class UserMap : SupportMapFragment(), MapView.OnSymbolErrorListener {
     private fun run() {
         if (USE_ALL_DRAWABLES) {
             bitmapDrawables =
-                org.maplibre.android.R.drawable::class.java.fields.map { field: Field ->
+                org.maplibre.android.R.drawable::class.java.fields
+                    .map { field: Field ->
+                        ResourcesCompat.getDrawable(
+                            this.resources,
+                            field.getInt(null),
+                            requireActivity().theme,
+                        )
+                    }.filterIsInstance<BitmapDrawable>()
+        } else {
+            bitmapDrawables =
+                ICONS.map { id ->
                     ResourcesCompat.getDrawable(
                         this.resources,
-                        field.getInt(null),
-                        requireActivity().theme
-                    )
-                }.filterIsInstance<BitmapDrawable>()
-        } else {
-            bitmapDrawables = ICONS.map { id ->
-                ResourcesCompat.getDrawable(
-                    this.resources,
-                    id,
-                    requireActivity().theme
-                )!!
-            }
+                        id,
+                        requireActivity().theme,
+                    )!!
+                }
         }
 
         lifecycleScope.launch {
@@ -185,27 +204,29 @@ class UserMap : SupportMapFragment(), MapView.OnSymbolErrorListener {
     private suspend fun runCameraActions() {
         // camera actions with different weights
         // position updates are more frequent
-        val actions = listOf(
-            Pair({ CameraUpdateFactory.newLatLng(randomLatLng(map)) }, 2.0),
-            Pair({ CameraUpdateFactory.zoomTo(randomZoom()) }, 1.0),
-            Pair({ CameraUpdateFactory.tiltTo(randomTilt()) }, 1.0),
-            Pair({ CameraUpdateFactory.bearingTo(randomBearing()) }, 1.0),
-        )
+        val actions =
+            listOf(
+                Pair({ CameraUpdateFactory.newLatLng(randomLatLng(map)) }, 2.0),
+                Pair({ CameraUpdateFactory.zoomTo(randomZoom()) }, 1.0),
+                Pair({ CameraUpdateFactory.tiltTo(randomTilt()) }, 1.0),
+                Pair({ CameraUpdateFactory.bearingTo(randomBearing()) }, 1.0),
+            )
 
         for (placeCenter in PLACES.shuffled(RANDOM)) {
             // update all values to simulate a long jump
             // (generated by the app, searching for a city/street, etc)
-            val cameraPosition = CameraPosition
-                .Builder()
-                .target(placeCenter)
-                .zoom(randomZoom())
-                .tilt(randomTilt())
-                .bearing(randomBearing())
-                .build()
+            val cameraPosition =
+                CameraPosition
+                    .Builder()
+                    .target(placeCenter)
+                    .zoom(randomZoom())
+                    .tilt(randomTilt())
+                    .bearing(randomBearing())
+                    .build()
 
             map.animateCameraSuspend(
                 CameraUpdateFactory.newCameraPosition(cameraPosition),
-                randomSlowDuration()
+                randomSlowDuration(),
             )
 
             repeat(randomPlacePoints()) {
@@ -244,8 +265,8 @@ class UserMap : SupportMapFragment(), MapView.OnSymbolErrorListener {
                                 .mutate()
                                 .apply { setTint(randomColor()) }
                                 .toBitmap(),
-                        )
-                    )
+                        ),
+                    ),
             )
         }
 
@@ -272,12 +293,11 @@ class UserMap : SupportMapFragment(), MapView.OnSymbolErrorListener {
 
     override fun onSymbolError(message: String) {
         Sentry.captureMessage("UserMap: $message")
-        //Bugsnag.notify(RuntimeException(message))
+        // Bugsnag.notify(RuntimeException(message))
     }
 }
 
 class UserMapActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

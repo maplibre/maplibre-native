@@ -3,17 +3,16 @@ package org.maplibre.android.maps
 import androidx.test.annotation.UiThreadTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.*
+import org.junit.runner.RunWith
 import org.maplibre.android.AppCenter
 import org.maplibre.android.MapLibre
 import org.maplibre.android.WellKnownTileServer
 import org.maplibre.android.storage.FileSource
 import org.maplibre.android.util.TileServerOptions
-import org.junit.*
-import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class BootstrapTest : AppCenter() {
-
     var apiKeyBackup: String? = null
 
     @Before
@@ -38,14 +37,14 @@ class BootstrapTest : AppCenter() {
 
         val tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapLibre)
         Assert.assertTrue(
-            Style.getPredefinedStyles().count() == tileServerOptions.defaultStyles.count()
+            Style.getPredefinedStyles()!!.count() == tileServerOptions.defaultStyles.count(),
         )
         Assert.assertTrue(
-            Style.getPredefinedStyles().first().url == tileServerOptions.defaultStyles.first().url
+            Style.getPredefinedStyles()!!.first().url == tileServerOptions.defaultStyles.first().url,
         )
 
         val fileSource = FileSource.getInstance(context)
-        Assert.assertEquals(fileSource.apiBaseUrl, tileServerOptions.baseURL)
+        Assert.assertEquals(fileSource.getApiBaseUrl(), tileServerOptions.baseURL)
     }
 
     @Test
@@ -58,15 +57,15 @@ class BootstrapTest : AppCenter() {
 
         val tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapTiler)
         Assert.assertTrue(
-            Style.getPredefinedStyles().count() == tileServerOptions.defaultStyles.count()
+            Style.getPredefinedStyles()!!.count() == tileServerOptions.defaultStyles.count(),
         )
         Assert.assertTrue(
-            Style.getPredefinedStyles().first().url == tileServerOptions.defaultStyles.first().url
+            Style.getPredefinedStyles()!!.first().url == tileServerOptions.defaultStyles.first().url,
         )
 
         val fileSource = FileSource.getInstance(context)
-        Assert.assertEquals(fileSource.apiBaseUrl, tileServerOptions.baseURL)
-        Assert.assertEquals(fileSource.apiKey, key)
+        Assert.assertEquals(fileSource.getApiBaseUrl(), tileServerOptions.baseURL)
+        Assert.assertEquals(fileSource.getApiKey(), key)
     }
 
     @Test
@@ -82,14 +81,14 @@ class BootstrapTest : AppCenter() {
 
         val tileServerOptions = TileServerOptions.get(WellKnownTileServer.Mapbox)
         Assert.assertTrue(
-            Style.getPredefinedStyles().count() == tileServerOptions.defaultStyles.count()
+            Style.getPredefinedStyles()!!.count() == tileServerOptions.defaultStyles.count(),
         )
         Assert.assertTrue(
-            Style.getPredefinedStyles().first().url == tileServerOptions.defaultStyles.first().url
+            Style.getPredefinedStyles()!!.first().url == tileServerOptions.defaultStyles.first().url,
         )
 
         val fileSource = FileSource.getInstance(context)
-        Assert.assertEquals(fileSource.apiBaseUrl, tileServerOptions.baseURL)
-        Assert.assertEquals(fileSource.apiKey, key)
+        Assert.assertEquals(fileSource.getApiBaseUrl(), tileServerOptions.baseURL)
+        Assert.assertEquals(fileSource.getApiKey(), key)
     }
 }

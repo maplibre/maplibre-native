@@ -1,0 +1,6 @@
+[{*.gradle.kts,*.kt,*.kts,*.main.kts}]
+# The activities embed `--8<--` snippet markers for the documentation. Those markers have to stay on
+# their own lines right next to the code they wrap, even where that puts one right after a KDoc.
+ktlint_standard_no-consecutive-comments = disabled
+
+ktlint_standard_property-naming = disabled

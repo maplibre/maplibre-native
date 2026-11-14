@@ -13,7 +13,9 @@ import org.maplibre.android.testapp.styles.TestStyles
  *  TestActivity demonstrating configuring MapView with XML
  */
 
-class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapOptionsXmlActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
 

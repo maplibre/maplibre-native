@@ -23,7 +23,7 @@ class RenderStatsTracker {
     private var reportListener: ((RenderingStats, RenderingStats, RenderingStats) -> Unit)? = null
 
     private var thresholds = HashMap<Int, Number>()
-    private var thresholdExceededListener: ((HashMap<String, Number>,RenderingStats) -> Unit)? = null
+    private var thresholdExceededListener: ((HashMap<String, Number>, RenderingStats) -> Unit)? = null
 
     /**
      * Set fields to be tracked and updated every frame. An empty list will track all fields.
@@ -68,7 +68,7 @@ class RenderStatsTracker {
     /**
      * Callback that provides the exceeded threshold values in the last frame.
      */
-    @Synchronized fun setThresholdExceededListener(listener: ((HashMap<String, Number>,RenderingStats) -> Unit)?) {
+    @Synchronized fun setThresholdExceededListener(listener: ((HashMap<String, Number>, RenderingStats) -> Unit)?) {
         thresholdExceededListener = listener
     }
 
@@ -78,14 +78,15 @@ class RenderStatsTracker {
     @Synchronized fun startReports(interval: Long) {
         reset()
 
-        reportTimer = fixedRateTimer(
-            name = "RenderStatsReportTimer",
-            initialDelay = interval * 1000L,
-            period = interval * 1000L
-        ) {
-            reportListener?.invoke(min, max, getAvg())
-            reset()
-        }
+        reportTimer =
+            fixedRateTimer(
+                name = "RenderStatsReportTimer",
+                initialDelay = interval * 1000L,
+                period = interval * 1000L,
+            ) {
+                reportListener?.invoke(min, max, getAvg())
+                reset()
+            }
     }
 
     /**
@@ -110,7 +111,7 @@ class RenderStatsTracker {
             return
         }
 
-        ++frameCount;
+        ++frameCount
 
         reportFields.map { field: Field ->
             when (val frameValue = field.get(frameStats)) {
@@ -165,9 +166,18 @@ class RenderStatsTracker {
 
         thresholds.map {
             when (val frameValue = fields[it.key].get(frameStats)) {
-                is Int -> if (frameValue > it.value as Int) exceededValues[fields[it.key].name] = frameValue
-                is Long -> if (frameValue > it.value as Long) exceededValues[fields[it.key].name] = frameValue
-                is Double -> if (frameValue > it.value as Double) exceededValues[fields[it.key].name] = frameValue
+                is Int -> {
+                    if (frameValue > it.value as Int) exceededValues[fields[it.key].name] = frameValue
+                }
+
+                is Long -> {
+                    if (frameValue > it.value as Long) exceededValues[fields[it.key].name] = frameValue
+                }
+
+                is Double -> {
+                    if (frameValue > it.value as Double) exceededValues[fields[it.key].name] = frameValue
+                }
+
                 else -> {}
             }
         }
@@ -181,14 +191,23 @@ class RenderStatsTracker {
         val avg = RenderingStats()
 
         if (frameCount == 0) {
-            return avg;
+            return avg
         }
 
         reportFields.map { field: Field ->
             when (val value = field.get(total)) {
-                is Int -> field.setInt(avg, value / frameCount)
-                is Long -> field.setLong(avg, value / frameCount)
-                is Double -> field.setDouble(avg, value / frameCount)
+                is Int -> {
+                    field.setInt(avg, value / frameCount)
+                }
+
+                is Long -> {
+                    field.setLong(avg, value / frameCount)
+                }
+
+                is Double -> {
+                    field.setDouble(avg, value / frameCount)
+                }
+
                 else -> {}
             }
         }
@@ -205,10 +224,9 @@ class RenderStatsTracker {
     }
 }
 
-fun RenderingStats.nonZeroValuesString(): String {
-    return this::class.java.fields
+fun RenderingStats.nonZeroValuesString(): String =
+    this::class.java.fields
         .filter { (it.get(this) as? Number)?.toDouble() != 0.0 }
         .joinToString(", ") { field ->
             "(${field.name}=${field.get(this)})"
         }
-}

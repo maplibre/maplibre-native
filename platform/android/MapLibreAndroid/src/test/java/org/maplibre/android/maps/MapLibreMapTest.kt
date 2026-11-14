@@ -2,6 +2,12 @@ package org.maplibre.android.maps
 
 import android.content.Context
 import android.graphics.PointF
+import io.mockk.*
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.maplibre.android.MapLibreInjector
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -10,19 +16,12 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.style.layers.TransitionOptions
 import org.maplibre.android.utils.ConfigUtils
-import io.mockk.*
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.maplibre.android.BaseTest
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class MapLibreMapTest : BaseTest() {
-
     private lateinit var maplibreMap: MapLibreMap
 
     private lateinit var nativeMapView: NativeMap
@@ -47,15 +46,16 @@ class MapLibreMapTest : BaseTest() {
         developerAnimationListener = mockk(relaxed = true)
         nativeMapView = mockk(relaxed = true)
         transform = mockk(relaxed = true)
-        maplibreMap = MapLibreMap(
-            nativeMapView,
-            transform,
-            mockk(relaxed = true),
-            null,
-            null,
-            cameraChangeDispatcher,
-            listOf(developerAnimationListener)
-        )
+        maplibreMap =
+            MapLibreMap(
+                nativeMapView,
+                transform,
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                cameraChangeDispatcher,
+                listOf(developerAnimationListener),
+            )
         every { nativeMapView.isDestroyed } returns false
         every { nativeMapView.nativePtr } returns 5
         maplibreMap.injectLocationComponent(spyk())
@@ -175,7 +175,12 @@ class MapLibreMapTest : BaseTest() {
 
     @Test
     fun testCameraForLatLngBounds() {
-        val bounds = LatLngBounds.Builder().include(LatLng()).include(LatLng(1.0, 1.0)).build()
+        val bounds =
+            LatLngBounds
+                .Builder()
+                .include(LatLng())
+                .include(LatLng(1.0, 1.0))
+                .build()
         maplibreMap.setLatLngBoundsForCameraTarget(bounds)
         verify { nativeMapView.setLatLngBounds(bounds) }
     }
@@ -261,5 +266,4 @@ class MapLibreMapTest : BaseTest() {
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
         verify { nativeMapView.setZoom(2.0, target, 0) }
     }
-
 }

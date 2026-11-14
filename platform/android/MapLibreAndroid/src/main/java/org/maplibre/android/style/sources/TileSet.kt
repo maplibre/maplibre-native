@@ -10,8 +10,10 @@ import org.maplibre.android.geometry.LatLngBounds
  *
  * @see [The tileset specification](https://github.com/mapbox/tilejson-spec/tree/master/2.1.0)
  */
-class TileSet(val tilejson: String, vararg tiles: String) {
-
+class TileSet(
+    val tilejson: String,
+    vararg tiles: String,
+) {
     /**
      * A name describing the tileset. The name can
      * contain any legal character. Implementations SHOULD NOT interpret the
@@ -154,9 +156,7 @@ class TileSet(val tilejson: String, vararg tiles: String) {
         this.data = arrayOf(*data)
     }
 
-    fun getMinZoom(): Float {
-        return minZoom!!
-    }
+    fun getMinZoom(): Float = minZoom!!
 
     /**
      * 0. &gt;= 0, &lt; 22. An integer specifying the minimum zoom level.
@@ -167,9 +167,7 @@ class TileSet(val tilejson: String, vararg tiles: String) {
         this.minZoom = minZoom
     }
 
-    fun getMaxZoom(): Float {
-        return maxZoom!!
-    }
+    fun getMaxZoom(): Float = maxZoom!!
 
     /**
      * 0. &gt;= 0, &lt;= 22. An integer specifying the maximum zoom level.
@@ -188,7 +186,9 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      *
      * @param bounds the Float array to set
      */
-    fun setBounds(@Size(value = 4) vararg bounds: Float) {
+    fun setBounds(
+        @Size(value = 4) vararg bounds: Float,
+    ) {
         this.bounds = bounds.toTypedArray()
     }
 
@@ -203,7 +203,12 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      * @param right the Float right bound
      * @param top the Float top bound
      */
-    fun setBounds(left: Float, bottom: Float, right: Float, top: Float) {
+    fun setBounds(
+        left: Float,
+        bottom: Float,
+        right: Float,
+        top: Float,
+    ) {
         this.bounds = arrayOf(left, bottom, right, top)
     }
 
@@ -216,7 +221,9 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      * @param bounds The Array of floats containing bounds in the order left, bottom, right, top
      */
     @Deprecated("Not strongly typed", ReplaceWith("setBounds(bounds: LatLngBounds"))
-    fun setBounds(@Size(value = 4) bounds: Array<Float>) {
+    fun setBounds(
+        @Size(value = 4) bounds: Array<Float>,
+    ) {
         this.bounds = bounds
     }
 
@@ -227,7 +234,12 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      * @param bounds The LatLngBounds instance containing bounds
      */
     fun setBounds(bounds: LatLngBounds) {
-        setBounds(bounds.longitudeWest.toFloat(), bounds.latitudeSouth.toFloat(), bounds.longitudeEast.toFloat(), bounds.latitudeNorth.toFloat())
+        setBounds(
+            bounds.longitudeWest.toFloat(),
+            bounds.latitudeSouth.toFloat(),
+            bounds.longitudeEast.toFloat(),
+            bounds.latitudeNorth.toFloat(),
+        )
     }
 
     /**
@@ -241,7 +253,9 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      * @param center the Float array to set as lattitude, longitude
      */
     @Deprecated("This function is not type safe", ReplaceWith("setCenter(center:LatLng)"))
-    fun setCenter(@Size(value = 2) vararg center: Float) {
+    fun setCenter(
+        @Size(value = 2) vararg center: Float,
+    ) {
         val latLng = LatLng(center[1].toDouble(), center[0].toDouble())
         setCenter(latLng)
     }

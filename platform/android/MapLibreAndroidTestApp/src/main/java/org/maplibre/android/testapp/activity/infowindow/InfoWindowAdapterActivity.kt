@@ -7,9 +7,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -24,6 +24,7 @@ import org.maplibre.android.testapp.utils.IconUtils
 class InfoWindowAdapterActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_infowindow_adapter)
@@ -36,7 +37,7 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
                     addMarkers()
                     addCustomInfoWindowAdapter()
                 }
-            }
+            },
         )
     }
 
@@ -49,24 +50,24 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
                 "Vatican City",
                 41.902916,
                 12.453389,
-                "#009688"
-            )
+                "#009688",
+            ),
         )
         maplibreMap.addMarker(
             generateCityStateMarker(
                 "San Marino",
                 43.942360,
                 12.457777,
-                "#795548"
-            )
+                "#795548",
+            ),
         )
         maplibreMap.addMarker(
             generateCityStateMarker(
                 "Liechtenstein",
                 47.166000,
                 9.555373,
-                "#FF5722"
-            )
+                "#FF5722",
+            ),
         )
     }
 
@@ -74,7 +75,7 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
         title: String,
         lat: Double,
         lng: Double,
-        color: String
+        color: String,
     ): CityStateMarkerOptions {
         val marker = CityStateMarkerOptions()
         marker.title(title)
@@ -87,19 +88,21 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
     }
 
     private fun addCustomInfoWindowAdapter() {
-        maplibreMap.infoWindowAdapter = object : InfoWindowAdapter {
-            private val tenDp = resources.getDimension(R.dimen.attr_margin).toInt()
-            override fun getInfoWindow(marker: Marker): View? {
-                val textView = TextView(this@InfoWindowAdapterActivity)
-                textView.text = marker.title
-                textView.setTextColor(Color.WHITE)
-                if (marker is CityStateMarker) {
-                    textView.setBackgroundColor(Color.parseColor(marker.infoWindowBackgroundColor))
+        maplibreMap.infoWindowAdapter =
+            object : InfoWindowAdapter {
+                private val tenDp = resources.getDimension(R.dimen.attr_margin).toInt()
+
+                override fun getInfoWindow(marker: Marker): View? {
+                    val textView = TextView(this@InfoWindowAdapterActivity)
+                    textView.text = marker.title
+                    textView.setTextColor(Color.WHITE)
+                    if (marker is CityStateMarker) {
+                        textView.setBackgroundColor(Color.parseColor(marker.infoWindowBackgroundColor))
+                    }
+                    textView.setPadding(tenDp, tenDp, tenDp, tenDp)
+                    return textView
                 }
-                textView.setPadding(tenDp, tenDp, tenDp, tenDp)
-                return textView
             }
-        }
     }
 
     override fun onStart() {

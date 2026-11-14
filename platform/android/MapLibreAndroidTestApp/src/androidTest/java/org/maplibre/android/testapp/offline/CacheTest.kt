@@ -3,17 +3,16 @@ package org.maplibre.android.testapp.offline
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
-import org.maplibre.android.offline.OfflineManager
-import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.offline.OfflineManager
+import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class CacheTest {
-
     @Rule
     @JvmField
     var rule = ActivityTestRule(FeatureOverviewActivity::class.java)
@@ -35,7 +34,7 @@ class CacheTest {
                     override fun onError(message: String) {
                         Assert.assertNull("onError should not be called", message)
                     }
-                }
+                },
             )
         }
         countDownLatch.await()
@@ -44,15 +43,17 @@ class CacheTest {
     @Test
     fun testSetClearAmbientCache() {
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).clearAmbientCache(object : OfflineManager.FileSourceCallback {
-                override fun onSuccess() {
-                    countDownLatch.countDown()
-                }
+            OfflineManager.getInstance(context).clearAmbientCache(
+                object : OfflineManager.FileSourceCallback {
+                    override fun onSuccess() {
+                        countDownLatch.countDown()
+                    }
 
-                override fun onError(message: String) {
-                    Assert.assertNull("onError should not be called", message)
-                }
-            })
+                    override fun onError(message: String) {
+                        Assert.assertNull("onError should not be called", message)
+                    }
+                },
+            )
         }
         countDownLatch.await()
     }
@@ -60,15 +61,17 @@ class CacheTest {
     @Test
     fun testSetInvalidateAmbientCache() {
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).invalidateAmbientCache(object : OfflineManager.FileSourceCallback {
-                override fun onSuccess() {
-                    countDownLatch.countDown()
-                }
+            OfflineManager.getInstance(context).invalidateAmbientCache(
+                object : OfflineManager.FileSourceCallback {
+                    override fun onSuccess() {
+                        countDownLatch.countDown()
+                    }
 
-                override fun onError(message: String) {
-                    Assert.assertNull("onError should not be called", message)
-                }
-            })
+                    override fun onError(message: String) {
+                        Assert.assertNull("onError should not be called", message)
+                    }
+                },
+            )
         }
         countDownLatch.await()
     }
@@ -76,15 +79,17 @@ class CacheTest {
     @Test
     fun testSetResetDatabase() {
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).resetDatabase(object : OfflineManager.FileSourceCallback {
-                override fun onSuccess() {
-                    countDownLatch.countDown()
-                }
+            OfflineManager.getInstance(context).resetDatabase(
+                object : OfflineManager.FileSourceCallback {
+                    override fun onSuccess() {
+                        countDownLatch.countDown()
+                    }
 
-                override fun onError(message: String) {
-                    Assert.assertNull("onError should not be called", message)
-                }
-            })
+                    override fun onError(message: String) {
+                        Assert.assertNull("onError should not be called", message)
+                    }
+                },
+            )
         }
         countDownLatch.await()
     }
@@ -92,15 +97,17 @@ class CacheTest {
     @Test
     fun testSetPackDatabase() {
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).packDatabase(object : OfflineManager.FileSourceCallback {
-                override fun onSuccess() {
-                    countDownLatch.countDown()
-                }
+            OfflineManager.getInstance(context).packDatabase(
+                object : OfflineManager.FileSourceCallback {
+                    override fun onSuccess() {
+                        countDownLatch.countDown()
+                    }
 
-                override fun onError(message: String) {
-                    Assert.assertNull("onError should not be called", message)
-                }
-            })
+                    override fun onError(message: String) {
+                        Assert.assertNull("onError should not be called", message)
+                    }
+                },
+            )
         }
         countDownLatch.await()
     }

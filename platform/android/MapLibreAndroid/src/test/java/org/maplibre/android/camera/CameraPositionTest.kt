@@ -2,14 +2,14 @@ package org.maplibre.android.camera
 
 import android.content.res.TypedArray
 import android.os.Parcel
-import org.maplibre.android.R
-import org.maplibre.android.camera.CameraUpdateFactory.ZoomUpdate
-import org.maplibre.android.camera.CameraUpdateFactory.zoomTo
-import org.maplibre.android.geometry.LatLng
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.BaseTest
+import org.maplibre.android.R
+import org.maplibre.android.camera.CameraUpdateFactory.ZoomUpdate
+import org.maplibre.android.camera.CameraUpdateFactory.zoomTo
+import org.maplibre.android.geometry.LatLng
 import org.mockito.Mockito
 import org.robolectric.RobolectricTestRunner
 
@@ -42,27 +42,32 @@ class CameraPositionTest : BaseTest() {
         val longitude = 11f
         val tilt = 44f
         val typedArray = Mockito.mock(TypedArray::class.java)
-        Mockito.`when`(
-            typedArray.getFloat(
-                R.styleable.maplibre_MapView_maplibre_cameraBearing,
-                0.0f
-            )
-        ).thenReturn(bearing)
-        Mockito.`when`(
-            typedArray.getFloat(
-                R.styleable.maplibre_MapView_maplibre_cameraTargetLat,
-                0.0f
-            )
-        ).thenReturn(latitude)
-        Mockito.`when`(
-            typedArray.getFloat(
-                R.styleable.maplibre_MapView_maplibre_cameraTargetLng,
-                0.0f
-            )
-        ).thenReturn(longitude)
-        Mockito.`when`(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoom, 0.0f))
+        Mockito
+            .`when`(
+                typedArray.getFloat(
+                    R.styleable.maplibre_MapView_maplibre_cameraBearing,
+                    0.0f,
+                ),
+            ).thenReturn(bearing)
+        Mockito
+            .`when`(
+                typedArray.getFloat(
+                    R.styleable.maplibre_MapView_maplibre_cameraTargetLat,
+                    0.0f,
+                ),
+            ).thenReturn(latitude)
+        Mockito
+            .`when`(
+                typedArray.getFloat(
+                    R.styleable.maplibre_MapView_maplibre_cameraTargetLng,
+                    0.0f,
+                ),
+            ).thenReturn(longitude)
+        Mockito
+            .`when`(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoom, 0.0f))
             .thenReturn(zoom)
-        Mockito.`when`(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTilt, 0.0f))
+        Mockito
+            .`when`(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTilt, 0.0f))
             .thenReturn(tilt)
         Mockito.doNothing().`when`(typedArray).recycle()
         val cameraPosition = CameraPosition.Builder(typedArray).build()
@@ -70,12 +75,12 @@ class CameraPositionTest : BaseTest() {
             "bearing should match",
             bearing.toDouble(),
             cameraPosition.bearing,
-            DELTA
+            DELTA,
         )
         Assert.assertEquals(
             "latlng should match",
             LatLng(latitude.toDouble(), longitude.toDouble()),
-            cameraPosition.target
+            cameraPosition.target,
         )
         Assert.assertEquals("tilt should match", tilt.toDouble(), cameraPosition.tilt, DELTA)
         Assert.assertEquals("zoom should match", zoom.toDouble(), cameraPosition.zoom, DELTA)
@@ -89,9 +94,9 @@ class CameraPositionTest : BaseTest() {
         Assert.assertEquals(
             "toString should match",
             "Target: LatLng [latitude=1.0, longitude=2.0, altitude=0.0], " +
-                    "Center Altitude:9.0, Zoom:3.0, Bearing:5.0, Tilt:4.0, Roll:6.0, FOV:7.0, " +
-                    "Padding:[0.0, 500.0, 0.0, 0.0]",
-            cameraPosition.toString()
+                "Center Altitude:9.0, Zoom:3.0, Bearing:5.0, Tilt:4.0, Roll:6.0, FOV:7.0, " +
+                "Padding:[0.0, 500.0, 0.0, 0.0]",
+            cameraPosition.toString(),
         )
     }
 
@@ -106,9 +111,10 @@ class CameraPositionTest : BaseTest() {
     @Test
     fun testZoomUpdateBuilder() {
         val zoomLevel = 5f
-        val builder = CameraPosition.Builder(
-            zoomTo(zoomLevel.toDouble()) as ZoomUpdate
-        )
+        val builder =
+            CameraPosition.Builder(
+                zoomTo(zoomLevel.toDouble()) as ZoomUpdate,
+            )
         Assert.assertEquals("zoom should match", zoomLevel.toDouble(), builder.build().zoom, 0.0)
     }
 
@@ -133,27 +139,27 @@ class CameraPositionTest : BaseTest() {
         Assert.assertNotEquals(
             "cameraPosition should not match for bearing",
             cameraPositionBearing,
-            cameraPosition
+            cameraPosition,
         )
         Assert.assertNotEquals(
             "cameraPosition should not match for tilt",
             cameraPositionTilt,
-            cameraPosition
+            cameraPosition,
         )
         Assert.assertNotEquals(
             "cameraPosition should not match for zoom",
             cameraPositionZoom,
-            cameraPosition
+            cameraPosition,
         )
         Assert.assertNotEquals(
             "cameraPosition should not match for target",
             cameraPositionTarget,
-            cameraPosition
+            cameraPosition,
         )
         Assert.assertNotEquals(
             "cameraPosition should not match for padding",
             cameraPositionPadding,
-            cameraPosition
+            cameraPosition,
         )
     }
 

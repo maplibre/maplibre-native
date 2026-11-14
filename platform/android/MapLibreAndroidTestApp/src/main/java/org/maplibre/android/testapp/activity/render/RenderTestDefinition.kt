@@ -7,7 +7,7 @@ class RenderTestDefinition internal constructor( // eg. background-color
     val category: String?, // eg. colorSpace-hcl
     val name: String,
     val styleJson: String?,
-    private val definition: RenderTestStyleDefinition
+    private val definition: RenderTestStyleDefinition,
 ) {
     val width: Int
         get() {
@@ -43,29 +43,26 @@ class RenderTestDefinition internal constructor( // eg. background-color
             return 1F
         }
 
-    fun hasOperations(): Boolean {
-        return test?.operations != null
-    }
+    fun hasOperations(): Boolean = test?.operations != null
 
     val test: RenderTestStyleDefinition.Test?
         get() = definition.metadata?.test
 
-    fun toOptions(): MapSnapshotter.Options {
-        return MapSnapshotter.Options(width, height)
+    fun toOptions(): MapSnapshotter.Options =
+        MapSnapshotter
+            .Options(width, height)
             .withStyleBuilder(Style.Builder().fromJson(styleJson!!))
             .withPixelRatio(pixelRatio)
             .withLogo(false)
-    }
 
-    override fun toString(): String {
-        return (
+    override fun toString(): String =
+        (
             "RenderTestDefinition{" +
                 "category='" + category + '\'' +
                 ", name='" + name + '\'' +
                 ", styleJson='" + styleJson + '\'' +
                 '}'
-            )
-    }
+        )
 
     companion object {
         private const val DEFAULT_WIDTH = 512

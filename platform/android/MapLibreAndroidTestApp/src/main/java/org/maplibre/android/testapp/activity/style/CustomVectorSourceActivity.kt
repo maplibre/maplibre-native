@@ -10,15 +10,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.CustomVectorSource
-import org.maplibre.android.style.sources.TileData
 import org.maplibre.android.style.sources.CustomVectorTileProvider
+import org.maplibre.android.style.sources.TileData
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import java.io.ByteArrayOutputStream
@@ -28,8 +28,9 @@ import java.io.ByteArrayOutputStream
  * Generates a diagonal cross pattern per tile as synthetic MVT data.
  * Toggle the source on/off with the FAB.
  */
-class CustomVectorSourceActivity : AppCompatActivity(), OnMapReadyCallback {
-
+class CustomVectorSourceActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback {
     private lateinit var mapView: MapView
     private var maplibreMap: MapLibreMap? = null
     private var sourceActive = false
@@ -64,14 +65,15 @@ class CustomVectorSourceActivity : AppCompatActivity(), OnMapReadyCallback {
             Toast.makeText(this, "CustomVectorSource removed", Toast.LENGTH_SHORT).show()
         } else {
             val source = CustomVectorSource(SOURCE_ID, DiagonalTileProvider(), tileScope, minZoom = 0, maxZoom = 14)
-            val layer = LineLayer(LAYER_ID, SOURCE_ID).apply {
-                setSourceLayer(SOURCE_LAYER_NAME)
-                setProperties(
-                    PropertyFactory.lineColor(Color.RED),
-                    PropertyFactory.lineWidth(2f),
-                    PropertyFactory.lineOpacity(0.8f)
-                )
-            }
+            val layer =
+                LineLayer(LAYER_ID, SOURCE_ID).apply {
+                    sourceLayer = SOURCE_LAYER_NAME
+                    setProperties(
+                        PropertyFactory.lineColor(Color.RED),
+                        PropertyFactory.lineWidth(2f),
+                        PropertyFactory.lineOpacity(0.8f),
+                    )
+                }
             style.addSource(source)
             style.addLayer(layer)
             sourceActive = true
@@ -84,7 +86,11 @@ class CustomVectorSourceActivity : AppCompatActivity(), OnMapReadyCallback {
      * Simulates async work with a small delay.
      */
     private class DiagonalTileProvider : CustomVectorTileProvider {
-        override suspend fun fetchTile(z: Int, x: Int, y: Int): TileData {
+        override suspend fun fetchTile(
+            z: Int,
+            x: Int,
+            y: Int,
+        ): TileData {
             // Simulate network latency
             delay(50)
             val mvtBytes = buildDiagonalMvtTile(z, x, y)
@@ -92,11 +98,32 @@ class CustomVectorSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    override fun onStart() { super.onStart(); mapView.onStart() }
-    override fun onResume() { super.onResume(); mapView.onResume() }
-    override fun onPause() { super.onPause(); mapView.onPause() }
-    override fun onStop() { super.onStop(); mapView.onStop() }
-    override fun onDestroy() { tileScope.cancel(); super.onDestroy(); mapView.onDestroy() }
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mapView.onStop()
+    }
+
+    override fun onDestroy() {
+        tileScope.cancel()
+        super.onDestroy()
+        mapView.onDestroy()
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
@@ -112,31 +139,39 @@ class CustomVectorSourceActivity : AppCompatActivity(), OnMapReadyCallback {
          * Builds a minimal MVT tile with two diagonal lines forming an X.
          * MVT protobuf encoding done by hand (no protobuf library needed).
          */
-        private fun buildDiagonalMvtTile(z: Int, x: Int, y: Int): ByteArray {
+        private fun buildDiagonalMvtTile(
+            z: Int,
+            x: Int,
+            y: Int,
+        ): ByteArray {
             // Geometry: two lines forming an X across the tile
             // Line 1: (0,0) -> (4096,4096)
             // Line 2: (4096,0) -> (0,4096)
-            val geom1 = encodeMvtGeometry(
-                listOf(Pair(0, 0), Pair(EXTENT, EXTENT))
-            )
-            val geom2 = encodeMvtGeometry(
-                listOf(Pair(EXTENT, 0), Pair(0, EXTENT))
-            )
+            val geom1 =
+                encodeMvtGeometry(
+                    listOf(Pair(0, 0), Pair(EXTENT, EXTENT)),
+                )
+            val geom2 =
+                encodeMvtGeometry(
+                    listOf(Pair(EXTENT, 0), Pair(0, EXTENT)),
+                )
 
             // Also add a border rectangle
-            val border = encodeMvtGeometry(
-                listOf(Pair(0, 0), Pair(EXTENT, 0), Pair(EXTENT, EXTENT), Pair(0, EXTENT), Pair(0, 0))
-            )
+            val border =
+                encodeMvtGeometry(
+                    listOf(Pair(0, 0), Pair(EXTENT, 0), Pair(EXTENT, EXTENT), Pair(0, EXTENT), Pair(0, 0)),
+                )
 
             val feature1 = encodeMvtFeature(id = 1, geometry = geom1, geomType = 2)
             val feature2 = encodeMvtFeature(id = 2, geometry = geom2, geomType = 2)
             val feature3 = encodeMvtFeature(id = 3, geometry = border, geomType = 2)
 
-            val layer = encodeMvtLayer(
-                name = SOURCE_LAYER_NAME,
-                extent = EXTENT,
-                features = listOf(feature1, feature2, feature3)
-            )
+            val layer =
+                encodeMvtLayer(
+                    name = SOURCE_LAYER_NAME,
+                    extent = EXTENT,
+                    features = listOf(feature1, feature2, feature3),
+                )
 
             // Tile: repeated Layer layers = 3;
             val tile = ByteArrayOutputStream()
@@ -167,7 +202,11 @@ class CustomVectorSourceActivity : AppCompatActivity(), OnMapReadyCallback {
             return commands.flatMap { encodeVarint(it) }.toByteArray()
         }
 
-        private fun encodeMvtFeature(id: Long, geometry: ByteArray, geomType: Int): ByteArray {
+        private fun encodeMvtFeature(
+            id: Long,
+            geometry: ByteArray,
+            geomType: Int,
+        ): ByteArray {
             val out = ByteArrayOutputStream()
             // optional uint64 id = 1
             writeTag(out, 1, 0)
@@ -181,7 +220,11 @@ class CustomVectorSourceActivity : AppCompatActivity(), OnMapReadyCallback {
             return out.toByteArray()
         }
 
-        private fun encodeMvtLayer(name: String, extent: Int, features: List<ByteArray>): ByteArray {
+        private fun encodeMvtLayer(
+            name: String,
+            extent: Int,
+            features: List<ByteArray>,
+        ): ByteArray {
             val out = ByteArrayOutputStream()
             // required uint32 version = 15
             writeTag(out, 15, 0)
@@ -200,7 +243,10 @@ class CustomVectorSourceActivity : AppCompatActivity(), OnMapReadyCallback {
             return out.toByteArray()
         }
 
-        private fun commandInteger(id: Int, count: Int): Int = (id and 0x7) or (count shl 3)
+        private fun commandInteger(
+            id: Int,
+            count: Int,
+        ): Int = (id and 0x7) or (count shl 3)
 
         private fun zigzag(value: Int): Int = (value shl 1) xor (value shr 31)
 
@@ -215,11 +261,18 @@ class CustomVectorSourceActivity : AppCompatActivity(), OnMapReadyCallback {
             return bytes
         }
 
-        private fun writeTag(out: ByteArrayOutputStream, fieldNumber: Int, wireType: Int) {
+        private fun writeTag(
+            out: ByteArrayOutputStream,
+            fieldNumber: Int,
+            wireType: Int,
+        ) {
             writeVarint(out, ((fieldNumber shl 3) or wireType).toLong())
         }
 
-        private fun writeVarint(out: ByteArrayOutputStream, value: Long) {
+        private fun writeVarint(
+            out: ByteArrayOutputStream,
+            value: Long,
+        ) {
             var v = value
             while (v > 0x7F) {
                 out.write(((v and 0x7F) or 0x80).toInt())
@@ -228,7 +281,10 @@ class CustomVectorSourceActivity : AppCompatActivity(), OnMapReadyCallback {
             out.write((v and 0x7F).toInt())
         }
 
-        private fun writeBytes(out: ByteArrayOutputStream, data: ByteArray) {
+        private fun writeBytes(
+            out: ByteArrayOutputStream,
+            data: ByteArray,
+        ) {
             writeVarint(out, data.size.toLong())
             out.write(data)
         }

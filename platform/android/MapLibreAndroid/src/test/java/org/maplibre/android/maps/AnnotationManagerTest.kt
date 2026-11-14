@@ -1,27 +1,27 @@
 package org.maplibre.android.maps
 
 import androidx.collection.LongSparseArray
+import org.junit.Assert
+import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.maplibre.android.annotations.Annotation
 import org.maplibre.android.annotations.BaseMarkerOptions
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
-import org.maplibre.android.geometry.LatLng
-import org.junit.Assert
-import org.junit.Test
-import org.maplibre.android.BaseTest
 import org.maplibre.android.annotations.PolygonOptions
 import org.maplibre.android.annotations.PolylineOptions
-import org.mockito.ArgumentMatchers
+import org.maplibre.android.geometry.LatLng
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 
 class AnnotationManagerTest : BaseTest() {
-
     private val aNativeMapView: NativeMap = Mockito.mock(NativeMapView::class.java)
     private val aMapView = Mockito.mock(MapView::class.java)
     private val annotationsArray = LongSparseArray<Annotation>()
-    private val aIconManager = Mockito.mock(
-        IconManager::class.java
-    )
+    private val aIconManager =
+        Mockito.mock(
+            IconManager::class.java,
+        )
     private val aMapLibreMap = Mockito.mock(MapLibreMap::class.java)
 
     private val annotations: Annotations = AnnotationContainer(aNativeMapView, annotationsArray)
@@ -31,29 +31,31 @@ class AnnotationManagerTest : BaseTest() {
     private val shapeAnnotations: ShapeAnnotations =
         ShapeAnnotationContainer(aNativeMapView, annotationsArray)
 
-
-    private val annotationManager = AnnotationManager(
-        aMapView,
-        annotationsArray,
-        aIconManager,
-        annotations,
-        markers,
-        polygons,
-        polylines,
-        shapeAnnotations
-    )
+    private val annotationManager =
+        AnnotationManager(
+            aMapView,
+            annotationsArray,
+            aIconManager,
+            annotations,
+            markers,
+            polygons,
+            polylines,
+            shapeAnnotations,
+        )
 
     @Test
     @Throws(Exception::class)
     fun checksAddAMarker() {
-        val aMarker = Mockito.mock(
-            Marker::class.java
-        )
+        val aMarker =
+            Mockito.mock(
+                Marker::class.java,
+            )
         val aId = 5L
         Mockito.`when`(aNativeMapView.addMarker(aMarker)).thenReturn(aId)
-        val aMarkerOptions = Mockito.mock(
-            BaseMarkerOptions::class.java
-        )
+        val aMarkerOptions =
+            Mockito.mock(
+                BaseMarkerOptions::class.java,
+            )
         val aMapLibreMap = Mockito.mock(MapLibreMap::class.java)
         Mockito.`when`(aMarkerOptions.marker).thenReturn(aMarker)
         annotationManager.addMarker(aMarkerOptions, aMapLibreMap)
@@ -72,14 +74,14 @@ class AnnotationManagerTest : BaseTest() {
         markerList.add(firstMarkerOption)
         markerList.add(secondMarkerOption)
         val aMapLibreMap = Mockito.mock(MapLibreMap::class.java)
-        Mockito.`when`(
-            aNativeMapView.addMarker(
-                ArgumentMatchers.any(
-                    Marker::class.java
-                )
-            )
-        ).thenReturn(firstId, secondId)
-        Mockito.`when`(aNativeMapView.addMarkers(ArgumentMatchers.anyList()))
+        Mockito
+            .`when`(
+                aNativeMapView.addMarker(
+                    any<Marker>(),
+                ),
+            ).thenReturn(firstId, secondId)
+        Mockito
+            .`when`(aNativeMapView.addMarkers(any<List<Marker>>()))
             .thenReturn(longArrayOf(firstId, secondId))
         annotationManager.addMarkers(markerList, aMapLibreMap)
         Assert.assertEquals(2, annotationManager.annotations.size)
@@ -101,7 +103,6 @@ class AnnotationManagerTest : BaseTest() {
         Assert.assertEquals(pId, resultPolygon.id)
         Assert.assertEquals(1, annotationManager.annotations.size)
         Assert.assertEquals(polygon, annotationManager.annotations[0])
-
     }
 
     @Test

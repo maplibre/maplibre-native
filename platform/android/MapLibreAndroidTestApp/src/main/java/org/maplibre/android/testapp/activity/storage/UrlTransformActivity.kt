@@ -3,8 +3,8 @@ package org.maplibre.android.testapp.activity.storage
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.storage.FileSource
 import org.maplibre.android.storage.FileSource.ResourceTransformCallback
 import org.maplibre.android.storage.Resource
@@ -26,7 +26,10 @@ class UrlTransformActivity : AppCompatActivity() {
      * Alternatively, unregister the callback in [Activity.onDestroy]
      */
     private class Transform : ResourceTransformCallback {
-        override fun onURL(@Resource.Kind kind: Int, url: String): String {
+        override fun onURL(
+            @Resource.Kind kind: Int,
+            url: String,
+        ): String {
             Timber.i("[%s] Could be rewriting %s", Thread.currentThread().name, url)
             return url
         }

@@ -45,7 +45,7 @@ class SurfaceViewDetachStressTest : SurfaceViewDetachTestBase() {
 
         assertUiThreadResponsive(
             SurfaceViewDetachTestBase.Companion.LIFECYCLE_TIMEOUT_MS,
-            "after " + CYCLES + " detach/attach cycles"
+            "after " + CYCLES + " detach/attach cycles",
         )
         assertMapRendersAFrame("after " + CYCLES + " detach/attach cycles")
     }
@@ -63,15 +63,18 @@ class SurfaceViewDetachStressTest : SurfaceViewDetachTestBase() {
             // render thread is still bringing its surface up and the native renderer may not exist yet.
             // A lock held across a render thread round trip deadlocks precisely here.
             postOnUiThread(Runnable { this.attachNow() })
-            val queries = postOnUiThread(Runnable {
-                Assert.assertNotNull(maplibreMap.queryRenderedFeatures(PointF(10f, 10f)))
-                maplibreMap.getTileCacheEnabled()
-                mapView.onLowMemory()
-            })
+            val queries =
+                postOnUiThread(
+                    Runnable {
+                        Assert.assertNotNull(maplibreMap.queryRenderedFeatures(PointF(10f, 10f)))
+                        maplibreMap.tileCacheEnabled
+                        mapView.onLowMemory()
+                    },
+                )
 
             queries.awaitWithin(
                 SurfaceViewDetachTestBase.Companion.QUERY_TIMEOUT_MS,
-                "queries racing surface recreation on cycle " + i
+                "queries racing surface recreation on cycle " + i,
             )
         }
 
@@ -93,13 +96,13 @@ class SurfaceViewDetachStressTest : SurfaceViewDetachTestBase() {
             postOnUiThread(Runnable { maplibreMap.setSwapBehaviorFlush(flush) })
                 .awaitWithin(
                     SurfaceViewDetachTestBase.Companion.LIFECYCLE_TIMEOUT_MS,
-                    "setSwapBehaviorFlush racing re-attach on cycle " + i
+                    "setSwapBehaviorFlush racing re-attach on cycle " + i,
                 )
         }
 
         assertUiThreadResponsive(
             SurfaceViewDetachTestBase.Companion.LIFECYCLE_TIMEOUT_MS,
-            "after swap behavior races"
+            "after swap behavior races",
         )
         assertMapRendersAFrame("after swap behavior races")
     }
@@ -115,7 +118,8 @@ class SurfaceViewDetachStressTest : SurfaceViewDetachTestBase() {
         runOnUiThreadWithin(
             SurfaceViewDetachTestBase.Companion.LIFECYCLE_TIMEOUT_MS,
             "switching to continuous rendering",
-            Runnable { mapView.setRenderingRefreshMode(MapRenderer.RenderingRefreshMode.CONTINUOUS) })
+            Runnable { mapView.setRenderingRefreshMode(MapRenderer.RenderingRefreshMode.CONTINUOUS) },
+        )
 
         try {
             for (i in 0..<CYCLES) {
@@ -125,14 +129,15 @@ class SurfaceViewDetachStressTest : SurfaceViewDetachTestBase() {
 
             assertUiThreadResponsive(
                 SurfaceViewDetachTestBase.Companion.LIFECYCLE_TIMEOUT_MS,
-                "after continuous rendering cycles"
+                "after continuous rendering cycles",
             )
             assertMapRendersAFrame("after continuous rendering cycles")
         } finally {
             runOnUiThreadWithin(
                 SurfaceViewDetachTestBase.Companion.LIFECYCLE_TIMEOUT_MS,
                 "restoring when-dirty rendering",
-                Runnable { mapView.setRenderingRefreshMode(MapRenderer.RenderingRefreshMode.WHEN_DIRTY) })
+                Runnable { mapView.setRenderingRefreshMode(MapRenderer.RenderingRefreshMode.WHEN_DIRTY) },
+            )
         }
     }
 

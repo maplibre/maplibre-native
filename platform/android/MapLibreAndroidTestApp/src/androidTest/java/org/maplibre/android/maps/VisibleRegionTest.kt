@@ -2,25 +2,21 @@ package org.maplibre.android.maps
 
 import android.graphics.PointF
 import androidx.test.espresso.UiController
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Ignore
+import org.junit.Test
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.testapp.action.MapLibreMapAction.invoke
 import org.maplibre.android.testapp.activity.BaseTest
 import org.maplibre.android.testapp.activity.espresso.PixelTestActivity
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Ignore
-import org.junit.Test
 
 class VisibleRegionTest : BaseTest() {
+    override fun getActivityClass(): Class<*> = PixelTestActivity::class.java
 
-    override fun getActivityClass(): Class<*> {
-        return PixelTestActivity::class.java
-    }
-
-    override
-    fun beforeTest() {
+    override fun beforeTest() {
         super.beforeTest()
         mapView = (rule.activity as PixelTestActivity).mapView
     }
@@ -30,17 +26,18 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 0.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
             val visibleRegion = maplibreMap.projection.visibleRegion
             assertTrue(latLngs.all { visibleRegion.latLngBounds.contains(it) })
         }
@@ -51,23 +48,24 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 0.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
 
             maplibreMap.setPadding(
                 mapView.width / 4,
                 mapView.height / 4,
                 mapView.width / 4,
-                mapView.height / 4
+                mapView.height / 4,
             )
 
             val visibleRegion = maplibreMap.projection.getVisibleRegion(false)
@@ -82,17 +80,18 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 0.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
 
             maplibreMap.setPadding(mapView.width / 4, 0, 0, 0)
 
@@ -108,17 +107,18 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 0.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
 
             maplibreMap.setPadding(0, mapView.height / 4, 0, 0)
 
@@ -134,17 +134,18 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 0.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
 
             maplibreMap.setPadding(0, 0, mapView.width / 4, 0)
 
@@ -160,17 +161,18 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 0.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
 
             maplibreMap.setPadding(0, 0, 0, mapView.height / 4)
 
@@ -186,20 +188,24 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 180.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
+                        .also { it.longitude += 360 },
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
             val visibleRegion = maplibreMap.projection.visibleRegion
             assertTrue(latLngs.all { visibleRegion.latLngBounds.contains(it) })
         }
@@ -210,23 +216,24 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 180.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
 
             maplibreMap.setPadding(
                 mapView.width / 4,
                 mapView.height / 4,
                 mapView.width / 4,
-                mapView.height / 4
+                mapView.height / 4,
             )
 
             val visibleRegion = maplibreMap.projection.getVisibleRegion(false)
@@ -241,20 +248,24 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 180.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
+                        .also { it.longitude += 360 },
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
 
             maplibreMap.setPadding(mapView.width / 4, 0, 0, 0)
 
@@ -271,20 +282,24 @@ class VisibleRegionTest : BaseTest() {
         invoke(maplibreMap) { ui: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 180.0), 8.0))
             ui.loopMainThreadForAtLeast(5000)
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
+                        .also { it.longitude += 360 },
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
 
             maplibreMap.setPadding(0, mapView.height / 4, 0, 0)
 
@@ -300,20 +315,24 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 180.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
+                        .also { it.longitude += 360 },
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
 
             maplibreMap.setPadding(0, 0, mapView.width / 4, 0)
 
@@ -329,20 +348,24 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 180.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
+                        .also { it.longitude += 360 },
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
 
             maplibreMap.setPadding(0, 0, 0, mapView.height / 4)
 
@@ -359,13 +382,14 @@ class VisibleRegionTest : BaseTest() {
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 0.0), 8.0))
             val d = Math.min(maplibreMap.width, maplibreMap.height) / 4
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f - d / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f + d / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f - d / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f + d / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f - d / 2f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f + d / 2f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f - d / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f + d / 2f),
+                )
 
             for (bearing in 45 until 360 step 45) {
                 maplibreMap.moveCamera(CameraUpdateFactory.bearingTo(bearing.toDouble()))
@@ -381,14 +405,16 @@ class VisibleRegionTest : BaseTest() {
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 180.0), 8.0))
             val d = Math.min(maplibreMap.width, maplibreMap.height) / 4
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f - d / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f + d / 2f, mapView.height / 2f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f - d / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f + d / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f - d / 2f, mapView.height / 2f),
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width / 2f + d / 2f, mapView.height / 2f)
+                        .also { it.longitude += 360 },
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f - d / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f + d / 2f),
+                )
 
             for (bearing in 45 until 360 step 45) {
                 maplibreMap.moveCamera(CameraUpdateFactory.bearingTo(bearing.toDouble()))
@@ -403,17 +429,18 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 0.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
             val bounds = doubleArrayOf(0.0, 0.0, 0.0, 0.0)
             maplibreMap.projection.getVisibleCoordinateBounds(bounds)
             val latLngBounds = LatLngBounds.from(bounds[0], bounds[1], bounds[2], bounds[3])
@@ -428,20 +455,24 @@ class VisibleRegionTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 180.0), 8.0))
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(0f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
-                    .also { it.longitude += 360 },
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
-                maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(0f, 0f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, 0f),
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), 0f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height / 2f)
+                        .also { it.longitude += 360 },
+                    maplibreMap
+                        .getLatLngFromScreenCoords(mapView.width.toFloat(), mapView.height.toFloat())
+                        .also { it.longitude += 360 },
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height.toFloat()),
+                    maplibreMap.getLatLngFromScreenCoords(0f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                )
             val bounds = doubleArrayOf(0.0, 0.0, 0.0, 0.0)
             maplibreMap.projection.getVisibleCoordinateBounds(bounds)
             val latLngBounds = LatLngBounds.from(bounds[0], bounds[1], bounds[2], bounds[3])
@@ -471,13 +502,14 @@ class VisibleRegionTest : BaseTest() {
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 0.0), 8.0))
             val d = Math.min(maplibreMap.width, maplibreMap.height) / 4
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f - d / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f + d / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f - d / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f + d / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f - d / 2f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f + d / 2f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f - d / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f + d / 2f),
+                )
 
             for (bearing in 45 until 360 step 45) {
                 maplibreMap.moveCamera(CameraUpdateFactory.bearingTo(bearing.toDouble()))
@@ -497,13 +529,14 @@ class VisibleRegionTest : BaseTest() {
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 179.0), 8.0))
             val d = Math.min(maplibreMap.width, maplibreMap.height) / 4
-            val latLngs = listOf(
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f - d / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f + d / 2f, mapView.height / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f - d / 2f),
-                maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f + d / 2f)
-            )
+            val latLngs =
+                listOf(
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f - d / 2f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f + d / 2f, mapView.height / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f - d / 2f),
+                    maplibreMap.getLatLngFromScreenCoords(mapView.width / 2f, mapView.height / 2f + d / 2f),
+                )
 
             for (bearing in 45 until 360 step 45) {
                 maplibreMap.moveCamera(CameraUpdateFactory.bearingTo(bearing.toDouble()))
@@ -515,7 +548,8 @@ class VisibleRegionTest : BaseTest() {
         }
     }
 
-    private fun MapLibreMap.getLatLngFromScreenCoords(x: Float, y: Float): LatLng {
-        return this.projection.fromScreenLocation(PointF(x, y))
-    }
+    private fun MapLibreMap.getLatLngFromScreenCoords(
+        x: Float,
+        y: Float,
+    ): LatLng = this.projection.fromScreenLocation(PointF(x, y))
 }

@@ -2,9 +2,9 @@ package org.maplibre.android.maps
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.runner.RunWith
 import org.maplibre.android.AppCenter
 import org.maplibre.android.style.layers.Layer
-import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 abstract class BaseLayerTest : AppCenter() {

@@ -21,9 +21,17 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun newCameraPosition(cameraPosition: CameraPosition): CameraUpdate {
-        return CameraPositionUpdate(cameraPosition.bearing, cameraPosition.target, cameraPosition.centerAltitude, cameraPosition.tilt, cameraPosition.roll, cameraPosition.fov, cameraPosition.zoom, cameraPosition.padding)
-    }
+    fun newCameraPosition(cameraPosition: CameraPosition): CameraUpdate =
+        CameraPositionUpdate(
+            cameraPosition.bearing,
+            cameraPosition.target,
+            cameraPosition.centerAltitude,
+            cameraPosition.tilt,
+            cameraPosition.roll,
+            cameraPosition.fov,
+            cameraPosition.zoom,
+            cameraPosition.padding,
+        )
 
     /**
      * Returns a CameraUpdate that moves the center of the screen to a latitude and longitude
@@ -33,9 +41,7 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun newLatLng(latLng: LatLng): CameraUpdate {
-        return CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, -1.0, -1.0, -1.0, null)
-    }
+    fun newLatLng(latLng: LatLng): CameraUpdate = CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, -1.0, -1.0, -1.0, null)
 
     /**
      * Returns a CameraUpdate that transforms the camera such that the specified
@@ -52,9 +58,10 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun newLatLngBounds(bounds: LatLngBounds, padding: Int): CameraUpdate {
-        return newLatLngBounds(bounds, padding, padding, padding, padding)
-    }
+    fun newLatLngBounds(
+        bounds: LatLngBounds,
+        padding: Int,
+    ): CameraUpdate = newLatLngBounds(bounds, padding, padding, padding, padding)
 
     /**
      * Returns a CameraUpdate that transforms the camera such that the specified
@@ -73,9 +80,12 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun newLatLngBounds(bounds: LatLngBounds, bearing: Double, tilt: Double, padding: Int): CameraUpdate {
-        return newLatLngBounds(bounds, bearing, tilt, padding, padding, padding, padding)
-    }
+    fun newLatLngBounds(
+        bounds: LatLngBounds,
+        bearing: Double,
+        tilt: Double,
+        padding: Int,
+    ): CameraUpdate = newLatLngBounds(bounds, bearing, tilt, padding, padding, padding, padding)
 
     /**
      * Returns a CameraUpdate that transforms the camera such that the specified
@@ -95,9 +105,13 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun newLatLngBounds(bounds: LatLngBounds, paddingLeft: Int, paddingTop: Int, paddingRight: Int, paddingBottom: Int): CameraUpdate {
-        return CameraBoundsUpdate(bounds, null, null, paddingLeft, paddingTop, paddingRight, paddingBottom)
-    }
+    fun newLatLngBounds(
+        bounds: LatLngBounds,
+        paddingLeft: Int,
+        paddingTop: Int,
+        paddingRight: Int,
+        paddingBottom: Int,
+    ): CameraUpdate = CameraBoundsUpdate(bounds, null, null, paddingLeft, paddingTop, paddingRight, paddingBottom)
 
     /**
      * Returns a CameraUpdate that transforms the camera such that the specified
@@ -119,9 +133,15 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun newLatLngBounds(bounds: LatLngBounds, bearing: Double, tilt: Double, paddingLeft: Int, paddingTop: Int, paddingRight: Int, paddingBottom: Int): CameraUpdate {
-        return CameraBoundsUpdate(bounds, bearing, tilt, paddingLeft, paddingTop, paddingRight, paddingBottom)
-    }
+    fun newLatLngBounds(
+        bounds: LatLngBounds,
+        bearing: Double,
+        tilt: Double,
+        paddingLeft: Int,
+        paddingTop: Int,
+        paddingRight: Int,
+        paddingBottom: Int,
+    ): CameraUpdate = CameraBoundsUpdate(bounds, bearing, tilt, paddingLeft, paddingTop, paddingRight, paddingBottom)
 
     /**
      * Returns a CameraUpdate that moves the center of the screen to a latitude and longitude
@@ -132,9 +152,10 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun newLatLngZoom(latLng: LatLng, zoom: Double): CameraUpdate {
-        return CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, -1.0, -1.0, zoom, null)
-    }
+    fun newLatLngZoom(
+        latLng: LatLng,
+        zoom: Double,
+    ): CameraUpdate = CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, -1.0, -1.0, zoom, null)
 
     /**
      * Returns a CameraUpdate that moves the center of the screen to a latitude and longitude
@@ -149,9 +170,13 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun newLatLngPadding(latLng: LatLng, left: Double, top: Double, right: Double, bottom: Double): CameraUpdate {
-        return CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, -1.0, -1.0, -1.0, doubleArrayOf(left, top, right, bottom))
-    }
+    fun newLatLngPadding(
+        latLng: LatLng,
+        left: Double,
+        top: Double,
+        right: Double,
+        bottom: Double,
+    ): CameraUpdate = CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, -1.0, -1.0, -1.0, doubleArrayOf(left, top, right, bottom))
 
     /**
      * Returns a CameraUpdate that shifts the zoom level of the current camera viewpoint.
@@ -161,9 +186,10 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun zoomBy(amount: Double, focus: Point): CameraUpdate {
-        return ZoomUpdate(amount, focus.x.toFloat(), focus.y.toFloat())
-    }
+    fun zoomBy(
+        amount: Double,
+        focus: Point,
+    ): CameraUpdate = ZoomUpdate(amount, focus.x.toFloat(), focus.y.toFloat())
 
     /**
      * Returns a CameraUpdate that shifts the zoom level of the current camera viewpoint.
@@ -172,9 +198,7 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun zoomBy(amount: Double): CameraUpdate {
-        return ZoomUpdate(ZoomUpdate.ZOOM_BY, amount)
-    }
+    fun zoomBy(amount: Double): CameraUpdate = ZoomUpdate(ZoomUpdate.ZOOM_BY, amount)
 
     /**
      * Returns a CameraUpdate that zooms in on the map by moving the viewpoint's height closer to
@@ -183,9 +207,7 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun zoomIn(): CameraUpdate {
-        return ZoomUpdate(ZoomUpdate.ZOOM_IN)
-    }
+    fun zoomIn(): CameraUpdate = ZoomUpdate(ZoomUpdate.ZOOM_IN)
 
     /**
      * Returns a CameraUpdate that zooms out on the map by moving the viewpoint's height farther
@@ -194,9 +216,7 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun zoomOut(): CameraUpdate {
-        return ZoomUpdate(ZoomUpdate.ZOOM_OUT)
-    }
+    fun zoomOut(): CameraUpdate = ZoomUpdate(ZoomUpdate.ZOOM_OUT)
 
     /**
      * Returns a CameraUpdate that moves the camera viewpoint to a particular zoom level.
@@ -205,9 +225,7 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun zoomTo(zoom: Double): CameraUpdate {
-        return ZoomUpdate(ZoomUpdate.ZOOM_TO, zoom)
-    }
+    fun zoomTo(zoom: Double): CameraUpdate = ZoomUpdate(ZoomUpdate.ZOOM_TO, zoom)
 
     /**
      * Returns a CameraUpdate that moves the camera viewpoint to a particular bearing.
@@ -216,9 +234,7 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun bearingTo(bearing: Double): CameraUpdate {
-        return CameraPositionUpdate(bearing, null, -1.0, -1.0, -1.0, -1.0, -1.0, null)
-    }
+    fun bearingTo(bearing: Double): CameraUpdate = CameraPositionUpdate(bearing, null, -1.0, -1.0, -1.0, -1.0, -1.0, null)
 
     /**
      * Returns a CameraUpdate that moves the camera viewpoint to a particular tilt.
@@ -227,9 +243,7 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun tiltTo(tilt: Double): CameraUpdate {
-        return CameraPositionUpdate(-1.0, null, -1.0, tilt, -1.0, -1.0, -1.0, null)
-    }
+    fun tiltTo(tilt: Double): CameraUpdate = CameraPositionUpdate(-1.0, null, -1.0, tilt, -1.0, -1.0, -1.0, null)
 
     /**
      * Returns a CameraUpdate that when animated changes the camera padding.
@@ -243,9 +257,7 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun paddingTo(padding: DoubleArray?): CameraUpdate {
-        return CameraPositionUpdate(-1.0, null, -1.0, -1.0, -1.0, -1.0, -1.0, padding)
-    }
+    fun paddingTo(padding: DoubleArray?): CameraUpdate = CameraPositionUpdate(-1.0, null, -1.0, -1.0, -1.0, -1.0, -1.0, padding)
 
     /**
      * Returns a CameraUpdate that when animated changes the camera padding.
@@ -258,15 +270,26 @@ object CameraUpdateFactory {
      * @return CameraUpdate Final Camera Position
      */
     @JvmStatic
-    fun paddingTo(left: Double, top: Double, right: Double, bottom: Double): CameraUpdate {
-        return paddingTo(doubleArrayOf(left, top, right, bottom))
-    }
+    fun paddingTo(
+        left: Double,
+        top: Double,
+        right: Double,
+        bottom: Double,
+    ): CameraUpdate = paddingTo(doubleArrayOf(left, top, right, bottom))
 
     //
     // CameraUpdate types
     //
-    class CameraPositionUpdate(val bearing: Double, val target: LatLng?, val centerAltitude: Double, val tilt: Double, val roll: Double, val fov: Double, val zoom: Double, val padding: DoubleArray?) : CameraUpdate {
-
+    class CameraPositionUpdate(
+        val bearing: Double,
+        val target: LatLng?,
+        val centerAltitude: Double,
+        val tilt: Double,
+        val roll: Double,
+        val fov: Double,
+        val zoom: Double,
+        val padding: DoubleArray?,
+    ) : CameraUpdate {
         override fun getCameraPosition(maplibreMap: MapLibreMap): CameraPosition {
             if (target == null) {
                 val previousPosition = maplibreMap.cameraPosition
@@ -328,22 +351,46 @@ object CameraUpdateFactory {
             return result
         }
 
-        override fun toString(): String {
-            return ("CameraPositionUpdate{" + "bearing=" + bearing + ", target=" + target + ", centerAltitude=" + centerAltitude + ", tilt=" + tilt + ", roll=" + roll + ", fov=" + fov + ", zoom=" + zoom + ", padding=" + Arrays.toString(padding) + '}')
-        }
+        override fun toString(): String =
+            (
+                "CameraPositionUpdate{" + "bearing=" + bearing + ", target=" + target + ", centerAltitude=" + centerAltitude + ", tilt=" +
+                    tilt +
+                    ", roll=" +
+                    roll +
+                    ", fov=" +
+                    fov +
+                    ", zoom=" +
+                    zoom +
+                    ", padding=" +
+                    Arrays.toString(padding) +
+                    '}'
+            )
     }
 
-    internal class CameraBoundsUpdate(val bounds: LatLngBounds, private val bearing: Double?, private val tilt: Double?, val padding: IntArray) : CameraUpdate {
-        constructor(bounds: LatLngBounds, bearing: Double?, tilt: Double?, paddingLeft: Int, paddingTop: Int, paddingRight: Int, paddingBottom: Int) : this(
+    internal class CameraBoundsUpdate(
+        val bounds: LatLngBounds,
+        private val bearing: Double?,
+        private val tilt: Double?,
+        val padding: IntArray,
+    ) : CameraUpdate {
+        constructor(
+            bounds: LatLngBounds,
+            bearing: Double?,
+            tilt: Double?,
+            paddingLeft: Int,
+            paddingTop: Int,
+            paddingRight: Int,
+            paddingBottom: Int,
+        ) : this(
             bounds,
             bearing,
             tilt,
-            intArrayOf(paddingLeft, paddingTop, paddingRight, paddingBottom)
+            intArrayOf(paddingLeft, paddingTop, paddingRight, paddingBottom),
         ) {
         }
 
-        override fun getCameraPosition(maplibreMap: MapLibreMap): CameraPosition? {
-            return if (bearing == null && tilt == null) {
+        override fun getCameraPosition(maplibreMap: MapLibreMap): CameraPosition? =
+            if (bearing == null && tilt == null) {
                 // use current camera position tilt and bearing
                 maplibreMap.getCameraForLatLngBounds(bounds, padding)
             } else {
@@ -352,7 +399,6 @@ object CameraUpdateFactory {
                 assert(tilt != null)
                 maplibreMap.getCameraForLatLngBounds(bounds, padding, bearing!!, tilt!!)
             }
-        }
 
         override fun equals(other: Any?): Boolean {
             if (this === other) {
@@ -375,9 +421,7 @@ object CameraUpdateFactory {
             return result
         }
 
-        override fun toString(): String {
-            return ("CameraBoundsUpdate{" + "bounds=" + bounds + ", padding=" + padding.contentToString() + '}')
-        }
+        override fun toString(): String = ("CameraBoundsUpdate{" + "bounds=" + bounds + ", padding=" + padding.contentToString() + '}')
     }
 
     class ZoomUpdate : CameraUpdate {
@@ -394,12 +438,17 @@ object CameraUpdateFactory {
         var y = 0f
             private set
 
-        constructor(@Type type: Int) {
+        constructor(
+            @Type type: Int,
+        ) {
             this.type = type
             zoom = 0.0
         }
 
-        constructor(@Type type: Int, zoom: Double) {
+        constructor(
+            @Type type: Int,
+            zoom: Double,
+        ) {
             this.type = type
             this.zoom = zoom
         }
@@ -411,28 +460,41 @@ object CameraUpdateFactory {
             this.y = y
         }
 
-        private fun transformZoom(currentZoomArg: Double): Double {
-            return when (type) {
-                ZOOM_IN -> currentZoomArg + 1
+        private fun transformZoom(currentZoomArg: Double): Double =
+            when (type) {
+                ZOOM_IN -> {
+                    currentZoomArg + 1
+                }
+
                 ZOOM_OUT -> {
                     max(currentZoomArg - 1, 0.0)
                 }
 
-                ZOOM_TO -> zoom
-                ZOOM_BY, ZOOM_TO_POINT -> currentZoomArg + zoom
+                ZOOM_TO -> {
+                    zoom
+                }
+
+                ZOOM_BY, ZOOM_TO_POINT -> {
+                    currentZoomArg + zoom
+                }
+
                 else -> {
                     Timber.e("Unprocessed when branch")
                     4.0
                 }
             }
-        }
 
         override fun getCameraPosition(maplibreMap: MapLibreMap): CameraPosition {
             val cameraPosition = maplibreMap.cameraPosition
             return if (type != ZOOM_TO_POINT) {
                 CameraPosition.Builder(cameraPosition).zoom(transformZoom(cameraPosition.zoom)).build()
             } else {
-                CameraPosition.Builder(cameraPosition).zoom(transformZoom(cameraPosition.zoom)).target(maplibreMap.projection.fromScreenLocation(PointF(x, y))).build()
+                CameraPosition
+                    .Builder(
+                        cameraPosition,
+                    ).zoom(transformZoom(cameraPosition.zoom))
+                    .target(maplibreMap.projection.fromScreenLocation(PointF(x, y)))
+                    .build()
             }
         }
 
@@ -468,9 +530,7 @@ object CameraUpdateFactory {
             return result
         }
 
-        override fun toString(): String {
-            return ("ZoomUpdate{" + "type=" + type + ", zoom=" + zoom + ", x=" + x + ", y=" + y + '}')
-        }
+        override fun toString(): String = ("ZoomUpdate{" + "type=" + type + ", zoom=" + zoom + ", x=" + x + ", y=" + y + '}')
 
         companion object {
             const val ZOOM_IN = 0

@@ -11,7 +11,6 @@ import org.maplibre.android.testapp.databinding.ActivityCacheManagementBinding
  * Test activity showcasing the cache management APIs
  */
 class CacheManagementActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityCacheManagementBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,39 +20,45 @@ class CacheManagementActivity : AppCompatActivity() {
 
         val fileSource = OfflineManager.getInstance(this)
         binding.resetDatabaseButton.setOnClickListener {
-            fileSource.resetDatabase(object : OfflineManager.FileSourceCallback {
-                override fun onSuccess() {
-                    showSnackbar("Reset database success")
-                }
+            fileSource.resetDatabase(
+                object : OfflineManager.FileSourceCallback {
+                    override fun onSuccess() {
+                        showSnackbar("Reset database success")
+                    }
 
-                override fun onError(message: String) {
-                    showSnackbar("Reset database fail: $message")
-                }
-            })
+                    override fun onError(message: String) {
+                        showSnackbar("Reset database fail: $message")
+                    }
+                },
+            )
         }
 
         binding.invalidateAmbientCacheButton.setOnClickListener {
-            fileSource.invalidateAmbientCache(object : OfflineManager.FileSourceCallback {
-                override fun onSuccess() {
-                    showSnackbar("Invalidate ambient cache success")
-                }
+            fileSource.invalidateAmbientCache(
+                object : OfflineManager.FileSourceCallback {
+                    override fun onSuccess() {
+                        showSnackbar("Invalidate ambient cache success")
+                    }
 
-                override fun onError(message: String) {
-                    showSnackbar("Invalidate ambient cache fail: $message")
-                }
-            })
+                    override fun onError(message: String) {
+                        showSnackbar("Invalidate ambient cache fail: $message")
+                    }
+                },
+            )
         }
 
         binding.clearAmbientCacheButton.setOnClickListener {
-            fileSource.clearAmbientCache(object : OfflineManager.FileSourceCallback {
-                override fun onSuccess() {
-                    showSnackbar("Clear ambient cache success")
-                }
+            fileSource.clearAmbientCache(
+                object : OfflineManager.FileSourceCallback {
+                    override fun onSuccess() {
+                        showSnackbar("Clear ambient cache success")
+                    }
 
-                override fun onError(message: String) {
-                    showSnackbar("Clear ambient cache fail: $message")
-                }
-            })
+                    override fun onError(message: String) {
+                        showSnackbar("Clear ambient cache fail: $message")
+                    }
+                },
+            )
         }
 
         binding.setMaximumAmbientCacheSizeButton.setOnClickListener {
@@ -67,7 +72,7 @@ class CacheManagementActivity : AppCompatActivity() {
                     override fun onError(message: String) {
                         showSnackbar("Set maximum ambient cache size fail: $message")
                     }
-                }
+                },
             )
         }
     }

@@ -2,16 +2,16 @@ package org.maplibre.android.style.expressions
 
 import android.graphics.Color
 import com.google.gson.JsonParser
-import org.maplibre.geojson.Point
-import org.maplibre.geojson.Polygon
-import org.maplibre.android.style.expressions.Expression.FormatOption
-import org.maplibre.android.style.layers.PropertyFactory
-import org.maplibre.android.style.layers.PropertyValue
-import org.maplibre.android.utils.ColorUtils
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.BaseTest
+import org.maplibre.android.style.expressions.Expression.FormatOption
+import org.maplibre.android.style.layers.PropertyFactory
+import org.maplibre.android.style.layers.PropertyValue
+import org.maplibre.android.utils.ColorUtils
+import org.maplibre.geojson.Point
+import org.maplibre.geojson.Polygon
 import org.robolectric.RobolectricTestRunner
 import java.util.*
 
@@ -37,7 +37,8 @@ class ExpressionTest : BaseTest() {
     fun testRgb() {
         val expected = arrayOf<Any>("rgb", 0f, 0f, 0f)
         val actual =
-            Expression.rgb(Expression.literal(0), Expression.literal(0), Expression.literal(0))
+            Expression
+                .rgb(Expression.literal(0), Expression.literal(0), Expression.literal(0))
                 .toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
@@ -54,12 +55,14 @@ class ExpressionTest : BaseTest() {
     @Throws(Exception::class)
     fun testRgba() {
         val expected = arrayOf<Any>("rgba", 0f, 0f, 0f, 1f)
-        val actual = Expression.rgba(
-            Expression.literal(0),
-            Expression.literal(0),
-            Expression.literal(0),
-            Expression.literal(1)
-        ).toArray()
+        val actual =
+            Expression
+                .rgba(
+                    Expression.literal(0),
+                    Expression.literal(0),
+                    Expression.literal(0),
+                    Expression.literal(1),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -75,15 +78,17 @@ class ExpressionTest : BaseTest() {
     @Throws(Exception::class)
     fun testToRgba() {
         val expected = arrayOf<Any>("to-rgba", arrayOf<Any>("to-color", "rgba(255, 0, 0, 1)"))
-        val actual = Expression.toRgba(
-            Expression.toColor(
-                Expression.literal(
-                    ColorUtils.colorToRgbaString(
-                        Color.RED
-                    )
-                )
-            )
-        ).toArray()
+        val actual =
+            Expression
+                .toRgba(
+                    Expression.toColor(
+                        Expression.literal(
+                            ColorUtils.colorToRgbaString(
+                                Color.RED,
+                            ),
+                        ),
+                    ),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -235,11 +240,13 @@ class ExpressionTest : BaseTest() {
     @Throws(Exception::class)
     fun testAll() {
         val expected = arrayOf<Any>("all", true, true, true)
-        val actual = Expression.all(
-            Expression.literal(true),
-            Expression.literal(true),
-            Expression.literal(true)
-        ).toArray()
+        val actual =
+            Expression
+                .all(
+                    Expression.literal(true),
+                    Expression.literal(true),
+                    Expression.literal(true),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -247,11 +254,13 @@ class ExpressionTest : BaseTest() {
     @Throws(Exception::class)
     fun testAny() {
         val expected = arrayOf<Any>("any", true, false, false)
-        val actual = Expression.any(
-            Expression.literal(true),
-            Expression.literal(false),
-            Expression.literal(false)
-        ).toArray()
+        val actual =
+            Expression
+                .any(
+                    Expression.literal(true),
+                    Expression.literal(false),
+                    Expression.literal(false),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -279,10 +288,12 @@ class ExpressionTest : BaseTest() {
         val expectedCaseTwoGet = arrayOf<Any>("get", "key2")
         val expectedCaseTwo = arrayOf<Any>("!=", expectedCaseTwoGet, "value2")
         val expected = arrayOf<Any>("case", expectedCaseOne, expectedCaseTwo)
-        val actual = Expression.switchCase(
-            Expression.eq(Expression.get(Expression.literal("key1")), Expression.literal("value1")),
-            Expression.neq(Expression.get(Expression.literal("key2")), Expression.literal("value2"))
-        ).toArray()
+        val actual =
+            Expression
+                .switchCase(
+                    Expression.eq(Expression.get(Expression.literal("key1")), Expression.literal("value1")),
+                    Expression.neq(Expression.get(Expression.literal("key2")), Expression.literal("value2")),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -294,10 +305,12 @@ class ExpressionTest : BaseTest() {
         val expectedCaseTwoGet = arrayOf<Any>("get", "key2")
         val expectedCaseTwo = arrayOf<Any>("!=", expectedCaseTwoGet, "value2")
         val expected = arrayOf<Any>("case", expectedCaseOne, expectedCaseTwo)
-        val actual = Expression.switchCase(
-            Expression.eq(Expression.get("key1"), Expression.literal("value1")),
-            Expression.neq(Expression.get("key2"), Expression.literal("value2"))
-        ).toArray()
+        val actual =
+            Expression
+                .switchCase(
+                    Expression.eq(Expression.get("key1"), Expression.literal("value1")),
+                    Expression.neq(Expression.get("key2"), Expression.literal("value2")),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -308,29 +321,36 @@ class ExpressionTest : BaseTest() {
         val labels = arrayOf("a", "b", "c")
         val outputs = arrayOf("1", "2", "3")
         val defaultOutput = "0"
-        val expected = arrayOf<Any>(
-            "match", input,
-            labels[0], outputs[0],
-            labels[1], outputs[1],
-            labels[2], outputs[2],
-            defaultOutput
-        )
-        val actual = Expression.match(
-            Expression.literal(input),
-            Expression.literal(labels[0]),
-            Expression.literal(
-                outputs[0]
-            ),
-            Expression.literal(labels[1]),
-            Expression.literal(
-                outputs[1]
-            ),
-            Expression.literal(labels[2]),
-            Expression.literal(
-                outputs[2]
-            ),
-            Expression.literal(defaultOutput)
-        ).toArray()
+        val expected =
+            arrayOf<Any>(
+                "match",
+                input,
+                labels[0],
+                outputs[0],
+                labels[1],
+                outputs[1],
+                labels[2],
+                outputs[2],
+                defaultOutput,
+            )
+        val actual =
+            Expression
+                .match(
+                    Expression.literal(input),
+                    Expression.literal(labels[0]),
+                    Expression.literal(
+                        outputs[0],
+                    ),
+                    Expression.literal(labels[1]),
+                    Expression.literal(
+                        outputs[1],
+                    ),
+                    Expression.literal(labels[2]),
+                    Expression.literal(
+                        outputs[2],
+                    ),
+                    Expression.literal(defaultOutput),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -341,21 +361,27 @@ class ExpressionTest : BaseTest() {
         val labels = arrayOf("a", "b", "c")
         val outputs = arrayOf("1", "2", "3")
         val defaultOutput = "0"
-        val expected = arrayOf<Any>(
-            "match", input,
-            labels[0], outputs[0],
-            labels[1], outputs[1],
-            labels[2], outputs[2],
-            defaultOutput
-        )
-        val actual = Expression.match(
-            Expression.literal(input),
-            Expression.literal(defaultOutput),
-            Expression.stop(labels[0], outputs[0]),
-            Expression.stop(labels[1], outputs[1]),
-            Expression.stop(labels[2], outputs[2])
-        )
-            .toArray()
+        val expected =
+            arrayOf<Any>(
+                "match",
+                input,
+                labels[0],
+                outputs[0],
+                labels[1],
+                outputs[1],
+                labels[2],
+                outputs[2],
+                defaultOutput,
+            )
+        val actual =
+            Expression
+                .match(
+                    Expression.literal(input),
+                    Expression.literal(defaultOutput),
+                    Expression.stop(labels[0], outputs[0]),
+                    Expression.stop(labels[1], outputs[1]),
+                    Expression.stop(labels[2], outputs[2]),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -365,10 +391,12 @@ class ExpressionTest : BaseTest() {
         val expectedGetOne = arrayOf<Any>("get", "invalidKey")
         val expectedGetTwo = arrayOf<Any>("get", "validKey")
         val expected = arrayOf<Any>("coalesce", expectedGetOne, expectedGetTwo)
-        val actual = Expression.coalesce(
-            Expression.get(Expression.literal("invalidKey")),
-            Expression.get(Expression.literal("validKey"))
-        ).toArray()
+        val actual =
+            Expression
+                .coalesce(
+                    Expression.get(Expression.literal("invalidKey")),
+                    Expression.get(Expression.literal("validKey")),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -378,10 +406,12 @@ class ExpressionTest : BaseTest() {
         val expectedGetOne = arrayOf<Any>("get", "invalidKey")
         val expectedGetTwo = arrayOf<Any>("get", "validKey")
         val expected = arrayOf<Any>("coalesce", expectedGetOne, expectedGetTwo)
-        val actual = Expression.coalesce(
-            Expression.get("invalidKey"),
-            Expression.get("validKey")
-        ).toArray()
+        val actual =
+            Expression
+                .coalesce(
+                    Expression.get("invalidKey"),
+                    Expression.get("validKey"),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -430,7 +460,8 @@ class ExpressionTest : BaseTest() {
     fun testAt() {
         val expected = arrayOf<Any>("at", 3f, arrayOf<Any>("literal", arrayOf<Any>("one", "two")))
         val actual =
-            Expression.at(Expression.literal(3), Expression.literal(arrayOf<Any>("one", "two")))
+            Expression
+                .at(Expression.literal(3), Expression.literal(arrayOf<Any>("one", "two")))
                 .toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
@@ -447,15 +478,16 @@ class ExpressionTest : BaseTest() {
     @Test
     @Throws(Exception::class)
     fun testWithIn() {
-        val lngLats = listOf(
-            Arrays.asList(
-                Point.fromLngLat(0.0, 0.0),
-                Point.fromLngLat(0.0, 5.0),
-                Point.fromLngLat(5.0, 5.0),
-                Point.fromLngLat(5.0, 0.0),
-                Point.fromLngLat(0.0, 0.0)
+        val lngLats =
+            listOf(
+                Arrays.asList(
+                    Point.fromLngLat(0.0, 0.0),
+                    Point.fromLngLat(0.0, 5.0),
+                    Point.fromLngLat(5.0, 5.0),
+                    Point.fromLngLat(5.0, 0.0),
+                    Point.fromLngLat(0.0, 0.0),
+                ),
             )
-        )
         val polygon = Polygon.fromLngLats(lngLats)
         val map = HashMap<String, String>()
         map["type"] = "Polygon"
@@ -470,18 +502,19 @@ class ExpressionTest : BaseTest() {
     fun testIndexOf() {
         val expected = arrayOf<Any>("index-of", 2f, arrayOf<Any>("literal", arrayOf<Any>(1f, 2f, 3f)))
         val actual =
-            Expression.indexOf(Expression.literal(2f), Expression.literal(arrayOf<Any>(1f, 2f, 3f)))
+            Expression
+                .indexOf(Expression.literal(2f), Expression.literal(arrayOf<Any>(1f, 2f, 3f)))
                 .toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
-
 
     @Test
     @Throws(Exception::class)
     fun testIndexOfWithFromIndex() {
         val expected = arrayOf<Any>("index-of", 2f, arrayOf<Any>("literal", arrayOf<Any>(1f, 2f, 3f)), 1f)
         val actual =
-            Expression.indexOf(Expression.literal(2f), Expression.literal(arrayOf<Any>(1f, 2f, 3f)), Expression.literal(1f))
+            Expression
+                .indexOf(Expression.literal(2f), Expression.literal(arrayOf<Any>(1f, 2f, 3f)), Expression.literal(1f))
                 .toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
@@ -491,7 +524,8 @@ class ExpressionTest : BaseTest() {
     fun testSlice() {
         val expected = arrayOf<Any>("slice", arrayOf<Any>("literal", arrayOf<Any>(1f, 2f, 3f)), 1f)
         val actual =
-            Expression.slice(Expression.literal(arrayOf<Any>(1f, 2f, 3f)), Expression.literal(1f))
+            Expression
+                .slice(Expression.literal(arrayOf<Any>(1f, 2f, 3f)), Expression.literal(1f))
                 .toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
@@ -501,7 +535,8 @@ class ExpressionTest : BaseTest() {
     fun testSliceWithToIndex() {
         val expected = arrayOf<Any>("slice", arrayOf<Any>("literal", arrayOf<Any>(1f, 2f, 3f)), 1f, 3f)
         val actual =
-            Expression.slice(Expression.literal(arrayOf<Any>(1f, 2f, 3f)), Expression.literal(1f), Expression.literal(3f))
+            Expression
+                .slice(Expression.literal(arrayOf<Any>(1f, 2f, 3f)), Expression.literal(1f), Expression.literal(3f))
                 .toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
@@ -511,7 +546,8 @@ class ExpressionTest : BaseTest() {
     fun testInNumber() {
         val expected = arrayOf<Any>("in", 1f, arrayOf<Any>("literal", arrayOf<Any>(1f, 2f)))
         val actual =
-            Expression.`in`(Expression.literal(1f), Expression.literal(arrayOf<Any>(1f, 2f)))
+            Expression
+                .`in`(Expression.literal(1f), Expression.literal(arrayOf<Any>(1f, 2f)))
                 .toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
@@ -532,10 +568,12 @@ class ExpressionTest : BaseTest() {
     fun testInArray() {
         val expected =
             arrayOf<Any>("in", "one", arrayOf<Any>("literal", arrayOf<Any>("one", "two")))
-        val actual = Expression.`in`(
-            Expression.literal("one"),
-            Expression.literal(arrayOf<Any>("one", "two"))
-        ).toArray()
+        val actual =
+            Expression
+                .`in`(
+                    Expression.literal("one"),
+                    Expression.literal(arrayOf<Any>("one", "two")),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -624,7 +662,8 @@ class ExpressionTest : BaseTest() {
     fun testHasExpression() {
         val expected = arrayOf<Any>("has", arrayOf<Any>("get", "key"), arrayOf<Any>("properties"))
         val actual =
-            Expression.has(Expression.get(Expression.literal("key")), Expression.properties())
+            Expression
+                .has(Expression.get(Expression.literal("key")), Expression.properties())
                 .toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
@@ -755,7 +794,8 @@ class ExpressionTest : BaseTest() {
         val nestedGet: Any = arrayOf<Any>("get", "key")
         val expected = arrayOf("/", 2f, nestedGet)
         val actual =
-            Expression.division(Expression.literal(2), Expression.get(Expression.literal("key")))
+            Expression
+                .division(Expression.literal(2), Expression.get(Expression.literal("key")))
                 .toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
@@ -956,12 +996,14 @@ class ExpressionTest : BaseTest() {
     @Throws(Exception::class)
     fun testMin() {
         val expected = arrayOf<Any>("min", 0f, 1f, 2f, 3f)
-        val actual = Expression.min(
-            Expression.literal(0),
-            Expression.literal(1),
-            Expression.literal(2),
-            Expression.literal(3)
-        ).toArray()
+        val actual =
+            Expression
+                .min(
+                    Expression.literal(0),
+                    Expression.literal(1),
+                    Expression.literal(2),
+                    Expression.literal(3),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -977,12 +1019,14 @@ class ExpressionTest : BaseTest() {
     @Throws(Exception::class)
     fun testMax() {
         val expected = arrayOf<Any>("max", 0f, 1f, 2f, 3f)
-        val actual = Expression.max(
-            Expression.literal(0),
-            Expression.literal(1),
-            Expression.literal(2),
-            Expression.literal(3)
-        ).toArray()
+        val actual =
+            Expression
+                .max(
+                    Expression.literal(0),
+                    Expression.literal(1),
+                    Expression.literal(2),
+                    Expression.literal(3),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1195,14 +1239,16 @@ class ExpressionTest : BaseTest() {
     @Throws(Exception::class)
     fun testStepBasic() {
         val expected = arrayOf<Any>("step", 12f, 11f, 0f, 111f, 1f, 1111f)
-        val actual = Expression.step(
-            Expression.literal(12),
-            Expression.literal(11),
-            Expression.literal(0),
-            Expression.literal(111),
-            Expression.literal(1),
-            Expression.literal(1111)
-        ).toArray()
+        val actual =
+            Expression
+                .step(
+                    Expression.literal(12),
+                    Expression.literal(11),
+                    Expression.literal(0),
+                    Expression.literal(111),
+                    Expression.literal(1),
+                    Expression.literal(1111),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1211,12 +1257,14 @@ class ExpressionTest : BaseTest() {
     fun testStepBasicLiteral() {
         val expected =
             arrayOf<Any>("step", arrayOf<Any>("get", "line-width"), 11f, 0f, 111f, 1f, 1111f)
-        val actual = Expression.step(
-            Expression.get("line-width"),
-            Expression.literal(11),
-            Expression.stop(0, 111),
-            Expression.stop(1, 1111)
-        ).toArray()
+        val actual =
+            Expression
+                .step(
+                    Expression.get("line-width"),
+                    Expression.literal(11),
+                    Expression.stop(0, 111),
+                    Expression.stop(1, 1111),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1226,14 +1274,16 @@ class ExpressionTest : BaseTest() {
         val input = arrayOf<Any>("get", "key")
         val number = arrayOf<Any>("to-number", input)
         val expected = arrayOf<Any>("step", number, 11f, 0f, 111f, 1f, 1111f)
-        val actual = Expression.step(
-            Expression.toNumber(Expression.get(Expression.literal("key"))),
-            Expression.literal(11),
-            Expression.literal(0),
-            Expression.literal(111),
-            Expression.literal(1),
-            Expression.literal(1111)
-        ).toArray()
+        val actual =
+            Expression
+                .step(
+                    Expression.toNumber(Expression.get(Expression.literal("key"))),
+                    Expression.literal(11),
+                    Expression.literal(0),
+                    Expression.literal(111),
+                    Expression.literal(1),
+                    Expression.literal(1111),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1243,12 +1293,14 @@ class ExpressionTest : BaseTest() {
         val input = arrayOf<Any>("get", "key")
         val number = arrayOf<Any>("to-number", input)
         val expected = arrayOf<Any>("step", number, 11f, 0f, 111f, 1f, 1111f)
-        val actual = Expression.step(
-            Expression.toNumber(Expression.get("key")),
-            Expression.literal(11),
-            Expression.stop(0, 111),
-            Expression.stop(1, 1111)
-        ).toArray()
+        val actual =
+            Expression
+                .step(
+                    Expression.toNumber(Expression.get("key")),
+                    Expression.literal(11),
+                    Expression.stop(0, 111),
+                    Expression.stop(1, 1111),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1257,17 +1309,18 @@ class ExpressionTest : BaseTest() {
     fun testLinear() {
         val expected =
             arrayOf<Any>("interpolate", arrayOf<Any>("linear"), 12f, 0f, 1f, 1f, 2f, 2f, 3f)
-        val actual = Expression.interpolate(
-            Expression.linear(),
-            Expression.literal(12),
-            Expression.literal(0),
-            Expression.literal(1),
-            Expression.literal(1),
-            Expression.literal(2),
-            Expression.literal(2),
-            Expression.literal(3)
-        )
-            .toArray()
+        val actual =
+            Expression
+                .interpolate(
+                    Expression.linear(),
+                    Expression.literal(12),
+                    Expression.literal(0),
+                    Expression.literal(1),
+                    Expression.literal(1),
+                    Expression.literal(2),
+                    Expression.literal(2),
+                    Expression.literal(3),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1276,13 +1329,15 @@ class ExpressionTest : BaseTest() {
     fun testLinearStops() {
         val expected =
             arrayOf<Any>("interpolate", arrayOf<Any>("linear"), 12f, 0f, 1f, 1f, 2f, 2f, 3f)
-        val actual = Expression.interpolate(
-            Expression.linear(),
-            Expression.literal(12),
-            Expression.stop(0, 1),
-            Expression.stop(1, 2),
-            Expression.stop(2, 3)
-        ).toArray()
+        val actual =
+            Expression
+                .interpolate(
+                    Expression.linear(),
+                    Expression.literal(12),
+                    Expression.stop(0, 1),
+                    Expression.stop(1, 2),
+                    Expression.stop(2, 3),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1292,13 +1347,15 @@ class ExpressionTest : BaseTest() {
         val exponential = arrayOf<Any>("exponential", 12f)
         val get = arrayOf<Any>("get", "x")
         val expected = arrayOf<Any>("interpolate", exponential, get, 0f, 100f, 200f)
-        val actual = Expression.interpolate(
-            Expression.exponential(Expression.literal(12)),
-            Expression.get(Expression.literal("x")),
-            Expression.literal(0),
-            Expression.literal(100),
-            Expression.literal(200)
-        ).toArray()
+        val actual =
+            Expression
+                .interpolate(
+                    Expression.exponential(Expression.literal(12)),
+                    Expression.get(Expression.literal("x")),
+                    Expression.literal(0),
+                    Expression.literal(100),
+                    Expression.literal(200),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1308,12 +1365,14 @@ class ExpressionTest : BaseTest() {
         val exponential = arrayOf<Any>("exponential", 12f)
         val get = arrayOf<Any>("get", "x")
         val expected = arrayOf<Any>("interpolate", exponential, get, 0f, 100f, 100f, 200f)
-        val actual = Expression.interpolate(
-            Expression.exponential(12),
-            Expression.get("x"),
-            Expression.stop(0, 100),
-            Expression.stop(100, 200)
-        ).toArray()
+        val actual =
+            Expression
+                .interpolate(
+                    Expression.exponential(12),
+                    Expression.get("x"),
+                    Expression.stop(0, 100),
+                    Expression.stop(100, 200),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1324,12 +1383,14 @@ class ExpressionTest : BaseTest() {
         val exponential = arrayOf<Any>("exponential", getX)
         val getY = arrayOf<Any>("get", "y")
         val expected = arrayOf<Any>("interpolate", exponential, getY, 0f, 100f, 100f, 200f)
-        val actual = Expression.interpolate(
-            Expression.exponential(Expression.get("x")),
-            Expression.get("y"),
-            Expression.stop(0, 100),
-            Expression.stop(100, 200)
-        ).toArray()
+        val actual =
+            Expression
+                .interpolate(
+                    Expression.exponential(Expression.get("x")),
+                    Expression.get("y"),
+                    Expression.stop(0, 100),
+                    Expression.stop(100, 200),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1339,19 +1400,21 @@ class ExpressionTest : BaseTest() {
         val cubicBezier = arrayOf<Any>("cubic-bezier", 1f, 1f, 1f, 1f)
         val get = arrayOf<Any>("get", "x")
         val expected = arrayOf<Any>("interpolate", cubicBezier, get, 0f, 100f, 100f, 200f)
-        val actual = Expression.interpolate(
-            Expression.cubicBezier(
-                Expression.literal(1),
-                Expression.literal(1),
-                Expression.literal(1),
-                Expression.literal(1)
-            ),
-            Expression.get(Expression.literal("x")),
-            Expression.literal(0),
-            Expression.literal(100),
-            Expression.literal(100),
-            Expression.literal(200)
-        ).toArray()
+        val actual =
+            Expression
+                .interpolate(
+                    Expression.cubicBezier(
+                        Expression.literal(1),
+                        Expression.literal(1),
+                        Expression.literal(1),
+                        Expression.literal(1),
+                    ),
+                    Expression.get(Expression.literal("x")),
+                    Expression.literal(0),
+                    Expression.literal(100),
+                    Expression.literal(100),
+                    Expression.literal(200),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1361,12 +1424,14 @@ class ExpressionTest : BaseTest() {
         val cubicBezier = arrayOf<Any>("cubic-bezier", 1f, 1f, 1f, 1f)
         val get = arrayOf<Any>("get", "x")
         val expected = arrayOf<Any>("interpolate", cubicBezier, get, 0f, 100f, 100f, 200f)
-        val actual = Expression.interpolate(
-            Expression.cubicBezier(1, 1, 1, 1),
-            Expression.get("x"),
-            Expression.stop(0, 100),
-            Expression.stop(100, 200)
-        ).toArray()
+        val actual =
+            Expression
+                .interpolate(
+                    Expression.cubicBezier(1, 1, 1, 1),
+                    Expression.get("x"),
+                    Expression.stop(0, 100),
+                    Expression.stop(100, 200),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1378,18 +1443,20 @@ class ExpressionTest : BaseTest() {
         val getZ = arrayOf<Any>("get", "z")
         val cubicBezier = arrayOf<Any>("cubic-bezier", getZ, 1f, getY, 1f)
         val expected = arrayOf<Any>("interpolate", cubicBezier, getX, 0f, 100f, 200f)
-        val actual = Expression.interpolate(
-            Expression.cubicBezier(
-                Expression.get(Expression.literal("z")),
-                Expression.literal(1),
-                Expression.get(Expression.literal("y")),
-                Expression.literal(1)
-            ),
-            Expression.get(Expression.literal("x")),
-            Expression.literal(0),
-            Expression.literal(100),
-            Expression.literal(200)
-        ).toArray()
+        val actual =
+            Expression
+                .interpolate(
+                    Expression.cubicBezier(
+                        Expression.get(Expression.literal("z")),
+                        Expression.literal(1),
+                        Expression.get(Expression.literal("y")),
+                        Expression.literal(1),
+                    ),
+                    Expression.get(Expression.literal("x")),
+                    Expression.literal(0),
+                    Expression.literal(100),
+                    Expression.literal(200),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1401,17 +1468,19 @@ class ExpressionTest : BaseTest() {
         val getZ = arrayOf<Any>("get", "z")
         val cubicBezier = arrayOf<Any>("cubic-bezier", getZ, 1f, getY, 1f)
         val expected = arrayOf<Any>("interpolate", cubicBezier, getX, 0f, 100f, 100f, 200f)
-        val actual = Expression.interpolate(
-            Expression.cubicBezier(
-                Expression.get("z"),
-                Expression.literal(1),
-                Expression.get("y"),
-                Expression.literal(1)
-            ),
-            Expression.get("x"),
-            Expression.stop(0, 100),
-            Expression.stop(100, 200)
-        ).toArray()
+        val actual =
+            Expression
+                .interpolate(
+                    Expression.cubicBezier(
+                        Expression.get("z"),
+                        Expression.literal(1),
+                        Expression.get("y"),
+                        Expression.literal(1),
+                    ),
+                    Expression.get("x"),
+                    Expression.stop(0, 100),
+                    Expression.stop(100, 200),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1438,38 +1507,42 @@ class ExpressionTest : BaseTest() {
         val expected = (
             "[\"interpolate\", [\"cubic-bezier\", 1.0, 1.0, 1.0, 1.0]," +
                 " [\"get\", \"x\"], 0.0, 100.0, 100.0, 200.0]"
-            )
-        val actual = Expression.interpolate(
-            Expression.cubicBezier(
-                Expression.literal(1),
-                Expression.literal(1),
-                Expression.literal(1),
-                Expression.literal(1)
-            ),
-            Expression.get(Expression.literal("x")),
-            Expression.literal(0),
-            Expression.literal(100),
-            Expression.literal(100),
-            Expression.literal(200)
-        ).toString()
+        )
+        val actual =
+            Expression
+                .interpolate(
+                    Expression.cubicBezier(
+                        Expression.literal(1),
+                        Expression.literal(1),
+                        Expression.literal(1),
+                        Expression.literal(1),
+                    ),
+                    Expression.get(Expression.literal("x")),
+                    Expression.literal(0),
+                    Expression.literal(100),
+                    Expression.literal(100),
+                    Expression.literal(200),
+                ).toString()
         org.junit.Assert.assertEquals("toString should match", expected, actual)
     }
 
     @Test
     fun testSemiliteralRoundTrip() {
-        val expression = Expression.semiliteral(
-            Expression.literal("top"),
-            Expression.semiliteral(Expression.get("x"), Expression.literal(2)),
-            Expression.literal(arrayOf("get", "literal-key"))
-        )
-        val expected = arrayOf<Any>(
-            "semiliteral",
-            arrayOf<Any>(
-                "top",
-                arrayOf<Any>("semiliteral", arrayOf<Any>(arrayOf("get", "x"), 2f)),
-                arrayOf<Any>("literal", arrayOf("get", "literal-key"))
+        val expression =
+            Expression.semiliteral(
+                Expression.literal("top"),
+                Expression.semiliteral(Expression.get("x"), Expression.literal(2)),
+                Expression.literal(arrayOf("get", "literal-key")),
             )
-        )
+        val expected =
+            arrayOf<Any>(
+                "semiliteral",
+                arrayOf<Any>(
+                    "top",
+                    arrayOf<Any>("semiliteral", arrayOf<Any>(arrayOf("get", "x"), 2f)),
+                    arrayOf<Any>("literal", arrayOf("get", "literal-key")),
+                ),
+            )
         Assert.assertTrue(Arrays.deepEquals(expected, expression.toArray()))
         val parsed = Expression.raw(expression.toString())
         Assert.assertTrue(Arrays.deepEquals(expected, parsed.toArray()))
@@ -1481,7 +1554,7 @@ class ExpressionTest : BaseTest() {
     fun testSemiliteralEmptyAndPrimitives() {
         for (expression in arrayOf(
             Expression.semiliteral(),
-            Expression.semiliteral(Expression.literal("x"), Expression.literal(1), Expression.literal(true))
+            Expression.semiliteral(Expression.literal("x"), Expression.literal(1), Expression.literal(true)),
         )) {
             val parsed = Expression.raw(expression.toString())
             Assert.assertTrue(Arrays.deepEquals(expression.toArray(), parsed.toArray()))
@@ -1507,12 +1580,12 @@ class ExpressionTest : BaseTest() {
         for (json in arrayOf(
             "[\"semiliteral\", [[\"literal\", {\"x\": null}], null]]",
             "[\"semiliteral\", null]",
-            "[\"semiliteral\", {\"x\": [\"get\", \"x\"], \"nested\": {\"y\": null}}]"
+            "[\"semiliteral\", {\"x\": [\"get\", \"x\"], \"nested\": {\"y\": null}}]",
         )) {
             val expression = Expression.raw(json)
             Assert.assertEquals(
                 JsonParser.parseString(json),
-                JsonParser.parseString(expression.toString())
+                JsonParser.parseString(expression.toString()),
             )
         }
     }
@@ -1555,19 +1628,20 @@ class ExpressionTest : BaseTest() {
         val expected = arrayOf<Any>("rgba", 0f, 255f, 0f, 1f)
         Assert.assertTrue(
             "expression should match",
-            Arrays.deepEquals(expected, greenColor.toArray())
+            Arrays.deepEquals(expected, greenColor.toArray()),
         )
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun testThrowIllegalArgumentExceptionForPropertyValueLiteral() {
-        val expression = Expression.interpolate(
-            Expression.exponential(1f),
-            Expression.zoom(),
-            Expression.stop(17f, PropertyFactory.lineOpacity(1f)),
-            Expression.stop(16.5f, PropertyFactory.lineOpacity(0.5f)),
-            Expression.stop(16f, PropertyFactory.lineOpacity(0f))
-        )
+        val expression =
+            Expression.interpolate(
+                Expression.exponential(1f),
+                Expression.zoom(),
+                Expression.stop(17f, PropertyFactory.lineOpacity(1f)),
+                Expression.stop(16.5f, PropertyFactory.lineOpacity(0.5f)),
+                Expression.stop(16f, PropertyFactory.lineOpacity(0f)),
+            )
         expression.toArray()
     }
 
@@ -1634,9 +1708,9 @@ class ExpressionTest : BaseTest() {
         org.junit.Assert.assertEquals(
             "expressions should match",
             Expression.raw(
-                raw
+                raw,
             ),
-            expected
+            expected,
         )
         raw = "[\"get\", key]"
         expected = Expression.get("key")
@@ -1645,90 +1719,99 @@ class ExpressionTest : BaseTest() {
 
     @Test
     fun testRawAndroidColors() {
-        val expected = Expression.interpolate(
-            Expression.linear(),
-            Expression.zoom(),
-            Expression.stop(
-                12,
-                Expression.step(
-                    Expression.get("stroke-width"),
-                    Expression.color(Color.BLACK),
-                    Expression.stop(1f, Expression.color(Color.RED)),
-                    Expression.stop(2f, Expression.color(Color.WHITE)),
-                    Expression.stop(3f, Expression.color(Color.BLUE))
-                )
-            ),
-            Expression.stop(
-                15,
-                Expression.step(
-                    Expression.get("stroke-width"),
-                    Expression.color(Color.BLACK),
-                    Expression.stop(1f, Expression.color(Color.YELLOW)),
-                    Expression.stop(2f, Expression.color(Color.LTGRAY)),
-                    Expression.stop(3f, Expression.color(Color.CYAN))
-                )
-            ),
-            Expression.stop(
-                18,
-                Expression.step(
-                    Expression.get("stroke-width"),
-                    Expression.color(Color.BLACK),
-                    Expression.stop(1f, Expression.color(Color.WHITE)),
-                    Expression.stop(2f, Expression.color(Color.GRAY)),
-                    Expression.stop(3f, Expression.color(Color.GREEN))
-                )
+        val expected =
+            Expression.interpolate(
+                Expression.linear(),
+                Expression.zoom(),
+                Expression.stop(
+                    12,
+                    Expression.step(
+                        Expression.get("stroke-width"),
+                        Expression.color(Color.BLACK),
+                        Expression.stop(1f, Expression.color(Color.RED)),
+                        Expression.stop(2f, Expression.color(Color.WHITE)),
+                        Expression.stop(3f, Expression.color(Color.BLUE)),
+                    ),
+                ),
+                Expression.stop(
+                    15,
+                    Expression.step(
+                        Expression.get("stroke-width"),
+                        Expression.color(Color.BLACK),
+                        Expression.stop(1f, Expression.color(Color.YELLOW)),
+                        Expression.stop(2f, Expression.color(Color.LTGRAY)),
+                        Expression.stop(3f, Expression.color(Color.CYAN)),
+                    ),
+                ),
+                Expression.stop(
+                    18,
+                    Expression.step(
+                        Expression.get("stroke-width"),
+                        Expression.color(Color.BLACK),
+                        Expression.stop(1f, Expression.color(Color.WHITE)),
+                        Expression.stop(2f, Expression.color(Color.GRAY)),
+                        Expression.stop(3f, Expression.color(Color.GREEN)),
+                    ),
+                ),
             )
-        )
         org.junit.Assert.assertEquals(
             "expressions should match",
             expected,
-            Expression.raw(expected.toString())
+            Expression.raw(expected.toString()),
         )
     }
 
     @Test
     fun testRawRgbaColor() {
-        val expected = Expression.interpolate(
-            Expression.exponential(2f), Expression.zoom(),
-            Expression.literal(5f), Expression.literal("rgba(0, 0, 0, 1)"),
-            Expression.literal(10.5f), Expression.literal("rgb(255, 0, 0)"),
-            Expression.literal(15), Expression.color(Color.GREEN),
-            Expression.literal(20), Expression.literal(ColorUtils.colorToRgbaString(Color.BLUE))
-        )
+        val expected =
+            Expression.interpolate(
+                Expression.exponential(2f),
+                Expression.zoom(),
+                Expression.literal(5f),
+                Expression.literal("rgba(0, 0, 0, 1)"),
+                Expression.literal(10.5f),
+                Expression.literal("rgb(255, 0, 0)"),
+                Expression.literal(15),
+                Expression.color(Color.GREEN),
+                Expression.literal(20),
+                Expression.literal(ColorUtils.colorToRgbaString(Color.BLUE)),
+            )
         org.junit.Assert.assertEquals(
             "expressions should match",
             expected,
-            Expression.raw(expected.toString())
+            Expression.raw(expected.toString()),
         )
     }
 
     @Test
     fun testRawMatchStrings() {
-        val expected = Expression.match(
-            Expression.get("property"),
-            Expression.literal(""),
-            Expression.stop("layer1", "image1"),
-            Expression.stop("layer2", "image2")
-        )
+        val expected =
+            Expression.match(
+                Expression.get("property"),
+                Expression.literal(""),
+                Expression.stop("layer1", "image1"),
+                Expression.stop("layer2", "image2"),
+            )
         org.junit.Assert.assertEquals(
             "expressions should match",
             expected,
-            Expression.raw(expected.toString())
+            Expression.raw(expected.toString()),
         )
     }
 
     @Test
     fun testRawMatchNumbers() {
-        val expected = Expression.match(
-            Expression.get("property"),
-            Expression.literal(""),
-            Expression.stop("layer1", 2),
-            Expression.stop("layer2", 2.7)
-        )
+        val expected =
+            Expression.match(
+                Expression.get("property"),
+                Expression.literal(""),
+                Expression.stop("layer1", 2),
+                Expression.stop("layer2", 2.7),
+            )
         org.junit.Assert.assertEquals(
             "expressions should match",
             expected,
-            Expression.raw(expected.toString())
+            Expression.raw(expected.toString()),
         )
     }
 
@@ -1741,35 +1824,40 @@ class ExpressionTest : BaseTest() {
             "alpha value should match",
             0.254f,
             (result[4] as Float),
-            0.001f
+            0.001f,
         )
     }
 
     @Test
     fun testAlphaValueInStringConversion() {
-        val color = ColorUtils.colorToRgbaString(Color.parseColor("#41FF0000"))
-            .split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[3]
+        val color =
+            ColorUtils
+                .colorToRgbaString(Color.parseColor("#41FF0000"))
+                .split(" ".toRegex())
+                .dropLastWhile { it.isEmpty() }
+                .toTypedArray()[3]
         val alpha = color.substring(0, color.length - 1)
         org.junit.Assert.assertEquals(
             "alpha value should match",
             0.254f,
             java.lang.Float.valueOf(alpha),
-            0.001f
+            0.001f,
         )
     }
 
     @Test
     fun testCollator() {
-        val expected = arrayOf<Any>(
-            "collator",
-            object : HashMap<String?, Any?>() {
-                init {
-                    put("case-sensitive", true)
-                    put("diacritic-sensitive", true)
-                    put("locale", "it-IT")
-                }
-            }
-        )
+        val expected =
+            arrayOf<Any>(
+                "collator",
+                object : HashMap<String?, Any?>() {
+                    init {
+                        put("case-sensitive", true)
+                        put("diacritic-sensitive", true)
+                        put("locale", "it-IT")
+                    }
+                },
+            )
         val actual = Expression.collator(true, true, Locale.ITALY).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
@@ -1780,26 +1868,27 @@ class ExpressionTest : BaseTest() {
             (
                 "[\"collator\", {\"diacritic-sensitive\": true, \"case-sensitive\": true, \"locale\": " +
                     "\"it\"}]"
-                )
+            )
         val actual = Expression.collator(true, true, Locale.ITALIAN).toString()
         org.junit.Assert.assertEquals("expression should match", expected, actual)
     }
 
     @Test
     fun testResolvedLocale() {
-        val expected = arrayOf<Any>(
-            "resolved-locale",
+        val expected =
             arrayOf<Any>(
-                "collator",
-                object : HashMap<String?, Any?>() {
-                    init {
-                        put("case-sensitive", false)
-                        put("diacritic-sensitive", false)
-                        put("locale", "it")
-                    }
-                }
+                "resolved-locale",
+                arrayOf<Any>(
+                    "collator",
+                    object : HashMap<String?, Any?>() {
+                        init {
+                            put("case-sensitive", false)
+                            put("diacritic-sensitive", false)
+                            put("locale", "it")
+                        }
+                    },
+                ),
             )
-        )
         val actual =
             Expression.resolvedLocale(Expression.collator(false, false, Locale.ITALIAN)).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
@@ -1807,20 +1896,23 @@ class ExpressionTest : BaseTest() {
 
     @Test
     fun testRawCollator() {
-        val expected = arrayOf<Any>(
-            "collator",
-            object : HashMap<String?, Any?>() {
-                init {
-                    put("case-sensitive", true)
-                    put("diacritic-sensitive", true)
-                    put("locale", "it-IT")
-                }
-            }
-        )
-        val actual = Expression.raw(
-            "[\"collator\", {\"diacritic-sensitive\": true, \"case-sensitive\": true, \"locale\": " +
-                "\"it-IT\"}]"
-        ).toArray()
+        val expected =
+            arrayOf<Any>(
+                "collator",
+                object : HashMap<String?, Any?>() {
+                    init {
+                        put("case-sensitive", true)
+                        put("diacritic-sensitive", true)
+                        put("locale", "it-IT")
+                    }
+                },
+            )
+        val actual =
+            Expression
+                .raw(
+                    "[\"collator\", {\"diacritic-sensitive\": true, \"case-sensitive\": true, \"locale\": " +
+                        "\"it-IT\"}]",
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
@@ -1837,12 +1929,14 @@ class ExpressionTest : BaseTest() {
             (
                 "[\"collator\", {\"diacritic-sensitive\": [\"==\", 2.0, 1.0], \"case-sensitive\": false," +
                     " \"locale\": \"it\"}]"
-                )
-        val actual = Expression.collator(
-            Expression.literal(false),
-            Expression.eq(Expression.literal(2), Expression.literal(1)),
-            Expression.literal("it")
-        ).toString()
+            )
+        val actual =
+            Expression
+                .collator(
+                    Expression.literal(false),
+                    Expression.eq(Expression.literal(2), Expression.literal(1)),
+                    Expression.literal("it"),
+                ).toString()
         org.junit.Assert.assertEquals("expression should match", expected, actual)
     }
 
@@ -1869,80 +1963,86 @@ class ExpressionTest : BaseTest() {
 
     @Test
     fun testFormatSingleArgument() {
-        val expected = arrayOf<Any>(
-            "format",
-            "test",
-            object : TestableExpressionHashMap() {
-                init {
-                    put("font-scale", 1.5f)
-                    put("text-font", arrayOf<Any>("literal", arrayOf("awesome")))
-                    put("text-color", arrayOf<Any>("rgb", 255f, 0f, 0f))
-                }
-            }
-        )
-        val actual = Expression.format(
-            Expression.formatEntry(
-                Expression.literal("test"),
-                FormatOption.formatFontScale(Expression.literal(1.5)),
-                FormatOption.formatTextFont(Expression.literal(arrayOf("awesome"))),
-                FormatOption.formatTextColor(Expression.rgb(255, 0, 0))
+        val expected =
+            arrayOf<Any>(
+                "format",
+                "test",
+                object : TestableExpressionHashMap() {
+                    init {
+                        put("font-scale", 1.5f)
+                        put("text-font", arrayOf<Any>("literal", arrayOf("awesome")))
+                        put("text-color", arrayOf<Any>("rgb", 255f, 0f, 0f))
+                    }
+                },
             )
-        ).toArray()
+        val actual =
+            Expression
+                .format(
+                    Expression.formatEntry(
+                        Expression.literal("test"),
+                        FormatOption.formatFontScale(Expression.literal(1.5)),
+                        FormatOption.formatTextFont(Expression.literal(arrayOf("awesome"))),
+                        FormatOption.formatTextColor(Expression.rgb(255, 0, 0)),
+                    ),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 
     @Test
     fun testFormatMultipleArgument() {
-        val expected = arrayOf<Any>(
-            "format",
-            "test",
-            object : TestableExpressionHashMap() {
-                init {
-                    put("text-font", arrayOf<Any>("literal", arrayOf("awesome")))
-                }
-            },
-            "test2",
-            object : TestableExpressionHashMap() {
-                init {
-                    put("font-scale", 1.5f)
-                }
-            },
-            "test3",
-            object : TestableExpressionHashMap() {
-            },
-            "test4",
-            object : TestableExpressionHashMap() {
-                init {
-                    put("text-color", arrayOf<Any>("rgb", 255f, 0f, 0f))
-                }
-            },
-            "test5",
-            object : TestableExpressionHashMap() {
-                init {
-                    put("font-scale", 1.5f)
-                    put("text-font", arrayOf<Any>("literal", arrayOf("awesome")))
-                    put("text-color", arrayOf<Any>("rgb", 255f, 0f, 0f))
-                }
-            }
-        )
-        val actual = Expression.format(
-            Expression.formatEntry(
-                Expression.literal("test"),
-                FormatOption.formatTextFont(arrayOf("awesome"))
-            ),
-            Expression.formatEntry("test2", FormatOption.formatFontScale(1.5)),
-            Expression.formatEntry(Expression.literal("test3")),
-            Expression.formatEntry(
-                Expression.literal("test4"),
-                FormatOption.formatTextColor(Expression.rgb(255, 0, 0))
-            ),
-            Expression.formatEntry(
-                Expression.literal("test5"),
-                FormatOption.formatFontScale(Expression.literal(1.5)),
-                FormatOption.formatTextFont(arrayOf("awesome")),
-                FormatOption.formatTextColor(Expression.rgb(255, 0, 0))
+        val expected =
+            arrayOf<Any>(
+                "format",
+                "test",
+                object : TestableExpressionHashMap() {
+                    init {
+                        put("text-font", arrayOf<Any>("literal", arrayOf("awesome")))
+                    }
+                },
+                "test2",
+                object : TestableExpressionHashMap() {
+                    init {
+                        put("font-scale", 1.5f)
+                    }
+                },
+                "test3",
+                object : TestableExpressionHashMap() {
+                },
+                "test4",
+                object : TestableExpressionHashMap() {
+                    init {
+                        put("text-color", arrayOf<Any>("rgb", 255f, 0f, 0f))
+                    }
+                },
+                "test5",
+                object : TestableExpressionHashMap() {
+                    init {
+                        put("font-scale", 1.5f)
+                        put("text-font", arrayOf<Any>("literal", arrayOf("awesome")))
+                        put("text-color", arrayOf<Any>("rgb", 255f, 0f, 0f))
+                    }
+                },
             )
-        ).toArray()
+        val actual =
+            Expression
+                .format(
+                    Expression.formatEntry(
+                        Expression.literal("test"),
+                        FormatOption.formatTextFont(arrayOf("awesome")),
+                    ),
+                    Expression.formatEntry("test2", FormatOption.formatFontScale(1.5)),
+                    Expression.formatEntry(Expression.literal("test3")),
+                    Expression.formatEntry(
+                        Expression.literal("test4"),
+                        FormatOption.formatTextColor(Expression.rgb(255, 0, 0)),
+                    ),
+                    Expression.formatEntry(
+                        Expression.literal("test5"),
+                        FormatOption.formatFontScale(Expression.literal(1.5)),
+                        FormatOption.formatTextFont(arrayOf("awesome")),
+                        FormatOption.formatTextColor(Expression.rgb(255, 0, 0)),
+                    ),
+                ).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 

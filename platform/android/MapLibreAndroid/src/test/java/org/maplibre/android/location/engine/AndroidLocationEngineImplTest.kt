@@ -19,6 +19,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.argumentCaptor
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -29,15 +30,16 @@ class AndroidLocationEngineImplTest : BaseTest() {
     private val locationManagerMock: LocationManager? = null
     private var engine: LocationEngine? = null
     private var androidLocationEngineImpl: AndroidLocationEngineImpl? = null
+
     @Before
     fun setUp() {
         val context = mock(Context::class.java)
         `when`(context.getSystemService(Context.LOCATION_SERVICE)).thenReturn(locationManagerMock)
         androidLocationEngineImpl = AndroidLocationEngineImpl(context)
-        engine = LocationEngineProxy(androidLocationEngineImpl)
+        engine = LocationEngineProxy(androidLocationEngineImpl!!)
     }
 
-    //@get:Throws(InterruptedException::class)
+    // @get:Throws(InterruptedException::class)
     @Test
     fun getLastLocation() {
         val latch = CountDownLatch(1)
@@ -54,21 +56,30 @@ class AndroidLocationEngineImplTest : BaseTest() {
 
     @Test
     fun createListener() {
-        val callback: LocationEngineCallback<LocationEngineResult> = mock(LocationEngineCallback::class.java) as LocationEngineCallback<LocationEngineResult>
+        val callback: LocationEngineCallback<LocationEngineResult> =
+            mock(
+                LocationEngineCallback::class.java,
+            ) as LocationEngineCallback<LocationEngineResult>
         val locationListener = androidLocationEngineImpl!!.createListener(callback)
         val mockLocation = getMockLocation(LATITUDE, LONGITUDE)
         locationListener.onLocationChanged(mockLocation)
-        val argument = ArgumentCaptor.forClass(LocationEngineResult::class.java)
+        val argument = argumentCaptor<LocationEngineResult>()
         verify(callback).onSuccess(argument.capture())
-        val result = argument.value
+        val result = argument.firstValue
         assertThat(result.lastLocation).isSameAs(mockLocation)
     }
 
     @Test
     fun requestLocationUpdatesWithNoPower() {
-        val request = LocationEngineRequest.Builder(10)
-                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER).build()
-        val callback: LocationEngineCallback<LocationEngineResult> = mock(LocationEngineCallback::class.java) as LocationEngineCallback<LocationEngineResult>
+        val request =
+            LocationEngineRequest
+                .Builder(10)
+                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
+                .build()
+        val callback: LocationEngineCallback<LocationEngineResult> =
+            mock(
+                LocationEngineCallback::class.java,
+            ) as LocationEngineCallback<LocationEngineResult>
         val looper = mock(Looper::class.java)
         val criteria = mock(Criteria::class.java)
         engine!!.requestLocationUpdates(request, callback, looper)
@@ -77,9 +88,15 @@ class AndroidLocationEngineImplTest : BaseTest() {
 
     @Test
     fun requestLocationUpdatesBestProviderNull() {
-        val request = LocationEngineRequest.Builder(10)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
-        val callback: LocationEngineCallback<LocationEngineResult> = mock(LocationEngineCallback::class.java) as LocationEngineCallback<LocationEngineResult>
+        val request =
+            LocationEngineRequest
+                .Builder(10)
+                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                .build()
+        val callback: LocationEngineCallback<LocationEngineResult> =
+            mock(
+                LocationEngineCallback::class.java,
+            ) as LocationEngineCallback<LocationEngineResult>
         val looper = mock(Looper::class.java)
         `when`(locationManagerMock!!.getBestProvider(any(Criteria::class.java), anyBoolean())).thenReturn(null)
         engine!!.requestLocationUpdates(request, callback, looper)
@@ -88,8 +105,11 @@ class AndroidLocationEngineImplTest : BaseTest() {
 
     @Test
     fun requestLocationUpdatesWithPendingIntent() {
-        val request = LocationEngineRequest.Builder(10)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
+        val request =
+            LocationEngineRequest
+                .Builder(10)
+                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                .build()
         val pendingIntent = mock(PendingIntent::class.java)
         `when`(locationManagerMock!!.getBestProvider(any(Criteria::class.java), anyBoolean())).thenReturn(null)
         engine!!.requestLocationUpdates(request, pendingIntent)
@@ -98,7 +118,10 @@ class AndroidLocationEngineImplTest : BaseTest() {
 
     @Test
     fun removeLocationUpdatesForInvalidListener() {
-        val callback: LocationEngineCallback<LocationEngineResult> = mock(LocationEngineCallback::class.java) as LocationEngineCallback<LocationEngineResult>
+        val callback: LocationEngineCallback<LocationEngineResult> =
+            mock(
+                LocationEngineCallback::class.java,
+            ) as LocationEngineCallback<LocationEngineResult>
         engine!!.removeLocationUpdates(callback)
         verify(locationManagerMock, never())?.removeUpdates(ArgumentMatchers.any(LocationListener::class.java))
     }
@@ -112,9 +135,15 @@ class AndroidLocationEngineImplTest : BaseTest() {
 
     @Test
     fun removeLocationUpdatesForValidListener() {
-        val callback: LocationEngineCallback<LocationEngineResult> = mock(LocationEngineCallback::class.java) as LocationEngineCallback<LocationEngineResult>
-        val request = LocationEngineRequest.Builder(10)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
+        val callback: LocationEngineCallback<LocationEngineResult> =
+            mock(
+                LocationEngineCallback::class.java,
+            ) as LocationEngineCallback<LocationEngineResult>
+        val request =
+            LocationEngineRequest
+                .Builder(10)
+                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                .build()
         engine!!.requestLocationUpdates(request, callback, mock(Looper::class.java))
         engine!!.removeLocationUpdates(callback)
         verify(locationManagerMock, times(1))?.removeUpdates(ArgumentMatchers.any(LocationListener::class.java))
@@ -141,9 +170,11 @@ class AndroidLocationEngineImplTest : BaseTest() {
     companion object {
         private const val LATITUDE = 37.7749
         private const val LONGITUDE = 122.4194
+
         private fun getCallback(
-                resultRef: AtomicReference<LocationEngineResult>,
-                latch: CountDownLatch): LocationEngineCallback<LocationEngineResult> {
+            resultRef: AtomicReference<LocationEngineResult>,
+            latch: CountDownLatch,
+        ): LocationEngineCallback<LocationEngineResult> {
             // J2K: remove "?" from  LocationEngineResult?
             return object : LocationEngineCallback<LocationEngineResult> {
                 override fun onSuccess(result: LocationEngineResult) {
@@ -157,11 +188,12 @@ class AndroidLocationEngineImplTest : BaseTest() {
             }
         }
 
-        private fun getMockEngineResult(location: Location): LocationEngineResult {
-            return LocationEngineResult.create(location)
-        }
+        private fun getMockEngineResult(location: Location): LocationEngineResult = LocationEngineResult.create(location)
 
-        private fun getMockLocation(lat: Double, lon: Double): Location {
+        private fun getMockLocation(
+            lat: Double,
+            lon: Double,
+        ): Location {
             val location = mock(Location::class.java)
             location.latitude = lat
             location.longitude = lon
