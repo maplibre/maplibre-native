@@ -17,8 +17,8 @@ layout (std140) uniform FillEvaluatedPropsUBO {
 
 uniform sampler2D u_image;
 
-in vec2 v_pos_a;
-in vec2 v_pos_b;
+in highp vec2 v_pos_a;
+in highp vec2 v_pos_b;
 
 #pragma mapbox: define highp vec4 color
 #pragma mapbox: define lowp float opacity
