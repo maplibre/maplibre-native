@@ -100,6 +100,125 @@ void expectColor(const Color& actual, float r, float g, float b, float a) {
 
 } // namespace
 
+// Expected values come from colorjs.io, by the CSS Color 4 editors, premultiplied.
+TEST(ColorParse, Oklch) {
+    expectColor(Color::parse("oklch(70% 0.1 30)").value(), 0.8367361f, 0.5266265f, 0.4751982f, 1.0f);
+    expectColor(Color::parse("oklch(0.8 0.05 160 / 0.75)").value(), 0.4785853f, 0.588708f, 0.5258182f, 0.75f);
+    for (const auto* input : {"oklch(0.6 0.1 90)",
+                              "oklch(60% 25% 90deg)",
+                              "oklch(0.6 0.1 100grad)",
+                              "oklch(0.6 0.1 1.5707963267948966rad)",
+                              "oklch(0.6 0.1 0.25turn)",
+                              "oklch(0.6 0.1 450)",
+                              "oklch(0.6 0.1 -270deg)",
+                              "OKLCH(60% 0.1 90DEG)",
+                              "oklch(6e-1 1E-1 +9e1)",
+                              "oklch(+.6 .1 90 / 1)",
+                              " oklch(  0.6\t0.1\n90  /  100% ) "}) {
+        SCOPED_TRACE(input);
+        expectColor(Color::parse(input).value(), 0.5937185f, 0.4908275f, 0.1901161f, 1.0f);
+    }
+    expectColor(Color::parse("oklch(0.6 0.1 90 / 50%)").value(), 0.2968593f, 0.2454138f, 0.09505807f, 0.5f);
+}
+
+TEST(ColorParse, OklchClampsAndReadsNoneAsZero) {
+    const Color lightest = Color::parse("oklch(1 0.1 30)").value();
+    const Color darkest = Color::parse("oklch(0 0.1 30)").value();
+    expectColor(Color::parse("oklch(1.2 0.1 30)").value(), lightest.r, lightest.g, lightest.b, lightest.a);
+    expectColor(Color::parse("oklch(-0.1 0.1 30)").value(), darkest.r, darkest.g, darkest.b, darkest.a);
+    expectColor(Color::parse("oklch(0.6 -0.1 30)").value(), 0.5021107f, 0.5021107f, 0.5021107f, 1.0f);
+    expectColor(Color::parse("oklch(0.6 0.1 90 / 1.5)").value(), 0.5937185f, 0.4908275f, 0.1901161f, 1.0f);
+    expectColor(Color::parse("oklch(0.6 0.1 90 / -1)").value(), 0.0f, 0.0f, 0.0f, 0.0f);
+    const Color zeroLightness = Color::parse("oklch(0 0.1 90)").value();
+    expectColor(
+        Color::parse("oklch(none 0.1 90)").value(), zeroLightness.r, zeroLightness.g, zeroLightness.b, zeroLightness.a);
+    expectColor(Color::parse("oklch(0.6 none 90)").value(), 0.5021107f, 0.5021107f, 0.5021107f, 1.0f);
+    const Color zeroHue = Color::parse("oklch(0.6 0.1 0)").value();
+    expectColor(Color::parse("oklch(0.6 0.1 none)").value(), zeroHue.r, zeroHue.g, zeroHue.b, zeroHue.a);
+    expectColor(Color::parse("oklch(0.6 0.1 90 / none)").value(), 0.0f, 0.0f, 0.0f, 0.0f);
+}
+
+TEST(ColorParse, OklchWrapsAHugeHueAngleBeforeConvertingIt) {
+    const Color zeroHue = Color::parse("oklch(0.6 0.1 0)").value();
+    expectColor(Color::parse("oklch(0.6 0.1 1e306turn)").value(), zeroHue.r, zeroHue.g, zeroHue.b, zeroHue.a);
+    EXPECT_TRUE(Color::parse("oklch(0.6 0.1 1e307rad)"));
+}
+
+TEST(ColorParse, OklchOutsideSrgbIsClipped) {
+    expectColor(Color::parse("oklch(0.7 0.3 140)").value(), 0.0f, 0.7715854f, 0.0f, 1.0f);
+    expectColor(Color::parse("oklch(0.9 0.3 300)").value(), 1.0f, 0.6255093f, 1.0f, 1.0f);
+    expectColor(Color::parse("oklch(0.3 0.25 30)").value(), 0.5091695f, 0.0f, 0.0f, 1.0f);
+    // A huge chroma converts as chroma 1e6, which stays finite.
+    expectColor(Color::parse("oklch(0.6 1e110 90)").value(), 0.0f, 1.0f, 0.0f, 1.0f);
+}
+
+TEST(ColorParse, OklchInvalid) {
+    for (const auto* input : {"oklch(0.6, 0.1, 90)",
+                              "oklch(0.6 0.1 90, 0.5)",
+                              "oklch()",
+                              "oklch(0.6 0.1)",
+                              "oklch(0.6 0.1 90 0.5)",
+                              "oklch(0.6 0.1 90 /)",
+                              "oklch(0.6 0.1 90 / 0.5 / 0.5)",
+                              "oklch(0.6 0.1 90%)",
+                              "oklch(0.6 0.1 90 deg)",
+                              "oklch(0.6 0.1 90grads)",
+                              "oklch(0.6 0.1 nonedeg)",
+                              "oklch(0.6deg 0.1 90)",
+                              "oklch(0.6 0.1deg 90)",
+                              "oklch(1. 0.1 90)",
+                              "oklch(0.6 0.1 --90)",
+                              "oklch(0.6 0.1 9e)",
+                              "oklch(0.6 0.1 1e999)",
+                              "oklch (0.6 0.1 90)",
+                              "oklch(0.6 0.1 90",
+                              "oklch(0.6 0.1 90))"}) {
+        SCOPED_TRACE(input);
+        EXPECT_FALSE(Color::parse(input).has_value());
+    }
+}
+
+TEST(ColorInterpolate, Oklch) {
+    const Color blue = Color::blue();
+    const Color green = Color::parse("rgba(0,255,0,.6)").value();
+    expectColor(Color::interpolate(blue, green, 0.25, ColorSpace::OKLCH), 0.0f, 0.3866815f, 0.8861813f, 0.9f);
+    expectColor(Color::interpolate(blue, green, 0.5, ColorSpace::OKLCH), 0.0f, 0.5325832f, 0.6610553f, 0.8f);
+    expectColor(Color::interpolate(blue, green, 0.75, ColorSpace::OKLCH), 0.0f, 0.5941883f, 0.3981223f, 0.7f);
+    // The hue takes the short way round, across 0.
+    expectColor(Color::interpolate(Color::parse("oklch(0.6 0.15 350)").value(),
+                                   Color::parse("oklch(0.7 0.12 20)").value(),
+                                   0.5,
+                                   ColorSpace::OKLCH),
+                0.8222712f,
+                0.409868f,
+                0.5177325f,
+                1.0f);
+}
+
+TEST(ColorInterpolate, OklchGrayTakesTheOtherHue) {
+    const Color gray = Color::parse("#808080").value();
+    const Color blue = Color::parse("oklch(0.6 0.12 250)").value();
+    expectColor(Color::interpolate(gray, blue, 0.5, ColorSpace::OKLCH), 0.3955842f, 0.5149412f, 0.6398697f, 1.0f);
+    expectColor(Color::interpolate(blue, gray, 0.5, ColorSpace::OKLCH), 0.3955842f, 0.5149412f, 0.6398697f, 1.0f);
+}
+
+TEST(ColorInterpolate, OklchPremultipliesLightnessAndChroma) {
+    expectColor(Color::interpolate(Color::parse("oklch(0.7 0.1 30 / 0.2)").value(),
+                                   Color::parse("oklch(0.5 0.1 250)").value(),
+                                   0.5,
+                                   ColorSpace::OKLCH),
+                0.315826f,
+                0.2084958f,
+                0.3403197f,
+                0.6f);
+    expectColor(Color::interpolate(Color(), Color::parse("oklch(0.7 0.1 150)").value(), 0.5, ColorSpace::OKLCH),
+                0.2181294f,
+                0.345293f,
+                0.2453651f,
+                0.5f);
+    expectColor(Color::interpolate(Color(), Color(), 0.5, ColorSpace::OKLCH), 0.0f, 0.0f, 0.0f, 0.0f);
+}
+
 // Expected values come from GL JS's Color.interpolate (maplibre-gl-style-spec), premultiplied.
 TEST(ColorInterpolate, Lab) {
     const Color red = *Color::parse("rgba(255,0,0,0.5)");

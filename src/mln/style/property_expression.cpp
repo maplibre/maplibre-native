@@ -4,6 +4,7 @@
 #include <mln/util/convert.hpp>
 
 #include <mln/gfx/gpu_expression.hpp>
+#include <mln/style/expression/interpolate.hpp>
 
 namespace mln {
 namespace style {
@@ -11,8 +12,14 @@ namespace style {
 namespace {
 
 using namespace expression;
+bool interpolatesInRGB(const ZoomCurvePtr& zoomCurve) {
+    return !zoomCurve.is<const Interpolate*>() ||
+           zoomCurve.get<const Interpolate*>()->getColorSpace() == ColorSpace::RGB;
+}
+
 bool checkGPUCapable(const Expression& expression, const ZoomCurvePtr& zoomCurve) {
     return (expression.dependencies == Dependency::Zoom) && !zoomCurve.is<std::nullptr_t>() &&
+           interpolatesInRGB(zoomCurve) &&
            (expression.getType().is<type::NumberType>() || expression.getType().is<type::ColorType>());
 }
 
