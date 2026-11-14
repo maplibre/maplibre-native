@@ -16,6 +16,7 @@
 #include <mln/util/i18n.hpp>
 #include <mln/util/mapbox.hpp>
 #include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/tileset.hpp>
 
@@ -145,12 +146,10 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
     result->requiredResourceCount++;
     std::optional<Response> styleResponse = offlineDatabase.get(
         Resource::style(std::visit([](auto& reg) { return reg.styleURL; }, definition)));
-    if (!styleResponse) {
+    style::Parser parser;
+    if (!styleResponse || !styleResponse->data || parser.parse(*styleResponse->data)) {
         return *result;
     }
-
-    style::Parser parser;
-    parser.parse(*styleResponse->data);
 
     result->requiredResourceCountIsPrecise = true;
 
@@ -159,22 +158,26 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
         auto handleTiledSource = [&](const variant<std::string, Tileset>& urlOrTileset, const uint16_t tileSize) {
             if (urlOrTileset.is<Tileset>()) {
-                uint64_t tileSourceCount = tileCount(definition, type, tileSize, urlOrTileset.get<Tileset>().zoomRange);
-                result->requiredTileCount += tileSourceCount;
-                result->requiredResourceCount += tileSourceCount;
+                const auto& tileset = urlOrTileset.get<Tileset>();
+                if (!tileset.tiles.empty()) {
+                    uint64_t tileSourceCount = tileCount(definition, type, tileSize, tileset.zoomRange);
+                    result->requiredTileCount += tileSourceCount;
+                    result->requiredResourceCount += tileSourceCount;
+                }
             } else {
                 result->requiredResourceCount += 1;
                 const auto& url = urlOrTileset.get<std::string>();
                 std::optional<Response> sourceResponse = offlineDatabase.get(Resource::source(url));
-                if (sourceResponse) {
+                std::optional<Tileset> tileset;
+                if (sourceResponse && sourceResponse->data) {
                     style::conversion::Error error;
-                    std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse->data,
-                                                                                             error);
-                    if (tileset) {
-                        uint64_t tileSourceCount = tileCount(definition, type, tileSize, (*tileset).zoomRange);
-                        result->requiredTileCount += tileSourceCount;
-                        result->requiredResourceCount += tileSourceCount;
-                    }
+                    tileset = style::conversion::convertJSON<Tileset>(*sourceResponse->data, error);
+                }
+                // A download reports a TileJSON it can't use and leaves the count imprecise.
+                if (tileset && !tileset->tiles.empty()) {
+                    uint64_t tileSourceCount = tileCount(definition, type, tileSize, tileset->zoomRange);
+                    result->requiredTileCount += tileSourceCount;
+                    result->requiredResourceCount += tileSourceCount;
                 } else {
                     result->requiredResourceCountIsPrecise = false;
                 }
@@ -250,10 +253,19 @@ void OfflineDownload::activateDownload() {
     styleResource.setUsage(Resource::Usage::Offline);
 
     ensureResource(std::move(styleResource), [&](const Response& styleResponse) {
-        status.requiredResourceCountIsPrecise = true;
+        const std::string styleURL = std::visit([](auto& reg) { return reg.styleURL; }, definition);
+        if (!styleResponse.data) {
+            reportError("The style " + styleURL + " has no content");
+            return;
+        }
 
         style::Parser parser;
-        parser.parse(*styleResponse.data);
+        if (auto error = parser.parse(*styleResponse.data)) {
+            reportError("Couldn't parse the style " + styleURL + ": " + util::toString(error));
+            return;
+        }
+
+        status.requiredResourceCountIsPrecise = true;
 
         auto tileServerOptions = onlineFileSource.getResourceOptions().tileServerOptions();
         parser.glyphURL = util::mapbox::canonicalizeGlyphURL(tileServerOptions, parser.glyphURL);
@@ -277,19 +289,31 @@ void OfflineDownload::activateDownload() {
                     sourceResource.setUsage(Resource::Usage::Offline);
 
                     ensureResource(std::move(sourceResource), [=, this](const Response& sourceResponse) {
+                        if (!sourceResponse.data) {
+                            reportError("The TileJSON " + url + " has no content");
+                            return;
+                        }
+
                         style::conversion::Error error;
                         std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse.data,
                                                                                                  error);
-                        if (tileset) {
-                            auto resourceOptions = onlineFileSource.getResourceOptions();
-                            util::mapbox::canonicalizeTileset(
-                                resourceOptions.tileServerOptions(), *tileset, url, type, tileSize);
-                            queueTiles(type, tileSize, *tileset);
+                        if (!tileset) {
+                            reportError("Couldn't parse the TileJSON " + url + ": " + error.message);
+                            return;
+                        }
+                        if (tileset->tiles.empty()) {
+                            reportError("The TileJSON " + url + " has no tile URLs");
+                            return;
+                        }
 
-                            requiredSourceURLs.erase(url);
-                            if (requiredSourceURLs.empty()) {
-                                status.requiredResourceCountIsPrecise = true;
-                            }
+                        auto resourceOptions = onlineFileSource.getResourceOptions();
+                        util::mapbox::canonicalizeTileset(
+                            resourceOptions.tileServerOptions(), *tileset, url, type, tileSize);
+                        queueTiles(type, tileSize, *tileset);
+
+                        requiredSourceURLs.erase(url);
+                        if (requiredSourceURLs.empty()) {
+                            status.requiredResourceCountIsPrecise = true;
                         }
                     });
                 }
@@ -451,6 +475,9 @@ void OfflineDownload::queueResource(Resource&& resource) {
 }
 
 void OfflineDownload::queueTiles(SourceType type, uint16_t tileSize, const Tileset& tileset) {
+    // A source without tile URLs has no tiles to download.
+    if (tileset.tiles.empty()) return;
+
     tileCover(definition, type, tileSize, tileset.zoomRange, [&](const auto& tile) {
         status.requiredResourceCount++;
         status.requiredTileCount++;
@@ -555,6 +582,10 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
             continueDownload();
         });
     });
+}
+
+void OfflineDownload::reportError(const std::string& message) {
+    observer->responseError(Response::Error(Response::Error::Reason::Other, message));
 }
 
 void OfflineDownload::onMapboxTileCountLimitExceeded() {
