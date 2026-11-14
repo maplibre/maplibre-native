@@ -153,7 +153,11 @@ mediump vec4 pattern_to = u_pattern_to;
     v_lighting *= u_opacity;
 }
 )";
-    static constexpr const char* fragment = R"(in vec2 v_pos_a;
+    static constexpr const char* fragment = R"(#ifdef GL_ES
+precision highp float;
+#endif
+
+in vec2 v_pos_a;
 in vec2 v_pos_b;
 in vec4 v_lighting;
 

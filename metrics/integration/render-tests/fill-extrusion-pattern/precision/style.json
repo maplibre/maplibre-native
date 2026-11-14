@@ -1,0 +1,64 @@
+{
+  "version": 8,
+  "metadata": {
+    "description": "Tests that the float precision is enough to overzoom the fill-extrusion pattern: z14 data shown at z22. The extrusion has no height, so the pattern is drawn 1:1 to pixels as in the fill-pattern tests.",
+    "test": {
+      "width": 128,
+      "height": 128
+    }
+  },
+  "zoom": 22,
+  "center": [
+    0.0065918,
+    -0.0065918
+  ],
+  "sources": {
+    "building": {
+      "type": "geojson",
+      "maxzoom": 14,
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -0.0373535,
+                -0.0505371
+              ],
+              [
+                -0.0373535,
+                0.0373535
+              ],
+              [
+                0.0505371,
+                0.0373535
+              ],
+              [
+                0.0505371,
+                -0.0505371
+              ],
+              [
+                -0.0373535,
+                -0.0505371
+              ]
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "sprite": "local://sprites/emerald",
+  "layers": [
+    {
+      "id": "building",
+      "type": "fill-extrusion",
+      "source": "building",
+      "paint": {
+        "fill-extrusion-height": 0,
+        "fill-extrusion-pattern": "generic_icon"
+      }
+    }
+  ]
+}

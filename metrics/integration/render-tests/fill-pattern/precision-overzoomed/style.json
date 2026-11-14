@@ -1,0 +1,134 @@
+{
+  "version": 8,
+  "metadata": {
+    "description": "Tests that overzoomed patterns only sample their own image in the atlas. As in a landcover style, z14 data is shown at z22, with a different pattern on each side of a shared edge.",
+    "test": {
+      "width": 256,
+      "height": 256
+    }
+  },
+  "zoom": 22,
+  "center": [
+    0.0065918,
+    -0.0065918
+  ],
+  "sources": {
+    "landcover": {
+      "type": "geojson",
+      "maxzoom": 14,
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "subclass": "forest_n"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -0.0373535,
+                    -0.0505371
+                  ],
+                  [
+                    -0.0373535,
+                    0.0373535
+                  ],
+                  [
+                    0.0065918,
+                    0.0373535
+                  ],
+                  [
+                    0.0065918,
+                    -0.0505371
+                  ],
+                  [
+                    -0.0373535,
+                    -0.0505371
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "subclass": "forest_b"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    0.0065918,
+                    -0.0505371
+                  ],
+                  [
+                    0.0065918,
+                    0.0373535
+                  ],
+                  [
+                    0.0505371,
+                    0.0373535
+                  ],
+                  [
+                    0.0505371,
+                    -0.0505371
+                  ],
+                  [
+                    0.0065918,
+                    -0.0505371
+                  ]
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "sprite": "local://sprites/emerald",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#e1ecd4"
+      }
+    },
+    {
+      "id": "forest_n",
+      "type": "fill",
+      "source": "landcover",
+      "filter": [
+        "==",
+        [
+          "get",
+          "subclass"
+        ],
+        "forest_n"
+      ],
+      "paint": {
+        "fill-pattern": "park_icon"
+      }
+    },
+    {
+      "id": "forest_b",
+      "type": "fill",
+      "source": "landcover",
+      "filter": [
+        "==",
+        [
+          "get",
+          "subclass"
+        ],
+        "forest_b"
+      ],
+      "paint": {
+        "fill-pattern": "golf_icon"
+      }
+    }
+  ]
+}
