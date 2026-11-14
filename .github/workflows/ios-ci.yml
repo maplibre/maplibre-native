@@ -300,11 +300,25 @@ jobs:
           sccache --start-server
           sccache --zero-stats
 
+      - name: Restore Dawn sources
+        id: dawn-sources
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: vendor/dawn
+          key: dawn-sources-${{ hashFiles('vendor/dawn.cmake') }}
+
       - name: Configure build with CMake
         run: |
           cmake --preset ios-webgpu-dawn \
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+
+      - name: Save Dawn sources
+        if: github.event_name != 'pull_request' && steps.dawn-sources.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: vendor/dawn
+          key: ${{ steps.dawn-sources.outputs.cache-primary-key }}
 
       - name: Build mbgl-core and iOS SDK
         continue-on-error: true
