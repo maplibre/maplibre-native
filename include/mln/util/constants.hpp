@@ -29,6 +29,13 @@ constexpr int32_t EXTENT = 8192;
 constexpr double M2PI = M_PI * 2;
 constexpr double EARTH_RADIUS_M = 6378137;
 constexpr double LATITUDE_MAX = 85.051128779806604;
+// Whether this build has the globe projection (`MLN_WITH_GLOBE`). Without it a style's globe draws Mercator and the
+// globe code is never reached, so the linker can drop it.
+#if MLN_WITH_GLOBE
+constexpr bool GLOBE_ENABLED = true;
+#else
+constexpr bool GLOBE_ENABLED = false;
+#endif
 constexpr double LONGITUDE_MAX = 180;
 constexpr double DEGREES_MAX = 360;
 constexpr double PITCH_MIN = 0.0;

@@ -41,6 +41,18 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+bool_flag(
+    name = "globe",
+    build_setting_default = True,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "globe_enabled",
+    flag_values = {":globe": "true"},
+    visibility = ["//visibility:public"],
+)
+
 # Plugins use the C ABI through callbacks and do not link the renderer.
 cc_library(
     name = "mln-plugin-api",
@@ -134,6 +146,9 @@ cc_library(
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
         ":plugins_enabled": ["MLN_WITH_PLUGINS=1"],
+        "//conditions:default": [],
+    }) + select({
+        ":globe_enabled": ["MLN_WITH_GLOBE=1"],
         "//conditions:default": [],
     }) + select({
         ":drawable_renderer": [

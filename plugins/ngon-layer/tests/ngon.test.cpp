@@ -1,5 +1,8 @@
 #include "ngon_layer.hpp"
+#include <array>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <string_view>
@@ -26,6 +29,15 @@ mln_plugin_property_value_v1 number(const char* name, float value) {
     p.value.struct_size = sizeof(p.value);
     p.value.type = MLN_PLUGIN_VALUE_FLOAT;
     p.value.data.float_value = value;
+    return p;
+}
+mln_plugin_property_value_v1 text(const char* name, const char* value) {
+    mln_plugin_property_value_v1 p{};
+    p.struct_size = sizeof(p);
+    p.name = {name, std::string_view(name).size()};
+    p.value.struct_size = sizeof(p.value);
+    p.value.type = MLN_PLUGIN_VALUE_STRING;
+    p.value.data.string_value = {value, std::string_view(value).size()};
     return p;
 }
 } // namespace
@@ -105,5 +117,47 @@ int main() {
     CHECK(!hit(100, 85));
     properties[0] = number("ngon-radius", 0);
     CHECK(!hit(100, 100));
+
+    // A host older than the projection fields passes the shorter contexts: hit test and draw on Mercator.
+    properties = {number("ngon-radius", 20), number("ngon-corners", 3), number("ngon-rotate", 0)};
+    query.struct_size = offsetof(mln_plugin_query_context_v1, projection_transition);
+    CHECK(hit(100, 85));
+    CHECK(!hit(100, 115));
+    mln_plugin_uniform_context_v1 uniform{};
+    std::array<uint8_t, 352> block{};
+    uniform.struct_size = offsetof(mln_plugin_uniform_context_v1, projection_transition);
+    CHECK(layer.update_uniform_block(&uniform, 0, block.data(), block.size()) == MLN_PLUGIN_STATUS_OK);
+    uniform.struct_size -= 1;
+    CHECK(layer.update_uniform_block(&uniform, 0, block.data(), block.size()) == MLN_PLUGIN_STATUS_INVALID_ARGUMENT);
+
+    // The unit sphere seen straight on, its near half (z > 0) in front of the horizon; the Mercator side puts every
+    // tile point at one place far from the sphere's.
+    mln_plugin_query_context_v1 globe{};
+    globe.struct_size = sizeof(globe);
+    globe.pixels_to_tile_units = globe.camera_to_center_distance = 1;
+    globe.viewport_width = globe.viewport_height = 256;
+    globe.tile_matrix[12] = globe.tile_matrix[13] = 0.9;
+    globe.tile_matrix[15] = 1;
+    globe.projection_matrix[0] = globe.projection_matrix[5] = globe.projection_matrix[15] = 1;
+    globe.clipping_plane[2] = 1;
+    globe.tile_mercator_coords[2] = globe.tile_mercator_coords[3] = 1.0 / 8192;
+    globe.pixels_to_sphere_radians = 1.0 / 256;
+    globe.projection_transition = 1;
+    const mln_plugin_tile_point_v1 front{4096, 4096}; // Null island, facing the camera.
+    const mln_plugin_tile_point_v1 back{7964, 4096};  // 170 degrees east, behind the horizon.
+    const auto onGlobe = [&](const mln_plugin_tile_point_v1& place,
+                             const std::vector<mln_plugin_property_value_v1>& values) {
+        feature.points = &place;
+        feature.point_count = 1;
+        return layer.query_feature(&feature, &place, 1, &globe, values.data(), values.size());
+    };
+    const std::vector viewportAligned = {number("ngon-radius", 20)};
+    const std::vector mapAligned = {number("ngon-radius", 20), text("ngon-pitch-alignment", "map")};
+    CHECK(onGlobe(front, viewportAligned) && onGlobe(front, mapAligned));
+    CHECK(!onGlobe(back, viewportAligned) && !onGlobe(back, mapAligned));
+    // Half way to Mercator the n-gon is drawn between the two places, 81 pixels from the query, which the host found
+    // on the sphere itself.
+    globe.projection_transition = 0.5;
+    CHECK(!onGlobe(front, viewportAligned));
     std::cout << "n-gon descriptor, ownership, segmentation and query tests passed\n";
 }

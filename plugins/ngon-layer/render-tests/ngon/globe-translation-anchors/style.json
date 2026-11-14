@@ -1,0 +1,196 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 256,
+      "height": 256,
+      "description": "globe-translation-anchors"
+    }
+  },
+  "center": [
+    0,
+    15
+  ],
+  "zoom": 0.3,
+  "pitch": 40,
+  "bearing": 25,
+  "projection": {
+    "type": "globe"
+  },
+  "sources": {
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": 1,
+            "properties": {
+              "offset": [
+                12,
+                -8
+              ],
+              "anchor": "map"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -50,
+                10
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 2,
+            "properties": {
+              "offset": [
+                12,
+                -8
+              ],
+              "anchor": "viewport"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 3,
+            "properties": {
+              "offset": [
+                12,
+                -8
+              ],
+              "anchor": "map"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                50,
+                10
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 4,
+            "properties": {
+              "offset": [
+                12,
+                -8
+              ],
+              "anchor": "viewport"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -35,
+                50
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 5,
+            "properties": {
+              "offset": [
+                12,
+                -8
+              ],
+              "anchor": "map"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                35,
+                50
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 6,
+            "properties": {
+              "offset": [
+                12,
+                -8
+              ],
+              "anchor": "viewport"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                -35
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 7,
+            "properties": {
+              "offset": [
+                12,
+                -8
+              ],
+              "anchor": "map"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                150,
+                0
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#eef2f7"
+      }
+    },
+    {
+      "id": "reference",
+      "type": "circle",
+      "source": "points",
+      "paint": {
+        "circle-radius": 12,
+        "circle-color": "rgba(0,0,0,0)",
+        "circle-stroke-width": 1.5,
+        "circle-stroke-color": "#172033",
+        "circle-pitch-alignment": "map"
+      }
+    },
+    {
+      "id": "points",
+      "type": "ngon",
+      "source": "points",
+      "paint": {
+        "ngon-radius": 12,
+        "ngon-corners": 3,
+        "ngon-color": "#e11d48",
+        "ngon-pitch-alignment": "map",
+        "ngon-translate": [
+          "get",
+          "offset"
+        ],
+        "ngon-translate-anchor": [
+          "get",
+          "anchor"
+        ]
+      }
+    }
+  ]
+}

@@ -4,6 +4,11 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Add nullable `MLNSky` runtime styling with zoom expressions, transitions, and removal.
+- feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
+- feat(ios): with `rotateEnabled`, drags and zooms on the globe turn the bearing with the planet, so the place under the finger stays under it over the poles and nothing spins about them ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
+- feat(ios): `-[MLNMapView isCoordinateOccluded:]` tells whether the globe hides a coordinate, for views placed over the map ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
+- Call offline-pack invalidation completion after the database operation finishes and propagate its errors.
 - Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.

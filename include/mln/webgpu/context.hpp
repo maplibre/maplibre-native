@@ -1,6 +1,8 @@
 #pragma once
 
 #include <mln/gfx/context.hpp>
+#include <mln/gfx/globe_clip_mask.hpp>
+#include <mln/shaders/layer_ubo.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/webgpu/renderer_backend.hpp>
 #include <mln/webgpu/buffer_resource.hpp>
@@ -8,6 +10,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <tuple>
 #include <vector>
 
 namespace mln {
@@ -55,7 +58,9 @@ public:
                                               bool persistent = false,
                                               bool ssbo = false) override;
     gfx::UniqueUniformBufferArray createLayerUniformBufferArray() override;
-    gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
+    gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&,
+                                               const std::string& name,
+                                               gfx::ProjectionVariant) override;
     TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
     LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
     gfx::Texture2DPtr createTexture2D() override;
@@ -65,6 +70,7 @@ public:
     // State management
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
     void setDirtyState() override;
+    void releaseGlobeClipMasks() override;
     void clearStencilBuffer(int32_t) override;
 
     // Uniform buffer management
@@ -87,6 +93,10 @@ public:
         const void* data, std::size_t size, uint32_t usage, bool isIndexBuffer, bool persistent) const;
 
     // Get reusable buffers (aligned with Metal)
+    bool renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
+                                      RenderStaticData& staticData,
+                                      const std::vector<gfx::GlobeClipMask>& masks);
+
     const BufferResource& getTileVertexBuffer();
     const BufferResource& getTileIndexBuffer();
 
@@ -140,6 +150,15 @@ private:
     std::optional<std::size_t> clipMaskPipelineHash;
     std::vector<BufferResource> clipMaskUniformBuffers;
     std::vector<WGPUBindGroup> clipMaskActiveBindGroups;
+
+    struct GlobeClipMesh {
+        BufferResource vertices;
+        BufferResource indices;
+        uint32_t indexCount;
+    };
+    gfx::ShaderProgramBasePtr globeClipMaskShader;
+    std::optional<std::size_t> globeClipMaskPipelineHash;
+    std::map<std::tuple<uint8_t, bool, bool, bool>, GlobeClipMesh> globeClipMeshes;
 };
 
 } // namespace webgpu

@@ -1,0 +1,41 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "A viewport-anchored atmosphere light stays on the right of the view. The 0.15% allowance covers translucent globe-edge PNG round-trip rounding.",
+      "width": 256,
+      "height": 256,
+      "allowed": 0.0015
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 1,
+  "bearing": 0,
+  "projection": {
+    "type": "globe"
+  },
+  "light": {
+    "anchor": "viewport",
+    "position": [
+      1.5,
+      90,
+      90
+    ]
+  },
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#16385f"
+      }
+    }
+  ],
+  "sky": {
+    "atmosphere-blend": 1
+  }
+}

@@ -12,6 +12,8 @@ MBGL_DEFINE_ENUM(BuiltIn,
                   {BuiltIn::ClippingMaskProgram, "ClippingMaskProgram"},
                   {BuiltIn::BackgroundShader, "BackgroundShader"},
                   {BuiltIn::BackgroundPatternShader, "BackgroundPatternShader"},
+                  {BuiltIn::SkyShader, "SkyShader"},
+                  {BuiltIn::AtmosphereShader, "AtmosphereShader"},
                   {BuiltIn::CircleShader, "CircleShader"},
                   {BuiltIn::CollisionBoxShader, "CollisionBoxShader"},
                   {BuiltIn::CollisionCircleShader, "CollisionCircleShader"},
@@ -41,6 +43,7 @@ MBGL_DEFINE_ENUM(BuiltIn,
                   {BuiltIn::SymbolIconShader, "SymbolIconShader"},
                   {BuiltIn::SymbolSDFShader, "SymbolSDFShader"},
                   {BuiltIn::SymbolTextAndIconShader, "SymbolTextAndIconShader"},
-                  {BuiltIn::WideVectorShader, "WideVectorShader"}});
+                  {BuiltIn::WideVectorShader, "WideVectorShader"},
+                  {BuiltIn::GlobeDepthShader, "GlobeDepthShader"}});
 
 } // namespace mln

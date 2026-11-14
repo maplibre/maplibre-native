@@ -41,7 +41,7 @@ private:
                                 float,
                                 const TransformState&,
                                 float,
-                                const mat4&,
+                                const TileProjector&,
                                 const FeatureState&) const override;
     void updateColorRamp();
 

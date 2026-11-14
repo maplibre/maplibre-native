@@ -3,6 +3,7 @@
 #include <mln/actor/scheduler.hpp>
 #include <mln/util/instrumentation.hpp>
 
+#include <algorithm>
 #include <cassert>
 
 namespace mln {
@@ -148,6 +149,20 @@ std::unique_ptr<Tile> TileCache::pop(const OverscaledTileID& key) {
         assert(tile->isRenderable());
     }
 
+    return tile;
+}
+
+std::unique_ptr<Tile> TileCache::popAnyWrap(const OverscaledTileID& key) {
+    const auto it = std::ranges::find_if(tiles, [&](const auto& entry) {
+        return entry.first.overscaledZ == key.overscaledZ && entry.first.canonical == key.canonical;
+    });
+    if (it == tiles.end()) {
+        return nullptr;
+    }
+    orderedKeys.remove(it->first);
+    std::unique_ptr<Tile> tile = std::move(tiles.extract(it).mapped());
+    assert(tile->isRenderable());
+    tile->id = key;
     return tile;
 }
 

@@ -38,6 +38,7 @@
 #include "map/camera_position.hpp"
 #include "map/image.hpp"
 #include "style/light.hpp"
+#include "style/sky.hpp"
 #include "tile/tile_operation.hpp"
 
 #include <jni/jni.hpp>
@@ -297,6 +298,10 @@ void NativeMapView::setGestureInProgress(jni::JNIEnv&, jni::jboolean inProgress)
     map->setGestureInProgress(inProgress);
 }
 
+void NativeMapView::setGlobeFreeBearing(jni::JNIEnv&, jni::jboolean freeBearing) {
+    map->setGlobeFreeBearing(freeBearing);
+}
+
 void NativeMapView::moveBy(jni::JNIEnv&, jni::jdouble dx, jni::jdouble dy, jni::jlong duration) {
     mln::AnimationOptions animationOptions;
     if (duration > 0) {
@@ -304,6 +309,10 @@ void NativeMapView::moveBy(jni::JNIEnv&, jni::jdouble dx, jni::jdouble dy, jni::
         animationOptions.easing.emplace(mln::util::UnitBezier{0.1, 0.4, 0.35, 1.0});
     }
     map->moveBy({dx, dy}, animationOptions);
+}
+
+void NativeMapView::moveByAround(jni::JNIEnv&, jni::jdouble dx, jni::jdouble dy, jni::jdouble x, jni::jdouble y) {
+    map->moveBy({dx, dy}, mln::ScreenCoordinate{x, y});
 }
 
 void NativeMapView::jumpTo(jni::JNIEnv& env,
@@ -749,6 +758,10 @@ jni::Local<jni::Object<LatLng>> NativeMapView::latLngForPixel(JNIEnv& env, jfloa
     return LatLng::New(env, map->latLngForPixel(mln::ScreenCoordinate(x, y)));
 }
 
+jboolean NativeMapView::isLocationOccluded(JNIEnv&, jdouble latitude, jdouble longitude) {
+    return map->isLocationOccluded(mln::LatLng(latitude, longitude));
+}
+
 void NativeMapView::latLngsForPixels(JNIEnv& env,
                                      const jni::Array<jdouble>& input,
                                      jni::Array<jdouble>& output,
@@ -1038,6 +1051,25 @@ jni::Local<jni::Object<Light>> NativeMapView::getLight(JNIEnv& env) {
     } else {
         return jni::Local<jni::Object<Light>>();
     }
+}
+
+jni::Local<jni::Object<Sky>> NativeMapView::getSky(JNIEnv& env) {
+    const mln::style::Sky* sky = map->getStyle().getSky();
+    return sky ? Sky::createJavaSkyPeer(env, *sky) : jni::Local<jni::Object<Sky>>();
+}
+
+void NativeMapView::setSky(JNIEnv& env, const jni::Object<Sky>& javaSky) {
+    if (!javaSky) {
+        map->getStyle().setSky(nullptr);
+    } else {
+        const auto* skyPeer = Sky::getNativePeer(env, javaSky);
+        if (!skyPeer) {
+            jni::ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "invalid Sky native peer");
+            return;
+        }
+        map->getStyle().setSky(std::make_unique<mln::style::Sky>(skyPeer->getSky().impl));
+    }
+    map->triggerRepaint();
 }
 
 jni::Local<jni::Array<jni::Object<Layer>>> NativeMapView::getLayers(JNIEnv& env) {
@@ -1391,7 +1423,9 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setStyleJson, "nativeSetStyleJson"),
         METHOD(&NativeMapView::cancelTransitions, "nativeCancelTransitions"),
         METHOD(&NativeMapView::setGestureInProgress, "nativeSetGestureInProgress"),
+        METHOD(&NativeMapView::setGlobeFreeBearing, "nativeSetGlobeFreeBearing"),
         METHOD(&NativeMapView::moveBy, "nativeMoveBy"),
+        METHOD(&NativeMapView::moveByAround, "nativeMoveByAround"),
         METHOD(&NativeMapView::jumpTo, "nativeJumpTo"),
         METHOD(&NativeMapView::easeTo, "nativeEaseTo"),
         METHOD(&NativeMapView::flyTo, "nativeFlyTo"),
@@ -1438,6 +1472,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getVisibleCoordinateBounds, "nativeGetVisibleCoordinateBounds"),
         METHOD(&NativeMapView::latLngForProjectedMeters, "nativeLatLngForProjectedMeters"),
         METHOD(&NativeMapView::latLngForPixel, "nativeLatLngForPixel"),
+        METHOD(&NativeMapView::isLocationOccluded, "nativeIsLocationOccluded"),
         METHOD(&NativeMapView::latLngsForPixels, "nativeLatLngsForPixels"),
         METHOD(&NativeMapView::addPolylines, "nativeAddPolylines"),
         METHOD(&NativeMapView::addPolygons, "nativeAddPolygons"),
@@ -1459,6 +1494,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setGlobalStateProperty, "nativeSetGlobalStateProperty"),
         METHOD(&NativeMapView::getGlobalState, "nativeGetGlobalState"),
         METHOD(&NativeMapView::getLight, "nativeGetLight"),
+        METHOD(&NativeMapView::getSky, "nativeGetSky"),
+        METHOD(&NativeMapView::setSky, "nativeSetSky"),
         METHOD(&NativeMapView::getLayers, "nativeGetLayers"),
         METHOD(&NativeMapView::getLayer, "nativeGetLayer"),
         METHOD(&NativeMapView::addLayer, "nativeAddLayer"),

@@ -1,0 +1,171 @@
+<%
+  const properties = locals.properties;
+  const className = locals.className;
+  const objectName = locals.objectName;
+  const observerName = `${className}Observer`;
+-%>
+// This file is generated. Do not edit.
+
+#include <mln/style/<%- objectName %>.hpp>
+#include <mln/style/<%- objectName %>_impl.hpp>
+#include <mln/style/<%- objectName %>_observer.hpp>
+#include <mln/style/conversion/<%- objectName %>.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/style/conversion/transition_options.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/util/traits.hpp>
+
+#include <mapbox/eternal.hpp>
+
+#include <utility>
+
+namespace mln {
+namespace style {
+
+namespace {
+<%- observerName %> nullObserver;
+} // namespace
+
+<%- className %>::<%- className %>(Immutable<<%- className %>::Impl> impl_) : impl(std::move(impl_)), observer(&nullObserver) {}
+
+<%- className %>::<%- className %>() : <%- className %>(makeMutable<Impl>()) {}
+
+<%- className %>::~<%- className %>() = default;
+
+void <%- className %>::setObserver(<%- observerName %>* observer_) {
+    observer = observer_ ? observer_ : &nullObserver;
+}
+
+Mutable<<%- className %>::Impl> <%- className %>::mutableImpl() const {
+    return makeMutable<Impl>(*impl);
+}
+
+using namespace conversion;
+
+namespace {
+
+enum class Property : uint8_t {
+<% for (const property of properties) { -%>
+    <%- camelize(property.name) %>,
+<% } -%>
+<% for (const property of properties) { -%>
+    <%- camelize(property.name) %>Transition,
+<% } -%>
+};
+
+template <typename T>
+constexpr uint8_t toUint8(T t) noexcept {
+    return uint8_t(mln::underlying_type(t));
+}
+
+constexpr const auto properties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
+    {<%- properties.map(p => `{"${p.name}", toUint8(Property::${camelize(p.name)})}`).join(',\n     ') %>,
+     <%- properties.map(p => `{"${p.name}-transition", toUint8(Property::${camelize(p.name)}Transition)}`).join(',\n     ') %>});
+
+} // namespace
+
+std::optional<Error> <%- className %>::setProperty(const std::string& name, const Convertible& value) {
+    const auto it = properties.find(name.c_str());
+    if (it == properties.end()) {
+        return Error { "<%- objectName %> doesn't support this property" };
+    }
+
+    auto property = static_cast<Property>(it->second);
+
+    <%
+        const conversions = {};
+        for (const property of properties) {
+            const dataDriven = property['property-type'] === 'data-driven' || property['property-type'] === 'cross-faded-data-driven';
+            const convertTokens = property.name === 'icon-image' || property.name === 'text-field';
+            const conversion = `std::optional<${propertyValueType(property)}> typedValue = convert<${propertyValueType(property)}>(value, error, ${dataDriven}, ${convertTokens})`;
+            conversions[conversion] = conversions[conversion] || [];
+            conversions[conversion].push(property);
+        }
+    -%>
+    <% for (const key in conversions) {
+        const properties = conversions[key];
+    %>
+    if (<%- properties.map(p => `property == Property::${camelize(p.name)}`).join(' || ') %>) {
+        Error error;
+        <%- key %>;
+        if (!typedValue) {
+            return error;
+        }
+        <% if (properties.length == 1) { %>
+        set<%- camelize(properties[0].name) %>(*typedValue);
+        return std::nullopt;
+        <% } else for (const property of properties) { %>
+        if (property == Property::<%- camelize(property.name) %>) {
+            set<%- camelize(property.name) %>(*typedValue);
+            return std::nullopt;
+        }
+        <% } %>
+    }
+    <% } %>
+
+    Error error;
+    std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
+    if (!transition) {
+        return error;
+    }
+    <% for (const property of properties) { %>
+    if (property == Property::<%- camelize(property.name) %>Transition) {
+        set<%- camelize(property.name) %>Transition(*transition);
+        return std::nullopt;
+    }
+    <% } %>
+
+    return Error { "<%- objectName %> doesn't support this property" };
+}
+
+StyleProperty <%- className %>::getProperty(const std::string& name) const {
+    const auto it = properties.find(name.c_str());
+    if (it == properties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+<% for (const property of properties) { -%>
+        case Property::<%- camelize(property.name) %>:
+            return makeStyleProperty(get<%- camelize(property.name) %>());
+<% } -%>
+<% for (const property of properties) { -%>
+        case Property::<%- camelize(property.name) %>Transition:
+            return makeStyleProperty(get<%- camelize(property.name) %>Transition());
+<% } -%>
+    }
+    return {};
+}
+
+<% for (const property of properties) { -%>
+<%- evaluatedType(property) %> <%- className %>::getDefault<%- camelize(property.name) %>() {
+    return <%- property.typeName %>::defaultValue();
+}
+
+<%- propertyValueType(property) %> <%- className %>::get<%- camelize(property.name) %>() const {
+    return impl->properties.template get<<%- property.typeName %>>().value;
+}
+
+void <%- className %>::set<%- camelize(property.name) %>(<%- propertyValueType(property) %> property) {
+    auto impl_ = mutableImpl();
+    impl_->properties.template get<<%- property.typeName %>>().value = std::move(property);
+    impl = std::move(impl_);
+    observer->on<%- className %>Changed(*this);
+}
+
+void <%- className %>::set<%- camelize(property.name) %>Transition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->properties.template get<<%- property.typeName %>>().options = options;
+    impl = std::move(impl_);
+    observer->on<%- className %>Changed(*this);
+}
+
+TransitionOptions <%- className %>::get<%- camelize(property.name) %>Transition() const {
+    return impl->properties.template get<<%- property.typeName %>>().options;
+}
+
+<% } -%>
+
+} // namespace style
+} // namespace mln

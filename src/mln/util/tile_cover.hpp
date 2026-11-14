@@ -34,11 +34,17 @@ private:
 };
 
 struct TileCoverParameters {
-    TransformState transformState;
+    /// Must outlive these parameters.
+    const TransformState& transformState;
     double tileLodMinRadius = 3;
     double tileLodScale = 1;
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     TileLodMode tileLodMode = TileLodMode::Default;
+    /// The zoom the source loads at the center of the view, shifted for its tile size and not yet clamped to its
+    /// zoom range; the globe's level of detail falls off from it, as GL JS's does.
+    std::optional<double> requestedZoom = std::nullopt;
+    /// Whether the source rounds zooms to whole tiles, as raster sources do, instead of flooring them.
+    bool roundZoom = false;
 };
 
 int32_t coveringZoomLevel(double z, style::SourceType type, uint16_t tileSize) noexcept;

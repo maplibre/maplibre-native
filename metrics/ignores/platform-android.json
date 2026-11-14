@@ -15,5 +15,13 @@
     "render-tests/regressions/mapbox-gl-js#5978": "Needs to be investigated and fixed.",
     "render-tests/sprites/1x-screen-2x-pattern": "Needs to be investigated and fixed.",
     "render-tests/text-field/formatted-images": "Needs to be investigated and fixed.",
-    "render-tests/symbol-visibility/visible": "Needs to be investigated and fixed."
+    "render-tests/symbol-visibility/visible": "Needs to be investigated and fixed.",
+    "render-tests/projection/globe/fill-planet-tiles": "fill outline anti-aliasing differs from the Metal expectation",
+    "render-tests/projection/globe/fill-planet-pole": "fill outline anti-aliasing differs from the Metal expectation",
+    "render-tests/projection/globe/fill-planet-pole-top": "fill outline anti-aliasing differs from the Metal expectation",
+    "render-tests/projection/globe/zoom-transition": "On a Mali-G57, under OpenGL and Vulkan, the edges along one direction land a pixel off the Metal expectation.",
+    "render-tests/projection/globe/background-pattern": "On an Adreno 830 under OpenGL, pattern pixels near the globe's edge differ from the Metal expectation.",
+    "render-tests/projection/globe/line-pattern": "On an Adreno 830 under OpenGL, pattern pixels along the line differ from the Metal expectation.",
+    "render-tests/projection/globe/debug-tile-borders": "The tile border is a hardware wide line on OpenGL and an anti-aliased polyline in the Metal expectation.",
+    "render-tests/projection/globe/fill-seams/checkerboard": "fill outline anti-aliasing differs from the Metal expectation"
 }

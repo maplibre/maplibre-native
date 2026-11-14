@@ -93,6 +93,7 @@ public:
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
                                      const StringIDSetsPair& propertiesAsUniforms,
+                                     gfx::ProjectionVariant,
                                      std::string_view) override {
         const auto name = getShaderName(groupName, propertyHash(propertiesAsUniforms));
         if (auto existing = getShader(name)) return existing;

@@ -65,6 +65,20 @@
   XCTAssertNil(self.style.name);
 }
 
+- (void)testSkyCanBeSetAndRemoved {
+  XCTAssertNil(self.style.sky);
+
+  MLNSky *sky = [[MLNSky alloc] init];
+  sky.skyColor = [NSExpression expressionForConstantValue:[MLNColor blueColor]];
+  self.style.sky = sky;
+
+  XCTAssertNotNil(self.style.sky);
+  XCTAssertEqualObjects(self.style.sky.skyColor, sky.skyColor);
+
+  self.style.sky = nil;
+  XCTAssertNil(self.style.sky);
+}
+
 - (void)testSources {
   NSSet<MLNSource *> *initialSources = self.style.sources;
   if ([initialSources.anyObject.identifier isEqualToString:@"org.maplibre.annotations"]) {
