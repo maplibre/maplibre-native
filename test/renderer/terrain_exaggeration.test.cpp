@@ -146,18 +146,29 @@ struct RidgeMap {
     // A continuous map draws by itself as the loop runs: the frame once it has stayed the same for a second.
     PremultipliedImage settleContinuous() {
         const auto start = std::chrono::steady_clock::now();
-        const auto read = [&] {
-            gfx::BackendScope guard{*frontend.getBackend()};
-            return frontend.readStillImage();
-        };
-        PremultipliedImage last = read();
-        int unchanged = 0;
-        while (std::chrono::steady_clock::now() - start < std::chrono::seconds(30)) {
-            const auto end = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
+        const auto pump = [&](std::chrono::milliseconds duration) {
+            const auto end = std::chrono::steady_clock::now() + duration;
             while (std::chrono::steady_clock::now() < end) {
                 loop.runOnce();
                 std::this_thread::sleep_for(std::chrono::milliseconds(8));
             }
+        };
+        const auto read = [&] {
+            gfx::BackendScope guard{*frontend.getBackend()};
+            return frontend.readStillImage();
+        };
+        // Nothing can be read back before the first frame is drawn: Vulkan has no image to read till then.
+        while (frontend.getFrameTime() == 0 && std::chrono::steady_clock::now() - start < std::chrono::seconds(30)) {
+            pump(std::chrono::milliseconds(8));
+        }
+        if (frontend.getFrameTime() == 0) {
+            ADD_FAILURE() << "the map drew no frame in 30 s";
+            return PremultipliedImage(frontend.getSize());
+        }
+        PremultipliedImage last = read();
+        int unchanged = 0;
+        while (std::chrono::steady_clock::now() - start < std::chrono::seconds(30)) {
+            pump(std::chrono::milliseconds(250));
             PremultipliedImage now = read();
             unchanged = std::memcmp(now.data.get(), last.data.get(), now.bytes()) == 0 ? unchanged + 1 : 0;
             last = std::move(now);
