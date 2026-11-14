@@ -1,4 +1,5 @@
 #include <mln/i18n/collator.hpp>
+#include <mln/util/exception.hpp>
 
 #include <sstream>
 
@@ -7,12 +8,22 @@
 namespace mln {
 namespace platform {
 
+namespace {
+NSString* toNSString(const std::string& text) {
+  NSString* string = @(text.c_str());
+  if (!string) {
+    throw util::LocaleException("Collator text is not valid UTF-8");
+  }
+  return string;
+}
+}  // namespace
+
 class Collator::Impl {
 public:
   Impl(bool caseSensitive, bool diacriticSensitive, const std::optional<std::string>& locale_)
       : options((caseSensitive ? 0 : NSCaseInsensitiveSearch) |
                 (diacriticSensitive ? 0 : NSDiacriticInsensitiveSearch)),
-        locale(locale_ ? [[NSLocale alloc] initWithLocaleIdentifier:@((*locale_).c_str())]
+        locale(locale_ ? [[NSLocale alloc] initWithLocaleIdentifier:toNSString(*locale_)]
                        : [NSLocale currentLocale]) {}
 
   bool operator==(const Impl& other) const {
@@ -21,8 +32,8 @@ public:
   }
 
   int compare(const std::string& lhs, const std::string& rhs) const {
-    NSString* nsLhs = @(lhs.c_str());
-    NSString* nsRhs = @(rhs.c_str());
+    NSString* nsLhs = toNSString(lhs);
+    NSString* nsRhs = toNSString(rhs);
     // Limiting the compare range to the length of the LHS seems weird, but
     // experimentally we've checked that if LHS is a prefix of RHS compare returns -1
     // https://developer.apple.com/documentation/foundation/nsstring/1414561-compare

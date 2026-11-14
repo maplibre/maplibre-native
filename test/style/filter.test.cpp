@@ -242,6 +242,13 @@ TEST(Filter, PropertyExpression) {
     ASSERT_FALSE(filter("[\"==\", [\"get\", \"two\"], 4]", {{"two", int64_t(2)}}));
 }
 
+TEST(Filter, CollatorMalformedUTF8) {
+    auto f = R"(["==", ["get", "name"], "cafe", ["collator", {}]])";
+    ASSERT_FALSE(filter(f, {{"name", std::string("bad\xFFname")}}));
+    ASSERT_FALSE(filter(R"(["==", ["resolved-locale", ["collator", {"locale": ["get", "locale"]}]], "en"])",
+                        {{"locale", std::string("en\xFF")}}));
+}
+
 TEST(Filter, LegacyProperty) {
     // <
 
