@@ -124,23 +124,9 @@ void Map::Impl::onUpdate() {
 
     transform.updateTransitions(timePoint);
 
-    // A running animation that is not a fling (a pinch's drift, a zoom, a recenter) owns the camera,
-    // so the clamp does not jump it (applyCenterClamp); but its eased height ignores the ground under
-    // the eye, which a zoom out up a slope runs into. Keep the eye over the ground after every frame,
-    // by the ground the map holds for where the eye is now, not the height the renderer last reported
-    // for where it was.
-    if (centerClampedToGround && !transitionIsFling && transform.inTransition() && terrainElevationIndex &&
-        style->impl->getTerrain()) {
-        const TransformState& state = transform.getState();
-        if (const auto eye = state.getFreeCameraOptions().getLocation()) {
-            if (const auto ground = terrainElevationIndex->getElevation(eye->location);
-                ground && eye->altitude < *ground + eyeClearanceMeters &&
-                transform.liftTransitionCenterAltitude(state.getCenterAltitude() + *ground + eyeClearanceMeters -
-                                                       eye->altitude)) {
-                centerAwaitingTerrainAnchor = true;
-            }
-        }
-    }
+    // The eye goes over the ground in the update that moves the camera: a pan, a jump or an animation
+    // would otherwise draw a frame from inside the mountain before the renderer reports the ground.
+    keepEyeAboveGround();
 
     // Terrain removed: a centre that gestures anchored on it (or the clamp held there) would stay
     // up to kilometres above the now flat map, and pans, tile cover and label placement would
@@ -386,6 +372,42 @@ void Map::Impl::onDidFinishRenderingMap() {
         }
     }
 };
+
+void Map::Impl::keepEyeAboveGround() {
+    if (!centerClampedToGround || !terrainElevationIndex || !style->impl->getTerrain()) {
+        return;
+    }
+    // By the ground the map holds for where the eye is now, not the height the renderer last
+    // reported for where it was. Where no DEM tile is loaded under the eye the ground is not known,
+    // and the camera is left until it is.
+    const TransformState& state = transform.getState();
+    const auto eye = state.getFreeCameraOptions().getLocation();
+    if (!eye) {
+        return;
+    }
+    const auto ground = terrainElevationIndex->getElevation(eye->location);
+    if (!ground || eye->altitude >= *ground + eyeClearanceMeters) {
+        return;
+    }
+    const double lifted = state.getCenterAltitude() + *ground + eyeClearanceMeters - eye->altitude;
+    if (transitionIsFling && transform.inTransition()) {
+        // A fling towards rising ground ends at the slope: the jump ends it, as in applyCenterClamp.
+        centerAwaitingTerrainAnchor = true;
+        centerAnchorKeepsView = true;
+        transform.jumpTo(CameraOptions().withCenterAltitude(lifted));
+    } else if (transform.isGestureInProgress()) {
+        // The height the gesture holds is the one it started at, not the one the eye needed.
+        if (!gestureHeldCenterAltitude) {
+            gestureHeldCenterAltitude = state.getCenterAltitude();
+        }
+        centerAwaitingTerrainAnchor = true;
+        centerAnchorKeepsView = true;
+        transform.liftCenterAltitude(lifted);
+    } else if (transform.liftCenterAltitude(lifted) && transform.inTransition()) {
+        // An animation that is not a fling owns the camera: its end anchors the center.
+        centerAwaitingTerrainAnchor = true;
+    }
+}
 
 void Map::Impl::anchorAfterHold() {
     centerAwaitingTerrainAnchor = false;

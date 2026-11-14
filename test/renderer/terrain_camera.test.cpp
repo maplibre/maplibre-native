@@ -1343,6 +1343,67 @@ TEST(TerrainCamera, APanIntoGroundThatIsStillLoadingDoesNotLetTheCameraDownIntoI
     EXPECT_GT(rig.clearance(), 0.0);
 }
 
+// The eye was lifted out of the ground once the renderer had drawn a frame and reported the ground under
+// it, so a camera change that put the eye under the ground drew that frame from inside the mountain. At
+// pitch 85 a pixel of a pan is tens of meters of ground, so the frame is under by far more than the
+// clearance. A pan, a fling and a jump keep the eye over the ground in the update that makes the change.
+TEST(TerrainCamera, APanUpAClimbKeepsTheEyeOverTheGroundInTheSameUpdate) {
+    EyeOverTheClimb rig;
+    rig.settleOnTheClimb(47.315);
+    ASSERT_GT(rig.clearance(), 0.0) << "the eye starts over the climb";
+
+    // The center is dragged south up the climb, a step a frame, and the eye goes up with it.
+    rig.map.setGestureInProgress(true);
+    double lowest = std::numeric_limits<double>::infinity();
+    int under = 0;
+    for (int i = 0; i < 10; ++i) {
+        rig.map.moveBy({0, -4});
+        lowest = std::min(lowest, rig.clearance());
+        under += rig.clearance() < 0.0 ? 1 : 0;
+        rig.loop.runOnce();
+    }
+    rig.map.setGestureInProgress(false);
+    ASSERT_LT(rig.map.getCameraOptions().center->latitude(), 47.311) << "the center went up the climb";
+    EXPECT_GE(rig.map.getCameraOptions().center->latitude(), 47.301) << "and the eye stayed over the tile it started over";
+    EXPECT_EQ(under, 0) << "the eye was under the ground after " << under << " of 10 steps, " << -lowest << " m at worst";
+}
+
+TEST(TerrainCamera, AFlingUpAClimbKeepsTheEyeOverTheGroundInTheSameUpdate) {
+    EyeOverTheClimb rig;
+    rig.settleOnTheClimb(47.315);
+    ASSERT_GT(rig.clearance(), 0.0) << "the eye starts over the climb";
+
+    // A fast fling: the camera moves tens of meters between one report of the ground and the next.
+    bool finished = false;
+    AnimationOptions animation(Milliseconds(100));
+    animation.transitionFinishFn = [&] {
+        finished = true;
+    };
+    rig.map.moveBy({0, -80}, animation);
+    double lowest = std::numeric_limits<double>::infinity();
+    int under = 0;
+    int updates = 0;
+    rig.pump(std::chrono::milliseconds(6000), [&] {
+        lowest = std::min(lowest, rig.clearance());
+        under += rig.clearance() < 0.0 ? 1 : 0;
+        ++updates;
+        return finished;
+    });
+    ASSERT_TRUE(finished);
+    EXPECT_EQ(under, 0) << "the eye was under the ground in " << under << " of " << updates << " updates, " << -lowest
+                        << " m at worst";
+}
+
+TEST(TerrainCamera, AJumpToAViewWithTheEyeOverAClimbKeepsTheEyeOverTheGroundInTheSameUpdate) {
+    EyeOverTheClimb rig;
+    rig.settleOnTheClimb(47.315);
+    ASSERT_GT(rig.clearance(), 0.0) << "the eye starts over the climb";
+
+    // A kilometer nearer the ridge: the eye lands a kilometer up the climb, over the same tile.
+    rig.map.jumpTo(CameraOptions().withCenter(LatLng{47.305, 11.4041}));
+    EXPECT_GE(rig.clearance(), 0.0) << "the eye was under the ground by " << -rig.clearance() << " m";
+}
+
 // A camera animation the app asks for (a recenter on the user, a flight to a place) from high
 // ground to low kept the center at the height it left, and only when it ended did the clamp jump
 // the center down to the ground: the camera dropped thousands of meters in one frame. As gl-js

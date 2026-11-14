@@ -143,6 +143,9 @@ public:
     /// The lowest height the center can be at with the eye `eyeClearanceMeters` above the ground
     /// under it, as last reported; -infinity until the renderer has reported that ground.
     double eyeClearCenterAltitude() const;
+    /// Raises the center so the eye is `eyeClearanceMeters` over the ground the map holds under it,
+    /// as the camera is now. Inert where that ground is not loaded.
+    void keepEyeAboveGround();
     /// The height the clamp puts the center at: the ground under it, or higher when the eye
     /// would otherwise sit under the ground under the eye.
     double clampedCenterAltitude() const;
