@@ -273,8 +273,21 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     };
 
     if (updateParameters->terrain) {
-        if (renderTerrain && renderTerrain->getImpl() != *updateParameters->terrain) {
-            dropRenderTerrain();
+        const auto& terrainImpl = *updateParameters->terrain;
+        // A source put in under the same name since the last frame is another DEM
+        const auto sourceImpl = [&](const auto& sources) -> const style::Source::Impl* {
+            const auto it = std::ranges::find_if(
+                *sources, [&](const auto& source) { return source->id == terrainImpl->sourceID; });
+            return it != sources->end() ? it->get() : nullptr;
+        };
+        if (renderTerrain) {
+            if (renderTerrain->getSourceID() != terrainImpl->sourceID ||
+                sourceImpl(sourceImpls) != sourceImpl(updateParameters->sources)) {
+                dropRenderTerrain();
+            } else if (renderTerrain->getImpl() != terrainImpl) {
+                // Only the exaggeration differs, and nothing built from the DEM depends on it.
+                renderTerrain->setImpl(terrainImpl);
+            }
         }
         if (!renderTerrain) {
             renderTerrain = std::make_unique<RenderTerrain>(*updateParameters->terrain);
