@@ -85,15 +85,18 @@ float dem_texel(sampler2D dem, ivec2 texel, vec4 dem_unpack) {
 
 // Sample the terrain elevation in meters at a tile-local coordinate, with manual
 // bilinear interpolation on DEM pixel centers (the DEM has a 2px backfilled border),
-// as in the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
-// terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
-// sampler and dem_* values are passed in as arguments rather than read from globals.
+// as in the maplibre-gl-js get_elevation() prelude function. DEM pixel i holds the
+// height of its cell, centred at tile coordinate (i + 0.5) / dim where hillshade and
+// color-relief draw it, and sits at texel i + 2 behind the border, so the texel
+// coordinate is uv * dim + 1.5 (gl-js #8420). Unlike gl-js (global terrain uniforms),
+// MapLibre Native carries the DEM data per-drawable, so the DEM sampler and dem_*
+// values are passed in as arguments rather than read from globals.
 float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
                     float dem_dim, float dem_exaggeration, float dem_enabled) {
     if (dem_enabled == 0.0) {
         return 0.0;
     }
-    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
+    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.5;
     vec2 f = fract(coord);
     ivec2 c = ivec2(floor(coord));
     ivec2 hi = textureSize(dem, 0) - 1;
@@ -110,7 +113,7 @@ float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
 // Identical bilinear terrarium/mapbox decode; the layer is selected per instance.
 float get_elevation_array(vec2 pos, highp sampler2DArray dem, float layer, vec4 dem_coords,
                           vec4 dem_unpack, float dem_dim, float dem_exaggeration) {
-    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
+    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.5;
     vec2 f = fract(coord);
     ivec2 c = ivec2(floor(coord));
     ivec2 hi = textureSize(dem, 0).xy - 1;

@@ -20,6 +20,7 @@
 #include <cmath>
 #include <limits>
 #include <set>
+#include <utility>
 
 using namespace mln;
 
@@ -110,6 +111,39 @@ TEST(TerrainElevationIndex, SamplesTheTileUnderTheLocation) {
 
     // A location no tile covers has no height, rather than sea level.
     EXPECT_FALSE(index.getElevation(LatLng{-33.87, 151.21}));
+}
+
+// A DEM pixel holds the height of its whole cell, and hillshade and color-relief draw it over that
+// cell, so the height at a pixel's centre is the pixel's value, as RenderTerrain reads it. Read as
+// the height at the cell's top-left corner, the copy stood half a pixel north-west of the renderer's
+// ground. The corner pixels' centres sit next to the tile's border.
+TEST(TerrainElevationIndex, APixelsHeightIsAtItsCentre) {
+    // A different whole number of metres for every pixel: 10 m a column, 100 m a row
+    const auto rampHeight = [](uint32_t x, uint32_t y) {
+        return 1000.0 + 10.0 * x + 100.0 * y;
+    };
+    PremultipliedImage image({demTileSize, demTileSize});
+    for (uint32_t y = 0; y < demTileSize; ++y) {
+        for (uint32_t x = 0; x < demTileSize; ++x) {
+            const auto encoded = static_cast<uint32_t>(std::lround((rampHeight(x, y) + 10000.0) * 10.0));
+            uint8_t* px = image.data.get() + (y * demTileSize + x) * 4;
+            px[0] = static_cast<uint8_t>((encoded >> 16) & 0xFF);
+            px[1] = static_cast<uint8_t>((encoded >> 8) & 0xFF);
+            px[2] = static_cast<uint8_t>(encoded & 0xFF);
+            px[3] = 255;
+        }
+    }
+    const DEMData dem(image, Tileset::RasterEncoding::Mapbox);
+    const UnwrappedTileID id(2, 2, 1);
+    TerrainElevationIndex index({{id, std::make_shared<const TerrainElevationIndex::Grid>(dem)}}, 1.0f);
+
+    for (const auto& [x, y] : {std::pair<uint32_t, uint32_t>{20, 40}, {0, 0}, {63, 63}}) {
+        // The centre of pixel (x, y) of tile 2/2/1, in z2 tile units
+        const Point<double> centre{2.0 + (x + 0.5) / demTileSize, 1.0 + (y + 0.5) / demTileSize};
+        const auto elevation = index.getElevation(Projection::unproject(centre * util::tileSize_D, 4.0));
+        ASSERT_TRUE(elevation) << "pixel " << x << ", " << y;
+        EXPECT_NEAR(*elevation, rampHeight(x, y), 0.01) << "pixel " << x << ", " << y;
+    }
 }
 
 // Where a deeper tile is loaded it wins over its ancestors, as in RenderTerrain.

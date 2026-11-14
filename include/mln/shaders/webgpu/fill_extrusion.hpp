@@ -87,7 +87,7 @@ fn fillExtrusionElevation(pos: vec2<f32>, drawable: FillExtrusionDrawableUBO) ->
     if (drawable.dem_enabled == 0.0) {
         return 0.0;
     }
-    let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 2.0;
+    let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.5;
     let f = fract(coord);
     let c = vec2<i32>(floor(coord));
     let hi = vec2<i32>(textureDimensions(dem_texture, 0)) - vec2<i32>(1);
