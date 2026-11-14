@@ -2,10 +2,12 @@
 #include <mln/test/stub_file_source.hpp>
 #include <mln/test/map_adapter.hpp>
 
+#include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/camera.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/style/image.hpp>
+#include <mln/style/source.hpp>
 #include <mln/style/sources/raster_dem_source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/terrain.hpp>
@@ -14,10 +16,14 @@
 #include <mln/util/run_loop.hpp>
 #include <mln/util/tileset.hpp>
 
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
+#include <functional>
 #include <memory>
 #include <string>
+#include <thread>
 #include <utility>
 
 using namespace mln;
@@ -96,12 +102,15 @@ std::string ridgeStyle(float exaggeration, const std::string& encoding, bool ico
 }
 
 struct RidgeMap {
-    explicit RidgeMap(float exaggeration, const std::string& encoding = "mapbox", bool icons = false)
+    explicit RidgeMap(float exaggeration,
+                      const std::string& encoding = "mapbox",
+                      bool icons = false,
+                      MapMode mode = MapMode::Static)
         : fileSource(std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions())),
           map(frontend,
               MapObserver::nullObserver(),
               fileSource,
-              MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())) {
+              MapOptions().withMapMode(mode).withSize(frontend.getSize())) {
         fileSource->tileResponse = [](const Resource& resource) {
             Response res;
             res.data = std::make_shared<std::string>(
@@ -132,6 +141,29 @@ struct RidgeMap {
             result = frontend.render(map);
         }
         return result;
+    }
+
+    // A continuous map draws by itself as the loop runs: the frame once it has stayed the same for a second.
+    PremultipliedImage settleContinuous() {
+        const auto start = std::chrono::steady_clock::now();
+        const auto read = [&] {
+            gfx::BackendScope guard{*frontend.getBackend()};
+            return frontend.readStillImage();
+        };
+        PremultipliedImage last = read();
+        int unchanged = 0;
+        while (std::chrono::steady_clock::now() - start < std::chrono::seconds(30)) {
+            const auto end = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
+            while (std::chrono::steady_clock::now() < end) {
+                loop.runOnce();
+                std::this_thread::sleep_for(std::chrono::milliseconds(8));
+            }
+            PremultipliedImage now = read();
+            unchanged = std::memcmp(now.data.get(), last.data.get(), now.bytes()) == 0 ? unchanged + 1 : 0;
+            last = std::move(now);
+            if (unchanged >= 4) break;
+        }
+        return last;
     }
 
     util::RunLoop loop;
@@ -238,4 +270,64 @@ TEST(TerrainExaggeration, ASourceSwappedInUnderTheSameNameStartsAgain) {
     style.addSource(std::make_unique<style::RasterDEMSource>("dem", tileset, 256));
     style.setTerrain(std::make_unique<style::Terrain>("dem", 1.0f));
     EXPECT_LT(differingPixels(swapped.settle().image, expected), 50u);
+}
+
+namespace {
+
+// A change to the DEM source that leaves its tiles as they are: the terrain built from them stays,
+// nothing is built again, and the frame is the one it was.
+void expectTerrainKept(const std::function<void(style::Source&)>& change) {
+    const PremultipliedImage expected = loadedFrame(1.0f);
+
+    RidgeMap ridge(1.0f);
+    const auto settled = ridge.settle();
+    ASSERT_LT(differingPixels(settled.image, expected), 50u);
+
+    change(*ridge.map.getStyle().getSource("dem"));
+    const auto after = ridge.frontend.render(ridge.map);
+    EXPECT_EQ(after.stats.numCreatedTextures, settled.stats.numCreatedTextures);
+    EXPECT_EQ(after.stats.numDEMTexturesCreated, settled.stats.numDEMTexturesCreated);
+    EXPECT_LT(differingPixels(after.image, expected), 50u);
+}
+
+} // namespace
+
+// Each of these makes a new impl of the DEM source, but its tileset is the one the terrain was built from.
+TEST(TerrainExaggeration, AVolatileDemSourceKeepsWhatTheTerrainBuilt) {
+    expectTerrainKept([](style::Source& source) { source.setVolatile(true); });
+}
+
+TEST(TerrainExaggeration, ADemSourceUpdateIntervalKeepsWhatTheTerrainBuilt) {
+    expectTerrainKept([](style::Source& source) { source.setMinimumTileUpdateInterval(std::chrono::seconds(30)); });
+}
+
+TEST(TerrainExaggeration, ADemSourceOverscaleLimitKeepsWhatTheTerrainBuilt) {
+    expectTerrainKept([](style::Source& source) { source.setMaxOverscaleFactorForParentTiles(2); });
+}
+
+// A source given by URL has no tileset until its TileJSON arrives. A continuous map keeps the tiles of
+// the source it took the place of till then, and the terrain holds textures made from them: the
+// tileset that comes is another's, so they go.
+TEST(TerrainExaggeration, ATileJSONForASourceTakingAnotherOnesPlaceStartsAgain) {
+    const auto tileJSON = [](const Resource&) {
+        Response res;
+        res.data = std::make_shared<std::string>(
+            R"JSON({"tilejson": "2.2.0", "tiles": ["http://example.com/terrarium/{z}-{x}-{y}.png"],
+                    "encoding": "terrarium", "maxzoom": 12, "tileSize": 256})JSON");
+        return res;
+    };
+    PremultipliedImage expected = [&] {
+        RidgeMap fresh(1.0f, "terrarium", false, MapMode::Continuous);
+        return fresh.settleContinuous();
+    }();
+
+    RidgeMap swapped(1.0f, "mapbox", false, MapMode::Continuous);
+    ASSERT_LT(differingPixels(swapped.settleContinuous(), expected), 50u) << "both encodings carry the same ridge";
+
+    swapped.fileSource->sourceResponse = tileJSON;
+    auto& style = swapped.map.getStyle();
+    style.removeSource("dem");
+    style.addSource(std::make_unique<style::RasterDEMSource>("dem", "http://example.com/dem.json", 256));
+    style.setTerrain(std::make_unique<style::Terrain>("dem", 1.0f));
+    EXPECT_LT(differingPixels(swapped.settleContinuous(), expected), 50u);
 }

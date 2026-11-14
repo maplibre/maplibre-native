@@ -24,6 +24,7 @@
 #include <mln/renderer/image_manager.hpp>
 #include <mln/geometry/line_atlas.hpp>
 #include <mln/style/source_impl.hpp>
+#include <mln/style/sources/tile_source_impl.hpp>
 #include <mln/style/transition_options.hpp>
 #include <mln/text/glyph_manager.hpp>
 #include <mln/tile/tile.hpp>
@@ -274,15 +275,37 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     if (updateParameters->terrain) {
         const auto& terrainImpl = *updateParameters->terrain;
-        // A source put in under the same name since the last frame is another DEM
         const auto sourceImpl = [&](const auto& sources) -> const style::Source::Impl* {
             const auto it = std::ranges::find_if(
                 *sources, [&](const auto& source) { return source->id == terrainImpl->sourceID; });
             return it != sources->end() ? it->get() : nullptr;
         };
+        // Whether the DEM is no longer the one the terrain was built from. What the terrain holds comes
+        // from the source's tiles, which depend on its tileset (tile URLs, encoding, zoom range, ...)
+        // and on nothing else: a setter such as setVolatile makes a new impl with the same tileset,
+        // and the source keeps its tiles. A tileset that arrives where there was none changes nothing
+        // unless the terrain already holds tiles, which happens when a source takes the place of
+        // another and its TileJSON is yet to load.
+        const auto demChanged = [&] {
+            const auto* before = sourceImpl(sourceImpls);
+            const auto* after = sourceImpl(updateParameters->sources);
+            if (before == after) {
+                return false;
+            }
+            const auto tilesetOf = [](const style::Source::Impl* impl) -> const std::optional<Tileset>* {
+                return impl && impl->type == style::SourceType::RasterDEM
+                           ? &static_cast<const style::TileSource::Impl*>(impl)->tileset
+                           : nullptr;
+            };
+            const auto* was = tilesetOf(before);
+            const auto* now = tilesetOf(after);
+            if (!was || !now) {
+                return true; // added, removed or put in under another type
+            }
+            return *now && *now != *was && (*was || renderTerrain->holdsDEMData());
+        };
         if (renderTerrain) {
-            if (renderTerrain->getSourceID() != terrainImpl->sourceID ||
-                sourceImpl(sourceImpls) != sourceImpl(updateParameters->sources)) {
+            if (renderTerrain->getSourceID() != terrainImpl->sourceID || demChanged()) {
                 dropRenderTerrain();
             } else if (renderTerrain->getImpl() != terrainImpl) {
                 // Only the exaggeration differs, and nothing built from the DEM depends on it.
