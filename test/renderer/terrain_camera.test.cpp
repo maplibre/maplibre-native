@@ -1424,18 +1424,28 @@ namespace {
 
 // A camera over a high mountain with its eye height read, then thrown onto flat ground far away.
 // The ground under the new eye is a tile of its own, which the test holds back, or never sends.
+struct InspectableMap : MapAdapter {
+    using MapAdapter::MapAdapter;
+    double reportedCenterGround() const { return impl->terrainCenterElevation; }
+    bool centerGroundLost() const { return impl->centerGroundLost; }
+    void removeTerrain() { getStyle().setTerrain(nullptr); }
+};
+
 struct EyeLeavesTheMountain {
     util::RunLoop loop;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(),
                                                                                   ClientOptions());
     HeadlessFrontend frontend{{390, 844}, 1};
-    MapAdapter map;
+    InspectableMap map;
     std::optional<LatLng> newEyeGround;
+    std::optional<LatLng> newCenterGround;
     enum class NewEyeTile {
         Held,
         Missing,
         Sent
-    } newEyeTile = NewEyeTile::Held;
+    };
+    NewEyeTile newEyeTile = NewEyeTile::Held;
+    NewEyeTile newCenterTile = NewEyeTile::Sent;
     const std::string shelf = makeUniformDEMTile(2000.0);
 
     EyeLeavesTheMountain()
@@ -1445,15 +1455,19 @@ struct EyeLeavesTheMountain {
               MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize())) {
         fileSource->tileResponse = [this](const Resource& resource) -> std::optional<Response> {
             Response res;
-            if (newEyeGround && tileUrlCovers(resource.url, *newEyeGround)) {
-                if (newEyeTile == NewEyeTile::Held) {
+            for (const auto& [ground, tile] :
+                 {std::pair{newEyeGround, newEyeTile}, std::pair{newCenterGround, newCenterTile}}) {
+                if (!ground || !tileUrlCovers(resource.url, *ground)) {
+                    continue;
+                }
+                if (tile == NewEyeTile::Held) {
                     return std::nullopt;
                 }
-                if (newEyeTile == NewEyeTile::Missing) {
+                if (tile == NewEyeTile::Missing) {
                     res.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
                     return res;
                 }
-                // Sent: 2,000 m ground under the eye.
+                // Sent: 2,000 m ground under it.
                 res.data = std::make_shared<std::string>(shelf);
                 return res;
             }
@@ -1475,28 +1489,40 @@ struct EyeLeavesTheMountain {
     }
 
     double centerAltitude() const { return map.getCameraOptions().centerAltitude.value_or(0.0); }
+    // The ground height under the center the renderer last reported to the map; NaN is "not known".
+    double reportedCenterGround() const { return map.reportedCenterGround(); }
+    bool centerGroundLost() const { return map.centerGroundLost(); }
     double eyeAltitude() const {
         const auto eye = map.getFreeCameraOptions().getLocation();
         return eye ? eye->altitude : 0.0;
     }
 
+    // The flat ground the camera is thrown onto.
+    static LatLng flatCenter() { return LatLng{47.60, 51.4041}; }
+
     // On the mountain: the eye a few kilometers up the slope behind the center, the camera lifted
     // out of it, then flat ground 40 degrees of longitude east, where the eye is over ground that is
     // not the mountain's. The center's own ground is never known there (the camera is too high over
-    // flat ground for the cover to take its tile), so it keeps the height it last had, 1,000 m.
-    void climbThenJump() {
+    // flat ground for the cover to take its tile), so it keeps the height it last had, 1,000 m. With
+    // `overview` the camera is also lifted to zoom 10, looking straight down, where the cover does
+    // take the tile under the center.
+    void climbThenJump(bool overview = false) {
         map.jumpTo(CameraOptions().withCenter(LatLng{47.29, 11.4041}).withZoom(15.0).withPitch(85.0).withBearing(0.0));
         render(1500, [&] { return centerAltitude() > 2500.0; });
         const auto onMountain = map.getFreeCameraOptions().getLocation();
         ASSERT_TRUE(onMountain.has_value());
         ASSERT_GT(rampMeters(onMountain->location.latitude()), 2500.0) << "the eye starts inside the mountain";
         ASSERT_GT(onMountain->altitude, 2500.0) << "and the camera is lifted out of it";
+        ASSERT_GT(reportedCenterGround(), 500.0) << "the ground under the center is known there";
 
-        map.jumpTo(CameraOptions().withCenter(LatLng{47.60, 51.4041}));
+        map.jumpTo(overview ? CameraOptions().withCenter(flatCenter()).withZoom(10.0).withPitch(0.0)
+                            : CameraOptions().withCenter(flatCenter()));
         const auto flat = map.getFreeCameraOptions().getLocation();
         ASSERT_TRUE(flat.has_value());
         ASSERT_EQ(rampMeters(flat->location.latitude()), 0.0) << "the new eye is over flat ground";
-        newEyeGround = flat->location;
+        if (!overview) {
+            newEyeGround = flat->location;
+        }
     }
 };
 
@@ -1530,6 +1556,57 @@ TEST(TerrainCamera, EyeHeightIsUnknownUntilTheTileUnderTheNewEyeArrives) {
 
     EXPECT_GE(test.eyeAltitude(), 2005.0) << "eye altitude " << test.eyeAltitude() << " over ground 2000";
     EXPECT_LT(test.eyeAltitude(), 2500.0) << "eye altitude " << test.eyeAltitude() << " over ground 2000";
+}
+
+// The same for the height under the center, which is not the eye's: after a jump from the mountain to
+// flat ground far away, the 1,000 m read under the old center is not the ground under the new one.
+// Where the tile under the new center never arrives, the map is told the height is not known, not
+// left with the mountain's, and the camera comes down to sea level as for one not told yet.
+TEST(TerrainCamera, CenterFarFromWhereItsHeightWasReadDoesNotKeepTheMountainHeight) {
+    EyeLeavesTheMountain test;
+    test.newCenterGround = EyeLeavesTheMountain::flatCenter();
+    test.newCenterTile = EyeLeavesTheMountain::NewEyeTile::Missing;
+    test.climbThenJump(true);
+    test.render(400);
+
+    EXPECT_TRUE(std::isnan(test.reportedCenterGround())) << "reported center ground " << test.reportedCenterGround();
+    EXPECT_LT(test.centerAltitude(), 100.0) << "center altitude " << test.centerAltitude() << " over unknown ground";
+}
+
+// A report that the ground under the center is lost belongs to the terrain it was reported for: with
+// the terrain removed it no longer holds, and it must not meet a new terrain that comes back.
+TEST(TerrainCamera, TheLostCenterGroundIsForgottenWhenTheTerrainIsRemoved) {
+    EyeLeavesTheMountain test;
+    test.newCenterGround = EyeLeavesTheMountain::flatCenter();
+    test.newCenterTile = EyeLeavesTheMountain::NewEyeTile::Missing;
+    test.climbThenJump(true);
+    test.render(400);
+    ASSERT_TRUE(test.centerGroundLost()) << "the renderer lost the ground under the center";
+
+    test.map.removeTerrain();
+    test.render(100);
+    EXPECT_FALSE(test.centerGroundLost()) << "still lost with no terrain";
+}
+
+// Until the tile under the new center gives a height the center's height is unknown, not the
+// mountain's; once it does, it is that ground's, here 2,000 m, and the center rides it.
+TEST(TerrainCamera, CenterHeightIsUnknownUntilTheTileUnderTheNewCenterArrives) {
+    EyeLeavesTheMountain test;
+    test.newCenterGround = EyeLeavesTheMountain::flatCenter();
+    test.newCenterTile = EyeLeavesTheMountain::NewEyeTile::Held;
+    test.climbThenJump(true);
+    test.render(400);
+
+    EXPECT_TRUE(std::isnan(test.reportedCenterGround()))
+        << "reported center ground " << test.reportedCenterGround() << " while its tile is on the way";
+
+    test.newCenterTile = EyeLeavesTheMountain::NewEyeTile::Sent;
+    test.render(1500, [&] { return test.reportedCenterGround() > 1500.0; });
+
+    EXPECT_NEAR(test.reportedCenterGround(), 2000.0, 5.0);
+    test.render(100);
+    EXPECT_NEAR(test.centerAltitude(), 2000.0, 5.0)
+        << "center altitude " << test.centerAltitude() << " over ground 2000";
 }
 
 namespace {
