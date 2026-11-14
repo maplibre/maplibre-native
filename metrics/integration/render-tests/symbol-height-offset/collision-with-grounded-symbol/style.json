@@ -1,0 +1,116 @@
+{
+    "version": 8,
+    "metadata": {
+        "test": {
+            "width": 256,
+            "height": 256,
+            "collisionDebug": true
+        }
+    },
+    "center": [
+        0,
+        0
+    ],
+    "zoom": 15,
+    "pitch": 70,
+    "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+    "sources": {
+        "geometry": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {
+                            "label": "back",
+                            "elevated": false
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                0,
+                                0.0015
+                            ]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "properties": {
+                            "label": "front",
+                            "elevated": true
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                0.0003,
+                                -0.0015
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "layers": [
+        {
+            "id": "background",
+            "type": "background",
+            "paint": {
+                "background-color": "white"
+            }
+        },
+        {
+            "id": "front",
+            "type": "symbol",
+            "source": "geometry",
+            "layout": {
+                "symbol-placement": "point",
+                "text-field": [
+                    "get",
+                    "label"
+                ],
+                "text-font": [
+                    "Open Sans Semibold",
+                    "Arial Unicode MS Bold"
+                ],
+                "text-size": 24,
+                "symbol-height-offset": 190
+            },
+            "paint": {
+                "text-color": "#000"
+            },
+            "filter": [
+                "get",
+                "elevated"
+            ]
+        },
+        {
+            "id": "back",
+            "type": "symbol",
+            "source": "geometry",
+            "layout": {
+                "symbol-placement": "point",
+                "text-field": [
+                    "get",
+                    "label"
+                ],
+                "text-font": [
+                    "Open Sans Semibold",
+                    "Arial Unicode MS Bold"
+                ],
+                "text-size": 24
+            },
+            "paint": {
+                "text-color": "#000"
+            },
+            "filter": [
+                "!",
+                [
+                    "get",
+                    "elevated"
+                ]
+            ]
+        }
+    ]
+}

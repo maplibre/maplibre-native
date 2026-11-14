@@ -136,6 +136,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
                                        : evaluated.get<style::IconTranslateAnchor>();
             matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+            matrix = bucket->elevatedMatrix(matrix);
         }
 
         // from symbol_program, makeValues

@@ -85,6 +85,10 @@ public:
     const PropertyValue<bool>& getSymbolAvoidEdges() const;
     void setSymbolAvoidEdges(const PropertyValue<bool>&);
 
+    static PropertyValue<float> getDefaultSymbolHeightOffset();
+    const PropertyValue<float>& getSymbolHeightOffset() const;
+    void setSymbolHeightOffset(const PropertyValue<float>&);
+
     static PropertyValue<SymbolPlacementType> getDefaultSymbolPlacement();
     const PropertyValue<SymbolPlacementType>& getSymbolPlacement() const;
     void setSymbolPlacement(const PropertyValue<SymbolPlacementType>&);

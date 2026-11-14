@@ -91,6 +91,11 @@ struct SymbolAvoidEdges : LayoutProperty<bool> {
     static bool defaultValue() { return false; }
 };
 
+struct SymbolHeightOffset : LayoutProperty<float> {
+    static constexpr const char *name() { return "symbol-height-offset"; }
+    static float defaultValue() { return 0.f; }
+};
+
 struct SymbolPlacement : LayoutProperty<SymbolPlacementType> {
     static constexpr const char *name() { return "symbol-placement"; }
     static SymbolPlacementType defaultValue() { return SymbolPlacementType::Point; }
@@ -306,6 +311,7 @@ class SymbolLayoutProperties : public Properties<
     IconTextFit,
     IconTextFitPadding,
     SymbolAvoidEdges,
+    SymbolHeightOffset,
     SymbolPlacement,
     SymbolScreenSpace,
     SymbolSortKey,

@@ -289,6 +289,21 @@ void SymbolLayer::setSymbolAvoidEdges(const PropertyValue<bool>& value) {
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
+PropertyValue<float> SymbolLayer::getDefaultSymbolHeightOffset() {
+    return SymbolHeightOffset::defaultValue();
+}
+
+const PropertyValue<float>& SymbolLayer::getSymbolHeightOffset() const {
+    return impl().layout.get<SymbolHeightOffset>();
+}
+
+void SymbolLayer::setSymbolHeightOffset(const PropertyValue<float>& value) {
+    if (value == getSymbolHeightOffset()) return;
+    auto impl_ = mutableImpl();
+    impl_->layout.get<SymbolHeightOffset>() = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
 PropertyValue<SymbolPlacementType> SymbolLayer::getDefaultSymbolPlacement() {
     return SymbolPlacement::defaultValue();
 }
@@ -1154,6 +1169,7 @@ enum class Property : uint8_t {
     IconTextFit,
     IconTextFitPadding,
     SymbolAvoidEdges,
+    SymbolHeightOffset,
     SymbolPlacement,
     SymbolScreenSpace,
     SymbolSortKey,
@@ -1233,6 +1249,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"icon-text-fit", toUint8(Property::IconTextFit)},
      {"icon-text-fit-padding", toUint8(Property::IconTextFitPadding)},
      {"symbol-avoid-edges", toUint8(Property::SymbolAvoidEdges)},
+     {"symbol-height-offset", toUint8(Property::SymbolHeightOffset)},
      {"symbol-placement", toUint8(Property::SymbolPlacement)},
      {"symbol-screen-space", toUint8(Property::SymbolScreenSpace)},
      {"symbol-sort-key", toUint8(Property::SymbolSortKey)},
@@ -1350,6 +1367,8 @@ StyleProperty getLayerProperty(const SymbolLayer& layer, Property property) {
             return makeStyleProperty(layer.getIconTextFitPadding());
         case Property::SymbolAvoidEdges:
             return makeStyleProperty(layer.getSymbolAvoidEdges());
+        case Property::SymbolHeightOffset:
+            return makeStyleProperty(layer.getSymbolHeightOffset());
         case Property::SymbolPlacement:
             return makeStyleProperty(layer.getSymbolPlacement());
         case Property::SymbolScreenSpace:
@@ -1744,22 +1763,18 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setIconTextFitPadding(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::SymbolPlacement) {
-        Error error;
-        const auto& typedValue = convert<PropertyValue<SymbolPlacementType>>(value, error, false, false);
-        if (!typedValue) {
-            return error;
-        }
-
-        setSymbolPlacement(*typedValue);
-        return std::nullopt;
-    }
-    if (property == Property::SymbolSpacing || property == Property::TextLineHeight ||
-        property == Property::TextMaxAngle || property == Property::TextPadding) {
+    if (property == Property::SymbolHeightOffset || property == Property::SymbolSpacing ||
+        property == Property::TextLineHeight || property == Property::TextMaxAngle ||
+        property == Property::TextPadding) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
         if (!typedValue) {
             return error;
+        }
+
+        if (property == Property::SymbolHeightOffset) {
+            setSymbolHeightOffset(*typedValue);
+            return std::nullopt;
         }
 
         if (property == Property::SymbolSpacing) {
@@ -1781,6 +1796,16 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
             setTextPadding(*typedValue);
             return std::nullopt;
         }
+    }
+    if (property == Property::SymbolPlacement) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<SymbolPlacementType>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        setSymbolPlacement(*typedValue);
+        return std::nullopt;
     }
     if (property == Property::SymbolZOrder) {
         Error error;
