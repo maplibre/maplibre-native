@@ -23,6 +23,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/dynamic_texture_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/fill_bucket.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/feature_tracking.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/hillshade_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/renderable.test.cpp
