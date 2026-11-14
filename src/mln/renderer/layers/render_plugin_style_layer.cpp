@@ -4,6 +4,7 @@
 #include <mln/gfx/color_mode.hpp>
 #include <mln/gfx/cull_face_mode.hpp>
 #include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/drawable_atlases_tweaker.hpp>
 #include <mln/plugin/plugin_drawable_data.hpp>
 #include <mln/plugin/plugin_conversion.hpp>
 #include <mln/gfx/shader_group.hpp>
@@ -24,12 +25,57 @@
 #include <mln/style/plugin_property.hpp>
 
 #include <set>
+#include <cmath>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace {
 
 const style::PluginStyleLayer::Impl& pluginImpl(const Immutable<style::Layer::Impl>& impl) {
     return static_cast<const style::PluginStyleLayer::Impl&>(*impl);
+}
+
+// The GPU state a drawable is drawn with.
+struct DrawState {
+    bool depthTest = true;
+    bool depthWrite = false;
+    bool colorWrite = true;
+    bool blend = true;
+    bool stencil = false;
+    bool is3D = false;
+    bool cullBack = false;
+};
+
+// A layer type that declares draw passes gets the state of each pass. Any other is drawn once, with the state the
+// drawable's own flags ask for.
+DrawState drawState(const plugin::RegisteredLayer& registration,
+                    const plugin::DrawPass& pass,
+                    const PluginDrawableDefinition& definition) {
+    if (registration.explicitDrawPasses) {
+        return {pass.depthTest,
+                pass.depthWrite,
+                pass.colorWrite,
+                pass.blend,
+                pass.stencilDedup,
+                registration.is3D,
+                pass.cull == MLN_PLUGIN_CULL_BACK_CCW};
+    }
+    DrawState state;
+    if (definition.enableStencilOverlap) {
+        // Overlapping tiles are deduplicated by the group's one stencil reference, not by depth.
+        state.depthTest = false;
+        state.stencil = true;
+        state.is3D = true;
+    } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
+        // Drawn like fill-extrusion: the per-layer depth mode is disabled above the opaque-pass
+        // cutoff, so a 2D drawable would not depth test against itself or the extrusions.
+        state.depthWrite = true;
+        state.is3D = true;
+        state.cullBack = definition.cullBackFaces;
+    } else if (definition.depthMode == PluginDrawableDepthMode::Disabled) {
+        state.depthTest = false;
+    }
+    return state;
 }
 
 } // namespace
@@ -44,13 +90,13 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
     const auto& definitions = registration->properties;
     const auto& layerImpl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
-        const auto property = layerImpl.pluginProperties.find(definition.name);
-        auto value = property == layerImpl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                                  : property->second;
+        if (definition.isLayout) continue;
+        auto value = style::pluginPropertyValue(definition, layerImpl.pluginProperties);
         transitioningPaintProperties.emplace(definition.name, style::PluginTransitioningPropertyValue{value});
         evaluatedPluginProperties.emplace(definition.name, std::move(value));
     }
-    evaluatedPaintSnapshot = std::make_shared<const style::PluginPropertyMap>(evaluatedPluginProperties);
+    propertiesSnapshot = std::make_shared<const PluginLayerSnapshot>(
+        PluginLayerSnapshot{staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties});
     passes = RenderPass::Translucent;
     styleDependencies = layerImpl.getDependencies();
 }
@@ -60,9 +106,8 @@ void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) 
     styleDependencies = impl.getDependencies();
     const auto& definitions = impl.registration->properties;
     for (const auto& definition : definitions) {
-        const auto property = impl.pluginProperties.find(definition.name);
-        auto value = property == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                             : property->second;
+        if (definition.isLayout) continue;
+        auto value = style::pluginPropertyValue(definition, impl.pluginProperties);
         if (!definition.supportsTransitions) {
             transitioningPaintProperties.insert_or_assign(definition.name,
                                                           style::PluginTransitioningPropertyValue{std::move(value)});
@@ -91,47 +136,79 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     const auto& definitions = registration->properties;
     const auto& impl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
+        if (definition.isLayout) continue;
         const auto transition = transitioningPaintProperties.find(definition.name);
         if (transition != transitioningPaintProperties.end()) {
-            evaluatedPluginProperties.emplace(definition.name,
-                                              transition->second.evaluate(parameters.z, definition, parameters.now));
+            evaluatedPluginProperties.emplace(
+                definition.name,
+                transition->second.evaluate(
+                    definition.type == MLN_PLUGIN_VALUE_IMAGE ? std::floor(parameters.z) : parameters.z,
+                    definition,
+                    parameters.now));
         } else {
-            const auto property = impl.pluginProperties.find(definition.name);
             evaluatedPluginProperties.emplace(definition.name,
-                                              property == impl.pluginProperties.end()
-                                                  ? style::defaultPluginPropertyValue(definition)
-                                                  : property->second);
+                                              style::pluginPropertyValue(definition, impl.pluginProperties));
         }
     }
-    if (*evaluatedPaintSnapshot != evaluatedPluginProperties) {
-        evaluatedPaintSnapshot = std::make_shared<const style::PluginPropertyMap>(evaluatedPluginProperties);
+    const auto layer = staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl);
+    if (propertiesSnapshot->layer != layer || propertiesSnapshot->paint != evaluatedPluginProperties) {
+        propertiesSnapshot = std::make_shared<const PluginLayerSnapshot>(
+            PluginLayerSnapshot{layer, evaluatedPluginProperties});
     }
+    // The paint property values at the camera for a callback; data-driven ones evaluate without a feature. The values
+    // borrow `storage` until the next call.
+    std::vector<style::PluginPropertyValue::EvaluationStorage> storage;
+    const auto cameraValues = [&](bool withDataDriven) {
+        storage.resize(definitions.size());
+        std::vector<mln_plugin_property_value_v1> values;
+        values.reserve(definitions.size());
+        for (size_t i = 0; i < definitions.size(); ++i) {
+            const auto& definition = definitions[i];
+            if (definition.isLayout) continue;
+            const auto& value = evaluatedPluginProperties.at(definition.name);
+            if (!withDataDriven && value.isDataDriven()) continue;
+            values.push_back({sizeof(mln_plugin_property_value_v1),
+                              {definition.name.data(), definition.name.size()},
+                              value.evaluate(parameters.z, definition, storage[i]),
+                              static_cast<uint8_t>(impl.pluginProperties.contains(definition.name))});
+        }
+        return values;
+    };
     if (registration->shouldAnimate) {
-        std::vector<style::PluginPropertyValue::EvaluationStorage> storage(definitions.size());
-        std::vector<mln_plugin_property_value_v1> animationProperties;
-        animationProperties.reserve(definitions.size());
-        auto storageIt = storage.begin();
-        for (const auto& definition : definitions) {
-            const auto propertyIt = evaluatedPluginProperties.find(definition.name);
-            const auto value = propertyIt == evaluatedPluginProperties.end()
-                                   ? style::defaultPluginPropertyValue(definition)
-                                   : propertyIt->second;
-            mln_plugin_property_value_v1 property{};
-            property.struct_size = sizeof(property);
-            property.name = {definition.name.data(), definition.name.size()};
-            property.value = value.evaluate(parameters.z, definition, *storageIt++);
-            property.explicitly_set = impl.pluginProperties.contains(definition.name);
-            animationProperties.push_back(property);
-        }
-        animated = registration->shouldAnimate(animationProperties.data(), animationProperties.size()) != 0;
+        const auto values = cameraValues(true);
+        animated = registration->shouldAnimate(values.data(), values.size()) != 0;
     } else {
         animated = false;
     }
-    auto properties = makeMutable<style::PluginStyleLayerProperties>(
-        staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties);
+    auto properties = makeMutable<style::PluginStyleLayerProperties>(layer, evaluatedPluginProperties);
+    properties->crossfade = parameters.getCrossfadeParameters();
+    const uint32_t allPasses = registration->drawPasses.size() == 32
+                                   ? 0xffffffffu
+                                   : (uint32_t{1} << registration->drawPasses.size()) - 1;
+    properties->rendering.enabled_passes = allPasses;
+    if (registration->evaluateLayer) {
+        const auto values = cameraValues(false);
+        const auto status = registration->evaluateLayer(values.data(), values.size(), &properties->rendering);
+        const auto& rendering = properties->rendering;
+        if (status != MLN_PLUGIN_STATUS_OK || rendering.struct_size != sizeof(rendering) ||
+            (rendering.enabled_passes & ~allPasses) || rendering.translation_anchor_viewport > 1 ||
+            !std::isfinite(rendering.translation.x) || !std::isfinite(rendering.translation.y)) {
+            properties->rendering.enabled_passes = 0;
+            Log::Error(Event::General, "Plugin '" + registration->pluginID + "' failed layer evaluation");
+        }
+    }
+    passes = properties->rendering.enabled_passes ? RenderPass::Translucent : RenderPass::None;
     properties->renderPasses = underlying_type(passes);
     evaluatedProperties = std::move(properties);
     if (layerTweaker) layerTweaker->updateProperties(evaluatedProperties);
+}
+
+bool RenderPluginStyleLayer::is3D() const {
+    return pluginImpl(baseImpl).registration->is3D;
+}
+
+bool RenderPluginStyleLayer::hasCrossfade() const {
+    return static_cast<const style::PluginStyleLayerProperties&>(*evaluatedProperties).crossfade.t != 1;
 }
 
 bool RenderPluginStyleLayer::hasTransition() const {
@@ -181,14 +258,12 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-    // These drawables disable stencil; generating tile masks adds an unused pass.
+    // A 3D group needs the shared layer stencil state, never per-tile clipping.
     if (!layerTweaker) {
         layerTweaker = std::make_shared<PluginLayerTweaker>(getID(), evaluatedProperties, registration);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    if (registration->enableStencilOverlapDedup) {
-        // Every is3D + stencil-enabled drawable below shares this group's single stencil ref.
-        // See the enable_stencil_overlap_dedup doc comment in plugin_api.h.
+    if (registration->is3D) {
         tileLayerGroup->setStencilTiles(renderTiles);
     }
 
@@ -204,7 +279,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
         auto& bucket = static_cast<PluginBucket&>(*renderData->bucket);
-        if (bucket.synchronizePaint(getID(), evaluatedPaintSnapshot, static_cast<float>(state.getZoom()))) {
+        if (bucket.synchronizePaint(getID(), propertiesSnapshot, static_cast<float>(state.getZoom()))) {
             removeTile(renderPass, tileID);
         }
         const auto previousBucket = getRenderTileBucketID(tileID);
@@ -218,81 +293,81 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        for (const auto& definition : bucket.drawables) {
-            const auto shaderGroup = shaderGroups.at(definition.shaderID);
-            StringIDSetsPair propertiesAsUniforms;
-            auto* paintBinders = bucket.paintBinders(getID(), definition.key);
-            auto attributes = context.createVertexAttributeArray();
-            if (paintBinders) paintBinders->populateVertexAttributes(*attributes, propertiesAsUniforms);
-            const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, propertiesAsUniforms)
-                                            : gfx::ShaderPtr{};
-            if (!shader || definition.segments.empty()) {
-                continue;
-            }
-
-            std::size_t vertexCount = 0;
-            gfx::AttributeDataType firstType = gfx::AttributeDataType::Invalid;
-            for (const auto& binding : definition.attributes) {
-                const auto stream = bucket.vertexStreams.find(binding.streamID);
-                if (stream == bucket.vertexStreams.end()) continue;
-                const auto type = binding.type;
-                if (const auto& attr = attributes->set(binding.attributeID)) {
-                    attr->setSharedRawData(stream->second, binding.byteOffset, 0, stream->second->getRawSize(), type);
+        for (size_t passIndex = 0; passIndex < registration->drawPasses.size(); ++passIndex) {
+            const auto& pass = registration->drawPasses[passIndex];
+            for (const auto& definition : bucket.drawables) {
+                const auto shaderGroup = shaderGroups.at(definition.shaderID);
+                StringIDSetsPair propertiesAsUniforms;
+                auto* paintBinders = bucket.paintBinders(getID(), definition.key);
+                auto attributes = context.createVertexAttributeArray();
+                if (paintBinders) paintBinders->populateVertexAttributes(*attributes, propertiesAsUniforms);
+                if (!pass.colorWrite) propertiesAsUniforms.first.emplace("__plugin_depth_only");
+                const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, propertiesAsUniforms)
+                                                : gfx::ShaderPtr{};
+                if (!shader || definition.segments.empty()) {
+                    continue;
                 }
-                vertexCount = std::max(vertexCount, stream->second->getRawCount());
-                if (firstType == gfx::AttributeDataType::Invalid) firstType = type;
-            }
-            if (!vertexCount || firstType == gfx::AttributeDataType::Invalid) continue;
 
-            auto builder = context.createDrawableBuilder("plugin/" + registration->type);
-            builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
-            builder->setRenderPass(renderPass);
-            const bool stencilOverlap = definition.enableStencilOverlap || registration->enableStencilOverlapDedup;
-            if (stencilOverlap) {
-                builder->setEnableDepth(false);
-                builder->setIs3D(true);
-                builder->setEnableStencil(true);
-            } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
-                // Drawn like fill-extrusion: the per-layer depth mode is disabled above the opaque-pass
-                // cutoff, so a 2D drawable would not depth test against itself or the extrusions.
-                builder->setEnableDepth(true);
-                builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setIs3D(true);
-                builder->setEnableStencil(false);
-                if (definition.cullBackFaces) {
-                    builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                gfx::AttributeDataType firstType = gfx::AttributeDataType::Invalid;
+                for (const auto& binding : definition.attributes) {
+                    const auto stream = bucket.vertexStreams.find(binding.streamID);
+                    if (stream == bucket.vertexStreams.end()) continue;
+                    const auto type = binding.type;
+                    if (const auto& attr = attributes->set(binding.attributeID)) {
+                        attr->setSharedRawData(stream->second,
+                                               binding.byteOffset,
+                                               binding.elementOffset,
+                                               stream->second->getRawSize(),
+                                               type);
+                    }
+                    if (firstType == gfx::AttributeDataType::Invalid) firstType = type;
                 }
-            } else if (definition.depthMode == PluginDrawableDepthMode::Disabled) {
-                builder->setEnableDepth(false);
-                builder->setIs3D(false);
-                builder->setEnableStencil(false);
-            } else {
-                builder->setEnableDepth(true);
-                builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                builder->setIs3D(false);
-                builder->setEnableStencil(false);
-            }
-            builder->setColorMode(gfx::ColorMode::alphaBlended());
-            if (!definition.cullBackFaces) {
-                builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            }
-            builder->setVertexAttributes(std::move(attributes));
-            builder->setRawVertices({}, vertexCount, firstType);
-            builder->setSegments(
-                gfx::Triangles(), bucket.indices, definition.segments.data(), definition.segments.size());
-            builder->flush(context);
-            for (auto& drawable : builder->clearDrawables()) {
-                drawable->setTileID(tileID);
-                drawable->setLayerTweaker(layerTweaker);
-                if (paintBinders) drawable->setBinders(renderData->bucket, paintBinders);
-                drawable->setData(std::make_unique<plugin::DrawableData>(definition.shaderID));
-                drawable->setRenderTile(renderTilesOwner, &tile);
-                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                ++stats.drawablesAdded;
+                if (firstType == gfx::AttributeDataType::Invalid) continue;
+
+                auto builder = context.createDrawableBuilder("plugin/" + registration->type);
+                builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
+                builder->setRenderPass(renderPass);
+                if (propertiesAsUniforms.first.contains("__plugin_pattern_enabled")) {
+                    if (const auto& atlases = tile.getAtlasTextures())
+                        builder->addTweaker(std::make_shared<gfx::DrawableAtlasesTweaker>(
+                            atlases, std::nullopt, 0, false, false, style::AlignmentType::Auto, false, false));
+                }
+                const auto passState = drawState(*registration, pass, definition);
+                builder->setDrawPriority(passIndex);
+                builder->setEnableDepth(passState.depthTest);
+                builder->setDepthType(passState.depthWrite ? gfx::DepthMaskType::ReadWrite
+                                                           : gfx::DepthMaskType::ReadOnly);
+                builder->setIs3D(passState.is3D);
+                builder->setEnableStencil(passState.stencil);
+                builder->setEnableColor(passState.colorWrite);
+                builder->setColorMode(!passState.colorWrite ? gfx::ColorMode::disabled()
+                                      : passState.blend     ? gfx::ColorMode::alphaBlended()
+                                                            : gfx::ColorMode::unblended());
+                builder->setCullFaceMode(passState.cullBack ? gfx::CullFaceMode::backCCW()
+                                                            : gfx::CullFaceMode::disabled());
+                if (definition.instanced)
+                    builder->setInstanceAttributes(std::move(attributes));
+                else
+                    builder->setVertexAttributes(std::move(attributes));
+                builder->setRawVertices({}, definition.primitiveVertexCount, firstType);
+                builder->setSegments(
+                    gfx::Triangles(), bucket.indices, definition.segments.data(), definition.segments.size());
+                builder->flush(context);
+                for (auto& drawable : builder->clearDrawables()) {
+                    drawable->setTileID(tileID);
+                    drawable->setLayerTweaker(layerTweaker);
+                    if (paintBinders) drawable->setBinders(renderData->bucket, paintBinders);
+                    drawable->setData(std::make_unique<plugin::DrawableData>(definition.shaderID, passIndex));
+                    drawable->setDepthMaskFor3D(passState.depthWrite ? gfx::DepthMaskType::ReadWrite
+                                                                     : gfx::DepthMaskType::ReadOnly);
+                    drawable->setRenderTile(renderTilesOwner, &tile);
+                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
+                }
             }
         }
     }
-    if (!registration->enableStencilOverlapDedup) {
+    if (!registration->is3D) {
         // Derived from the live drawables on every update so that the stencil tiles go away again once a
         // layer stops producing read-write drawables (e.g. after zooming out of a 3D representation).
         bool hasDepthDrawables = false;
@@ -326,9 +401,8 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     properties.reserve(definitions.size());
     for (size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
-        const auto propertyIt = evaluatedPluginProperties.find(definition.name);
-        const auto value = propertyIt == evaluatedPluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                                         : propertyIt->second;
+        const auto value = style::pluginPropertyValue(
+            definition, definition.isLayout ? impl.pluginProperties : evaluatedPluginProperties);
         mln_plugin_property_value_v1 property{};
         property.struct_size = sizeof(property);
         property.name = {definition.name.data(), definition.name.size()};

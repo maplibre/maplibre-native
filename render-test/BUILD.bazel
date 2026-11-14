@@ -30,7 +30,7 @@ cc_library(
         "include",
     ],
     visibility = [
-        "//plugins:__pkg__",
+        "//plugins:__subpackages__",
         "//render-test/ios:__pkg__",
     ],
     deps = [

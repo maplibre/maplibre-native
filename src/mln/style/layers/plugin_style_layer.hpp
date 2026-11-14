@@ -65,6 +65,8 @@ public:
 
     expression::Dependency getDependencies() const noexcept override { return baseImpl->getDependencies(); }
 
+    mln_plugin_layer_evaluation_v1 rendering{sizeof(mln_plugin_layer_evaluation_v1), 0xffffffffu, {}, 0};
+    CrossfadeParameters crossfade{1, 1, 1};
     PluginPropertyMap evaluatedPaintProperties;
 };
 

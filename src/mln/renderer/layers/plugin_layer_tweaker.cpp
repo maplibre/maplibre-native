@@ -5,6 +5,7 @@
 #include <mln/plugin/plugin_drawable_data.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
@@ -23,19 +24,42 @@ namespace mln {
 void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) return;
 
+    const auto& rendering = static_cast<const style::PluginStyleLayerProperties&>(*evaluatedProperties).rendering;
     const auto drawableCount = layerGroup.getDrawableCount();
     if (drawableCount > std::numeric_limits<uint32_t>::max()) return;
     for (auto& [key, uniform] : sharedUniforms) {
         uniform.drawables.clear();
         uniform.failed = false;
     }
+    // The values of the frame; each drawable adds its tile's.
+    mln_plugin_uniform_context_v1 frameContext{};
+    frameContext.struct_size = sizeof(frameContext);
+    frameContext.bearing = parameters.state.getBearing();
+    frameContext.camera_to_center_distance = parameters.state.getCameraToCenterDistance();
+    frameContext.pixel_ratio = parameters.pixelRatio;
+    frameContext.zoom = parameters.state.getZoom();
+    const auto& crossfade = static_cast<const style::PluginStyleLayerProperties&>(*evaluatedProperties).crossfade;
+    frameContext.crossfade_from_scale = crossfade.fromScale;
+    frameContext.crossfade_to_scale = crossfade.toScale;
+    frameContext.crossfade_t = crossfade.t;
+    const auto lightColor = FillExtrusionBucket::lightColor(parameters.evaluatedLight);
+    std::copy(lightColor.begin(), lightColor.end(), frameContext.light_color);
+    frameContext.light_intensity = FillExtrusionBucket::lightIntensity(parameters.evaluatedLight);
+    const auto lightDirection = FillExtrusionBucket::lightPosition(parameters.evaluatedLight, parameters.state);
+    std::copy(lightDirection.begin(), lightDirection.end(), frameContext.light_direction);
+    frameContext.pixels_to_gl_units[0] = parameters.pixelsToGLUnits[0];
+    frameContext.pixels_to_gl_units[1] = parameters.pixelsToGLUnits[1];
+    const auto viewportSize = parameters.state.getSize();
+    frameContext.viewport_width = viewportSize.width;
+    frameContext.viewport_height = viewportSize.height;
+
     uint32_t drawableIndex = 0;
     {
         visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
             if (!drawable.getData() || !checkTweakDrawable(drawable)) return;
             auto& data = static_cast<plugin::DrawableData&>(*drawable.getData());
-            if (data.uniformFailed) drawable.setEnabled(true);
-            data.uniformFailed = false;
+            drawable.setEnabled((rendering.enabled_passes & (uint32_t{1} << data.passIndex)) != 0);
+            if (!drawable.getEnabled()) return;
             const auto* shader = [&]() -> const plugin::ShaderDefinition* {
                 const auto it = std::find_if(registration->shaders.begin(),
                                              registration->shaders.end(),
@@ -53,25 +77,27 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             if (hasTile) {
                 tileMatrix = getTileMatrix(*tileID,
                                            parameters,
-                                           {0.0f, 0.0f},
-                                           style::TranslateAnchorType::Viewport,
+                                           {rendering.translation.x, rendering.translation.y},
+                                           rendering.translation_anchor_viewport ? style::TranslateAnchorType::Viewport
+                                                                                 : style::TranslateAnchorType::Map,
                                            registration->enableNearClippedMatrix,
                                            false,
                                            drawable,
                                            !registration->enableNearClippedMatrix);
             }
-            mln_plugin_uniform_context_v1 callbackContext{};
-            callbackContext.struct_size = sizeof(callbackContext);
-            callbackContext.bearing = parameters.state.getBearing();
-            callbackContext.camera_to_center_distance = parameters.state.getCameraToCenterDistance();
-            callbackContext.pixel_ratio = parameters.pixelRatio;
-            callbackContext.pixels_to_gl_units[0] = parameters.pixelsToGLUnits[0];
-            callbackContext.pixels_to_gl_units[1] = parameters.pixelsToGLUnits[1];
+            auto callbackContext = frameContext;
+            if (tileID) {
+                callbackContext.tile_x = tileID->canonical.x;
+                callbackContext.tile_y = tileID->canonical.y;
+                callbackContext.tile_z = tileID->canonical.z;
+                callbackContext.tile_wrap = tileID->wrap;
+            }
+            if (const auto& texture = drawable.getTexture(0)) {
+                callbackContext.pattern_texture_size[0] = texture->getSize().width;
+                callbackContext.pattern_texture_size[1] = texture->getSize().height;
+            }
             const auto tileMatrixFloats = util::cast<float>(tileMatrix);
             std::copy(tileMatrixFloats.begin(), tileMatrixFloats.end(), callbackContext.tile_matrix);
-            const auto viewportSize = parameters.state.getSize();
-            callbackContext.viewport_width = viewportSize.width;
-            callbackContext.viewport_height = viewportSize.height;
             callbackContext.pixels_to_tile_units = hasTile ? tileID->pixelsToTileUnits(
                                                                  1.0f, static_cast<float>(parameters.state.getZoom()))
                                                            : 0.0f;
@@ -121,7 +147,6 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                    ")");
                     if (shared) shared->failed = true;
                     drawable.setEnabled(false);
-                    data.uniformFailed = true;
                     continue;
                 }
                 if (const auto* baseBinders = drawable.getBinders()) {
@@ -162,10 +187,7 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             } else if (uniform.failed) {
                 // Never draw with an incomplete array or an old, smaller one
                 // after tile churn. Retry callbacks on the next frame.
-                for (auto* drawable : uniform.drawables) {
-                    drawable->setEnabled(false);
-                    static_cast<plugin::DrawableData&>(*drawable->getData()).uniformFailed = true;
-                }
+                for (auto* drawable : uniform.drawables) drawable->setEnabled(false);
             }
             uniform.drawables.clear();
         }
