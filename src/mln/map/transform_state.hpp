@@ -205,6 +205,8 @@ public:
     float getFieldOfView() const;
     void setFieldOfView(double);
     float getCameraToCenterDistance() const;
+    /// GL JS `getMercatorHorizon`: the horizon's height above the center, in pixels.
+    double getMercatorHorizon() const;
     double getPitch() const;
     void setPitch(double);
     double getRoll() const;
