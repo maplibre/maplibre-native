@@ -139,13 +139,14 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
 
 GeoJSONSource::Impl::Impl(std::string id_, Immutable<GeoJSONOptions> options_)
     : Source::Impl(SourceType::GeoJSON, std::move(id_)),
-      options(std::move(options_)) {}
+      options(std::move(options_)),
+      synchronousUpdate(options->synchronousUpdate) {}
 
 GeoJSONSource::Impl::Impl(const GeoJSONSource::Impl& other, std::shared_ptr<GeoJSONData> data_)
     : Source::Impl(other),
       options(other.options),
       data(std::move(data_)),
-      overrideSynchronousUpdate(other.overrideSynchronousUpdate) {}
+      synchronousUpdate(other.synchronousUpdate) {}
 
 GeoJSONSource::Impl::~Impl() = default;
 
@@ -162,11 +163,7 @@ std::optional<std::string> GeoJSONSource::Impl::getAttribution() const {
 }
 
 bool GeoJSONSource::Impl::isUpdateSynchronous() const {
-    return options->synchronousUpdate || overrideSynchronousUpdate;
-}
-
-void GeoJSONSource::Impl::setOverrideSynchronousUpdate(bool newOverride) const {
-    overrideSynchronousUpdate = newOverride;
+    return synchronousUpdate;
 }
 
 } // namespace style
