@@ -541,11 +541,33 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             demDim = demData->dim;
             if (auto existing = demTextures.find(loaded.id); existing != demTextures.end()) {
                 existing->second.lastUsed = demUpdateCounter;
+                // A neighbour that loaded after the texture was made has backfilled the border
+                // (RenderRasterDEMSource::onTileChanged), which the tile's edge samples. The
+                // image is shared and already changed; the copy on the GPU is not. Send it
+                // again, as gl-js does (needsDEMTextureUpload), or the edge keeps the stand-in
+                // border and steps against its neighbour.
+                if (existing->second.borderRevision != demData->getBorderRevision()) {
+                    existing->second.borderRevision = demData->getBorderRevision();
+                    existing->second.texture->setImage(demData->getImagePtr());
+#if MLN_RENDER_BACKEND_OPENGL
+                    // OpenGL uploads at once; Metal does it when the texture is next bound
+                    existing->second.texture->upload();
+                    // A tile already packed into the array is packed again; one not yet bound is
+                    // packed from this frame's data when it is
+                    if (demArrayLayer.contains(loaded.id)) {
+                        packDEMArrayLayer(context, loaded.id, *demData);
+                    }
+#endif
+                    context.renderingStats().numDEMTexturesRefreshed++;
+                }
             } else if (relatedToMesh(loaded.id)) {
                 if (auto texture = createDEMTexture(context, *demData)) {
                     context.renderingStats().numDEMTexturesCreated++;
                     // Keep the texture available for elevation sampling by non-draped layers
-                    demTextures[loaded.id] = {.texture = texture, .dim = demData->dim, .lastUsed = demUpdateCounter};
+                    demTextures[loaded.id] = {.texture = texture,
+                                              .dim = demData->dim,
+                                              .lastUsed = demUpdateCounter,
+                                              .borderRevision = demData->getBorderRevision()};
                 }
             }
         }
