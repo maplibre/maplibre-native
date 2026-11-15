@@ -117,4 +117,17 @@
 #endif
 }
 
+- (void)testTerrainSetThroughTheStyleProperty {
+  self.mapView.style.terrain = [[MLNTerrain alloc] initWithSourceIdentifier:@"dem"
+                                                               exaggeration:1.5];
+  [self waitForDrawWithTerrain:YES];
+
+  XCTAssertEqualWithAccuracy(self.layer.drawnContext.terrainExaggeration, 1.5, 1e-6);
+
+  self.mapView.style.terrain = nil;
+  [self waitForDrawWithTerrain:NO];
+
+  XCTAssertEqual(self.layer.drawnContext.terrainExaggeration, 0);
+}
+
 @end
