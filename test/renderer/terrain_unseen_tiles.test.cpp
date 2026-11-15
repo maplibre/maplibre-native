@@ -298,7 +298,15 @@ public:
         return settle();
     }
 
-    void look(double pitch) { map.jumpTo(CameraOptions().withCenter(thimblePeak).withZoom(viewZoom).withPitch(pitch)); }
+    // The camera starts on the ground, as the app's clamp leaves it. Left to the clamp, a view whose first
+    // DEM tile is the eye's, not the center's, sat under the ground and covered other tiles.
+    void look(double pitch) {
+        map.jumpTo(CameraOptions()
+                       .withCenter(thimblePeak)
+                       .withCenterAltitude(thimblePeakMeters)
+                       .withZoom(viewZoom)
+                       .withPitch(pitch));
+    }
 
     TilesBySource requested;
 
@@ -342,12 +350,27 @@ void print(const char* what, double pitch, const TilesBySource& tiles) {
     std::printf("  (overlays %zu)\n", total(tiles));
 }
 
-// The tiles each source asked for
-void expectTiles(const TilesBySource& tiles, const std::map<std::string, size_t>& expected, const char* when) {
-    for (const auto& [source, count] : expected) {
-        const auto it = tiles.find(source);
-        EXPECT_EQ(count, it == tiles.end() ? 0u : it->second.size()) << source << ", " << when;
+// Sources none of whose layers draws over the first zoom levels of the source: the style gives
+// each of them a layer minzoom above the source's own (peaks 10 over 7, land labels 12 over 11,
+// streams 11 over 8). Every other source has a layer that draws at every zoom it is served at.
+const std::set<std::string> thinned = {"backcountry_label_points", "public_land_label_points", "reference_streams"};
+
+// What leaving the tiles out does to what each source asks for, against the same view without it
+// in this process: every source asks for no tile it did not ask for before, the thinned ones for
+// fewer, and the others, the DEM and the imagery for the same ones.
+void expectLeftOut(const TilesBySource& today, const TilesBySource& now, const char* when) {
+    for (const auto& [source, before] : today) {
+        const auto it = now.find(source);
+        const std::set<CanonicalTileID> after = it == now.end() ? std::set<CanonicalTileID>{} : it->second;
+        EXPECT_TRUE(std::includes(before.begin(), before.end(), after.begin(), after.end()))
+            << source << ", " << when << ": asks for a tile it did not ask for without leaving out";
+        if (thinned.count(source)) {
+            EXPECT_LT(after.size(), before.size()) << source << ", " << when;
+        } else {
+            EXPECT_EQ(before, after) << source << ", " << when;
+        }
     }
+    EXPECT_LT(total(now), total(today)) << when;
 }
 
 struct Difference {
@@ -386,27 +409,7 @@ TEST(TerrainUnseenTiles, ASourceDoesNotAskForTilesThatBuildNothingAtPitch77) {
     print("today", 77.0, today);
     print("left out", 77.0, now);
 
-    expectTiles(today,
-                {{"backcountry_label_points", 55},
-                 {"backcountry_tile_features", 106},
-                 {"imagery", 38},
-                 {"mvum_roads", 207},
-                 {"public_land_label_points", 202},
-                 {"public_land_units", 39},
-                 {"reference_streams", 106},
-                 {"reference_trails", 207}},
-                "today");
-    expectTiles(now,
-                {{"backcountry_label_points", 15},
-                 {"backcountry_tile_features", 106},
-                 {"imagery", 38},
-                 {"mvum_roads", 207},
-                 {"public_land_label_points", 10},
-                 {"public_land_units", 39},
-                 {"reference_streams", 14},
-                 {"reference_trails", 207}},
-                "left out");
-    EXPECT_EQ(today.at("dem"), now.at("dem"));
+    expectLeftOut(today, now, "pitch 77");
 }
 
 TEST(TerrainUnseenTiles, ASourceDoesNotAskForTilesThatBuildNothingAtPitch85) {
@@ -415,27 +418,7 @@ TEST(TerrainUnseenTiles, ASourceDoesNotAskForTilesThatBuildNothingAtPitch85) {
     print("today", 85.0, today);
     print("left out", 85.0, now);
 
-    expectTiles(today,
-                {{"backcountry_label_points", 127},
-                 {"backcountry_tile_features", 208},
-                 {"imagery", 34},
-                 {"mvum_roads", 207},
-                 {"public_land_label_points", 202},
-                 {"public_land_units", 47},
-                 {"reference_streams", 208},
-                 {"reference_trails", 207}},
-                "today");
-    expectTiles(now,
-                {{"backcountry_label_points", 15},
-                 {"backcountry_tile_features", 208},
-                 {"imagery", 34},
-                 {"mvum_roads", 207},
-                 {"public_land_label_points", 10},
-                 {"public_land_units", 47},
-                 {"reference_streams", 14},
-                 {"reference_trails", 207}},
-                "left out");
-    EXPECT_EQ(today.at("dem"), now.at("dem"));
+    expectLeftOut(today, now, "pitch 85");
 }
 
 // What is left out must change no pixel: the same views with and without, after the view has been
