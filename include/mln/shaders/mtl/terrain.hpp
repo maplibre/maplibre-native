@@ -19,9 +19,13 @@ enum {
 struct alignas(16) TerrainDrawableUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */ float4 dem_coords;
-    /* 80 */
+    /* 80 */ float skirt_edges; // edges with a neighbor tile: north 1, east 2, south 4, west 8
+    /* 84 */ float pad1;
+    /* 88 */ float pad2;
+    /* 92 */ float pad3;
+    /* 96 */
 };
-static_assert(sizeof(TerrainDrawableUBO) == 5 * 16, "wrong size");
+static_assert(sizeof(TerrainDrawableUBO) == 6 * 16, "wrong size");
 
 struct alignas(16) TerrainTilePropsUBO {
     /*  0 */ float2 dem_tl;
@@ -90,8 +94,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // Skirt vertices hang below the surface by elevation_offset, forming a curtain
     // that hides the cracks between neighbouring tiles at different zoom levels
-    // (maplibre-gl-js u_ele_delta). pos.z carries the skirt flag.
-    const float ele_delta = (float(vertx.pos.z) == 1.0) ? props.elevation_offset : 0.0;
+    // (maplibre-gl-js u_ele_delta). pos.z carries the skirt flag. A skirt vertex on an edge with no
+    // neighbor tile stays on the surface, so a corner hangs only where both of its edges have one.
+    const int edges = int(drawable.skirt_edges);
+    const bool bare = (pos.y == 0.0 && (edges & 1) == 0) || (pos.x == 8192.0 && (edges & 2) == 0) ||
+                      (pos.y == 8192.0 && (edges & 4) == 0) || (pos.x == 0.0 && (edges & 8) == 0);
+    const float ele_delta = (float(vertx.pos.z) == 1.0 && !bare) ? props.elevation_offset : 0.0;
     float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
 
     return {

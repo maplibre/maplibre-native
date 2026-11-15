@@ -92,7 +92,11 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         const TerrainDrawableUBO drawableUBO = {
 #endif
             .matrix = util::cast<float>(matrix),
-            .dem_coords = terrain->getDrawableDemCoords(*drawable.getTileID())
+            .dem_coords = terrain->getDrawableDemCoords(*drawable.getTileID()),
+            .skirt_edges = terrain->getDrawableSkirtEdges(*drawable.getTileID()),
+            .pad1 = 0.0f,
+            .pad2 = 0.0f,
+            .pad3 = 0.0f
         };
 
 #if !MLN_UBO_CONSOLIDATION

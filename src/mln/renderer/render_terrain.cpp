@@ -152,6 +152,8 @@ std::vector<LoadedDEMTile> loadedDEMTiles(const RenderSource* demSource) {
 // Set by tests only (RenderTerrain::setMaxDEMTexturesForTesting); 0 keeps the default cap
 std::atomic<size_t> demTextureCapOverride{0};
 
+std::function<bool(const UnwrappedTileID&)> meshCoverFilter;
+
 } // namespace
 
 RenderTerrain::RenderTerrain(Immutable<style::Terrain::Impl> impl_)
@@ -161,6 +163,41 @@ RenderTerrain::~RenderTerrain() = default;
 
 void RenderTerrain::setMaxDEMTexturesForTesting(size_t cap) {
     demTextureCapOverride = cap;
+}
+
+void RenderTerrain::setMeshCoverFilterForTesting(std::function<bool(const UnwrappedTileID&)> keep) {
+    meshCoverFilter = std::move(keep);
+}
+
+uint8_t RenderTerrain::skirtEdges(const UnwrappedTileID& tile, const std::set<UnwrappedTileID>& cover) {
+    // The two tiles' edges on the grid of the finer zoom, in tiles across the unwrapped world
+    struct Box {
+        int64_t x0, x1, y0, y1;
+    };
+    const auto boxAt = [](const UnwrappedTileID& id, int zoom) {
+        const int shift = zoom - id.canonical.z;
+        const int64_t x = static_cast<int64_t>(id.wrap) * (int64_t{1} << id.canonical.z) + id.canonical.x;
+        return Box{
+            x << shift, (x + 1) << shift, int64_t{id.canonical.y} << shift, (int64_t{id.canonical.y} + 1) << shift};
+    };
+    const auto overlap = [](int64_t a0, int64_t a1, int64_t b0, int64_t b1) {
+        return std::max(a0, b0) < std::min(a1, b1);
+    };
+
+    uint8_t edges = 0;
+    for (const auto& other : cover) {
+        if (other == tile) {
+            continue;
+        }
+        const int zoom = std::max(tile.canonical.z, other.canonical.z);
+        const Box a = boxAt(tile, zoom);
+        const Box b = boxAt(other, zoom);
+        if (a.y0 == b.y1 && overlap(a.x0, a.x1, b.x0, b.x1)) edges |= 1;
+        if (a.x1 == b.x0 && overlap(a.y0, a.y1, b.y0, b.y1)) edges |= 2;
+        if (a.y1 == b.y0 && overlap(a.x0, a.x1, b.x0, b.x1)) edges |= 4;
+        if (a.x0 == b.x1 && overlap(a.y0, a.y1, b.y0, b.y1)) edges |= 8;
+    }
+    return edges;
 }
 
 std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
@@ -253,6 +290,9 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
         const auto origin = meshTileCapOrigin(state);
         out = coarsenFarMeshTiles(std::move(out), maxTiles, demSource->getMaxZoom(), origin);
         out = nearestMeshTiles(std::move(out), maxTiles, origin);
+    }
+    if (meshCoverFilter) {
+        std::erase_if(out, [](const UnwrappedTileID& id) { return !meshCoverFilter(id); });
     }
     return out;
 }
@@ -516,6 +556,13 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     std::set<UnwrappedTileID> meshTiles = frameMeshCover ? std::move(*frameMeshCover)
                                                          : computeMeshCover(state, updateParameters);
     frameMeshCover.reset();
+
+    skirtEdgeMasks.clear();
+    if (meshSkirtLength == TerrainSkirtLength::Shared) {
+        for (const auto& id : meshTiles) {
+            skirtEdgeMasks.emplace(OverscaledTileID(id.canonical.z, id.wrap, id.canonical), skirtEdges(id, meshTiles));
+        }
+    }
 
     // A loaded DEM tile worth a texture: a mesh tile itself; an ancestor of one, which the mesh
     // falls back to while its own tile loads; or a descendant, which an elevated layer's tile
@@ -800,7 +847,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 cc != drawableDemCoords.end()
                     ? cc->second
                     : std::array<float, 4>{{1.0f / util::EXTENT, 0.0f, 0.0f, static_cast<float>(demDim)}};
-            instances.push_back({tileID, coords, lc->second});
+            instances.push_back({tileID, coords, lc->second, getDrawableSkirtEdges(tileID)});
             util::hash_combine(sig, std::hash<OverscaledTileID>{}(tileID));
             util::hash_combine(sig, static_cast<int>(lc->second));
         }
@@ -1665,7 +1712,8 @@ void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
         arr[i].matrix = util::cast<float>(m);
         arr[i].dem_coords = inst.demCoords;
         arr[i].dem_layer = inst.demLayer;
-        arr[i].pad1 = arr[i].pad2 = arr[i].pad3 = 0.0f;
+        arr[i].skirt_edges = inst.skirtEdges;
+        arr[i].pad2 = arr[i].pad3 = 0.0f;
     }
     const std::size_t bytes = sizeof(shaders::TerrainDepthInstanceUBO) * maxDepthInstances;
     if (!depthInstanceUBO || depthInstanceUBO->getSize() < bytes) {
