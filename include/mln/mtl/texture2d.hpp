@@ -9,6 +9,7 @@
 #include <Metal/MTLTexture.hpp>
 
 #include <memory>
+#include <optional>
 
 namespace mln {
 namespace mtl {
@@ -51,6 +52,7 @@ public:
     bool needsUpload() const noexcept override { return !!image; };
 
     gfx::Texture2D& setUsage(MTL::TextureUsage usage_) noexcept;
+    gfx::Texture2D& setStorageMode(MTL::StorageMode storageMode_) noexcept;
 
     MTL::Texture* getMetalTexture() const noexcept;
 
@@ -79,6 +81,7 @@ private:
     gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};
     gfx::TextureChannelDataType channelType{gfx::TextureChannelDataType::UnsignedByte};
     MTL::TextureUsage usage{MTL::TextureUsageShaderRead};
+    std::optional<MTL::StorageMode> storageMode;
     SamplerState samplerState{};
     size_t trackedBytes{0};
 

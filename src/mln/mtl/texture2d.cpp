@@ -68,6 +68,9 @@ gfx::Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) 
 }
 
 size_t Texture2D::getDataSize() const noexcept {
+    if (storageMode == MTL::StorageModeMemoryless) {
+        return 0;
+    }
     return size.width * size.height * getPixelStride(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
 }
 
@@ -200,6 +203,9 @@ void Texture2D::createMetalTexture() {
                 break;
         }
 #endif
+        if (storageMode) {
+            textureDescriptor->setStorageMode(*storageMode);
+        }
         metalTexture = context.createMetalTexture(std::move(textureDescriptor));
         if (!metalTexture) {
             throw std::bad_alloc();
@@ -241,6 +247,12 @@ void Texture2D::destroyMetalTexture() noexcept {
 
 gfx::Texture2D& Texture2D::setUsage(MTL::TextureUsage usage_) noexcept {
     usage = usage_;
+    textureDirty = true;
+    return *this;
+}
+
+gfx::Texture2D& Texture2D::setStorageMode(MTL::StorageMode storageMode_) noexcept {
+    storageMode = storageMode_;
     textureDirty = true;
     return *this;
 }
