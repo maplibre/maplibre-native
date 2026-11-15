@@ -22,6 +22,7 @@
 #import "MLNShapeSource.h"
 #import "MLNSource.h"
 #import "MLNSource_Private.h"
+#import "MLNTerrain_Private.h"
 #import "MLNTileSource_Private.h"
 #import "MLNVectorTileSource_Private.h"
 
@@ -38,6 +39,7 @@
 #include <mln/style/sources/raster_source.hpp>
 #include <mln/style/sources/vector_source.hpp>
 #include <mln/style/style.hpp>
+#include <mln/style/terrain.hpp>
 
 #import "NSDate+MLNAdditions.h"
 
@@ -589,6 +591,26 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
   auto mbglLight = self.rawStyle->getLight();
   MLNLight *light = [[MLNLight alloc] initWithMBGLLight:mbglLight];
   return light;
+}
+
+// MARK: Style terrain
+
+- (void)setTerrain:(nullable MLNTerrain *)terrain {
+  MLNLogDebug(@"Setting terrain: %@", terrain);
+  if (!self.rawStyle->isLoaded()) {
+    MLNLogWarning(@"Setting terrain before the style has finished loading. Loading the style "
+                  @"replaces it. Wait for -mapView:didFinishLoadingStyle:.");
+  }
+  if (terrain) {
+    self.rawStyle->setTerrain(std::make_unique<mln::style::Terrain>(terrain.mbglTerrain));
+  } else {
+    self.rawStyle->setTerrain(nullptr);
+  }
+}
+
+- (nullable MLNTerrain *)terrain {
+  const mln::style::Terrain *mbglTerrain = self.rawStyle->getTerrain();
+  return mbglTerrain ? [[MLNTerrain alloc] initWithMBGLTerrain:*mbglTerrain] : nil;
 }
 
 - (NSString *)description {
