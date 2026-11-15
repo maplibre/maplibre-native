@@ -215,7 +215,12 @@ void CollisionFeature::bboxifyLabel(const GeometryCoordinates& line,
                                                ? 0.0f
                                                : (boxDistanceToAnchor - firstBoxOffset) * 0.8f;
 
-        boxes.emplace_back(boxAnchor, -boxSize / 2, -boxSize / 2, boxSize / 2, boxSize / 2, paddedAnchorDistance);
+        // CollisionIndex::placeLineFeature() moves the circle along this normal,
+        // so that it follows the y component of text-offset.
+        const Point<float> lineNormal = util::perp(convertPoint<float>(p1) - convertPoint<float>(p0)) / segmentLength;
+
+        boxes.emplace_back(
+            boxAnchor, -boxSize / 2, -boxSize / 2, boxSize / 2, boxSize / 2, paddedAnchorDistance, lineNormal);
     }
 }
 

@@ -54,13 +54,20 @@ private:
 
 class CollisionBox {
 public:
-    CollisionBox(Point<float> _anchor, float _x1, float _y1, float _x2, float _y2, float _signedDistanceFromAnchor = 0)
+    CollisionBox(Point<float> _anchor,
+                 float _x1,
+                 float _y1,
+                 float _x2,
+                 float _y2,
+                 float _signedDistanceFromAnchor = 0,
+                 Point<float> _lineNormal = {0.0f, 0.0f})
         : anchor(_anchor),
           x1(_x1),
           y1(_y1),
           x2(_x2),
           y2(_y2),
-          signedDistanceFromAnchor(_signedDistanceFromAnchor) {}
+          signedDistanceFromAnchor(_signedDistanceFromAnchor),
+          lineNormal(_lineNormal) {}
 
     // the box is centered around the anchor point
     Point<float> anchor;
@@ -76,6 +83,12 @@ public:
     float y2;
 
     float signedDistanceFromAnchor;
+
+    // Circles of line labels only: unit normal of the line segment that the
+    // circle sits on, that is util::perp() of the segment's forward direction,
+    // in tile coordinates. The y component of text-offset moves the glyphs in
+    // this direction. Zero for boxes.
+    Point<float> lineNormal;
 };
 
 class CollisionFeature {
