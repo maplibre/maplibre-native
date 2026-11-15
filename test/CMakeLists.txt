@@ -32,6 +32,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_zoom_step.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_mipmaps.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation_index.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_first_frame.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_fill_pattern_drape.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_pattern_crossfade.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_resolution.test.cpp
