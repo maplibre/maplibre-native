@@ -65,8 +65,8 @@ struct FirstFrameTest {
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(),
                                                                                   ClientOptions());
     // Only the frames the test asks for render.
-    HeadlessFrontend frontend{{128, 128}, 1, gfx::HeadlessBackend::SwapBehaviour::NoFlush, gfx::ContextMode::Unique,
-                              std::nullopt, false};
+    HeadlessFrontend frontend{
+        {128, 128}, 1, gfx::HeadlessBackend::SwapBehaviour::NoFlush, gfx::ContextMode::Unique, std::nullopt, false};
     MapAdapter map;
 
     FirstFrameTest()
