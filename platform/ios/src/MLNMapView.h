@@ -533,6 +533,24 @@ MLN_EXPORT
 @property (nonatomic, assign) double tileLodZoomShift;
 
 /**
+ How much work the map does per frame while it loads and draws 3D terrain.
+
+ This is a performance option for the device, not a style property. See ``MLNTerrainLoadMode``.
+ The default is ``MLNTerrainLoadModeQuality``.
+ */
+@property (nonatomic, assign) MLNTerrainLoadMode terrainLoadMode;
+
+/**
+ Whether the edges of 3D terrain tiles are skirted.
+
+ Skirts hide the gaps between terrain tiles of different zoom levels, but show as vertical
+ artifacts where the map has a transparent background, so use ``MLNTerrainSkirtLengthNone`` there.
+ Changing this property rebuilds the terrain mesh and every tile. The default is
+ ``MLNTerrainSkirtLengthAuto``.
+ */
+@property (nonatomic, assign) MLNTerrainSkirtLength terrainSkirtLength;
+
+/**
  Frustum offset used to disable rendering of elements at the edge of the screen
 
  Offset applied to camera frustum and scissor rectangle. The camrea frustum is modified
