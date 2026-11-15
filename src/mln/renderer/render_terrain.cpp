@@ -494,11 +494,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         return;
     }
 
-    // Get tiles from the DEM source
-    auto renderTiles = demSource->getRawRenderTiles();
-    if (renderTiles->empty()) {
-        return;
-    }
+    // A DEM source with no tile loaded yet is no reason to draw nothing: the mesh tiles below
+    // fall back to the flat placeholder until their elevation arrives.
 
     // Cast to LayerGroup for addDrawable
     auto* lg = static_cast<LayerGroup*>(layerGroup.get());
@@ -546,6 +543,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             // All tiles come from the same raster-dem source, so they share one
             // encoding and DEM dimension
             demUnpackVector = demData->getUnpackVector();
+            demEncoding = demData->encoding;
             demDim = demData->dim;
             if (auto existing = demTextures.find(loaded.id); existing != demTextures.end()) {
                 existing->second.lastUsed = demUpdateCounter;
@@ -1104,15 +1102,48 @@ std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const Un
     };
 }
 
+namespace {
+
+// The 1x1 DEM image of 0 m. dem_texel decodes a texel as R * u0 + G * u1 + B * u2 - u3 with the
+// unpack vector of the source's encoding, so a zero texel is -u3 (-10,000 m for Mapbox, -32,768 m
+// for Terrarium), not sea level.
+PremultipliedImage flatDEMImage(Tileset::RasterEncoding encoding) {
+    PremultipliedImage image(Size{1, 1});
+    if (encoding == Tileset::RasterEncoding::Terrarium) {
+        // 128 * 256 - 32768
+        image.data[0] = 128;
+        image.data[1] = 0;
+        image.data[2] = 0;
+    } else {
+        // 1 * 6553.6 + 134 * 25.6 + 160 * 0.1 - 10000
+        image.data[0] = 1;
+        image.data[1] = 134;
+        image.data[2] = 160;
+    }
+    image.data[3] = 255;
+    return image;
+}
+
+} // namespace
+
 const std::shared_ptr<gfx::Texture2D>& RenderTerrain::getPlaceholderDEMTexture(gfx::Context& context) {
     if (!placeholderDEMTexture) {
-        auto image = std::make_shared<PremultipliedImage>(Size{1, 1});
-        std::memset(image->data.get(), 0, image->bytes());
+        placeholderDEMEncoding = demEncoding;
         placeholderDEMTexture = context.createTexture2D();
-        placeholderDEMTexture->setImage(image);
+        placeholderDEMTexture->setImage(std::make_shared<PremultipliedImage>(flatDEMImage(demEncoding)));
         placeholderDEMTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
                                                         .wrapU = gfx::TextureWrapType::Clamp,
                                                         .wrapV = gfx::TextureWrapType::Clamp});
+    } else if (placeholderDEMEncoding != demEncoding) {
+        // The unpack vector changed under drawables still bound to the placeholder (the first tile
+        // of a Terrarium source loaded while the rest of the mesh waits). Their texture is the one
+        // that changes, in place, as for a DEM tile whose border was backfilled.
+        placeholderDEMEncoding = demEncoding;
+        placeholderDEMTexture->setImage(std::make_shared<PremultipliedImage>(flatDEMImage(demEncoding)));
+#if MLN_RENDER_BACKEND_OPENGL
+        // OpenGL uploads at once; the other backends do it when the texture is next bound
+        placeholderDEMTexture->upload();
+#endif
     }
     return placeholderDEMTexture;
 }
