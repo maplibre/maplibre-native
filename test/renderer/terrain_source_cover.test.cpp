@@ -272,3 +272,25 @@ TEST(TerrainSourceCover, ASourceKeepsItsWholeCoverWithoutTerrain) {
     ASSERT_GT(coverSize, test.sourceTileLimit()) << "the view has to cover more than the cap would allow";
     EXPECT_EQ(test.parcelTiles.size(), coverSize);
 }
+
+// A wide pitched view draws many terrain tiles, but their topology is identical.
+// Account for small non-terrain index buffers while rejecting one mesh buffer per tile/pass.
+TEST(TerrainSourceCover, MetalTerrainUploadsOneIndexBufferAcrossTilesAndCameraChanges) {
+#if !MLN_RENDER_BACKEND_METAL
+    GTEST_SKIP() << "Checks Metal index-buffer accounting";
+#else
+    TerrainSourceCoverTest test({.demMaxZoom = 12, .pitch = 60.0, .zoom = 12.0, .size = {512, 512}});
+    constexpr int meshBytes = 6 * (128 * 128 + 4 * 128) * sizeof(uint16_t);
+    test.settleDEM();
+    const auto before = test.frontend.render(test.map).stats;
+    EXPECT_GT(before.numDrawCalls, 1);
+    EXPECT_GE(before.memIndexBuffers, meshBytes);
+    EXPECT_LT(before.memIndexBuffers, 2 * meshBytes);
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{38.28, -120.66}).withZoom(13.0).withPitch(60.0));
+    test.settleDEM();
+    const auto after = test.frontend.render(test.map).stats;
+    EXPECT_GT(after.numDrawCalls, 1);
+    EXPECT_GE(after.memIndexBuffers, meshBytes);
+    EXPECT_LT(after.memIndexBuffers, 2 * meshBytes);
+#endif
+}
