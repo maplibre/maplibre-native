@@ -1,6 +1,7 @@
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_impl.hpp>
 #include <mln/math/wrap.hpp>
+#include <mln/renderer/terrain_elevation_index.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source.hpp>
 #include <mln/style/style_impl.hpp>
@@ -122,6 +123,24 @@ void Map::Impl::onUpdate() {
     TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
     transform.updateTransitions(timePoint);
+
+    // A running animation that is not a fling (a pinch's drift, a zoom, a recenter) owns the camera,
+    // so the clamp does not jump it (applyCenterClamp); but its eased height ignores the ground under
+    // the eye, which a zoom out up a slope runs into. Keep the eye over the ground after every frame,
+    // by the ground the map holds for where the eye is now, not the height the renderer last reported
+    // for where it was.
+    if (centerClampedToGround && !transitionIsFling && transform.inTransition() && terrainElevationIndex &&
+        style->impl->getTerrain()) {
+        const TransformState& state = transform.getState();
+        if (const auto eye = state.getFreeCameraOptions().getLocation()) {
+            if (const auto ground = terrainElevationIndex->getElevation(eye->location);
+                ground && eye->altitude < *ground + eyeClearanceMeters &&
+                transform.liftTransitionCenterAltitude(state.getCenterAltitude() + *ground + eyeClearanceMeters -
+                                                       eye->altitude)) {
+                centerAwaitingTerrainAnchor = true;
+            }
+        }
+    }
 
     // Terrain removed: a centre that gestures anchored on it (or the clamp held there) would stay
     // up to kilometres above the now flat map, and pans, tile cover and label placement would
@@ -459,6 +478,8 @@ void Map::Impl::noteTerrainRemoval() {
     const bool hasTerrain = style->impl->getTerrain() != nullptr;
     if (hadTerrain && !hasTerrain) {
         centerAwaitingSeaLevel = true;
+        // A report that the ground under the center was lost belongs to the terrain that is gone
+        centerGroundLost = false;
     } else if (hasTerrain) {
         centerAwaitingSeaLevel = false;
     }
@@ -531,8 +552,17 @@ void Map::Impl::applyCenterClamp() {
         centerSettledBesideACliff = false;
         target = std::max(*gestureHeldCenterAltitude, eyeClearCenterAltitude());
     } else {
-        // The eye's height can be reported before the center's.
         if (std::isnan(terrainCenterElevation)) {
+            // The eye's height can be reported before the center's: leave the camera until then.
+            if (!centerGroundLost) {
+                return;
+            }
+            // The renderer lost the ground under the center (a jump far away): the height it had
+            // is another place's, and the new ground is not known to be anything but sea level, as
+            // for a camera that has not been told yet. Only the eye clearance lifts it from there.
+            if (clampCenterToTerrain(std::max(0.0, eyeClearCenterAltitude()))) {
+                onUpdate();
+            }
             return;
         }
         // A ground report can arrive before the update that follows the end of a gesture or a
@@ -585,6 +615,7 @@ void Map::Impl::applyCenterClamp() {
 
 void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
     terrainCenterElevation = elevationMeters;
+    centerGroundLost = std::isnan(elevationMeters);
     if (!centerClampedToGround) {
         return;
     }

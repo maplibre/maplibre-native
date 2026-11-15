@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_map>
 #include <mln/renderer/render_pass.hpp>
 #include <mln/renderer/render_light.hpp>
 #include <mln/renderer/render_source.hpp>
@@ -112,6 +113,9 @@ public:
     /// whose own content changed re-scan/re-render - not all of them, as the global
     /// signature would force. Owned by the renderer for the frame; null off-terrain.
     const std::map<UnwrappedTileID, std::size_t>* perTargetDrapeSignature = nullptr;
+    /// Layer id -> revision of its style (RenderLayer::styleRevision), for drape targets to tell
+    /// an app-animated layer (a line-gradient reveal) from unchanged content.
+    const std::unordered_map<std::string, std::uintptr_t>* drapeLayerRevisions = nullptr;
 
     RenderPass pass = RenderPass::Opaque;
     MapMode mapMode;

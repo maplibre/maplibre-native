@@ -119,6 +119,13 @@ public:
     /// so a burst of dirty drape targets is spread across frames rather than stalling one.
     RenderResult render(RenderOrchestrator&, const RenderTree&, PaintParameters&, bool canRerender = true);
 
+    /// Forget what this drape target baked, so its next render evaluates and bakes again. For a
+    /// render that threw part-way (out of GPU memory): the bake was recorded before it started.
+    void invalidateBake() {
+        bakedCoverage = {};
+        bakedSignature.reset();
+    }
+
 protected:
     void renderDrapedLayerGroups(RenderOrchestrator&, PaintParameters&);
 
@@ -135,6 +142,11 @@ protected:
         /// tiles or their data change - a tile loading, unloading, getting new data or emptied,
         /// or an integer-zoom crossing.
         std::size_t contentHash = 0;
+        /// The style revision of each draped layer group where it covers this target, in the order
+        /// of `groups` (0 for a group with no revision, or one that covers nothing here). Part of
+        /// contentHash. A change here is a genuine change of look (an app animating a draped
+        /// layer), never a transient drop-out, so it is exempt from the keep-the-better-bake rule.
+        std::vector<std::size_t> groupRevisions;
         /// Integer tile-zoom (draped UBOs carry zoom-derived values like line ratio);
         /// stored quantized so a pinch within one zoom level does not invalidate the
         /// cache. See computeDrapeCoverage.
@@ -158,6 +170,10 @@ protected:
         /// over groups - see terrain::drapeFallbackStrictlyWorse.
         bool worseThan(const DrapeCoverage& other) const {
             return terrain::drapeFallbackStrictlyWorse(groups, other.groups);
+        }
+        /// Whether a layer group's style revision changed between `other` and this.
+        bool revisionChangedFrom(const DrapeCoverage& other) const {
+            return terrain::drapeRevisionChanged(groupRevisions, other.groupRevisions);
         }
     };
     DrapeCoverage computeDrapeCoverage(RenderOrchestrator&, const PaintParameters&) const;

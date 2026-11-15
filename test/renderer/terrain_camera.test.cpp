@@ -2,6 +2,8 @@
 #include <mln/test/stub_file_source.hpp>
 #include <mln/test/map_adapter.hpp>
 
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/context.hpp>
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/bound_options.hpp>
 #include <mln/map/camera.hpp>
@@ -1141,6 +1143,64 @@ TEST(TerrainCamera, AFlingDoesNotCarryTheEyeUnderTheGround) {
     EXPECT_GT(clearance(), 0.0) << "the eye was lifted out of the ground while the fling ran";
 }
 
+// An animation that is not a fling (a pinch's drift, a double-tap zoom, a recenter) zooming out
+// backs the eye up a climb that rises faster than the eye does. The eye was lifted only for a fling,
+// and for every other animation only once it had ended, so the camera was inside the mountain for
+// the whole of it (up to a second after a pinch). Each frame of the animation keeps the eye over the
+// ground under it.
+TEST(TerrainCamera, AnAnimatedZoomDoesNotCarryTheEyeUnderTheGround) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeRampDEMTile(resource.url));
+        return res;
+    };
+    HeadlessFrontend frontend{{390, 844}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize()));
+    map.setCenterClampedToGround(true);
+    map.setBounds(BoundOptions().withMaxPitch(85.0));
+    map.getStyle().loadJSON(rampStyle);
+    const auto pump = [&](std::chrono::milliseconds duration, const std::function<bool()>& done = nullptr) {
+        const auto end = std::chrono::steady_clock::now() + duration;
+        while (std::chrono::steady_clock::now() < end && !(done && done())) {
+            loop.runOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(8));
+        }
+    };
+    const auto clearance = [&] {
+        const auto location = map.getFreeCameraOptions().getLocation();
+        EXPECT_TRUE(location.has_value());
+        return location ? location->altitude - rampMeters(location->location.latitude()) : 0.0;
+    };
+
+    // The center on the ridge line looking north, the climb behind the camera, the eye settled over it.
+    map.jumpTo(
+        CameraOptions().withCenter(LatLng{rampStartLatitude, 11.4041}).withZoom(14.0).withPitch(80.0).withBearing(0.0));
+    pump(std::chrono::milliseconds(30000), [&] { return clearance() > 0.0; });
+    ASSERT_GT(clearance(), 0.0) << "the eye starts over the ground";
+    pump(std::chrono::milliseconds(500));
+
+    bool finished = false;
+    AnimationOptions animation(Milliseconds(3000));
+    animation.transitionFinishFn = [&] {
+        finished = true;
+    };
+    map.easeTo(CameraOptions().withZoom(12.0), animation);
+    double lowest = std::numeric_limits<double>::infinity();
+    pump(std::chrono::milliseconds(15000), [&] {
+        if (!finished) {
+            lowest = std::min(lowest, clearance());
+        }
+        return finished;
+    });
+    ASSERT_TRUE(finished);
+    EXPECT_GE(lowest, 0.0) << "the eye was " << -lowest << " m under the ground during the animation";
+}
+
 // A camera animation the app asks for (a recenter on the user, a flight to a place) from high
 // ground to low kept the center at the height it left, and only when it ended did the clamp jump
 // the center down to the ground: the camera dropped thousands of meters in one frame. As gl-js
@@ -1366,18 +1426,28 @@ namespace {
 
 // A camera over a high mountain with its eye height read, then thrown onto flat ground far away.
 // The ground under the new eye is a tile of its own, which the test holds back, or never sends.
+struct InspectableMap : MapAdapter {
+    using MapAdapter::MapAdapter;
+    double reportedCenterGround() const { return impl->terrainCenterElevation; }
+    bool centerGroundLost() const { return impl->centerGroundLost; }
+    void removeTerrain() { getStyle().setTerrain(nullptr); }
+};
+
 struct EyeLeavesTheMountain {
     util::RunLoop loop;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(),
                                                                                   ClientOptions());
     HeadlessFrontend frontend{{390, 844}, 1};
-    MapAdapter map;
+    InspectableMap map;
     std::optional<LatLng> newEyeGround;
+    std::optional<LatLng> newCenterGround;
     enum class NewEyeTile {
         Held,
         Missing,
         Sent
-    } newEyeTile = NewEyeTile::Held;
+    };
+    NewEyeTile newEyeTile = NewEyeTile::Held;
+    NewEyeTile newCenterTile = NewEyeTile::Sent;
     const std::string shelf = makeUniformDEMTile(2000.0);
 
     EyeLeavesTheMountain()
@@ -1387,15 +1457,19 @@ struct EyeLeavesTheMountain {
               MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize())) {
         fileSource->tileResponse = [this](const Resource& resource) -> std::optional<Response> {
             Response res;
-            if (newEyeGround && tileUrlCovers(resource.url, *newEyeGround)) {
-                if (newEyeTile == NewEyeTile::Held) {
+            for (const auto& [ground, tile] :
+                 {std::pair{newEyeGround, newEyeTile}, std::pair{newCenterGround, newCenterTile}}) {
+                if (!ground || !tileUrlCovers(resource.url, *ground)) {
+                    continue;
+                }
+                if (tile == NewEyeTile::Held) {
                     return std::nullopt;
                 }
-                if (newEyeTile == NewEyeTile::Missing) {
+                if (tile == NewEyeTile::Missing) {
                     res.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
                     return res;
                 }
-                // Sent: 2,000 m ground under the eye.
+                // Sent: 2,000 m ground under it.
                 res.data = std::make_shared<std::string>(shelf);
                 return res;
             }
@@ -1417,28 +1491,40 @@ struct EyeLeavesTheMountain {
     }
 
     double centerAltitude() const { return map.getCameraOptions().centerAltitude.value_or(0.0); }
+    // The ground height under the center the renderer last reported to the map; NaN is "not known".
+    double reportedCenterGround() const { return map.reportedCenterGround(); }
+    bool centerGroundLost() const { return map.centerGroundLost(); }
     double eyeAltitude() const {
         const auto eye = map.getFreeCameraOptions().getLocation();
         return eye ? eye->altitude : 0.0;
     }
 
+    // The flat ground the camera is thrown onto.
+    static LatLng flatCenter() { return LatLng{47.60, 51.4041}; }
+
     // On the mountain: the eye a few kilometers up the slope behind the center, the camera lifted
     // out of it, then flat ground 40 degrees of longitude east, where the eye is over ground that is
     // not the mountain's. The center's own ground is never known there (the camera is too high over
-    // flat ground for the cover to take its tile), so it keeps the height it last had, 1,000 m.
-    void climbThenJump() {
+    // flat ground for the cover to take its tile), so it keeps the height it last had, 1,000 m. With
+    // `overview` the camera is also lifted to zoom 10, looking straight down, where the cover does
+    // take the tile under the center.
+    void climbThenJump(bool overview = false) {
         map.jumpTo(CameraOptions().withCenter(LatLng{47.29, 11.4041}).withZoom(15.0).withPitch(85.0).withBearing(0.0));
         render(1500, [&] { return centerAltitude() > 2500.0; });
         const auto onMountain = map.getFreeCameraOptions().getLocation();
         ASSERT_TRUE(onMountain.has_value());
         ASSERT_GT(rampMeters(onMountain->location.latitude()), 2500.0) << "the eye starts inside the mountain";
         ASSERT_GT(onMountain->altitude, 2500.0) << "and the camera is lifted out of it";
+        ASSERT_GT(reportedCenterGround(), 500.0) << "the ground under the center is known there";
 
-        map.jumpTo(CameraOptions().withCenter(LatLng{47.60, 51.4041}));
+        map.jumpTo(overview ? CameraOptions().withCenter(flatCenter()).withZoom(10.0).withPitch(0.0)
+                            : CameraOptions().withCenter(flatCenter()));
         const auto flat = map.getFreeCameraOptions().getLocation();
         ASSERT_TRUE(flat.has_value());
         ASSERT_EQ(rampMeters(flat->location.latitude()), 0.0) << "the new eye is over flat ground";
-        newEyeGround = flat->location;
+        if (!overview) {
+            newEyeGround = flat->location;
+        }
     }
 };
 
@@ -1472,6 +1558,57 @@ TEST(TerrainCamera, EyeHeightIsUnknownUntilTheTileUnderTheNewEyeArrives) {
 
     EXPECT_GE(test.eyeAltitude(), 2005.0) << "eye altitude " << test.eyeAltitude() << " over ground 2000";
     EXPECT_LT(test.eyeAltitude(), 2500.0) << "eye altitude " << test.eyeAltitude() << " over ground 2000";
+}
+
+// The same for the height under the center, which is not the eye's: after a jump from the mountain to
+// flat ground far away, the 1,000 m read under the old center is not the ground under the new one.
+// Where the tile under the new center never arrives, the map is told the height is not known, not
+// left with the mountain's, and the camera comes down to sea level as for one not told yet.
+TEST(TerrainCamera, CenterFarFromWhereItsHeightWasReadDoesNotKeepTheMountainHeight) {
+    EyeLeavesTheMountain test;
+    test.newCenterGround = EyeLeavesTheMountain::flatCenter();
+    test.newCenterTile = EyeLeavesTheMountain::NewEyeTile::Missing;
+    test.climbThenJump(true);
+    test.render(400);
+
+    EXPECT_TRUE(std::isnan(test.reportedCenterGround())) << "reported center ground " << test.reportedCenterGround();
+    EXPECT_LT(test.centerAltitude(), 100.0) << "center altitude " << test.centerAltitude() << " over unknown ground";
+}
+
+// A report that the ground under the center is lost belongs to the terrain it was reported for: with
+// the terrain removed it no longer holds, and it must not meet a new terrain that comes back.
+TEST(TerrainCamera, TheLostCenterGroundIsForgottenWhenTheTerrainIsRemoved) {
+    EyeLeavesTheMountain test;
+    test.newCenterGround = EyeLeavesTheMountain::flatCenter();
+    test.newCenterTile = EyeLeavesTheMountain::NewEyeTile::Missing;
+    test.climbThenJump(true);
+    test.render(400);
+    ASSERT_TRUE(test.centerGroundLost()) << "the renderer lost the ground under the center";
+
+    test.map.removeTerrain();
+    test.render(100);
+    EXPECT_FALSE(test.centerGroundLost()) << "still lost with no terrain";
+}
+
+// Until the tile under the new center gives a height the center's height is unknown, not the
+// mountain's; once it does, it is that ground's, here 2,000 m, and the center rides it.
+TEST(TerrainCamera, CenterHeightIsUnknownUntilTheTileUnderTheNewCenterArrives) {
+    EyeLeavesTheMountain test;
+    test.newCenterGround = EyeLeavesTheMountain::flatCenter();
+    test.newCenterTile = EyeLeavesTheMountain::NewEyeTile::Held;
+    test.climbThenJump(true);
+    test.render(400);
+
+    EXPECT_TRUE(std::isnan(test.reportedCenterGround()))
+        << "reported center ground " << test.reportedCenterGround() << " while its tile is on the way";
+
+    test.newCenterTile = EyeLeavesTheMountain::NewEyeTile::Sent;
+    test.render(1500, [&] { return test.reportedCenterGround() > 1500.0; });
+
+    EXPECT_NEAR(test.reportedCenterGround(), 2000.0, 5.0);
+    test.render(100);
+    EXPECT_NEAR(test.centerAltitude(), 2000.0, 5.0)
+        << "center altitude " << test.centerAltitude() << " over ground 2000";
 }
 
 namespace {
@@ -1635,6 +1772,75 @@ TEST(TerrainDEMTextures, ATextureIsMadeOnlyForTilesRelatedToTheMeshTileSet) {
     EXPECT_GT(stats.numDEMTexturesCreated, 0) << "the mesh tiles have no DEM texture";
     EXPECT_LE(stats.numDEMTexturesCreated, static_cast<int>(2 * cap))
         << "a texture was made for a tile unrelated to the mesh";
+}
+
+// A tile's edge vertices read the DEM's 2 px border, which the neighbouring tile backfills when it
+// loads (RenderRasterDEMSource::onTileChanged). A tile whose neighbour arrives after the tile's
+// texture was made must have that texture sent again, or its edge keeps the stand-in border (a copy
+// of its own last column) and steps against the neighbour, which the skirts show as a vertical riser.
+TEST(TerrainDEMTextures, ANeighbourLoadingLaterRefreshesTheTexturesOfTheTilesItBackfills) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string tile = makeFlatDEMTile();
+    // Tiles in odd columns are held back until released, so the tiles in even columns are loaded, and
+    // have their textures, before the neighbours that backfill them
+    bool holdOddColumns = true;
+    std::set<std::string> requestedOdd;
+    std::set<std::string> demTiles;
+    fileSource->tileResponse = [&](const Resource& resource) -> std::optional<Response> {
+        const auto lastDash = resource.url.rfind('-');
+        const auto firstDash = resource.url.rfind('-', lastDash - 1);
+        const int column = std::stoi(resource.url.substr(firstDash + 1, lastDash - firstDash - 1));
+        if (column % 2 == 1) {
+            requestedOdd.insert(resource.url);
+            if (holdOddColumns) {
+                return std::nullopt;
+            }
+        }
+        demTiles.insert(resource.url);
+        Response res;
+        res.data = std::make_shared<std::string>(tile);
+        return res;
+    };
+    HeadlessFrontend frontend{{512, 512}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize()));
+    map.getStyle().loadJSON(terrainStyle);
+    map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(2.5).withPitch(0.0));
+
+    // A Continuous map renders as tiles arrive (a still waits for every tile, so it could not show
+    // a tile that loads after the others), and the counters are read from the backend's context.
+    gfx::RenderingStats stats;
+    const auto renderUntilQuiet = [&] {
+        constexpr int maxFrames = 200;
+        constexpr int quietFrames = 10;
+        std::size_t seen = 0;
+        int quiet = 0;
+        for (int frame = 0; frame < maxFrames && quiet < quietFrames; ++frame) {
+            loop.runOnce();
+            const int before = stats.numDEMTexturesCreated;
+            {
+                gfx::BackendScope guard{*frontend.getBackend()};
+                stats = frontend.getBackend()->getContext().renderingStats();
+            }
+            quiet = demTiles.size() == seen && stats.numDEMTexturesCreated == before ? quiet + 1 : 0;
+            seen = demTiles.size();
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+        return quiet == quietFrames;
+    };
+
+    ASSERT_TRUE(renderUntilQuiet()) << "the even columns kept arriving";
+    ASSERT_GT(stats.numDEMTexturesCreated, 0) << "the tiles in the even columns have no texture";
+    ASSERT_FALSE(requestedOdd.empty()) << "the view has no tile in an odd column, so nothing backfills";
+    EXPECT_EQ(stats.numDEMTexturesRefreshed, 0) << "nothing has backfilled a border yet";
+
+    holdOddColumns = false;
+    ASSERT_TRUE(renderUntilQuiet()) << "the odd columns kept arriving";
+    EXPECT_GT(stats.numDEMTexturesRefreshed, 0)
+        << "a tile backfilled by a neighbour that loaded after its texture was made kept the stale texture";
 }
 
 namespace {
