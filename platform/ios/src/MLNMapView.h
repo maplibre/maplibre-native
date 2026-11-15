@@ -573,6 +573,20 @@ MLN_EXPORT
  */
 @property (nonatomic, assign, getter=isCenterClampedToGround) BOOL centerClampedToGround;
 
+/**
+ The rendered 3D terrain's height under a coordinate, in meters with the style's
+ exaggeration applied, as the renderer last loaded it.
+
+ Returns `nil` when terrain is not enabled or the DEM under the coordinate has not
+ loaded yet. The same query positions annotation views and the user location on
+ the draped surface; a caller that needs true elevation divides by the terrain's
+ exaggeration.
+
+ @param coordinate The geographic coordinate to sample.
+ */
+- (nullable NSNumber *)terrainElevationForCoordinate:(CLLocationCoordinate2D)coordinate
+    NS_SWIFT_NAME(terrainElevation(at:));
+
 // MARK: Displaying the User’s Location
 
 /**

@@ -3273,6 +3273,15 @@ static void *windowScreenContext = &windowScreenContext;
   return _mbglMap->getCenterClampedToGround();
 }
 
+- (nullable NSNumber *)terrainElevationForCoordinate:(CLLocationCoordinate2D)coordinate {
+  if (!CLLocationCoordinate2DIsValid(coordinate)) {
+    return nil;
+  }
+  std::optional<double> elevation =
+      _mbglMap->getTerrainElevation(MLNLatLngFromLocationCoordinate2D(coordinate));
+  return elevation ? @(*elevation) : nil;
+}
+
 // MARK: - Accessibility -
 
 - (NSString *)accessibilityValue {
