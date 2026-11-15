@@ -52,6 +52,7 @@
 #include <mln/gfx/vertex_attribute.hpp> // VertexAttributeArray for the a_instance attribute
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstring>
 #include <functional>
@@ -148,12 +149,23 @@ std::vector<LoadedDEMTile> loadedDEMTiles(const RenderSource* demSource) {
     return out;
 }
 
+// Set by tests only (RenderTerrain::setLeaveOutEmptyTilesForTesting)
+std::atomic<bool> leaveOutEmptyTiles{true};
+
 } // namespace
 
 RenderTerrain::RenderTerrain(Immutable<style::Terrain::Impl> impl_)
     : impl(std::move(impl_)) {}
 
 RenderTerrain::~RenderTerrain() = default;
+
+void RenderTerrain::setLeaveOutEmptyTilesForTesting(bool leaveOut) {
+    leaveOutEmptyTiles = leaveOut;
+}
+
+bool RenderTerrain::leavesOutEmptyTiles() {
+    return leaveOutEmptyTiles;
+}
 
 std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     const TransformState& state, const std::shared_ptr<UpdateParameters>& updateParameters) const {

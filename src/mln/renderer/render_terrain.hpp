@@ -109,6 +109,11 @@ public:
     /// the ground under the camera (the map centre when the map is not tilted).
     static std::array<double, 2> meshTileCapOrigin(const TransformState& state);
 
+    /// Whether a source leaves out the tiles that build none of its layers (on by default); a test
+    /// turns it off to compare what it leaves out.
+    static void setLeaveOutEmptyTilesForTesting(bool leaveOut);
+    static bool leavesOutEmptyTiles();
+
     /// The cover with a one-ring dilation: every 8-neighbour of a tile, at that tile's zoom,
     /// except one that lies over, or under, a tile the cover already has (whatever its zoom).
     static std::set<UnwrappedTileID> dilateCover(const std::set<UnwrappedTileID>& cover);
