@@ -3,6 +3,7 @@
 #include <mln/gl/context.hpp>
 #include <mln/gl/framebuffer.hpp>
 #include <mln/gfx/renderbuffer.hpp>
+#include <mln/gl/texture2d.hpp>
 
 namespace mln {
 namespace gl {
@@ -29,6 +30,23 @@ public:
     }
 
     ~OffscreenTextureResource() noexcept override = default;
+
+    void setMipmapped(bool mipmapped_, uint8_t maxAnisotropy) {
+        mipmapped = mipmapped_;
+        texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                          .wrapU = gfx::TextureWrapType::Clamp,
+                                          .wrapV = gfx::TextureWrapType::Clamp,
+                                          .maxAnisotropy = mipmapped ? maxAnisotropy : uint8_t{1},
+                                          .mipmapped = mipmapped});
+    }
+
+    void swap() override {
+        // Presented once the render pass that drew into the texture is over, so once per render
+        if (mipmapped && framebuffer) {
+            static_cast<gl::Texture2D*>(texture.get())->generateMipmaps();
+            context.renderingStats().numMipmapChainsBuilt++;
+        }
+    }
 
     void bind() override {
         if (!framebuffer) {
@@ -71,6 +89,7 @@ private:
     const Size size;
     gfx::Texture2DPtr texture;
     const gfx::TextureChannelDataType type;
+    bool mipmapped = false;
     const bool depth;
     const bool stencil;
     std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthBuffer;
@@ -96,6 +115,10 @@ bool OffscreenTexture::isRenderable() {
 
 PremultipliedImage OffscreenTexture::readStillImage() {
     return getResource<OffscreenTextureResource>().readStillImage();
+}
+
+void OffscreenTexture::setMipmapped(bool mipmapped, uint8_t maxAnisotropy) {
+    getResource<OffscreenTextureResource>().setMipmapped(mipmapped, maxAnisotropy);
 }
 
 const gfx::Texture2DPtr& OffscreenTexture::getTexture() {

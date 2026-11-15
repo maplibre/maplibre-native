@@ -72,6 +72,22 @@ inline bool drapeFallbackStrictlyWorse(const std::vector<DrapeGroupFallback>& no
     return worse;
 }
 
+/// Whether the style revision of a draped layer group differs between what a drape target would
+/// render now and what it baked. A revision of 0 means the group has none or covers nothing there,
+/// and is not a change: a layer whose tiles dropped out of the cover is a drop-out, which the
+/// drape cache rides out, not a new look.
+inline bool drapeRevisionChanged(const std::vector<std::size_t>& now, const std::vector<std::size_t>& baked) {
+    if (now.size() != baked.size()) {
+        return true;
+    }
+    for (std::size_t i = 0; i < now.size(); ++i) {
+        if (now[i] != 0 && baked[i] != 0 && now[i] != baked[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /// What one draped layer group would render into a drape target, gathered tile by tile from the
 /// tiles the group draws on and the tiles its layer has no data on. Tiles that do not overlap the
 /// target are ignored.

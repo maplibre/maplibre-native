@@ -15,6 +15,7 @@
 #import "MLNOfflineStorage_Private.h"
 #import "MLNShape_Private.h"
 #import "MLNStyle_Private.h"
+#import "MLNTerrain_Private.h"
 
 #import "MLNAnnotationImage.h"
 #import "MLNImageSource.h"
@@ -783,6 +784,22 @@ public:
 
 - (double)tileLodZoomShift {
   return _mbglMap->getTileLodZoomShift();
+}
+
+- (void)setTerrainLoadMode:(MLNTerrainLoadMode)terrainLoadMode {
+  _mbglMap->setTerrainLoadMode(MLNTerrainLoadModeToMBGL(terrainLoadMode));
+}
+
+- (MLNTerrainLoadMode)terrainLoadMode {
+  return MLNTerrainLoadModeFromMBGL(_mbglMap->getTerrainLoadMode());
+}
+
+- (void)setTerrainSkirtLength:(MLNTerrainSkirtLength)terrainSkirtLength {
+  _mbglMap->setTerrainSkirtLength(MLNTerrainSkirtLengthToMBGL(terrainSkirtLength));
+}
+
+- (MLNTerrainSkirtLength)terrainSkirtLength {
+  return MLNTerrainSkirtLengthFromMBGL(_mbglMap->getTerrainSkirtLength());
 }
 
 - (mln::Renderer *)renderer {

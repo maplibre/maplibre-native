@@ -5,6 +5,8 @@
 #include <mln/platform/gl_functions.hpp>
 #include <mln/util/instrumentation.hpp>
 
+#include <algorithm>
+
 namespace mln {
 namespace gl {
 
@@ -99,13 +101,54 @@ platform::GLuint Texture2D::getTextureID() const noexcept {
     return texture ? *texture : 0;
 }
 
+namespace {
+/// The most taps the driver's anisotropic filter takes, 1 where it has none. Asked once: every
+/// context of a process sits on the same driver.
+float maxSupportedAnisotropy() {
+    using namespace platform;
+    static const float limit = [] {
+        while (glGetError() != GL_NO_ERROR) {
+        }
+        GLfloat value = 1.0f;
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &value);
+        return glGetError() == GL_NO_ERROR ? std::max(value, 1.0f) : 1.0f;
+    }();
+    return limit;
+}
+} // namespace
+
+void Texture2D::generateMipmaps() noexcept {
+    using namespace platform;
+    if (!texture) {
+        return;
+    }
+    context.activeTextureUnit = 0;
+    context.texture[0] = getTextureID();
+    MBGL_CHECK_ERROR(glGenerateMipmap(GL_TEXTURE_2D));
+    if (!mipChainBuilt) {
+        // From now on the sampler may filter between levels
+        mipChainBuilt = true;
+        samplerStateDirty = true;
+    }
+}
+
 void Texture2D::updateSamplerConfiguration() noexcept {
     using namespace platform;
     samplerStateDirty = false;
 
+    const bool filterLevels = samplerState.mipmapped && mipChainBuilt &&
+                              samplerState.filter == gfx::TextureFilterType::Linear;
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D,
                                      GL_TEXTURE_MIN_FILTER,
-                                     samplerState.filter == gfx::TextureFilterType::Nearest ? GL_NEAREST : GL_LINEAR));
+                                     filterLevels                                             ? GL_LINEAR_MIPMAP_LINEAR
+                                     : samplerState.filter == gfx::TextureFilterType::Nearest ? GL_NEAREST
+                                                                                              : GL_LINEAR));
+    if (filterLevels && samplerState.maxAnisotropy > 1 && maxSupportedAnisotropy() > 1.0f) {
+        MBGL_CHECK_ERROR(
+            glTexParameterf(GL_TEXTURE_2D,
+                            GL_TEXTURE_MAX_ANISOTROPY_EXT,
+                            std::min(static_cast<float>(samplerState.maxAnisotropy), maxSupportedAnisotropy())));
+    }
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D,
                                      GL_TEXTURE_MAG_FILTER,
                                      samplerState.filter == gfx::TextureFilterType::Nearest ? GL_NEAREST : GL_LINEAR));

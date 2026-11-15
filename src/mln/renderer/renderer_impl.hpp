@@ -60,7 +60,8 @@ private:
     /// textures they sample. Rebuilding the pool per frame would reallocate every
     /// tile-sized target every frame - churning GPU memory and discarding the
     /// baked content that suppresses drape flicker.
-    // Drape target resolution = base tile size x qualityFactor. maplibre-gl-js renders
+    // Drape target resolution = base tile size x qualityFactor, for the finest tiles of the cover;
+    // the coarser ones get the base tile size (Renderer::Impl::render). maplibre-gl-js renders
     // its render-to-texture tiles at tileSize * qualityFactor (qualityFactor = 2, i.e.
     // 1024x1024) precisely so draped content - thin lines especially - is not pixelated
     // or aliased when the terrain mesh magnifies it onto the screen. Its own words
@@ -72,6 +73,8 @@ private:
     static constexpr uint32_t drapeTileSize = 512;
     static constexpr uint32_t drapeQualityFactor = 2;
     TexturePool texturePool{drapeTileSize * drapeQualityFactor};
+    /// This frame's layer revisions (see PaintParameters::drapeLayerRevisions).
+    std::unordered_map<std::string, std::uintptr_t> layerIdentities;
 
     gfx::RendererBackend& backend;
 
@@ -113,6 +116,9 @@ private:
     /// post an observer message every frame. NaN until one is: ground at 0 m is a height too.
     double lastReportedCenterElevation = std::numeric_limits<double>::quiet_NaN();
     double lastReportedEyeElevation = std::numeric_limits<double>::quiet_NaN();
+    /// The loaded DEM tile the center's height was last read from: once the center is outside it
+    /// with no loaded tile under it, that height is not the ground under the center any more.
+    std::optional<UnwrappedTileID> centerElevationTile;
     /// The loaded DEM tile the eye's height was last read from: once the eye is outside it with no
     /// loaded tile under it, that height is not the ground under the eye any more.
     std::optional<UnwrappedTileID> eyeElevationTile;

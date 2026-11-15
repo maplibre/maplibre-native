@@ -52,6 +52,7 @@
 #include <mln/gfx/vertex_attribute.hpp> // VertexAttributeArray for the a_instance attribute
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstring>
 #include <functional>
@@ -148,12 +149,19 @@ std::vector<LoadedDEMTile> loadedDEMTiles(const RenderSource* demSource) {
     return out;
 }
 
+// Set by tests only (RenderTerrain::setMaxDEMTexturesForTesting); 0 keeps the default cap
+std::atomic<size_t> demTextureCapOverride{0};
+
 } // namespace
 
 RenderTerrain::RenderTerrain(Immutable<style::Terrain::Impl> impl_)
     : impl(std::move(impl_)) {}
 
 RenderTerrain::~RenderTerrain() = default;
+
+void RenderTerrain::setMaxDEMTexturesForTesting(size_t cap) {
+    demTextureCapOverride = cap;
+}
 
 std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     const TransformState& state, const std::shared_ptr<UpdateParameters>& updateParameters) const {
@@ -174,8 +182,8 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // elevation-aware ideal cover from the view, not the DEM's loaded tile set.
     const uint16_t terrainCoverTileSize = demSource->getTileSize();
     // Deeper than the DEM goes, as maplibre-gl-js does: a tile past its maxzoom samples its DEM
-    // ancestor through a sub-tile offset (the ancestor fallback in update()), and its 1024 px
-    // drape target covers a smaller area. Capped at the DEM's maxzoom, a close-up at z16 over a
+    // ancestor through a sub-tile offset (the ancestor fallback in update()), and its drape
+    // target covers a smaller area. Capped at the DEM's maxzoom, a close-up at z16 over a
     // z12 DEM stretched each target 8x (dotted roads, blocky imagery). How deep depends on the
     // load mode (meshMaxZoom): Quality follows the view as gl-js does; Balanced and Performance
     // stop sooner, since each level deeper adds tiles, and drape memory with them.
@@ -184,7 +192,7 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
 
     // LOD parameters from the frame drive the same near-high/far-low zoom
     // selection every other source uses, so the near field drapes at a higher
-    // zoom (smaller ground area per 1024 target = sharper draped content).
+    // zoom (smaller ground area per drape target = sharper draped content).
     util::TileCoverParameters coverParams{.transformState = state, .elevationProvider = &elevationProvider};
     // The finest tiles go under the camera (where the screen is densest), as the mesh-tile cap below
     // keeps the tiles nearest it; measured from the map centre, a steep pitch gives the ground at the
@@ -233,7 +241,7 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // them as streaks. Per-mode cap (TerrainLoadBudget::maxMeshTiles): Quality keeps
     // a generous cap so terrain render distance stays long; Balanced/Performance trade distance
     // for frame time. It caps the cover, not just the mesh: the drape-target pool allocates a
-    // 1024 px target per cover tile, so a cap on the mesh alone still allocated one for every
+    // drape target per cover tile, so a cap on the mesh alone still allocated one for every
     // tile it dropped.
     // Before the cap drops any tile, the farthest tiles past the DEM's maxzoom go back to their
     // parents (coarsenFarMeshTiles): the deeper mesh (meshMaxZoom) then costs detail in the
@@ -297,7 +305,7 @@ std::set<UnwrappedTileID> RenderTerrain::dilateCover(const std::set<UnwrappedTil
                 // The neighbour at this tile's zoom may sit over ground a tile of another zoom
                 // already covers (the cover mixes zooms, a finer tile beside a coarser one): meshing
                 // it would add a second surface over that ground, sampled from a coarser or finer
-                // DEM, and a drape target and 1024 px of texture to hold it. Only ground the cover
+                // DEM, and a drape target and its texture to hold it. Only ground the cover
                 // leaves out is worth a tile.
                 if (coveredAlready(neighbour)) continue;
                 dilated.insert(neighbour);
@@ -486,11 +494,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         return;
     }
 
-    // Get tiles from the DEM source
-    auto renderTiles = demSource->getRawRenderTiles();
-    if (renderTiles->empty()) {
-        return;
-    }
+    // A DEM source with no tile loaded yet is no reason to draw nothing: the mesh tiles below
+    // fall back to the flat placeholder until their elevation arrives.
 
     // Cast to LayerGroup for addDrawable
     auto* lg = static_cast<LayerGroup*>(layerGroup.get());
@@ -538,6 +543,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             // All tiles come from the same raster-dem source, so they share one
             // encoding and DEM dimension
             demUnpackVector = demData->getUnpackVector();
+            demEncoding = demData->encoding;
             demDim = demData->dim;
             if (auto existing = demTextures.find(loaded.id); existing != demTextures.end()) {
                 existing->second.lastUsed = demUpdateCounter;
@@ -613,11 +619,15 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // Cap the cache: ancestor/descendant relations accumulate while browsing
     // (zooming makes whole chains "related"), which previously grew past 2GB
     // of DEM textures and overflowed/OOMed. Evict least-recently-used entries
-    // that were not used this frame until the cache is back under budget.
+    // that were not used this frame until the cache is back under budget. A texture an
+    // elevated layer bound in the previous frame's draw (getTerrainData) is in use as well: an
+    // ancestor DEM that only symbols still sample has no loaded DEM tile to remake it from.
+    const size_t capOverride = demTextureCapOverride.load();
+    const size_t maxDEMTextures = capOverride ? capOverride : defaultMaxDEMTextures;
     if (demTextures.size() > maxDEMTextures) {
         std::vector<std::pair<uint64_t, UnwrappedTileID>> evictable;
         for (const auto& [id, entry] : demTextures) {
-            if (entry.lastUsed != demUpdateCounter) {
+            if (entry.lastUsed != demUpdateCounter && entry.sampledAt + 1 < demUpdateCounter) {
                 evictable.emplace_back(entry.lastUsed, id);
             }
         }
@@ -1078,6 +1088,8 @@ std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const Un
     if (!entry || !entry->texture) {
         return std::nullopt;
     }
+    // The layer is about to draw with this texture: keep it out of the next update()'s eviction
+    entry->sampledAt = demUpdateCounter;
 
     // Map tile-local coordinates (0..EXTENT) of the requested tile into
     // normalized coordinates (0..1) of the (possibly ancestor) DEM tile
@@ -1090,15 +1102,48 @@ std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const Un
     };
 }
 
+namespace {
+
+// The 1x1 DEM image of 0 m. dem_texel decodes a texel as R * u0 + G * u1 + B * u2 - u3 with the
+// unpack vector of the source's encoding, so a zero texel is -u3 (-10,000 m for Mapbox, -32,768 m
+// for Terrarium), not sea level.
+PremultipliedImage flatDEMImage(Tileset::RasterEncoding encoding) {
+    PremultipliedImage image(Size{1, 1});
+    if (encoding == Tileset::RasterEncoding::Terrarium) {
+        // 128 * 256 - 32768
+        image.data[0] = 128;
+        image.data[1] = 0;
+        image.data[2] = 0;
+    } else {
+        // 1 * 6553.6 + 134 * 25.6 + 160 * 0.1 - 10000
+        image.data[0] = 1;
+        image.data[1] = 134;
+        image.data[2] = 160;
+    }
+    image.data[3] = 255;
+    return image;
+}
+
+} // namespace
+
 const std::shared_ptr<gfx::Texture2D>& RenderTerrain::getPlaceholderDEMTexture(gfx::Context& context) {
     if (!placeholderDEMTexture) {
-        auto image = std::make_shared<PremultipliedImage>(Size{1, 1});
-        std::memset(image->data.get(), 0, image->bytes());
+        placeholderDEMEncoding = demEncoding;
         placeholderDEMTexture = context.createTexture2D();
-        placeholderDEMTexture->setImage(image);
+        placeholderDEMTexture->setImage(std::make_shared<PremultipliedImage>(flatDEMImage(demEncoding)));
         placeholderDEMTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
                                                         .wrapU = gfx::TextureWrapType::Clamp,
                                                         .wrapV = gfx::TextureWrapType::Clamp});
+    } else if (placeholderDEMEncoding != demEncoding) {
+        // The unpack vector changed under drawables still bound to the placeholder (the first tile
+        // of a Terrarium source loaded while the rest of the mesh waits). Their texture is the one
+        // that changes, in place, as for a DEM tile whose border was backfilled.
+        placeholderDEMEncoding = demEncoding;
+        placeholderDEMTexture->setImage(std::make_shared<PremultipliedImage>(flatDEMImage(demEncoding)));
+#if MLN_RENDER_BACKEND_OPENGL
+        // OpenGL uploads at once; the other backends do it when the texture is next bound
+        placeholderDEMTexture->upload();
+#endif
     }
     return placeholderDEMTexture;
 }
