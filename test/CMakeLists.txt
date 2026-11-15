@@ -48,6 +48,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_mesh_cover.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_edges.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_source_cover.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_skirt_edges.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_skirt_shared.test.cpp
     $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_parser.test.cpp
