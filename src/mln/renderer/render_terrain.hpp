@@ -227,6 +227,10 @@ public:
      */
     static bool normalizeTileCoordinates(UnwrappedTileID& tileID, float& x, float& y);
 
+    /// Overrides the DEM texture cache cap (default 96) for every RenderTerrain, so a test can
+    /// reach the eviction with a few tiles. Pass 0 to restore the default.
+    static void setMaxDEMTexturesForTesting(size_t cap);
+
     /**
      * @brief Get elevation at a specific tile coordinate
      * @param tileID The tile containing the coordinate
@@ -532,12 +536,16 @@ private:
         uint64_t lastUsed = 0;
         // DEMData::getBorderRevision() of the image the texture holds
         uint32_t borderRevision = 0;
+        // demUpdateCounter of the last frame an elevated layer (symbol, circle, heatmap,
+        // fill-extrusion) bound this texture through getTerrainData. Mutable because that
+        // lookup is const and runs after update(), in the frame's draw.
+        mutable uint64_t sampledAt = 0;
     };
     std::map<UnwrappedTileID, DEMTextureEntry> demTextures;
     // Retention cap for demTextures (~1MB per 514x514 DEM texture); entries not
     // used in the current frame are evicted least-recently-used first beyond
     // this, preventing unbounded growth while browsing (previously reached 2GB+)
-    static constexpr size_t maxDEMTextures = 96;
+    static constexpr size_t defaultMaxDEMTextures = 96;
     uint64_t demUpdateCounter = 0;
 
     /// Per-tile height copies behind elevationIndex, kept across rebuilds so a new tile set
