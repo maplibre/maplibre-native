@@ -13,6 +13,7 @@
 #include <mln/util/mat4.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/geometry.hpp>
+#include <mln/util/tileset.hpp>
 
 #include <algorithm>
 #include <array>
@@ -188,6 +189,10 @@ public:
      */
     static bool normalizeTileCoordinates(UnwrappedTileID& tileID, float& x, float& y);
 
+    /// Overrides the DEM texture cache cap (default 96) for every RenderTerrain, so a test can
+    /// reach the eviction with a few tiles. Pass 0 to restore the default.
+    static void setMaxDEMTexturesForTesting(size_t cap);
+
     /**
      * @brief Get elevation at a specific tile coordinate
      * @param tileID The tile containing the coordinate
@@ -322,8 +327,11 @@ public:
     std::optional<TerrainData> getTerrainData(const UnwrappedTileID&) const;
 
     /**
-     * @brief A 1x1 zero-elevation DEM texture bound when no DEM tile is available,
-     * so shaders that declare the DEM sampler always have a valid binding
+     * @brief A 1x1 DEM texture of 0 m bound when no DEM tile is available, so shaders
+     * that declare the DEM sampler always have a valid binding. The texel is the one that
+     * decodes to 0 m under the unpack vector in force (the encoding of the DEM tiles loaded
+     * so far): an all-zero texel would decode to minus the vector's offset, 10 km or 32 km
+     * below sea level.
      */
     const std::shared_ptr<gfx::Texture2D>& getPlaceholderDEMTexture(gfx::Context&);
 
@@ -480,6 +488,8 @@ private:
 
     // DEM decode vector for the source's encoding (default: Mapbox Terrain-RGB)
     std::array<float, 4> demUnpackVector = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
+    // The encoding demUnpackVector decodes; the placeholder DEM texel follows it
+    Tileset::RasterEncoding demEncoding = Tileset::RasterEncoding::Mapbox;
 
     // DEM tile inner dimension (e.g. 256/512), source-constant; rides in
     // dem_coords.w so the shader's get_elevation() knows the texel grid
@@ -492,12 +502,16 @@ private:
         uint64_t lastUsed = 0;
         // DEMData::getBorderRevision() of the image the texture holds
         uint32_t borderRevision = 0;
+        // demUpdateCounter of the last frame an elevated layer (symbol, circle, heatmap,
+        // fill-extrusion) bound this texture through getTerrainData. Mutable because that
+        // lookup is const and runs after update(), in the frame's draw.
+        mutable uint64_t sampledAt = 0;
     };
     std::map<UnwrappedTileID, DEMTextureEntry> demTextures;
     // Retention cap for demTextures (~1MB per 514x514 DEM texture); entries not
     // used in the current frame are evicted least-recently-used first beyond
     // this, preventing unbounded growth while browsing (previously reached 2GB+)
-    static constexpr size_t maxDEMTextures = 96;
+    static constexpr size_t defaultMaxDEMTextures = 96;
     uint64_t demUpdateCounter = 0;
 
     /// Per-tile height copies behind elevationIndex, kept across rebuilds so a new tile set
@@ -543,6 +557,8 @@ private:
 
     // See getPlaceholderDEMTexture
     std::shared_ptr<gfx::Texture2D> placeholderDEMTexture;
+    // The encoding the placeholder's texel is for
+    Tileset::RasterEncoding placeholderDEMEncoding = Tileset::RasterEncoding::Mapbox;
 
     // Layer index (terrain renders early in 3D pass, use negative index)
     static constexpr int32_t TERRAIN_LAYER_INDEX = -1000;

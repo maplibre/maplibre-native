@@ -144,3 +144,18 @@ TEST(TerrainCachePolicy, ATileWithoutDrawablesYetKeepsTheBake) {
     drawn.addDrawn(target, 1);
     EXPECT_TRUE(drapeFallbackStrictlyWorse(fallbackOf(pending), fallbackOf(drawn)));
 }
+
+TEST(TerrainCachePolicy, ALayerThatDropsOutOfTheCoverHasNotChangedItsRevision) {
+    // A layer's tiles leaving the cover take its revision with them (0): the drape keeps its bake
+    // then, instead of re-baking without the layer. Only a layer that covers the target both times
+    // with another revision is a new look.
+    EXPECT_FALSE(drapeRevisionChanged({0}, {7}));
+    EXPECT_FALSE(drapeRevisionChanged({7}, {0}));
+    EXPECT_FALSE(drapeRevisionChanged({7, 0, 9}, {7, 0, 9}));
+    EXPECT_TRUE(drapeRevisionChanged({8}, {7}));
+    EXPECT_TRUE(drapeRevisionChanged({7, 0, 10}, {7, 4, 9}));
+}
+
+TEST(TerrainCachePolicy, DifferentGroupSetsHaveChangedTheirRevisions) {
+    EXPECT_TRUE(drapeRevisionChanged({7}, {7, 3}));
+}

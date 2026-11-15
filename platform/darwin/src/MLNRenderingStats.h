@@ -103,6 +103,16 @@ MLN_EXPORT
 /// Number of stencil buffer updates
 @property (readonly, nonatomic) int stencilUpdates;
 
+/// Terrain drape targets whose re-render the per-frame load budget deferred, total over all
+/// the frames. Each deferral asks for a follow-up frame.
+@property (readonly, nonatomic) int numDrapeTargetsDeferred;
+/// New tile builds the load budget deferred, total over all the frames and counted once per
+/// tile per frame. Each deferral asks for a follow-up frame.
+@property (readonly, nonatomic) int numNewTileBuildsDeferred;
+/// Follow-up frames asked for an empty terrain drape cover, total over all the frames. The
+/// retry is bounded, so at most 4 per empty stretch.
+@property (readonly, nonatomic) int numTerrainCoverPendingFrames;
+
 /* Collected feature information by layer, if enabled via MLNMapOptions.featureInfoEnabled
     (MLNSourceLayerID -> [MLNFeatureInfo])
  */
