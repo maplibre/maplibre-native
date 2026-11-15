@@ -173,6 +173,18 @@ mat4 PaintParameters::clipMatrixForTile(const UnwrappedTileID& tileID) const {
     matrix::remapClipZToUnitRange(matrix);
 #endif
 
+#if MLN_RENDER_BACKEND_VULKAN
+    // Vulkan's clipping-mask vertex shader flips y for its framebuffer, but the draped geometry the masks
+    // clip is not flipped (applySurfaceTransform returns before its flip when drawing into a drape target).
+    // A mask for a tile that fills the target is the same either way; one placed in part of it (a tile of
+    // another zoom than the target's) landed mirrored and clipped the tile's content away. Flip here, so
+    // the shader's flip puts the mask where the geometry is.
+    mat4 flipY;
+    matrix::identity(flipY);
+    flipY[5] = -1.0;
+    matrix::multiply(matrix, flipY, matrix);
+#endif
+
     return matrix;
 }
 

@@ -29,16 +29,20 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/color_relief.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/dem_elevation_provider.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_camera.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_mipmaps.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation_index.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_first_frame.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_fill_pattern_drape.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_pattern_crossfade.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_resolution.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_zoom_out.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_dem_cache.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_occlusion.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_exaggeration.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_drape.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_horizon_haze.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_runtime_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/layer_min_zoom_tiles.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_cache_policy.test.cpp
