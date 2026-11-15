@@ -29,6 +29,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/color_relief.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/dem_elevation_provider.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_camera.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_mipmaps.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation_index.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_fill_pattern_drape.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_pattern_crossfade.test.cpp
