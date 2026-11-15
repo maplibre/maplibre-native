@@ -1234,7 +1234,7 @@ struct EyeOverTheClimb {
     util::RunLoop loop;
     FrameCounter frameCounter;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(),
-                                                                                   ClientOptions());
+                                                                                  ClientOptions());
     HeadlessFrontend frontend{{390, 844}, 1};
     MapAdapter map;
     std::map<std::string, std::chrono::steady_clock::time_point> askedFor;
@@ -1364,8 +1364,10 @@ TEST(TerrainCamera, APanUpAClimbKeepsTheEyeOverTheGroundInTheSameUpdate) {
     }
     rig.map.setGestureInProgress(false);
     ASSERT_LT(rig.map.getCameraOptions().center->latitude(), 47.311) << "the center went up the climb";
-    EXPECT_GE(rig.map.getCameraOptions().center->latitude(), 47.301) << "and the eye stayed over the tile it started over";
-    EXPECT_EQ(under, 0) << "the eye was under the ground after " << under << " of 10 steps, " << -lowest << " m at worst";
+    EXPECT_GE(rig.map.getCameraOptions().center->latitude(), 47.301)
+        << "and the eye stayed over the tile it started over";
+    EXPECT_EQ(under, 0) << "the eye was under the ground after " << under << " of 10 steps, " << -lowest
+                        << " m at worst";
 }
 
 TEST(TerrainCamera, AFlingUpAClimbKeepsTheEyeOverTheGroundInTheSameUpdate) {
