@@ -3966,6 +3966,58 @@ static void *windowScreenContext = &windowScreenContext;
   return moved;
 }
 
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
+             centerAltitude:(CLLocationDistance)centerAltitude
+          fromEyeCoordinate:(CLLocationCoordinate2D)eyeCoordinate
+                eyeAltitude:(CLLocationDistance)eyeAltitude {
+  MLNLogDebug(@"Setting centerCoordinate: %@ centerAltitude: %f fromEyeCoordinate: %@ "
+              @"eyeAltitude: %f",
+              MLNStringFromCLLocationCoordinate2D(centerCoordinate), centerAltitude,
+              MLNStringFromCLLocationCoordinate2D(eyeCoordinate), eyeAltitude);
+  if (!_mbglMap) {
+    return;
+  }
+  const mln::LatLng center = MLNLatLngFromLocationCoordinate2D(centerCoordinate);
+  const mln::LatLng eye = MLNLatLngFromLocationCoordinate2D(eyeCoordinate);
+  // The camera sits `cameraToCenter` points from the center along the line of sight, and a
+  // point is as many meters up as along the ground at the center's latitude. So measure the
+  // eye's offset from the center in points of the world at zoom level 0, and the zoom level is
+  // the one that scales that offset to `cameraToCenter`.
+  const mln::Point<double> centerPoint = mln::Projection::project(center, 1.0);
+  const mln::Point<double> eyePoint = mln::Projection::project(eye, 1.0);
+  const double worldSize = mln::Projection::worldSize(1.0);
+  double east = centerPoint.x - eyePoint.x;
+  if (east > worldSize / 2) {
+    east -= worldSize;
+  } else if (east < -worldSize / 2) {
+    east += worldSize;
+  }
+  const double north = eyePoint.y - centerPoint.y;
+  const double along = std::hypot(east, north);
+  const double up = (eyeAltitude - centerAltitude) /
+                    mln::Projection::getMetersPerPixelAtLatitude(center.latitude(), 0);
+  const double offset = std::hypot(along, up);
+  const double fieldOfView = mln::util::deg2rad(self.fieldOfView);
+  const double cameraToCenter = 0.5 * self.bounds.size.height / std::tan(fieldOfView / 2);
+  if (!(offset > 0) || !(cameraToCenter > 0) || !std::isfinite(offset)) {
+    return;
+  }
+
+  mln::CameraOptions cameraOptions;
+  cameraOptions.center = center;
+  cameraOptions.centerAltitude = centerAltitude;
+  cameraOptions.zoom = std::log2(cameraToCenter / offset);
+  cameraOptions.pitch = mln::util::rad2deg(std::atan2(along, up));
+  if (along > 0) {
+    cameraOptions.bearing = mln::util::rad2deg(std::atan2(east, north));
+  }
+
+  [self cancelTransitions];
+  self.userTrackingMode = MLNUserTrackingModeNone;
+  self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
+  self.mbglMap.jumpTo(cameraOptions);
+}
+
 - (void)setZoomLevel:(double)zoomLevel animated:(BOOL)animated {
   MLNLogDebug(@"Setting zoomLevel: %f animated: %@", zoomLevel, MLNStringFromBOOL(animated));
   if (zoomLevel == self.zoomLevel) return;
@@ -4028,6 +4080,15 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)setMaximumPitch:(CGFloat)maximumPitch {
   MLNLogDebug(@"Setting maximumPitch: %f", maximumPitch);
   self.mbglMap.setBounds(mln::BoundOptions().withMaxPitch(maximumPitch));
+}
+
+- (CGFloat)fieldOfView {
+  return *self.mbglMap.getCameraOptions().fov;
+}
+
+- (void)setFieldOfView:(CGFloat)fieldOfView {
+  MLNLogDebug(@"Setting fieldOfView: %f", fieldOfView);
+  self.mbglMap.jumpTo(mln::CameraOptions().withFov(fieldOfView));
 }
 
 - (MLNCoordinateBounds)visibleCoordinateBounds {
