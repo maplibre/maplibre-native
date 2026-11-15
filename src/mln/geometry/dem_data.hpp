@@ -27,6 +27,10 @@ public:
     /// Highest elevation in the tile, in meters, excluding the backfilled border.
     int32_t getMaxElevation() const { return maxElevation; }
 
+    /// How many times a neighbouring tile has backfilled the border. The border is read at the
+    /// tile's edge, so a copy of the image uploaded earlier is stale once this changes.
+    uint32_t getBorderRevision() const { return borderRevision; }
+
     const int32_t dim;
     const int32_t stride;
     const Tileset::RasterEncoding encoding;
@@ -35,6 +39,7 @@ private:
     std::shared_ptr<PremultipliedImage> image;
     int32_t minElevation = 0;
     int32_t maxElevation = 0;
+    uint32_t borderRevision = 0;
 
     size_t idx(const int32_t x, const int32_t y) const {
         assert(x >= -2);

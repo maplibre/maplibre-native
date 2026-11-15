@@ -69,6 +69,7 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     numDrapeMasksDrawn += r.numDrapeMasksDrawn;
     numDrapeMasksSkipped += r.numDrapeMasksSkipped;
     numDEMTexturesCreated += r.numDEMTexturesCreated;
+    numDEMTexturesRefreshed += r.numDEMTexturesRefreshed;
     numDepthPasses += r.numDepthPasses;
     numDrapeTargetsDeferred += r.numDrapeTargetsDeferred;
     numNewTileBuildsDeferred += r.numNewTileBuildsDeferred;
@@ -132,6 +133,7 @@ std::string RenderingStats::toString(std::string_view sep) const {
     optionalStatLine(ss, numDrapeMasksDrawn, "numDrapeMasksDrawn", sep);
     optionalStatLine(ss, numDrapeMasksSkipped, "numDrapeMasksSkipped", sep);
     optionalStatLine(ss, numDEMTexturesCreated, "numDEMTexturesCreated", sep);
+    optionalStatLine(ss, numDEMTexturesRefreshed, "numDEMTexturesRefreshed", sep);
     optionalStatLine(ss, numDepthPasses, "numDepthPasses", sep);
     optionalStatLine(ss, numDrapeTargetsDeferred, "numDrapeTargetsDeferred", sep);
     optionalStatLine(ss, numNewTileBuildsDeferred, "numNewTileBuildsDeferred", sep);
