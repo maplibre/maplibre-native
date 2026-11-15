@@ -31,6 +31,7 @@ const std::string& RenderLayer::getId() const {
 
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
+    ++styleRevision;
     transition(parameters);
 }
 

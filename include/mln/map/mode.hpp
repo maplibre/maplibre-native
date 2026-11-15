@@ -83,8 +83,8 @@ struct TerrainLoadBudget {
     /// than the aggressive one Performance uses.
     size_t maxMeshTiles;
     /// The zoom the terrain mesh reaches over a coarser DEM (RenderTerrain::meshMaxZoom). Each
-    /// mesh tile drapes into its own 1024 px target, so how sharp draped content stays in a
-    /// close-up follows the zoom of the mesh tiles, not of the DEM; each level deeper also adds
+    /// mesh tile drapes into its own target (1024 px for the finest tiles, 512 px for the rest), so how sharp draped
+    /// content stays in a close-up follows the zoom of the mesh tiles, not of the DEM; each level deeper also adds
     /// tiles to the near field, and drape memory with them. A DEM at or past this zoom meshes
     /// at its own maxzoom. Quality's 22 (util::DEFAULT_MAX_ZOOM, the deepest a map goes) sets no
     /// limit: the mesh follows the view as maplibre-gl-js's terrain does, and only the tile cap
