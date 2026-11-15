@@ -62,16 +62,15 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
     // Populate layer-level UBO with terrain properties
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    const TerrainEvaluatedPropsUBO propsUBO = {
-        .unpack = terrain->getDEMUnpackVector(),
-        .exaggeration = exaggeration,
-        .elevation_offset = elevationOffset,
-        .pad1 = 0.0f,
-        .pad2 = 0.0f,
-        .haze_color = {hazeColor.r, hazeColor.g, hazeColor.b, hazeColor.a},
-        .haze_ramp = hazeRamp,
-        .pad3 = 0.0f,
-        .pad4 = 0.0f};
+    const TerrainEvaluatedPropsUBO propsUBO = {.unpack = terrain->getDEMUnpackVector(),
+                                               .exaggeration = exaggeration,
+                                               .elevation_offset = elevationOffset,
+                                               .pad1 = 0.0f,
+                                               .pad2 = 0.0f,
+                                               .haze_color = {hazeColor.r, hazeColor.g, hazeColor.b, hazeColor.a},
+                                               .haze_ramp = hazeRamp,
+                                               .pad3 = 0.0f,
+                                               .pad4 = 0.0f};
     layerUniforms.createOrUpdate(idTerrainEvaluatedPropsUBO, &propsUBO, context);
 
 #if MLN_UBO_CONSOLIDATION
