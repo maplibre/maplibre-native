@@ -13,6 +13,7 @@
 #include <mln/util/mat4.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/geometry.hpp>
+#include <mln/util/tileset.hpp>
 
 #include <algorithm>
 #include <array>
@@ -322,8 +323,11 @@ public:
     std::optional<TerrainData> getTerrainData(const UnwrappedTileID&) const;
 
     /**
-     * @brief A 1x1 zero-elevation DEM texture bound when no DEM tile is available,
-     * so shaders that declare the DEM sampler always have a valid binding
+     * @brief A 1x1 DEM texture of 0 m bound when no DEM tile is available, so shaders
+     * that declare the DEM sampler always have a valid binding. The texel is the one that
+     * decodes to 0 m under the unpack vector in force (the encoding of the DEM tiles loaded
+     * so far): an all-zero texel would decode to minus the vector's offset, 10 km or 32 km
+     * below sea level.
      */
     const std::shared_ptr<gfx::Texture2D>& getPlaceholderDEMTexture(gfx::Context&);
 
@@ -480,6 +484,8 @@ private:
 
     // DEM decode vector for the source's encoding (default: Mapbox Terrain-RGB)
     std::array<float, 4> demUnpackVector = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
+    // The encoding demUnpackVector decodes; the placeholder DEM texel follows it
+    Tileset::RasterEncoding demEncoding = Tileset::RasterEncoding::Mapbox;
 
     // DEM tile inner dimension (e.g. 256/512), source-constant; rides in
     // dem_coords.w so the shader's get_elevation() knows the texel grid
@@ -543,6 +549,8 @@ private:
 
     // See getPlaceholderDEMTexture
     std::shared_ptr<gfx::Texture2D> placeholderDEMTexture;
+    // The encoding the placeholder's texel is for
+    Tileset::RasterEncoding placeholderDEMEncoding = Tileset::RasterEncoding::Mapbox;
 
     // Layer index (terrain renders early in 3D pass, use negative index)
     static constexpr int32_t TERRAIN_LAYER_INDEX = -1000;
