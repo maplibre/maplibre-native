@@ -65,6 +65,18 @@ int redInLineBand(const PremultipliedImage& image) {
     return red;
 }
 
+// Blue pixels in the same band.
+int blueInLineBand(const PremultipliedImage& image) {
+    int blue = 0;
+    for (uint32_t y = 16; y < 240; ++y) {
+        for (uint32_t x = 70; x < 92; ++x) {
+            const uint8_t* px = image.data.get() + (y * image.size.width + x) * 4;
+            blue += px[2] > 150 && px[0] < 90 && px[1] < 90 ? 1 : 0;
+        }
+    }
+    return blue;
+}
+
 class TerrainStyleChangeTest {
 public:
     explicit TerrainStyleChangeTest(TerrainLoadMode loadMode)
@@ -84,14 +96,16 @@ public:
         map.jumpTo(CameraOptions().withCenter(LatLng{46.0, 10.0}).withZoom(16.0).withPitch(0.0));
     }
 
-    int renderRedInLineBand() {
+    PremultipliedImage renderImage() {
         PremultipliedImage image;
         for (int i = 0; i < 4; ++i) {
             loop.runOnce();
             image = frontend.render(map).image;
         }
-        return redInLineBand(image);
+        return image;
     }
+
+    int renderRedInLineBand() { return redInLineBand(renderImage()); }
 
     void addLine() {
         auto source = std::make_unique<style::GeoJSONSource>("line");
@@ -141,4 +155,22 @@ TEST(TerrainDrape, AStyleSwitchReplacesTheDrape) {
     EXPECT_EQ(0, test.renderRedInLineBand());
     test.map.getStyle().loadJSON(terrainStyle(true));
     EXPECT_GT(test.renderRedInLineBand(), 1000);
+}
+
+// An app changes the paint of a draped layer after the drapes were baked (a route recolored). Which tiles
+// cover the drape, and the data on them, have not changed, so only the layer's own change tells the drape
+// to bake again; without it the ground keeps the old color.
+TEST(TerrainDrape, APaintChangeOnADrapedLineIsBakedAgain) {
+    for (const auto loadMode : {TerrainLoadMode::Quality, TerrainLoadMode::Balanced}) {
+        TerrainStyleChangeTest test(loadMode);
+        test.map.getStyle().loadJSON(terrainStyle(true));
+        const int red = test.renderRedInLineBand();
+        ASSERT_GT(red, 1000) << "the line drapes in red";
+
+        static_cast<style::LineLayer*>(test.map.getStyle().getLayer("line"))->setLineColor(Color::blue());
+        const PremultipliedImage image = test.renderImage();
+        const char* mode = loadMode == TerrainLoadMode::Quality ? "Quality" : "Balanced";
+        EXPECT_GT(blueInLineBand(image), red * 9 / 10) << mode << ": the line shows its new color";
+        EXPECT_EQ(0, redInLineBand(image)) << mode << ": the old color is gone";
+    }
 }
