@@ -26,6 +26,7 @@ MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, decimals_ed);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, normal2d);
 
 MBGL_DEFINE_ATTRIBUTE(uint32_t, 3, triangle_instance);
+MBGL_DEFINE_ATTRIBUTE(uint32_t, 2, data_indices);
 MBGL_DEFINE_ATTRIBUTE(uint32_t, 3, triangle_indices);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, prev_next_offset);
 

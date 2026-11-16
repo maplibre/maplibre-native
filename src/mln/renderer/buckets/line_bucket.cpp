@@ -48,8 +48,8 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
             if (point == prev) {
                 continue;
             }
-            neighborsMap[point].emplace_back(prev);
-            neighborsMap[prev].emplace_back(point);
+            neighborsMap[point].emplace_back(std::make_pair(prev, vertexOffset));
+            neighborsMap[prev].emplace_back(std::make_pair(point, vertexOffset));
         }
     }
 
@@ -65,18 +65,22 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
         }
         auto& cornerPoint = pair.first;
         std::sort(neighbors.begin(), neighbors.end(),
-            [cornerPoint](const GeometryCoordinate& a, const GeometryCoordinate& b) {
-                return util::angle_to(cornerPoint, a) > util::angle_to<>(cornerPoint, b);
+            [cornerPoint](const std::pair<GeometryCoordinate, int>& a, const std::pair<GeometryCoordinate, int>& b) {
+                return util::angle_to(cornerPoint, std::get<GeometryCoordinate>(a)) > util::angle_to<>(cornerPoint, std::get<GeometryCoordinate>(b));
         });
         for (uint i = 0; i < neighbors.size(); i++) {
-            auto& prevPoint = neighbors[i];
-            auto& nextPoint = neighbors[(i + 1) % neighbors.size()];
+            auto nextIndex = (i + 1) % neighbors.size();
+            auto& prevPoint = std::get<GeometryCoordinate>(neighbors[i]);
+            auto& nextPoint = std::get<GeometryCoordinate>(neighbors[nextIndex]);
             
             auto angle = abs(util::rad2deg(util::angle_between(prevPoint - cornerPoint, nextPoint - cornerPoint)));
             if (angle > 150.0 && angle < 210.0) {
                 continue;
             }
-            triangleInstances.emplace_back(triangleInstance(prevPoint, cornerPoint, nextPoint));
+            auto& prevDataIndex = std::get<uint32_t>(neighbors[i]);
+            auto& nextDataIndex = std::get<uint32_t>(neighbors[nextIndex]);
+            
+            triangleInstances.emplace_back(triangleInstance(prevPoint, cornerPoint, nextPoint, prevDataIndex, nextDataIndex));
             intersectionSegments.back().instanceCount ++;
         }
     }

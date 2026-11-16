@@ -255,7 +255,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 #if defined(HAS_UNIFORM_u_width)
     const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
-    const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width * 10;
+    const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
 #else
     const auto width    = unpack_mix_float(vertx.width, drawable.width_t);
 #endif
@@ -362,8 +362,8 @@ struct ShaderSource<BuiltIn::LineIntersectionShader, gfx::Backend::Type::Metal> 
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 1> attributes;
-    static const std::array<AttributeInfo, 1> instanceAttributes;
+    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 2> instanceAttributes;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto prelude = lineShaderPrelude;
@@ -442,6 +442,17 @@ float cross2(float2 a, float2 b) {
     return a.x * b.y - a.y * b.x;
 }
 
+float2 rotate(float2 v, float angle)
+{
+    float c = cos(angle);
+    float s = sin(angle);
+
+    return float2(
+        v.x * c - v.y * s,
+        v.x * s + v.y * c
+    );
+}
+
 float computeRadius(float2 prevPoint, float2 cornerPoint, float2 nextPoint, float desiredCornerDistance) {
     float maxEdgeLenPercent = 0.5;
     float sinParallelTreshold = sin(5 * M_PI_F / 180);
@@ -486,29 +497,42 @@ float computeRadius(float2 prevPoint, float2 cornerPoint, float2 nextPoint, floa
 }
 
 struct VertexStage {
-    uint3 triangle_instance [[attribute(1)]];
+    uint3 triangle_instance [[attribute(7)]];
+    uint2 data_indices [[attribute(8)]];
 
-/*    short2 pos_normal [[attribute(0)]];
-    uchar4 data [[attribute(1)]];
+    /*short2 pos_normal [[attribute(0)]];
+    uchar4 data [[attribute(1)]];*/
+};
 
-#if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(2)]];
-#endif
+// Same order as in LinePaintProperties
+struct DataVertex {
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(3)]];
+    float blur[2];
 #endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(4)]];
+#if !defined(HAS_UNIFORM_u_color)
+    float color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_floorwidth)
+    float floorwidth[2];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(5)]];
+    float gapwidth[2];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(6)]];
+    float offset[2];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    ushort pattern_to[4];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    ushort pattern_from[4];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(7)]];
-#endif */
+    float width[2];
+#endif
 };
 
 struct FragmentStage {
@@ -520,6 +544,12 @@ struct FragmentStage {
     float2 triangle_corner_prev [[flat]];
     float2 triangle_corner_next [[flat]];
     float triangle_corner_radius [[flat]];
+
+#if !defined(HAS_UNIFORM_u_color)
+    //float4 color;
+    float4 color1 [[flat]];;
+    float4 color2 [[flat]];;
+#endif
 
 /*    float2 width2;
     float2 normal;
@@ -542,6 +572,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                                 device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]],
+                                device const DataVertex* data [[buffer(lineUBOCount + 1)]],
                                 uint vertexID [[vertex_id]]) {
 
     device const LineDrawableUBO& drawable = drawableVector[uboIndex].lineDrawableUBO;
@@ -612,18 +643,52 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         int16_t pos_x = int16_t(vertx.triangle_instance[i] >> 16);
         int16_t pos_y = int16_t(vertx.triangle_instance[i] & 0xFFFF);
         triangle_vertex_pos[i] = float2(pos_x, pos_y);
+    }
+    
+    float2 edgePrev = triangle_vertex_pos[0] - triangle_vertex_pos[1];
+    float2 edgeNext = triangle_vertex_pos[2] - triangle_vertex_pos[1];
+    float angle = atan2(cross2(edgeNext, edgePrev), dot(edgeNext, edgePrev));
 
-        if (i == 0) {
-            continue;
-        }
+    for (int i = 1; i < 3; i++) {
+        uint dataIndex = vertx.data_indices[i - 1];
+
+/* #if defined(HAS_UNIFORM_u_gapwidth)
+        const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
+        const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2;
+#else
+        const auto gapwidth = unpack_mix_float(data[dataIndex].gapwidth, drawable.gapwidth_t) / 2;
+#endif
+
+#if defined(HAS_UNIFORM_u_offset)
+        const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
+        const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1;
+#else
+        const auto offset   = unpack_mix_float(data[dataIndex].offset, drawable.offset_t) * -1;
+#endif */
+
+#if defined(HAS_UNIFORM_u_width)
+        const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
+        const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
+#else
+        const auto width    = unpack_mix_float(data[dataIndex].width, drawable.width_t);
+#endif
 
         float2 edgeVector = normalize(triangle_vertex_pos[i] - triangle_vertex_pos[i - 1]);
-        float2 perpVector = float2(-edgeVector.y, edgeVector.x);
-        triangle_vertex_pos[i] = triangle_vertex_pos[i] + perpVector * props.width * 5 / drawable.ratio;
-        triangle_vertex_pos[i - 1] = triangle_vertex_pos[i - 1] + perpVector * props.width * 5 / drawable.ratio;
+        
+        float2 perpVector1 = float2(-edgeVector.y, edgeVector.x);
+        if (i == 1) {
+            perpVector1 = rotate(perpVector1, M_PI_F / 2 - angle) / sin(angle);
+        }
+        triangle_vertex_pos[i] = triangle_vertex_pos[i] + perpVector1 * width * 0.5 / drawable.ratio;
+
+        float2 perpVector2 = float2(-edgeVector.y, edgeVector.x);
+        if (i == 2) {
+            perpVector2 = rotate(perpVector2, -(M_PI_F / 2 - angle)) / sin(angle);
+        }
+        triangle_vertex_pos[i - 1] = triangle_vertex_pos[i - 1] + perpVector2 * width * 0.5 / drawable.ratio;
     }
 
-    triangle_corner_radius = computeRadius(triangle_vertex_pos[0], triangle_vertex_pos[1], triangle_vertex_pos[2], 20 / drawable.ratio);
+    triangle_corner_radius = computeRadius(triangle_vertex_pos[0], triangle_vertex_pos[1], triangle_vertex_pos[2], 20);
 
     float2 position = triangle_vertex_pos[vertexID];
 
@@ -636,6 +701,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .triangle_corner_pos = triangle_vertex_pos[1],
         .triangle_corner_next = triangle_vertex_pos[2],
         .triangle_corner_radius = triangle_corner_radius,
+
+#if !defined(HAS_UNIFORM_u_color) 
+        .color1        = unpack_mix_color(data[vertx.data_indices[0]].color, drawable.color_t),
+        .color2        = unpack_mix_color(data[vertx.data_indices[1]].color, drawable.color_t),
+        //.color1        = float4(1.0, 0.0, 0.0, 1.0),
+        //.color2        = float4(0.0, 1.0, 0.0, 1.0),
+#endif
 
 /*        .position    = position,
         .width2      = float2(outset, inset),
@@ -662,14 +734,20 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(1.0);
 #endif
 
-/*
 #if defined(HAS_UNIFORM_u_color)
     const auto exprColor = (props.expressionMask & LineExpressionMask::Color);
     const auto color     = exprColor ? expr.color.evalColor(paintParams.map_zoom) : props.color;
 #else
-    const float4 color = in.color;
+    float2 vPos = in.triangle_pos - in.triangle_corner_pos;
+    float2 vPrev = in.triangle_corner_prev - in.triangle_corner_pos;
+    float2 vNext = in.triangle_corner_next - in.triangle_corner_pos;
+    
+    float angle = atan2(cross2(vPos, vPrev), dot(vPos, vPrev));
+    float angleMax = atan2(cross2(vNext, vPrev), dot(vNext, vPrev));
+    const float4 color = mix(in.color1, in.color2, angle / angleMax);
 #endif
 
+/*
 #if defined(HAS_UNIFORM_u_blur)
     const auto exprBlur = (props.expressionMask & LineExpressionMask::Blur);
     const float blur = exprBlur ? expr.blur.eval(paintParams.map_zoom) : props.blur;
@@ -705,7 +783,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(0.0);
     }
 
-    return half4(1.0, 0.0, 0.0, 1.0);
+    return half4(color);
 }
 )";
 };

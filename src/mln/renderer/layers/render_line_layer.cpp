@@ -609,9 +609,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     continue;
                 }
             }
-
-            propertiesAsUniforms.first.emplace("width");
-            propertiesAsUniforms.second.emplace(idLineWidthVertexAttribute);
             
             auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
             if (!shader) {
@@ -643,27 +640,17 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
             
             StringIDSetsPair intersectionPropertiesAsUniforms;
+            auto intersectionVertexAttrs = context.createVertexAttributeArray();
+            intersectionVertexAttrs->readDataDrivenPaintProperties<LineColor,
+                                                                   LineBlur,
+                                                                   LineOpacity,
+                                                                   LineGapWidth,
+                                                                   LineOffset,
+                                                                   LineWidth,
+                                                                   LineFloorWidth,
+                                                                   LinePattern>(
+                paintPropertyBinders, evaluated, intersectionPropertiesAsUniforms, idLineColorVertexAttribute);
             
-            intersectionPropertiesAsUniforms.first.emplace("color");
-            intersectionPropertiesAsUniforms.first.emplace("blur");
-            intersectionPropertiesAsUniforms.first.emplace("opacity");
-            intersectionPropertiesAsUniforms.first.emplace("gapwidth");
-            intersectionPropertiesAsUniforms.first.emplace("offset");
-            intersectionPropertiesAsUniforms.first.emplace("width");
-            intersectionPropertiesAsUniforms.first.emplace("floorwidth");
-            intersectionPropertiesAsUniforms.first.emplace("pattern_from");
-            intersectionPropertiesAsUniforms.first.emplace("pattern_to");
-            
-            intersectionPropertiesAsUniforms.second.emplace(idLineColorVertexAttribute);
-            intersectionPropertiesAsUniforms.second.emplace(idLineBlurVertexAttribute);
-            intersectionPropertiesAsUniforms.second.emplace(idLineOpacityVertexAttribute);
-            intersectionPropertiesAsUniforms.second.emplace(idLineGapWidthVertexAttribute);
-            intersectionPropertiesAsUniforms.second.emplace(idLineOffsetVertexAttribute);
-            intersectionPropertiesAsUniforms.second.emplace(idLineWidthVertexAttribute);
-            intersectionPropertiesAsUniforms.second.emplace(idLineFloorWidthVertexAttribute);
-            intersectionPropertiesAsUniforms.second.emplace(idLinePatternFromVertexAttribute);
-            intersectionPropertiesAsUniforms.second.emplace(idLinePatternToVertexAttribute);
-
             auto intersectionShader = lineIntersectionShaderGroup->getOrCreateShader(context, intersectionPropertiesAsUniforms, posNormalAttribName);
             if (!intersectionShader) {
                 continue;
@@ -675,7 +662,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             const auto vertexCount = 3; //bucket.vertices.elements();
             intersectionBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
             
-            auto intersectionVertexAttrs = context.createVertexAttributeArray();
             if (const auto& attr = intersectionVertexAttrs->set(idLinePosNormalVertexAttribute)) {
                 attr->setSharedRawData(bucket.sharedVertices,
                                        offsetof(LineLayoutVertex, a1),
@@ -692,6 +678,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                        /*vertexOffset=*/0,
                                        sizeof(LineTriangleInstance),
                                        gfx::AttributeDataType::UInt3);
+            }
+            if (const auto& attr = intersectionInstanceAttrs->set(idLineDataIndicesAttribute)) {
+                attr->setSharedRawData(bucket.sharedTriangleInstances,
+                                       offsetof(LineTriangleInstance, a2),
+                                       /*vertexOffset=*/0,
+                                       sizeof(LineTriangleInstance),
+                                       gfx::AttributeDataType::UInt2);
             }
             intersectionBuilder->setInstanceAttributes(std::move(intersectionInstanceAttrs));
             intersectionBuilder->setSubLayerIndex(1);
