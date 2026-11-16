@@ -100,6 +100,10 @@ void RenderLayer::updateEmptyTileIDs(const LayerPrepareParameters& params) {
             }
         }
     }
+    if (params.terrain && params.source) {
+        const auto& leftOut = params.source->getEmptyTileIDs();
+        emptyTileIDs.insert(emptyTileIDs.end(), leftOut.begin(), leftOut.end());
+    }
     if (!emptyTileIDs.empty() || !tileGroup.getEmptyTileIDs().empty()) {
         tileGroup.setEmptyTileIDs(std::move(emptyTileIDs));
     }

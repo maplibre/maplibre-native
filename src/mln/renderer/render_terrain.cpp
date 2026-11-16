@@ -149,6 +149,9 @@ std::vector<LoadedDEMTile> loadedDEMTiles(const RenderSource* demSource) {
     return out;
 }
 
+// Set by tests only (RenderTerrain::setLeaveOutEmptyTilesForTesting)
+std::atomic<bool> leaveOutEmptyTiles{true};
+
 // Set by tests only (RenderTerrain::setMaxDEMTexturesForTesting); 0 keeps the default cap
 std::atomic<size_t> demTextureCapOverride{0};
 
@@ -158,6 +161,14 @@ RenderTerrain::RenderTerrain(Immutable<style::Terrain::Impl> impl_)
     : impl(std::move(impl_)) {}
 
 RenderTerrain::~RenderTerrain() = default;
+
+void RenderTerrain::setLeaveOutEmptyTilesForTesting(bool leaveOut) {
+    leaveOutEmptyTiles = leaveOut;
+}
+
+bool RenderTerrain::leavesOutEmptyTiles() {
+    return leaveOutEmptyTiles;
+}
 
 void RenderTerrain::setMaxDEMTexturesForTesting(size_t cap) {
     demTextureCapOverride = cap;
