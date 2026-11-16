@@ -256,6 +256,28 @@ TEST(TerrainSourceCover, TheCapFollowsTheTerrainLoadMode) {
     expectOnlyTheTilesNearestTheCamera({.mode = TerrainLoadMode::Performance});
 }
 
+// A little past the pitch threshold with the map at the source's min zoom, all the ground in view
+// is within the source's reach, and it asks for what it did without the rule: 16 tiles on a phone's
+// screen. With a reach of one zoom it asked for 13, the farthest three left out in view.
+TEST(TerrainSourceCover, ASourceAtItsMinZoomKeepsItsCoverAtPitch65) {
+    const TerrainSourceCoverTest::Options options{
+        .mode = TerrainLoadMode::Balanced, .pitch = 65.0, .zoom = 13.0, .size = {393, 852}};
+    const auto parcelsAskedFor = [&] {
+        TerrainSourceCoverTest test(options);
+        test.settleDEM();
+        test.showParcels();
+        test.render(10);
+        return test.parcelTiles;
+    };
+    std::set<CanonicalTileID> whole;
+    {
+        const CoveringAllTheGround use;
+        whole = parcelsAskedFor();
+    }
+    ASSERT_GT(whole.size(), 8u);
+    EXPECT_EQ(parcelsAskedFor(), whole);
+}
+
 // The terrain draws from its DEM source, so the DEM keeps its own cover rather than the cap.
 // Here the DEM is as deep as the vector source, so its cover holds far more tiles than the cap
 // allows. A capped DEM would stay within a few tiles of the limit: the tiles it asks for before
