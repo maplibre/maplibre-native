@@ -562,7 +562,7 @@ public final class MapLibreMap {
    * </p>
    * <p>
    * The default maximum Pitch is {@link MapLibreConstants#MAXIMUM_PITCH} (60); it can be raised
-   * up to {@link MapLibreConstants#MAXIMUM_PITCH_LIMIT} (85).
+   * up to {@link MapLibreConstants#MAXIMUM_PITCH_LIMIT} (180).
    * </p>
    * <p>
    * With top padding (for example from {@link CameraPosition.Builder#padding}), the map lowers

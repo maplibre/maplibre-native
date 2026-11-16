@@ -211,13 +211,13 @@ class TransformTest : BaseTest() {
 
     @Test
     fun testMaxPitchAboveDefaultIsSet() {
-        transform.setMaxPitch(75.0)
-        verify { nativeMapView.maxPitch = 75.0 }
+        transform.setMaxPitch(120.0)
+        verify { nativeMapView.maxPitch = 120.0 }
     }
 
     @Test
     fun testMaxPitchAboveLimitIsIgnored() {
-        transform.setMaxPitch(90.0)
-        verify(exactly = 0) { nativeMapView.maxPitch = 90.0 }
+        transform.setMaxPitch(190.0)
+        verify(exactly = 0) { nativeMapView.maxPitch = 190.0 }
     }
 }

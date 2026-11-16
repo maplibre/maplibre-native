@@ -447,7 +447,7 @@ public class MapLibreMapOptions implements Parcelable {
 
   /**
    * Specifies the used maximum pitch for a map view: by default
-   * {@link MapLibreConstants#MAXIMUM_PITCH} (60), at most {@link MapLibreConstants#MAXIMUM_PITCH_LIMIT} (85).
+   * {@link MapLibreConstants#MAXIMUM_PITCH} (60), at most {@link MapLibreConstants#MAXIMUM_PITCH_LIMIT} (180).
    * With top padding the map draws a lower pitch than this (see {@link MapLibreMap#setMaxPitchPreference}).
    *
    * @param maxPitch Pitch to be used

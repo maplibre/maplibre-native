@@ -181,13 +181,13 @@ class CameraPositionTest : BaseTest() {
 
     @Test
     fun testTiltAboveDefaultMaximumIsKept() {
-        val cameraPosition = CameraPosition.Builder().tilt(75.0).build()
-        Assert.assertEquals("tilt up to the limit should be kept", 75.0, cameraPosition.tilt, DELTA)
+        val cameraPosition = CameraPosition.Builder().tilt(120.0).build()
+        Assert.assertEquals("tilt up to the limit should be kept", 120.0, cameraPosition.tilt, DELTA)
     }
 
     @Test
     fun testTiltClampedToLimit() {
-        val cameraPosition = CameraPosition.Builder().tilt(90.0).build()
+        val cameraPosition = CameraPosition.Builder().tilt(190.0).build()
         Assert.assertEquals(
             "tilt should be clamped to the limit",
             MapLibreConstants.MAXIMUM_TILT_LIMIT,
