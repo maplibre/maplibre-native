@@ -29,6 +29,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/color_relief.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/dem_elevation_provider.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_camera.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_zoom_step.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_mipmaps.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation_index.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_first_frame.test.cpp
@@ -174,6 +175,7 @@ if(MLN_WITH_OPENGL)
         PRIVATE
             ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/bucket.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/gl/drape_target_pool.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/enum.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/gl_functions.test.cpp

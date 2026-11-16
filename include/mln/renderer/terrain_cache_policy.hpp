@@ -3,19 +3,30 @@
 #include <mln/tile/tile_id.hpp>
 #include <mln/util/hash.hpp>
 
+#include <algorithm>
+#include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <vector>
 
 namespace mln {
+
+namespace gfx {
+class Texture2D;
+} // namespace gfx
+
 namespace terrain {
 
-/// The DEM a terrain mesh drawable was built on.
+/// What a terrain mesh drawable was built on: the DEM it samples, and the drape texture it draws.
 struct DEMBinding {
     /// 0 = flat placeholder, 1 = closest loaded ancestor DEM, 2 = the tile's own DEM
     uint8_t tier = 0;
     /// Zoom of the bound DEM tile (-1 for the placeholder)
     int8_t demZoom = -1;
+    /// The drape texture the drawable was built with. Held, not just compared: a freed texture's
+    /// address must never be taken for a new texture's.
+    std::shared_ptr<gfx::Texture2D> drapeTexture{};
 };
 
 /// Whether a terrain drawable built on `current` should be rebuilt now that `available` could be
@@ -30,6 +41,26 @@ inline bool shouldRebind(const DEMBinding& current, const DEMBinding& available)
         return available.tier > current.tier;
     }
     return available.tier == 1 && available.demZoom > current.demZoom;
+}
+
+/// Whether a terrain drawable built on `built` must be rebuilt because its tile's drape target now
+/// has the texture `current`. A drawable binds its drape texture once, when it is created; the
+/// drape pool replaces a tile's target (and so its texture) when the tile changes drape size, and
+/// nothing bakes the old texture any more, so a drawable left alone would show it frozen. No
+/// target, or a drawable built before it had a texture, is no change.
+inline bool drapeTextureReplaced(const DEMBinding& built, const gfx::Texture2D* current) {
+    return current && built.drapeTexture && built.drapeTexture.get() != current;
+}
+
+/// How many drape targets that already hold a bake may re-render this frame: the load mode's cap
+/// (`cap` <= 0 is unlimited) less the `replaced` targets, which the pool made anew this frame and
+/// which bake at once on their new textures. One cap then governs both, instead of a frame
+/// baking up to twice the cap.
+inline int drapeRerenderBudget(int cap, std::size_t replaced) {
+    if (cap <= 0) {
+        return 1 << 30;
+    }
+    return std::max(cap - static_cast<int>(replaced), 0);
 }
 
 /// How one draped layer group covers a drape target.

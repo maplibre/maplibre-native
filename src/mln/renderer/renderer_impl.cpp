@@ -256,6 +256,15 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     const auto& layerRenderItems = renderTree.getLayerRenderItemMap();
 
+    // Per-frame cap on drape targets that bake over a texture they already have, from the map's
+    // TerrainLoadMode (<= 0, Quality's, is unlimited). The pool's size changes and the drape pass
+    // share it.
+    const int drapeCap = terrainLoadBudget(updateParameters->terrainLoadMode).drapeRerendersPerFrame;
+    // The tiles whose drape target the pool replaced this frame (it changed size): they bake at
+    // once on their new texture, and are paid for out of the cap before the drape pass. Not kept
+    // for a still, which has no frames after this one: its drape pass is as it always was.
+    std::set<UnwrappedTileID> replacedDrapeTiles;
+
     // Number of terrain drape targets in this frame's cover; drives the re-enable follow-up
     // frame and the drape re-bake trigger below (0 while terrain is off or its cover is empty).
     std::size_t frameDrapeTargetCount = 0;
@@ -272,15 +281,25 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // permanent blankness in single-frame still renders (the render tests).
         terrain->prepareSource(orchestrator);
         const std::set<UnwrappedTileID> demTileIDs = terrain->computeMeshCover(state, updateParameters);
-        // Full-size drape textures only for the finest tiles of the cover - the ones nearest the
-        // camera, where the ground is magnified most; the coarser tiles further out get a quarter
-        // of the memory. At 1024 px each target costs ~9 MB with its stencil, and a pitched cover
-        // over relief runs to dozens of them: all full size, an older phone ran out of GPU memory.
-        uint8_t finestZoom = 0;
-        for (const auto& id : demTileIDs) finestZoom = std::max(finestZoom, id.canonical.z);
-        for (const auto& id : demTileIDs) {
-            const uint32_t size = id.canonical.z >= finestZoom ? drapeTileSize * drapeQualityFactor : drapeTileSize;
-            texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor, size);
+        // Full-size drape textures only for the nearest of the finest tiles of the cover - the ones
+        // under the camera, where the ground is magnified most; every other tile gets a quarter of the
+        // memory. At 1024 px each target costs ~9 MB with its stencil, and a pitched cover over relief
+        // runs to dozens of them: all full size, an older phone ran out of GPU memory. A still is
+        // decided from scratch, whatever this renderer drew before (RenderTerrain::drapeSizesFor).
+        const auto sizes = RenderTerrain::drapeSizesFor(renderTreeParameters.mapMode,
+                                                        drapeCap,
+                                                        demTileIDs,
+                                                        RenderTerrain::meshTileCapOrigin(state),
+                                                        texturePool.tilesAtFullSize());
+        // A tile that changes size gets a new target, which bakes at once whatever the drape budget
+        // below says, so the cap limits how many change in a frame and the drape pass has the rest.
+        auto resizes = texturePool.createRenderTargets(
+            context, demTileIDs, sizes.fullSizeTiles, renderTreeParameters.backgroundColor, sizes.maxResizes);
+        if (renderTreeParameters.mapMode == MapMode::Continuous) {
+            replacedDrapeTiles = std::move(resizes.replaced);
+        }
+        if (resizes.deferred) {
+            drapeWorkDeferred = true;
         }
         texturePool.removeStaleRenderTargets(demTileIDs);
         frameDrapeTargetCount = demTileIDs.size();
@@ -603,27 +622,37 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // tens of ms each; instead render up to the budget and defer the rest (they keep their
         // stale texture), requesting a follow-up frame so they catch up progressively.
         // Never-rendered targets always render (avoid blank tiles). The cap comes from the
-        // map's TerrainLoadMode; Quality (default) is unlimited.
-        const int drapeCap = terrainLoadBudget(updateParameters->terrainLoadMode).drapeRerendersPerFrame;
-        int drapeBudget = drapeCap > 0 ? drapeCap : (1 << 30);
+        // map's TerrainLoadMode; Quality (default) is unlimited. The targets the pool replaced
+        // this frame bake over it too, and are already taken off it here.
+        int drapeBudget = terrain::drapeRerenderBudget(drapeCap, replacedDrapeTiles.size());
         orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
             if (renderTarget.getDrapeTileID()) {
                 // Out of GPU memory for a drape texture (Metal returns no texture and the backend
-                // throws bad_alloc): keep the target's last bake and go on, rather than abort the
-                // app. The next frame tries again, by which time the cover may be smaller.
+                // throws bad_alloc): go on without it, rather than abort the app. The target has no
+                // bake to keep - its texture never existed, or a replaced target's old one is gone -
+                // and it already recorded having baked, so the pool drops it and the next frame
+                // builds another, at half size if memory is short (by then the cover may be smaller).
+                // A replaced target's tile has already been rebuilt on the texture that failed, so
+                // it draws nothing for the frame (the terrain update runs before this pass).
                 RenderTarget::RenderResult res;
                 try {
                     res = renderTarget.render(orchestrator, renderTree, parameters, /*canRerender=*/drapeBudget > 0);
                 } catch (const std::bad_alloc&) {
-                    Log::Warning(Event::Render, "Terrain: out of memory for a drape target; skipped this frame");
-                    // render() recorded the bake before it threw: forget it, or the fast path skips
-                    // this target until its content changes, and it stays blank
-                    renderTarget.invalidateBake();
-                    drapeWorkDeferred = true;
+                    // A tile that goes on failing, even at half size, is rebuilt and fails again each
+                    // frame it is drawn in: only the first failure of a run of them is logged, or asks
+                    // for another frame. The others do not, so their retry waits for the next repaint.
+                    if (texturePool.renderTargetFailed(*renderTarget.getDrapeTileID())) {
+                        Log::Warning(Event::Render,
+                                     "Terrain: out of memory for a drape target; rebuilding it next frame");
+                        drapeWorkDeferred = true;
+                    }
                     return;
                 }
                 if (res == RenderTarget::RenderResult::Rendered) {
-                    --drapeBudget;
+                    // A replaced target was paid for before this pass
+                    if (!replacedDrapeTiles.contains(*renderTarget.getDrapeTileID())) {
+                        --drapeBudget;
+                    }
                 } else if (res == RenderTarget::RenderResult::Deferred) {
                     drapeWorkDeferred = true;
                     ++context.renderingStats().numDrapeTargetsDeferred;
