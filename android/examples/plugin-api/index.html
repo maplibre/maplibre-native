@@ -1562,7 +1562,7 @@
 <p class="admonition-title">Warning</p>
 <p>The plugin API is experimental and does not yet have stability guarantees.</p>
 </div>
-<p>MapLibre Native has a C plugin API for adding style layer types implemented in native code. After a plugin registers its layer types, styles can use them like the built-in layer types, for example <code>"type": "ngon"</code>. The API is defined in <a href="https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h"><code>plugin_api.h</code></a>.</p>
+<p>MapLibre Native has a C plugin API for adding style layer types implemented in native code. After a plugin registers its layer types, styles can use them like the built-in layer types, for example <code>"type": "org.maplibre.ngon"</code>. The API is defined in <a href="https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h"><code>plugin_api.h</code></a>.</p>
 <h2 id="artifacts">Artifacts</h2>
 <p>Only the <a href="../artifacts/">artifacts</a> with the <code>-with-plugin-api</code> postfix export the plugin API. Apart from that, they are the same as the artifacts without it. For example, use <code>android-sdk-with-plugin-api</code> instead of <code>android-sdk</code>:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>dependencies {
@@ -1576,7 +1576,7 @@
 <li>Look up <code>mln_plugin_register_v1</code> in the MapLibre native library that is already loaded, with <code>dlopen</code> and <code>dlsym</code>. This library is <code>libmaplibre.so</code>, except with the OpenGL ES backend of the <code>-vulkan-opengl-with-plugin-api</code> artifact, which uses <code>libmaplibre-opengl.so</code>.</li>
 <li>Register after <code>MapLibre.getInstance()</code> and before loading a style that uses the plugin's layer types.</li>
 </ul>
-<p>The <a href="https://github.com/maplibre/maplibre-native/tree/main/plugins/ngon-layer">n-gon layer</a> in the repository is an example plugin, with an <a href="https://github.com/maplibre/maplibre-native/tree/main/plugins/android">Android demo app</a>.</p>
+<p>The <a href="https://github.com/maplibre/maplibre-native/tree/main/plugins/plugins/ngon-layer">n-gon layer</a> in the repository is an example plugin, with an <a href="https://github.com/maplibre/maplibre-native/tree/main/plugins/demo/android">Android demo app</a>.</p>
 
 
 
