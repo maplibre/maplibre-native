@@ -223,10 +223,10 @@ fn main(in: VertexInput) -> VertexOutput {
     out.fade_opacity = out.fade_opacity * calculate_visibility(projectedPoint, depth_texture, depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
 #ifndef HAS_UNIFORM_u_opacity
     out.opacity = final_opacity;
+#endif
     // Over ground the distance haze has taken, the symbol goes with the ground
     let haze = clamp(drawable.haze_ramp.x - drawable.haze_ramp.y / max(projectedPoint.w, 1e-6), 0.0, 1.0);
     out.fade_opacity = out.fade_opacity * (1.0 - drawable.haze_alpha * haze * haze);
-#endif
 
     return out;
 }
@@ -411,10 +411,10 @@ fn main(in: VertexInput) -> VertexOutput {
     out.fade_opacity = out.fade_opacity * calculate_visibility(projectedPoint, depth_texture, depth_sampler, drawable.depth_enabled, paintParams.units_to_pixels.y);
 #ifndef HAS_UNIFORM_u_fill_color
     out.fill_color = unpack_mix_color(in.fill_color, drawable.fill_color_t);
+#endif
     // Over ground the distance haze has taken, the symbol goes with the ground
     let haze = clamp(drawable.haze_ramp.x - drawable.haze_ramp.y / max(projectedPoint.w, 1e-6), 0.0, 1.0);
     out.fade_opacity = out.fade_opacity * (1.0 - drawable.haze_alpha * haze * haze);
-#endif
 #ifndef HAS_UNIFORM_u_halo_color
     out.halo_color = unpack_mix_color(in.halo_color, drawable.halo_color_t);
 #endif
