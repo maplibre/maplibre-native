@@ -34,15 +34,13 @@ import org.maplibre.android.style.layers.PropertyValue;
 
 /**
  * <%- doc %>
+<% if (type !== 'location-indicator') { -%>
  *
  * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-<%- type %>">The online documentation</a>
+<% } -%>
  */
 @UiThread
-<% if (type === 'location-indicator') { -%>
-class <%- camelize(type) %>Layer extends Layer {
-<% } else { -%>
 public class <%- camelize(type) %>Layer extends Layer {
-<% } -%>
 
   /**
    * Creates a <%- camelize(type) %>Layer.

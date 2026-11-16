@@ -3,6 +3,7 @@
 ## main
 
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
+- Make `LocationIndicatorLayer` and `LocationPropertyFactory` public, so apps can add and style a location indicator layer themselves instead of only through `LocationComponent`.
 
 ### 🐞 Bug fixes
 

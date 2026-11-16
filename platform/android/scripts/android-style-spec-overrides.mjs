@@ -3,7 +3,9 @@ import styleSpec from "../../../scripts/style-spec.mjs";
 /** @type {any} */
 let modifiedReferenceSpec = styleSpec;
 
-modifiedReferenceSpec.layer.type.values["location-indicator"] = {};
+modifiedReferenceSpec.layer.type.values["location-indicator"] = {
+    "doc": "Draws a location indicator: an accuracy circle plus top, bearing and shadow images taken from the style's images. This layer type is a MapLibre Native extension and is not part of the MapLibre Style Spec. {@link LocationComponent} uses it to show the device location."
+};
 modifiedReferenceSpec["layout_location-indicator"] = {
     "top-image": {
         "type": "resolvedImage",
