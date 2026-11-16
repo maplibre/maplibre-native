@@ -43,9 +43,13 @@ struct alignas(16) TerrainEvaluatedPropsUBO {
     /* 20 */ float elevation_offset;
     /* 24 */ float pad1;
     /* 28 */ float pad2;
-    /* 32 */
+    /* 32 */ std::array<float, 4> haze_color; // distance haze, premultiplied; clear when there is none
+    /* 48 */ std::array<float, 2> haze_ramp;  // haze = clamp(x - y / view depth, 0, 1)^2 (TerrainLayerTweaker)
+    /* 56 */ float pad3;
+    /* 60 */ float pad4;
+    /* 64 */
 };
-static_assert(sizeof(TerrainEvaluatedPropsUBO) == 32);
+static_assert(sizeof(TerrainEvaluatedPropsUBO) == 64);
 
 } // namespace shaders
 } // namespace mln

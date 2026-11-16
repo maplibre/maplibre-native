@@ -699,6 +699,22 @@ TerrainSkirtLength Map::getTerrainSkirtLength() const {
     return impl->terrainSkirtLength;
 }
 
+void Map::setTerrainHaze(const Color& color, float range) {
+    const float clamped = range > 1.0f ? std::min(range, 1000.0f) : 0.0f; // NaN turns it off too
+    if (impl->terrainHazeColor == color && impl->terrainHazeRange == clamped) return;
+    impl->terrainHazeColor = color;
+    impl->terrainHazeRange = clamped;
+    impl->onUpdate();
+}
+
+Color Map::getTerrainHazeColor() const {
+    return impl->terrainHazeColor;
+}
+
+float Map::getTerrainHazeRange() const {
+    return impl->terrainHazeRange;
+}
+
 void Map::anchorCenterOnTerrain() {
     impl->anchorCenterOnTerrain();
 }
