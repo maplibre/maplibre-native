@@ -281,6 +281,14 @@ public:
     const Color& getHazeColor() const { return hazeColor; }
     float getHazeRange() const { return hazeRange; }
 
+    /// The distance haze as the shaders take it in this view: the color, premultiplied and clear
+    /// when there is no haze, and the ramp, haze = clamp(ramp[0] - ramp[1] / view depth, 0, 1)^2.
+    struct Haze {
+        Color color;
+        std::array<float, 2> ramp{{0.0f, 0.0f}};
+    };
+    Haze getHaze(const TransformState& state) const;
+
     /**
      * @brief Get the source ID providing DEM data
      */

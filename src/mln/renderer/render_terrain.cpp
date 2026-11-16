@@ -1258,6 +1258,26 @@ const std::shared_ptr<gfx::Texture2D>& RenderTerrain::getDepthTexture(gfx::Conte
     return placeholderDepthTexture;
 }
 
+RenderTerrain::Haze RenderTerrain::getHaze(const TransformState& state) const {
+    // Distance haze (Map::setTerrainHaze), as maplibre-gl-js's terrain fog with fog-ground-blend 0.5, its
+    // near plane at n, the camera-to-center distance, and its far plane where the haze is to be full,
+    // `range` times n. (gl-js puts its fog near plane at the sea-level point under the center; the center
+    // itself keeps the reach the same multiple of n over high ground.) gl-js's fog depth at view depth d,
+    // far / (far - n) * (1 - n / d), is clear up to 0.5 and full at 1; the shaders take the haze as
+    // clamp(a - b / d, 0, 1) squared, with a = (far + n) / (far - n) and b = 2 far n / (far - n). As in
+    // gl-js it fades in between pitches of 60 and 70 degrees. Off, a and b are 0 and the color is clear.
+    const double hazeNear = state.getCameraToCenterDistance();
+    const double hazeFar = hazeNear * hazeRange;
+    const double hazeFade = std::clamp((state.getPitch() - util::deg2rad(60.0)) / util::deg2rad(10.0), 0.0, 1.0);
+    if (hazeFar <= hazeNear || hazeFade <= 0.0) {
+        return {};
+    }
+    const double hazeSpan = hazeFar - hazeNear;
+    return {.color = hazeColor * static_cast<float>(hazeFade),
+            .ramp = {{static_cast<float>((hazeFar + hazeNear) / hazeSpan),
+                      static_cast<float>(2.0 * hazeFar * hazeNear / hazeSpan)}}};
+}
+
 float RenderTerrain::getExaggeration() const {
     return impl->exaggeration;
 }
