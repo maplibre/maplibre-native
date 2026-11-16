@@ -239,6 +239,9 @@ public:
     std::vector<float> tileDistances;
     std::vector<float> glyphOffsets;
     bool hidden;
+    // Set while a label that does not pitch with the map is left out because it would fold
+    // over itself on the screen (see `reprojectLineLabels`).
+    mutable bool foldedInLabelPlane = false;
     size_t startIndex;
     // The crossTileID is only filled/used on the foreground for variable text anchors
     uint32_t crossTileID = 0u;

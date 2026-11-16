@@ -9,6 +9,7 @@
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/tile/geometry_tile.hpp>
 #include <mln/util/instrumentation.hpp>
+#include <mln/math/angles.hpp>
 #include <mln/util/math.hpp>
 
 #include <list>
@@ -856,7 +857,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                 tile,
                                 *bucket.textSizeBinder,
                                 state,
-                                getElevation);
+                                getElevation,
+                                util::deg2radf(layout.get<style::TextMaxAngle>()));
             result = true;
         }
     } else if (hasVariableAnchors) {

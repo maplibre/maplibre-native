@@ -102,6 +102,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/text/local_glyph_rasterizer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/quads.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/shaping.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/text/symbol_projection.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/tagged_string.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/custom_geometry_tile.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/geojson_tile.test.cpp
