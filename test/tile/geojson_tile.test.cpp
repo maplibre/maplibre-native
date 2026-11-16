@@ -10,6 +10,11 @@
 #include <mln/renderer/tile_parameters.hpp>
 #include <mln/style/layers/circle_layer.hpp>
 #include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion/json.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/text/glyph_manager.hpp>
@@ -73,6 +78,11 @@ private:
     TileFeatures features;
 };
 
+Filter parseFilter(const std::string& expression) {
+    conversion::Error error;
+    return *conversion::convertJSON<Filter>(expression, error);
+}
+
 } // namespace
 
 TEST(GeoJSONTile, SynchronousUpdate) {
@@ -92,6 +102,33 @@ TEST(GeoJSONTile, SynchronousUpdate) {
     tile.setLayers(layers, tileParameters.globalState);
     ASSERT_TRUE(tile.isComplete());
     ASSERT_TRUE(tile.isRenderable());
+}
+
+// A symbol layer that matches none of the tile's features gets no render data, while a layer that matches gets it.
+TEST(GeoJSONTile, SymbolLayerWithoutMatchingFeatures) {
+    GeoJSONTileTest test;
+
+    CircleLayer circleLayer("circle", "source");
+    SymbolLayer symbolLayer("symbol", "source");
+    symbolLayer.setFilter(parseFilter(R"(["==", ["get", "kind"], "shop"])"));
+
+    mapbox::feature::feature_collection<int16_t> features;
+    features.push_back(mapbox::feature::feature<int16_t>{mapbox::geometry::point<int16_t>(0, 0)});
+    auto data = std::make_shared<FakeGeoJSONData>(std::move(features));
+    TileParameters tileParameters = test.tileParameters;
+    tileParameters.isUpdateSynchronous = true;
+    GeoJSONTile tile(OverscaledTileID(0, 0, 0), "source", tileParameters, data);
+    Immutable<LayerProperties> circleProperties = makeMutable<CircleLayerProperties>(
+        staticImmutableCast<CircleLayer::Impl>(circleLayer.baseImpl));
+    Immutable<LayerProperties> symbolProperties = makeMutable<SymbolLayerProperties>(
+        staticImmutableCast<SymbolLayer::Impl>(symbolLayer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{circleProperties, symbolProperties};
+    tile.setLayers(layers, tileParameters.globalState);
+
+    ASSERT_TRUE(tile.isComplete());
+    EXPECT_TRUE(tile.isRenderable());
+    EXPECT_TRUE(tile.layerPropertiesUpdated(circleProperties));
+    EXPECT_FALSE(tile.layerPropertiesUpdated(symbolProperties));
 }
 
 TEST(GeoJSONTile, Issue7648) {

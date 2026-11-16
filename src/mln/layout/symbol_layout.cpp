@@ -1041,6 +1041,12 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                 const bool firstLoad,
                                 const bool showCollisionBoxes,
                                 const CanonicalTileID& canonical) {
+    // Without symbol instances the bucket gets no vertices, fails hasData() below and is dropped;
+    // most filtered symbol layers have no matching features in a given tile.
+    if (symbolInstances.empty()) {
+        return;
+    }
+
     auto bucket = std::make_shared<SymbolBucket>(layout,
                                                  layerPaintProperties,
                                                  textSize,
