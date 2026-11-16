@@ -12,6 +12,8 @@
 #include <mln/tile/tile.hpp>
 #include <mln/util/logging.hpp>
 
+#include <algorithm>
+
 namespace mln {
 
 using namespace style;
@@ -164,6 +166,16 @@ std::size_t RenderLayer::removeAllDrawables() {
 void RenderLayer::updateRenderTileIDs() {
     if (!renderTiles || renderTiles->empty()) {
         renderTileIDs.clear();
+        return;
+    }
+
+    // Every layer runs this every frame, while the visible tile set usually stays the same between
+    // frames. Rebuilding would copy each bucket ID onto the same tile ID, so an unchanged set is kept.
+    const bool sameTiles = renderTileIDs.size() == renderTiles->size() &&
+                           std::all_of(renderTiles->begin(), renderTiles->end(), [&](const auto& tile) {
+                               return renderTileIDs.find(tile.get().getOverscaledTileID()).has_value();
+                           });
+    if (sameTiles) {
         return;
     }
 
