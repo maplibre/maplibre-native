@@ -412,9 +412,11 @@ TEST(PluginApi, LayoutPropertiesValidateScopeSerializeAndInvalidateGeometry) {
     input.property.supports_transitions = 1;
     input.expectRejected();
     input.property.supports_transitions = 0;
-    input.property.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE;
+    input.property.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
     input.expectRejected();
-    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    // Feature-dependent layout values are evaluated per feature and need no shader binding.
+    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
+                                             MLN_PLUGIN_EXPRESSION_COMPOSITE;
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
     style::conversion::Error error;
     auto parse = [&](const std::string& section, int value) {

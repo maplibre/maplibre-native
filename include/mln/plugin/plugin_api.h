@@ -141,8 +141,11 @@ typedef struct mln_plugin_property_descriptor_v1 {
     /* Optional allowed string values. */
     const mln_plugin_string* enum_values;
     size_t enum_value_count;
-    /* 0 = paint, 1 = layout. Layout values may use camera expressions only,
-     * never transition, and are evaluated at tile zoom before create_layout. */
+    /* 0 = paint, 1 = layout. Layout values are evaluated at tile zoom: once
+     * for the tile, passed to create_layout, and once for each feature, passed
+     * to layout_feature (see mln_plugin_feature_v1::layout_properties). They
+     * may use camera, feature and composite expressions, but not feature
+     * state, and never transition. */
     uint8_t is_layout;
 } mln_plugin_property_descriptor_v1;
 
@@ -332,6 +335,10 @@ typedef struct mln_plugin_feature_v1 {
     /* path_offsets has path_count + 1 entries and ends at point_count. */
     const uint32_t* path_offsets;
     size_t path_count;
+    /* The layout properties evaluated for this feature, in registration order.
+     * Set for layout_feature only; null with a zero count otherwise. */
+    const mln_plugin_property_value_v1* layout_properties;
+    size_t layout_property_count;
 } mln_plugin_feature_v1;
 
 /* Worker-thread input. Paint evaluation is owned by the host binders. */
@@ -339,6 +346,8 @@ typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
+    /* The layout properties evaluated at tile zoom without a feature, in
+     * registration order. A feature-dependent value is its default here. */
     const mln_plugin_property_value_v1* properties;
     size_t property_count;
     /* 1 when the map renders a still image or a tile, 0 for a continuous map. A continuous map draws a point only in

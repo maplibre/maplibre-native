@@ -328,9 +328,9 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
             return false;
         }
         if (property.is_layout > 1 ||
-            (property.is_layout &&
-             (property.supports_transitions || (property.expression_capabilities & ~MLN_PLUGIN_EXPRESSION_CAMERA)))) {
-            error = "plugin layout properties support only camera expressions and cannot transition";
+            (property.is_layout && (property.supports_transitions ||
+                                    (property.expression_capabilities & MLN_PLUGIN_EXPRESSION_FEATURE_STATE)))) {
+            error = "plugin layout properties cannot depend on feature state or transition";
             return false;
         }
         if (property.type == MLN_PLUGIN_VALUE_IMAGE &&
@@ -545,7 +545,8 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         for (const auto& property : copiedLayerType.properties) {
             const auto dataDependencies = MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_COMPOSITE |
                                           MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
-            if ((property.expressionCapabilities & dataDependencies) == 0) continue;
+            // Layout properties are evaluated for each feature at layout time, without a shader binding.
+            if (property.isLayout || (property.expressionCapabilities & dataDependencies) == 0) continue;
             const bool bound = std::any_of(
                 copiedLayerType.shaders.begin(), copiedLayerType.shaders.end(), [&](const auto& shader) {
                     return std::any_of(shader.propertyBindings.begin(),

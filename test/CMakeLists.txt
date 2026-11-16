@@ -232,6 +232,7 @@ if(MLN_WITH_PLUGINS)
     target_sources(mbgl-test PRIVATE
         plugin/api.test.cpp
         plugin/layout.test.cpp
+        plugin/layout_properties.test.cpp
         plugin/property_binding.test.cpp
         plugin/registry.test.cpp
         plugin/rendering.test.cpp
