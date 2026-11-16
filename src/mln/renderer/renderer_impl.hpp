@@ -3,6 +3,8 @@
 #include <mln/gfx/context_observer.hpp>
 #include <mln/renderer/render_orchestrator.hpp>
 #include <mln/renderer/texture_pool.hpp>
+#include <mln/style/terrain.hpp>
+#include <mln/util/immutable.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mln/mtl/mtl_fwd.hpp>
@@ -124,6 +126,9 @@ private:
     /// loaded tile under it, that height is not the ground under the eye any more.
     std::optional<UnwrappedTileID> eyeElevationTile;
     double lastReportedTargetElevation = std::numeric_limits<double>::quiet_NaN();
+    /// The terrain those heights were reported for. One set again after it was removed is another
+    /// terrain to the map, even where the renderer drew no frame without one.
+    std::optional<Immutable<style::Terrain::Impl>> reportedTerrain;
 
     /// The terrain height copy last handed to the observer (null: none, or terrain off), so it
     /// is sent once per change rather than once per frame.

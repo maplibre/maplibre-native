@@ -4,6 +4,7 @@
 #include <mln/style/terrain_impl.hpp>
 #include <mln/util/immutable.hpp>
 #include <mln/tile/tile_id.hpp>
+#include <mln/util/color.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/gfx/index_buffer.hpp>
@@ -148,6 +149,11 @@ public:
                                     const std::set<UnwrappedTileID>& cover,
                                     const std::array<double, 2>& origin,
                                     const std::set<UnwrappedTileID>& hadFullSize);
+
+    /// Whether a source leaves out the tiles that build none of its layers (on by default); a test
+    /// turns it off to compare what it leaves out.
+    static void setLeaveOutEmptyTilesForTesting(bool leaveOut);
+    static bool leavesOutEmptyTiles();
 
     /// The cover with a one-ring dilation: every 8-neighbour of a tile, at that tile's zoom,
     /// except one that lies over, or under, a tile the cover already has (whatever its zoom).
@@ -309,6 +315,12 @@ public:
     float getExaggeration() const;
 
     /**
+     * @brief The map's distance haze (Map::setTerrainHaze) as of the last update; range 0 is none
+     */
+    const Color& getHazeColor() const { return hazeColor; }
+    float getHazeRange() const { return hazeRange; }
+
+    /**
      * @brief Get the source ID providing DEM data
      */
     const std::string& getSourceID() const;
@@ -465,6 +477,9 @@ private:
     // The skirt setting the cached mesh was built with. update() drops the mesh and every
     // tile drawable built from it when the map's setting no longer matches.
     TerrainSkirtLength meshSkirtLength = TerrainSkirtLength::Auto;
+    // The map's distance haze, taken from each update for the tweaker.
+    Color hazeColor;
+    float hazeRange = 0.0f;
 
     // Layer group for terrain drawables
     LayerGroupBasePtr layerGroup;

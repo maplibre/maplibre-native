@@ -9,6 +9,7 @@
 #include <mln/style/layer.hpp>
 #include <mln/text/glyph.hpp>
 #include <mln/util/chrono.hpp>
+#include <mln/util/color.hpp>
 #include <mln/util/feature.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/immutable.hpp>
@@ -67,6 +68,9 @@ public:
     TileLodMode tileLodMode = TileLodMode::Default;
     TerrainLoadMode terrainLoadMode = TerrainLoadMode::Quality;
     TerrainSkirtLength terrainSkirtLength = TerrainSkirtLength::Auto;
+    // Distance haze over the terrain (Map::setTerrainHaze); a range of 0 is no haze.
+    Color terrainHazeColor;
+    float terrainHazeRange = 0.0f;
     // Debug: when set, RenderTerrain logs the camera eye's clearance over the terrain
     // (ABOVE-GROUND ...). Off by default; the per-frame elevation sampling is skipped entirely
     // when off, so it has no cost unless explicitly enabled (Map::setDebugAboveGroundLog).

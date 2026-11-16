@@ -42,6 +42,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_exaggeration.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_drape.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_horizon_haze.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_runtime_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/layer_min_zoom_tiles.test.cpp
@@ -49,6 +50,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_mesh_cover.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_edges.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_source_cover.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_unseen_tiles.test.cpp
     $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_parser.test.cpp

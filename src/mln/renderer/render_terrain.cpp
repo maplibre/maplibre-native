@@ -157,6 +157,9 @@ std::vector<LoadedDEMTile> loadedDEMTiles(const RenderSource* demSource) {
     return out;
 }
 
+// Set by tests only (RenderTerrain::setLeaveOutEmptyTilesForTesting)
+std::atomic<bool> leaveOutEmptyTiles{true};
+
 // Set by tests only (RenderTerrain::setMaxDEMTexturesForTesting); 0 keeps the default cap
 std::atomic<size_t> demTextureCapOverride{0};
 
@@ -210,6 +213,14 @@ RenderTerrain::DrapeSizes RenderTerrain::drapeSizesFor(MapMode mode,
                 .maxResizes = static_cast<size_t>(std::max(drapeCap, 0))};
     }
     return {.fullSizeTiles = fullSizeDrapeTilesOf(cover, origin, {}, fullSizeDrapeMax), .maxResizes = 0};
+}
+
+void RenderTerrain::setLeaveOutEmptyTilesForTesting(bool leaveOut) {
+    leaveOutEmptyTiles = leaveOut;
+}
+
+bool RenderTerrain::leavesOutEmptyTiles() {
+    return leaveOutEmptyTiles;
 }
 
 void RenderTerrain::setMaxDEMTexturesForTesting(size_t cap) {
@@ -535,6 +546,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             depthDirty = true;
         }
         tilesWithDrawables.clear();
+    }
+
+    if (updateParameters) {
+        hazeColor = updateParameters->terrainHazeColor;
+        hazeRange = updateParameters->terrainHazeRange;
     }
 
     // If we don't have a DEM source, we can't create terrain drawables
@@ -1756,7 +1772,11 @@ void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
                                                         .exaggeration = getExaggeration(),
                                                         .elevation_offset = elevationOffset,
                                                         .pad1 = 0.0f,
-                                                        .pad2 = 0.0f};
+                                                        .pad2 = 0.0f,
+                                                        .haze_color = {0.0f, 0.0f, 0.0f, 0.0f},
+                                                        .haze_ramp = {0.0f, 0.0f},
+                                                        .pad3 = 0.0f,
+                                                        .pad4 = 0.0f};
 
     depthLg->visitDrawables([&](gfx::Drawable& drawable) {
         auto& u = drawable.mutableUniformBuffers();
