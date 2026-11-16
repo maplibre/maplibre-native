@@ -102,8 +102,10 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
 
             // If the already-allocated buffer is large enough, we can re-use it
             if (rawBufSize <= resource.getSizeInBytes()) {
-                // If the source changed, update the buffer contents.
-                if (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated())) {
+                // forceUpdate is set for a drawable that has never uploaded. Several attributes share
+                // one vertex vector, and the first of them frees the CPU copy. Later attributes reuse
+                // the GPU buffer, the CPU buffer is already freed.
+                if (vec->hasRawData() && (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated()))) {
                     updateVertexBufferResource(resource, vec->getRawData(), rawBufSize);
                     resource.setLastUpdated(vec->getLastModified());
                 }
