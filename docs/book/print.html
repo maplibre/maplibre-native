@@ -74,7 +74,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-fc84038b.js";
+            window.path_to_searchindex_js = "searchindex-2a8f943d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-743eb912.js"></script>
@@ -557,7 +557,7 @@ scripts/aws-device-farm/plot-android-benchmark-results.py
 </table>
 </div>
 <p>Each published flavor also has a debug artifact, with a <code>-debug</code> postfix (e.g. <code>android-sdk-vulkan-debug</code> or <code>android-sdk-opengl-with-plugin-api-debug</code>).</p>
-<p>The <code>*WithPluginApi</code> flavors are the same as the flavor they are named after, but their native library also exports the C plugin API (<a href="https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h"><code>include/mln/plugin/plugin_api.h</code></a>). The plugin API does not support WebGPU. The <a href="https://github.com/maplibre/maplibre-native/tree/main/plugins/android">n-gon layer demo app</a> in <code>plugins/android</code> uses these flavors.</p>
+<p>The <code>*WithPluginApi</code> flavors are the same as the flavor they are named after, but their native library also exports the C plugin API (<a href="https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h"><code>include/mln/plugin/plugin_api.h</code></a>). The plugin API does not support WebGPU. The <a href="https://github.com/maplibre/maplibre-native/tree/main/plugins/demo/android">n-gon layer demo app</a> in <code>plugins/demo/android</code> uses these flavors.</p>
 <h2 id="building-a-flavor"><a class="header" href="#building-a-flavor">Building a flavor</a></h2>
 <p>The flavor name is part of the Gradle task. For the test app:</p>
 <pre><code class="language-bash">cd platform/android
