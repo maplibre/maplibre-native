@@ -212,9 +212,17 @@ public:
     std::set<CanonicalTileID> demTiles;
 };
 
+// A source that covers all the ground in view, which is what the cap holds
+class CoveringAllTheGround {
+public:
+    CoveringAllTheGround() { RenderTerrain::setSourcesEndBelowMinZoomForTesting(false); }
+    ~CoveringAllTheGround() { RenderTerrain::setSourcesEndBelowMinZoomForTesting(true); }
+};
+
 // The source asks for the tiles nearest the camera and no others: the same set as the nearest
 // of the whole cover, measured from where the camera stands on the ground.
 void expectOnlyTheTilesNearestTheCamera(const TerrainSourceCoverTest::Options& options) {
+    const CoveringAllTheGround use;
     TerrainSourceCoverTest test(options);
     // The DEM arrives first: the elevated cover shifts as it lands, and a source that asked for
     // the tiles on each side of that shift has asked for more than its cap in all.

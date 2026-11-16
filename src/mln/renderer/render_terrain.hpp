@@ -181,6 +181,15 @@ public:
     /// Tiles a source may cover per tile of the mesh-tile cap (TileParameters::coverTileLimit).
     static constexpr size_t sourceTilesPerMeshTile = 4;
 
+    /// How far below its min zoom a source still covers the ground (TileParameters::coverMinZoomReach).
+    /// The default level of detail puts ground at a zoom about one and a half below the scale it
+    /// is drawn at, so with a reach of one a source ends about where the ground is drawn half a
+    /// zoom under the source's min zoom.
+    static std::optional<uint8_t> sourceMinZoomReach();
+    /// Whether a source ends there (on by default); a test turns it off to cover all the ground
+    /// in view.
+    static void setSourcesEndBelowMinZoomForTesting(bool end);
+
     /// Resolve the DEM render source from the orchestrator if not yet bound.
     /// Renderer::Impl::render calls this before building the frame's drape-target
     /// pool from computeMeshCover: the source is otherwise first bound inside
