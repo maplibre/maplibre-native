@@ -25,6 +25,44 @@ inline gfx::AttributeDataType attributeType(mln_plugin_vertex_attribute_type typ
     return index < std::size(types) ? types[index] : Type::Invalid;
 }
 
+// The size in bytes of a property value in a shader binding's encoding, or 0 for an unknown encoding.
+inline uint32_t propertyEncodingSize(mln_plugin_property_encoding_v1 encoding) {
+    switch (encoding) {
+        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
+        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
+        case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
+            return 4;
+        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
+            return 8;
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
+            return 16;
+    }
+    return 0;
+}
+
+// The vertex attribute type of a property binding. A packed binding has the minimum and the maximum in one attribute.
+inline mln_plugin_vertex_attribute_type propertyAttributeType(mln_plugin_property_encoding_v1 encoding, bool packed) {
+    if (packed) return propertyEncodingSize(encoding) == 4 ? MLN_PLUGIN_VERTEX_FLOAT_X2 : MLN_PLUGIN_VERTEX_FLOAT_X4;
+    switch (encoding) {
+        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
+        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
+        case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
+            return MLN_PLUGIN_VERTEX_FLOAT;
+        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
+            return MLN_PLUGIN_VERTEX_FLOAT_X2;
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
+            return MLN_PLUGIN_VERTEX_FLOAT_X4;
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
+            return MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED;
+    }
+    return static_cast<mln_plugin_vertex_attribute_type>(0);
+}
+
 inline mln_plugin_geometry_type geometryType(FeatureType type) {
     switch (type) {
         case FeatureType::Point:
