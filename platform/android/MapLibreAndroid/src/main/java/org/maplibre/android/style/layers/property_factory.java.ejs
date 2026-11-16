@@ -25,17 +25,18 @@ import org.maplibre.android.style.layers.Property;
 import org.maplibre.android.style.layers.PropertyValue;
 <% } -%>
 
-<% if (locationIndicator) { -%>
-/**
- * Constructs paint/layout properties for {@link LocationIndicatorLayer}
- */
-public class LocationPropertyFactory {
-<% } else { -%>
 /**
  * Constructs paint/layout properties for Layers
+<% if (locationIndicator) { -%>
+ * <p>
+ * The properties built here are for {@link LocationIndicatorLayer}.
+<% } -%>
  *
  * @see <a href="https://maplibre.org/maplibre-style-spec/#layers">Layer style documentation</a>
  */
+<% if (locationIndicator) { -%>
+public class LocationPropertyFactory {
+<% } else { -%>
 public class PropertyFactory {
 <% } -%>
 

@@ -18,7 +18,9 @@ import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.PropertyValue;
 
 /**
- * Draws a location indicator: an accuracy circle plus top, bearing and shadow images taken from the style's images. This layer type is a MapLibre Native extension and is not part of the MapLibre Style Spec. {@link LocationComponent} uses it to show the device location.
+ * Draws a location indicator: an accuracy circle plus top, bearing and shadow images taken from the style's images. {@link LocationComponent} draws the device location with this layer when {@link LocationComponentActivationOptions.Builder#useSpecializedLocationLayer(boolean)} is set to true.
+ *
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-location-indicator">The online documentation</a>
  */
 @UiThread
 public class LocationIndicatorLayer extends Layer {
