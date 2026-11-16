@@ -100,15 +100,15 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
                                                              const gfx::BufferUsageType usage,
                                                              bool forceUpdate) {
     if (vec) {
-        const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
 
         if (auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer()); rawData && rawData->resource) {
             auto& resource = static_cast<VertexBufferResource&>(*rawData->resource);
 
             if (rawBufSize <= resource.getSizeInBytes()) {
-                if (vec->hasRawData() && (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated()))) {
-                    updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
+                // getRawData throws once the CPU copy is gone.
+                if (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated())) {
+                    updateVertexBufferResource(resource, vec->getRawData(), rawBufSize);
                     resource.setLastUpdated(vec->getLastModified());
                 }
                 return rawData->resource;
@@ -116,7 +116,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         }
         if (rawBufSize > 0) {
             auto buffer_ = std::make_unique<VertexBuffer>();
-            buffer_->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
+            buffer_->resource = createVertexBufferResource(vec->getRawData(), rawBufSize, usage, /*persistent=*/false);
             vec->setBuffer(std::move(buffer_));
             return static_cast<VertexBuffer*>(vec->getBuffer())->resource;
         }
