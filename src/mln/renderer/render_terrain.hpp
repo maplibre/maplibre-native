@@ -183,8 +183,9 @@ public:
 
     /// How far below its min zoom a source still covers the ground (TileParameters::coverMinZoomReach).
     /// The default level of detail puts ground at a zoom about one and a half below the scale it
-    /// is drawn at, so with a reach of one a source ends about where the ground is drawn half a
-    /// zoom under the source's min zoom.
+    /// is drawn at, so with a reach of two a source ends about where the ground is drawn one and
+    /// a half zooms under the source's min zoom. A reach of one ends it in view at a pitch of 65
+    /// degrees when the map is at the source's min zoom.
     static std::optional<uint8_t> sourceMinZoomReach();
     /// Whether a source ends there (on by default); a test turns it off to cover all the ground
     /// in view.

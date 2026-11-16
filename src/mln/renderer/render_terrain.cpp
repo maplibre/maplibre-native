@@ -226,7 +226,7 @@ bool RenderTerrain::leavesOutEmptyTiles() {
 }
 
 std::optional<uint8_t> RenderTerrain::sourceMinZoomReach() {
-    return sourcesEndBelowMinZoom ? std::optional<uint8_t>{1} : std::nullopt;
+    return sourcesEndBelowMinZoom ? std::optional<uint8_t>{2} : std::nullopt;
 }
 
 void RenderTerrain::setSourcesEndBelowMinZoomForTesting(bool end) {

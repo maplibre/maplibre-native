@@ -430,7 +430,7 @@ TEST(TerrainUnseenTiles, ASourceDoesNotAskForTilesThatBuildNothingAtPitch85) {
 }
 
 // A source with a deep minzoom was covered at it over the far field, as far as the tile limit
-// let it. It ends where the ground is more than a zoom below its minzoom.
+// let it. It ends where the ground is more than two zooms below its minzoom.
 TEST(TerrainUnseenTiles, ASourceEndsWhereTheGroundIsFarBelowItsMinZoom) {
     for (const double pitch : {77.0, 85.0}) {
         const TilesBySource whole = tilesRequested(true, pitch);
