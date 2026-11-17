@@ -1595,7 +1595,7 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
   }
 
   if (firstCondition.expressionType == NSConstantValueExpressionType &&
-      [firstCondition.constantValue isKindOfClass:[NSComparisonPredicate class]]) {
+      [firstCondition.constantValue isKindOfClass:[NSPredicate class]]) {
     NSPredicate *predicate = (NSPredicate *)firstCondition.constantValue;
     condition = predicate.mgl_jsonExpressionObject;
   } else {
@@ -1608,7 +1608,7 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
 
   for (NSUInteger index = minimumIndex; index < arguments.count; index++) {
     if (arguments[index].expressionType == NSConstantValueExpressionType &&
-        [arguments[index].constantValue isKindOfClass:[NSComparisonPredicate class]]) {
+        [arguments[index].constantValue isKindOfClass:[NSPredicate class]]) {
       NSPredicate *predicate = (NSPredicate *)arguments[index].constantValue;
       [expressionObject addObject:predicate.mgl_jsonExpressionObject];
     } else {

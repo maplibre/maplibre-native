@@ -70,8 +70,6 @@ add_library(
     mbgl-compiler-options INTERFACE
 )
 
-set(UBSAN_BLACKLIST ${PROJECT_SOURCE_DIR}/scripts/ubsan.blacklist)
-
 if (MLN_WITH_SANITIZER)
     message(STATUS "MLN_WITH_SANITIZER is enabled, using \"${MLN_WITH_SANITIZER}\" sanitizer")
 endif()
@@ -85,16 +83,8 @@ target_compile_options(
         $<$<BOOL:${MLN_WITH_SANITIZER}>:-fno-optimize-sibling-calls>
         $<$<STREQUAL:${MLN_WITH_SANITIZER},address>:-fsanitize=address>
         $<$<STREQUAL:${MLN_WITH_SANITIZER},thread>:-fsanitize=thread>
-        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=implicit-conversion,
-        -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=undefined,
-        -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=unsigned-integer-overflow,
-        -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=nullability,
-        -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=float-divide-by-zero,
-        -fsanitize-blacklist=${UBSAN_BLACKLIST}>
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=undefined>
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fno-sanitize-recover=undefined>
         $<$<PLATFORM_ID:iOS>:-fembed-bitcode>
         $<$<AND:$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:OBJCXX>>,$<NOT:$<OR:$<BOOL:${MLN_WITH_RTTI}>,$<CXX_COMPILER_ID:MSVC>>>>:-fno-rtti>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wall>

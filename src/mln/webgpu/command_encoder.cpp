@@ -76,8 +76,9 @@ void CommandEncoder::submitCommandBuffer() {
     wgpuCommandEncoderRelease(encoder);
     encoder = nullptr;
 
+    // Buffer writes made while recording land before the commands that use them
+    context.getBufferUploader().submit(cmdBuffer);
     if (cmdBuffer) {
-        wgpuQueueSubmit(queue, 1, &cmdBuffer);
         wgpuCommandBufferRelease(cmdBuffer);
     } else {
         Log::Error(Event::Render, "WebGPU: Failed to finish command encoder");

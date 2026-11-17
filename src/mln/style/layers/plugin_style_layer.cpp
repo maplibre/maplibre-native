@@ -1,6 +1,7 @@
 #include <mln/style/layers/plugin_style_layer.hpp>
 #include <mln/style/layer_observer.hpp>
 #include <mln/style/conversion_impl.hpp>
+#include <mln/style/conversion/stringify.hpp>
 #include <mln/style/conversion/transition_options.hpp>
 
 namespace mln {
@@ -18,6 +19,11 @@ std::optional<std::string> pluginTransitionPropertyName(const plugin::LayerType&
     return definition && definition->supportsTransitions ? std::optional<std::string>{std::move(propertyName)}
                                                          : std::nullopt;
 }
+
+// Whether the property changes the layout of the layer: layout properties, and images, which the layout requests.
+bool affectsLayout(const plugin::PropertyDefinition& definition) {
+    return definition.isLayout || definition.type == MLN_PLUGIN_VALUE_IMAGE;
+}
 } // namespace
 
 PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, plugin::RegisteredLayerPtr registration_)
@@ -26,11 +32,23 @@ PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, p
 
 bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
     assert(other.getTypeInfo() == getTypeInfo());
-    return filter != other.filter || visibility != other.visibility;
+    if (filter != other.filter || visibility != other.visibility) return true;
+    const auto& rhs = static_cast<const Impl&>(other);
+    for (const auto& definition : registration->properties) {
+        if (affectsLayout(definition) &&
+            pluginPropertyValue(definition, pluginProperties) != pluginPropertyValue(definition, rhs.pluginProperties))
+            return true;
+    }
+    return false;
 }
 
 void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
     writer.StartObject();
+    for (const auto& definition : registration->properties) {
+        if (!affectsLayout(definition)) continue;
+        writer.String(definition.name);
+        conversion::stringify(writer, pluginPropertyValue(definition, pluginProperties).toStyleProperty().getValue());
+    }
     writer.EndObject();
 }
 
@@ -40,6 +58,10 @@ const LayerTypeInfo* PluginStyleLayer::Impl::getTypeInfo() const noexcept {
 
 expression::Dependency PluginStyleLayer::Impl::getDependencies() const noexcept {
     expression::Dependency result = expression::Dependency::None;
+    if (std::any_of(registration->properties.begin(), registration->properties.end(), [](const auto& p) {
+            return p.type == MLN_PLUGIN_VALUE_IMAGE;
+        }))
+        result |= expression::Dependency::Zoom;
     for (const auto& [name, value] : pluginProperties) {
         (void)name;
         result |= value.getDependencies();
@@ -72,12 +94,8 @@ StyleProperty PluginStyleLayer::getProperty(const std::string& name) const {
                    ? StyleProperty{TransitionOptions{}.serialize(), StyleProperty::Kind::Transition}
                    : StyleProperty{transition->second.serialize(), StyleProperty::Kind::Transition};
     }
-    const auto value = impl().pluginProperties.find(name);
-    if (value != impl().pluginProperties.end()) {
-        return value->second.toStyleProperty();
-    }
     const auto definition = impl().registration->findProperty(name);
-    return definition ? defaultPluginPropertyValue(*definition).toStyleProperty() : StyleProperty{};
+    return definition ? pluginPropertyValue(*definition, impl().pluginProperties).toStyleProperty() : StyleProperty{};
 }
 
 std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::string& name,
@@ -87,7 +105,7 @@ std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::
     const auto definition = impl().registration->findProperty(name);
     if (!definition) return Error{"layer doesn't support this property"};
     if (scope) {
-        if (*scope != PropertyScope::Paint) {
+        if (*scope != (definition->isLayout ? PropertyScope::Layout : PropertyScope::Paint)) {
             return Error{"plugin property '" + name + "' is in the wrong style section"};
         }
     }
@@ -150,7 +168,7 @@ Value PluginStyleLayer::serialize() const {
     for (const auto& [name, value] : impl().pluginProperties) {
         const auto definition = impl().registration->findProperty(name);
         if (!definition) continue;
-        auto& object = result["paint"];
+        auto& object = result[definition->isLayout ? "layout" : "paint"];
         if (!object.getObject()) object = mapbox::base::ValueObject{};
         const auto property = value.toStyleProperty();
         if (property.getKind() != StyleProperty::Kind::Undefined) {

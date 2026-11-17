@@ -139,8 +139,23 @@ jobs:
             echo "CXX=clang++"
           } >> "$GITHUB_ENV"
 
+      - name: Restore Dawn sources
+        if: matrix.variant.impl == 'dawn'
+        id: dawn-sources
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: vendor/dawn
+          key: dawn-sources-${{ hashFiles('vendor/dawn.cmake') }}
+
       - name: Configure build
         run: cmake --preset macos-webgpu-${{ matrix.variant.impl }}
+
+      - name: Save Dawn sources
+        if: matrix.variant.impl == 'dawn' && github.event_name != 'pull_request' && steps.dawn-sources.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: vendor/dawn
+          key: ${{ steps.dawn-sources.outputs.cache-primary-key }}
 
       - name: Build targets
         run: |

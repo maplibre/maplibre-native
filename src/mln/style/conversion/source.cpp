@@ -56,7 +56,23 @@ std::optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id
         tileSize = static_cast<uint16_t>(*size);
     }
 
-    return {std::make_unique<RasterSource>(id, std::move(*urlOrTileset), tileSize)};
+    // Inline zooms win over the TileJSON's (RasterSource::setTilesetOverrides); an invalid one
+    // rejects the source, as for vector sources
+    std::optional<uint8_t> zooms[2];
+    const char* const zoomNames[2] = {"minzoom", "maxzoom"};
+    for (int i = 0; i < 2; ++i) {
+        if (const auto zoomValue = objectMember(value, zoomNames[i])) {
+            const std::optional<float> zoom = toNumber(*zoomValue);
+            if (!zoom || *zoom < 0 || *zoom > std::numeric_limits<uint8_t>::max()) {
+                error.message = std::string("invalid ") + zoomNames[i];
+                return std::nullopt;
+            }
+            zooms[i] = static_cast<uint8_t>(*zoom);
+        }
+    }
+
+    return {
+        std::make_unique<RasterSource>(id, std::move(*urlOrTileset), tileSize, SourceType::Raster, zooms[0], zooms[1])};
 }
 
 std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string& id,
@@ -83,7 +99,15 @@ std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string&
            parameters. Since style.json can contain TileJSON parameter overrides or non-TileJSON spec parameters, a
            separate mechanism is needed. Ideally these two pathways share parsing logic.
     */
-    auto options = convert<SourceOptions>(value, error);
+    // An invalid `encoding`, `minzoom` or `maxzoom` rejects the source, as for vector sources:
+    // building it without the options decoded a terrarium DEM as Mapbox, with wrong heights and
+    // nothing logged. No options at all is not an error.
+    Error optionsError;
+    auto options = convert<SourceOptions>(value, optionsError);
+    if (!options && !optionsError.message.empty()) {
+        error = std::move(optionsError);
+        return std::nullopt;
+    }
 
     return {std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize, options)};
 }
