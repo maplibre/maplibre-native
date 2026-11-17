@@ -241,8 +241,10 @@ uint8_t RenderTerrain::skirtEdges(const UnwrappedTileID& tile, const std::set<Un
     const auto boxAt = [](const UnwrappedTileID& id, int zoom) {
         const int shift = zoom - id.canonical.z;
         const int64_t x = static_cast<int64_t>(id.wrap) * (int64_t{1} << id.canonical.z) + id.canonical.x;
-        return Box{
-            x << shift, (x + 1) << shift, int64_t{id.canonical.y} << shift, (int64_t{id.canonical.y} + 1) << shift};
+        return Box{.x0 = x << shift,
+                   .x1 = (x + 1) << shift,
+                   .y0 = int64_t{id.canonical.y} << shift,
+                   .y1 = (int64_t{id.canonical.y} + 1) << shift};
     };
     const auto overlap = [](int64_t a0, int64_t a1, int64_t b0, int64_t b1) {
         return std::max(a0, b0) < std::min(a1, b1);

@@ -179,7 +179,7 @@ Render renderScene(TerrainSkirtLength skirts,
             static_cast<uint8_t>(data.z), static_cast<uint32_t>(data.x), static_cast<uint32_t>(data.y)};
         const bool dem = resource.url.find("/dem/") != std::string::npos;
         if (dem) {
-            const std::lock_guard<std::mutex> lock(mutex);
+            const std::scoped_lock lock(mutex);
             out.demZooms.insert(tile.z);
             if (tile == withheldDemTile) {
                 return std::nullopt;
