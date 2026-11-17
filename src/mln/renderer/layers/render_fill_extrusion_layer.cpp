@@ -873,6 +873,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 for (auto* drawables : {&occlusionDrawables, &resolveDrawables}) {
                     for (auto& drawable : *drawables) {
                         drawable->setTileID(tileID);
+                        // Hidden behind the buildings of this layer and the ones below, also when this layer is not
+                        // the lowest fill-extrusion layer
+                        drawable->setDepthTestAbove3D(true);
                         drawable->setLayerTweaker(groundOcclusionTweaker);
                         drawable->setBinders(renderData.bucket, &binders);
                         drawable->setRenderTile(renderTilesOwner, &tile);

@@ -155,6 +155,11 @@ void Drawable::setDepthType(gfx::DepthMaskType value) {
     impl->depthStencilState.reset();
 }
 
+void Drawable::setDepthTestAbove3D(bool value) {
+    gfx::Drawable::setDepthTestAbove3D(value);
+    impl->depthStencilState.reset();
+}
+
 void Drawable::setShader(gfx::ShaderProgramBasePtr value) {
     impl->pipelineState.reset();
     gfx::Drawable::setShader(value);
@@ -250,7 +255,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                 impl->depthStencilState.reset();
             }
         }
-        const auto depthMode = getEnableDepth() ? parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType())
+        const auto depthMode = getEnableDepth() ? parameters.depthModeForSublayer(
+                                                      getSubLayerIndex(), getDepthType(), getDepthTestAbove3D())
                                                 : gfx::DepthMode::disabled();
         if (!impl->depthStencilState) {
             if (enableStencil && !newStencilMode) {

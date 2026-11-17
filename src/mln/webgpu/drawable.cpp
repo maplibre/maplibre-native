@@ -266,6 +266,14 @@ void Drawable::setDepthType(gfx::DepthMaskType value) {
     impl->pipelineState = nullptr; // Reset pipeline to force recreation with new depth mask
 }
 
+void Drawable::setDepthTestAbove3D(bool value) {
+    if (getDepthTestAbove3D() == value) {
+        return;
+    }
+    gfx::Drawable::setDepthTestAbove3D(value);
+    impl->pipelineState = nullptr; // Reset pipeline to force recreation with new depth state
+}
+
 void Drawable::setDepthModeFor3D(const gfx::DepthMode& value) {
     if (impl->depthMode.func != value.func || impl->depthMode.mask != value.mask) {
         impl->pipelineState = nullptr;
@@ -660,7 +668,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         stencilMode = impl->stencilMode;
     } else {
         if (getEnableDepth()) {
-            depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+            depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType(), getDepthTestAbove3D());
         }
         if (getEnableStencil() && drawableTileID) {
             stencilMode = parameters.stencilModeForClipping(drawableTileID->toUnwrapped());
@@ -927,7 +935,8 @@ void Drawable::draw(PaintParameters& parameters) const {
 
         if (getEnableDepth()) {
 #if !defined(NDEBUG)
-            const auto expectedDepth = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+            const auto expectedDepth = parameters.depthModeForSublayer(
+                getSubLayerIndex(), getDepthType(), getDepthTestAbove3D());
             assert(expectedDepth.func == impl->depthMode.func);
             assert(expectedDepth.mask == impl->depthMode.mask);
 #endif

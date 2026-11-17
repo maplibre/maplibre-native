@@ -56,6 +56,7 @@ public:
     void setEnableDepth(bool) override;
     void setSubLayerIndex(int32_t) override;
     void setDepthType(gfx::DepthMaskType) override;
+    void setDepthTestAbove3D(bool) override;
 
     void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
                                 std::size_t vertexCount,
