@@ -160,9 +160,8 @@ public:
     static std::set<UnwrappedTileID> dilateCover(const std::set<UnwrappedTileID>& cover);
 
     /// The `maxTiles` tiles whose centres lie nearest `origin` (normalized web-mercator), or all
-    /// of them when there are no more than that or `maxTiles` is 0. The mesh-tile cap
-    /// (TerrainLoadBudget::maxMeshTiles) that computeMeshCover applies, after
-    /// coarsenFarMeshTiles.
+    /// of them when there are no more than that or `maxTiles` is 0. computeMeshCover applies it
+    /// with the frame's mesh-tile cap (meshTileCap), after coarsenFarMeshTiles.
     static std::set<UnwrappedTileID> nearestMeshTiles(std::set<UnwrappedTileID> tiles,
                                                       size_t maxTiles,
                                                       const std::array<double, 2>& origin);
@@ -186,7 +185,9 @@ public:
     /// (`oneZoom`: no level of detail, the pitch at or under the threshold) and whose top edge is
     /// on the ground (`pitch` plus half of `fieldOfView`, in radians, short of the horizon). The
     /// cap is for the far tiles a steep pitch or a wide field of view pulls in; such a view has
-    /// none, the view itself bounds its cover, and every tile dropped from it is a hole on screen.
+    /// none, and every tile dropped from it is a hole on screen. Twice the cap holds a phone's
+    /// view at every pitch up to the threshold (68 tiles at most); a wider frame, or a wide field
+    /// of view short of the horizon, can still need more and lose its farthest tiles.
     static size_t meshTileCap(size_t modeCap, double pitch, double fieldOfView, bool oneZoom);
 
     /// Resolve the DEM render source from the orchestrator if not yet bound.

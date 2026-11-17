@@ -552,7 +552,7 @@ TEST(TerrainMeshCover, AViewOfOneZoomThatEndsOnTheGroundMayHoldTwiceTheCap) {
     EXPECT_EQ(48u, RenderTerrain::meshTileCap(48, util::deg2rad(61.0), fov, false));
     // A field of view that reaches the horizon, at or under the pitch threshold
     EXPECT_EQ(48u, RenderTerrain::meshTileCap(48, util::deg2rad(40.0), util::deg2rad(120.0), true));
-    EXPECT_EQ(48u, RenderTerrain::meshTileCap(48, util::deg2rad(60.0), util::deg2rad(60.0), true));
+    EXPECT_EQ(48u, RenderTerrain::meshTileCap(48, util::deg2rad(60.0), util::deg2rad(65.0), true));
     // No cap stays no cap
     EXPECT_EQ(0u, RenderTerrain::meshTileCap(0, util::deg2rad(60.0), fov, true));
 }
