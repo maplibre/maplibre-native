@@ -12,6 +12,9 @@ TEST(URL, percentEncode) {
 
 TEST(URL, percentDecode) {
     EXPECT_EQ("\"éncøðing\"", percentDecode("%22%C3%A9nc%C3%B8%C3%B0ing%22"));
+    EXPECT_EQ("100%", percentDecode("100%"));
+    EXPECT_EQ("%//x", percentDecode("%//x"));
+    EXPECT_EQ("A%4", percentDecode("%41%4"));
 }
 
 TEST(URL, Scheme) {
