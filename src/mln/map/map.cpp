@@ -155,6 +155,10 @@ void Map::jumpTo(const CameraOptions& camera) {
 
 void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    // A gesture's step is a non-animated one; an animation goes somewhere else.
+    if (animation.duration && *animation.duration > Duration::zero()) {
+        impl->forgetEyeElevation();
+    }
     impl->noteCameraSet();
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.easeTo(camera, animation);
@@ -163,6 +167,10 @@ void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation)
 
 void Map::flyTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
+    // A gesture's step is a non-animated one; an animation goes somewhere else.
+    if (animation.duration && *animation.duration > Duration::zero()) {
+        impl->forgetEyeElevation();
+    }
     impl->noteCameraSet();
     impl->settleCenterAwaitingSeaLevel();
     impl->transform.flyTo(camera, animation);
@@ -699,6 +707,22 @@ TerrainSkirtLength Map::getTerrainSkirtLength() const {
     return impl->terrainSkirtLength;
 }
 
+void Map::setTerrainHaze(const Color& color, float range) {
+    const float clamped = range > 1.0f ? std::min(range, 1000.0f) : 0.0f; // NaN turns it off too
+    if (impl->terrainHazeColor == color && impl->terrainHazeRange == clamped) return;
+    impl->terrainHazeColor = color;
+    impl->terrainHazeRange = clamped;
+    impl->onUpdate();
+}
+
+Color Map::getTerrainHazeColor() const {
+    return impl->terrainHazeColor;
+}
+
+float Map::getTerrainHazeRange() const {
+    return impl->terrainHazeRange;
+}
+
 void Map::anchorCenterOnTerrain() {
     impl->anchorCenterOnTerrain();
 }
@@ -717,6 +741,7 @@ bool Map::setCenterAltitudeKeepingView(double altitudeMeters) {
 
 void Map::setCenterClampedToGround(bool clamped) {
     impl->centerClampedToGround = clamped;
+    impl->forgetEyeElevation();
 }
 
 bool Map::getCenterClampedToGround() const {

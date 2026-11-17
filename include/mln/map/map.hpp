@@ -8,6 +8,7 @@
 #include <mln/map/mode.hpp>
 #include <mln/map/projection_mode.hpp>
 #include <mln/storage/resource_options.hpp>
+#include <mln/util/color.hpp>
 #include <mln/util/action_journal_options.hpp>
 #include <mln/util/chrono.hpp>
 #include <mln/util/client_options.hpp>
@@ -252,6 +253,18 @@ public:
     /// No effect when terrain is not enabled.
     void setTerrainSkirtLength(TerrainSkirtLength length);
     TerrainSkirtLength getTerrainSkirtLength() const;
+
+    /// Distance haze over the terrain: ground far from the camera fades toward `color`, so the far edge
+    /// of the terrain blends into what is drawn behind the map instead of ending at a hard edge where
+    /// tiles pop in. `range` is how far the haze reaches, in multiples of the map center's distance from
+    /// the camera: ground that far away and beyond takes the full color (at its alpha). Nearer ground
+    /// fades toward it as in maplibre-gl-js's terrain fog with `fog-ground-blend` 0.5 and gl-js's far
+    /// plane at that distance, so the haze begins at 2 * range / (range + 1) times the center's distance.
+    /// As in gl-js, it fades in between pitches of 60 and 70 degrees. A range of 1 or less turns it off
+    /// (0, the default), and one above 1000 is held at 1000. No effect when terrain is not enabled.
+    void setTerrainHaze(const Color& color, float range);
+    Color getTerrainHazeColor() const;
+    float getTerrainHazeRange() const;
 
     /// Whether the map centre rides the terrain surface rather than sea level. Off by
     /// default; with it on the center altitude follows the rendered terrain height under the

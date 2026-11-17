@@ -29,6 +29,7 @@ public:
     const MTLDevicePtr& getDevice() const { return device; }
     const MTLCommandQueuePtr& getCommandQueue() const { return commandQueue; }
     bool isBaseVertexInstanceDrawingSupported() const { return baseVertexInstanceDrawingSupported; }
+    bool isMemorylessTextureSupported() const { return memorylessTextureSupported; }
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
@@ -39,6 +40,7 @@ protected:
     MTLDevicePtr device;
     MTLCommandQueuePtr commandQueue;
     bool baseVertexInstanceDrawingSupported = false;
+    bool memorylessTextureSupported = false;
 };
 
 } // namespace mtl

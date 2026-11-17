@@ -9,6 +9,7 @@
 #include <Metal/MTLTexture.hpp>
 
 #include <memory>
+#include <optional>
 
 namespace mln {
 namespace mtl {
@@ -35,6 +36,9 @@ public:
 
     size_t getDataSize() const noexcept override;
 
+    /// Bytes the texture takes in memory: the base level and, if mipmapped, the rest of the chain
+    size_t getStorageSize() const noexcept;
+
     size_t getPixelStride() const noexcept override;
 
     size_t numChannels() const noexcept override;
@@ -48,6 +52,7 @@ public:
     bool needsUpload() const noexcept override { return !!image; };
 
     gfx::Texture2D& setUsage(MTL::TextureUsage usage_) noexcept;
+    gfx::Texture2D& setStorageMode(MTL::StorageMode storageMode_) noexcept;
 
     MTL::Texture* getMetalTexture() const noexcept;
 
@@ -76,7 +81,9 @@ private:
     gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};
     gfx::TextureChannelDataType channelType{gfx::TextureChannelDataType::UnsignedByte};
     MTL::TextureUsage usage{MTL::TextureUsageShaderRead};
+    std::optional<MTL::StorageMode> storageMode;
     SamplerState samplerState{};
+    size_t trackedBytes{0};
 
     std::shared_ptr<PremultipliedImage> image{nullptr};
     bool textureDirty{true};

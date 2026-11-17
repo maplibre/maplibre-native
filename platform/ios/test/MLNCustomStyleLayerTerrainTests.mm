@@ -239,6 +239,19 @@ static float MLNDepthOverCenter(MLNStyleLayerDrawingContext context, double mete
 #endif
 }
 
+- (void)testTerrainSetThroughTheStyleProperty {
+  self.mapView.style.terrain = [[MLNTerrain alloc] initWithSourceIdentifier:@"dem"
+                                                               exaggeration:1.5];
+  [self waitForDrawWithTerrain:YES];
+
+  XCTAssertEqualWithAccuracy(self.layer.drawnContext.terrainExaggeration, 1.5, 1e-6);
+
+  self.mapView.style.terrain = nil;
+  [self waitForDrawWithTerrain:NO];
+
+  XCTAssertEqual(self.layer.drawnContext.terrainExaggeration, 0);
+}
+
 #if MLN_RENDER_BACKEND_METAL
 // The attached depth buffer holds the mesh's depth, and a custom layer that remaps its clip z as
 // the mesh does compares with it: what it draws just above the ground passes a less-or-equal

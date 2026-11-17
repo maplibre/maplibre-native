@@ -1,5 +1,7 @@
 #include <mln/renderer/render_orchestrator.hpp>
 
+#include <mln/style/layers/raster_layer_impl.hpp>
+
 #include <mln/annotation/annotation_manager.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/renderer/change_request.hpp>
@@ -24,6 +26,7 @@
 #include <mln/renderer/image_manager.hpp>
 #include <mln/geometry/line_atlas.hpp>
 #include <mln/style/source_impl.hpp>
+#include <mln/style/sources/tile_source_impl.hpp>
 #include <mln/style/transition_options.hpp>
 #include <mln/text/glyph_manager.hpp>
 #include <mln/tile/tile.hpp>
@@ -273,8 +276,43 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     };
 
     if (updateParameters->terrain) {
-        if (renderTerrain && renderTerrain->getImpl() != *updateParameters->terrain) {
-            dropRenderTerrain();
+        const auto& terrainImpl = *updateParameters->terrain;
+        const auto sourceImpl = [&](const auto& sources) -> const style::Source::Impl* {
+            const auto it = std::ranges::find_if(
+                *sources, [&](const auto& source) { return source->id == terrainImpl->sourceID; });
+            return it != sources->end() ? it->get() : nullptr;
+        };
+        // Whether the DEM is no longer the one the terrain was built from. What the terrain holds comes
+        // from the source's tiles, which depend on its tileset (tile URLs, encoding, zoom range, ...)
+        // and on nothing else: a setter such as setVolatile makes a new impl with the same tileset,
+        // and the source keeps its tiles. A tileset that arrives where there was none changes nothing
+        // unless the terrain already holds tiles, which happens when a source takes the place of
+        // another and its TileJSON is yet to load.
+        const auto demChanged = [&] {
+            const auto* before = sourceImpl(sourceImpls);
+            const auto* after = sourceImpl(updateParameters->sources);
+            if (before == after) {
+                return false;
+            }
+            const auto tilesetOf = [](const style::Source::Impl* impl) -> const std::optional<Tileset>* {
+                return impl && impl->type == style::SourceType::RasterDEM
+                           ? &static_cast<const style::TileSource::Impl*>(impl)->tileset
+                           : nullptr;
+            };
+            const auto* was = tilesetOf(before);
+            const auto* now = tilesetOf(after);
+            if (!was || !now) {
+                return true; // added, removed or put in under another type
+            }
+            return *now && *now != *was && (*was || renderTerrain->holdsDEMData());
+        };
+        if (renderTerrain) {
+            if (renderTerrain->getSourceID() != terrainImpl->sourceID || demChanged()) {
+                dropRenderTerrain();
+            } else if (renderTerrain->getImpl() != terrainImpl) {
+                // Only the exaggeration differs, and nothing built from the DEM depends on it.
+                renderTerrain->setImpl(terrainImpl);
+            }
         }
         if (!renderTerrain) {
             renderTerrain = std::make_unique<RenderTerrain>(*updateParameters->terrain);
@@ -434,7 +472,20 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (layerAddedOrChanged || zoomChangedAndMatters || globalStateChangedAndMatters ||
             evaluationParameters.hasCrossfade || layer.hasTransition()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();
+            const bool wasInTransition = layer.hasTransition();
             layer.evaluate(evaluationParameters);
+            // A drape over terrain bakes a layer once per revision of its style
+            // (RenderLayer::styleRevision), on the frame the style changed. That is the frame a
+            // paint transition starts on, so the drape kept the paint the transition started
+            // from: a raster basemap whose brightness the app changed kept its old look. The
+            // paint a raster layer's transition ends on is another revision. Only a raster
+            // layer's: a fill-pattern layer baked again on this frame comes out without its
+            // pattern (TerrainDrape.APatternDrapedDuringAZoomLevelFadeSettlesOnTheFinalScale),
+            // and every layer ends a transition 300 ms after it is added.
+            if (wasInTransition && !layer.hasTransition() &&
+                layer.baseImpl->getTypeInfo() == style::RasterLayer::Impl::staticTypeInfo()) {
+                ++layer.styleRevision;
+            }
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
                 constantsMaskChanged.insert(id);
             }
@@ -558,6 +609,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
         tileParameters.coverTileLimit = isDemSource ? 0 : coverTileLimit;
         tileParameters.alsoCover = isDemSource ? terrainEye : std::nullopt;
+        tileParameters.leaveOutEmptyTiles = terrainEnabled && !isDemSource && RenderTerrain::leavesOutEmptyTiles();
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
         // The DEM source additionally keeps the coarser ancestors of its cover that are already

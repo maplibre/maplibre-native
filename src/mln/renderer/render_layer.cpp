@@ -31,6 +31,7 @@ const std::string& RenderLayer::getId() const {
 
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
+    ++styleRevision;
     transition(parameters);
 }
 
@@ -98,6 +99,10 @@ void RenderLayer::updateEmptyTileIDs(const LayerPrepareParameters& params) {
                 emptyTileIDs.push_back(tile.getOverscaledTileID().toUnwrapped());
             }
         }
+    }
+    if (params.terrain && params.source) {
+        const auto& leftOut = params.source->getEmptyTileIDs();
+        emptyTileIDs.insert(emptyTileIDs.end(), leftOut.begin(), leftOut.end());
     }
     if (!emptyTileIDs.empty() || !tileGroup.getEmptyTileIDs().empty()) {
         tileGroup.setEmptyTileIDs(std::move(emptyTileIDs));
