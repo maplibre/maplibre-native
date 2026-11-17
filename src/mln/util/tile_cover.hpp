@@ -78,6 +78,12 @@ struct TileCoverParameters {
     /// finest zoom, and the zoom drops with distance from it. Unset (the default) measures from
     /// the map centre. Only read once the pitch passes `tileLodPitchThreshold`.
     std::optional<std::array<double, 2>> tileLodOrigin = std::nullopt;
+    /// Leave out the ground whose level of detail is more than this many zooms below the zoom
+    /// range's minimum, where the cover otherwise goes down to that minimum: a source that starts
+    /// at zoom 10 is not shown on a map at zoom 7, and ground that far away is at zoom 7. Unset
+    /// (the default) covers all the ground in view. Only read where the cover varies its zoom:
+    /// past `tileLodPitchThreshold`, or at any pitch with `TileLodMode::Adaptive`.
+    std::optional<uint8_t> minZoomReach = std::nullopt;
 };
 
 int32_t coveringZoomLevel(double z, style::SourceType type, uint16_t tileSize) noexcept;

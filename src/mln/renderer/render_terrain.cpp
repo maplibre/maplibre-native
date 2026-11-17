@@ -159,6 +159,8 @@ std::vector<LoadedDEMTile> loadedDEMTiles(const RenderSource* demSource) {
 
 // Set by tests only (RenderTerrain::setLeaveOutEmptyTilesForTesting)
 std::atomic<bool> leaveOutEmptyTiles{true};
+// Set by tests only (RenderTerrain::setSourcesEndBelowMinZoomForTesting)
+std::atomic<bool> sourcesEndBelowMinZoom{true};
 
 // Set by tests only (RenderTerrain::setMaxDEMTexturesForTesting); 0 keeps the default cap
 std::atomic<size_t> demTextureCapOverride{0};
@@ -221,6 +223,14 @@ void RenderTerrain::setLeaveOutEmptyTilesForTesting(bool leaveOut) {
 
 bool RenderTerrain::leavesOutEmptyTiles() {
     return leaveOutEmptyTiles;
+}
+
+std::optional<uint8_t> RenderTerrain::sourceMinZoomReach() {
+    return sourcesEndBelowMinZoom ? std::optional<uint8_t>{2} : std::nullopt;
+}
+
+void RenderTerrain::setSourcesEndBelowMinZoomForTesting(bool end) {
+    sourcesEndBelowMinZoom = end;
 }
 
 void RenderTerrain::setMaxDEMTexturesForTesting(size_t cap) {

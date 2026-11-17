@@ -77,6 +77,8 @@ public:
     /// With terrain on: leave out the tiles that build none of the source's layers, every layer being
     /// outside its zoom range for them (GeometryTile::setLayers). They draw nothing.
     bool leaveOutEmptyTiles = false;
+    /// With terrain on: util::TileCoverParameters::minZoomReach for the source's covers.
+    std::optional<uint8_t> coverMinZoomReach = std::nullopt;
 };
 
 } // namespace mln
