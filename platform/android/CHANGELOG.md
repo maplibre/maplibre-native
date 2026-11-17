@@ -2,6 +2,7 @@
 
 ## main
 
+- With 3D terrain, a map pitched at or just under the level-of-detail pitch threshold (60 degrees) no longer shows the sky through the far corners of the view. Such a view needs more mesh tiles than the load mode's cap when the mesh is no deeper than the DEM, and the farthest were dropped.
 ### ✨ Features and improvements
 
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.

@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- With 3D terrain, a map pitched at or just under the level-of-detail pitch threshold (60 degrees) no longer shows the sky through the far corners of the view. Such a view needs more mesh tiles than the load mode's cap when the mesh is no deeper than the DEM, and the farthest were dropped.
 - Add `MLNMapView.fieldOfView`, the vertical field of view of the map’s camera in degrees, and `-[MLNMapView setCenterCoordinate:centerAltitude:fromEyeCoordinate:eyeAltitude:]`, which puts the camera at an eye position looking at a point, above the eye included.
 - Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
