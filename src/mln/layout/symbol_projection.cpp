@@ -404,13 +404,20 @@ float labelPlaneTurn(const std::vector<PlacedGlyph>& placedGlyphs) {
     return largest;
 }
 
+namespace {
+// Layout holds the turn within its angle window to `text-max-angle`, and three glyphs span
+// about two such windows, so a label seen from straight above stays under twice the angle. A
+// single kink the pitch has sharpened still reads; past twice the angle the label runs back
+// into itself.
+constexpr float labelPlaneFoldFactor = 2.0f;
+// A label that was left out comes back once it is within the angle again. The turn jumps as
+// glyphs pass a vertex of the projected line, so with one limit for going and coming back a
+// label near it would flicker while the camera moves.
+constexpr float labelPlaneUnfoldFactor = 1.0f;
+} // namespace
+
 float labelPlaneTurnLimit(const float maxAngle, const bool leftOut) {
-    // Layout holds the turn within its angle window to `maxAngle`, and three glyphs span about
-    // two such windows, so a label seen from straight above stays under twice that. A single
-    // kink the pitch has sharpened still reads; past twice the angle the label runs back into
-    // itself. Once left out it stays out until it is within the angle again: the turn jumps as
-    // glyphs pass a vertex of the projected line, and a label near one limit would flicker.
-    return leftOut ? maxAngle : 2.0f * maxAngle;
+    return (leftOut ? labelPlaneUnfoldFactor : labelPlaneFoldFactor) * maxAngle;
 }
 
 PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
@@ -538,7 +545,7 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
 }
 
 void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArray,
-                         const std::vector<PlacedSymbol>& placedSymbols,
+                         std::vector<PlacedSymbol>& placedSymbols,
                          const mat4& posMatrix,
                          bool pitchWithMap,
                          bool rotateWithMap,

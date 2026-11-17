@@ -2,6 +2,7 @@
 #include <mln/renderer/render_terrain.hpp>
 
 #include <mln/layout/symbol_layout.hpp>
+#include <mln/math/angles.hpp>
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
@@ -9,7 +10,6 @@
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/tile/geometry_tile.hpp>
 #include <mln/util/instrumentation.hpp>
-#include <mln/math/angles.hpp>
 #include <mln/util/math.hpp>
 
 #include <list>

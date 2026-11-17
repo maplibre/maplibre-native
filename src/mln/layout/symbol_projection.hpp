@@ -60,7 +60,7 @@ PointAndCameraDistance project(const Point<float>& point,
                                const SymbolElevationFn* getElevation = nullptr);
 
 void reprojectLineLabels(SymbolBucket::DynamicAttributeVector&,
-                         const std::vector<PlacedSymbol>&,
+                         std::vector<PlacedSymbol>&,
                          const mat4& posMatrix,
                          bool pitchWithMap,
                          bool rotateWithMap,
