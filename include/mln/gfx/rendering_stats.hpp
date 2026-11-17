@@ -121,6 +121,9 @@ struct RenderingStats {
     /// which the camera or the mesh set changed, none for a still frame
     int numDepthPasses = 0;
 
+    /// Number of terrain surface tiles with drawables in the current frame (excludes depth copies).
+    int numTerrainTiles = 0;
+
     // Why frames asked for a follow-up frame, totaled over all the frames. A frame's status
     // (MapObserver::RenderFrameStatus::needsRepaint) says whether it asked for one, not why.
     // Three causes are counted: drape re-renders and new tile builds the terrain load budget

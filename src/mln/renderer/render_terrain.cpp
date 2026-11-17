@@ -1375,6 +1375,9 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
                        .vertices = std::move(vertices),
                        .indices = std::make_shared<gfx::IndexVectorBase>(std::move(indices))};
     // The topology never changes. Drop its CPU copy after the first GPU upload.
+    // The uploaded buffer belongs to that renderer's context: this mesh must be dropped
+    // with the context, not reused after context replacement. RenderOrchestrator owns
+    // RenderTerrain within Renderer::Impl; context replacement recreates the renderer.
     mesh->indices->release();
 }
 
@@ -1416,7 +1419,7 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
     // Ensure mesh is generated
     const auto& terrainMesh = getMesh(context);
 
-    if (terrainMesh.vertices.empty() || terrainMesh.indices->empty()) {
+    if (terrainMesh.vertices.empty() || terrainMesh.indexCount == 0) {
         Log::Error(Event::Render, "Terrain mesh is empty, cannot create drawable");
         return nullptr;
     }
@@ -1590,7 +1593,7 @@ void RenderTerrain::rebuildInstancedDepthDrawable(gfx::Context& context, gfx::Sh
     }
 
     const auto& depthMeshRef = getDepthMesh(context);
-    if (depthMeshRef.vertices.empty() || depthMeshRef.indices->empty()) {
+    if (depthMeshRef.vertices.empty() || depthMeshRef.indexCount == 0) {
         return;
     }
     auto shader = context.getGenericShader(shaders, "TerrainDepthShader");

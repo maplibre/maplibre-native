@@ -283,13 +283,13 @@ TEST(TerrainSourceCover, MetalTerrainUploadsOneIndexBufferAcrossTilesAndCameraCh
     constexpr int meshBytes = 6 * (128 * 128 + 4 * 128) * sizeof(uint16_t);
     test.settleDEM();
     const auto before = test.frontend.render(test.map).stats;
-    EXPECT_GT(before.numDrawCalls, 1);
+    ASSERT_GE(before.numTerrainTiles, 3) << "the memory bound requires multiple terrain tiles";
     EXPECT_GE(before.memIndexBuffers, meshBytes);
     EXPECT_LT(before.memIndexBuffers, 2 * meshBytes);
     test.map.jumpTo(CameraOptions().withCenter(LatLng{38.28, -120.66}).withZoom(13.0).withPitch(60.0));
     test.settleDEM();
     const auto after = test.frontend.render(test.map).stats;
-    EXPECT_GT(after.numDrawCalls, 1);
+    ASSERT_GE(after.numTerrainTiles, 3) << "the moved camera must still draw multiple terrain tiles";
     EXPECT_GE(after.memIndexBuffers, meshBytes);
     EXPECT_LT(after.memIndexBuffers, 2 * meshBytes);
 #endif
