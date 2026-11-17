@@ -241,16 +241,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
-    const auto gapwidth = 0; //(exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2;
+    const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2;
 #else
-    const auto gapwidth = 0; //unpack_mix_float(vertx.gapwidth, drawable.gapwidth_t) / 2;
+    const auto gapwidth = unpack_mix_float(vertx.gapwidth, drawable.gapwidth_t) / 2;
 #endif
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
-    const auto offset   = 0; //(exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1;
+    const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1;
 #else
-    const auto offset   = 0; //unpack_mix_float(vertx.offset, drawable.offset_t) * -1;
+    const auto offset   = unpack_mix_float(vertx.offset, drawable.offset_t) * -1;
 #endif
 
 #if defined(HAS_UNIFORM_u_width)
@@ -440,17 +440,6 @@ float dRoundedTri(float2 p, thread float &dTri, float2 v0, float2 v1, float2 v2,
 
 float cross2(float2 a, float2 b) {
     return a.x * b.y - a.y * b.x;
-}
-
-float2 rotate(float2 v, float angle)
-{
-    float c = cos(angle);
-    float s = sin(angle);
-
-    return float2(
-        v.x * c - v.y * s,
-        v.x * s + v.y * c
-    );
 }
 
 float computeRadius(float2 prevPoint, float2 cornerPoint, float2 nextPoint, float desiredCornerDistance) {
@@ -645,14 +634,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         triangle_vertex_pos[i] = float2(pos_x, pos_y);
     }
     
-    float2 edgePrev = triangle_vertex_pos[0] - triangle_vertex_pos[1];
-    float2 edgeNext = triangle_vertex_pos[2] - triangle_vertex_pos[1];
-    float angle = atan2(cross2(edgeNext, edgePrev), dot(edgeNext, edgePrev));
+    float2 edgePrev = normalize(triangle_vertex_pos[0] - triangle_vertex_pos[1]);
+    float2 edgeNext = normalize(triangle_vertex_pos[2] - triangle_vertex_pos[1]);
+    float sinAngle = cross2(edgeNext, edgePrev);
 
-    for (int i = 1; i < 3; i++) {
-        uint dataIndex = vertx.data_indices[i - 1];
+    for (int i = 0; i < 2; i++) {
+        uint dataIndex = vertx.data_indices[i] / 2.0;
+        float direction = (float(vertx.data_indices[i] % 2) * 2.0 - 1.0);
 
-/* #if defined(HAS_UNIFORM_u_gapwidth)
+#if defined(HAS_UNIFORM_u_gapwidth)
         const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
         const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2;
 #else
@@ -661,10 +651,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 #if defined(HAS_UNIFORM_u_offset)
         const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
-        const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1;
+        const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset);
 #else
-        const auto offset   = unpack_mix_float(data[dataIndex].offset, drawable.offset_t) * -1;
-#endif */
+        const auto offset   = unpack_mix_float(data[dataIndex].offset, drawable.offset_t);
+#endif
 
 #if defined(HAS_UNIFORM_u_width)
         const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
@@ -673,19 +663,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         const auto width    = unpack_mix_float(data[dataIndex].width, drawable.width_t);
 #endif
 
-        float2 edgeVector = normalize(triangle_vertex_pos[i] - triangle_vertex_pos[i - 1]);
-        
-        float2 perpVector1 = float2(-edgeVector.y, edgeVector.x);
-        if (i == 1) {
-            perpVector1 = rotate(perpVector1, M_PI_F / 2 - angle) / sin(angle);
-        }
-        triangle_vertex_pos[i] = triangle_vertex_pos[i] + perpVector1 * width * 0.5 / drawable.ratio;
+        const float halfwidth = width / 2.0;
+        //const float inset = gapwidth + (gapwidth > 0.0 ? ANTIALIASING : 0.0);
+        const float outset = gapwidth + halfwidth * (gapwidth > 0.0 ? 2.0 : 1.0);// + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
 
-        float2 perpVector2 = float2(-edgeVector.y, edgeVector.x);
-        if (i == 2) {
-            perpVector2 = rotate(perpVector2, -(M_PI_F / 2 - angle)) / sin(angle);
-        }
-        triangle_vertex_pos[i - 1] = triangle_vertex_pos[i - 1] + perpVector2 * width * 0.5 / drawable.ratio;
+        float2 outsetVector = (i == 0 ? edgeNext : edgePrev);
+        float2 offsetVector = (i == 0 ? -edgeNext : edgePrev);
+        const float2 dist = (outset * outsetVector + offset * direction * offsetVector) / sinAngle;
+
+        triangle_vertex_pos[i] = triangle_vertex_pos[i] + dist / drawable.ratio;
+        triangle_vertex_pos[i + 1] = triangle_vertex_pos[i + 1] + dist / drawable.ratio;
     }
 
     triangle_corner_radius = computeRadius(triangle_vertex_pos[0], triangle_vertex_pos[1], triangle_vertex_pos[2], 20);
@@ -703,8 +690,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .triangle_corner_radius = triangle_corner_radius,
 
 #if !defined(HAS_UNIFORM_u_color) 
-        .color1        = unpack_mix_color(data[vertx.data_indices[0]].color, drawable.color_t),
-        .color2        = unpack_mix_color(data[vertx.data_indices[1]].color, drawable.color_t),
+        .color1        = unpack_mix_color(data[vertx.data_indices[0] / 2].color, drawable.color_t),
+        .color2        = unpack_mix_color(data[vertx.data_indices[1] / 2].color, drawable.color_t),
         //.color1        = float4(1.0, 0.0, 0.0, 1.0),
         //.color2        = float4(0.0, 1.0, 0.0, 1.0),
 #endif
