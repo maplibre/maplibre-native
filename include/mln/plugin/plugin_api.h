@@ -71,6 +71,15 @@ typedef enum mln_plugin_value_type {
      * its features when it is laid out, and feature state changes without a
      * new layout. */
     MLN_PLUGIN_VALUE_IMAGE = 6,
+    /* Layout only, no expressions. In the style, an object that maps names to
+     * the URLs of the resources the layer may use, such as
+     * {"car": "asset://car.glb"}. The host loads the ones that RESOURCE
+     * properties name. Callbacks never receive this property. */
+    MLN_PLUGIN_VALUE_RESOURCES = 7,
+    /* Layout only. The name of a resource in the RESOURCES property that the
+     * descriptor's `resources` field names, possibly through a feature
+     * expression. Represented by data.resource_value. */
+    MLN_PLUGIN_VALUE_RESOURCE = 8,
 } mln_plugin_value_type;
 
 /* Expression dependencies accepted by a plugin property. */
@@ -110,6 +119,17 @@ typedef struct mln_plugin_color {
     float a;
 } mln_plugin_color;
 
+/* A RESOURCE value. name comes first, so that it shares its place with
+ * string_value. */
+typedef struct mln_plugin_resource_value {
+    mln_plugin_string name;
+    /* What create_resource returned for the resource that name maps to. Null
+     * when the name is not in the layer's resources, when the resource failed
+     * to load or to be created, in create_layout for a value that depends on
+     * the feature, and outside layout callbacks. */
+    void* handle;
+} mln_plugin_resource_value;
+
 typedef union mln_plugin_value_data {
     float float_value;
     /* Must be 0 or 1. */
@@ -117,6 +137,7 @@ typedef union mln_plugin_value_data {
     mln_plugin_float2 float2_value;
     mln_plugin_color color_value;
     mln_plugin_string string_value;
+    mln_plugin_resource_value resource_value;
 } mln_plugin_value_data;
 
 typedef struct mln_plugin_value {
@@ -147,6 +168,9 @@ typedef struct mln_plugin_property_descriptor_v1 {
      * may use camera, feature and composite expressions, but not feature
      * state, and never transition. */
     uint8_t is_layout;
+    /* For a RESOURCE property, the name of the RESOURCES property of the same
+     * layer type that its names are looked up in. Empty for any other type. */
+    mln_plugin_string resources;
 } mln_plugin_property_descriptor_v1;
 
 typedef struct mln_plugin_property_value_v1 {
@@ -548,6 +572,25 @@ typedef mln_plugin_status (*mln_plugin_evaluate_layer_fn)(const mln_plugin_prope
  * maps. */
 typedef uint8_t (*mln_plugin_should_animate_fn)(const mln_plugin_property_value_v1* properties, size_t property_count);
 
+/*
+ * Resources that RESOURCE properties name. The host loads each URL through its
+ * file source (cache, URL transformation, asset://, file://) on the render
+ * thread, and lays a tile out only after the resources its features name have
+ * arrived, as it does for sprite images. Before the layout, on a tile worker,
+ * it calls create_resource once per loaded resource and layer type; url and
+ * data are borrowed for the call. The handle reaches create_layout and
+ * layout_feature through RESOURCE values, possibly on several workers at once,
+ * so what it points to must not change. Every non-null handle transfers to the
+ * host regardless of the status code: destroy_resource runs exactly once for
+ * it, on any thread, when no tile uses the resource any more. A failed
+ * creation is not retried for that load.
+ */
+typedef mln_plugin_status (*mln_plugin_create_resource_fn)(mln_plugin_string url,
+                                                           const uint8_t* data,
+                                                           size_t data_size,
+                                                           void** handle);
+typedef void (*mln_plugin_destroy_resource_fn)(void* handle);
+
 /* The name of a layer type cannot be the name of a built-in layer type or of a layer type of another plugin, which
  * registration rejects with MLN_PLUGIN_STATUS_CONFLICT. A reverse domain name prefix, as in org.maplibre.circle, keeps
  * it unique. */
@@ -574,6 +617,9 @@ typedef struct mln_plugin_layer_type_v1 {
     /* Unaligned projection with near-clip adjustment; translation is host-owned. */
     uint8_t enable_near_clipped_matrix;
     mln_plugin_should_animate_fn should_animate;
+    /* Required by, and only by, a layer type with a RESOURCE property. */
+    mln_plugin_create_resource_fn create_resource;
+    mln_plugin_destroy_resource_fn destroy_resource;
 } mln_plugin_layer_type_v1;
 
 typedef struct mln_plugin_descriptor_v1 {

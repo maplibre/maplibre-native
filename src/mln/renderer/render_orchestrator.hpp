@@ -32,6 +32,7 @@ class RenderedQueryOptions;
 class SourceQueryOptions;
 class GlyphManager;
 class ImageManager;
+class LayoutResourceManager;
 class LineAtlas;
 class PatternAtlas;
 class CrossTileSymbolIndex;
@@ -212,6 +213,7 @@ private:
 
     std::shared_ptr<GlyphManager> glyphManager;
     std::shared_ptr<ImageManager> imageManager;
+    std::shared_ptr<LayoutResourceManager> layoutResourceManager;
     std::unique_ptr<LineAtlas> lineAtlas;
     std::unique_ptr<PatternAtlas> patternAtlas;
 

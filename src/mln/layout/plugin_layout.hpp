@@ -15,7 +15,9 @@ public:
                  plugin::RegisteredLayerPtr,
                  const LayoutParameters* = nullptr);
 
-    bool hasDependencies() const override { return needsImages; }
+    bool hasDependencies() const override { return needsImages || !resourceURLs.empty(); }
+
+    void prepareResources(const LayoutResourceMap&) override;
 
     void createBucket(const ImagePositions&,
                       std::unique_ptr<FeatureIndex>&,
@@ -25,7 +27,13 @@ public:
                       const CanonicalTileID&) override;
 
 private:
+    // The handle of the resource that a RESOURCE value names, or null.
+    void* resourceHandle(const plugin::PropertyDefinition&, const mln_plugin_value&) const;
+
     bool needsImages = false;
+    // The URLs that the RESOURCE properties of the layer name in this tile, and the handles made from them.
+    LayoutResourceDependencies resourceURLs;
+    std::map<std::string, std::shared_ptr<void>> resourceHandles;
     const float zoom;
     const bool stillImage;
     const std::shared_ptr<const GlobalStateMap> globalState;

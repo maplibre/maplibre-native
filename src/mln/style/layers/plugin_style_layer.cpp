@@ -24,6 +24,12 @@ std::optional<std::string> pluginTransitionPropertyName(const plugin::LayerType&
 bool affectsLayout(const plugin::PropertyDefinition& definition) {
     return definition.isLayout || definition.type == MLN_PLUGIN_VALUE_IMAGE;
 }
+
+Value resourcesValue(const std::map<std::string, std::string>& urls) {
+    mapbox::base::ValueObject object;
+    for (const auto& [name, url] : urls) object.emplace(name, url);
+    return object;
+}
 } // namespace
 
 PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, plugin::RegisteredLayerPtr registration_)
@@ -39,7 +45,7 @@ bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const
             pluginPropertyValue(definition, pluginProperties) != pluginPropertyValue(definition, rhs.pluginProperties))
             return true;
     }
-    return false;
+    return pluginResources != rhs.pluginResources;
 }
 
 void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
@@ -47,6 +53,14 @@ void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::String
     for (const auto& definition : registration->properties) {
         if (!affectsLayout(definition)) continue;
         writer.String(definition.name);
+        if (definition.type == MLN_PLUGIN_VALUE_RESOURCES) {
+            const auto resources = pluginResources.find(definition.name);
+            conversion::stringify(
+                writer,
+                resourcesValue(resources == pluginResources.end() ? std::map<std::string, std::string>{}
+                                                                  : resources->second));
+            continue;
+        }
         conversion::stringify(writer, pluginPropertyValue(definition, pluginProperties).toStyleProperty().getValue());
     }
     writer.EndObject();
@@ -95,7 +109,43 @@ StyleProperty PluginStyleLayer::getProperty(const std::string& name) const {
                    : StyleProperty{transition->second.serialize(), StyleProperty::Kind::Transition};
     }
     const auto definition = impl().registration->findProperty(name);
+    if (definition && definition->type == MLN_PLUGIN_VALUE_RESOURCES) {
+        const auto resources = impl().pluginResources.find(name);
+        return resources == impl().pluginResources.end()
+                   ? StyleProperty{}
+                   : StyleProperty{resourcesValue(resources->second), StyleProperty::Kind::Constant};
+    }
     return definition ? pluginPropertyValue(*definition, impl().pluginProperties).toStyleProperty() : StyleProperty{};
+}
+
+std::optional<conversion::Error> PluginStyleLayer::setPluginResources(const std::string& name,
+                                                                      const conversion::Convertible& value) {
+    using namespace conversion;
+    auto impl_ = mutableImpl();
+    if (isUndefined(value)) {
+        if (impl_->pluginResources.erase(name) != 0) {
+            baseImpl = std::move(impl_);
+            observer->onLayerChanged(*this);
+        }
+        return std::nullopt;
+    }
+    if (!isObject(value)) return Error{"plugin property '" + name + "' must be an object of names to URLs"};
+    std::map<std::string, std::string> urls;
+    const auto error = eachMember(value,
+                                  [&](const std::string& key, const Convertible& member) -> std::optional<Error> {
+                                      auto url = toString(member);
+                                      if (!url || url->empty())
+                                          return Error{"plugin property '" + name + "' maps '" + key + "' to no URL"};
+                                      urls.emplace(key, std::move(*url));
+                                      return std::nullopt;
+                                  });
+    if (error) return error;
+    const auto existing = impl_->pluginResources.find(name);
+    if (existing != impl_->pluginResources.end() && existing->second == urls) return std::nullopt;
+    impl_->pluginResources.insert_or_assign(name, std::move(urls));
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+    return std::nullopt;
 }
 
 std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::string& name,
@@ -109,6 +159,7 @@ std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::
             return Error{"plugin property '" + name + "' is in the wrong style section"};
         }
     }
+    if (definition->type == MLN_PLUGIN_VALUE_RESOURCES) return setPluginResources(name, value);
 
     auto impl_ = mutableImpl();
     if (isUndefined(value)) {
@@ -174,6 +225,11 @@ Value PluginStyleLayer::serialize() const {
         if (property.getKind() != StyleProperty::Kind::Undefined) {
             object.getObject()->insert_or_assign(name, property.getValue());
         }
+    }
+    for (const auto& [name, urls] : impl().pluginResources) {
+        auto& layout = result["layout"];
+        if (!layout.getObject()) layout = mapbox::base::ValueObject{};
+        layout.getObject()->insert_or_assign(name, resourcesValue(urls));
     }
     for (const auto& [name, transition] : impl().pluginPropertyTransitions) {
         auto& paint = result["paint"];

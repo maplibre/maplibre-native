@@ -401,6 +401,7 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     properties.reserve(definitions.size());
     for (size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
+        if (definition.type == MLN_PLUGIN_VALUE_RESOURCES) continue;
         const auto value = style::pluginPropertyValue(
             definition, definition.isLayout ? impl.pluginProperties : evaluatedPluginProperties);
         mln_plugin_property_value_v1 property{};
