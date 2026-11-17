@@ -7,6 +7,7 @@
 #include <mln/gfx/color_mode.hpp>
 #include <algorithm>
 #include <array>
+#include <ranges>
 #include <mln/gfx/depth_mode.hpp>
 #include <mln/webgpu/command_encoder.hpp>
 #include <mln/webgpu/drawable_builder.hpp>
@@ -47,6 +48,11 @@ const auto clipMaskStencilMode = gfx::StencilMode{
 };
 const auto clipMaskDepthMode = gfx::DepthMode{
     .func = gfx::DepthFunctionType::Always, .mask = gfx::DepthMaskType::ReadOnly, .range = {0.0f, 1.0f}};
+
+// One tile's clipping mask uniforms, padded to an offset that any bind group can use
+struct alignas(256) ClipMaskSlot {
+    shaders::ClipUBO ubo;
+};
 } // namespace
 
 Context::Context(RendererBackend& backend_)
@@ -57,10 +63,20 @@ Context::Context(RendererBackend& backend_)
 
 Context::~Context() {
     backend.getThreadPool().runRenderJobs(true /* closeQueue */);
+    releaseClipMaskBindGroups();
+}
+
+void Context::releaseClipMaskBindGroups() {
+    for (auto bindGroup : clipMaskBindGroups) {
+        wgpuBindGroupRelease(bindGroup);
+    }
+    clipMaskBindGroups.clear();
+    clipMaskBindGroupLayout = nullptr;
 }
 
 void Context::beginFrame() {
     backend.getThreadPool().runRenderJobs();
+    clipMaskSlotsUsed = 0;
 }
 
 void Context::endFrame() {
@@ -343,19 +359,6 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                         /*offset=*/0,
                                         indexResource.getSizeInBytes());
 
-    const uint64_t uboSize = sizeof(shaders::ClipUBO);
-
-    clipMaskUniformBuffers.clear();
-    clipMaskUniformBuffers.reserve(tileUBOs.size());
-    for (const auto& ubo : tileUBOs) {
-        auto buffer = createBuffer(&ubo, uboSize, WGPUBufferUsage_Uniform, false, false);
-        if (!buffer.getBuffer()) {
-            Log::Error(Event::Render, "WebGPU: Failed to allocate uniform buffer for clipping mask tile");
-            return false;
-        }
-        clipMaskUniformBuffers.emplace_back(std::move(buffer));
-    }
-
     auto& rendererBackend = static_cast<RendererBackend&>(getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(rendererBackend.getDevice());
     if (!device) {
@@ -390,32 +393,57 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         return false;
     }
 
-    clipMaskActiveBindGroups.clear();
-    clipMaskActiveBindGroups.reserve(tileUBOs.size());
-
-    for (std::size_t i = 0; i < tileUBOs.size(); ++i) {
-        WGPUBindGroupEntry entry{};
-        entry.binding = uniformBinding;
-        const auto& uboBuffer = clipMaskUniformBuffers[i];
-        entry.buffer = uboBuffer.getBuffer();
-        entry.offset = 0;
-        entry.size = uboSize;
-
-        WGPUBindGroupDescriptor descriptor{};
-        descriptor.layout = layout;
-        descriptor.entryCount = 1;
-        descriptor.entries = &entry;
-
-        const auto bindGroup = wgpuDeviceCreateBindGroup(device, &descriptor);
-        if (!bindGroup) {
-            Log::Error(Event::Render, "WebGPU: Failed to create bind group for clipping mask draw");
-            continue;
+    // Each tile gets its own slot in a buffer reused across frames, with a bind group made once per slot.
+    // Writes land before the frame's commands run, so a frame that draws masks more than once uses new slots.
+    const std::size_t firstSlot = clipMaskSlotsUsed;
+    const std::size_t slotsNeeded = firstSlot + tileUBOs.size();
+    if (slotsNeeded > clipMaskBindGroups.size() || layout != clipMaskBindGroupLayout) {
+        const std::size_t slotCount = std::max(slotsNeeded, clipMaskBindGroups.size() * 2);
+        // Draws already recorded keep the old buffer and bind groups alive
+        releaseClipMaskBindGroups();
+        clipMaskUniformBuffer.emplace(
+            createBuffer(nullptr, slotCount * sizeof(ClipMaskSlot), WGPUBufferUsage_Uniform, false, false));
+        if (!clipMaskUniformBuffer->getBuffer()) {
+            Log::Error(Event::Render, "WebGPU: Failed to allocate uniform buffer for clipping masks");
+            clipMaskUniformBuffer.reset();
+            return false;
         }
 
-        clipMaskActiveBindGroups.push_back(bindGroup);
+        clipMaskBindGroupLayout = layout;
+        clipMaskBindGroups.reserve(slotCount);
+        for (const auto slot : std::views::iota(std::size_t{0}, slotCount)) {
+            WGPUBindGroupEntry entry{};
+            entry.binding = uniformBinding;
+            entry.buffer = clipMaskUniformBuffer->getBuffer();
+            entry.offset = slot * sizeof(ClipMaskSlot);
+            entry.size = sizeof(shaders::ClipUBO);
 
-        wgpuRenderPassEncoderSetBindGroup(encoder, bindGroupIndex, bindGroup, 0, nullptr);
-        wgpuRenderPassEncoderSetStencilReference(encoder, tileUBOs[i].stencil_ref);
+            WGPUBindGroupDescriptor descriptor{};
+            descriptor.layout = layout;
+            descriptor.entryCount = 1;
+            descriptor.entries = &entry;
+
+            const auto bindGroup = wgpuDeviceCreateBindGroup(device, &descriptor);
+            if (!bindGroup) {
+                Log::Error(Event::Render, "WebGPU: Failed to create bind group for clipping masks");
+                releaseClipMaskBindGroups();
+                return false;
+            }
+            clipMaskBindGroups.push_back(bindGroup);
+        }
+    }
+
+    std::vector<ClipMaskSlot> slots;
+    slots.reserve(tileUBOs.size());
+    for (const auto& ubo : tileUBOs) {
+        slots.push_back({ubo});
+    }
+    clipMaskUniformBuffer->update(slots.data(), slots.size() * sizeof(ClipMaskSlot), firstSlot * sizeof(ClipMaskSlot));
+    clipMaskSlotsUsed = slotsNeeded;
+
+    for (auto slot = firstSlot; const auto& ubo : tileUBOs) {
+        wgpuRenderPassEncoderSetBindGroup(encoder, bindGroupIndex, clipMaskBindGroups[slot++], 0, nullptr);
+        wgpuRenderPassEncoderSetStencilReference(encoder, ubo.stencil_ref);
 
         wgpuRenderPassEncoderDrawIndexed(encoder,
                                          /*indexCount=*/6,
@@ -424,13 +452,6 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                          /*baseVertex=*/0,
                                          /*firstInstance=*/0);
     }
-
-    for (auto bindGroup : clipMaskActiveBindGroups) {
-        if (bindGroup) {
-            wgpuBindGroupRelease(bindGroup);
-        }
-    }
-    clipMaskActiveBindGroups.clear();
 
     auto& renderStats = renderingStats();
     renderStats.numDrawCalls += tileUBOs.size();
