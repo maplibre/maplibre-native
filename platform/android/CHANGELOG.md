@@ -2,7 +2,6 @@
 
 ## main
 
-- With 3D terrain, a map pitched at or just under the level-of-detail pitch threshold (60 degrees) no longer shows the sky through the far corners of the view. Such a view needs more mesh tiles than the load mode's cap when the mesh is no deeper than the DEM, and the farthest were dropped.
 ### ✨ Features and improvements
 
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
@@ -12,6 +11,7 @@
 
 ### 🐞 Bug fixes
 
+- With 3D terrain, a map pitched at or just under the level-of-detail pitch threshold (60 degrees) no longer shows the sky through the far corners of the view. Such a view needs more mesh tiles than the load mode's cap when the mesh is no deeper than the DEM, and the farthest were dropped.
 - With 3D terrain on, a `GeoJsonSource` updated with `setGeoJson` or emptied of its features shows the change on the terrain at once, instead of keeping its old content until the next zoom level ([#4816](https://github.com/maplibre/maplibre-native/pull/4816)).
 - With 3D terrain on and the centre clamp enabled, the clamp no longer cancels a running camera animation; the camera is anchored to the ground once the animation ends ([#4768](https://github.com/maplibre/maplibre-native/pull/4768)).
 
