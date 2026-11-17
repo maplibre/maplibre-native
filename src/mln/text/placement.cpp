@@ -848,6 +848,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         if (bucket.hasTextData() && layout.get<TextRotationAlignment>() == AlignmentType::Map) {
             const bool pitchWithMap = layout.get<style::TextPitchAlignment>() == style::AlignmentType::Map;
             const bool keepUpright = layout.get<style::TextKeepUpright>();
+            const bool cameraAtRest = lineLabelCameraAtRest(
+                bucket.lineLabelMatrix, bucket.lineLabelUpdatesAtRest, tile.matrix);
             reprojectLineLabels(bucket.text.dynamicAttributeData(),
                                 bucket.text.placedSymbols,
                                 tile.matrix,
@@ -858,7 +860,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                 *bucket.textSizeBinder,
                                 state,
                                 getElevation,
-                                util::deg2radf(layout.get<style::TextMaxAngle>()));
+                                util::deg2radf(layout.get<style::TextMaxAngle>()),
+                                cameraAtRest);
             result = true;
         }
     } else if (hasVariableAnchors) {

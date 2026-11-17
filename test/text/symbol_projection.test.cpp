@@ -132,3 +132,23 @@ TEST(SymbolProjection, ALabelLeftOutComesBackOnlyWithinTheMaxAngle) {
     // Back at a pitch of 60 degrees the bend is 39 degrees and the label returns.
     EXPECT_EQ(PlacementResult::OK, place(screenSeenAlongY(0.5), leftOutLimit));
 }
+
+TEST(SymbolProjection, TheCameraIsAtRestAfterSeveralUpdatesWithTheSameMatrix) {
+    std::optional<mat4> lastMatrix;
+    uint8_t updatesAtRest = 0;
+    mat4 here;
+    matrix::identity(here);
+    mat4 there = here;
+    matrix::translate(there, there, 1.0, 0.0, 0.0);
+
+    // The first update has nothing to compare with, and one or two repeated frames are not rest.
+    EXPECT_FALSE(lineLabelCameraAtRest(lastMatrix, updatesAtRest, here));
+    EXPECT_FALSE(lineLabelCameraAtRest(lastMatrix, updatesAtRest, here));
+    EXPECT_FALSE(lineLabelCameraAtRest(lastMatrix, updatesAtRest, here));
+    // The same matrix three more times in a row.
+    EXPECT_TRUE(lineLabelCameraAtRest(lastMatrix, updatesAtRest, here));
+    EXPECT_TRUE(lineLabelCameraAtRest(lastMatrix, updatesAtRest, here));
+    // A move starts the count again.
+    EXPECT_FALSE(lineLabelCameraAtRest(lastMatrix, updatesAtRest, there));
+    EXPECT_FALSE(lineLabelCameraAtRest(lastMatrix, updatesAtRest, here));
+}

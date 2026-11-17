@@ -410,11 +410,25 @@ namespace {
 // single kink the pitch has sharpened still reads; past twice the angle the label runs back
 // into itself.
 constexpr float labelPlaneFoldFactor = 2.0f;
-// A label that was left out comes back once it is within the angle again. The turn jumps as
-// glyphs pass a vertex of the projected line, so with one limit for going and coming back a
-// label near it would flicker while the camera moves.
+// While the camera moves, a label that was left out comes back once it is within the angle
+// again. The turn jumps as glyphs pass a vertex of the projected line, so with one limit for
+// going and coming back a label near it would flicker.
 constexpr float labelPlaneUnfoldFactor = 1.0f;
+// The camera is at rest once the labels have been laid out with the same matrix this many
+// more times in a row. A single repeated frame during a slow gesture is not rest, and a map
+// that has stopped moving draws only a few more frames.
+constexpr uint8_t lineLabelUpdatesForRest = 3;
 } // namespace
+
+bool lineLabelCameraAtRest(std::optional<mat4>& lastMatrix, uint8_t& updatesAtRest, const mat4& matrix) {
+    if (lastMatrix && *lastMatrix == matrix) {
+        if (updatesAtRest < lineLabelUpdatesForRest) ++updatesAtRest;
+    } else {
+        lastMatrix = matrix;
+        updatesAtRest = 0;
+    }
+    return updatesAtRest >= lineLabelUpdatesForRest;
+}
 
 float labelPlaneTurnLimit(const float maxAngle, const bool leftOut) {
     return (leftOut ? labelPlaneUnfoldFactor : labelPlaneFoldFactor) * maxAngle;
@@ -554,11 +568,13 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
                          const SymbolSizeBinder& sizeBinder,
                          const TransformState& state,
                          const SymbolElevationFn* getElevation,
-                         const float maxAngle) {
+                         const float maxAngle,
+                         const bool cameraAtRest) {
     // A label that pitches with the map is laid along its line in the tile, where layout
     // already held it to the angle. One that faces the viewport is laid along the line as
-    // it projects to the screen, so its turn is checked again there.
-    const bool checkTurn = !pitchWithMap && maxAngle < std::numeric_limits<float>::infinity();
+    // it projects to the screen, so its turn is checked again there. A map that is not
+    // pitched shows the line as layout saw it, and its labels are left alone.
+    const bool checkTurn = !pitchWithMap && maxAngle < std::numeric_limits<float>::infinity() && state.getPitch() > 0.0;
     const ZoomEvaluatedSize partiallyEvaluatedSize = sizeBinder.evaluateForZoom(static_cast<float>(state.getZoom()));
 
     const std::array<double, 2> clippingBuffer = {
@@ -575,6 +591,9 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
     bool useVertical = false;
 
     for (auto& placedSymbol : placedSymbols) {
+        if (!checkTurn) {
+            placedSymbol.foldedInLabelPlane = false;
+        }
         // Don't do calculations for vertical glyphs unless the previous symbol
         // was horizontal and we determined that vertical glyphs were necessary.
         // Also don't do calculations for symbols that are collided and fully
@@ -607,8 +626,10 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
         const float pitchScaledFontSize = pitchWithMap ? fontSize * perspectiveRatio : fontSize / perspectiveRatio;
 
         const Point<float> anchorPoint = project(placedSymbol.anchorPoint, labelPlaneMatrix, getElevation).first;
-        const float turnLimit = checkTurn ? labelPlaneTurnLimit(maxAngle, placedSymbol.foldedInLabelPlane)
-                                          : std::numeric_limits<float>::infinity();
+        // At rest the labels are those of a fresh view: only a moving camera holds a label out.
+        const float turnLimit = checkTurn
+                                    ? labelPlaneTurnLimit(maxAngle, placedSymbol.foldedInLabelPlane && !cameraAtRest)
+                                    : std::numeric_limits<float>::infinity();
 
         PlacementResult placeUnflipped = placeGlyphsAlongLine(placedSymbol,
                                                               pitchScaledFontSize,
