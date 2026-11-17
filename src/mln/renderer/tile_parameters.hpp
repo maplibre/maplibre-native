@@ -74,6 +74,9 @@ public:
     /// camera's eye, which is often behind or below the view and so outside the frustum the cover
     /// is taken from. Nothing is asked for where the cover already holds a tile over it.
     std::optional<LatLng> alsoCover = std::nullopt;
+    /// With terrain on: leave out the tiles that build none of the source's layers, every layer being
+    /// outside its zoom range for them (GeometryTile::setLayers). They draw nothing.
+    bool leaveOutEmptyTiles = false;
 };
 
 } // namespace mln

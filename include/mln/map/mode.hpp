@@ -64,8 +64,8 @@ enum class TerrainLoadMode : uint8_t {
                  ///< stall a frame on big bursts (zoom-in over new coverage). The mesh follows
                  ///< the view past a coarser DEM, as maplibre-gl-js does, up to 64 mesh tiles.
                  ///< Default.
-    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame. Mesh to z15, up to
-                 ///< 48 mesh tiles.
+    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame. The mesh follows the
+                 ///< view past a coarser DEM, up to 48 mesh tiles.
     Performance, ///< Cap 8 new-tile builds + 4 drape re-renders per frame; smoothest on
                  ///< weak GPUs, most progressive fill-in. Mesh to z14, up to 24 mesh tiles.
 };
@@ -83,12 +83,14 @@ struct TerrainLoadBudget {
     /// than the aggressive one Performance uses.
     size_t maxMeshTiles;
     /// The zoom the terrain mesh reaches over a coarser DEM (RenderTerrain::meshMaxZoom). Each
-    /// mesh tile drapes into its own target (1024 px for the finest tiles, 512 px for the rest), so how sharp draped
-    /// content stays in a close-up follows the zoom of the mesh tiles, not of the DEM; each level deeper also adds
-    /// tiles to the near field, and drape memory with them. A DEM at or past this zoom meshes
-    /// at its own maxzoom. Quality's 22 (util::DEFAULT_MAX_ZOOM, the deepest a map goes) sets no
-    /// limit: the mesh follows the view as maplibre-gl-js's terrain does, and only the tile cap
-    /// bounds it. The other modes stop at most RenderTerrain::maxMeshOverzoomLevels past the DEM.
+    /// mesh tile drapes into its own target (1024 px for the nearest tiles, 512 px for the rest,
+    /// see RenderTerrain::fullSizeDrapeTilesOf), so how sharp draped content stays in a close-up
+    /// follows the zoom of the mesh tiles, not of the DEM; each level deeper also adds tiles to
+    /// the near field, and drape memory with them. A DEM at or past this zoom meshes at its own
+    /// maxzoom. The 22 of Quality and Balanced (util::DEFAULT_MAX_ZOOM, the deepest a map goes)
+    /// sets no limit: the mesh follows the view as maplibre-gl-js's terrain does, and only the
+    /// tile cap bounds it. Performance stops at most RenderTerrain::maxMeshOverzoomLevels past
+    /// the DEM.
     uint8_t meshTargetZoom;
 };
 
@@ -96,7 +98,7 @@ constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
     switch (mode) {
         case TerrainLoadMode::Balanced:
             return {
-                .newTileBuildsPerFrame = 32, .drapeRerendersPerFrame = 16, .maxMeshTiles = 48, .meshTargetZoom = 15};
+                .newTileBuildsPerFrame = 32, .drapeRerendersPerFrame = 16, .maxMeshTiles = 48, .meshTargetZoom = 22};
         case TerrainLoadMode::Performance:
             return {.newTileBuildsPerFrame = 8, .drapeRerendersPerFrame = 4, .maxMeshTiles = 24, .meshTargetZoom = 14};
         case TerrainLoadMode::Quality:

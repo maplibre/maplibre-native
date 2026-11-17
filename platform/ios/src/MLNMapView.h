@@ -533,6 +533,28 @@ MLN_EXPORT
 @property (nonatomic, assign) double tileLodZoomShift;
 
 /**
+ The color far 3D terrain fades toward: distance haze that blends the far edge of the terrain
+ into whatever is drawn behind the map, such as a sky the app paints under a transparent map
+ view.
+
+ The color's alpha is the most the ground is blended toward it. The haze shows only while
+ ``terrainHazeRange`` is above `1`. The default is `UIColor.clearColor`, no haze. Has no effect
+ when terrain is not enabled.
+ */
+@property (nonatomic, copy, null_resettable) UIColor *terrainHazeColor;
+
+/**
+ How far the distance haze reaches, in multiples of the map center's distance from the camera.
+
+ Ground that far away and beyond takes the full ``terrainHazeColor``; nearer ground fades toward
+ it as in maplibre-gl-js's terrain fog with a `fog-ground-blend` of `0.5`, so with `3` the haze
+ begins at one and a half times the center's distance. As in maplibre-gl-js, the haze fades in
+ between pitches of 60 and 70 degrees. A value of `1` or less turns the haze off, and one above
+ `1000` is held at `1000`; the default is `0`. Has no effect when terrain is not enabled.
+ */
+@property (nonatomic, assign) CGFloat terrainHazeRange;
+
+/**
  How much work the map does per frame while it loads and draws 3D terrain.
 
  This is a performance option for the device, not a style property. See ``MLNTerrainLoadMode``.
@@ -1137,6 +1159,31 @@ of north, the map will automatically snap to exact north.
     NS_SWIFT_NAME(setCenterAltitudeKeepingView(_:));
 
 /**
+ Puts the camera at an eye position and points it at a point, without
+ animation.
+
+ The map's center becomes `centerCoordinate` at `centerAltitude`. The zoom
+ level, direction and pitch become those that place the camera at
+ `eyeCoordinate` and `eyeAltitude` with the current `fieldOfView`. A center
+ above the eye gives a pitch over 90 degrees.
+
+ The pitch is limited by `maximumPitch` and the zoom level by
+ `minimumZoomLevel` and `maximumZoomLevel`; where a limit applies, the camera
+ is not at the eye position. With 3D terrain, altitudes are in meters with the
+ terrain exaggeration applied, and `centerClampedToGround` moves the center
+ after this call: turn it off to keep the camera where this method put it.
+
+ @param centerCoordinate The point the camera looks at.
+ @param centerAltitude The altitude of that point above sea level, in meters.
+ @param eyeCoordinate The coordinate the camera is over.
+ @param eyeAltitude The altitude of the camera above sea level, in meters.
+ */
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
+             centerAltitude:(CLLocationDistance)centerAltitude
+          fromEyeCoordinate:(CLLocationCoordinate2D)eyeCoordinate
+                eyeAltitude:(CLLocationDistance)eyeAltitude;
+
+/**
  * The minimum zoom level at which the map can be shown.
  *
  * Depending on the map view’s aspect ratio, the map view may be prevented
@@ -1214,6 +1261,22 @@ of north, the map will automatically snap to exact north.
  The default value of this property is 60 degrees.
  */
 @property (nonatomic) CGFloat maximumPitch;
+
+/**
+ The vertical field of view of the map’s camera, measured in degrees.
+
+ The map keeps its center coordinate, zoom level, pitch and direction when this
+ property changes: the scale at the center of the view stays the same, and a
+ wider field of view moves the camera closer to the center, so a pitched map
+ shows more of the distance, as a wide-angle lens does.
+
+ The value is limited to the range from 0.1 to 150 degrees. The default value
+ of this property is about 36.87 degrees.
+
+ `MLNMapCamera.altitude` and `MLNMapCamera.viewingDistance` describe the camera
+ at the default field of view.
+ */
+@property (nonatomic) CGFloat fieldOfView;
 
 /**
  Resets the map rotation to a northern heading — a `direction` of `0` degrees.

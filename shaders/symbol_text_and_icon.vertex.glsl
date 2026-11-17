@@ -47,9 +47,8 @@ layout (std140) uniform SymbolDrawableUBO {
     highp float u_opacity_t;
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
-    lowp float drawable_pad1;
-    lowp float drawable_pad2;
-    lowp float drawable_pad3;
+    highp float u_haze_alpha;
+    highp vec2 u_haze_ramp;
     // 3D terrain elevation
     highp vec4 u_dem_coords;
     highp vec4 u_dem_unpack;
@@ -168,6 +167,9 @@ void main() {
     float fade_change = fade_opacity[1] > 0.5 ? u_symbol_fade_change : -u_symbol_fade_change;
     float interpolated_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
     interpolated_fade_opacity *= calculate_visibility(projectedPoint, u_depth, u_depth_enabled, u_units_to_pixels.y);
+    // Over ground the distance haze has taken, the symbol goes with the ground (terrain.fragment.glsl)
+    highp float haze = clamp(u_haze_ramp.x - u_haze_ramp.y / max(projectedPoint.w, 1e-6), 0.0, 1.0);
+    interpolated_fade_opacity *= 1.0 - u_haze_alpha * haze * haze;
 
     v_data0.xy = a_tex / u_texsize;
     v_data0.zw = a_tex / u_texsize_icon;

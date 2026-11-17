@@ -4,6 +4,7 @@
 #include <mln/style/terrain_impl.hpp>
 #include <mln/util/immutable.hpp>
 #include <mln/tile/tile_id.hpp>
+#include <mln/util/color.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/gfx/index_buffer.hpp>
@@ -88,7 +89,7 @@ public:
 
     /// The deepest zoom of the terrain mesh over a DEM whose maxzoom is `demMaxZoom`: the load
     /// mode's TerrainLoadBudget::meshTargetZoom, never shallower than the DEM. A target of
-    /// util::DEFAULT_MAX_ZOOM (Quality) follows the view, as maplibre-gl-js's TerrainSourceCache
+    /// util::DEFAULT_MAX_ZOOM (Quality and Balanced) follows the view, as maplibre-gl-js's TerrainSourceCache
     /// does (to z22, clamping only the DEM lookup); a lower one goes at most
     /// maxMeshOverzoomLevels past the DEM. A mesh tile past the DEM samples its DEM ancestor
     /// through a sub-tile offset.
@@ -109,6 +110,50 @@ public:
     /// The point the mesh-tile cap measures distance from, in normalized web-mercator [0, 1]:
     /// the ground under the camera (the map centre when the map is not tilted).
     static std::array<double, 2> meshTileCapOrigin(const TransformState& state);
+
+    /// How many of the cover's finest tiles nearest the camera get a full-size drape target in a
+    /// view that keeps moving, and the most that have one at once in any view.
+    static constexpr size_t fullSizeDrapeNearest = 16;
+    static constexpr size_t fullSizeDrapeMax = 24;
+
+    /// The tiles of the cover that get a full-size drape target (1024 px, four times the memory of
+    /// the half-size one every other tile has): the `nearest` tiles of the cover's finest zoom
+    /// nearest `origin` (the ground under the camera, where it is magnified most), and then,
+    /// nearest first, those of `hadFullSize` (tiles that have one now, of any zoom) until
+    /// `fullSizeDrapeMax` are full size. A full-size target is therefore taken away only when
+    /// that many nearer tiles displace it: replacing a target re-bakes the tile, and a view that
+    /// pans over the rank boundary, or whose finest zoom changes as one tile appears or leaves,
+    /// would otherwise swap the same targets back and forth.
+    static std::set<UnwrappedTileID> fullSizeDrapeTilesOf(const std::set<UnwrappedTileID>& cover,
+                                                          const std::array<double, 2>& origin,
+                                                          const std::set<UnwrappedTileID>& hadFullSize,
+                                                          size_t nearest = fullSizeDrapeNearest);
+
+    /// What the drape pool is asked for in a frame.
+    struct DrapeSizes {
+        /// The tiles that get full-size targets (fullSizeDrapeTilesOf).
+        std::set<UnwrappedTileID> fullSizeTiles;
+        /// How many existing targets may change size (TexturePool::createRenderTargets); 0 = all.
+        size_t maxResizes = 0;
+    };
+
+    /// The sizes of the drape targets for a frame of a map in `mode`, given the tiles that have a
+    /// full-size target now and the load mode's cap on drape re-renders (`drapeCap`, <= 0 for none).
+    /// A map that keeps moving keeps its targets steady: the earlier sizes count, and the cap
+    /// paces the swaps, the rest following on the repaints it asks for. A still (a Static or Tile
+    /// map) has no earlier frame to keep steady and no later one to finish deferred swaps, even on
+    /// a renderer that drew other views before: it is decided from scratch, the nearest
+    /// `fullSizeDrapeMax` tiles of the finest zoom at once, and every swap is made in the frame.
+    static DrapeSizes drapeSizesFor(MapMode mode,
+                                    int drapeCap,
+                                    const std::set<UnwrappedTileID>& cover,
+                                    const std::array<double, 2>& origin,
+                                    const std::set<UnwrappedTileID>& hadFullSize);
+
+    /// Whether a source leaves out the tiles that build none of its layers (on by default); a test
+    /// turns it off to compare what it leaves out.
+    static void setLeaveOutEmptyTilesForTesting(bool leaveOut);
+    static bool leavesOutEmptyTiles();
 
     /// The cover with a one-ring dilation: every 8-neighbour of a tile, at that tile's zoom,
     /// except one that lies over, or under, a tile the cover already has (whatever its zoom).
@@ -280,6 +325,20 @@ public:
     float getExaggeration() const;
 
     /**
+     * @brief The map's distance haze (Map::setTerrainHaze) as of the last update; range 0 is none
+     */
+    const Color& getHazeColor() const { return hazeColor; }
+    float getHazeRange() const { return hazeRange; }
+
+    /// The distance haze as the shaders take it in this view: the color, premultiplied and clear
+    /// when there is no haze, and the ramp, haze = clamp(ramp[0] - ramp[1] / view depth, 0, 1)^2.
+    struct Haze {
+        Color color;
+        std::array<float, 2> ramp{{0.0f, 0.0f}};
+    };
+    Haze getHaze(const TransformState& state) const;
+
+    /**
      * @brief Get the source ID providing DEM data
      */
     const std::string& getSourceID() const;
@@ -443,6 +502,9 @@ private:
     // The skirt setting the cached mesh was built with. update() drops the mesh and every
     // tile drawable built from it when the map's setting no longer matches.
     TerrainSkirtLength meshSkirtLength = TerrainSkirtLength::Auto;
+    // The map's distance haze, taken from each update for the tweaker.
+    Color hazeColor;
+    float hazeRange = 0.0f;
 
     // Layer group for terrain drawables
     LayerGroupBasePtr layerGroup;
@@ -468,7 +530,8 @@ private:
     // Mesh drawables by tile, with the DEM they were built on (tier: 0 = placeholder/flat,
     // 1 = ancestor fallback, 2 = own DEM, plus that DEM's zoom); a drawable is replaced
     // whenever terrain::shouldRebind says a better DEM can be bound - a higher tier, or a
-    // deeper ancestor within the fallback tier
+    // deeper ancestor within the fallback tier - or terrain::drapeTextureReplaced says the
+    // tile's drape target was replaced (it changed size) and so has a new texture
     std::unordered_map<OverscaledTileID, terrain::DEMBinding> tilesWithDrawables;
 
     // Per-drawable scale/offset into the bound DEM texture ({1,0,0,0} unless

@@ -9,8 +9,9 @@ package org.maplibre.android.maps;
  * <p>This is a rendering/performance option, not a style property. Besides spreading the
  * loading work across frames, it sets how deep the terrain mesh goes past a coarse DEM and how
  * many mesh tiles a frame may have, so it changes the final image: close-ups are sharper in
- * {@link #QUALITY}, and tilted views keep more detail in the distance. The enum ordinals must
- * stay in sync with the native {@code mln::TerrainLoadMode}.</p>
+ * {@link #QUALITY} and {@link #BALANCED} than in {@link #PERFORMANCE}, and tilted views keep more
+ * detail in the distance. The enum ordinals must stay in sync with the native
+ * {@code mln::TerrainLoadMode}.</p>
  */
 public enum TerrainLoadMode {
 
@@ -23,8 +24,8 @@ public enum TerrainLoadMode {
 
   /**
    * Cap 32 new-tile builds and 16 drape re-renders per frame - a middle ground that keeps a
-   * near-instant initial view while smoothing the worst interaction stalls. Meshes the terrain
-   * to z15 over a coarser DEM, with up to 48 mesh tiles.
+   * near-instant initial view while smoothing the worst interaction stalls. The terrain mesh
+   * follows the view past a coarser DEM, as in {@link #QUALITY}, with up to 48 mesh tiles.
    */
   BALANCED,
 

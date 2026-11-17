@@ -3,6 +3,8 @@
 #include <mln/gfx/context_observer.hpp>
 #include <mln/renderer/render_orchestrator.hpp>
 #include <mln/renderer/texture_pool.hpp>
+#include <mln/style/terrain.hpp>
+#include <mln/util/immutable.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mln/mtl/mtl_fwd.hpp>
@@ -57,9 +59,10 @@ private:
     /// into it, see RenderTarget::render), and the terrain drawables hold the
     /// textures they sample. Rebuilding the pool per frame would reallocate every
     /// tile-sized target every frame - churning GPU memory and discarding the
-    /// baked content that suppresses drape flicker.
-    // Drape target resolution = base tile size x qualityFactor, for the finest tiles of the cover;
-    // the coarser ones get the base tile size (Renderer::Impl::render). maplibre-gl-js renders
+    /// baked content that suppresses drape flicker. A tile's target is replaced only
+    /// when the tile needs the other of the two sizes (TexturePool::createRenderTargets), or
+    /// after it failed to allocate (TexturePool::renderTargetFailed).
+    // Drape target resolution = base tile size x qualityFactor. maplibre-gl-js renders
     // its render-to-texture tiles at tileSize * qualityFactor (qualityFactor = 2, i.e.
     // 1024x1024) precisely so draped content - thin lines especially - is not pixelated
     // or aliased when the terrain mesh magnifies it onto the screen. Its own words
@@ -68,9 +71,11 @@ private:
     // 1) draped roads look aliased because the line AA band, sized to the screen's device
     // pixel ratio, falls sub-texel in the lower-resolution target. Lower drapeQualityFactor
     // back to 1 to save GPU memory on constrained devices (each step is 4x memory/target).
+    // Only the tiles nearest the camera get that full size (RenderTerrain::fullSizeDrapeTilesOf);
+    // every other tile's target is drapeTileSize, a quarter of the memory.
     static constexpr uint32_t drapeTileSize = 512;
     static constexpr uint32_t drapeQualityFactor = 2;
-    TexturePool texturePool{drapeTileSize * drapeQualityFactor};
+    TexturePool texturePool{drapeTileSize * drapeQualityFactor, drapeTileSize};
     /// This frame's layer revisions (see PaintParameters::drapeLayerRevisions).
     std::unordered_map<std::string, std::uintptr_t> layerIdentities;
 
@@ -121,6 +126,9 @@ private:
     /// loaded tile under it, that height is not the ground under the eye any more.
     std::optional<UnwrappedTileID> eyeElevationTile;
     double lastReportedTargetElevation = std::numeric_limits<double>::quiet_NaN();
+    /// The terrain those heights were reported for. One set again after it was removed is another
+    /// terrain to the map, even where the renderer drew no frame without one.
+    std::optional<Immutable<style::Terrain::Impl>> reportedTerrain;
 
     /// The terrain height copy last handed to the observer (null: none, or terrain off), so it
     /// is sent once per change rather than once per frame.

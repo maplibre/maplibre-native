@@ -8,6 +8,7 @@
 #include <mln/util/constants.hpp>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <limits>
@@ -119,22 +120,24 @@ constexpr TerrainLoadMode allModes[] = {
 } // namespace
 
 TEST(TerrainMeshCover, MeshGoesPastACoarseDEMAsFarAsTheModeAffords) {
-    // A z12 DEM: Performance meshes to z14 and Balanced to z15.
+    // A z12 DEM: Performance meshes to z14; Balanced follows the view, as Quality does.
     EXPECT_EQ(14, meshMaxZoom(TerrainLoadMode::Performance, 12));
-    EXPECT_EQ(15, meshMaxZoom(TerrainLoadMode::Balanced, 12));
+    EXPECT_EQ(util::DEFAULT_MAX_ZOOM, meshMaxZoom(TerrainLoadMode::Balanced, 12));
 }
 
 TEST(TerrainMeshCover, ADeepDEMGetsFewOrNoExtraLevels) {
-    // A z15 DEM (lidar) is already as deep as Performance and Balanced go.
+    // A z15 DEM (lidar) is already as deep as Performance goes.
     EXPECT_EQ(15, meshMaxZoom(TerrainLoadMode::Performance, 15));
-    EXPECT_EQ(15, meshMaxZoom(TerrainLoadMode::Balanced, 15));
 }
 
-TEST(TerrainMeshCover, QualityFollowsTheViewAsGlJsDoes) {
+TEST(TerrainMeshCover, QualityAndBalancedFollowTheViewAsGlJsDoes) {
     // maplibre-gl-js's TerrainSourceCache covers to z22 whatever the DEM's maxzoom, clamping only
-    // the DEM lookup; in Quality only the tile cap (and the coarsening before it) bounds the mesh.
-    for (const uint8_t demMaxZoom : {6, 12, 15, 18, 22}) {
-        EXPECT_EQ(util::DEFAULT_MAX_ZOOM, meshMaxZoom(TerrainLoadMode::Quality, demMaxZoom));
+    // the DEM lookup; in Quality and Balanced only the tile cap (and the coarsening before it)
+    // bounds the mesh.
+    for (const auto mode : {TerrainLoadMode::Quality, TerrainLoadMode::Balanced}) {
+        for (const uint8_t demMaxZoom : {6, 12, 15, 18, 22}) {
+            EXPECT_EQ(util::DEFAULT_MAX_ZOOM, meshMaxZoom(mode, demMaxZoom));
+        }
     }
 }
 
@@ -142,13 +145,197 @@ TEST(TerrainMeshCover, MeshIsNeverShallowerThanTheDEM) {
     for (const auto mode : allModes) {
         EXPECT_LE(18, meshMaxZoom(mode, 18));
     }
-    EXPECT_EQ(18, meshMaxZoom(TerrainLoadMode::Balanced, 18));
     EXPECT_EQ(18, meshMaxZoom(TerrainLoadMode::Performance, 18));
 }
 
-TEST(TerrainMeshCover, BalancedAndPerformanceGoAtMostThreeLevelsPastTheDEM) {
-    EXPECT_EQ(9, meshMaxZoom(TerrainLoadMode::Balanced, 6));
+TEST(TerrainMeshCover, PerformanceGoesAtMostThreeLevelsPastTheDEM) {
     EXPECT_EQ(9, meshMaxZoom(TerrainLoadMode::Performance, 6));
+}
+
+namespace {
+// An 8x8 block of z17 tiles. Its middle is the corner (4, 4) in tile units: the 16 tiles nearest
+// it are the 4x4 block around it (squared distance up to 4.5 tile widths), the next 8 follow at 6.5
+// and the next 8 at 8.5, so the 16th and the 24th nearest each end a group of tied distances.
+std::set<UnwrappedTileID> z17Block() {
+    std::set<UnwrappedTileID> cover;
+    for (uint32_t y = 0; y < 8; ++y) {
+        for (uint32_t x = 0; x < 8; ++x) cover.insert(UnwrappedTileID(17, 70000 + x, 40000 + y));
+    }
+    return cover;
+}
+
+// A point at (x, y) tile widths from the block's top left corner, in normalized web-mercator.
+std::array<double, 2> z17Point(double x, double y) {
+    const double n = std::exp2(17);
+    return {{(70000 + x) / n, (40000 + y) / n}};
+}
+
+// Squared distance, in z17 tile widths, from the block's middle corner to the tile's centre.
+double fromMiddle2(const UnwrappedTileID& id) {
+    const double dx = static_cast<double>(id.canonical.x) - 70000 + 0.5 - 4;
+    const double dy = static_cast<double>(id.canonical.y) - 40000 + 0.5 - 4;
+    return dx * dx + dy * dy;
+}
+
+std::set<UnwrappedTileID> nearest16() {
+    std::set<UnwrappedTileID> tiles;
+    for (const auto& id : z17Block()) {
+        if (fromMiddle2(id) < 5.0) tiles.insert(id);
+    }
+    return tiles;
+}
+} // namespace
+
+TEST(TerrainMeshCover, TheNearestTilesOfTheFinestZoomGetFullSizeDrapes) {
+    // A coarser tile west of the block (z15 17499/10000 is z17 69996-69999 / 40000-40003), with the
+    // camera at its middle: the nearest tile of all, yet not of the finest zoom, so never full size.
+    auto cover = z17Block();
+    const UnwrappedTileID coarse(15, 17499, 10000);
+    cover.insert(coarse);
+
+    const auto full = RenderTerrain::fullSizeDrapeTilesOf(cover, z17Point(-2, 2), {});
+    EXPECT_EQ(RenderTerrain::fullSizeDrapeNearest, full.size());
+    EXPECT_FALSE(full.contains(coarse));
+    for (const auto& id : full) EXPECT_EQ(17, id.canonical.z);
+
+    EXPECT_TRUE(RenderTerrain::fullSizeDrapeTilesOf({}, z17Point(-2, 2), {}).empty());
+}
+
+TEST(TerrainMeshCover, TiedDistancesGoByTileIDForFullSizeDrapes) {
+    // A row of z17 tiles with the camera over the middle one: the others pair off at equal
+    // distances either side, and the 16th and 17th nearest are such a pair.
+    std::set<UnwrappedTileID> row;
+    for (uint32_t x = 0; x < 21; ++x) row.insert(UnwrappedTileID(17, 70000 + x, 40000));
+
+    const auto full = RenderTerrain::fullSizeDrapeTilesOf(row, z17Point(10.5, 0.5), {});
+    EXPECT_EQ(RenderTerrain::fullSizeDrapeNearest, full.size());
+    EXPECT_TRUE(full.contains(UnwrappedTileID(17, 70002, 40000)));
+    EXPECT_FALSE(full.contains(UnwrappedTileID(17, 70018, 40000)));
+}
+
+TEST(TerrainMeshCover, ATileKeepsItsFullSizeDrapeUntilTheMostAreNearer) {
+    const auto cover = z17Block();
+    const auto origin = z17Point(4, 4);
+
+    // A tile just past the nearest 16 and the far corner had full size: both keep it, with room
+    // to spare.
+    const UnwrappedTileID twentieth(17, 70001, 40003);
+    const UnwrappedTileID corner(17, 70000, 40000);
+    ASSERT_EQ(6.5, fromMiddle2(twentieth));
+    auto expected = nearest16();
+    expected.insert(twentieth);
+    expected.insert(corner);
+    EXPECT_EQ(expected, RenderTerrain::fullSizeDrapeTilesOf(cover, origin, {twentieth, corner}));
+
+    // All of them had: the nearest 24 keep it, and nothing past them, whatever it had.
+    const auto kept = RenderTerrain::fullSizeDrapeTilesOf(cover, origin, cover);
+    EXPECT_EQ(RenderTerrain::fullSizeDrapeMax, kept.size());
+    for (const auto& id : cover) {
+        EXPECT_EQ(fromMiddle2(id) <= 6.5, kept.contains(id)) << id.canonical.x << "/" << id.canonical.y;
+    }
+}
+
+TEST(TerrainMeshCover, TilesKeepTheirFullSizeDrapesWhenTheFinestZoomChanges) {
+    // The z17 tile beside the camera is replaced by its four z18 children, and z17 is no longer the
+    // finest zoom. The other z17 tiles that had full-size targets keep them (the swap would re-bake
+    // them all at once), and the z18 tiles, now the finest, get theirs too.
+    auto cover = z17Block();
+    const auto origin = z17Point(4, 4);
+    const auto hadFullSize = RenderTerrain::fullSizeDrapeTilesOf(cover, origin, {});
+    ASSERT_EQ(nearest16(), hadFullSize);
+
+    const UnwrappedTileID parent(17, 70003, 40003);
+    ASSERT_TRUE(hadFullSize.contains(parent));
+    std::set<UnwrappedTileID> children;
+    for (uint32_t y = 80006; y < 80008; ++y) {
+        for (uint32_t x = 140006; x < 140008; ++x) children.insert(UnwrappedTileID(18, x, y));
+    }
+    cover.erase(parent);
+    cover.insert(children.begin(), children.end());
+
+    auto expected = hadFullSize;
+    expected.erase(parent);
+    expected.insert(children.begin(), children.end());
+    EXPECT_EQ(expected, RenderTerrain::fullSizeDrapeTilesOf(cover, origin, hadFullSize));
+
+    // They leave again: the same tiles, no change.
+    for (const auto& child : children) cover.erase(child);
+    cover.insert(parent);
+    EXPECT_EQ(hadFullSize, RenderTerrain::fullSizeDrapeTilesOf(cover, origin, hadFullSize));
+}
+
+TEST(TerrainMeshCover, CoarserTilesThatHadFullSizeNeverDisplaceTheNearestFinestOnes) {
+    // The camera is ten tiles west of the block, and twelve z16 tiles around it (z17 69986-69991 /
+    // 40000-40007) had full-size targets: the finest zoom was z16 a moment ago. They are all nearer
+    // than the block, but its nearest 16 tiles, its two western columns, still get theirs.
+    auto cover = z17Block();
+    std::set<UnwrappedTileID> hadFullSize;
+    for (uint32_t y = 20000; y < 20004; ++y) {
+        for (uint32_t x = 34993; x < 34996; ++x) hadFullSize.insert(UnwrappedTileID(16, x, y));
+    }
+    cover.insert(hadFullSize.begin(), hadFullSize.end());
+
+    const auto full = RenderTerrain::fullSizeDrapeTilesOf(cover, z17Point(-10, 4), hadFullSize);
+    EXPECT_EQ(RenderTerrain::fullSizeDrapeMax, full.size());
+    for (uint32_t y = 40000; y < 40008; ++y) {
+        EXPECT_TRUE(full.contains(UnwrappedTileID(17, 70000, y)));
+        EXPECT_TRUE(full.contains(UnwrappedTileID(17, 70001, y)));
+    }
+}
+
+TEST(TerrainMeshCover, AStillTakesTheMaxFullSizeDrapesAtOnce) {
+    // A still has no earlier frame to keep steady: the nearest 24 tiles at full size (the same
+    // bound as a moving view), not the 16 a moving view starts from.
+    const auto cover = z17Block();
+    const auto full = RenderTerrain::fullSizeDrapeTilesOf(cover, z17Point(4, 4), {}, RenderTerrain::fullSizeDrapeMax);
+    EXPECT_EQ(RenderTerrain::fullSizeDrapeMax, full.size());
+    for (const auto& id : cover) {
+        EXPECT_EQ(fromMiddle2(id) <= 6.5, full.contains(id)) << id.canonical.x << "/" << id.canonical.y;
+    }
+}
+
+TEST(TerrainMeshCover, AStillOnAReusedRendererIsDecidedFromScratch) {
+    // A view of nine z17 tiles and three coarser z16 tiles beside them. The renderer drew other
+    // views before, and its pool still holds their sizes: the three z16 tiles have full-size targets.
+    // A moving map keeps those (there is room); a still is the same on this renderer as on a fresh
+    // one: the nearest tiles of the finest zoom, and no coarse tile at full size.
+    std::set<UnwrappedTileID> cover;
+    for (uint32_t y = 0; y < 3; ++y) {
+        for (uint32_t x = 0; x < 3; ++x) cover.insert(UnwrappedTileID(17, 70000 + x, 40000 + y));
+    }
+    const std::set<UnwrappedTileID> coarse{
+        UnwrappedTileID(16, 34997, 20000), UnwrappedTileID(16, 34997, 20001), UnwrappedTileID(16, 34998, 20002)};
+    cover.insert(coarse.begin(), coarse.end());
+    const auto origin = z17Point(1.5, 1.5);
+
+    const auto moving = RenderTerrain::drapeSizesFor(MapMode::Continuous, 16, cover, origin, coarse);
+    EXPECT_EQ(12u, moving.fullSizeTiles.size());
+
+    for (const auto mode : {MapMode::Static, MapMode::Tile}) {
+        const auto fresh = RenderTerrain::drapeSizesFor(mode, 16, cover, origin, {});
+        const auto reused = RenderTerrain::drapeSizesFor(mode, 16, cover, origin, coarse);
+        EXPECT_EQ(9u, reused.fullSizeTiles.size());
+        EXPECT_EQ(fresh.fullSizeTiles, reused.fullSizeTiles);
+        for (const auto& id : reused.fullSizeTiles) EXPECT_EQ(17, id.canonical.z);
+        // No swaps are left for a later frame: a still gets no follow-up to finish deferred ones.
+        EXPECT_EQ(0u, fresh.maxResizes);
+        EXPECT_EQ(0u, reused.maxResizes);
+    }
+}
+
+TEST(TerrainMeshCover, AMovingMapKeepsItsSizesSteadyAndPacesTheSwaps) {
+    // The same pool in a map that keeps moving: the earlier sizes count, and the drape cap paces
+    // the swaps (Quality's 0 stays unlimited).
+    const auto cover = z17Block();
+    const auto origin = z17Point(4, 4);
+    const UnwrappedTileID kept(17, 70007, 40007); // far corner, had full size
+    const auto moving = RenderTerrain::drapeSizesFor(MapMode::Continuous, 16, cover, origin, {kept});
+
+    auto expected = nearest16();
+    expected.insert(kept);
+    EXPECT_EQ(expected, moving.fullSizeTiles);
+    EXPECT_EQ(16u, moving.maxResizes);
+    EXPECT_EQ(0u, RenderTerrain::drapeSizesFor(MapMode::Continuous, 0, cover, origin, {}).maxResizes);
 }
 
 namespace {

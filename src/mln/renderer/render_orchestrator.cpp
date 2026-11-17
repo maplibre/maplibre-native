@@ -1,5 +1,7 @@
 #include <mln/renderer/render_orchestrator.hpp>
 
+#include <mln/style/layers/raster_layer_impl.hpp>
+
 #include <mln/annotation/annotation_manager.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/renderer/change_request.hpp>
@@ -470,7 +472,20 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (layerAddedOrChanged || zoomChangedAndMatters || globalStateChangedAndMatters ||
             evaluationParameters.hasCrossfade || layer.hasTransition()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();
+            const bool wasInTransition = layer.hasTransition();
             layer.evaluate(evaluationParameters);
+            // A drape over terrain bakes a layer once per revision of its style
+            // (RenderLayer::styleRevision), on the frame the style changed. That is the frame a
+            // paint transition starts on, so the drape kept the paint the transition started
+            // from: a raster basemap whose brightness the app changed kept its old look. The
+            // paint a raster layer's transition ends on is another revision. Only a raster
+            // layer's: a fill-pattern layer baked again on this frame comes out without its
+            // pattern (TerrainDrape.APatternDrapedDuringAZoomLevelFadeSettlesOnTheFinalScale),
+            // and every layer ends a transition 300 ms after it is added.
+            if (wasInTransition && !layer.hasTransition() &&
+                layer.baseImpl->getTypeInfo() == style::RasterLayer::Impl::staticTypeInfo()) {
+                ++layer.styleRevision;
+            }
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
                 constantsMaskChanged.insert(id);
             }
@@ -594,6 +609,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
         tileParameters.coverTileLimit = isDemSource ? 0 : coverTileLimit;
         tileParameters.alsoCover = isDemSource ? terrainEye : std::nullopt;
+        tileParameters.leaveOutEmptyTiles = terrainEnabled && !isDemSource && RenderTerrain::leavesOutEmptyTiles();
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
         // The DEM source additionally keeps the coarser ancestors of its cover that are already

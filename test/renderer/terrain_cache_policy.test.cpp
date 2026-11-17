@@ -2,6 +2,8 @@
 
 #include <mln/renderer/terrain_cache_policy.hpp>
 
+#include <memory>
+
 using namespace mln::terrain;
 
 TEST(TerrainCachePolicy, RebindsToABetterTier) {
@@ -26,6 +28,46 @@ TEST(TerrainCachePolicy, KeepsTheSameOrADeeperAncestor) {
     EXPECT_FALSE(shouldRebind({1, 12}, {1, 6})); // a deeper ancestor was evicted: keep what is bound
     EXPECT_FALSE(shouldRebind({2, 12}, {2, 12}));
     EXPECT_FALSE(shouldRebind({0, -1}, {0, -1}));
+}
+
+namespace {
+// A stand-in for a texture: the policy only compares which texture it is, never looks inside, so
+// the pointer is a distinct address that is never dereferenced.
+std::shared_ptr<mln::gfx::Texture2D> standIn() {
+    const auto token = std::make_shared<char>();
+    return {token, reinterpret_cast<mln::gfx::Texture2D*>(token.get())};
+}
+} // namespace
+
+TEST(TerrainCachePolicy, ADrawableFollowsItsTilesDrapeTexture) {
+    const auto first = standIn();
+    const auto second = standIn();
+    const DEMBinding built{2, 12, first};
+    EXPECT_FALSE(drapeTextureReplaced(built, first.get()));
+    // The pool replaced the tile's target when the tile changed drape size: the drawable has to
+    // be built again on the new texture.
+    EXPECT_TRUE(drapeTextureReplaced(built, second.get()));
+}
+
+TEST(TerrainCachePolicy, NoDrapeTextureYetIsNotAReplacement) {
+    const auto texture = standIn();
+    EXPECT_FALSE(drapeTextureReplaced({2, 12, texture}, nullptr)); // the tile has no target now
+    EXPECT_FALSE(drapeTextureReplaced({2, 12}, texture.get()));    // the drawable recorded none
+}
+
+TEST(TerrainCachePolicy, ReplacedTargetsAreTakenOffTheRerenderCap) {
+    // A replaced target bakes at once on its new texture, so it spends the cap before the drape
+    // pass: the frame bakes the cap's worth in all, not that many replaced and as many again.
+    EXPECT_EQ(16, drapeRerenderBudget(16, 0));
+    EXPECT_EQ(12, drapeRerenderBudget(16, 4));
+    EXPECT_EQ(0, drapeRerenderBudget(4, 4));
+    EXPECT_EQ(0, drapeRerenderBudget(4, 9));
+}
+
+TEST(TerrainCachePolicy, AnUnlimitedRerenderCapStaysUnlimited) {
+    // Quality's cap is 0: unlimited, replaced targets or not.
+    EXPECT_GT(drapeRerenderBudget(0, 0), 1'000'000);
+    EXPECT_GT(drapeRerenderBudget(0, 24), 1'000'000);
 }
 
 namespace {
