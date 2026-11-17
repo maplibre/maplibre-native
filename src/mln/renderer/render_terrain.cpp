@@ -316,7 +316,13 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
         const size_t maxTiles = terrainLoadBudget(updateParameters->terrainLoadMode).maxMeshTiles;
         const auto origin = meshTileCapOrigin(state);
         out = coarsenFarMeshTiles(std::move(out), maxTiles, demSource->getMaxZoom(), origin);
-        out = nearestMeshTiles(std::move(out), maxTiles, origin);
+        // Up to the pitch threshold the cover has one zoom and ends with the view, short of the
+        // horizon, so it is the view that bounds it and every tile of it is ground on screen: at
+        // the threshold on a phone, 67 tiles of the DEM's own zoom, which cannot merge. Dropping
+        // the farthest of them left the far corners of the view to the sky.
+        const bool oneZoom = coverParams.tileLodMode != TileLodMode::Adaptive &&
+                             state.getPitch() <= coverParams.tileLodPitchThreshold;
+        out = nearestMeshTiles(std::move(out), oneZoom ? maxTiles * oneZoomCoverCapFactor : maxTiles, origin);
     }
     return out;
 }

@@ -455,3 +455,13 @@ TEST(TerrainUnseenTiles, LeavingThemOutLeavesThePictureAsItWas) {
         EXPECT_GT(drawn(with[i].image), 10000u) << "the picture is not blank";
     }
 }
+
+// At the pitch threshold the cover has one zoom and the most tiles it ever has, more than the
+// mesh-tile cap on a phone, and none of them can merge while the mesh is no deeper than the DEM.
+// The cap dropped the farthest, and the far corners of the view showed the sky.
+TEST(TerrainMeshCap, AViewAtThePitchThresholdHasNoHoles) {
+    FarFieldView view(false);
+    ASSERT_TRUE(view.open(60.0));
+    const PremultipliedImage image = view.read();
+    EXPECT_EQ(drawn(image), static_cast<size_t>(image.size.width) * image.size.height);
+}

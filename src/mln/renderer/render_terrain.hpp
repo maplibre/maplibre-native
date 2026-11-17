@@ -181,6 +181,11 @@ public:
     /// Tiles a source may cover per tile of the mesh-tile cap (TileParameters::coverTileLimit).
     static constexpr size_t sourceTilesPerMeshTile = 4;
 
+    /// How many times the mesh-tile cap a cover of one zoom may hold (computeMeshCover): the cap
+    /// is for the far tiles a steep pitch pulls in, and a view at or under the pitch threshold
+    /// has none.
+    static constexpr size_t oneZoomCoverCapFactor = 2;
+
     /// Resolve the DEM render source from the orchestrator if not yet bound.
     /// Renderer::Impl::render calls this before building the frame's drape-target
     /// pool from computeMeshCover: the source is otherwise first bound inside
