@@ -29,8 +29,12 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
 #if MLN_RENDER_BACKEND_METAL
     const auto& mtlRenderPass = static_cast<mtl::RenderPass*>(paintParameters.renderPass.get());
     mtlRenderPass->resetState();
-    // Custom layers get the full depth range rather than whatever range the previous drawable left on the encoder
-    mtlRenderPass->setDepthRange({0.0f, 1.0f});
+    // Custom layers get the full depth range rather than whatever range the previous drawable left on the encoder.
+    // With 3D terrain the mesh is drawn in the 3D range, and a custom layer is told the depth buffer holds the
+    // mesh's depth so that it can test its own geometry against it: it draws in that range too, or its depth
+    // would be behind the mesh's wherever there is terrain, whatever the geometry.
+    mtlRenderPass->setDepthRange(paintParameters.terrain ? paintParameters.depthModeFor3D().range
+                                                         : Range<float>{0.0f, 1.0f});
 
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);
 #elif MLN_RENDER_BACKEND_VULKAN

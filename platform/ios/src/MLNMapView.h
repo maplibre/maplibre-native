@@ -567,6 +567,8 @@ MLN_EXPORT
 
  Skirts hide the gaps between terrain tiles of different zoom levels, but show as vertical
  artifacts where the map has a transparent background, so use ``MLNTerrainSkirtLengthNone`` there.
+ ``MLNTerrainSkirtLengthShared`` keeps the skirts between tiles and drops them at the end of the
+ mesh.
  Changing this property rebuilds the terrain mesh and every tile. The default is
  ``MLNTerrainSkirtLengthAuto``.
  */

@@ -454,6 +454,9 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                     result.push_back({.id = id, .sqrDist = dx * dx + dy * dy});
                 }
             }
+        } else if (state.minZoomReach && allowVariableZoom && !shouldSplitTile &&
+                   node.zoom + *state.minZoomReach < minZoom) {
+            continue;
         } else {
             std::vector<Node> children = childrenOf(node);
             if (limited) {

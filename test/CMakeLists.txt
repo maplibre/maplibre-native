@@ -50,6 +50,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_mesh_cover.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_edges.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_source_cover.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_skirt_edges.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_skirt_shared.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_unseen_tiles.test.cpp
     $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
@@ -110,6 +112,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/text/local_glyph_rasterizer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/quads.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/shaping.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/text/symbol_projection.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/tagged_string.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/custom_geometry_tile.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/geojson_tile.test.cpp

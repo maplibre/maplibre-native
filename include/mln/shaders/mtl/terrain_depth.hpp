@@ -48,7 +48,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                           drawable.dem_coords.w, props.exaggeration, 1.0);
 
     // Skirt vertices drop below the surface by elevation_offset (gl-js u_ele_delta)
-    const float ele_delta = (float(vertx.pos.z) == 1.0) ? props.elevation_offset : 0.0;
+    const int edges = int(drawable.skirt_edges);
+    const bool bare = (pos.y == 0.0 && (edges & 1) == 0) || (pos.x == 8192.0 && (edges & 2) == 0) ||
+                      (pos.y == 8192.0 && (edges & 4) == 0) || (pos.x == 0.0 && (edges & 8) == 0);
+    const float ele_delta = (float(vertx.pos.z) == 1.0 && !bare) ? props.elevation_offset : 0.0;
     const float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
     return {
         .position = position,

@@ -249,7 +249,8 @@ public:
 
     /// Selects whether terrain tiles are skirted (see TerrainSkirtLength). Default is Auto.
     /// None suits a map drawn over a transparent background, where the skirts would show as
-    /// vertical artifacts. Changing it rebuilds the terrain mesh and every tile drawable.
+    /// vertical artifacts; Shared keeps the skirts between tiles and drops them at the end of the
+    /// mesh. Changing it rebuilds the terrain mesh and every tile drawable.
     /// No effect when terrain is not enabled.
     void setTerrainSkirtLength(TerrainSkirtLength length);
     TerrainSkirtLength getTerrainSkirtLength() const;
