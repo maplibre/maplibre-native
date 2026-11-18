@@ -146,6 +146,43 @@ TEST(TerrainElevationIndex, APixelsHeightIsAtItsCentre) {
     }
 }
 
+// Two neighbours that have backfilled each other's border read the same height on their shared
+// edge: halfway between the pixels on either side of it, as the GPU reads it. Clamped to the
+// tile's own last pixel, each side read its own edge pixel and the two disagreed.
+TEST(TerrainElevationIndex, NeighboursAgreeOnTheirSharedEdge) {
+    // 10 m a column and 100 m a row, from a different base height per tile
+    const auto rampImage = [](double base) {
+        PremultipliedImage image({demTileSize, demTileSize});
+        for (uint32_t y = 0; y < demTileSize; ++y) {
+            for (uint32_t x = 0; x < demTileSize; ++x) {
+                const auto encoded = static_cast<uint32_t>(std::lround((base + 10.0 * x + 100.0 * y + 10000.0) * 10.0));
+                uint8_t* px = image.data.get() + (y * demTileSize + x) * 4;
+                px[0] = static_cast<uint8_t>((encoded >> 16) & 0xFF);
+                px[1] = static_cast<uint8_t>((encoded >> 8) & 0xFF);
+                px[2] = static_cast<uint8_t>(encoded & 0xFF);
+                px[3] = 255;
+            }
+        }
+        return image;
+    };
+    DEMData west(rampImage(1000.0), Tileset::RasterEncoding::Mapbox);
+    DEMData east(rampImage(3000.0), Tileset::RasterEncoding::Mapbox);
+    west.backfillBorder(east, 1, 0);
+    east.backfillBorder(west, -1, 0);
+    TerrainElevationIndex index({{UnwrappedTileID(2, 1, 1), std::make_shared<const TerrainElevationIndex::Grid>(west)},
+                                 {UnwrappedTileID(2, 2, 1), std::make_shared<const TerrainElevationIndex::Grid>(east)}},
+                                1.0f);
+
+    // Row 40's centre, on the shared edge x = 2 in z2 tile units and a hair to either side of it.
+    // West's last pixel there is 1000 + 630 + 4000 = 5630 m, east's first 3000 + 4000 = 7000 m.
+    const double y = 1.0 + 40.5 / demTileSize;
+    for (const double x : {2.0 - 1e-9, 2.0, 2.0 + 1e-9}) {
+        const auto elevation = index.getElevation(Projection::unproject(Point<double>{x, y} * util::tileSize_D, 4.0));
+        ASSERT_TRUE(elevation) << "x " << x;
+        EXPECT_NEAR(*elevation, (5630.0 + 7000.0) / 2.0, 0.01) << "x " << x;
+    }
+}
+
 // Where a deeper tile is loaded it wins over its ancestors, as in RenderTerrain.
 TEST(TerrainElevationIndex, DeepestTileWins) {
     const auto world = Projection::project(innsbruck, 4);
