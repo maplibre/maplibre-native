@@ -6,12 +6,11 @@
 #include <mln/gfx/upload_pass.hpp>
 #include <mln/gfx/vertex_vector.hpp>
 #include <mln/layout/pattern_layout.hpp>
-#include <mln/shaders/attributes.hpp>
-#include <mln/style/expression/expression.hpp>
 #include <mln/renderer/cross_faded_property_evaluator.hpp>
 #include <mln/renderer/paint_property_statistics.hpp>
 #include <mln/renderer/possibly_evaluated_property_value.hpp>
 #include <mln/shaders/attributes.hpp>
+#include <mln/style/expression/expression.hpp>
 #include <mln/util/indexed_tuple.hpp>
 #include <mln/util/literal.hpp>
 #include <mln/util/type_list.hpp>
