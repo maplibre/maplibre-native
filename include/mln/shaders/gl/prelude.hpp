@@ -87,8 +87,11 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
 // Decode one DEM texel to meters. The clamp at the call sites matters: texelFetch out of
 // range is undefined where the sampler's clamp-to-edge used to cover it, and a tile with
 // no DEM of its own is bound the 1x1 placeholder, whose only valid texel is (0, 0).
+// The bytes are whole numbers, but a driver can return them times 255.0 a hair off one (Mesa
+// does), and Mapbox's 6553.6 m per unit of red turns that into a height about a millimetre off,
+// where a Terrarium tile of the same heights is exact. Rounded, as unpack_depth does.
 float dem_texel(sampler2D dem, ivec2 texel, vec4 dem_unpack) {
-    vec4 data = texelFetch(dem, texel, 0) * 255.0;
+    vec4 data = floor(texelFetch(dem, texel, 0) * 255.0 + 0.5);
     data.a = -1.0;
     return dot(data, dem_unpack);
 }
@@ -128,13 +131,13 @@ float get_elevation_array(vec2 pos, highp sampler2DArray dem, float layer, vec4 
     ivec2 c = ivec2(floor(coord));
     ivec2 hi = textureSize(dem, 0).xy - 1;
     int l = int(layer);
-    vec4 tl = texelFetch(dem, ivec3(clamp(c, ivec2(0), hi), l), 0) * 255.0;
+    vec4 tl = floor(texelFetch(dem, ivec3(clamp(c, ivec2(0), hi), l), 0) * 255.0 + 0.5);
     tl.a = -1.0;
-    vec4 tr = texelFetch(dem, ivec3(clamp(c + ivec2(1, 0), ivec2(0), hi), l), 0) * 255.0;
+    vec4 tr = floor(texelFetch(dem, ivec3(clamp(c + ivec2(1, 0), ivec2(0), hi), l), 0) * 255.0 + 0.5);
     tr.a = -1.0;
-    vec4 bl = texelFetch(dem, ivec3(clamp(c + ivec2(0, 1), ivec2(0), hi), l), 0) * 255.0;
+    vec4 bl = floor(texelFetch(dem, ivec3(clamp(c + ivec2(0, 1), ivec2(0), hi), l), 0) * 255.0 + 0.5);
     bl.a = -1.0;
-    vec4 br = texelFetch(dem, ivec3(clamp(c + ivec2(1, 1), ivec2(0), hi), l), 0) * 255.0;
+    vec4 br = floor(texelFetch(dem, ivec3(clamp(c + ivec2(1, 1), ivec2(0), hi), l), 0) * 255.0 + 0.5);
     br.a = -1.0;
     float elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
                           mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),

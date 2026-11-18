@@ -257,8 +257,11 @@ float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enable
 // Decode one DEM texel to meters. The clamp at the call sites matters: texelFetch out of
 // range is undefined where the sampler's clamp-to-edge used to cover it, and a tile with
 // no DEM of its own is bound the 1x1 placeholder, whose only valid texel is (0, 0).
+// The bytes are whole numbers, but a driver can return them times 255.0 a hair off one (Mesa
+// does), and Mapbox's 6553.6 m per unit of red turns that into a height about a millimetre off,
+// where a Terrarium tile of the same heights is exact. Rounded, as unpack_depth does.
 float dem_texel(sampler2D dem, ivec2 texel, vec4 dem_unpack) {
-    vec4 data = texelFetch(dem, texel, 0) * 255.0;
+    vec4 data = floor(texelFetch(dem, texel, 0) * 255.0 + 0.5);
     data.a = -1.0;
     return dot(data, dem_unpack);
 }

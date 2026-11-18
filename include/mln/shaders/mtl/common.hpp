@@ -78,8 +78,11 @@ inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel
 // Decode one DEM texel to meters. The clamp at the call sites matters: read() out of range
 // is undefined where the sampler's clamp-to-edge used to cover it, and a tile with no DEM of
 // its own is bound the 1x1 placeholder, whose only valid texel is (0, 0).
+// The bytes are whole numbers, but a driver can return them times 255.0 a hair off one (Mesa
+// does), and Mapbox's 6553.6 m per unit of red turns that into a height about a millimetre off,
+// where a Terrarium tile of the same heights is exact. Rounded, as unpack_depth does.
 inline float dem_texel(texture2d<float, access::sample> dem, int2 texel, float4 dem_unpack) {
-    float4 data = dem.read(uint2(texel)) * 255.0;
+    float4 data = round(dem.read(uint2(texel)) * 255.0);
     data.a = -1.0;
     return dot(data, dem_unpack);
 }
