@@ -6,6 +6,7 @@
 #include <mln/map/transform.hpp>
 #include <mln/math/clamp.hpp>
 #include <mln/actor/scheduler.hpp>
+#include <mln/util/tile_coordinate.hpp>
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/tile_range.hpp>
 #include <mln/util/enum.hpp>
@@ -15,6 +16,7 @@
 
 #include <mapbox/geometry/envelope.hpp>
 
+#include <array>
 #include <cmath>
 #include <algorithm>
 
@@ -25,6 +27,22 @@ using namespace style;
 namespace {
 TileObserver nullObserver;
 const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
+
+// Whether every corner of the viewport lies within `tileID`, allowing for rounding.
+bool viewportWithinTile(const TransformState& state, const UnwrappedTileID& tileID) {
+    // In tile units, far below a pixel.
+    constexpr double tolerance = 1e-6;
+    const double x = tileID.canonical.x + (tileID.wrap * std::pow(2.0, tileID.canonical.z));
+    const double y = tileID.canonical.y;
+    const Size size = state.getSize();
+    const double width = size.width;
+    const double height = size.height;
+    const std::array<ScreenCoordinate, 4> corners = {{{0.0, 0.0}, {width, 0.0}, {0.0, height}, {width, height}}};
+    return std::ranges::all_of(corners, [&](const ScreenCoordinate& corner) {
+        const auto p = TileCoordinate::fromScreenCoordinate(state, tileID.canonical.z, corner).p;
+        return p.x > x - tolerance && p.x < x + 1 + tolerance && p.y > y - tolerance && p.y < y + 1 + tolerance;
+    });
+}
 } // namespace
 
 TilePyramid::TilePyramid(const TaggedScheduler& threadPool_)
@@ -143,9 +161,12 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         idealTiles = util::tileCover(tileCoverParameters, idealZoom, zoomRange, tileZoom);
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
-            mln::Log::Warning(mln::Event::General,
-                              "Provided camera options returned " + std::to_string(idealTiles.size()) +
-                                  " tiles, only " + util::toString(idealTiles[0]) + " is taken in Tile mode.");
+            // Rounding at high zooms may add the neighbours of an exactly framed tile to `idealTiles`
+            if (!viewportWithinTile(parameters.transformState, idealTiles[0].toUnwrapped())) {
+                mln::Log::Warning(mln::Event::General,
+                                  "Provided camera options returned " + std::to_string(idealTiles.size()) +
+                                      " tiles, only " + util::toString(idealTiles[0]) + " is taken in Tile mode.");
+            }
             idealTiles = {idealTiles[0]};
         }
     }
