@@ -45,22 +45,16 @@ std::unique_ptr<RenderItem> RenderImageSource::createRenderItem() {
     return std::move(renderData);
 }
 
-void RenderImageSource::prepare(const SourcePrepareParameters& parameters) {
+void RenderImageSource::prepare(const SourcePrepareParameters&) {
     MLN_TRACE_FUNC();
     assert(!renderData);
     if (!isLoaded()) {
-        renderData = std::make_unique<ImageSourceRenderData>(bucket, std::vector<mat4>{}, baseImpl->id);
+        renderData = std::make_unique<ImageSourceRenderData>(
+            bucket, std::vector<UnwrappedTileID>{}, std::vector<UnwrappedTileID>{}, baseImpl->id);
         return;
     }
 
-    std::vector<mat4> matrices{tileIds.size(), mat4()};
-    const auto& transformParams = parameters.transform;
-    for (size_t i = 0u; i < tileIds.size(); ++i) {
-        mat4& matrix = matrices[i];
-        matrix::identity(matrix);
-        transformParams.state.matrixFor(matrix, tileIds[i]);
-    }
-    renderData = std::make_unique<ImageSourceRenderData>(bucket, std::move(matrices), baseImpl->id);
+    renderData = std::make_unique<ImageSourceRenderData>(bucket, tileIds, cover, baseImpl->id);
 }
 
 std::unordered_map<std::string, std::vector<Feature>> RenderImageSource::queryRenderedFeatures(
@@ -138,6 +132,7 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
         enabled = false;
         return;
     }
+    cover = tileCover;
     tileIds.push_back(tileCover[0]);
 
     bool hasVisibleTile = false;
