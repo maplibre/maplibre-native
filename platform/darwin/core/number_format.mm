@@ -6,7 +6,8 @@ namespace mln {
 namespace platform {
 
 std::string formatNumber(double number, const std::string& localeId, const std::string& currency,
-                         uint8_t minFractionDigits, uint8_t maxFractionDigits) {
+                         std::optional<uint8_t> minFractionDigits,
+                         std::optional<uint8_t> maxFractionDigits) {
   // Create a new formatter each time to avoid state pollution between calls
   NSNumberFormatter* numberFormatter = [[NSNumberFormatter alloc] init];
 
@@ -15,8 +16,8 @@ std::string formatNumber(double number, const std::string& localeId, const std::
   numberFormatter.currencyCode = !currency.empty() ? @(currency.c_str()) : nil;
 
   if (currency.empty()) {
-    numberFormatter.minimumFractionDigits = minFractionDigits;
-    numberFormatter.maximumFractionDigits = maxFractionDigits;
+    numberFormatter.minimumFractionDigits = minFractionDigits.value_or(0);
+    numberFormatter.maximumFractionDigits = maxFractionDigits.value_or(3);
     numberFormatter.numberStyle = NSNumberFormatterDecimalStyle;
   } else {
     numberFormatter.numberStyle = NSNumberFormatterCurrencyStyle;

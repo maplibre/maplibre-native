@@ -79,8 +79,8 @@ std::string makeString(jni::JNIEnv& env, const jni::String& value) {
 std::string formatNumber(double number,
                          const std::string& localeId,
                          const std::string& currency,
-                         uint8_t minFractionDigits,
-                         uint8_t maxFractionDigits) {
+                         std::optional<uint8_t> minFractionDigits,
+                         std::optional<uint8_t> maxFractionDigits) {
     auto env{android::AttachEnv()};
 
     jni::Global<jni::Object<android::Locale>> locale;
@@ -99,8 +99,10 @@ std::string formatNumber(double number,
     jni::Global<jni::Object<android::NumberFormat>> formatter;
     if (currency.empty()) {
         formatter = jni::NewGlobal(*env, android::NumberFormat::getInstance(*env, locale));
-        android::NumberFormat::setMinimumFractionDigits(*env, formatter, static_cast<jni::jint>(minFractionDigits));
-        android::NumberFormat::setMaximumFractionDigits(*env, formatter, static_cast<jni::jint>(maxFractionDigits));
+        android::NumberFormat::setMinimumFractionDigits(
+            *env, formatter, static_cast<jni::jint>(minFractionDigits.value_or(0)));
+        android::NumberFormat::setMaximumFractionDigits(
+            *env, formatter, static_cast<jni::jint>(maxFractionDigits.value_or(3)));
     } else {
         formatter = jni::NewGlobal(*env, android::NumberFormat::getCurrencyInstance(*env, locale));
     }
