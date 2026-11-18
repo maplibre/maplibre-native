@@ -1,0 +1,48 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 256,
+      "width": 256,
+      "description": "At zoom 0 and pitch 60 the camera sits beyond the edge of the world, so pixels per meter must come from the map center: high relief (exaggeration 1000) still draws the terrain instead of an all-black frame."
+    }
+  },
+  "center": [0, 0],
+  "zoom": 0,
+  "pitch": 60,
+  "sources": {
+    "terrain": {
+      "type": "raster-dem",
+      "tiles": ["local://tiles/{z}-{x}-{y}.terrain.png"],
+      "maxzoom": 0,
+      "tileSize": 512
+    },
+    "osm": {
+      "type": "raster",
+      "tiles": ["local://tiles/number/{z}.png"],
+      "maxzoom": 17,
+      "tileSize": 512
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "raster",
+      "type": "raster",
+      "source": "osm",
+      "paint": {
+        "raster-opacity": 1.0
+      }
+    }
+  ],
+  "terrain": {
+    "source": "terrain",
+    "exaggeration": 1000
+  }
+}
