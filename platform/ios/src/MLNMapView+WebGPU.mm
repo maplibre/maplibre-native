@@ -4,6 +4,7 @@
 #import "MLNMapView+WebGPU.h"
 
 #import <mln/util/logging.hpp>
+#import <mln/webgpu/context.hpp>
 #import <mln/webgpu/renderable_resource.hpp>
 
 #import <Metal/Metal.h>

@@ -74,7 +74,7 @@ public:
     if (currentDrawable) {
       if (presentsWithTransaction) {
         [commandBuffer commit];
-        [commandBuffer waitUntilCompleted];
+        [commandBuffer waitUntilScheduled];
         [currentDrawable present];
       } else {
         [commandBuffer presentDrawable:currentDrawable];
