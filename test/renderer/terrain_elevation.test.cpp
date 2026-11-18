@@ -14,6 +14,7 @@
 #include <mln/util/run_loop.hpp>
 
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <optional>
 #include <thread>
@@ -203,12 +204,16 @@ TEST(TerrainElevation, APixelsHeightIsAtItsCentre) {
                        .withCenter(Projection::unproject(centre * util::tileSize_D, 4.0))
                        .withZoom(2.0)
                        .withPitch(0.0));
-        for (int i = 0; i < 8; ++i) {
+        // Until the centre altitude has the height, or for at most 100 frames: a slow machine can
+        // render a few frames before the tile is in
+        const auto centreAltitude = [&] {
+            return map.getCameraOptions({}).centerAltitude.value_or(0.0);
+        };
+        for (int i = 0; i < 100 && std::abs(centreAltitude() - rampHeight(x, y)) > 0.5; ++i) {
             loop.runOnce();
             frontend.render(map);
         }
-        EXPECT_NEAR(map.getCameraOptions({}).centerAltitude.value_or(0.0), rampHeight(x, y), 0.5)
-            << "pixel " << x << ", " << y;
+        EXPECT_NEAR(centreAltitude(), rampHeight(x, y), 0.5) << "pixel " << x << ", " << y;
     }
 }
 
