@@ -1,11 +1,11 @@
 #include <mln/vulkan/upload_pass.hpp>
 
+#include <mln/util/logging.hpp>
 #include <mln/vulkan/context.hpp>
 #include <mln/vulkan/command_encoder.hpp>
-#include <mln/util/logging.hpp>
+#include <mln/vulkan/index_buffer_resource.hpp>
 #include <mln/vulkan/vertex_attribute.hpp>
 #include <mln/vulkan/vertex_buffer_resource.hpp>
-#include <mln/vulkan/index_buffer_resource.hpp>
 
 #include <algorithm>
 
@@ -66,7 +66,6 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
                                                              size_t usage,
                                                              [[maybe_unused]] bool forceUpdate) {
     if (vec) {
-        const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
 
         // If we already have a buffer...
@@ -75,9 +74,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
 
             // If it's changed, update it
             if (rawBufSize <= resource.getSizeInBytes()) {
-                if (vec->isModifiedAfter(resource.getLastUpdated())) {
-                    // updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
-                } else {
+                if (!vec->isModifiedAfter(resource.getLastUpdated())) {
                     return rawData->resource;
                 }
             }
@@ -86,7 +83,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         if (rawBufSize > 0) {
             auto buffer = std::make_unique<VertexBuffer>();
             buffer->resource = std::make_unique<VertexBufferResource>(
-                createBufferResource(rawBufPtr, rawBufSize, usage, false));
+                createBufferResource(vec->getRawData(), rawBufSize, usage, false));
             vec->setBuffer(std::move(buffer));
 
             auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer());

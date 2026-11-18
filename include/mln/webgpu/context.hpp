@@ -131,7 +131,7 @@ public:
                                                          const gfx::VertexAttributeArray& overrides,
                                                          gfx::BufferUsageType,
                                                          const std::optional<std::chrono::duration<double>>&,
-                                                         std::shared_ptr<webgpu::VertexBufferResource>&) noexcept;
+                                                         std::shared_ptr<webgpu::VertexBufferResource>&);
 
 protected:
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType, Size) override;
