@@ -535,24 +535,14 @@ struct FragmentStage {
     float triangle_corner_radius [[flat]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    //float4 color;
-    float4 color1 [[flat]];;
-    float4 color2 [[flat]];;
+    float4 color1 [[flat]];
+    float4 color2 [[flat]];
 #endif
 
-/*    float2 width2;
-    float2 normal;
-    half gamma_scale;
-
-#if !defined(HAS_UNIFORM_u_color)
-    float4 color;
-#endif
-#if !defined(HAS_UNIFORM_u_blur)
-    float blur;
-#endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity;
-#endif*/
+    float opacity1 [[flat]];
+    float opacity2 [[flat]];
+#endif
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -565,65 +555,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 uint vertexID [[vertex_id]]) {
 
     device const LineDrawableUBO& drawable = drawableVector[uboIndex].lineDrawableUBO;
-
-/*
-#if defined(HAS_UNIFORM_u_gapwidth)
-    const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
-    const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.map_zoom) : props.gapwidth) / 2;
-#else
-    const auto gapwidth = unpack_mix_float(vertx.gapwidth, drawable.gapwidth_t) / 2;
-#endif
-
-#if defined(HAS_UNIFORM_u_offset)
-    const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
-    const auto offset   = (exprOffset ? expr.offset.eval(paintParams.map_zoom) : props.offset) * -1;
-#else
-    const auto offset   = unpack_mix_float(vertx.offset, drawable.offset_t) * -1;
-#endif
-
-#if defined(HAS_UNIFORM_u_width)
-    const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
-    const auto width    = exprWidth ? expr.width.eval(paintParams.map_zoom) : props.width;
-#else
-    const auto width    = unpack_mix_float(vertx.width, drawable.width_t);
-#endif
-
-    // the distance over which the line edge fades out.
-    // Retina devices need a smaller distance to avoid aliasing.
-    const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
-
-    const float2 a_extrude = float2(vertx.data.xy) - 128.0;
-    const float a_direction = glMod(float(vertx.data.z), 4.0) - 1.0;
-    const float2 pos = floor(float2(vertx.pos_normal) * 0.5);
-
-    // x is 1 if it's a round cap, 0 otherwise
-    // y is 1 if the normal points up, and -1 if it points down
-    // We store these in the least significant bit of a_pos_normal
-    const float2 normal = float2(vertx.pos_normal) - 2.0 * pos;
-    const float2 v_normal = float2(normal.x, normal.y * 2.0 - 1.0);
-
-    const float halfwidth = width / 2.0;
-    const float inset = gapwidth + (gapwidth > 0.0 ? ANTIALIASING : 0.0);
-    const float outset = gapwidth + halfwidth * (gapwidth > 0.0 ? 2.0 : 1.0) + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
-
-    // Scale the extrusion vector down to a normal and then up by the line width of this vertex.
-    const float2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
-
-    // Calculate the offset when drawing a line that is to the side of the actual line.
-    // We do this by creating a vector that points towards the extrude, but rotate
-    // it when we're drawing round end points (a_direction = -1 or 1) since their
-    // extrude vector points in another direction.
-    const float u = 0.5 * a_direction;
-    const float t = 1.0 - abs(u);
-    const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
-
-    const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
-    const float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-
-    // calculate how much the perspective view squishes or stretches the extrude
-    const float extrude_length_without_perspective = length(dist);
-    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
-*/
 
     float2 triangle_vertex_pos[3];
     float triangle_corner_radius;
@@ -639,7 +570,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float sinAngle = cross2(edgeNext, edgePrev);
 
     for (int i = 0; i < 2; i++) {
-        uint dataIndex = vertx.data_indices[i] / 2.0;
+        uint dataIndex = vertx.data_indices[i] / 2;
         float direction = (float(vertx.data_indices[i] % 2) * 2.0 - 1.0);
 
 #if defined(HAS_UNIFORM_u_gapwidth)
@@ -663,9 +594,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         const auto width    = unpack_mix_float(data[dataIndex].width, drawable.width_t);
 #endif
 
+#if defined(HAS_UNIFORM_u_blur)
+        const auto exprBlur = (props.expressionMask & LineExpressionMask::Width);
+        const auto blur     = exprBlur ? expr.blur.eval(paintParams.map_zoom) : props.blur;
+#else
+        const auto blur     = unpack_mix_float(data[dataIndex].blur, drawable.blur_t);
+#endif
+
         const float halfwidth = width / 2.0;
-        //const float inset = gapwidth + (gapwidth > 0.0 ? ANTIALIASING : 0.0);
-        const float outset = gapwidth + halfwidth * (gapwidth > 0.0 ? 2.0 : 1.0);// + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
+        const float outset = max(gapwidth + halfwidth * (gapwidth > 0.0 ? 2.0 : 1.0) - blur, 0.0);
 
         float2 outsetVector = (i == 0 ? edgeNext : edgePrev);
         float2 offsetVector = (i == 0 ? -edgeNext : edgePrev);
@@ -678,6 +615,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     triangle_corner_radius = computeRadius(triangle_vertex_pos[0], triangle_vertex_pos[1], triangle_vertex_pos[2], 20);
 
     float2 position = triangle_vertex_pos[vertexID];
+    uint dataIndex1 = vertx.data_indices[0] / 2;
+    uint dataIndex2 = vertx.data_indices[1] / 2;
 
     return {
         .position = drawable.matrix * float4(position, 0.0f, 1.0f),
@@ -690,26 +629,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .triangle_corner_radius = triangle_corner_radius,
 
 #if !defined(HAS_UNIFORM_u_color) 
-        .color1        = unpack_mix_color(data[vertx.data_indices[0] / 2].color, drawable.color_t),
-        .color2        = unpack_mix_color(data[vertx.data_indices[1] / 2].color, drawable.color_t),
-        //.color1        = float4(1.0, 0.0, 0.0, 1.0),
-        //.color2        = float4(0.0, 1.0, 0.0, 1.0),
+        .color1        = unpack_mix_color(data[dataIndex1].color, drawable.color_t),
+        .color2        = unpack_mix_color(data[dataIndex2].color, drawable.color_t),
 #endif
-
-/*        .position    = position,
-        .width2      = float2(outset, inset),
-        .normal      = v_normal,
-        .gamma_scale = half(extrude_length_without_perspective / extrude_length_with_perspective),
-
-#if !defined(HAS_UNIFORM_u_color)
-        .color       = unpack_mix_color(vertx.color,   drawable.color_t),
+#if !defined(HAS_UNIFORM_u_opacity) 
+        .opacity1      = unpack_mix_float(data[dataIndex1].opacity, drawable.opacity_t),
+        .opacity2      = unpack_mix_float(data[dataIndex2].opacity, drawable.opacity_t),
 #endif
-#if !defined(HAS_UNIFORM_u_blur)
-        .blur        = unpack_mix_float(vertx.blur,    drawable.blur_t),
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-        .opacity     = unpack_mix_float(vertx.opacity, drawable.opacity_t),
-#endif */
     };
 }
 
@@ -721,43 +647,28 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(1.0);
 #endif
 
-#if defined(HAS_UNIFORM_u_color)
-    const auto exprColor = (props.expressionMask & LineExpressionMask::Color);
-    const auto color     = exprColor ? expr.color.evalColor(paintParams.map_zoom) : props.color;
-#else
+#if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity)
     float2 vPos = in.triangle_pos - in.triangle_corner_pos;
     float2 vPrev = in.triangle_corner_prev - in.triangle_corner_pos;
     float2 vNext = in.triangle_corner_next - in.triangle_corner_pos;
     
     float angle = atan2(cross2(vPos, vPrev), dot(vPos, vPrev));
     float angleMax = atan2(cross2(vNext, vPrev), dot(vNext, vPrev));
-    const float4 color = mix(in.color1, in.color2, angle / angleMax);
 #endif
 
-/*
-#if defined(HAS_UNIFORM_u_blur)
-    const auto exprBlur = (props.expressionMask & LineExpressionMask::Blur);
-    const float blur = exprBlur ? expr.blur.eval(paintParams.map_zoom) : props.blur;
+#if defined(HAS_UNIFORM_u_color)
+    const auto exprColor = (props.expressionMask & LineExpressionMask::Color);
+    const auto color     = exprColor ? expr.color.evalColor(paintParams.map_zoom) : props.color;
 #else
-    const float blur = in.blur;
+    const float4 color = mix(in.color1, in.color2, angle / angleMax);
 #endif
 
 #if defined(HAS_UNIFORM_u_opacity)
     const auto exprOpacity = (props.expressionMask & LineExpressionMask::Opacity);
     const float opacity = exprOpacity ? expr.opacity.eval(paintParams.map_zoom) : props.opacity;
 #else
-    const float opacity = in.opacity;
+    const float opacity = mix(in.opacity1, in.opacity2, angle / angleMax);
 #endif
-
-    // Calculate the distance of the pixel from the line in pixels.
-    const float dist = length(in.normal) * in.width2.x;
-
-    // Calculate the antialiasing fade factor. This is either when fading in the
-    // line in case of an offset line (v_width2.y) or when fading out (v_width2.x)
-    const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
-    const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
-
-    return half4(color * (alpha * opacity));*/
 
     float dTri = -1.0;
 
@@ -770,7 +681,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(0.0);
     }
 
-    return half4(color);
+    return half4(color * opacity);
 }
 )";
 };
