@@ -309,7 +309,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                                               .width = 4.f,
                                                               .floorwidth = 0,
                                                               .expressionMask = LineExpressionMask::None,
-                                                              .pad1 = 0};
+                                                              .intersection_rounded_corner_distance = 0};
 
     // function to add polylines drawable
     const auto addPolylineDrawable = [&](TileLayerGroup* tileLayerGroup, const RenderTile& tile) {

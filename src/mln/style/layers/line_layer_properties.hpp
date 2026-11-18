@@ -65,6 +65,10 @@ struct LineGapWidth : DataDrivenPaintProperty<float, attributes::gapwidth, unifo
 struct LineGradient : ColorRampProperty {
 };
 
+struct LineIntersectionRoundedCornerDistance : PaintProperty<float> {
+    static float defaultValue() { return 0.f; }
+};
+
 struct LineOffset : DataDrivenPaintProperty<float, attributes::offset, uniforms::offset> {
     static float defaultValue() { return 0.f; }
 };
@@ -104,6 +108,7 @@ class LinePaintProperties : public Properties<
     LineFloorWidth,
     LineGapWidth,
     LineGradient,
+    LineIntersectionRoundedCornerDistance,
     LineOffset,
     LineOpacity,
     LinePattern,

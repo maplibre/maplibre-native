@@ -137,7 +137,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .floorwidth = (expressionMask & LineExpressionMask::FloorWidth) ? LineFloorWidth::defaultValue()
                                                                             : evaluate<LineFloorWidth>(parameters),
             .expressionMask = expressionMask,
-            .pad1 = 0};
+            .intersection_rounded_corner_distance = evaluated.get<LineIntersectionRoundedCornerDistance>()};
 #elif MLN_RENDER_BACKEND_WEBGPU
         expressionMask = LineExpressionMask::None;
         if (evaluated.get<LineColor>().isConstant()) {

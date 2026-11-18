@@ -157,7 +157,7 @@ struct alignas(16) LineEvaluatedPropsUBO {
     /* 32 */ float width;
     /* 36 */ float floorwidth;
     /* 40 */ LineExpressionMask expressionMask;
-    /* 44 */ float pad1;
+    /* 44 */ float intersection_rounded_corner_distance;
     /* 48 */
 };
 static_assert(sizeof(LineEvaluatedPropsUBO) == 3 * 16, "wrong size");
@@ -488,9 +488,6 @@ float computeRadius(float2 prevPoint, float2 cornerPoint, float2 nextPoint, floa
 struct VertexStage {
     uint3 triangle_instance [[attribute(7)]];
     uint2 data_indices [[attribute(8)]];
-
-    /*short2 pos_normal [[attribute(0)]];
-    uchar4 data [[attribute(1)]];*/
 };
 
 // Same order as in LinePaintProperties
@@ -612,7 +609,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         triangle_vertex_pos[i + 1] = triangle_vertex_pos[i + 1] + dist / drawable.ratio;
     }
 
-    triangle_corner_radius = computeRadius(triangle_vertex_pos[0], triangle_vertex_pos[1], triangle_vertex_pos[2], 20);
+    triangle_corner_radius = computeRadius(triangle_vertex_pos[0], triangle_vertex_pos[1], triangle_vertex_pos[2], props.intersection_rounded_corner_distance);
 
     float2 position = triangle_vertex_pos[vertexID];
     uint dataIndex1 = vertx.data_indices[0] / 2;

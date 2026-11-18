@@ -461,6 +461,26 @@ public class PropertyFactory {
   }
 
   /**
+   * The distance from the intersection to the point where the corner rounding begins.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> lineIntersectionRoundedCornerDistance(Float value) {
+    return new PaintPropertyValue<>("line-intersection-rounded-corner-distance", value);
+  }
+
+  /**
+   * The distance from the intersection to the point where the corner rounding begins.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> lineIntersectionRoundedCornerDistance(Expression expression) {
+    return new PaintPropertyValue<>("line-intersection-rounded-corner-distance", expression);
+  }
+
+  /**
    * The opacity at which the icon will be drawn.
    *
    * @param value a Float value
