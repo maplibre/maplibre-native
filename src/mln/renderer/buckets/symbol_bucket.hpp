@@ -10,6 +10,7 @@
 #include <mln/renderer/paint_property_binder.hpp>
 #include <mln/style/layers/symbol_layer_properties.hpp>
 #include <mln/text/glyph_range.hpp>
+#include <mln/util/mat4.hpp>
 
 #include <memory>
 #include <vector>
@@ -239,6 +240,9 @@ public:
     std::vector<float> tileDistances;
     std::vector<float> glyphOffsets;
     bool hidden;
+    // Set while a label that does not pitch with the map is left out because it would fold
+    // over itself on the screen (see `reprojectLineLabels`).
+    bool foldedInLabelPlane = false;
     size_t startIndex;
     // The crossTileID is only filled/used on the foreground for variable text anchors
     uint32_t crossTileID = 0u;
@@ -412,6 +416,11 @@ public:
     std::map<std::string, PaintProperties> paintProperties;
 
     std::unique_ptr<SymbolSizeBinder> textSizeBinder;
+
+    // The tile matrix the line labels were last laid out with, and for how many updates in a
+    // row it has stayed the same: the camera is at rest (see `lineLabelCameraAtRest`).
+    std::optional<mat4> lineLabelMatrix;
+    uint8_t lineLabelUpdatesAtRest = 0;
 
     using AttributeVector = gfx::VertexVector<SymbolLayoutAttributes>;
     using DynamicAttributeVector = gfx::VertexVector<SymbolDynamicLayoutAttributes>;

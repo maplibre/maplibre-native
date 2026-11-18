@@ -5,6 +5,8 @@
 #include <mln/renderer/layers/render_symbol_layer.hpp>
 #include <mln/util/math.hpp>
 
+#include <cmath>
+#include <limits>
 #include <numbers>
 
 using namespace std::numbers;
@@ -206,13 +208,6 @@ void hideGlyphs(size_t numGlyphs, SymbolBucket::DynamicAttributeVector& dynamicV
     }
 }
 
-enum PlacementResult {
-    OK,
-    NotEnoughRoom,
-    NeedsFlipping,
-    UseVertical
-};
-
 Point<float> projectTruncatedLineSegment(const Point<float>& previousTilePoint,
                                          const Point<float>& currentTilePoint,
                                          const Point<float>& previousProjectedPoint,
@@ -392,6 +387,53 @@ std::optional<PlacementResult> requiresOrientationChange(const WritingModeType w
     return {};
 }
 
+float labelPlaneTurn(const std::vector<PlacedGlyph>& placedGlyphs) {
+    const PlacedGlyph* previous = nullptr;
+    float previousTurn = 0.0f;
+    float largest = 0.0f;
+    for (const auto& glyph : placedGlyphs) {
+        // A glyph that found no place on the line carries no angle.
+        if (!std::isfinite(glyph.point.x) || !std::isfinite(glyph.point.y)) continue;
+        if (previous) {
+            const float turn = std::abs(std::remainder(glyph.angle - previous->angle, 2.0f * pi_v<float>));
+            largest = std::max(largest, turn + previousTurn);
+            previousTurn = turn;
+        }
+        previous = &glyph;
+    }
+    return largest;
+}
+
+namespace {
+// Layout holds the turn within its angle window to `text-max-angle`, and three glyphs span
+// about two such windows, so a label seen from straight above stays under twice the angle. A
+// single kink the pitch has sharpened still reads; past twice the angle the label runs back
+// into itself.
+constexpr float labelPlaneFoldFactor = 2.0f;
+// While the camera moves, a label that was left out comes back once it is within the angle
+// again. The turn jumps as glyphs pass a vertex of the projected line, so with one limit for
+// going and coming back a label near it would flicker.
+constexpr float labelPlaneUnfoldFactor = 1.0f;
+// The camera is at rest once the labels have been laid out with the same matrix this many
+// more times in a row. A single repeated frame during a slow gesture is not rest, and a map
+// that has stopped moving draws only a few more frames.
+constexpr uint8_t lineLabelUpdatesForRest = 3;
+} // namespace
+
+bool lineLabelCameraAtRest(std::optional<mat4>& lastMatrix, uint8_t& updatesAtRest, const mat4& matrix) {
+    if (lastMatrix && *lastMatrix == matrix) {
+        if (updatesAtRest < lineLabelUpdatesForRest) ++updatesAtRest;
+    } else {
+        lastMatrix = matrix;
+        updatesAtRest = 0;
+    }
+    return updatesAtRest >= lineLabelUpdatesForRest;
+}
+
+float labelPlaneTurnLimit(const float maxAngle, const bool leftOut) {
+    return (leftOut ? labelPlaneUnfoldFactor : labelPlaneFoldFactor) * maxAngle;
+}
+
 PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
                                      const float fontSize,
                                      const bool flip,
@@ -402,7 +444,8 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
                                      SymbolBucket::DynamicAttributeVector& dynamicVertexArray,
                                      const Point<float>& projectedAnchorPoint,
                                      const float aspectRatio,
-                                     const SymbolElevationFn* getElevation) {
+                                     const SymbolElevationFn* getElevation,
+                                     const float turnLimit) {
     const float fontScale = fontSize / util::ONE_EM;
     const float lineOffsetX = symbol.lineOffset[0] * fontScale;
     const float lineOffsetY = symbol.lineOffset[1] * fontScale;
@@ -459,6 +502,10 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
             }
         }
         placedGlyphs.push_back(firstAndLastGlyph->second);
+
+        if (turnLimit < std::numeric_limits<float>::infinity() && labelPlaneTurn(placedGlyphs) > turnLimit) {
+            return PlacementResult::Folded;
+        }
     } else if (symbol.glyphOffsets.size() == 1) {
         // Only a single glyph to place
         // So, determine whether to flip based on projected angle of the line segment it's on
@@ -512,7 +559,7 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
 }
 
 void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArray,
-                         const std::vector<PlacedSymbol>& placedSymbols,
+                         std::vector<PlacedSymbol>& placedSymbols,
                          const mat4& posMatrix,
                          bool pitchWithMap,
                          bool rotateWithMap,
@@ -520,7 +567,14 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
                          const RenderTile& tile,
                          const SymbolSizeBinder& sizeBinder,
                          const TransformState& state,
-                         const SymbolElevationFn* getElevation) {
+                         const SymbolElevationFn* getElevation,
+                         const float maxAngle,
+                         const bool cameraAtRest) {
+    // A label that pitches with the map is laid along its line in the tile, where layout
+    // already held it to the angle. One that faces the viewport is laid along the line as
+    // it projects to the screen, so its turn is checked again there. A map that is not
+    // pitched shows the line as layout saw it, and its labels are left alone.
+    const bool checkTurn = !pitchWithMap && maxAngle < std::numeric_limits<float>::infinity() && state.getPitch() > 0.0;
     const ZoomEvaluatedSize partiallyEvaluatedSize = sizeBinder.evaluateForZoom(static_cast<float>(state.getZoom()));
 
     const std::array<double, 2> clippingBuffer = {
@@ -537,6 +591,9 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
     bool useVertical = false;
 
     for (auto& placedSymbol : placedSymbols) {
+        if (!checkTurn) {
+            placedSymbol.foldedInLabelPlane = false;
+        }
         // Don't do calculations for vertical glyphs unless the previous symbol
         // was horizontal and we determined that vertical glyphs were necessary.
         // Also don't do calculations for symbols that are collided and fully
@@ -558,6 +615,7 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
         // Don't bother calculating the correct point for invisible labels.
         if (!isVisible(anchorPos, clippingBuffer)) {
             hideGlyphs(placedSymbol.glyphOffsets.size(), dynamicVertexArray);
+            placedSymbol.foldedInLabelPlane = false;
             continue;
         }
 
@@ -568,6 +626,10 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
         const float pitchScaledFontSize = pitchWithMap ? fontSize * perspectiveRatio : fontSize / perspectiveRatio;
 
         const Point<float> anchorPoint = project(placedSymbol.anchorPoint, labelPlaneMatrix, getElevation).first;
+        // At rest the labels are those of a fresh view: only a moving camera holds a label out.
+        const float turnLimit = checkTurn
+                                    ? labelPlaneTurnLimit(maxAngle, placedSymbol.foldedInLabelPlane && !cameraAtRest)
+                                    : std::numeric_limits<float>::infinity();
 
         PlacementResult placeUnflipped = placeGlyphsAlongLine(placedSymbol,
                                                               pitchScaledFontSize,
@@ -579,24 +641,33 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
                                                               dynamicVertexArray,
                                                               anchorPoint,
                                                               state.getSize().aspectRatio(),
-                                                              getElevation);
+                                                              getElevation,
+                                                              turnLimit);
 
         useVertical = placeUnflipped == PlacementResult::UseVertical;
 
-        if (placeUnflipped == PlacementResult::NotEnoughRoom || useVertical ||
-            (placeUnflipped == PlacementResult::NeedsFlipping &&
-             placeGlyphsAlongLine(placedSymbol,
-                                  pitchScaledFontSize,
-                                  true /*flipped*/,
-                                  keepUpright,
-                                  posMatrix,
-                                  labelPlaneMatrix,
-                                  glCoordMatrix,
-                                  dynamicVertexArray,
-                                  anchorPoint,
-                                  state.getSize().aspectRatio(),
-                                  getElevation) == PlacementResult::NotEnoughRoom)) {
+        const PlacementResult placed = placeUnflipped == PlacementResult::NeedsFlipping
+                                           ? placeGlyphsAlongLine(placedSymbol,
+                                                                  pitchScaledFontSize,
+                                                                  true /*flipped*/,
+                                                                  keepUpright,
+                                                                  posMatrix,
+                                                                  labelPlaneMatrix,
+                                                                  glCoordMatrix,
+                                                                  dynamicVertexArray,
+                                                                  anchorPoint,
+                                                                  state.getSize().aspectRatio(),
+                                                                  getElevation,
+                                                                  turnLimit)
+                                           : placeUnflipped;
+
+        if (placed == PlacementResult::NotEnoughRoom || placed == PlacementResult::Folded || useVertical) {
             hideGlyphs(placedSymbol.glyphOffsets.size(), dynamicVertexArray);
+        }
+        if (placed == PlacementResult::Folded) {
+            placedSymbol.foldedInLabelPlane = true;
+        } else if (placed == PlacementResult::OK) {
+            placedSymbol.foldedInLabelPlane = false;
         }
     }
 }
