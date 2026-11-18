@@ -188,6 +188,11 @@ typedef NS_ENUM(NSUInteger, MLNTerrainSkirtLength) {
    different zoom levels.
    */
   MLNTerrainSkirtLengthNone,
+  /**
+   Skirt a tile edge only where another tile of the mesh lies beside it, so the stitches
+   close and the edges at the end of the mesh show no vertical artifacts.
+   */
+  MLNTerrainSkirtLengthShared,
 };
 
 NS_ASSUME_NONNULL_END

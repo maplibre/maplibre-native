@@ -114,9 +114,11 @@ constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
 /// want is a per-map tradeoff. Default is Auto. Mirrors maplibre-gl-js
 /// `MapOptions.terrainSkirtLength`.
 enum class TerrainSkirtLength : uint8_t {
-    Auto, ///< Skirt every tile edge by ~1/5 of the tile's width at the current zoom. Default.
-    None, ///< Build no skirts at all: no vertical artifacts over a transparent background,
-          ///< at the cost of visible stitches between tiles at different zoom levels.
+    Auto,   ///< Skirt every tile edge by ~1/5 of the tile's width at the current zoom. Default.
+    None,   ///< Build no skirts at all: no vertical artifacts over a transparent background,
+            ///< at the cost of visible stitches between tiles at different zoom levels.
+    Shared, ///< Skirt a tile edge only where another tile of the mesh lies beside it, so the
+            ///< stitches close and the edges at the end of the mesh show no vertical artifacts.
 };
 
 enum class MapDebugOptions : EnumType {
