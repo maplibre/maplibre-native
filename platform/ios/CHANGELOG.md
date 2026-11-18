@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Add `MLNMapView.fieldOfView`, the vertical field of view of the map’s camera in degrees, and `-[MLNMapView setCenterCoordinate:centerAltitude:fromEyeCoordinate:eyeAltitude:]`, which puts the camera at an eye position looking at a point, above the eye included.
 - Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
@@ -14,6 +15,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - With 3D terrain, annotation views, the user location view, callouts, line-placed labels and the collision index sit on the terrain surface instead of at sea level, so labels show, hide and overlap where they are drawn and pins on slopes can be selected. `-convertCoordinate:toPointToView:` and `-convertPoint:toCoordinateFromView:` answer on the terrain surface, from a copy of the terrain heights kept on the map side ([#4558](https://github.com/maplibre/maplibre-native/pull/4558)).
 - With 3D terrain, each height of the DEM stands at the centre of its pixel, where a hillshade or color-relief layer of the same source draws it, as in maplibre-gl-js. The terrain stood half a DEM pixel north-west of its data (about 6 m with 512 px tiles at zoom 12), so the shading of a hillshade did not line up with the slopes it shades ([#4971](https://github.com/maplibre/maplibre-native/pull/4971)).
 - An `MLNColor` passed into a style value or an expression is written with whole-number channels, as MapLibre GL JS prints colors, so a fractional channel rounds to the nearest of 0-255 ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
+- A line label with `text-pitch-alignment: viewport` is no longer drawn folded over itself on a pitched map. Such a label follows its line as projected to the screen, where a bend that `text-max-angle` allowed at layout can be a hairpin: it is now left out once it turns by more than twice `text-max-angle` over three glyphs. While the camera moves, a label that was left out comes back only once it is within `text-max-angle` again, so it does not flicker; a map that is not pitched is unchanged ([#5030](https://github.com/maplibre/maplibre-native/pull/5030)).
 
 ## 7.0.0
 

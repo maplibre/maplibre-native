@@ -167,6 +167,9 @@ public:
     Immutable<style::LayerProperties> evaluatedProperties;
     /// Private implementation
     Immutable<style::Layer::Impl> baseImpl;
+    /// Bumped each time the layer's style object is replaced (the app changed its paint or
+    /// layout). An address would not do: the new object often lands where the old one was freed.
+    std::uint64_t styleRevision = 0;
 
     virtual void markContextDestroyed();
 

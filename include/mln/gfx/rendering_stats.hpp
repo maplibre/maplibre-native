@@ -96,6 +96,10 @@ struct RenderingStats {
     /// misses); panning a static terrain scene should keep this at 0
     int numDrapeTargetsRendered = 0;
 
+    /// Number of mip chains rebuilt for a mipmapped render target (a terrain drape target),
+    /// one each time it is rendered: still frames and pans that re-render nothing leave it alone
+    int numMipmapChainsBuilt = 0;
+
     /// Number of terrain drape targets that ran the full per-target coverage scan
     /// this frame (i.e. did not hit the global-signature fast path). Should be ~0
     /// on a static scene; if it stays high, the short-circuit is not engaging
@@ -109,6 +113,10 @@ struct RenderingStats {
     /// Number of CPU-side texture objects made for terrain DEM tiles (numCreatedTextures counts GPU
     /// allocations, which these are not); a still terrain scene should leave it unchanged
     int numDEMTexturesCreated = 0;
+    /// DEM textures sent to the GPU again because a neighbouring tile backfilled the tile's border
+    /// after the texture was made; a tile's edge reads that border, so a stale copy leaves a step
+    /// against the neighbour
+    int numDEMTexturesRefreshed = 0;
     /// Terrain depth passes (the symbol-occlusion depth texture) rendered; one per frame in
     /// which the camera or the mesh set changed, none for a still frame
     int numDepthPasses = 0;

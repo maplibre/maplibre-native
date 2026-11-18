@@ -97,6 +97,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #endif
 
     const auto camDist = state.getCameraToCenterDistance();
+    // The terrain's distance haze in this view, for symbols over ground it has taken.
+    const RenderTerrain::Haze haze = parameters.terrain && parameters.terrain->isEnabled()
+                                         ? parameters.terrain->getHaze(state)
+                                         : RenderTerrain::Haze{};
     const auto screenSpaceProp = symbolLayerProperties.layerImpl().layout.get<SymbolScreenSpace>();
     const auto isScreenSpace = screenSpaceProp.isConstant() ? screenSpaceProp.asConstant()
                                                             : SymbolScreenSpace::defaultValue();
@@ -215,9 +219,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .opacity_t = getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
             .halo_width_t = getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
             .halo_blur_t = getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
-            .pad1 = 0,
-            .pad2 = 0,
-            .pad3 = 0,
+            .haze_alpha = haze.color.a,
+            .haze_ramp = haze.ramp,
 
             .dem_coords = terrainData ? terrainData->demCoords : std::array<float, 4>{{0, 0, 0, 0}},
             .dem_unpack = parameters.terrain ? parameters.terrain->getDEMUnpackVector()

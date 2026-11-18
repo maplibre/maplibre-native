@@ -18,7 +18,7 @@ struct TerrainInstance {
     highp mat4 matrix;
     highp vec4 dem_coords;
     highp float dem_layer;
-    highp float pad1;
+    highp float skirt_edges;
     highp float pad2;
     highp float pad3;
 };
@@ -62,7 +62,10 @@ void main() {
     float elevation = get_elevation_array(pos, u_dem_array, dem_layer, dem_coords,
                                           u_unpack, dem_coords.w, u_exaggeration);
 
-    float ele_delta = a_pos.z == 1.0 ? u_elevation_offset : 0.0;
+    int edges = int(u_inst[idx].skirt_edges);
+    bool bare = (pos.y == 0.0 && (edges & 1) == 0) || (pos.x == 8192.0 && (edges & 2) == 0) ||
+                (pos.y == 8192.0 && (edges & 4) == 0) || (pos.x == 0.0 && (edges & 8) == 0);
+    float ele_delta = a_pos.z == 1.0 && !bare ? u_elevation_offset : 0.0;
     gl_Position = matrix * vec4(pos.x, pos.y, elevation - ele_delta, 1.0);
     // Carry clip-space NDC z (not gl_FragCoord.z window depth) so the packed value is
     // independent of glDepthRange and matches the symbol's frag.z = pos.z/pos.w, exactly
