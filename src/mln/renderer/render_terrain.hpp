@@ -8,6 +8,7 @@
 #include <mln/util/constants.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/gfx/index_buffer.hpp>
+#include <mln/gfx/index_vector.hpp>
 #include <mln/renderer/terrain_cache_policy.hpp>
 #include <mln/renderer/texture_pool.hpp>
 #include <mln/renderer/terrain_elevation_index.hpp>
@@ -447,7 +448,8 @@ public:
         size_t vertexCount;
         size_t indexCount;
         std::vector<int16_t> vertices; // Raw vertex data (x, y pairs as short2)
-        std::vector<uint16_t> indices; // Raw index data
+        // One immutable index vector and uploaded GPU buffer shared by all surface/depth tiles.
+        gfx::IndexVectorBasePtr indices;
     };
 
     const TerrainMesh& getMesh(gfx::Context& context);
