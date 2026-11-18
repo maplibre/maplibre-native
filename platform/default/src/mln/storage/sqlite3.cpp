@@ -333,7 +333,7 @@ void Query::bindBlob(int offset, const std::vector<uint8_t>& value, bool retain)
 template <>
 void Query::bind(int offset, std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds> value) {
     assert(stmt.impl);
-    stmt.impl->check(sqlite3_bind_int64(stmt.impl->stmt, offset, std::chrono::system_clock::to_time_t(value)));
+    stmt.impl->check(sqlite3_bind_int64(stmt.impl->stmt, offset, value.time_since_epoch().count()));
 }
 
 template <>
@@ -413,8 +413,8 @@ std::vector<uint8_t> Query::get(int offset) {
 template <>
 std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds> Query::get(int offset) {
     assert(stmt.impl);
-    return std::chrono::time_point_cast<std::chrono::seconds>(
-        std::chrono::system_clock::from_time_t(sqlite3_column_int64(stmt.impl->stmt, offset)));
+    return std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>(
+        std::chrono::seconds(sqlite3_column_int64(stmt.impl->stmt, offset)));
 }
 
 template <>

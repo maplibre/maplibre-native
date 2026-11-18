@@ -79,6 +79,16 @@ TEST(ColorParse, HSLWithAlphaMatchesHSLA) {
     EXPECT_FLOAT_EQ(hsl->a, hsla->a);
 }
 
+// As GL JS's Color.toString, which rounds each channel: a channel stored as a float can read back a float step off.
+TEST(ColorStringify, WholeChannels) {
+    constexpr int maxChannel = 255;
+    for (int v = 0; v <= maxChannel; ++v) {
+        const auto input = "rgba(" + std::to_string(v) + "," + std::to_string(v) + "," + std::to_string(v) + ",1)";
+        EXPECT_EQ(input, Color::parse(input)->stringify());
+    }
+    EXPECT_EQ("rgba(26,207,26,0.73)", Color::parse("rgba(26, 207, 26, .73)")->stringify());
+}
+
 namespace {
 
 void expectColor(const Color& actual, float r, float g, float b, float a) {

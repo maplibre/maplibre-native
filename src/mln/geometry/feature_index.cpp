@@ -25,9 +25,7 @@ mln::LatLng screenCoordinateToLatLng(mln::ScreenCoordinate point,
     return state.screenCoordinateToLatLng(point, wrapMode);
 }
 mln::Point<double> project(const mln::LatLng& coordinate, const mln::TransformState& state) {
-    mln::LatLng unwrappedLatLng = coordinate.wrapped();
-    unwrappedLatLng.unwrapForShortestPath(state.getLatLng(mln::LatLng::Wrapped));
-    return mln::Projection::project(unwrappedLatLng, state.getScale());
+    return mln::Projection::project(state.latLngNearCenter(coordinate), state.getScale());
 }
 } // namespace
 
