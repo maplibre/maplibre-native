@@ -7,6 +7,7 @@
 #include <mln/map/transform_state.hpp>
 
 #include <array>
+#include <optional>
 
 namespace mln {
 
@@ -35,9 +36,10 @@ public:
                                         const mat4& posMatrix,
                                         float textPixelRatio,
                                         const CollisionBoundaries& tileEdges) const;
+    /// `shift` is a variable anchor's offset, unset when the label has none.
     std::pair<bool, bool> placeFeature(
         const CollisionFeature& feature,
-        Point<float> shift,
+        std::optional<Point<float>> shift,
         const mat4& posMatrix,
         const mat4& labelPlaneMatrix,
         float textPixelRatio,
@@ -46,6 +48,7 @@ public:
         float fontSize,
         bool allowOverlap,
         bool pitchWithMap,
+        bool rotateWithMap,
         bool collisionDebug,
         const std::optional<CollisionBoundaries>& avoidEdges,
         const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
@@ -102,6 +105,15 @@ private:
                                                         Point<float> shift,
                                                         float textPixelRatio,
                                                         const CollisionBox& box) const;
+    /// The box of a label pitched or rotated with the map: eight samples along the label's own axes, projected,
+    /// so it turns and foreshortens the way the label does (GL JS `_projectCollisionBox`).
+    CollisionBoundaries projectCollisionBox(const CollisionBox& box,
+                                            const mat4& posMatrix,
+                                            float textPixelRatio,
+                                            float scale,
+                                            bool pitchWithMap,
+                                            bool rotateWithMap,
+                                            std::optional<Point<float>> shift) const;
 
     const TransformState transformState;
 

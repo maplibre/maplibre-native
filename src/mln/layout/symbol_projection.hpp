@@ -40,6 +40,7 @@ struct PlacedGlyph {
 };
 
 float evaluateSizeForFeature(const ZoomEvaluatedSize& zoomEvaluatedSize, const PlacedSymbol& placedSymbol);
+void getTileSkewVectors(const TransformState& state, vec2& vecEast, vec2& vecSouth);
 mat4 getLabelPlaneMatrix(
     const mat4& posMatrix, bool pitchWithMap, bool rotateWithMap, const TransformState& state, float pixelsToTileUnits);
 mat4 getGlCoordMatrix(
