@@ -163,6 +163,8 @@ struct TestMetadata {
     mln::MapMode mapMode = mln::MapMode::Static;
     mln::MapDebugOptions debug = mln::MapDebugOptions::NoDebug;
     mln::TerrainSkirtLength terrainSkirtLength = mln::TerrainSkirtLength::Auto;
+    // Map::setCenterClampedToGround; gl-js has it on by default, native off.
+    bool centerClampedToGround = false;
     bool crossSourceCollisions = true;
     bool axonometric = false;
     double xSkew = 0.0;

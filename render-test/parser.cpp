@@ -540,6 +540,11 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
         }
     }
 
+    if (testValue.HasMember("centerClampedToGround")) {
+        assert(testValue["centerClampedToGround"].IsBool());
+        metadata.centerClampedToGround = testValue["centerClampedToGround"].GetBool();
+    }
+
     if (testValue.HasMember("description")) {
         assert(testValue["description"].IsString());
         metadata.description = std::string{testValue["description"].GetString(),
