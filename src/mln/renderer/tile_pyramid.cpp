@@ -63,6 +63,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                          const Range<uint8_t> zoomRange,
                          std::optional<LatLngBounds> bounds,
                          std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile) {
+    emptyTileIDs.clear();
+
     // If we need a relayout, abandon any cached tiles; they're now stale.
     if (needsRelayout) {
         cache.clear();
@@ -119,7 +121,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         .tileLodMode = parameters.tileLodMode,
         .roundZoom = type == SourceType::Raster || type == SourceType::Video,
         .elevationProvider = parameters.elevationProvider,
-        .tileLodOrigin = parameters.tileLodOrigin};
+        .tileLodOrigin = parameters.tileLodOrigin,
+        .minZoomReach = parameters.coverMinZoomReach};
 
     if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
@@ -173,6 +176,24 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     if (parameters.coverTileLimit > 0) {
         util::keepNearestTiles(idealTiles, parameters.coverTileLimit, parameters.coverTileLimitOrigin);
         util::keepNearestTiles(panTiles, parameters.coverTileLimit, parameters.coverTileLimitOrigin);
+    }
+
+    // After the cap, so that it keeps the tiles it did and only these go
+    if (parameters.leaveOutEmptyTiles && (type == SourceType::Vector || type == SourceType::GeoJSON)) {
+        const auto buildsNothing = [&](const OverscaledTileID& id) {
+            return std::none_of(layers.begin(), layers.end(), [&](const auto& layer) {
+                const auto& impl = *layer->baseImpl;
+                return id.overscaledZ >= std::floor(impl.minZoom) && id.overscaledZ < std::ceil(impl.maxZoom);
+            });
+        };
+        for (auto* cover : {&idealTiles, &panTiles}) {
+            for (const auto& id : *cover) {
+                if (buildsNothing(id)) emptyTileIDs.push_back(id.toUnwrapped());
+            }
+            std::erase_if(*cover, buildsNothing);
+        }
+        std::sort(emptyTileIDs.begin(), emptyTileIDs.end());
+        emptyTileIDs.erase(std::unique(emptyTileIDs.begin(), emptyTileIDs.end()), emptyTileIDs.end());
     }
 
     // Stores a list of all the tiles that we're definitely going to retain.

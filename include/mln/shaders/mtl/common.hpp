@@ -138,6 +138,14 @@ inline float depth_opacity(float3 frag,
     return 1.0 - max(0.0, min(1.0, -d * depth_ramp));
 }
 
+// How much of a symbol shows over ground the distance haze has taken: the terrain layer's
+// haze, clamp(x - y / view depth, 0, 1)^2 (terrain.hpp), at the haze color's alpha, so the
+// symbol fades with the ground under it. A zero ramp or alpha is no haze.
+inline float haze_visibility(float view_depth, float haze_alpha, float2 haze_ramp) {
+    const float haze = clamp(haze_ramp.x - haze_ramp.y / max(view_depth, 1e-6), 0.0, 1.0);
+    return 1.0 - haze_alpha * haze * haze;
+}
+
 // Whether a clip-space position is visible in front of the terrain, from the
 // packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
 // Unlike gl-js (global terrain uniforms), the depth texture and enable flag are

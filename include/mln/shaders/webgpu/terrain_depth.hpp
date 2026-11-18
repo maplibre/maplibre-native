@@ -32,6 +32,7 @@ struct GlobalIndexUBO {
 struct TerrainDrawableUBO {
     matrix: mat4x4<f32>,
     dem_coords: vec4<f32>,
+    skirt_edges: f32, // edges with a neighbor tile: north 1, east 2, south 4, west 8
 };
 
 struct TerrainEvaluatedPropsUBO {
@@ -61,7 +62,10 @@ fn main(in: VertexInput) -> VertexOutput {
                                   drawable.dem_coords.w, props.exaggeration, 1.0);
 
     // Skirt vertices drop below the surface by elevation_offset (gl-js u_ele_delta)
-    let ele_delta = select(0.0, props.elevation_offset, in.position.z == 1);
+    let edges = i32(drawable.skirt_edges);
+    let bare = (pos.y == 0.0 && (edges & 1) == 0) || (pos.x == 8192.0 && (edges & 2) == 0) ||
+               (pos.y == 8192.0 && (edges & 4) == 0) || (pos.x == 0.0 && (edges & 8) == 0);
+    let ele_delta = select(0.0, props.elevation_offset, in.position.z == 1 && !bare);
     out.position = drawable.matrix * vec4<f32>(pos.x, pos.y, elevation - ele_delta, 1.0);
     out.depth_zw = out.position.zw;
     return out;

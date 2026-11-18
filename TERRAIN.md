@@ -310,7 +310,8 @@ Implemented:
   levels. The skirt flag rides in the mesh vertex's z (native analog of gl-js
   `a_pos3d.z`); the terrain depth pass drops the skirts too so they occlude
   correctly. Skirts can be turned off per map with `Map::setTerrainSkirtLength`
-  (`TerrainSkirtLength::Auto` / `None`; Android `MapLibreMap.setTerrainSkirtLength`),
+  (`TerrainSkirtLength::Auto` / `None`; Android `MapLibreMap.setTerrainSkirtLength`,
+  iOS and macOS `MLNMapView.terrainSkirtLength`),
   matching gl-js's `MapOptions.terrainSkirtLength`. `None` suits a transparent
   background, where the skirts would otherwise show as vertical artifacts, at the
   cost of visible stitches; it builds the bare grid rather than shortening the
@@ -472,6 +473,9 @@ The load-mode budgets do **not** help on the device they were designed for:
 | balanced | 8.2 | 265/732/990 | 6.14 | 735/1297 |
 | performance | 8.2 | 270/701/865 | 6.23 | 698/1324 |
 
+(Measured when Balanced meshed to z15; it has since been changed to follow the view as
+Quality does, and the table was not re-run.)
+
 All three modes are within noise of each other, even though the per-mode tile
 cap meant Performance drew 24 mesh tiles against Quality's 64 - a 62% cut in
 terrain tiles for no measurable gain. Encode is 700-1350ms per frame and the
@@ -480,7 +484,8 @@ whole scene runs at ~8 fps (the Adreno 750 does ~105 fps on the same build).
 This is the experiment the `TerrainLoadMode` budgets existed to justify, and it
 says they do not work: the bottleneck on this hardware is not the number of
 terrain mesh tiles or how many drapes re-render per frame. Something else
-dominates - the 1024x1024 drape targets, the DEM uploads, or the non-terrain
+dominates - the drape targets (1024x1024 for the nearest tiles, see "Drape target
+size"), the DEM uploads, or the non-terrain
 layers - and should be measured before any more tuning of the budgets. Consider
 whether Balanced/Performance earn their complexity at all in their current form.
 
@@ -885,7 +890,7 @@ per-map API knob, not a style property: `Map::setTerrainLoadMode` /
 unlimited** = the historical sharp snap-load, so nothing regresses; Balanced =
 32 tiles / 16 drapes per frame, Performance = 8 / 4. The mode also sets the mesh-tile
 cap (`maxMeshTiles`: 64 / 48 / 24) and how deep the mesh goes past a coarse DEM
-(`meshTargetZoom`: Quality follows the view as gl-js does; Balanced z15, Performance z14,
+(`meshTargetZoom`: Quality and Balanced follow the view as gl-js does; Performance z14,
 at most three levels past the DEM), so it changes the final image too: close-up
 sharpness, and detail in the distance in tilted views. Exposed on Android
 (`MapLibreMap.setTerrainLoadMode`, `TerrainLoadMode` enum). All five "3D Terrain"
@@ -894,7 +899,8 @@ switches load mode, toggles the built-in rendering-stats HUD (FPS + frame
 timings + counts), and toggles an above-ground-margin debug log (off by default,
 gated so the sampling does not cost anything when unused); the same controls are
 driveable over adb (`am broadcast ... --es cmd terrain_toggle`, plus launch
-extras) for on-device testing. Not yet exposed on iOS/macOS.
+extras) for on-device testing. On iOS and macOS it is `MLNMapView.terrainLoadMode`
+(`MLNTerrainLoadMode`).
 
 **Fixed - runtime terrain re-enable left the map blank until panned.** Toggling
 `style.setTerrain(null)` then back on over an otherwise static map left the map
@@ -1033,8 +1039,8 @@ This known issue is closed.
 ### Phase 3 - Seams and quality
 
 - **Drape target size** (`Renderer::Impl::texturePool`). Now `drapeTileSize *
-  drapeQualityFactor` = 512 * 2 = **1024x1024**, matching maplibre-gl-js, which
-  renders its render-to-texture tiles at `tileSize * qualityFactor` (a fixed
+  drapeQualityFactor` = 512 * 2 = **1024x1024** for the finest tiles of the cover and 512x512 for the rest.
+  maplibre-gl-js renders its render-to-texture tiles at `tileSize * qualityFactor` (a fixed
   `qualityFactor = 2`) *specifically* so draped thin lines are not pixelated/
   aliased when the mesh magnifies them (`src/render/terrain.ts`,
   `src/webgl/render_to_texture.ts` `rttSize`). This was the fix for draped roads
@@ -1045,7 +1051,11 @@ This known issue is closed.
   1024 target can still be below screen resolution (softer, but no longer
   aliased); `drapeQualityFactor` is the single knob to raise it (each step is 4x
   GPU memory per target) or drop back to 1 on constrained devices. Was the
-  long-standing `// TODO: tile size`.
+  long-standing `// TODO: tile size`. Only the nearest tiles get that size now
+  (`RenderTerrain::fullSizeDrapeTilesOf`): the 16 tiles of the cover's finest zoom nearest the
+  ground under the camera, plus tiles that already had it, until 24 are full size (a still
+  takes the nearest 24 at once); every other tile's target is 512x512, a quarter of the memory,
+  and a tile that changes between the two gets a new target, paced by the drape re-render cap.
 - Camera-terrain collision: a collision-only fix was prototyped and reverted
   (felt worse - it corrected only after the gesture); the real fix is the
   terrain-anchored camera in Phase 4
@@ -1348,7 +1358,6 @@ terrain during placement sees the previous frame's state - the same first-frame 
 - **(done)** Heatmap is elevated, not draped, as in gl-js (which does not drape it): each
   kernel is lifted to the DEM height at its centre in the kernel vertex shader, and the
   colour-ramp composite stays a screen-space pass.
-- Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing
 
@@ -1813,6 +1822,23 @@ style.setTerrain(Terrain("terrain-source", exaggeration = 1.0f))
 val terrain = style.getTerrain() // null when terrain is not enabled
 style.setTerrain(null)           // disable terrain
 ```
+
+### iOS and macOS API
+
+```swift
+// Requires a raster-dem source in the style
+style.addSource(MLNRasterDEMSource(identifier: "terrain-dem", tileURLTemplates: urls, options: nil))
+style.terrain = MLNTerrain(sourceIdentifier: "terrain-dem", exaggeration: 1.0)
+
+let terrain = style.terrain // nil when terrain is not enabled
+style.terrain = nil         // disable terrain
+
+mapView.terrainLoadMode = .balanced    // per-frame loading budget, .quality by default
+mapView.terrainSkirtLength = .none     // no skirts, for a transparent background
+```
+
+Set it after the style has loaded (`mapView(_:didFinishLoading:)`); loading a style replaces the
+terrain. A style whose JSON has a `terrain` object starts with it set.
 
 ### Saving and restoring the camera
 

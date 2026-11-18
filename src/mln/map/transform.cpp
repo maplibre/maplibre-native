@@ -707,6 +707,14 @@ void Transform::retargetTransitionCenterAltitude(double altitudeMeters) {
     ease.target = altitudeMeters;
 }
 
+bool Transform::liftCenterAltitude(double altitudeMeters) {
+    if (std::isnan(altitudeMeters) || state.getCenterAltitude() >= altitudeMeters) {
+        return false;
+    }
+    state.setCenterAltitude(altitudeMeters);
+    return true;
+}
+
 void Transform::updateTransitions(const TimePoint& now) {
     // Use a temporary function to ensure that the transitionFrameFn lambda is
     // called only once per update.

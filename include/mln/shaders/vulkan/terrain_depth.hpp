@@ -29,6 +29,7 @@ layout(push_constant) uniform Constants {
 struct TerrainDrawableUBO {
     mat4 matrix;
     vec4 dem_coords;
+    float skirt_edges; // edges with a neighbor tile: north 1, east 2, south 4, west 8
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idTerrainDrawableUBO) readonly buffer TerrainDrawableUBOVector {
@@ -58,7 +59,10 @@ void main() {
                                           drawable.dem_coords.w, props.exaggeration, 1.0);
 
     // Skirt vertices drop below the surface by elevation_offset (gl-js u_ele_delta)
-    const float ele_delta = in_position.z == 1 ? props.elevation_offset : 0.0;
+    const int edges = int(drawable.skirt_edges);
+    const bool bare = (pos.y == 0.0 && (edges & 1) == 0) || (pos.x == 8192.0 && (edges & 2) == 0) ||
+                      (pos.y == 8192.0 && (edges & 4) == 0) || (pos.x == 0.0 && (edges & 8) == 0);
+    const float ele_delta = (in_position.z == 1 && !bare) ? props.elevation_offset : 0.0;
     gl_Position = drawable.matrix * vec4(pos.x, pos.y, elevation - ele_delta, 1.0);
     // Must match the transform the symbol pass applies, so the depth texture
     // and the symbols it occludes share one clip space

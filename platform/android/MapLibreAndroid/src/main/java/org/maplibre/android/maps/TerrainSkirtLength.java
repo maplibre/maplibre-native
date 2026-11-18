@@ -20,5 +20,11 @@ public enum TerrainSkirtLength {
    * Build no skirts at all: no vertical artifacts over a transparent background, at the cost
    * of visible stitches between tiles at different zoom levels.
    */
-  NONE
+  NONE,
+
+  /**
+   * Skirt a tile edge only where another tile of the mesh lies beside it, so the stitches
+   * close and the edges at the end of the mesh show no vertical artifacts.
+   */
+  SHARED
 }

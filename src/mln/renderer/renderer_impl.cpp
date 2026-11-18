@@ -256,6 +256,15 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     const auto& layerRenderItems = renderTree.getLayerRenderItemMap();
 
+    // Per-frame cap on drape targets that bake over a texture they already have, from the map's
+    // TerrainLoadMode (<= 0, Quality's, is unlimited). The pool's size changes and the drape pass
+    // share it.
+    const int drapeCap = terrainLoadBudget(updateParameters->terrainLoadMode).drapeRerendersPerFrame;
+    // The tiles whose drape target the pool replaced this frame (it changed size): they bake at
+    // once on their new texture, and are paid for out of the cap before the drape pass. Not kept
+    // for a still, which has no frames after this one: its drape pass is as it always was.
+    std::set<UnwrappedTileID> replacedDrapeTiles;
+
     // Number of terrain drape targets in this frame's cover; drives the re-enable follow-up
     // frame and the drape re-bake trigger below (0 while terrain is off or its cover is empty).
     std::size_t frameDrapeTargetCount = 0;
@@ -272,8 +281,25 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // permanent blankness in single-frame still renders (the render tests).
         terrain->prepareSource(orchestrator);
         const std::set<UnwrappedTileID> demTileIDs = terrain->computeMeshCover(state, updateParameters);
-        for (const auto& id : demTileIDs) {
-            texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor);
+        // Full-size drape textures only for the nearest of the finest tiles of the cover - the ones
+        // under the camera, where the ground is magnified most; every other tile gets a quarter of the
+        // memory. At 1024 px each target costs ~9 MB with its stencil, and a pitched cover over relief
+        // runs to dozens of them: all full size, an older phone ran out of GPU memory. A still is
+        // decided from scratch, whatever this renderer drew before (RenderTerrain::drapeSizesFor).
+        const auto sizes = RenderTerrain::drapeSizesFor(renderTreeParameters.mapMode,
+                                                        drapeCap,
+                                                        demTileIDs,
+                                                        RenderTerrain::meshTileCapOrigin(state),
+                                                        texturePool.tilesAtFullSize());
+        // A tile that changes size gets a new target, which bakes at once whatever the drape budget
+        // below says, so the cap limits how many change in a frame and the drape pass has the rest.
+        auto resizes = texturePool.createRenderTargets(
+            context, demTileIDs, sizes.fullSizeTiles, renderTreeParameters.backgroundColor, sizes.maxResizes);
+        if (renderTreeParameters.mapMode == MapMode::Continuous) {
+            replacedDrapeTiles = std::move(resizes.replaced);
+        }
+        if (resizes.deferred) {
+            drapeWorkDeferred = true;
         }
         texturePool.removeStaleRenderTargets(demTileIDs);
         frameDrapeTargetCount = demTileIDs.size();
@@ -373,12 +399,25 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             std::size_t drapedGroupCount = 0;
             std::vector<std::pair<UnwrappedTileID, std::size_t>> drapedTiles;
             drapedTiles.reserve(1024);
+            // Layer id -> revision of its style (RenderLayer::styleRevision), from this frame's tree.
+            layerIdentities.clear();
+            for (const auto& item : renderTree.getLayerRenderItemMap()) {
+                const RenderLayer& layer = item.layer.get();
+                layerIdentities.emplace(layer.getID(), static_cast<std::uintptr_t>(layer.styleRevision));
+            }
             orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
                 if (layerGroup.getType() != LayerGroupBase::Type::TileLayerGroup ||
                     !layerGroup.shouldRenderToTerrain()) {
                     return;
                 }
                 drapedGroupCount++;
+                // The layer's style object is replaced when the app changes its paint or layout
+                // (setPaintProperty and the like) - not on zoom, fades or transitions. Folding it
+                // in re-bakes, only under that layer's tiles, a drape the app is animating (a
+                // replay revealing a route by its line-gradient), which otherwise showed a stale
+                // bake until something else invalidated it.
+                const auto found = layerIdentities.find(layerGroup.getName());
+                const std::uintptr_t layerIdentity = found != layerIdentities.end() ? found->second : 0;
                 static_cast<TileLayerGroup&>(layerGroup).visitDrawables([&](const gfx::Drawable& drawable) {
                     if (!drawable.getEnabled() || !drawable.getTileID()) {
                         return;
@@ -389,6 +428,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                     util::hash_combine(h, tile.canonical.z);
                     util::hash_combine(h, tile.canonical.x);
                     util::hash_combine(h, tile.canonical.y);
+                    util::hash_combine(h, layerIdentity);
                     // Fold the identity of the drawn data so new data under the same covering-tile
                     // id re-renders the drape instead of serving the stale bake until the next zoom.
                     util::hash_combine(h, RenderTarget::drapedDataID(drawable));
@@ -434,6 +474,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                 });
             }
             parameters.perTargetDrapeSignature = &perTargetDrapeSignature;
+            parameters.drapeLayerRevisions = &layerIdentities;
         }
         // Latch whether the drape cover had targets this frame, for the re-bake trigger above.
         terrainHadCoverLastFrame = frameDrapeTargetCount > 0;
@@ -581,15 +622,37 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // tens of ms each; instead render up to the budget and defer the rest (they keep their
         // stale texture), requesting a follow-up frame so they catch up progressively.
         // Never-rendered targets always render (avoid blank tiles). The cap comes from the
-        // map's TerrainLoadMode; Quality (default) is unlimited.
-        const int drapeCap = terrainLoadBudget(updateParameters->terrainLoadMode).drapeRerendersPerFrame;
-        int drapeBudget = drapeCap > 0 ? drapeCap : (1 << 30);
+        // map's TerrainLoadMode; Quality (default) is unlimited. The targets the pool replaced
+        // this frame bake over it too, and are already taken off it here.
+        int drapeBudget = terrain::drapeRerenderBudget(drapeCap, replacedDrapeTiles.size());
         orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
             if (renderTarget.getDrapeTileID()) {
-                const auto res = renderTarget.render(
-                    orchestrator, renderTree, parameters, /*canRerender=*/drapeBudget > 0);
+                // Out of GPU memory for a drape texture (Metal returns no texture and the backend
+                // throws bad_alloc): go on without it, rather than abort the app. The target has no
+                // bake to keep - its texture never existed, or a replaced target's old one is gone -
+                // and it already recorded having baked, so the pool drops it and the next frame
+                // builds another, at half size if memory is short (by then the cover may be smaller).
+                // A replaced target's tile has already been rebuilt on the texture that failed, so
+                // it draws nothing for the frame (the terrain update runs before this pass).
+                RenderTarget::RenderResult res;
+                try {
+                    res = renderTarget.render(orchestrator, renderTree, parameters, /*canRerender=*/drapeBudget > 0);
+                } catch (const std::bad_alloc&) {
+                    // A tile that goes on failing, even at half size, is rebuilt and fails again each
+                    // frame it is drawn in: only the first failure of a run of them is logged, or asks
+                    // for another frame. The others do not, so their retry waits for the next repaint.
+                    if (texturePool.renderTargetFailed(*renderTarget.getDrapeTileID())) {
+                        Log::Warning(Event::Render,
+                                     "Terrain: out of memory for a drape target; rebuilding it next frame");
+                        drapeWorkDeferred = true;
+                    }
+                    return;
+                }
                 if (res == RenderTarget::RenderResult::Rendered) {
-                    --drapeBudget;
+                    // A replaced target was paid for before this pass
+                    if (!replacedDrapeTiles.contains(*renderTarget.getDrapeTileID())) {
+                        --drapeBudget;
+                    }
                 } else if (res == RenderTarget::RenderResult::Deferred) {
                     drapeWorkDeferred = true;
                     ++context.renderingStats().numDrapeTargetsDeferred;
@@ -751,12 +814,35 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // DEM, so this is the channel; whether the camera acts on it is the map's call
     // (Map::setCenterClampedToGround). Gated so a still map does not post a message a frame.
     // Only once a DEM tile covers the spot: ground not loaded yet is not sea level.
+    //
+    // The map brings its center back to sea level when the terrain is removed, and waits to be
+    // told the ground again when one is set. A style swap removes the terrain and the app sets it
+    // back from the load callback, before a frame is drawn without it: the same heights over the
+    // same center, which were held back as already reported, so the center stayed at sea level and
+    // the camera inside the ground until the view moved. Heights are news to a terrain set again.
+    if (reportedTerrain != updateParameters->terrain) {
+        reportedTerrain = updateParameters->terrain;
+        lastReportedCenterElevation = std::numeric_limits<double>::quiet_NaN();
+        lastReportedEyeElevation = std::numeric_limits<double>::quiet_NaN();
+        eyeElevationTile.reset();
+    }
     if (auto* terrain = orchestrator.getRenderTerrain()) {
-        if (const auto centerElevation = terrain->getElevationForLatLng(updateParameters->transformState.getLatLng())) {
+        const auto center = updateParameters->transformState.getLatLng();
+        UnwrappedTileID centerReadFrom(0, 0, 0);
+        if (const auto centerElevation = terrain->getElevationForLatLng(center, &centerReadFrom)) {
+            centerElevationTile = centerReadFrom;
             if (std::isnan(lastReportedCenterElevation) ||
                 std::abs(*centerElevation - lastReportedCenterElevation) > 0.25) {
                 lastReportedCenterElevation = *centerElevation;
                 observer->onTerrainCenterElevationChanged(*centerElevation);
+            }
+        } else if (centerElevationTile && !tileHolds(*centerElevationTile, center)) {
+            // The center left the tile its height came from and no loaded tile is under it yet (or
+            // ever): the old height is another place's, so the map is told it does not know.
+            centerElevationTile.reset();
+            if (!std::isnan(lastReportedCenterElevation)) {
+                lastReportedCenterElevation = std::numeric_limits<double>::quiet_NaN();
+                observer->onTerrainCenterElevationChanged(lastReportedCenterElevation);
             }
         }
         // And under the eye: a camera dragged towards a slope rising in front of it ends up under

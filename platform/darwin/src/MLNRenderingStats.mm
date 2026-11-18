@@ -85,6 +85,9 @@
   _memUniformBuffers = stats.memUniformBuffers;
   _stencilClears = stats.stencilClears;
   _stencilUpdates = stats.stencilUpdates;
+  _numDrapeTargetsDeferred = stats.numDrapeTargetsDeferred;
+  _numNewTileBuildsDeferred = stats.numNewTileBuildsDeferred;
+  _numTerrainCoverPendingFrames = stats.numTerrainCoverPendingFrames;
 }
 
 - (void)setFeatureInfo:(const mln::gfx::RenderingStats&)stats {

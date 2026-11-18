@@ -911,6 +911,53 @@ TEST(TileCover, ElevatedCentreCoversTheGroundAtTheBottomOfTheView) {
     }
 }
 
+// A source that starts at zoom 10 was covered at zoom 10 over all the ground in view, to the
+// horizon at a steep pitch. With a reach, the cover ends where the ground's own zoom is more than
+// the reach below zoom 10, and is the same everywhere else.
+TEST(TileCover, MinZoomReachLeavesOutGroundFarBelowTheMinZoom) {
+    Transform transform;
+    transform.resize({393, 852});
+    transform.setMaxPitch(85.0);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{38.52, -120.09}).withZoom(14.5).withPitch(80.0));
+    util::TileCoverParameters params{transform.getState()};
+
+    const auto ground = util::tileCover(params, 14, Range<uint8_t>{0, 14}, std::optional<uint8_t>{14});
+    const auto toMinZoom = util::tileCover(params, 14, Range<uint8_t>{10, 14}, std::optional<uint8_t>{14});
+    const auto groundZoomOf = [&](const OverscaledTileID& tile) {
+        for (const auto& id : ground) {
+            if (id.wrap == tile.wrap && (id.canonical == tile.canonical || tile.canonical.isChildOf(id.canonical))) {
+                return static_cast<int>(id.canonical.z);
+            }
+        }
+        return -1;
+    };
+
+    for (const uint8_t reach : {0, 1, 2}) {
+        std::vector<OverscaledTileID> expected;
+        for (const auto& id : toMinZoom) {
+            if (groundZoomOf(id) + reach >= 10) expected.push_back(id);
+        }
+        ASSERT_FALSE(expected.empty());
+        ASSERT_LT(expected.size(), toMinZoom.size()) << "the view has ground below zoom " << 10 - reach;
+
+        params.minZoomReach = reach;
+        auto cover = util::tileCover(params, 14, Range<uint8_t>{10, 14}, std::optional<uint8_t>{14});
+        std::sort(cover.begin(), cover.end());
+        std::sort(expected.begin(), expected.end());
+        EXPECT_EQ(cover, expected) << "reach " << static_cast<int>(reach);
+    }
+}
+
+TEST(TileCover, MinZoomReachLeavesTheCoverAloneUnderThePitchThreshold) {
+    Transform transform;
+    transform.resize({393, 852});
+    transform.jumpTo(CameraOptions().withCenter(LatLng{38.52, -120.09}).withZoom(14.5).withPitch(55.0));
+    util::TileCoverParameters params{transform.getState()};
+    const auto cover = util::tileCover(params, 14, Range<uint8_t>{10, 14}, std::optional<uint8_t>{14});
+    params.minZoomReach = 0;
+    EXPECT_EQ(util::tileCover(params, 14, Range<uint8_t>{10, 14}, std::optional<uint8_t>{14}), cover);
+}
+
 TEST(TileCover, KeepNearestTilesKeepsThoseNearestTheOrigin) {
     // z3 row 4: columns 0..7 run west to east; the origin sits on column 2.
     std::vector<OverscaledTileID> tiles;

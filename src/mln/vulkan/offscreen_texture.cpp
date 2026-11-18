@@ -79,7 +79,7 @@ public:
 
     // Create the depth (and, for drape render targets, stencil) attachment for the offscreen
     // target. Terrain drape targets need a stencil to clip overlapping draped tiles against
-    // each other (TexturePool::createRenderTarget), matching gl-js's render-to-texture
+    // each other (TexturePool::createRenderTargets), matching gl-js's render-to-texture
     // framebuffer; other offscreen textures (e.g. the depth-occlusion pass) stay depth-only.
     // eD32Sfloat is a Vulkan-mandated depth-only format; a combined depth/stencil format is
     // not universally guaranteed, so it is queried the same way

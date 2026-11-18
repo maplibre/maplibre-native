@@ -111,4 +111,9 @@ Immutable<std::vector<RenderTile>> RenderSource::getRawRenderTiles() const {
     return makeMutable<std::vector<RenderTile>>();
 }
 
+const std::vector<UnwrappedTileID>& RenderSource::getEmptyTileIDs() const {
+    static const std::vector<UnwrappedTileID> none;
+    return none;
+}
+
 } // namespace mln
