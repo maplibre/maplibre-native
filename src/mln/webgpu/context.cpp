@@ -468,7 +468,7 @@ gfx::AttributeBindingArray Context::getOrCreateVertexBindings(gfx::Context&,
                                                               const gfx::VertexAttributeArray& overrides,
                                                               gfx::BufferUsageType,
                                                               const std::optional<std::chrono::duration<double>>&,
-                                                              std::shared_ptr<VertexBufferResource>&) noexcept {
+                                                              std::shared_ptr<VertexBufferResource>&) {
     static_cast<void>(vertexType);
     static_cast<void>(vertexAttributeIndex);
     static_cast<void>(vertexData);
