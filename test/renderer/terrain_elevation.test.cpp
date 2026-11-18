@@ -13,6 +13,10 @@
 #include <mln/util/projection.hpp>
 #include <mln/util/run_loop.hpp>
 
+#include <chrono>
+#include <cstdio>
+#include <optional>
+#include <thread>
 #include <utility>
 
 using namespace mln;
@@ -206,4 +210,93 @@ TEST(TerrainElevation, APixelsHeightIsAtItsCentre) {
         EXPECT_NEAR(map.getCameraOptions({}).centerAltitude.value_or(0.0), rampHeight(x, y), 0.5)
             << "pixel " << x << ", " << y;
     }
+}
+
+namespace {
+
+// A Terrarium tile of one whole number of metres everywhere.
+std::string makeUniformDEMTile(uint32_t metres) {
+    const uint32_t value = metres + 32768;
+    PremultipliedImage image({rampTileSize, rampTileSize});
+    for (uint32_t i = 0; i < rampTileSize * rampTileSize; ++i) {
+        uint8_t* px = image.data.get() + i * 4;
+        px[0] = static_cast<uint8_t>(value >> 8);
+        px[1] = static_cast<uint8_t>(value & 0xff);
+        px[2] = 0;
+        px[3] = 255;
+    }
+    return encodePNG(image);
+}
+
+} // namespace
+
+// Within half a pixel of its edge a tile's height is read between its edge pixel and the border,
+// which the neighbouring tile backfills when it loads. The map's copy of the heights
+// (getTerrainElevation) must take that backfill too when the neighbour loads after the tile.
+// Kept as first copied, it read the stand-in border (a copy of the tile's own edge) there,
+// while the ground drawn on screen had the neighbour's.
+TEST(TerrainElevation, ANeighbourLoadingLaterChangesTheHeightsNextToTheSharedEdge) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    const std::string evenColumn = makeUniformDEMTile(1000);
+    const std::string oddColumn = makeUniformDEMTile(3000);
+    // Tiles in odd columns are held back until released, so tile 2/2/1 is loaded before its west
+    // neighbour 2/1/1
+    bool holdOddColumns = true;
+    bool oddRequested = false;
+    fileSource->tileResponse = [&](const Resource& resource) -> std::optional<Response> {
+        int z = 0, x = 0, y = 0;
+        const auto name = resource.url.substr(resource.url.rfind('/') + 1);
+        EXPECT_EQ(std::sscanf(name.c_str(), "%d-%d-%d.png", &z, &x, &y), 3) << resource.url;
+        const bool odd = x % 2 == 1;
+        if (odd) {
+            oddRequested = true;
+            if (holdOddColumns) {
+                return std::nullopt;
+            }
+        }
+        Response res;
+        res.data = std::make_shared<std::string>(odd ? oddColumn : evenColumn);
+        return res;
+    };
+    HeadlessFrontend frontend{{256, 256}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Continuous).withSize(frontend.getSize()));
+    map.getStyle().loadJSON(rampStyle);
+
+    // A quarter pixel inside tile 2/2/1 from its west edge, on row 40's centre, in z2 tile units:
+    // read with weight 1/4 from the border pixel and 3/4 from the tile's first pixel
+    const LatLng nearTheEdge = Projection::unproject(
+        Point<double>{2.0 + 0.25 / rampTileSize, 1.0 + 40.5 / rampTileSize} * util::tileSize_D, 4.0);
+    map.jumpTo(CameraOptions().withCenter(nearTheEdge).withZoom(2.0).withPitch(0.0));
+
+    // A Continuous map renders as tiles arrive. Renders until the height there has stayed the
+    // same for a while
+    const auto renderUntilSettled = [&] {
+        constexpr int maxFrames = 200;
+        constexpr int quietFrames = 10;
+        std::optional<double> last;
+        int quiet = 0;
+        for (int frame = 0; frame < maxFrames && quiet < quietFrames; ++frame) {
+            loop.runOnce();
+            const auto elevation = map.getTerrainElevation(nearTheEdge);
+            quiet = elevation && elevation == last ? quiet + 1 : 0;
+            last = elevation;
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+        return last;
+    };
+
+    const auto before = renderUntilSettled();
+    ASSERT_TRUE(oddRequested) << "the view has no tile in an odd column, so nothing backfills";
+    ASSERT_TRUE(before) << "tile 2/2/1 has no height";
+    EXPECT_NEAR(*before, 1000.0, 0.5) << "with its west neighbour not loaded, the border is the tile's own edge";
+
+    holdOddColumns = false;
+    const auto after = renderUntilSettled();
+    ASSERT_TRUE(after);
+    EXPECT_NEAR(*after, 0.75 * 1000.0 + 0.25 * 3000.0, 0.5)
+        << "the map kept the heights of tile 2/2/1 from before its west neighbour backfilled its border";
 }

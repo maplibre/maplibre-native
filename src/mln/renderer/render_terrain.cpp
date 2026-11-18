@@ -1134,6 +1134,10 @@ std::optional<LatLng> RenderTerrain::pickLatLng(const TransformState& state, con
         state, pixel, [&index](const LatLng& latLng) { return index->getElevation(latLng); }, index->getMaxElevation());
 }
 
+bool RenderTerrain::ElevationGridCopy::isCopyOf(const DEMData* dem) const {
+    return source == dem && borderRevision == dem->getBorderRevision();
+}
+
 bool RenderTerrain::updateElevationIndex() {
     if (!demSource || !isEnabled()) {
         elevationGrids.clear();
@@ -1148,7 +1152,7 @@ bool RenderTerrain::updateElevationIndex() {
     if (!changed) {
         for (const auto& tile : loaded) {
             const auto found = elevationGrids.find(tile.id);
-            if (found == elevationGrids.end() || found->second.source != tile.data) {
+            if (found == elevationGrids.end() || !found->second.isCopyOf(tile.data)) {
                 changed = true;
                 break;
             }
@@ -1163,10 +1167,12 @@ bool RenderTerrain::updateElevationIndex() {
     for (const auto& tile : loaded) {
         ElevationGridCopy copy;
         if (const auto found = elevationGrids.find(tile.id);
-            found != elevationGrids.end() && found->second.source == tile.data) {
+            found != elevationGrids.end() && found->second.isCopyOf(tile.data)) {
             copy = found->second;
         } else {
-            copy = {.source = tile.data, .grid = std::make_shared<const TerrainElevationIndex::Grid>(*tile.data)};
+            copy = {.source = tile.data,
+                    .borderRevision = tile.data->getBorderRevision(),
+                    .grid = std::make_shared<const TerrainElevationIndex::Grid>(*tile.data)};
         }
         tiles.push_back({.id = tile.id, .grid = copy.grid});
         grids.emplace(tile.id, std::move(copy));
