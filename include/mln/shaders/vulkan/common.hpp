@@ -193,7 +193,9 @@ vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
 
 // Sample the terrain elevation in meters at a tile-local coordinate, with manual
 // bilinear interpolation on DEM pixel centers (the DEM has a 2px backfilled border),
-// matching the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
+// matching the maplibre-gl-js get_elevation() prelude function. DEM pixel i holds the
+// height of its cell, centred at tile coordinate (i + 0.5) / dim, and sits at texel
+// i + 2 behind the border, so the texel coordinate is uv * dim + 1.5. Unlike gl-js (global
 // terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
 // sampler and dem_* values are passed in as arguments rather than read from globals.
 // Unpack a depth value packed by the terrain depth pass (vulkan/terrain_depth.hpp).
@@ -255,8 +257,11 @@ float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enable
 // Decode one DEM texel to meters. The clamp at the call sites matters: texelFetch out of
 // range is undefined where the sampler's clamp-to-edge used to cover it, and a tile with
 // no DEM of its own is bound the 1x1 placeholder, whose only valid texel is (0, 0).
+// The bytes are whole numbers, but a driver can return them times 255.0 a hair off one (Mesa
+// does), and Mapbox's 6553.6 m per unit of red turns that into a height about a millimetre off,
+// where a Terrarium tile of the same heights is exact. Rounded, as unpack_depth does.
 float dem_texel(sampler2D dem, ivec2 texel, vec4 dem_unpack) {
-    vec4 data = texelFetch(dem, texel, 0) * 255.0;
+    vec4 data = floor(texelFetch(dem, texel, 0) * 255.0 + 0.5);
     data.a = -1.0;
     return dot(data, dem_unpack);
 }
@@ -266,7 +271,8 @@ float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
     if (dem_enabled == 0.0) {
         return 0.0;
     }
-    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
+    // DEM pixel i is centred at uv (i + 0.5) / dim and sits at texel i + 2 behind the border.
+    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.5;
     vec2 f = fract(coord);
     ivec2 c = ivec2(floor(coord));
     ivec2 hi = textureSize(dem, 0) - 1;

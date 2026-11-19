@@ -355,11 +355,15 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // The ground under the camera's eye has to be known to keep the eye above it
     // (Renderer::Impl::render), and its DEM tile lies outside the view's cover as often as not.
-    std::optional<LatLng> terrainEye;
+    // So does the ground under the center, for the center clamp: with the center at sea level
+    // over high ground the eye sits just above the slope, the elevated cover keeps little more
+    // than the eye's tile, and the clamp never learned the height that would lift the camera.
+    std::vector<LatLng> terrainGroundToKnow;
     if (terrainEnabled) {
         if (const auto eye = updateParameters->transformState.getFreeCameraOptions().getLocation()) {
-            terrainEye = eye->location;
+            terrainGroundToKnow.push_back(eye->location);
         }
+        terrainGroundToKnow.push_back(updateParameters->transformState.getLatLng());
     }
 
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
@@ -610,7 +614,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         tileParameters.coverTileLimit = isDemSource ? 0 : coverTileLimit;
         tileParameters.coverMinZoomReach = terrainEnabled && !isDemSource ? RenderTerrain::sourceMinZoomReach()
                                                                           : std::nullopt;
-        tileParameters.alsoCover = isDemSource ? terrainEye : std::nullopt;
+        tileParameters.alsoCover = isDemSource ? terrainGroundToKnow : std::vector<LatLng>{};
         tileParameters.leaveOutEmptyTiles = terrainEnabled && !isDemSource && RenderTerrain::leavesOutEmptyTiles();
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
