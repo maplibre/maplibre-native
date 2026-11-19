@@ -5,7 +5,8 @@
       "description": "A raster layer on an image source is drawn on terrain, also across the edges between the tiles that cover the image (2 x 2 here).",
       "height": 512,
       "width": 512,
-      "threshold": 0.05
+      "threshold": 0.05,
+      "allowed": 0.001
     }
   },
   "center": [
