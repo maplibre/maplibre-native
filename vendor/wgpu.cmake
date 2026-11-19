@@ -98,7 +98,6 @@ if (NOT MLN_WEBGPU_IMPL_FFI)
     endmacro()
 
     mln_wgpu_find_library()
-	mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY "wgpu-native static library")
 endif()
 
 if(NOT MLN_WEBGPU_IMPL_FFI AND (NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION))
@@ -166,7 +165,6 @@ if(NOT MLN_WEBGPU_IMPL_FFI AND (NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION))
 
     # Try to find the library again
     mln_wgpu_find_library()
-    mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY "wgpu-native static library")
 
     if(NOT WGPU_LIBRARY)
         message(FATAL_ERROR "Failed to locate wgpu-native library after building")
@@ -175,14 +173,6 @@ if(NOT MLN_WEBGPU_IMPL_FFI AND (NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION))
     message(STATUS "Successfully built wgpu-native: ${WGPU_LIBRARY}")
 else()
     message(STATUS "Found wgpu-native library: ${WGPU_LIBRARY}")
-endif()
-
-if(WGPU_STATIC_LIBRARY)
-    message(STATUS "Found wgpu-native static library: ${WGPU_STATIC_LIBRARY}")
-elseif(MLN_CREATE_AMALGAMATION)
-    message(FATAL_ERROR
-        "MLN_CREATE_AMALGAMATION=ON requires a static wgpu-native library, "
-        "but none was found in: ${_wgpu_lib_search_paths}")
 endif()
 
 # Create compatibility shims for Dawn header paths if they don't exist

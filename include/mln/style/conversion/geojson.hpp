@@ -14,8 +14,7 @@ namespace conversion {
 std::optional<GeoJSON> parseGeoJSON(const std::string&, Error&);
 
 // Serialize a GeoJSON value back to a JSON string. This is the public
-// counterpart to parseGeoJSON: consumers that link the core through the
-// amalgam (which exports only mln::* symbols) cannot reach the bundled
+// counterpart to parseGeoJSON, so consumers need not reach for the bundled
 // mapbox::geojson::stringify directly.
 std::string stringifyGeoJSON(const GeoJSON&);
 
