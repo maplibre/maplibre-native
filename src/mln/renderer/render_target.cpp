@@ -113,6 +113,7 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     parameters.encoder->present(*offscreenTexture);
 
     parameters.scissorRect = prevScissorRect;
+    rendered = true;
 }
 
 } // namespace mln
