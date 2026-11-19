@@ -14,6 +14,7 @@
 #include <mln/util/convert.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/logging.hpp>
+#include <mln/util/projection.hpp>
 
 #include <algorithm>
 #include <cstring>
@@ -38,6 +39,10 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     frameContext.camera_to_center_distance = parameters.state.getCameraToCenterDistance();
     frameContext.pixel_ratio = parameters.pixelRatio;
     frameContext.zoom = parameters.state.getZoom();
+    // The scale Camera::getWorldToCamera applies to z, which the projection reads as meters.
+    const auto metersPerPixel = Projection::getMetersPerPixelAtLatitude(parameters.state.getLatLng().latitude(),
+                                                                        parameters.state.getZoom());
+    frameContext.pixels_per_meter = metersPerPixel > 0 ? static_cast<float>(1.0 / metersPerPixel) : 0.0f;
     const auto& crossfade = static_cast<const style::PluginStyleLayerProperties&>(*evaluatedProperties).crossfade;
     frameContext.crossfade_from_scale = crossfade.fromScale;
     frameContext.crossfade_to_scale = crossfade.toScale;
