@@ -687,16 +687,25 @@ struct TerrainTransitionTest {
 
     // Eases west onto the 2000 m plateau; `whileRunning` is called after every frame of the
     // transition. Returns once the transition has finished and a few more frames rendered.
+    // The transition runs on the clock, so it lasts about 40 frames of this machine instead of a
+    // fixed time: with slow frames (software GL) a 1.5 s ease ended within its first frame, and a
+    // test that acts mid-transition never got the frame it acts on.
     template <typename Fn>
     bool easeWest(Fn whileRunning) {
+        const auto frameStart = Clock::now();
+        renderFrame();
+        const auto frameTime = std::chrono::duration_cast<Milliseconds>(Clock::now() - frameStart);
+        constexpr int framesPerTransition = 40;
+        const Milliseconds duration = std::max(Milliseconds(1500), frameTime * framesPerTransition);
+
         bool finished = false;
-        AnimationOptions animation(Milliseconds(1500));
+        AnimationOptions animation(duration);
         animation.transitionFinishFn = [&] {
             finished = true;
         };
         map.easeTo(CameraOptions().withCenter(westTarget), animation);
 
-        const auto deadline = Clock::now() + Seconds(20);
+        const auto deadline = Clock::now() + duration * 4 + Seconds(20);
         while (!finished && Clock::now() < deadline) {
             renderFrame();
             whileRunning(finished);
@@ -1305,7 +1314,8 @@ TEST(TerrainCamera, AnAnimatedZoomDoesNotCarryTheEyeUnderTheGround) {
     const auto clearance = [&] {
         const auto location = map.getFreeCameraOptions().getLocation();
         EXPECT_TRUE(location.has_value());
-        return location ? location->altitude - rampMeters(location->location.latitude()) : 0.0;
+        const auto ground = location ? map.getTerrainElevation(location->location) : std::nullopt;
+        return ground ? location->altitude - *ground : -std::numeric_limits<double>::infinity();
     };
 
     // The center on the ridge line looking north, the climb behind the camera, the eye settled over it.

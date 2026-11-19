@@ -134,7 +134,10 @@ void TestRunner::checkQueryTestResults(mln::PremultipliedImage&& actualImage,
     metadata.actual = mln::encodePNG(actualImage);
 
     if (actualImage.size.isEmpty()) {
-        metadata.errorMessage = "Invalid size for actual image";
+        // Keep the reason a render raised, if it did (runTest); the empty image is only its effect.
+        if (metadata.errorMessage.empty()) {
+            metadata.errorMessage = "Invalid size for actual image";
+        }
         metadata.renderErrored++;
         return;
     }
@@ -215,7 +218,10 @@ void TestRunner::checkRenderTestResults(mln::PremultipliedImage&& actualImage, T
         metadata.actual = mln::encodePNG(actualImage);
 
         if (actualImage.size.isEmpty()) {
-            metadata.errorMessage = "Invalid size for actual image";
+            // Keep the reason a render raised, if it did (runTest); the empty image is only its effect.
+            if (metadata.errorMessage.empty()) {
+                metadata.errorMessage = "Invalid size for actual image";
+            }
             metadata.renderErrored++;
             return;
         }
@@ -668,6 +674,7 @@ void resetContext(const TestMetadata& metadata, TestContext& ctx) {
                               .withYSkew(metadata.ySkew));
     map.setDebug(metadata.debug);
     map.setTerrainSkirtLength(metadata.terrainSkirtLength);
+    map.setCenterClampedToGround(metadata.centerClampedToGround);
     map.getStyle().loadJSON(serializeJsonValue(metadata.document));
 }
 
@@ -945,7 +952,7 @@ mln::HeadlessFrontend::RenderResult TestRunner::runTest(TestMetadata& metadata, 
     try {
         if (metadata.outputsImage) result = ctx.getFrontend().render(ctx.getMap());
     } catch (const std::exception& e) {
-        ctx.getMetadata().errorMessage = std::string("Renering raised an exception: ") + e.what();
+        ctx.getMetadata().errorMessage = std::string("Rendering raised an exception: ") + e.what();
     }
     return result;
 }

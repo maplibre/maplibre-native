@@ -11,13 +11,20 @@ class RasterBucket;
 
 class ImageSourceRenderData final : public RenderItem {
 public:
-    ImageSourceRenderData(std::shared_ptr<RasterBucket> bucket_, std::vector<mat4> matrices_, std::string name_)
+    ImageSourceRenderData(std::shared_ptr<RasterBucket> bucket_,
+                          std::vector<UnwrappedTileID> tileIds_,
+                          std::vector<UnwrappedTileID> cover_,
+                          std::string name_)
         : bucket(std::move(bucket_)),
-          matrices(std::move(matrices_)),
+          tileIds(std::move(tileIds_)),
+          cover(std::move(cover_)),
           name(std::move(name_)) {}
     ~ImageSourceRenderData() override;
     const std::shared_ptr<RasterBucket> bucket;
-    const std::vector<mat4> matrices;
+    /// The tiles the image is drawn in (the bucket's vertices are in the first one's coordinates)
+    /// and the same image's covering tiles, which tileIds[0] is the first of.
+    const std::vector<UnwrappedTileID> tileIds;
+    const std::vector<UnwrappedTileID> cover;
 
 private:
     void upload(gfx::UploadPass&) const override;
@@ -68,6 +75,7 @@ private:
     std::shared_ptr<RasterBucket> bucket;
     std::unique_ptr<ImageSourceRenderData> renderData;
     std::vector<UnwrappedTileID> tileIds;
+    std::vector<UnwrappedTileID> cover;
 };
 
 } // namespace mln

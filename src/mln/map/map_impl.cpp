@@ -165,6 +165,8 @@ void Map::Impl::onUpdate() {
         terrainImpl = terrain->impl;
     }
 
+    renderedCenterAltitude = transform.getState().getCenterAltitude();
+
     UpdateParameters params = {.styleLoaded = style->impl->isLoaded(),
                                .mode = mode,
                                .pixelRatio = pixelRatio,
@@ -299,6 +301,8 @@ void Map::Impl::onResourceError(std::exception_ptr error) {
 }
 
 void Map::Impl::onWillStartRenderingFrame() {
+    frameCenterAltitude = renderedCenterAltitude;
+
     if (mode == MapMode::Continuous) {
         observer.onWillStartRenderingFrame();
 
@@ -339,8 +343,19 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
             }
         }
     } else if (stillImageRequest && rendererFullyLoaded) {
-        const auto request = std::move(stillImageRequest);
-        request->callback(nullptr);
+        // A few frames at most: the clamp settles in one, as it ignores changes under half a metre.
+        constexpr int maxStillFramesForCenterClamp = 3;
+        constexpr double centerMovedMeters = 0.5;
+        const bool centerMoved = std::abs(transform.getState().getCenterAltitude() - frameCenterAltitude) >=
+                                 centerMovedMeters;
+        if (centerMoved && stillFramesForCenterClamp < maxStillFramesForCenterClamp) {
+            ++stillFramesForCenterClamp;
+            onUpdate();
+        } else {
+            stillFramesForCenterClamp = 0;
+            const auto request = std::move(stillImageRequest);
+            request->callback(nullptr);
+        }
     }
 
     lastFrameStats = std::move(stats);
