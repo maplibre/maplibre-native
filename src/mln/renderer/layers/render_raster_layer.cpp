@@ -245,26 +245,36 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         RasterBucket& bucket = *imageData->bucket;
         if (!bucket.vertices.empty()) {
             if (!imageLayerGroup) {
-                // Set up a layer group
-                imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), true);
+                // Set up a tile layer group: only those are drawn into terrain, which an image
+                // reaches through the tiles it covers
+                imageLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), true);
                 imageLayerGroup->addLayerTweaker(layerTweaker);
                 activateLayerGroup(imageLayerGroup, isRenderable, changes);
             }
 
-            // Create a drawable for each transformation
+            // Create a drawable for each tile the image is drawn in
             // TODO: Share textures
             builder = createBuilder();
-            for (const auto& matrix_ : imageData->matrices) {
+            for (const auto& tileID_ : imageData->tileIds) {
                 buildVertexData(builder, /*drawable=*/nullptr, bucket);
                 setTextures(builder, bucket);
 
                 // finish
                 builder->flush(context);
 
+                // The cover moves along with the (wrapped) tile the image is drawn in
+                std::vector<UnwrappedTileID> cover;
+                cover.reserve(imageData->cover.size());
+                for (const auto& coverTile : imageData->cover) {
+                    cover.emplace_back(coverTile.wrap + tileID_.wrap - imageData->cover[0].wrap, coverTile.canonical);
+                }
+                const OverscaledTileID tileID(tileID_.canonical.z, tileID_.wrap, tileID_.canonical);
+
                 for (auto& drawable : builder->clearDrawables()) {
-                    drawable->setData(std::make_unique<gfx::ImageDrawableData>(matrix_));
+                    drawable->setTileID(tileID);
+                    drawable->setData(std::make_unique<gfx::ImageDrawableData>(cover));
                     drawable->setLayerTweaker(layerTweaker);
-                    imageLayerGroup->addDrawable(std::move(drawable));
+                    imageLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.drawablesAdded;
                 }
             }
