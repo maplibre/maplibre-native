@@ -57,6 +57,7 @@
 #include <cstring>
 #include <functional>
 #include <iomanip>
+#include <numbers>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
@@ -227,6 +228,14 @@ bool RenderTerrain::leavesOutEmptyTiles() {
     return leaveOutEmptyTiles;
 }
 
+size_t RenderTerrain::meshTileCap(const size_t modeCap,
+                                  const double pitch,
+                                  const double fieldOfView,
+                                  const bool oneZoom) {
+    const bool topEdgeOnTheGround = pitch + fieldOfView / 2.0 < std::numbers::pi / 2.0;
+    return oneZoom && topEdgeOnTheGround ? modeCap * 2 : modeCap;
+}
+
 std::optional<uint8_t> RenderTerrain::sourceMinZoomReach() {
     return sourcesEndBelowMinZoom ? std::optional<uint8_t>{2} : std::nullopt;
 }
@@ -365,7 +374,13 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
         const size_t maxTiles = terrainLoadBudget(updateParameters->terrainLoadMode).maxMeshTiles;
         const auto origin = meshTileCapOrigin(state);
         out = coarsenFarMeshTiles(std::move(out), maxTiles, demSource->getMaxZoom(), origin);
-        out = nearestMeshTiles(std::move(out), maxTiles, origin);
+        // Up to the pitch threshold the cover has one zoom: at the threshold on a phone, 67 tiles
+        // of the DEM's own zoom, which cannot merge. Dropping the farthest of them left the far
+        // corners of the view to the sky.
+        const bool oneZoom = coverParams.tileLodMode != TileLodMode::Adaptive &&
+                             state.getPitch() <= coverParams.tileLodPitchThreshold;
+        out = nearestMeshTiles(
+            std::move(out), meshTileCap(maxTiles, state.getPitch(), state.getFieldOfView(), oneZoom), origin);
     }
     if (meshCoverFilter) {
         std::erase_if(out, [](const UnwrappedTileID& id) { return !meshCoverFilter(id); });
