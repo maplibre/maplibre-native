@@ -27,6 +27,30 @@ public:
 
     // Paint properties
 
+    static PropertyValue<float> getDefaultFillExtrusionAmbientOcclusionGroundIntensity();
+    const PropertyValue<float>& getFillExtrusionAmbientOcclusionGroundIntensity() const;
+    void setFillExtrusionAmbientOcclusionGroundIntensity(const PropertyValue<float>&);
+    void setFillExtrusionAmbientOcclusionGroundIntensityTransition(const TransitionOptions&);
+    TransitionOptions getFillExtrusionAmbientOcclusionGroundIntensityTransition() const;
+
+    static PropertyValue<float> getDefaultFillExtrusionAmbientOcclusionGroundRadius();
+    const PropertyValue<float>& getFillExtrusionAmbientOcclusionGroundRadius() const;
+    void setFillExtrusionAmbientOcclusionGroundRadius(const PropertyValue<float>&);
+    void setFillExtrusionAmbientOcclusionGroundRadiusTransition(const TransitionOptions&);
+    TransitionOptions getFillExtrusionAmbientOcclusionGroundRadiusTransition() const;
+
+    static PropertyValue<float> getDefaultFillExtrusionAmbientOcclusionWallIntensity();
+    const PropertyValue<float>& getFillExtrusionAmbientOcclusionWallIntensity() const;
+    void setFillExtrusionAmbientOcclusionWallIntensity(const PropertyValue<float>&);
+    void setFillExtrusionAmbientOcclusionWallIntensityTransition(const TransitionOptions&);
+    TransitionOptions getFillExtrusionAmbientOcclusionWallIntensityTransition() const;
+
+    static PropertyValue<float> getDefaultFillExtrusionAmbientOcclusionWallRadius();
+    const PropertyValue<float>& getFillExtrusionAmbientOcclusionWallRadius() const;
+    void setFillExtrusionAmbientOcclusionWallRadius(const PropertyValue<float>&);
+    void setFillExtrusionAmbientOcclusionWallRadiusTransition(const TransitionOptions&);
+    TransitionOptions getFillExtrusionAmbientOcclusionWallRadiusTransition() const;
+
     static PropertyValue<float> getDefaultFillExtrusionBase();
     const PropertyValue<float>& getFillExtrusionBase() const;
     void setFillExtrusionBase(const PropertyValue<float>&);

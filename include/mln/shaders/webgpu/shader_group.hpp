@@ -91,6 +91,7 @@ public:
                                                      vertexSource,
                                                      fragmentSource,
                                                      ShaderSource::attributes,
+                                                     ShaderSource::instanceAttributes,
                                                      ShaderSource::textures,
                                                      std::string(name));
 

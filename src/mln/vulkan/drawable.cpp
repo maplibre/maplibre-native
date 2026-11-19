@@ -323,7 +323,8 @@ void Drawable::draw(PaintParameters& parameters) const {
             if (getDepthMaskFor3D()) depth.mask = *getDepthMaskFor3D();
             impl->pipelineInfo.setDepthMode(depth);
         } else {
-            const auto& depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+            const auto& depthMode = parameters.depthModeForSublayer(
+                getSubLayerIndex(), getDepthType(), getDepthTestAbove3D());
             impl->pipelineInfo.setDepthMode(depthMode);
         }
     } else {

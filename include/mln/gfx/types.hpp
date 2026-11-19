@@ -15,6 +15,8 @@ enum class ColorBlendEquationType : uint8_t {
               ///< blending parameters.
     ReverseSubtract, ///< Subtracts the source from the destination. O = dD - sS. The source and dest are multiplied by
                      ///< blending parameters.
+    Min,             ///< The smaller of the source and destination. O = min(S, D), without blending parameters.
+    Max,             ///< The larger of the source and destination. O = max(S, D), without blending parameters.
 };
 
 /// Color blending factor type

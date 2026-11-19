@@ -38,6 +38,8 @@ constexpr auto CaptureFrameCount = 1;
 #include <mln/gl/drawable_gl.hpp>
 #endif // !MLN_RENDER_BACKEND_METAL
 
+#include <optional>
+
 namespace mln {
 
 using namespace style;
@@ -338,6 +340,49 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         }
     };
 
+    // `currentLayer` counts style layers from the top, like `opaquePassCutoff`, which disables depth for the 2D
+    // layers above the lowest 3D layer. The layer groups of one style layer share its layer index (the ground ambient
+    // occlusion of a fill-extrusion layer, the symbol collision boxes), so they get the same `currentLayer`: counting
+    // them apart would shift every layer below them past the cutoff.
+    const auto numLayerIndices = [&] {
+        std::size_t count = 0;
+        std::optional<int32_t> lastIndex;
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            if (layerGroup.getLayerIndex() != lastIndex) {
+                lastIndex = layerGroup.getLayerIndex();
+                ++count;
+            }
+        });
+        return count;
+    };
+    // Bottom to top, `currentLayer` counting down to 0
+    const auto renderLayerGroupsUpward = [&] {
+        auto layersLeft = numLayerIndices();
+        std::optional<int32_t> lastIndex;
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            if (layerGroup.getLayerIndex() != lastIndex) {
+                lastIndex = layerGroup.getLayerIndex();
+                if (layersLeft > 0) {
+                    --layersLeft;
+                }
+            }
+            parameters.currentLayer = static_cast<uint32_t>(layersLeft);
+            layerGroup.render(orchestrator, parameters);
+        });
+    };
+    // Top to bottom, `currentLayer` counting up from 0
+    const auto renderLayerGroupsDownward = [&] {
+        std::optional<int32_t> lastIndex;
+        parameters.currentLayer = 0;
+        orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
+            if (lastIndex && layerGroup.getLayerIndex() != *lastIndex) {
+                parameters.currentLayer++;
+            }
+            lastIndex = layerGroup.getLayerIndex();
+            layerGroup.render(orchestrator, parameters);
+        });
+    };
+
     const auto drawable3DPass = [&] {
         const auto debugGroup(parameters.encoder->createDebugGroup("drawables-3d"));
         assert(parameters.pass == RenderPass::Pass3D);
@@ -346,13 +391,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, 3D pass
-        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
-        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
-            if (parameters.currentLayer > 0) {
-                parameters.currentLayer--;
-            }
-        });
+        renderLayerGroupsUpward();
     };
 
     const auto drawableTargetsPass = [&] {
@@ -394,11 +433,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
-        parameters.currentLayer = 0;
-        orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer++;
-        });
+        renderLayerGroupsDownward();
     };
 
     const auto drawableTranslucentPass = [&] {
@@ -408,13 +443,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
-        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
-        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
-            if (parameters.currentLayer > 0) {
-                parameters.currentLayer--;
-            }
-        });
+        renderLayerGroupsUpward();
 
         // Finally, render any legacy layers which have not been converted to drawables.
         // Note that they may be out of order, this is just a temporary fix for `RenderLocationIndicatorLayer` (#2216)

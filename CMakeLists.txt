@@ -207,6 +207,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/fill_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/fill_extrusion_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/fill_extrusion_layer_tweaker.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/fill_extrusion_ground_occlusion_layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/fill_extrusion_ground_occlusion_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/heatmap_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/heatmap_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/heatmap_texture_layer_tweaker.cpp

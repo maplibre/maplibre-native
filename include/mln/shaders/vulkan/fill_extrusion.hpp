@@ -84,13 +84,13 @@ void main() {
     const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
-    const float base = props.light_position_base.w;
+    const float base = max(props.light_position_base.w, 0.0);
 #else
     const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
-    const float height = props.height;
+    const float height = max(props.height, 0.0);
 #else
     const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
@@ -223,7 +223,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float ambient_occlusion_wall_radius;
 } props;
 
 struct OutlineInstance {
@@ -236,8 +236,14 @@ layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedD
 } instanceVector;
 
 layout(location = 0) out mediump vec4 frag_color;
+// Height above the ground in meters, for the ambient occlusion
+layout(location = 1) out float frag_z;
+// The color without the ambient part of the lighting, for the ambient occlusion
+layout(location = 2) out mediump vec3 frag_color_without_ambient;
 
 void main() {
+    frag_z = 0.0;
+    frag_color_without_ambient = vec3(0.0);
 
     const vec2 instancePos = unpack_int(instanceVector.instance[gl_InstanceIndex].pos);
     const vec2 instanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex].decimals_ed);
@@ -252,13 +258,13 @@ void main() {
     const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
-    const float base = props.light_position_base.w;
+    const float base = max(props.light_position_base.w, 0.0);
 #else
     const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
-    const float height = props.height;
+    const float height = max(props.height, 0.0);
 #else
     const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
@@ -281,6 +287,7 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
     applySurfaceTransform();
+    frag_z = z;
 
 #if defined(OVERDRAW_INSPECTOR)
     frag_color = vec4(1.0);
@@ -305,6 +312,7 @@ void main() {
     float directional = mix(minDirectional, maxDirectional, directionalFraction);
 
     // Add gradient along z axis of side surfaces
+    float gradient = 1.0;
     if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no
         // vertical gradient, and otherwise calculates the gradient based on base + height
@@ -312,8 +320,9 @@ void main() {
         //       the square root when height is a uniform.
         const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        gradient = (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
     }
+    directional *= gradient;
 
     // Assign final color based on surface + ambient light color, diffuse light directional,
     // and light color with lower bounds adjusted to hue of light so that shading is tinted
@@ -323,16 +332,51 @@ void main() {
     vcolor += vec4(clamp(color.rgb * directional * light_color.rgb, minLight, vec3(1.0)), 0.0);
 
     frag_color = vcolor * props.opacity;
+
+    // The same without the ambient part of the lighting, 1 - light_intensity, which the ambient occlusion takes away
+    const float directionalWithoutAmbient = directional - (1.0 - props.light_intensity) * gradient;
+    frag_color_without_ambient = clamp(color.rgb * directionalWithoutAmbient * light_color.rgb, minLight, vec3(1.0)) * props.opacity;
 }
 )";
 
     static constexpr auto fragment = R"(
 
 layout(location = 0) in vec4 frag_color;
+layout(location = 1) in float frag_z;
+layout(location = 2) in mediump vec3 frag_color_without_ambient;
 layout(location = 0) out vec4 out_color;
 
+layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
+    vec4 color;
+    vec4 light_color_pad;
+    vec4 light_position_base;
+    float height;
+    float light_intensity;
+    float vertical_gradient;
+    float opacity;
+    float fade;
+    float from_scale;
+    float to_scale;
+    float ambient_occlusion_wall_radius;
+} props;
+
+// Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
+// 0 leaves the color as is. `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
+float wallAmbientOcclusion(float z) {
+    const float intensity = props.light_color_pad.w;
+    if (intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
+        return 0.0;
+    }
+    return intensity * ambientOcclusionFalloff(z / props.ambient_occlusion_wall_radius);
+}
+
 void main() {
+#if defined(OVERDRAW_INSPECTOR)
     out_color = frag_color;
+    return;
+#endif
+    // Take ambient light away from the bottom of the walls. Both colors are premultiplied.
+    out_color = vec4(mix(frag_color.rgb, frag_color_without_ambient, wallAmbientOcclusion(frag_z)), frag_color.a);
 }
 )";
 };
@@ -433,13 +477,13 @@ void main() {
     const FillExtrusionTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
-    const float base = props.light_position_base.w;
+    const float base = max(props.light_position_base.w, 0.0);
 #else
     const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
-    const float height = props.height;
+    const float height = max(props.height, 0.0);
 #else
     const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
@@ -690,7 +734,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float ambient_occlusion_wall_radius;
 } props;
 
 layout(location = 0) out mediump vec4 frag_lighting;
@@ -705,7 +749,15 @@ layout(location = 3) out mediump vec4 frag_pattern_from;
 layout(location = 4) out mediump vec4 frag_pattern_to;
 #endif
 
+// Height above the ground in meters, for the ambient occlusion
+layout(location = 5) out float frag_z;
+// The lighting without its ambient part, for the ambient occlusion
+layout(location = 6) out mediump vec3 frag_lighting_without_ambient;
+
 void main() {
+    frag_z = 0.0;
+    frag_lighting_without_ambient = vec3(0.0);
+
     const vec2 instancePos = unpack_int(instanceVector.instance[gl_InstanceIndex].pos);
     const vec2 instanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex].decimals_ed);
 
@@ -719,13 +771,13 @@ void main() {
     const FillExtrusionTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
-    const float base = props.light_position_base.w;
+    const float base = max(props.light_position_base.w, 0.0);
 #else
     const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
-    const float height = props.height;
+    const float height = max(props.height, 0.0);
 #else
     const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
@@ -743,6 +795,7 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
     applySurfaceTransform();
+    frag_z = z;
 
 #if defined(OVERDRAW_INSPECTOR)
     frag_lighting = vec4(1.0);
@@ -786,6 +839,7 @@ void main() {
     float directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
+    float gradient = 1.0;
     if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no
         // vertical gradient, and otherwise calculates the gradient based on base + height
@@ -793,11 +847,17 @@ void main() {
         //       the square root when height is a uniform.
         const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        gradient = (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
     }
+    directional *= gradient;
 
-    lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(vec3(0.0), vec3(0.3), 1.0 - props.light_color_pad.rgb), vec3(1.0));
+    const vec3 minLight = mix(vec3(0.0), vec3(0.3), 1.0 - props.light_color_pad.rgb);
+    lighting.rgb += clamp(directional * props.light_color_pad.rgb, minLight, vec3(1.0));
     lighting *= props.opacity;
+
+    // The same without the ambient part of the lighting, 1 - light_intensity, which the ambient occlusion takes away
+    const float directionalWithoutAmbient = directional - (1.0 - props.light_intensity) * gradient;
+    frag_lighting_without_ambient = clamp(directionalWithoutAmbient * props.light_color_pad.rgb, minLight, vec3(1.0)) * props.opacity;
 
     frag_lighting = lighting;
     frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, pos);
@@ -826,6 +886,9 @@ layout(location = 3) in mediump vec4 frag_pattern_from;
 #if !defined(HAS_UNIFORM_u_pattern_to)
 layout(location = 4) in mediump vec4 frag_pattern_to;
 #endif
+
+layout(location = 5) in float frag_z;
+layout(location = 6) in mediump vec3 frag_lighting_without_ambient;
 
 layout(location = 0) out vec4 out_color;
 
@@ -856,10 +919,20 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float ambient_occlusion_wall_radius;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
+
+// Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
+// 0 leaves the color as is. `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
+float wallAmbientOcclusion(float z) {
+    const float intensity = props.light_color_pad.w;
+    if (intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
+        return 0.0;
+    }
+    return intensity * ambientOcclusionFalloff(z / props.ambient_occlusion_wall_radius);
+}
 
 void main() {
 
@@ -894,7 +967,9 @@ void main() {
     const vec2 pos2 = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
     const vec4 color2 = texture(image0_sampler, pos2);
 
-    out_color = mix(color1, color2, props.fade) * frag_lighting;
+    // Take ambient light away from the bottom of the walls. Both are premultiplied.
+    const vec4 lighting = vec4(mix(frag_lighting.rgb, frag_lighting_without_ambient, wallAmbientOcclusion(frag_z)), frag_lighting.a);
+    out_color = mix(color1, color2, props.fade) * lighting;
 }
 )";
 };

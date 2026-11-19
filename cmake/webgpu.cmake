@@ -36,6 +36,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/debug.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/fill.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/fill_extrusion.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/fill_extrusion_ground_occlusion.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/heatmap.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/heatmap_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/hillshade.cpp
@@ -75,6 +76,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/debug.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/fill.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/fill_extrusion.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/fill_extrusion_ground_occlusion.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/heatmap.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/hillshade.hpp
