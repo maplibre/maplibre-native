@@ -335,6 +335,10 @@ typedef struct mln_plugin_uniform_context_v1 {
     int32_t tile_wrap;
     float crossfade_from_scale, crossfade_to_scale, crossfade_t;
     float pattern_texture_size[2];
+    /* World pixels (the xy unit of tile_matrix) per meter at the map center's latitude. The projection takes a
+     * vertex z in meters and scales it by this, so geometry that must keep its proportions across zoom levels
+     * divides its height in pixels by it. */
+    float pixels_per_meter;
 } mln_plugin_uniform_context_v1;
 
 /* output is host-owned writable storage of output_size bytes, borrowed only
