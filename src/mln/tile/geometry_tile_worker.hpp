@@ -126,6 +126,10 @@ private:
     GlyphDependencies pendingGlyphDependencies;
     ImageDependencies pendingImageDependencies;
     LayoutResourceDependencies pendingResourceDependencies;
+    // True while `parse` requests the dependencies of the layouts it created. With a synchronous update a request
+    // can be answered before it returns, and finalizing then would run before the later requests are registered
+    // as pending, laying the layouts out without everything they wait for.
+    bool parsing = false;
     GlyphMap glyphMap;
     ImageMap iconMap;
     ImageMap patternMap;

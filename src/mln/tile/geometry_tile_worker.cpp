@@ -23,6 +23,7 @@
 #include <mln/util/string.hpp>
 #include <mln/util/thread_pool.hpp>
 
+#include <optional>
 #include <utility>
 
 namespace mln {
@@ -240,6 +241,11 @@ void GeometryTileWorker::setShowCollisionBoxes(bool showCollisionBoxes_, uint64_
 void GeometryTileWorker::symbolDependenciesChanged() {
     MLN_TRACE_FUNC();
 
+    // `parse` finalizes once it has requested every dependency.
+    if (parsing) {
+        return;
+    }
+
     try {
         switch (state) {
             case Idle:
@@ -453,6 +459,16 @@ void GeometryTileWorker::parse() {
     // called on this worker thread.
     const ErrorScope errorScope{observer};
 
+    struct ParsingScope {
+        bool& flag;
+        explicit ParsingScope(bool& flag_)
+            : flag(flag_) {
+            flag = true;
+        }
+        ~ParsingScope() { flag = false; }
+    };
+    std::optional<ParsingScope> parsingScope{std::in_place, parsing};
+
     MBGL_TIMING_START(watch)
 
     std::unordered_map<std::string, std::unique_ptr<SymbolLayout>> symbolLayoutMap;
@@ -563,6 +579,7 @@ void GeometryTileWorker::parse() {
     requestNewImages(imageDependencies);
     requestNewResources(resourceDependencies);
 
+    parsingScope.reset();
     MBGL_TIMING_FINISH(watch,
                        " Action: " << "Parsing,"
                                    << " SourceID: " << sourceID.c_str()
