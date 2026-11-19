@@ -76,7 +76,7 @@ public:
     /// is taken from, and the ground under the map's center, which a camera low over high ground
     /// cannot see but whose height the center clamp needs. Nothing is asked for where the cover
     /// already holds a tile over it.
-    std::vector<LatLng> alsoCover;
+    std::vector<LatLng> alsoCover{};
     /// With terrain on: leave out the tiles that build none of the source's layers, every layer being
     /// outside its zoom range for them (GeometryTile::setLayers). They draw nothing.
     bool leaveOutEmptyTiles = false;
