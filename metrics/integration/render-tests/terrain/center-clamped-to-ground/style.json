@@ -4,6 +4,7 @@
     "test": {
       "height": 256,
       "width": 256,
+      "allowed": 0.001,
       "centerClampedToGround": true,
       "description": "A still image of a pitched view over high ground, with the center clamped to the ground: it is drawn with the center on the ground (as gl-js draws terrain/fill-outline), not at sea level with the camera low over the slope."
     }
