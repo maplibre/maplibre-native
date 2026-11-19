@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 namespace mln {
@@ -40,6 +41,13 @@ public:
 
     /// False once the CPU copy has been freed after upload. The element count is kept.
     bool hasRawData() const { return !rawFreed; }
+
+    /// Throw if a caller is about to read or write the CPU copy after it was discarded.
+    void requireRawData() const {
+        if (!hasRawData()) {
+            throw std::logic_error("CPU vertex data was discarded after upload");
+        }
+    }
 
     std::chrono::duration<double> getLastModified() const { return lastModified; }
     bool isModifiedAfter(std::chrono::duration<double> t) const { return !rawFreed && t < lastModified; }
@@ -84,24 +92,28 @@ public:
 
     template <class... Args>
     void emplace_back(Args&&... args) {
+        requireRawData();
         assert(!released);
         util::ignore({(v.emplace_back(std::forward<Args>(args)), 0)...});
         dirty = true;
     }
 
     void extend(std::size_t n, const Vertex& val) {
+        requireRawData();
         assert(!released);
         v.resize(v.size() + n, val);
         dirty = true;
     }
 
     Vertex& at(std::size_t n) {
+        requireRawData();
         assert(n < v.size());
         assert(!released);
         dirty = true;
         return v.at(n);
     }
     const Vertex& at(std::size_t n) const {
+        requireRawData();
         assert(n < v.size());
         return v.at(n);
     }
@@ -130,11 +142,14 @@ public:
         }
     }
 
-    const Vertex* data() const { return v.data(); }
+    const Vertex* data() const {
+        requireRawData();
+        return v.data();
+    }
 
     const std::vector<Vertex>& vector() const { return v; }
 
-    const void* getRawData() const override { return v.data(); }
+    const void* getRawData() const override { return data(); }
     std::size_t getRawSize() const override { return sizeof(Vertex); }
     std::size_t getRawCount() const override { return elements(); }
 

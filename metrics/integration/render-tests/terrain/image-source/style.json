@@ -1,0 +1,122 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "A raster layer on an image source is drawn on terrain, also across the edges between the tiles that cover the image (2 x 2 here).",
+      "height": 512,
+      "width": 512,
+      "threshold": 0.05,
+      "allowed": 0.001
+    }
+  },
+  "center": [
+    11.5137,
+    47.3388
+  ],
+  "zoom": 12,
+  "pitch": 40,
+  "bearing": 0,
+  "sources": {
+    "terrainSource": {
+      "type": "raster-dem",
+      "tiles": [
+        "local://tiles/terrain-shading/{z}-{x}-{y}.terrain.png"
+      ],
+      "maxzoom": 12,
+      "tileSize": 256
+    },
+    "image": {
+      "type": "image",
+      "url": "local://image/0.png",
+      "coordinates": [
+        [
+          11.4737,
+          47.3638
+        ],
+        [
+          11.5537,
+          47.3638
+        ],
+        [
+          11.5537,
+          47.3138
+        ],
+        [
+          11.4737,
+          47.3138
+        ]
+      ]
+    },
+    "ground": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                11.3,
+                47.2
+              ],
+              [
+                11.7,
+                47.2
+              ],
+              [
+                11.7,
+                47.5
+              ],
+              [
+                11.3,
+                47.5
+              ],
+              [
+                11.3,
+                47.2
+              ]
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "terrain": {
+    "source": "terrainSource",
+    "exaggeration": 1
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#ddd"
+      }
+    },
+    {
+      "id": "ground",
+      "type": "fill",
+      "source": "ground",
+      "paint": {
+        "fill-color": "#a9b58f"
+      }
+    },
+    {
+      "id": "relief",
+      "type": "hillshade",
+      "source": "terrainSource",
+      "paint": {
+        "hillshade-exaggeration": 0.8
+      }
+    },
+    {
+      "id": "image",
+      "type": "raster",
+      "source": "image",
+      "paint": {
+        "raster-opacity": 0.85
+      }
+    }
+  ]
+}

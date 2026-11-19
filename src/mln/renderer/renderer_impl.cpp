@@ -433,6 +433,13 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                     // id re-renders the drape instead of serving the stale bake until the next zoom.
                     util::hash_combine(h, RenderTarget::drapedDataID(drawable));
                     util::hash_combine(signature, h);
+                    // A drawable that spans several tiles (an image) counts under each of them
+                    if (const auto& data = drawable.getData(); data && !data->drapeCover().empty()) {
+                        for (const auto& coverTile : data->drapeCover()) {
+                            drapedTiles.emplace_back(coverTile, h);
+                        }
+                        return;
+                    }
                     drapedTiles.emplace_back(tile, h);
                 });
             });
