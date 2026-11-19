@@ -8,7 +8,7 @@ linux:
   - '.github/workflows/linux-ci.yml'
   - 'vendor/**'
   - 'CMakeLists.txt'
-  - 'metrics/linux-gcc8-release-style.json'
+  - 'metrics/**'
   - 'MODULE.bazel'
   - 'BUILD.bazel'
   - '.bazelrc'
