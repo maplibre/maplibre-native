@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Add `MLNFillExtrusionStyleLayer.fillExtrusionAmbientOcclusionWallIntensity` and `fillExtrusionAmbientOcclusionWallRadius`, with their transitions, for the new `fill-extrusion-ambient-occlusion-wall-intensity` and `fill-extrusion-ambient-occlusion-wall-radius` paint properties. They take ambient light away from the bottom of fill-extrusion walls ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
 - Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.

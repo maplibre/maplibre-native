@@ -46,6 +46,7 @@ MapLibre iOS is based in part of the work of the [FreeType](https://freetype.org
 - <doc:BlockingGesturesExample>
 - <doc:AnnotationViewExample>
 - <doc:BuildingLightExample>
+- <doc:AmbientOcclusionExample>
 
 ### Features
 

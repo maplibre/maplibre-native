@@ -14,6 +14,8 @@
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/layers/fill_extrusion_layer_properties.hpp>
 
+#include <algorithm>
+
 #if MLN_RENDER_BACKEND_METAL
 #include <mln/shaders/mtl/fill_extrusion.hpp>
 #endif
@@ -44,7 +46,9 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
     const FillExtrusionPropsUBO propsUBO = {
         .color = constOrDefault<FillExtrusionColor>(evaluated),
         .light_color = FillExtrusionBucket::lightColor(parameters.evaluatedLight),
-        .pad1 = 0,
+        // Spec `minimum`/`maximum` are documentation only, so clamp here
+        .ambient_occlusion_wall_intensity = std::clamp(
+            evaluated.get<FillExtrusionAmbientOcclusionWallIntensity>(), 0.0f, 1.0f),
         .light_position = FillExtrusionBucket::lightPosition(parameters.evaluatedLight, state),
         .base = constOrDefault<FillExtrusionBase>(evaluated),
         .height = constOrDefault<FillExtrusionHeight>(evaluated),
@@ -54,7 +58,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         .fade = crossfade.t,
         .from_scale = crossfade.fromScale,
         .to_scale = crossfade.toScale,
-        .pad2 = 0};
+        .ambient_occlusion_wall_radius = std::max(evaluated.get<FillExtrusionAmbientOcclusionWallRadius>(), 0.0f)};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context);
 
