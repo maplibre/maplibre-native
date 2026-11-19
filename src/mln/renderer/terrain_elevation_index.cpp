@@ -13,14 +13,14 @@ namespace mln {
 
 TerrainElevationIndex::Grid::Grid(const DEMData& dem)
     : dim(dem.dim) {
-    const int32_t side = dim + 1;
+    const int32_t side = dim + 2;
     heights.resize(static_cast<size_t>(side) * side);
-    for (int32_t y = 0; y < side; ++y) {
-        for (int32_t x = 0; x < side; ++x) {
+    for (int32_t y = -1; y <= dim; ++y) {
+        for (int32_t x = -1; x <= dim; ++x) {
             const int32_t h = util::clamp(dem.get(x, y),
                                           static_cast<int32_t>(std::numeric_limits<int16_t>::min()),
                                           static_cast<int32_t>(std::numeric_limits<int16_t>::max()));
-            heights[static_cast<size_t>(y) * side + x] = static_cast<int16_t>(h);
+            heights[static_cast<size_t>(y + 1) * side + static_cast<size_t>(x + 1)] = static_cast<int16_t>(h);
             maxHeight = std::max(maxHeight, static_cast<int16_t>(h));
         }
     }
@@ -54,11 +54,13 @@ std::optional<double> TerrainElevationIndex::getElevation(const LatLng& latLng) 
         if (found == level.tiles.end()) {
             continue;
         }
-        // Bilinear interpolation of the DEM texels, as RenderTerrain::getElevation
+        // Bilinear interpolation of the DEM texels, as RenderTerrain::getElevation: pixel i holds
+        // the height of its cell, centred at (i + 0.5) / dim, so a point maps to pixel coordinate
+        // uv * dim - 0.5, which reaches into the border within half a pixel of the tile's edge.
         const Grid& grid = *found->second->grid;
         const auto dim = static_cast<double>(grid.dim);
-        const double px = util::clamp((world.x - fx) * dim, 0.0, dim - 1.0);
-        const double py = util::clamp((world.y - fy) * dim, 0.0, dim - 1.0);
+        const double px = util::clamp((world.x - fx) * dim - 0.5, -0.5, dim - 0.5);
+        const double py = util::clamp((world.y - fy) * dim - 0.5, -0.5, dim - 0.5);
         const auto x0 = static_cast<int32_t>(std::floor(px));
         const auto y0 = static_cast<int32_t>(std::floor(py));
         const double tx = px - x0;

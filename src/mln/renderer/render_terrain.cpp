@@ -101,12 +101,15 @@ DEMSubTileOffset demSubTileOffset(const CanonicalTileID& child, const CanonicalT
 
 /// Bilinear interpolation of a DEM tile's texels at a point given in a (possibly descendant) tile's
 /// local space, as maplibre-gl-js Terrain.getDEMElevation. Unexaggerated metres.
+/// Pixel i holds the height of its cell, centred at (i + 0.5) / dim, where hillshade and
+/// color-relief draw it (gl-js #8420), so a point maps to pixel coordinate uv * dim - 0.5.
+/// Within half a pixel of the tile's edge that reaches into the backfilled border.
 float sampleDEM(const DEMData& demData, const DEMSubTileOffset& off, float x, float y) {
     const float xInDem = (off.dx * util::EXTENT + x) / off.scale;
     const float yInDem = (off.dy * util::EXTENT + y) / off.scale;
     const auto dim = static_cast<float>(demData.dim);
-    const float px = util::clamp(xInDem / util::EXTENT * dim, 0.0f, dim - 1.0f);
-    const float py = util::clamp(yInDem / util::EXTENT * dim, 0.0f, dim - 1.0f);
+    const float px = util::clamp(xInDem / util::EXTENT * dim - 0.5f, -0.5f, dim - 0.5f);
+    const float py = util::clamp(yInDem / util::EXTENT * dim - 0.5f, -0.5f, dim - 0.5f);
     const auto x0 = static_cast<int32_t>(std::floor(px));
     const auto y0 = static_cast<int32_t>(std::floor(py));
     const float fx = px - static_cast<float>(x0);
@@ -1146,6 +1149,10 @@ std::optional<LatLng> RenderTerrain::pickLatLng(const TransformState& state, con
         state, pixel, [&index](const LatLng& latLng) { return index->getElevation(latLng); }, index->getMaxElevation());
 }
 
+bool RenderTerrain::ElevationGridCopy::isCopyOf(const DEMData* dem) const {
+    return source == dem && borderRevision == dem->getBorderRevision();
+}
+
 bool RenderTerrain::updateElevationIndex() {
     if (!demSource || !isEnabled()) {
         elevationGrids.clear();
@@ -1160,7 +1167,7 @@ bool RenderTerrain::updateElevationIndex() {
     if (!changed) {
         for (const auto& tile : loaded) {
             const auto found = elevationGrids.find(tile.id);
-            if (found == elevationGrids.end() || found->second.source != tile.data) {
+            if (found == elevationGrids.end() || !found->second.isCopyOf(tile.data)) {
                 changed = true;
                 break;
             }
@@ -1175,10 +1182,12 @@ bool RenderTerrain::updateElevationIndex() {
     for (const auto& tile : loaded) {
         ElevationGridCopy copy;
         if (const auto found = elevationGrids.find(tile.id);
-            found != elevationGrids.end() && found->second.source == tile.data) {
+            found != elevationGrids.end() && found->second.isCopyOf(tile.data)) {
             copy = found->second;
         } else {
-            copy = {.source = tile.data, .grid = std::make_shared<const TerrainElevationIndex::Grid>(*tile.data)};
+            copy = {.source = tile.data,
+                    .borderRevision = tile.data->getBorderRevision(),
+                    .grid = std::make_shared<const TerrainElevationIndex::Grid>(*tile.data)};
         }
         tiles.push_back({.id = tile.id, .grid = copy.grid});
         grids.emplace(tile.id, std::move(copy));

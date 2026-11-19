@@ -20,6 +20,7 @@
 #include <cmath>
 #include <limits>
 #include <set>
+#include <utility>
 
 using namespace mln;
 
@@ -110,6 +111,76 @@ TEST(TerrainElevationIndex, SamplesTheTileUnderTheLocation) {
 
     // A location no tile covers has no height, rather than sea level.
     EXPECT_FALSE(index.getElevation(LatLng{-33.87, 151.21}));
+}
+
+// A DEM pixel holds the height of its whole cell, and hillshade and color-relief draw it over that
+// cell, so the height at a pixel's centre is the pixel's value, as RenderTerrain reads it. Read as
+// the height at the cell's top-left corner, the copy stood half a pixel north-west of the renderer's
+// ground. The corner pixels' centres sit next to the tile's border.
+TEST(TerrainElevationIndex, APixelsHeightIsAtItsCentre) {
+    // A different whole number of metres for every pixel: 10 m a column, 100 m a row
+    const auto rampHeight = [](uint32_t x, uint32_t y) {
+        return 1000.0 + 10.0 * x + 100.0 * y;
+    };
+    PremultipliedImage image({demTileSize, demTileSize});
+    for (uint32_t y = 0; y < demTileSize; ++y) {
+        for (uint32_t x = 0; x < demTileSize; ++x) {
+            const auto encoded = static_cast<uint32_t>(std::lround((rampHeight(x, y) + 10000.0) * 10.0));
+            uint8_t* px = image.data.get() + (y * demTileSize + x) * 4;
+            px[0] = static_cast<uint8_t>((encoded >> 16) & 0xFF);
+            px[1] = static_cast<uint8_t>((encoded >> 8) & 0xFF);
+            px[2] = static_cast<uint8_t>(encoded & 0xFF);
+            px[3] = 255;
+        }
+    }
+    const DEMData dem(image, Tileset::RasterEncoding::Mapbox);
+    const UnwrappedTileID id(2, 2, 1);
+    TerrainElevationIndex index({{id, std::make_shared<const TerrainElevationIndex::Grid>(dem)}}, 1.0f);
+
+    for (const auto& [x, y] : {std::pair<uint32_t, uint32_t>{20, 40}, {0, 0}, {63, 63}}) {
+        // The centre of pixel (x, y) of tile 2/2/1, in z2 tile units
+        const Point<double> centre{2.0 + (x + 0.5) / demTileSize, 1.0 + (y + 0.5) / demTileSize};
+        const auto elevation = index.getElevation(Projection::unproject(centre * util::tileSize_D, 4.0));
+        ASSERT_TRUE(elevation) << "pixel " << x << ", " << y;
+        EXPECT_NEAR(*elevation, rampHeight(x, y), 0.01) << "pixel " << x << ", " << y;
+    }
+}
+
+// Two neighbours that have backfilled each other's border read the same height on their shared
+// edge: halfway between the pixels on either side of it, as the GPU reads it. Clamped to the
+// tile's own last pixel, each side read its own edge pixel and the two disagreed.
+TEST(TerrainElevationIndex, NeighboursAgreeOnTheirSharedEdge) {
+    // 10 m a column and 100 m a row, from a different base height per tile
+    const auto rampImage = [](double base) {
+        PremultipliedImage image({demTileSize, demTileSize});
+        for (uint32_t y = 0; y < demTileSize; ++y) {
+            for (uint32_t x = 0; x < demTileSize; ++x) {
+                const auto encoded = static_cast<uint32_t>(std::lround((base + 10.0 * x + 100.0 * y + 10000.0) * 10.0));
+                uint8_t* px = image.data.get() + (y * demTileSize + x) * 4;
+                px[0] = static_cast<uint8_t>((encoded >> 16) & 0xFF);
+                px[1] = static_cast<uint8_t>((encoded >> 8) & 0xFF);
+                px[2] = static_cast<uint8_t>(encoded & 0xFF);
+                px[3] = 255;
+            }
+        }
+        return image;
+    };
+    DEMData west(rampImage(1000.0), Tileset::RasterEncoding::Mapbox);
+    DEMData east(rampImage(3000.0), Tileset::RasterEncoding::Mapbox);
+    west.backfillBorder(east, 1, 0);
+    east.backfillBorder(west, -1, 0);
+    TerrainElevationIndex index({{UnwrappedTileID(2, 1, 1), std::make_shared<const TerrainElevationIndex::Grid>(west)},
+                                 {UnwrappedTileID(2, 2, 1), std::make_shared<const TerrainElevationIndex::Grid>(east)}},
+                                1.0f);
+
+    // Row 40's centre, on the shared edge x = 2 in z2 tile units and a hair to either side of it.
+    // West's last pixel there is 1000 + 630 + 4000 = 5630 m, east's first 3000 + 4000 = 7000 m.
+    const double y = 1.0 + 40.5 / demTileSize;
+    for (const double x : {2.0 - 1e-9, 2.0, 2.0 + 1e-9}) {
+        const auto elevation = index.getElevation(Projection::unproject(Point<double>{x, y} * util::tileSize_D, 4.0));
+        ASSERT_TRUE(elevation) << "x " << x;
+        EXPECT_NEAR(*elevation, (5630.0 + 7000.0) / 2.0, 0.01) << "x " << x;
+    }
 }
 
 // Where a deeper tile is loaded it wins over its ancestors, as in RenderTerrain.
