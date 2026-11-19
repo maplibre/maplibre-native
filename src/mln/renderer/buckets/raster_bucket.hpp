@@ -33,12 +33,20 @@ public:
 
     void clear();
     void setImage(std::shared_ptr<PremultipliedImage>);
+
+    /// Drops the CPU copy of the pixels once a texture owns them. `hasData()` stays true.
+    void releaseImage();
     void setMask(TileMask&&);
+
+    /// Total size of the decoded images that all live raster buckets hold (for tests and diagnostics).
+    static std::size_t getHeldImageBytes();
 
     static RasterLayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
         return RasterLayoutVertex{.a1 = {{p.x, p.y}}, .a2 = {{t.x, t.y}}};
     }
 
+    // The decoded pixels, until the layer hands them to `texture2d` and calls `releaseImage()`.
+    // Image source buckets keep them, because the source compares against them to detect a new image.
     std::shared_ptr<PremultipliedImage> image;
     gfx::Texture2DPtr texture2d;
     TileMask mask{{0, 0, 0}};
