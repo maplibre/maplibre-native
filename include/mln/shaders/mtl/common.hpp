@@ -70,14 +70,19 @@ inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel
 
 // Sample the terrain elevation in meters at a tile-local coordinate, with manual
 // bilinear interpolation on DEM pixel centers (the DEM has a 2px backfilled border),
-// matching the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
+// matching the maplibre-gl-js get_elevation() prelude function. DEM pixel i holds the
+// height of its cell, centred at tile coordinate (i + 0.5) / dim, and sits at texel
+// i + 2 behind the border, so the texel coordinate is uv * dim + 1.5. Unlike gl-js (global
 // terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
 // texture and dem_* values are passed in as arguments rather than read from globals.
 // Decode one DEM texel to meters. The clamp at the call sites matters: read() out of range
 // is undefined where the sampler's clamp-to-edge used to cover it, and a tile with no DEM of
 // its own is bound the 1x1 placeholder, whose only valid texel is (0, 0).
+// The bytes are whole numbers, but a driver can return them times 255.0 a hair off one (Mesa
+// does), and Mapbox's 6553.6 m per unit of red turns that into a height about a millimetre off,
+// where a Terrarium tile of the same heights is exact. Rounded, as unpack_depth does.
 inline float dem_texel(texture2d<float, access::sample> dem, int2 texel, float4 dem_unpack) {
-    float4 data = dem.read(uint2(texel)) * 255.0;
+    float4 data = round(dem.read(uint2(texel)) * 255.0);
     data.a = -1.0;
     return dot(data, dem_unpack);
 }
@@ -93,7 +98,7 @@ inline float get_elevation(float2 pos,
     if (dem_enabled == 0.0) {
         return 0.0;
     }
-    const float2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
+    const float2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.5;
     const float2 f = fract(coord);
     const int2 c = int2(floor(coord));
     const int2 hi = int2(dem.get_width(), dem.get_height()) - 1;
