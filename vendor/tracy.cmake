@@ -10,7 +10,7 @@ include(FetchContent)
 FetchContent_Declare(
     tracy
     GIT_REPOSITORY "https://github.com/wolfpld/tracy.git"
-    GIT_TAG master
+    GIT_TAG v0.11.1 # master no longer builds with the GL symbols in mln::platform
     GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE
 )
