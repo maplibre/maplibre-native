@@ -52,7 +52,7 @@ private:
     const ImageSourceRenderData* imageData = nullptr;
 
     gfx::ShaderProgramBasePtr rasterShader;
-    LayerGroupPtr imageLayerGroup;
+    TileLayerGroupPtr imageLayerGroup;
 
     using RasterVertexVector = gfx::VertexVector<RasterLayoutVertex>;
     using RasterVertexVectorPtr = std::shared_ptr<RasterVertexVector>;

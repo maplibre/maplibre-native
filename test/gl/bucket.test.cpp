@@ -174,6 +174,8 @@ TEST(Buckets, FillBucketFreesCpuGeometryAfterUpload) {
     EXPECT_EQ(vertexCount, bucket->vertices.elements());
     EXPECT_EQ(0u, bucket->triangles.vector().capacity());
     EXPECT_EQ(indexCount, bucket->triangles.elements());
+    EXPECT_THROW(bucket->vertices.at(0), std::logic_error);
+    EXPECT_THROW(bucket->triangles.data(), std::logic_error);
 
     // A second drawable over the same bucket reuses the buffer without reading the data.
     EXPECT_EQ(&buffer, &glUploadPass.getBuffer(bucket->sharedVertices, gfx::BufferUsageType::StaticDraw));
@@ -183,6 +185,7 @@ TEST(Buckets, FillBucketFreesCpuGeometryAfterUpload) {
     ASSERT_GT(paint->elements(), 0u);
     ASSERT_TRUE(glUploadPass.getBuffer(paint, gfx::BufferUsageType::StaticDraw));
     EXPECT_EQ(0u, paint->vector().capacity());
+    EXPECT_THROW(paint->data(), std::logic_error);
 }
 
 TEST(Buckets, FillBucketKeepsPaintDataThatFeatureStateRewrites) {
