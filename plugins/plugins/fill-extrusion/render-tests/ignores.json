@@ -1,5 +1,6 @@
 {
   "render-tests/fill-extrusion-color/global-state": "Plugin properties are not evaluated with the style's global state",
   "render-tests/fill-extrusion-color/global-state-with-get": "Plugin properties are not evaluated with the style's global state",
-  "render-tests/fill-extrusion-pattern/global-state": "Plugin properties are not evaluated with the style's global state"
+  "render-tests/fill-extrusion-pattern/global-state": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/terrain/fill-extrusion-occluded": "The terrain elevation is sampled in the shaders of the built-in layer, and the plugin API gives a plugin no elevation, so the extrusion sits at sea level, under the terrain"
 }
