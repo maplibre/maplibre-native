@@ -67,6 +67,30 @@
   [_styleLoadingExpectation fulfill];
 }
 
+- (void)testFlyToCameraWithEdgePaddingAndPeakAltitude {
+  UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 2, 3, 4);
+  self.mapView.contentInset = contentInset;
+
+  UIEdgeInsets edgePadding = UIEdgeInsetsMake(5, 6, 7, 8);
+  UIEdgeInsets expectedEdgePadding = MLNEdgeInsetsInsetEdgeInset(edgePadding, contentInset);
+
+  XCTestExpectation *transitionExpectation =
+      [self expectationWithDescription:@"Fly transition should finish"];
+  [self.mapView flyToCamera:self.mapView.camera
+                edgePadding:edgePadding
+               withDuration:0.0
+               peakAltitude:1000
+          completionHandler:^{
+            [transitionExpectation fulfill];
+          }];
+  [self waitForExpectations:@[ transitionExpectation ] timeout:1.0];
+
+  auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
+  mbgl::EdgeInsets expectedPadding = MLNEdgeInsetsFromNSEdgeInsets(expectedEdgePadding);
+  XCTAssertEqual(expectedPadding, cameraPadding,
+                 @"flyToCamera should apply edgePadding relative to contentInset.");
+}
+
 - (void)testHandlePinchGestureContentInset {
   UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
   self.mapView.contentInset = contentInset;
