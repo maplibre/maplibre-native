@@ -107,7 +107,7 @@ jobs:
 
       - name: Prepare Bloaty message (main)
         run: |
-          report_path=bloaty-results/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-main.txt
+          report_path="bloaty-results/pr-${PR_NUMBER}-compared-to-main.txt"
           aws s3 cp tlus_diff_main.txt s3://maplibre-native/"$report_path"
           {
             echo "# Bloaty Results 🐋"
@@ -118,10 +118,12 @@ jobs:
             echo "Full report: $download_url/$report_path"
             echo "---"
           } >> message.md
+        env:
+          PR_NUMBER: ${{ steps.get-pr-number.outputs.pr-number }}
 
       - name: Prepare Bloaty message (legacy)
         run: |
-          report_path=bloaty-results/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-legacy.txt
+          report_path="bloaty-results/pr-${PR_NUMBER}-compared-to-legacy.txt"
           aws s3 cp tlus_diff_legacy.txt s3://maplibre-native/"$report_path"
           {
             echo "Compared to $legacy_maplibre_sha (legacy)"
@@ -130,6 +132,8 @@ jobs:
             echo '```'
             echo "Full report: $download_url/$report_path"
           } >> message.md
+        env:
+          PR_NUMBER: ${{ steps.get-pr-number.outputs.pr-number }}
 
       - name: Leave a comment with Bloaty results
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
@@ -183,7 +187,7 @@ jobs:
       - name: Prepare Benchmark message
         run: |
           sed -n '/Comparing/,$p' benchmark_out.txt | tail -n +2 > benchmark_diff.txt
-          report_path=benchmark-results/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-main.txt
+          report_path="benchmark-results/pr-${PR_NUMBER}-compared-to-main.txt"
           aws s3 cp benchmark_diff.txt s3://maplibre-native/"$report_path"
           {
             echo "Benchmark Results ⚡"
@@ -192,6 +196,8 @@ jobs:
             echo '```'
             echo "Full report: $download_url/$report_path"
           } >> message.md
+        env:
+          PR_NUMBER: ${{ steps.get-pr-number.outputs.pr-number }}
 
       - name: Leave a comment with Benchmark results
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5

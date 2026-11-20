@@ -97,7 +97,7 @@ jobs:
 
       - name: Prepare Bloaty message
         run: |
-          report_path=bloaty-results-ios/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-main.txt
+          report_path="bloaty-results-ios/pr-${PR_NUMBER}-compared-to-main.txt"
           aws s3 cp bloaty_diff.txt s3://maplibre-native/"$report_path"
           {
             echo "# Bloaty Results (iOS) 🐋"
@@ -108,6 +108,8 @@ jobs:
             echo "Full report: $download_url/$report_path"
             echo "---"
           } >> message.md
+        env:
+          PR_NUMBER: ${{ steps.get-pr-number.outputs.pr-number }}
 
       - name: Leave a comment with Bloaty results
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
