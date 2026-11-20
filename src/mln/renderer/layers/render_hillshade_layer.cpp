@@ -270,6 +270,9 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             }
             bucket.renderTarget = renderTarget;
             bucket.renderTargetPrepared = true;
+            // The slope data only depends on the tile's elevation: draw the prepare pass once. A tile whose
+            // elevation changes (a neighbour's border) gets a new target and is drawn once more.
+            renderTarget->setRenderOnce(true);
 
             auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID(), false);
             if (!singleTileLayerGroup) {
