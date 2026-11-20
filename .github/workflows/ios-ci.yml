@@ -142,16 +142,11 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body-regex: '^!benchmark.*ios.*$'
 
-      - name: Build BenchmarkApp .ipa and BenchmarkUITests runner .ipa for AWS Device Farm
+      - name: Build BenchmarkApp .ipa and BenchmarkTests .xctest for AWS Device Farm
         if: steps.benchmark_comment.outputs.comment-id
         run: |
-          set -e
-          # the CI profile isn't Xcode-managed, so Xcode has to sign the UI test runner manually
-          profile_name="$(sed -n 's/^APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "\(.*\)"$/\1/p' ../darwin/bazel/config.bzl)"
-          test -n "$profile_name"
           benchmark_artifacts_dir="$(mktemp -d)"
-          scripts/build-benchmark-for-device-farm.sh "$benchmark_artifacts_dir" \
-            CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER="$profile_name"
+          scripts/build-benchmark-for-device-farm.sh "$benchmark_artifacts_dir"
           echo benchmark_artifacts_dir="$benchmark_artifacts_dir" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -162,7 +157,7 @@ jobs:
           if-no-files-found: error
           path: |
             ${{ env.benchmark_artifacts_dir }}/BenchmarkApp.ipa
-            ${{ env.benchmark_artifacts_dir }}/BenchmarkUITests-Runner.ipa
+            ${{ env.benchmark_artifacts_dir }}/BenchmarkTests.xctest.zip
 
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal

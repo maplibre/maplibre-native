@@ -5,7 +5,7 @@
 # Usage:
 #   platform/ios/scripts/run-benchmark.sh [IPA_DIR]
 #
-# IPA_DIR contains BenchmarkApp.ipa and BenchmarkUITests-Runner.ipa, from build-benchmark-for-device-farm.sh or from
+# IPA_DIR contains BenchmarkApp.ipa and BenchmarkTests.xctest.zip, from build-benchmark-for-device-farm.sh or from
 # the ios-benchmark artifact of an ios-ci run. Without IPA_DIR, the benchmark is built first.
 #
 # Needs AWS credentials for the Device Farm project and `npm install` in the repository root (to download the results).
@@ -32,9 +32,9 @@ export AWS_DEVICE_FARM_DEVICE_POOL_ARN="${AWS_DEVICE_FARM_DEVICE_POOL_ARN:-arn:a
 export name="iOS Benchmark"
 export appType=IOS_APP
 export appFile="$ipa_dir/BenchmarkApp.ipa"
-export testFile="$ipa_dir/BenchmarkUITests-Runner.ipa"
-export testPackageType=XCTEST_UI_TEST_PACKAGE
-export testType=XCTEST_UI
+export testFile="$ipa_dir/BenchmarkTests.xctest.zip"
+export testPackageType=XCTEST_TEST_PACKAGE
+export testType=XCTEST
 export wait_for_completion=true
 
 run_status=0
@@ -49,7 +49,9 @@ node "$repo_root/scripts/aws-device-farm/store-test-artifacts.mjs" --runArn "$ru
 # The benchmark app logs its results with NSLog, so they end up in the device syslog.
 find "$results_dir" -name '*.syslog' -print0 | while IFS= read -r -d '' syslog; do
   echo "== $(basename "$(dirname "$syslog")")"
-  grep -E 'Benchmark completed|\| .* ms \| .* ms \||Average frame|Cpu usage|Memory usage' "$syslog" || echo "No benchmark results in $syslog"
+  grep -E ' BenchmarkApp[[(]' "$syslog" |
+    grep -E 'Benchmark completed|\| .* ms \| .* ms \||Average frame|Cpu usage|Memory usage' ||
+    echo "No benchmark results in $syslog"
 done
 
 echo "Device Farm artifacts: $results_dir"

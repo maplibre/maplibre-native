@@ -284,18 +284,9 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
     frontend.reset();
 #endif  // !defined(NDEBUG)
 
-    // this does not shut the application down correctly,
-    // and results in an assertion failure in thread-local code
-    // exit(0);
-
-    // Use the UIApplication lifecycle instead.
-    // Terminating an app programmatically is strongly discouraged by Apple.
-    // Combined with the plist setting "Application does not run in background" suspend allows
-    // the XCUITest to wake up, so it doesn't need to guess how long we'll take and wait.
-    UIApplication *app = [UIApplication sharedApplication];
-    if ([app respondsToSelector:@selector(suspend)]) {
-      [app performSelector:@selector(suspend)];
-    }
+    // BenchmarkTests, which runs inside this app, waits for this notification.
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"MBXBenchmarkDidFinish"
+                                                        object:self];
   }
 }
 
