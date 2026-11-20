@@ -18,6 +18,7 @@ concurrency:
 
 permissions:
   id-token: write         # needed for AWS
+  pull-requests: read     # needed to check for a '!benchmark ios' comment
 
 jobs:
   pre_job:
@@ -130,6 +131,42 @@ jobs:
           path: |
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
+
+      # benchmark (only built for PRs with a '!benchmark ios' comment, see ios-device-test.yml)
+
+      - name: Check if comment on PR contains '!benchmark ios'
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        id: benchmark_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-regex: '^!benchmark.*ios.*$'
+
+      - name: Build BenchmarkApp .ipa and BenchmarkUITests runner .ipa for AWS Device Farm
+        if: steps.benchmark_comment.outputs.comment-id
+        run: |
+          set -e
+          build_dir="$(mktemp -d)"
+          xcodebuild build-for-testing -scheme BenchmarkUITests -configuration Release -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+          benchmark_artifacts_dir="$(mktemp -d)"
+          for app in BenchmarkApp BenchmarkUITests-Runner; do
+            app_dir="$(find "$build_dir" -name "$app.app" -type d | head -n 1)"
+            staging_dir="$(mktemp -d)"
+            mkdir -p "$staging_dir/Payload"
+            ditto "$app_dir" "$staging_dir/Payload/$app.app"
+            (cd "$staging_dir" && zip -qr "$benchmark_artifacts_dir/$app.ipa" Payload)
+          done
+          echo benchmark_artifacts_dir="$benchmark_artifacts_dir" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.benchmark_comment.outputs.comment-id
+        with:
+          name: ios-benchmark
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            ${{ env.benchmark_artifacts_dir }}/BenchmarkApp.ipa
+            ${{ env.benchmark_artifacts_dir }}/BenchmarkUITests-Runner.ipa
 
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal

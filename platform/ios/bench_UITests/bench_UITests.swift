@@ -26,6 +26,12 @@ class bench_UITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
         app.activate()
-        _ = app.wait(for: .notRunning, timeout: 1000)
+
+        // The benchmark app leaves the foreground (suspends, and exits if UIApplicationExitsOnSuspend is honored) when it is done.
+        let benchmarkFinished = XCTNSPredicateExpectation(
+            predicate: NSPredicate { _, _ in app.state != .runningForeground },
+            object: nil
+        )
+        wait(for: [benchmarkFinished], timeout: 1000)
     }
 }

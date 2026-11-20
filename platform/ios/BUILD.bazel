@@ -319,6 +319,13 @@ xcodeproj(
             ],
         ),
         top_level_target(
+            "//platform/ios/bench_UITests:BenchmarkUITests",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
             "//render-test/ios:RenderTest",
             target_environments = [
                 "simulator",
@@ -360,9 +367,9 @@ sh_binary(
         "Integration_Test_Harness/Info.plist",
         "Integration_Tests/Info.plist",
         "app/Info.plist",
-        "bench_UITests/Info.plist",
         "framework/Info.plist",
         "framework/Info-static.plist",
+        "//platform/ios/bench_UITests:Info.plist",
         "//platform/ios/benchmark:Info.plist",
         "//platform/ios/iosapp-UITests:Info.plist",
         "//platform/ios/test:Info.plist",

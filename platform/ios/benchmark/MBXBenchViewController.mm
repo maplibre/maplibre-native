@@ -82,8 +82,9 @@ protected:
   NSURL *tileSourceURL = [[NSBundle mainBundle] URLForResource:@"openmaptiles"
                                                  withExtension:@"json"
                                                   subdirectory:@"tiles"];
+  // Keyless, so the benchmark runs without an API key (e.g. on CI).
   const std::vector<std::string> styles = {
-      "maptiler://maps/streets",
+      "https://tiles.openfreemap.org/styles/bright",
   };
   constexpr auto styleIndex = 0;
   NSURL *url = [NSURL URLWithString:tile ? @"asset://styles/streets.json"
