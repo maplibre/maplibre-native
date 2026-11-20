@@ -382,6 +382,7 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
     symbolDependenciesChanged();
 }
 
+#if MLN_WITH_PLUGINS
 void GeometryTileWorker::onLayoutResourcesAvailable(LayoutResourceMap resources) {
     MLN_TRACE_FUNC();
 
@@ -391,6 +392,7 @@ void GeometryTileWorker::onLayoutResourcesAvailable(LayoutResourceMap resources)
     }
     symbolDependenciesChanged();
 }
+#endif
 
 void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependencies) {
     MLN_TRACE_FUNC();
@@ -428,6 +430,7 @@ void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependen
     }
 }
 
+#if MLN_WITH_PLUGINS
 void GeometryTileWorker::requestNewResources(const LayoutResourceDependencies& resourceDependencies) {
     MLN_TRACE_FUNC();
 
@@ -443,6 +446,7 @@ void GeometryTileWorker::requestNewResources(const LayoutResourceDependencies& r
         parent.invoke(&GeometryTile::getLayoutResources, std::move(missing));
     }
 }
+#endif
 
 void GeometryTileWorker::setObserver(TileObserver* observer_) {
     observer = observer_;
@@ -485,7 +489,9 @@ void GeometryTileWorker::parse() {
 
     GlyphDependencies glyphDependencies;
     ImageDependencies imageDependencies;
+#if MLN_WITH_PLUGINS
     LayoutResourceDependencies resourceDependencies;
+#endif
 
     // Create render layers and group by layout
     GroupMap groupMap = groupLayers(*layers);
@@ -534,7 +540,10 @@ void GeometryTileWorker::parse() {
                  .glyphDependencies = glyphDependencies,
                  .imageDependencies = imageDependencies,
                  .availableImages = *availableImages,
-                 .resourceDependencies = resourceDependencies},
+#if MLN_WITH_PLUGINS
+                 .resourceDependencies = resourceDependencies
+#endif
+                },
                 std::move(geometryLayer),
                 group);
             if (layout->hasDependencies()) {
@@ -577,7 +586,9 @@ void GeometryTileWorker::parse() {
 
     requestNewGlyphs(glyphDependencies);
     requestNewImages(imageDependencies);
+#if MLN_WITH_PLUGINS
     requestNewResources(resourceDependencies);
+#endif
 
     parsingScope.reset();
     MBGL_TIMING_FINISH(watch,
@@ -594,7 +605,12 @@ bool GeometryTileWorker::hasPendingDependencies() const {
             return true;
         }
     }
-    return !pendingImageDependencies.empty() || !pendingResourceDependencies.empty();
+#if MLN_WITH_PLUGINS
+    if (!pendingResourceDependencies.empty()) {
+        return true;
+    }
+#endif
+    return !pendingImageDependencies.empty();
 }
 
 bool GeometryTileWorker::hasPendingParseResult() const {
@@ -631,7 +647,9 @@ void GeometryTileWorker::finalizeLayout() {
             }
 
             layout->prepareSymbols(glyphMap, glyphAtlas.glyphPositions, iconMap, imageAtlas.iconPositions);
+#if MLN_WITH_PLUGINS
             layout->prepareResources(resourceMap);
+#endif
 
             if (!layout->hasSymbolInstances()) {
                 continue;

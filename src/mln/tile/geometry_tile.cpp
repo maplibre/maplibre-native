@@ -199,10 +199,13 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       fileSource(parameters.fileSource),
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
+#if MLN_WITH_PLUGINS
       layoutResourceManager(parameters.layoutResourceManager ? parameters.layoutResourceManager
                                                              : std::make_shared<LayoutResourceManager>()),
+#endif
       mode(parameters.mode),
-      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
+      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {
+}
 
 GeometryTile::~GeometryTile() {
     MLN_TRACE_FUNC();
@@ -211,7 +214,9 @@ GeometryTile::~GeometryTile() {
 
     glyphManager->removeRequestor(*this);
     imageManager->removeRequestor(*this);
+#if MLN_WITH_PLUGINS
     layoutResourceManager->removeRequestor(*this);
+#endif
 
     if (pending) {
         // This tile never finished loading or was abandoned, emit a cancellation event
@@ -454,6 +459,7 @@ void GeometryTile::getImages(ImageRequestPair pair) {
     imageManager->getImages(*this, std::move(pair));
 }
 
+#if MLN_WITH_PLUGINS
 void GeometryTile::onLayoutResourcesAvailable(LayoutResourceMap resources) {
     MLN_TRACE_FUNC();
 
@@ -465,6 +471,7 @@ void GeometryTile::getLayoutResources(LayoutResourceDependencies dependencies) {
 
     layoutResourceManager->getResources(*this, dependencies, fileSource.get());
 }
+#endif
 
 std::shared_ptr<FeatureIndex> GeometryTile::getFeatureIndex() const {
     return layoutResult ? layoutResult->featureIndex : nullptr;

@@ -7,7 +7,9 @@
 #include <mln/text/glyph_manager.hpp>
 #include <mln/tile/tile.hpp>
 #include <mln/tile/geometry_tile_worker.hpp>
+#if MLN_WITH_PLUGINS
 #include <mln/tile/layout_resource_manager.hpp>
+#endif
 #include <mln/util/feature.hpp>
 #include <mln/util/containers.hpp>
 
@@ -24,7 +26,14 @@ class SourceQueryOptions;
 class TileParameters;
 class TileAtlasTextures;
 
-class GeometryTile : public Tile, public GlyphRequestor, public ImageRequestor, public LayoutResourceRequestor {
+class GeometryTile : public Tile,
+                     public GlyphRequestor,
+                     public ImageRequestor
+#if MLN_WITH_PLUGINS
+    ,
+                     public LayoutResourceRequestor
+#endif
+{
 public:
     const std::thread::id renderThreadID = std::this_thread::get_id();
 
@@ -48,11 +57,15 @@ public:
 
     void onGlyphsAvailable(GlyphMap, HBShapeRequests) override;
     void onImagesAvailable(ImageMap, ImageMap, ImageVersionMap versionMap, uint64_t imageCorrelationID) override;
+#if MLN_WITH_PLUGINS
     void onLayoutResourcesAvailable(LayoutResourceMap) override;
+#endif
 
     void getGlyphs(GlyphDependencies);
     void getImages(ImageRequestPair);
+#if MLN_WITH_PLUGINS
     void getLayoutResources(LayoutResourceDependencies);
+#endif
 
     bool layerPropertiesUpdated(const Immutable<style::LayerProperties>&) override;
 
@@ -128,7 +141,9 @@ private:
     const std::shared_ptr<FileSource> fileSource;
     const std::shared_ptr<GlyphManager> glyphManager;
     const std::shared_ptr<ImageManager> imageManager;
+#if MLN_WITH_PLUGINS
     const std::shared_ptr<LayoutResourceManager> layoutResourceManager;
+#endif
 
     uint64_t correlationID = 0;
 

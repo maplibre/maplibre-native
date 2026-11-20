@@ -22,5 +22,7 @@ if(MLN_WITH_PLUGINS)
         ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/plugin_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/plugin_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_drawable_data.hpp
+        ${PROJECT_SOURCE_DIR}/src/mln/tile/layout_resource_manager.hpp
+        ${PROJECT_SOURCE_DIR}/src/mln/tile/layout_resource_manager.cpp
     )
 endif()

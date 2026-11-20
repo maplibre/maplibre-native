@@ -44,8 +44,10 @@ public:
     std::shared_ptr<const GlobalStateMap> globalState = nullptr;
     bool isUpdateSynchronous = false;
     bool captureRenderedFeatures = false;
+#if MLN_WITH_PLUGINS
     // Shared by the tiles of a map. A tile without one makes its own.
     std::shared_ptr<LayoutResourceManager> layoutResourceManager = nullptr;
+#endif
 };
 
 } // namespace mln

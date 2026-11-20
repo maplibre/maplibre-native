@@ -8,6 +8,7 @@ PLUGIN_API_TESTS = [
     "plugin/property_binding.test.cpp",
     "plugin/registry.test.cpp",
     "plugin/rendering.test.cpp",
+    "tile/layout_resource_manager.test.cpp",
 ]
 
 cc_library(

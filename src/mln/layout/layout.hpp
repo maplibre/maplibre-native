@@ -4,7 +4,9 @@
 #include <mln/text/glyph_manager.hpp>
 #include <mln/text/glyph.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
+#if MLN_WITH_PLUGINS
 #include <mln/tile/layout_resource_manager.hpp>
+#endif
 #include <mln/util/containers.hpp>
 
 #include <memory>
@@ -34,8 +36,10 @@ public:
 
     virtual void finalizeSymbols(HBShapeResults&) {}
 
+#if MLN_WITH_PLUGINS
     // The resources the tile has received, including the ones this layout added to its dependencies.
     virtual void prepareResources(const LayoutResourceMap&) {}
+#endif
 
     virtual bool needFinalizeSymbols() { return false; }
 
@@ -51,8 +55,10 @@ public:
     GlyphDependencies& glyphDependencies;
     ImageDependencies& imageDependencies;
     const std::set<std::string>& availableImages;
+#if MLN_WITH_PLUGINS
     // The URLs a layout needs loaded before it builds its buckets, see prepareResources.
     LayoutResourceDependencies& resourceDependencies;
+#endif
 };
 
 } // namespace mln
