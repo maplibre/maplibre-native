@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
+import io.sentry.Sentry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -44,9 +45,12 @@ import org.maplibre.navigation.android.navigation.v5.routeprogress.RouteProgress
 import java.util.Locale
 import java.util.logging.Logger
 import kotlin.random.Random
-import io.sentry.Sentry
 
-class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEventListener, MapView.OnSymbolErrorListener {
+class NavigationMap :
+    SupportMapFragment(),
+    ProgressChangeListener,
+    MilestoneEventListener,
+    MapView.OnSymbolErrorListener {
     private lateinit var map: MapLibreMap
     private lateinit var mapView: MapView
 
@@ -61,16 +65,17 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
         private const val RANDOM_SEED = 42
         private val RANDOM = Random(RANDOM_SEED)
 
-        private val STYLES = arrayListOf(
-            TestStyles.AMERICANA,
-            TestStyles.OPENFREEMAP_LIBERTY,
-            TestStyles.OPENFREEMAP_BRIGHT,
-            TestStyles.PROTOMAPS_LIGHT,
-            TestStyles.PROTOMAPS_DARK,
-            TestStyles.PROTOMAPS_GRAYSCALE,
-            TestStyles.PROTOMAPS_WHITE,
-            TestStyles.PROTOMAPS_BLACK,
-        )
+        private val STYLES =
+            arrayListOf(
+                TestStyles.AMERICANA,
+                TestStyles.OPENFREEMAP_LIBERTY,
+                TestStyles.OPENFREEMAP_BRIGHT,
+                TestStyles.PROTOMAPS_LIGHT,
+                TestStyles.PROTOMAPS_DARK,
+                TestStyles.PROTOMAPS_GRAYSCALE,
+                TestStyles.PROTOMAPS_WHITE,
+                TestStyles.PROTOMAPS_BLACK,
+            )
 
         enum class RouteProvider {
             Local,
@@ -82,21 +87,32 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
         private const val ROUTE_UPDATE_INTERVAL = 10.0
 
         // used by remote providers
-        private val ROUTES = arrayOf(
-            Pair(LatLng(52.521487, 13.409961), LatLng(52.502501, 13.423342)), // BER short
-            Pair(LatLng(52.46314, 13.339116), LatLng(52.545929, 13.457635)), // BER long
-            Pair(LatLng(38.903727, -77.000668), LatLng(38.890509, -77.025958)), // DC short
-            Pair(LatLng(38.876664, -77.206788), LatLng(38.957716, -77.027674)), // DC long
-            Pair(LatLng(37.781832, -122.401477), LatLng(37.771035, -122.410592)), // SF short
-            Pair(LatLng(37.736431, -122.504263), LatLng(37.785594, -122.401209)), // SF long
-        )
+        private val ROUTES =
+            arrayOf(
+                Pair(LatLng(52.521487, 13.409961), LatLng(52.502501, 13.423342)), // BER short
+                Pair(LatLng(52.46314, 13.339116), LatLng(52.545929, 13.457635)), // BER long
+                Pair(LatLng(38.903727, -77.000668), LatLng(38.890509, -77.025958)), // DC short
+                Pair(LatLng(38.876664, -77.206788), LatLng(38.957716, -77.027674)), // DC long
+                Pair(LatLng(37.781832, -122.401477), LatLng(37.771035, -122.410592)), // SF short
+                Pair(LatLng(37.736431, -122.504263), LatLng(37.785594, -122.401209)), // SF long
+            )
 
-        private fun random(min: Double, max: Double): Double = min + RANDOM.nextDouble() * (max - min)
-        private fun random(min: Int, max: Int): Int = RANDOM.nextInt(min, max)
+        private fun random(
+            min: Double,
+            max: Double,
+        ): Double = min + RANDOM.nextDouble() * (max - min)
+
+        private fun random(
+            min: Int,
+            max: Int,
+        ): Int = RANDOM.nextInt(min, max)
 
         private fun randomZoom(): Double = random(13.0, 18.0)
+
         private fun randomTilt(): Double = random(30.0, 60.0)
+
         private fun randomSpeed(): Int = random(30, 130) // in km/h
+
         private fun randomWaitTime(): Long = random(5000, 10000).toLong()
     }
 
@@ -116,15 +132,18 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
             mapView.setStyleSuspend(STYLES.random(RANDOM))
             enableLocation()
 
-            navigation = MapLibreNavigation(requireContext(), MapLibreNavigationOptions
-                .builder()
-                .snapToRoute(true)
-                .build()
-            ).apply {
-                snapEngine
-                addProgressChangeListener(this@NavigationMap)
-                addMilestoneEventListener(this@NavigationMap)
-            }
+            navigation =
+                MapLibreNavigation(
+                    requireContext(),
+                    MapLibreNavigationOptions
+                        .builder()
+                        .snapToRoute(true)
+                        .build(),
+                ).apply {
+                    snapEngine
+                    addProgressChangeListener(this@NavigationMap)
+                    addMilestoneEventListener(this@NavigationMap)
+                }
 
             navigationMapRoute = NavigationMapRoute(navigation, mapView, map)
             navigation.locationEngine = replayRouteLocationEngine
@@ -157,7 +176,7 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
                     Location("StartingLocation").apply {
                         latitude = startingPoint.latitude()
                         longitude = startingPoint.longitude()
-                    }
+                    },
                 )
             }
 
@@ -176,7 +195,7 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
                 .builder(requireContext(), map.style!!)
                 .useDefaultLocationEngine(false)
                 .useSpecializedLocationLayer(true)
-                .build()
+                .build(),
         )
 
         map.locationComponent.isLocationComponentEnabled = true
@@ -191,7 +210,7 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
                 }
 
                 override fun onLocationCameraTransitionCanceled(cameraMode: Int) {}
-            }
+            },
         )
     }
 
@@ -199,114 +218,138 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
         var location: LatLng? = null
         var destination: LatLng? = null
 
-        val routeString: String? = when (ROUTE_PROVIDER) {
-            RouteProvider.Local -> {
-                val context = requireContext()
-                val routeFile = context.assets.list("routes/")!!.random(RANDOM)
-                LOG.info("Navigation - local route: $routeFile")
+        val routeString: String? =
+            when (ROUTE_PROVIDER) {
+                RouteProvider.Local -> {
+                    val context = requireContext()
+                    val routeFile = context.assets.list("routes/")!!.random(RANDOM)
+                    LOG.info("Navigation - local route: $routeFile")
 
-                val routeStr = GeoParseUtil.loadStringFromAssets(context, "routes/$routeFile")
+                    val routeStr = GeoParseUtil.loadStringFromAssets(context, "routes/$routeFile")
 
-                // quick parse to get the waypoints before starting the route
-                val json = Json.parseToJsonElement(routeStr).jsonObject
+                    // quick parse to get the waypoints before starting the route
+                    val json = Json.parseToJsonElement(routeStr).jsonObject
 
-                val waypoints = json["waypoints"]?.jsonArray
-                val startWaypoint = waypoints?.first()?.jsonObject?.get("location")?.jsonArray
-                val endWaypoint = waypoints?.last()?.jsonObject?.get("location")?.jsonArray
+                    val waypoints = json["waypoints"]?.jsonArray
+                    val startWaypoint =
+                        waypoints
+                            ?.first()
+                            ?.jsonObject
+                            ?.get("location")
+                            ?.jsonArray
+                    val endWaypoint =
+                        waypoints
+                            ?.last()
+                            ?.jsonObject
+                            ?.get("location")
+                            ?.jsonArray
 
-                if (startWaypoint != null) {
-                    location = LatLng(
-                        Json.decodeFromJsonElement<Double>(startWaypoint.last()),
-                        Json.decodeFromJsonElement<Double>(startWaypoint.first()),
-                    )
+                    if (startWaypoint != null) {
+                        location =
+                            LatLng(
+                                Json.decodeFromJsonElement<Double>(startWaypoint.last()),
+                                Json.decodeFromJsonElement<Double>(startWaypoint.first()),
+                            )
+                    }
+
+                    if (endWaypoint != null) {
+                        destination =
+                            LatLng(
+                                Json.decodeFromJsonElement<Double>(endWaypoint.last()),
+                                Json.decodeFromJsonElement<Double>(endWaypoint.first()),
+                            )
+                    }
+
+                    routeStr
                 }
 
-                if (endWaypoint != null) {
-                    destination = LatLng(
-                        Json.decodeFromJsonElement<Double>(endWaypoint.last()),
-                        Json.decodeFromJsonElement<Double>(endWaypoint.first()),
+                RouteProvider.OSRM -> {
+                    val routePoints = ROUTES.random(RANDOM)
+                    location = routePoints.first
+                    destination = routePoints.second
+
+                    val get =
+                        "${location.longitude},${location.latitude};" +
+                            "${destination.longitude},${destination.latitude}" +
+                            "?steps=true"
+
+                    val request =
+                        Request
+                            .Builder()
+                            .header("User-Agent", "MapLibre Android")
+                            .url("https://router.project-osrm.org/route/v1/driving/$get")
+                            .get()
+                            .build()
+
+                    LOG.info(
+                        "Navigation - OSRM route request " +
+                            "(${location.longitude},${location.latitude}) -> " +
+                            "(${destination.longitude},${destination.latitude})",
                     )
+
+                    val response = OkHttpClient().newCall(request).execute()
+                    response.body?.string()
                 }
 
-                routeStr
-            }
+                RouteProvider.Valhalla -> {
+                    val routePoints = ROUTES.random(RANDOM)
+                    location = routePoints.first
+                    destination = routePoints.second
 
-            RouteProvider.OSRM -> {
-                val routePoints = ROUTES.random(RANDOM)
-                location = routePoints.first
-                destination = routePoints.second
+                    val requestBody =
+                        Gson()
+                            .toJson(
+                                mapOf(
+                                    "format" to "osrm",
+                                    "costing" to "auto",
+                                    "banner_instructions" to true,
+                                    "voice_instructions" to true,
+                                    "language" to Locale.getDefault().language,
+                                    "directions_options" to
+                                        mapOf(
+                                            "units" to "kilometers",
+                                        ),
+                                    "costing_options" to
+                                        mapOf(
+                                            "auto" to
+                                                mapOf(
+                                                    "top_speed" to 130,
+                                                ),
+                                        ),
+                                    "locations" to
+                                        listOf(
+                                            mapOf(
+                                                "lon" to location.longitude,
+                                                "lat" to location.latitude,
+                                                "type" to "break",
+                                            ),
+                                            mapOf(
+                                                "lon" to destination.longitude,
+                                                "lat" to destination.latitude,
+                                                "type" to "break",
+                                            ),
+                                        ),
+                                ),
+                            ).toRequestBody("application/json; charset=utf-8".toMediaType())
 
-                val get = "${location.longitude},${location.latitude};" +
-                        "${destination.longitude},${destination.latitude}" +
-                        "?steps=true"
+                    val request =
+                        Request
+                            .Builder()
+                            .header("User-Agent", "MapLibre Android")
+                            .url("https://valhalla1.openstreetmap.de/route")
+                            .post(requestBody)
+                            .build()
 
-                val request = Request
-                    .Builder()
-                    .header("User-Agent", "MapLibre Android")
-                    .url("https://router.project-osrm.org/route/v1/driving/$get")
-                    .get()
-                    .build()
-
-                LOG.info("Navigation - OSRM route request " +
-                        "(${location.longitude},${location.latitude}) -> " +
-                        "(${destination.longitude},${destination.latitude})"
-                )
-
-                val response = OkHttpClient().newCall(request).execute()
-                response.body?.string()
-            }
-
-            RouteProvider.Valhalla -> {
-                val routePoints = ROUTES.random(RANDOM)
-                location = routePoints.first
-                destination = routePoints.second
-
-                val requestBody = Gson().toJson(
-                    mapOf(
-                        "format" to "osrm",
-                        "costing" to "auto",
-                        "banner_instructions" to true,
-                        "voice_instructions" to true,
-                        "language" to Locale.getDefault().language,
-                        "directions_options" to mapOf(
-                            "units" to "kilometers"
-                        ),
-                        "costing_options" to mapOf(
-                            "auto" to mapOf(
-                                "top_speed" to 130
-                            )
-                        ),
-                        "locations" to listOf(
-                            mapOf(
-                                "lon" to location.longitude,
-                                "lat" to location.latitude,
-                                "type" to "break"
-                            ),
-                            mapOf(
-                                "lon" to destination.longitude,
-                                "lat" to destination.latitude,
-                                "type" to "break"
-                            )
-                        )
+                    LOG.info(
+                        "Navigation - Valhalla route request " +
+                            "(${location.longitude},${location.latitude}) -> " +
+                            "(${destination.longitude},${destination.latitude})",
                     )
-                ).toRequestBody("application/json; charset=utf-8".toMediaType())
 
-                val request = Request
-                    .Builder()
-                    .header("User-Agent", "MapLibre Android")
-                    .url("https://valhalla1.openstreetmap.de/route")
-                    .post(requestBody)
-                    .build()
-
-                LOG.info("Navigation - Valhalla route request " +
-                        "(${location.longitude},${location.latitude}) -> " +
-                        "(${destination.longitude},${destination.latitude})"
-                )
-
-                val response = OkHttpClient().newCall(request).execute()
-                response.body?.string()
+                    val response = OkHttpClient().newCall(request).execute()
+                    response.body?.string()
+                }
             }
-        }
 
         if (routeString == null) {
             LOG.warning("Failed to get route data")
@@ -316,26 +359,31 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
         val directionsResponse = DirectionsResponse.fromJson(routeString)
         val route = directionsResponse.routes().first()
 
-        val routeOptions = RouteOptions
-            .builder()
-            .baseUrl("https://maplibre.org")
-            .profile("maplibre")
-            .user("maplibre")
-            .accessToken("maplibre")
-            .voiceInstructions(true)
-            .bannerInstructions(true)
-            .language(Locale.getDefault().language)
-            .coordinates(mutableListOf(
-                location?.let { Point.fromLngLat(it.longitude, location.latitude) },
-                destination?.let { Point.fromLngLat(it.longitude, destination.latitude) },
-            ))
-            .requestUuid("0000-0000-0000-0000")
-            .build()
+        val routeOptions =
+            RouteOptions
+                .builder()
+                .baseUrl("https://maplibre.org")
+                .profile("maplibre")
+                .user("maplibre")
+                .accessToken("maplibre")
+                .voiceInstructions(true)
+                .bannerInstructions(true)
+                .language(Locale.getDefault().language)
+                .coordinates(
+                    mutableListOf(
+                        location?.let { Point.fromLngLat(it.longitude, location.latitude) },
+                        destination?.let { Point.fromLngLat(it.longitude, destination.latitude) },
+                    ),
+                ).requestUuid("0000-0000-0000-0000")
+                .build()
 
         return route.toBuilder().routeOptions(routeOptions).build()
     }
 
-    override fun onProgressChange(location: Location, progress: RouteProgress) {
+    override fun onProgressChange(
+        location: Location,
+        progress: RouteProgress,
+    ) {
         map.locationComponent.forceLocationUpdate(location)
 
         if (routeUpdateTimer - progress.durationRemaining() > ROUTE_UPDATE_INTERVAL) {
@@ -350,7 +398,11 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
         }
     }
 
-    override fun onMilestoneEvent(routeProgress: RouteProgress, instruction: String, milestone: Milestone) {
+    override fun onMilestoneEvent(
+        routeProgress: RouteProgress,
+        instruction: String,
+        milestone: Milestone,
+    ) {
         if (milestone !is BannerInstructionMilestone) {
             return
         }
@@ -362,12 +414,11 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
 
     override fun onSymbolError(message: String) {
         Sentry.captureMessage("NavigationMap: $message")
-        //Bugsnag.notify(RuntimeException(message))
+        // Bugsnag.notify(RuntimeException(message))
     }
 }
 
 class NavigationMapActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

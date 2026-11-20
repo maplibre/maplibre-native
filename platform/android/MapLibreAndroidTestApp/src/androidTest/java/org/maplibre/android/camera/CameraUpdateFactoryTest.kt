@@ -3,36 +3,37 @@ package org.maplibre.android.camera
 import android.graphics.PointF
 import androidx.test.annotation.UiThreadTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.geometry.LatLngBounds
-import org.maplibre.android.testapp.activity.BaseTest
-import org.maplibre.android.testapp.activity.espresso.DeviceIndependentTestActivity
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.testapp.activity.BaseTest
+import org.maplibre.android.testapp.activity.espresso.DeviceIndependentTestActivity
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class CameraUpdateFactoryTest : BaseTest() {
-
-    override fun getActivityClass(): Class<*> {
-        return DeviceIndependentTestActivity::class.java
-    }
+    override fun getActivityClass(): Class<*> = DeviceIndependentTestActivity::class.java
 
     @Test
     @UiThreadTest
     fun testLatLngBoundsUntiltedUnrotated() {
-        maplibreMap.cameraPosition = CameraPosition.Builder()
-            .target(LatLng(60.0, 24.0))
-            .bearing(0.0)
-            .tilt(0.0)
-            .build()
+        maplibreMap.cameraPosition =
+            CameraPosition
+                .Builder()
+                .target(LatLng(60.0, 24.0))
+                .bearing(0.0)
+                .tilt(0.0)
+                .build()
 
-        val bounds: LatLngBounds = LatLngBounds.Builder()
-            .include(LatLng(62.0, 26.0))
-            .include(LatLng(58.0, 22.0))
-            .build()
+        val bounds: LatLngBounds =
+            LatLngBounds
+                .Builder()
+                .include(LatLng(62.0, 26.0))
+                .include(LatLng(58.0, 22.0))
+                .build()
 
         maplibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
 
@@ -47,16 +48,20 @@ class CameraUpdateFactoryTest : BaseTest() {
     @Test
     @UiThreadTest
     fun testLatLngBoundsTilted() {
-        maplibreMap.cameraPosition = CameraPosition.Builder()
-            .target(LatLng(60.0, 24.0))
-            .bearing(0.0)
-            .tilt(45.0)
-            .build()
+        maplibreMap.cameraPosition =
+            CameraPosition
+                .Builder()
+                .target(LatLng(60.0, 24.0))
+                .bearing(0.0)
+                .tilt(45.0)
+                .build()
 
-        val bounds: LatLngBounds = LatLngBounds.Builder()
-            .include(LatLng(62.0, 26.0))
-            .include(LatLng(58.0, 22.0))
-            .build()
+        val bounds: LatLngBounds =
+            LatLngBounds
+                .Builder()
+                .include(LatLng(62.0, 26.0))
+                .include(LatLng(58.0, 22.0))
+                .build()
 
         maplibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
 
@@ -71,16 +76,20 @@ class CameraUpdateFactoryTest : BaseTest() {
     @Test
     @UiThreadTest
     fun testLatLngBoundsRotated() {
-        maplibreMap.cameraPosition = CameraPosition.Builder()
-            .target(LatLng(60.0, 24.0))
-            .bearing(30.0)
-            .tilt(0.0)
-            .build()
+        maplibreMap.cameraPosition =
+            CameraPosition
+                .Builder()
+                .target(LatLng(60.0, 24.0))
+                .bearing(30.0)
+                .tilt(0.0)
+                .build()
 
-        val bounds: LatLngBounds = LatLngBounds.Builder()
-            .include(LatLng(62.0, 26.0))
-            .include(LatLng(58.0, 22.0))
-            .build()
+        val bounds: LatLngBounds =
+            LatLngBounds
+                .Builder()
+                .include(LatLng(62.0, 26.0))
+                .include(LatLng(58.0, 22.0))
+                .build()
 
         maplibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
 
@@ -95,16 +104,20 @@ class CameraUpdateFactoryTest : BaseTest() {
     @Test
     @UiThreadTest
     fun testLatLngBoundsTiltedRotated() {
-        maplibreMap.cameraPosition = CameraPosition.Builder()
-            .target(LatLng(60.0, 24.0))
-            .bearing(30.0)
-            .tilt(45.0)
-            .build()
+        maplibreMap.cameraPosition =
+            CameraPosition
+                .Builder()
+                .target(LatLng(60.0, 24.0))
+                .bearing(30.0)
+                .tilt(45.0)
+                .build()
 
-        val bounds: LatLngBounds = LatLngBounds.Builder()
-            .include(LatLng(62.0, 26.0))
-            .include(LatLng(58.0, 22.0))
-            .build()
+        val bounds: LatLngBounds =
+            LatLngBounds
+                .Builder()
+                .include(LatLng(62.0, 26.0))
+                .include(LatLng(58.0, 22.0))
+                .build()
 
         maplibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
 
@@ -119,16 +132,20 @@ class CameraUpdateFactoryTest : BaseTest() {
     @Test
     @UiThreadTest
     fun testLatLngBoundsWithProvidedTiltAndRotation() {
-        maplibreMap.cameraPosition = CameraPosition.Builder()
-            .target(LatLng(60.0, 24.0))
-            .bearing(0.0)
-            .tilt(0.0)
-            .build()
+        maplibreMap.cameraPosition =
+            CameraPosition
+                .Builder()
+                .target(LatLng(60.0, 24.0))
+                .bearing(0.0)
+                .tilt(0.0)
+                .build()
 
-        val bounds: LatLngBounds = LatLngBounds.Builder()
-            .include(LatLng(62.0, 26.0))
-            .include(LatLng(58.0, 22.0))
-            .build()
+        val bounds: LatLngBounds =
+            LatLngBounds
+                .Builder()
+                .include(LatLng(62.0, 26.0))
+                .include(LatLng(58.0, 22.0))
+                .build()
 
         maplibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30.0, 40.0, 0))
 
@@ -157,7 +174,7 @@ class CameraUpdateFactoryTest : BaseTest() {
         assertEquals(initialCameraPosition.target!!, resultingCameraPosition.target!!)
         assertEquals(
             PointF(initialPoint.x + leftPadding / 2, initialPoint.y - bottomPadding / 2),
-            maplibreMap.projection.toScreenLocation(resultingCameraPosition.target!!)
+            maplibreMap.projection.toScreenLocation(resultingCameraPosition.target!!),
         )
         Assert.assertArrayEquals(padding, resultingCameraPosition.padding, 0.0001)
     }
@@ -170,7 +187,9 @@ class CameraUpdateFactoryTest : BaseTest() {
         val topPadding = mapView.height / 4
         val rightPadding = mapView.width / 4
         val padding = doubleArrayOf(0.0, topPadding.toDouble(), rightPadding.toDouble(), 0.0)
-        maplibreMap.moveCamera(CameraUpdateFactory.newLatLngPadding(expectedTarget, 0.0, topPadding.toDouble(), rightPadding.toDouble(), 0.0))
+        maplibreMap.moveCamera(
+            CameraUpdateFactory.newLatLngPadding(expectedTarget, 0.0, topPadding.toDouble(), rightPadding.toDouble(), 0.0),
+        )
 
         Assert.assertArrayEquals(intArrayOf(0, topPadding, rightPadding, 0), maplibreMap.padding)
 

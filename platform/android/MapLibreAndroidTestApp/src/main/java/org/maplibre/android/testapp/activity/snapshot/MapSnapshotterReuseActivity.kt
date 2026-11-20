@@ -17,9 +17,12 @@ import java.util.*
 /**
  * Test activity showing how to use a the [MapSnapshotter]
  */
-class MapSnapshotterReuseActivity : AppCompatActivity(), MapSnapshotter.SnapshotReadyCallback {
+class MapSnapshotterReuseActivity :
+    AppCompatActivity(),
+    MapSnapshotter.SnapshotReadyCallback {
     private var mapSnapshotter: MapSnapshotter? = null
     private lateinit var fab: View
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_snapshotter_reuse)
@@ -40,16 +43,17 @@ class MapSnapshotterReuseActivity : AppCompatActivity(), MapSnapshotter.Snapshot
                     mapSnapshotter!!.setSize(256, 256)
                 }
                 mapSnapshotter!!.start(this@MapSnapshotterReuseActivity)
-            }
+            },
         )
-        mapSnapshotter = MapSnapshotter(
-            applicationContext,
-            MapSnapshotter.Options(512, 512).withStyleBuilder(
-                Style.Builder().fromUri(
-                    randomStyle
-                )
+        mapSnapshotter =
+            MapSnapshotter(
+                applicationContext,
+                MapSnapshotter.Options(512, 512).withStyleBuilder(
+                    Style.Builder().fromUri(
+                        randomStyle,
+                    ),
+                ),
             )
-        )
         mapSnapshotter!!.start(this@MapSnapshotterReuseActivity)
     }
 
@@ -60,48 +64,52 @@ class MapSnapshotterReuseActivity : AppCompatActivity(), MapSnapshotter.Snapshot
     }
 
     private val randomBounds: LatLngBounds
-        private get() = LatLngBounds.Builder()
-            .include(
-                LatLng(
-                    randomInRange(5f, 10f).toDouble(),
-                    randomInRange(-5f, 5f)
-                        .toDouble()
-                )
-            )
-            .include(
-                LatLng(
-                    randomInRange(-5f, 5f).toDouble(),
-                    randomInRange(5f, 10f)
-                        .toDouble()
-                )
-            )
-            .build()
+        private get() =
+            LatLngBounds
+                .Builder()
+                .include(
+                    LatLng(
+                        randomInRange(5f, 10f).toDouble(),
+                        randomInRange(-5f, 5f)
+                            .toDouble(),
+                    ),
+                ).include(
+                    LatLng(
+                        randomInRange(-5f, 5f).toDouble(),
+                        randomInRange(5f, 10f)
+                            .toDouble(),
+                    ),
+                ).build()
     private val randomCameraPosition: CameraPosition
-        private get() = CameraPosition.Builder()
-            .target(
-                LatLng(
-                    randomInRange(-80f, 80f).toDouble(),
-                    randomInRange(-160f, 160f)
-                        .toDouble()
-                )
-            )
-            .zoom(randomInRange(2f, 10f).toDouble())
-            .bearing(randomInRange(0f, 90f).toDouble())
-            .build()
+        private get() =
+            CameraPosition
+                .Builder()
+                .target(
+                    LatLng(
+                        randomInRange(-80f, 80f).toDouble(),
+                        randomInRange(-160f, 160f)
+                            .toDouble(),
+                    ),
+                ).zoom(randomInRange(2f, 10f).toDouble())
+                .bearing(randomInRange(0f, 90f).toDouble())
+                .build()
     val randomStyle: String
-        get() = when (random.nextInt(5)) {
-            0 -> TestStyles.getPredefinedStyleWithFallback("Pastel")
-            1 -> TestStyles.getPredefinedStyleWithFallback("Bright")
-            2 -> TestStyles.getPredefinedStyleWithFallback("Streets")
-            3 -> TestStyles.getPredefinedStyleWithFallback("Outdoor")
-            4 -> TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
-            else -> TestStyles.getPredefinedStyleWithFallback("Streets")
-        }
+        get() =
+            when (random.nextInt(5)) {
+                0 -> TestStyles.getPredefinedStyleWithFallback("Pastel")
+                1 -> TestStyles.getPredefinedStyleWithFallback("Bright")
+                2 -> TestStyles.getPredefinedStyleWithFallback("Streets")
+                3 -> TestStyles.getPredefinedStyleWithFallback("Outdoor")
+                4 -> TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
+                else -> TestStyles.getPredefinedStyleWithFallback("Streets")
+            }
 
     companion object {
         private val random = Random()
-        fun randomInRange(min: Float, max: Float): Float {
-            return random.nextFloat() * (max - min) + min
-        }
+
+        fun randomInRange(
+            min: Float,
+            max: Float,
+        ): Float = random.nextFloat() * (max - min) + min
     }
 }

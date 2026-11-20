@@ -2,9 +2,9 @@ package org.maplibre.android.testapp.utils
 
 import android.content.Context
 import android.text.TextUtils
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
-import org.maplibre.android.geometry.LatLng
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -15,10 +15,12 @@ import java.util.ArrayList
 import kotlin.Throws
 
 class GeoParseUtil {
-
     companion object {
         @Throws(IOException::class)
-        fun loadStringFromAssets(context: Context, fileName: String?): String {
+        fun loadStringFromAssets(
+            context: Context,
+            fileName: String?,
+        ): String {
             if (TextUtils.isEmpty(fileName)) {
                 throw NullPointerException("No GeoJSON File Name passed in.")
             }

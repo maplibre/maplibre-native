@@ -12,7 +12,11 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import org.maplibre.android.style.expressions.Expression.*
+import org.maplibre.android.style.expressions.Expression.Companion.color
+import org.maplibre.android.style.expressions.Expression.Companion.featureState
+import org.maplibre.android.style.expressions.Expression.Companion.literal
+import org.maplibre.android.style.expressions.Expression.Companion.switchCase
+import org.maplibre.android.style.expressions.Expression.Companion.toBool
 import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PropertyFactory.fillColor
@@ -40,6 +44,7 @@ import org.maplibre.android.testapp.styles.TestStyles
 class FeatureStateVectorActivity : AppCompatActivity() {
     companion object {
         private const val COUNTRIES_SOURCE_ID = "countries-source"
+
         // The source layer that holds the country polygons in the demo tiles.
         private const val COUNTRIES_SOURCE_LAYER = "countries"
         private const val FILL_LAYER_ID = "country-fills"
@@ -51,9 +56,10 @@ class FeatureStateVectorActivity : AppCompatActivity() {
     private lateinit var maplibreMap: MapLibreMap
     private lateinit var countriesSource: VectorSource
 
-    private val mapClickListener = MapLibreMap.OnMapClickListener { point ->
-        handleMapClick(point)
-    }
+    private val mapClickListener =
+        MapLibreMap.OnMapClickListener { point ->
+            handleMapClick(point)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +70,7 @@ class FeatureStateVectorActivity : AppCompatActivity() {
         mapView.getMapAsync { map ->
             maplibreMap = map
             maplibreMap.moveCamera(
-                CameraUpdateFactory.newLatLngZoom(LatLng(20.0, 0.0), 1.0)
+                CameraUpdateFactory.newLatLngZoom(LatLng(20.0, 0.0), 1.0),
             )
             maplibreMap.setStyle(TestStyles.DEMOTILES) { style ->
                 addCountriesLayer(style)
@@ -95,10 +101,10 @@ class FeatureStateVectorActivity : AppCompatActivity() {
                         switchCase(
                             toBool(featureState("selected")),
                             literal(0.5f),
-                            literal(0.0f)
-                        )
-                    )
-                )
+                            literal(0.0f),
+                        ),
+                    ),
+                ),
         )
 
         // Border layer: a thin border everywhere, thicker and red where selected.
@@ -110,17 +116,17 @@ class FeatureStateVectorActivity : AppCompatActivity() {
                         switchCase(
                             toBool(featureState("selected")),
                             color(selectedBorder),
-                            color(defaultBorder)
-                        )
+                            color(defaultBorder),
+                        ),
                     ),
                     lineWidth(
                         switchCase(
                             toBool(featureState("selected")),
                             literal(2.0f),
-                            literal(0.5f)
-                        )
-                    )
-                )
+                            literal(0.5f),
+                        ),
+                    ),
+                ),
         )
     }
 
@@ -132,11 +138,12 @@ class FeatureStateVectorActivity : AppCompatActivity() {
 
         // Note the source-layer id argument, which is required for a vector source.
         val currentState = countriesSource.getFeatureState(COUNTRIES_SOURCE_LAYER, featureId)
-        val isSelected = currentState
-            ?.get("selected")
-            ?.takeUnless { it.isJsonNull }
-            ?.asBoolean
-            ?: false
+        val isSelected =
+            currentState
+                ?.get("selected")
+                ?.takeUnless { it.isJsonNull }
+                ?.asBoolean
+                ?: false
 
         // Toggle the selection state of the tapped country. Selection is not
         // exclusive: any number of countries can be selected at the same time.
@@ -144,11 +151,12 @@ class FeatureStateVectorActivity : AppCompatActivity() {
         countriesSource.setFeatureState(COUNTRIES_SOURCE_LAYER, featureId, nextState)
 
         val countryName = feature.getStringProperty("NAME") ?: "Unknown"
-        Toast.makeText(
-            this,
-            "$countryName ${if (!isSelected) "selected" else "deselected"}",
-            Toast.LENGTH_SHORT
-        ).show()
+        Toast
+            .makeText(
+                this,
+                "$countryName ${if (!isSelected) "selected" else "deselected"}",
+                Toast.LENGTH_SHORT,
+            ).show()
         return true
     }
 

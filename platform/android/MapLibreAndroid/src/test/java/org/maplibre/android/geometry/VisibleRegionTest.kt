@@ -1,9 +1,9 @@
 package org.maplibre.android.geometry
 
-import org.maplibre.android.utils.MockParcel
 import org.junit.Assert
 import org.junit.Test
 import org.maplibre.android.BaseTest
+import org.maplibre.android.utils.MockParcel
 
 class VisibleRegionTest : BaseTest() {
     @Test
@@ -18,7 +18,7 @@ class VisibleRegionTest : BaseTest() {
         Assert.assertEquals(
             "visibleRegion is not equal to a LatLng",
             region.equals(FAR_LEFT),
-            false
+            false,
         )
         Assert.assertEquals("visibleRegion is equal to itself", region.equals(region), true)
     }
@@ -76,7 +76,7 @@ class VisibleRegionTest : BaseTest() {
                 "nearLeft [LatLng [latitude=34.0, longitude=-12.0, altitude=0.0]], " +
                 "nearRight [LatLng [latitude=34.0, longitude=26.0, altitude=0.0]], " +
                 "latLngBounds [N:52.0; E:26.0; S:34.0; W:-12.0]]",
-            region.toString()
+            region.toString(),
         )
     }
 
@@ -92,8 +92,14 @@ class VisibleRegionTest : BaseTest() {
         private val NEAR_LEFT = LatLng(34.0, -12.0)
         private val FAR_RIGHT = LatLng(52.0, 26.0)
         private val NEAR_RIGHT = LatLng(34.0, 26.0)
-        private val BOUNDS = LatLngBounds.Builder().include(FAR_LEFT).include(FAR_RIGHT).include(
-            NEAR_LEFT
-        ).include(NEAR_RIGHT).build()
+        private val BOUNDS =
+            LatLngBounds
+                .Builder()
+                .include(FAR_LEFT)
+                .include(FAR_RIGHT)
+                .include(
+                    NEAR_LEFT,
+                ).include(NEAR_RIGHT)
+                .build()
     }
 }

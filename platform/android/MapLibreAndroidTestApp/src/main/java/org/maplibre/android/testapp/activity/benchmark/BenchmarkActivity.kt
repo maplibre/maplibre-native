@@ -70,16 +70,18 @@ class BenchmarkActivity : AppCompatActivity() {
     private lateinit var inputData: BenchmarkInputData
 
     @SuppressLint("DiscouragedApi")
-    private fun getArrayFromResources(name: String): Array<String> {
-        return try {
-            resources.getStringArray(applicationContext.resources.getIdentifier(
-                name,
-                "array",
-                applicationContext.packageName))
+    private fun getArrayFromResources(name: String): Array<String> =
+        try {
+            resources.getStringArray(
+                applicationContext.resources.getIdentifier(
+                    name,
+                    "array",
+                    applicationContext.packageName,
+                ),
+            )
         } catch (e: Throwable) {
             emptyArray()
         }
-    }
 
     private fun getBenchmarkInputData(): BenchmarkInputData {
         // read input for benchmark from JSON file (on CI)
@@ -97,7 +99,7 @@ class BenchmarkActivity : AppCompatActivity() {
             }
             return BenchmarkInputData(
                 styleNames = styleNames.toList(),
-                styleURLs = styleURLs.toList()
+                styleURLs = styleURLs.toList(),
             )
         } else {
             Logger.i(TAG, "${jsonFile.name} not found, reading from developer-config.xml")
@@ -109,26 +111,28 @@ class BenchmarkActivity : AppCompatActivity() {
         if (styleNames.isNotEmpty() && styleURLs.isNotEmpty()) {
             return BenchmarkInputData(
                 styleNames = styleNames.toList(),
-                styleURLs = styleURLs.toList()
+                styleURLs = styleURLs.toList(),
             )
         }
 
         // return default
         return BenchmarkInputData(
-            styleNames = listOf(
-                "Facebook Light",
-                "Americana",
+            styleNames =
+                listOf(
+                    "Facebook Light",
+                    "Americana",
 //                "Protomaps Light",
 //                "Versatiles Colorful",
-               "OpenFreeMap Bright"
-            ),
-            styleURLs = listOf(
-                "https://external.xx.fbcdn.net/maps/vt/style/canterbury_1_0/?locale=en_US",
-                "https://americanamap.org/style.json",
+                    "OpenFreeMap Bright",
+                ),
+            styleURLs =
+                listOf(
+                    "https://external.xx.fbcdn.net/maps/vt/style/canterbury_1_0/?locale=en_US",
+                    "https://americanamap.org/style.json",
 //                "https://api.protomaps.com/styles/v2/light.json?key=e761cc7daedf832a",
 //                "https://tiles.versatiles.org/assets/styles/colorful.json",
-               "https://tiles.openfreemap.org/styles/bright"
-            )
+                    "https://tiles.openfreemap.org/styles/bright",
+                ),
         )
     }
 
@@ -159,14 +163,14 @@ class BenchmarkActivity : AppCompatActivity() {
             return powerManager.currentThermalStatus
         }
 
-        return -1;
+        return -1
     }
 
     private fun setupMapView() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-            powerManager.addThermalStatusListener {
-                    status -> println("Thermal status changed $status")
+            powerManager.addThermalStatusListener { status ->
+                println("Thermal status changed $status")
             }
         }
 
@@ -178,19 +182,24 @@ class BenchmarkActivity : AppCompatActivity() {
             val benchmarkFastDuration = 15000
 
             lifecycleScope.launch {
-                val benchmarkRuns = inputData.styleNames.zip(inputData.styleURLs).flatMap { (styleName, styleUrl) ->
-                    listOf(
-                        BenchmarkRun(styleName, styleUrl, true, benchmarkSlowDuration),
-                        BenchmarkRun(styleName, styleUrl, false, benchmarkSlowDuration)
-                    )
-                }.toTypedArray()
+                val benchmarkRuns =
+                    inputData.styleNames
+                        .zip(inputData.styleURLs)
+                        .flatMap { (styleName, styleUrl) ->
+                            listOf(
+                                BenchmarkRun(styleName, styleUrl, true, benchmarkSlowDuration),
+                                BenchmarkRun(styleName, styleUrl, false, benchmarkSlowDuration),
+                            )
+                        }.toTypedArray()
                 val benchmarkIterations = 4
                 for (i in 0 until benchmarkIterations) {
                     for (benchmarkRun in benchmarkRuns) {
-                        val benchmarkRunResult = doBenchmarkRun(
-                            maplibreMap,
-                            // do one fast run to cache needed tiles
-                            if (i == 0)  benchmarkRun.copy(duration = benchmarkFastDuration) else benchmarkRun)
+                        val benchmarkRunResult =
+                            doBenchmarkRun(
+                                maplibreMap,
+                                // do one fast run to cache needed tiles
+                                if (i == 0) benchmarkRun.copy(duration = benchmarkFastDuration) else benchmarkRun,
+                            )
                         val benchmarkPair = Pair(benchmarkRun, benchmarkRunResult)
                         // don't store results for fast run
                         if (i != 0) benchmarkResult.runs.add(benchmarkPair)
@@ -205,7 +214,10 @@ class BenchmarkActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun doBenchmarkRun(maplibreMap: MapLibreMap, benchmarkRun: BenchmarkRun): BenchmarkRunResult {
+    private suspend fun doBenchmarkRun(
+        maplibreMap: MapLibreMap,
+        benchmarkRun: BenchmarkRun,
+    ): BenchmarkRunResult {
         var numFrames = 0
 
         val encodingTimeStore = FrameTimeStore()
@@ -216,11 +228,12 @@ class BenchmarkActivity : AppCompatActivity() {
 
         maplibreMap.setSwapBehaviorFlush(benchmarkRun.syncRendering)
 
-        val listener = MapView.OnDidFinishRenderingFrameWithStatsListener { _: Boolean, stats: RenderingStats ->
-            encodingTimeStore.add(stats.encodingTime * 1e3)
-            renderingTimeStore.add(stats.renderingTime * 1e3)
-            numFrames++;
-        }
+        val listener =
+            MapView.OnDidFinishRenderingFrameWithStatsListener { _: Boolean, stats: RenderingStats ->
+                encodingTimeStore.add(stats.encodingTime * 1e3)
+                renderingTimeStore.add(stats.renderingTime * 1e3)
+                numFrames++
+            }
 
         mapView.addOnDidFinishRenderingFrameListener(listener)
         val styleResult = mapView.setStyleSuspend(benchmarkRun.styleURL)
@@ -239,7 +252,7 @@ class BenchmarkActivity : AppCompatActivity() {
         for (place in PLACES) {
             maplibreMap.animateCameraSuspend(
                 CameraUpdateFactory.newLatLngZoom(place, 14.0),
-                benchmarkRun.duration
+                benchmarkRun.duration,
             )
         }
         val endTime = System.nanoTime()
@@ -302,15 +315,16 @@ class BenchmarkActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val PLACES = arrayOf(
-            LatLng(37.7749, -122.4194), // SF
-            LatLng(38.9072, -77.0369), // DC
-            LatLng(52.3702, 4.8952), // AMS
-            LatLng(60.1699, 24.9384), // HEL
+        private val PLACES =
+            arrayOf(
+                LatLng(37.7749, -122.4194), // SF
+                LatLng(38.9072, -77.0369), // DC
+                LatLng(52.3702, 4.8952), // AMS
+                LatLng(60.1699, 24.9384), // HEL
 //            LatLng(-13.1639, -74.2236), // AYA
 //            LatLng(52.5200, 13.4050), // BER
 //            LatLng(12.9716, 77.5946), // BAN
 //            LatLng(31.2304, 121.4737) // SHA
-        )
+            )
     }
 }

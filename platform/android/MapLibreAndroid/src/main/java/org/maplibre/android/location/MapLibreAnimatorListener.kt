@@ -4,8 +4,9 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import org.maplibre.android.maps.MapLibreMap
 
-internal class MapLibreAnimatorListener(cancelableCallback: MapLibreMap.CancelableCallback?) :
-    AnimatorListenerAdapter() {
+internal class MapLibreAnimatorListener(
+    cancelableCallback: MapLibreMap.CancelableCallback?,
+) : AnimatorListenerAdapter() {
     private val cancelableCallback: MapLibreMap.CancelableCallback?
 
     init {

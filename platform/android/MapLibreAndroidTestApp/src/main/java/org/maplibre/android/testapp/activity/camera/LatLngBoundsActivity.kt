@@ -5,15 +5,15 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import org.maplibre.geojson.FeatureCollection
-import org.maplibre.geojson.FeatureCollection.fromJson
-import org.maplibre.geojson.Point
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
-import org.maplibre.android.style.layers.PropertyFactory.*
+import org.maplibre.android.style.layers.PropertyFactory.iconAllowOverlap
+import org.maplibre.android.style.layers.PropertyFactory.iconAnchor
+import org.maplibre.android.style.layers.PropertyFactory.iconIgnorePlacement
+import org.maplibre.android.style.layers.PropertyFactory.iconImage
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
@@ -21,11 +21,13 @@ import org.maplibre.android.testapp.databinding.ActivityLatlngboundsBinding
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.GeoParseUtil
 import org.maplibre.android.utils.BitmapUtils
+import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.FeatureCollection.fromJson
+import org.maplibre.geojson.Point
 import java.net.URISyntaxException
 
 /** Test activity showcasing using the LatLngBounds camera API. */
 class LatLngBoundsActivity : AppCompatActivity() {
-
     private lateinit var maplibreMap: MapLibreMap
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
     private lateinit var bounds: LatLngBounds
@@ -72,7 +74,8 @@ class LatLngBoundsActivity : AppCompatActivity() {
 
     private fun loadStyle(featureCollection: FeatureCollection) {
         maplibreMap.setStyle(
-            Style.Builder()
+            Style
+                .Builder()
                 .fromUri(TestStyles.OPENFREEMAP_LIBERTY)
                 .withLayer(
                     SymbolLayer("symbol", "symbol")
@@ -80,17 +83,16 @@ class LatLngBoundsActivity : AppCompatActivity() {
                             iconAllowOverlap(true),
                             iconIgnorePlacement(true),
                             iconImage("icon"),
-                            iconAnchor(ICON_ANCHOR_CENTER)
-                        )
-                )
-                .withSource(GeoJsonSource("symbol", featureCollection))
+                            iconAnchor(ICON_ANCHOR_CENTER),
+                        ),
+                ).withSource(GeoJsonSource("symbol", featureCollection))
                 .withImage(
                     "icon",
                     BitmapUtils.getDrawableFromRes(
                         this@LatLngBoundsActivity,
-                        R.drawable.ic_android
-                    )!!
-                )
+                        R.drawable.ic_android,
+                    )!!,
+                ),
         ) {
             initBottomSheet()
             binding.fab.setOnClickListener {
@@ -103,33 +105,37 @@ class LatLngBoundsActivity : AppCompatActivity() {
         bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
         bottomSheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                override fun onSlide(
+                    bottomSheet: View,
+                    slideOffset: Float,
+                ) {
                     val offset = convertSlideOffset(slideOffset)
                     val bottomPadding = (peekHeight * offset).toInt()
 
-                    maplibreMap.getCameraForLatLngBounds(bounds, createPadding(bottomPadding))
+                    maplibreMap
+                        .getCameraForLatLngBounds(bounds, createPadding(bottomPadding))
                         ?.let { maplibreMap.cameraPosition = it }
                 }
 
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                override fun onStateChanged(
+                    bottomSheet: View,
+                    newState: Int,
+                ) {
                     // no-op
                 }
-            }
+            },
         )
     }
 
     // slideOffset ranges from NaN to -1.0, range from 1.0 to 0 instead
-    fun convertSlideOffset(slideOffset: Float): Float {
-        return if (slideOffset.equals(Float.NaN)) {
+    fun convertSlideOffset(slideOffset: Float): Float =
+        if (slideOffset.equals(Float.NaN)) {
             1.0f
         } else {
             1 + slideOffset
         }
-    }
 
-    fun createPadding(bottomPadding: Int): IntArray {
-        return intArrayOf(additionalPadding, additionalPadding, additionalPadding, bottomPadding)
-    }
+    fun createPadding(bottomPadding: Int): IntArray = intArrayOf(additionalPadding, additionalPadding, additionalPadding, bottomPadding)
 
     // # --8<-- [start:createBounds]
     private fun createBounds(featureCollection: FeatureCollection): LatLngBounds {

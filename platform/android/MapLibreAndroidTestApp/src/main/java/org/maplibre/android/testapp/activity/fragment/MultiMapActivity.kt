@@ -26,7 +26,7 @@ class MultiMapActivity : AppCompatActivity() {
     private fun initFragmentStyle(
         fragmentManager: FragmentManager,
         fragmentId: Int,
-        styleId: String
+        styleId: String,
     ) {
         (fragmentManager.findFragmentById(fragmentId) as SupportMapFragment?)
             ?.getMapAsync(OnMapReadyCallback { maplibreMap: MapLibreMap -> maplibreMap.setStyle(styleId) })

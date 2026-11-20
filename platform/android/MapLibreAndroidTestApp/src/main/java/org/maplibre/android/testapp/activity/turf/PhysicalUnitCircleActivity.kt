@@ -5,23 +5,28 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.geojson.Point
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Style
-import org.maplibre.android.style.expressions.Expression.*
+import org.maplibre.android.style.expressions.Expression.Companion.color
+import org.maplibre.android.style.expressions.Expression.Companion.exponential
+import org.maplibre.android.style.expressions.Expression.Companion.interpolate
+import org.maplibre.android.style.expressions.Expression.Companion.stop
+import org.maplibre.android.style.expressions.Expression.Companion.zoom
 import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.PropertyFactory.fillColor
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityPhysicalCircleBinding
 import org.maplibre.android.testapp.styles.TestStyles
+import org.maplibre.geojson.Point
 import org.maplibre.turf.TurfTransformation
 
 /**
  * An Activity that showcases how to create a Circle with radius expressed in physical units using a FillLayer.
  */
-class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
-
+class PhysicalUnitCircleActivity :
+    AppCompatActivity(),
+    SeekBar.OnSeekBarChangeListener {
     companion object {
         const val LAYER_ID = "circle-id"
         const val SOURCE_ID = "circle-id"
@@ -42,26 +47,30 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
         binding.mapView.onCreate(savedInstanceState)
         binding.mapView.getMapAsync { maplibreMap ->
 
-            maplibreMap.cameraPosition = CameraPosition.Builder()
-                .target(LatLng(LATITUDE, LONGITUDE))
-                .zoom(ZOOM)
-                .build()
+            maplibreMap.cameraPosition =
+                CameraPosition
+                    .Builder()
+                    .target(LatLng(LATITUDE, LONGITUDE))
+                    .zoom(ZOOM)
+                    .build()
 
-            source = GeoJsonSource(
-                SOURCE_ID,
-                TurfTransformation.circle(
-                    Point.fromLngLat(LONGITUDE, LATITUDE),
-                    9000.0,
-                    10,
-                    "meters"
+            source =
+                GeoJsonSource(
+                    SOURCE_ID,
+                    TurfTransformation.circle(
+                        Point.fromLngLat(LONGITUDE, LATITUDE),
+                        9000.0,
+                        10,
+                        "meters",
+                    ),
                 )
-            )
 
             binding.stepsBar.setOnSeekBarChangeListener(this)
             binding.radiusBar.setOnSeekBarChangeListener(this)
 
             maplibreMap.setStyle(
-                Style.Builder()
+                Style
+                    .Builder()
                     .fromUri(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
                     .withLayer(
                         FillLayer(LAYER_ID, SOURCE_ID).withProperties(
@@ -71,17 +80,20 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
                                     zoom(),
                                     stop(8, color(Color.RED)),
                                     stop(12, color(Color.BLUE)),
-                                    stop(16, color(Color.GREEN))
-                                )
-                            )
-                        )
-                    )
-                    .withSource(source)
+                                    stop(16, color(Color.GREEN)),
+                                ),
+                            ),
+                        ),
+                    ).withSource(source),
             )
         }
     }
 
-    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+    override fun onProgressChanged(
+        seekBar: SeekBar?,
+        progress: Int,
+        fromUser: Boolean,
+    ) {
         seekBar?.let {
             if (it.id == binding.stepsBar.id) {
                 steps = progress
@@ -94,8 +106,8 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
                     Point.fromLngLat(LONGITUDE, LATITUDE),
                     radius,
                     steps,
-                    "meters"
-                )
+                    "meters",
+                ),
             )
         }
     }
@@ -138,7 +150,10 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
         binding.mapView.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+    override fun onSaveInstanceState(
+        outState: Bundle,
+        outPersistentState: PersistableBundle,
+    ) {
         super.onSaveInstanceState(outState, outPersistentState)
         outState?.let {
             binding.mapView.onSaveInstanceState(it)

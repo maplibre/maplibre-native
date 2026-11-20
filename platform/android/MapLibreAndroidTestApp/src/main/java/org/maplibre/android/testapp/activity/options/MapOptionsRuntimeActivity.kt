@@ -17,10 +17,12 @@ import org.maplibre.android.testapp.styles.TestStyles
 /**
  *  TestActivity demonstrating configuring MapView with MapOptions
  */
-class MapOptionsRuntimeActivity : AppCompatActivity(), OnMapReadyCallback {
-
+class MapOptionsRuntimeActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback {
     private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_options_runtime)
@@ -30,12 +32,13 @@ class MapOptionsRuntimeActivity : AppCompatActivity(), OnMapReadyCallback {
         maplibreMapOptions.apply {
             apiBaseUri("https://api.maplibre.org")
             camera(
-                CameraPosition.Builder()
+                CameraPosition
+                    .Builder()
                     .bearing(0.0)
                     .target(LatLng(42.31230486601532, 64.63967338936439))
                     .zoom(3.9)
                     .tilt(0.0)
-                    .build()
+                    .build(),
             )
             maxPitchPreference(90.0)
             minPitchPreference(0.0)

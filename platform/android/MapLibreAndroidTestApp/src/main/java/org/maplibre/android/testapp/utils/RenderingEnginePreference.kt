@@ -13,24 +13,25 @@ import org.maplibre.android.RenderingEngine
  * this class is for.
  */
 object RenderingEnginePreference {
+    private const val PREFS_NAME = "rendering_engine_prefs"
+    private const val KEY_ENGINE_TYPE = "engine_type"
 
-  private const val PREFS_NAME = "rendering_engine_prefs"
-  private const val KEY_ENGINE_TYPE = "engine_type"
+    /** Returns the persisted choice, or null if the user never picked one. */
+    fun load(context: Context): RenderingEngine.Type? {
+        val stored = prefs(context).getString(KEY_ENGINE_TYPE, null) ?: return null
+        return runCatching { RenderingEngine.Type.valueOf(stored) }.getOrNull()
+    }
 
-  /** Returns the persisted choice, or null if the user never picked one. */
-  fun load(context: Context): RenderingEngine.Type? {
-    val stored = prefs(context).getString(KEY_ENGINE_TYPE, null) ?: return null
-    return runCatching { RenderingEngine.Type.valueOf(stored) }.getOrNull()
-  }
+    fun save(
+        context: Context,
+        type: RenderingEngine.Type,
+    ) {
+        prefs(context).edit().putString(KEY_ENGINE_TYPE, type.name).commit()
+    }
 
-  fun save(context: Context, type: RenderingEngine.Type) {
-    prefs(context).edit().putString(KEY_ENGINE_TYPE, type.name).commit()
-  }
+    fun clear(context: Context) {
+        prefs(context).edit().clear().commit()
+    }
 
-  fun clear(context: Context) {
-      prefs(context).edit().clear().commit()
-  }
-
-  private fun prefs(context: Context) =
-    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private fun prefs(context: Context) = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 }

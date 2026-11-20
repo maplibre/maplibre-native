@@ -17,15 +17,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.maplibre.android.annotations.Marker
+import org.maplibre.android.annotations.MarkerOptions
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.gestures.AndroidGesturesManager
 import org.maplibre.android.gestures.MoveGestureDetector
 import org.maplibre.android.gestures.RotateGestureDetector
 import org.maplibre.android.gestures.ShoveGestureDetector
 import org.maplibre.android.gestures.StandardScaleGestureDetector
-import org.maplibre.android.annotations.Marker
-import org.maplibre.android.annotations.MarkerOptions
-import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapLibreMap.OnMoveListener
@@ -47,6 +47,7 @@ class GestureDetectorActivity : AppCompatActivity() {
     private var gesturesManager: AndroidGesturesManager? = null
     private var marker: Marker? = null
     private var focalPointLatLng: LatLng? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gesture_detector)
@@ -115,67 +116,67 @@ class GestureDetectorActivity : AppCompatActivity() {
             object : OnMoveListener {
                 override fun onMoveBegin(detector: MoveGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_START, "MOVE START")
+                        GestureAlert(GestureAlert.TYPE_START, "MOVE START"),
                     )
                 }
 
                 override fun onMove(detector: MoveGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_PROGRESS, "MOVE PROGRESS")
+                        GestureAlert(GestureAlert.TYPE_PROGRESS, "MOVE PROGRESS"),
                     )
                 }
 
                 override fun onMoveEnd(detector: MoveGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_END, "MOVE END")
+                        GestureAlert(GestureAlert.TYPE_END, "MOVE END"),
                     )
                     recalculateFocalPoint()
                 }
-            }
+            },
         )
         // # --8<-- [end:addOnMoveListener]
         maplibreMap.addOnRotateListener(
             object : OnRotateListener {
                 override fun onRotateBegin(detector: RotateGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_START, "ROTATE START")
+                        GestureAlert(GestureAlert.TYPE_START, "ROTATE START"),
                     )
                 }
 
                 override fun onRotate(detector: RotateGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_PROGRESS, "ROTATE PROGRESS")
+                        GestureAlert(GestureAlert.TYPE_PROGRESS, "ROTATE PROGRESS"),
                     )
                     recalculateFocalPoint()
                 }
 
                 override fun onRotateEnd(detector: RotateGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_END, "ROTATE END")
+                        GestureAlert(GestureAlert.TYPE_END, "ROTATE END"),
                     )
                 }
-            }
+            },
         )
         maplibreMap.addOnScaleListener(
             object : OnScaleListener {
                 override fun onScaleBegin(detector: StandardScaleGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_START, "SCALE START")
+                        GestureAlert(GestureAlert.TYPE_START, "SCALE START"),
                     )
                     if (focalPointLatLng != null) {
                         gestureAlertsAdapter!!.addAlert(
                             GestureAlert(
                                 GestureAlert.TYPE_OTHER,
-                                "INCREASING MOVE THRESHOLD"
-                            )
+                                "INCREASING MOVE THRESHOLD",
+                            ),
                         )
                         gesturesManager!!.moveGestureDetector.moveThreshold =
                             ResourceUtils.convertDpToPx(this@GestureDetectorActivity, 175f)
                         gestureAlertsAdapter!!.addAlert(
                             GestureAlert(
                                 GestureAlert.TYPE_OTHER,
-                                "MANUALLY INTERRUPTING MOVE"
-                            )
+                                "MANUALLY INTERRUPTING MOVE",
+                            ),
                         )
                         gesturesManager!!.moveGestureDetector.interrupt()
                     }
@@ -184,46 +185,46 @@ class GestureDetectorActivity : AppCompatActivity() {
 
                 override fun onScale(detector: StandardScaleGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_PROGRESS, "SCALE PROGRESS")
+                        GestureAlert(GestureAlert.TYPE_PROGRESS, "SCALE PROGRESS"),
                     )
                 }
 
                 override fun onScaleEnd(detector: StandardScaleGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_END, "SCALE END")
+                        GestureAlert(GestureAlert.TYPE_END, "SCALE END"),
                     )
                     if (focalPointLatLng != null) {
                         gestureAlertsAdapter!!.addAlert(
                             GestureAlert(
                                 GestureAlert.TYPE_OTHER,
-                                "REVERTING MOVE THRESHOLD"
-                            )
+                                "REVERTING MOVE THRESHOLD",
+                            ),
                         )
                         gesturesManager!!.moveGestureDetector.moveThreshold = 0f
                     }
                 }
-            }
+            },
         )
         maplibreMap.addOnShoveListener(
             object : OnShoveListener {
                 override fun onShoveBegin(detector: ShoveGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_START, "SHOVE START")
+                        GestureAlert(GestureAlert.TYPE_START, "SHOVE START"),
                     )
                 }
 
                 override fun onShove(detector: ShoveGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_PROGRESS, "SHOVE PROGRESS")
+                        GestureAlert(GestureAlert.TYPE_PROGRESS, "SHOVE PROGRESS"),
                     )
                 }
 
                 override fun onShoveEnd(detector: ShoveGestureDetector) {
                     gestureAlertsAdapter!!.addAlert(
-                        GestureAlert(GestureAlert.TYPE_END, "SHOVE END")
+                        GestureAlert(GestureAlert.TYPE_END, "SHOVE END"),
                     )
                 }
-            }
+            },
         )
     }
 
@@ -239,42 +240,46 @@ class GestureDetectorActivity : AppCompatActivity() {
                 fixedFocalPointEnabled(focalPointLatLng == null)
                 return true
             }
+
             R.id.menu_gesture_animation -> {
-                uiSettings.isScaleVelocityAnimationEnabled =
-                    !uiSettings.isScaleVelocityAnimationEnabled
-                uiSettings.isRotateVelocityAnimationEnabled =
-                    !uiSettings.isRotateVelocityAnimationEnabled
-                uiSettings.isFlingVelocityAnimationEnabled =
-                    !uiSettings.isFlingVelocityAnimationEnabled
+                uiSettings.isScaleVelocityAnimationEnabled = !uiSettings.isScaleVelocityAnimationEnabled
+                uiSettings.isRotateVelocityAnimationEnabled = !uiSettings.isRotateVelocityAnimationEnabled
+                uiSettings.isFlingVelocityAnimationEnabled = !uiSettings.isFlingVelocityAnimationEnabled
                 return true
             }
+
             R.id.menu_gesture_rotate -> {
                 uiSettings.isRotateGesturesEnabled = !uiSettings.isRotateGesturesEnabled
                 return true
             }
+
             R.id.menu_gesture_tilt -> {
                 uiSettings.isTiltGesturesEnabled = !uiSettings.isTiltGesturesEnabled
                 return true
             }
+
             R.id.menu_gesture_zoom -> {
                 uiSettings.isZoomGesturesEnabled = !uiSettings.isZoomGesturesEnabled
                 return true
             }
+
             R.id.menu_gesture_scroll -> {
                 uiSettings.isScrollGesturesEnabled = !uiSettings.isScrollGesturesEnabled
                 return true
             }
+
             R.id.menu_gesture_double_tap -> {
                 uiSettings.isDoubleTapGesturesEnabled = !uiSettings.isDoubleTapGesturesEnabled
                 return true
             }
+
             R.id.menu_gesture_quick_zoom -> {
                 uiSettings.isQuickZoomGesturesEnabled = !uiSettings.isQuickZoomGesturesEnabled
                 return true
             }
+
             R.id.menu_gesture_scroll_horizontal -> {
-                uiSettings.isHorizontalScrollGesturesEnabled =
-                    !uiSettings.isHorizontalScrollGesturesEnabled
+                uiSettings.isHorizontalScrollGesturesEnabled = !uiSettings.isHorizontalScrollGesturesEnabled
                 return true
             }
         }
@@ -295,7 +300,7 @@ class GestureDetectorActivity : AppCompatActivity() {
                     override fun onFinish() {
                         recalculateFocalPoint()
                     }
-                }
+                },
             )
         } else {
             if (marker != null) {
@@ -309,8 +314,7 @@ class GestureDetectorActivity : AppCompatActivity() {
 
     private fun recalculateFocalPoint() {
         if (focalPointLatLng != null) {
-            maplibreMap.uiSettings.focalPoint =
-                maplibreMap.projection.toScreenLocation(focalPointLatLng!!)
+            maplibreMap.uiSettings.focalPoint = maplibreMap.projection.toScreenLocation(focalPointLatLng!!)
         }
     }
 
@@ -319,7 +323,9 @@ class GestureDetectorActivity : AppCompatActivity() {
         private val updateHandler = Handler(Looper.getMainLooper())
         private val alerts: MutableList<GestureAlert> = ArrayList()
 
-        class ViewHolder internal constructor(view: View) : RecyclerView.ViewHolder(view) {
+        class ViewHolder internal constructor(
+            view: View,
+        ) : RecyclerView.ViewHolder(view) {
             var alertMessageTv: TextView
 
             init {
@@ -329,24 +335,29 @@ class GestureDetectorActivity : AppCompatActivity() {
             }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int,
+        ): ViewHolder {
             val view =
-                LayoutInflater.from(parent.context)
+                LayoutInflater
+                    .from(parent.context)
                     .inflate(R.layout.item_gesture_alert, parent, false)
             return ViewHolder(view)
         }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        override fun onBindViewHolder(
+            holder: ViewHolder,
+            position: Int,
+        ) {
             val alert = alerts[position]
             holder.alertMessageTv.text = alert.message
             holder.alertMessageTv.setTextColor(
-                ContextCompat.getColor(holder.alertMessageTv.context, alert.color)
+                ContextCompat.getColor(holder.alertMessageTv.context, alert.color),
             )
         }
 
-        override fun getItemCount(): Int {
-            return alerts.size
-        }
+        override fun getItemCount(): Int = alerts.size
 
         fun addAlert(alert: GestureAlert) {
             for (gestureAlert in alerts) {
@@ -368,10 +379,11 @@ class GestureDetectorActivity : AppCompatActivity() {
         }
 
         @SuppressLint("NotifyDataSetChanged")
-        private val updateRunnable = Runnable {
-            notifyDataSetChanged()
-            isUpdating = false
-        }
+        private val updateRunnable =
+            Runnable {
+                notifyDataSetChanged()
+                isUpdating = false
+            }
 
         fun cancelUpdates() {
             updateHandler.removeCallbacksAndMessages(null)
@@ -381,13 +393,14 @@ class GestureDetectorActivity : AppCompatActivity() {
     private class GestureAlert(
         @field:Type @param:Type
         val alertType: Int,
-        val message: String?
+        val message: String?,
     ) {
         @Retention(AnnotationRetention.SOURCE)
         @IntDef(TYPE_NONE, TYPE_START, TYPE_PROGRESS, TYPE_END, TYPE_OTHER)
         annotation class Type
 
         @ColorInt var color = 0
+
         override fun equals(other: Any?): Boolean {
             if (this === other) {
                 return true

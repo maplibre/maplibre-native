@@ -1,13 +1,13 @@
 package org.maplibre.android.annotations
 
 import android.graphics.PointF
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Projection
 import org.junit.Assert
 import org.junit.Test
 import org.maplibre.android.BaseTest
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.Projection
 import org.mockito.InjectMocks
 import org.mockito.Mockito
 
@@ -42,9 +42,10 @@ class InfoWindowTest : BaseTest() {
     @Test
     fun testOpen() {
         val latLng = LatLng(0.0, 0.0)
-        val projection = Mockito.mock(
-            Projection::class.java
-        )
+        val projection =
+            Mockito.mock(
+                Projection::class.java,
+            )
         Mockito.`when`(mMapLibreMap.projection).thenReturn(projection)
         Mockito.`when`(projection.toScreenLocation(latLng)).thenReturn(PointF(0f, 0f))
         val infoWindow = InfoWindow(mMapView, mMapLibreMap)
@@ -55,9 +56,10 @@ class InfoWindowTest : BaseTest() {
     @Test
     fun testOpenClose() {
         val latLng = LatLng(0.0, 0.0)
-        val projection = Mockito.mock(
-            Projection::class.java
-        )
+        val projection =
+            Mockito.mock(
+                Projection::class.java,
+            )
         Mockito.`when`(mMapLibreMap.projection).thenReturn(projection)
         Mockito.`when`(projection.toScreenLocation(latLng)).thenReturn(PointF(0f, 0f))
         val infoWindow = InfoWindow(mMapView, mMapLibreMap)
@@ -69,9 +71,10 @@ class InfoWindowTest : BaseTest() {
     @Test
     fun testUpdate() {
         val latLng = LatLng(0.0, 0.0)
-        val projection = Mockito.mock(
-            Projection::class.java
-        )
+        val projection =
+            Mockito.mock(
+                Projection::class.java,
+            )
         Mockito.`when`(mMapLibreMap.projection).thenReturn(projection)
         Mockito.`when`(projection.toScreenLocation(latLng)).thenReturn(PointF(0f, 0f))
         val infoWindow = InfoWindow(mMapView, mMapLibreMap)
