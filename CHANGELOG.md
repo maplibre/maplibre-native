@@ -35,6 +35,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
+- [core] Fix collision detection of line-placed labels with a vertical `text-offset`: the collision circles now follow the offset text, so labels on opposite sides of one line no longer suppress each other.
 - [core] Stop custom geometry tile callbacks before cancelled tiles are released on a worker thread.
 - [core] Fix rendered-feature queries near the final endpoint of an offset line.
 - [core] Fix plugin layer filters ignoring the style's global state.

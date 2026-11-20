@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "Two line-center labels on opposite sides of one line, with a text-offset y of -1.5 and 1.5 em, do not overlap and must both be placed.",
+      "width": 512,
+      "height": 128
+    }
+  },
+  "center": [
+    11.25,
+    11
+  ],
+  "zoom": 4,
+  "sources": {
+    "line": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              6,
+              11
+            ],
+            [
+              16.5,
+              11
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "line",
+      "type": "line",
+      "source": "line",
+      "paint": {
+        "line-color": "#888888",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "above",
+      "type": "symbol",
+      "source": "line",
+      "layout": {
+        "symbol-placement": "line-center",
+        "text-field": "above the line",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-offset": [
+          0,
+          -1.5
+        ]
+      }
+    },
+    {
+      "id": "below",
+      "type": "symbol",
+      "source": "line",
+      "layout": {
+        "symbol-placement": "line-center",
+        "text-field": "below the line",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-offset": [
+          0,
+          1.5
+        ]
+      }
+    }
+  ]
+}

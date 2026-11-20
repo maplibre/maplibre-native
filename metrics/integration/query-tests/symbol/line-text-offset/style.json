@@ -1,0 +1,61 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "A line-center label with a text-offset y of 1.5 em is drawn 24 px below its line. A query at the drawn text, away from the line, must return the feature.",
+      "width": 512,
+      "height": 128,
+      "queryGeometry": [
+        256,
+        88
+      ]
+    }
+  },
+  "center": [
+    11.25,
+    11
+  ],
+  "zoom": 4,
+  "sources": {
+    "line": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              6,
+              11
+            ],
+            [
+              16.5,
+              11
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "below",
+      "type": "symbol",
+      "source": "line",
+      "layout": {
+        "symbol-placement": "line-center",
+        "text-field": "below the line",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-offset": [
+          0,
+          1.5
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "A line-center label with a text-offset y of 10 em, in the far half of a pitched view. Text that is pitched with the map is drawn with its font size, and with it the offset, scaled by the perspective ratio of the anchor. A query at the drawn text must return the feature.",
+      "width": 512,
+      "height": 512,
+      "queryGeometry": [
+        256,
+        161
+      ]
+    }
+  },
+  "center": [
+    11.25,
+    -8.3
+  ],
+  "zoom": 4,
+  "pitch": 60,
+  "sources": {
+    "line": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              6,
+              11
+            ],
+            [
+              16.5,
+              11
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "below",
+      "type": "symbol",
+      "source": "line",
+      "layout": {
+        "symbol-placement": "line-center",
+        "text-field": "below the line",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-offset": [
+          0,
+          10
+        ]
+      }
+    }
+  ]
+}

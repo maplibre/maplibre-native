@@ -235,6 +235,20 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
     // equivalent to pixel_to_tile_units
     const auto pixelsToTileUnits = 1 / (textPixelRatio * scale);
 
+    // The y component of text-offset moves the glyphs away from the line, see
+    // placeGlyphAlongLine(). Move the collision circles by the same distance,
+    // converted from pixels to tile units. Without this, the circles stay on
+    // the line, and labels on opposite sides of one line suppress each other.
+    // Text that is pitched with the map is drawn with its font size, and with
+    // it the offset, scaled by the perspective ratio of the anchor, see
+    // reprojectLineLabels(). lineOffsetY above is scaled differently and is
+    // only meant for placeFirstAndLastGlyph().
+    float offsetPerspectiveRatio = 1.0f;
+    if (pitchWithMap) {
+        offsetPerspectiveRatio = 0.5f + 0.5f * (projectedAnchor.second / transformState.getCameraToCenterDistance());
+    }
+    const float circleOffset = symbol.lineOffset[1] * fontScale * offsetPerspectiveRatio * pixelsToTileUnits;
+
     float firstTileDistance = 0.f;
     float lastTileDistance = 0.f;
     if (firstAndLastGlyph) {
@@ -264,7 +278,7 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
             continue;
         }
 
-        const auto projectedPoint = projectPoint(posMatrix, circle.anchor);
+        const auto projectedPoint = projectPoint(posMatrix, circle.anchor + circle.lineNormal * circleOffset);
         const float tileUnitRadius = (circle.x2 - circle.x1) / 2;
         const float radius = tileUnitRadius * tileToViewport;
 
