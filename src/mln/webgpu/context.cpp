@@ -75,6 +75,8 @@ void Context::releaseClipMaskBindGroups() {
 }
 
 void Context::beginFrame() {
+    stats.numDrawCalls = 0;
+    stats.numFrames++;
     backend.getThreadPool().runRenderJobs();
     clipMaskSlotsUsed = 0;
 }
