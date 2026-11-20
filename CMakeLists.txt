@@ -1292,6 +1292,8 @@ endif()
 
 include(${PROJECT_SOURCE_DIR}/scripts/license.cmake)
 
+include(${PROJECT_SOURCE_DIR}/platform/default/sources.cmake)
+
 if(MLN_WITH_QT)
     include(${PROJECT_SOURCE_DIR}/platform/qt/qt.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
