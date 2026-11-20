@@ -143,11 +143,8 @@ jobs:
       - name: Running iOS tests
         run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
 
-      # tsan run fails with 'Interceptors are not working. This may be because ThreadSanitizer is loaded too late...'
-      #- name: Running iOS UI tests (Thread Sanitizer)
-      #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
-
       - name: Running iOS UI tests (UB Sanitizer)
+        if: github.ref == 'refs/heads/main'
         run: |
           bazel test //platform/ios/iosapp-UITests:uitest \
             --test_output=errors \
@@ -158,6 +155,15 @@ jobs:
             --linkopt=-fsanitize=undefined \
             --copt=-fsanitize-recover=null \
             --linkopt=-fsanitize-recover=null
+
+      - name: Running iOS UI tests (Thread Sanitizer)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          bazel test //platform/ios/iosapp-UITests:uitest \
+            --test_output=errors \
+            --flaky_test_attempts=5 \
+            --//:renderer=metal \
+            --features=tsan
 
       # C++ unit tests
 
