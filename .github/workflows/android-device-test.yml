@@ -132,7 +132,7 @@ jobs:
         id: benchmark_comment
         with:
           issue-number: ${{ steps.get-pr-number.outputs.pr-number }}
-          body-regex: '^!benchmark.*android.*$'
+          body-regex: '/^!benchmark.*\bandroid\b/im'
 
       - name: Should we run this device test?
         # always run when something was merged into main

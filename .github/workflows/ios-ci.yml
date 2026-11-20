@@ -140,7 +140,7 @@ jobs:
         id: benchmark_comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          body-regex: '^!benchmark.*ios.*$'
+          body-regex: '/^!benchmark.*\bios\b/im'
 
       - name: Should we build the benchmark?
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || steps.benchmark_comment.outputs.comment-id
