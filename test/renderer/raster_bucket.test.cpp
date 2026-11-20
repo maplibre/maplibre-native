@@ -63,8 +63,17 @@ TEST(RasterBucket, ReleasesDecodedImageAfterTextureCreated) {
         const auto camera = CameraOptions().withCenter(LatLng{20.0, 10.0}).withZoom(2.0);
         map.jumpTo(camera);
 
+        // A tile that arrives after a frame's update is drawn, and releases its image, in the next frame: render
+        // until nothing is held any more, a few frames at most. An image that is never released still fails.
+        const auto settle = [&] {
+            for (int frames = 0; frames < 10 && baseline != RasterBucket::getHeldImageBytes(); ++frames) {
+                (void)frontend.render(map);
+            }
+        };
+
         const auto first = frontend.render(map).image;
         EXPECT_GT(tileRequests, 1);
+        settle();
         EXPECT_EQ(baseline, RasterBucket::getHeldImageBytes()) << "decoded raster images are still held after upload";
 
         // Another frame from the textures alone must look the same.
@@ -77,6 +86,7 @@ TEST(RasterBucket, ReleasesDecodedImageAfterTextureCreated) {
         map.jumpTo(camera);
         const auto third = frontend.render(map).image;
         EXPECT_TRUE(first == third);
+        settle();
         EXPECT_EQ(baseline, RasterBucket::getHeldImageBytes());
     }
 
