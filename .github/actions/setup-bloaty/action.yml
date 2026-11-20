@@ -1,0 +1,30 @@
+name: 'setup-bloaty'
+description: 'Restores Bloaty from the cache or builds it, at bloaty/build/bloaty'
+inputs:
+  sha:
+    description: 'Bloaty commit to build'
+    required: false
+    default: 8be8b448550b37c978e8defd9d421c0464c52cc7
+runs:
+  using: "composite"
+  steps:
+    - name: Cache Bloaty
+      id: cache-bloaty
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: bloaty/build/bloaty
+        key: bloaty-${{ inputs.sha }}
+
+    # because Google is not making a release...
+    # https://github.com/google/bloaty/issues/334
+    - name: Compile Bloaty
+      if: ${{ !steps.cache-bloaty.outputs.cache-hit }}
+      shell: bash
+      run: |
+        git clone https://github.com/google/bloaty.git
+        cd bloaty
+        git checkout "$BLOATY_SHA"
+        cmake -B build -G Ninja -S .
+        cmake --build build
+      env:
+        BLOATY_SHA: ${{ inputs.sha }}

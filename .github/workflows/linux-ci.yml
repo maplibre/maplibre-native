@@ -246,8 +246,12 @@ jobs:
     env:
       download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com
       legacy_maplibre_sha: d38709084a9865fe0bb8300aec70ebf8243b3d43
-      bloaty_sha: 8be8b448550b37c978e8defd9d421c0464c52cc7
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/actions
+          persist-credentials: false
+
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: mbgl-render
@@ -260,23 +264,7 @@ jobs:
         run: wget -O mbgl-render-legacy "${download_url}/mbgl-render-${legacy_maplibre_sha}"
         continue-on-error: true
 
-      - name: Cache Bloaty
-        id: cache-bloaty
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: bloaty/build/bloaty
-          key: bloaty-${{ env.bloaty_sha }}
-
-      # because Google is not making a release...
-      # https://github.com/google/bloaty/issues/334
-      - name: Compile Bloaty
-        if: ${{ !steps.cache-bloaty.outputs.cache-hit }}
-        run: |
-          git clone https://github.com/google/bloaty.git
-          cd bloaty
-          git checkout "$bloaty_sha"
-          cmake -B build -G Ninja -S .
-          cmake --build build
+      - uses: ./.github/actions/setup-bloaty
 
       - name: Run Bloaty McBloatface on main
         run: bloaty/build/bloaty mbgl-render -- mbgl-render-main -n 0 -s vm -d compileunits > tlus_diff_main.txt
