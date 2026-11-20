@@ -15,11 +15,10 @@ namespace vulkan {
 class OffscreenTextureResource final : public RenderableResource {
 public:
     OffscreenTextureResource(RendererBackend& backend_,
-                             const Size size_,
+                             const Size size,
                              const gfx::TextureChannelDataType type_,
                              bool stencil_)
         : RenderableResource(backend_),
-          size(size_),
           type(type_),
           wantsStencil(stencil_) {
         assert(!size.isEmpty());
@@ -50,9 +49,25 @@ public:
     }
 
     void bind() override {
+        auto& texture = static_cast<Texture2D&>(*colorTexture);
+        const bool dirty = texture.isDirty();
+
         colorTexture->create();
+
+        if (dirty) {
+            // The texture may have a new size; the depth attachment must match it.
+            const auto& textureSize = texture.getSize();
+            extent.width = textureSize.width;
+            extent.height = textureSize.height;
+            releaseDepthImage();
+        }
+
         createDepthImage();
         createRenderPass();
+
+        if (dirty) {
+            createFramebuffer();
+        }
     }
 
     const vk::UniqueFramebuffer& getFramebuffer() const override { return framebuffer; };
@@ -143,6 +158,12 @@ public:
             imageViewCreateInfo, nullptr, backend.getDispatcher());
     }
 
+    void releaseDepthImage() {
+        if (!depthAllocation) return;
+        std::shared_ptr<ImageAllocation> oldDepth = std::move(depthAllocation);
+        backend.getContext<Context>().enqueueDeletion([oldDepth](auto&) mutable { oldDepth.reset(); });
+    }
+
     void createRenderPass() {
         if (renderPass) return;
 
@@ -214,6 +235,20 @@ public:
 
         renderPass = backend.getDevice()->createRenderPassUnique(
             renderPassCreateInfo, nullptr, backend.getDispatcher());
+    }
+
+    void createFramebuffer() {
+        if (framebuffer) {
+            backend.getContext<Context>().enqueueDeletion([oldFramebuffer = framebuffer.release()](auto& context_) {
+                context_.getBackend().getDevice()->destroyFramebuffer(
+                    oldFramebuffer, nullptr, context_.getBackend().getDispatcher());
+            });
+        }
+
+        auto& texture = static_cast<Texture2D&>(*colorTexture);
+        const auto& textureSize = texture.getSize();
+        extent.width = textureSize.width;
+        extent.height = textureSize.height;
 
         const std::array<vk::ImageView, 2> framebufferAttachments = {texture.getVulkanImageView().get(),
                                                                      depthAllocation->imageView.get()};
@@ -230,7 +265,6 @@ public:
     }
 
 private:
-    const Size size;
     const gfx::TextureChannelDataType type;
     const bool wantsStencil;
     bool stencilSupported = false;
