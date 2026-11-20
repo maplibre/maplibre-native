@@ -8,6 +8,7 @@
 #include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstring>
@@ -69,21 +70,27 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
     if (layers.empty()) return;
     // The resources that the RESOURCE properties name, at tile zoom: for the tile, or for each feature drawn.
     const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
+    const auto nameOf = [](const mln_plugin_value& value) {
+        const auto& name = value.data.resource_value.name;
+        return name.size ? std::string(name.data, name.size) : std::string{};
+    };
+    std::vector<style::PluginPropertyValue> featureResourceValues;
     for (const auto& definition : registration->properties) {
         if (definition.type != MLN_PLUGIN_VALUE_RESOURCE) continue;
-        const auto resources = leader.pluginResources.find(definition.resources);
-        if (resources == leader.pluginResources.end()) continue;
-        const auto value = style::pluginPropertyValue(definition, leader.pluginProperties);
-        style::PluginPropertyValue::EvaluationStorage storage;
-        const auto add = [&](const mln_plugin_value& resource) {
-            const auto& name = resource.data.resource_value.name;
-            const auto url = resources->second.find(name.size ? std::string(name.data, name.size) : std::string{});
-            if (url != resources->second.end()) resourceURLs.insert(url->second);
-        };
-        if (!value.isDataDriven()) {
-            add(value.evaluate(zoom, definition, storage));
+        auto value = style::pluginPropertyValue(definition, leader.pluginProperties);
+        if (value.isDataDriven()) {
+            featureResourceDefinitions.push_back(&definition);
+            featureResourceValues.push_back(std::move(value));
             continue;
         }
+        style::PluginPropertyValue::EvaluationStorage storage;
+        if (const auto* url = resourceURL(definition, nameOf(value.evaluate(zoom, definition, storage)))) {
+            resourceURLs.insert(*url);
+        }
+    }
+    if (!featureResourceDefinitions.empty()) {
+        drawnFeatures.emplace();
+        std::vector<style::PluginPropertyValue::EvaluationStorage> storage(featureResourceValues.size());
         const FeatureState noFeatureState;
         for (size_t i = 0; i < sourceLayer->featureCount(); ++i) {
             const auto feature = sourceLayer->getFeature(i);
@@ -95,7 +102,16 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                                    .withGlobalState(globalState.get()))) {
                 continue;
             }
-            add(value.evaluate(zoom, *feature, noFeatureState, definition, storage));
+            DrawnFeature drawn{.index = i, .resourceNames = {}};
+            drawn.resourceNames.reserve(featureResourceValues.size());
+            for (size_t r = 0; r < featureResourceValues.size(); ++r) {
+                drawn.resourceNames.push_back(nameOf(featureResourceValues[r].evaluate(
+                    zoom, *feature, noFeatureState, *featureResourceDefinitions[r], storage[r])));
+                if (const auto* url = resourceURL(*featureResourceDefinitions[r], drawn.resourceNames.back())) {
+                    resourceURLs.insert(*url);
+                }
+            }
+            drawnFeatures->push_back(std::move(drawn));
         }
     }
     layoutParameters->resourceDependencies.insert(resourceURLs.begin(), resourceURLs.end());
@@ -125,14 +141,19 @@ void PluginLayout::prepareResources(const LayoutResourceMap& resources) {
     }
 }
 
-void* PluginLayout::resourceHandle(const plugin::PropertyDefinition& definition, const mln_plugin_value& value) const {
+const std::string* PluginLayout::resourceURL(const plugin::PropertyDefinition& definition,
+                                             const std::string& name) const {
     const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
     const auto resources = leader.pluginResources.find(definition.resources);
     if (resources == leader.pluginResources.end()) return nullptr;
-    const auto& name = value.data.resource_value.name;
-    const auto url = resources->second.find(name.size ? std::string(name.data, name.size) : std::string{});
-    if (url == resources->second.end()) return nullptr;
-    const auto handle = resourceHandles.find(url->second);
+    const auto url = resources->second.find(name);
+    return url == resources->second.end() ? nullptr : &url->second;
+}
+
+void* PluginLayout::resourceHandle(const plugin::PropertyDefinition& definition, const std::string& name) const {
+    const auto* url = resourceURL(definition, name);
+    if (!url) return nullptr;
+    const auto handle = resourceHandles.find(*url);
     return handle == resourceHandles.end() ? nullptr : handle->second.get();
 }
 
@@ -171,7 +192,8 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
         // A RESOURCE value that depends on the feature has its handle in layout_feature only.
         if (definition.type == MLN_PLUGIN_VALUE_RESOURCE && !layoutValues[i].isDataDriven()) {
             auto& resource = layoutProperties.back().value.data.resource_value;
-            resource.handle = resourceHandle(definition, layoutProperties.back().value);
+            resource.handle = resourceHandle(
+                definition, resource.name.size ? std::string(resource.name.data, resource.name.size) : std::string{});
         }
     }
     context.properties = layoutProperties.data();
@@ -190,25 +212,45 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
         return;
     }
 
-    for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
+    // The slot of each feature-dependent RESOURCE value in DrawnFeature::resourceNames.
+    std::vector<std::optional<std::size_t>> resourceSlots(layoutDefinitions.size());
+    for (size_t p = 0; p < layoutDefinitions.size(); ++p) {
+        const auto found = std::find(
+            featureResourceDefinitions.begin(), featureResourceDefinitions.end(), layoutDefinitions[p]);
+        if (found != featureResourceDefinitions.end()) {
+            resourceSlots[p] = static_cast<std::size_t>(found - featureResourceDefinitions.begin());
+        }
+    }
+
+    // With drawnFeatures, the constructor already filtered the features and evaluated their RESOURCE values.
+    const std::size_t candidates = drawnFeatures ? drawnFeatures->size() : sourceLayer->featureCount();
+    for (std::size_t n = 0; n < candidates; ++n) {
+        const std::size_t i = drawnFeatures ? (*drawnFeatures)[n].index : n;
         auto feature = sourceLayer->getFeature(i);
         if (!feature) continue;
-        const auto type = plugin::geometryType(feature->getType());
-        if (type == 0 || (registration->geometryTypeMask & type) == 0) continue;
-        if (!leader.filter(style::expression::EvaluationContext(zoom, feature.get())
-                               .withCanonicalTileID(&canonical)
-                               .withGlobalState(globalState.get()))) {
-            continue;
+        if (!drawnFeatures) {
+            const auto type = plugin::geometryType(feature->getType());
+            if (type == 0 || (registration->geometryTypeMask & type) == 0) continue;
+            if (!leader.filter(style::expression::EvaluationContext(zoom, feature.get())
+                                   .withCanonicalTileID(&canonical)
+                                   .withGlobalState(globalState.get()))) {
+                continue;
+            }
         }
 
         for (size_t p = 0; p < layoutValues.size(); ++p) {
             if (!layoutValues[p].isDataDriven()) continue;
-            featureProperties[p].value = layoutValues[p].evaluate(
-                zoom, *feature, noFeatureState, *layoutDefinitions[p], featureStorage[p]);
-            if (layoutDefinitions[p]->type == MLN_PLUGIN_VALUE_RESOURCE) {
-                featureProperties[p].value.data.resource_value.handle = resourceHandle(*layoutDefinitions[p],
-                                                                                       featureProperties[p].value);
+            auto& value = featureProperties[p].value;
+            if (drawnFeatures && resourceSlots[p]) {
+                const auto& name = (*drawnFeatures)[n].resourceNames[*resourceSlots[p]];
+                value = {};
+                value.struct_size = sizeof(value);
+                value.type = MLN_PLUGIN_VALUE_RESOURCE;
+                value.data.resource_value.name = {name.data(), name.size()};
+                value.data.resource_value.handle = resourceHandle(*layoutDefinitions[p], name);
+                continue;
             }
+            value = layoutValues[p].evaluate(zoom, *feature, noFeatureState, *layoutDefinitions[p], featureStorage[p]);
         }
         plugin::FeatureView pluginFeature(*feature, i);
         pluginFeature.value.layout_properties = featureProperties.data();
