@@ -1,12 +1,29 @@
 name: "Pull Request Labeler"
 on:
-- pull_request_target
+  workflow_run:
+    workflows: [labeler-trigger]
+    types:
+      - completed
 
 jobs:
   labeler:
+    if: github.event.workflow_run.conclusion == 'success'
     permissions:
+      actions: read
       contents: read
       pull-requests: write
     runs-on: ubuntu-26.04
     steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        sparse-checkout: .github
+        persist-credentials: false
+
+    - uses: ./.github/actions/get-pr-number
+      id: get-pr-number
+
+    # The PR number comes from an untrusted run. Labels are derived from that
+    # PR's changed files and the labeler config on the default branch.
     - uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7.0.0
+      with:
+        pr-number: ${{ steps.get-pr-number.outputs.pr-number }}

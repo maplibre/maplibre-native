@@ -1,8 +1,7 @@
 name: cleanup-branch-caches
 on:
-  pull_request_target:
-    types:
-      - closed
+  schedule:
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -12,30 +11,22 @@ jobs:
       # `actions:write` permission is required to delete caches
       #   See also: https://docs.github.com/en/rest/actions/cache?apiVersion=2022-11-28#delete-a-github-actions-cache-for-a-repository-using-a-cache-id
       actions: write
-      contents: read
+      pull-requests: read
     steps:
-      - name: Check out code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Cleanup
+      - name: Delete caches of closed PRs
         run: |
-          gh extension install actions/gh-actions-cache
+          refs=$(gh cache list --limit 1000 --json ref \
+            --jq '[.[].ref | select(test("^refs/pull/[0-9]+/merge$"))] | unique | .[]')
 
-          REPO="${{ github.repository }}"
-          BRANCH="refs/pull/${{ github.event.pull_request.number }}/merge"
-
-          echo "Fetching list of cache key"
-          cacheKeysForPR=$(gh actions-cache list -R "$REPO" -B "$BRANCH" | cut -f 1 )
-
-          # set this to not fail the workflow while deleting cache keys
-          set +e
-          echo "Deleting caches..."
-          for cacheKey in $cacheKeysForPR
-          do
-            gh actions-cache delete "$cacheKey" -R "$REPO" -B "$BRANCH" --confirm
+          for ref in $refs; do
+            pr=${ref#refs/pull/}
+            pr=${pr%/merge}
+            state=$(gh pr view "$pr" --json state --jq .state)
+            if [ "$state" != OPEN ]; then
+              echo "Deleting caches of #$pr ($state)"
+              gh cache delete --all --ref "$ref" --succeed-on-no-caches
+            fi
           done
-          echo "Done"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
