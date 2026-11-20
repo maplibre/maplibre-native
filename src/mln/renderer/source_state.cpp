@@ -69,7 +69,7 @@ void SourceFeatureState::coalesceChanges(std::vector<RenderTile>& tiles) {
 
     for (const auto& layerStatesEntry : deletedStates) {
         const auto& sourceLayer = layerStatesEntry.first;
-        FeatureStates layerStates = {{}, {}};
+        FeatureStates& layerStates = changes[sourceLayer];
 
         if (deletedStates[sourceLayer].empty()) {
             for (const auto& featureStatesEntry : currentStates[sourceLayer]) {
@@ -91,20 +91,25 @@ void SourceFeatureState::coalesceChanges(std::vector<RenderTile>& tiles) {
                 layerStates[featureID] = currentStates[sourceLayer][featureID];
             }
         }
-        changes[sourceLayer] = std::move(layerStates);
     }
 
     stateChanges.clear();
     deletedStates.clear();
 
-    changes.insert(currentStates.begin(), currentStates.end());
-
-    if (changes.empty()) {
-        return;
+    if (!changes.empty()) {
+        ++version;
     }
 
+    // A tile that holds the previous version gets this frame's changes. A tile with new buckets, or one that was
+    // not rendered in a frame with changes, gets the whole state. A tile that is up to date gets nothing.
     for (auto& tile : tiles) {
-        tile.setFeatureState(changes);
+        auto& tileVersion = tile.featureStateVersion();
+        if (tileVersion == version) {
+            continue;
+        }
+        const bool previous = !changes.empty() && tileVersion != 0 && tileVersion + 1 == version;
+        tile.setFeatureState(previous ? changes : currentStates);
+        tileVersion = version;
     }
 }
 
