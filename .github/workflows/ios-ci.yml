@@ -147,7 +147,12 @@ jobs:
         run: |
           set -e
           build_dir="$(mktemp -d)"
-          xcodebuild build-for-testing -scheme BenchmarkUITests -configuration Release -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+          # Bazel signs the app and the .xctest, but Xcode signs the generated UI test runner. Automatic signing only
+          # works with Xcode-managed profiles, so sign it manually with the profile the signing assets installed.
+          profile_name="$(sed -n 's/^APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "\(.*\)"$/\1/p' ../darwin/bazel/config.bzl)"
+          test -n "$profile_name"
+          xcodebuild build-for-testing -scheme BenchmarkUITests -configuration Release -project MapLibre.xcodeproj -derivedDataPath "$build_dir" \
+            CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER="$profile_name"
           benchmark_artifacts_dir="$(mktemp -d)"
           for app in BenchmarkApp BenchmarkUITests-Runner; do
             app_dir="$(find "$build_dir" -name "$app.app" -type d | head -n 1)"
