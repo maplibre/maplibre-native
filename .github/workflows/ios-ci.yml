@@ -132,7 +132,7 @@ jobs:
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
 
-      # benchmark (only built for PRs with a '!benchmark ios' comment, see ios-device-test.yml)
+      # benchmark (built on pushes to main and for PRs with a '!benchmark ios' comment, see ios-device-test.yml)
 
       - name: Check if comment on PR contains '!benchmark ios'
         if: github.event_name == 'pull_request'
@@ -142,15 +142,19 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body-regex: '^!benchmark.*ios.*$'
 
+      - name: Should we build the benchmark?
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || steps.benchmark_comment.outputs.comment-id
+        run: echo "build_benchmark=true" >> "$GITHUB_ENV"
+
       - name: Build BenchmarkApp .ipa and BenchmarkTests .xctest for AWS Device Farm
-        if: steps.benchmark_comment.outputs.comment-id
+        if: env.build_benchmark == 'true'
         run: |
           benchmark_artifacts_dir="$(mktemp -d)"
           scripts/build-benchmark-for-device-farm.sh "$benchmark_artifacts_dir"
           echo benchmark_artifacts_dir="$benchmark_artifacts_dir" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: steps.benchmark_comment.outputs.comment-id
+        if: env.build_benchmark == 'true'
         with:
           name: ios-benchmark
           retention-days: 3

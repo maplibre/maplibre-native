@@ -34,6 +34,10 @@ unzip -q "$app_ipa" -d "$staging_dir"
 mkdir -p "$staging_dir/Payload/BenchmarkApp.app/PlugIns"
 unzip -q "$tests_zip" -d "$staging_dir/Payload/BenchmarkApp.app/PlugIns"
 chmod -R u+w "$staging_dir/Payload"
+# BenchmarkApp reports this as the gitRevision of its results.
+if git_revision="$(git rev-parse HEAD 2>/dev/null)"; then
+  plutil -replace MLNGitRevision -string "$git_revision" "$staging_dir/Payload/BenchmarkApp.app/Info.plist"
+fi
 # XCTest bundles hosted in an app need Swift Testing's interop libraries in the app on Device Farm.
 iphoneos_developer_dir="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
 ditto "$iphoneos_developer_dir/Library/Frameworks/Testing.framework" \

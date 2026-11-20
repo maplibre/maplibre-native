@@ -212,7 +212,7 @@ jobs:
         run: |
           benchmark_results_dir="$(mktemp -d)"
           node scripts/aws-device-farm/collect-benchmark-outputs.mjs --inputDir "${{ env.results_dir }}" --outputDir "$benchmark_results_dir"
-          node scripts/aws-device-farm/upload-benchmark-outputs-to-s3.mjs --dir "$benchmark_results_dir"
+          node scripts/aws-device-farm/upload-benchmark-outputs-to-s3.mjs --dir "$benchmark_results_dir" --platform android
 
       - name: Upload Test Artifacts
         if: (matrix.test.benchmark || failure()) && env.run_device_test == 'true'

@@ -50,8 +50,11 @@ jobs:
           body-regex: '^!benchmark.*ios.*$'
 
       - name: Should we run this device test?
+        # always run when something was merged into main
         # run benchmark when comment with '!benchmark ios' exists in PR
-        if: ${{ !matrix.test.benchmark || steps.benchmark_comment.outputs.comment-id }}
+        if: |
+          (github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push') ||
+          !matrix.test.benchmark || steps.benchmark_comment.outputs.comment-id
         run:
           echo "run_device_test=true" >> "$GITHUB_ENV"
 
@@ -76,7 +79,7 @@ jobs:
         uses: andstor/file-existence-action@558493d6c74bf472d87c84eab196434afc2fa029 # v3.1.0
         with:
           files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
-          # ios-ci only builds the benchmark if the comment existed when it ran
+          # for PRs, ios-ci only builds the benchmark if the comment existed when it ran
           fail: ${{ matrix.test.benchmark == true }}
 
       - name: Configure AWS Credentials
@@ -123,10 +126,18 @@ jobs:
         run: |
           npm install
           results_dir="$(mktemp -d)"
+          echo results_dir="$results_dir" >> "$GITHUB_ENV"
           node scripts/aws-device-farm/store-test-artifacts.mjs --runArn "${{ env.run_arn }}" --outputDir "$results_dir"
           # unzip and delete .zip files so we don't have nested .zip
           find "$results_dir" -type f -name '*.zip' -exec sh -c 'unzip -o -d "$(dirname "$1")" "$1" && rm "$1"' _ {} \;
           zip -r test_artifacts.zip "$results_dir"
+
+      - name: Store Benchmark Results
+        if: matrix.test.benchmark && env.run_arn
+        run: |
+          benchmark_results_dir="$(mktemp -d)"
+          node scripts/aws-device-farm/collect-benchmark-outputs.mjs --inputDir "${{ env.results_dir }}" --outputDir "$benchmark_results_dir"
+          node scripts/aws-device-farm/upload-benchmark-outputs-to-s3.mjs --dir "$benchmark_results_dir" --platform ios
 
       - name: Upload Test Artifacts
         if: always() && matrix.test.benchmark && env.run_arn

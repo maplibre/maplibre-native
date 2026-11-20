@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Run the iOS benchmark on AWS Device Farm and print its results.
+# Run the iOS benchmark on AWS Device Farm and print its results (benchmark_results.json, see
+# docs/mdbook/src/platforms/android/benchmark.md for the format). It doesn't upload them to S3.
 #
 # Usage:
 #   platform/ios/scripts/run-benchmark.sh [IPA_DIR]
@@ -46,13 +47,11 @@ fi
 results_dir="$(mktemp -d)"
 node "$repo_root/scripts/aws-device-farm/store-test-artifacts.mjs" --runArn "$run_arn" --outputDir "$results_dir"
 
-# The benchmark app logs its results with NSLog, so they end up in the device syslog.
-find "$results_dir" -name '*.syslog' -print0 | while IFS= read -r -d '' syslog; do
-  echo "== $(basename "$(dirname "$syslog")")"
-  grep -E ' BenchmarkApp[[(]' "$syslog" |
-    grep -E 'Benchmark completed|\| .* ms \| .* ms \||Average frame|Cpu usage|Memory usage' ||
-    echo "No benchmark results in $syslog"
-done
+benchmark_results_dir="$(mktemp -d)"
+node "$repo_root/scripts/aws-device-farm/collect-benchmark-outputs.mjs" --inputDir "$results_dir" \
+  --outputDir "$benchmark_results_dir"
+cat "$benchmark_results_dir"/*.json 2>/dev/null || echo "No benchmark results found"
+echo
 
 echo "Device Farm artifacts: $results_dir"
 exit "$run_status"
