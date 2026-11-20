@@ -7,8 +7,11 @@
 #include <mln/gfx/types.hpp>
 #include <mln/gl/headless_backend.hpp>
 #include <mln/gl/context.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/platform/gl_functions.hpp>
 
 using namespace mln;
+using namespace mln::platform;
 
 namespace {
 
@@ -118,6 +121,24 @@ TEST(ResourcePool, TexturePool) {
     EXPECT_FALSE(pool.isUnused(id));
     EXPECT_FALSE(pool.isPooled(id));
     EXPECT_TRUE(context.empty(true));
+}
+
+TEST(ResourcePool, TextureAllocationIgnoresEarlierErrors) {
+    gl::HeadlessBackend backend{{32, 32}};
+    gfx::BackendScope scope{backend};
+
+    gl::Context context{backend};
+    auto& pool = context.getTexturePool();
+
+    glBindBuffer(0, 0);
+
+    gl::TextureID id = 0;
+    EXPECT_NO_THROW(id = pool.alloc(makeDescOneMB()));
+    EXPECT_EQ(glGetError(), GL_NO_ERROR);
+
+    pool.release(id);
+    context.reduceMemoryUsage();
+    context.renderingStats().numActiveTextures = 0;
 }
 
 #endif
