@@ -1,6 +1,9 @@
 #include <mln/plugin/plugin_registry.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/style/image_impl.hpp>
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/layer.hpp>
 #include <mln/map/transform_state.hpp>
@@ -692,5 +695,96 @@ TEST(PluginApi, LaysATileOutOnceTheResourcesItsFeaturesNameHaveLoaded) {
         EXPECT_EQ(0u, tileResources.destroyed);
     }
     // No tile uses the model any more.
+    EXPECT_EQ(1u, tileResources.destroyed);
+}
+
+// parse() requests the images before the resources. An image that is already loaded is answered while parse() still
+// runs, and that answer must not lay the tile out before the resources are requested and have arrived.
+TEST(PluginApi, WaitsForResourcesWhenAnImageIsAnsweredDuringParse) {
+    tileResources = {};
+    ResourceDescriptor input("test.resources-image");
+    input.layer.create_layout = [](const mln_plugin_layout_context_v1*, void** instance) {
+        static int layout = 0;
+        *instance = &layout;
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.layout_feature = [](void*, const mln_plugin_feature_v1* feature) {
+        if (feature->layout_property_count == 1) {
+            tileResources.featureHandles.push_back(feature->layout_properties[0].value.data.resource_value.handle);
+        }
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
+        *output = {};
+        output->struct_size = sizeof(*output);
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.create_resource = [](mln_plugin_string, const uint8_t* data, size_t size, void** handle) {
+        tileResources.created.emplace_back(reinterpret_cast<const char*>(data), size);
+        *handle = new std::string(tileResources.created.back());
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.destroy_resource = [](void* handle) {
+        ++tileResources.destroyed;
+        delete static_cast<std::string*>(handle);
+    };
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(StubFileSource::ResponseType::Manual);
+    fileSource->response = [&](const Resource& resource) -> std::optional<Response> {
+        Response response;
+        response.data = std::make_shared<std::string>("glb of " + resource.url);
+        return response;
+    };
+    // The icon is already loaded, so the image manager answers as soon as the tile asks.
+    auto imageManager = ImageManager::create();
+    imageManager->addImage(makeMutable<style::Image::Impl>("pin", PremultipliedImage({4, 4}), 1.0f));
+    imageManager->setLoaded(true);
+    TransformState transformState;
+    util::SimpleIdentity uniqueID;
+    TileParameters parameters{.pixelRatio = 1.0,
+                              .debugOptions = MapDebugOptions(),
+                              .transformState = transformState,
+                              .fileSource = fileSource,
+                              .mode = MapMode::Continuous,
+                              .annotationManager = {},
+                              .imageManager = imageManager,
+                              .glyphManager = std::make_shared<GlyphManager>(),
+                              .prefetchZoomDelta = 0,
+                              .threadPool = {Scheduler::GetBackground(), uniqueID},
+                              .isUpdateSynchronous = true};
+
+    style::conversion::Error error;
+    const auto models = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+        R"({"id":"models","source":"points","type":")" + input.type +
+            R"(","layout":{"test-models":{"car":"asset://car.glb"},"test-model":["get","kind"]}})",
+        error);
+    ASSERT_TRUE(models) << error.message;
+    const auto pins = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+        R"({"id":"pins","source":"points","type":"symbol","layout":{"icon-image":"pin"}})", error);
+    ASSERT_TRUE(pins) << error.message;
+    const std::vector<Immutable<style::LayerProperties>> layers{
+        makeMutable<style::PluginStyleLayerProperties>(
+            staticImmutableCast<style::PluginStyleLayer::Impl>((*models)->baseImpl)),
+        makeMutable<style::SymbolLayerProperties>(staticImmutableCast<style::SymbolLayer::Impl>((*pins)->baseImpl))};
+
+    mapbox::feature::feature_collection<int16_t> features;
+    mapbox::feature::feature<int16_t> car{mapbox::geometry::point<int16_t>(100, 100)};
+    car.properties = {{"kind", std::string("car")}};
+    features.push_back(std::move(car));
+    {
+        GeoJSONTile tile(OverscaledTileID(0, 0, 0), "points", parameters, std::make_shared<PointData>(features));
+        tile.setLayers(layers, nullptr);
+        // The image answered during parse(), but the model has not arrived, so nothing is laid out yet.
+        EXPECT_FALSE(tile.isComplete());
+        EXPECT_TRUE(tileResources.featureHandles.empty());
+
+        fileSource->respondToAll();
+        EXPECT_TRUE(tile.isComplete());
+        ASSERT_EQ(1u, tileResources.featureHandles.size());
+        ASSERT_NE(nullptr, tileResources.featureHandles[0]);
+        EXPECT_EQ("glb of asset://car.glb", *static_cast<std::string*>(tileResources.featureHandles[0]));
+    }
     EXPECT_EQ(1u, tileResources.destroyed);
 }
