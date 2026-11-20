@@ -49,16 +49,11 @@ jobs:
           sha: ${{ github.event.workflow_run.head_sha }}
 
       - uses: ./.github/actions/download-workflow-run-artifact
+        id: download
         with:
           artifact-name: ${{ matrix.test.artifactName }}
           files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
           optional: 'true'
-
-      - name: Check if test files exist (otherwise the parent workflow was skipped)
-        id: check_files
-        uses: andstor/file-existence-action@558493d6c74bf472d87c84eab196434afc2fa029 # v3.1.0
-        with:
-          files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
@@ -69,7 +64,7 @@ jobs:
           role-duration-seconds: 14400
 
       - name: Run ${{ matrix.test.name }} on AWS Device Farm
-        if: steps.check_files.outputs.files_exists == 'true'
+        if: steps.download.outputs.found == 'true'
         run: |
           export name="${{ matrix.test.name }}"
           export appType=IOS_APP

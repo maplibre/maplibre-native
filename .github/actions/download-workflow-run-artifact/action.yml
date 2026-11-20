@@ -11,6 +11,10 @@ inputs:
     description: 'Do not fail when the artifact or one of the files is missing'
     required: false
     default: 'false'
+outputs:
+  found:
+    description: 'Whether every listed file was taken from the artifact'
+    value: ${{ steps.extract.outputs.found }}
 runs:
   using: "composite"
   steps:
@@ -44,6 +48,7 @@ runs:
     # only the listed names into an empty directory and move regular files
     # (not symlinks) into the workspace.
     - name: Extract ${{ inputs.artifact-name }}
+      id: extract
       shell: bash
       run: |
         read -ra files <<< "${FILES//,/ }"
@@ -51,15 +56,19 @@ runs:
         if [ -f "$ZIP" ]; then
           unzip -q "$ZIP" "${files[@]}" -d "$dir" || true
         fi
+        found=true
         for f in "${files[@]}"; do
           if [ -f "$dir/$f" ] && [ ! -L "$dir/$f" ]; then
             mv "$dir/$f" "./$f"
-          elif [ "$OPTIONAL" != true ]; then
+          elif [ "$OPTIONAL" = true ]; then
+            found=false
+          else
             echo "::error::artifact $ARTIFACT has no regular file $f"
             exit 1
           fi
         done
         rm -rf "$dir"
+        echo "found=$found" >> "$GITHUB_OUTPUT"
       env:
         ARTIFACT: ${{ inputs.artifact-name }}
         FILES: ${{ inputs.files }}

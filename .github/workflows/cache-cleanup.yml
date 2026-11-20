@@ -1,7 +1,7 @@
 name: cleanup-branch-caches
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -15,16 +15,14 @@ jobs:
     steps:
       - name: Delete caches of closed PRs
         run: |
-          refs=$(gh cache list --limit 1000 --json ref \
-            --jq '[.[].ref | select(test("^refs/pull/[0-9]+/merge$"))] | unique | .[]')
+          prs=$(gh cache list --limit 1000 --json ref \
+            --jq '[.[].ref | capture("^refs/pull/(?<n>[0-9]+)/merge$").n] | unique | .[]')
 
-          for ref in $refs; do
-            pr=${ref#refs/pull/}
-            pr=${pr%/merge}
+          for pr in $prs; do
             state=$(gh pr view "$pr" --json state --jq .state)
             if [ "$state" != OPEN ]; then
               echo "Deleting caches of #$pr ($state)"
-              gh cache delete --all --ref "$ref" --succeed-on-no-caches
+              gh cache delete --all --ref "refs/pull/$pr/merge" --succeed-on-no-caches
             fi
           done
         env:
