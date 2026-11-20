@@ -1,4 +1,4 @@
-# Runs Bloaty (size test) and reports its results and the Google Benchmark results from linux-ci on PR
+# Reports the Bloaty (size test) and Google Benchmark results from linux-ci on PR
 name: pr-linux-tests
 
 on:
@@ -13,7 +13,6 @@ concurrency:
 env:
   download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com
   legacy_maplibre_sha: d38709084a9865fe0bb8300aec70ebf8243b3d43
-  bloaty_sha: 8be8b448550b37c978e8defd9d421c0464c52cc7
 
 permissions:
   pull-requests: write
@@ -51,6 +50,9 @@ jobs:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip == 'false'
     runs-on: ubuntu-26.04
+    environment:
+      name: workflow-run
+      deployment: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -61,41 +63,8 @@ jobs:
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
-          artifact-name: mbgl-render
-          files: "mbgl-render"
-
-      - name: Download mbgl-render-main
-        run: wget -O mbgl-render-main "${download_url}/mbgl-render-main"
-
-      - name: Download mbgl-render-legacy
-        id: download-mbgl-render-legacy
-        run: wget -O mbgl-render-legacy "${download_url}/mbgl-render-${legacy_maplibre_sha}"
-        continue-on-error: true
-
-      - name: Cache Bloaty
-        id: cache-bloaty
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: bloaty/build/bloaty
-          key: bloaty-${{ env.bloaty_sha }}
-
-      # because Google is not making a release...
-      # https://github.com/google/bloaty/issues/334
-      - name: Compile Bloaty
-        if: ${{ !steps.cache-bloaty.outputs.cache-hit }}
-        run: |
-          git clone https://github.com/google/bloaty.git
-          cd bloaty
-          git checkout "$bloaty_sha"
-          cmake -B build -G Ninja -S .
-          cmake --build build
-
-      - name: Run Bloaty McBloatface on main
-        run: bloaty/build/bloaty mbgl-render -- mbgl-render-main -n 0 -s vm -d compileunits > tlus_diff_main.txt
-
-      - name: Run Bloaty McBloatface on legacy
-        if: steps.download-mbgl-render-legacy.outcome == 'success'
-        run: bloaty/build/bloaty mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff_legacy.txt
+          artifact-name: bloaty-results
+          files: "tlus_diff_main.txt,tlus_diff_legacy.txt"
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
@@ -146,6 +115,9 @@ jobs:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip == 'false'
     runs-on: ubuntu-26.04
+    environment:
+      name: workflow-run
+      deployment: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -154,7 +126,6 @@ jobs:
       - uses: ./.github/actions/get-pr-number
         id: get-pr-number
 
-      # The PR's benchmark runner only runs in linux-ci, where it has no secrets
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: benchmark-results

@@ -1,7 +1,5 @@
 name: labeler-trigger
 
-# Fork PRs get a read-only token, so this run only saves the PR number and
-# labeler.yml applies the labels from a workflow_run.
 on:
   pull_request:
     types: [opened, synchronize, reopened]

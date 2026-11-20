@@ -48,44 +48,21 @@ jobs:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip == 'false'
     runs-on: ubuntu-26.04
+    environment:
+      name: workflow-run
+      deployment: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Cache Bloaty
-        id: cache-bloaty
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: bloaty/build/bloaty
-          key: bloaty-${{ env.bloaty_sha }}
-
-      # because Google is not making a release...
-      # https://github.com/google/bloaty/issues/334
-      - name: Compile Bloaty
-        if: ${{ !steps.cache-bloaty.outputs.cache-hit }}
-        run: |
-          git clone https://github.com/google/bloaty.git
-          cd bloaty
-          git checkout "$bloaty_sha"
-          cmake -B build -G Ninja -S .
-          cmake --build build
-
-      - name: Download MapLibre_dynamic-main, MapLibre_DWARF-main
-        run: |
-          wget -O MapLibre_dynamic-main "${download_url}/size-test-ios/MapLibre_dynamic-main"
-          wget -O MapLibre_DWARF-main "${download_url}/size-test-ios/MapLibre_DWARF-main"
 
       - uses: ./.github/actions/get-pr-number
         id: get-pr-number
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
-          artifact-name: ios-size-test-files
-          files: "MapLibre_dynamic,MapLibre_DWARF"
-
-      - name: Run Bloaty
-        run: bloaty/build/bloaty --debug-file MapLibre_DWARF --debug-file MapLibre_DWARF-main MapLibre_dynamic -n 0 -s vm -d compileunits -- MapLibre_dynamic-main > bloaty_diff.txt
+          artifact-name: ios-bloaty-results
+          files: "bloaty_diff.txt"
 
       - name: Configure AWS Credentials
         if: vars.OIDC_AWS_ROLE_TO_ASSUME
