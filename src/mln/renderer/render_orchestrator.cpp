@@ -540,7 +540,17 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
     }
 
-    if (isMapModeContinuous) {
+    if (isMapModeContinuous && layersNeedPlacement.empty()) {
+        // Discard deferred placement and query data when no symbol buckets remain.
+        renderTreeParameters->placementChanged = placementController.reset();
+        crossTileSymbolIndex.reset();
+        // Source fades still need their placement bookkeeping to advance.
+        for (const auto& entry : renderSources) {
+            entry.second->updateFadingTiles();
+        }
+        renderTreeParameters->symbolFadeChange = 1.0f;
+        renderTreeParameters->needsRepaint = hasTransitions(updateParameters->timePoint);
+    } else if (isMapModeContinuous) {
         MLN_TRACE_ZONE(placement);
 
         std::optional<Duration> placementUpdatePeriodOverride;

@@ -150,11 +150,18 @@ public:
 // PlacementController implementation
 
 PlacementController::PlacementController()
-    : placement(makeMutable<Placement>()) {}
+    : emptyPlacement(makeMutable<Placement>()),
+      placement(emptyPlacement) {}
 
 void PlacementController::setPlacement(Immutable<Placement> placement_) {
     placement = std::move(placement_);
     stale = false;
+}
+
+bool PlacementController::reset() {
+    const bool changed = placement != emptyPlacement;
+    setPlacement(emptyPlacement);
+    return changed;
 }
 
 bool PlacementController::placementIsRecent(TimePoint now,
