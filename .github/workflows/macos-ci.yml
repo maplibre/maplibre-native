@@ -73,7 +73,7 @@ jobs:
           submodules: recursive
 
       - name: Set up Bazel
-        uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3 # 0.19.1
+        uses: bazel-contrib/setup-bazel@f34d6a05eae3c24acab7fa54587492daeaeffdab # 0.19.2
         with:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
@@ -126,7 +126,7 @@ jobs:
           brew link --overwrite python@3.11
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        uses: hendrikmuhs/ccache-action@dbeefd73e8e2ffc1bbc412570072735eb4db3607 # v1.2.25
         with:
           key: macos-webgpu-${{ matrix.variant.impl }}
 

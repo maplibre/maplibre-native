@@ -174,7 +174,7 @@ jobs:
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
-        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        uses: hendrikmuhs/ccache-action@dbeefd73e8e2ffc1bbc412570072735eb4db3607 # v1.2.25
         with:
           key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
@@ -185,7 +185,7 @@ jobs:
 
       - name: Set up ccache (Windows)
         if: runner.os == 'Windows'
-        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        uses: hendrikmuhs/ccache-action@dbeefd73e8e2ffc1bbc412570072735eb4db3607 # v1.2.25
         with:
           variant: "sccache"
           key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
