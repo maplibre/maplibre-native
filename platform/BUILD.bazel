@@ -346,7 +346,10 @@ objc_library(
 
 objc_library(
     name = "ios-benchapp",
-    srcs = ["//platform/ios/benchmark:ios_benchmark_srcs"],
+    srcs = [
+        "//platform/ios:umbrella_hdr",
+        "//platform/ios/benchmark:ios_benchmark_srcs",
+    ],
     hdrs = ["//platform/ios/benchmark:ios_benchmark_hdrs"],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     includes = [
