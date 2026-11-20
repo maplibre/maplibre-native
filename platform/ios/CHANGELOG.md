@@ -9,6 +9,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 - An `MLNColor` passed into a style value or an expression is written with whole-number channels, as MapLibre GL JS prints colors, so a fractional channel rounds to the nearest of 0-255 ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
 
+### 🐞 Bug fixes
+
+- Changing `fill-extrusion-rounded-corner-distance` at runtime now rebuilds the extrusions of tiles that are already loaded.
+
 ## 7.0.0
 
 ### 💥 Breaking changes
