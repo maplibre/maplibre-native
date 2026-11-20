@@ -129,6 +129,8 @@
     "render-tests/terrain/pitched-world": "graded against maplibre-gl-js, which native 3D terrain does not match yet (https://github.com/maplibre/maplibre-native/commit/430ae6733711)",
     "render-tests/terrain/skirts-auto": "graded against maplibre-gl-js; native requests tiles gl-js does not, which are not in the fixtures (https://github.com/maplibre/maplibre-native/commit/430ae6733711)",
     "render-tests/terrain/skirts-none": "graded against maplibre-gl-js; native requests tiles gl-js does not, which are not in the fixtures (https://github.com/maplibre/maplibre-native/commit/430ae6733711)",
+    "render-tests/terrain/field-of-view-number": "graded against maplibre-gl-js; native's adaptive tile rule picks one zoom finer than gl-js on tilted views",
+    "render-tests/terrain/image-projective": "graded against maplibre-gl-js; native's adaptive tile rule picks one zoom finer than gl-js on tilted views",
     "render-tests/color-relief/low-zoom": "graded against maplibre-gl-js, which native shades 1-2.5/255 differently (https://github.com/maplibre/maplibre-native/commit/9a646762b49e)",
     "render-tests/combinations/color-relief--hillshade--color-relief--hillshade": "graded against maplibre-gl-js, which native shades 1-2.5/255 differently (https://github.com/maplibre/maplibre-native/commit/9a646762b49e)",
     "render-tests/combinations/color-relief--hillshade--vector-fill--color-relief--hillshade": "graded against maplibre-gl-js, which native shades 1-2.5/255 differently (https://github.com/maplibre/maplibre-native/commit/9a646762b49e)",
