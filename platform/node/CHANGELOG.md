@@ -4,12 +4,15 @@
 
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
-- core: fix renders that hang when retried after a glyph range fails to load ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)) (by [@johncarmack1984](https://github.com/johncarmack1984))
 
-## 6.5.0-pre.1
+## 6.5.0
 ### ✨ Features and improvements
 - Update node support to v26, remove node v20, update NAN to 2.27.0 ([#4322](https://github.com/maplibre/maplibre-native/pull/4322)) (by [@acalcutt](https://github.com/acalcutt))
 - replace node-pre-gyp-github with gh release ([#4329](https://github.com/maplibre/maplibre-native/pull/4329)) (by [@acalcutt](https://github.com/acalcutt))
+- core: support the `global-state` expression, with `setGlobalStateProperty` and `getGlobalState` on `Map` ([#4516](https://github.com/maplibre/maplibre-native/pull/4516)) (by [@NEKOYASAN](https://github.com/NEKOYASAN))
+
+### 🐞 Bug fixes
+- core: fix renders that hang when retried after a glyph range fails to load ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)) (by [@johncarmack1984](https://github.com/johncarmack1984))
 
 ## 6.4.1
 ### 🐞 Bug fixes
