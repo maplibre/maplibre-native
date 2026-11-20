@@ -157,7 +157,7 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     // Make sure the camera state is up-to-date
     updateCameraState();
 
-    mat4 worldToCamera = camera.getWorldToCamera(scale, viewportMode == ViewportMode::FlippedY);
+    mat4 worldToCamera = camera.getWorldToCamera(scale, viewportMode == ViewportMode::FlippedY, getLatLng().latitude());
     mat4 cameraToClip = camera.getCameraToClipPerspective(
         getFieldOfView(), static_cast<double>(size.width) / size.height, nearZ, farZ);
 
