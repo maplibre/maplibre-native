@@ -46,9 +46,9 @@ jobs:
             name: "Android Benchmark (OpenGL)",
             benchmark: true,
             testFilter: "org.maplibre.android.benchmark.Benchmark",
-            # Google Pixel 7 Pro
+            # Google Pixel 7a, Google Pixel 11
             # query with `aws list-device-pools --arn <project_arn>`
-            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564",
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/95cdeba4-bbea-4810-b683-553a9cf59381",
             # benchmark-android.yaml
             # see https://github.com/maplibre/ci-runners/tree/main/aws-device-farm/custom-test-envs
             testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/14862afb-cf88-44aa-9f1e-5131cbb22f01"
@@ -60,8 +60,8 @@ jobs:
             name: "Android Benchmark (Vulkan)",
             benchmark: true,
             testFilter: "org.maplibre.android.benchmark.Benchmark",
-            # Google Pixel 7 Pro
-            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564",
+            # Google Pixel 7a, Google Pixel 11
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/95cdeba4-bbea-4810-b683-553a9cf59381",
             # benchmark-android.yaml
             testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/14862afb-cf88-44aa-9f1e-5131cbb22f01"
           },
