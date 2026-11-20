@@ -93,7 +93,7 @@ aws s3 sync s3://maplibre-native/android-benchmark-render/ .
 
 ## Benchmarks in Pull Request
 
-To run the benchmarks, add a line starting with `!benchmark` to a PR comment, with `android`, `ios` or both on that same line (case-insensitive). For example, to run only the Android benchmark:
+To run the benchmarks, add a line starting with `!benchmark` to a PR comment, with `android` on that same line (case-insensitive):
 
 ```
 !benchmark android
