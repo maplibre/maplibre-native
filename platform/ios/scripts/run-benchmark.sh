@@ -13,7 +13,7 @@
 #
 # Optional environment:
 #   AWS_DEVICE_FARM_PROJECT_ARN      Device Farm project (default: MapLibre Native)
-#   AWS_DEVICE_FARM_DEVICE_POOL_ARN  device pool (default: the iPhone pool used by ios-device-test.yml)
+#   AWS_DEVICE_FARM_DEVICE_POOL_ARN  device pool (default: the iOS Benchmark pool used by ios-device-test.yml)
 
 set -euo pipefail
 
@@ -29,7 +29,7 @@ fi
 
 export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-west-2}"
 export AWS_DEVICE_FARM_PROJECT_ARN="${AWS_DEVICE_FARM_PROJECT_ARN:-arn:aws:devicefarm:us-west-2:373521797162:project:20687d72-0e46-403e-8f03-0941850665bc}"
-export AWS_DEVICE_FARM_DEVICE_POOL_ARN="${AWS_DEVICE_FARM_DEVICE_POOL_ARN:-arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/d84a2883-0000-44b5-afc4-af22084caf85}"
+export AWS_DEVICE_FARM_DEVICE_POOL_ARN="${AWS_DEVICE_FARM_DEVICE_POOL_ARN:-arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/01e1bf69-08a2-4912-8413-808399c7920f}"
 export name="iOS Benchmark"
 export appType=IOS_APP
 export appFile="$ipa_dir/BenchmarkApp.ipa"
