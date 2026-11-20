@@ -4,9 +4,20 @@
 #include <mln/storage/resource.hpp>
 #include <mln/storage/response.hpp>
 #include <mln/util/async_request.hpp>
+#include <mln/util/http_timeout.hpp>
 #include <mln/util/logging.hpp>
 
+#include <algorithm>
+
 namespace mln {
+
+namespace {
+
+// The longest a failed URL waits before it is requested again, also for errors the file source never retries, such
+// as a missing file, so that a fixed file is picked up while the map runs.
+constexpr Seconds maxRetryDelay{300};
+
+} // namespace
 
 std::shared_ptr<void> LayoutResource::getOrCreate(
     const void* owner, const std::function<std::shared_ptr<void>(const std::string&)>& create) const {
@@ -30,6 +41,15 @@ void LayoutResourceManager::getResources(LayoutResourceRequestor& requestor,
         auto& entry = entries[url];
         auto resource = entry.resource.lock();
         if (resource && !entry.failed) {
+            ready.emplace(url, std::move(resource));
+            continue;
+        }
+        if (entry.failed && util::now() < entry.retryAt) {
+            // The last load failed and its retry time has not come: hand out the failure again.
+            if (!resource) {
+                resource = std::make_shared<const LayoutResource>(nullptr);
+                entry.resource = resource;
+            }
             ready.emplace(url, std::move(resource));
             continue;
         }
@@ -65,8 +85,13 @@ void LayoutResourceManager::onResponse(const std::string& url, const Response& r
     std::shared_ptr<const std::string> data;
     if (response.error) {
         Log::Warning(Event::Style, "Failed to load layout resource '" + url + "': " + response.error->message);
-    } else if (!response.noContent) {
-        data = response.data;
+        ++entry.failures;
+        const auto delay = std::min<Duration>(
+            http::errorRetryTimeout(response.error->reason, entry.failures, response.error->retryAfter), maxRetryDelay);
+        entry.retryAt = util::now() + std::chrono::ceil<Seconds>(delay);
+    } else {
+        entry.failures = 0;
+        if (!response.noContent) data = response.data;
     }
     auto resource = std::make_shared<const LayoutResource>(std::move(data));
     entry.loaded = true;
@@ -81,7 +106,9 @@ void LayoutResourceManager::onResponse(const std::string& url, const Response& r
 void LayoutResourceManager::prune() {
     std::erase_if(entries, [](const auto& item) {
         const auto& entry = item.second;
-        return entry.requestors.empty() && entry.resource.expired();
+        // A failed entry stays until its retry time, so that the failure is not requested again sooner.
+        const bool waitingToRetry = entry.failed && util::now() < entry.retryAt;
+        return entry.requestors.empty() && entry.resource.expired() && !waitingToRetry;
     });
 }
 

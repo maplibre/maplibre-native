@@ -1,5 +1,8 @@
 #pragma once
 
+#include <mln/util/chrono.hpp>
+
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <memory>
@@ -46,7 +49,8 @@ public:
 
 // Loads layout resources through the file source and hands them to the tiles that asked for them. Runs on the
 // render thread. A URL is requested once while a tile uses its resource. A failed load is handed out as a
-// resource without data, and the next tile that asks requests the URL again.
+// resource without data. Until its retry time, which follows the file source's own retry rules, tiles that ask
+// get the failure again without a new request.
 class LayoutResourceManager {
 public:
     LayoutResourceManager();
@@ -63,6 +67,9 @@ private:
         std::set<LayoutResourceRequestor*> requestors;
         bool loaded = false;
         bool failed = false;
+        // Failed loads in a row, and when the URL may be requested again after the last one.
+        uint32_t failures = 0;
+        Timestamp retryAt;
     };
 
     void onResponse(const std::string& url, const Response&);

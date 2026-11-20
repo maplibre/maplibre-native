@@ -31,13 +31,15 @@ struct Fixture {
     LayoutResourceManager manager;
     std::vector<std::string> requested;
     bool fail = false;
+    Response::Error::Reason failReason = Response::Error::Reason::NotFound;
+    std::optional<Timestamp> retryAfter;
 
     Fixture() {
         fileSource.response = [this](const Resource& resource) -> std::optional<Response> {
             requested.push_back(resource.url);
             Response response;
             if (fail) {
-                response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound, "missing");
+                response.error = std::make_unique<Response::Error>(failReason, "failed", retryAfter);
             } else {
                 response.data = std::make_shared<std::string>("bytes of " + resource.url);
             }
@@ -102,13 +104,32 @@ TEST(LayoutResourceManager, RequestsAgainOnceNoTileUsesTheResource) {
     EXPECT_EQ(2u, fixture.requested.size());
 }
 
-TEST(LayoutResourceManager, HandsOutAFailedLoadWithoutDataAndRetriesItForTheNextTile) {
+TEST(LayoutResourceManager, HandsOutAFailedLoadWithoutDataUntilItsRetryTime) {
     Fixture fixture;
     fixture.fail = true;
     Requestor first, second;
     fixture.manager.getResources(first, {"asset://car.glb"}, &fixture.fileSource);
     fixture.fileSource.respondToAll();
     ASSERT_EQ(1u, first.received.size());
+    EXPECT_EQ(nullptr, first.received.at("asset://car.glb")->data);
+
+    // A missing file is not requested again by the next tile; it gets the failure at once.
+    fixture.fail = false;
+    fixture.manager.getResources(second, {"asset://car.glb"}, &fixture.fileSource);
+    ASSERT_EQ(1u, second.calls);
+    EXPECT_EQ(nullptr, second.received.at("asset://car.glb")->data);
+    EXPECT_EQ(1u, fixture.requested.size());
+}
+
+TEST(LayoutResourceManager, RequestsAFailedUrlAgainOnceItsRetryTimeHasPassed) {
+    Fixture fixture;
+    fixture.fail = true;
+    // A rate limit whose retry time has already passed.
+    fixture.failReason = Response::Error::Reason::RateLimit;
+    fixture.retryAfter = util::now() - Seconds(1);
+    Requestor first, second;
+    fixture.manager.getResources(first, {"asset://car.glb"}, &fixture.fileSource);
+    fixture.fileSource.respondToAll();
     EXPECT_EQ(nullptr, first.received.at("asset://car.glb")->data);
 
     fixture.fail = false;
