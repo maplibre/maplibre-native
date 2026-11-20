@@ -10,18 +10,15 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillShader";
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(0) position: vec2<i32>,
-#ifndef HAS_UNIFORM_u_color
-    @location(1) color: vec4<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    @location(2) opacity: vec2<f32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(1) feature_index: u32,
 #endif
 };
 
@@ -35,7 +32,7 @@ struct FillDrawableUBO {
     matrix: mat4x4<f32>,
     color_t: f32,
     opacity_t: f32,
-    pad1: f32,
+    feature_base: u32,
     pad2: f32,
 };
 
@@ -61,6 +58,9 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillDrawableUnionUBO>;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(3) var<storage, read> features: array<f32>;
+#endif
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
 
 @vertex
@@ -76,14 +76,14 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifdef HAS_UNIFORM_u_color
     color = props.color;
 #else
-    color = unpack_mix_color(in.color, drawable.color_t);
+    color = unpack_mix_color(featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
     var opacity: f32;
 #ifdef HAS_UNIFORM_u_opacity
     opacity = props.opacity;
 #else
-    opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     out.color = color;
@@ -134,18 +134,15 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillOutlineShader";
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(0) position: vec2<i32>,
-#ifndef HAS_UNIFORM_u_outline_color
-    @location(1) outline_color: vec4<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    @location(2) opacity: vec2<f32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(1) feature_index: u32,
 #endif
 };
 
@@ -160,7 +157,7 @@ struct FillOutlineDrawableUBO {
     matrix: mat4x4<f32>,
     outline_color_t: f32,
     opacity_t: f32,
-    pad1: f32,
+    feature_base: u32,
     pad2: f32,
 };
 
@@ -199,6 +196,9 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineDrawableUnionUBO>;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(3) var<storage, read> features: array<f32>;
+#endif
 @group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
 
 @vertex
@@ -217,14 +217,14 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifdef HAS_UNIFORM_u_outline_color
     color = props.outline_color;
 #else
-    color = unpack_mix_color(in.outline_color, drawable.outline_color_t);
+    color = unpack_mix_color(featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_outline_color), drawable.outline_color_t);
 #endif
 
     var opacity: f32;
 #ifdef HAS_UNIFORM_u_opacity
     opacity = props.opacity;
 #else
-    opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     out.color = color;
@@ -276,24 +276,15 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillPatternShader";
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(4) position: vec2<i32>,
-#ifndef HAS_UNIFORM_u_color
-    @location(5) color: vec4<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_pattern_from
-    @location(6) pattern_from: vec4<u32>,
-#endif
-#ifndef HAS_UNIFORM_u_pattern_to
-    @location(7) pattern_to: vec4<u32>,
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    @location(8) opacity: vec2<f32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(5) feature_index: u32,
 #endif
 };
 
@@ -324,7 +315,7 @@ struct FillPatternDrawableUBO {
     pattern_to_t: f32,
     opacity_t: f32,
     color_t: f32,
-    pad1: f32,
+    feature_base: u32,
     pad2: f32,
     pad3: f32,
 };
@@ -365,6 +356,9 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillPatternDrawableUBO>;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(3) var<storage, read> features: array<f32>;
+#endif
 @group(0) @binding(4) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
@@ -380,14 +374,14 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifdef HAS_UNIFORM_u_pattern_from
     pattern_from = tileProps.pattern_from;
 #else
-    pattern_from = vec4<f32>(in.pattern_from);
+    pattern_from = featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_from);
 #endif
 
     var pattern_to: vec4<f32>;
 #ifdef HAS_UNIFORM_u_pattern_to
     pattern_to = tileProps.pattern_to;
 #else
-    pattern_to = vec4<f32>(in.pattern_to);
+    pattern_to = featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_to);
 #endif
 
     let pattern_tl_a = pattern_from.xy;
@@ -427,7 +421,7 @@ fn main(in: VertexInput) -> VertexOutput {
         pos
     );
 #ifndef HAS_UNIFORM_u_color
-    out.color = unpack_mix_color(in.color, drawable.color_t);
+    out.color = unpack_mix_color(featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
     out.pattern_from = pattern_from;
@@ -436,7 +430,7 @@ fn main(in: VertexInput) -> VertexOutput {
     out.pattern_to = pattern_to;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    out.opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     return out;
@@ -553,24 +547,15 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillOutlinePatternShader";
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(4) position: vec2<i32>,
-#ifndef HAS_UNIFORM_u_color
-    @location(5) color: vec4<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_pattern_from
-    @location(6) pattern_from: vec4<u32>,
-#endif
-#ifndef HAS_UNIFORM_u_pattern_to
-    @location(7) pattern_to: vec4<u32>,
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    @location(8) opacity: vec2<f32>,
+#ifdef MLN_FEATURE_INDEX
+    @location(5) feature_index: u32,
 #endif
 };
 
@@ -602,7 +587,7 @@ struct FillOutlinePatternDrawableUBO {
     pattern_to_t: f32,
     opacity_t: f32,
     color_t: f32,
-    pad1: f32,
+    feature_base: u32,
     pad2: f32,
     pad3: f32,
 };
@@ -643,6 +628,9 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlinePatternDrawableUBO>;
+#ifdef MLN_FEATURE_INDEX
+@group(0) @binding(3) var<storage, read> features: array<f32>;
+#endif
 @group(0) @binding(4) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
@@ -658,14 +646,14 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifdef HAS_UNIFORM_u_pattern_from
     pattern_from = tileProps.pattern_from;
 #else
-    pattern_from = vec4<f32>(in.pattern_from);
+    pattern_from = featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_from);
 #endif
 
     var pattern_to: vec4<f32>;
 #ifdef HAS_UNIFORM_u_pattern_to
     pattern_to = tileProps.pattern_to;
 #else
-    pattern_to = vec4<f32>(in.pattern_to);
+    pattern_to = featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_pattern_to);
 #endif
 
     let pattern_tl_a = pattern_from.xy;
@@ -710,7 +698,7 @@ fn main(in: VertexInput) -> VertexOutput {
     // Fragment positions use a top-left origin, while NDC Y points up.
     out.v_pos = (ndcXY * vec2<f32>(1.0, -1.0) + vec2<f32>(1.0, 1.0)) * 0.5 * paintParams.world_size;
 #ifndef HAS_UNIFORM_u_color
-    out.color = unpack_mix_color(in.color, drawable.color_t);
+    out.color = unpack_mix_color(featureFloat4(drawable.feature_base, in.feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
     out.pattern_from = pattern_from;
@@ -719,7 +707,7 @@ fn main(in: VertexInput) -> VertexOutput {
     out.pattern_to = pattern_to;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    out.opacity = unpack_mix_float(featureFloat2(drawable.feature_base, in.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     return out;

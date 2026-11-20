@@ -1013,6 +1013,7 @@ MLN_DRAWABLES_HEADERS = [
     "include/mln/shaders/circle_layer_ubo.hpp",
     "include/mln/shaders/collision_layer_ubo.hpp",
     "include/mln/shaders/debug_layer_ubo.hpp",
+    "include/mln/shaders/feature_index.hpp",
     "include/mln/shaders/fill_layer_ubo.hpp",
     "include/mln/shaders/fill_extrusion_layer_ubo.hpp",
     "include/mln/shaders/heatmap_layer_ubo.hpp",

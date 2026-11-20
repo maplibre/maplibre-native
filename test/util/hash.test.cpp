@@ -1,12 +1,13 @@
+#include <algorithm>
 #include <mln/test/util.hpp>
 
 #include <mln/util/hash.hpp>
 
 #include <algorithm>
 #include <cstdint>
-#include <iostream>
-#include <iomanip>
+#include <functional>
 #include <random>
+#include <string_view>
 #include <vector>
 
 #if MLN_RENDER_BACKEND_METAL
@@ -29,6 +30,35 @@
 #endif
 
 using namespace mln;
+
+TEST(OrderIndependentHash, StringViews) {
+    const std::vector<std::string_view> names{"a_color", "a_opacity", "a_width"};
+    std::vector<std::string_view> permutation = names;
+    std::ranges::sort(permutation);
+
+    const auto hashNames = [](auto begin, auto end) {
+        using Iter = decltype(begin);
+        return util::order_independent_hash<Iter, std::uint64_t>(begin, end);
+    };
+
+    const auto expected = hashNames(names.begin(), names.end());
+    do {
+        EXPECT_EQ(expected, hashNames(permutation.begin(), permutation.end()));
+    } while (std::next_permutation(permutation.begin(), permutation.end())); // NOLINT(modernize-use-ranges)
+
+    std::vector<std::uint64_t> asIntegers;
+    asIntegers.reserve(names.size());
+    for (const auto name : names) {
+        asIntegers.push_back(static_cast<std::uint64_t>(std::hash<std::string_view>{}(name)));
+    }
+    EXPECT_EQ(expected,
+              (util::order_independent_hash<decltype(asIntegers.begin()), std::uint64_t>(asIntegers.begin(),
+                                                                                         asIntegers.end())));
+
+    auto different = names;
+    different.back() = "a_gap_width";
+    EXPECT_NE(expected, hashNames(different.begin(), different.end()));
+}
 
 TEST(OrderIndependentHash, Permutations) {
     // Try collections of up to this many elements

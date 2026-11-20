@@ -11,6 +11,7 @@ constexpr auto fillShaderPrelude = R"(
 
 enum {
     idFillDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idFillFeatureUBO = idDrawableReservedFragmentOnlyUBO,
     idFillTilePropsUBO = drawableReservedUBOCount,
     idFillEvaluatedPropsUBO,
     fillUBOCount
@@ -25,7 +26,7 @@ struct alignas(16) FillDrawableUBO {
     // Interpolations
     /* 64 */ float color_t;
     /* 68 */ float opacity_t;
-    /* 72 */ float pad1;
+    /* 72 */ uint feature_base;
     /* 76 */ float pad2;
     /* 80 */
 };
@@ -40,7 +41,7 @@ struct alignas(16) FillOutlineDrawableUBO {
     // Interpolations
     /* 64 */ float outline_color_t;
     /* 68 */ float opacity_t;
-    /* 72 */ float pad1;
+    /* 72 */ uint feature_base;
     /* 76 */ float pad2;
     /* 80 */
 };
@@ -60,7 +61,7 @@ struct alignas(16) FillPatternDrawableUBO {
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
     /* 96 */ float color_t;
-    /*100 */ float pad1;
+    /*100 */ uint feature_base;
     /*104 */ float pad2;
     /*108 */ float pad3;
     /*112 */
@@ -91,7 +92,7 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
     /* 96 */ float color_t;
-    /*100 */ float pad1;
+    /*100 */ uint feature_base;
     /*104 */ float pad2;
     /*108 */ float pad3;
     /*112 */
@@ -154,7 +155,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -163,12 +164,8 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-
-#if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(1)]];
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(2)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(1)]];
 #endif
 };
 
@@ -185,6 +182,9 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const float* features [[buffer(idFillFeatureUBO)]],
+#endif
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]]) {
 
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
@@ -192,10 +192,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f),
 #if !defined(HAS_UNIFORM_u_color)
-        .color    = half4(unpack_mix_color(vertx.color, drawable.color_t)),
+        .color    = half4(unpack_mix_color(featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_color), drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity  = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
+        .opacity  = half(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_opacity), drawable.opacity_t)),
 #endif
     };
 }
@@ -229,7 +229,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -238,8 +238,9 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-    float4 outline_color [[attribute(1)]];
-    float2 opacity [[attribute(2)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(1)]];
+#endif
 };
 
 struct FragmentStage {
@@ -256,6 +257,9 @@ struct FragmentStage {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const float* features [[buffer(idFillFeatureUBO)]],
+#endif
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]]) {
 
     device const FillOutlineDrawableUBO& drawable = drawableVector[uboIndex].fillOutlineDrawableUBO;
@@ -265,10 +269,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position       = position,
         .pos            = (position.xy / position.w + 1.0) / 2.0 * paintParams.world_size,
 #if !defined(HAS_UNIFORM_u_outline_color)
-        .outline_color  = half4(unpack_mix_color(vertx.outline_color, drawable.outline_color_t)),
+        .outline_color  = half4(unpack_mix_color(featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_outline_color), drawable.outline_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
+        .opacity        = half(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_opacity), drawable.opacity_t)),
 #endif
     };
 }
@@ -308,7 +312,7 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -317,18 +321,8 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-
-#if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(1)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(2)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(4)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(1)]];
 #endif
 };
 
@@ -354,6 +348,9 @@ struct FragmentStage {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const float* features [[buffer(idFillFeatureUBO)]],
+#endif
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
                                 device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
                                 device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
@@ -364,13 +361,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
 #else
-    const auto pattern_from = float4(vertx.pattern_from);
+    const auto pattern_from = featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_pattern_from);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = float4(tileProps.pattern_to);
 #else
-    const auto pattern_to   = float4(vertx.pattern_to);
+    const auto pattern_to   = featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_pattern_to);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -392,7 +389,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
 #if !defined(HAS_UNIFORM_u_color)
-        .color          = half4(unpack_mix_color(vertx.color, drawable.color_t)),
+        .color          = half4(unpack_mix_color(featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_color), drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),
@@ -401,7 +398,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .pattern_to     = half4(pattern_to),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
+        .opacity        = half(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_opacity), drawable.opacity_t)),
 #endif
     };
 }
@@ -474,7 +471,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -483,18 +480,8 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-
-#if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(1)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(2)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(4)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(1)]];
 #endif
 };
 
@@ -521,6 +508,9 @@ struct FragmentStage {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const float* features [[buffer(idFillFeatureUBO)]],
+#endif
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
                                 device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
                                 device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
@@ -531,17 +521,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = tileProps.pattern_from;
 #else
-    const auto pattern_from = float4(vertx.pattern_from);
+    const auto pattern_from = featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_pattern_from);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = tileProps.pattern_to;
 #else
-    const auto pattern_to   = float4(vertx.pattern_to);
+    const auto pattern_to   = featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_pattern_to);
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    const auto opacity      = unpack_mix_float(vertx.opacity, drawable.opacity_t);
+    const auto opacity      = unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_opacity), drawable.opacity_t);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -567,7 +557,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v_pos          = (position.xy / position.w * float2(1.0, -1.0) + 1.0) / 2.0 * paintParams.world_size,
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color          = half4(unpack_mix_color(vertx.color, drawable.color_t)),
+        .color          = half4(unpack_mix_color(featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_color), drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),

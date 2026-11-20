@@ -372,11 +372,16 @@ public:
             propertiesAsUniforms->second.reserve(sizeof...(DataDrivenPaintProperty));
         }
         size_t dataDrivenAttrId = firstDataDrivenAttrId;
+        FeatureTableBinding featureTableBind;
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
                                                               isConstant<DataDrivenPaintProperty>(evaluated),
                                                               propertiesAsUniforms,
-                                                              dataDrivenAttrId),
+                                                              dataDrivenAttrId,
+                                                              featureTableBind),
          ...);
+#if MLN_UBO_CONSOLIDATION
+        finishFeatureTableBind(firstDataDrivenAttrId, featureTableBind);
+#endif
     }
 
     /// Specialized DataDrivenPaintProperty reader
@@ -395,11 +400,16 @@ public:
         propertiesAsUniforms.second.reserve(sizeof...(DataDrivenPaintProperty));
 
         size_t dataDrivenAttrId = firstDataDrivenAttrId;
+        FeatureTableBinding featureTableBind;
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
                                                               isConstant<DataDrivenPaintProperty>(evaluated),
                                                               &propertiesAsUniforms,
-                                                              dataDrivenAttrId),
+                                                              dataDrivenAttrId,
+                                                              featureTableBind),
          ...);
+#if MLN_UBO_CONSOLIDATION
+        finishFeatureTableBind(firstDataDrivenAttrId, featureTableBind);
+#endif
     }
 
 protected:
@@ -412,12 +422,41 @@ protected:
         return evaluated.template get<DataDrivenPaintProperty>().isConstant();
     }
 
+    /// @brief One index per vertex for every feature-table property in a type pack.
+    /// The index occupies `firstDataDrivenAttrId`, the id the caller passes in.
+    struct FeatureTableBinding {
+        bool needsIndex = false;
+        VertexVectorBasePtr indexData;
+    };
+
+    void bindFeatureIndex(size_t attributeId, const VertexVectorBasePtr& indexData) {
+        if (!indexData) {
+            return;
+        }
+        if (const auto& attr = set(attributeId, /*index=*/-1, AttributeDataType::UInt, /*count=*/0)) {
+            attr->setSharedRawData(indexData, 0, 0, sizeof(uint32_t), AttributeDataType::UInt);
+        }
+    }
+
+#if MLN_UBO_CONSOLIDATION
+    void finishFeatureTableBind(size_t indexAttributeId, FeatureTableBinding& featureTableBind) {
+        if (!featureTableBind.needsIndex) {
+            return;
+        }
+        // The index occupies the pack's first attribute id on the drawable.
+        // Leave that id in the uniform set when the property itself is constant,
+        // so each shader can tell which of its own attributes are data-driven.
+        bindFeatureIndex(indexAttributeId, featureTableBind.indexData);
+    }
+#endif
+
     /// Place one property from a type pack into an attribute in this collection, replacing if it already exists.
     template <typename DataDrivenPaintProperty, typename Binder>
     void readDataDrivenPaintProperty(const Binder& binder,
                                      const bool isConstant,
                                      StringIDSetsPair* propertiesAsUniforms,
-                                     size_t& dataDrivenAttrId) {
+                                     size_t& dataDrivenAttrId,
+                                     [[maybe_unused]] FeatureTableBinding& featureTableBind) {
         if (!binder) {
             return;
         }
@@ -427,7 +466,22 @@ protected:
             const auto& attributeName = DataDrivenPaintProperty::AttributeNames[attrIndex];
 
             // Apply the property, or add it to the uniforms collection if it's constant.
-            if (!isConstant && binder->getVertexCount() > 0) {
+            // Feature-table properties keep one value per feature. Shaders sample it
+            // with the single per-vertex index bound at the pack's first attribute id.
+#if MLN_UBO_CONSOLIDATION
+            if (binder->usesFeatureTable()) {
+                if (!featureTableBind.indexData) {
+                    featureTableBind.indexData = binder->featureIndexData();
+                }
+                if (!isConstant) {
+                    featureTableBind.needsIndex = true;
+                } else if (propertiesAsUniforms) {
+                    propertiesAsUniforms->first.emplace(attributeName);
+                    propertiesAsUniforms->second.emplace(dataDrivenAttrId);
+                }
+            } else
+#endif
+                if (!isConstant && binder->getVertexCount() > 0) {
                 using Attribute = typename DataDrivenPaintProperty::Attribute;
                 if (const auto& attr = set(dataDrivenAttrId)) {
                     binder->template applyPaintProperty<Attribute>(attrIndex, *attr);

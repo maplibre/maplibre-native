@@ -1,10 +1,12 @@
 #pragma once
 
 #include <mln/gfx/shader_group.hpp>
+#include <mln/shaders/feature_index.hpp>
 #include <mln/shaders/webgpu/shader_program.hpp>
 #include <mln/shaders/webgpu/common.hpp>
 #include <mln/shaders/webgpu/wgsl_preprocessor.hpp>
 #include <mln/shaders/program_parameters.hpp>
+#include <mln/shaders/shader_defines.hpp>
 #include <mln/shaders/shader_source.hpp>
 #include <mln/util/hash.hpp>
 #include <mln/util/containers.hpp>
@@ -62,16 +64,29 @@ public:
         if (!shader) {
             DefinesMap additionalDefines;
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
+            constexpr auto featureIndexSlot = shaders::featureIndexAttributeId<ShaderID>();
+            [[maybe_unused]] bool useFeatureIndex = false;
+            if constexpr (featureIndexSlot.has_value()) {
+                useFeatureIndex = defineFeatureIndex(
+                    shaders::featureSamples<ShaderID>(), propertiesAsUniforms, additionalDefines);
+            }
+
+            std::string featureConstants;
+            if (useFeatureIndex) {
+                constexpr auto attributes = shaders::featureAttributes<ShaderID>();
+                featureConstants = shaders::featureLayoutSource(
+                    shaders::featureLayout(attributes, propertiesAsUniforms.second));
+            }
 
             std::string vertexSource;
             std::string fragmentSource;
 
             if constexpr (requires { ShaderSource::prelude; }) {
-                vertexSource = std::string(ShaderSource::prelude) + vert;
-                fragmentSource = std::string(ShaderSource::prelude) + frag;
+                vertexSource = featureConstants + std::string(ShaderSource::prelude) + vert;
+                fragmentSource = featureConstants + std::string(ShaderSource::prelude) + frag;
             } else {
-                vertexSource = vert;
-                fragmentSource = frag;
+                vertexSource = featureConstants + vert;
+                fragmentSource = featureConstants + frag;
             }
 
             std::unordered_map<std::string, bool> defineSet;
@@ -85,14 +100,37 @@ public:
 
             vertexSource = detail::preprocessWGSL(vertexSource, defineSet);
             fragmentSource = detail::preprocessWGSL(fragmentSource, defineSet);
+            if (useFeatureIndex) {
+                // The binding is declared in the vertex shader. Loaders go after it.
+                // The fragment stage does not declare `features`.
+                vertexSource += shaders::featureLoadSource();
+            }
 
             auto& context = static_cast<Context&>(gfxContext);
-            shader = std::make_shared<ShaderProgram>(context,
-                                                     vertexSource,
-                                                     fragmentSource,
-                                                     ShaderSource::attributes,
-                                                     ShaderSource::textures,
-                                                     std::string(name));
+            if constexpr (featureIndexSlot.has_value()) {
+                shader = std::make_shared<ShaderProgram>(context, vertexSource, fragmentSource, std::string(name));
+                for (const auto& attrib : ShaderSource::attributes) {
+                    // The feature-index slot reuses a paint attribute id. Bind it only
+                    // when this variant reads the table.
+                    if (attrib.id == *featureIndexSlot) {
+                        if (useFeatureIndex) {
+                            shader->initAttribute(attrib);
+                        }
+                        continue;
+                    }
+                    shader->initAttribute(attrib);
+                }
+                for (const auto& texture : ShaderSource::textures) {
+                    shader->initTexture(texture);
+                }
+            } else {
+                shader = std::make_shared<ShaderProgram>(context,
+                                                         vertexSource,
+                                                         fragmentSource,
+                                                         ShaderSource::attributes,
+                                                         ShaderSource::textures,
+                                                         std::string(name));
+            }
 
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {

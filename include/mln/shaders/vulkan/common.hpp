@@ -133,6 +133,20 @@ void applySurfaceTransform() {
     gl_Position.y *= -1.0;
 }
 
+#ifdef MLN_FEATURE_INDEX
+// `MLN_FEATURE_STRIDE` and `MLN_FEATURE_<name>` are variant constants. The record is a
+// tightly packed float array. Only data-driven fields are present.
+// Unsized shader-storage arrays cannot be function parameters, so these are macros.
+#define featureFloat2(features, base, index, offset) \
+    vec2((features)[((base) + (index)) * MLN_FEATURE_STRIDE + (offset)], \
+         (features)[((base) + (index)) * MLN_FEATURE_STRIDE + (offset) + 1u])
+#define featureFloat4(features, base, index, offset) \
+    vec4((features)[((base) + (index)) * MLN_FEATURE_STRIDE + (offset)], \
+         (features)[((base) + (index)) * MLN_FEATURE_STRIDE + (offset) + 1u], \
+         (features)[((base) + (index)) * MLN_FEATURE_STRIDE + (offset) + 2u], \
+         (features)[((base) + (index)) * MLN_FEATURE_STRIDE + (offset) + 3u])
+#endif
+
 )";
 
     static constexpr auto fragment = R"(

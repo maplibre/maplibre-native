@@ -11,6 +11,7 @@ constexpr auto fillExtrusionShaderPrelude = R"(
 
 enum {
     idFillExtrusionDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idFillExtrusionFeatureUBO = idDrawableReservedFragmentOnlyUBO,
     idFillExtrusionTilePropsUBO = drawableReservedUBOCount,
     idFillExtrusionPropsUBO,
     fillExtrusionUBOCount
@@ -29,7 +30,7 @@ struct alignas(16) FillExtrusionDrawableUBO {
     /*  96 */ float color_t;
     /* 100 */ float pattern_from_t;
     /* 104 */ float pattern_to_t;
-    /* 108 */ float pad1;
+    /* 108 */ uint feature_base;
     /* 112 */
 };
 static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16, "wrong size");
@@ -69,7 +70,7 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -79,15 +80,8 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
 struct VertexStage {
     short2 pos [[attribute(0)]];
     ushort2 decimals_ed [[attribute(1)]];
-
-#if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(2)]];
-#endif
-#if !defined(HAS_UNIFORM_u_base)
-    float2 base [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_height)
-    float2 height [[attribute(4)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(2)]];
 #endif
 };
 
@@ -103,6 +97,9 @@ struct FragmentOutput {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const float* features [[buffer(idFillExtrusionFeatureUBO)]],
+#endif
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]]) {
 
@@ -111,12 +108,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_base)
     const auto base   = props.light_position_base.w;
 #else
-    const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
+    const auto base   = max(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_base), drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
     const auto height = props.height;
 #else
-    const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
+    const auto height = max(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_height), drawable.height_t), 0.0);
 #endif
 
     const float3 normal = float3(0.0, 0.0, 1.0);
@@ -136,7 +133,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_color)
     auto color = props.color;
 #else
-    auto color = unpack_mix_color(vertx.color, drawable.color_t);
+    auto color = unpack_mix_color(featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
     // Relative luminance (how dark/bright is the surface color?)
@@ -193,7 +190,7 @@ struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::M
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 1> attributes;
-    static const std::array<AttributeInfo, 5> instanceAttributes;
+    static const std::array<AttributeInfo, 3> instanceAttributes;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
@@ -201,15 +198,8 @@ struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::M
 
 struct VertexStage {
     short2 pos [[attribute(0)]];
-
-#if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_base)
-    float2 base [[attribute(4)]];
-#endif
-#if !defined(HAS_UNIFORM_u_height)
-    float2 height [[attribute(5)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(3)]];
 #endif
 };
 
@@ -232,6 +222,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const float* features [[buffer(idFillExtrusionFeatureUBO)]],
+#endif
                                 uint instanceID [[ instance_id ]],
                                 device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]]) {
 
@@ -248,12 +241,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_base)
     const auto base   = props.light_position_base.w;
 #else
-    const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
+    const auto base   = max(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_base), drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
     const auto height = props.height;
 #else
-    const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
+    const auto height = max(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_height), drawable.height_t), 0.0);
 #endif
 
     const float2 p1 = float2(outline[instanceID + 0].pos) + unpack_float(float(outline[instanceID + 0].decimals_ed.x / 2)) / 128.0;
@@ -276,7 +269,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_color)
     auto color = props.color;
 #else
-    auto color = unpack_mix_color(vertx.color, drawable.color_t);
+    auto color = unpack_mix_color(featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
     // Relative luminance (how dark/bright is the surface color?)
@@ -332,7 +325,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -342,18 +335,8 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
 struct VertexStage {
     short2 pos [[attribute(0)]];
     ushort2 decimals_ed [[attribute(1)]];
-
-#if !defined(HAS_UNIFORM_u_base)
-    float2 base [[attribute(2)]];
-#endif
-#if !defined(HAS_UNIFORM_u_height)
-    float2 height [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(4)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(5)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(2)]];
 #endif
 };
 
@@ -381,6 +364,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
                                 device const FillExtrusionTilePropsUBO* tilePropsVector [[buffer(idFillExtrusionTilePropsUBO)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const float* features [[buffer(idFillExtrusionFeatureUBO)]],
+#endif
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]]) {
 
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
@@ -389,12 +375,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_base)
     const auto base   = props.light_position_base.w;
 #else
-    const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
+    const auto base   = max(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_base), drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
     const auto height = props.height;
 #else
-    const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
+    const auto height = max(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_height), drawable.height_t), 0.0);
 #endif
 
     const float3 normal = float3(0.0, 0.0, 1.0);
@@ -418,12 +404,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = tileProps.pattern_from;
 #else
-    const auto pattern_from = float4(vertx.pattern_from);
+    const auto pattern_from = featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_pattern_from);
 #endif
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = tileProps.pattern_to;
 #else
-    const auto pattern_to   = float4(vertx.pattern_to);
+    const auto pattern_to   = featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_pattern_to);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -520,7 +506,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternInstancedShader, gfx::Backend::
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 1> attributes;
-    static const std::array<AttributeInfo, 6> instanceAttributes;
+    static const std::array<AttributeInfo, 3> instanceAttributes;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
@@ -528,18 +514,8 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternInstancedShader, gfx::Backend::
 
 struct VertexStage {
     short2 pos [[attribute(0)]];
-
-#if !defined(HAS_UNIFORM_u_base)
-    float2 base [[attribute(3)]];
-#endif
-#if !defined(HAS_UNIFORM_u_height)
-    float2 height [[attribute(4)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(5)]];
-#endif
-#if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(6)]];
+#ifdef MLN_FEATURE_INDEX
+    uint feature_index [[attribute(3)]];
 #endif
 };
 
@@ -573,6 +549,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
                                 device const FillExtrusionTilePropsUBO* tilePropsVector [[buffer(idFillExtrusionTilePropsUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
+#ifdef MLN_FEATURE_INDEX
+                                device const float* features [[buffer(idFillExtrusionFeatureUBO)]],
+#endif
                                 uint instanceID [[ instance_id ]],
                                 device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]]) {
 
@@ -599,12 +578,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_base)
     const auto base   = props.light_position_base.w;
 #else
-    const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
+    const auto base   = max(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_base), drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
     const auto height = props.height;
 #else
-    const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
+    const auto height = max(unpack_mix_float(featureFloat2(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_height), drawable.height_t), 0.0);
 #endif
 
     const float2 p1 = float2(outline[instanceID + 0].pos) + unpack_float(float(outline[instanceID + 0].decimals_ed.x / 2)) / 128.0;
@@ -637,12 +616,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = tileProps.pattern_from;
 #else
-    const auto pattern_from = float4(vertx.pattern_from);
+    const auto pattern_from = featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_pattern_from);
 #endif
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = tileProps.pattern_to;
 #else
-    const auto pattern_to   = float4(vertx.pattern_to);
+    const auto pattern_to   = featureFloat4(features, drawable.feature_base, vertx.feature_index, MLN_FEATURE_pattern_to);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;

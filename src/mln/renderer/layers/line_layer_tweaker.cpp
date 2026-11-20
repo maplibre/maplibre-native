@@ -8,17 +8,66 @@
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_tile.hpp>
+#include <mln/shaders/feature_index.hpp>
 #include <mln/shaders/line_layer_ubo.hpp>
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/layers/line_layer_properties.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/math.hpp>
 
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <vector>
+
 #if MLN_RENDER_BACKEND_METAL
 #include <mln/shaders/mtl/line.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 namespace mln {
+
+#if MLN_UBO_CONSOLIDATION
+namespace {
+
+// `update` cannot shrink. Recreate when the live set does not fit, or once it drops to
+// half the allocation, so a dense view does not pin the high-water mark. Spare of 256
+// bytes is alignment padding (WebGPU rounds storage allocations up to that).
+bool needNewBuffer(std::size_t capacity, std::size_t bytes) {
+    constexpr std::size_t alignmentSlack = 256;
+    return (capacity < bytes) || (capacity > alignmentSlack && (capacity - alignmentSlack) / 2 > bytes);
+}
+
+template <typename Function>
+auto withLineFeatureCatalog(LineLayerTweaker::LineType lineType, Function&& function) {
+    switch (lineType) {
+        case LineLayerTweaker::LineType::Simple:
+            return function(shaders::featureAttributes<shaders::BuiltIn::LineShader>());
+        case LineLayerTweaker::LineType::Gradient:
+            return function(shaders::featureAttributes<shaders::BuiltIn::LineGradientShader>());
+        case LineLayerTweaker::LineType::Pattern:
+            return function(shaders::featureAttributes<shaders::BuiltIn::LinePatternShader>());
+        case LineLayerTweaker::LineType::SDF:
+            return function(shaders::featureAttributes<shaders::BuiltIn::LineSDFShader>());
+        case LineLayerTweaker::LineType::GradientSDF:
+            return function(shaders::featureAttributes<shaders::BuiltIn::LineGradientSDFShader>());
+    }
+    assert(false);
+    return function(shaders::featureAttributes<shaders::BuiltIn::LineShader>());
+}
+
+std::size_t lineFeatureCount(const LineBinders& binders, LineLayerTweaker::LineType lineType) {
+    return withLineFeatureCatalog(lineType, [&](const auto& catalog) { return binders.featureCount(catalog); });
+}
+
+void packLineFeatureRecords(LineBinders& binders, LineLayerTweaker::LineType lineType) {
+    if (!binders.geFeatureRecordsDirty() && !binders.getFeatureRecords().empty()) {
+        return;
+    }
+    withLineFeatureCatalog(lineType, [&](const auto& catalog) { binders.packFeatureRecords(catalog); });
+}
+
+} // namespace
+#endif
 
 using namespace style;
 using namespace shaders;
@@ -199,6 +248,91 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     int i = 0;
     std::vector<LineDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<LineTilePropsUnionUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+
+    // Pattern parameters can flip `pattern_from` before records are packed. Drawable UBOs then read the cached base.
+    // Pointers stay in this frame's list. The cache keeps bucket ids, which outlive the binders.
+    struct LiveBinder {
+        util::SimpleIdentity bucketId;
+        LineBinders* binders = nullptr;
+        LineType lineType = LineType::Simple;
+    };
+    std::vector<LiveBinder> liveBinders;
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
+        if (!drawable.getTileID() || !drawable.getShader() || !checkTweakDrawable(drawable)) {
+            return;
+        }
+        auto* binders = static_cast<LineBinders*>(drawable.getBinders());
+        const auto* tile = drawable.getRenderTile();
+        const auto& bucket = drawable.getBucket();
+        if (!binders || !tile || !bucket) {
+            return;
+        }
+        const auto patternPosA = tile->getPattern(linePatternValue.from.id());
+        const auto patternPosB = tile->getPattern(linePatternValue.to.id());
+        binders->setPatternParameters(patternPosA, patternPosB, crossfade);
+
+        const auto lineType = static_cast<LineType>(drawable.getType());
+        if (lineFeatureCount(*binders, lineType) == 0) {
+            binders->setFeatureBase(0);
+            return;
+        }
+        const auto bucketId = bucket->getID();
+        const auto alreadySeen = std::find_if(
+            liveBinders.begin(), liveBinders.end(), [&](const LiveBinder& live) { return live.bucketId == bucketId; });
+        if (alreadySeen == liveBinders.end()) {
+            liveBinders.push_back({.bucketId = bucketId, .binders = binders, .lineType = lineType});
+        }
+    });
+
+    const bool orderChanged = liveBinders.size() != featureBinderOrder.size() ||
+                              !std::equal(
+                                  liveBinders.begin(),
+                                  liveBinders.end(),
+                                  featureBinderOrder.begin(),
+                                  [](const LiveBinder& live, util::SimpleIdentity id) { return live.bucketId == id; });
+    bool anyDirty = false;
+    if (!orderChanged) {
+        for (const LiveBinder& live : liveBinders) {
+            if (live.binders->geFeatureRecordsDirty()) {
+                anyDirty = true;
+                break;
+            }
+        }
+    }
+    if (orderChanged || anyDirty || !featureUniformBuffer) {
+        std::vector<float> records;
+        std::vector<util::SimpleIdentity> binderOrder;
+        binderOrder.reserve(liveBinders.size());
+        uint32_t stride = 0;
+        uint32_t base = 0;
+        for (const LiveBinder& live : liveBinders) {
+            auto* binders = live.binders;
+            packLineFeatureRecords(*binders, live.lineType);
+            const auto packedStride = binders->getFeatureStride();
+            assert(packedStride > 0);
+            if (stride == 0) {
+                stride = packedStride;
+            } else {
+                assert(stride == packedStride);
+            }
+            binders->setFeatureBase(base);
+            const auto& packed = binders->getFeatureRecords();
+            records.insert(records.end(), packed.begin(), packed.end());
+            base += static_cast<uint32_t>(packed.size() / packedStride);
+            binderOrder.push_back(live.bucketId);
+        }
+        featureBinderOrder = std::move(binderOrder);
+
+        const std::array<float, 4> dummy{};
+        const void* featureData = records.empty() ? static_cast<const void*>(dummy.data())
+                                                  : static_cast<const void*>(records.data());
+        const size_t featureBytes = records.empty() ? sizeof(dummy) : records.size() * sizeof(float);
+        if (!featureUniformBuffer || needNewBuffer(featureUniformBuffer->getSize(), featureBytes)) {
+            featureUniformBuffer = context.createUniformBuffer(featureData, featureBytes, false, true);
+        } else {
+            featureUniformBuffer->update(featureData, featureBytes);
+        }
+    }
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -218,7 +352,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
         const auto patternPosA = tile->getPattern(linePatternValue.from.id());
         const auto patternPosB = tile->getPattern(linePatternValue.to.id());
+#if !MLN_UBO_CONSOLIDATION
         binders->setPatternParameters(patternPosA, patternPosB, crossfade);
+#endif
 
         const auto& translation = evaluated.get<LineTranslate>();
         const auto anchor = evaluated.get<LineTranslateAnchor>();
@@ -246,7 +382,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                    .feature_base = binders->getFeatureBase()
+#else
                     .pad1 = 0
+#endif
                 };
 
 #if !MLN_UBO_CONSOLIDATION
@@ -269,7 +409,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                    .feature_base = binders->getFeatureBase(),
+#else
                     .pad1 = 0,
+#endif
                     .pad2 = 0
                 };
 
@@ -299,7 +443,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_from_t = std::get<0>(binders->get<LinePattern>()->interpolationFactor(zoom)),
                     .pattern_to_t = std::get<1>(binders->get<LinePattern>()->interpolationFactor(zoom)),
                     .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                    .feature_base = binders->getFeatureBase(),
+#else
                     .pad1 = 0,
+#endif
                     .pad2 = 0,
                     .pad3 = 0
                 };
@@ -373,7 +521,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                         .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
                         .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                        .feature_base = binders->getFeatureBase(),
+#else
                         .pad1 = 0,
+#endif
                         .pad2 = 0
                     };
 
@@ -424,6 +576,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     layerUniforms.set(idLineDrawableUBO, drawableUniformBuffer);
     layerUniforms.set(idLineTilePropsUBO, tilePropsUniformBuffer);
+    layerUniforms.set(idLineFeatureUBO, featureUniformBuffer);
 #endif
 }
 

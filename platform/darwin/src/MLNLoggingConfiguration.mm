@@ -43,6 +43,8 @@ public:
   std::unique_ptr<mln::MLNCoreLoggingObserver> _coreLoggingObserver;
 }
 
+@synthesize handler = _handler;
+
 + (instancetype)sharedConfiguration {
   static dispatch_once_t once;
   static id sharedConfiguration;
@@ -58,6 +60,10 @@ public:
     mln::Log::setObserver(std::make_unique<mln::MLNCoreLoggingObserver>());
   }
   return self;
+}
+
+- (MLNLoggingBlockHandler)handler {
+  return _handler ? _handler : [self defaultBlockHandler];
 }
 
 - (void)setHandler:(void (^)(MLNLoggingLevel, NSString *, NSUInteger, NSString *))handler {

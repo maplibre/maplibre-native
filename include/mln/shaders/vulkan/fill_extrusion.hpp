@@ -9,6 +9,7 @@ namespace shaders {
 constexpr auto fillExtrusionShaderPrelude = R"(
 
 #define idFillExtrusionDrawableUBO              idDrawableReservedVertexOnlyUBO
+#define idFillExtrusionFeatureUBO               idDrawableReservedFragmentOnlyUBO
 #define idFillExtrusionTilePropsUBO             drawableReservedUBOCount
 #define idFillExtrusionPropsUBO                 layerUBOStartId
 #define idFillExtrusionInstancedDrawableUBO     drawableSSBOStartId
@@ -19,7 +20,7 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionShader";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -29,16 +30,8 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in uvec2 in_decimals_ed;
 
-#if !defined(HAS_UNIFORM_u_color)
-layout(location = 2) in vec4 in_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_base)
-layout(location = 3) in vec2 in_base;
-#endif
-
-#if !defined(HAS_UNIFORM_u_height)
-layout(location = 4) in vec2 in_height;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 2) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -57,12 +50,18 @@ struct FillExtrusionDrawableUBO {
     float color_t;
     float pattern_from_t;
     float pattern_to_t;
-    float pad1;
+    uint feature_base;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std430, set = LAYER_SET_INDEX, binding = idFillExtrusionFeatureUBO) readonly buffer FillExtrusionFeatures {
+    float features[];
+} featureData;
+#endif
 
 layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
@@ -86,19 +85,19 @@ void main() {
 #if defined(HAS_UNIFORM_u_base)
     const float base = props.light_position_base.w;
 #else
-    const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
+    const float base = max(unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_base), drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
     const float height = props.height;
 #else
-    const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
+    const float height = max(unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_height), drawable.height_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
     vec4 color = props.color;
 #else
-    vec4 color = unpack_mix_color(in_color, drawable.color_t);
+    vec4 color = unpack_mix_color(featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
 
     const vec3 normal = vec3(0.0, 0.0, 1.0);
@@ -168,7 +167,7 @@ struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::V
     static constexpr const char* name = "FillExtrusionInstancedShader";
 
     static const std::array<AttributeInfo, 1> attributes;
-    static const std::array<AttributeInfo, 5> instanceAttributes;
+    static const std::array<AttributeInfo, 3> instanceAttributes;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
@@ -177,16 +176,8 @@ struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::V
 
 layout(location = 0) in ivec2 in_position;
 
-#if !defined(HAS_UNIFORM_u_color)
-layout(location = 3) in vec4 in_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_base)
-layout(location = 4) in vec2 in_base;
-#endif
-
-#if !defined(HAS_UNIFORM_u_height)
-layout(location = 5) in vec2 in_height;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 3) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -205,12 +196,18 @@ struct FillExtrusionDrawableUBO {
     float color_t;
     float pattern_from_t;
     float pattern_to_t;
-    float pad1;
+    uint feature_base;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std430, set = LAYER_SET_INDEX, binding = idFillExtrusionFeatureUBO) readonly buffer FillExtrusionFeatures {
+    float features[];
+} featureData;
+#endif
 
 layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
@@ -254,19 +251,19 @@ void main() {
 #if defined(HAS_UNIFORM_u_base)
     const float base = props.light_position_base.w;
 #else
-    const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
+    const float base = max(unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_base), drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
     const float height = props.height;
 #else
-    const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
+    const float height = max(unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_height), drawable.height_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
     vec4 color = props.color;
 #else
-    vec4 color = unpack_mix_color(in_color, drawable.color_t);
+    vec4 color = unpack_mix_color(featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_color), drawable.color_t);
 #endif
     const vec2 nextInstancePos = unpack_int(instanceVector.instance[gl_InstanceIndex + 1].pos);
     const vec2 nextInstanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex + 1].decimals_ed);
@@ -341,7 +338,7 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionPatternShader";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -351,20 +348,8 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vul
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in uvec2 in_decimals_ed;
 
-#if !defined(HAS_UNIFORM_u_base)
-layout(location = 2) in vec2 in_base;
-#endif
-
-#if !defined(HAS_UNIFORM_u_height)
-layout(location = 3) in vec2 in_height;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 4) in uvec4 in_pattern_from;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 5) in uvec4 in_pattern_to;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 2) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -383,12 +368,18 @@ struct FillExtrusionDrawableUBO {
     float color_t;
     float pattern_from_t;
     float pattern_to_t;
-    float pad1;
+    uint feature_base;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std430, set = LAYER_SET_INDEX, binding = idFillExtrusionFeatureUBO) readonly buffer FillExtrusionFeatures {
+    float features[];
+} featureData;
+#endif
 
 struct FillExtrusionTilePropsUBO {
     vec4 pattern_from;
@@ -435,13 +426,13 @@ void main() {
 #if defined(HAS_UNIFORM_u_base)
     const float base = props.light_position_base.w;
 #else
-    const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
+    const float base = max(unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_base), drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
     const float height = props.height;
 #else
-    const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
+    const float height = max(unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_height), drawable.height_t), 0.0);
 #endif
 
     const vec3 normal = vec3(0.0, 0.0, 1.0);
@@ -464,15 +455,15 @@ void main() {
 #if defined(HAS_UNIFORM_u_pattern_from)
     const mediump vec4 pattern_from = tileProps.pattern_from;
 #else
-    const mediump vec4 pattern_from = in_pattern_from;
-    frag_pattern_from = in_pattern_from;
+    const mediump vec4 pattern_from = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_from);
+    frag_pattern_from = pattern_from;
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const mediump vec4 pattern_to = tileProps.pattern_to;
 #else
-    const mediump vec4 pattern_to = in_pattern_to;
-    frag_pattern_to = in_pattern_to;
+    const mediump vec4 pattern_to = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_to);
+    frag_pattern_to = pattern_to;
 #endif
 
     const vec2 pattern_tl_a = pattern_from.xy;
@@ -511,11 +502,11 @@ void main() {
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos);
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    frag_pattern_from = in_pattern_from;
+    frag_pattern_from = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_from);
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    frag_pattern_to = in_pattern_to;
+    frag_pattern_to = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_to);
 #endif
 }
 )";
@@ -611,7 +602,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternInstancedShader, gfx::Backend::
     static constexpr const char* name = "FillExtrusionPatternInstancedShader";
 
     static const std::array<AttributeInfo, 1> attributes;
-    static const std::array<AttributeInfo, 6> instanceAttributes;
+    static const std::array<AttributeInfo, 3> instanceAttributes;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
@@ -619,20 +610,8 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternInstancedShader, gfx::Backend::
 
 layout(location = 0) in ivec2 in_position;
 
-#if !defined(HAS_UNIFORM_u_base)
-layout(location = 3) in vec2 in_base;
-#endif
-
-#if !defined(HAS_UNIFORM_u_height)
-layout(location = 4) in vec2 in_height;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 5) in uvec4 in_pattern_from;
-#endif
-
-#if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 6) in uvec4 in_pattern_to;
+#ifdef MLN_FEATURE_INDEX
+layout(location = 3) in uint in_feature_index;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -651,12 +630,18 @@ struct FillExtrusionDrawableUBO {
     float color_t;
     float pattern_from_t;
     float pattern_to_t;
-    float pad1;
+    uint feature_base;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
+
+#ifdef MLN_FEATURE_INDEX
+layout(std430, set = LAYER_SET_INDEX, binding = idFillExtrusionFeatureUBO) readonly buffer FillExtrusionFeatures {
+    float features[];
+} featureData;
+#endif
 
 struct OutlineInstance {
     int pos;
@@ -721,13 +706,13 @@ void main() {
 #if defined(HAS_UNIFORM_u_base)
     const float base = props.light_position_base.w;
 #else
-    const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
+    const float base = max(unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_base), drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
     const float height = props.height;
 #else
-    const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
+    const float height = max(unpack_mix_float(featureFloat2(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_height), drawable.height_t), 0.0);
 #endif
     const vec2 nextInstancePos = unpack_int(instanceVector.instance[gl_InstanceIndex + 1].pos);
     const vec2 nextInstanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex + 1].decimals_ed);
@@ -756,15 +741,15 @@ void main() {
 #if defined(HAS_UNIFORM_u_pattern_from)
     const mediump vec4 pattern_from = tileProps.pattern_from;
 #else
-    const mediump vec4 pattern_from = in_pattern_from;
-    frag_pattern_from = in_pattern_from;
+    const mediump vec4 pattern_from = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_from);
+    frag_pattern_from = pattern_from;
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const mediump vec4 pattern_to = tileProps.pattern_to;
 #else
-    const mediump vec4 pattern_to = in_pattern_to;
-    frag_pattern_to = in_pattern_to;
+    const mediump vec4 pattern_to = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_to);
+    frag_pattern_to = pattern_to;
 #endif
 
     const vec2 pattern_tl_a = pattern_from.xy;
@@ -804,11 +789,11 @@ void main() {
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos);
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    frag_pattern_from = in_pattern_from;
+    frag_pattern_from = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_from);
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    frag_pattern_to = in_pattern_to;
+    frag_pattern_to = featureFloat4(featureData.features, drawable.feature_base, in_feature_index, MLN_FEATURE_pattern_to);
 #endif
 }
 )";

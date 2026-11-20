@@ -1,5 +1,7 @@
 #import "MapLibre.h"
 
+#import "MLNLoggingConfiguration.h"
+
 #import "MBXBenchAppDelegate.h"
 #import "MBXBenchViewController.h"
 
@@ -8,7 +10,14 @@
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 #ifndef MLN_LOGGING_DISABLED
-  [MLNLoggingConfiguration sharedConfiguration].loggingLevel = MLNLoggingLevelFault;
+  // Enable debug logging so we can see cache miss messages
+  [MLNLoggingConfiguration sharedConfiguration].loggingLevel =
+#if MLN_LOGGING_ENABLE_DEBUG
+      MLNLoggingLevelDebug;
+#else
+      MLNLoggingLevelVerbose;
+#endif
+  [MBXBenchViewController installCacheMissLogger];
 #endif
 
   [MLNSettings useWellKnownTileServer:MLNMapTiler];
