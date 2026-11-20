@@ -24,8 +24,8 @@ jobs:
             testFile: RenderTests-opengl.apk,
             appFile: RenderTestsApp-opengl.apk,
             name: "Android Render Tests (OpenGL)",
-            # Pixel 7 Android 14, Pixel 9 Android 16
-            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/55db2b56-930a-4485-bdc0-03409a5a6060",
+            # Pixel 7 Android 14, Pixel 9 Android 16, Pixel 11 Android 17
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/bed68eda-6574-4429-a220-5f2d1c1bbfe3",
             testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/c1fc7d3e-dfe3-4a31-9ee0-7b0f71b08872"
           },
           {
@@ -33,8 +33,8 @@ jobs:
             testFile: RenderTests-vulkan.apk,
             appFile: RenderTestsApp-vulkan.apk,
             name: "Android Render Tests (Vulkan)",
-            # Pixel 7 Android 14, Pixel 9 Android 16
-            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/55db2b56-930a-4485-bdc0-03409a5a6060",
+            # Pixel 7 Android 14, Pixel 9 Android 16, Pixel 11 Android 17
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/bed68eda-6574-4429-a220-5f2d1c1bbfe3",
             # android-render-test.yml
             # see https://github.com/maplibre/ci-runners/tree/main/aws-device-farm/custom-test-envs
             testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/c1fc7d3e-dfe3-4a31-9ee0-7b0f71b08872"
