@@ -1,4 +1,4 @@
-# Runs Bloaty (size test) and Google Benchmark and reports results on PR
+# Runs Bloaty (size test) and reports its results and the Google Benchmark results from linux-ci on PR
 name: pr-linux-tests
 
 on:
@@ -62,7 +62,7 @@ jobs:
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: mbgl-render
-          expect-files: "mbgl-render"
+          files: "mbgl-render"
 
       - name: Download mbgl-render-main
         run: wget -O mbgl-render-main "${download_url}/mbgl-render-main"
@@ -149,32 +149,16 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          submodules: true
           persist-credentials: false
 
       - uses: ./.github/actions/get-pr-number
         id: get-pr-number
 
+      # The PR's benchmark runner only runs in linux-ci, where it has no secrets
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
-          artifact-name: mbgl-benchmark-runner
-          expect-files: "mbgl-benchmark-runner"
-
-      - name: Download mbgl-benchmark-runner-main, set permissions
-        run: |
-          wget -O mbgl-benchmark-runner-main "${download_url}/mbgl-benchmark-runner-main"
-          chmod +x mbgl-benchmark-runner-main mbgl-benchmark-runner
-
-      # needed for compare.py
-      - name: Install scipy
-        run: pip3 install scipy
-
-      - name: Install dependencies
-        run: .github/scripts/install-linux-deps
-
-      - name: Run Benchmarks
-        # excluding the API tests because they hang https://github.com/maplibre/maplibre-native/issues/1808
-        run: python3 vendor/benchmark/tools/compare.py --no-color benchmarks ./mbgl-benchmark-runner-main ./mbgl-benchmark-runner --benchmark_filter='^[^A][^P][^I].*' > benchmark_out.txt
+          artifact-name: benchmark-results
+          files: "benchmark_out.txt"
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME

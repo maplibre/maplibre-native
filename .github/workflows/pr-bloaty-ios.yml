@@ -82,7 +82,7 @@ jobs:
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: ios-size-test-files
-          expect-files: "MapLibre_dynamic,MapLibre_DWARF"
+          files: "MapLibre_dynamic,MapLibre_DWARF"
 
       - name: Run Bloaty
         run: bloaty/build/bloaty --debug-file MapLibre_DWARF --debug-file MapLibre_DWARF-main MapLibre_dynamic -n 0 -s vm -d compileunits -- MapLibre_dynamic-main > bloaty_diff.txt

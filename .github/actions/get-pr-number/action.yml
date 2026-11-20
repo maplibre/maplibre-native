@@ -10,6 +10,8 @@ runs:
     - uses: ./.github/actions/download-workflow-run-artifact
       with:
         artifact-name: pr-number
+        files: pr_number
+        optional: 'true'
 
     - run: touch ./pr_number
       shell: bash

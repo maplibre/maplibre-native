@@ -49,7 +49,7 @@ jobs:
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: coverage-report
-          expect-files: "_coverage_report.dat"
+          files: "_coverage_report.dat"
 
       - name: Upload coverage report
         if: '!cancelled()'

@@ -48,6 +48,8 @@ jobs:
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: ${{ matrix.test.artifactName }}
+          files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
+          optional: 'true'
 
       - name: Check if test files exist (otherwise the parent workflow was skipped)
         id: check_files
