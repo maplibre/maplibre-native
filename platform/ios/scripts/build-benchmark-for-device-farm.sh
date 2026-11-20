@@ -38,12 +38,16 @@ chmod -R u+w "$staging_dir/Payload"
 if git_revision="$(git rev-parse HEAD 2>/dev/null)"; then
   plutil -replace MLNGitRevision -string "$git_revision" "$staging_dir/Payload/BenchmarkApp.app/Info.plist"
 fi
-# XCTest bundles hosted in an app need Swift Testing's interop libraries in the app on Device Farm.
+# The app has to contain Xcode's testing libraries to load the test bundle, like xcodebuild build-for-testing does
+# for RenderTestApp. Not every Xcode version has all of them (Xcode 27 has no XCUnit.framework).
 iphoneos_developer_dir="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
-ditto "$iphoneos_developer_dir/Library/Frameworks/Testing.framework" \
-  "$staging_dir/Payload/BenchmarkApp.app/Frameworks/Testing.framework"
-ditto "$iphoneos_developer_dir/usr/lib/lib_TestingInterop.dylib" \
-  "$staging_dir/Payload/BenchmarkApp.app/Frameworks/lib_TestingInterop.dylib"
+for library in Library/Frameworks/{XCTest,XCUIAutomation,Testing}.framework \
+  Library/PrivateFrameworks/{XCTestCore,XCTestSupport,XCTAutomationSupport,XCUnit}.framework \
+  usr/lib/{libXCTestBundleInject,libXCTestSwiftSupport,lib_TestingInterop}.dylib; do
+  if [[ -e "$iphoneos_developer_dir/$library" ]]; then
+    ditto "$iphoneos_developer_dir/$library" "$staging_dir/Payload/BenchmarkApp.app/Frameworks/$(basename "$library")"
+  fi
+done
 rm -f "$output_dir/BenchmarkApp.ipa"
 (cd "$staging_dir" && zip -qr "$output_dir/BenchmarkApp.ipa" Payload)
 
