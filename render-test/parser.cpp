@@ -639,7 +639,10 @@ TestMetadata parseTestMetadata(const TestPaths& paths, const mln::TestStyleTrans
 }
 
 namespace mln {
-MBGL_DEFINE_ENUM(TileLodMode, {{TileLodMode::Default, "default"}, {TileLodMode::Distance, "distance"}});
+MBGL_DEFINE_ENUM(TileLodMode,
+                 {{TileLodMode::Default, "default"},
+                  {TileLodMode::Distance, "distance"},
+                  {TileLodMode::Adaptive, "adaptive"}});
 }
 
 namespace TestOperationNames {
