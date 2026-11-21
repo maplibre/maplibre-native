@@ -1,3 +1,7 @@
+if(NOT MLN_WITH_TESTS)
+    return()
+endif()
+
 add_library(
     mbgl-test STATIC EXCLUDE_FROM_ALL
     ${PROJECT_SOURCE_DIR}/test/actor/actor.test.cpp

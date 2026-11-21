@@ -1,3 +1,7 @@
+if(NOT MLN_WITH_TESTS)
+    return()
+endif()
+
 # The render test runner, as an executable.
 
 add_executable(
