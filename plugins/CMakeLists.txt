@@ -33,6 +33,10 @@ foreach(manifest ${plugin_manifests})
     target_include_directories(mln-${id} PUBLIC ${directory}/shared/include PRIVATE ${directory}/vendor)
     target_link_libraries(mln-${id} PUBLIC mbgl-core)
 
+    if(NOT MLN_WITH_TESTS)
+        continue()
+    endif()
+
     file(GLOB tests CONFIGURE_DEPENDS ${directory}/tests/*.test.cpp)
     if(MLN_WITH_VULKAN)
         file(GLOB host_tests CONFIGURE_DEPENDS ${directory}/tests/host/*.test.cpp)
@@ -56,6 +60,10 @@ foreach(manifest ${plugin_manifests})
                      --repository-manifest ${repository_manifest}
              WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endforeach()
+
+if(NOT MLN_WITH_TESTS)
+    return()
+endif()
 
 # The tests of the plugin API of the host.
 add_executable(mln-plugin-api-tests EXCLUDE_FROM_ALL

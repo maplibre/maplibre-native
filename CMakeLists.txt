@@ -64,6 +64,18 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
 include(CTest)
 include(GNUInstallDirs)
 
+# The tests, benchmarks and test runners: by default as `BUILD_TESTING` says, when this is the
+# top-level project, and not when it is included in another project, whose `BUILD_TESTING` is
+# for its own tests.
+block()
+    if(PROJECT_IS_TOP_LEVEL)
+        set(default ${BUILD_TESTING})
+    else()
+        set(default OFF)
+    endif()
+    option(MLN_WITH_TESTS "Build the tests, benchmarks and test runners" ${default})
+endblock()
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -1246,6 +1258,7 @@ if(_can_export)
 endif()
 
 if(MLN_WITH_VULKAN)
+    include(${PROJECT_SOURCE_DIR}/vendor/glslang.cmake)
     include(${PROJECT_SOURCE_DIR}/vendor/vulkan.cmake)
 
     target_link_libraries(
