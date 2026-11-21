@@ -73,7 +73,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-2a8f943d.js";
+            window.path_to_searchindex_js = "../../searchindex-b5b9d14b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-743eb912.js"></script>
@@ -288,7 +288,7 @@ scripts/aws-device-farm/plot-android-benchmark-results.py
 <pre><code>aws s3 sync s3://maplibre-native/android-benchmark-render/ .
 </code></pre>
 <h2 id="benchmarks-in-pull-request"><a class="header" href="#benchmarks-in-pull-request">Benchmarks in Pull Request</a></h2>
-<p>To run the benchmarks (for Android) include the following line on a PR comment:</p>
+<p>To run the benchmarks, add a line starting with <code>!benchmark</code> to a PR comment, with <code>android</code> on that same line (case-insensitive):</p>
 <pre><code>!benchmark android
 </code></pre>
 <p>A file with the benchmark results will be added to the workflow summary, which you can compare with the previous results in the bucket.</p>
