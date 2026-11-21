@@ -148,6 +148,20 @@ void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) 
     activatedRenderTargets.clear();
 }
 
+void RenderHillshadeLayer::releaseRenderedTargets(UniqueChangeRequestVec& changes) {
+    // A tile's prepare pass only has to run once per bucket: its texture then holds the slope data that the
+    // tile drawable samples. Stop the orchestrator from drawing it again every frame, and free the prepare
+    // drawable with its DEM texture. The bucket keeps the target alive for the texture.
+    std::erase_if(activatedRenderTargets, [&](const RenderTargetPtr& renderTarget) {
+        if (!renderTarget->hasBeenRendered()) {
+            return false;
+        }
+        activateRenderTarget(renderTarget, false, changes);
+        renderTarget->removeLayerGroup(0);
+        return true;
+    });
+}
+
 static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
 static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
@@ -158,6 +172,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   [[maybe_unused]] const PaintParameters& paintParameters,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
+    releaseRenderedTargets(changes);
+
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
