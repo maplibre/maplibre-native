@@ -15,6 +15,12 @@ function(mbgl_generate_license param)
         endif()
 
         if(TARGET ${LIBRARY})
+            # Installed libraries are not part of what is built here.
+            get_target_property(IMPORTED ${LIBRARY} IMPORTED)
+            if(IMPORTED)
+                continue()
+            endif()
+
             get_target_property(NAME ${LIBRARY} INTERFACE_MAPLIBRE_NAME)
             get_target_property(URL ${LIBRARY} INTERFACE_MAPLIBRE_URL)
             get_target_property(AUTHOR ${LIBRARY} INTERFACE_MAPLIBRE_AUTHOR)

@@ -8,7 +8,7 @@ target_compile_definitions(
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/sqlite.cmake)
 
 # cmake-format: off
 # Apply size optimizations for both Release and RelWithDebInfo configs.
@@ -18,7 +18,9 @@ set(_OPT_CONFIGS "$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>")
 target_compile_options(mbgl-vendor-csscolorparser PRIVATE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
 target_compile_options(mbgl-vendor-icu PRIVATE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
 target_compile_options(mbgl-vendor-parsedate PRIVATE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
-target_compile_options(mbgl-vendor-sqlite PRIVATE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
+if(MLN_USE_BUILTIN_SQLITE)
+    target_compile_options(mbgl-vendor-sqlite PRIVATE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
+endif()
 target_compile_options(mbgl-compiler-options INTERFACE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
 # cmake-format: on
 
@@ -93,7 +95,7 @@ target_link_libraries(
         jnigraphics
         log
         mbgl-vendor-icu
-        mbgl-vendor-sqlite
+        mbgl-sqlite
         z
 )
 
@@ -133,7 +135,7 @@ if(MLN_WITH_VULKAN)
             MapLibreNative::Base
             log
             mbgl-compiler-options
-            mbgl-vendor-vulkan-headers
+            mbgl-vulkan-headers
     )
 endif()
 
