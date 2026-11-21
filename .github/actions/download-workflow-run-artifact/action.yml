@@ -1,55 +1,53 @@
 name: 'Download workflow_run artifact'
-description: 'Downloads and unzips artifact from workflow that triggered workflow_run'
+description: 'Downloads an artifact from the workflow that triggered workflow_run and takes the listed files from it'
 inputs:
   artifact-name:
     description: 'Name of artifact'
     required: true
-  expect-files:
-    description: 'Check for existence of expected files'
+  files:
+    description: 'Comma-separated top-level files to take from the artifact into the workspace; everything else in it is ignored'
+    required: true
+  optional:
+    description: 'Do not fail when the artifact or one of the files is missing'
     required: false
+    default: 'false'
+outputs:
+  found:
+    description: 'Whether every listed file was taken from the artifact'
+    value: ${{ steps.take.outputs.found }}
 runs:
   using: "composite"
   steps:
-    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run
-    - name: Download ${{ inputs.artifact-name }} artifact
-      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    # pattern rather than name, so a missing artifact downloads nothing instead of failing
+    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
-        script: |
-          let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.payload.workflow_run.id,
-          });
-          let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
-            return artifact.name == "${{ inputs.artifact-name }}"
-          })[0];
-          if (!matchArtifact) {
-            console.log("Could not find artifact '${{ inputs.artifact-name }}'");
-            return;
-          }
-          let download = await github.rest.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: matchArtifact.id,
-              archive_format: 'zip',
-          });
-          let fs = require('fs');
-          fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/${{ inputs.artifact-name }}.zip`, Buffer.from(download.data));
+        pattern: ${{ inputs.artifact-name }}
+        merge-multiple: true
+        path: ${{ runner.temp }}/${{ inputs.artifact-name }}
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ github.token }}
 
-    - name: "Check .zip file existence"
-      id: zip_exists
-      uses: andstor/file-existence-action@558493d6c74bf472d87c84eab196434afc2fa029 # v3.1.0
-      with:
-        files: ${{ inputs.artifact-name }}.zip
-
-    - name: Unzip artifact
+    # The artifact was uploaded by a run that a fork PR controls, so only the
+    # listed files leave the download directory.
+    - name: Take ${{ inputs.artifact-name }} files
+      id: take
       shell: bash
-      if: steps.zip_exists.outputs.files_exists == 'true'
-      run: unzip ${{ inputs.artifact-name }}.zip
-
-    - name: "Check file existence"
-      uses: andstor/file-existence-action@558493d6c74bf472d87c84eab196434afc2fa029 # v3.1.0
-      if: ${{ inputs.expect-files }}
-      with:
-        fail: true
-        files: ${{ inputs.expect-files }}
+      run: |
+        read -ra files <<< "${FILES//,/ }"
+        found=true
+        for f in "${files[@]}"; do
+          if [ -f "$DIR/$f" ]; then
+            mv "$DIR/$f" "./$f"
+          elif [ "$OPTIONAL" = true ]; then
+            found=false
+          else
+            echo "::error::artifact $ARTIFACT has no file $f"
+            exit 1
+          fi
+        done
+        echo "found=$found" >> "$GITHUB_OUTPUT"
+      env:
+        ARTIFACT: ${{ inputs.artifact-name }}
+        FILES: ${{ inputs.files }}
+        OPTIONAL: ${{ inputs.optional }}
+        DIR: ${{ runner.temp }}/${{ inputs.artifact-name }}
