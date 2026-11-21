@@ -128,6 +128,9 @@ private:
 
     uint64_t correlationID = 0;
 
+    // Whether the worker has data to parse, set by `setData` and cleared by `reset`.
+    bool hasData = false;
+
     std::shared_ptr<LayoutResult> layoutResult;
     std::shared_ptr<TileAtlasTextures> atlasTextures;
 
