@@ -1,0 +1,22 @@
+{
+  "expression": ["interpolate-oklch", ["linear"], ["get", "x"], 0, 100, 10, ["get", "b"]],
+  "inputs": [
+    [{}, {"properties": {"x": 0, "b": 200}}],
+    [{}, {"properties": {"x": 5, "b": 200}}],
+    [{}, {"properties": {"x": 10, "b": 200}}],
+    [{}, {"properties": {"x": -1234, "b": 200}}],
+    [{}, {"properties": {"x": 1234, "b": 200}}],
+    [{}, {"properties": {"x": "abcd", "b": 200}}]
+  ],
+  "expected": {
+    "compiled": {
+      "result": "error",
+      "errors": [
+        {
+          "key": "[4]",
+          "error": "Expected color but found number instead."
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "expression": ["interpolate-oklab", ["linear"], ["get", "t"], 0, ["get", "from"], 1, ["get", "to"]],
+  "inputs": [
+    [{}, {"properties": {"t": 0.2, "from": "#11aa11", "to": "#2233ff"}}],
+    [{}, {"properties": {"t": 0.45, "from": "#11aa11", "to": "#2233ff"}}],
+    [{}, {"properties": {"t": 0.75, "from": "#11aa11", "to": "#2233ff"}}],
+    [{}, {"properties": {"t": 0.45, "from": "#00ff00", "to": "#0000ff"}}],
+    [{}, {"properties": {"t": 0.9, "from": "#ffff00", "to": "#0000ff"}}],
+    [{}, {"properties": {"t": 0.5, "from": "oklab(0.7 -0.3 0.3)", "to": "oklab(0.4 0.1 -0.3)"}}]
+  ],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": false,
+      "isZoomConstant": true,
+      "type": "color"
+    },
+    "outputs": [
+      [0, 0.616795, 0.404118, 1],
+      [0, 0.540051, 0.619027, 1],
+      [0, 0.408913, 0.833161, 1],
+      [0, 0.701827, 0.715202, 1],
+      [0, 0.289172, 0.965156, 1],
+      [0.232896, 0.538576, 0.629525, 1]
+    ],
+    "serialized": [
+      "interpolate-oklab",
+      ["linear"],
+      ["number", ["get", "t"]],
+      0,
+      ["to-color", ["get", "from"]],
+      1,
+      ["to-color", ["get", "to"]]
+    ]
+  }
+}
