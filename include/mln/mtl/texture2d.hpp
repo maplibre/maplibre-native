@@ -41,6 +41,11 @@ public:
 
     void create() override;
 
+    /// @brief Create the Metal texture if needed, without updating the sampler state.
+    /// For uploads from worker threads: the render thread changes and applies the sampler state
+    /// (`setSamplerConfiguration`, `bind`) without a lock, so only the render thread may update it.
+    void createTexture();
+
     void upload(const void* pixelData, const Size& size_) override;
     void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
     void upload() override;

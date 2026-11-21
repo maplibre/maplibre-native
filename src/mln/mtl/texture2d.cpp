@@ -195,10 +195,14 @@ void Texture2D::createMetalTexture() {
     }
 }
 
-void Texture2D::create() {
+void Texture2D::createTexture() {
     if (textureDirty) {
         createMetalTexture();
     }
+}
+
+void Texture2D::create() {
+    createTexture();
     if (samplerStateDirty) {
         updateSamplerConfiguration();
     }
