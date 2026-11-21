@@ -8,6 +8,8 @@ else()
     add_library(mbgl-vendor-icu STATIC)
 endif()
 
+mln_install_libraries(mbgl-vendor-icu)
+
 target_sources(
     mbgl-vendor-icu PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/cmemory.cpp

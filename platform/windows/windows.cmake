@@ -152,6 +152,10 @@ target_include_directories(
         ${LIBUV_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
 )
+mln_install_headers(
+    DIRECTORIES
+        ${PROJECT_SOURCE_DIR}/platform/default/include/
+)
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)

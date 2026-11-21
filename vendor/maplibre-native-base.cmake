@@ -2,6 +2,17 @@ if(NOT TARGET maplibre-native)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base)
 endif()
 
+# The core's headers include these.
+mln_install_headers(
+    DIRECTORIES
+        ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/include/
+        ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/deps/cheap-ruler-cpp/include/
+        ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/deps/geojson.hpp/include/
+        ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/deps/geometry.hpp/include/
+        ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/deps/shelf-pack-cpp/include/
+        ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/deps/variant/include/
+)
+
 set_target_properties(
     maplibre-native-base-shelf-pack-cpp
     PROPERTIES

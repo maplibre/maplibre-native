@@ -62,6 +62,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
 
 include(CTest)
+include(GNUInstallDirs)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -144,6 +145,9 @@ if(MLN_WITH_QT)
 else()
     add_library(mbgl-core STATIC)
 endif()
+
+include(${PROJECT_SOURCE_DIR}/cmake/install.cmake)
+mln_install_libraries(mbgl-core)
 
 include(cmake/plugins.cmake)
 
@@ -1119,6 +1123,7 @@ target_include_directories(
     mbgl-core
     PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
+mln_install_headers(DIRECTORIES ${PROJECT_SOURCE_DIR}/include/)
 
 include(${PROJECT_SOURCE_DIR}/vendor/args.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
