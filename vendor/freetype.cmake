@@ -68,4 +68,6 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
             INTERFACE_MAPLIBRE_AUTHOR "David Turner, Robert Wilhelm, Werner Lemberg and FreeType contributors"
             INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/freetype/docs/FTL.TXT
     )
+
+    mln_install_libraries(mbgl-freetype)
 endif()

@@ -7,3 +7,5 @@ if(MLN_WITH_QT)
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec/cpp SYSTEM)
+
+mln_install_libraries(mlt-cpp fastpfor-lib)

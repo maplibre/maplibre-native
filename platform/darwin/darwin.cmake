@@ -75,6 +75,11 @@ target_include_directories(
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/darwin/src ${PROJECT_SOURCE_DIR}/platform/macos/src
 )
+mln_install_headers(
+    DIRECTORIES
+        ${PROJECT_SOURCE_DIR}/platform/darwin/include/
+        ${PROJECT_SOURCE_DIR}/platform/default/include/
+)
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 
