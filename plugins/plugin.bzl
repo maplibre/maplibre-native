@@ -18,7 +18,7 @@ def mln_plugin():
 
     cc_library(
         name = id,
-        srcs = native.glob(["shared/cpp/*.cpp", "shared/cpp/*.hpp", "vendor/**/*.hpp"], allow_empty = True),
+        srcs = native.glob(["shared/cpp/*.cpp", "shared/cpp/*.hpp", "vendor/**/*.hpp", "vendor/**/*.h"], allow_empty = True),
         hdrs = native.glob(["shared/include/*.hpp"]),
         copts = CPP_FLAGS,
         includes = ["shared/include"] + (["vendor"] if native.glob(["vendor/**"], allow_empty = True) else []),

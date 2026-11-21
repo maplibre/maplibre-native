@@ -110,3 +110,6 @@
 [submodule "vendor/metal-cpp"]
 	path = vendor/metal-cpp
 	url = https://github.com/apple/metal-cpp
+[submodule "plugins/plugins/gltf-layer/vendor/tinygltf"]
+	path = plugins/plugins/gltf-layer/vendor/tinygltf
+	url = https://github.com/syoyo/tinygltf.git
