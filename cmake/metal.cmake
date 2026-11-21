@@ -93,3 +93,4 @@ list(APPEND
 )
 
 target_link_libraries(mbgl-core PRIVATE "-framework Metal")
+mln_pkg_config_libs("-framework Metal")

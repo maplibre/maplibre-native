@@ -15,6 +15,7 @@ target_link_libraries(
     PRIVATE
         "-framework AppKit"
 )
+mln_pkg_config_libs("-framework AppKit")
 
 
 if(MLN_WITH_OPENGL)
@@ -33,6 +34,7 @@ if(MLN_WITH_OPENGL)
         mbgl-core
         PRIVATE OpenGL::GL
     )
+    mln_pkg_config_libs("-framework OpenGL")
 endif()
 
 if(MLN_WITH_VULKAN)

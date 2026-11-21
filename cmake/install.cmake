@@ -17,6 +17,8 @@ function(mln_install_libraries)
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         COMPONENT core
     )
+    # For the pkg-config file.
+    set_property(GLOBAL APPEND PROPERTY MLN_CORE_INSTALLED_LIBRARIES ${ARGN})
 endfunction()
 
 # Install the headers in directories, for building against the installed core.

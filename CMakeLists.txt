@@ -159,7 +159,10 @@ else()
 endif()
 
 include(${PROJECT_SOURCE_DIR}/cmake/install.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/pkg-config.cmake)
 mln_install_libraries(mbgl-core)
+# At the end, when every dependency has been recorded.
+cmake_language(DEFER CALL mln_install_pkg_config)
 
 include(cmake/plugins.cmake)
 

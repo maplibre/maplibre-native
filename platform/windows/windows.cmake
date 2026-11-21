@@ -94,6 +94,7 @@ if(MLN_WITH_EGL)
             PRIVATE
                 ${EGL_LIBRARIES}
         )
+        mln_pkg_config_requires(angleproject)
     endif()
 
     target_sources(
@@ -130,6 +131,7 @@ else()
         PRIVATE
             OpenGL::GL
     )
+    mln_pkg_config_libs(-lopengl32)
 endif()
 
 if (DEFINED ENV{CI})
@@ -206,6 +208,7 @@ elseif(MSYS)
             ${CURL_STATIC_LIBRARIES}
     )
 endif()
+mln_pkg_config_requires(libcurl)
 
 target_link_libraries(
     mbgl-core
@@ -220,6 +223,10 @@ target_link_libraries(
         mbgl-vendor-nunicode
         mbgl-sqlite
 )
+mln_pkg_config_requires(libjpeg libwebp libpng)
+if(NOT MLN_USE_BUILTIN_ICU)
+    mln_pkg_config_requires(icu-uc icu-i18n)
+endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 if(MLN_WITH_GLFW)
@@ -233,12 +240,14 @@ elseif(MSVC)
         PRIVATE
             $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
+    mln_pkg_config_requires(libuv)
 elseif(MSYS)
     target_link_libraries(
         mbgl-core
         PRIVATE
             ${LIBUV_LIBRARIES}
     )
+    mln_pkg_config_requires(libuv)
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/test)

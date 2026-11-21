@@ -11,6 +11,14 @@ target_link_libraries(
         sqlite3
         z
 )
+mln_pkg_config_libs(
+    "-framework CoreGraphics"
+    "-framework CoreLocation"
+    "-framework CoreImage"
+    "-framework SystemConfiguration"
+    -lsqlite3
+    -lz
+)
 
 if(TARGET mbgl-vendor-dawn)
     target_link_libraries(
@@ -32,6 +40,7 @@ if(MLN_DARWIN_USE_LIBUV)
         PRIVATE
             PkgConfig::LIBUV
     )
+    mln_pkg_config_requires(libuv)
 endif()
 
 target_sources(
