@@ -8,6 +8,8 @@
 
 #include <map>
 #include <memory>
+#include <optional>
+#include <string>
 #include <utility>
 
 namespace mln {
@@ -37,6 +39,9 @@ struct GeoJSONOptions {
 
     // Update options
     bool synchronousUpdate = false;
+
+    // Attribution text for the data, reported by Source::getAttribution()
+    std::optional<std::string> attribution;
 
     static Immutable<GeoJSONOptions> defaultOptions();
 };
