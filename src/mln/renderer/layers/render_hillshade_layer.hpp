@@ -45,6 +45,7 @@ private:
 
     void addRenderTarget(const RenderTargetPtr&, UniqueChangeRequestVec&);
     void removeRenderTargets(UniqueChangeRequestVec&);
+    void releaseRenderedTargets(UniqueChangeRequestVec&);
 
     // Paint properties
     style::HillshadePaintProperties::Unevaluated unevaluated;
