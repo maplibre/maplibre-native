@@ -1097,6 +1097,27 @@ TEST(Source, GeoJSONSourceTilesAfterDataReset) {
     EXPECT_TRUE(renderSource.isLoaded()); // Tiles are reset in static mode.
 }
 
+TEST(Source, GeoJSONSourceOverrideSynchronousUpdateOff) {
+    SourceTest test;
+    GeoJSONOptions options;
+    options.synchronousUpdate = true;
+    GeoJSONSource source("source", makeMutable<GeoJSONOptions>(options));
+    source.setGeoJSON(mapbox::geojson::parse(
+        R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})"));
+
+    source.setOverrideSynchronousUpdate(false);
+    EXPECT_FALSE(source.isUpdateSynchronous());
+
+    RenderGeoJSONSource renderSource{staticImmutableCast<GeoJSONSource::Impl>(source.baseImpl), test.threadPool};
+    CircleLayer layer("id", "source");
+    std::vector<Immutable<LayerProperties>> layers{
+        makeMutable<CircleLayerProperties>(staticImmutableCast<CircleLayer::Impl>(layer.baseImpl))};
+    TileParameters parameters = test.tileParameters();
+    parameters.isUpdateSynchronous = source.baseImpl->isUpdateSynchronous();
+    static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, parameters);
+    EXPECT_FALSE(renderSource.isLoaded()); // The tiles load in the background.
+}
+
 TEST(Source, SetMaxParentOverscaleFactor) {
     SourceTest test;
     test.transform.jumpTo(CameraOptions().withCenter(LatLng()).withZoom(8.0));

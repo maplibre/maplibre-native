@@ -132,8 +132,12 @@ bool GeoJSONSource::isUpdateSynchronous() const noexcept {
     return baseImpl->isUpdateSynchronous();
 }
 
-void GeoJSONSource::setOverrideSynchronousUpdate(bool value) const noexcept {
-    impl().setOverrideSynchronousUpdate(value);
+void GeoJSONSource::setOverrideSynchronousUpdate(bool value) noexcept {
+    if (isUpdateSynchronous() == value) return;
+    auto newImpl = makeMutable<Impl>(impl());
+    newImpl->setUpdateSynchronous(value);
+    baseImpl = std::move(newImpl);
+    observer->onSourceChanged(*this);
 }
 
 } // namespace style
