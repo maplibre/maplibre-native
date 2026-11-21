@@ -279,7 +279,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getInternal(const 
     }
 }
 
-std::optional<int64_t> OfflineDatabase::hasInternal(const Resource& resource) {
+std::optional<std::pair<Response, uint64_t>> OfflineDatabase::hasInternal(const Resource& resource) {
     if (resource.kind == Resource::Kind::Tile) {
         assert(resource.tileData);
         return hasTile(*resource.tileData);
@@ -417,14 +417,25 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
     return std::make_pair(response, size);
 }
 
-std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
-    mapbox::sqlite::Query query{getStatement("SELECT length(data) FROM resources WHERE url = ?")};
+std::optional<std::pair<Response, uint64_t>> OfflineDatabase::hasResource(const Resource& resource) {
+    mapbox::sqlite::Query query{
+        getStatement("SELECT etag, expires, must_revalidate, modified, length(data) FROM resources WHERE url = ?")};
     query.bind(1, cacheKey(resource));
     if (!query.run()) {
         return std::nullopt;
     }
 
-    return query.get<std::optional<int64_t>>(0);
+    auto size = query.get<std::optional<int64_t>>(4);
+    if (!size) {
+        return std::nullopt;
+    }
+
+    Response response;
+    response.etag = query.get<std::optional<std::string>>(0);
+    response.expires = query.get<std::optional<Timestamp>>(1);
+    response.mustRevalidate = query.get<bool>(2);
+    response.modified = query.get<std::optional<Timestamp>>(3);
+    return std::make_pair(response, *size);
 }
 
 bool OfflineDatabase::putResource(const Resource& resource,
@@ -591,10 +602,10 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
     return std::make_pair(response, size);
 }
 
-std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) {
+std::optional<std::pair<Response, uint64_t>> OfflineDatabase::hasTile(const Resource::TileData& tile) {
     // clang-format off
     mapbox::sqlite::Query size{ getStatement(
-        "SELECT length(data) "
+        "SELECT etag, expires, must_revalidate, modified, length(data) "
         "FROM tiles "
         "WHERE url_template = ?1 "
         "  AND pixel_ratio  = ?2 "
@@ -613,7 +624,17 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
         return std::nullopt;
     }
 
-    return size.get<std::optional<int64_t>>(0);
+    auto result = size.get<std::optional<int64_t>>(4);
+    if (!result) {
+        return std::nullopt;
+    }
+
+    Response response;
+    response.etag = size.get<std::optional<std::string>>(0);
+    response.expires = size.get<std::optional<Timestamp>>(1);
+    response.mustRevalidate = size.get<bool>(2);
+    response.modified = size.get<std::optional<Timestamp>>(3);
+    return std::make_pair(response, *result);
 }
 
 bool OfflineDatabase::putTile(const Resource::TileData& tile,
@@ -1018,7 +1039,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getRegionResource(
     return std::nullopt;
 }
 
-std::optional<int64_t> OfflineDatabase::hasRegionResource(const Resource& resource) try {
+std::optional<std::pair<Response, uint64_t>> OfflineDatabase::hasRegionResource(const Resource& resource) try {
     return hasInternal(resource);
 } catch (...) {
     handleError("query region resource");
@@ -1094,6 +1115,11 @@ uint64_t OfflineDatabase::putRegionResourceInternal(int64_t regionID,
     checkFlags();
 
     uint64_t size = putInternal(resource, response, false).second;
+    if (response.notModified) {
+        // A 304 keeps the stored data, so report its size.
+        auto stored = hasInternal(resource);
+        size = stored ? stored->second : 0;
+    }
     bool previouslyUnused = markUsed(regionID, resource);
 
     if (previouslyUnused && exceedsOfflineMapboxTileCountLimit(resource)) {
