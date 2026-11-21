@@ -1,3 +1,7 @@
+if(NOT MLN_WITH_TESTS)
+    return()
+endif()
+
 add_executable(
     mbgl-expression-test
     ${PROJECT_SOURCE_DIR}/expression-test/expression_test_logger.cpp
@@ -35,3 +39,11 @@ add_test(
     COMMAND mbgl-expression-test -s --seed=${MLN_EXPRESSION_TEST_SEED}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
+
+if(MSVC)
+    target_link_libraries(
+        mbgl-expression-test
+        PRIVATE
+            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+    )
+endif()
