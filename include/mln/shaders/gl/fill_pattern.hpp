@@ -114,7 +114,11 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, toScale * display_size_b, tileZoomRatio, a_pos);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillPatternTilePropsUBO {
+    static constexpr const char* fragment = R"(#ifdef GL_ES
+precision highp float;
+#endif
+
+layout (std140) uniform FillPatternTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
     highp vec2 u_texsize;

@@ -118,7 +118,11 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world_size;
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillOutlinePatternTilePropsUBO {
+    static constexpr const char* fragment = R"(#ifdef GL_ES
+precision highp float;
+#endif
+
+layout (std140) uniform FillOutlinePatternTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
     highp vec2 u_texsize;
