@@ -4,7 +4,7 @@ endif()
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/sqlite.cmake)
 
 find_library(MLN_OHOS_NET_HTTP_LIBRARY NAMES net_http REQUIRED)
 
@@ -62,6 +62,7 @@ if(MLN_WITH_VULKAN)
         PRIVATE
             vulkan
     )
+    mln_pkg_config_libs(-lvulkan)
 endif()
 
 target_include_directories(
@@ -100,13 +101,14 @@ target_link_libraries(
         image_source
         mbgl-vendor-icu
         mbgl-vendor-nunicode
-        mbgl-vendor-sqlite
+        mbgl-sqlite
         pixelmap
         hilog_ndk.z
         ${MLN_OHOS_NET_HTTP_LIBRARY}
         uv
         z
 )
+mln_pkg_config_libs(-limage_source -lpixelmap -lhilog_ndk.z ${MLN_OHOS_NET_HTTP_LIBRARY} -luv -lz)
 
 if(MLN_WITH_OPENGL)
     target_link_libraries(
@@ -115,6 +117,7 @@ if(MLN_WITH_OPENGL)
             EGL
             GLESv3
     )
+    mln_pkg_config_libs(-lEGL -lGLESv3)
 endif()
 
 function(mln_ohos_link_core_whole_archive target)

@@ -11,6 +11,14 @@ target_link_libraries(
         sqlite3
         z
 )
+mln_pkg_config_libs(
+    "-framework CoreGraphics"
+    "-framework CoreLocation"
+    "-framework CoreImage"
+    "-framework SystemConfiguration"
+    -lsqlite3
+    -lz
+)
 
 if(TARGET mbgl-vendor-dawn)
     target_link_libraries(
@@ -32,6 +40,7 @@ if(MLN_DARWIN_USE_LIBUV)
         PRIVATE
             PkgConfig::LIBUV
     )
+    mln_pkg_config_requires(libuv)
 endif()
 
 target_sources(
@@ -74,6 +83,11 @@ target_include_directories(
         ${PROJECT_SOURCE_DIR}/platform/default/include
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/darwin/src ${PROJECT_SOURCE_DIR}/platform/macos/src
+)
+mln_install_headers(
+    DIRECTORIES
+        ${PROJECT_SOURCE_DIR}/platform/darwin/include/
+        ${PROJECT_SOURCE_DIR}/platform/default/include/
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)

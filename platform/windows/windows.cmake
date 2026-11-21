@@ -94,6 +94,7 @@ if(MLN_WITH_EGL)
             PRIVATE
                 ${EGL_LIBRARIES}
         )
+        mln_pkg_config_requires(angleproject)
     endif()
 
     target_sources(
@@ -130,6 +131,7 @@ else()
         PRIVATE
             OpenGL::GL
     )
+    mln_pkg_config_libs(-lopengl32)
 endif()
 
 if (DEFINED ENV{CI})
@@ -152,9 +154,13 @@ target_include_directories(
         ${LIBUV_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
 )
+mln_install_headers(
+    DIRECTORIES
+        ${PROJECT_SOURCE_DIR}/platform/default/include/
+)
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/sqlite.cmake)
 
 if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
     message(STATUS "ICU not found, too old or MLN_USE_BUILTIN_ICU requestd, using builtin.")
@@ -202,6 +208,7 @@ elseif(MSYS)
             ${CURL_STATIC_LIBRARIES}
     )
 endif()
+mln_pkg_config_requires(libcurl)
 
 target_link_libraries(
     mbgl-core
@@ -214,8 +221,12 @@ target_link_libraries(
         $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
         PNG::PNG
         mbgl-vendor-nunicode
-        mbgl-vendor-sqlite
+        mbgl-sqlite
 )
+mln_pkg_config_requires(libjpeg libwebp libpng)
+if(NOT MLN_USE_BUILTIN_ICU)
+    mln_pkg_config_requires(icu-uc icu-i18n)
+endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 if(MLN_WITH_GLFW)
@@ -229,107 +240,16 @@ elseif(MSVC)
         PRIVATE
             $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
+    mln_pkg_config_requires(libuv)
 elseif(MSYS)
     target_link_libraries(
         mbgl-core
         PRIVATE
             ${LIBUV_LIBRARIES}
     )
+    mln_pkg_config_requires(libuv)
 endif()
 
-add_executable(
-    mbgl-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/test/main.cpp
-)
-
-target_compile_definitions(
-    mbgl-test-runner
-    PRIVATE
-        MBGL_BUILDING_LIB
-        WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
-)
-
-if (DEFINED ENV{CI})
-    target_compile_definitions(
-        mbgl-test-runner
-        PRIVATE
-            CI_BUILD=1
-    )
-endif()
-
-target_include_directories(
-    mbgl-test-runner
-    PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/windows/include
-)
-
-target_link_libraries(
-    mbgl-test-runner
-    PRIVATE
-        mbgl-compiler-options
-        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
-)
-
-if(MSVC)
-    target_link_libraries(
-        mbgl-test-runner
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
-endif()
-
-add_executable(
-    mbgl-benchmark-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark/main.cpp
-)
-
-target_link_libraries(
-    mbgl-benchmark-runner
-    PRIVATE
-        mbgl-compiler-options
-        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
-)
-
-if(MSVC)
-    target_link_libraries(
-        mbgl-benchmark-runner
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
-endif()
-
-add_executable(
-    mbgl-render-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test/main.cpp
-)
-
-target_link_libraries(
-    mbgl-render-test-runner
-    PRIVATE
-        mbgl-compiler-options
-        mbgl-render-test
-)
-
-if(MSVC)
-    target_link_libraries(
-        mbgl-render-test-runner
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
-endif()
-
-if(MSVC)
-    target_link_libraries(
-        mbgl-expression-test
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
-endif()
-
-# Disable benchmarks in CI as they run in VM environment
-if(NOT DEFINED ENV{CI})
-    add_test(NAME mbgl-benchmark-runner COMMAND mbgl-benchmark-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-endif()
-add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-
-install(TARGETS mbgl-render-test-runner RUNTIME DESTINATION bin)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/test)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test)

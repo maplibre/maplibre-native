@@ -8,6 +8,8 @@ else()
     add_library(mbgl-vendor-nunicode STATIC)
 endif()
 
+mln_install_libraries(mbgl-vendor-nunicode)
+
 target_sources(
     mbgl-vendor-nunicode PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/nunicode/src/libnu/ducet.c

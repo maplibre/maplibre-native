@@ -68,6 +68,7 @@ if(MLN_WITH_EGL)
         PRIVATE
             OpenGL::EGL
     )
+    mln_pkg_config_requires(egl)
     if (MLN_WITH_WAYLAND)
         target_compile_definitions(mbgl-core PUBLIC
                 EGL_NO_X11
@@ -94,6 +95,7 @@ else()
         PRIVATE
             OpenGL::GLX
     )
+    mln_pkg_config_requires(glx)
 endif()
 
 if (DEFINED ENV{CI})
@@ -116,9 +118,13 @@ target_include_directories(
         ${X11_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
 )
+mln_install_headers(
+    DIRECTORIES
+        ${PROJECT_SOURCE_DIR}/platform/default/include/
+)
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/sqlite.cmake)
 
 if(NOT ICUUC_FOUND OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
     message(STATUS "ICU not found, too old or MLN_USE_BUILTIN_ICU requestd, using builtin.")
@@ -148,8 +154,18 @@ target_link_libraries(
         $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
         PNG::PNG
         mbgl-vendor-nunicode
-        mbgl-vendor-sqlite
+        mbgl-sqlite
 )
+# zlib comes with PNG::PNG, but only privately with libpng's pkg-config module,
+# and the core uses it too.
+mln_pkg_config_requires(libcurl libjpeg libuv libwebp libpng zlib)
+mln_pkg_config_libs(${CMAKE_THREAD_LIBS_INIT})
+if(MLN_WITH_X11)
+    mln_pkg_config_requires(x11 xext)
+endif()
+if(NOT MLN_USE_BUILTIN_ICU)
+    mln_pkg_config_requires(icu-uc icu-i18n)
+endif()
 
 if(MLN_CREATE_AMALGAMATION)
     if(NOT ARMERGE)
@@ -214,59 +230,6 @@ if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
 endif()
 
-add_executable(
-    mbgl-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/test/main.cpp
-)
-
-target_compile_definitions(
-    mbgl-test-runner
-    PRIVATE
-        WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
-)
-
-if (DEFINED ENV{CI})
-    message("Building for CI")
-    target_compile_definitions(
-        mbgl-test-runner
-        PRIVATE
-            CI_BUILD=1
-    )
-endif()
-
-target_link_libraries(
-    mbgl-test-runner
-    PRIVATE
-        mbgl-compiler-options
-        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
-)
-
-add_executable(
-    mbgl-benchmark-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark/main.cpp
-)
-
-target_link_libraries(
-    mbgl-benchmark-runner
-    PRIVATE
-        mbgl-compiler-options
-        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
-)
-
-add_executable(
-    mbgl-render-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test/main.cpp
-)
-
-target_link_libraries(
-    mbgl-render-test-runner
-    PRIVATE mbgl-compiler-options mbgl-render-test
-)
-
-# Disable benchmarks in CI as they run in VM environment
-if(NOT DEFINED ENV{CI})
-    add_test(NAME mbgl-benchmark-runner COMMAND mbgl-benchmark-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-endif()
-add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-
-install(TARGETS mbgl-render-test-runner RUNTIME DESTINATION bin)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/test)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test)

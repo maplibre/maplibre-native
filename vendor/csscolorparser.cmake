@@ -8,6 +8,8 @@ else()
     add_library(mbgl-vendor-csscolorparser STATIC)
 endif()
 
+mln_install_libraries(mbgl-vendor-csscolorparser)
+
 target_sources(
     mbgl-vendor-csscolorparser PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/csscolorparser/csscolorparser.cpp
