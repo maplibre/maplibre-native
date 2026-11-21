@@ -4,7 +4,7 @@ inputs:
   sha:
     description: 'Bloaty commit to build'
     required: false
-    default: 8be8b448550b37c978e8defd9d421c0464c52cc7
+    default: ccb49b0be3d5bc0dd156bcf16f1515726c395ec5
 runs:
   using: "composite"
   steps:
