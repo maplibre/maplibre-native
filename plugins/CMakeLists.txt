@@ -60,7 +60,7 @@ endforeach()
 # The tests of the plugin API of the host.
 add_executable(mln-plugin-api-tests EXCLUDE_FROM_ALL
     ../test/plugin/api.test.cpp ../test/plugin/registry.test.cpp ../test/plugin/layout.test.cpp
-    ../test/plugin/property_binding.test.cpp ../test/plugin/rendering.test.cpp
+    ../test/plugin/layout_properties.test.cpp ../test/plugin/property_binding.test.cpp ../test/plugin/rendering.test.cpp
     ../test/src/mln/test/stub_file_source.cpp ../vendor/googletest/googletest/src/gtest_main.cc)
 target_include_directories(mln-plugin-api-tests PRIVATE ../src ../test/include ../test/src)
 target_link_libraries(mln-plugin-api-tests PRIVATE mbgl-core mbgl-vendor-googletest ${test_libraries})

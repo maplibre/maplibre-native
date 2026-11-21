@@ -11,6 +11,9 @@
 #include <mln/geometry/feature_index.hpp>
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
+#if MLN_WITH_PLUGINS
+#include <mln/tile/layout_resource_manager.hpp>
+#endif
 #include <mln/tile/tile.hpp>
 #include <mln/util/containers.hpp>
 
@@ -69,6 +72,10 @@ public:
                            ImageVersionMap versionMap,
                            uint64_t imageCorrelationID);
 
+#if MLN_WITH_PLUGINS
+    void onLayoutResourcesAvailable(LayoutResourceMap);
+#endif
+
 private:
     void coalesced();
     void parse();
@@ -78,6 +85,9 @@ private:
 
     void requestNewGlyphs(const GlyphDependencies&);
     void requestNewImages(const ImageDependencies&);
+#if MLN_WITH_PLUGINS
+    void requestNewResources(const LayoutResourceDependencies&);
+#endif
 
     void symbolDependenciesChanged();
     bool hasPendingDependencies() const;
@@ -121,10 +131,21 @@ private:
 
     GlyphDependencies pendingGlyphDependencies;
     ImageDependencies pendingImageDependencies;
+#if MLN_WITH_PLUGINS
+    LayoutResourceDependencies pendingResourceDependencies;
+#endif
+    // True while `parse` requests the dependencies of the layouts it created. With a synchronous update a request
+    // can be answered before it returns, and finalizing then would run before the later requests are registered
+    // as pending, laying the layouts out without everything they wait for.
+    bool parsing = false;
     GlyphMap glyphMap;
     ImageMap iconMap;
     ImageMap patternMap;
     ImageVersionMap versionMap;
+#if MLN_WITH_PLUGINS
+    // The layout resources that the current layouts use, kept across parses like the glyphs.
+    LayoutResourceMap resourceMap;
+#endif
     Immutable<std::set<std::string>> availableImages = makeMutable<std::set<std::string>>();
 
     bool showCollisionBoxes;
