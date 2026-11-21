@@ -35,6 +35,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
+- [core] Apply feature state to a tile once, then only its changes, instead of re-applying the whole stored state to every rendered tile on every frame.
 - [core] Stop custom geometry tile callbacks before cancelled tiles are released on a worker thread.
 - [core] Fix rendered-feature queries near the final endpoint of an offset line.
 - [core] Fix plugin layer filters ignoring the style's global state.
