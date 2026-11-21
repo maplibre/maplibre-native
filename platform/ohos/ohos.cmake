@@ -4,7 +4,7 @@ endif()
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/sqlite.cmake)
 
 find_library(MLN_OHOS_NET_HTTP_LIBRARY NAMES net_http REQUIRED)
 
@@ -100,7 +100,7 @@ target_link_libraries(
         image_source
         mbgl-vendor-icu
         mbgl-vendor-nunicode
-        mbgl-vendor-sqlite
+        mbgl-sqlite
         pixelmap
         hilog_ndk.z
         ${MLN_OHOS_NET_HTTP_LIBRARY}
