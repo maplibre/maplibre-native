@@ -16,9 +16,10 @@ import java.util.concurrent.atomic.AtomicReference
  * Shared scaffolding for the SurfaceView detach regression tests.
  *
  *
- * Detaching a [MapView] from its window tears down the render thread and, through
- * `MapLibreSurfaceView#onDetachedFromWindow`, calls `nativeReset()` on the native
- * `MapRenderer`. Everything in this package exercises that boundary.
+ * Detaching a [MapView] from its window tears down the render thread, which releases the native
+ * renderer before it exits (`SurfaceViewMapRenderer#onRenderThreadExit`). Attaching it again
+ * starts a new render thread that builds a new renderer. Everything in this package exercises that
+ * boundary.
  *
  *
  * The important property of this base class is that it *never* blocks the instrumentation

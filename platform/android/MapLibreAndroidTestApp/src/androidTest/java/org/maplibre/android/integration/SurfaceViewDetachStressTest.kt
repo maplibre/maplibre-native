@@ -110,8 +110,8 @@ class SurfaceViewDetachStressTest : SurfaceViewDetachTestBase() {
         validateTestSetup()
 
         // Continuous mode keeps the render thread drawing right up to the detach, so teardown happens
-        // with work already queued in the render thread's event queue - the queue that
-        // MapLibreGLSurfaceView#guardedRun drops on exit without draining.
+        // with work already queued in the render thread's event queue - the queue that the exiting
+        // render thread leaves to the next one.
         runOnUiThreadWithin(
             SurfaceViewDetachTestBase.Companion.LIFECYCLE_TIMEOUT_MS,
             "switching to continuous rendering",
