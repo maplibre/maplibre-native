@@ -49,6 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 // MLNMapView from IB.  Changing these after initialization has no effect.
 @property (nonatomic) IBInspectable BOOL fastPFOREnabled;
 @property (nonatomic) IBInspectable BOOL featureInfoEnabled;
+@property (nonatomic) IBInspectable float keepUprightMargin;
 
 @end
 

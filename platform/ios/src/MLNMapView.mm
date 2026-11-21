@@ -515,6 +515,7 @@ public:
   BOOL _createdFromIB;
   BOOL _fastPFOREnabled;
   BOOL _featureInfoEnabled;
+  float _keepUprightMargin;
 }
 
 // MARK: - Setup & Teardown -
@@ -523,6 +524,7 @@ public:
   _createdFromIB = NO;
   _fastPFOREnabled = NO;
   _featureInfoEnabled = NO;
+  _keepUprightMargin = 0;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -609,6 +611,7 @@ public:
   MLNMapOptions *options = [[MLNMapOptions alloc] init];
   options.fastPFOREnabled = _fastPFOREnabled;
   options.featureInfoEnabled = _featureInfoEnabled;
+  options.keepUprightMargin = _keepUprightMargin;
   [self commonInitWithOptions:options];
   self.styleURL = nil;
 
@@ -741,6 +744,7 @@ public:
       .withConstrainMode(mln::ConstrainMode::None)
       .withViewportMode(mln::ViewportMode::Default)
       .withCrossSourceCollisions(enableCrossSourceCollisions)
+      .withKeepUprightMargin(mlnMapoptions.keepUprightMargin)
       .withFastPFOREnabled(mlnMapoptions.fastPFOREnabled)
       .withRenderedFeatureInfo(mlnMapoptions.featureInfoEnabled);
 
@@ -7914,6 +7918,13 @@ static void *windowScreenContext = &windowScreenContext;
 }
 - (void)setFeatureInfoEnabled:(BOOL)featureInfoEnabled {
   _featureInfoEnabled = featureInfoEnabled;
+}
+
+- (float)keepUprightMargin {
+  return _keepUprightMargin;
+}
+- (void)setKeepUprightMargin:(float)keepUprightMargin {
+  _keepUprightMargin = keepUprightMargin;
 }
 
 @end
