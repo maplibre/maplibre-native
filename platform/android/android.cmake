@@ -98,6 +98,7 @@ target_link_libraries(
         mbgl-sqlite
         z
 )
+mln_pkg_config_libs(-lEGL -lGLESv3 -landroid -latomic -ljnigraphics -llog -lz)
 
 add_library(
     example-custom-layer MODULE

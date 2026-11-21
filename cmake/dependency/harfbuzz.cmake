@@ -25,6 +25,7 @@ if(FREETYPE_FOUND
     target_link_libraries(mbgl-freetype INTERFACE Freetype::Freetype)
     add_library(mbgl-harfbuzz INTERFACE IMPORTED)
     target_link_libraries(mbgl-harfbuzz INTERFACE PkgConfig::HARFBUZZ)
+    mln_pkg_config_requires(harfbuzz freetype2)
 else()
     set(MLN_USE_BUILTIN_FREETYPE TRUE)
     set(MLN_USE_BUILTIN_HARFBUZZ TRUE)

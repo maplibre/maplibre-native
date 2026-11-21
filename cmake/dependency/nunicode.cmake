@@ -13,6 +13,8 @@ endif()
 if(nunicode_FOUND)
     message(STATUS "Using installed nunicode.")
     add_library(mbgl-nunicode ALIAS nunicode::nu)
+    # nunicode installs no pkg-config module.
+    mln_pkg_config_libs(-lnu)
 else()
     set(MLN_USE_BUILTIN_NUNICODE TRUE)
     include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)

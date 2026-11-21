@@ -62,6 +62,7 @@ if(MLN_WITH_VULKAN)
         PRIVATE
             vulkan
     )
+    mln_pkg_config_libs(-lvulkan)
 endif()
 
 target_include_directories(
@@ -107,6 +108,7 @@ target_link_libraries(
         uv
         z
 )
+mln_pkg_config_libs(-limage_source -lpixelmap -lhilog_ndk.z ${MLN_OHOS_NET_HTTP_LIBRARY} -luv -lz)
 
 if(MLN_WITH_OPENGL)
     target_link_libraries(
@@ -115,6 +117,7 @@ if(MLN_WITH_OPENGL)
             EGL
             GLESv3
     )
+    mln_pkg_config_libs(-lEGL -lGLESv3)
 endif()
 
 function(mln_ohos_link_core_whole_archive target)
