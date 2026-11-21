@@ -81,6 +81,9 @@ public:
     virtual const ImageSourceRenderData* getImageRenderData() const { return nullptr; }
     virtual const Tile* getRenderedTile(const UnwrappedTileID&) const { return nullptr; }
     virtual Immutable<std::vector<RenderTile>> getRawRenderTiles() const;
+    /// The tiles left out of the cover for building none of the layers (TileParameters::leaveOutEmptyTiles),
+    /// empty for every layer though not among the render tiles.
+    virtual const std::vector<UnwrappedTileID>& getEmptyTileIDs() const;
 
     virtual std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,
@@ -116,6 +119,10 @@ public:
     virtual void dumpDebugLogs() const = 0;
 
     virtual uint8_t getMaxZoom() const;
+
+    /// The tile size the source selects tiles with, which decides the zoom its cover lands on.
+    /// Not necessarily the size its tiles decode to.
+    virtual uint16_t getTileSize() const;
 
     void setObserver(RenderSourceObserver*);
 

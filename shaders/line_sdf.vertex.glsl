@@ -23,6 +23,7 @@ layout (std140) uniform GlobalPaintParamsUBO {
     highp float u_pixel_ratio;
     highp float u_map_zoom;
     lowp float global_pad1;
+    highp vec4 u_drape_tile;
 };
 
 layout (std140) uniform LineSDFDrawableUBO {
@@ -119,11 +120,18 @@ void main() {
 
     vec4 projected_extrude = u_matrix * vec4(dist / u_ratio, 0.0, 0.0);
     gl_Position = u_matrix * vec4(pos + offset2 / u_ratio, 0.0, 1.0) + projected_extrude;
+    gl_Position = apply_drape_transform(gl_Position, u_matrix, u_drape_tile);
 
     // calculate how much the perspective view squishes or stretches the extrude
-    float extrude_length_without_perspective = length(dist);
-    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * u_units_to_pixels);
-    v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    if (drawable_pad1 != 0.0) {
+        // Drawn into a terrain render-to-texture tile with an orthographic matrix;
+        // perspective scaling happens when the textured terrain mesh is projected
+        v_gamma_scale = 1.0;
+    } else {
+        float extrude_length_without_perspective = length(dist);
+        float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * u_units_to_pixels);
+        v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    }
 
     v_tex_a = vec2(a_linesofar * u_patternscale_a.x / floorwidth, normal.y * u_patternscale_a.y + u_tex_y_a);
     v_tex_b = vec2(a_linesofar * u_patternscale_b.x / floorwidth, normal.y * u_patternscale_b.y + u_tex_y_b);

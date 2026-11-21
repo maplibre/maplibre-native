@@ -78,13 +78,16 @@
   _numUniformBuffers = stats.numUniformBuffers;
   _numUniformUpdates = stats.numUniformUpdates;
   _uniformUpdateBytes = stats.uniformUpdateBytes;
-  _memTextures = stats.memTextures;
+  _memTextures = static_cast<int>(stats.memTextures);
   _memBuffers = stats.memBuffers;
   _memIndexBuffers = stats.memIndexBuffers;
   _memVertexBuffers = stats.memVertexBuffers;
   _memUniformBuffers = stats.memUniformBuffers;
   _stencilClears = stats.stencilClears;
   _stencilUpdates = stats.stencilUpdates;
+  _numDrapeTargetsDeferred = stats.numDrapeTargetsDeferred;
+  _numNewTileBuildsDeferred = stats.numNewTileBuildsDeferred;
+  _numTerrainCoverPendingFrames = stats.numTerrainCoverPendingFrames;
 }
 
 - (void)setFeatureInfo:(const mln::gfx::RenderingStats&)stats {

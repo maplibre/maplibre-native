@@ -40,10 +40,13 @@
 - [core] Fix rendered-feature queries near the final endpoint of an offset line.
 - [core] Fix plugin layer filters ignoring the style's global state.
 - [core] Fix plugin layers with read-write depth drawables not depth testing when drawn above a `fill-extrusion` layer.
+- [core] Revalidate unusable cached resources when resuming an offline download, preserving cached data for conditional requests ([#410](https://github.com/maplibre/maplibre-native/issues/410)).
 - [core] Fix a crash in `RenderImageSource::update` when an image source's coordinates give an empty tile cover, such as an image wholly beyond the latitudes Web Mercator can show.
 - [OpenGL] Fix invisible raster layers on Adreno 3xx by avoiding an in-place alpha assignment in the fragment shader.
 - [core] Draw numbers and short uppercase codes upright in vertical CJK line labels ([#4565](https://github.com/maplibre/maplibre-native/issues/4565)), compat to [maplibre-gl-js#8205](https://github.com/maplibre/maplibre-gl-js/pull/8205).
 - [core] Fix `ImageSource` not rendering across world copies ([#4508](https://github.com/maplibre/maplibre-native/issues/4508)).
+- [core] Honour `tileSize` from a raster/raster-dem source's TileJSON, as maplibre-gl-js does. It was parsed off the wire and discarded, so a style entry that omitted or mis-stated the size tiled at the wrong zoom.
+- [core] Mesh 3D terrain at the tile size the DEM source selects tiles with, not the decoded DEM's pixel dimension. When the two disagreed the mesh covered a shallower zoom than the DEM loaded, every per-tile DEM lookup missed, and the terrain rendered flat off the placeholder DEM.
 - [core] Repaint data-driven symbol paint properties after feature-state updates.
 - [core] Accept alpha values in legacy comma-separated `hsl()` colors ([#4434](https://github.com/maplibre/maplibre-native/issues/4434)).
 - [core] Fix thread-unsafe headless OpenGL display singleton initialization [#4332](https://github.com/maplibre/maplibre-native/pull/4332)

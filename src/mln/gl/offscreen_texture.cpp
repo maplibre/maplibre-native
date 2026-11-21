@@ -2,16 +2,24 @@
 #include <mln/gl/renderable_resource.hpp>
 #include <mln/gl/context.hpp>
 #include <mln/gl/framebuffer.hpp>
+#include <mln/gfx/renderbuffer.hpp>
+#include <mln/gl/texture2d.hpp>
 
 namespace mln {
 namespace gl {
 
 class OffscreenTextureResource final : public gl::RenderableResource {
 public:
-    OffscreenTextureResource(gl::Context& context_, const Size size_, const gfx::TextureChannelDataType type_)
+    OffscreenTextureResource(gl::Context& context_,
+                             const Size size_,
+                             const gfx::TextureChannelDataType type_,
+                             const bool depth_,
+                             const bool stencil_)
         : context(context_),
           size(size_),
-          type(type_) {
+          type(type_),
+          depth(depth_),
+          stencil(stencil_) {
         assert(!size.isEmpty());
         texture = context.createTexture2D();
         texture->setSize(size);
@@ -23,11 +31,39 @@ public:
 
     ~OffscreenTextureResource() noexcept override = default;
 
+    void setMipmapped(bool mipmapped_, uint8_t maxAnisotropy) {
+        mipmapped = mipmapped_;
+        texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                          .wrapU = gfx::TextureWrapType::Clamp,
+                                          .wrapV = gfx::TextureWrapType::Clamp,
+                                          .maxAnisotropy = mipmapped ? maxAnisotropy : uint8_t{1},
+                                          .mipmapped = mipmapped});
+    }
+
+    void swap() override {
+        // Presented once the render pass that drew into the texture is over, so once per render
+        if (mipmapped && framebuffer) {
+            static_cast<gl::Texture2D*>(texture.get())->generateMipmaps();
+            context.renderingStats().numMipmapChainsBuilt++;
+        }
+    }
+
     void bind() override {
         if (!framebuffer) {
             assert(texture);
             texture->create();
-            framebuffer = context.createFramebuffer(*texture);
+            if (stencil) {
+                // Combined depth/stencil, as maplibre-gl-js attaches to its render-to-texture
+                // framebuffer (createFramebuffer(w, h, /*depth*/ true, /*stencil*/ true)). The
+                // stencil clips overlapping draped tiles against each other.
+                depthStencilBuffer = context.createRenderbuffer<gfx::RenderbufferPixelType::DepthStencil>(size);
+                framebuffer = context.createFramebuffer(*texture, *depthStencilBuffer);
+            } else if (depth) {
+                depthBuffer = context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(size);
+                framebuffer = context.createFramebuffer(*texture, *depthBuffer);
+            } else {
+                framebuffer = context.createFramebuffer(*texture);
+            }
         } else {
             context.bindFramebuffer = framebuffer->framebuffer;
         }
@@ -53,11 +89,20 @@ private:
     const Size size;
     gfx::Texture2DPtr texture;
     const gfx::TextureChannelDataType type;
+    bool mipmapped = false;
+    const bool depth;
+    const bool stencil;
+    std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthBuffer;
+    std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>> depthStencilBuffer;
     std::optional<gl::Framebuffer> framebuffer;
 };
 
-OffscreenTexture::OffscreenTexture(gl::Context& context, const Size size_, const gfx::TextureChannelDataType type)
-    : gfx::OffscreenTexture(size_, std::make_unique<OffscreenTextureResource>(context, size_, type)) {}
+OffscreenTexture::OffscreenTexture(gl::Context& context,
+                                   const Size size_,
+                                   const gfx::TextureChannelDataType type,
+                                   const bool depth,
+                                   const bool stencil)
+    : gfx::OffscreenTexture(size_, std::make_unique<OffscreenTextureResource>(context, size_, type, depth, stencil)) {}
 
 bool OffscreenTexture::isRenderable() {
     try {
@@ -70,6 +115,10 @@ bool OffscreenTexture::isRenderable() {
 
 PremultipliedImage OffscreenTexture::readStillImage() {
     return getResource<OffscreenTextureResource>().readStillImage();
+}
+
+void OffscreenTexture::setMipmapped(bool mipmapped, uint8_t maxAnisotropy) {
+    getResource<OffscreenTextureResource>().setMipmapped(mipmapped, maxAnisotropy);
 }
 
 const gfx::Texture2DPtr& OffscreenTexture::getTexture() {

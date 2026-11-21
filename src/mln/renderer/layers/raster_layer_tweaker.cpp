@@ -8,7 +8,6 @@
 #include <mln/shaders/raster_layer_ubo.hpp>
 #include <mln/style/layers/raster_layer_properties.hpp>
 #include <mln/util/convert.hpp>
-#include <mln/gfx/image_drawable_data.hpp>
 #include <mln/util/logging.hpp>
 
 namespace mln {
@@ -79,30 +78,22 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             return;
         }
 
-        mat4 matrix;
         if (!drawable.getTileID()) {
-            // this is an image drawable
-            if (const auto& data = drawable.getData()) {
-                const gfx::ImageDrawableData& imageData = static_cast<const gfx::ImageDrawableData&>(*data);
-                matrix = imageData.matrix;
-                multiplyWithProjectionMatrix(
-                    /*in-out*/ matrix, parameters.transformParams, /*nearClipped*/ false, /*aligned*/ true);
-            } else {
-                Log::Error(Event::General, "Invalid raster layer drawable: neither tile id nor image data is set.");
-                return;
-            }
-        } else {
-            // this is a tile drawable
-            const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-            matrix = getTileMatrix(tileID,
-                                   parameters,
-                                   {0.f, 0.f},
-                                   TranslateAnchorType::Viewport,
-                                   false,
-                                   false,
-                                   drawable,
-                                   !parameters.state.isChanging());
+            Log::Error(Event::General, "Invalid raster layer drawable: no tile id is set.");
+            return;
         }
+        // Image drawables have a tile too, which places them in terrain drape targets. Only they
+        // carry data, and they are always drawn aligned, as before they had a tile.
+        const bool isImage = !!drawable.getData();
+        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+        const mat4 matrix = getTileMatrix(tileID,
+                                          parameters,
+                                          {0.f, 0.f},
+                                          TranslateAnchorType::Viewport,
+                                          false,
+                                          false,
+                                          drawable,
+                                          isImage || !parameters.state.isChanging());
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {

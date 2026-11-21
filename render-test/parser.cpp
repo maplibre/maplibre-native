@@ -532,6 +532,25 @@ TestMetadata parseTestMetadata(const TestPaths& paths, const mln::TestStyleTrans
         metadata.allowed = testValue["allowed"].GetDouble();
     }
 
+    if (testValue.HasMember("terrainSkirtLength")) {
+        assert(testValue["terrainSkirtLength"].IsString());
+        const std::string skirtStr{testValue["terrainSkirtLength"].GetString(),
+                                   testValue["terrainSkirtLength"].GetStringLength()};
+        if (skirtStr == "none") {
+            metadata.terrainSkirtLength = mln::TerrainSkirtLength::None;
+        } else if (skirtStr == "auto") {
+            metadata.terrainSkirtLength = mln::TerrainSkirtLength::Auto;
+        } else {
+            mln::Log::Warning(mln::Event::ParseStyle,
+                              "Unknown terrain skirt length: " + skirtStr + ". Falling back to auto");
+        }
+    }
+
+    if (testValue.HasMember("centerClampedToGround")) {
+        assert(testValue["centerClampedToGround"].IsBool());
+        metadata.centerClampedToGround = testValue["centerClampedToGround"].GetBool();
+    }
+
     if (testValue.HasMember("description")) {
         assert(testValue["description"].IsString());
         metadata.description = std::string{testValue["description"].GetString(),
@@ -620,7 +639,10 @@ TestMetadata parseTestMetadata(const TestPaths& paths, const mln::TestStyleTrans
 }
 
 namespace mln {
-MBGL_DEFINE_ENUM(TileLodMode, {{TileLodMode::Default, "default"}, {TileLodMode::Distance, "distance"}});
+MBGL_DEFINE_ENUM(TileLodMode,
+                 {{TileLodMode::Default, "default"},
+                  {TileLodMode::Distance, "distance"},
+                  {TileLodMode::Adaptive, "adaptive"}});
 }
 
 namespace TestOperationNames {

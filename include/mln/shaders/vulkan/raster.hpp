@@ -29,6 +29,7 @@ layout(location = 1) in ivec2 in_texture_position;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct RasterDrawableUBO {
@@ -61,7 +62,8 @@ void main() {
     const RasterDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     gl_Position = drawable.matrix * vec4(in_position, 0, 1);
-    applySurfaceTransform();
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
+    applySurfaceTransform(constant.drape_tile);
 
     // We are using Int16 for texture position coordinates to give us enough precision for
     // fractional coordinates. We use 8192 to scale the texture coordinates in the buffer

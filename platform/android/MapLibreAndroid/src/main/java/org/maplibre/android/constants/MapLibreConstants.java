@@ -144,9 +144,16 @@ public class MapLibreConstants {
   public static final float MINIMUM_PITCH = 0.0f;
 
   /**
-   * The currently supported maximum pitch level.
+   * The default maximum pitch level.
    */
   public static final float MAXIMUM_PITCH = 60.0f;
+
+  /**
+   * The highest pitch a map is allowed to be set to via
+   * {@code setMaxPitchPreference}, matching maplibre-gl-js's maximum
+   * settable pitch. The default maximum stays {@link #MAXIMUM_PITCH}.
+   */
+  public static final float MAXIMUM_PITCH_LIMIT = 85.0f;
 
   /**
    * The currently supported maximum tilt value.

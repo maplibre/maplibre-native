@@ -34,9 +34,9 @@ public:
     CrossfadeParameters getCrossfadeParameters() const {
         const float fraction = z - std::floor(z);
         const std::chrono::duration<float> d = defaultFadeDuration;
-        const float t = d != std::chrono::duration<float>::zero()
-                            ? std::min((now - zoomHistory.lastIntegerZoomTime) / d, 1.0f)
-                            : 1.0f;
+        const float t = crossfadeSettled || d == std::chrono::duration<float>::zero()
+                            ? 1.0f
+                            : std::min((now - zoomHistory.lastIntegerZoomTime) / d, 1.0f);
 
         return z > zoomHistory.lastIntegerZoom
                    ? CrossfadeParameters{.fromScale = 2.0f, .toScale = 1.0f, .t = fraction + (1.0f - fraction) * t}
@@ -59,6 +59,10 @@ public:
     bool layerChanged = false;
     bool hasCrossfade = true;
     bool globalStateChanged = false;
+    /// Evaluate a cross-faded property as if the fade after a zoom level change had run out already,
+    /// whatever the time since: only the target image shows, at its final scale. Unlike `hasCrossfade`,
+    /// which says the layer is mid-fade, this makes the layer report no fade (t is 1) from then on.
+    bool crossfadeSettled = false;
 };
 
 } // namespace mln

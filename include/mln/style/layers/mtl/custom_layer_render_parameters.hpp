@@ -25,6 +25,9 @@ struct CustomLayerRenderParameters : mln::style::CustomLayerRenderParameters {
     mln::mtl::MTLRenderCommandEncoderPtr encoder;
     mln::mtl::MTLCommandBufferPtr commandBuffer;
     mln::mtl::MTLRenderPassDescriptorPtr renderPassDesc;
+    /// The terrain depth pass's packed-RGBA output for this frame, or null when terrain is off or
+    /// the pass has not drawn yet. Set only while drawing in the main render pass.
+    MTL::Texture *terrainDepthTexture = nullptr;
 
     CustomLayerRenderParameters(const PaintParameters &);
 };

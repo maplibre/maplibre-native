@@ -2,12 +2,26 @@
 
 ## main
 
+### ✨ Features and improvements
+
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
+- With 3D terrain, pinch, rotate, tilt and quick-zoom gestures turn around the ground under the middle of the screen instead of a sea-level point beneath it. Add `MapLibreMap.getCenterAltitude()` and `setCenterAltitudeKeepingView(double)`: a target and zoom describe the same view only at the same centre altitude, so save the altitude with a `CameraPosition` and restore it before moving the camera back ([#4712](https://github.com/maplibre/maplibre-native/pull/4712)).
+
+- With 3D terrain, markers, view annotations, line-placed labels and the collision index sit on the terrain surface instead of at sea level, and `Projection.toScreenLocation` / `fromScreenLocation` and their batch versions answer on the terrain surface, from a copy of the terrain heights kept on the map side, without waiting on the render thread. Add `Projection.fromScreenLocationAtCenterAltitude` for code that turns a screen point into a camera target ([#4558](https://github.com/maplibre/maplibre-native/pull/4558)).
 
 ### 🐞 Bug fixes
 
+- With 3D terrain, a map pitched at or just under the level-of-detail pitch threshold (60 degrees) no longer shows the sky through the far corners of the view. Such a view needs more mesh tiles than the load mode's cap when the mesh is no deeper than the DEM, and the farthest were dropped.
+- With 3D terrain on, a `GeoJsonSource` updated with `setGeoJson` or emptied of its features shows the change on the terrain at once, instead of keeping its old content until the next zoom level ([#4816](https://github.com/maplibre/maplibre-native/pull/4816)).
+- With 3D terrain on and the centre clamp enabled, the clamp no longer cancels a running camera animation; the camera is anchored to the ground once the animation ends ([#4768](https://github.com/maplibre/maplibre-native/pull/4768)).
+- With 3D terrain, each height of the DEM stands at the centre of its pixel, where a hillshade or color-relief layer of the same source draws it, as in maplibre-gl-js. The terrain stood half a DEM pixel north-west of its data (about 6 m with 512 px tiles at zoom 12), so the shading of a hillshade did not line up with the slopes it shades ([#4971](https://github.com/maplibre/maplibre-native/pull/4971)).
+
+### 🐞 Bug fixes
+
+- Revalidate unusable cached resources when resuming an offline download ([#410](https://github.com/maplibre/maplibre-native/issues/410)).
 - `raster` and `raster-dem` sources loaded from a `url` take the style's inline `minzoom` and `maxzoom` over the TileJSON's, as `vector` sources and maplibre-gl-js already do. A `raster-dem` source with an invalid `encoding`, `minzoom` or `maxzoom`, or a `raster` source with an invalid `minzoom` or `maxzoom`, is now rejected with an error, as a `vector` source is. Before, such a `raster-dem` source still loaded, decoded as Mapbox whatever its `encoding` ([#4557](https://github.com/maplibre/maplibre-native/pull/4557)).
 - Color property getters return whole-number channels, as MapLibre GL JS prints colors: a color set to `rgba(240,245,255,1)` reads back as set instead of `rgba(240.00001525878906,245.00001525878906,255,1)` ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
+- A line label with `text-pitch-alignment: viewport` is no longer drawn folded over itself on a pitched map. Such a label follows its line as projected to the screen, where a bend that `text-max-angle` allowed at layout can be a hairpin: it is now left out once it turns by more than twice `text-max-angle` over three glyphs. While the camera moves, a label that was left out comes back only once it is within `text-max-angle` again, so it does not flicker; a map that is not pitched is unchanged ([#5030](https://github.com/maplibre/maplibre-native/pull/5030)).
 - Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).
 
 ## 13.7.1

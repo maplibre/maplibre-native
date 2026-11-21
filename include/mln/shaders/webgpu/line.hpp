@@ -69,6 +69,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -156,7 +157,8 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let projected_extrude = drawable.matrix * vec4<f32>(dist / ratio, 0.0, 0.0);
     let base = drawable.matrix * vec4<f32>(pos + offset2 / ratio, 0.0, 1.0);
-    let clip = base + projected_extrude;
+    let raw_clip = base + projected_extrude;
+    let clip = apply_drape_transform(raw_clip, drawable.matrix, paintParams.drape_tile);
 
     let inv_w = 1.0 / clip.w;
 
@@ -169,7 +171,10 @@ fn main(in: VertexInput) -> VertexOutput {
 
     out.v_width2 = vec2<f32>(outset, inset);
     out.v_normal = normal;
-    out.v_gamma_scale = extrude_length_without_perspective / gamma_denom;
+    // A value of 1.0 is used when drawn into a terrain render-to-texture tile with an
+    // orthographic matrix; perspective scaling happens when the terrain mesh is projected
+    out.v_gamma_scale = select(
+        extrude_length_without_perspective / gamma_denom, 1.0, drawable.pad1 != 0.0);
     out.v_color = color;
     out.v_blur = blur;
     out.v_opacity = opacity;
@@ -198,6 +203,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
@@ -288,6 +294,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -369,7 +376,8 @@ fn main(in: VertexInput) -> VertexOutput {
     let offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * mat2x2<f32>(t, -u, u, t);
 
     let projected_extrude = drawable.matrix * vec4<f32>(dist / drawable.ratio, 0.0, 0.0);
-    let position = drawable.matrix * vec4<f32>(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    let raw_position = drawable.matrix * vec4<f32>(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    let position = apply_drape_transform(raw_position, drawable.matrix, paintParams.drape_tile);
 
     // Calculate gamma scale
     let extrude_length_without_perspective = length(dist);
@@ -378,7 +386,9 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = position;
     out.v_width2 = vec2<f32>(outset, inset);
     out.v_normal = v_normal;
-    out.v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    // 1.0 when drawn into a terrain render-to-texture tile (see the line shader)
+    out.v_gamma_scale = select(
+        extrude_length_without_perspective / extrude_length_with_perspective, 1.0, drawable.pad1 != 0.0);
     out.v_lineprogress = v_lineprogress;
     out.v_blur = blur;
     out.v_opacity = opacity;
@@ -407,6 +417,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
@@ -511,6 +522,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -605,11 +617,14 @@ fn main(in: VertexInput) -> VertexOutput {
     let offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * mat2x2<f32>(t, -u, u, t);
 
     let projected_extrude = drawable.matrix * vec4<f32>(dist / ratio, 0.0, 0.0);
-    let position = drawable.matrix * vec4<f32>(pos + offset2 / ratio, 0.0, 1.0) + projected_extrude;
+    let raw_position = drawable.matrix * vec4<f32>(pos + offset2 / ratio, 0.0, 1.0) + projected_extrude;
+    let position = apply_drape_transform(raw_position, drawable.matrix, paintParams.drape_tile);
 
     let extrude_length_without_perspective = length(dist);
     let extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
-    let gamma_scale = extrude_length_without_perspective / max(extrude_length_with_perspective, 1e-6);
+    // 1.0 when drawn into a terrain render-to-texture tile (see the line shader)
+    let gamma_scale = select(
+        extrude_length_without_perspective / max(extrude_length_with_perspective, 1e-6), 1.0, drawable.pad1 != 0.0);
 
     out.position = position;
     out.v_width2 = vec2<f32>(outset, inset);
@@ -649,6 +664,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct LinePatternTilePropsUBO {
@@ -830,6 +846,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -930,7 +947,8 @@ fn main(in: VertexInput) -> VertexOutput {
     let offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * mat2x2<f32>(t, -u, u, t);
 
     let projected_extrude = drawable.matrix * vec4<f32>(dist / drawable.ratio, 0.0, 0.0);
-    let position = drawable.matrix * vec4<f32>(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    let raw_position = drawable.matrix * vec4<f32>(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    let position = apply_drape_transform(raw_position, drawable.matrix, paintParams.drape_tile);
 
     // Calculate gamma scale
     let extrude_length_without_perspective = length(dist);
@@ -949,7 +967,9 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = position;
     out.v_width2 = vec2<f32>(outset, inset);
     out.v_normal = v_normal;
-    out.v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    // 1.0 when drawn into a terrain render-to-texture tile (see the line shader)
+    out.v_gamma_scale = select(
+        extrude_length_without_perspective / extrude_length_with_perspective, 1.0, drawable.pad1 != 0.0);
     out.v_tex_a = tex_a;
     out.v_tex_b = tex_b;
     out.v_color = color;
@@ -991,6 +1011,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -1116,6 +1137,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -1204,7 +1226,8 @@ fn main(in: VertexInput) -> VertexOutput {
     let offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * mat2x2<f32>(t, -u, u, t);
 
     let projected_extrude = drawable.matrix * vec4<f32>(dist / drawable.ratio, 0.0, 0.0);
-    let position = drawable.matrix * vec4<f32>(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    let raw_position = drawable.matrix * vec4<f32>(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    let position = apply_drape_transform(raw_position, drawable.matrix, paintParams.drape_tile);
 
     // Calculate gamma scale
     let extrude_length_without_perspective = length(dist);
@@ -1223,7 +1246,9 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = position;
     out.v_width2 = vec2<f32>(outset, inset);
     out.v_normal = v_normal;
-    out.v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    // 1.0 when drawn into a terrain render-to-texture tile (see the line shader)
+    out.v_gamma_scale = select(
+        extrude_length_without_perspective / extrude_length_with_perspective, 1.0, drawable.pad1 != 0.0);
     out.v_tex_a = tex_a;
     out.v_tex_b = tex_b;
     out.v_blur = blur;
@@ -1265,6 +1290,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {

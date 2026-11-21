@@ -50,7 +50,10 @@ public:
     };
 
 protected:
-    LayerGroupBase(int32_t layerIndex, std::string name = std::string(), Type type = Type::Invalid);
+    LayerGroupBase(int32_t layerIndex,
+                   std::string name = std::string(),
+                   Type type = Type::Invalid,
+                   bool renderToTerrain_ = false);
 
 public:
     LayerGroupBase(const LayerGroupBase&) = delete;
@@ -108,6 +111,8 @@ public:
     /// Get the mutable uniform buffer array attached to this layer group
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
 
+    bool shouldRenderToTerrain() const { return renderToTerrain; }
+
     /// Set observer
     void setObserver(gfx::ContextObserver*);
 
@@ -117,6 +122,7 @@ protected:
     int32_t layerIndex;
     std::vector<LayerTweakerWeakPtr> layerTweakers;
     std::string name;
+    bool renderToTerrain;
     gfx::ContextObserver* observer;
 };
 
@@ -125,7 +131,7 @@ protected:
  */
 class TileLayerGroup : public LayerGroupBase {
 public:
-    TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
+    TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain);
     ~TileLayerGroup() override;
 
     std::size_t getDrawableCount() const override;
@@ -194,6 +200,13 @@ public:
     std::size_t clearDrawables() override;
 
     void setStencilTiles(RenderTiles);
+    const RenderTiles& getStencilTiles() const { return stencilTiles; }
+
+    /// With terrain on, the tiles of a draped layer that have no data for it, such as a GeoJSON
+    /// tile emptied by a data update: the drape shows them as empty instead of keeping what it
+    /// drew there (see terrain::DrapeGroupCoverage)
+    void setEmptyTileIDs(std::vector<UnwrappedTileID> ids) { emptyTileIDs = std::move(ids); }
+    const std::vector<UnwrappedTileID>& getEmptyTileIDs() const { return emptyTileIDs; }
 
     void updateLayerIndex(int32_t value) override { layerIndex = value; }
 
@@ -201,6 +214,8 @@ protected:
     // When stencil clipping is enabled for the layer, this is the set
     // of tile IDs that need to be rendered to the stencil buffer.
     RenderTiles stencilTiles;
+
+    std::vector<UnwrappedTileID> emptyTileIDs;
 
     struct TileLayerGroupTileKey {
         mln::RenderPass renderPass;
@@ -228,7 +243,7 @@ private:
  */
 class LayerGroup : public LayerGroupBase {
 public:
-    LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
+    LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain);
     ~LayerGroup() override;
 
     std::size_t getDrawableCount() const override;

@@ -27,6 +27,8 @@
 #include <mln/shaders/mtl/location_indicator.hpp>
 #include <mln/shaders/mtl/raster.hpp>
 #include <mln/shaders/mtl/symbol.hpp>
+#include <mln/shaders/mtl/terrain.hpp>
+#include <mln/shaders/mtl/terrain_depth.hpp>
 #include <mln/shaders/mtl/widevector.hpp>
 
 #include <cassert>
@@ -45,6 +47,7 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     baseVertexInstanceDrawingSupported = true;
 #else
     baseVertexInstanceDrawingSupported = device->supportsFamily(MTL::GPUFamilyApple3);
+    memorylessTextureSupported = device->supportsFamily(MTL::GPUFamilyApple2);
 #endif
 }
 
@@ -116,6 +119,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
+                  shaders::BuiltIn::TerrainShader,
+                  shaders::BuiltIn::TerrainDepthShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }
 

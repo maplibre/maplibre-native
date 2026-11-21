@@ -18,7 +18,8 @@ template <typename T>
 TileLoader<T>::TileLoader(T& tile_,
                           const OverscaledTileID& id,
                           const TileParameters& parameters,
-                          const Tileset& tileset)
+                          const Tileset& tileset,
+                          Resource::Priority priority)
     : tile(tile_),
       necessity(TileNecessity::Optional),
       resource(Resource::tile(tileset.tiles.at(0),
@@ -30,6 +31,7 @@ TileLoader<T>::TileLoader(T& tile_,
                               Resource::LoadingMethod::CacheOnly)),
       fileSource(parameters.fileSource) {
     assert(!request);
+    resource.setPriority(priority);
 
     shared = std::make_shared<Shared>();
 
@@ -181,6 +183,12 @@ void TileLoader<T>::loadedData(const Response& res, Resource::LoadingMethod meth
         resource.priorEtag = res.etag;
         tile.setMetadata(res.modified, res.expires);
         tile.setData(res.noContent ? nullptr : res.data);
+    }
+
+    // The tile has something to show now, so keeping it up to date is no
+    // longer ahead of the tiles that still have nothing.
+    if (resource.priority == Resource::Priority::High) {
+        resource.setPriority(Resource::Priority::Regular);
     }
 }
 

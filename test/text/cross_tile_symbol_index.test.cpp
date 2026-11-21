@@ -1,3 +1,5 @@
+#include <mln/map/camera.hpp>
+#include <mln/map/transform.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/style/variable_anchor_offset_collection.hpp>
@@ -440,4 +442,61 @@ TEST(CrossTileSymbolLayerIndex, offscreenSymbols) {
 
     EXPECT_EQ(symbolBucket.symbolInstances.at(0).getCrossTileID(), 1u);
     EXPECT_EQ(symbolBucket.symbolInstances.at(1).getCrossTileID(), 2u);
+}
+
+// A label on a summit near the bottom of a tilted view over terrain, in an overscaled tile. The
+// viewport test projected its anchor at sea level: under ground 1268 m high (exaggerated) that
+// point lies far below the bottom of the screen, so the label lost its cross-tile ID and vanished
+// in a single frame while it was drawn on screen. Javorový vrch above Liberec, on a 402x874 view.
+TEST(CrossTileSymbolLayerIndex, offscreenSymbolsOnTerrain) {
+    Transform transform;
+    transform.resize({402, 874});
+    transform.jumpTo(CameraOptions()
+                         .withCenter(LatLng{50.808806, 15.098764})
+                         .withZoom(15.393)
+                         .withPitch(60.0)
+                         .withCenterAltitude(1213.7));
+    const TransformState& state = transform.getState();
+
+    const OverscaledTileID tileId(15, 0, 14, 8879, 5499);
+    mat4 projMatrix;
+    state.getProjMatrix(projMatrix);
+    mat4 posMatrix;
+    state.matrixFor(posMatrix, tileId.toUnwrapped());
+    matrix::multiply(posMatrix, projMatrix, posMatrix);
+
+    const auto makeBucket = [] {
+        std::vector<SymbolInstance> instances;
+        instances.push_back(makeSymbolInstance(1322, 538, u"Javorový vrch"));
+        return SymbolBucket{makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>(),
+                            {},
+                            16.0f,
+                            1.0f,
+                            0,
+                            false,
+                            false,
+                            "test",
+                            std::move(instances),
+                            {},
+                            1.0f,
+                            false,
+                            {},
+                            false /*iconsInText*/};
+    };
+    const SymbolElevationFn summit = [](const Point<float>&) {
+        return 1268.0f;
+    };
+
+    uint32_t maxCrossTileID = 0;
+    CrossTileSymbolLayerIndex seaLevelIndex(maxCrossTileID);
+    auto seaLevel = makeBucket();
+    seaLevelIndex.addBucket(tileId, posMatrix, seaLevel);
+    EXPECT_EQ(seaLevel.symbolInstances.at(0).getCrossTileID(), SymbolInstance::invalidCrossTileID)
+        << "at sea level the anchor projects off screen";
+
+    CrossTileSymbolLayerIndex terrainIndex(maxCrossTileID);
+    auto onTerrain = makeBucket();
+    terrainIndex.addBucket(tileId, posMatrix, onTerrain, &summit);
+    EXPECT_NE(onTerrain.symbolInstances.at(0).getCrossTileID(), SymbolInstance::invalidCrossTileID)
+        << "on the terrain the label is on screen and keeps an ID";
 }

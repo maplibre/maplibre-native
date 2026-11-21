@@ -48,7 +48,9 @@ const auto posNormalAttribName = "a_pos_normal";
 RenderLineLayer::RenderLineLayer(Immutable<style::LineLayer::Impl> _impl)
     : RenderLayer(makeMutable<LineLayerProperties>(std::move(_impl))),
       unevaluated(impl_cast(baseImpl).paint.untransitioned()),
-      colorRamp(std::make_shared<PremultipliedImage>(Size(256, 1))) {
+      // 4096 steps along the line: at 256 a sharp stop on a long line (a route drawn so far)
+      // snapped to steps of 1/256 of its length - 160 m on a 40 km day.
+      colorRamp(std::make_shared<PremultipliedImage>(Size(4096, 1))) {
     styleDependencies = unevaluated.getDependencies();
 }
 
@@ -279,14 +281,14 @@ void RenderLineLayer::updateColorRamp() {
     }
 
     if (colorRampTexture2D) {
-        colorRampTexture2D.reset();
-
-        // delete all gradient drawables
-        if (layerGroup) {
-            stats.drawablesRemoved += layerGroup->getDrawableCount();
-            layerGroup->clearDrawables();
-        }
+        // Update the ramp in place: every gradient drawable shares this texture, so a fresh image
+        // is picked up on its next upload. Dropping the texture and clearing the drawables, as
+        // this used to, left an animated gradient (a route revealed progress by progress) with
+        // no line at all until each tile rebuilt - and over terrain, drape targets baked blank.
+        colorRampTexture2D->setImage(std::make_shared<PremultipliedImage>(colorRamp->clone()));
     }
+    // Drapes over terrain bake this layer into cached textures; a new ramp must re-bake them.
+    ++styleRevision;
 }
 
 float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
@@ -328,7 +330,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), true)) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
             return;
@@ -443,6 +445,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             return drawable.getLayerTweaker() == layerTweaker;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
+            continue;
+        }
+
+        // Progressive build budget: new tile (no drawables yet). Defer its construction when
+        // the per-frame tile budget is spent; retried next frame (follow-up frame requested),
+        // with the terrain drape keeping the parent/prior texture meanwhile.
+        if (!context.allowNewTileBuild(std::hash<OverscaledTileID>{}(tileID))) {
             continue;
         }
 

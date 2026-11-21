@@ -1,5 +1,6 @@
 #include "android_renderer_frontend.hpp"
 
+#include <mln/renderer/update_parameters.hpp>
 #include <mln/tile/tile_operation.hpp>
 #include <mln/actor/scheduler.hpp>
 #include <mln/renderer/renderer.hpp>
@@ -61,6 +62,22 @@ public:
     }
 
     void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }
+
+    void onTerrainCenterElevationChanged(double elevationMeters) override {
+        delegate.invoke(&RendererObserver::onTerrainCenterElevationChanged, elevationMeters);
+    }
+
+    void onTerrainElevationIndexChanged(std::shared_ptr<const TerrainElevationIndex> index) override {
+        delegate.invoke(&RendererObserver::onTerrainElevationIndexChanged, std::move(index));
+    }
+
+    void onTerrainEyeElevationChanged(double elevationMeters) override {
+        delegate.invoke(&RendererObserver::onTerrainEyeElevationChanged, elevationMeters);
+    }
+
+    void onTerrainTransitionTargetElevationChanged(double elevationMeters) override {
+        delegate.invoke(&RendererObserver::onTerrainTransitionTargetElevationChanged, elevationMeters);
+    }
 
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
         delegate.invoke(&RendererObserver::onStyleImageMissing, id, done);

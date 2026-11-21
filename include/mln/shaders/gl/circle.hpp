@@ -10,6 +10,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "CircleShader";
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 out vec3 v_data;
+out float v_visibility;
 
 layout (std140) uniform GlobalPaintParamsUBO {
     highp vec2 u_pattern_atlas_texsize;
@@ -37,7 +38,17 @@ layout (std140) uniform CircleDrawableUBO {
     lowp float drawable_pad1;
     lowp float drawable_pad2;
     lowp float drawable_pad3;
+    // 3D terrain elevation
+    highp vec4 u_dem_coords;
+    highp vec4 u_dem_unpack;
+    highp float u_dem_dim;
+    highp float u_dem_exaggeration;
+    lowp float u_dem_enabled;
+    lowp float u_depth_enabled;
 };
+
+uniform sampler2D u_dem;
+uniform sampler2D u_depth;
 
 layout (std140) uniform CircleEvaluatedPropsUBO {
     highp vec4 u_color;
@@ -124,6 +135,9 @@ lowp float stroke_opacity = u_stroke_opacity;
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
     vec2 circle_center = floor(a_pos * 0.5);
+    float ele = get_elevation(circle_center, u_dem, u_dem_coords, u_dem_unpack, u_dem_dim, u_dem_exaggeration, u_dem_enabled);
+    // Hidden where the terrain covers the circle's centre, as maplibre-gl-js does (and as symbols are)
+    v_visibility = calculate_visibility(u_matrix * vec4(circle_center, ele, 1), u_depth, u_depth_enabled, u_units_to_pixels.y);
     if (u_pitch_with_map) {
         vec2 corner_position = circle_center;
         if (u_scale_with_map) {
@@ -132,13 +146,13 @@ lowp float stroke_opacity = u_stroke_opacity;
             // Pitching the circle with the map effectively scales it with the map
             // To counteract the effect for pitch-scale: viewport, we rescale the
             // whole circle based on the pitch scaling effect at its central point
-            vec4 projected_center = u_matrix * vec4(circle_center, 0, 1);
+            vec4 projected_center = u_matrix * vec4(circle_center, ele, 1);
             corner_position += extrude * (radius + stroke_width) * u_extrude_scale * (projected_center.w / u_camera_to_center_distance);
         }
 
-        gl_Position = u_matrix * vec4(corner_position, 0, 1);
+        gl_Position = u_matrix * vec4(corner_position, ele, 1);
     } else {
-        gl_Position = u_matrix * vec4(circle_center, 0, 1);
+        gl_Position = u_matrix * vec4(circle_center, ele, 1);
 
         if (u_scale_with_map) {
             gl_Position.xy += extrude * (radius + stroke_width) * u_extrude_scale * u_camera_to_center_distance;
@@ -156,6 +170,7 @@ lowp float stroke_opacity = u_stroke_opacity;
 }
 )";
     static constexpr const char* fragment = R"(in vec3 v_data;
+in float v_visibility;
 
 layout (std140) uniform CircleEvaluatedPropsUBO {
     highp vec4 u_color;
@@ -229,7 +244,7 @@ lowp float stroke_opacity = u_stroke_opacity;
         extrude_length - radius / (radius + stroke_width)
     );
 
-    fragColor = opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t);
+    fragColor = v_visibility * opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t);
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

@@ -34,6 +34,21 @@ struct HillshadeDrawableUBO {
     matrix: mat4x4<f32>,
 };
 
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+    drape_tile: vec4<f32>,
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<HillshadeDrawableUBO>;
 
@@ -41,7 +56,7 @@ struct HillshadeDrawableUBO {
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let drawable = drawableVector[globalIndex.value];
-    out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    out.position = apply_drape_transform(drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0), drawable.matrix, paintParams.drape_tile);
 
     var tex = vec2<f32>(f32(in.texcoord.x), f32(in.texcoord.y)) / 8192.0;
     tex.y = 1.0 - tex.y;
@@ -199,7 +214,11 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 #endif
 
     let tileProps = tilePropsVector[globalIndex.value];
-    let pixel = textureSample(hillshade_texture, texture_sampler, in.tex_coord);
+    // The prepare target carries a 1px ring of derivatives from outside the tile, so that
+    // bilinear filtering at the tile edge blends against a real neighbour. Inset past it.
+    let size = vec2<f32>(textureDimensions(hillshade_texture, 0));
+    let texturePos = (in.tex_coord * (size - 2.0) + 1.0) / size;
+    let pixel = textureSample(hillshade_texture, texture_sampler, texturePos);
 
     let latRange = tileProps.latrange;
     let latitude = (latRange.x - latRange.y) * in.tex_coord.y + latRange.y;

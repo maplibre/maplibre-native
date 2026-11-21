@@ -12,12 +12,15 @@ class OffscreenTexture final : public gfx::OffscreenTexture {
 public:
     OffscreenTexture(gl::Context&,
                      Size size,
-                     gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte);
+                     gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte,
+                     bool depth = true,
+                     bool stencil = false);
 
     bool isRenderable() override;
 
     PremultipliedImage readStillImage() override;
     const gfx::Texture2DPtr& getTexture() override;
+    void setMipmapped(bool mipmapped, uint8_t maxAnisotropy) override;
 };
 
 } // namespace gl

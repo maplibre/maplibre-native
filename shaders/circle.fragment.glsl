@@ -1,4 +1,5 @@
 in vec3 v_data;
+in float v_visibility;
 
 layout (std140) uniform CircleEvaluatedPropsUBO {
     highp vec4 u_color;
@@ -44,7 +45,7 @@ void main() {
         extrude_length - radius / (radius + stroke_width)
     );
 
-    fragColor = opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t);
+    fragColor = v_visibility * opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t);
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);
