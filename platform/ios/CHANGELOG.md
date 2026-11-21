@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Add `MLNSymbolStyleLayer.symbolHeightOffset` for the [`symbol-height-offset`](https://maplibre.org/maplibre-style-spec/layers/#symbol-height-offset) layout property. It places symbols the given number of meters above the ground, as MapLibre GL JS does. Only constant and zoom-dependent values are supported for now, not data-driven ones ([#1929](https://github.com/maplibre/maplibre-native/issues/1929)).
 - Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).
 - Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).

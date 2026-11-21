@@ -919,6 +919,19 @@ public class SymbolLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testSymbolHeightOffsetAsConstant() {
+    Timber.i("symbol-height-offset");
+    assertNotNull(layer);
+    assertNull(layer.getSymbolHeightOffset().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(symbolHeightOffset(propertyValue));
+    assertEquals(layer.getSymbolHeightOffset().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
   public void testSymbolScreenSpaceAsConstant() {
     Timber.i("symbol-screen-space");
     assertNotNull(layer);

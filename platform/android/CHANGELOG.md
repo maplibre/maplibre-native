@@ -2,6 +2,7 @@
 
 ## main
 
+- Add the [`symbol-height-offset`](https://maplibre.org/maplibre-style-spec/layers/#symbol-height-offset) layout property with `PropertyFactory.symbolHeightOffset()` and `SymbolLayer.getSymbolHeightOffset()`. It places symbols the given number of meters above the ground, as MapLibre GL JS does. Only constant and zoom-dependent values are supported for now, not data-driven ones ([#1929](https://github.com/maplibre/maplibre-native/issues/1929)).
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 
 ### 🐞 Bug fixes

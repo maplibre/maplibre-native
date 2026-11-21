@@ -2743,6 +2743,26 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
+   * The height above the anchor, in meters, at which the symbol is placed.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> symbolHeightOffset(Float value) {
+    return new LayoutPropertyValue<>("symbol-height-offset", value);
+  }
+
+  /**
+   * The height above the anchor, in meters, at which the symbol is placed.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Expression> symbolHeightOffset(Expression value) {
+    return new LayoutPropertyValue<>("symbol-height-offset", value);
+  }
+
+  /**
    * Internal use only
    *
    * @param value a Boolean value

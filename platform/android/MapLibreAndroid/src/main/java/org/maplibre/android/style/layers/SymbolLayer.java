@@ -650,6 +650,18 @@ public class SymbolLayer extends Layer {
   }
 
   /**
+   * Get the SymbolHeightOffset property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getSymbolHeightOffset() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("symbol-height-offset", nativeGetSymbolHeightOffset());
+  }
+
+  /**
    * Get the SymbolScreenSpace property
    *
    * @return property wrapper value around Boolean
@@ -1316,6 +1328,10 @@ public class SymbolLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetTextOptional();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetSymbolHeightOffset();
 
   @NonNull
   @Keep

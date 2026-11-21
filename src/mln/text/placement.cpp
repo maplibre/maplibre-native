@@ -107,13 +107,13 @@ public:
     bool pitchIconWithMap = getLayout().get<IconPitchAlignment>() == AlignmentType::Map;
     SymbolPlacementType placementType = getLayout().get<SymbolPlacement>();
 
+    mat4 posMatrix = getBucket().elevatedMatrix(renderTile.get().matrix);
     mat4 textLabelPlaneMatrix = getLabelPlaneMatrix(
-        renderTile.get().matrix, pitchTextWithMap, rotateTextWithMap, state, pixelsToTileUnits);
-    mat4 iconLabelPlaneMatrix =
-        (rotateTextWithMap == rotateIconWithMap && pitchTextWithMap == pitchIconWithMap)
-            ? textLabelPlaneMatrix
-            : getLabelPlaneMatrix(
-                  renderTile.get().matrix, pitchIconWithMap, rotateIconWithMap, state, pixelsToTileUnits);
+        posMatrix, pitchTextWithMap, rotateTextWithMap, state, pixelsToTileUnits);
+    mat4 iconLabelPlaneMatrix = (rotateTextWithMap == rotateIconWithMap && pitchTextWithMap == pitchIconWithMap)
+                                    ? textLabelPlaneMatrix
+                                    : getLabelPlaneMatrix(
+                                          posMatrix, pitchIconWithMap, rotateIconWithMap, state, pixelsToTileUnits);
 
     CollisionGroups::CollisionGroup collisionGroup;
     ZoomEvaluatedSize partiallyEvaluatedTextSize;
@@ -242,7 +242,7 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
                          collisionIndex.getTransformState(),
                          placementZoom,
                          collisionGroups.get(params.sourceId),
-                         getAvoidEdges(symbolBucket, renderTile.matrix)};
+                         getAvoidEdges(symbolBucket, symbolBucket.elevatedMatrix(renderTile.matrix))};
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
         if (!symbol.check(SYM_GUARD_LOC)) continue;
         if (seenCrossTileIDs.contains(symbol.getCrossTileID())) continue;
@@ -277,7 +277,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         return kUnplaced;
     }
     const SymbolBucket& bucket = ctx.getBucket();
-    const mat4& posMatrix = ctx.getRenderTile().matrix;
+    const mat4& posMatrix = ctx.posMatrix;
     const auto& collisionGroup = ctx.collisionGroup;
     auto variableTextAnchors = symbolInstance.getTextAnchors();
     textBoxes.clear();
@@ -783,6 +783,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
     const bool updateTextFitIcon = layout.get<IconTextFit>() != IconTextFitType::None &&
                                    (bucket.allowVerticalPlacement || hasVariableAnchors) &&
                                    (bucket.hasIconData() || bucket.hasSdfIconData());
+    const mat4 tileMatrix = bucket.elevatedMatrix(tile.matrix);
     bool result = false;
 
     if (alongLine) {
@@ -792,7 +793,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
             if (bucket.hasSdfIconData()) {
                 reprojectLineLabels(bucket.sdfIcon.dynamicAttributeData(),
                                     bucket.sdfIcon.placedSymbols,
-                                    tile.matrix,
+                                    tileMatrix,
                                     pitchWithMap,
                                     true /*rotateWithMap*/,
                                     keepUpright,
@@ -804,7 +805,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
             if (bucket.hasIconData()) {
                 reprojectLineLabels(bucket.icon.dynamicAttributeData(),
                                     bucket.icon.placedSymbols,
-                                    tile.matrix,
+                                    tileMatrix,
                                     pitchWithMap,
                                     true /*rotateWithMap*/,
                                     keepUpright,
@@ -820,7 +821,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
             const bool keepUpright = layout.get<style::TextKeepUpright>();
             reprojectLineLabels(bucket.text.dynamicAttributeData(),
                                 bucket.text.placedSymbols,
-                                tile.matrix,
+                                tileMatrix,
                                 pitchWithMap,
                                 true /*rotateWithMap*/,
                                 keepUpright,
@@ -840,7 +841,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         const bool pitchWithMap = layout.get<TextPitchAlignment>() == AlignmentType::Map;
         const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
         const auto labelPlaneMatrix = getLabelPlaneMatrix(
-            tile.matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+            tileMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         std::unordered_map<std::size_t, std::pair<std::size_t, Point<float>>> placedTextShifts;
 
         for (std::size_t i = 0; i < bucket.text.placedSymbols.size(); ++i) {
@@ -862,7 +863,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicAttributeData());
             } else {
                 const Point<float> tileAnchor = symbol.anchorPoint;
-                const auto projectedAnchor = project(tileAnchor, pitchWithMap ? tile.matrix : labelPlaneMatrix);
+                const auto projectedAnchor = project(tileAnchor, pitchWithMap ? tileMatrix : labelPlaneMatrix);
                 const float perspectiveRatio = 0.5f +
                                                0.5f * (state.getCameraToCenterDistance() / projectedAnchor.second);
                 float renderTextSize = evaluateSizeForFeature(partiallyEvaluatedSize, symbol) * perspectiveRatio /
@@ -1491,7 +1492,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
                          collisionIndex.getTransformState(),
                          placementZoom,
                          collisionGroups.get(params.sourceId),
-                         getAvoidEdges(bucket, renderTile.matrix)};
+                         getAvoidEdges(bucket, bucket.elevatedMatrix(renderTile.matrix))};
 
     // In this case we first try to place symbols, which intersects the tile
     // borders, so that those symbols will remain even if each tile is handled
@@ -1501,12 +1502,16 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
 
     // Keeps the data necessary to find a feature location according to a tile.
     struct NeighborTileData {
-        NeighborTileData(const CollisionIndex& collisionIndex, UnwrappedTileID id_, Point<float> shift_)
+        NeighborTileData(const CollisionIndex& collisionIndex,
+                         const SymbolBucket& bucket,
+                         UnwrappedTileID id_,
+                         Point<float> shift_)
             : id(id_),
               shift(shift_),
               matrix() {
             collisionIndex.getTransformState().matrixFor(matrix, id);
             matrix::multiply(matrix, collisionIndex.getTransformState().getProjectionMatrix(), matrix);
+            matrix = bucket.elevatedMatrix(matrix);
             borders = collisionIndex.projectTileBoundaries(matrix);
         }
 
@@ -1520,16 +1525,16 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
     uint32_t x = renderTile.id.canonical.x;
     uint32_t y = renderTile.id.canonical.y;
     const std::array<NeighborTileData, 4> neighbours{{
-        {collisionIndex, UnwrappedTileID(z, x, y - 1), {0.0f, util::EXTENT}},  // top
-        {collisionIndex, UnwrappedTileID(z, x, y + 1), {0.0f, -util::EXTENT}}, // bottom
-        {collisionIndex, UnwrappedTileID(z, x - 1, y), {util::EXTENT, 0.0f}},  // left
-        {collisionIndex, UnwrappedTileID(z, x + 1, y), {-util::EXTENT, 0.0f}}  // right
+        {collisionIndex, bucket, UnwrappedTileID(z, x, y - 1), {0.0f, util::EXTENT}},  // top
+        {collisionIndex, bucket, UnwrappedTileID(z, x, y + 1), {0.0f, -util::EXTENT}}, // bottom
+        {collisionIndex, bucket, UnwrappedTileID(z, x - 1, y), {util::EXTENT, 0.0f}},  // left
+        {collisionIndex, bucket, UnwrappedTileID(z, x + 1, y), {-util::EXTENT, 0.0f}}  // right
     }};
 
     auto collisionBoxIntersectsTileEdges = [&](const CollisionBox& collisionBox,
                                                Point<float> shift) noexcept -> IntersectStatus {
         IntersectStatus intersects = collisionIndex.intersectsTileEdges(
-            collisionBox, shift, renderTile.matrix, ctx.pixelRatio, *tileBorders);
+            collisionBox, shift, ctx.posMatrix, ctx.pixelRatio, *tileBorders);
         // Check if this symbol intersects the neighbor tile borders. If so, it
         // also shall be placed with priority.
         for (const auto& neighbor : neighbours) {
