@@ -208,4 +208,16 @@ class TransformTest : BaseTest() {
         }
         transform.animateCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(expected), 500, callback)
     }
+
+    @Test
+    fun testMaxPitchAboveDefaultIsSet() {
+        transform.setMaxPitch(120.0)
+        verify { nativeMapView.maxPitch = 120.0 }
+    }
+
+    @Test
+    fun testMaxPitchAboveLimitIsIgnored() {
+        transform.setMaxPitch(190.0)
+        verify(exactly = 0) { nativeMapView.maxPitch = 190.0 }
+    }
 }

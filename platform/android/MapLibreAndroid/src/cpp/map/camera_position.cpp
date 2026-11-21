@@ -34,7 +34,7 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
         bearing_degrees += 360;
     }
 
-    // convert tilt, core ranges from  [0 rad, 1,0472 rad], android ranges from 0 to 60
+    // tilt in degrees, as in core; Android allows 0 up to MapLibreConstants.MAXIMUM_TILT_LIMIT
     double tilt_degrees = options.pitch.value_or(0);
     double roll_degrees = options.roll.value_or(0);
     double fov_degrees = options.fov.value_or(util::rad2deg(util::DEFAULT_FOV));
