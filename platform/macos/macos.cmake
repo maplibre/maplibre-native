@@ -71,68 +71,9 @@ if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
 endif()
 
-add_executable(
-    mbgl-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/test/main.cpp
-)
-
-target_include_directories(
-    mbgl-test-runner
-    PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/test/include
-)
-
-target_compile_definitions(
-    mbgl-test-runner
-    PRIVATE WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
-)
-
-target_link_libraries(
-    mbgl-test-runner
-    PRIVATE mbgl-compiler-options -Wl,-force_load mbgl-test
-)
-
-add_executable(
-    mbgl-benchmark-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark/main.cpp
-)
-
-target_include_directories(
-    mbgl-benchmark-runner
-    PUBLIC ${PROJECT_SOURCE_DIR}/benchmark/include
-)
-
-target_link_libraries(
-    mbgl-benchmark-runner
-    PRIVATE mbgl-compiler-options -Wl,-force_load mbgl-benchmark
-)
-
-add_executable(
-    mbgl-render-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test/main.cpp
-)
-
-target_link_libraries(
-    mbgl-render-test-runner
-    PRIVATE mbgl-compiler-options mbgl-render-test
-)
-
-set_property(TARGET mbgl-benchmark-runner PROPERTY FOLDER Executables)
-set_property(TARGET mbgl-test-runner PROPERTY FOLDER Executables)
-set_property(TARGET mbgl-render-test-runner PROPERTY FOLDER Executables)
-set_target_properties(mbgl-benchmark-runner mbgl-test-runner mbgl-render-test-runner PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[variant=Debug] "YES")
-
-# Disable benchmarks in CI as they run in VM environment
-if(NOT DEFINED ENV{CI})
-    add_test(NAME mbgl-benchmark-runner COMMAND mbgl-benchmark-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-endif()
-add_test(
-    NAME mbgl-test-runner
-    COMMAND
-        node
-        ${PROJECT_SOURCE_DIR}/test/storage/with-server.js
-        ${PROJECT_SOURCE_DIR}/test/storage/server.js
-        $<TARGET_FILE:mbgl-test-runner>
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/test)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test)
 
 find_program(ARMERGE NAMES armerge)
 find_program(
