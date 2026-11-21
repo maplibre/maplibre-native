@@ -156,13 +156,20 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         return builder;
     };
 
-    const auto setTextures = [&](gfx::UniqueDrawableBuilder& builder, RasterBucket& bucket) {
-        if (bucket.image) {
+    // `releaseImage`: let go of the decoded pixels once the texture exists. The texture keeps its own
+    // reference until it has uploaded them, and the bucket keeps the texture. Image sources must keep
+    // the image, they compare it to detect a new one.
+    const auto setTextures = [&](gfx::UniqueDrawableBuilder& builder, RasterBucket& bucket, bool releaseImage) {
+        if (bucket.hasData()) {
             if (!bucket.texture2d) {
                 if (auto tex = context.createTexture2D()) {
                     tex->setImage(bucket.image);
                     bucket.texture2d = std::move(tex);
                 }
+            }
+
+            if (releaseImage && bucket.texture2d) {
+                bucket.releaseImage();
             }
 
             if (bucket.texture2d) {
@@ -255,7 +262,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             builder = createBuilder();
             for (const auto& matrix_ : imageData->matrices) {
                 buildVertexData(builder, /*drawable=*/nullptr, bucket);
-                setTextures(builder, bucket);
+                setTextures(builder, bucket, /*releaseImage=*/false);
 
                 // finish
                 builder->flush(context);
@@ -348,9 +355,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 builder = createBuilder();
             }
 
-            if (bucket.image && !builder->getTexture(idRasterImage0Texture) &&
+            if (bucket.hasData() && !builder->getTexture(idRasterImage0Texture) &&
                 !builder->getTexture(idRasterImage1Texture)) {
-                setTextures(builder, bucket);
+                setTextures(builder, bucket, /*releaseImage=*/true);
             };
 
             buildVertexData(builder, /*drawable=*/nullptr, bucket);

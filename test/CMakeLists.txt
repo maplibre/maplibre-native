@@ -26,6 +26,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/hillshade_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/raster_bucket.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/renderable.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/source_state.test.cpp
