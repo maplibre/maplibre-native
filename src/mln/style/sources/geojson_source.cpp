@@ -37,6 +37,8 @@ const GeoJSONSource::Impl& GeoJSONSource::impl() const {
  */
 void GeoJSONSource::setURL(const std::string& url_) {
     url = url_;
+    // Ignore the result of a response that is still building in the background.
+    ++requestGeneration;
 
     // Signal that the source description needs a reload
     if (loaded || req) {
@@ -52,6 +54,8 @@ void GeoJSONSource::setGeoJSON(const mapbox::geojson::geojson& geoJSON) {
 
 void GeoJSONSource::setGeoJSONData(std::shared_ptr<GeoJSONData> geoJSONData) {
     req.reset();
+    // Ignore the result of a response that is still building in the background.
+    ++requestGeneration;
     baseImpl = makeMutable<Impl>(impl(), std::move(geoJSONData));
     observer->onSourceChanged(*this);
 }
