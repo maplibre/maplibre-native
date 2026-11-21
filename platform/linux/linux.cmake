@@ -237,7 +237,6 @@ if(MLN_CREATE_AMALGAMATION)
 
 endif()
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 if(MLN_WITH_GLFW)
 	add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
