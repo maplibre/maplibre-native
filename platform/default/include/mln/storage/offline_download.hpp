@@ -49,6 +49,7 @@ private:
      */
     void ensureResource(Resource&&, std::function<void(Response)> = {});
 
+    void reportError(const std::string& message);
     void onMapboxTileCountLimitExceeded();
 
     int64_t id;
