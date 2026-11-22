@@ -1,0 +1,3 @@
+{
+  "render-tests/line-pattern/mixed": "Flaky on the Pixel 11 device-farm phone (OpenGL only): https://github.com/maplibre/maplibre-native/actions/runs/44860696293 failed on main at 1f2992c. Remove once the Pixel 11 baseline is fixed."
+}
