@@ -81,7 +81,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
         }
     }
 
-    Scoped activityFlag{[this]() {
+    Scoped activityFlag{[this] {
         if (state == State::Processing) {
             state = State::Idle;
         }
@@ -119,7 +119,7 @@ void Mailbox::receive() {
         }
     }
 
-    Scoped activityFlag{[this]() {
+    Scoped activityFlag{[this] {
         if (state == State::Processing) {
             state = State::Idle;
         }
@@ -154,7 +154,7 @@ void Mailbox::receive() {
 void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
     if (auto guard = weakScheduler.lock(); weakScheduler) {
         std::weak_ptr<Mailbox> mailbox = shared_from_this();
-        auto setToRecieve = [mbox = std::move(mailbox)]() {
+        auto setToRecieve = [mbox = std::move(mailbox)] {
             if (auto locked = mbox.lock()) {
                 locked->receive();
             }

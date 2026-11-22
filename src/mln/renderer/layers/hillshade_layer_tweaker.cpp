@@ -46,7 +46,7 @@ IlluminationProperties getIlluminationProperties(const HillshadePaintProperties:
 
     // Pad shorter arrays by repeating the last element
     auto padArray = [maxLength](auto& arr) {
-        if (arr.empty()) arr.push_back(typename std::decay<decltype(arr)>::type::value_type{});
+        if (arr.empty()) arr.push_back(typename std::decay_t<decltype(arr)>::value_type{});
         while (arr.size() < maxLength) {
             arr.push_back(arr.back());
         }

@@ -91,7 +91,7 @@ LayerManagerDefault::LayerManagerDefault() {
 void LayerManagerDefault::addLayerType(std::unique_ptr<LayerFactory> factory) {
     std::string type{factory->getTypeInfo()->type};
     if (!type.empty()) {
-        typeToFactory.emplace(std::make_pair(std::move(type), factory.get()));
+        typeToFactory.emplace(std::move(type), factory.get());
     } else {
         Log::Warning(Event::Setup,
                      "Failure adding layer factory. getTypeInfo() returned an empty "

@@ -357,7 +357,7 @@ double pointsToPolygonDistance(const mapbox::geometry::multi_point<double>& poin
     }
 
     DistQueue distQueue;
-    distQueue.push(std::forward_as_tuple(0, IndexRange(0, points.size() - 1), IndexRange(0, 0)));
+    distQueue.emplace(std::forward_as_tuple(0, IndexRange(0, points.size() - 1), IndexRange(0, 0)));
 
     const auto polyBBox = getBBox(polygon);
     while (!distQueue.empty()) {
@@ -393,7 +393,7 @@ double pointsToPolygonDistance(const mapbox::geometry::multi_point<double>& poin
                     // Insert new pair to the queue if the bbox distance is less than
                     // miniDist, The pair with biggest distance will be at the top
                     if (tempDist < miniDist) {
-                        distQueue.push(std::make_tuple(tempDist, std::move(*rangeA), IndexRange(0, 0)));
+                        distQueue.emplace(tempDist, std::move(*rangeA), IndexRange(0, 0));
                     }
                 };
             updateQueue(newRangesA.first);
@@ -413,7 +413,7 @@ double lineToPolygonDistance(const mapbox::geometry::line_string<double>& line,
     }
 
     DistQueue distQueue;
-    distQueue.push(std::forward_as_tuple(0, IndexRange(0, line.size() - 1), IndexRange(0, 0)));
+    distQueue.emplace(std::forward_as_tuple(0, IndexRange(0, line.size() - 1), IndexRange(0, 0)));
 
     const auto polyBBox = getBBox(polygon);
     while (!distQueue.empty()) {
@@ -443,7 +443,7 @@ double lineToPolygonDistance(const mapbox::geometry::line_string<double>& line,
                     // Insert new pair to the queue if the bbox distance is less than
                     // miniDist, The pair with biggest distance will be at the top
                     if (tempDist < miniDist) {
-                        distQueue.push(std::make_tuple(tempDist, std::move(*rangeA), IndexRange(0, 0)));
+                        distQueue.emplace(tempDist, std::move(*rangeA), IndexRange(0, 0));
                     }
                 };
             updateQueue(newRangesA.first);
@@ -463,7 +463,7 @@ double lineToLineDistance(const mapbox::geometry::line_string<double>& line1,
     }
 
     DistQueue distQueue;
-    distQueue.push(std::forward_as_tuple(0, IndexRange(0, line1.size() - 1), IndexRange(0, line2.size() - 1)));
+    distQueue.emplace(std::forward_as_tuple(0, IndexRange(0, line1.size() - 1), IndexRange(0, line2.size() - 1)));
 
     while (!distQueue.empty()) {
         const auto distPair = distQueue.top();
@@ -495,7 +495,7 @@ double lineToLineDistance(const mapbox::geometry::line_string<double>& line1,
                 // Insert new pair to the queue if the bbox distance is less than
                 // miniDist, The pair with biggest distance will be at the top
                 if (tempDist < miniDist) {
-                    distQueue.push(std::make_tuple(tempDist, std::move(*range1), std::move(*range2)));
+                    distQueue.emplace(tempDist, std::move(*range1), std::move(*range2));
                 }
             };
             updateQueue(newRangesA.first, newRangesB.first);
@@ -516,7 +516,8 @@ double pointsToPointsDistance(const mapbox::geometry::multi_point<double>& point
     }
 
     DistQueue distQueue;
-    distQueue.push(std::forward_as_tuple(0, IndexRange(0, pointSet1.size() - 1), IndexRange(0, pointSet2.size() - 1)));
+    distQueue.emplace(
+        std::forward_as_tuple(0, IndexRange(0, pointSet1.size() - 1), IndexRange(0, pointSet2.size() - 1)));
 
     while (!distQueue.empty()) {
         const auto distPair = distQueue.top();
@@ -549,7 +550,7 @@ double pointsToPointsDistance(const mapbox::geometry::multi_point<double>& point
                 // Insert new pair to the queue if the bbox distance is less than
                 // miniDist, The pair with biggest distance will be at the top
                 if (tempDist < miniDist) {
-                    distQueue.push(std::make_tuple(tempDist, std::move(*range1), std::move(*range2)));
+                    distQueue.emplace(tempDist, std::move(*range1), std::move(*range2));
                 }
             };
             updateQueue(newRangesA.first, newRangesB.first);
@@ -571,7 +572,7 @@ double pointsToLineDistance(const mapbox::geometry::multi_point<double>& points,
     }
 
     DistQueue distQueue;
-    distQueue.push(std::forward_as_tuple(0, IndexRange(0, points.size() - 1), IndexRange(0, line.size() - 1)));
+    distQueue.emplace(std::forward_as_tuple(0, IndexRange(0, points.size() - 1), IndexRange(0, line.size() - 1)));
 
     while (!distQueue.empty()) {
         const auto distPair = distQueue.top();
@@ -610,7 +611,7 @@ double pointsToLineDistance(const mapbox::geometry::multi_point<double>& points,
                 // Insert new pair to the queue if the bbox distance is less than
                 // miniDist, The pair with biggest distance will be at the top
                 if (tempDist < miniDist) {
-                    distQueue.push(std::make_tuple(tempDist, std::move(*range1), std::move(*range2)));
+                    distQueue.emplace(tempDist, std::move(*range1), std::move(*range2));
                 }
             };
             updateQueue(newRangesA.first, newRangesB.first);

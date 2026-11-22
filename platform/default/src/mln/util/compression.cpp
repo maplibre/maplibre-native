@@ -11,11 +11,11 @@
 #include <stdexcept>
 
 // Check zlib library version.
-[[maybe_unused]] const static bool zlibVersionCheck = []() {
+[[maybe_unused]] const static bool zlibVersionCheck = [] {
     const char *const version = zlibVersion();
     if (version[0] != ZLIB_VERSION[0]) {
         char message[96];
-        snprintf(
+        (void)snprintf(
             message, 96, "zlib version mismatch: headers report %s, but library reports %s", ZLIB_VERSION, version);
         throw std::runtime_error(message);
     }

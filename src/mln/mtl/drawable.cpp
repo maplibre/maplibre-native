@@ -250,13 +250,12 @@ void Drawable::draw(PaintParameters& parameters) const {
                 impl->depthStencilState.reset();
             }
         }
+        const auto depthMode = getEnableDepth() ? parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType())
+                                                : gfx::DepthMode::disabled();
         if (!impl->depthStencilState) {
             if (enableStencil && !newStencilMode) {
                 newStencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
             }
-            const auto depthMode = getEnableDepth()
-                                       ? parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType())
-                                       : gfx::DepthMode::disabled();
             const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
                                                    : gfx::StencilMode::disabled();
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
@@ -265,6 +264,9 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
         renderPass.setDepthStencilState(impl->depthStencilState);
         renderPass.setStencilReference(impl->previousStencilMode.ref);
+        renderPass.setDepthRange(depthMode.range);
+    } else {
+        renderPass.setDepthRange(parameters.depthModeFor3D().range);
     }
 
     for (const auto& seg_ : impl->segments) {
@@ -321,6 +323,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             }
 
             context.renderingStats().numDrawCalls++;
+            context.renderingStats().totalDrawCalls++;
         }
     }
 
@@ -402,7 +405,8 @@ void Drawable::bindAttributes(RenderPass& renderPass) const {
                                                                                    : nullptr);
         if (buffer && buffer->get()) {
             assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
-            renderPass.bindVertex(buffer->get(), /*offset=*/0, binding->bufferIndex);
+            const auto offset = static_cast<std::size_t>(binding->vertexOffset) * binding->vertexStride;
+            renderPass.bindVertex(buffer->get(), offset, binding->bufferIndex);
         }
     }
 }
@@ -412,7 +416,8 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const {
         if (binding.has_value()) {
             const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding->vertexBufferResource);
             if (buffer && buffer->get()) {
-                renderPass.bindVertex(buffer->get(), /*offset=*/0, binding->bufferIndex);
+                const auto offset = static_cast<std::size_t>(binding->vertexOffset) * binding->vertexStride;
+                renderPass.bindVertex(buffer->get(), offset, binding->bufferIndex);
             }
         }
     }

@@ -68,11 +68,12 @@ std::unordered_map<std::string, std::vector<Feature>> RenderImageSource::queryRe
     const TransformState&,
     const std::unordered_map<std::string, const RenderLayer*>&,
     const RenderedQueryOptions&,
+    const GlobalStateMap*,
     const mat4&) const {
     return std::unordered_map<std::string, std::vector<Feature>>{};
 }
 
-std::vector<Feature> RenderImageSource::querySourceFeatures(const SourceQueryOptions&) const {
+std::vector<Feature> RenderImageSource::querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const {
     return {};
 }
 
@@ -131,6 +132,12 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
     imageBounds.extend(coords[3]);
     auto tileCover = util::tileCover(imageBounds, zoom);
     tileIds.clear();
+    // The cover is empty, for example, when the image lies wholly outside the
+    // latitudes a Web Mercator map can show (beyond about ±85.05°).
+    if (tileCover.empty()) {
+        enabled = false;
+        return;
+    }
     tileIds.push_back(tileCover[0]);
 
     bool hasVisibleTile = false;

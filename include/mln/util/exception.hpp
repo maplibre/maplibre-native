@@ -47,5 +47,12 @@ struct NotFoundException : Exception {
         : Exception(msg) {}
 };
 
+struct LocaleException : Exception {
+    LocaleException(const char *msg)
+        : Exception(msg) {}
+    LocaleException(const std::string &msg)
+        : Exception(msg) {}
+};
+
 } // namespace util
 } // namespace mln

@@ -7,6 +7,9 @@ Response::Response(const Response& res) {
 }
 
 Response& Response::operator=(const Response& res) {
+    if (this == &res) {
+        return *this;
+    }
     error = res.error ? std::make_unique<Error>(*res.error) : nullptr;
     noContent = res.noContent;
     notModified = res.notModified;

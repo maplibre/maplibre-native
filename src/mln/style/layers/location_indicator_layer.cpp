@@ -133,6 +133,7 @@ void LocationIndicatorLayer::setAccuracyRadiusTransition(const TransitionOptions
     auto impl_ = mutableImpl();
     impl_->paint.template get<AccuracyRadius>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LocationIndicatorLayer::getAccuracyRadiusTransition() const {
@@ -160,6 +161,7 @@ void LocationIndicatorLayer::setAccuracyRadiusBorderColorTransition(const Transi
     auto impl_ = mutableImpl();
     impl_->paint.template get<AccuracyRadiusBorderColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LocationIndicatorLayer::getAccuracyRadiusBorderColorTransition() const {
@@ -187,6 +189,7 @@ void LocationIndicatorLayer::setAccuracyRadiusColorTransition(const TransitionOp
     auto impl_ = mutableImpl();
     impl_->paint.template get<AccuracyRadiusColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LocationIndicatorLayer::getAccuracyRadiusColorTransition() const {
@@ -214,6 +217,7 @@ void LocationIndicatorLayer::setBearingTransition(const TransitionOptions& optio
     auto impl_ = mutableImpl();
     impl_->paint.template get<Bearing>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LocationIndicatorLayer::getBearingTransition() const {
@@ -241,6 +245,7 @@ void LocationIndicatorLayer::setBearingImageSizeTransition(const TransitionOptio
     auto impl_ = mutableImpl();
     impl_->paint.template get<BearingImageSize>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LocationIndicatorLayer::getBearingImageSizeTransition() const {
@@ -268,6 +273,7 @@ void LocationIndicatorLayer::setImageTiltDisplacementTransition(const Transition
     auto impl_ = mutableImpl();
     impl_->paint.template get<ImageTiltDisplacement>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LocationIndicatorLayer::getImageTiltDisplacementTransition() const {
@@ -295,6 +301,7 @@ void LocationIndicatorLayer::setLocationTransition(const TransitionOptions& opti
     auto impl_ = mutableImpl();
     impl_->paint.template get<Location>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LocationIndicatorLayer::getLocationTransition() const {
@@ -322,6 +329,7 @@ void LocationIndicatorLayer::setPerspectiveCompensationTransition(const Transiti
     auto impl_ = mutableImpl();
     impl_->paint.template get<PerspectiveCompensation>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LocationIndicatorLayer::getPerspectiveCompensationTransition() const {
@@ -349,6 +357,7 @@ void LocationIndicatorLayer::setShadowImageSizeTransition(const TransitionOption
     auto impl_ = mutableImpl();
     impl_->paint.template get<ShadowImageSize>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LocationIndicatorLayer::getShadowImageSizeTransition() const {
@@ -376,6 +385,7 @@ void LocationIndicatorLayer::setTopImageSizeTransition(const TransitionOptions& 
     auto impl_ = mutableImpl();
     impl_->paint.template get<TopImageSize>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions LocationIndicatorLayer::getTopImageSizeTransition() const {

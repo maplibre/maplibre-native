@@ -21,7 +21,6 @@ MLN_MACOS_PUBLIC_HEADERS = [
     "src/MLNMapView+IBAdditions.h",
     "src/MLNMapView.h",
     "src/MLNMapViewDelegate.h",
-    "src/Mapbox.h",
     "src/NSProcessInfo+MLNAdditions.h",
 ]
 

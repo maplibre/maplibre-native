@@ -61,9 +61,13 @@ struct alignas(16) LinePatternDrawableUBO {
     /* 84 */ float width_t;
     /* 88 */ float pattern_from_t;
     /* 92 */ float pattern_to_t;
-    /* 96 */
+    /* 96 */ float floorwidth_t;
+    /* 100 */ float pad1;
+    /* 104 */ float pad2;
+    /* 108 */ float pad3;
+    /* 112 */
 };
-static_assert(sizeof(LinePatternDrawableUBO) == 6 * 16);
+static_assert(sizeof(LinePatternDrawableUBO) == 7 * 16);
 
 struct alignas(16) LinePatternTilePropsUBO {
     /*  0 */ std::array<float, 4> pattern_from;

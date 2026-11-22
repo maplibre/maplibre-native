@@ -92,7 +92,7 @@ EvaluationResult Slice::evaluateForArrayInput(const std::vector<Value> &array,
 EvaluationResult Slice::evaluateForStringInput(const std::string &string, int fromIndexValue, int toIndexValue) const {
     size_t lengthBytes = string.size();
     int length = static_cast<int>(unicodeLengthOnValidatedUtf8(string));
-    size_t toIndexValueBytes = ([&]() {
+    size_t toIndexValueBytes = ([&] {
         if (toIndexValue == std::numeric_limits<int>::max()) {
             return lengthBytes;
         } else {
@@ -144,9 +144,8 @@ ParseResult Slice::parse(const Convertible &value, ParsingContext &ctx) {
 bool Slice::operator==(const Expression &e) const noexcept {
     if (e.getKind() == Kind::Slice) {
         auto rhs = static_cast<const Slice *>(&e);
-        const auto toIndexEqual = (toIndex && rhs->toIndex && *toIndex == *(rhs->toIndex)) ||
-                                  (!toIndex && !rhs->toIndex);
-        return *input == *(rhs->input) && *fromIndex == *(rhs->fromIndex) && toIndexEqual;
+        const auto toIndexEqual = (toIndex && rhs->toIndex && *toIndex == *rhs->toIndex) || (!toIndex && !rhs->toIndex);
+        return *input == *rhs->input && *fromIndex == *rhs->fromIndex && toIndexEqual;
     }
     return false;
 }

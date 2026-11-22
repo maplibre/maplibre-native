@@ -10,9 +10,6 @@
 [submodule "vendor/vector-tile"]
 	path = vendor/vector-tile
 	url = https://github.com/maplibre/mvt-cpp.git
-[submodule "vendor/wagyu"]
-	path = vendor/wagyu
-	url = https://github.com/mapbox/wagyu.git
 [submodule "vendor/unique_resource"]
 	path = vendor/unique_resource
 	url = https://github.com/okdshin/unique_resource.git

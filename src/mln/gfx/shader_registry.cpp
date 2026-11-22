@@ -6,8 +6,7 @@
 
 namespace mln::gfx {
 
-ShaderRegistry::ShaderRegistry()
-    : legacyGroup() {}
+ShaderRegistry::ShaderRegistry() = default;
 
 ShaderGroup& ShaderRegistry::getLegacyGroup() noexcept {
     return legacyGroup;

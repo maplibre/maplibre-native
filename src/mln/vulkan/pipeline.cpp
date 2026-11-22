@@ -313,6 +313,9 @@ void PipelineInfo::setDepthWrite(const gfx::DepthMaskType& value) {
 void PipelineInfo::setDepthMode(const gfx::DepthMode& value) {
     depthFunction = vulkanCompareOp(value.func);
     setDepthWrite(value.mask);
+
+    viewport.minDepth = value.range.min;
+    viewport.maxDepth = value.range.max;
 }
 
 void PipelineInfo::setStencilMode(const gfx::StencilMode& value) {
@@ -348,7 +351,15 @@ void PipelineInfo::setRenderable(const gfx::Renderable& value) {
     const auto& renderableResource = value.getResource<RenderableResource>();
 
     renderPass = renderableResource.getRenderPass().get();
-    viewExtent = renderableResource.getExtent();
+
+    const auto extent = renderableResource.getExtent();
+
+    viewport = {.x = 0,
+                .y = 0,
+                .width = static_cast<float>(extent.width),
+                .height = static_cast<float>(extent.height),
+                .minDepth = 0.0f,
+                .maxDepth = 1.0f};
 }
 
 void PipelineInfo::setLineWidth(float value) {
@@ -384,6 +395,7 @@ void PipelineInfo::updateVertexInputHash() {
 
     for (const auto& value : inputBindings) {
         util::hash_combine(vertexInputHash, value.binding);
+        util::hash_combine(vertexInputHash, value.stride);
         util::hash_combine(vertexInputHash, value.inputRate);
     }
 }
@@ -427,8 +439,6 @@ void PipelineInfo::setDynamicValues(const RendererBackend& backend, const vk::Un
     if (backend.getDeviceFeatures().wideLines && wideLines) {
         buffer->setLineWidth(dynamicValues.lineWidth, dispatcher);
     }
-
-    const vk::Viewport viewport(0.0f, 0.0f, viewExtent.width, viewExtent.height, 0.0f, 1.0f);
 
     buffer->setViewport(0, viewport, dispatcher);
     buffer->setScissor(0, scissorRect, dispatcher);

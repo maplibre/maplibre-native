@@ -1123,6 +1123,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
   /**
    * Set a callback that's invoked after a corrupted symbol is detected
+   * <p>
+   * Only called when the environment variable {@code MLN_SYMBOL_GUARDS} is {@code 1} before the first map loads.
+   * </p>
    *
    * @param listener The callback that's invoked
    */

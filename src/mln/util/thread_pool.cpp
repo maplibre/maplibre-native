@@ -62,7 +62,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                 std::function<void()> tasklet;
                 {
                     std::scoped_lock lock(q->lock);
-                    if (q->queue.size()) {
+                    if (!q->queue.empty()) {
                         q->runningCount++;
                         tasklet = std::move(q->queue.front());
                         q->queue.pop();

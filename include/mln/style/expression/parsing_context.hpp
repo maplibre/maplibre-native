@@ -133,15 +133,15 @@ public:
         return scope->get(name);
     }
 
-    void error(std::string message) { errors->push_back({std::move(message), key}); }
+    void error(std::string message) { errors->push_back({.message = std::move(message), .key = key}); }
 
     void error(std::string message, std::size_t child) {
-        errors->push_back({std::move(message), key + "[" + util::toString(child) + "]"});
+        errors->push_back({.message = std::move(message), .key = key + "[" + util::toString(child) + "]"});
     }
 
     void error(std::string message, std::size_t child, std::size_t grandchild) {
-        errors->push_back(
-            {std::move(message), key + "[" + util::toString(child) + "][" + util::toString(grandchild) + "]"});
+        errors->push_back({.message = std::move(message),
+                           .key = key + "[" + util::toString(child) + "][" + util::toString(grandchild) + "]"});
     }
 
     void appendErrors(ParsingContext&& ctx) {

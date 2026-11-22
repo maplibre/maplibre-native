@@ -3,6 +3,7 @@ package org.maplibre.android.testapp
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
+import android.system.Os
 import android.text.TextUtils
 import android.widget.Toast
 import androidx.multidex.MultiDexApplication
@@ -12,6 +13,7 @@ import org.maplibre.android.WellKnownTileServer
 import org.maplibre.android.log.Logger
 import org.maplibre.android.testapp.utils.ApiKeyUtils
 import org.maplibre.android.testapp.utils.RenderingEnginePreference
+import org.maplibre.android.testapp.utils.SystemBarInsets
 import org.maplibre.android.testapp.utils.TileLoadingMeasurementUtils
 import org.maplibre.android.testapp.utils.TimberLogger
 import timber.log.Timber
@@ -27,9 +29,12 @@ import timber.log.Timber.DebugTree
 open class MapLibreApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
+        // Keeps the symbol guard checks on, so the stability activities report corrupted symbols.
+        Os.setenv("MLN_SYMBOL_GUARDS", "1", true)
         initializeLogger()
         initializeStrictMode()
         initializeMapbox()
+        registerActivityLifecycleCallbacks(SystemBarInsets)
     }
 
     private fun initializeLogger() {

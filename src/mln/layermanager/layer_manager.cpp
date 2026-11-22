@@ -82,10 +82,6 @@ LayerFactory* LayerManager::findFactory(const style::LayerTypeInfo* info) noexce
     return factory && factory->getTypeInfo() == info ? factory : nullptr;
 }
 
-bool LayerManager::hasLayerType(const std::string& type) noexcept {
-    return findFactory(type) != nullptr;
-}
-
 #else
 LayerFactory* LayerManager::findFactory(const std::string& type) noexcept {
     return getFactory(type);
@@ -94,6 +90,10 @@ LayerFactory* LayerManager::findFactory(const style::LayerTypeInfo* info) noexce
     return getFactory(info);
 }
 #endif
+
+bool LayerManager::hasLayerType(const std::string& type) noexcept {
+    return findFactory(type) != nullptr;
+}
 
 void LayerManager::addLayerTypeCoreOnly(std::unique_ptr<mln::LayerFactory>) {}
 

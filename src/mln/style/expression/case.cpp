@@ -31,7 +31,7 @@ void Case::eachChild(const std::function<void(const Expression&)>& visit) const 
 bool Case::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Case) {
         const auto* rhs = static_cast<const Case*>(&e);
-        return *otherwise == *(rhs->otherwise) && Expression::childrenEqual(branches, rhs->branches);
+        return *otherwise == *rhs->otherwise && Expression::childrenEqual(branches, rhs->branches);
     }
     return false;
 }

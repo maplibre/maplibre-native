@@ -599,6 +599,23 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL dynamicNavigationCameraAnimationDuration;
 
 /**
+ Media time at which the latest user-location animation started.
+
+ `CACurrentMediaTime()` sampled immediately before that animation, so
+ other graphics can share its clock. It stays `0` until the first location update.
+ */
+@property (nonatomic, readonly) NSTimeInterval userLocationAnimationReferenceTime;
+
+/**
+ Whether the latest location update started a constant-zoom camera animation.
+
+ `YES` only when this sample's camera transition is the constant-zoom path
+ used by `easeTo`. The puck stays on a linear animation otherwise,
+ including a starting flyTo, a target-coordinate fit, a gesture, and camera bounds.
+ */
+@property (nonatomic, readonly) BOOL userLocationCameraFollowsConstantZoomFly;
+
+/**
  A Boolean value indicating whether the map may request authorization to use location services.
 
  Setting this property to `YES` causes the map view to use the Core Location
@@ -837,6 +854,11 @@ MLN_EXPORT
  programmatically.
  */
 @property (nonatomic, getter=isScrollEnabled) BOOL scrollEnabled;
+
+/**
+ A Boolean value indicating that a gesture is currently in progress on the map.
+ */
+@property (nonatomic, readonly, getter=isGestureInProgress) BOOL gestureInProgress;
 
 /**
  The scrolling mode the user is allowed to use to interact with the map.

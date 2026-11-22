@@ -59,7 +59,7 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
 
-    scheduler.runOnRenderThread([renderData_{std::move(renderData)}]() {});
+    scheduler.runOnRenderThread([renderData_{std::move(renderData)}] {});
 }
 
 /*
@@ -161,12 +161,14 @@ void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
 }
 
 void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layers_,
+                                   std::shared_ptr<const GlobalStateMap> globalState_,
                                    Immutable<std::set<std::string>> availableImages_,
                                    uint64_t correlationID_) {
     MLN_TRACE_FUNC();
 
     try {
         layers = std::move(layers_);
+        globalState = std::move(globalState_);
         correlationID = correlationID_;
         availableImages = std::move(availableImages_);
 
@@ -322,7 +324,7 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults 
                     std::optional<Immutable<Glyph>>& glyph = newGlyph.second;
 
                     if (pendingGlyphIDs.erase(glyphID)) {
-                        if (!(glyphID.complex.code == 0 && glyphID.complex.type != GlyphIDType::FontPBF)) {
+                        if (glyphID.complex.code != 0 || glyphID.complex.type == GlyphIDType::FontPBF) {
                             glyphs.emplace(glyphID, std::move(glyph));
                         }
                     }
@@ -343,7 +345,7 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults 
                 const GlyphID& glyphID = newGlyph.first;
                 std::optional<Immutable<Glyph>>& glyph = newGlyph.second;
 
-                if (!(glyphID.complex.code == 0 && glyphID.complex.type != GlyphIDType::FontPBF))
+                if (glyphID.complex.code != 0 || glyphID.complex.type == GlyphIDType::FontPBF)
                     glyphs.emplace(glyphID, std::move(glyph));
             }
         }
@@ -455,11 +457,12 @@ void GeometryTileWorker::parse() {
             continue; // Tile has no data.
         }
 
-        const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
+        const style::Layer::Impl& leaderImpl = *group.at(0)->baseImpl;
         BucketParameters parameters{.tileID = id,
                                     .mode = mode,
                                     .pixelRatio = pixelRatio,
                                     .layerType = leaderImpl.getTypeInfo(),
+                                    .globalState = globalState,
                                     .retainFeaturesById = captureRenderedFeatures};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
@@ -506,8 +509,9 @@ void GeometryTileWorker::parse() {
                 auto feature = geometryLayer->getFeature(i);
 
                 const auto effectiveZ = static_cast<float>(id.overscaledZ);
-                if (!filter(
-                        expression::EvaluationContext(effectiveZ, feature.get()).withCanonicalTileID(&id.canonical))) {
+                if (!filter(expression::EvaluationContext(effectiveZ, feature.get())
+                                .withCanonicalTileID(&id.canonical)
+                                .withGlobalState(globalState.get()))) {
                     continue;
                 }
 

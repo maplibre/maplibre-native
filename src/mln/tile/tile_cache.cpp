@@ -14,7 +14,7 @@ TileCache::~TileCache() {
     pendingReleases.clear();
 
     std::unique_lock counterLock{deferredSignalLock};
-    deferredSignal.wait(counterLock, [&]() { return deferredDeletionsPending == 0; });
+    deferredSignal.wait(counterLock, [&] { return deferredDeletionsPending == 0; });
 }
 
 void TileCache::setSize(size_t size_) {
@@ -48,8 +48,7 @@ struct CaptureWrapper {
     CaptureWrapper(CaptureWrapper&&) = default;
 
     /// This copy constructor is required to build, but doesn't seem to be called.
-    CaptureWrapper(const CaptureWrapper& other)
-        : items(other.items) {}
+    CaptureWrapper(const CaptureWrapper& other) = default;
 
     std::vector<std::shared_ptr<Tile>> items;
 };
@@ -153,7 +152,7 @@ std::unique_ptr<Tile> TileCache::pop(const OverscaledTileID& key) {
 }
 
 bool TileCache::has(const OverscaledTileID& key) {
-    return tiles.find(key) != tiles.end();
+    return tiles.contains(key);
 }
 
 void TileCache::clear() {

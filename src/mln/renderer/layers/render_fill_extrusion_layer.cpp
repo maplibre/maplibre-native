@@ -64,9 +64,6 @@ void RenderFillExtrusionLayer::captureRenderedFeatures(
     constexpr bool inViewportPixelUnits = false;
     constexpr bool nearClipped = true;
     constexpr bool aligned = false;
-    constexpr bool is3d = true;
-    constexpr bool enableDepth = true;
-    constexpr std::int32_t subLayerIndex = 1;
     const auto translation = evaluated.get<FillExtrusionTranslate>();
     const auto translationAnchor = evaluated.get<FillExtrusionTranslateAnchor>();
     const auto base = constOrDefault<FillExtrusionBase>(evaluated);
@@ -96,13 +93,9 @@ void RenderFillExtrusionLayer::captureRenderedFeatures(
             tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
                                                      state,
                                                      transformParams,
-                                                     layerIndex,
                                                      translation,
                                                      translationAnchor,
                                                      origin,
-                                                     is3d,
-                                                     enableDepth,
-                                                     subLayerIndex,
                                                      nearClipped,
                                                      inViewportPixelUnits,
                                                      aligned);
@@ -227,10 +220,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (!(drawable.getRenderPass() & drawPass) || (tileID && !hasRenderTile(*tileID))) {
-            return true;
-        }
-        return false;
+        return !(drawable.getRenderPass() & drawPass) || (tileID && !hasRenderTile(*tileID));
     });
 
     const auto layerPrefix = getID() + "/";
@@ -314,11 +304,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-            return true;
+            // A drawable produced on a previous style/bucket should not be updated.
+            return drawable.getLayerTweaker() == layerTweaker;
         };
         if (updateTile(drawPass, tileID, std::move(updateExisting))) {
             continue;

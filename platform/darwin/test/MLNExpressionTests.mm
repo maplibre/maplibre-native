@@ -932,6 +932,16 @@ using namespace std::string_literals;
   }
 }
 
+- (void)testGlobalStateExpressionObject {
+  {
+    NSArray *jsonExpression = @[ @"global-state", @"chargerType" ];
+    NSExpression *expression = [NSExpression expressionWithMLNJSONObject:jsonExpression];
+    XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
+    XCTAssertThrowsSpecificNamed([expression expressionValueWithObject:nil context:nil],
+                                 NSException, NSInvalidArgumentException);
+  }
+}
+
 - (void)testStringFormattingExpressionObject {
   NSArray *arguments = @[ MLNConstantExpression(@"MacDonald") ];
   {
@@ -1326,6 +1336,23 @@ using namespace std::string_literals;
     XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
     XCTAssertEqualObjects([NSExpression expressionWithMLNJSONObject:jsonExpression], expression);
     XCTAssertEqualObjects([expression expressionValueWithObject:nil context:nil], @YES);
+  }
+  {
+    NSArray *jsonExpression = @[
+      @"case", @[ @"all", @[ @"==", @[ @"get", @"a" ], @1 ], @[ @"==", @[ @"get", @"b" ], @2 ] ],
+      @"#ff0000", @[ @"==", @[ @"get", @"c" ], @3 ], @"#00ff00", @"#0000ff"
+    ];
+    NSExpression *expression = [NSExpression expressionWithMLNJSONObject:jsonExpression];
+    XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
+  }
+  {
+    NSArray *jsonExpression = @[
+      @"case", @[ @"==", @[ @"get", @"a" ], @1 ], @"#ff0000",
+      @[ @"any", @[ @"==", @[ @"get", @"b" ], @2 ], @[ @"==", @[ @"get", @"c" ], @3 ] ], @"#00ff00",
+      @"#0000ff"
+    ];
+    NSExpression *expression = [NSExpression expressionWithMLNJSONObject:jsonExpression];
+    XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
   }
   {
     NSArray *jsonExpression = @[

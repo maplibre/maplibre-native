@@ -894,7 +894,7 @@ jni::Local<jni::Array<jlong>> NativeMapView::queryPointAnnotations(JNIEnv& env, 
     };
 
     // Assume only points for now
-    mln::AnnotationIDs ids = rendererFrontend->queryPointAnnotations(box, annotationRequestTimeout);
+    mln::AnnotationIDs ids = rendererFrontend->queryPointAnnotations(box);
 
     // Convert result
     std::vector<jlong> longIds(ids.begin(), ids.end());
@@ -914,7 +914,7 @@ jni::Local<jni::Array<jlong>> NativeMapView::queryShapeAnnotations(JNIEnv& env, 
         {RectF::getRight(env, rect), RectF::getBottom(env, rect)},
     };
 
-    mln::AnnotationIDs ids = rendererFrontend->queryShapeAnnotations(box, annotationRequestTimeout);
+    mln::AnnotationIDs ids = rendererFrontend->queryShapeAnnotations(box);
 
     // Convert result
     std::vector<jlong> longIds(ids.begin(), ids.end());
@@ -1014,6 +1014,21 @@ void NativeMapView::removeFeatureState(JNIEnv& env,
         featureId ? std::optional<std::string>(jni::Make<std::string>(env, featureId)) : std::nullopt,
         stateKey ? std::optional<std::string>(jni::Make<std::string>(env, stateKey)) : std::nullopt);
     map->triggerRepaint();
+}
+
+void NativeMapView::setGlobalStateProperty(JNIEnv& env,
+                                           const jni::String& name,
+                                           const jni::Object<gson::JsonElement>& value) {
+    if (!name) {
+        return;
+    }
+
+    map->getStyle().setGlobalStateProperty(jni::Make<std::string>(env, name),
+                                           value ? gson::JsonElement::convert(env, value) : mln::Value());
+}
+
+jni::Local<jni::Object<gson::JsonObject>> NativeMapView::getGlobalState(JNIEnv& env) {
+    return gson::JsonObject::New(env, map->getStyle().getGlobalState());
 }
 
 jni::Local<jni::Object<Light>> NativeMapView::getLight(JNIEnv& env) {
@@ -1441,6 +1456,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setFeatureState, "nativeSetFeatureState"),
         METHOD(&NativeMapView::getFeatureState, "nativeGetFeatureState"),
         METHOD(&NativeMapView::removeFeatureState, "nativeRemoveFeatureState"),
+        METHOD(&NativeMapView::setGlobalStateProperty, "nativeSetGlobalStateProperty"),
+        METHOD(&NativeMapView::getGlobalState, "nativeGetGlobalState"),
         METHOD(&NativeMapView::getLight, "nativeGetLight"),
         METHOD(&NativeMapView::getLayers, "nativeGetLayers"),
         METHOD(&NativeMapView::getLayer, "nativeGetLayer"),

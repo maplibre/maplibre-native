@@ -4,6 +4,7 @@
 #include <mln/renderer/bucket_parameters.hpp>
 #include <mln/renderer/layers/render_fill_layer.hpp>
 #include <mln/style/layers/fill_layer_impl.hpp>
+#include <mln/util/logging.hpp>
 #include <mln/util/math.hpp>
 
 namespace mln {
@@ -22,6 +23,19 @@ FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
 
 FillBucket::~FillBucket() {
     sharedVertices->release();
+}
+
+void FillBucket::recordSDFPattern(const std::string& layerID, const bool sdf) {
+    const auto [it, inserted] = sdfPatterns.emplace(layerID, sdf);
+    if (!inserted && it->second != sdf && mixedSDFPatternLayers.emplace(layerID).second) {
+        Log::Warning(Event::Style,
+                     "Style sheet warning: Cannot mix SDF and non-SDF fill patterns in layer \"" + layerID + "\"");
+    }
+}
+
+bool FillBucket::isSDFPattern(const std::string& layerID) const {
+    const auto it = sdfPatterns.find(layerID);
+    return it != sdfPatterns.end() && it->second;
 }
 
 void FillBucket::generateBuffers(const GeometryCollection& geometry) {
@@ -78,6 +92,21 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
 
 void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     uploaded = true;
+    // Layout is final: once these are in GPU buffers the CPU copies are dropped, unless the map
+    // reads them back to report rendered features.
+    if (retainFeaturesById) {
+        return;
+    }
+    sharedVertices->release();
+    sharedTriangles->release();
+    sharedBasicLineIndexes->release();
+#if MLN_TRIANGULATE_FILL_OUTLINES
+    sharedLineVertices->release();
+    sharedLineIndexes->release();
+#endif
+    for (auto& pair : paintPropertyBinders) {
+        pair.second.release();
+    }
 }
 
 bool FillBucket::hasData() const {

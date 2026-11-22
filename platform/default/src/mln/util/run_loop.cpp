@@ -61,11 +61,11 @@ RunLoop* RunLoop::Get() {
 
 class RunLoop::Impl {
 public:
-    void closeHolder() {
+    void closeHolder() const {
         uv_close(holderHandle(), [](uv_handle_t* h) { delete reinterpret_cast<uv_async_t*>(h); });
     }
 
-    uv_handle_t* holderHandle() { return reinterpret_cast<uv_handle_t*>(holder); }
+    uv_handle_t* holderHandle() const { return reinterpret_cast<uv_handle_t*>(holder); }
 
     uv_loop_t* loop = nullptr;
     uv_async_t* holder = new uv_async_t;

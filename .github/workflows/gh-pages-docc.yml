@@ -12,12 +12,15 @@ on:
       - ios-ci
     types:
       - completed
+    branches:
+      - main
 
 jobs:
   gh-pages-docc-build:
     name: Build DocC Docs
     runs-on: macos-latest
-    if: ${{ github.ref_name == 'main' }}
+    # A pull request from a fork can have a head branch called main too
+    if: ${{ github.ref_name == 'main' && github.event.workflow_run.event != 'pull_request' }}
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -43,7 +46,7 @@ jobs:
           cd build
           zip -r docs.zip docs/
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: docc-docs
           path: build/docs.zip
@@ -51,7 +54,7 @@ jobs:
   gh-pages-docc-deploy:
     needs: gh-pages-docc-build
     name: Deploy DocC Docs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

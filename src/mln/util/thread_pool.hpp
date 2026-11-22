@@ -126,7 +126,7 @@ public:
         }
 
         std::scoped_lock taskLock(queue->mutex);
-        while (queue->queue.size()) {
+        while (!queue->queue.empty()) {
             auto fn = std::move(queue->queue.front());
             queue->queue.pop();
             if (fn) {

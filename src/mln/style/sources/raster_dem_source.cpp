@@ -16,7 +16,12 @@ RasterDEMSource::RasterDEMSource(std::string id,
                                  variant<std::string, Tileset> urlOrTileset_,
                                  uint16_t tileSize,
                                  std::optional<SourceOptions> options_)
-    : RasterSource(std::move(id), std::move(urlOrTileset_), tileSize, SourceType::RasterDEM),
+    : RasterSource(std::move(id),
+                   std::move(urlOrTileset_),
+                   tileSize,
+                   SourceType::RasterDEM,
+                   options_ ? options_->minzoom : std::nullopt,
+                   options_ ? options_->maxzoom : std::nullopt),
       options(std::move(options_)) {}
 
 RasterDEMSource::~RasterDEMSource() {
@@ -29,6 +34,7 @@ bool RasterDEMSource::supportsLayerType(const mln::style::LayerTypeInfo* info) c
 }
 
 void RasterDEMSource::setTilesetOverrides(Tileset& tileset) {
+    RasterSource::setTilesetOverrides(tileset); // the inline zoom range
     if (options) {
         if (const auto encoding = options->rasterEncoding) {
             tileset.rasterEncoding = encoding;

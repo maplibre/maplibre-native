@@ -7,28 +7,8 @@ namespace mln {
 namespace vulkan {
 
 SurfaceRenderableResource::~SurfaceRenderableResource() {
-    if (!backend.getDevice()) {
-        return;
-    }
-
-    try {
-        backend.getDevice()->waitIdle(backend.getDispatcher());
-    } catch (const vk::DeviceLostError& error) {
-        Log::Error(mln::Event::Render, "Vulkan device lost during surface shutdown");
-    }
-
-    // specific order
-    swapchainFramebuffers.clear();
+    destroyResources();
     renderPass.reset();
-    swapchainImageViews.clear();
-    swapchainImages.clear();
-    swapchain.reset();
-    surface.reset();
-
-    depthAllocation.reset();
-    colorAllocations.clear();
-
-    readTexture.reset();
 }
 
 void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
@@ -366,7 +346,7 @@ void SurfaceRenderableResource::swap() {
     }
 }
 
-const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
+vk::Image SurfaceRenderableResource::getAcquiredImage() const {
     if (surface) {
         return swapchainImages[acquiredImageIndex];
     }
@@ -466,8 +446,9 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     }
 }
 
-void SurfaceRenderableResource::recreateSwapchain() {
-    if (!surface) return;
+void SurfaceRenderableResource::recreateSwapchain(bool recreateSurface) {
+    // without a surface there is no swapchain, unless the surface itself is being recreated
+    if (!surface && !recreateSurface) return;
 
     backend.getDevice()->waitIdle(backend.getDispatcher());
 
@@ -477,9 +458,43 @@ void SurfaceRenderableResource::recreateSwapchain() {
     acquireSemaphores.clear();
     presentSemaphores.clear();
 
+    if (recreateSurface) {
+        swapchain.reset();
+        surface.reset();
+
+        createPlatformSurface();
+    }
+
     readTexture.reset();
 
     init(extent.width, extent.height);
+}
+
+void SurfaceRenderableResource::destroyResources() {
+    if (!backend.getDevice()) {
+        return;
+    }
+
+    try {
+        backend.getDevice()->waitIdle(backend.getDispatcher());
+    } catch (const vk::DeviceLostError& error) {
+        Log::Error(mln::Event::Render, "Vulkan device lost during surface deletion");
+    }
+
+    // specific order
+    swapchainFramebuffers.clear();
+    swapchainImageViews.clear();
+    swapchainImages.clear();
+    swapchain.reset();
+    surface.reset();
+
+    acquireSemaphores.clear();
+    presentSemaphores.clear();
+
+    depthAllocation.reset();
+    colorAllocations.clear();
+
+    readTexture.reset();
 }
 
 void SurfaceRenderableResource::queueSurfaceRead() {
@@ -582,7 +597,8 @@ std::shared_ptr<PremultipliedImage> SurfaceRenderableResource::readImage() {
     // swizzle pixels to RGBA
     if (!useBlit && colorFormat == vk::Format::eB8G8R8A8Unorm) {
         for (size_t i = 0, size = image->size.area(); i < size; ++i) {
-            std::swap(image->data[i * image->channels + 0], image->data[i * image->channels + 2]);
+            std::swap(image->data[i * mln::Image<mln::ImageAlphaMode::Premultiplied>::channels + 0],
+                      image->data[i * mln::Image<mln::ImageAlphaMode::Premultiplied>::channels + 2]);
         }
     }
 
