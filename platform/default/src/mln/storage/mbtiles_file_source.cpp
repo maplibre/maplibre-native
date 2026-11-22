@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <map>
+#include <stdexcept>
 
 #include <mln/platform/settings.hpp>
 #include <mln/storage/mbtiles_file_source.hpp>
@@ -73,8 +74,16 @@ public:
 
     std::string db_path(const std::string &path) { return path.substr(0, path.find('?')); }
 
-    // Generate a tilejson resource from .mbtiles file
     void request_tilejson(const Resource &resource, ActorRef<FileSourceRequest> req) {
+        respondToErrors(req, [&] { tilejson(resource, req); });
+    }
+
+    void request_tile(const Resource &resource, ActorRef<FileSourceRequest> req) {
+        respondToErrors(req, [&] { tile(resource, req); });
+    }
+
+    // Generate a tilejson resource from .mbtiles file
+    void tilejson(const Resource &resource, ActorRef<FileSourceRequest> req) {
         const auto path = url_to_path(resource.url);
 
         Response response;
@@ -188,7 +197,7 @@ public:
     }
 
     // Load data for specific tile
-    void request_tile(const Resource &resource, ActorRef<FileSourceRequest> req) {
+    void tile(const Resource &resource, ActorRef<FileSourceRequest> req) {
         std::string base_path = url_to_path(resource.url);
         std::string path = db_path(base_path);
         auto &db = get_db(path);
@@ -244,6 +253,27 @@ public:
     }
 
 private:
+    // SQLite and metadata parsing throw for a file that is not a valid MBTiles
+    // database, and nothing above this thread catches.
+    template <typename Fn>
+    void respondToErrors(const ActorRef<FileSourceRequest> &req, Fn &&fn) {
+        try {
+            fn();
+        } catch (const mapbox::sqlite::Exception &e) {
+            respondWithError(req, e);
+        } catch (const std::invalid_argument &e) {
+            respondWithError(req, e);
+        } catch (const std::out_of_range &e) {
+            respondWithError(req, e);
+        }
+    }
+
+    void respondWithError(const ActorRef<FileSourceRequest> &req, const std::exception &e) {
+        Response response;
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, e.what());
+        req.invoke(&FileSourceRequest::setResponse, response);
+    }
+
     std::map<std::string, mapbox::sqlite::Database> db_cache;
 
     void close_db(const std::string &path) {
