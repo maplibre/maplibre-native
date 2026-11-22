@@ -1,5 +1,6 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 
+#include <mln/plugin/plugin_conversion.hpp>
 #include <mln/plugin/plugin_registry.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/plugin_property.hpp>
@@ -15,25 +16,6 @@
 namespace mln {
 namespace {
 
-style::PluginPropertyValue propertyValue(const plugin::PropertyDefinition& definition,
-                                         const style::PluginPropertyMap& properties) {
-    const auto it = properties.find(definition.name);
-    return it == properties.end() ? style::defaultPluginPropertyValue(definition) : it->second;
-}
-
-std::size_t componentCount(mln_plugin_property_encoding_v1 encoding) {
-    switch (encoding) {
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
-        case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
-            return 1;
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
-            return 2;
-        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
-            return 4;
-    }
-    return 0;
-}
-
 void encodedValue(const mln_plugin_value& value,
                   mln_plugin_property_encoding_v1 encoding,
                   const plugin::PropertyDefinition& definition,
@@ -42,6 +24,9 @@ void encodedValue(const mln_plugin_value& value,
     switch (encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
             output[0] = value.data.float_value;
+            break;
+        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
+            output[0] = value.data.boolean_value ? 1.0f : 0.0f;
             break;
         case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT: {
             const std::string_view text(value.data.string_value.data, value.data.string_value.size);
@@ -56,7 +41,11 @@ void encodedValue(const mln_plugin_value& value,
             output[0] = value.data.float2_value.x;
             output[1] = value.data.float2_value.y;
             break;
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
+            break; // Resolved through the binder's tile atlas.
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
             output[0] = value.data.color_value.r;
             output[1] = value.data.color_value.g;
             output[2] = value.data.color_value.b;
@@ -71,6 +60,9 @@ mln_plugin_value decodedValue(const std::array<float, 4>& input, const plugin::P
     value.struct_size = sizeof(value);
     value.type = type;
     switch (type) {
+        case MLN_PLUGIN_VALUE_BOOLEAN:
+            value.data.boolean_value = input[0] != 0;
+            break;
         case MLN_PLUGIN_VALUE_FLOAT:
             value.data.float_value = input[0];
             break;
@@ -80,6 +72,7 @@ mln_plugin_value decodedValue(const std::array<float, 4>& input, const plugin::P
         case MLN_PLUGIN_VALUE_COLOR:
             value.data.color_value = {input[0], input[1], input[2], input[3]};
             break;
+        case MLN_PLUGIN_VALUE_IMAGE:
         case MLN_PLUGIN_VALUE_STRING:
             if (!definition.enumValues.empty()) {
                 const auto index = static_cast<size_t>(
@@ -125,10 +118,24 @@ const PluginFeatureData::Drawable& PluginFeatureData::drawable(uint64_t key) con
 
 void PluginPaintVertexVector::set(std::size_t first, std::size_t length, const float* minimum, const float* maximum) {
     if (!length || first > count || length > count - first) return;
-    for (std::size_t vertex = first; vertex < first + length; ++vertex) {
-        auto* destination = data.data() + vertex * components * 2;
-        std::copy_n(minimum, components, destination);
-        std::copy_n(maximum, components, destination + components);
+    const auto samples = singleEndpoint ? 1u : 2u;
+    if (normalized) {
+        std::array<uint8_t, 8> record{};
+        for (size_t sample = 0; sample < samples; ++sample) {
+            const auto* values = sample ? maximum : minimum;
+            for (size_t component = 0; component < components; ++component) {
+                const auto value = std::clamp(values[component], 0.0f, 1.0f);
+                record[sample * components + component] = uint8_t(std::isnan(value) ? 0.0f : value * 255.0f);
+            }
+        }
+        for (std::size_t vertex = first; vertex < first + length; ++vertex)
+            std::copy_n(record.data(), components * samples, byteData.data() + vertex * components * samples);
+    } else {
+        for (std::size_t vertex = first; vertex < first + length; ++vertex) {
+            auto* destination = data.data() + vertex * components * samples;
+            std::copy_n(minimum, components, destination);
+            if (!singleEndpoint) std::copy_n(maximum, components, destination + components);
+        }
     }
     for (auto block = first / boundsBlockSize; block <= (first + length - 1) / boundsBlockSize; ++block) {
         blocks[block].dirty = true;
@@ -147,12 +154,13 @@ void PluginPaintVertexVector::bounds(std::array<float, 4>& minimum, std::array<f
             const auto first = index * boundsBlockSize;
             const auto length = std::min(boundsBlockSize, count - first);
             for (std::size_t vertex = first; vertex < first + length; ++vertex) {
-                const auto* values = data.data() + vertex * components * 2;
+                const auto offset = vertex * components * (singleEndpoint ? 1 : 2);
+                const auto upper = offset + (singleEndpoint ? 0 : components);
                 for (std::size_t component = 0; component < components; ++component) {
-                    block.minimum[component] = std::min(
-                        {block.minimum[component], values[component], values[components + component]});
-                    block.maximum[component] = std::max(
-                        {block.maximum[component], values[component], values[components + component]});
+                    const auto low = normalized ? byteData[offset + component] / 255.0f : data[offset + component];
+                    const auto high = normalized ? byteData[upper + component] / 255.0f : data[upper + component];
+                    block.minimum[component] = std::min({block.minimum[component], low, high});
+                    block.maximum[component] = std::max({block.maximum[component], low, high});
                 }
             }
             block.dirty = false;
@@ -182,33 +190,27 @@ PluginPaintPropertyBinder::PluginPaintPropertyBinder(plugin::PropertyDefinition 
       bucketZoom(bucketZoom_),
       vertexCount(vertexCount_),
       dataDriven(value.isDataDriven()),
+      stateDependent(value.usesFeatureState()),
       drawableKey(drawableKey_),
       features(std::move(features_)),
       featureStates(std::move(states_)) {
     if (dataDriven) {
-        vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount());
+        vertexVector = std::make_shared<PluginPaintVertexVector>(
+            vertexCount,
+            componentCount(),
+            canShareEndpoints(),
+            binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8);
         refill();
     }
 }
 
 gfx::AttributeDataType PluginPaintPropertyBinder::attributeType() const noexcept {
-    if (binding.minimumAttributeID == binding.maximumAttributeID) {
-        return componentCount() == 1 ? gfx::AttributeDataType::Float2 : gfx::AttributeDataType::Float4;
-    }
-    switch (binding.encoding) {
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
-        case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
-            return gfx::AttributeDataType::Float;
-        case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
-            return gfx::AttributeDataType::Float2;
-        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
-            return gfx::AttributeDataType::Float4;
-    }
-    return gfx::AttributeDataType::Invalid;
+    return plugin::attributeType(
+        plugin::propertyAttributeType(binding.encoding, binding.minimumAttributeID == binding.maximumAttributeID));
 }
 
 std::size_t PluginPaintPropertyBinder::componentCount() const noexcept {
-    return mln::componentCount(binding.encoding);
+    return plugin::propertyEncodingSize(binding.encoding) / sizeof(float);
 }
 
 float PluginPaintPropertyBinder::interpolationFactor(float zoom) const noexcept {
@@ -223,8 +225,8 @@ void PluginPaintPropertyBinder::writeUniform(float zoom,
     if (!dataDriven && uniformID == binding.uniformID) {
         if (!uniformZoom || (!value.isZoomConstant() && *uniformZoom != zoom)) {
             style::PluginPropertyValue::EvaluationStorage storage;
-            const auto evaluated = value.evaluate(zoom, definition, storage);
-            encodedValue(evaluated, binding.encoding, definition, uniformValue);
+            const auto evaluated = value.evaluate(zoom, definition, storage, &availableImages);
+            encode(evaluated, uniformValue);
             uniformZoom = zoom;
         }
         const auto size = componentCount() * sizeof(float);
@@ -245,12 +247,44 @@ bool PluginPaintPropertyBinder::synchronize(const style::PluginPropertyValue& re
     value = replacement;
     uniformZoom.reset();
     dataDriven = value.isDataDriven();
-    if (dataDriven && !vertexVector) {
-        vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount());
+    stateDependent = value.usesFeatureState();
+    if (dataDriven && (!vertexVector || vertexVector->hasSingleEndpoint() != canShareEndpoints())) {
+        vertexVector = std::make_shared<PluginPaintVertexVector>(
+            vertexCount,
+            componentCount(),
+            canShareEndpoints(),
+            binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8);
     }
     if (dataDriven) refill();
     if (!dataDriven) vertexVector.reset();
     return wasDataDriven != dataDriven || dataDriven;
+}
+
+bool PluginPaintPropertyBinder::hasImage() const {
+    if (definition.type != MLN_PLUGIN_VALUE_IMAGE) return false;
+    return !value.isUndefined();
+}
+
+void PluginPaintPropertyBinder::setPatternPositions(std::shared_ptr<const ImagePositions> positions) {
+    if (definition.type != MLN_PLUGIN_VALUE_IMAGE) return;
+    imagePositions = std::move(positions);
+    availableImages.clear();
+    for (const auto& [name, position] : *imagePositions) availableImages.insert(name);
+    uniformZoom.reset();
+    if (dataDriven) refill();
+}
+
+void PluginPaintPropertyBinder::encode(const mln_plugin_value& input, std::array<float, 4>& output) const {
+    if (definition.type != MLN_PLUGIN_VALUE_IMAGE) {
+        encodedValue(input, binding.encoding, definition, output);
+        return;
+    }
+    output = {};
+    if (!imagePositions || !input.data.string_value.size) return;
+    const auto it = imagePositions->find(std::string(input.data.string_value.data, input.data.string_value.size));
+    if (it == imagePositions->end()) return;
+    const auto rect = it->second.tlbr();
+    std::copy(rect.begin(), rect.end(), output.begin());
 }
 
 bool PluginPaintPropertyBinder::update(const FeatureStates& states, const GeometryTileLayer&) {
@@ -259,7 +293,7 @@ bool PluginPaintPropertyBinder::update(const FeatureStates& states, const Geomet
 }
 
 bool PluginPaintPropertyBinder::updateRanges(const FeatureStates& states) {
-    if (!dataDriven || states.empty()) return false;
+    if (!dataDriven || !stateDependent || states.empty()) return false;
     bool changed = false;
     const auto& drawable = features->drawable(drawableKey);
     for (const auto& [id, state] : states) {
@@ -279,7 +313,8 @@ void PluginPaintPropertyBinder::statistics(float zoom, mln_plugin_value& minimum
     if (!dataDriven || !vertexVector) {
         style::PluginPropertyValue::EvaluationStorage storage;
         minimum = value.evaluate(zoom, definition, storage);
-        if (binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT) {
+        if (binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT ||
+            binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT) {
             std::array<float, 4> encoded{};
             encodedValue(minimum, binding.encoding, definition, encoded);
             minimum = decodedValue(encoded, definition);
@@ -289,6 +324,12 @@ void PluginPaintPropertyBinder::statistics(float zoom, mln_plugin_value& minimum
     }
     minimum = decodedValue(minimumValues, definition);
     maximum = decodedValue(maximumValues, definition);
+}
+
+bool PluginPaintPropertyBinder::canShareEndpoints() const {
+    // Separate attributes can alias one record. A packed float2/float4
+    // attribute still needs both components even when their values agree.
+    return value.isZoomConstant() && binding.minimumAttributeID != binding.maximumAttributeID;
 }
 
 void PluginPaintPropertyBinder::refill() {
@@ -307,13 +348,24 @@ void PluginPaintPropertyBinder::fillRange(const PluginFeatureData::Range& range,
                                           const FeatureState& state) {
     style::PluginPropertyValue::EvaluationStorage minimumStorage;
     style::PluginPropertyValue::EvaluationStorage maximumStorage;
-    const auto minimumValue = value.evaluate(bucketZoom, feature, state, definition, minimumStorage);
-    const auto maximumValue = value.evaluate(
-        value.isZoomConstant() ? bucketZoom : bucketZoom + 1.0f, feature, state, definition, maximumStorage);
-    std::array<float, 4> minimum{};
-    std::array<float, 4> maximum{};
-    encodedValue(minimumValue, binding.encoding, definition, minimum);
-    encodedValue(maximumValue, binding.encoding, definition, maximum);
+    const bool image = definition.type == MLN_PLUGIN_VALUE_IMAGE;
+    const bool from = binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM;
+    // Native composite pattern dependencies use Faded<Image>::to, evaluated
+    // one zoom above the requested bucket zoom.
+    const float imageZoom = bucketZoom + (value.isZoomConstant() ? 0.0f : 1.0f);
+    const auto minimumValue = value.evaluate(
+        image ? imageZoom - (from ? 1 : 0) : bucketZoom, feature, state, definition, minimumStorage, &availableImages);
+    const auto maximumValue = value.isZoomConstant()
+                                  ? minimumValue
+                                  : value.evaluate(image ? imageZoom + (from ? 1 : 0) : bucketZoom + 1.0f,
+                                                   feature,
+                                                   state,
+                                                   definition,
+                                                   maximumStorage,
+                                                   &availableImages);
+    std::array<float, 4> minimum{}, maximum{};
+    encode(minimumValue, minimum);
+    encode(maximumValue, maximum);
     vertexVector->set(range.firstVertex, range.vertexCount, minimum.data(), maximum.data());
 }
 
@@ -336,7 +388,7 @@ PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::RegisteredL
         if (definition == definitions.end()) continue;
         binders.emplace_back(*definition,
                              binding,
-                             propertyValue(*definition, properties),
+                             style::pluginPropertyValue(*definition, properties),
                              bucketZoom,
                              drawableKey,
                              vertexCount,
@@ -345,9 +397,14 @@ PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::RegisteredL
     }
 }
 
+void PluginPaintPropertyBinders::setPatternPositions(std::shared_ptr<const ImagePositions> positions) {
+    for (auto& binder : binders) binder.setPatternPositions(positions);
+}
+
 void PluginPaintPropertyBinders::populateVertexAttributes(gfx::VertexAttributeArray& attributes,
                                                           gfx::StringIDSetsPair& uniforms) const {
     for (const auto& binder : binders) {
+        if (binder.hasImage()) uniforms.first.emplace("__plugin_pattern_enabled");
         const auto& binding = binder.getBinding();
         if (!binder.isDataDriven()) {
             uniforms.first.emplace(binding.propertyName);
@@ -356,7 +413,6 @@ void PluginPaintPropertyBinders::populateVertexAttributes(gfx::VertexAttributeAr
             continue;
         }
         const auto& vector = binder.getVertexVector();
-        const auto components = binder.componentCount();
         if (const auto& minimum = attributes.set(binding.minimumAttributeID)) {
             minimum->setSharedRawData(vector, 0, 0, vector->getRawSize(), binder.attributeType());
         }
@@ -364,7 +420,7 @@ void PluginPaintPropertyBinders::populateVertexAttributes(gfx::VertexAttributeAr
                                 ? attributes.set(binding.maximumAttributeID).get()
                                 : nullptr) {
             maximum->setSharedRawData(vector,
-                                      static_cast<uint32_t>(components * sizeof(float)),
+                                      static_cast<uint32_t>(vector->maximumOffset()),
                                       0,
                                       vector->getRawSize(),
                                       binder.attributeType());
@@ -382,7 +438,7 @@ void PluginPaintPropertyBinders::writeUniforms(float zoom,
 bool PluginPaintPropertyBinders::synchronize(const style::PluginPropertyMap& properties) {
     bool rebuildDrawable = false;
     for (auto& binder : binders) {
-        const auto replacement = propertyValue(binder.getDefinition(), properties);
+        const auto replacement = style::pluginPropertyValue(binder.getDefinition(), properties);
         rebuildDrawable = binder.synchronize(replacement) || rebuildDrawable;
     }
     return rebuildDrawable;
@@ -401,6 +457,7 @@ void PluginPaintPropertyBinders::appendStatistics(
         if (output.find(binder.getDefinition().name) != output.end()) continue;
         mln_plugin_value minimum{};
         mln_plugin_value maximum{};
+        if (binder.getDefinition().type == MLN_PLUGIN_VALUE_IMAGE) continue;
         binder.statistics(zoom, minimum, maximum);
         output.emplace(binder.getDefinition().name, std::make_pair(minimum, maximum));
     }
@@ -413,16 +470,18 @@ void PluginBucket::update(const FeatureStates& states,
     const auto it = paintPropertyBinders.find(layerID);
     if (it == paintPropertyBinders.end()) return;
     bool changed = false;
+    std::set<PluginPaintPropertyBinders*> updated;
     for (auto& [key, binders] : it->second) {
         (void)key;
-        changed = binders.update(states, layer) || changed;
+        if (updated.insert(binders.get()).second) changed = binders->update(states, layer) || changed;
     }
     if (changed) {
         uploaded = false;
-        const auto properties = latestPaintProperties.find(layerID);
+        const auto properties = latestProperties.find(layerID);
         const auto zoom = latestZoom.find(layerID);
-        if (properties != latestPaintProperties.end() && zoom != latestZoom.end()) {
-            updateQueryRadius(layerID, *properties->second, zoom->second);
+        if (properties != latestProperties.end() && zoom != latestZoom.end()) {
+            const auto& snapshot = *properties->second;
+            updateQueryRadius(layerID, snapshot.layer->pluginProperties, snapshot.paint, zoom->second);
         }
     }
 }
@@ -433,42 +492,45 @@ float PluginBucket::getQueryRadius(const RenderLayer& layer) const {
 }
 
 bool PluginBucket::synchronizePaint(const std::string& layerID,
-                                    const std::shared_ptr<const style::PluginPropertyMap>& properties,
+                                    const std::shared_ptr<const PluginLayerSnapshot>& properties,
                                     float zoom) {
     assert(properties);
-    const auto priorProperties = latestPaintProperties.find(layerID);
+    const auto priorProperties = latestProperties.find(layerID);
     const auto priorZoom = latestZoom.find(layerID);
-    const bool propertiesChanged = priorProperties == latestPaintProperties.end() ||
-                                   priorProperties->second != properties;
+    const bool propertiesChanged = priorProperties == latestProperties.end() || priorProperties->second != properties;
     const bool queryRadiusChanged = propertiesChanged || priorZoom == latestZoom.end() || priorZoom->second != zoom;
-    if (propertiesChanged) latestPaintProperties.insert_or_assign(layerID, properties);
+    if (propertiesChanged) latestProperties.insert_or_assign(layerID, properties);
     if (queryRadiusChanged) latestZoom.insert_or_assign(layerID, zoom);
     const auto it = paintPropertyBinders.find(layerID);
     if (it == paintPropertyBinders.end()) {
-        if (queryRadiusChanged) updateQueryRadius(layerID, *properties, zoom);
+        if (queryRadiusChanged)
+            updateQueryRadius(layerID, properties->layer->pluginProperties, properties->paint, zoom);
         return false;
     }
     bool rebuildDrawable = false;
     if (propertiesChanged) {
+        std::set<PluginPaintPropertyBinders*> updated;
         for (auto& [key, binders] : it->second) {
             (void)key;
-            rebuildDrawable = binders.synchronize(*properties) || rebuildDrawable;
+            if (updated.insert(binders.get()).second)
+                rebuildDrawable = binders->synchronize(properties->paint) || rebuildDrawable;
         }
     }
     if (rebuildDrawable) uploaded = false;
-    if (queryRadiusChanged) updateQueryRadius(layerID, *properties, zoom);
+    if (queryRadiusChanged) updateQueryRadius(layerID, properties->layer->pluginProperties, properties->paint, zoom);
     return rebuildDrawable;
 }
 
 void PluginBucket::updateQueryRadius(const std::string& layerID,
-                                     const style::PluginPropertyMap& properties,
+                                     const style::PluginPropertyMap& layerProperties,
+                                     const style::PluginPropertyMap& paint,
                                      float zoom) {
     if (!registration->queryRadius) return;
     std::map<std::string, std::pair<mln_plugin_value, mln_plugin_value>> values;
     if (const auto layer = paintPropertyBinders.find(layerID); layer != paintPropertyBinders.end()) {
         for (const auto& [key, binders] : layer->second) {
             (void)key;
-            binders.appendStatistics(zoom, values);
+            binders->appendStatistics(zoom, values);
         }
     }
     std::vector<mln_plugin_property_statistics_v1> statistics;
@@ -484,11 +546,11 @@ void PluginBucket::updateQueryRadius(const std::string& layerID,
     cameraProperties.reserve(definitions.size());
     for (std::size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
-        const auto current = propertyValue(definition, properties);
+        const auto current = style::pluginPropertyValue(definition, definition.isLayout ? layerProperties : paint);
         cameraProperties.push_back({sizeof(mln_plugin_property_value_v1),
                                     {definition.name.data(), definition.name.size()},
                                     current.evaluate(zoom, definition, storage[i]),
-                                    properties.find(definition.name) != properties.end()});
+                                    layerProperties.contains(definition.name)});
     }
     const auto radius = registration->queryRadius(
         statistics.data(), statistics.size(), cameraProperties.data(), cameraProperties.size());
@@ -507,7 +569,7 @@ PluginPaintPropertyBinders* PluginBucket::paintBinders(const std::string& layerI
     const auto layer = paintPropertyBinders.find(layerID);
     if (layer == paintPropertyBinders.end()) return nullptr;
     const auto drawable = layer->second.find(drawableKey);
-    return drawable == layer->second.end() ? nullptr : &drawable->second;
+    return drawable == layer->second.end() ? nullptr : drawable->second.get();
 }
 
 } // namespace mln
