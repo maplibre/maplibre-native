@@ -35,10 +35,11 @@ public:
 
     friend bool operator==(const Filter& lhs, const Filter& rhs) {
         if (!lhs.expression || !rhs.expression) {
-            return lhs.expression == rhs.expression;
-        } else {
-            return *lhs.expression == *rhs.expression;
+            return lhs.expression.has_value() == rhs.expression.has_value();
         }
+        // Compare the expressions themselves: every layer parses its own filter, so two layers
+        // with the same filter hold different expression objects.
+        return *lhs.expression == *rhs.expression || **lhs.expression == **rhs.expression;
     }
 
     friend bool operator!=(const Filter& lhs, const Filter& rhs) { return !(lhs == rhs); }
