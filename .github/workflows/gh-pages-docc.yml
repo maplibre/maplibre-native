@@ -12,12 +12,15 @@ on:
       - ios-ci
     types:
       - completed
+    branches:
+      - main
 
 jobs:
   gh-pages-docc-build:
     name: Build DocC Docs
     runs-on: macos-latest
-    if: ${{ github.ref_name == 'main' }}
+    # A pull request from a fork can have a head branch called main too
+    if: ${{ github.ref_name == 'main' && github.event.workflow_run.event != 'pull_request' }}
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

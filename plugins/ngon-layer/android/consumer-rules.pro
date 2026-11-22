@@ -1,1 +1,0 @@
--keep class org.maplibre.plugins.ngon.NgonLayer { native <methods>; }
