@@ -2,6 +2,7 @@
 
 ## main
 
+- Text a tile was drawn without because its glyph range failed to load is drawn as soon as the range loads, instead of when the tile is next reloaded.
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 
 ### 🐞 Bug fixes
