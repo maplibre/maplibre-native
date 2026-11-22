@@ -152,7 +152,12 @@ public:
         if (glyphsAvailable) glyphsAvailable(std::move(glyphs));
     }
 
+    void onLateGlyphsAvailable() override {
+        if (lateGlyphsAvailable) lateGlyphsAvailable();
+    }
+
     std::function<void(GlyphMap)> glyphsAvailable;
+    std::function<void()> lateGlyphsAvailable;
 };
 
 class GlyphManagerTest {
@@ -294,6 +299,64 @@ TEST(GlyphManager, LoadingFailRequestsTheRangeAgain) {
 
     EXPECT_EQ(requests, 2);
     EXPECT_EQ(answers, 2);
+}
+
+// A requestor answered without a range that failed is told when another requestor's request loads it,
+// and only that requestor: the one answered with the glyphs has nothing to lay out again.
+TEST(GlyphManager, LoadingFailTellsTheRequestorWhenTheRangeLoadsLater) {
+    GlyphManagerTest test;
+    StubGlyphRequestor second;
+    int requests = 0;
+    int late = 0;
+    bool secondAnswered = false;
+
+    test.observer.glyphsRequested = [&](const FontStack&, const GlyphRange&) {
+        ++requests;
+    };
+
+    test.fileSource.glyphsResponse = [&](const Resource&) {
+        Response response;
+        if (requests == 1) {
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                               "Failed by the test case");
+        } else {
+            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        }
+        return response;
+    };
+
+    test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
+        EXPECT_FALSE(glyphs.at(FontStackHasher()({{"Test Stack"}})).at(u'a').has_value());
+        test.loop.invoke([&] {
+            test.glyphManager.getGlyphs(
+                second, GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a'}}}, .shapes = {}}, test.fileSource);
+        });
+    };
+
+    second.glyphsAvailable = [&](GlyphMap glyphs) {
+        EXPECT_TRUE(glyphs.at(FontStackHasher()({{"Test Stack"}})).at(u'a').has_value());
+        secondAnswered = true;
+    };
+
+    second.lateGlyphsAvailable = [&] {
+        ADD_FAILURE() << "the second requestor was answered with the glyphs";
+    };
+
+    test.requestor.lateGlyphsAvailable = [&] {
+        EXPECT_TRUE(secondAnswered);
+        ++late;
+        test.end();
+    };
+
+    util::Timer timeout;
+    timeout.start(Milliseconds(1000), Duration::zero(), [&] { test.end(); });
+
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a'}}}, .shapes = {}});
+    test.glyphManager.removeRequestor(second);
+
+    EXPECT_EQ(requests, 2);
+    EXPECT_EQ(late, 1);
 }
 
 TEST(GlyphManager, LoadingFailStillAnswersWithTheOtherRanges) {
