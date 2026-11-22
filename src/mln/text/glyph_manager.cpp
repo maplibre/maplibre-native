@@ -43,7 +43,7 @@ void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphD
             std::unordered_set<GlyphRange> ranges;
             for (const auto& glyphID : glyphIDs) {
                 if (localGlyphRasterizer->canRasterizeGlyph(fontStack, glyphID)) {
-                    if (entry.glyphs.find(glyphID) == entry.glyphs.end()) {
+                    if (!entry.glyphs.contains(glyphID)) {
                         entry.glyphs.emplace(glyphID, makeMutable<Glyph>(generateLocalSDF(fontStack, glyphID)));
                     }
                 } else {
@@ -80,9 +80,10 @@ void GlyphManager::requestRange(GlyphRequest& request,
                                 const FontStack& fontStack,
                                 const GlyphRange& range,
                                 FileSource& fileSource) {
-    if (request.req) {
+    if (request.req && !request.failed) {
         return;
     }
+    request.failed = false;
     Resource res(Resource::Kind::Unknown, "");
     switch (range.type) {
         case GlyphIDType::FontPBF:
@@ -90,7 +91,7 @@ void GlyphManager::requestRange(GlyphRequest& request,
             break;
         default: {
             std::string url = getFontFaceURL(range.type);
-            if (url.size()) {
+            if (!url.empty()) {
                 res = Resource::fontFace(url);
             } else {
                 Log::Error(Event::Style, "Try download a glyph doesn't in current faces");
@@ -106,22 +107,20 @@ void GlyphManager::requestRange(GlyphRequest& request,
 }
 
 void GlyphManager::processResponse(const Response& res, const FontStack& fontStack, const GlyphRange& range) {
-    if (res.error) {
-        observer->onGlyphsError(fontStack, range, std::make_exception_ptr(std::runtime_error(res.error->message)));
-        return;
-    }
-
     if (res.notModified) {
         return;
     }
 
+    std::exception_ptr error;
     {
         std::scoped_lock readWriteLock(rwLock);
 
         Entry& entry = entries[fontStack];
         GlyphRequest& request = entry.ranges[range];
 
-        if (!res.noContent) {
+        if (res.error) {
+            error = std::make_exception_ptr(std::runtime_error(res.error->message));
+        } else if (!res.noContent) {
             std::vector<Glyph> glyphs;
 
             try {
@@ -135,8 +134,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
                     }
                 }
             } catch (...) {
-                observer->onGlyphsError(fontStack, range, std::current_exception());
-                return;
+                error = std::current_exception();
             }
 
             for (auto& glyph : glyphs) {
@@ -148,7 +146,12 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
             }
         }
 
-        request.parsed = true;
+        if (error) {
+            // The waiting requestors get the range's glyphs as missing, and the next one to need it asks again.
+            request.failed = true;
+        } else {
+            request.parsed = true;
+        }
 
         for (auto& pair : request.requestors) {
             GlyphRequestor& requestor = *pair.first;
@@ -161,7 +164,11 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
         request.requestors.clear();
     }
 
-    observer->onGlyphsLoaded(fontStack, range);
+    if (error) {
+        observer->onGlyphsError(fontStack, range, error);
+    } else {
+        observer->onGlyphsLoaded(fontStack, range);
+    }
 }
 
 void GlyphManager::setObserver(GlyphManagerObserver* observer_) {
@@ -206,9 +213,9 @@ void GlyphManager::evict(const std::set<FontStack>& keep) {
 }
 
 std::shared_ptr<HBShaper> GlyphManager::getHBShaper(FontStack fontStack, GlyphIDType type) {
-    if (hbShapers.find(fontStack) != hbShapers.end()) {
+    if (hbShapers.contains(fontStack)) {
         auto& glyphs = hbShapers[fontStack];
-        if (glyphs.find(type) != glyphs.end()) {
+        if (glyphs.contains(type)) {
             return glyphs[type];
         }
     }
@@ -225,7 +232,7 @@ bool GlyphManager::loadHBShaper(const FontStack& fontStack, GlyphIDType type, co
 
 Immutable<Glyph> GlyphManager::getGlyph(const FontStack& fontStack, GlyphID glyphID) {
     auto& entry = entries[fontStack];
-    if (entry.glyphs.find(glyphID) != entry.glyphs.end()) return entry.glyphs.at(glyphID);
+    if (entry.glyphs.contains(glyphID)) return entry.glyphs.at(glyphID);
 
     if (glyphID.complex.type != FontPBF) {
         auto shaper = getHBShaper(fontStack, glyphID.complex.type);

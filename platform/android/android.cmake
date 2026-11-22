@@ -49,31 +49,14 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/android/src/string_util.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/thread.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_frontend.cpp
+        ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
+        ${MLN_DEFAULT_HEADLESS_SOURCES}
+        ${MLN_DEFAULT_UNICODE_SOURCES}
+        ${MLN_DEFAULT_UTIL_SOURCES}
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/map/map_snapshotter.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/platform/time.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/asset_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/database_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/mbtiles_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/main_resource_loader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_database.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_download.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/online_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/sqlite3.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/bidi.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/compression.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/filesystem.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/monotonic_timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_writer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/thread_local.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/utf.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/layermanager/layer_manager.cpp
 )
 
@@ -81,17 +64,8 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend.cpp
             ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
             ${PROJECT_SOURCE_DIR}/platform/android/src/gl_functions.cpp
-    )
-endif()
-
-if(MLN_WITH_VULKAN)
-    target_sources(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/vulkan/headless_backend.cpp
     )
 endif()
 

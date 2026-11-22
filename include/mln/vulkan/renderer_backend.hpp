@@ -31,7 +31,7 @@ class ProgramParameters;
 
 namespace vulkan {
 
-using DynamicLoader = vk::detail::DynamicLoader;
+using vk::detail::DynamicLoader;
 using DispatchLoaderDynamic = VULKAN_HPP_DISPATCH_LOADER_DYNAMIC_TYPE;
 template <typename OwnerType>
 using ObjectDestroy = vk::detail::ObjectDestroy<OwnerType, DispatchLoaderDynamic>;

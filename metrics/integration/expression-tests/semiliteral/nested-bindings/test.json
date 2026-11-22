@@ -1,0 +1,24 @@
+{
+  "expression": [
+    "let",
+    "x",
+    ["get", "x"],
+    ["semiliteral", ["top", ["semiliteral", [["var", "x"], 2]], ["literal", ["get", "x"]]]]
+  ],
+  "inputs": [[{}, {"properties": {"x": 3}}]],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": false,
+      "isZoomConstant": true,
+      "type": "array<value, 3>"
+    },
+    "outputs": [["top", [3, 2], ["get", "x"]]],
+    "serialized": [
+      "let",
+      "x",
+      ["get", "x"],
+      ["semiliteral", ["top", ["semiliteral", [["var", "x"], 2]], ["literal", ["get", "x"]]]]
+    ]
+  }
+}

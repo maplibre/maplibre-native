@@ -35,8 +35,6 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/clipping_mask.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/common.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/collision.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/custom_geometry.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/custom_symbol_icon.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/debug.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/fill.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/fill_extrusion.hpp
@@ -78,8 +76,6 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/circle.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/collision.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/clipping_mask.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/custom_geometry.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/custom_symbol_icon.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/debug.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/fill.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/fill_extrusion.cpp

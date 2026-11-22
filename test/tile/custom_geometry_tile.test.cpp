@@ -8,6 +8,7 @@
 #include <mln/util/run_loop.hpp>
 #include <mln/map/transform.hpp>
 #include <mln/renderer/tile_parameters.hpp>
+#include <mln/renderer/query.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/layers/circle_layer.hpp>
 #include <mln/style/layers/circle_layer_impl.hpp>
@@ -134,11 +135,68 @@ TEST(CustomGeometryTile, InvokeTileChanged) {
     };
 
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
-    tile.setLayers(layers);
+    tile.setLayers(layers, test.tileParameters.globalState);
     tile.setObserver(&observer);
+    std::vector<Feature> result;
+    tile.querySourceFeatures(result, {}, nullptr);
+    EXPECT_TRUE(result.empty());
+
     tile.setTileData(features);
 
     while (!tile.isComplete()) {
         test.loop.runOnce();
     }
+
+    tile.querySourceFeatures(result, {}, nullptr);
+    EXPECT_EQ(1u, result.size());
+}
+
+TEST(CustomGeometryTile, CancellationDiscardsQueuedInvalidation) {
+    CustomTileTest test;
+    StubTileObserver observer;
+    unsigned changes = 0;
+    observer.tileChanged = [&](Tile&) {
+        ++changes;
+    };
+    bool requested = false;
+    CustomTileLoader loader([&](const CanonicalTileID&) { requested = true; }, nullptr);
+    auto mailbox = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
+    ActorRef<CustomTileLoader> loaderActor(loader, mailbox);
+    const OverscaledTileID id(0, 0, 0);
+    CustomGeometryTile tile(
+        id, "source", test.tileParameters, makeMutable<CustomGeometrySource::TileOptions>(), loaderActor, &observer);
+    tile.setNecessity(TileNecessity::Required);
+    test.loop.runOnce();
+    ASSERT_TRUE(requested);
+
+    loader.invalidateTile(id.canonical);
+    tile.cancel();
+    test.loop.runOnce();
+
+    EXPECT_EQ(changes, 0u);
+}
+
+TEST(CustomGeometryTile, CancellationDiscardsLateInvalidation) {
+    CustomTileTest test;
+    StubTileObserver observer;
+    unsigned changes = 0;
+    observer.tileChanged = [&](Tile&) {
+        ++changes;
+    };
+    bool requested = false;
+    CustomTileLoader loader([&](const CanonicalTileID&) { requested = true; }, nullptr);
+    auto mailbox = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
+    ActorRef<CustomTileLoader> loaderActor(loader, mailbox);
+    const OverscaledTileID id(0, 0, 0);
+    CustomGeometryTile tile(
+        id, "source", test.tileParameters, makeMutable<CustomGeometrySource::TileOptions>(), loaderActor, &observer);
+    tile.setNecessity(TileNecessity::Required);
+    test.loop.runOnce();
+    ASSERT_TRUE(requested);
+
+    tile.cancel();
+    loader.invalidateTile(id.canonical);
+    test.loop.runOnce();
+
+    EXPECT_EQ(changes, 0u);
 }

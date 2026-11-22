@@ -22,8 +22,8 @@ std::optional<Color> Color::parse(const std::string& s) {
 
 std::string Color::stringify() const {
     std::array<double, 4> array = toArray();
-    return "rgba(" + util::toString(array[0]) + "," + util::toString(array[1]) + "," + util::toString(array[2]) + "," +
-           util::toString(array[3]) + ")";
+    return "rgba(" + util::toString(std::round(array[0])) + "," + util::toString(std::round(array[1])) + "," +
+           util::toString(std::round(array[2])) + "," + util::toString(array[3]) + ")";
 }
 
 std::array<double, 4> Color::toArray() const {

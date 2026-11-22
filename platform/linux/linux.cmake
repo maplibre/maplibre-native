@@ -31,52 +31,27 @@ endif()
 target_sources(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/i18n/collator.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/i18n/number_format.cpp
+        ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
+        ${MLN_DEFAULT_HEADLESS_SOURCES}
+        ${MLN_DEFAULT_IMAGE_DECODER_SOURCES}
+        ${MLN_DEFAULT_LIBUV_RUN_LOOP_SOURCES}
+        ${MLN_DEFAULT_LOCALE_SOURCES}
+        ${MLN_DEFAULT_UNICODE_SOURCES}
+        ${MLN_DEFAULT_UTIL_SOURCES}
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/layermanager/layer_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/platform/time.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/asset_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/database_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_request.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/http_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/mbtiles_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/main_resource_loader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_database.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_download.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/online_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/sqlite3.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/bidi.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/local_glyph_rasterizer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/async_task.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/compression.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/filesystem.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/image.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/jpeg_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/webp_reader.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/logging_stderr.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/monotonic_timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_reader.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_writer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/run_loop.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/string_stdlib.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/thread.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/thread_local.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/utf.cpp
 )
 
 if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend.cpp
             ${PROJECT_SOURCE_DIR}/platform/linux/src/gl_functions.cpp
     )
 endif()
@@ -107,11 +82,6 @@ elseif(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include
     )
 
-    target_sources(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/vulkan/headless_backend.cpp
-    )
 else()
     find_package(OpenGL REQUIRED GLX)
     target_sources(
@@ -150,7 +120,7 @@ target_include_directories(
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 
-if(NOT ${ICUUC_FOUND} OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
+if(NOT ICUUC_FOUND OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
     message(STATUS "ICU not found, too old or MLN_USE_BUILTIN_ICU requestd, using builtin.")
 
     set(MLN_USE_BUILTIN_ICU TRUE)
@@ -236,7 +206,6 @@ if(MLN_CREATE_AMALGAMATION)
 
 endif()
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 if(MLN_WITH_GLFW)
 	add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)

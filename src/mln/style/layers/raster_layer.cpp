@@ -87,6 +87,7 @@ void RasterLayer::setRasterBrightnessMaxTransition(const TransitionOptions& opti
     auto impl_ = mutableImpl();
     impl_->paint.template get<RasterBrightnessMax>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions RasterLayer::getRasterBrightnessMaxTransition() const {
@@ -114,6 +115,7 @@ void RasterLayer::setRasterBrightnessMinTransition(const TransitionOptions& opti
     auto impl_ = mutableImpl();
     impl_->paint.template get<RasterBrightnessMin>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions RasterLayer::getRasterBrightnessMinTransition() const {
@@ -141,6 +143,7 @@ void RasterLayer::setRasterContrastTransition(const TransitionOptions& options) 
     auto impl_ = mutableImpl();
     impl_->paint.template get<RasterContrast>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions RasterLayer::getRasterContrastTransition() const {
@@ -168,6 +171,7 @@ void RasterLayer::setRasterFadeDurationTransition(const TransitionOptions& optio
     auto impl_ = mutableImpl();
     impl_->paint.template get<RasterFadeDuration>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions RasterLayer::getRasterFadeDurationTransition() const {
@@ -195,6 +199,7 @@ void RasterLayer::setRasterHueRotateTransition(const TransitionOptions& options)
     auto impl_ = mutableImpl();
     impl_->paint.template get<RasterHueRotate>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions RasterLayer::getRasterHueRotateTransition() const {
@@ -222,6 +227,7 @@ void RasterLayer::setRasterOpacityTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<RasterOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions RasterLayer::getRasterOpacityTransition() const {
@@ -249,6 +255,7 @@ void RasterLayer::setRasterResamplingTransition(const TransitionOptions& options
     auto impl_ = mutableImpl();
     impl_->paint.template get<RasterResampling>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions RasterLayer::getRasterResamplingTransition() const {
@@ -276,6 +283,7 @@ void RasterLayer::setRasterSaturationTransition(const TransitionOptions& options
     auto impl_ = mutableImpl();
     impl_->paint.template get<RasterSaturation>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions RasterLayer::getRasterSaturationTransition() const {

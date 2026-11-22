@@ -107,9 +107,13 @@ public:
                              )
         : layoutSize(expression_.evaluate(tileZoom + 1)),
           expression(expression_) {
-        const Range<float> zoomLevels = expression_.getCoveringStops(tileZoom, tileZoom + 1);
-        coveringRanges = std::make_tuple(
-            zoomLevels, Range<float>{expression_.evaluate(zoomLevels.min), expression_.evaluate(zoomLevels.max)});
+        // A feature-constant expression without a zoom dependency (e.g. one
+        // that only depends on the global state) has no zoom curve.
+        if (!expression_.isZoomConstant()) {
+            const Range<float> zoomLevels = expression_.getCoveringStops(tileZoom, tileZoom + 1);
+            coveringRanges = std::make_tuple(
+                zoomLevels, Range<float>{expression_.evaluate(zoomLevels.min), expression_.evaluate(zoomLevels.max)});
+        }
     }
 
     Range<float> getVertexSizeData(const GeometryTileFeature&) noexcept override { return {0.0f, 0.0f}; };
@@ -210,6 +214,7 @@ public:
                  WritingModeType writingModes_,
                  GeometryCoordinates line_,
                  std::vector<float> tileDistances_,
+                 std::optional<std::string> featureId_,
                  std::optional<size_t> placedIconIndex_ = std::nullopt)
         : anchorPoint(anchorPoint_),
           segment(segment_),
@@ -221,7 +226,8 @@ public:
           tileDistances(std::move(tileDistances_)),
           hidden(false),
           startIndex(0),
-          placedIconIndex(std::move(placedIconIndex_)) {}
+          placedIconIndex(std::move(placedIconIndex_)),
+          featureId(std::move(featureId_)) {}
     Point<float> anchorPoint;
     std::size_t segment;
     float lowerSize;
@@ -242,6 +248,8 @@ public:
 
     // Reference to placed icon, only applicable for text symbols.
     std::optional<size_t> placedIconIndex;
+
+    std::optional<std::string> featureId;
 };
 
 class SymbolBucket final : public Bucket {
@@ -305,30 +313,32 @@ public:
                                   uint16_t(symbol.isSDF);
         const uint16_t aSizeMax = std::min(MAX_PACKED_SIZE, static_cast<uint16_t>(sizeData.max * SIZE_PACK_FACTOR));
 
-        return {{static_cast<int16_t>(labelAnchor.point.x),
-                 static_cast<int16_t>(labelAnchor.point.y),
-                 static_cast<int16_t>(symbol.minFontScale.x * 256),
-                 static_cast<int16_t>(symbol.minFontScale.y * 256)},
+        return {.a1 = {static_cast<int16_t>(labelAnchor.point.x),
+                       static_cast<int16_t>(labelAnchor.point.y),
+                       static_cast<int16_t>(symbol.minFontScale.x * 256),
+                       static_cast<int16_t>(symbol.minFontScale.y * 256)},
 
-                {static_cast<int16_t>(std::round(symbol.tl.x * 32)),
-                 static_cast<int16_t>(std::round((symbol.tl.y + symbol.glyphOffset.y) * 32)),
-                 static_cast<int16_t>(std::round(symbol.tr.x * 32)),
-                 static_cast<int16_t>(std::round((symbol.tr.y + symbol.glyphOffset.y) * 32))},
+                .a2 = {static_cast<int16_t>(std::round(symbol.tl.x * 32)),
+                       static_cast<int16_t>(std::round((symbol.tl.y + symbol.glyphOffset.y) * 32)),
+                       static_cast<int16_t>(std::round(symbol.tr.x * 32)),
+                       static_cast<int16_t>(std::round((symbol.tr.y + symbol.glyphOffset.y) * 32))},
 
-                {static_cast<int16_t>(std::round(symbol.bl.x * 32)),
-                 static_cast<int16_t>(std::round((symbol.bl.y + symbol.glyphOffset.y) * 32)),
-                 static_cast<int16_t>(std::round(symbol.br.x * 32)),
-                 static_cast<int16_t>(std::round((symbol.br.y + symbol.glyphOffset.y) * 32))},
+                .a3 = {static_cast<int16_t>(std::round(symbol.bl.x * 32)),
+                       static_cast<int16_t>(std::round((symbol.bl.y + symbol.glyphOffset.y) * 32)),
+                       static_cast<int16_t>(std::round(symbol.br.x * 32)),
+                       static_cast<int16_t>(std::round((symbol.br.y + symbol.glyphOffset.y) * 32))},
 
-                {symbol.tex.x, symbol.tex.y, symbol.tex.w, symbol.tex.h},
+                .a4 = {symbol.tex.x, symbol.tex.y, symbol.tex.w, symbol.tex.h},
 
-                {static_cast<int16_t>(symbol.pixelOffsetTL.x * 16),
-                 static_cast<int16_t>(symbol.pixelOffsetTL.y * 16),
-                 static_cast<int16_t>(symbol.pixelOffsetBR.x * 16),
-                 static_cast<int16_t>(symbol.pixelOffsetBR.y * 16)},
+                .a5 = {static_cast<int16_t>(symbol.pixelOffsetTL.x * 16),
+                       static_cast<int16_t>(symbol.pixelOffsetTL.y * 16),
+                       static_cast<int16_t>(symbol.pixelOffsetBR.x * 16),
+                       static_cast<int16_t>(symbol.pixelOffsetBR.y * 16)},
 
-                { aSizeMin,
-                  aSizeMax }};
+                .a6 = {
+                    aSizeMin,
+                    aSizeMax
+                }};
     }
 #else
     static SymbolLayoutAttributes layoutAttributes(Point<float> labelAnchor,
@@ -347,15 +357,15 @@ public:
         return {
             // combining pos and offset to reduce number of vertex attributes
             // passed to shader (8 max for some devices)
-            {{static_cast<int16_t>(labelAnchor.x),
-              static_cast<int16_t>(labelAnchor.y),
-              static_cast<int16_t>(std::round(o.x * 32)), // use 1/32 pixels for placement
-              static_cast<int16_t>(std::round((o.y + glyphOffsetY) * 32))}},
-            {{tx, ty, aSizeMin, aSizeMax}},
-            {{static_cast<int16_t>(pixelOffset.x * 16),
-              static_cast<int16_t>(pixelOffset.y * 16),
-              static_cast<int16_t>(minFontScale.x * 256),
-              static_cast<int16_t>(minFontScale.y * 256)}},
+            .a1 = {{static_cast<int16_t>(labelAnchor.x),
+                    static_cast<int16_t>(labelAnchor.y),
+                    static_cast<int16_t>(std::round(o.x * 32)), // use 1/32 pixels for placement
+                    static_cast<int16_t>(std::round((o.y + glyphOffsetY) * 32))}},
+            .a2 = {{tx, ty, aSizeMin, aSizeMax}},
+            .a3 = {{static_cast<int16_t>(pixelOffset.x * 16),
+                    static_cast<int16_t>(pixelOffset.y * 16),
+                    static_cast<int16_t>(minFontScale.x * 256),
+                    static_cast<int16_t>(minFontScale.y * 256)}},
         };
     }
 #endif
@@ -518,13 +528,13 @@ public:
     static CollisionBoxLayoutVertexAttributes collisionLayoutVertex(Point<float> a,
                                                                     Point<float> anchor,
                                                                     Point<float> o) {
-        return {{{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
-                {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
-                {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
+        return {.a1 = {{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
+                .a2 = {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
+                .a3 = {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
     }
 
     static CollisionBoxDynamicVertexAttributes collisionDynamicVertex(bool placed, bool notUsed, Point<float> shift) {
-        return {{{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, {{shift.x, shift.y}}};
+        return {.a1 = {{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, .a2 = {{shift.x, shift.y}}};
     }
 
     const float tilePixelRatio;

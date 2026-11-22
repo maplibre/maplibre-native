@@ -436,6 +436,89 @@ MLN_EXPORT
  */
 - (double)zoomLevelForExpandingCluster:(MLNPointFeatureCluster *)cluster;
 
+// MARK: Managing Feature State
+
+/**
+ Sets the state of a feature in this source.
+
+ A feature's state is a set of user-defined key-value pairs that are assigned
+ to a feature at runtime. The state object is merged with any existing
+ key-value pairs in the feature's state. Feature state can be read in style
+ expressions through the `feature-state` expression operator.
+
+ The target feature must have an identifier in the underlying source data:
+ either an `id` attribute in the original GeoJSON data, or an ``MLNFeature``
+ whose `identifier` is set.
+
+ This method can only be used while the source is attached to a map.
+
+ @param featureID The identifier of the feature whose state to set.
+ @param state A set of key-value pairs to merge into the feature's state. The
+    values should be valid JSON types.
+ @return `YES` if the source is attached to a map and the update was
+    dispatched.
+ */
+- (BOOL)setFeatureStateForFeatureID:(NSString *)featureID
+                              state:(NSDictionary<NSString *, id> *)state
+    NS_SWIFT_NAME(setFeatureState(featureID:state:));
+
+/**
+ Gets the current state of a feature in this source.
+
+ This method can only be used while the source is attached to a map.
+
+ @param featureID The identifier of the feature whose state to get.
+ @return A dictionary containing the current state of the feature, or `nil` if
+    the feature has no state or the source is not attached to a map.
+ */
+- (nullable NSDictionary<NSString *, id> *)featureStateForFeatureID:(NSString *)featureID
+    NS_SWIFT_NAME(featureState(featureID:));
+
+/**
+ Removes state from a feature in this source, or from all features when
+ `featureID` is `nil`.
+
+ This method can only be used while the source is attached to a map.
+ Removals are applied on the next rendering frame: reading the state
+ back immediately afterwards may still return the removed entries.
+
+ @param featureID The identifier of the feature, or `nil` to target all
+    features.
+ @param stateKey The key of the state entry to remove, or `nil` to remove all
+    keys.
+ @return `YES` if the source is attached to a map and the update was
+    dispatched.
+ */
+- (BOOL)removeFeatureStateForFeatureID:(nullable NSString *)featureID
+                              stateKey:(nullable NSString *)stateKey
+    NS_SWIFT_NAME(removeFeatureState(featureID:stateKey:));
+
+/**
+ Removes all state from a single feature in this source.
+
+ This method can only be used while the source is attached to a map.
+ Removals are applied on the next rendering frame: reading the state
+ back immediately afterwards may still return the removed entries.
+
+ @param featureID The identifier of the feature.
+ @return `YES` if the source is attached to a map and the update was
+    dispatched.
+ */
+- (BOOL)removeFeatureStateForFeatureID:(NSString *)featureID
+    NS_SWIFT_NAME(removeFeatureState(featureID:));
+
+/**
+ Removes all feature state entries from this source.
+
+ This method can only be used while the source is attached to a map.
+ Removals are applied on the next rendering frame: reading the state
+ back immediately afterwards may still return the removed entries.
+
+ @return `YES` if the source is attached to a map and the update was
+    dispatched.
+ */
+- (BOOL)resetFeatureStates;
+
 @end
 
 NS_ASSUME_NONNULL_END

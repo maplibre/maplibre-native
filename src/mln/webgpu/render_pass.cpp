@@ -179,6 +179,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     impl->encoder = wgpuCommandEncoderBeginRenderPass(impl->commandEncoder, &renderPassDesc);
 
     if (impl->encoder) {
+        context.performCleanup();
         auto size = descriptor.renderable.getSize();
         wgpuRenderPassEncoderSetViewport(
             impl->encoder, 0.0f, 0.0f, static_cast<float>(size.width), static_cast<float>(size.height), 0.0f, 1.0f);

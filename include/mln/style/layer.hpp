@@ -3,6 +3,7 @@
 #include <mln/style/conversion.hpp>
 #include <mln/style/style_property.hpp>
 #include <mln/style/types.hpp>
+#include <mln/util/feature.hpp>
 #include <mln/util/immutable.hpp>
 
 #include <mapbox/std/weak.hpp>
@@ -133,6 +134,14 @@ public:
     VisibilityType getVisibility() const;
     void setVisibility(VisibilityType);
 
+    /// Re-evaluates the layer's visibility expression (a "visibility" layout
+    /// value using "global-state"), if any, against the given global state.
+    void reevaluateVisibility(const GlobalStateMap&);
+
+    /// The serialized visibility expression, or a null value when the
+    /// visibility is a constant.
+    Value getVisibilityExpression() const;
+
     // Zoom range
     float getMinZoom() const;
     float getMaxZoom() const;
@@ -140,7 +149,13 @@ public:
     void setMaxZoom(float);
 
     // Dynamic properties
-    std::optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
+    enum class PropertyScope {
+        Paint,
+        Layout
+    };
+    virtual std::optional<conversion::Error> setProperty(const std::string& name,
+                                                         const conversion::Convertible& value,
+                                                         std::optional<PropertyScope> scope = std::nullopt);
 
     virtual StyleProperty getProperty(const std::string&) const = 0;
     virtual Value serialize() const;

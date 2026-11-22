@@ -136,6 +136,21 @@ Database& Database::operator=(Database&& other) noexcept {
 
 Database::~Database() {}
 
+std::string Database::getFilename() const {
+    assert(impl);
+    QSqlQuery query(QSqlDatabase::database(impl->connectionName));
+    if (!query.exec("PRAGMA database_list")) {
+        checkQueryError(query);
+    }
+    while (query.next()) {
+        if (query.value(1).toString() == "main") {
+            return query.value(2).toString().toStdString();
+        }
+    }
+    checkQueryError(query);
+    return "";
+}
+
 void Database::setBusyTimeout(std::chrono::milliseconds timeout) {
     assert(impl);
     impl->setBusyTimeout(timeout);
@@ -255,7 +270,7 @@ void Query::bind(int offset, uint8_t value) {
 
 template <>
 void Query::bind(int offset, mln::Timestamp value) {
-    bind(offset, std::chrono::system_clock::to_time_t(value));
+    bind(offset, static_cast<int64_t>(value.time_since_epoch().count()));
 }
 
 template <>
@@ -359,8 +374,7 @@ mln::Timestamp Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
-    return std::chrono::time_point_cast<std::chrono::seconds>(
-        std::chrono::system_clock::from_time_t(value.value<::time_t>()));
+    return mln::Timestamp(std::chrono::seconds(value.value<::time_t>()));
 }
 
 template <>

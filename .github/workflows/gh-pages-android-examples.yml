@@ -10,7 +10,7 @@ on:
 
 jobs:
   gh-pages-android-examples:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     defaults:
       run:
         working-directory: platform/android

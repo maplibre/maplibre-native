@@ -1,12 +1,14 @@
 #include <mln/layout/merge_lines.hpp>
+
 #include <mln/layout/symbol_feature.hpp>
+#include <mln/util/containers.hpp>
 #include <mln/util/hash.hpp>
 
 namespace mln {
 namespace util {
 
 // Map of key -> index into features
-using Index = std::unordered_map<size_t, size_t>;
+using Index = mln::unordered_map<size_t, size_t>;
 namespace {
 size_t mergeFromRight(std::vector<SymbolFeature>& features,
                       Index& rightIndex,

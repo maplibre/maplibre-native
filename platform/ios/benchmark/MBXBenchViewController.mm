@@ -7,7 +7,10 @@
 #include "BenchmarkAdvancedMetrics.h"
 #include "locations.hpp"
 
+#include <sys/utsname.h>
+#include <algorithm>
 #include <chrono>
+#include <numeric>
 
 #include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/headless_frontend.hpp>
@@ -32,8 +35,8 @@ public:
 
     bool fullyRendered = status.mode == mln::MapObserver::RenderMode::Full;
     [mapDelegate mapDidFinishRenderingFrameFullyRendered:fullyRendered
-                                       frameEncodingTime:status.renderingStats.encodingTime
-                                      frameRenderingTime:status.renderingStats.renderingTime];
+                                       frameEncodingTime:status.renderingStats->encodingTime
+                                      frameRenderingTime:status.renderingStats->renderingTime];
   }
 
 protected:
@@ -82,13 +85,14 @@ protected:
   NSURL *tileSourceURL = [[NSBundle mainBundle] URLForResource:@"openmaptiles"
                                                  withExtension:@"json"
                                                   subdirectory:@"tiles"];
-  const std::vector<std::string> styles = {
-      "maptiler://maps/streets",
+  // Keyless, so the benchmark runs without an API key (e.g. on CI).
+  const std::vector<std::pair<NSString *, NSString *>> styles = {
+      {@"OpenFreeMap Bright", @"https://tiles.openfreemap.org/styles/bright"},
   };
   constexpr auto styleIndex = 0;
-  NSURL *url = [NSURL URLWithString:tile ? @"asset://styles/streets.json"
-                                         : [NSString stringWithCString:styles[styleIndex].c_str()
-                                                              encoding:NSUTF8StringEncoding]];
+  styleName = tile ? @"MapTiler Streets (bundled assets)" : styles[styleIndex].first;
+  NSURL *url =
+      [NSURL URLWithString:tile ? @"asset://styles/streets.json" : styles[styleIndex].second];
   NSLog(@"Using style URL: \"%@\"", [url absoluteString]);
 
   self.imageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
@@ -187,6 +191,12 @@ double totalFrameRenderingTime = 0;
 BenchmarkAdvancedMetrics *advancedMetrics = nil;
 std::chrono::steady_clock::time_point started;
 std::vector<std::pair<std::string, std::pair<double, double>>> result;
+NSString *styleName = nil;
+// Over all locations: the encoding and rendering time of every frame in milliseconds, and the time
+// spent benchmarking.
+std::vector<double> frameEncodingTimes;
+std::vector<double> frameRenderingTimes;
+double benchmarkingSeconds = 0;
 
 static const int benchmarkDuration = 5;  // seconds
 
@@ -273,6 +283,8 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
           advancedMetrics.min.memory / 0x100000, advancedMetrics.max.memory / 0x100000,
           advancedMetrics.avg.memory / 0x100000);
 
+    NSData *results = [self writeResults];
+
     advancedMetrics = nil;
 
 #if !defined(NDEBUG)
@@ -283,19 +295,74 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
     frontend.reset();
 #endif  // !defined(NDEBUG)
 
-    // this does not shut the application down correctly,
-    // and results in an assertion failure in thread-local code
-    // exit(0);
-
-    // Use the UIApplication lifecycle instead.
-    // Terminating an app programmatically is strongly discouraged by Apple.
-    // Combined with the plist setting "Application does not run in background" suspend allows
-    // the XCUITest to wake up, so it doesn't need to guess how long we'll take and wait.
-    UIApplication *app = [UIApplication sharedApplication];
-    if ([app respondsToSelector:@selector(suspend)]) {
-      [app performSelector:@selector(suspend)];
-    }
+    // BenchmarkTests, which runs inside this app, waits for this notification.
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"MBXBenchmarkDidFinish"
+                                                        object:self
+                                                      userInfo:@{@"results" : results}];
   }
+}
+
+static double average(const std::vector<double> &values) {
+  return values.empty() ? 0 : std::accumulate(values.begin(), values.end(), 0.0) / values.size();
+}
+
+// Average of the slowest 1% of the values, like FrameTimeStore.low1p() in the Android benchmark.
+static double low1p(std::vector<double> values) {
+  std::sort(values.begin(), values.end());
+  return average(std::vector<double>(values.begin() + 99 * values.size() / 100, values.end()));
+}
+
+// Writes Documents/benchmark_results.json in the format of the Android benchmark's
+// benchmark_results.json (see docs/mdbook/src/platforms/android/benchmark.md) and returns its
+// contents. The git revision is added to Info.plist by build-benchmark-for-device-farm.sh.
+- (NSData *)writeResults {
+  auto memoryInMB = [](unsigned long long bytes) { return @(bytes / 0x100000); };
+  NSDictionary *result = @{
+    @"styleName" : styleName,
+    @"syncRendering" : @YES,
+    @"thermalState" : @(NSProcessInfo.processInfo.thermalState),
+    @"fps" : @(benchmarkingSeconds > 0 ? frameEncodingTimes.size() / benchmarkingSeconds : 0),
+    @"avgEncodingTime" : @(average(frameEncodingTimes)),
+    @"avgRenderingTime" : @(average(frameRenderingTimes)),
+    @"low1pEncodingTime" : @(low1p(frameEncodingTimes)),
+    @"low1pRenderingTime" : @(low1p(frameRenderingTimes)),
+    @"cpu" : @{
+      @"min" : @(advancedMetrics.min.cpu),
+      @"max" : @(advancedMetrics.max.cpu),
+      @"avg" : @(advancedMetrics.avg.cpu),
+    },
+    @"memory" : @{
+      @"min" : memoryInMB(advancedMetrics.min.memory),
+      @"max" : memoryInMB(advancedMetrics.max.memory),
+      @"avg" : memoryInMB(advancedMetrics.avg.memory),
+    },
+  };
+
+  struct utsname systemInfo;
+  uname(&systemInfo);
+#ifdef NDEBUG
+  const BOOL debugBuild = NO;
+#else
+  const BOOL debugBuild = YES;
+#endif
+  NSDictionary *payload = @{
+    @"results" : @[ result ],
+    @"deviceManufacturer" : @"Apple",
+    @"model" : @(systemInfo.machine),
+    @"renderer" : @"metal",
+    @"debugBuild" : @(debugBuild),
+    @"gitRevision" : [NSBundle.mainBundle objectForInfoDictionaryKey:@"MLNGitRevision"] ?: @"",
+    @"timestamp" : @((long long)(NSDate.date.timeIntervalSince1970 * 1000)),
+  };
+
+  NSData *json = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
+  NSURL *documents = [NSFileManager.defaultManager URLsForDirectory:NSDocumentDirectory
+                                                          inDomains:NSUserDomainMask]
+                         .firstObject;
+  NSURL *file = [documents URLByAppendingPathComponent:@"benchmark_results.json"];
+  [json writeToURL:file atomically:YES];
+  NSLog(@"Wrote %@", file.path);
+  return json;
 }
 
 - (void)mapDidFinishRenderingFrameFullyRendered:(__unused BOOL)fullyRendered
@@ -305,12 +372,15 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
     frames++;
     totalFrameEncodingTime += frameEncodingTime;
     totalFrameRenderingTime += frameRenderingTime;
+    frameEncodingTimes.push_back(frameEncodingTime * 1e3);
+    frameRenderingTimes.push_back(frameRenderingTime * 1e3);
 
     const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                               std::chrono::steady_clock::now() - started)
                               .count();
     if (duration >= benchmarkDuration * 1e6) {
       state = State::None;
+      benchmarkingSeconds += duration / 1e6;
 
       // Report FPS
       const auto frameEncodingTime = static_cast<double>(totalFrameEncodingTime) / frames;

@@ -21,7 +21,7 @@ template <typename T>
 bool Match<T>::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Match) {
         const auto* rhs = static_cast<const Match*>(&e);
-        return (*input == *(rhs->input) && *otherwise == *(rhs->otherwise) &&
+        return (*input == *rhs->input && *otherwise == *rhs->otherwise &&
                 Expression::childrenEqual(branches, rhs->branches));
     }
     return false;
@@ -184,7 +184,7 @@ std::optional<InputType> parseInputValue(const Convertible& input,
     }
 
     if (!inputType) {
-        inputType = type;
+        inputType = std::move(type);
     } else {
         std::optional<std::string> err = type::checkSubtype(*inputType, *type);
         if (err) {

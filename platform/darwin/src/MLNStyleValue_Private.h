@@ -38,6 +38,8 @@ class Expression;
 
 id MLNJSONObjectFromMBGLValue(const mln::Value &value);
 
+mln::Value MLNValueFromJSONObject(id object);
+
 NS_INLINE MLNTransition MLNTransitionFromOptions(const mln::style::TransitionOptions &options) {
   MLNTransition transition;
   transition.duration =

@@ -17,7 +17,7 @@ public:
     ~ClientOptions();
 
     ClientOptions(ClientOptions&&) noexcept;
-    ClientOptions& operator=(const ClientOptions& options);
+    ClientOptions& operator=(const ClientOptions& other);
     ClientOptions& operator=(ClientOptions&& options);
 
     ClientOptions clone() const;

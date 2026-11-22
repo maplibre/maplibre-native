@@ -14,9 +14,6 @@ struct string_literal {
     static constexpr const char* value() { return chars; }
 };
 
-template <char... Cs>
-constexpr const char string_literal<Cs...>::chars[];
-
 namespace detail {
 
 using string_fn = const char* (*)();

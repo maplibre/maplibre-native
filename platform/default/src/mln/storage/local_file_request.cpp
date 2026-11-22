@@ -1,13 +1,9 @@
 #include <mln/storage/file_source_request.hpp>
 #include <mln/storage/response.hpp>
+#include <mln/util/filesystem.hpp>
 #include <mln/util/io.hpp>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#if defined(_WIN32) && !defined(S_ISDIR)
-#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
-#endif
+#include <system_error>
 
 namespace mln {
 
@@ -15,13 +11,24 @@ void requestLocalFile(const std::string& path,
                       const ActorRef<FileSourceRequest>& req,
                       const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
     Response response;
-    struct stat buf;
-    int result = stat(path.c_str(), &buf);
+    std::error_code error;
+    std::filesystem::file_status status;
+    try {
+        status = std::filesystem::status(util::pathFromUTF8(path), error);
+    } catch (const std::filesystem::filesystem_error& exception) {
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, exception.what());
+        req.invoke(&FileSourceRequest::setResponse, response);
+        return;
+    }
+    const bool notFound = status.type() == std::filesystem::file_type::not_found;
+    const bool isDirectory = std::filesystem::is_directory(status);
 
-    if (result == 0 && (S_IFDIR & buf.st_mode)) {
-        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
-    } else if (result == -1 && errno == ENOENT) {
-        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
+    if (notFound) {
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                           std::string("Cannot find file ") + path);
+    } else if (isDirectory) {
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                           std::string("Cannot read directory ") + path);
     } else {
         auto data = util::readFile(path, dataRange);
         if (!data) {

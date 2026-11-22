@@ -15,7 +15,7 @@ VectorTile::VectorTile(const OverscaledTileID& id_,
     : GeometryTile(id_, std::move(sourceID_), parameters_, observer_),
       loader(std::make_unique<TileLoader<VectorTile>>(*this, id_, parameters_, tileset)) {}
 
-VectorTile::~VectorTile() {}
+VectorTile::~VectorTile() = default;
 
 void VectorTile::setNecessity(TileNecessity necessity) {
     loader->setNecessity(necessity);

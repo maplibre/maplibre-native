@@ -1,61 +1,58 @@
-#include <array>
+#include <algorithm>
+#include <mln/style/layers/location_indicator_layer.hpp>
+
+#include <mln/geometry/feature_index.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/renderer/image_manager.hpp>
+#include <mln/renderer/layers/render_location_indicator_layer.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_tree.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/style/layers/location_indicator_layer_impl.hpp>
+#include <mln/style/layers/location_indicator_layer_properties.hpp>
+#include <mln/util/mat4.hpp>
+#include <mln/util/tile_cover.hpp>
+
+#if MLN_RENDER_BACKEND_OPENGL
+#include <mln/gl/context.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/renderable_resource.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/gl/uniform.hpp>
+#include <mln/platform/gl_functions.hpp>
+#endif // MLN_RENDER_BACKEND_OPENGL
+
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/drawable_impl.hpp>
+#include <mln/gfx/drawable_tweaker.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/gfx/vertex_attribute.hpp>
+#include <mln/renderer/layers/location_indicator_layer_tweaker.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/shaders/location_indicator_ubo.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#endif // MLN_DRAWABLE_LOCATION_INDICATOR
 
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4267)
 #endif
-
 #include <mapbox/cheap_ruler.hpp>
-
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
-#include <mln/geometry/feature_index.hpp>
-#include <mln/gfx/backend_scope.hpp>
-#include <mln/gfx/renderer_backend.hpp>
-#include <mln/map/transform_state.hpp>
-#include <mln/math/angles.hpp>
-#include <mln/renderer/bucket.hpp>
-#include <mln/renderer/layers/render_location_indicator_layer.hpp>
-#include <mln/renderer/paint_parameters.hpp>
-#include <mln/style/layers/location_indicator_layer.hpp>
-#include <mln/style/layers/location_indicator_layer_impl.hpp>
-#include <mln/style/layers/location_indicator_layer_properties.hpp>
-#include <mln/util/mat4.hpp>
-#include <mln/util/tile_cover.hpp>
-#include <mln/gfx/context.hpp>
-
 #include <mapbox/eternal.hpp>
-#include <mln/renderer/image_manager.hpp>
 
-#if MLN_RENDER_BACKEND_OPENGL
-
-#include <mln/platform/gl_functions.hpp>
-#include <mln/gl/context.hpp>
-#include <mln/gl/renderable_resource.hpp>
-#include <mln/gl/defines.hpp>
-#include <mln/gl/uniform.hpp>
-#include <mln/gl/types.hpp>
-
-#endif
-
-#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
-
-#include <mln/gfx/vertex_attribute.hpp>
-#include <mln/renderer/render_static_data.hpp>
-#include <mln/shaders/location_indicator_ubo.hpp>
-#include <mln/gfx/drawable.hpp>
-#include <mln/gfx/drawable_builder.hpp>
-#include <mln/gfx/drawable_impl.hpp>
-#include <mln/gfx/drawable_tweaker.hpp>
-#include <mln/gfx/texture2d.hpp>
-#include <mln/shaders/shader_defines.hpp>
-#include <mln/renderer/layers/location_indicator_layer_tweaker.hpp>
-
-#endif
-
+#include <array>
 #include <numbers>
 
 using namespace mln::platform;
@@ -83,7 +80,7 @@ struct LocationIndicatorRenderParameters {
     // some testing defaults, for before it gets updated via props
     double puckBearing = 0.0;
     LatLng puckPosition = {0, 0};
-    double errorRadiusMeters;
+    double errorRadiusMeters = 0.0;
     mln::Color errorRadiusColor{0, 0, 0, 0};
     mln::Color errorRadiusBorderColor{0, 0, 0, 0};
     float puckScale = 0;
@@ -319,7 +316,7 @@ public:
         */
         void assign(const Immutable<style::Image::Impl>* img) {
             imageDirty = true;
-            image = (img) ? &(img->get()->image) : nullptr;
+            image = img ? &img->get()->image : nullptr;
             width = height = 0;
             pixelRatio = 1.0f;
             if (image) {
@@ -374,7 +371,7 @@ public:
             MBGL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, texId));
         }
         void detach() { MBGL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0)); }
-        bool isValid() { return imageDirty || image; }
+        bool isValid() const { return imageDirty || image; }
         GLuint texId = 0;
         const mln::PremultipliedImage* image = nullptr;
         std::optional<Immutable<style::Image::Impl>> sharedImage;
@@ -423,7 +420,7 @@ public:
     struct TextureInfo {
         std::shared_ptr<gfx::Texture2D> texture;
         std::optional<Immutable<style::Image::Impl>> image;
-        std::string id = "";
+        std::string id;
         float pixelRatio = 1.0f;
         size_t width = 0;
         size_t height = 0;
@@ -511,8 +508,9 @@ public:
                    params.puckLayersDisplacement != oldParams.puckLayersDisplacement ||
                    params.perspectiveCompensation != oldParams.perspectiveCompensation ||
                    params.puckScale != oldParams.puckScale || params.puckHatScale != oldParams.puckHatScale ||
-                   params.puckShadowScale != oldParams.puckShadowScale)
+                   params.puckShadowScale != oldParams.puckShadowScale) {
             bearingChanged = true; // changes puck geometry but not necessarily the location
+        }
         if (params.errorRadiusMeters != oldParams.errorRadiusMeters) radiusChanged = true;
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
         bearingChanged |= setTextureFromImageID(params.puckImagePath, texPuck, params);
@@ -570,25 +568,30 @@ public:
         featureEnvelope->push_back(border);
     }
 
+    const auto& getProjectionCircle() const { return projectionCircle; }
+    const auto& getProjectionPuck() const { return projectionPuck; }
+
+    auto getPuckGeometry() const {
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
+        return puckDrawableInfo.geometry;
+#else
+        return puckGeometry;
+#endif // MLN_DRAWABLE_LOCATION_INDICATOR
+    }
+
 protected:
     static ScreenCoordinate latLngToScreenCoordinate(const LatLng& p, const TransformState& s) {
-        LatLng unwrappedLatLng = p.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
-        ScreenCoordinate point = s.latLngToScreenCoordinate(unwrappedLatLng);
+        ScreenCoordinate point = s.latLngToScreenCoordinate(s.latLngNearCenter(p));
         point.y = s.getSize().height - point.y;
         return point;
     }
 
     static Point<double> project(const LatLng& c, const TransformState& s) {
-        LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
-        return Projection::project(unwrappedLatLng, s.getScale());
+        return Projection::project(s.latLngNearCenter(c), s.getScale());
     }
 
     static Point<double> unproject(const LatLng& c, const TransformState& s) {
-        LatLng unwrappedLatLng = c.wrapped();
-        unwrappedLatLng.unwrapForShortestPath(s.getLatLng(LatLng::Wrapped));
-        return Projection::project(unwrappedLatLng, s.getScale());
+        return Projection::project(s.latLngNearCenter(c), s.getScale());
     }
 
     void updateRadius(const mln::LocationIndicatorRenderParameters& params) {
@@ -711,14 +714,14 @@ protected:
         //     ^ clamping this to 0.8 to avoid growing the puck too much close to the camera.
 
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
-        const double shadowRadius = ((texShadow) ? texShadow->width / texShadow->pixelRatio : 0.0) *
+        const double shadowRadius = (texShadow ? texShadow->width / texShadow->pixelRatio : 0.0) *
                                     params.puckShadowScale * M_SQRT2 * 0.5 *
                                     horizontalScaleFactor; // Technically it's not the radius, but
                                                            // the half diagonal of the quad.
-        const double puckRadius = ((texPuck) ? texPuck->width / texPuck->pixelRatio : 0.0) * params.puckScale *
-                                  M_SQRT2 * 0.5 * horizontalScaleFactor;
-        const double hatRadius = ((texPuckHat) ? texPuckHat->width / texPuckHat->pixelRatio : 0.0) *
-                                 params.puckHatScale * M_SQRT2 * 0.5 * horizontalScaleFactor;
+        const double puckRadius = (texPuck ? texPuck->width / texPuck->pixelRatio : 0.0) * params.puckScale * M_SQRT2 *
+                                  0.5 * horizontalScaleFactor;
+        const double hatRadius = (texPuckHat ? texPuckHat->width / texPuckHat->pixelRatio : 0.0) * params.puckHatScale *
+                                 M_SQRT2 * 0.5 * horizontalScaleFactor;
 #else
         const double shadowScale = shadowDrawableInfo.textureInfo.width / shadowDrawableInfo.textureInfo.pixelRatio;
         const double shadowRadius = shadowScale * params.puckShadowScale * M_SQRT2 * 0.5 * horizontalScaleFactor;
@@ -822,8 +825,8 @@ protected:
                                std::shared_ptr<Texture>& texture,
                                const mln::LocationIndicatorRenderParameters& params) {
         bool updated = false;
-        if (textures.find(imagePath) == textures.end()) {
-            std::shared_ptr<Texture> tx = std::make_shared<Texture>();
+        if (!textures.contains(imagePath)) {
+            auto tx = std::make_shared<Texture>();
             if (!imagePath.empty() && params.imageManager) {
                 tx->assign(params.imageManager->getSharedImage(imagePath));
                 updated = true;
@@ -831,10 +834,10 @@ protected:
                 tx->assign(nullptr);
             }
             textures[imagePath] = tx;
-            texture = tx;
+            texture = std::move(tx);
         } else {
             const Immutable<style::Image::Impl>* sharedImage = params.imageManager->getSharedImage(imagePath);
-            const mln::PremultipliedImage* img = (sharedImage) ? &sharedImage->get()->image : nullptr;
+            const mln::PremultipliedImage* img = sharedImage ? &sharedImage->get()->image : nullptr;
             std::shared_ptr<Texture>& tex = textures.at(imagePath);
             if (tex->image != img) { // image for the ID might have changed.
                 tex->assign(sharedImage);
@@ -907,9 +910,6 @@ public:
     QuadDrawableInfo puckDrawableInfo;
     QuadDrawableInfo hatDrawableInfo;
 
-    const auto& getProjectionCircle() const { return projectionCircle; }
-    const auto& getProjectionPuck() const { return projectionPuck; }
-
 #endif
 
 public:
@@ -978,6 +978,12 @@ void RenderLocationIndicatorLayer::evaluate(const PropertyEvaluationParameters& 
         renderImpl->parameters.puckHatImagePath = layout.get<style::TopImage>().asConstant().id();
 
     evaluatedProperties = std::move(properties);
+
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
+    }
+#endif
 }
 
 bool RenderLocationIndicatorLayer::hasTransition() const {
@@ -1019,6 +1025,10 @@ void RenderLocationIndicatorLayer::populateDynamicRenderFeatureIndex(DynamicFeat
 void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
     auto& glContext = static_cast<gl::Context&>(paintParameters.context);
 
+    if (paintParameters.captureRenderedFeatures) {
+        captureRenderedFeatures();
+    }
+
     // Reset GL state to a known state so the CustomLayer always has a clean slate.
     glContext.bindVertexArray = 0;
     glContext.setDepthMode(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly));
@@ -1035,16 +1045,35 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
 }
 #endif
 
+void RenderLocationIndicatorLayer::captureRenderedFeatures() {
+    using namespace vector;
+
+    // Only considering the puck for now, not the accuracy circle
+    const auto& proj = renderImpl->getProjectionPuck();
+    const auto& geom = renderImpl->getPuckGeometry();
+
+    const auto getVertex = [&](std::size_t i) {
+        return vec3{geom[i].x, geom[i].y, 0};
+    };
+
+    if (const auto bound = computeFeatureNDCBound(geom.size(), proj, getVertex)) {
+        constexpr auto locationID = "maplibre:LocationIndicator";
+        stats.addRenderedFeature(locationID, *bound, {/* no tile */});
+    }
+}
+
 #ifdef MLN_DRAWABLE_LOCATION_INDICATOR
 
 void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                                           gfx::Context& context,
                                           const TransformState&,
-                                          const std::shared_ptr<UpdateParameters>&,
+                                          const std::shared_ptr<UpdateParameters>& updateParameters,
                                           [[maybe_unused]] const PaintParameters& paintParameters,
                                           const RenderTree&,
                                           UniqueChangeRequestVec& changes) {
-    const auto drawPasses = RenderPass::Translucent;
+    constexpr auto drawPasses = RenderPass::Translucent;
+
+    stats.renderedFeatures.clear();
 
     // If the result is transparent or missing, just remove any existing drawables and stop
     if (drawPasses == RenderPass::None) {
@@ -1082,6 +1111,10 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(
             getID(), evaluatedProperties, renderImpl->getProjectionCircle(), renderImpl->getProjectionPuck());
         layerGroup->addLayerTweaker(layerTweaker);
+    }
+
+    if (updateParameters->captureRenderedFeatures) {
+        captureRenderedFeatures();
     }
 
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
@@ -1164,7 +1197,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             return drawable;
         };
 
-        const auto createCircleDrawable = [&]() {
+        const auto createCircleDrawable = [&] {
             // circle[0] is the center
             const auto& geometry = renderImpl->circleDrawableInfo.geometry;
             const uint16_t vertexCount = static_cast<uint16_t>(geometry.size());
@@ -1221,7 +1254,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         createQuadDrawable(renderImpl->hatDrawableInfo, "locationPuckHat", LocationIndicatorComponentType::PuckHat);
     };
 
-    const auto updateCircleDrawable = [&]() {
+    const auto updateCircleDrawable = [&] {
         auto& circleDrawable = renderImpl->circleDrawableInfo.drawable.value().get();
         auto& circleOutlineDrawable = renderImpl->circleDrawableInfo.outlineDrawable.value().get();
 
@@ -1292,6 +1325,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             drawable.setTexture(info.textureInfo.texture, shaders::idLocationIndicatorTexture);
             info.textureInfo.dirty = false;
         }
+        drawable.setEnabled(static_cast<bool>(info.textureInfo.texture));
     };
 
     updateCircleDrawable();

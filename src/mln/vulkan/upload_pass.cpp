@@ -1,11 +1,11 @@
 #include <mln/vulkan/upload_pass.hpp>
 
+#include <mln/util/logging.hpp>
 #include <mln/vulkan/context.hpp>
 #include <mln/vulkan/command_encoder.hpp>
-#include <mln/util/logging.hpp>
+#include <mln/vulkan/index_buffer_resource.hpp>
 #include <mln/vulkan/vertex_attribute.hpp>
 #include <mln/vulkan/vertex_buffer_resource.hpp>
-#include <mln/vulkan/index_buffer_resource.hpp>
 
 #include <algorithm>
 
@@ -15,7 +15,7 @@ namespace vulkan {
 UploadPass::UploadPass(gfx::Renderable&, CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_) {
     // Push the group for the name provided
-    debugGroups.emplace_back(gfx::DebugGroup<gfx::UploadPass>{*this, name});
+    debugGroups.emplace_back(*this, name);
 }
 
 UploadPass::~UploadPass() {
@@ -66,7 +66,6 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
                                                              size_t usage,
                                                              [[maybe_unused]] bool forceUpdate) {
     if (vec) {
-        const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
 
         // If we already have a buffer...
@@ -75,9 +74,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
 
             // If it's changed, update it
             if (rawBufSize <= resource.getSizeInBytes()) {
-                if (vec->isModifiedAfter(resource.getLastUpdated())) {
-                    // updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
-                } else {
+                if (!vec->isModifiedAfter(resource.getLastUpdated())) {
                     return rawData->resource;
                 }
             }
@@ -86,7 +83,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         if (rawBufSize > 0) {
             auto buffer = std::make_unique<VertexBuffer>();
             buffer->resource = std::make_unique<VertexBufferResource>(
-                createBufferResource(rawBufPtr, rawBufSize, usage, false));
+                createBufferResource(vec->getRawData(), rawBufSize, usage, false));
             vec->setBuffer(std::move(buffer));
 
             auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer());
@@ -118,17 +115,22 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         bindings.resize(std::max(bindings.size(), index + 1));
 
-        if (!override_) {
-            // No attribute was provided, this value will be used from a uniform, but we have to set
-            // up a valid binding or the validation will complain when the shader code references the
-            // attribute at compile time, regardless of whether it's ever used at runtime.
+        // No attribute was provided, this value will be used from a uniform, but we have to set
+        // up a valid binding or the validation will complain when the shader code references the
+        // attribute at compile time, regardless of whether it's ever used at runtime.
+        const auto setEmptyBinding = [&]() {
             bindings[index] = {
-                /*.attribute = */ {defaultAttr.getDataType(), /*offset=*/0},
-                /*.vertexStride = */ static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
-                /*.vertexBufferResource = */ nullptr,
-                /*.vertexOffset = */ 0,
-                /*.bufferIndex = */ 0,
+                .attribute = {.dataType = defaultAttr.getDataType(), .offset = 0},
+                .vertexStride = static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
+                .vertexBufferResource = nullptr,
+                .vertexOffset = 0,
+                .bufferIndex = 0,
             };
+        };
+
+        if (!override_) {
+            // No attribute was provided, this value will be used from a uniform
+            setEmptyBinding();
             return;
         }
 
@@ -148,6 +150,12 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
+        if (effectiveAttr.getSharedRawData()) {
+            // shared data exists but is empty
+            setEmptyBinding();
+            return;
+        }
+
         assert(effectiveAttr.getStride() > 0);
 
         // Otherwise, turn the data managed by the attribute into a buffer.
@@ -163,7 +171,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
-        assert(false);
+        setEmptyBinding();
     };
     // This version is called when the attribute is available, but isn't being used by the shader
     const auto missingAttr = [&](const size_t, auto& attr_) -> void {

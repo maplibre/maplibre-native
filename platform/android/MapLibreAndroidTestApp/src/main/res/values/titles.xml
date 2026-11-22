@@ -5,6 +5,7 @@
     <string name="activity_map_fragment_backstack">Backstack Map Fragment</string>
     <string name="activity_multimap">Multiple Maps on Screen</string>
     <string name="activity_long_running_maps">Long running Maps</string>
+    <string name="activity_disappearing_route">Disappearing Route</string>
     <string name="activity_add_bulk_markers">Add Markers In Bulk</string>
     <string name="activity_animated_symbollayer">Animated SymbolLayer</string>
     <string name="activity_dynamic_marker">Dynamic Marker</string>
@@ -50,6 +51,7 @@
     <string name="activity_query_rendered_features_box_highlight">Highlight features in box</string>
     <string name="activity_query_source_features">Query source features</string>
     <string name="activity_feature_state">Feature state</string>
+    <string name="activity_feature_state_vector">Feature state (vector)</string>
     <string name="activity_symbol_layer">Symbols</string>
     <string name="activity_add_sprite">Add Custom Sprite</string>
     <string name="activity_simple_map">Simple Map</string>

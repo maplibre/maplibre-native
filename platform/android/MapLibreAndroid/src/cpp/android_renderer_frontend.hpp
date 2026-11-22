@@ -63,8 +63,8 @@ public:
                             const std::optional<std::string>& sourceLayerID,
                             const std::optional<std::string>& featureID,
                             const std::optional<std::string>& stateKey) const;
-    AnnotationIDs queryPointAnnotations(const ScreenBox& box, const std::chrono::milliseconds& timeout) const;
-    AnnotationIDs queryShapeAnnotations(const ScreenBox& box, const std::chrono::milliseconds& timeout) const;
+    AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
+    AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
 
     // Feature extension query
     FeatureExtensionValue queryFeatureExtensions(const std::string& sourceID,

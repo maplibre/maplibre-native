@@ -3,7 +3,9 @@
 #include <mln/util/ignore.hpp>
 #include <mln/util/monotonic_timer.hpp>
 
+#include <cassert>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 namespace mln {
@@ -20,7 +22,8 @@ public:
     VertexVectorBase(VertexVectorBase&& other)
         : buffer(std::move(other.buffer)),
           dirty(other.dirty),
-          released(other.released) {}
+          released(other.released),
+          rawFreed(other.rawFreed) {}
     virtual ~VertexVectorBase() = default;
 
     virtual const void* getRawData() const = 0;
@@ -28,10 +31,26 @@ public:
     virtual std::size_t getRawCount() const = 0;
 
     VertexBufferBase* getBuffer() const { return buffer.get(); }
-    void setBuffer(std::unique_ptr<VertexBufferBase>&& value) { buffer = std::move(value); }
+    void setBuffer(std::unique_ptr<VertexBufferBase>&& value) {
+        buffer = std::move(value);
+        // The data now lives in the buffer; a released vector will not be modified or re-uploaded.
+        if (released && buffer) {
+            freeRawData();
+        }
+    }
+
+    /// False once the CPU copy has been freed after upload. The element count is kept.
+    bool hasRawData() const { return !rawFreed; }
+
+    /// Throw if a caller is about to read or write the CPU copy after it was discarded.
+    void requireRawData() const {
+        if (!hasRawData()) {
+            throw std::logic_error("CPU vertex data was discarded after upload");
+        }
+    }
 
     std::chrono::duration<double> getLastModified() const { return lastModified; }
-    bool isModifiedAfter(std::chrono::duration<double> t) const { return t < lastModified; }
+    bool isModifiedAfter(std::chrono::duration<double> t) const { return !rawFreed && t < lastModified; }
 
     void updateModified(bool force = false) {
         if (dirty || force) {
@@ -44,9 +63,13 @@ public:
     bool isReleased() const { return released; }
 
 protected:
+    /// Drop the CPU copy of the data. Vectors that keep their data (the plugin vectors) leave it be.
+    virtual void freeRawData() {}
+
     std::unique_ptr<VertexBufferBase> buffer;
     bool dirty = true;
     bool released = false;
+    bool rawFreed = false;
 
     std::chrono::duration<double> lastModified = util::MonotonicTimer::now();
 };
@@ -63,65 +86,83 @@ public:
           v(other.v) {}
     VertexVector(VertexVector<V>&& other)
         : VertexVectorBase(static_cast<VertexVectorBase&&>(other)),
-          v(std::move(other.v)) {}
+          v(std::move(other.v)),
+          freedCount(other.freedCount) {}
     ~VertexVector() override = default;
 
     template <class... Args>
     void emplace_back(Args&&... args) {
+        requireRawData();
         assert(!released);
         util::ignore({(v.emplace_back(std::forward<Args>(args)), 0)...});
         dirty = true;
     }
 
     void extend(std::size_t n, const Vertex& val) {
+        requireRawData();
         assert(!released);
         v.resize(v.size() + n, val);
         dirty = true;
     }
 
     Vertex& at(std::size_t n) {
+        requireRawData();
         assert(n < v.size());
         assert(!released);
         dirty = true;
         return v.at(n);
     }
     const Vertex& at(std::size_t n) const {
+        requireRawData();
         assert(n < v.size());
         return v.at(n);
     }
 
-    std::size_t elements() const { return v.size(); }
+    std::size_t elements() const { return v.size() + freedCount; }
 
-    std::size_t bytes() const { return v.size() * sizeof(Vertex); }
+    std::size_t bytes() const { return elements() * sizeof(Vertex); }
 
-    bool empty() const { return v.empty(); }
+    bool empty() const { return elements() == 0; }
 
     void clear() {
         dirty = true;
         v.clear();
+        freedCount = 0;
+        rawFreed = false;
     }
 
     void reserve(std::size_t count) { v.reserve(count); }
 
     /// Indicate that this shared vertex vector instance will no longer be updated.
     void release() {
+        released = true;
         // If we've already created a buffer, we don't need the raw data any more.
         if (buffer) {
-            v.clear();
+            freeRawData();
         }
-        released = true;
     }
 
-    const Vertex* data() const { return v.data(); }
+    const Vertex* data() const {
+        requireRawData();
+        return v.data();
+    }
 
     const std::vector<Vertex>& vector() const { return v; }
 
-    const void* getRawData() const override { return v.data(); }
+    const void* getRawData() const override { return data(); }
     std::size_t getRawSize() const override { return sizeof(Vertex); }
-    std::size_t getRawCount() const override { return v.size(); }
+    std::size_t getRawCount() const override { return elements(); }
+
+protected:
+    void freeRawData() override {
+        freedCount += v.size();
+        std::vector<Vertex>().swap(v);
+        rawFreed = true;
+    }
 
 private:
     std::vector<Vertex> v;
+    std::size_t freedCount = 0;
 };
 
 template <typename T>

@@ -397,12 +397,12 @@ private:
     }
 
     intptr_t getFreeBuffer() {
-        if (freeList.size() > 0) {
+        if (!freeList.empty()) {
             assert(buffers[freeList.back()].pointer == 0);
             const auto index = freeList.back();
             freeList.pop_back();
             return index;
-        } else if (reclaimedList.size() > 0) {
+        } else if (!reclaimedList.empty()) {
             const auto index = reclaimedList.back();
             reclaimedList.pop_back();
             new (&buffers[index]) Buffer(*this);

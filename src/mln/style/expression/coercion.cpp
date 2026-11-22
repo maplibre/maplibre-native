@@ -16,7 +16,7 @@ namespace {
 
 EvaluationResult toBoolean(const Value& v) noexcept {
     return v.match([&](double f) { return static_cast<bool>(f); },
-                   [&](const std::string& s) { return s.length() > 0; },
+                   [&](const std::string& s) { return !s.empty(); },
                    [&](bool b) { return b; },
                    [&](const NullValue&) { return false; },
                    [&](const Image& i) { return i.isAvailable(); },

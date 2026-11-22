@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.24)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "14.3")
 
 # Override default CMake NATIVE_ARCH_ACTUAL
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20893
@@ -28,7 +27,6 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend.cpp
             ${PROJECT_SOURCE_DIR}/platform/darwin/src/gl_functions.cpp ${PROJECT_SOURCE_DIR}/platform/darwin/src/headless_backend_cgl.mm
     )
     target_link_libraries(
@@ -39,12 +37,6 @@ endif()
 
 if(MLN_WITH_VULKAN)
     find_package(Vulkan REQUIRED)
-
-    target_sources(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/vulkan/headless_backend.cpp
-    )
 
     if(Vulkan_FOUND)
         get_filename_component(Vulkan_LIBRARY_DIR ${Vulkan_LIBRARY} DIRECTORY)
@@ -71,10 +63,9 @@ target_include_directories(
         ${PROJECT_SOURCE_DIR}/platform/macos/src
 )
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 if(MLN_WITH_GLFW)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
 endif()
 if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)

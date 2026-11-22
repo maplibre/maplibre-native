@@ -16,8 +16,22 @@ namespace style {
 RasterSource::RasterSource(std::string id,
                            variant<std::string, Tileset> urlOrTileset_,
                            uint16_t tileSize,
-                           SourceType sourceType)
-    : TileSource(id, urlOrTileset_, tileSize, sourceType) {}
+                           SourceType sourceType,
+                           std::optional<uint8_t> minzoom,
+                           std::optional<uint8_t> maxzoom)
+    : TileSource(id, urlOrTileset_, tileSize, sourceType),
+      minzoomOverride(minzoom),
+      maxzoomOverride(maxzoom) {}
+
+void RasterSource::setTilesetOverrides(Tileset& tileset) {
+    // The style's inline zoom range wins over the TileJSON's, as in maplibre-gl-js
+    if (minzoomOverride) {
+        tileset.zoomRange.min = *minzoomOverride;
+    }
+    if (maxzoomOverride) {
+        tileset.zoomRange.max = *maxzoomOverride;
+    }
+}
 
 bool RasterSource::supportsLayerType(const mln::style::LayerTypeInfo* info) const {
     return mln::underlying_type(Tile::Kind::Raster) == mln::underlying_type(info->tileKind);

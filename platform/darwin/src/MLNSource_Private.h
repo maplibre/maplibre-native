@@ -87,6 +87,33 @@ struct SourceWrapper {
  */
 - (BOOL)removeFromStylable:(id<MLNStylable>)mapView error:(NSError *__nullable *__nullable)outError;
 
+/**
+ Sets the state of a feature in this source. Shared implementation backing the
+ public feature state methods exposed by ``MLNShapeSource`` and
+ ``MLNVectorTileSource``.
+ */
+- (BOOL)mgl_setFeatureStateForSourceLayerID:(nullable NSString *)sourceLayerID
+                                  featureID:(NSString *)featureID
+                                      state:(NSDictionary<NSString *, id> *)state;
+
+/**
+ Gets the current state of a feature in this source. Shared implementation
+ backing the public feature state methods exposed by ``MLNShapeSource`` and
+ ``MLNVectorTileSource``.
+ */
+- (nullable NSDictionary<NSString *, id> *)mgl_featureStateForSourceLayerID:
+                                               (nullable NSString *)sourceLayerID
+                                                                  featureID:(NSString *)featureID;
+
+/**
+ Removes state from features in this source. Shared implementation backing the
+ public feature state methods exposed by ``MLNShapeSource`` and
+ ``MLNVectorTileSource``.
+ */
+- (BOOL)mgl_removeFeatureStateForSourceLayerID:(nullable NSString *)sourceLayerID
+                                     featureID:(nullable NSString *)featureID
+                                      stateKey:(nullable NSString *)stateKey;
+
 @end
 
 NS_ASSUME_NONNULL_END

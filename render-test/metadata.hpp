@@ -7,8 +7,9 @@
 #include <mln/util/rapidjson.hpp>
 #include <mln/util/size.hpp>
 
-#include "filesystem.hpp"
+#include "filesystem.hpp" // IWYU pragma: keep
 
+#include <functional>
 #include <list>
 #include <map>
 

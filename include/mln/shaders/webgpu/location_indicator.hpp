@@ -28,7 +28,7 @@ struct LocationIndicatorUBO {
     color: vec4<f32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
+@group(0) @binding(4) var<uniform> ubo: LocationIndicatorUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -44,7 +44,7 @@ struct LocationIndicatorUBO {
     color: vec4<f32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
+@group(0) @binding(4) var<uniform> ubo: LocationIndicatorUBO;
 
 @fragment
 fn main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
@@ -76,7 +76,7 @@ struct LocationIndicatorUBO {
     color: vec4<f32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
+@group(0) @binding(4) var<uniform> ubo: LocationIndicatorUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -93,7 +93,7 @@ struct LocationIndicatorUBO {
     color: vec4<f32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
+@group(0) @binding(4) var<uniform> ubo: LocationIndicatorUBO;
 @group(0) @binding(1) var colorTexture: texture_2d<f32>;
 @group(0) @binding(2) var colorSampler: sampler;
 

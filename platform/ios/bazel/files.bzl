@@ -14,10 +14,6 @@ MLN_IOS_SDK_HEADERS = [
     "src/MLNScaleBar.h",
 ]
 
-MLN_IOS_PUBLIC_HEADERS = [
-    "src/Mapbox.h",
-]
-
 MLN_IOS_PRIVATE_HEADERS = [
     "src/NSOrthography+MLNAdditions.h",
     "src/UIDevice+MLNAdditions.h",
@@ -87,6 +83,7 @@ MLN_PUBLIC_IOS_APP_HEADERS = [
     "app/MBXFrameTimeGraphView.h",
     "app/MBXOfflinePacksTableViewController.h",
     "app/MBXOrnamentsViewController.h",
+    "app/MBXSceneDelegate.h",
     "app/MBXSnapshotTestViewController.h",
     "app/MBXSnapshotsViewController.h",
     "app/MBXState.h",
@@ -105,6 +102,7 @@ MLN_PUBLIC_IOS_APP_SOURCE = [
     "app/MBXFrameTimeGraphView.m",
     "app/MBXOfflinePacksTableViewController.m",
     "app/MBXOrnamentsViewController.m",
+    "app/MBXSceneDelegate.m",
     "app/MBXSnapshotsViewController.m",
     "app/MBXState.m",
     "app/MBXStateManager.m",

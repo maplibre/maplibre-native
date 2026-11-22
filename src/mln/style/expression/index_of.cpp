@@ -122,9 +122,9 @@ ParseResult IndexOf::parse(const Convertible &value, ParsingContext &ctx) {
 bool IndexOf::operator==(const Expression &e) const noexcept {
     if (e.getKind() == Kind::IndexOf) {
         auto rhs = static_cast<const IndexOf *>(&e);
-        const auto fromIndexEqual = (fromIndex && rhs->fromIndex && *fromIndex == *(rhs->fromIndex)) ||
+        const auto fromIndexEqual = (fromIndex && rhs->fromIndex && *fromIndex == *rhs->fromIndex) ||
                                     (!fromIndex && !rhs->fromIndex);
-        return *keyword == *(rhs->keyword) && *input == *(rhs->input) && fromIndexEqual;
+        return *keyword == *rhs->keyword && *input == *rhs->input && fromIndexEqual;
     }
     return false;
 }
