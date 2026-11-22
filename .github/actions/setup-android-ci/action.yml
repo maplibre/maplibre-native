@@ -37,4 +37,12 @@ runs:
           gradle-v1-${{ github.job }}-${{ matrix.renderer }}-
           gradle-v1-
 
+    # Robolectric downloads its android-all jars at test time into the local Maven repository, outside Gradle
+    - name: restore-robolectric-cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.m2/repository/org/robolectric
+        key: robolectric-v1-${{ hashFiles('platform/android/gradle/libs.versions.toml') }}
+        restore-keys: robolectric-v1-
+
     - uses: ./.github/actions/install-sccache
