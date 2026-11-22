@@ -71,17 +71,35 @@ async function unzipFilesInDirectory(directory) {
 }
 
 async function writeResultsToOutputDir() {
+  // Android: the benchmark app writes benchmark_results.json, which the test spec pulls from the device.
   for await (const benchmarkResultPath of fs.glob("**/benchmark_results.json", {cwd: inputDir})) {
     try {
-      const fullBenchmarkResultPath  = path.join(inputDir, benchmarkResultPath);
-      const benchmarkResultContents = await fs.readFile(fullBenchmarkResultPath, {encoding: 'utf-8'});
-      const benchmarkResults = JSON.parse(benchmarkResultContents);
-      const { timestamp } = benchmarkResults;
-      if (typeof timestamp !== 'number') throw new Error("No timestamp found in benchmark result");
-      await fs.copyFile(fullBenchmarkResultPath, path.join(outputDir, `${timestamp}.json`));
+      const benchmarkResultContents = await fs.readFile(path.join(inputDir, benchmarkResultPath), {encoding: 'utf-8'});
+      await writeResult(benchmarkResultContents);
     } catch (err) {
       console.error(`Error ${err}. Skipping: '${benchmarkResultPath}'`);
     }
   }
+
+  // iOS: BenchmarkTests prints the results on a line in the test output.
+  for await (const textPath of fs.glob("**/*.txt", {cwd: inputDir})) {
+    const text = await fs.readFile(path.join(inputDir, textPath), {encoding: 'utf-8'});
+    for (const [, benchmarkResultContents] of text.matchAll(/MLN_BENCHMARK_RESULTS (\{.*\})\s*$/gm)) {
+      try {
+        await writeResult(benchmarkResultContents);
+      } catch (err) {
+        console.error(`Error ${err}. Skipping result in: '${textPath}'`);
+      }
+    }
+  }
   console.log(`Wrote benchmark results to ${outputDir}`);
+}
+
+/**
+ * @param {string} benchmarkResultContents
+ */
+async function writeResult(benchmarkResultContents) {
+  const { timestamp } = JSON.parse(benchmarkResultContents);
+  if (typeof timestamp !== 'number') throw new Error("No timestamp found in benchmark result");
+  await fs.writeFile(path.join(outputDir, `${timestamp}.json`), benchmarkResultContents);
 }
