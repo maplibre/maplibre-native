@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -53,6 +54,18 @@ constexpr bool operator!=(circle<T> const& lhs, circle<T> const& rhs) {
  the number of comparisons necessary.
 */
 
+/// A test applied to an element during a hit test.
+template <class F, class T>
+concept GridIndexPredicate = requires(const F& f, const T& t) {
+    { f(t) } -> std::convertible_to<bool>;
+};
+
+/// Called with each element a query finds, and its box; returning true stops the query.
+template <class F, class T>
+concept GridIndexVisitor = requires(F& f, const T& t, const mapbox::geometry::box<float>& box) {
+    { f(t, box) } -> std::convertible_to<bool>;
+};
+
 template <class T>
 class GridIndex {
 public:
@@ -71,9 +84,9 @@ public:
     std::vector<std::pair<T, BBox>> queryWithBoxes(const BBox&) const;
 
     /// The predicate is any callable taking an element; it is not copied or converted.
-    template <class Predicate = std::function<bool(const T&)>>
+    template <GridIndexPredicate<T> Predicate = std::function<bool(const T&)>>
     bool hitTest(const BBox&, const std::optional<Predicate>& predicate = std::nullopt) const;
-    template <class Predicate = std::function<bool(const T&)>>
+    template <GridIndexPredicate<T> Predicate = std::function<bool(const T&)>>
     bool hitTest(const BCircle&, const std::optional<Predicate>& predicate = std::nullopt) const;
 
     bool empty() const;
@@ -83,9 +96,9 @@ private:
     bool completeIntersection(const BBox& queryBBox) const;
     BBox convertToBox(const BCircle& circle) const;
 
-    template <class ResultFn>
+    template <GridIndexVisitor<T> ResultFn>
     void visit(const BBox&, ResultFn&&) const;
-    template <class ResultFn>
+    template <GridIndexVisitor<T> ResultFn>
     void visit(const BCircle&, ResultFn&&) const;
 
     // An element is listed in every cell it touches. A query that visits the cells from (cx1, cy1) on
@@ -200,7 +213,7 @@ std::vector<std::pair<T, typename GridIndex<T>::BBox>> GridIndex<T>::queryWithBo
 }
 
 template <class T>
-template <class Predicate>
+template <GridIndexPredicate<T> Predicate>
 bool GridIndex<T>::hitTest(const BBox& queryBBox, const std::optional<Predicate>& predicate) const {
     bool hit = false;
     visit(queryBBox, [&](const T& t, const BBox&) -> bool {
@@ -215,7 +228,7 @@ bool GridIndex<T>::hitTest(const BBox& queryBBox, const std::optional<Predicate>
 }
 
 template <class T>
-template <class Predicate>
+template <GridIndexPredicate<T> Predicate>
 bool GridIndex<T>::hitTest(const BCircle& queryBCircle, const std::optional<Predicate>& predicate) const {
     bool hit = false;
     visit(queryBCircle, [&](const T& t, const BBox&) -> bool {
@@ -246,7 +259,7 @@ typename GridIndex<T>::BBox GridIndex<T>::convertToBox(const BCircle& circle) co
 }
 
 template <class T>
-template <class ResultFn>
+template <GridIndexVisitor<T> ResultFn>
 void GridIndex<T>::visit(const BBox& queryBBox, ResultFn&& resultFn) const {
     if (noIntersection(queryBBox)) {
         return;
@@ -305,7 +318,7 @@ void GridIndex<T>::visit(const BBox& queryBBox, ResultFn&& resultFn) const {
 }
 
 template <class T>
-template <class ResultFn>
+template <GridIndexVisitor<T> ResultFn>
 void GridIndex<T>::visit(const BCircle& queryBCircle, ResultFn&& resultFn) const {
     BBox queryBBox = convertToBox(queryBCircle);
     if (noIntersection(queryBBox)) {
