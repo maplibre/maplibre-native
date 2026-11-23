@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Schedules a run on AWS Device Farm. The device-test-watch workflow reports its result on the check run.
+
 set -e
 set -o xtrace
 
@@ -13,6 +15,7 @@ required_vars=(
   "testType"
   "testPackageType"
   "name"
+  "checkId"
 )
 
 check_var() {
@@ -76,69 +79,25 @@ while ((max_checks--)); do
   sleep $sleep_time
 done
 
-# Retry logic: reschedule when result is SKIPPED up to 3 times
-max_retries=3
-for attempt in $(seq 1 $max_retries); do
-  echo "Scheduling Device Farm run (attempt $attempt)" >&2
-  arn=$(aws devicefarm schedule-run \
-    --project-arn "$AWS_DEVICE_FARM_PROJECT_ARN" \
-    --name "MapLibre Native $name" \
-    --app-arn "$app_arn" \
-    --device-pool-arn "$AWS_DEVICE_FARM_DEVICE_POOL_ARN" \
-    --test type=$testType,testPackageArn=$test_package_arn${testFilter:+,filter=$testFilter}${testSpecArn:+,testSpecArn=$testSpecArn} \
-    --execution-configuration '{"videoCapture": false}' \
-    --output text --query run.arn)
+run_name="MapLibre Native $name |${supersedeKey:+ key=$(sha256sum <<< "$supersedeKey" | head -c 12)} check="
 
-  echo "ARN: $arn" >&2
+# Stop the runs of this test that an earlier commit of the same pull request scheduled
+if [[ -n "$supersedeKey" ]]; then
+  aws devicefarm list-runs --arn "$AWS_DEVICE_FARM_PROJECT_ARN" --max-items 500 --output json |
+    jq -r --arg name "$run_name" '.runs[] | select(.status != "COMPLETED" and .status != "STOPPING" and (.name | startswith($name))) | .arn' |
+    xargs -r -n 1 aws devicefarm stop-run --query run.status --arn
+fi
 
-  if [[ -z "$arn" ]]; then
-    echo "Error: Failed to schedule Device Farm run or got empty ARN" >&2
-    exit 1
-  fi
+aws devicefarm schedule-run \
+  --project-arn "$AWS_DEVICE_FARM_PROJECT_ARN" \
+  --name "$run_name$checkId" \
+  --app-arn "$app_arn" \
+  --device-pool-arn "$AWS_DEVICE_FARM_DEVICE_POOL_ARN" \
+  --test type=$testType,testPackageArn=$test_package_arn${testFilter:+,filter=$testFilter}${testSpecArn:+,testSpecArn=$testSpecArn} \
+  --execution-configuration '{"videoCapture": false}' \
+  --output text --query run.arn
 
-  if [[ "$wait_for_completion" != "true" ]]; then
-    echo "Not waiting for run to complete" >&2
-    exit 0
-  fi
-
-  # Wait for run result
-  while true; do
-    sleep 30
-    result=$(aws devicefarm get-run --arn "$arn" --output text --query "run.result")
-    case $result in
-      FAILED|ERRORED|STOPPED)
-        echo "$arn"
-        echo "Run $result" >&2
-        exit 1
-        ;;
-      SKIPPED)
-        echo "Run skipped on attempt $attempt" >&2
-        if [[ $attempt -lt $max_retries ]]; then
-          echo "Retrying..." >&2
-          break  # break wait loop and retry
-        else
-          echo "$arn"
-          echo "Max retries ($max_retries) reached. Exiting." >&2
-          exit 1
-        fi
-        ;;
-      PASSED)
-        echo "$arn"
-        echo "Run $result" >&2
-        exit 0
-        ;;
-      PENDING)
-        continue
-        ;;
-      *)
-        echo "Unexpected run result $result" >&2
-        exit 1
-        ;;
-    esac
-  done
-
-done
-
-# If for-loop exits without passing or failing, exit with error
-echo "Retries exhausted without a definitive result." >&2
-exit 1
+# A watcher that has yet to start will see this run, any other one may be about to exit
+if [[ "$(gh run list --workflow device-test-watch.yml --json status --jq 'all(.[]; .status == "in_progress" or .status == "completed")')" == true ]]; then
+  gh workflow run device-test-watch.yml
+fi
