@@ -1,11 +1,11 @@
 ## main
-- Text a tile was drawn without because its glyph range failed to load is drawn as soon as the range loads, instead of when the tile is next reloaded.
 ### ✨ Features and improvements
 - _...Add new stuff here..._
 
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 - core: fix renders that hang when retried after a glyph range fails to load ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)) (by [@johncarmack1984](https://github.com/johncarmack1984))
+- core: draw a tile's missing text as soon as its glyph range loads ([#5086](https://github.com/maplibre/maplibre-native/pull/5086)) (by [@nickvellios](https://github.com/nickvellios))
 
 ## 6.5.0-pre.1
 ### ✨ Features and improvements
