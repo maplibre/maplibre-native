@@ -74,7 +74,8 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     // a different value.
     // We can keep the depth-based descriptors, but the stencil-based ones can change
     // every time, as a new value is assigned in each call to `stencilModeFor3D`.
-    std::optional<MTLDepthStencilStatePtr> stateStencil, stateDepthStencil;
+    std::optional<MTLDepthStencilStatePtr> stateStencil, stateDepthStencil, stateReadOnlyDepth,
+        stateReadOnlyDepthStencil;
     std::function<const MTLDepthStencilStatePtr&(bool, bool)> getDepthStencilState;
     if (features3d) {
         // If we're using group-wide states, build only the ones that actually get used
@@ -137,8 +138,20 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // stencil mode for features with stencil enabled or disable stenciling.
         // 2D drawables will set their own stencil mode within `draw`.
         if (features3d) {
-            const auto& state = getDepthStencilState(drawable.getEnableDepth(), drawable.getEnableStencil());
-            renderPass.setDepthStencilState(state);
+            const auto mask = drawable.getDepthMaskFor3D();
+            if (mask && drawable.getEnableDepth() && *mask != parameters.depthModeFor3D().mask) {
+                auto& state = drawable.getEnableStencil() ? stateReadOnlyDepthStencil : stateReadOnlyDepth;
+                if (!state) {
+                    auto depth = parameters.depthModeFor3D();
+                    depth.mask = *mask;
+                    state = context.makeDepthStencilState(
+                        depth, drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled(), renderable);
+                }
+                renderPass.setDepthStencilState(*state);
+            } else {
+                const auto& state = getDepthStencilState(drawable.getEnableDepth(), drawable.getEnableStencil());
+                renderPass.setDepthStencilState(state);
+            }
         }
 
         drawable.draw(parameters);

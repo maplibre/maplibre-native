@@ -1,9 +1,10 @@
 #pragma once
 
+#include <mln/util/tile_server_options.hpp>
+
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <mln/util/tile_server_options.hpp>
 
 namespace mln {
 
@@ -87,9 +88,16 @@ public:
     const std::string& assetPath() const;
 
     /**
-     * @brief Sets the maximum cache size.
+     * @brief Sets the maximum ambient cache size
      *
-     * @param size Cache maximum size in bytes.
+     * Applied when the database file source for these options is first opened.
+     * That source is reused for the same tile server, API key, and cache path,
+     * so a later change to this value does not resize an already-open database.
+     * The default is 50 MB. A limit set on a file source opened with a different
+     * tile server or API key does not apply to this one.
+     *
+     * @param size Cache maximum size in bytes. `0` disables the cache when the
+     *             database has no offline regions.
      * @return reference to ResourceOptions for chaining options together.
      */
     ResourceOptions& withMaximumCacheSize(uint64_t size);
