@@ -429,11 +429,11 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onRenderError() {
+  public void onRenderError(String message) {
     try {
       if (!onRenderErrorList.isEmpty()) {
         for (MapView.OnRenderErrorListener listener : onRenderErrorList) {
-          listener.onRenderError();
+          listener.onRenderError(message);
         }
       }
     } catch (Throwable err) {

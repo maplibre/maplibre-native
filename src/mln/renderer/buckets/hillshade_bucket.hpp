@@ -14,6 +14,10 @@
 
 namespace mln {
 
+namespace gfx {
+class Texture2D;
+} // namespace gfx
+
 using HillshadeBinders = PaintPropertyBinders<style::HillshadePaintProperties::DataDrivenProperties>;
 using HillshadeLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::texture_pos>>;
 
@@ -32,6 +36,9 @@ public:
 
     RenderTargetPtr renderTarget;
     bool renderTargetPrepared = false;
+
+    /// DEM texture of the color relief layer for the current DEM data. Owned by the tile drawables.
+    std::weak_ptr<gfx::Texture2D> demTexture;
 
     TileMask mask{{0, 0, 0}};
 
