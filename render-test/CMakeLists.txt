@@ -1,3 +1,7 @@
+if(NOT MLN_WITH_TESTS)
+    return()
+endif()
+
 add_library(
     mbgl-render-test STATIC EXCLUDE_FROM_ALL
     ${PROJECT_SOURCE_DIR}/expression-test/test_runner_common.cpp
