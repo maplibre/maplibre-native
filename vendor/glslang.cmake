@@ -1,0 +1,52 @@
+set(ENABLE_OPT OFF)
+set(ENABLE_HLSL OFF)
+set(ENABLE_GLSLANG_BINARIES OFF)
+set(GLSLANG_TESTS_DEFAULT OFF)
+set(ENABLE_PCH OFF)
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glslang SYSTEM)
+else()
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glslang)
+endif()
+
+get_target_property(glslang_inc glslang INTERFACE_INCLUDE_DIRECTORIES)
+set_target_properties(glslang PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${glslang_inc})
+if (NOT (WIN32 OR MINGW))
+    target_compile_options(SPIRV PRIVATE -include cstdint)
+endif()
+
+set_target_properties(
+    glslang
+    PROPERTIES
+        INTERFACE_MAPLIBRE_NAME "glslang"
+        INTERFACE_MAPLIBRE_URL "https://github.com/KhronosGroup/glslang.git"
+        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/glslang/LICENSE.txt
+)
+
+set_target_properties(
+    SPIRV
+    PROPERTIES
+        INTERFACE_MAPLIBRE_NAME "SPIRV"
+        INTERFACE_MAPLIBRE_URL "https://github.com/KhronosGroup/glslang.git"
+        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/glslang/LICENSE.txt
+)
+
+set_target_properties(
+    glslang-default-resource-limits
+    PROPERTIES
+        INTERFACE_MAPLIBRE_NAME "glslang-default-resource-limits"
+        INTERFACE_MAPLIBRE_URL "https://github.com/KhronosGroup/glslang.git"
+        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/glslang/LICENSE.txt
+)
+
+export(TARGETS
+    glslang
+    SPIRV
+    glslang-default-resource-limits
+    MachineIndependent
+    OSDependent
+    GenericCodeGen
+
+    APPEND FILE MapboxCoreTargets.cmake
+)
