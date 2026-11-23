@@ -85,27 +85,27 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/i18n/collator.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/layermanager/layer_manager.cpp
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,default/src/mln/storage/sqlite3.cpp,qt/src/mln/sqlite3.cpp>
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/async_task.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/async_task_impl.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/gl_functions.cpp
-        $<$<BOOL:${MLN_WITH_OPENGL}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mln/headless_backend_qt.cpp>
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_file_source.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_request.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/i18n.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/image.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/number_format.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/local_glyph_rasterizer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/logging_qt.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/run_loop.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/run_loop_impl.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/string_stdlib.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/thread.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/thread_local.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/timer_impl.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/utf.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/async_task.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/async_task_impl.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/gl_functions.cpp
+        $<$<BOOL:${MLN_WITH_OPENGL}>:${CMAKE_CURRENT_LIST_DIR}/src/mln/headless_backend_qt.cpp>
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/http_file_source.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/http_file_source.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/http_request.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/http_request.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/i18n.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/image.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/number_format.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/local_glyph_rasterizer.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/logging_qt.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/run_loop.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/run_loop_impl.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/string_stdlib.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/thread.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/thread_local.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/timer.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/timer_impl.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/utf.cpp
 )
 
 target_compile_definitions(

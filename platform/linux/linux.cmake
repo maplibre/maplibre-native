@@ -1,6 +1,3 @@
-option(MLN_WITH_X11 "Build with X11 Support" ON)
-option(MLN_WITH_WAYLAND "Build with Wayland Support" OFF)
-
 find_package(CURL REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
@@ -11,7 +8,6 @@ endif ()
 find_package(Threads REQUIRED)
 
 pkg_search_module(WEBP libwebp REQUIRED)
-pkg_search_module(LIBUV libuv REQUIRED)
 pkg_search_module(ICUUC icu-uc)
 pkg_search_module(ICUI18N icu-i18n)
 find_program(ARMERGE NAMES armerge)
@@ -34,7 +30,6 @@ target_sources(
         ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
         ${MLN_DEFAULT_HEADLESS_SOURCES}
         ${MLN_DEFAULT_IMAGE_DECODER_SOURCES}
-        ${MLN_DEFAULT_LIBUV_RUN_LOOP_SOURCES}
         ${MLN_DEFAULT_LOCALE_SOURCES}
         ${MLN_DEFAULT_UNICODE_SOURCES}
         ${MLN_DEFAULT_UTIL_SOURCES}
@@ -52,7 +47,7 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/linux/src/gl_functions.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/gl_functions.cpp
     )
 endif()
 
@@ -61,7 +56,7 @@ if(MLN_WITH_EGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend_egl.cpp
     )
     target_link_libraries(
         mbgl-core
@@ -75,19 +70,12 @@ if(MLN_WITH_EGL)
                 WL_EGL_PLATFORM
         )
     endif()
-elseif(MLN_WITH_VULKAN)
-    target_include_directories(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include
-    )
-
-else()
+elseif(NOT MLN_WITH_VULKAN)
     find_package(OpenGL REQUIRED GLX)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_glx.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/headless_backend_glx.cpp
     )
     target_link_libraries(
         mbgl-core
@@ -112,7 +100,6 @@ target_include_directories(
     PRIVATE
         ${CURL_INCLUDE_DIRS}
         ${JPEG_INCLUDE_DIRS}
-        ${LIBUV_INCLUDE_DIRS}
         ${X11_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
 )
@@ -139,7 +126,6 @@ target_link_libraries(
     PRIVATE
         ${CURL_LIBRARIES}
         ${JPEG_LIBRARIES}
-        ${LIBUV_LIBRARIES}
         ${X11_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         ${WEBP_LIBRARIES}
@@ -206,14 +192,9 @@ if(MLN_CREATE_AMALGAMATION)
 
 endif()
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
-if(MLN_WITH_GLFW)
-	add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
-endif()
-if(MLN_WITH_NODE)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
-endif()
+# The expression test and the default platform's runners work here, and are
+# added at the top level.
+set(MLN_DEFAULT_TEST_RUNNERS TRUE)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/test)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test)
+# The default run loop, with libuv, which the top level adds.
+set(MLN_USE_LIBUV TRUE)

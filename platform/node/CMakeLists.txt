@@ -11,7 +11,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
 # For node versions, see: https://raw.githubusercontent.com/nodejs/node/main/doc/abi_version_registry.json
 add_node_module(
     mbgl-node
-    INSTALL_PATH ${PROJECT_SOURCE_DIR}/platform/node/lib/{node_abi}/mbgl.node
+    INSTALL_PATH ${CMAKE_CURRENT_LIST_DIR}/lib/{node_abi}/mbgl.node
     NAN_VERSION 2.27.0
     EXCLUDE_NODE_ABIS
         46
@@ -20,21 +20,14 @@ add_node_module(
         51
 )
 
-if(WIN32)
-    find_package(LIBUV REQUIRED)
-else()
-    find_package(PkgConfig REQUIRED)
-    pkg_search_module(LIBUV libuv REQUIRED)
-endif()
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/libuv.cmake)
 
 add_library(mbgl-node-loop STATIC)
 
 target_sources(
     mbgl-node-loop
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/async_task.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/run_loop.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/timer.cpp
+        ${MLN_DEFAULT_LIBUV_RUN_LOOP_SOURCES}
 )
 
 target_include_directories(
@@ -55,19 +48,19 @@ target_link_libraries(
 target_sources(
     mbgl-node
     INTERFACE
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_conversion.hpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_expression.cpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_expression.hpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_feature.cpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_feature.hpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_logging.cpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_logging.hpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_map.cpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_map.hpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_mapbox_gl_native.cpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/node_request.hpp
-        ${PROJECT_SOURCE_DIR}/platform/node/src/util/async_queue.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_conversion.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_expression.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_expression.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_feature.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_feature.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_logging.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_logging.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_map.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_map.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_mapbox_gl_native.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_request.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/node_request.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/util/async_queue.hpp
 )
 
 target_link_libraries(

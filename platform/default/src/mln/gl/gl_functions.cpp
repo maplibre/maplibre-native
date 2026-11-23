@@ -1,8 +1,26 @@
 #include <mln/platform/gl_functions.hpp>
 
+#ifdef __APPLE__
+#include "TargetConditionals.h"
+#if TARGET_OS_IPHONE
+#include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/glext.h>
+#elif TARGET_OS_SIMULATOR
+#include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/glext.h>
+#elif TARGET_OS_MAC
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl3.h>
+#include <OpenGL/gl3ext.h>
+#else
+#error Unsupported Apple platform
+#endif
+#else
+#ifndef GL_GLEXT_PROTOTYPES
 #define GL_GLEXT_PROTOTYPES
-
+#endif
 #include <GLES3/gl3.h>
+#endif
 
 namespace mln {
 namespace platform {
@@ -271,9 +289,12 @@ void (*const glResumeTransformFeedback)() = ::glResumeTransformFeedback;
 void (*const glGetProgramBinary)(GLuint, GLsizei, GLsizei*, GLenum*, GLvoid*) = ::glGetProgramBinary;
 void (*const glProgramBinary)(GLuint, GLenum, const GLvoid*, GLsizei) = ::glProgramBinary;
 void (*const glProgramParameteri)(GLuint, GLenum, GLint) = ::glProgramParameteri;
+// Not in desktop OpenGL 3, which macOS has.
+#if !defined(__APPLE__) || TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
 void (*const glInvalidateFramebuffer)(GLenum, GLsizei, const GLenum*) = ::glInvalidateFramebuffer;
 void (*const glInvalidateSubFramebuffer)(GLenum, GLsizei, const GLenum*, GLint, GLint, GLsizei, GLsizei) =
     ::glInvalidateSubFramebuffer;
+#endif
 void (*const glTexStorage2D)(GLenum, GLsizei, GLenum, GLsizei, GLsizei) = ::glTexStorage2D;
 void (*const glTexStorage3D)(GLenum, GLsizei, GLenum, GLsizei, GLsizei, GLsizei) = ::glTexStorage3D;
 void (*const glGetInternalformativ)(GLenum, GLenum, GLenum, GLsizei, GLint*) = ::glGetInternalformativ;

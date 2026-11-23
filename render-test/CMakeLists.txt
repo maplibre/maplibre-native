@@ -1,43 +1,24 @@
-if(NOT MLN_WITH_TESTS)
-    return()
-endif()
-
 add_library(
     mbgl-render-test STATIC EXCLUDE_FROM_ALL
     ${PROJECT_SOURCE_DIR}/expression-test/test_runner_common.cpp
     ${PROJECT_SOURCE_DIR}/expression-test/test_runner_common.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/allocation_index.cpp
-    ${PROJECT_SOURCE_DIR}/render-test/allocation_index.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/file_source.cpp
-    ${PROJECT_SOURCE_DIR}/render-test/file_source.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/filesystem.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/include/mln/render_test.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/manifest_parser.cpp
-    ${PROJECT_SOURCE_DIR}/render-test/manifest_parser.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/metadata.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/parser.cpp
-    ${PROJECT_SOURCE_DIR}/render-test/parser.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/render_test.cpp
-    ${PROJECT_SOURCE_DIR}/render-test/runner.cpp
-    ${PROJECT_SOURCE_DIR}/render-test/runner.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/allocation_index.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/allocation_index.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/file_source.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/file_source.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/mln/render_test.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/manifest_parser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/manifest_parser.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/metadata.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/parser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/parser.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/render_test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/runner.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/runner.hpp
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL iOS)
-    set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}")
-    set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
-    set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE bitcode)
-    set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
-endif()
-
-if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
-    set_target_properties(mbgl-render-test
-        PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-    )
-endif()
+mln_test_library_properties(mbgl-render-test)
 
 # FIXME: Should not use core private interface
 target_include_directories(
@@ -47,7 +28,7 @@ target_include_directories(
 
 target_include_directories(
     mbgl-render-test
-    PUBLIC ${PROJECT_SOURCE_DIR}/render-test/include ${PROJECT_SOURCE_DIR}/include
+    PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include ${PROJECT_SOURCE_DIR}/include
 )
 
 # needed for test_runner_common.hpp

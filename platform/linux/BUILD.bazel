@@ -11,8 +11,8 @@ ICU_FLAGS = [
 cc_library(
     name = "impl",
     srcs = [
-        "src/gl_functions.cpp",
         "src/headless_backend_glx.cpp",
+        "//platform/default:gl-functions",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     linkopts = [

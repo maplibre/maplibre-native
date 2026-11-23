@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
+include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
+
 # Override default CMake NATIVE_ARCH_ACTUAL
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20893
 # https://stackoverflow.com/a/22689917/5531400
@@ -27,7 +29,7 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/darwin/src/gl_functions.cpp ${PROJECT_SOURCE_DIR}/platform/darwin/src/headless_backend_cgl.mm
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/gl_functions.cpp ${PROJECT_SOURCE_DIR}/platform/darwin/src/headless_backend_cgl.mm
     )
     target_link_libraries(
         mbgl-core
@@ -51,29 +53,11 @@ endif()
 
 target_compile_options(mbgl-core PRIVATE -fobjc-arc)
 
-# FIXME: Should not be needed, but now needed by node because of the headless frontend.
-target_include_directories(
-    mbgl-core
-    PUBLIC ${PROJECT_SOURCE_DIR}/platform/default/include
-)
-
 target_include_directories(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/macos/src
+        ${CMAKE_CURRENT_LIST_DIR}/src
 )
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
-if(MLN_WITH_GLFW)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
-endif()
-if(MLN_WITH_NODE)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
-endif()
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/test)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test)
 
 find_program(ARMERGE NAMES armerge)
 find_program(
@@ -123,3 +107,7 @@ if(MLN_CREATE_AMALGAMATION)
     )
 
 endif()
+
+# The expression test and the default platform's runners work here, and are
+# added at the top level.
+set(MLN_DEFAULT_TEST_RUNNERS TRUE)

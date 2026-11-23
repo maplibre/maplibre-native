@@ -25,7 +25,6 @@ target_sources(
     PRIVATE
         ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
         ${MLN_DEFAULT_HEADLESS_SOURCES}
-        ${MLN_DEFAULT_LIBUV_RUN_LOOP_SOURCES}
         ${MLN_DEFAULT_LOCALE_SOURCES}
         ${MLN_DEFAULT_UNICODE_SOURCES}
         ${MLN_DEFAULT_UTIL_SOURCES}
@@ -36,17 +35,17 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_writer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/thread.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/thread_local.cpp
-        ${PROJECT_SOURCE_DIR}/platform/ohos/src/http_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/ohos/src/image.cpp
-        ${PROJECT_SOURCE_DIR}/platform/ohos/src/logging_hilog.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/http_file_source.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/image.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/logging_hilog.cpp
 )
 
 if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/linux/src/gl_functions.cpp
-            ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/gl_functions.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend_egl.cpp
     )
 endif()
 
@@ -80,7 +79,7 @@ target_include_directories(
     mbgl-core
     BEFORE
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/ohos/compat
+        ${CMAKE_CURRENT_LIST_DIR}/compat
 )
 
 foreach(MLN_OHOS_MLT_TARGET mlt-cpp mlt-cpp-encoder)
@@ -89,7 +88,7 @@ foreach(MLN_OHOS_MLT_TARGET mlt-cpp mlt-cpp-encoder)
             ${MLN_OHOS_MLT_TARGET}
             BEFORE
             PRIVATE
-                ${PROJECT_SOURCE_DIR}/platform/ohos/compat
+                ${CMAKE_CURRENT_LIST_DIR}/compat
         )
     endif()
 endforeach()
@@ -104,7 +103,6 @@ target_link_libraries(
         pixelmap
         hilog_ndk.z
         ${MLN_OHOS_NET_HTTP_LIBRARY}
-        uv
         z
 )
 
@@ -135,3 +133,6 @@ function(mln_ohos_link_core_whole_archive target)
             LINKER:--no-undefined
     )
 endfunction()
+
+# The default run loop, with libuv, which the top level adds.
+set(MLN_USE_LIBUV TRUE)

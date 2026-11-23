@@ -4,7 +4,7 @@ endif()
 
 add_executable(
     mbgl-cache
-    ${PROJECT_SOURCE_DIR}/bin/cache.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/cache.cpp
 )
 
 target_link_libraries(
@@ -18,7 +18,7 @@ target_link_libraries(
 
 add_executable(
     mbgl-offline
-    ${PROJECT_SOURCE_DIR}/bin/offline.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/offline.cpp
 )
 
 target_link_libraries(
@@ -28,7 +28,7 @@ target_link_libraries(
 
 add_executable(
     mbgl-render
-    ${PROJECT_SOURCE_DIR}/bin/render.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/render.cpp
 )
 
 target_link_libraries(
@@ -36,21 +36,9 @@ target_link_libraries(
     PRIVATE mbgl-vendor-args mbgl-compiler-options mbgl-core
 )
 
-if(WIN32)
-    find_package(libuv REQUIRED)
-
-    target_link_libraries(
-        mbgl-cache PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
-
-    target_link_libraries(
-        mbgl-offline PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
-
-    target_link_libraries(
-        mbgl-render PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
-endif()
+target_link_libraries(mbgl-cache PRIVATE ${MLN_LIBUV_LIBRARIES})
+target_link_libraries(mbgl-offline PRIVATE ${MLN_LIBUV_LIBRARIES})
+target_link_libraries(mbgl-render PRIVATE ${MLN_LIBUV_LIBRARIES})
 
 install(TARGETS mbgl-offline mbgl-render RUNTIME DESTINATION bin)
 

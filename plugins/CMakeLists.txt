@@ -1,5 +1,3 @@
-enable_testing()
-
 # `mln-plugin-tests` builds the tests of every plugin, which ctest runs from the repository root.
 add_custom_target(mln-plugin-tests)
 
