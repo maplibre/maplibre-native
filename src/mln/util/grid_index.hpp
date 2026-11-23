@@ -42,6 +42,16 @@ constexpr bool operator!=(circle<T> const& lhs, circle<T> const& rhs) {
 
 } // namespace geometry
 
+template <class F, class T>
+concept GridIndexPredicate = requires(const F& f, const T& t) {
+    { f(t) } -> std::convertible_to<bool>;
+};
+
+template <class F, class T>
+concept GridIndexVisitor = requires(F& f, const T& t, const mapbox::geometry::box<float>& box) {
+    { f(t, box) } -> std::convertible_to<bool>;
+};
+
 /*
  GridIndex is a data structure for testing the intersection of
  circles and rectangles in a 2d plane.
@@ -53,18 +63,6 @@ constexpr bool operator!=(circle<T> const& lhs, circle<T> const& rhs) {
  uniformly distributed across the plane, this greatly reduces
  the number of comparisons necessary.
 */
-
-/// A test applied to an element during a hit test.
-template <class F, class T>
-concept GridIndexPredicate = requires(const F& f, const T& t) {
-    { f(t) } -> std::convertible_to<bool>;
-};
-
-/// Called with each element a query finds, and its box; returning true stops the query.
-template <class F, class T>
-concept GridIndexVisitor = requires(F& f, const T& t, const mapbox::geometry::box<float>& box) {
-    { f(t, box) } -> std::convertible_to<bool>;
-};
 
 template <class T>
 class GridIndex {
