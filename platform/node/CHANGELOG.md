@@ -13,6 +13,7 @@
 
 ### 🐞 Bug fixes
 - core: fix renders that hang when retried after a glyph range fails to load ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)) (by [@johncarmack1984](https://github.com/johncarmack1984))
+- Leave pre-releases out of the Node versions the module builds for ([#4957](https://github.com/maplibre/maplibre-native/pull/4957)) (by [@johncarmack1984](https://github.com/johncarmack1984))
 
 ## 6.4.1
 ### 🐞 Bug fixes
