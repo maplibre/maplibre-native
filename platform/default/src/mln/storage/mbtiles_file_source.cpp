@@ -189,6 +189,16 @@ public:
 
     // Load data for specific tile
     void request_tile(const Resource &resource, ActorRef<FileSourceRequest> req) {
+        // A matching etag means the loader already has this tile, so skip the re-read and re-decode
+        if (resource.priorEtag && *resource.priorEtag == resource.url) {
+            Response response;
+            response.notModified = true;
+            response.expires = Timestamp::max();
+            response.etag = resource.url;
+            req.invoke(&FileSourceRequest::setResponse, response);
+            return;
+        }
+
         std::string base_path = url_to_path(resource.url);
         std::string path = db_path(base_path);
         auto &db = get_db(path);
