@@ -640,4 +640,216 @@ class LocationComponentTest : BaseTest() {
 
         verify(locationAnimatorCoordinator).feedNewAccuracyRadius(location.accuracy, false)
     }
+
+    @Test
+    fun newLocation_unchanged_notGivenToAnimators() {
+        startWithoutLocationEngine()
+
+        locationComponent.forceLocationUpdate(location(51.0, 17.0))
+        // same values in another object, other values such as altitude and time differ
+        val same = location(51.0, 17.0)
+        same.altitude = 100.0
+        same.time = 1000
+        locationComponent.forceLocationUpdate(same)
+
+        verify(locationAnimatorCoordinator, times(1)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+        verify(locationAnimatorCoordinator, times(1)).feedNewAccuracyRadius(anyFloat(), eq(false))
+        Assert.assertSame(same, locationComponent.lastKnownLocation)
+    }
+
+    @Test
+    fun newLocation_changedPosition_givenToAnimators() {
+        startWithoutLocationEngine()
+
+        locationComponent.forceLocationUpdate(location(51.0, 17.0))
+        locationComponent.forceLocationUpdate(location(51.0, 17.000001))
+        locationComponent.forceLocationUpdate(location(51.000001, 17.000001))
+
+        verify(locationAnimatorCoordinator, times(3)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+    }
+
+    @Test
+    fun newLocation_changedBearing_givenToAnimators() {
+        startWithoutLocationEngine()
+
+        locationComponent.forceLocationUpdate(location(51.0, 17.0, bearing = 30f))
+        locationComponent.forceLocationUpdate(location(51.0, 17.0, bearing = 40f))
+
+        verify(locationAnimatorCoordinator, times(2)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+    }
+
+    @Test
+    fun newLocation_onlyAccuracyChanged_onlyAccuracyGivenToAnimators() {
+        startWithoutLocationEngine()
+
+        locationComponent.forceLocationUpdate(location(51.0, 17.0, accuracy = 20f))
+        locationComponent.forceLocationUpdate(location(51.0, 17.0, accuracy = 30f))
+
+        verify(locationAnimatorCoordinator, times(1)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+        verify(locationAnimatorCoordinator).feedNewAccuracyRadius(2f, false)
+        verify(locationAnimatorCoordinator).feedNewAccuracyRadius(3f, false)
+    }
+
+    @Test
+    fun newLocation_reusedLocationObject_givenToAnimators() {
+        startWithoutLocationEngine()
+
+        val location = location(51.0, 17.0)
+        locationComponent.forceLocationUpdate(location)
+        location.longitude = 17.001
+        locationComponent.forceLocationUpdate(location)
+
+        verify(locationAnimatorCoordinator, times(2)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+    }
+
+    @Test
+    fun newLocation_intermediatePoints_alwaysGivenToAnimators() {
+        startWithoutLocationEngine()
+
+        locationComponent.forceLocationUpdate(location(51.0, 17.0))
+        locationComponent.forceLocationUpdate(listOf(location(51.0, 17.0)), false)
+
+        verify(locationAnimatorCoordinator).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+        verify(locationAnimatorCoordinator).feedNewLocation(any(), any(CameraPosition::class.java), anyBoolean(), anyBoolean())
+    }
+
+    @Test
+    fun newLocation_unchangedAfterRestart_givenToAnimators() {
+        startWithoutLocationEngine()
+        locationComponent.forceLocationUpdate(location(51.0, 17.0))
+        clearInvocations(locationAnimatorCoordinator)
+        locationComponent.onStop()
+        locationComponent.onStart()
+
+        // onStart gave the last location to the animators again, after stopping canceled the animations
+        verify(locationAnimatorCoordinator).cancelAllAnimations()
+        verify(locationAnimatorCoordinator, times(1)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+        locationComponent.forceLocationUpdate(location(51.0, 17.0))
+        verify(locationAnimatorCoordinator, times(1)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+    }
+
+    @Test
+    fun newLocation_unchangedAfterStyleReload_givenToAnimators() {
+        startWithoutLocationEngine()
+        locationComponent.forceLocationUpdate(location(51.0, 17.0))
+
+        locationComponent.onStartLoadingMap()
+        locationComponent.onFinishLoadingStyle()
+
+        verify(locationAnimatorCoordinator, times(2)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+    }
+
+    @Test
+    fun compass_smallChange_notGivenToAnimators() {
+        val compassListener = startWithCompass()
+
+        compassListener.onCompassChanged(77f)
+        compassListener.onCompassChanged(77.05f)
+        compassListener.onCompassChanged(76.95f)
+        verify(locationAnimatorCoordinator, times(1)).feedNewCompassBearing(anyFloat(), any(CameraPosition::class.java))
+
+        // compared with the last heading given to the animators, so slow drift adds up
+        compassListener.onCompassChanged(77.06f)
+        compassListener.onCompassChanged(77.12f)
+        verify(locationAnimatorCoordinator).feedNewCompassBearing(77.12f, CameraPosition.DEFAULT)
+        verify(locationAnimatorCoordinator, times(2)).feedNewCompassBearing(anyFloat(), any(CameraPosition::class.java))
+    }
+
+    @Test
+    fun compass_smallChangeAcrossSouth_notGivenToAnimators() {
+        val compassListener = startWithCompass()
+
+        compassListener.onCompassChanged(179.98f)
+        compassListener.onCompassChanged(-179.98f)
+
+        verify(locationAnimatorCoordinator, times(1)).feedNewCompassBearing(anyFloat(), any(CameraPosition::class.java))
+    }
+
+    @Test
+    fun compass_unchangedAfterRestart_givenToAnimators() {
+        val compassListener = startWithCompass()
+        compassListener.onCompassChanged(77f)
+        `when`(compassEngine.lastHeading).thenReturn(77f)
+
+        locationComponent.onStop()
+        locationComponent.onStart()
+
+        verify(locationAnimatorCoordinator, times(2)).feedNewCompassBearing(anyFloat(), any(CameraPosition::class.java))
+    }
+
+    @Test
+    fun newLocation_unchangedAfterCameraModeChange_givenToAnimators() {
+        startWithoutLocationEngine()
+        locationComponent.forceLocationUpdate(location(51.0, 17.0, bearing = 90f))
+
+        // animators that start listening, such as the camera bearing, need the current location
+        locationComponent.cameraTrackingChangedListener.onCameraTrackingChanged(CameraMode.TRACKING_GPS)
+        locationComponent.forceLocationUpdate(location(51.0, 17.0, bearing = 90f))
+        locationComponent.forceLocationUpdate(location(51.0, 17.0, bearing = 90f))
+
+        verify(locationAnimatorCoordinator, times(2)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+        verify(locationAnimatorCoordinator, times(2)).feedNewAccuracyRadius(anyFloat(), eq(false))
+    }
+
+    @Test
+    fun newLocation_unchangedAfterRenderModeChange_givenToAnimators() {
+        startWithoutLocationEngine()
+        locationComponent.forceLocationUpdate(location(51.0, 17.0))
+
+        // e.g. the accuracy circle returning after RenderMode.GPS
+        locationComponent.renderModeChangedListener.onRenderModeChanged(RenderMode.NORMAL)
+        locationComponent.forceLocationUpdate(location(51.0, 17.0))
+
+        verify(locationAnimatorCoordinator, times(2)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+        verify(locationAnimatorCoordinator, times(2)).feedNewAccuracyRadius(anyFloat(), eq(false))
+    }
+
+    @Test
+    fun compass_unchangedAfterModeChange_givenToAnimators() {
+        val compassListener = startWithCompass()
+        compassListener.onCompassChanged(77f)
+
+        locationComponent.cameraTrackingChangedListener.onCameraTrackingChanged(CameraMode.TRACKING_COMPASS)
+        compassListener.onCompassChanged(77f)
+        locationComponent.renderModeChangedListener.onRenderModeChanged(RenderMode.COMPASS)
+        compassListener.onCompassChanged(77f)
+        compassListener.onCompassChanged(77f)
+
+        verify(locationAnimatorCoordinator, times(3)).feedNewCompassBearing(eq(77f), any(CameraPosition::class.java))
+    }
+
+    private fun startWithoutLocationEngine() {
+        val projection: Projection = mock(Projection::class.java)
+        `when`(projection.getMetersPerPixelAtLatitude(anyDouble())).thenReturn(10.0)
+        `when`(maplibreMap.projection).thenReturn(projection)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        locationComponent.activateLocationComponent(
+            LocationComponentActivationOptions.builder(context, style)
+                .locationComponentOptions(locationComponentOptions)
+                .useDefaultLocationEngine(false)
+                .build()
+        )
+        locationComponent.isLocationComponentEnabled = true
+        locationComponent.onStart()
+        clearInvocations(locationAnimatorCoordinator)
+    }
+
+    private fun startWithCompass(): CompassListener {
+        // onStart gives the engine's last heading, 0, to the animators
+        `when`(compassEngine.lastHeading).thenReturn(0f)
+        `when`(locationLayerController.isConsumingCompass).thenReturn(true)
+        startWithoutLocationEngine()
+        val captor = ArgumentCaptor.forClass(CompassListener::class.java)
+        verify(compassEngine).addCompassListener(captor.capture())
+        return captor.value
+    }
+
+    private fun location(latitude: Double, longitude: Double, bearing: Float = 0f, accuracy: Float = 20f): Location {
+        return Location("test").also {
+            it.latitude = latitude
+            it.longitude = longitude
+            it.bearing = bearing
+            it.accuracy = accuracy
+        }
+    }
 }
