@@ -10,6 +10,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "harfbuzz.hpp"
 
@@ -35,6 +36,8 @@ using HBShapeResults = std::map<FontStack, std::map<GlyphIDType, std::map<std::u
 class GlyphRequestor {
 public:
     virtual void onGlyphsAvailable(GlyphMap, HBShapeRequests) = 0;
+    // A range this requestor was answered without, because it failed to load, has loaded since.
+    virtual void onLateGlyphsAvailable() {}
 
 protected:
     virtual ~GlyphRequestor() = default;
@@ -88,6 +91,8 @@ private:
         bool failed = false;
         std::unique_ptr<AsyncRequest> req;
         std::unordered_map<GlyphRequestor *, std::shared_ptr<GlyphDependencies>> requestors;
+        // Requestors answered without this range because it failed to load.
+        std::vector<GlyphRequestor *> unanswered;
     };
 
     struct Entry {
