@@ -40,6 +40,8 @@ public:
     float getQueryRadius(const RenderLayer&) const override;
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
+    
+    bool isIntersectionRoundedCornerEnabled() const { return intersectionRoundedCornerEnabled; }
 
     /*
      * @param p vertex position
@@ -123,7 +125,9 @@ private:
         size_t operator()(const GeometryCoordinate& coord) const { return util::hash(coord.x, coord.y); }
     };
     
-    std::unordered_map<GeometryCoordinate, std::vector<std::pair<GeometryCoordinate, uint32_t>>, CoordinateHasher> neighborsMap;
+    using CoordIndexPair = std::pair<GeometryCoordinate, uint32_t>;
+    std::unordered_map<GeometryCoordinate, std::vector<CoordIndexPair>, CoordinateHasher> neighborsMap;
+    bool intersectionRoundedCornerEnabled = false;
 };
 
 } // namespace mln

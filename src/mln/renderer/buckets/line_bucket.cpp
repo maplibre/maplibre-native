@@ -20,9 +20,14 @@ LineBucket::LineBucket(LineBucket::PossiblyEvaluatedLayoutProperties layout_,
       zoom(zoom_),
       overscaling(overscaling_) {
     for (const auto& pair : layerPaintProperties) {
+        const auto& lineProps = static_cast<const LineLayerProperties&>(*pair.second);
+#if MLN_USE_LINE_INTERSECTION_ROUNDED_CORNER
+        const auto& intersectionRoundedCornerProperty = lineProps.layerImpl().paint.get<LineIntersectionRoundedCornerDistance>().value;
+        intersectionRoundedCornerEnabled |= !intersectionRoundedCornerProperty.isUndefined();
+#endif
         paintPropertyBinders.emplace(std::piecewise_construct,
                                      std::forward_as_tuple(pair.first),
-                                     std::forward_as_tuple(getEvaluated<LineLayerProperties>(pair.second), zoom));
+                                     std::forward_as_tuple(lineProps.evaluated, zoom));
     }
 }
 
@@ -42,46 +47,53 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
     for (auto& line : geometryCollection) {
         addGeometry(line, feature, canonical);
         
-        for(uint i = 1; i < line.size(); i++) {
-            auto& point = line[i];
-            auto& prev = line[i - 1];
-            if (point == prev) {
-                continue;
+        if (intersectionRoundedCornerEnabled) {
+            for(uint i = 1; i < line.size(); i++) {
+                auto& point = line[i];
+                auto& prev = line[i - 1];
+                if (point == prev) {
+                    continue;
+                }
+                neighborsMap[point].emplace_back(std::make_pair(prev, vertexOffset * 2.0 + 0));
+                neighborsMap[prev].emplace_back(std::make_pair(point, vertexOffset * 2.0 + 1));
             }
-            neighborsMap[point].emplace_back(std::make_pair(prev, vertexOffset * 2.0 + 0));
-            neighborsMap[prev].emplace_back(std::make_pair(point, vertexOffset * 2.0 + 1));
         }
     }
 
-    triangleInstances.clear();
-    intersectionTriangles.clear();
-    intersectionTriangles.emplace_back(0, 1, 2);
-    intersectionSegments.clear();
-    intersectionSegments.emplace_back(0, 0, 3, 3, 0, 0);
-    for (auto& pair : neighborsMap) {
-        auto& neighbors = pair.second;
-        if (neighbors.size() <= 2) {
-            continue;
-        }
-        auto& cornerPoint = pair.first;
-        std::sort(neighbors.begin(), neighbors.end(),
-            [cornerPoint](const std::pair<GeometryCoordinate, int>& a, const std::pair<GeometryCoordinate, int>& b) {
-                return util::angle_to(cornerPoint, std::get<GeometryCoordinate>(a)) > util::angle_to<>(cornerPoint, std::get<GeometryCoordinate>(b));
-        });
-        for (uint i = 0; i < neighbors.size(); i++) {
-            auto nextIndex = (i + 1) % neighbors.size();
-            auto& prevPoint = std::get<GeometryCoordinate>(neighbors[i]);
-            auto& nextPoint = std::get<GeometryCoordinate>(neighbors[nextIndex]);
-            
-            auto angle = abs(util::rad2deg(util::angle_between(prevPoint - cornerPoint, nextPoint - cornerPoint)));
-            if (angle > 150.0 && angle < 210.0) {
+    if (intersectionRoundedCornerEnabled) {
+        triangleInstances.clear();
+        intersectionTriangles.clear();
+        intersectionTriangles.emplace_back(0, 1, 2);
+        intersectionSegments.clear();
+        intersectionSegments.emplace_back(0, 0, 3, 3, 0, 0);
+        for (auto& pair : neighborsMap) {
+            auto& neighbors = pair.second;
+            if (neighbors.size() <= 2) {
                 continue;
             }
-            auto& prevDataIndex = std::get<uint32_t>(neighbors[i]);
-            auto& nextDataIndex = std::get<uint32_t>(neighbors[nextIndex]);
-            
-            triangleInstances.emplace_back(triangleInstance(prevPoint, cornerPoint, nextPoint, prevDataIndex, nextDataIndex));
-            intersectionSegments.back().instanceCount ++;
+            auto& cornerPoint = pair.first;
+            std::sort(neighbors.begin(), neighbors.end(), [cornerPoint](const CoordIndexPair& a, const CoordIndexPair& b) {
+                return util::angle_to(cornerPoint, a.first) > util::angle_to(cornerPoint, b.first);
+            });
+            auto minInterator = std::min_element(neighbors.begin(), neighbors.end(), [cornerPoint](const CoordIndexPair& a, const CoordIndexPair& b) {
+                return util::distSqr<float>(cornerPoint, a.first) > util::distSqr<float>(cornerPoint, b.first);
+            });
+            auto maxCornerDistance = static_cast<uint32_t>(util::dist<double>(cornerPoint, minInterator->first) / 2.0);
+            for (uint i = 0; i < neighbors.size(); i++) {
+                auto nextIndex = (i + 1) % neighbors.size();
+                auto& prevPoint = neighbors[i].first;
+                auto& nextPoint = neighbors[nextIndex].first;
+                
+                auto angle = abs(util::rad2deg(util::angle_between(prevPoint - cornerPoint, nextPoint - cornerPoint)));
+                if (angle > 170.0 && angle < 190.0) {
+                    continue;
+                }
+                auto& prevDataIndex = neighbors[i].second;
+                auto& nextDataIndex = neighbors[nextIndex].second;
+                
+                triangleInstances.emplace_back(triangleInstance(prevPoint, cornerPoint, nextPoint, prevDataIndex, nextDataIndex));
+                intersectionSegments.back().instanceCount ++;
+            }
         }
     }
         

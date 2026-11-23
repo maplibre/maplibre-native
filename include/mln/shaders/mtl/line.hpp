@@ -553,6 +553,29 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     device const LineDrawableUBO& drawable = drawableVector[uboIndex].lineDrawableUBO;
 
+    if (props.intersection_rounded_corner_distance == 0) {
+        return {
+            .position = float4(0.0),
+            
+            .triangle_pos = float2(0.0),
+
+            .triangle_corner_prev = float2(0.0),
+            .triangle_corner_pos = float2(0.0),
+            .triangle_corner_next = float2(0.0),
+            .triangle_corner_radius = 0.0,
+
+#if !defined(HAS_UNIFORM_u_color) 
+            .color1        = float4(0.0),
+            .color2        = float4(0.0),
+#endif
+#if !defined(HAS_UNIFORM_u_opacity) 
+            .opacity1      = 0.0,
+            .opacity2      = 0.0,
+#endif
+        };
+    }
+
+
     float2 triangle_vertex_pos[3];
     float triangle_corner_radius;
 
@@ -616,7 +639,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     uint dataIndex2 = vertx.data_indices[1] / 2;
 
     return {
-        .position = drawable.matrix * float4(position, 0.0f, 1.0f),
+        .position = drawable.matrix * float4(position, 0.0, 1.0),
         
         .triangle_pos = position,
 
@@ -626,8 +649,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .triangle_corner_radius = triangle_corner_radius,
 
 #if !defined(HAS_UNIFORM_u_color) 
-        .color1        = unpack_mix_color(data[dataIndex1].color, drawable.color_t),
-        .color2        = unpack_mix_color(data[dataIndex2].color, drawable.color_t),
+        //.color1        = unpack_mix_color(data[dataIndex1].color, drawable.color_t),
+        //.color2        = unpack_mix_color(data[dataIndex2].color, drawable.color_t),
+        .color1        = float4(1.0, 0.0, 0.0, 1.0),
+        .color2        = float4(0.0, 1.0, 0.0, 1.0),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity) 
         .opacity1      = unpack_mix_float(data[dataIndex1].opacity, drawable.opacity_t),
@@ -643,6 +668,10 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
+
+    if (props.intersection_rounded_corner_distance == 0) {
+        return half4(0.0);
+    }
 
 #if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity)
     float2 vPos = in.triangle_pos - in.triangle_corner_pos;

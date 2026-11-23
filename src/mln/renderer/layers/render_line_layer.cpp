@@ -628,7 +628,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
             
             // line intersection
-            if (bucket.sharedTriangleInstances->empty()) {
+            if (!bucket.isIntersectionRoundedCornerEnabled() || bucket.sharedTriangleInstances->empty()) {
                 continue;
             }
             
