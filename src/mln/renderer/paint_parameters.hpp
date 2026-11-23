@@ -136,17 +136,13 @@ private:
 
 public:
     uint32_t currentLayer;
-    float depthRangeSize;
+    float depthRangeSize = 1.0f;
     uint32_t opaquePassCutoff = 0;
     float symbolFadeChange;
     const uint64_t frameCount;
 
     static constexpr int numSublayers = 3;
-#if MLN_RENDER_BACKEND_OPENGL
     static constexpr float depthEpsilon = 1.0f / (1 << 16);
-#else
-    static constexpr float depthEpsilon = 1.0f / (1 << 11);
-#endif
     static constexpr int maxStencilValue = 255;
 
     double tileLodMinRadius;

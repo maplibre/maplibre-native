@@ -64,9 +64,6 @@ void RenderFillExtrusionLayer::captureRenderedFeatures(
     constexpr bool inViewportPixelUnits = false;
     constexpr bool nearClipped = true;
     constexpr bool aligned = false;
-    constexpr bool is3d = true;
-    constexpr bool enableDepth = true;
-    constexpr std::int32_t subLayerIndex = 1;
     const auto translation = evaluated.get<FillExtrusionTranslate>();
     const auto translationAnchor = evaluated.get<FillExtrusionTranslateAnchor>();
     const auto base = constOrDefault<FillExtrusionBase>(evaluated);
@@ -96,13 +93,9 @@ void RenderFillExtrusionLayer::captureRenderedFeatures(
             tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
                                                      state,
                                                      transformParams,
-                                                     layerIndex,
                                                      translation,
                                                      translationAnchor,
                                                      origin,
-                                                     is3d,
-                                                     enableDepth,
-                                                     subLayerIndex,
                                                      nearClipped,
                                                      inViewportPixelUnits,
                                                      aligned);

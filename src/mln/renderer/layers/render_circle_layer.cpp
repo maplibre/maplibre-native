@@ -221,9 +221,6 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
     constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
     constexpr bool nearClipped = false;
     constexpr bool aligned = false;
-    constexpr bool is3d = false;
-    constexpr bool enableDepth = true;
-    constexpr std::int32_t subLayerIndex = 0;
     constexpr std::optional<mln::Point<double>> origin = std::nullopt;
 
     const auto zoom = state.getZoom();
@@ -302,13 +299,9 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
             tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
                                                      state,
                                                      transformParams,
-                                                     layerIndex,
                                                      translation,
                                                      translationAnchor,
                                                      origin,
-                                                     is3d,
-                                                     enableDepth,
-                                                     subLayerIndex,
                                                      nearClipped,
                                                      inViewportPixelUnits,
                                                      aligned);

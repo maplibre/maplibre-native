@@ -9,9 +9,8 @@ namespace vulkan {
 
 class OffscreenTextureResource final : public RenderableResource {
 public:
-    OffscreenTextureResource(RendererBackend& backend_, const Size size_, const gfx::TextureChannelDataType type_)
+    OffscreenTextureResource(RendererBackend& backend_, const Size size, const gfx::TextureChannelDataType type_)
         : RenderableResource(backend_),
-          size(size_),
           type(type_) {
         assert(!size.isEmpty());
 
@@ -40,8 +39,15 @@ public:
     }
 
     void bind() override {
+        auto& texture = static_cast<Texture2D&>(*colorTexture);
+        const bool dirty = texture.isDirty();
+
         colorTexture->create();
         createRenderPass();
+
+        if (dirty) {
+            createFramebuffer();
+        }
     }
 
     const vk::UniqueFramebuffer& getFramebuffer() const override { return framebuffer; };
@@ -108,6 +114,20 @@ public:
 
         renderPass = backend.getDevice()->createRenderPassUnique(
             renderPassCreateInfo, nullptr, backend.getDispatcher());
+    }
+
+    void createFramebuffer() {
+        if (framebuffer) {
+            backend.getContext<Context>().enqueueDeletion([oldFramebuffer = framebuffer.release()](auto& context_) {
+                context_.getBackend().getDevice()->destroyFramebuffer(
+                    oldFramebuffer, nullptr, context_.getBackend().getDispatcher());
+            });
+        }
+
+        auto& texture = static_cast<Texture2D&>(*colorTexture);
+        const auto& textureSize = texture.getSize();
+        extent.width = textureSize.width;
+        extent.height = textureSize.height;
 
         const auto framebufferCreateInfo = vk::FramebufferCreateInfo()
                                                .setRenderPass(renderPass.get())
@@ -122,7 +142,6 @@ public:
     }
 
 private:
-    const Size size;
     const gfx::TextureChannelDataType type;
 
     gfx::Texture2DPtr colorTexture;

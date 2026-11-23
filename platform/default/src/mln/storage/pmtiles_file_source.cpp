@@ -110,9 +110,12 @@ public:
             uint64_t tileID;
 
             try {
-                tileID = pmtiles::zxy_to_tileid(static_cast<uint8_t>(resource.tileData->z),
-                                                static_cast<uint32_t>(resource.tileData->x),
-                                                static_cast<uint32_t>(resource.tileData->y));
+                // pmtiles::zxy_to_tileid shifts by -1 for the z0 tile: https://github.com/protomaps/PMTiles/pull/687
+                tileID = resource.tileData->z == 0
+                             ? 0
+                             : pmtiles::zxy_to_tileid(static_cast<uint8_t>(resource.tileData->z),
+                                                      static_cast<uint32_t>(resource.tileData->x),
+                                                      static_cast<uint32_t>(resource.tileData->y));
             } catch (const std::exception& e) {
                 Response response;
                 response.noContent = true;

@@ -18,6 +18,7 @@ concurrency:
 
 permissions:
   id-token: write         # needed for AWS
+  pull-requests: read     # needed to check for a '!benchmark ios' comment
 
 jobs:
   pre_job:
@@ -91,19 +92,21 @@ jobs:
           df -h "$HOME"
 
       - name: Set up Bazel
-        uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3 # 0.19.1
+        uses: bazel-contrib/setup-bazel@f34d6a05eae3c24acab7fa54587492daeaeffdab # 0.19.2
         with:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
           repository-cache: true
           cache-save: ${{ github.event_name != 'pull_request' }}
 
+      - name: Generate Xcode project
+        run: bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+
       # render test
 
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
@@ -129,6 +132,37 @@ jobs:
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
 
+      # benchmark (built on pushes to main and for PRs with a '!benchmark ios' comment, see ios-device-test.yml)
+
+      - name: Check if comment on PR contains '!benchmark ios'
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        id: benchmark_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-regex: '/^!benchmark.*\bios\b/im'
+
+      - name: Should we build the benchmark?
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || steps.benchmark_comment.outputs.comment-id
+        run: echo "build_benchmark=true" >> "$GITHUB_ENV"
+
+      - name: Build BenchmarkApp .ipa and BenchmarkTests .xctest for AWS Device Farm
+        if: env.build_benchmark == 'true'
+        run: |
+          benchmark_artifacts_dir="$(mktemp -d)"
+          scripts/build-benchmark-for-device-farm.sh "$benchmark_artifacts_dir"
+          echo benchmark_artifacts_dir="$benchmark_artifacts_dir" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: env.build_benchmark == 'true'
+        with:
+          name: ios-benchmark
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            ${{ env.benchmark_artifacts_dir }}/BenchmarkApp.ipa
+            ${{ env.benchmark_artifacts_dir }}/BenchmarkTests.xctest.zip
+
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
 
@@ -145,34 +179,23 @@ jobs:
       #- name: Running iOS UI tests (Thread Sanitizer)
       #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
 
-      # https://github.com/maplibre/maplibre-native/issues/3642
-      # - name: Running iOS UI tests (Address+UB Sanitizer)
-      #   run: |
-      #     retry_count=0
-      #     max_retries=5
-      #     while [ $retry_count -le $max_retries ]; do
-      #       bazel test //platform/ios/iosapp-UITests:uitest \
-      #         --test_output=errors \
-      #         --//:renderer=metal \
-      #         --features=include_clang_rt \
-      #         --copt=-fsanitize=undefined \
-      #         --linkopt=-fsanitize=undefined \
-      #         --copt=-fsanitize-recover=null \
-      #         --linkopt=-fsanitize-recover=null && break
-      #       retry_count=$((retry_count+1))
-      #       if [ $retry_count -eq $max_retries ]; then
-      #         echo "::error::Failed to run iOS UI tests after $max_retries attempts"
-      #         exit 1
-      #       fi
-      #       echo "Attempt $retry_count failed. Retrying..."
-      #     done
+      - name: Running iOS UI tests (UB Sanitizer)
+        run: |
+          bazel test //platform/ios/iosapp-UITests:uitest \
+            --test_output=errors \
+            --flaky_test_attempts=5 \
+            --//:renderer=metal \
+            --features=include_clang_rt \
+            --copt=-fsanitize=undefined \
+            --linkopt=-fsanitize=undefined \
+            --copt=-fsanitize-recover=null \
+            --linkopt=-fsanitize-recover=null
 
       # C++ unit tests
 
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
@@ -310,14 +333,27 @@ jobs:
           sccache --start-server
           sccache --zero-stats
 
+      - name: Restore Dawn sources
+        id: dawn-sources
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: vendor/dawn
+          key: dawn-sources-${{ hashFiles('vendor/dawn.cmake') }}
+
       - name: Configure build with CMake
         run: |
           cmake --preset ios-webgpu-dawn \
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
+      - name: Save Dawn sources
+        if: github.event_name != 'pull_request' && steps.dawn-sources.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: vendor/dawn
+          key: ${{ steps.dawn-sources.outputs.cache-primary-key }}
+
       - name: Build mbgl-core and iOS SDK
-        continue-on-error: true
         run: cmake --build build-ios-webgpu-dawn --target mbgl-core ios-sdk-static
 
       - name: Show sccache stats
@@ -366,7 +402,6 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Build mbgl-core and iOS SDK
-        continue-on-error: true
         run: RUSTC_WRAPPER=sccache cmake --build build-ios-webgpu-wgpu --target mbgl-core ios-sdk-static
 
       - name: Show sccache stats

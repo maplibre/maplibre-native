@@ -148,6 +148,20 @@ void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) 
     activatedRenderTargets.clear();
 }
 
+void RenderHillshadeLayer::releaseRenderedTargets(UniqueChangeRequestVec& changes) {
+    // A tile's prepare pass only has to run once per bucket: its texture then holds the slope data that the
+    // tile drawable samples. Stop the orchestrator from drawing it again every frame, and free the prepare
+    // drawable with its DEM texture. The bucket keeps the target alive for the texture.
+    std::erase_if(activatedRenderTargets, [&](const RenderTargetPtr& renderTarget) {
+        if (!renderTarget->hasBeenRendered()) {
+            return false;
+        }
+        activateRenderTarget(renderTarget, false, changes);
+        renderTarget->removeLayerGroup(0);
+        return true;
+    });
+}
+
 static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
 static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
@@ -158,6 +172,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   [[maybe_unused]] const PaintParameters& paintParameters,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
+    releaseRenderedTargets(changes);
+
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -203,7 +219,10 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     if (!staticDataSharedVertices) {
         staticDataSharedVertices = std::make_shared<HillshadeVertexVector>(RenderStaticData::rasterVertices());
     }
-    const auto staticDataIndices = RenderStaticData::quadTriangleIndices();
+    if (!staticDataSharedIndices) {
+        staticDataSharedIndices = std::make_shared<gfx::IndexVector<gfx::Triangles>>(
+            RenderStaticData::quadTriangleIndices());
+    }
     const auto staticDataSegments = RenderStaticData::rasterSegments();
 
     std::unique_ptr<gfx::DrawableBuilder> hillshadeBuilder;
@@ -282,8 +301,10 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             hillshadePrepareBuilder->setVertexAttributes(getPrepareVertexAttributes());
             hillshadePrepareBuilder->setRawVertices(
                 {}, staticDataSharedVertices->elements(), gfx::AttributeDataType::Short2);
-            hillshadePrepareBuilder->setSegments(
-                gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
+            hillshadePrepareBuilder->setSegments(gfx::Triangles(),
+                                                 staticDataSharedIndices->vector(),
+                                                 staticDataSegments.data(),
+                                                 staticDataSegments.size());
 
             std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
             texture->setImage(bucket.getDEMData().getImagePtr());
@@ -316,7 +337,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             segments = &bucket.segments;
         } else {
             vertices = staticDataSharedVertices;
-            indices = std::make_shared<gfx::IndexVector<gfx::Triangles>>(staticDataIndices);
+            indices = staticDataSharedIndices;
         }
 
         if (!hillshadeBuilder) {

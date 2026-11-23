@@ -26,6 +26,7 @@ env:
   EGL_PLATFORM: surfaceless
   # Mesa 26's gfxstream ICD leaks a pthread key per vkCreateInstance, which exhausts glibc's 1024 keys in the Vulkan render tests.
   VK_DRIVER_FILES: /usr/share/vulkan/icd.d/lvp_icd.json
+  UBSAN_OPTIONS: print_stacktrace=1
 
 jobs:
   pre_job:
@@ -72,14 +73,14 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           languages: cpp
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@68a389c788b2cd04016ce8c80ee23b80d2ab3d68 # v2.88.1
+      - uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2.90.3
         with:
           tool: armerge@2
 
@@ -123,7 +124,8 @@ jobs:
             -DCLANG_TIDY_COMMAND=/usr/local/bin/ctcache/clang-tidy \
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
-            -DMLN_WITH_COVERAGE=ON
+            -DMLN_WITH_COVERAGE=ON \
+            -DMLN_WITH_SANITIZER=${{ matrix.variant.renderer == 'vulkan' && 'undefined' || 'OFF' }}
           cmake --build build-linux-${{ matrix.variant.renderer }} --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # mbgl-render (used for size test) & mbgl-benchmark-runner
@@ -156,7 +158,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           category: "/language:cpp"
 
@@ -165,7 +167,6 @@ jobs:
       - run: chmod +x build-linux-${{ matrix.variant.renderer }}/mbgl-test-runner
 
       - name: Run C++ tests
-        continue-on-error: ${{ matrix.variant.renderer == 'vulkan' }}
         run: xvfb-run -a build-linux-${{ matrix.variant.renderer }}/mbgl-test-runner
 
       # render tests
@@ -209,7 +210,7 @@ jobs:
         run: .github/scripts/install-linux-deps
 
       - name: Set up Bazel
-        uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3 # 0.19.1
+        uses: bazel-contrib/setup-bazel@f34d6a05eae3c24acab7fa54587492daeaeffdab # 0.19.2
         with:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}

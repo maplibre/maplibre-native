@@ -16,6 +16,7 @@ option(MLN_WITH_METAL "Build with Metal renderer" OFF)
 option(MLN_WITH_WEBGPU "Build with WebGPU renderer" OFF)
 option(MLN_WITH_PMTILES "Build with PMTiles support" ON)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
+option(MLN_WITH_TOOLS "Build the command line tools in bin/" OFF)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
 option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
 option(MLN_USE_RUST "Use components in Rust" OFF)
@@ -70,8 +71,6 @@ add_library(
     mbgl-compiler-options INTERFACE
 )
 
-set(UBSAN_BLACKLIST ${PROJECT_SOURCE_DIR}/scripts/ubsan.blacklist)
-
 if (MLN_WITH_SANITIZER)
     message(STATUS "MLN_WITH_SANITIZER is enabled, using \"${MLN_WITH_SANITIZER}\" sanitizer")
 endif()
@@ -85,16 +84,8 @@ target_compile_options(
         $<$<BOOL:${MLN_WITH_SANITIZER}>:-fno-optimize-sibling-calls>
         $<$<STREQUAL:${MLN_WITH_SANITIZER},address>:-fsanitize=address>
         $<$<STREQUAL:${MLN_WITH_SANITIZER},thread>:-fsanitize=thread>
-        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=implicit-conversion,
-        -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=undefined,
-        -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=unsigned-integer-overflow,
-        -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=nullability,
-        -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=float-divide-by-zero,
-        -fsanitize-blacklist=${UBSAN_BLACKLIST}>
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=undefined>
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fno-sanitize-recover=undefined>
         $<$<PLATFORM_ID:iOS>:-fembed-bitcode>
         $<$<AND:$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:OBJCXX>>,$<NOT:$<OR:$<BOOL:${MLN_WITH_RTTI}>,$<CXX_COMPILER_ID:MSVC>>>>:-fno-rtti>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wall>
@@ -1250,6 +1241,7 @@ if(_can_export)
 endif()
 
 if(MLN_WITH_VULKAN)
+    include(${PROJECT_SOURCE_DIR}/vendor/glslang.cmake)
     include(${PROJECT_SOURCE_DIR}/vendor/vulkan.cmake)
 
     target_link_libraries(
@@ -1302,6 +1294,8 @@ endif()
 
 include(${PROJECT_SOURCE_DIR}/scripts/license.cmake)
 
+include(${PROJECT_SOURCE_DIR}/platform/default/sources.cmake)
+
 if(MLN_WITH_QT)
     include(${PROJECT_SOURCE_DIR}/platform/qt/qt.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
@@ -1322,6 +1316,7 @@ else()
     message(FATAL_ERROR "Unsupported target platform: " ${CMAKE_SYSTEM_NAME})
 endif()
 
+add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/benchmark)
 add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)

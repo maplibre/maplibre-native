@@ -53,7 +53,7 @@ bool RenderLayer::needsRendering() const {
 
 bool RenderLayer::supportsZoom(float zoom) const {
     // TODO: shall we use rounding or epsilon comparisons?
-    return baseImpl->minZoom <= zoom && baseImpl->maxZoom >= zoom;
+    return baseImpl->minZoom <= zoom && zoom < baseImpl->maxZoom;
 }
 
 void RenderLayer::prepare(const LayerPrepareParameters& params) {
