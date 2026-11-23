@@ -9,6 +9,7 @@
 #include <memory>
 #include <numbers>
 #include <optional>
+#include <vector>
 
 #include <mapbox/std/weak.hpp>
 
@@ -70,10 +71,17 @@ public:
     /// Where coverTileLimit measures from (normalized web-mercator): the ground under the
     /// camera, RenderTerrain::meshTileCapOrigin, the same point the mesh-tile cap uses.
     std::array<double, 2> coverTileLimitOrigin{{0.0, 0.0}};
-    /// A position the source asks a tile for as well, wherever the view is: the ground under the
+    /// Positions the source asks a tile for as well, wherever the view is: the ground under the
     /// camera's eye, which is often behind or below the view and so outside the frustum the cover
-    /// is taken from. Nothing is asked for where the cover already holds a tile over it.
-    std::optional<LatLng> alsoCover = std::nullopt;
+    /// is taken from, and the ground under the map's center, which a camera low over high ground
+    /// cannot see but whose height the center clamp needs. Nothing is asked for where the cover
+    /// already holds a tile over it.
+    std::vector<LatLng> alsoCover{};
+    /// With terrain on: leave out the tiles that build none of the source's layers, every layer being
+    /// outside its zoom range for them (GeometryTile::setLayers). They draw nothing.
+    bool leaveOutEmptyTiles = false;
+    /// With terrain on: util::TileCoverParameters::minZoomReach for the source's covers.
+    std::optional<uint8_t> coverMinZoomReach = std::nullopt;
 };
 
 } // namespace mln

@@ -212,9 +212,17 @@ public:
     std::set<CanonicalTileID> demTiles;
 };
 
+// A source that covers all the ground in view, which is what the cap holds
+class CoveringAllTheGround {
+public:
+    CoveringAllTheGround() { RenderTerrain::setSourcesEndBelowMinZoomForTesting(false); }
+    ~CoveringAllTheGround() { RenderTerrain::setSourcesEndBelowMinZoomForTesting(true); }
+};
+
 // The source asks for the tiles nearest the camera and no others: the same set as the nearest
 // of the whole cover, measured from where the camera stands on the ground.
 void expectOnlyTheTilesNearestTheCamera(const TerrainSourceCoverTest::Options& options) {
+    const CoveringAllTheGround use;
     TerrainSourceCoverTest test(options);
     // The DEM arrives first: the elevated cover shifts as it lands, and a source that asked for
     // the tiles on each side of that shift has asked for more than its cap in all.
@@ -246,6 +254,28 @@ TEST(TerrainSourceCover, ASourceRequestsOnlyTheTilesNearestTheCamera) {
 
 TEST(TerrainSourceCover, TheCapFollowsTheTerrainLoadMode) {
     expectOnlyTheTilesNearestTheCamera({.mode = TerrainLoadMode::Performance});
+}
+
+// A little past the pitch threshold with the map at the source's min zoom, all the ground in view
+// is within the source's reach, and it asks for what it did without the rule: 16 tiles on a phone's
+// screen. With a reach of one zoom it asked for 13, the farthest three left out in view.
+TEST(TerrainSourceCover, ASourceAtItsMinZoomKeepsItsCoverAtPitch65) {
+    const TerrainSourceCoverTest::Options options{
+        .mode = TerrainLoadMode::Balanced, .pitch = 65.0, .zoom = 13.0, .size = {393, 852}};
+    const auto parcelsAskedFor = [&] {
+        TerrainSourceCoverTest test(options);
+        test.settleDEM();
+        test.showParcels();
+        test.render(10);
+        return test.parcelTiles;
+    };
+    std::set<CanonicalTileID> whole;
+    {
+        const CoveringAllTheGround use;
+        whole = parcelsAskedFor();
+    }
+    ASSERT_GT(whole.size(), 8u);
+    EXPECT_EQ(parcelsAskedFor(), whole);
 }
 
 // The terrain draws from its DEM source, so the DEM keeps its own cover rather than the cap.

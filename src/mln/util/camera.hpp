@@ -16,8 +16,8 @@ public:
     Camera() noexcept;
 
     vec3 getPosition() const noexcept;
-    mat4 getCameraToWorld(double scale, bool flippedY) const noexcept;
-    mat4 getWorldToCamera(double scale, bool flippedY) const noexcept;
+    mat4 getCameraToWorld(double scale, bool flippedY, double latitude) const noexcept;
+    mat4 getWorldToCamera(double scale, bool flippedY, double latitude) const noexcept;
     mat4 getCameraToClipPerspective(double fovy, double aspectRatio, double nearZ, double farZ) const noexcept;
 
     vec3 forward() const noexcept;

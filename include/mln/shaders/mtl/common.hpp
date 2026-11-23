@@ -70,14 +70,19 @@ inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel
 
 // Sample the terrain elevation in meters at a tile-local coordinate, with manual
 // bilinear interpolation on DEM pixel centers (the DEM has a 2px backfilled border),
-// matching the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
+// matching the maplibre-gl-js get_elevation() prelude function. DEM pixel i holds the
+// height of its cell, centred at tile coordinate (i + 0.5) / dim, and sits at texel
+// i + 2 behind the border, so the texel coordinate is uv * dim + 1.5. Unlike gl-js (global
 // terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
 // texture and dem_* values are passed in as arguments rather than read from globals.
 // Decode one DEM texel to meters. The clamp at the call sites matters: read() out of range
 // is undefined where the sampler's clamp-to-edge used to cover it, and a tile with no DEM of
 // its own is bound the 1x1 placeholder, whose only valid texel is (0, 0).
+// The bytes are whole numbers, but a driver can return them times 255.0 a hair off one (Mesa
+// does), and Mapbox's 6553.6 m per unit of red turns that into a height about a millimetre off,
+// where a Terrarium tile of the same heights is exact. Rounded, as unpack_depth does.
 inline float dem_texel(texture2d<float, access::sample> dem, int2 texel, float4 dem_unpack) {
-    float4 data = dem.read(uint2(texel)) * 255.0;
+    float4 data = round(dem.read(uint2(texel)) * 255.0);
     data.a = -1.0;
     return dot(data, dem_unpack);
 }
@@ -93,7 +98,7 @@ inline float get_elevation(float2 pos,
     if (dem_enabled == 0.0) {
         return 0.0;
     }
-    const float2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
+    const float2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.5;
     const float2 f = fract(coord);
     const int2 c = int2(floor(coord));
     const int2 hi = int2(dem.get_width(), dem.get_height()) - 1;
@@ -136,6 +141,14 @@ inline float depth_opacity(float3 frag,
     const float bias = 0.05 / depth_ramp; // gl-js: 0.0001 * 500
     const float d = unpack_depth(depth_texture.sample(depth_sampler, float2(uv.x, 1.0 - uv.y))) + bias - frag.z;
     return 1.0 - max(0.0, min(1.0, -d * depth_ramp));
+}
+
+// How much of a symbol shows over ground the distance haze has taken: the terrain layer's
+// haze, clamp(x - y / view depth, 0, 1)^2 (terrain.hpp), at the haze color's alpha, so the
+// symbol fades with the ground under it. A zero ramp or alpha is no haze.
+inline float haze_visibility(float view_depth, float haze_alpha, float2 haze_ramp) {
+    const float haze = clamp(haze_ramp.x - haze_ramp.y / max(view_depth, 1e-6), 0.0, 1.0);
+    return 1.0 - haze_alpha * haze * haze;
 }
 
 // Whether a clip-space position is visible in front of the terrain, from the

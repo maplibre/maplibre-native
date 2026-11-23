@@ -29,7 +29,10 @@ static_assert(static_cast<uint8_t>(mln::TerrainLoadMode::Quality) == MLNTerrainL
                       MLNTerrainLoadModePerformance,
               "MLNTerrainLoadMode must match mln::TerrainLoadMode");
 static_assert(static_cast<uint8_t>(mln::TerrainSkirtLength::Auto) == MLNTerrainSkirtLengthAuto &&
-                  static_cast<uint8_t>(mln::TerrainSkirtLength::None) == MLNTerrainSkirtLengthNone,
+                  static_cast<uint8_t>(mln::TerrainSkirtLength::None) ==
+                      MLNTerrainSkirtLengthNone &&
+                  static_cast<uint8_t>(mln::TerrainSkirtLength::Shared) ==
+                      MLNTerrainSkirtLengthShared,
               "MLNTerrainSkirtLength must match mln::TerrainSkirtLength");
 
 NS_INLINE mln::TerrainLoadMode MLNTerrainLoadModeToMBGL(MLNTerrainLoadMode mode) {

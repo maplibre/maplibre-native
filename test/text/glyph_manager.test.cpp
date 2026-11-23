@@ -3,6 +3,7 @@
 
 #include <mln/text/glyph_manager.hpp>
 #include <mln/util/run_loop.hpp>
+#include <mln/util/timer.hpp>
 #include <mln/util/string.hpp>
 #include <mln/util/i18n.hpp>
 #include <mln/util/io.hpp>
@@ -136,8 +137,13 @@ public:
         if (glyphsError) glyphsError(fontStack, glyphRange, error);
     }
 
+    void onGlyphsRequested(const FontStack& fontStack, const GlyphRange& glyphRange) override {
+        if (glyphsRequested) glyphsRequested(fontStack, glyphRange);
+    }
+
     std::function<void(const FontStack&, const GlyphRange&)> glyphsLoaded;
     std::function<void(const FontStack&, const GlyphRange&, std::exception_ptr)> glyphsError;
+    std::function<void(const FontStack&, const GlyphRange&)> glyphsRequested;
 };
 
 class StubGlyphRequestor : public GlyphRequestor {
@@ -146,7 +152,12 @@ public:
         if (glyphsAvailable) glyphsAvailable(std::move(glyphs));
     }
 
+    void onLateGlyphsAvailable() override {
+        if (lateGlyphsAvailable) lateGlyphsAvailable();
+    }
+
     std::function<void(GlyphMap)> glyphsAvailable;
+    std::function<void()> lateGlyphsAvailable;
 };
 
 class GlyphManagerTest {
@@ -213,11 +224,20 @@ TEST(GlyphManager, LoadingSuccess) {
 
 TEST(GlyphManager, LoadingFail) {
     GlyphManagerTest test;
+    bool answered = false;
 
     test.fileSource.glyphsResponse = [&](const Resource&) {
         Response response;
         response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Failed by the test case");
         return response;
+    };
+
+    test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
+        const auto& testPositions = glyphs.at(FontStackHasher()({{"Test Stack"}}));
+        ASSERT_EQ(testPositions.size(), 2u);
+        EXPECT_FALSE(testPositions.at(u'a').has_value());
+        EXPECT_FALSE(testPositions.at(u'å').has_value());
+        answered = true;
     };
 
     test.observer.glyphsError =
@@ -228,25 +248,166 @@ TEST(GlyphManager, LoadingFail) {
             EXPECT_TRUE(error != nullptr);
             EXPECT_EQ(util::toString(error), "Failed by the test case");
 
+            EXPECT_TRUE(answered);
             test.end();
         };
-
-    test.requestor.glyphsAvailable = [&](GlyphMap) {
-        FAIL();
-        test.end();
-    };
 
     test.run("test/fixtures/resources/glyphs.pbf",
              GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å'}}}, .shapes = {}});
 }
 
+TEST(GlyphManager, LoadingFailRequestsTheRangeAgain) {
+    GlyphManagerTest test;
+    int requests = 0;
+    int answers = 0;
+
+    test.observer.glyphsRequested = [&](const FontStack&, const GlyphRange&) {
+        ++requests;
+    };
+
+    test.fileSource.glyphsResponse = [&](const Resource&) {
+        Response response;
+        if (requests == 1) {
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                               "Failed by the test case");
+        } else {
+            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        }
+        return response;
+    };
+
+    test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
+        const auto& testPositions = glyphs.at(FontStackHasher()({{"Test Stack"}}));
+        if (++answers == 1) {
+            EXPECT_FALSE(testPositions.at(u'a').has_value());
+            test.loop.invoke([&] {
+                test.glyphManager.getGlyphs(test.requestor,
+                                            GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a'}}}, .shapes = {}},
+                                            test.fileSource);
+            });
+        } else {
+            EXPECT_TRUE(testPositions.at(u'a').has_value());
+            test.end();
+        }
+    };
+
+    util::Timer timeout;
+    timeout.start(Milliseconds(1000), Duration::zero(), [&] { test.end(); });
+
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a'}}}, .shapes = {}});
+
+    EXPECT_EQ(requests, 2);
+    EXPECT_EQ(answers, 2);
+}
+
+// A requestor answered without a range that failed is told when another requestor's request loads it,
+// and only that requestor: the one answered with the glyphs has nothing to lay out again.
+TEST(GlyphManager, LoadingFailTellsTheRequestorWhenTheRangeLoadsLater) {
+    GlyphManagerTest test;
+    StubGlyphRequestor second;
+    int requests = 0;
+    int late = 0;
+    bool secondAnswered = false;
+
+    test.observer.glyphsRequested = [&](const FontStack&, const GlyphRange&) {
+        ++requests;
+    };
+
+    test.fileSource.glyphsResponse = [&](const Resource&) {
+        Response response;
+        if (requests == 1) {
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                               "Failed by the test case");
+        } else {
+            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        }
+        return response;
+    };
+
+    test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
+        EXPECT_FALSE(glyphs.at(FontStackHasher()({{"Test Stack"}})).at(u'a').has_value());
+        test.loop.invoke([&] {
+            test.glyphManager.getGlyphs(
+                second, GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a'}}}, .shapes = {}}, test.fileSource);
+        });
+    };
+
+    second.glyphsAvailable = [&](GlyphMap glyphs) {
+        EXPECT_TRUE(glyphs.at(FontStackHasher()({{"Test Stack"}})).at(u'a').has_value());
+        secondAnswered = true;
+    };
+
+    second.lateGlyphsAvailable = [&] {
+        ADD_FAILURE() << "the second requestor was answered with the glyphs";
+    };
+
+    test.requestor.lateGlyphsAvailable = [&] {
+        EXPECT_TRUE(secondAnswered);
+        ++late;
+        test.end();
+    };
+
+    util::Timer timeout;
+    timeout.start(Milliseconds(1000), Duration::zero(), [&] { test.end(); });
+
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a'}}}, .shapes = {}});
+    test.glyphManager.removeRequestor(second);
+
+    EXPECT_EQ(requests, 2);
+    EXPECT_EQ(late, 1);
+}
+
+TEST(GlyphManager, LoadingFailStillAnswersWithTheOtherRanges) {
+    GlyphManagerTest test;
+    bool answered = false;
+
+    test.fileSource.glyphsResponse = [&](const Resource& resource) {
+        Response response;
+        if (resource.url == "test/fixtures/resources/glyphs-0-255.pbf") {
+            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        } else {
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                               "Failed by the test case");
+        }
+        return response;
+    };
+
+    test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
+        const auto& testPositions = glyphs.at(FontStackHasher()({{"Test Stack"}}));
+        ASSERT_EQ(testPositions.size(), 2u);
+        EXPECT_TRUE(testPositions.at(u'a').has_value());
+        EXPECT_FALSE(testPositions.at(u'ở').has_value());
+        answered = true;
+        test.end();
+    };
+
+    util::Timer timeout;
+    timeout.start(Milliseconds(1000), Duration::zero(), [&] { test.end(); });
+
+    test.run("test/fixtures/resources/glyphs-{range}.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'ở'}}}, .shapes = {}});
+
+    EXPECT_TRUE(answered);
+}
+
 TEST(GlyphManager, LoadingCorrupted) {
     GlyphManagerTest test;
+    bool answered = false;
 
     test.fileSource.glyphsResponse = [&](const Resource&) {
         Response response;
         response.data = std::make_unique<std::string>("CORRUPTED");
         return response;
+    };
+
+    test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
+        const auto& testPositions = glyphs.at(FontStackHasher()({{"Test Stack"}}));
+        ASSERT_EQ(testPositions.size(), 2u);
+        EXPECT_FALSE(testPositions.at(u'a').has_value());
+        EXPECT_FALSE(testPositions.at(u'å').has_value());
+        answered = true;
     };
 
     test.observer.glyphsError =
@@ -257,13 +418,9 @@ TEST(GlyphManager, LoadingCorrupted) {
             EXPECT_TRUE(error != nullptr);
             EXPECT_EQ(util::toString(error), "unknown pbf field type exception");
 
+            EXPECT_TRUE(answered);
             test.end();
         };
-
-    test.requestor.glyphsAvailable = [&](GlyphMap) {
-        FAIL();
-        test.end();
-    };
 
     test.run("test/fixtures/resources/glyphs.pbf",
              GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å'}}}, .shapes = {}});
@@ -485,6 +642,47 @@ TEST(GlyphManager, ImmediateFileSource) {
 
     test.run("test/fixtures/resources/glyphs.pbf",
              GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å', u' '}}}, .shapes = {}});
+}
+
+TEST(GlyphManager, ImmediateFileSourceFailureRequestsTheRangeAgain) {
+    util::RunLoop loop;
+    StubFileSource fileSource{StubFileSource::ResponseType::Synchronous};
+    StubGlyphManagerObserver observer;
+    StubGlyphRequestor requestor;
+    GlyphManager glyphManager(std::make_unique<StubLocalGlyphRasterizer>());
+    int requests = 0;
+    std::vector<bool> answers;
+
+    Log::setObserver(std::make_unique<Log::NullObserver>());
+
+    observer.glyphsRequested = [&](const FontStack&, const GlyphRange&) {
+        ++requests;
+    };
+
+    fileSource.glyphsResponse = [&](const Resource&) {
+        Response response;
+        if (requests == 1) {
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                               "Failed by the test case");
+        } else {
+            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        }
+        return response;
+    };
+
+    requestor.glyphsAvailable = [&](GlyphMap glyphs) {
+        answers.push_back(glyphs.at(FontStackHasher()({{"Test Stack"}})).at(u'a').has_value());
+    };
+
+    glyphManager.setURL("test/fixtures/resources/glyphs.pbf");
+    glyphManager.setObserver(&observer);
+
+    const GlyphDependencies dependencies{.glyphs = {{{{"Test Stack"}}, {u'a'}}}, .shapes = {}};
+    glyphManager.getGlyphs(requestor, dependencies, fileSource);
+    glyphManager.getGlyphs(requestor, dependencies, fileSource);
+
+    EXPECT_EQ(requests, 2);
+    EXPECT_EQ(answers, std::vector<bool>({false, true}));
 }
 
 // Guards against silent drift between allowsFixedWidthGlyphGeneration's range

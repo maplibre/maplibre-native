@@ -77,23 +77,29 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
 // Decode one DEM texel to meters. The clamp at the call sites matters: texelFetch out of
 // range is undefined where the sampler's clamp-to-edge used to cover it, and a tile with
 // no DEM of its own is bound the 1x1 placeholder, whose only valid texel is (0, 0).
+// The bytes are whole numbers, but a driver can return them times 255.0 a hair off one (Mesa
+// does), and Mapbox's 6553.6 m per unit of red turns that into a height about a millimetre off,
+// where a Terrarium tile of the same heights is exact. Rounded, as unpack_depth does.
 float dem_texel(sampler2D dem, ivec2 texel, vec4 dem_unpack) {
-    vec4 data = texelFetch(dem, texel, 0) * 255.0;
+    vec4 data = floor(texelFetch(dem, texel, 0) * 255.0 + 0.5);
     data.a = -1.0;
     return dot(data, dem_unpack);
 }
 
 // Sample the terrain elevation in meters at a tile-local coordinate, with manual
 // bilinear interpolation on DEM pixel centers (the DEM has a 2px backfilled border),
-// as in the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
-// terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
-// sampler and dem_* values are passed in as arguments rather than read from globals.
+// as in the maplibre-gl-js get_elevation() prelude function. DEM pixel i holds the
+// height of its cell, centred at tile coordinate (i + 0.5) / dim where hillshade and
+// color-relief draw it, and sits at texel i + 2 behind the border, so the texel
+// coordinate is uv * dim + 1.5 (gl-js #8420). Unlike gl-js (global terrain uniforms),
+// MapLibre Native carries the DEM data per-drawable, so the DEM sampler and dem_*
+// values are passed in as arguments rather than read from globals.
 float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
                     float dem_dim, float dem_exaggeration, float dem_enabled) {
     if (dem_enabled == 0.0) {
         return 0.0;
     }
-    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
+    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.5;
     vec2 f = fract(coord);
     ivec2 c = ivec2(floor(coord));
     ivec2 hi = textureSize(dem, 0) - 1;
@@ -110,18 +116,18 @@ float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
 // Identical bilinear terrarium/mapbox decode; the layer is selected per instance.
 float get_elevation_array(vec2 pos, highp sampler2DArray dem, float layer, vec4 dem_coords,
                           vec4 dem_unpack, float dem_dim, float dem_exaggeration) {
-    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
+    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.5;
     vec2 f = fract(coord);
     ivec2 c = ivec2(floor(coord));
     ivec2 hi = textureSize(dem, 0).xy - 1;
     int l = int(layer);
-    vec4 tl = texelFetch(dem, ivec3(clamp(c, ivec2(0), hi), l), 0) * 255.0;
+    vec4 tl = floor(texelFetch(dem, ivec3(clamp(c, ivec2(0), hi), l), 0) * 255.0 + 0.5);
     tl.a = -1.0;
-    vec4 tr = texelFetch(dem, ivec3(clamp(c + ivec2(1, 0), ivec2(0), hi), l), 0) * 255.0;
+    vec4 tr = floor(texelFetch(dem, ivec3(clamp(c + ivec2(1, 0), ivec2(0), hi), l), 0) * 255.0 + 0.5);
     tr.a = -1.0;
-    vec4 bl = texelFetch(dem, ivec3(clamp(c + ivec2(0, 1), ivec2(0), hi), l), 0) * 255.0;
+    vec4 bl = floor(texelFetch(dem, ivec3(clamp(c + ivec2(0, 1), ivec2(0), hi), l), 0) * 255.0 + 0.5);
     bl.a = -1.0;
-    vec4 br = texelFetch(dem, ivec3(clamp(c + ivec2(1, 1), ivec2(0), hi), l), 0) * 255.0;
+    vec4 br = floor(texelFetch(dem, ivec3(clamp(c + ivec2(1, 1), ivec2(0), hi), l), 0) * 255.0 + 0.5);
     br.a = -1.0;
     float elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
                           mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),

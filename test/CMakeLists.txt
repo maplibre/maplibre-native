@@ -23,12 +23,16 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/dynamic_texture_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/fill_bucket.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/feature_tracking.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/group_by_layout.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/hillshade_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/raster_bucket.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/renderable.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/color_relief.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/dem_elevation_provider.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_camera.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_zoom_step.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_mipmaps.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation_index.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_first_frame.test.cpp
@@ -41,6 +45,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_exaggeration.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_drape.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_horizon_haze.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_runtime_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/layer_min_zoom_tiles.test.cpp
@@ -48,6 +53,10 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_mesh_cover.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_edges.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_source_cover.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_skirt_edges.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_skirt_shared.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_unseen_tiles.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/source_state.test.cpp
     $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_parser.test.cpp
@@ -107,6 +116,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/text/local_glyph_rasterizer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/quads.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/shaping.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/text/symbol_projection.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/tagged_string.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/custom_geometry_tile.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/geojson_tile.test.cpp
@@ -172,6 +182,7 @@ if(MLN_WITH_OPENGL)
         PRIVATE
             ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/bucket.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/gl/drape_target_pool.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/enum.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/gl_functions.test.cpp

@@ -40,9 +40,8 @@ struct alignas(16) SymbolDrawableUBO {
     /* 248 */ float opacity_t;
     /* 252 */ float halo_width_t;
     /* 256 */ float halo_blur_t;
-    /* 260 */ float pad1;
-    /* 264 */ float pad2;
-    /* 268 */ float pad3;
+    /* 260 */ float haze_alpha;  // the distance haze's alpha; 0 when there is none
+    /* 264 */ float2 haze_ramp;  // haze = clamp(x - y / view depth, 0, 1)^2
 
     // 3D terrain elevation
     /* 272 */ float4 dem_coords;
@@ -249,7 +248,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, z, 1.0);
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled, paintParams.units_to_pixels.y));
+    // and symbols over ground the distance haze has taken (see haze_visibility)
+    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled, paintParams.units_to_pixels.y) *
+                          haze_visibility(projectedPoint.w, drawable.haze_alpha, drawable.haze_ramp));
 
     return {
         .position     = position,
@@ -472,7 +473,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, z, 1.0);
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled, paintParams.units_to_pixels.y));
+    // and symbols over ground the distance haze has taken (see haze_visibility)
+    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled, paintParams.units_to_pixels.y) *
+                          haze_visibility(projectedPoint.w, drawable.haze_alpha, drawable.haze_ramp));
 
     return {
         .position     = position,
@@ -756,7 +759,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float gamma_scale = position.w;
     const bool is_icon = (is_sdf == ICON);
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled, paintParams.units_to_pixels.y));
+    // and symbols over ground the distance haze has taken (see haze_visibility)
+    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled, paintParams.units_to_pixels.y) *
+                          haze_visibility(projectedPoint.w, drawable.haze_alpha, drawable.haze_ramp));
 
     return {
         .position     = position,

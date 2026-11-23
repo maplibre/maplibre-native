@@ -64,8 +64,8 @@ enum class TerrainLoadMode : uint8_t {
                  ///< stall a frame on big bursts (zoom-in over new coverage). The mesh follows
                  ///< the view past a coarser DEM, as maplibre-gl-js does, up to 64 mesh tiles.
                  ///< Default.
-    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame. Mesh to z15, up to
-                 ///< 48 mesh tiles.
+    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame. The mesh follows the
+                 ///< view past a coarser DEM, up to 48 mesh tiles.
     Performance, ///< Cap 8 new-tile builds + 4 drape re-renders per frame; smoothest on
                  ///< weak GPUs, most progressive fill-in. Mesh to z14, up to 24 mesh tiles.
 };
@@ -74,7 +74,9 @@ enum class TerrainLoadMode : uint8_t {
 struct TerrainLoadBudget {
     int newTileBuildsPerFrame;  ///< max NEW tiles that build their drawables per frame
     int drapeRerendersPerFrame; ///< max terrain drape targets that re-render per frame
-    /// Hard cap on terrain mesh tiles per frame (0 = unlimited). When the cover exceeds it, the
+    /// Cap on terrain mesh tiles per frame (0 = unlimited); a view at or under the level-of-detail
+    /// pitch threshold whose top edge is on the ground may hold twice as many, since every tile
+    /// of it is ground on screen (RenderTerrain::meshTileCap). When the cover exceeds it, the
     /// farthest tiles past the DEM's maxzoom first go back to coarser ones (down to the DEM's
     /// maxzoom), and only then are the farthest - the horizon tiles a high tilt pulls in -
     /// dropped, keeping those nearest the camera. Everything downstream scales with this (mesh draws, drape
@@ -83,12 +85,14 @@ struct TerrainLoadBudget {
     /// than the aggressive one Performance uses.
     size_t maxMeshTiles;
     /// The zoom the terrain mesh reaches over a coarser DEM (RenderTerrain::meshMaxZoom). Each
-    /// mesh tile drapes into its own target (1024 px for the finest tiles, 512 px for the rest), so how sharp draped
-    /// content stays in a close-up follows the zoom of the mesh tiles, not of the DEM; each level deeper also adds
-    /// tiles to the near field, and drape memory with them. A DEM at or past this zoom meshes
-    /// at its own maxzoom. Quality's 22 (util::DEFAULT_MAX_ZOOM, the deepest a map goes) sets no
-    /// limit: the mesh follows the view as maplibre-gl-js's terrain does, and only the tile cap
-    /// bounds it. The other modes stop at most RenderTerrain::maxMeshOverzoomLevels past the DEM.
+    /// mesh tile drapes into its own target (1024 px for the nearest tiles, 512 px for the rest,
+    /// see RenderTerrain::fullSizeDrapeTilesOf), so how sharp draped content stays in a close-up
+    /// follows the zoom of the mesh tiles, not of the DEM; each level deeper also adds tiles to
+    /// the near field, and drape memory with them. A DEM at or past this zoom meshes at its own
+    /// maxzoom. The 22 of Quality and Balanced (util::DEFAULT_MAX_ZOOM, the deepest a map goes)
+    /// sets no limit: the mesh follows the view as maplibre-gl-js's terrain does, and only the
+    /// tile cap bounds it. Performance stops at most RenderTerrain::maxMeshOverzoomLevels past
+    /// the DEM.
     uint8_t meshTargetZoom;
 };
 
@@ -96,7 +100,7 @@ constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
     switch (mode) {
         case TerrainLoadMode::Balanced:
             return {
-                .newTileBuildsPerFrame = 32, .drapeRerendersPerFrame = 16, .maxMeshTiles = 48, .meshTargetZoom = 15};
+                .newTileBuildsPerFrame = 32, .drapeRerendersPerFrame = 16, .maxMeshTiles = 48, .meshTargetZoom = 22};
         case TerrainLoadMode::Performance:
             return {.newTileBuildsPerFrame = 8, .drapeRerendersPerFrame = 4, .maxMeshTiles = 24, .meshTargetZoom = 14};
         case TerrainLoadMode::Quality:
@@ -112,9 +116,11 @@ constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
 /// want is a per-map tradeoff. Default is Auto. Mirrors maplibre-gl-js
 /// `MapOptions.terrainSkirtLength`.
 enum class TerrainSkirtLength : uint8_t {
-    Auto, ///< Skirt every tile edge by ~1/5 of the tile's width at the current zoom. Default.
-    None, ///< Build no skirts at all: no vertical artifacts over a transparent background,
-          ///< at the cost of visible stitches between tiles at different zoom levels.
+    Auto,   ///< Skirt every tile edge by ~1/5 of the tile's width at the current zoom. Default.
+    None,   ///< Build no skirts at all: no vertical artifacts over a transparent background,
+            ///< at the cost of visible stitches between tiles at different zoom levels.
+    Shared, ///< Skirt a tile edge only where another tile of the mesh lies beside it, so the
+            ///< stitches close and the edges at the end of the mesh show no vertical artifacts.
 };
 
 enum class MapDebugOptions : EnumType {

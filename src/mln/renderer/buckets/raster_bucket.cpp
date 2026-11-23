@@ -2,19 +2,37 @@
 #include <mln/renderer/layers/render_raster_layer.hpp>
 #include <mln/gfx/upload_pass.hpp>
 
+#include <atomic>
+
 namespace mln {
 
 using namespace style;
 
+namespace {
+std::atomic<std::size_t> heldImageBytes{0};
+
+std::size_t imageBytes(const std::shared_ptr<PremultipliedImage>& image) {
+    return image ? image->bytes() : 0;
+}
+} // namespace
+
 RasterBucket::RasterBucket(PremultipliedImage&& image_)
-    : image(std::make_shared<PremultipliedImage>(std::move(image_))) {}
+    : image(std::make_shared<PremultipliedImage>(std::move(image_))) {
+    heldImageBytes += imageBytes(image);
+}
 
 RasterBucket::RasterBucket(std::shared_ptr<PremultipliedImage> image_)
-    : image(std::move(image_)) {}
+    : image(std::move(image_)) {
+    heldImageBytes += imageBytes(image);
+}
 
 RasterBucket::~RasterBucket() {
     clear();
     setImage({});
+}
+
+std::size_t RasterBucket::getHeldImageBytes() {
+    return heldImageBytes;
 }
 
 void RasterBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
@@ -35,9 +53,16 @@ void RasterBucket::clear() {
 }
 
 void RasterBucket::setImage(std::shared_ptr<PremultipliedImage> image_) {
+    heldImageBytes -= imageBytes(image);
     image = std::move(image_);
+    heldImageBytes += imageBytes(image);
     texture2d.reset();
     uploaded = false;
+}
+
+void RasterBucket::releaseImage() {
+    heldImageBytes -= imageBytes(image);
+    image.reset();
 }
 
 void RasterBucket::setMask(TileMask&& mask_) {
@@ -102,7 +127,7 @@ void RasterBucket::setMask(TileMask&& mask_) {
 }
 
 bool RasterBucket::hasData() const {
-    return !!image;
+    return image || texture2d;
 }
 
 } // namespace mln

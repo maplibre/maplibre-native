@@ -4,6 +4,7 @@
 #include <mln/style/terrain_impl.hpp>
 #include <mln/util/immutable.hpp>
 #include <mln/tile/tile_id.hpp>
+#include <mln/util/color.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/gfx/index_buffer.hpp>
@@ -89,7 +90,7 @@ public:
 
     /// The deepest zoom of the terrain mesh over a DEM whose maxzoom is `demMaxZoom`: the load
     /// mode's TerrainLoadBudget::meshTargetZoom, never shallower than the DEM. A target of
-    /// util::DEFAULT_MAX_ZOOM (Quality) follows the view, as maplibre-gl-js's TerrainSourceCache
+    /// util::DEFAULT_MAX_ZOOM (Quality and Balanced) follows the view, as maplibre-gl-js's TerrainSourceCache
     /// does (to z22, clamping only the DEM lookup); a lower one goes at most
     /// maxMeshOverzoomLevels past the DEM. A mesh tile past the DEM samples its DEM ancestor
     /// through a sub-tile offset.
@@ -111,14 +112,57 @@ public:
     /// the ground under the camera (the map centre when the map is not tilted).
     static std::array<double, 2> meshTileCapOrigin(const TransformState& state);
 
+    /// How many of the cover's finest tiles nearest the camera get a full-size drape target in a
+    /// view that keeps moving, and the most that have one at once in any view.
+    static constexpr size_t fullSizeDrapeNearest = 16;
+    static constexpr size_t fullSizeDrapeMax = 24;
+
+    /// The tiles of the cover that get a full-size drape target (1024 px, four times the memory of
+    /// the half-size one every other tile has): the `nearest` tiles of the cover's finest zoom
+    /// nearest `origin` (the ground under the camera, where it is magnified most), and then,
+    /// nearest first, those of `hadFullSize` (tiles that have one now, of any zoom) until
+    /// `fullSizeDrapeMax` are full size. A full-size target is therefore taken away only when
+    /// that many nearer tiles displace it: replacing a target re-bakes the tile, and a view that
+    /// pans over the rank boundary, or whose finest zoom changes as one tile appears or leaves,
+    /// would otherwise swap the same targets back and forth.
+    static std::set<UnwrappedTileID> fullSizeDrapeTilesOf(const std::set<UnwrappedTileID>& cover,
+                                                          const std::array<double, 2>& origin,
+                                                          const std::set<UnwrappedTileID>& hadFullSize,
+                                                          size_t nearest = fullSizeDrapeNearest);
+
+    /// What the drape pool is asked for in a frame.
+    struct DrapeSizes {
+        /// The tiles that get full-size targets (fullSizeDrapeTilesOf).
+        std::set<UnwrappedTileID> fullSizeTiles;
+        /// How many existing targets may change size (TexturePool::createRenderTargets); 0 = all.
+        size_t maxResizes = 0;
+    };
+
+    /// The sizes of the drape targets for a frame of a map in `mode`, given the tiles that have a
+    /// full-size target now and the load mode's cap on drape re-renders (`drapeCap`, <= 0 for none).
+    /// A map that keeps moving keeps its targets steady: the earlier sizes count, and the cap
+    /// paces the swaps, the rest following on the repaints it asks for. A still (a Static or Tile
+    /// map) has no earlier frame to keep steady and no later one to finish deferred swaps, even on
+    /// a renderer that drew other views before: it is decided from scratch, the nearest
+    /// `fullSizeDrapeMax` tiles of the finest zoom at once, and every swap is made in the frame.
+    static DrapeSizes drapeSizesFor(MapMode mode,
+                                    int drapeCap,
+                                    const std::set<UnwrappedTileID>& cover,
+                                    const std::array<double, 2>& origin,
+                                    const std::set<UnwrappedTileID>& hadFullSize);
+
+    /// Whether a source leaves out the tiles that build none of its layers (on by default); a test
+    /// turns it off to compare what it leaves out.
+    static void setLeaveOutEmptyTilesForTesting(bool leaveOut);
+    static bool leavesOutEmptyTiles();
+
     /// The cover with a one-ring dilation: every 8-neighbour of a tile, at that tile's zoom,
     /// except one that lies over, or under, a tile the cover already has (whatever its zoom).
     static std::set<UnwrappedTileID> dilateCover(const std::set<UnwrappedTileID>& cover);
 
     /// The `maxTiles` tiles whose centres lie nearest `origin` (normalized web-mercator), or all
-    /// of them when there are no more than that or `maxTiles` is 0. The mesh-tile cap
-    /// (TerrainLoadBudget::maxMeshTiles) that computeMeshCover applies, after
-    /// coarsenFarMeshTiles.
+    /// of them when there are no more than that or `maxTiles` is 0. computeMeshCover applies it
+    /// with the frame's mesh-tile cap (meshTileCap), after coarsenFarMeshTiles.
     static std::set<UnwrappedTileID> nearestMeshTiles(std::set<UnwrappedTileID> tiles,
                                                       size_t maxTiles,
                                                       const std::array<double, 2>& origin);
@@ -136,6 +180,26 @@ public:
 
     /// Tiles a source may cover per tile of the mesh-tile cap (TileParameters::coverTileLimit).
     static constexpr size_t sourceTilesPerMeshTile = 4;
+
+    /// The most mesh tiles a frame may have (computeMeshCover; 0 = no limit): `modeCap`
+    /// (TerrainLoadBudget::maxMeshTiles), or twice that for a view whose cover has one zoom
+    /// (`oneZoom`: no level of detail, the pitch at or under the threshold) and whose top edge is
+    /// on the ground (`pitch` plus half of `fieldOfView`, in radians, short of the horizon). The
+    /// cap is for the far tiles a steep pitch or a wide field of view pulls in; such a view has
+    /// none, and every tile dropped from it is a hole on screen. Twice the cap holds a phone's
+    /// view at every pitch up to the threshold (68 tiles at most); a wider frame, or a wide field
+    /// of view short of the horizon, can still need more and lose its farthest tiles.
+    static size_t meshTileCap(size_t modeCap, double pitch, double fieldOfView, bool oneZoom);
+
+    /// How far below its min zoom a source still covers the ground (TileParameters::coverMinZoomReach).
+    /// The default level of detail puts ground at a zoom about one and a half below the scale it
+    /// is drawn at, so with a reach of two a source ends about where the ground is drawn one and
+    /// a half zooms under the source's min zoom. A reach of one ends it in view at a pitch of 65
+    /// degrees when the map is at the source's min zoom.
+    static std::optional<uint8_t> sourceMinZoomReach();
+    /// Whether a source ends there (on by default); a test turns it off to cover all the ground
+    /// in view.
+    static void setSourcesEndBelowMinZoomForTesting(bool end);
 
     /// Resolve the DEM render source from the orchestrator if not yet bound.
     /// Renderer::Impl::render calls this before building the frame's drape-target
@@ -193,6 +257,16 @@ public:
     /// Overrides the DEM texture cache cap (default 96) for every RenderTerrain, so a test can
     /// reach the eviction with a few tiles. Pass 0 to restore the default.
     static void setMaxDEMTexturesForTesting(size_t cap);
+
+    /// Drops the mesh tiles `keep` returns false for, after the cap, so a test can leave the mesh
+    /// a frontier. An empty function (the default) keeps them all.
+    static void setMeshCoverFilterForTesting(std::function<bool(const UnwrappedTileID&)> keep);
+
+    /// Which edges of `tile` have another tile of `cover` beside them, as a mask: north 1, east 2,
+    /// south 4, west 8. The neighbor may be of the same zoom, a coarser tile that contains the
+    /// adjacent area, or any finer tile that touches the edge. TerrainSkirtLength::Shared hangs
+    /// a skirt on these edges only.
+    static uint8_t skirtEdges(const UnwrappedTileID& tile, const std::set<UnwrappedTileID>& cover);
 
     /**
      * @brief Get elevation at a specific tile coordinate
@@ -271,6 +345,20 @@ public:
     float getExaggeration() const;
 
     /**
+     * @brief The map's distance haze (Map::setTerrainHaze) as of the last update; range 0 is none
+     */
+    const Color& getHazeColor() const { return hazeColor; }
+    float getHazeRange() const { return hazeRange; }
+
+    /// The distance haze as the shaders take it in this view: the color, premultiplied and clear
+    /// when there is no haze, and the ramp, haze = clamp(ramp[0] - ramp[1] / view depth, 0, 1)^2.
+    struct Haze {
+        Color color;
+        std::array<float, 2> ramp{{0.0f, 0.0f}};
+    };
+    Haze getHaze(const TransformState& state) const;
+
+    /**
      * @brief Get the source ID providing DEM data
      */
     const std::string& getSourceID() const;
@@ -302,6 +390,13 @@ public:
      * tile-local position (0..EXTENT) into its bound DEM texture's normalized
      * space, for the shader's get_elevation() (see the demCoords built in update)
      */
+    /// The edges a tile's skirt hangs from (skirtEdges): all four unless the map's skirt setting
+    /// is TerrainSkirtLength::Shared.
+    float getDrawableSkirtEdges(const OverscaledTileID& tileID) const {
+        const auto it = skirtEdgeMasks.find(tileID);
+        return it != skirtEdgeMasks.end() ? static_cast<float>(it->second) : 15.0f;
+    }
+
     std::array<float, 4> getDrawableDemCoords(const OverscaledTileID& tileID) const {
         const auto it = drawableDemCoords.find(tileID);
         return it != drawableDemCoords.end()
@@ -428,6 +523,9 @@ private:
     // The skirt setting the cached mesh was built with. update() drops the mesh and every
     // tile drawable built from it when the map's setting no longer matches.
     TerrainSkirtLength meshSkirtLength = TerrainSkirtLength::Auto;
+    // The map's distance haze, taken from each update for the tweaker.
+    Color hazeColor;
+    float hazeRange = 0.0f;
 
     // Layer group for terrain drawables
     LayerGroupBasePtr layerGroup;
@@ -453,12 +551,15 @@ private:
     // Mesh drawables by tile, with the DEM they were built on (tier: 0 = placeholder/flat,
     // 1 = ancestor fallback, 2 = own DEM, plus that DEM's zoom); a drawable is replaced
     // whenever terrain::shouldRebind says a better DEM can be bound - a higher tier, or a
-    // deeper ancestor within the fallback tier
+    // deeper ancestor within the fallback tier - or terrain::drapeTextureReplaced says the
+    // tile's drape target was replaced (it changed size) and so has a new texture
     std::unordered_map<OverscaledTileID, terrain::DEMBinding> tilesWithDrawables;
 
     // Per-drawable scale/offset into the bound DEM texture ({1,0,0,0} unless
     // an ancestor tile's DEM is bound); read by the terrain layer tweaker
     std::map<OverscaledTileID, std::array<float, 4>> drawableDemCoords;
+    // skirtEdges of each tile of this frame's mesh cover, filled for TerrainSkirtLength::Shared only
+    std::map<OverscaledTileID, uint8_t> skirtEdgeMasks;
 #if MLN_RENDER_BACKEND_OPENGL
     // Per-tile demTextureArray layer (own or ancestor DEM), -1 when the tile has no packed DEM;
     // feeds the instanced depth pass (see rebuildInstancedDepthDrawable / depthInstances).
@@ -517,10 +618,15 @@ private:
     uint64_t demUpdateCounter = 0;
 
     /// Per-tile height copies behind elevationIndex, kept across rebuilds so a new tile set
-    /// copies only its new tiles. `source` identifies the DEM the copy was taken from.
+    /// copies only its new tiles. `source` identifies the DEM the copy was taken from, and
+    /// `borderRevision` its border then: a neighbour that loads later backfills the border in
+    /// place, which the pointer cannot show, and the copy reads the border near the tile's edge.
     struct ElevationGridCopy {
         const DEMData* source = nullptr;
+        uint32_t borderRevision = 0;
         std::shared_ptr<const TerrainElevationIndex::Grid> grid;
+
+        bool isCopyOf(const DEMData* dem) const;
     };
     std::unordered_map<UnwrappedTileID, ElevationGridCopy> elevationGrids;
     std::shared_ptr<const TerrainElevationIndex> elevationIndex;
@@ -549,6 +655,7 @@ private:
         OverscaledTileID tileID;
         std::array<float, 4> demCoords; // scale, x/y offset, dem_dim (.w)
         float demLayer;                 // demTextureArray layer for this tile (own or ancestor)
+        float skirtEdges;
     };
     std::vector<DepthInstance> depthInstances; // current tile set, index == a_instance / gl_InstanceID
     std::size_t depthInstanceSignature = 0;    // hash of the tile set the instanced drawable was built for

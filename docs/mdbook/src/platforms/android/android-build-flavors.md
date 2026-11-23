@@ -17,7 +17,7 @@ The rendering backend is selected at build time through Gradle product flavors. 
 
 Each published flavor also has a debug artifact, with a `-debug` postfix (e.g. `android-sdk-vulkan-debug` or `android-sdk-opengl-with-plugin-api-debug`).
 
-The `*WithPluginApi` flavors are the same as the flavor they are named after, but their native library also exports the C plugin API ([`include/mln/plugin/plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h)). The plugin API does not support WebGPU. The [n-gon layer demo app](https://github.com/maplibre/maplibre-native/tree/main/plugins/android) in `plugins/android` uses these flavors.
+The `*WithPluginApi` flavors are the same as the flavor they are named after, but their native library also exports the C plugin API ([`include/mln/plugin/plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h)). The plugin API does not support WebGPU. The [n-gon layer demo app](https://github.com/maplibre/maplibre-native/tree/main/plugins/demo/android) in `plugins/demo/android` uses these flavors.
 
 ## Building a flavor
 

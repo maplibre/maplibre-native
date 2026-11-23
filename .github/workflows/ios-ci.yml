@@ -18,6 +18,7 @@ concurrency:
 
 permissions:
   id-token: write         # needed for AWS
+  pull-requests: read     # needed to check for a '!benchmark ios' comment
 
 jobs:
   pre_job:
@@ -91,7 +92,7 @@ jobs:
           df -h "$HOME"
 
       - name: Set up Bazel
-        uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3 # 0.19.1
+        uses: bazel-contrib/setup-bazel@f34d6a05eae3c24acab7fa54587492daeaeffdab # 0.19.2
         with:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
@@ -130,6 +131,37 @@ jobs:
           path: |
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
+
+      # benchmark (built on pushes to main and for PRs with a '!benchmark ios' comment, see ios-device-test.yml)
+
+      - name: Check if comment on PR contains '!benchmark ios'
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        id: benchmark_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-regex: '/^!benchmark.*\bios\b/im'
+
+      - name: Should we build the benchmark?
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || steps.benchmark_comment.outputs.comment-id
+        run: echo "build_benchmark=true" >> "$GITHUB_ENV"
+
+      - name: Build BenchmarkApp .ipa and BenchmarkTests .xctest for AWS Device Farm
+        if: env.build_benchmark == 'true'
+        run: |
+          benchmark_artifacts_dir="$(mktemp -d)"
+          scripts/build-benchmark-for-device-farm.sh "$benchmark_artifacts_dir"
+          echo benchmark_artifacts_dir="$benchmark_artifacts_dir" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: env.build_benchmark == 'true'
+        with:
+          name: ios-benchmark
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            ${{ env.benchmark_artifacts_dir }}/BenchmarkApp.ipa
+            ${{ env.benchmark_artifacts_dir }}/BenchmarkTests.xctest.zip
 
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal

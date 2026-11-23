@@ -49,6 +49,15 @@ void prepare_map2(Map& map, std::optional<std::string> json = std::nullopt) {
     map.getStyle().addImage(std::make_unique<style::Image>("test-icon", std::move(image), 1.0f));
 }
 
+// Local tiles (San Francisco, zoom 15) and a style whose road layers come in casing and fill pairs
+// with identical filters and layouts, so no network or cache file is needed.
+constexpr const char* pairedLayersAssetPath = "vendor/maplibre-tile-spec/test/mvt-fixtures/real-world";
+
+void preparePairedLayers(Map& map) {
+    map.getStyle().loadJSON(util::read_file("benchmark/fixtures/api/style_paired_layers.json"));
+    map.jumpTo(CameraOptions().withCenter(LatLng{37.76637, -122.44812}).withZoom(15.0));
+}
+
 } // end namespace
 
 static void API_renderStill_reuse_map(::benchmark::State& state) {
@@ -123,6 +132,20 @@ static void API_renderStill_recreate_map_2(::benchmark::State& state) {
     }
 }
 
+static void API_renderStill_recreate_map_paired_layers(::benchmark::State& state) {
+    RenderBenchmark bench;
+
+    for (auto _ : state) {
+        HeadlessFrontend frontend{size, pixelRatio};
+        Map map{frontend,
+                MapObserver::nullObserver(),
+                MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
+                ResourceOptions().withAssetPath(pairedLayersAssetPath).withApiKey("foobar")};
+        preparePairedLayers(map);
+        frontend.render(map);
+    }
+}
+
 static void API_renderStill_multiple_sources(::benchmark::State& state) {
     using namespace mln::style;
     RenderBenchmark bench;
@@ -159,4 +182,5 @@ BENCHMARK(API_renderStill_reuse_map_formatted_labels)->Unit(benchmark::kMillisec
 BENCHMARK(API_renderStill_reuse_map_switch_styles)->Unit(benchmark::kMillisecond)->Iterations(50);
 BENCHMARK(API_renderStill_recreate_map)->Unit(benchmark::kMillisecond)->Iterations(50);
 BENCHMARK(API_renderStill_recreate_map_2)->Unit(benchmark::kMillisecond)->Iterations(50);
+BENCHMARK(API_renderStill_recreate_map_paired_layers)->Unit(benchmark::kMillisecond)->Iterations(50);
 BENCHMARK(API_renderStill_multiple_sources)->Unit(benchmark::kMillisecond)->Iterations(50);

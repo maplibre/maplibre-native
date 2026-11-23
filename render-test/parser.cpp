@@ -449,11 +449,17 @@ TestMetrics readExpectedMetrics(const mln::filesystem::path& path) {
     return result;
 }
 
-TestMetadata parseTestMetadata(const TestPaths& paths) {
+TestMetadata parseTestMetadata(const TestPaths& paths, const mln::TestStyleTransform& transformStyle) {
     TestMetadata metadata;
     metadata.paths = paths;
 
     auto maybeJson = readJson(paths.stylePath.string());
+    if (transformStyle && maybeJson.is<mln::JSDocument>()) {
+        mln::JSDocument transformed;
+        transformed.Parse<0>(transformStyle(serializeJsonValue(maybeJson.get<mln::JSDocument>())));
+        maybeJson = transformed.HasParseError() ? JSONReply{mln::formatJSONParseError(transformed)}
+                                                : JSONReply{std::move(transformed)};
+    }
     if (!maybeJson.is<mln::JSDocument>()) { // NOLINT
         metadata.errorMessage = std::string("Unable to parse: ") + metadata.paths.stylePath.string();
         return metadata;
@@ -538,6 +544,11 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
             mln::Log::Warning(mln::Event::ParseStyle,
                               "Unknown terrain skirt length: " + skirtStr + ". Falling back to auto");
         }
+    }
+
+    if (testValue.HasMember("centerClampedToGround")) {
+        assert(testValue["centerClampedToGround"].IsBool());
+        metadata.centerClampedToGround = testValue["centerClampedToGround"].GetBool();
     }
 
     if (testValue.HasMember("description")) {
@@ -628,7 +639,10 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
 }
 
 namespace mln {
-MBGL_DEFINE_ENUM(TileLodMode, {{TileLodMode::Default, "default"}, {TileLodMode::Distance, "distance"}});
+MBGL_DEFINE_ENUM(TileLodMode,
+                 {{TileLodMode::Default, "default"},
+                  {TileLodMode::Distance, "distance"},
+                  {TileLodMode::Adaptive, "adaptive"}});
 }
 
 namespace TestOperationNames {

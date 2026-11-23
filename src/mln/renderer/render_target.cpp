@@ -158,6 +158,18 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
             if (!drawable.getEnabled() || !drawable.getTileID()) {
                 return;
             }
+            // A drawable that spans several tiles (an image) adds each of them that overlaps
+            // this target; the others contribute nothing to it.
+            if (const auto& data = drawable.getData()) {
+                for (const auto& tile : data->drapeCover()) {
+                    if (PaintParameters::tilesOverlap(tile, *drapeTileID)) {
+                        group.addDrawn(tile, drapedDataID(drawable));
+                    }
+                }
+                if (!data->drapeCover().empty()) {
+                    return;
+                }
+            }
             const UnwrappedTileID unwrapped = drawable.getTileID()->toUnwrapped();
             if (!PaintParameters::tilesOverlap(unwrapped, *drapeTileID)) {
                 return; // contributes nothing to this target
@@ -223,6 +235,12 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
             if (const auto& tileID = drawable.getTileID()) {
                 const UnwrappedTileID unwrapped = tileID->toUnwrapped();
                 overlaps = PaintParameters::tilesOverlap(unwrapped, *drapeTileID);
+                // An image spans the tiles of its cover, not only its own
+                if (const auto& data = drawable.getData(); data && !overlaps) {
+                    for (const auto& tile : data->drapeCover()) {
+                        overlaps = overlaps || PaintParameters::tilesOverlap(tile, *drapeTileID);
+                    }
+                }
             }
             drawable.setEnabled(drawable.getEnabled() && overlaps);
         });

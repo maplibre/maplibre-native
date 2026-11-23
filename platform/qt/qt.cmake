@@ -79,31 +79,12 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<PLATFORM_ID:Linux>,default/src/mln/text/bidi.cpp,qt/src/mln/bidi.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/include/mln/gfx/headless_backend.hpp
         ${PROJECT_SOURCE_DIR}/platform/default/include/mln/gfx/headless_frontend.hpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_frontend.cpp
-        $<$<BOOL:${MLN_WITH_OPENGL}>:${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend.cpp>
-        $<$<BOOL:${MLN_WITH_METAL}>:${PROJECT_SOURCE_DIR}/platform/default/src/mln/mtl/headless_backend.cpp>
-        $<$<BOOL:${MLN_WITH_VULKAN}>:${PROJECT_SOURCE_DIR}/platform/default/src/mln/vulkan/headless_backend.cpp>
+        ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
+        ${MLN_DEFAULT_HEADLESS_SOURCES}
+        ${MLN_DEFAULT_UTIL_SOURCES}
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/i18n/collator.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/layermanager/layer_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/platform/time.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/asset_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/database_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/main_resource_loader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/mbtiles_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_database.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_download.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/online_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,default/src/mln/storage/sqlite3.cpp,qt/src/mln/sqlite3.cpp>
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/compression.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/filesystem.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/monotonic_timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/gl_functions.cpp

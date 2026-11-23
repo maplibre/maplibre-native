@@ -10,7 +10,10 @@
 #include <mln/util/image.hpp>
 #include <mln/util/logging.hpp>
 
+#include <algorithm>
 #include <fstream>
+#include <utility>
+#include <vector>
 
 namespace mln {
 
@@ -80,9 +83,10 @@ void GlyphManager::requestRange(GlyphRequest& request,
                                 const FontStack& fontStack,
                                 const GlyphRange& range,
                                 FileSource& fileSource) {
-    if (request.req) {
+    if (request.req && !request.failed) {
         return;
     }
+    request.failed = false;
     Resource res(Resource::Kind::Unknown, "");
     switch (range.type) {
         case GlyphIDType::FontPBF:
@@ -106,22 +110,20 @@ void GlyphManager::requestRange(GlyphRequest& request,
 }
 
 void GlyphManager::processResponse(const Response& res, const FontStack& fontStack, const GlyphRange& range) {
-    if (res.error) {
-        observer->onGlyphsError(fontStack, range, std::make_exception_ptr(std::runtime_error(res.error->message)));
-        return;
-    }
-
     if (res.notModified) {
         return;
     }
 
+    std::exception_ptr error;
     {
         std::scoped_lock readWriteLock(rwLock);
 
         Entry& entry = entries[fontStack];
         GlyphRequest& request = entry.ranges[range];
 
-        if (!res.noContent) {
+        if (res.error) {
+            error = std::make_exception_ptr(std::runtime_error(res.error->message));
+        } else if (!res.noContent) {
             std::vector<Glyph> glyphs;
 
             try {
@@ -135,8 +137,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
                     }
                 }
             } catch (...) {
-                observer->onGlyphsError(fontStack, range, std::current_exception());
-                return;
+                error = std::current_exception();
             }
 
             for (auto& glyph : glyphs) {
@@ -148,20 +149,39 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
             }
         }
 
-        request.parsed = true;
+        if (error) {
+            // The waiting requestors get the range's glyphs as missing, and the next one to need it asks again.
+            request.failed = true;
+        } else {
+            request.parsed = true;
+        }
 
         for (auto& pair : request.requestors) {
             GlyphRequestor& requestor = *pair.first;
             const std::shared_ptr<GlyphDependencies>& dependencies = pair.second;
+            if (error && std::ranges::find(request.unanswered, &requestor) == request.unanswered.end()) {
+                request.unanswered.push_back(&requestor);
+            }
             if (dependencies.use_count() == 1) {
                 notify(requestor, *dependencies);
             }
         }
 
         request.requestors.clear();
+
+        if (!error) {
+            // The requestors an earlier failure answered without this range lay out again with it.
+            for (auto* requestor : std::exchange(request.unanswered, {})) {
+                requestor->onLateGlyphsAvailable();
+            }
+        }
     }
 
-    observer->onGlyphsLoaded(fontStack, range);
+    if (error) {
+        observer->onGlyphsError(fontStack, range, error);
+    } else {
+        observer->onGlyphsLoaded(fontStack, range);
+    }
 }
 
 void GlyphManager::setObserver(GlyphManagerObserver* observer_) {
@@ -196,6 +216,7 @@ void GlyphManager::removeRequestor(GlyphRequestor& requestor) {
     for (auto& entry : entries) {
         for (auto& range : entry.second.ranges) {
             range.second.requestors.erase(&requestor);
+            std::erase(range.second.unanswered, &requestor);
         }
     }
 }

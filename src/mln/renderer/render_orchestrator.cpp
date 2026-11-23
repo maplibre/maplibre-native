@@ -1,5 +1,7 @@
 #include <mln/renderer/render_orchestrator.hpp>
 
+#include <mln/style/layers/raster_layer_impl.hpp>
+
 #include <mln/annotation/annotation_manager.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/renderer/change_request.hpp>
@@ -353,11 +355,15 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // The ground under the camera's eye has to be known to keep the eye above it
     // (Renderer::Impl::render), and its DEM tile lies outside the view's cover as often as not.
-    std::optional<LatLng> terrainEye;
+    // So does the ground under the center, for the center clamp: with the center at sea level
+    // over high ground the eye sits just above the slope, the elevated cover keeps little more
+    // than the eye's tile, and the clamp never learned the height that would lift the camera.
+    std::vector<LatLng> terrainGroundToKnow;
     if (terrainEnabled) {
         if (const auto eye = updateParameters->transformState.getFreeCameraOptions().getLocation()) {
-            terrainEye = eye->location;
+            terrainGroundToKnow.push_back(eye->location);
         }
+        terrainGroundToKnow.push_back(updateParameters->transformState.getLatLng());
     }
 
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
@@ -470,7 +476,20 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (layerAddedOrChanged || zoomChangedAndMatters || globalStateChangedAndMatters ||
             evaluationParameters.hasCrossfade || layer.hasTransition()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();
+            const bool wasInTransition = layer.hasTransition();
             layer.evaluate(evaluationParameters);
+            // A drape over terrain bakes a layer once per revision of its style
+            // (RenderLayer::styleRevision), on the frame the style changed. That is the frame a
+            // paint transition starts on, so the drape kept the paint the transition started
+            // from: a raster basemap whose brightness the app changed kept its old look. The
+            // paint a raster layer's transition ends on is another revision. Only a raster
+            // layer's: a fill-pattern layer baked again on this frame comes out without its
+            // pattern (TerrainDrape.APatternDrapedDuringAZoomLevelFadeSettlesOnTheFinalScale),
+            // and every layer ends a transition 300 ms after it is added.
+            if (wasInTransition && !layer.hasTransition() &&
+                layer.baseImpl->getTypeInfo() == style::RasterLayer::Impl::staticTypeInfo()) {
+                ++layer.styleRevision;
+            }
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
                 constantsMaskChanged.insert(id);
             }
@@ -593,7 +612,10 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             sourceNeedsRendering = true;
         }
         tileParameters.coverTileLimit = isDemSource ? 0 : coverTileLimit;
-        tileParameters.alsoCover = isDemSource ? terrainEye : std::nullopt;
+        tileParameters.coverMinZoomReach = terrainEnabled && !isDemSource ? RenderTerrain::sourceMinZoomReach()
+                                                                          : std::nullopt;
+        tileParameters.alsoCover = isDemSource ? terrainGroundToKnow : std::vector<LatLng>{};
+        tileParameters.leaveOutEmptyTiles = terrainEnabled && !isDemSource && RenderTerrain::leavesOutEmptyTiles();
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
         // The DEM source additionally keeps the coarser ancestors of its cover that are already

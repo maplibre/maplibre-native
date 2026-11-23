@@ -36,7 +36,7 @@ void main() {
     v_pos = a_texture_pos / 8192.0;
 }
 )";
-    static constexpr const char* fragment = R"(in vec2 v_pos;
+    static constexpr const char* fragment = R"(in highp vec2 v_pos;
 uniform sampler2D u_image;
 
 layout(std140) uniform HillshadeTilePropsUBO {
@@ -192,8 +192,10 @@ void igor_hillshade(vec2 deriv) {
 void main() {
     // The prepare target carries a 1px ring of derivatives from outside the tile, so that
     // bilinear filtering at the tile edge blends against a real neighbour. Inset past it.
-    vec2 size = vec2(textureSize(u_image, 0));
-    vec2 texturePos = (v_pos * (size - 2.0) + 1.0) / size;
+    // highp: at the default mediump (half precision on some GPUs) this arithmetic is off by up
+    // to half a texel at a 260 px target, which shifts and blurs the whole hillshade.
+    highp vec2 size = vec2(textureSize(u_image, 0));
+    highp vec2 texturePos = (v_pos * (size - 2.0) + 1.0) / size;
     vec4 pixel = texture(u_image, texturePos);
 
     // Scale the derivative based on the mercator distortion at this latitude (v_pos.y)

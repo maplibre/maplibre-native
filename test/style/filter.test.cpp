@@ -384,3 +384,28 @@ TEST(Filter, LegacyExpressionInvalidType) {
     std::optional<Filter> result = conversion::convert<Filter>(conversion::Convertible(&value), error);
     EXPECT_FALSE(result);
 }
+
+TEST(Filter, EqualityComparesExpressionContents) {
+    const auto parse = [](const char* json) {
+        conversion::Error error;
+        auto parsed = conversion::convertJSON<Filter>(json, error);
+        EXPECT_TRUE(bool(parsed));
+        return *parsed;
+    };
+
+    // Separate parses build separate expression objects.
+    const Filter a = parse(R"(["==", ["get", "class"], "street"])");
+    const Filter b = parse(R"(["==", ["get", "class"], "street"])");
+    const Filter c = parse(R"(["==", ["get", "class"], "path"])");
+
+    EXPECT_NE(a.expression->get(), b.expression->get());
+    EXPECT_TRUE(a == b);
+    EXPECT_FALSE(a != b);
+    EXPECT_TRUE(a != c);
+    EXPECT_TRUE(a == a);
+
+    const Filter none;
+    EXPECT_TRUE(none == Filter());
+    EXPECT_TRUE(none != a);
+    EXPECT_TRUE(a != none);
+}
