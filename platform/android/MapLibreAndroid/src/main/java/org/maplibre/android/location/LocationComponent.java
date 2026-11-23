@@ -140,14 +140,15 @@ public final class LocationComponent {
   /**
    * Copy of the last location given to the animators, so that updates which would not change what is shown can be
    * skipped. A copy, because callers may reuse and modify the same {@link Location} object. {@code null} while the
-   * animations are stopped, and after the render or camera mode changed.
+   * animations are stopped, after the render or camera mode changed, after a camera transition, and after a
+   * multi-point update.
    */
   @Nullable
   private Location lastAnimatedLocation;
 
   /**
-   * The last compass heading given to the animators. {@code null} while the animations are stopped, and after the
-   * render or camera mode changed.
+   * The last compass heading given to the animators. {@code null} while the animations are stopped, after the render
+   * or camera mode changed, and after a camera transition.
    */
   @Nullable
   private Float lastAnimatedCompassHeading;
@@ -436,6 +437,9 @@ public final class LocationComponent {
     }
 
     private void reset(@CameraMode.Mode int cameraMode) {
+      // The camera ignored values given during the transition, so the next location and heading are given again.
+      lastAnimatedLocation = null;
+      lastAnimatedCompassHeading = null;
       locationAnimatorCoordinator.resetAllCameraAnimations(maplibreMap.getCameraPosition(),
         cameraMode == CameraMode.TRACKING_GPS_NORTH);
     }
@@ -1370,7 +1374,9 @@ public final class LocationComponent {
     }
     updateAccuracyRadius(location, false);
     lastLocation = location;
-    lastAnimatedLocation = new Location(location);
+    // After a multi-point update the animation still follows the intermediate points, so the next location is always
+    // given, even if it equals the last point.
+    lastAnimatedLocation = intermediatePoints == null ? new Location(location) : null;
   }
 
   private static boolean isSamePosition(@Nullable Location previous, @NonNull Location location) {

@@ -818,6 +818,37 @@ class LocationComponentTest : BaseTest() {
         verify(locationAnimatorCoordinator, times(3)).feedNewCompassBearing(eq(77f), any(CameraPosition::class.java))
     }
 
+    @Test
+    fun newLocation_afterMultiPointUpdateToSameLocation_givenToAnimators() {
+        startWithoutLocationEngine()
+
+        // a path through an intermediate point, then a single location at its last point
+        locationComponent.forceLocationUpdate(listOf(location(51.0, 17.0), location(51.0, 17.001)), false)
+        locationComponent.forceLocationUpdate(location(51.0, 17.001))
+
+        verify(locationAnimatorCoordinator).feedNewLocation(any(), any(CameraPosition::class.java), anyBoolean(), anyBoolean())
+        verify(locationAnimatorCoordinator).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+    }
+
+    @Test
+    fun valuesGivenDuringCameraTransition_givenAgainAfterTransition() {
+        val compassListener = startWithCompass()
+        `when`(locationCameraController.isConsumingCompass).thenReturn(true)
+        val callback = ArgumentCaptor.forClass(OnLocationCameraTransitionListener::class.java)
+        locationComponent.setCameraMode(CameraMode.TRACKING_COMPASS, null)
+        verify(locationCameraController).setCameraMode(eq(CameraMode.TRACKING_COMPASS), any(), eq(TRANSITION_ANIMATION_DURATION_MS), isNull(), isNull(), isNull(), callback.capture())
+
+        // given during the transition, which the camera ignores
+        compassListener.onCompassChanged(77f)
+        locationComponent.forceLocationUpdate(location(51.0, 17.0))
+        callback.value.onLocationCameraTransitionFinished(CameraMode.TRACKING_COMPASS)
+        compassListener.onCompassChanged(77f)
+        locationComponent.forceLocationUpdate(location(51.0, 17.0))
+
+        verify(locationAnimatorCoordinator, times(2)).feedNewCompassBearing(eq(77f), any(CameraPosition::class.java))
+        verify(locationAnimatorCoordinator, times(2)).feedNewLocation(any(Location::class.java), any(CameraPosition::class.java), anyBoolean())
+    }
+
     private fun startWithoutLocationEngine() {
         val projection: Projection = mock(Projection::class.java)
         `when`(projection.getMetersPerPixelAtLatitude(anyDouble())).thenReturn(10.0)
