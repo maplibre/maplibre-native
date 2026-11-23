@@ -119,6 +119,9 @@ public:
     /// so a burst of dirty drape targets is spread across frames rather than stalling one.
     RenderResult render(RenderOrchestrator&, const RenderTree&, PaintParameters&, bool canRerender = true);
 
+    /// Whether `render` has run at least once, so the texture holds the result
+    bool hasBeenRendered() const noexcept { return hasRenderedContent; }
+
 protected:
     void renderDrapedLayerGroups(RenderOrchestrator&, PaintParameters&);
 
