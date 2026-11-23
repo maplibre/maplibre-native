@@ -1,0 +1,136 @@
+<%
+  const properties = locals.properties;
+  const doc = locals.doc;
+-%>
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
+
+package org.maplibre.android.style.light
+
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.layers.Property
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.utils.ColorUtils
+import org.maplibre.android.utils.ThreadUtils
+
+/**
+ * The global light source.
+ *
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#light)
+ */
+@UiThread
+class Light
+    /**
+     * Creates a Light.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) {
+
+    @Keep
+    @Suppress("unused")
+    private var nativePtr: Long
+
+    init {
+        checkThread()
+        this.nativePtr = nativePtr
+    }
+<% for (const property of properties) { -%>
+<% if (property.name == "position") { -%>
+
+    /**
+     * The <%- camelize(property.name) %> property. <%- property.doc %>
+     */
+    var <%- property.name %>: Position
+        get() {
+            checkThread()
+            return nativeGet<%- camelize(property.name) %>()
+        }
+        set(value) {
+            checkThread()
+            nativeSet<%- camelize(property.name) %>(value)
+        }
+<% } else { -%>
+<% const annotation = propertyTypeAnnotation(property); -%>
+
+    /**
+     * The <%- camelize(property.name) %> property. <%- property.doc %>
+     */
+<% if (annotation) { -%>
+    @get:<%- annotation.substring(1) %>
+    @setparam:<%- annotation.substring(1) %>
+<% } -%>
+    var <%- property.name %>: <%- propertyKotlinType(property) %>
+        get() {
+            checkThread()
+            return nativeGet<%- camelize(property.name) %>()
+        }
+        set(value) {
+            checkThread()
+            nativeSet<%- camelize(property.name) %>(value)
+        }
+<% if (property.name == "color") { -%>
+
+    /**
+     * Set the <%- camelize(property.name) %> property. <%- property.doc %>
+     *
+     * @param <%- property.name %> as int
+     */
+    fun set<%- camelize(property.name) %>(@ColorInt <%- property.name %>: Int) {
+        checkThread()
+        nativeSet<%- camelize(property.name) %>(ColorUtils.colorToRgbaString(<%- property.name %>))
+    }
+<% } -%>
+<% } -%>
+<% if (property.transition) { -%>
+
+    /**
+     * The <%- camelize(property.name) %> property transition options.
+     */
+    var <%- property.name %>Transition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGet<%- camelize(property.name) %>Transition()
+        }
+        set(options) {
+            checkThread()
+            nativeSet<%- camelize(property.name) %>Transition(options.duration, options.delay)
+        }
+<% } -%>
+<% } -%>
+
+    private fun checkThread() {
+        ThreadUtils.checkThread(TAG)
+    }
+
+<% for (const property of properties) { -%>
+<% if (property.name == "position") { -%>
+    @Keep
+    private external fun nativeSet<%- camelize(property.name) %>(position: Position)
+
+    @Keep
+    private external fun nativeGet<%- camelize(property.name) %>(): Position
+
+<% } else { -%>
+    @Keep
+    private external fun nativeSet<%- camelize(property.name) %>(<%- property.name %>: <%- propertyKotlinType(property) %>)
+
+    @Keep
+    private external fun nativeGet<%- camelize(property.name) %>(): <%- propertyKotlinType(property) %>
+
+<% } -%>
+<% if (property.transition) { -%>
+    @Keep
+    private external fun nativeGet<%- camelize(property.name) %>Transition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSet<%- camelize(property.name) %>Transition(duration: Long, delay: Long)
+
+<% } -%>
+<% } -%>
+    private companion object {
+        const val TAG = "Mbgl-Light"
+    }
+}

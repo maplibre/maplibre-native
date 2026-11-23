@@ -4,21 +4,20 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import android.util.Pair
-import org.maplibre.android.style.layers.SymbolLayer
-import org.maplibre.android.style.layers.TransitionOptions
-import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.android.utils.BitmapUtils
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.BaseTest
+import org.maplibre.android.style.layers.SymbolLayer
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.android.utils.BitmapUtils
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class StyleBuilderTest : BaseTest() {
-
     @Test
     fun testFromUrl() {
         val expected = "https://demotiles.maplibre.org/style.json"
@@ -108,7 +107,7 @@ class StyleBuilderTest : BaseTest() {
         builder.withImage("id", bitmap)
         assertEquals(bitmap, builder.images[0].bitmap)
         assertEquals("id", builder.images[0].id)
-        assertEquals(false, builder.images[0].sdf)
+        assertEquals(false, builder.images[0].isSdf)
     }
 
     @Test
@@ -119,10 +118,10 @@ class StyleBuilderTest : BaseTest() {
         builder.withBitmapImages(Pair("id1", bitmap1), Pair("id2", bitmap2))
         assertEquals(bitmap1, builder.images[0].bitmap)
         assertEquals("id1", builder.images[0].id)
-        assertEquals(false, builder.images[0].sdf)
+        assertEquals(false, builder.images[0].isSdf)
         assertEquals(bitmap2, builder.images[1].bitmap)
         assertEquals("id2", builder.images[1].id)
-        assertEquals(false, builder.images[1].sdf)
+        assertEquals(false, builder.images[1].isSdf)
     }
 
     @Test
@@ -132,7 +131,7 @@ class StyleBuilderTest : BaseTest() {
         builder.withImage("id", bitmap, true)
         assertEquals(bitmap, builder.images[0].bitmap)
         assertEquals("id", builder.images[0].id)
-        assertEquals(true, builder.images[0].sdf)
+        assertEquals(true, builder.images[0].isSdf)
     }
 
     @Test
@@ -143,10 +142,10 @@ class StyleBuilderTest : BaseTest() {
         builder.withBitmapImages(true, Pair("id1", bitmap1), Pair("id2", bitmap2))
         assertEquals(bitmap1, builder.images[0].bitmap)
         assertEquals("id1", builder.images[0].id)
-        assertEquals(true, builder.images[0].sdf)
+        assertEquals(true, builder.images[0].isSdf)
         assertEquals(bitmap2, builder.images[1].bitmap)
         assertEquals("id2", builder.images[1].id)
-        assertEquals(true, builder.images[1].sdf)
+        assertEquals(true, builder.images[1].isSdf)
     }
 
     @Test
@@ -159,11 +158,11 @@ class StyleBuilderTest : BaseTest() {
         assertTrue(
             BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable)!!,
-                builder.images[0].bitmap
-            )
+                builder.images[0].bitmap,
+            ),
         )
         assertEquals("id", builder.images[0].id)
-        assertEquals(false, builder.images[0].sdf)
+        assertEquals(false, builder.images[0].isSdf)
     }
 
     @Test
@@ -176,11 +175,11 @@ class StyleBuilderTest : BaseTest() {
         assertTrue(
             BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable)!!,
-                builder.images[0].bitmap
-            )
+                builder.images[0].bitmap,
+            ),
         )
         assertEquals("id", builder.images[0].id)
-        assertEquals(true, builder.images[0].sdf)
+        assertEquals(true, builder.images[0].isSdf)
     }
 
     @Test
@@ -196,19 +195,19 @@ class StyleBuilderTest : BaseTest() {
         assertTrue(
             BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable1)!!,
-                builder.images[0].bitmap
-            )
+                builder.images[0].bitmap,
+            ),
         )
         assertEquals("id1", builder.images[0].id)
-        assertEquals(false, builder.images[0].sdf)
+        assertEquals(false, builder.images[0].isSdf)
         assertTrue(
             BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable2)!!,
-                builder.images[1].bitmap
-            )
+                builder.images[1].bitmap,
+            ),
         )
         assertEquals("id2", builder.images[1].id)
-        assertEquals(false, builder.images[1].sdf)
+        assertEquals(false, builder.images[1].isSdf)
     }
 
     @Test
@@ -224,19 +223,19 @@ class StyleBuilderTest : BaseTest() {
         assertTrue(
             BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable1)!!,
-                builder.images[0].bitmap
-            )
+                builder.images[0].bitmap,
+            ),
         )
         assertEquals("id1", builder.images[0].id)
-        assertEquals(true, builder.images[0].sdf)
+        assertEquals(true, builder.images[0].isSdf)
         assertTrue(
             BitmapUtils.equals(
                 BitmapUtils.getBitmapFromDrawable(drawable2)!!,
-                builder.images[1].bitmap
-            )
+                builder.images[1].bitmap,
+            ),
         )
         assertEquals("id2", builder.images[1].id)
-        assertEquals(true, builder.images[1].sdf)
+        assertEquals(true, builder.images[1].isSdf)
     }
 
     @Test
@@ -244,7 +243,7 @@ class StyleBuilderTest : BaseTest() {
         val transitionOptions = TransitionOptions(100, 200)
         val builder = Style.Builder()
         builder.withTransition(transitionOptions)
-        assertEquals(100, builder.transitionOptions.duration)
-        assertEquals(200, builder.transitionOptions.delay)
+        assertEquals(100, builder.transitionOptions!!.duration)
+        assertEquals(200, builder.transitionOptions!!.delay)
     }
 }

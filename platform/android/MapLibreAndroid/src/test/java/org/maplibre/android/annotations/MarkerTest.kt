@@ -1,12 +1,12 @@
 package org.maplibre.android.annotations
 
 import android.graphics.Bitmap
-import org.maplibre.android.exceptions.InvalidMarkerPositionException
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.utils.MockParcel
 import org.junit.Assert
 import org.junit.Test
 import org.maplibre.android.BaseTest
+import org.maplibre.android.exceptions.InvalidMarkerPositionException
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.utils.MockParcel
 import org.mockito.Mockito
 
 class MarkerTest : BaseTest() {
@@ -53,7 +53,11 @@ class MarkerTest : BaseTest() {
     @Test
     fun testBuilder() {
         val marker =
-            MarkerOptions().title("title").snippet("snippet").position(LatLng(10.0, 12.0)).marker
+            MarkerOptions()
+                .title("title")
+                .snippet("snippet")
+                .position(LatLng(10.0, 12.0))
+                .marker
         Assert.assertEquals(marker.snippet, "snippet")
         Assert.assertEquals(marker.position, LatLng(10.0, 12.0))
     }
@@ -103,11 +107,12 @@ class MarkerTest : BaseTest() {
 
     @Test
     fun testEqualityDifferentIcon() {
-        val marker = MarkerOptions().icon(
-            Mockito.mock(
-                Icon::class.java
+        val marker =
+            MarkerOptions().icon(
+                Mockito.mock(
+                    Icon::class.java,
+                ),
             )
-        )
         val other = MarkerOptions()
         Assert.assertNotEquals("Should not match", other, marker)
     }
@@ -147,7 +152,7 @@ class MarkerTest : BaseTest() {
         val marker = MarkerOptions().position(LatLng(0.0, 0.0)).marker
         Assert.assertEquals(
             marker.toString(),
-            "Marker [position[" + "LatLng [latitude=0.0, longitude=0.0, altitude=0.0]" + "]]"
+            "Marker [position[" + "LatLng [latitude=0.0, longitude=0.0, altitude=0.0]" + "]]",
         )
     }
 

@@ -4,20 +4,22 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.geojson.Point
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
-import org.maplibre.android.style.expressions.Expression.distance
-import org.maplibre.android.style.expressions.Expression.lt
+import org.maplibre.android.style.expressions.Expression.Companion.distance
+import org.maplibre.android.style.expressions.Expression.Companion.lt
 import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.Property.NONE
-import org.maplibre.android.style.layers.PropertyFactory.*
+import org.maplibre.android.style.layers.PropertyFactory.fillColor
+import org.maplibre.android.style.layers.PropertyFactory.fillOpacity
+import org.maplibre.android.style.layers.PropertyFactory.visibility
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityWithinExpressionBinding
 import org.maplibre.android.testapp.styles.TestStyles
+import org.maplibre.geojson.Point
 import org.maplibre.turf.TurfConstants
 import org.maplibre.turf.TurfTransformation
 
@@ -25,7 +27,6 @@ import org.maplibre.turf.TurfTransformation
  * An Activity that showcases the within expression to filter features outside a geometry
  */
 class DistanceExpressionActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityWithinExpressionBinding
     private lateinit var maplibreMap: MapLibreMap
 
@@ -42,10 +43,12 @@ class DistanceExpressionActivity : AppCompatActivity() {
             maplibreMap = map
 
             // Setup camera position above Georgetown
-            maplibreMap.cameraPosition = CameraPosition.Builder()
-                .target(LatLng(lat, lon))
-                .zoom(16.0)
-                .build()
+            maplibreMap.cameraPosition =
+                CameraPosition
+                    .Builder()
+                    .target(LatLng(lat, lon))
+                    .zoom(16.0)
+                    .build()
             setupStyle()
         }
     }
@@ -55,35 +58,37 @@ class DistanceExpressionActivity : AppCompatActivity() {
         val center = Point.fromLngLat(lon, lat)
         val circle = TurfTransformation.circle(center, 150.0, TurfConstants.UNIT_METRES)
         maplibreMap.setStyle(
-            Style.Builder()
+            Style
+                .Builder()
                 .fromUri(TestStyles.OPENFREEMAP_BRIGHT)
                 .withSources(
                     GeoJsonSource(
                         POINT_ID,
-                        Point.fromLngLat(lon, lat)
+                        Point.fromLngLat(lon, lat),
                     ),
-                    GeoJsonSource(CIRCLE_ID, circle)
-                )
-                .withLayerBelow(
+                    GeoJsonSource(CIRCLE_ID, circle),
+                ).withLayerBelow(
                     FillLayer(CIRCLE_ID, CIRCLE_ID)
                         .withProperties(
                             fillOpacity(0.5f),
-                            fillColor(Color.parseColor("#3bb2d0"))
+                            fillColor(Color.parseColor("#3bb2d0")),
                         ),
-                    "poi"
-                )
+                    "poi",
+                ),
             // --8<-- [end:FillLayer]
         ) { style ->
             // --8<-- [start:distanceExpression]
             for (layer in style.layers) {
                 if (layer is SymbolLayer) {
                     if (layer.id.startsWith("poi")) {
-                        layer.setFilter(lt(
-                            distance(
-                                Point.fromLngLat(lon, lat)
+                        layer.setFilter(
+                            lt(
+                                distance(
+                                    Point.fromLngLat(lon, lat),
+                                ),
+                                150,
                             ),
-                            150
-                        ))
+                        )
                     } else {
                         layer.setProperties(visibility(NONE))
                     }
@@ -123,7 +128,10 @@ class DistanceExpressionActivity : AppCompatActivity() {
         binding.mapView.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+    override fun onSaveInstanceState(
+        outState: Bundle,
+        outPersistentState: PersistableBundle,
+    ) {
         super.onSaveInstanceState(outState, outPersistentState)
         outState.let {
             binding.mapView.onSaveInstanceState(it)

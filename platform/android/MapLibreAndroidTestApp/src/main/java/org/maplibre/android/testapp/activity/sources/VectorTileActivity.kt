@@ -13,7 +13,6 @@ import org.maplibre.android.style.sources.VectorSource
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 
-
 class VectorTileActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
 
@@ -28,24 +27,26 @@ class VectorTileActivity : AppCompatActivity() {
                     // z: 12, x: 2177, y: 1436 is one of the available tiles:
                     // https://github.com/maplibre/demotiles/tree/gh-pages/tiles-omt/12/2177
                     LatLngBounds.from(12, 2177, 1436),
-                    0
-                )
+                    0,
+                ),
             )
             it.setStyle(TestStyles.PROTOMAPS_GRAYSCALE) { style ->
                 // --8<-- [start:addTileSet]
-                val tileset = TileSet(
-                    "openmaptiles",
-                    "https://demotiles.maplibre.org/tiles-omt/{z}/{x}/{y}.pbf"
-                )
+                val tileset =
+                    TileSet(
+                        "openmaptiles",
+                        "https://demotiles.maplibre.org/tiles-omt/{z}/{x}/{y}.pbf",
+                    )
                 val openmaptiles = VectorSource("openmaptiles", tileset)
                 style.addSource(openmaptiles)
-                val roadLayer = LineLayer("road", "openmaptiles").apply {
-                    setSourceLayer("transportation")
-                    setProperties(
-                        lineColor("red"),
-                        lineWidth(2.0f)
-                    )
-                }
+                val roadLayer =
+                    LineLayer("road", "openmaptiles").apply {
+                        sourceLayer = "transportation"
+                        setProperties(
+                            lineColor("red"),
+                            lineWidth(2.0f),
+                        )
+                    }
                 // --8<-- [end:addTileSet]
 
                 style.addLayer(roadLayer)

@@ -1,12 +1,12 @@
 package org.maplibre.android.geometry
 
 import android.location.Location
-import org.maplibre.android.utils.MockParcel
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.maplibre.android.BaseTest
+import org.maplibre.android.utils.MockParcel
 import org.mockito.Mockito
 
 class LatLngTest : BaseTest() {
@@ -166,7 +166,7 @@ class LatLngTest : BaseTest() {
             "distances should match",
             latLng1.distanceTo(latLng2),
             157298.7453847275,
-            DELTA
+            DELTA,
         )
     }
 
@@ -194,9 +194,10 @@ class LatLngTest : BaseTest() {
         val altitude = 5.6
 
         // Mock the location class
-        val locationMocked = Mockito.mock(
-            Location::class.java
-        )
+        val locationMocked =
+            Mockito.mock(
+                Location::class.java,
+            )
         Mockito.`when`(locationMocked.latitude).thenReturn(latitude)
         Mockito.`when`(locationMocked.longitude).thenReturn(longitude)
         Mockito.`when`(locationMocked.altitude).thenReturn(altitude)
@@ -226,7 +227,7 @@ class LatLngTest : BaseTest() {
         Assert.assertEquals(
             "string should match",
             latLng.toString(),
-            "LatLng [latitude=1.2, longitude=3.4, altitude=5.6]"
+            "LatLng [latitude=1.2, longitude=3.4, altitude=5.6]",
         )
     }
 

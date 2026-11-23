@@ -11,11 +11,7 @@ import org.maplibre.android.testapp.utils.ExampleHttpRequestImpl
  * a custom implementation of HttpRequest used by the core.
  */
 class ExampleCustomModuleProviderImpl : ModuleProvider {
-    override fun createHttpRequest(): HttpRequest {
-        return ExampleHttpRequestImpl()
-    }
+    override fun createHttpRequest(): HttpRequest = ExampleHttpRequestImpl()
 
-    override fun createLibraryLoaderProvider(): LibraryLoaderProvider {
-        return LibraryLoaderProviderImpl()
-    }
+    override fun createLibraryLoaderProvider(): LibraryLoaderProvider = LibraryLoaderProviderImpl()
 }

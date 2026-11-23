@@ -9,12 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnInfoWindowClickListener
 import org.maplibre.android.maps.MapLibreMap.OnInfoWindowCloseListener
 import org.maplibre.android.maps.MapLibreMap.OnInfoWindowLongClickListener
 import org.maplibre.android.maps.MapLibreMap.OnMapLongClickListener
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -37,25 +37,26 @@ class InfoWindowActivity :
     private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
     private var customMarker: Marker? = null
-    private val mapLongClickListener = OnMapLongClickListener { point ->
-        if (customMarker != null) {
-            // Remove previous added marker
-            maplibreMap.removeAnnotation(customMarker!!)
-            customMarker = null
-        }
+    private val mapLongClickListener =
+        OnMapLongClickListener { point ->
+            if (customMarker != null) {
+                // Remove previous added marker
+                maplibreMap.removeAnnotation(customMarker!!)
+                customMarker = null
+            }
 
-        // Add marker on long click location with default marker image
-        customMarker = maplibreMap.addMarker(
-            MarkerOptions()
-                .title("Custom Marker")
-                .snippet(
-                    DecimalFormat("#.#####").format(point.latitude) + ", " +
-                        DecimalFormat("#.#####").format(point.longitude)
+            // Add marker on long click location with default marker image
+            customMarker =
+                maplibreMap.addMarker(
+                    MarkerOptions()
+                        .title("Custom Marker")
+                        .snippet(
+                            DecimalFormat("#.#####").format(point.latitude) + ", " +
+                                DecimalFormat("#.#####").format(point.longitude),
+                        ).position(point),
                 )
-                .position(point)
-        )
-        true
-    }
+            true
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,30 +79,31 @@ class InfoWindowActivity :
             MarkerOptions()
                 .title("Intersection")
                 .snippet("H St NW with 15th St NW")
-                .position(LatLng(38.9002073, -77.03364419))
+                .position(LatLng(38.9002073, -77.03364419)),
         )
         maplibreMap.addMarker(
-            MarkerOptions().title("Intersection")
+            MarkerOptions()
+                .title("Intersection")
                 .snippet("E St NW with 17th St NW")
-                .position(LatLng(38.8954236, -77.0394623))
+                .position(LatLng(38.8954236, -77.0394623)),
         )
         maplibreMap.addMarker(
-            MarkerOptions().title("The Ellipse").position(LatLng(38.89393, -77.03654))
+            MarkerOptions().title("The Ellipse").position(LatLng(38.89393, -77.03654)),
         )
         maplibreMap.addMarker(MarkerOptions().position(LatLng(38.89596, -77.03434)))
         maplibreMap.addMarker(
-            MarkerOptions().snippet("Lafayette Square").position(LatLng(38.89949, -77.03656))
+            MarkerOptions().snippet("Lafayette Square").position(LatLng(38.89949, -77.03656)),
         )
-        val marker = maplibreMap.addMarker(
-            MarkerOptions()
-                .title("White House")
-                .snippet(
-                    "The official residence and principal workplace of the President of the United States, " +
-                        "located at 1600 Pennsylvania Avenue NW in Washington, D.C. It has been the residence of every" +
-                        "U.S. president since John Adams in 1800."
-                )
-                .position(LatLng(38.897705003219784, -77.03655168667463))
-        )
+        val marker =
+            maplibreMap.addMarker(
+                MarkerOptions()
+                    .title("White House")
+                    .snippet(
+                        "The official residence and principal workplace of the President of the United States, " +
+                            "located at 1600 Pennsylvania Avenue NW in Washington, D.C. It has been the residence of every" +
+                            "U.S. president since John Adams in 1800.",
+                    ).position(LatLng(38.897705003219784, -77.03655168667463)),
+            )
 
         // open InfoWindow at startup
         maplibreMap.selectMarker(marker)
@@ -180,19 +182,22 @@ class InfoWindowActivity :
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
             R.id.action_toggle_concurrent_infowindow -> {
                 toggleConcurrentInfoWindow(!item.isChecked)
                 item.isChecked = !item.isChecked
                 true
             }
+
             R.id.action_toggle_deselect_markers_on_tap -> {
                 toggleDeselectMarkersOnTap(!item.isChecked)
                 item.isChecked = !item.isChecked
                 true
             }
-            else -> super.onOptionsItemSelected(item)
+
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
         }
-    }
 }

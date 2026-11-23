@@ -7,8 +7,8 @@ import android.system.Os
 import android.text.TextUtils
 import android.widget.Toast
 import androidx.multidex.MultiDexApplication
-import org.maplibre.android.MapStrictMode
 import org.maplibre.android.MapLibre
+import org.maplibre.android.MapStrictMode
 import org.maplibre.android.WellKnownTileServer
 import org.maplibre.android.log.Logger
 import org.maplibre.android.testapp.utils.ApiKeyUtils
@@ -46,20 +46,22 @@ open class MapLibreApplication : MultiDexApplication() {
 
     private fun initializeStrictMode() {
         StrictMode.setThreadPolicy(
-            ThreadPolicy.Builder()
+            ThreadPolicy
+                .Builder()
                 .detectDiskReads()
                 .detectDiskWrites()
                 .detectNetwork()
                 .penaltyLog()
-                .build()
+                .build(),
         )
         StrictMode.setVmPolicy(
-            VmPolicy.Builder()
+            VmPolicy
+                .Builder()
                 .detectLeakedSqlLiteObjects()
                 .detectLeakedClosableObjects()
                 .penaltyLog()
                 .penaltyDeath()
-                .build()
+                .build(),
         )
     }
 
@@ -90,11 +92,12 @@ open class MapLibreApplication : MultiDexApplication() {
             RenderingEnginePreference.clear(this)
 
             Timber.w(error, "Rendering engine %s is not supported by this build", persistedType)
-            Toast.makeText(
-                this,
-                getString(R.string.rendering_engine_unsupported, persistedType?.name),
-                Toast.LENGTH_LONG
-            ).show()
+            Toast
+                .makeText(
+                    this,
+                    getString(R.string.rendering_engine_unsupported, persistedType?.name),
+                    Toast.LENGTH_LONG,
+                ).show()
             MapLibre.getInstance(applicationContext, apiKey, TILE_SERVER)
         }
     }
@@ -108,7 +111,7 @@ open class MapLibreApplication : MultiDexApplication() {
                     "API key. During development, you can set the MLN_API_KEY environment variable for the SDK to " +
                     "automatically include it in the Test App. Otherwise, you can manually include it in the " +
                     "res/values/developer-config.xml file in the MapLibreAndroidTestApp folder."
-                )
+            )
 
         private fun validateApiKey(apiKey: String) {
             if (TextUtils.isEmpty(apiKey) || apiKey == DEFAULT_API_KEY) {

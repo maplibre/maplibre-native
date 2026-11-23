@@ -11,22 +11,25 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class MapLibreAnimatorTest : BaseTest() {
-
     @Test
     fun fps_unlimited() {
         val valueAnimator = mockk<ValueAnimator>()
         every { valueAnimator.animatedValue } answers { 5f }
         val listener = mockk<MapLibreAnimator.AnimationsValueChangeListener<Float>>()
         every { listener.onNewAnimationValue(any()) } answers {}
-        val mapboxAnimator = MapLibreFloatAnimator(
-            floatArrayOf(
-                0f,
-                10f
-            ).toTypedArray(), listener, Int.MAX_VALUE
-        )
+        val mapboxAnimator =
+            MapLibreFloatAnimator(
+                floatArrayOf(
+                    0f,
+                    10f,
+                ).toTypedArray(),
+                listener,
+                Int.MAX_VALUE,
+            )
 
-        for (i in 0 until 5)
+        for (i in 0 until 5) {
             mapboxAnimator.onAnimationUpdate(valueAnimator)
+        }
 
         verify(exactly = 5) { listener.onNewAnimationValue(5f) }
     }
@@ -37,12 +40,15 @@ class MapLibreAnimatorTest : BaseTest() {
         every { valueAnimator.animatedValue } answers { 5f }
         val listener = mockk<MapLibreAnimator.AnimationsValueChangeListener<Float>>()
         every { listener.onNewAnimationValue(any()) } answers {}
-        val mapboxAnimator = MapLibreFloatAnimator(
-            floatArrayOf(
-                0f,
-                10f
-            ).toTypedArray(), listener, 5
-        )
+        val mapboxAnimator =
+            MapLibreFloatAnimator(
+                floatArrayOf(
+                    0f,
+                    10f,
+                ).toTypedArray(),
+                listener,
+                5,
+            )
 
         for (i in 0 until 5) {
             mapboxAnimator.onAnimationUpdate(valueAnimator)

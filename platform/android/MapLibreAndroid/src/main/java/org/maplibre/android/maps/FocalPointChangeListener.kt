@@ -1,0 +1,10 @@
+package org.maplibre.android.maps
+
+import android.graphics.PointF
+
+/**
+ * Interface definition of a callback that is invoked when the focal point will change.
+ */
+fun interface FocalPointChangeListener {
+    fun onFocalPointChanged(pointF: PointF?)
+}

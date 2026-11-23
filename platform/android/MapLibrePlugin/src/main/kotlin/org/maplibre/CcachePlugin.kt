@@ -46,10 +46,14 @@ fun findCacheToolPath(): String? {
     val ccacheCommand = if (os.startsWith("Windows")) "where ccache" else "which ccache"
     val sccacheCommand = if (os.startsWith("Windows")) "where sccache" else "which sccache"
 
-    fun findCommandPath(command: String): String? {
-        return try {
+    fun findCommandPath(command: String): String? =
+        try {
             val process = Runtime.getRuntime().exec(command)
-            val result = process.inputStream.bufferedReader().readText().trim()
+            val result =
+                process.inputStream
+                    .bufferedReader()
+                    .readText()
+                    .trim()
             if (process.waitFor() == 0 && result.isNotEmpty()) {
                 File(result).absolutePath
             } else {
@@ -58,7 +62,6 @@ fun findCacheToolPath(): String? {
         } catch (e: Exception) {
             null
         }
-    }
 
     // Try to find sccache first, then fallback to ccache
     return findCommandPath(sccacheCommand) ?: findCommandPath(ccacheCommand)

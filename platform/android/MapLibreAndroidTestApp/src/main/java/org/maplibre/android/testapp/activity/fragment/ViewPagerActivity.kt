@@ -16,7 +16,6 @@ import org.maplibre.android.testapp.styles.TestStyles
  * Test activity showcasing using the Android SDK ViewPager API to show MapFragments.
  */
 class ViewPagerActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityViewpagerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,38 +43,42 @@ class ViewPagerActivity : AppCompatActivity() {
         }
     }
 
-    internal class MapFragmentAdapter(private val context: Context, fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager) {
-
-        override fun getCount(): Int {
-            return NUM_ITEMS
-        }
+    internal class MapFragmentAdapter(
+        private val context: Context,
+        fragmentManager: FragmentManager,
+    ) : FragmentStatePagerAdapter(fragmentManager) {
+        override fun getCount(): Int = NUM_ITEMS
 
         override fun getItem(position: Int): androidx.fragment.app.Fragment {
             val options = MapLibreMapOptions.createFromAttributes(context)
             options.textureMode(false)
             options.camera(
-                CameraPosition.Builder()
+                CameraPosition
+                    .Builder()
                     .zoom(3.0)
                     .target(
                         when (position) {
                             0 -> {
                                 LatLng(34.920526, 102.634774)
                             }
+
                             1 -> {
                                 LatLng(62.326440, 92.764913)
                             }
+
                             2 -> {
                                 LatLng(-25.007786, 133.623852)
                             }
+
                             3 -> {
                                 LatLng(62.326440, 92.764913)
                             }
+
                             else -> {
                                 LatLng(34.920526, 102.634774)
                             }
-                        }
-                    )
-                    .build()
+                        },
+                    ).build(),
             )
 
             val fragment = SupportMapFragment.newInstance(options)
@@ -83,9 +86,7 @@ class ViewPagerActivity : AppCompatActivity() {
             return fragment
         }
 
-        override fun getPageTitle(position: Int): CharSequence? {
-            return "Page $position"
-        }
+        override fun getPageTitle(position: Int): CharSequence? = "Page $position"
 
         companion object {
             private const val NUM_ITEMS = 5
@@ -102,7 +103,7 @@ fun SupportMapFragment.getMapAsync(index: Int) {
                 2 -> TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
                 3 -> TestStyles.getPredefinedStyleWithFallback("Bright")
                 else -> TestStyles.getPredefinedStyleWithFallback("Streets")
-            }
+            },
         )
     }
 }

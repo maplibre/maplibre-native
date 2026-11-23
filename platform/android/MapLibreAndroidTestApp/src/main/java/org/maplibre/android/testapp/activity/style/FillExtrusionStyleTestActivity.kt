@@ -3,8 +3,8 @@ package org.maplibre.android.testapp.activity.style
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
@@ -26,7 +26,7 @@ class FillExtrusionStyleTestActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             maplibreMap.setStyle(
-                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
+                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets")),
             ) { style: Style? -> this@FillExtrusionStyleTestActivity.maplibreMap = maplibreMap }
         }
     }

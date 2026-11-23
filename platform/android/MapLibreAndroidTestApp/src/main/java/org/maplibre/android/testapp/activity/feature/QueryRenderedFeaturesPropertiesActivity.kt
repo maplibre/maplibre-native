@@ -8,16 +8,16 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.geojson.Feature
 import org.maplibre.android.annotations.BaseMarkerOptions
 import org.maplibre.android.annotations.Marker
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
+import org.maplibre.geojson.Feature
 import timber.log.Timber
 
 /**
@@ -28,31 +28,32 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
     lateinit var maplibreMap: MapLibreMap
         private set
     private var marker: Marker? = null
-    private val mapClickListener = OnMapClickListener { point ->
-        val density = resources.displayMetrics.density
-        val pixel = maplibreMap.projection.toScreenLocation(point)
-        Timber.i(
-            "Requesting features for %sx%s (%sx%s adjusted for density)",
-            pixel.x,
-            pixel.y,
-            pixel.x / density,
-            pixel.y / density
-        )
-        val features = maplibreMap.queryRenderedFeatures(pixel)
+    private val mapClickListener =
+        OnMapClickListener { point ->
+            val density = resources.displayMetrics.density
+            val pixel = maplibreMap.projection.toScreenLocation(point)
+            Timber.i(
+                "Requesting features for %sx%s (%sx%s adjusted for density)",
+                pixel.x,
+                pixel.y,
+                pixel.x / density,
+                pixel.y / density,
+            )
+            val features = maplibreMap.queryRenderedFeatures(pixel)
 
-        // Debug output
-        debugOutput(features)
+            // Debug output
+            debugOutput(features)
 
-        // Remove any previous markers
-        if (marker != null) {
-            maplibreMap.removeMarker(marker!!)
+            // Remove any previous markers
+            if (marker != null) {
+                maplibreMap.removeMarker(marker!!)
+            }
+
+            // Add a marker on the clicked point
+            marker = maplibreMap.addMarker(CustomMarkerOptions().position(point)!!.features(features))
+            maplibreMap.selectMarker(marker!!)
+            true
         }
-
-        // Add a marker on the clicked point
-        marker = maplibreMap.addMarker(CustomMarkerOptions().position(point)!!.features(features))
-        maplibreMap.selectMarker(marker!!)
-        true
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,8 +82,10 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
                 "Got feature %s with %s properties and Geometry %s",
                 feature.id(),
                 if (feature.properties() != null) {
-                    feature.properties()!!
-                        .entrySet().size
+                    feature
+                        .properties()!!
+                        .entrySet()
+                        .size
                 } else {
                     "<null>"
                 },
@@ -90,7 +93,7 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
                     feature.geometry()!!::class.java.simpleName
                 } else {
                     "<null>"
-                }
+                },
             )
             if (feature.properties() != null) {
                 for ((key, value) in feature.properties()!!.entrySet()) {
@@ -101,37 +104,38 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
     }
 
     private fun addCustomInfoWindowAdapter(maplibreMap: MapLibreMap) {
-        maplibreMap.infoWindowAdapter = object : InfoWindowAdapter {
-            private fun row(text: String): TextView {
-                val view = TextView(this@QueryRenderedFeaturesPropertiesActivity)
-                view.text = text
-                return view
-            }
-
-            override fun getInfoWindow(marker: Marker): View? {
-                val customMarker = marker as CustomMarker
-                val view = LinearLayout(this@QueryRenderedFeaturesPropertiesActivity)
-                view.orientation = LinearLayout.VERTICAL
-                view.setBackgroundColor(Color.WHITE)
-                if (customMarker.features!!.size > 0) {
-                    view.addView(
-                        row(
-                            String.format(
-                                "Found %s features",
-                                customMarker.features.size
-                            )
-                        )
-                    )
-                    val feature = customMarker.features[0]
-                    for ((key, value) in feature.properties()!!.entrySet()) {
-                        view.addView(row(String.format("%s: %s", key, value)))
-                    }
-                } else {
-                    view.addView(row("No features here"))
+        maplibreMap.infoWindowAdapter =
+            object : InfoWindowAdapter {
+                private fun row(text: String): TextView {
+                    val view = TextView(this@QueryRenderedFeaturesPropertiesActivity)
+                    view.text = text
+                    return view
                 }
-                return view
+
+                override fun getInfoWindow(marker: Marker): View? {
+                    val customMarker = marker as CustomMarker
+                    val view = LinearLayout(this@QueryRenderedFeaturesPropertiesActivity)
+                    view.orientation = LinearLayout.VERTICAL
+                    view.setBackgroundColor(Color.WHITE)
+                    if (customMarker.features!!.size > 0) {
+                        view.addView(
+                            row(
+                                String.format(
+                                    "Found %s features",
+                                    customMarker.features.size,
+                                ),
+                            ),
+                        )
+                        val feature = customMarker.features[0]
+                        for ((key, value) in feature.properties()!!.entrySet()) {
+                            view.addView(row(String.format("%s: %s", key, value)))
+                        }
+                    } else {
+                        view.addView(row("No features here"))
+                    }
+                    return view
+                }
             }
-        }
     }
 
     override fun onStart() {
@@ -174,11 +178,12 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
 
     private class CustomMarker constructor(
         baseMarkerOptions: BaseMarkerOptions<*, *>?,
-        val features: List<Feature>?
+        val features: List<Feature>?,
     ) : Marker(baseMarkerOptions)
 
     private class CustomMarkerOptions : BaseMarkerOptions<CustomMarker?, CustomMarkerOptions?> {
         private var features: List<Feature>? = null
+
         fun features(features: List<Feature>?): CustomMarkerOptions {
             this.features = features
             return this
@@ -189,19 +194,17 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
             // Should implement this
         }
 
-        override fun getThis(): CustomMarkerOptions {
-            return this
-        }
+        override fun getThis(): CustomMarkerOptions = this
 
-        override fun getMarker(): CustomMarker {
-            return CustomMarker(this, features)
-        }
+        override val marker: CustomMarker
+            get() = CustomMarker(this, features)
 
-        override fun describeContents(): Int {
-            return 0
-        }
+        override fun describeContents(): Int = 0
 
-        override fun writeToParcel(out: Parcel, flags: Int) {
+        override fun writeToParcel(
+            out: Parcel,
+            flags: Int,
+        ) {
             // Should implement this
         }
 
@@ -209,13 +212,9 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
             @JvmField
             val CREATOR: Parcelable.Creator<CustomMarkerOptions?> =
                 object : Parcelable.Creator<CustomMarkerOptions?> {
-                    override fun createFromParcel(`in`: Parcel): CustomMarkerOptions? {
-                        return CustomMarkerOptions(`in`)
-                    }
+                    override fun createFromParcel(`in`: Parcel): CustomMarkerOptions? = CustomMarkerOptions(`in`)
 
-                    override fun newArray(size: Int): Array<CustomMarkerOptions?> {
-                        return arrayOfNulls(size)
-                    }
+                    override fun newArray(size: Int): Array<CustomMarkerOptions?> = arrayOfNulls(size)
                 }
         }
     }

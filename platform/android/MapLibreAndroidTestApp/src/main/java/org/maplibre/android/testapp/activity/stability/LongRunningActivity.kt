@@ -13,20 +13,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.location.permissions.PermissionsListener
+import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.testapp.R
 import java.util.logging.Logger
 import kotlin.time.Duration.Companion.hours
 
 class LongRunningActivity : AppCompatActivity() {
-
     // config
     companion object {
         private val LOG = Logger.getLogger(LongRunningActivity::class.java.name)
 
         // activity lifetime (seconds)
         private val DURATION = 72.hours
+
         // start one activity/view per display if available
         private const val USE_SECONDARY_DISPLAY = true
 
@@ -36,17 +36,19 @@ class LongRunningActivity : AppCompatActivity() {
             val sysMemInfo = ActivityManager.MemoryInfo()
             activityManager.getMemoryInfo(sysMemInfo)
 
-            LOG.info("System: \n" +
+            LOG.info(
+                "System: \n" +
                     "\tavailable memory - ${sysMemInfo.availMem / 1048576} MB\n" +
                     "\ttotal memory - ${sysMemInfo.totalMem / 1048576} MB\n" +
                     "\tlow memory threshold - ${sysMemInfo.threshold / 1048576} MB\n" +
-                    "\tlow memory - ${sysMemInfo.lowMemory}\n"
+                    "\tlow memory - ${sysMemInfo.lowMemory}\n",
             )
 
             val appMemInfo = activityManager.getProcessMemoryInfo(intArrayOf(android.os.Process.myPid())).first()
 
-            LOG.info("Application memory: \n" +
-                    appMemInfo.memoryStats.map { "\t${it.key} - ${it.value} KB" }.joinToString("\n")
+            LOG.info(
+                "Application memory: \n" +
+                    appMemInfo.memoryStats.map { "\t${it.key} - ${it.value} KB" }.joinToString("\n"),
             )
         }
     }
@@ -60,23 +62,27 @@ class LongRunningActivity : AppCompatActivity() {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             start()
         } else {
-            permissionsManager = PermissionsManager(object : PermissionsListener {
-                override fun onExplanationNeeded(permissionsToExplain: List<String>) {
-                    Toast.makeText(
-                        this@LongRunningActivity,
-                        "Location permissions are required to run this test",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+            permissionsManager =
+                PermissionsManager(
+                    object : PermissionsListener {
+                        override fun onExplanationNeeded(permissionsToExplain: List<String>) {
+                            Toast
+                                .makeText(
+                                    this@LongRunningActivity,
+                                    "Location permissions are required to run this test",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
 
-                override fun onPermissionResult(granted: Boolean) {
-                    if (granted) {
-                        start()
-                    } else {
-                        finish()
-                    }
-                }
-            })
+                        override fun onPermissionResult(granted: Boolean) {
+                            if (granted) {
+                                start()
+                            } else {
+                                finish()
+                            }
+                        }
+                    },
+                )
             permissionsManager!!.requestLocationPermissions(this)
         }
     }
@@ -84,7 +90,7 @@ class LongRunningActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionsManager?.onRequestPermissionsResult(requestCode, permissions, grantResults)

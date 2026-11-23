@@ -12,7 +12,11 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import org.maplibre.android.style.expressions.Expression.*
+import org.maplibre.android.style.expressions.Expression.Companion.color
+import org.maplibre.android.style.expressions.Expression.Companion.featureState
+import org.maplibre.android.style.expressions.Expression.Companion.literal
+import org.maplibre.android.style.expressions.Expression.Companion.switchCase
+import org.maplibre.android.style.expressions.Expression.Companion.toBool
 import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PropertyFactory.fillColor
@@ -43,9 +47,10 @@ class FeatureStateActivity : AppCompatActivity() {
     private lateinit var maplibreMap: MapLibreMap
     private lateinit var statesSource: GeoJsonSource
 
-    private val mapClickListener = MapLibreMap.OnMapClickListener { point ->
-        handleMapClick(point)
-    }
+    private val mapClickListener =
+        MapLibreMap.OnMapClickListener { point ->
+            handleMapClick(point)
+        }
 
     // # --8<-- [start:onCreate]
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +62,7 @@ class FeatureStateActivity : AppCompatActivity() {
         mapView.getMapAsync { map ->
             maplibreMap = map
             maplibreMap.moveCamera(
-                CameraUpdateFactory.newLatLngZoom(LatLng(42.619626, -103.523181), 3.0)
+                CameraUpdateFactory.newLatLngZoom(LatLng(42.619626, -103.523181), 3.0),
             )
             maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style ->
                 addStatesLayer(style)
@@ -84,17 +89,17 @@ class FeatureStateActivity : AppCompatActivity() {
                     switchCase(
                         toBool(featureState("selected")),
                         color(selectedFill),
-                        color(defaultFill)
-                    )
+                        color(defaultFill),
+                    ),
                 ),
                 fillOpacity(
                     switchCase(
                         toBool(featureState("selected")),
                         literal(0.7f),
-                        literal(0.5f)
-                    )
-                )
-            )
+                        literal(0.5f),
+                    ),
+                ),
+            ),
         )
 
         style.addLayer(
@@ -103,17 +108,17 @@ class FeatureStateActivity : AppCompatActivity() {
                     switchCase(
                         toBool(featureState("selected")),
                         color(selectedBorder),
-                        color(defaultBorder)
-                    )
+                        color(defaultBorder),
+                    ),
                 ),
                 lineWidth(
                     switchCase(
                         toBool(featureState("selected")),
                         literal(2.0f),
-                        literal(1.0f)
-                    )
-                )
-            )
+                        literal(1.0f),
+                    ),
+                ),
+            ),
         )
     }
     // # --8<-- [end:addStatesLayer]
@@ -126,21 +131,23 @@ class FeatureStateActivity : AppCompatActivity() {
         val featureId = feature.id() ?: return false
 
         val currentState = statesSource.getFeatureState(featureId)
-        val isSelected = currentState
-            ?.get("selected")
-            ?.takeUnless { it.isJsonNull }
-            ?.asBoolean
-            ?: false
+        val isSelected =
+            currentState
+                ?.get("selected")
+                ?.takeUnless { it.isJsonNull }
+                ?.asBoolean
+                ?: false
 
         val nextState = JsonObject().apply { addProperty("selected", !isSelected) }
         statesSource.setFeatureState(featureId, nextState)
 
         val stateName = feature.getStringProperty("STATE_NAME") ?: "Unknown"
-        Toast.makeText(
-            this,
-            "$stateName ${if (!isSelected) "selected" else "deselected"}",
-            Toast.LENGTH_SHORT
-        ).show()
+        Toast
+            .makeText(
+                this,
+                "$stateName ${if (!isSelected) "selected" else "deselected"}",
+                Toast.LENGTH_SHORT,
+            ).show()
         return true
     }
     // # --8<-- [end:handleMapClick]

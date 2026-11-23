@@ -3,8 +3,8 @@ package org.maplibre.android.testapp.activity.imagegenerator
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.log.Logger
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.RenderingStats
 import org.maplibre.android.maps.Style
@@ -15,24 +15,30 @@ import timber.log.Timber
 /**
  * Test activity showcasing the Snapshot API to create and display a bitmap of the current shown Map.
  */
-class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
-
+class SnapshotActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback {
     private lateinit var binding: ActivitySnapshotBinding
 
     private lateinit var maplibreMap: MapLibreMap
 
-    private val idleListener = object : MapView.OnDidFinishRenderingFrameListener {
-        override fun onDidFinishRenderingFrame(fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double) {
-            if (fully) {
-                binding.mapView.removeOnDidFinishRenderingFrameListener(this)
-                Logger.v(TAG, LOG_MESSAGE)
-                maplibreMap.snapshot { snapshot ->
-                    binding.imageView.setImageBitmap(snapshot)
-                    binding.mapView.addOnDidFinishRenderingFrameListener(this)
+    private val idleListener =
+        object : MapView.OnDidFinishRenderingFrameListener {
+            override fun onDidFinishRenderingFrame(
+                fully: Boolean,
+                frameEncodingTime: Double,
+                frameRenderingTime: Double,
+            ) {
+                if (fully) {
+                    binding.mapView.removeOnDidFinishRenderingFrameListener(this)
+                    Logger.v(TAG, LOG_MESSAGE)
+                    maplibreMap.snapshot { snapshot ->
+                        binding.imageView.setImageBitmap(snapshot)
+                        binding.mapView.addOnDidFinishRenderingFrameListener(this)
+                    }
                 }
             }
         }
-    }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +50,9 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Outdoor"))) { binding.mapView.addOnDidFinishRenderingFrameListener(idleListener) }
+        maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Outdoor"))) {
+            binding.mapView.addOnDidFinishRenderingFrameListener(idleListener)
+        }
     }
 
     override fun onStart() {

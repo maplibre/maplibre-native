@@ -5,8 +5,8 @@ import androidx.annotation.Keep
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import com.google.gson.JsonObject
-import org.maplibre.geojson.Feature
 import org.maplibre.android.style.expressions.Expression
+import org.maplibre.geojson.Feature
 import java.net.URL
 import java.util.*
 import kotlin.collections.ArrayList
@@ -114,7 +114,11 @@ class VectorSource : Source {
      * @param state         a JSON object with the state key-value pairs to merge
      * @return true if the source is attached to a map and the update was dispatched
      */
-    fun setFeatureState(sourceLayerId: String, featureId: String, state: JsonObject): Boolean {
+    fun setFeatureState(
+        sourceLayerId: String,
+        featureId: String,
+        state: JsonObject,
+    ): Boolean {
         checkThread()
         return nativeSetFeatureState(sourceLayerId, featureId, state)
     }
@@ -128,7 +132,10 @@ class VectorSource : Source {
      * @param featureId     the id of the feature whose state to get
      * @return the feature state, or null
      */
-    fun getFeatureState(sourceLayerId: String, featureId: String): JsonObject? {
+    fun getFeatureState(
+        sourceLayerId: String,
+        featureId: String,
+    ): JsonObject? {
         checkThread()
         return nativeGetFeatureState(sourceLayerId, featureId)
     }
@@ -142,7 +149,11 @@ class VectorSource : Source {
      * @param stateKey      the state key to remove, or null to remove all keys
      * @return true if the source is attached to a map and the update was dispatched
      */
-    fun removeFeatureState(sourceLayerId: String, featureId: String?, stateKey: String?): Boolean {
+    fun removeFeatureState(
+        sourceLayerId: String,
+        featureId: String?,
+        stateKey: String?,
+    ): Boolean {
         checkThread()
         return nativeRemoveFeatureState(sourceLayerId, featureId, stateKey)
     }
@@ -154,7 +165,10 @@ class VectorSource : Source {
      * @param featureId     the id of the feature
      * @return true if the source is attached to a map and the update was dispatched
      */
-    fun removeFeatureState(sourceLayerId: String, featureId: String): Boolean {
+    fun removeFeatureState(
+        sourceLayerId: String,
+        featureId: String,
+    ): Boolean {
         checkThread()
         return nativeRemoveFeatureState(sourceLayerId, featureId, null)
     }
@@ -177,7 +191,10 @@ class VectorSource : Source {
      * @param filter         an optional filter expression to filter the returned Features
      * @return the features
      */
-    fun querySourceFeatures(@Size(min = 1) sourceLayerIds: Array<String>, filter: Expression?): List<Feature> {
+    fun querySourceFeatures(
+        @Size(min = 1) sourceLayerIds: Array<String>,
+        filter: Expression?,
+    ): List<Feature> {
         checkThread()
         val features = querySourceFeatures(sourceLayerIds, filter?.toArray())
         return listOf(*features)
@@ -205,7 +222,10 @@ class VectorSource : Source {
         }
 
     @Keep
-    protected external fun initialize(layerId: String?, payload: Any?)
+    protected external fun initialize(
+        layerId: String?,
+        payload: Any?,
+    )
 
     @Keep
     @Throws(Throwable::class)
@@ -215,5 +235,8 @@ class VectorSource : Source {
     protected external fun nativeGetUrl(): String?
 
     @Keep
-    private external fun querySourceFeatures(sourceLayerId: Array<String>, filter: Array<Any>?): Array<Feature>
+    private external fun querySourceFeatures(
+        sourceLayerId: Array<String>,
+        filter: Array<Any?>?,
+    ): Array<Feature>
 }

@@ -2,6 +2,9 @@ package org.maplibre.android.maps
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.constants.MapLibreConstants
@@ -11,9 +14,6 @@ import org.maplibre.android.maps.GesturesUiTestUtils.quickScale
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.activity.BaseTest
 import org.maplibre.android.testapp.activity.maplayout.SimpleMapActivity
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
 
 class MapGestureDetectorTest : BaseTest() {
     override fun getActivityClass() = SimpleMapActivity::class.java
@@ -114,7 +114,15 @@ class MapGestureDetectorTest : BaseTest() {
             maplibreMap.moveCamera(CameraUpdateFactory.zoomTo(2.0))
             initialZoom = maplibreMap.cameraPosition.zoom
         }
-        onView(withId(R.id.mapView)).perform(quickScale(-(maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold * 2), withVelocity = false, duration = 1000L))
+        onView(
+            withId(R.id.mapView),
+        ).perform(
+            quickScale(
+                -(maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold * 2),
+                withVelocity = false,
+                duration = 1000L,
+            ),
+        )
         R.id.mapView.loopFor(MapLibreConstants.ANIMATION_DURATION.toLong())
         rule.runOnUiThread {
             Assert.assertTrue(maplibreMap.cameraPosition.zoom < initialZoom!!)
@@ -128,7 +136,15 @@ class MapGestureDetectorTest : BaseTest() {
         rule.runOnUiThread {
             initialZoom = maplibreMap.cameraPosition.zoom
         }
-        onView(withId(R.id.mapView)).perform(quickScale(maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold / 2, withVelocity = false, duration = 50L))
+        onView(
+            withId(R.id.mapView),
+        ).perform(
+            quickScale(
+                maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold / 2,
+                withVelocity = false,
+                duration = 50L,
+            ),
+        )
         R.id.mapView.loopFor(MapLibreConstants.ANIMATION_DURATION.toLong())
         rule.runOnUiThread {
             Assert.assertEquals(initialZoom!! + 1, maplibreMap.cameraPosition.zoom, 0.1)
@@ -144,7 +160,15 @@ class MapGestureDetectorTest : BaseTest() {
             initialZoom = maplibreMap.cameraPosition.zoom
             maplibreMap.uiSettings.isQuickZoomGesturesEnabled = false
         }
-        onView(withId(R.id.mapView)).perform(quickScale(maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold * 2, withVelocity = false, duration = 50L))
+        onView(
+            withId(R.id.mapView),
+        ).perform(
+            quickScale(
+                maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold * 2,
+                withVelocity = false,
+                duration = 50L,
+            ),
+        )
         R.id.mapView.loopFor(MapLibreConstants.ANIMATION_DURATION.toLong())
         rule.runOnUiThread {
             Assert.assertEquals(initialZoom!!, maplibreMap.cameraPosition.zoom, 0.01)
@@ -159,7 +183,16 @@ class MapGestureDetectorTest : BaseTest() {
             maplibreMap.moveCamera(CameraUpdateFactory.zoomTo(4.0))
         }
 
-        onView(withId(R.id.mapView)).perform(quickScale(maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold / 2, withVelocity = false, duration = 50L, interrupt = true))
+        onView(
+            withId(R.id.mapView),
+        ).perform(
+            quickScale(
+                maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold / 2,
+                withVelocity = false,
+                duration = 50L,
+                interrupt = true,
+            ),
+        )
 
         var initialCameraPosition: CameraPosition? = null
         rule.runOnUiThread {

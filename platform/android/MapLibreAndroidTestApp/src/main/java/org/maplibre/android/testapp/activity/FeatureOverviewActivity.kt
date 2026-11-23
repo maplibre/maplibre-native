@@ -53,16 +53,23 @@ class FeatureOverviewActivity : AppCompatActivity() {
         recyclerView.addOnItemTouchListener(SimpleOnItemTouchListener())
         recyclerView.setHasFixedSize(true)
 
-        ItemClickSupport.addTo(recyclerView)
-            .setOnItemClickListener(object : ItemClickSupport.OnItemClickListener {
-                override fun onItemClicked(recyclerView: RecyclerView?, position: Int, view: View?) {
-                    if (sectionAdapter!!.isSectionHeaderPosition(position).not()) {
-                        val itemPosition = sectionAdapter!!.getConvertedPosition(position)
-                        val feature = featureAdapter!!.getItem(itemPosition)
-                        startFeature(feature)
+        ItemClickSupport
+            .addTo(recyclerView)
+            .setOnItemClickListener(
+                object : ItemClickSupport.OnItemClickListener {
+                    override fun onItemClicked(
+                        recyclerView: RecyclerView?,
+                        position: Int,
+                        view: View?,
+                    ) {
+                        if (sectionAdapter!!.isSectionHeaderPosition(position).not()) {
+                            val itemPosition = sectionAdapter!!.getConvertedPosition(position)
+                            val feature = featureAdapter!!.getItem(itemPosition)
+                            startFeature(feature)
+                        }
                     }
-                }
-            })
+                },
+            )
         if (savedInstanceState == null) {
             loadFeatures()
         } else {
@@ -74,12 +81,13 @@ class FeatureOverviewActivity : AppCompatActivity() {
     private fun loadFeatures() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                features = loadFeaturesTask(
-                    packageManager.getPackageInfo(
-                        packageName,
-                        PackageManager.GET_ACTIVITIES or PackageManager.GET_META_DATA
+                features =
+                    loadFeaturesTask(
+                        packageManager.getPackageInfo(
+                            packageName,
+                            PackageManager.GET_ACTIVITIES or PackageManager.GET_META_DATA,
+                        ),
                     )
-                )
                 withContext(Dispatchers.Main) {
                     onFeaturesLoaded(features)
                 }
@@ -104,12 +112,13 @@ class FeatureOverviewActivity : AppCompatActivity() {
                 currentCat = category
             }
         }
-        sectionAdapter = FeatureSectionAdapter(
-            this,
-            R.layout.section_main_layout,
-            R.id.section_text,
-            featureAdapter!!
-        )
+        sectionAdapter =
+            FeatureSectionAdapter(
+                this,
+                R.layout.section_main_layout,
+                R.id.section_text,
+                featureAdapter!!,
+            )
         sectionAdapter!!.setSections(sections.toTypedArray())
         recyclerView.adapter = sectionAdapter
     }
@@ -143,19 +152,23 @@ class FeatureOverviewActivity : AppCompatActivity() {
             }
         }
         if (features.isNotEmpty()) {
-            val comparator = Comparator { lhs: Feature, rhs: Feature ->
-                var result = lhs.category.compareTo(rhs.category, ignoreCase = true)
-                if (result == 0) {
-                    result = lhs.getLabel().compareTo(rhs.getLabel(), ignoreCase = true)
+            val comparator =
+                Comparator { lhs: Feature, rhs: Feature ->
+                    var result = lhs.category.compareTo(rhs.category, ignoreCase = true)
+                    if (result == 0) {
+                        result = lhs.getLabel().compareTo(rhs.getLabel(), ignoreCase = true)
+                    }
+                    result
                 }
-                result
-            }
             Collections.sort(features, comparator)
         }
         return features
     }
 
-    private fun resolveMetaData(bundle: Bundle?, key: String): String? {
+    private fun resolveMetaData(
+        bundle: Bundle?,
+        key: String,
+    ): String? {
         var category: String? = null
         if (bundle != null) {
             category = bundle.getString(key)
@@ -163,29 +176,32 @@ class FeatureOverviewActivity : AppCompatActivity() {
         return category
     }
 
-    private fun resolveString(@StringRes stringRes: Int): String {
-        return try {
+    private fun resolveString(
+        @StringRes stringRes: Int,
+    ): String =
+        try {
             getString(stringRes)
         } catch (exception: NotFoundException) {
             "-"
         }
-    }
 
     // Add SearchView to the app bar
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_feature_overview, menu)
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false // No action on submit
-            }
+        searchView.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    return false // No action on submit
+                }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                filterFeatures(newText)
-                return true
-            }
-        })
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    filterFeatures(newText)
+                    return true
+                }
+            },
+        )
         return true
     }
 
@@ -199,22 +215,24 @@ class FeatureOverviewActivity : AppCompatActivity() {
 
     private fun showRenderingEngineDialog() {
         val engineTypes = RenderingEngine.Type.values()
-        val currentType = RenderingEngine.getCurrentType()
-        val labels = engineTypes.map { type ->
-            if (type == currentType) {
-                getString(R.string.rendering_engine_current_label, type.name)
-            } else {
-                type.name
-            }
-        }.toTypedArray()
+        val currentType = RenderingEngine.currentType
+        val labels =
+            engineTypes
+                .map { type ->
+                    if (type == currentType) {
+                        getString(R.string.rendering_engine_current_label, type.name)
+                    } else {
+                        type.name
+                    }
+                }.toTypedArray()
         val checkedIndex = engineTypes.indexOf(currentType)
-        AlertDialog.Builder(this)
+        AlertDialog
+            .Builder(this)
             .setTitle(R.string.rendering_engine_dialog_title)
             .setSingleChoiceItems(labels, checkedIndex) { dialog, which ->
                 dialog.dismiss()
                 switchRenderingEngine(engineTypes[which])
-            }
-            .setNegativeButton(R.string.cancel, null)
+            }.setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -225,7 +243,7 @@ class FeatureOverviewActivity : AppCompatActivity() {
     // MapLibreApplication#applyPersistedRenderingEngine(), which also surfaces the
     // unsupported-backend error if the persisted choice turns out not to be supported.
     private fun switchRenderingEngine(type: RenderingEngine.Type) {
-        if (type == RenderingEngine.getCurrentType()) {
+        if (type == RenderingEngine.currentType) {
             return
         }
         RenderingEnginePreference.save(this, type)
@@ -234,11 +252,12 @@ class FeatureOverviewActivity : AppCompatActivity() {
 
     // Filter the features based on the search query
     private fun filterFeatures(query: String?) {
-        val filteredFeatures = if (query.isNullOrEmpty()) {
-            features // Show full list if query is empty
-        } else {
-            features?.filter { it.getLabel().contains(query, ignoreCase = true) }
-        }
+        val filteredFeatures =
+            if (query.isNullOrEmpty()) {
+                features // Show full list if query is empty
+            } else {
+                features?.filter { it.getLabel().contains(query, ignoreCase = true) }
+            }
         updateAdapter(filteredFeatures)
     }
 
