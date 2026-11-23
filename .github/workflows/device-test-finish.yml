@@ -1,0 +1,88 @@
+name: device-test-finish
+run-name: ${{ inputs.name }} ${{ inputs.run }}
+
+on:
+  workflow_dispatch: # started by scripts/aws-device-farm/watch-runs.sh
+    inputs:
+      run:
+        description: ID of the completed AWS Device Farm run
+        required: true
+      name:
+        description: Name of the test, for the list of workflow runs
+
+permissions:
+  id-token: write         # needed for AWS
+
+jobs:
+  device-test-finish:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Get result of AWS Device Farm run
+        env:
+          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          run: ${{ inputs.run }}
+        run: |
+          aws devicefarm get-run --arn "${project_arn/:project:/:run:}/$run" --output json | jq -er '.run | select(.status == "COMPLETED") |
+            (.name | capture(" check=(?<id>[0-9]+)$")) as $check |
+            "run_arn=\(.arn)",
+            "check_id=\($check.id)",
+            "platform=\(.platform | ascii_downcase | rtrimstr("_app"))",
+            "benchmark=\(.name | test("Benchmark"))",
+            "conclusion=\({PASSED: "success", STOPPED: "cancelled"}[.result] // "failure")"' >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: env.benchmark == 'true' || env.conclusion == 'failure'
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Store Test Artifacts
+        if: env.benchmark == 'true' || env.conclusion == 'failure'
+        run: |
+          npm install
+          results_dir="$(mktemp -d)"
+          echo results_dir="$results_dir" >> "$GITHUB_ENV"
+          node scripts/aws-device-farm/store-test-artifacts.mjs --runArn "$run_arn" --outputDir "$results_dir"
+          # unzip and delete .zip files so we don't have nested .zip
+          find "$results_dir" -type f -name '*.zip' -exec sh -c 'unzip -o -d "$(dirname "$1")" "$1" && rm "$1"' _ {} \;
+          zip -r test_artifacts.zip "$results_dir"
+
+      - name: Store Benchmark Results
+        if: env.benchmark == 'true' && env.conclusion == 'success'
+        run: |
+          benchmark_results_dir="$(mktemp -d)"
+          node scripts/aws-device-farm/collect-benchmark-outputs.mjs --inputDir "$results_dir" --outputDir "$benchmark_results_dir"
+          node scripts/aws-device-farm/upload-benchmark-outputs-to-s3.mjs --dir "$benchmark_results_dir" --platform "$platform"
+
+      - name: Upload Test Artifacts
+        if: env.benchmark == 'true' || env.conclusion == 'failure'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: "Test Artifacts ${{ inputs.name }}"
+          path: test_artifacts.zip
+
+      - name: Generate token
+        if: always() && env.check_id
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        id: generate_token
+        with:
+          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+
+      - uses: LouisBrunner/checks-action@937cbbcde3259005b50746dc91cde29098aac2ff # v3.1.0
+        if: always() && env.check_id
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          check_id: ${{ env.check_id }}
+          details_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          conclusion: ${{ job.status == 'success' && env.conclusion || job.status }}
