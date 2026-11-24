@@ -386,6 +386,7 @@ void Texture2D::upload() noexcept {
     if (image) {
         upload(image->data.get(), image->size);
         dirty = false;
+        image.reset();
     }
 }
 
