@@ -14,7 +14,7 @@ class RenderLineLayer;
 
 using LineBinders = PaintPropertyBinders<style::LinePaintProperties::DataDrivenProperties>;
 using LineLayoutVertex = gfx::Vertex<TypeList<attributes::pos_normal, attributes::data<uint8_t, 4>>>;
-using LineTriangleInstance = gfx::Vertex<TypeList<attributes::triangle_instance, attributes::data_indices>>;
+using LineTriangleInstance = gfx::Vertex<TypeList<attributes::triangle_vertices, attributes::data_indices>>;
 
 class LineBucket final : public Bucket {
 public:

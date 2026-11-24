@@ -40,7 +40,7 @@ const std::array<AttributeInfo, 7> LineIntersectionShaderSource::attributes = {
     AttributeInfo{6, gfx::AttributeDataType::Float2, lineUBOCount + 1, idLineWidthVertexAttribute},
 };
 const std::array<AttributeInfo, 2> LineIntersectionShaderSource::instanceAttributes = {
-    AttributeInfo{7, gfx::AttributeDataType::UInt3, lineUBOCount + 2, idLineTriangleInstanceAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::UInt3, lineUBOCount + 2, idLineTriangleVerticesAttribute},
     AttributeInfo{8, gfx::AttributeDataType::UInt2, lineUBOCount + 2, idLineDataIndicesAttribute},
 };
 const std::array<TextureInfo, 0> LineIntersectionShaderSource::textures = {};

@@ -616,7 +616,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto builder = createLineBuilder("line", std::move(shader));
-            // builder->setDepthType(gfx::DepthMaskType::ReadWrite);
 
             // vertices, attributes and segments
             addAttributes(*builder, bucket, std::move(vertexAttrs));
@@ -660,7 +659,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             auto intersectionBuilder = createLineBuilder("lineIntersection", std::move(intersectionShader));
 
             // vertices, attributes and segments
-            const auto vertexCount = 3; // bucket.vertices.elements();
+            const auto vertexCount = 3;
             intersectionBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
 
             if (const auto& attr = intersectionVertexAttrs->set(idLinePosNormalVertexAttribute)) {
@@ -673,7 +672,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             intersectionBuilder->setVertexAttributes(std::move(intersectionVertexAttrs));
 
             auto intersectionInstanceAttrs = context.createVertexAttributeArray();
-            if (const auto& attr = intersectionInstanceAttrs->set(idLineTriangleInstanceAttribute)) {
+            if (const auto& attr = intersectionInstanceAttrs->set(idLineTriangleVerticesAttribute)) {
                 attr->setSharedRawData(bucket.sharedTriangleInstances,
                                        offsetof(LineTriangleInstance, a1),
                                        /*vertexOffset=*/0,
@@ -688,7 +687,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::UInt2);
             }
             intersectionBuilder->setInstanceAttributes(std::move(intersectionInstanceAttrs));
-            intersectionBuilder->setSubLayerIndex(1);
 
             intersectionBuilder->setSegments(gfx::Triangles(),
                                              bucket.sharedIntersectionTriangles,

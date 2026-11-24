@@ -59,7 +59,7 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     mediump float u_width;
     lowp float u_floorwidth;
     highp uint u_expression_mask;
-    lowp float intersection_rounded_corner_distance;
+    lowp float u_intersection_rounded_corner_distance;
 };
 
 out vec2 v_normal;

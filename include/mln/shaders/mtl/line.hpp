@@ -486,7 +486,7 @@ float computeRadius(float2 prevPoint, float2 cornerPoint, float2 nextPoint, floa
 }
 
 struct VertexStage {
-    uint3 triangle_instance [[attribute(7)]];
+    uint3 triangle_vertices [[attribute(7)]];
     uint2 data_indices [[attribute(8)]];
 };
 
@@ -580,8 +580,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float triangle_corner_radius;
 
     for (int i = 0; i < 3; i++) {
-        int16_t pos_x = int16_t(vertx.triangle_instance[i] >> 16);
-        int16_t pos_y = int16_t(vertx.triangle_instance[i] & 0xFFFF);
+        int16_t pos_x = int16_t(vertx.triangle_vertices[i] >> 16);
+        int16_t pos_y = int16_t(vertx.triangle_vertices[i] & 0xFFFF);
         triangle_vertex_pos[i] = float2(pos_x, pos_y);
     }
 
