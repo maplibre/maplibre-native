@@ -63,6 +63,7 @@ public:
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
 
     void onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults results);
+    void onLateGlyphsAvailable(uint64_t correlationID_);
 
     void onImagesAvailable(ImageMap newIconMap,
                            ImageMap newPatternMap,

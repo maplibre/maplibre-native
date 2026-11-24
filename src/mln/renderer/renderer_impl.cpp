@@ -543,6 +543,14 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
     }
 
+    // Each surface drawable represents one terrain tile; depth drawables live in a separate group.
+    context.renderingStats().numTerrainTiles = 0;
+    if (const auto* terrain = orchestrator.getRenderTerrain()) {
+        if (const auto& group = terrain->getLayerGroup()) {
+            context.renderingStats().numTerrainTiles = static_cast<int>(group->getDrawableCount());
+        }
+    }
+
     const Size atlasSize = parameters.patternAtlas.getPixelSize();
     const auto& worldSize = parameters.renderableSize;
     const shaders::GlobalPaintParamsUBO globalPaintParamsUBO = {

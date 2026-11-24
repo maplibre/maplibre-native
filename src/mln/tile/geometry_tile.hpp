@@ -46,6 +46,7 @@ public:
     void setShowCollisionBoxes(bool showCollisionBoxes) override;
 
     void onGlyphsAvailable(GlyphMap, HBShapeRequests) override;
+    void onLateGlyphsAvailable() override;
     void onImagesAvailable(ImageMap, ImageMap, ImageVersionMap versionMap, uint64_t imageCorrelationID) override;
 
     void getGlyphs(GlyphDependencies);
