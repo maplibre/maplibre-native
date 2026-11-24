@@ -97,6 +97,8 @@ TEST(FillGenerator, GlobeZoomZeroOutlineStaysInsideTheTile) {
     const auto wide = square(-2000, 1000, util::EXTENT + 2000, 2000);
     for (const uint8_t zoom : {0, 1}) {
         gfx::VertexVector<FillLayoutVertex> fillVertices;
+        gfx::VertexVector<FillNeighborVertex> fillNeighbors;
+        gfx::VertexVector<FillTriangleInstance> fillTriangles;
         gfx::IndexVector<gfx::Triangles> fillIndexes;
         SegmentVector fillSegments;
         gfx::VertexVector<LineLayoutVertex> lineVertices;
@@ -106,8 +108,11 @@ TEST(FillGenerator, GlobeZoomZeroOutlineStaysInsideTheTile) {
         SegmentVector basicLineSegments;
         gfx::generateFillAndOutineBuffers(wide,
                                           fillVertices,
+                                          fillNeighbors,
+                                          fillTriangles,
                                           fillIndexes,
                                           fillSegments,
+                                          /*fillRoundedCornerEnabled=*/false,
                                           lineVertices,
                                           lineIndexes,
                                           lineSegments,
@@ -127,6 +132,8 @@ TEST(FillGenerator, GlobeSubdividesPretessellatedPolygons) {
     static const std::array<uint32_t, 6> triangles = {0, 1, 2, 0, 2, 3};
     const auto generate = [](const GeometryCollection& geometry, uint32_t granularity) {
         gfx::VertexVector<FillLayoutVertex> fillVertices;
+        gfx::VertexVector<FillNeighborVertex> fillNeighbors;
+        gfx::VertexVector<FillTriangleInstance> fillTriangles;
         gfx::IndexVector<gfx::Triangles> fillIndexes;
         SegmentVector fillSegments;
         gfx::VertexVector<LineLayoutVertex> lineVertices;
@@ -136,8 +143,11 @@ TEST(FillGenerator, GlobeSubdividesPretessellatedPolygons) {
         SegmentVector basicLineSegments;
         gfx::generateFillAndOutineBuffers(geometry,
                                           fillVertices,
+                                          fillNeighbors,
+                                          fillTriangles,
                                           fillIndexes,
                                           fillSegments,
+                                          /*fillRoundedCornerEnabled=*/false,
                                           lineVertices,
                                           lineIndexes,
                                           lineSegments,
@@ -179,6 +189,10 @@ TEST(FillGenerator, GlobeSubdividedPolygonBeyondTheIndexLimitKeepsItsGranularity
     const CanonicalTileID tile(3, 4, 4);
 
     gfx::VertexVector<FillLayoutVertex> fillVertices;
+
+    gfx::VertexVector<FillNeighborVertex> fillNeighbors;
+
+    gfx::VertexVector<FillTriangleInstance> fillTriangles;
     gfx::IndexVector<gfx::Triangles> fillIndexes;
     SegmentVector fillSegments;
     gfx::VertexVector<LineLayoutVertex> lineVertices;
@@ -188,8 +202,11 @@ TEST(FillGenerator, GlobeSubdividedPolygonBeyondTheIndexLimitKeepsItsGranularity
     SegmentVector outlineSegments;
     gfx::generateFillAndOutineBuffers(polygon,
                                       fillVertices,
+                                      fillNeighbors,
+                                      fillTriangles,
                                       fillIndexes,
                                       fillSegments,
+                                      /*fillRoundedCornerEnabled=*/false,
                                       lineVertices,
                                       lineIndexes,
                                       lineSegments,

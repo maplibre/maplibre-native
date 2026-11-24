@@ -179,6 +179,13 @@ static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(
                                                           static_cast<uint32_t>(atmosphereLayerUBOCount)});
 
 enum {
+    idFillPosVertexDrawableUBO = getEnumValue(fillLayerUBOCount, drawableSSBOStartId),
+    idFillNeighborVertexDrawableUBO,
+    idFillDataVertexDrawableUBO,
+    fillDrawableSSBOCount
+};
+
+enum {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
     idFillExtrusionInstancedDrawableUBO = getEnumValue(fillExtrusionLayerUBOCount, drawableSSBOStartId),
 #endif
@@ -198,6 +205,7 @@ enum {
 // drawable UBOs
 
 static constexpr uint32_t drawableUBOStartId = std::max({static_cast<uint32_t>(drawableSSBOStartId),
+                                                         static_cast<uint32_t>(fillDrawableSSBOCount),
                                                          static_cast<uint32_t>(fillExtrusionDrawableSSBOCount),
                                                          static_cast<uint32_t>(symbolDrawableSSBOCount)});
 
@@ -444,6 +452,8 @@ enum {
 
 enum {
     idFillPosVertexAttribute,
+    idFillNeighborVertexAttribute,
+    idFillTriangleIndicesAttribute,
 
     // Data driven
     idFillColorVertexAttribute,

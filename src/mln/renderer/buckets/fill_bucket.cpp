@@ -4,6 +4,7 @@
 #include <mln/renderer/bucket_parameters.hpp>
 #include <mln/renderer/layers/render_fill_layer.hpp>
 #include <mln/style/layers/fill_layer_impl.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/math.hpp>
 
@@ -15,14 +16,21 @@ FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
                        const uint32_t /* overscaling */) {
     using namespace style;
     for (const auto& pair : layerPaintProperties) {
+        const auto& fillProps = static_cast<const FillLayerProperties&>(*pair.second);
+#if MLN_USE_FILL_ROUNDED_CORNER
+        const auto& roundedCornerProperty = fillProps.layerImpl().paint.get<FillRoundedCornerDistance>().value;
+        roundedCornerEnabled |= !roundedCornerProperty.isUndefined();
+#endif
         paintPropertyBinders.emplace(std::piecewise_construct,
                                      std::forward_as_tuple(pair.first),
-                                     std::forward_as_tuple(getEvaluated<FillLayerProperties>(pair.second), zoom));
+                                     std::forward_as_tuple(fillProps.evaluated, zoom));
     }
 }
 
 FillBucket::~FillBucket() {
     sharedVertices->release();
+    sharedNeighbors->release();
+    sharedTriangleInstances->release();
 }
 
 void FillBucket::recordSDFPattern(const std::string& layerID, const bool sdf) {
@@ -39,29 +47,44 @@ bool FillBucket::isSDFPattern(const std::string& layerID) const {
 }
 
 void FillBucket::generateBuffers(const GeometryCollection& geometry, const CanonicalTileID& canonical) {
+    const auto granularity = subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z);
+    // The globe's subdivided triangles carry no corners to round.
+    if (util::GLOBE_ENABLED && granularity >= 2) {
+        roundedCornerEnabled = false;
+    }
 // MLN_TRIANGULATE_FILL_OUTLINES is defined in fill_bucket.hpp
 #if MLN_TRIANGULATE_FILL_OUTLINES
     gfx::generateFillAndOutineBuffers(geometry,
                                       vertices,
+                                      neighbors,
+                                      triangleInstances,
                                       triangles,
                                       triangleSegments,
+                                      roundedCornerEnabled,
                                       lineVertices,
                                       lineIndexes,
                                       lineSegments,
                                       basicLines,
                                       basicLineSegments,
                                       canonical,
-                                      subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z));
+                                      granularity);
 #else
     gfx::generateFillAndOutineBuffers(geometry,
                                       vertices,
+                                      neighbors,
+                                      triangleInstances,
                                       triangles,
                                       triangleSegments,
+                                      roundedCornerEnabled,
                                       basicLines,
                                       basicLineSegments,
                                       canonical,
-                                      subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z));
+                                      granularity);
 #endif
+
+    if (roundedCornerEnabled && triangles.empty()) {
+        triangles.emplace_back(0, 1, 2);
+    }
 }
 
 void FillBucket::populateBinders(const GeometryTileFeature& feature,

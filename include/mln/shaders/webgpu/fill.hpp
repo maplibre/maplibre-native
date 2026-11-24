@@ -49,9 +49,13 @@ struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
+    rounded_corner_distance: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct GlobalIndexUBO {
@@ -100,9 +104,13 @@ struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
+    rounded_corner_distance: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 @group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
@@ -290,14 +298,14 @@ struct VertexInput {
 #ifndef HAS_UNIFORM_u_color
     @location(5) color: vec4<f32>,
 #endif
+#ifndef HAS_UNIFORM_u_opacity
+    @location(6) opacity: vec2<f32>,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(6) pattern_from: vec4<u32>,
+    @location(7) pattern_from: vec4<u32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(7) pattern_to: vec4<u32>,
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    @location(8) opacity: vec2<f32>,
+    @location(8) pattern_to: vec4<u32>,
 #endif
 };
 
@@ -308,14 +316,14 @@ struct VertexOutput {
 #ifndef HAS_UNIFORM_u_color
     @location(2) color: vec4<f32>,
 #endif
+#ifndef HAS_UNIFORM_u_opacity
+    @location(3) opacity: f32,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(3) pattern_from: vec4<f32>,
+    @location(4) pattern_from: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(4) pattern_to: vec4<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    @location(5) opacity: f32,
+    @location(5) pattern_to: vec4<f32>,
 #endif
 };
 
@@ -345,9 +353,13 @@ struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
+    rounded_corner_distance: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct GlobalPaintParamsUBO {
@@ -434,14 +446,14 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifndef HAS_UNIFORM_u_color
     out.color = unpack_mix_color(in.color, drawable.color_t);
 #endif
+#ifndef HAS_UNIFORM_u_opacity
+    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
     out.pattern_from = pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
     out.pattern_to = pattern_to;
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
 #endif
 
     return out;
@@ -455,14 +467,14 @@ struct FragmentInput {
 #ifndef HAS_UNIFORM_u_color
     @location(2) color: vec4<f32>,
 #endif
+#ifndef HAS_UNIFORM_u_opacity
+    @location(3) opacity: f32,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(3) pattern_from: vec4<f32>,
+    @location(4) pattern_from: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(4) pattern_to: vec4<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    @location(5) opacity: f32,
+    @location(5) pattern_to: vec4<f32>,
 #endif
 };
 
@@ -478,9 +490,13 @@ struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
+    rounded_corner_distance: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct GlobalIndexUBO {
@@ -497,6 +513,20 @@ struct GlobalIndexUBO {
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let tileProps = tilePropsVector[globalIndex.value];
+
+    let color =
+#ifdef HAS_UNIFORM_u_color
+        props.color;
+#else
+        in.color;
+#endif
+
+    let opacity =
+#ifdef HAS_UNIFORM_u_opacity
+        props.opacity;
+#else
+        in.opacity;
+#endif
 
     let pattern_from =
 #ifdef HAS_UNIFORM_u_pattern_from
@@ -528,20 +558,6 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let color_b = textureSample(pattern_texture, texture_sampler, pos_b);
 
     // Mix patterns and apply opacity
-    let opacity =
-#ifdef HAS_UNIFORM_u_opacity
-        props.opacity;
-#else
-        in.opacity;
-#endif
-
-    let color =
-#ifdef HAS_UNIFORM_u_color
-        props.color;
-#else
-        in.color;
-#endif
-
     if (tileProps.sdf > 0.5) {
         let sdf_edge = (256.0 - 64.0) / 256.0;
         let sdf_gamma_a = max(fwidth(color_a.a) * 0.5, 1.0 / 255.0 / 16.0);
@@ -568,14 +584,14 @@ struct VertexInput {
 #ifndef HAS_UNIFORM_u_color
     @location(5) color: vec4<f32>,
 #endif
+#ifndef HAS_UNIFORM_u_opacity
+    @location(6) opacity: vec2<f32>,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(6) pattern_from: vec4<u32>,
+    @location(7) pattern_from: vec4<u32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(7) pattern_to: vec4<u32>,
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    @location(8) opacity: vec2<f32>,
+    @location(8) pattern_to: vec4<u32>,
 #endif
 };
 
@@ -587,14 +603,14 @@ struct VertexOutput {
 #ifndef HAS_UNIFORM_u_color
     @location(3) color: vec4<f32>,
 #endif
+#ifndef HAS_UNIFORM_u_opacity
+    @location(4) opacity: f32,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(4) pattern_from: vec4<f32>,
+    @location(5) pattern_from: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(5) pattern_to: vec4<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    @location(6) opacity: f32,
+    @location(6) pattern_to: vec4<f32>,
 #endif
 };
 
@@ -624,9 +640,13 @@ struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
+    rounded_corner_distance: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct GlobalPaintParamsUBO {
@@ -718,14 +738,14 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifndef HAS_UNIFORM_u_color
     out.color = unpack_mix_color(in.color, drawable.color_t);
 #endif
+#ifndef HAS_UNIFORM_u_opacity
+    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
     out.pattern_from = pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
     out.pattern_to = pattern_to;
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
 #endif
 
     return out;
@@ -741,14 +761,14 @@ struct FragmentInput {
 #ifndef HAS_UNIFORM_u_color
     @location(3) color: vec4<f32>,
 #endif
+#ifndef HAS_UNIFORM_u_opacity
+    @location(4) opacity: f32,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(4) pattern_from: vec4<f32>,
+    @location(5) pattern_from: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(5) pattern_to: vec4<f32>,
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-    @location(6) opacity: f32,
+    @location(6) pattern_to: vec4<f32>,
 #endif
 };
 
@@ -764,9 +784,13 @@ struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
+    rounded_corner_distance: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct GlobalIndexUBO {
@@ -783,6 +807,20 @@ struct GlobalIndexUBO {
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let tileProps = tilePropsVector[globalIndex.value];
+
+    let color =
+#ifdef HAS_UNIFORM_u_color
+        props.color;
+#else
+        in.color;
+#endif
+
+    let opacity =
+#ifdef HAS_UNIFORM_u_opacity
+        props.opacity;
+#else
+        in.opacity;
+#endif
 
     let pattern_from =
 #ifdef HAS_UNIFORM_u_pattern_from
@@ -814,20 +852,6 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let color_b = textureSample(pattern_texture, texture_sampler, pos_b);
 
     // Mix patterns and apply opacity
-    let opacity =
-#ifdef HAS_UNIFORM_u_opacity
-        props.opacity;
-#else
-        in.opacity;
-#endif
-
-    let color =
-#ifdef HAS_UNIFORM_u_color
-        props.color;
-#else
-        in.color;
-#endif
-
     let dist = length(in.v_pos - in.position.xy);
     let alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
@@ -952,9 +976,13 @@ struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
+    rounded_corner_distance: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct GlobalPaintParamsUBO {
