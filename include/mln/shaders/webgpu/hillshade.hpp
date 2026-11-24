@@ -95,6 +95,21 @@ fn get_aspect(deriv: vec2<f32>) -> f32 {
     return select(aspectDefault, atan2(deriv.y, -deriv.x), deriv.x != 0.0);
 }
 
+// log(1 + x) without rounding 1 + x, which loses x when x is small.
+fn log1p_stable(x: f32) -> f32 {
+    let series = x * (1.0 - x * (0.5 - x * (1.0 / 3.0 - x * (0.25 - x * (0.2 - x / 6.0)))));
+    return select(log(1.0 + x), series, abs(x) < 0.1);
+}
+
+// (exp(x) - 1) / x, which tends to 1 as x tends to 0 instead of cancelling.
+fn expm1_over_x(x: f32) -> f32 {
+    let series = 1.0 + x * (0.5 + x * (1.0 / 6.0 + x * (1.0 / 24.0 + x / 120.0)));
+    let small = abs(x) < 0.1;
+    // Keep the divisor away from 0 so the unused branch of select stays finite.
+    let safeX = select(x, 1.0, small);
+    return select((exp(x) - 1.0) / safeX, series, small);
+}
+
 fn standard_hillshade(deriv: vec2<f32>, tileProps: HillshadeTilePropsUBO) -> vec4<f32> {
     let azimuth = props.azimuths.x + PI;
     let slope = atan(0.625 * length(deriv));
@@ -102,11 +117,11 @@ fn standard_hillshade(deriv: vec2<f32>, tileProps: HillshadeTilePropsUBO) -> vec
 
     let intensity = tileProps.exaggeration;
 
-    let base = 1.875 - intensity * 1.75;
+    // This is (pow(base, slope) - 1) / (pow(base, maxValue) - 1) * maxValue with base = 1.875 - intensity * 1.75,
+    // rewritten with log(base) so that it tends to slope as intensity tends to 0.5 instead of cancelling to 0 / 0.
+    let logBase = log1p_stable(1.75 * (0.5 - intensity));
     let maxValue = 0.5 * PI;
-    let denom = pow(base, maxValue) - 1.0;
-    let useNonLinear = abs(intensity - 0.5) > 1e-6;
-    let scaledSlope = select(slope, ((pow(base, slope) - 1.0) / denom) * maxValue, useNonLinear);
+    let scaledSlope = slope * expm1_over_x(slope * logBase) / expm1_over_x(maxValue * logBase);
 
     let accent = cos(scaledSlope);
     let accentColor = (1.0 - accent) * props.accent * clamp(intensity * 2.0, 0.0, 1.0);

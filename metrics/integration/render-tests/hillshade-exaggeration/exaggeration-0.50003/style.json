@@ -1,0 +1,39 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 256,
+      "width": 256,
+      "description": "hillshade-exaggeration 0.50003 must draw the same image as 0.5: the standard method's scaling tends to the slope itself at 0.5, and used to cancel to nothing on mediump GPUs (maplibre-native issue 5095)"
+    }
+  },
+  "center": [-113.26903, 35.9654],
+  "zoom": 11,
+  "sources": {
+    "source": {
+      "type": "raster-dem",
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.terrain.png"
+      ],
+      "maxzoom": 15,
+      "tileSize": 256
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "hillshade",
+      "type": "hillshade",
+      "source": "source",
+      "paint": {
+        "hillshade-exaggeration": 0.50003
+      }
+    }
+  ]
+}

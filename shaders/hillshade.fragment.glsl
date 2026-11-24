@@ -31,19 +31,38 @@ float get_aspect(vec2 deriv) {
     atan(deriv.y, -deriv.x) : PI / 2.0 * (deriv.y > 0.0 ? 1.0 : -1.0);
 }
 
+// log(1 + x) without rounding 1 + x, which loses x when x is small.
+highp float log1p_stable(highp float x) {
+    if (abs(x) < 0.1) {
+        return x * (1.0 - x * (0.5 - x * (1.0 / 3.0 - x * (0.25 - x * (0.2 - x / 6.0)))));
+    }
+    return log(1.0 + x);
+}
+
+// (exp(x) - 1) / x, which tends to 1 as x tends to 0 instead of cancelling.
+highp float expm1_over_x(highp float x) {
+    if (abs(x) < 0.1) {
+        return 1.0 + x * (0.5 + x * (1.0 / 6.0 + x * (1.0 / 24.0 + x / 120.0)));
+    }
+    return (exp(x) - 1.0) / x;
+}
+
 // MapLibre's legacy hillshade algorithm (Method 0)
 void standard_hillshade(vec2 deriv) {
     float azimuth = u_azimuths.x + PI;
-    float slope = atan(0.625 * length(deriv));
+    highp float slope = atan(0.625 * length(deriv));
     float aspect = get_aspect(deriv);
 
     // Note: This implementation uses u_exaggeration as intensity, though it typically should be derived from u_altitudes.x.
-    float intensity = u_exaggeration;
+    highp float intensity = u_exaggeration;
 
     // Scale the slope exponentially based on intensity
-    float base = 1.875 - intensity * 1.75;
-    float maxValue = 0.5 * PI;
-    float scaledSlope = abs(intensity - 0.5) > 1e-6 ? ((pow(base, slope) - 1.0) / (pow(base, maxValue) - 1.0)) * maxValue : slope;
+    // This is (pow(base, slope) - 1) / (pow(base, maxValue) - 1) * maxValue with base = 1.875 - intensity * 1.75,
+    // rewritten with log(base) so that it tends to slope as intensity tends to 0.5 instead of cancelling to 0 / 0.
+    // It is computed in highp: near 0.5 both pow(base, x) - 1 terms are tiny, and mediump (fp16 on Adreno) cannot hold them.
+    highp float logBase = log1p_stable(1.75 * (0.5 - intensity));
+    highp float maxValue = 0.5 * PI;
+    highp float scaledSlope = slope * expm1_over_x(slope * logBase) / expm1_over_x(maxValue * logBase);
 
     float accent = cos(scaledSlope);
     vec4 accent_color = (1.0 - accent) * u_accent * clamp(intensity * 2.0, 0.0, 1.0);

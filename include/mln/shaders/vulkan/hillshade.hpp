@@ -97,6 +97,22 @@ float get_aspect(vec2 deriv) {
     return deriv.x != 0.0 ? atan(deriv.y, -deriv.x) : PI / 2.0 * (deriv.y > 0.0 ? 1.0 : -1.0);
 }
 
+// log(1 + x) without rounding 1 + x, which loses x when x is small.
+float log1p_stable(float x) {
+    if (abs(x) < 0.1) {
+        return x * (1.0 - x * (0.5 - x * (1.0 / 3.0 - x * (0.25 - x * (0.2 - x / 6.0)))));
+    }
+    return log(1.0 + x);
+}
+
+// (exp(x) - 1) / x, which tends to 1 as x tends to 0 instead of cancelling.
+float expm1_over_x(float x) {
+    if (abs(x) < 0.1) {
+        return 1.0 + x * (0.5 + x * (1.0 / 6.0 + x * (1.0 / 24.0 + x / 120.0)));
+    }
+    return (exp(x) - 1.0) / x;
+}
+
 // MapLibre's legacy hillshade algorithm (Method 0: STANDARD)
 void standard_hillshade(vec2 deriv, const HillshadeTilePropsUBO tileProps) {
     float azimuth = props.azimuths.x + PI;
@@ -106,9 +122,11 @@ void standard_hillshade(vec2 deriv, const HillshadeTilePropsUBO tileProps) {
     float intensity = tileProps.exaggeration;
 
     // Scale the slope exponentially based on intensity
-    float base = 1.875 - intensity * 1.75;
+    // This is (pow(base, slope) - 1) / (pow(base, maxValue) - 1) * maxValue with base = 1.875 - intensity * 1.75,
+    // rewritten with log(base) so that it tends to slope as intensity tends to 0.5 instead of cancelling to 0 / 0.
+    float logBase = log1p_stable(1.75 * (0.5 - intensity));
     float maxValue = 0.5 * PI;
-    float scaledSlope = abs(intensity - 0.5) > 1e-6 ? ((pow(base, slope) - 1.0) / (pow(base, maxValue) - 1.0)) * maxValue : slope;
+    float scaledSlope = slope * expm1_over_x(slope * logBase) / expm1_over_x(maxValue * logBase);
 
     float accent = cos(scaledSlope);
     vec4 accent_color = (1.0 - accent) * props.accent * clamp(intensity * 2.0, 0.0, 1.0);

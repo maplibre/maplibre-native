@@ -6,6 +6,7 @@
 
 ### 🐞 Bug fixes
 
+- Hillshade layers with `hillshade-exaggeration` just below `0.5` (for example `0.49997`) no longer lose their shading on GPUs that compute fragment shader floats in half precision, such as Adreno. The standard method now computes its slope scaling in a form that stays accurate as the exaggeration approaches `0.5` ([#5095](https://github.com/maplibre/maplibre-native/issues/5095)).
 - `raster` and `raster-dem` sources loaded from a `url` take the style's inline `minzoom` and `maxzoom` over the TileJSON's, as `vector` sources and maplibre-gl-js already do. A `raster-dem` source with an invalid `encoding`, `minzoom` or `maxzoom`, or a `raster` source with an invalid `minzoom` or `maxzoom`, is now rejected with an error, as a `vector` source is. Before, such a `raster-dem` source still loaded, decoded as Mapbox whatever its `encoding` ([#4557](https://github.com/maplibre/maplibre-native/pull/4557)).
 - Color property getters return whole-number channels, as MapLibre GL JS prints colors: a color set to `rgba(240,245,255,1)` reads back as set instead of `rgba(240.00001525878906,245.00001525878906,255,1)` ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
 - Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).
