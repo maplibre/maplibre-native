@@ -89,6 +89,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/conversion/property_value.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/source_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/stringify.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/conversion/terrain.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/tileset.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/dependency.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/expression.test.cpp

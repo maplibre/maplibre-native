@@ -17,6 +17,7 @@
 #include <mln/util/projection.hpp>
 #include <mln/util/run_loop.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <set>
@@ -563,4 +564,95 @@ TEST(TerrainElevationIndex, LineLabelPastTheTileEdgeSitsOnTheNeighbouringTile) {
     const RenderedQueryOptions options{std::vector<std::string>{"label"}};
     EXPECT_EQ(1u, frontend.getRenderer()->queryRenderedFeatures(onSurface, options).size());
     EXPECT_EQ(0u, frontend.getRenderer()->queryRenderedFeatures(atTheWesternHeight, options).size());
+}
+
+namespace {
+
+// Terrain-RGB tile of a ramp that climbs to the north, 100 m for each DEM row (about 12 degrees at
+// z10): 3000 m at `baseRow`, a row of the zoom 10 world (64 rows to a tile), and held between 0 and
+// 6000 m further out.
+std::string makeSlopeTile(const Resource& resource, double baseRow) {
+    const auto& id = *resource.tileData;
+    const double rowsPerTileRow = std::pow(2.0, 10.0 - id.z);
+    PremultipliedImage image({demTileSize, demTileSize});
+    for (uint32_t row = 0; row < demTileSize; ++row) {
+        const double worldRow = (id.y * double(demTileSize) + row + 0.5) * rowsPerTileRow;
+        const double metres = std::clamp(3000.0 - (worldRow - baseRow) * 100.0, 0.0, 6000.0);
+        const auto encoded = static_cast<uint32_t>(std::lround((metres + 10000.0) * 10.0));
+        for (uint32_t col = 0; col < demTileSize; ++col) {
+            uint8_t* px = image.data.get() + (row * demTileSize + col) * 4;
+            px[0] = static_cast<uint8_t>((encoded >> 16) & 0xFF);
+            px[1] = static_cast<uint8_t>((encoded >> 8) & 0xFF);
+            px[2] = static_cast<uint8_t>(encoded & 0xFF);
+            px[3] = 255;
+        }
+    }
+    return encodePNG(image);
+}
+
+// A DEM to z10 and a small square of fill around the point it is asked to draw at.
+std::string patchOnTerrainStyle(const LatLng& at) {
+    const auto corner = [&](double dLon, double dLat) {
+        return "[" + std::to_string(at.longitude() + dLon) + ", " + std::to_string(at.latitude() + dLat) + "]";
+    };
+    return R"STYLE({
+  "version": 8,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": ["http://example.com/{z}-{x}-{y}.png"],
+      "encoding": "mapbox",
+      "maxzoom": 10,
+      "tileSize": 64
+    },
+    "patch": {
+      "type": "geojson",
+      "data": {"type": "Feature", "properties": {}, "geometry": {"type": "Polygon", "coordinates": [[)STYLE" +
+           corner(-0.002, -0.0014) + ", " + corner(0.002, -0.0014) + ", " + corner(0.002, 0.0014) + ", " +
+           corner(-0.002, 0.0014) + ", " + corner(-0.002, -0.0014) + R"STYLE(]]}}
+    }
+  },
+  "terrain": {"source": "dem", "exaggeration": 1.0},
+  "layers": [{"id": "patch", "type": "fill", "source": "patch", "paint": {"fill-color": "red"}}]
+})STYLE";
+}
+
+} // namespace
+
+// A tap on the terrain queries the features under the ground it hit, not under the sea-level point
+// the same pixel's ray reaches. On a slope the ground under a pixel is neither the height of the
+// view's centre nor a plateau's, so the pick must follow the surface between them.
+TEST(TerrainElevationIndex, QueryingFeaturesPicksTheSlopeUnderThePixel) {
+    TerrainProjectionTest test;
+    const double baseRow = Projection::project(innsbruck, 10).y * demTileSize;
+    test.fileSource->tileResponse = [baseRow](const Resource& resource) {
+        Response res;
+        res.data = std::make_shared<std::string>(makeSlopeTile(resource, baseRow));
+        return res;
+    };
+    // On the slope 4 km north of the centre
+    const LatLng patch{innsbruck.latitude() + 0.04, innsbruck.longitude()};
+    test.map.getStyle().loadJSON(patchOnTerrainStyle(patch));
+    test.map.jumpTo(CameraOptions().withCenter(innsbruck).withZoom(10.0).withPitch(60.0));
+    test.render(8);
+
+    const auto height = test.map.getTerrainElevation(patch);
+    const auto centreHeight = test.map.getTerrainElevation(innsbruck);
+    ASSERT_TRUE(height);
+    ASSERT_TRUE(centreHeight);
+    // It is a slope: the patch sits well above the centre
+    ASSERT_GT(*height - *centreHeight, 500.0);
+
+    const ScreenCoordinate onSurface = test.map.pixelForLatLngOnTerrain(patch);
+    const ScreenCoordinate atSeaLevel = test.map.pixelForLatLng(patch);
+    const ScreenCoordinate atCentreHeight = test.map.pixelForLatLng(patch, *centreHeight);
+    // Each candidate pixel is further from the next than the patch is wide
+    ASSERT_GT(std::hypot(onSurface.x - atSeaLevel.x, onSurface.y - atSeaLevel.y), 20.0);
+    ASSERT_GT(std::hypot(onSurface.x - atCentreHeight.x, onSurface.y - atCentreHeight.y), 10.0);
+
+    const RenderedQueryOptions options{std::vector<std::string>{"patch"}};
+    auto* renderer = test.frontend.getRenderer();
+    EXPECT_EQ(1u, renderer->queryRenderedFeatures(onSurface, options).size());
+    EXPECT_EQ(0u, renderer->queryRenderedFeatures(atSeaLevel, options).size());
+    EXPECT_EQ(0u, renderer->queryRenderedFeatures(atCentreHeight, options).size());
 }
