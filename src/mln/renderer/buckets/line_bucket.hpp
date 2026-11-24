@@ -122,7 +122,6 @@ private:
 
     const float zoom;
     const uint32_t overscaling;
-    int count = 0;
 
     struct CoordinateHasher {
         size_t operator()(const GeometryCoordinate& coord) const { return util::hash(coord.x, coord.y); }
