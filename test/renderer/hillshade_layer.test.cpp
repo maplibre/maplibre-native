@@ -194,3 +194,16 @@ TEST(HillshadeLayer, PrepareTargetsOfTilesThatLeftTheCoverAreReleased) {
     // After a visit to another place, the layer holds what a layer that started here holds.
     EXPECT_LE(frameBuffersAfterSettling("hillshade", secondView, &firstView), hillshadeHere);
 }
+
+// The elevation tile of a color relief tile only has to be uploaded once.
+TEST(ColorReliefLayer, AStillFrameCreatesNoTextures) {
+    Fixture fixture("color-relief");
+    (void)fixture.settle();
+    const auto settled = fixture.frontend.render(fixture.map).stats;
+    if (settled.numCreatedTextures == 0) {
+        GTEST_SKIP() << "this backend does not count the textures it creates";
+    }
+    const auto still = fixture.frontend.render(fixture.map).stats;
+    EXPECT_EQ(0, still.numCreatedTextures - settled.numCreatedTextures);
+    EXPECT_EQ(0u, still.textureUpdateBytes - settled.textureUpdateBytes);
+}
