@@ -189,9 +189,6 @@ TEST(HillshadeLayer, PrepareTargetsOfTilesThatLeftTheCoverAreReleased) {
     const int colorReliefHere = frameBuffersAfterSettling("color-relief", secondView, nullptr);
     const int hillshadeHere = frameBuffersAfterSettling("hillshade", secondView, nullptr);
     // The test only means something if the layer holds targets at all
-    if (hillshadeHere == 0) {
-        GTEST_SKIP() << "this backend's hillshade layer holds no offscreen targets";
-    }
     ASSERT_GT(hillshadeHere, colorReliefHere);
 
     // After a visit to another place, the layer holds what a layer that started here holds.
