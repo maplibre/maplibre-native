@@ -6,6 +6,7 @@
 #include <mln/util/run_loop.hpp>
 #include <mln/util/timer.hpp>
 
+#include <cstdint>
 #include <cstdio>
 #include <string>
 
@@ -128,6 +129,7 @@ TEST(DatabaseFileSource, CancelledRequestDoesNotReadTheDatabase) {
             mapbox::sqlite::Database db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadWriteCreate);
             db.exec("UPDATE resources SET accessed = 0");
         }
+        ASSERT_NE(-1, accessedTime(path));
         auto cancelled = dbfs->request(resource, [&](const Response&) { answered = true; });
         cancelled.reset();
         dbfs->resume();
