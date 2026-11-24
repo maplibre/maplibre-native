@@ -88,7 +88,7 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
                 auto& prevPoint = neighbors[i].first;
                 auto& nextPoint = neighbors[nextIndex].first;
 
-                auto angle = abs(util::rad2deg(util::angle_between(prevPoint - cornerPoint, nextPoint - cornerPoint)));
+                auto angle = std::abs(util::rad2deg(util::angle_between(prevPoint - cornerPoint, nextPoint - cornerPoint)));
                 if (angle > 170.0 && angle < 190.0) {
                     continue;
                 }

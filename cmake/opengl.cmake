@@ -39,7 +39,9 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/hillshade.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/color_relief.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/line.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/line_intersection.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/line_gradient.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/line_gradient_sdf.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/line_pattern.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/line_sdf.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/location_indicator.hpp
