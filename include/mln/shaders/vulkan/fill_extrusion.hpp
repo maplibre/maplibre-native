@@ -396,9 +396,9 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionPatternShader";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto vertex = R"(
@@ -421,6 +421,13 @@ layout(location = 4) in uvec4 in_pattern_from;
 #if !defined(HAS_UNIFORM_u_pattern_to)
 layout(location = 5) in uvec4 in_pattern_to;
 #endif
+
+layout(location = 6) in ivec2 in_centroid;
+
+// 3D-terrain DEM. Binding MUST equal idFillExtrusionDEMTexture (= 1); the
+// Vulkan drawable binds textures by texture-id slot, see the plain variant's
+// note.
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D dem_sampler;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
@@ -511,7 +518,15 @@ void main() {
     const float z = t > 0.0 ? height : base;
     const vec2 decimals = unpack_float(floor(in_decimals_ed.x / 2)) / 128.0;
 
-    gl_Position = drawable.matrix * vec4(in_position + decimals, z, 1.0);
+    // Raise the extrusion by the terrain elevation sampled once at the polygon centroid, and
+    // drop ground-level floors slightly so buildings don't hang off a slope (as the plain
+    // extrusion shader does). The pattern position and the side gradient keep the height
+    // above the ground, so the pattern does not shift with the terrain.
+    const float ele = get_elevation(vec2(in_centroid), dem_sampler, drawable.dem_coords, drawable.dem_unpack,
+                                    drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const float lifted_z = z + ele - (t > 0.0 || base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+
+    gl_Position = drawable.matrix * vec4(in_position + decimals, lifted_z, 1.0);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -674,7 +689,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternInstancedShader, gfx::Backend::
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 6> instanceAttributes;
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto vertex = R"(
@@ -696,6 +711,11 @@ layout(location = 5) in uvec4 in_pattern_from;
 #if !defined(HAS_UNIFORM_u_pattern_to)
 layout(location = 6) in uvec4 in_pattern_to;
 #endif
+
+// 3D-terrain DEM. Binding MUST equal idFillExtrusionDEMTexture (= 1); the
+// Vulkan drawable binds textures by texture-id slot, see the plain
+// non-instanced variant's note.
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D dem_sampler;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
@@ -813,7 +833,16 @@ void main() {
     const float t = float(in_position.y);
     const float z = t > 0.0 ? height : base;
 
-    gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
+
+    // Same rigid whole-building lift as the plain instanced shader: elevation at the polygon
+    // centroid (from the aliased instance record). The pattern position and the side gradient
+    // keep the height above the ground, so the pattern does not shift with the terrain.
+    const vec2 centroidPos = unpack_int(instanceVector.instance[gl_InstanceIndex].centroid_pos);
+    const float ele = get_elevation(centroidPos, dem_sampler, drawable.dem_coords, drawable.dem_unpack,
+                                    drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const float lifted_z = z + ele - (t > 0.0 || base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+
+    gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, lifted_z, 1.0);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
