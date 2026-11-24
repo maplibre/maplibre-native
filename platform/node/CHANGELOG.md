@@ -1,4 +1,5 @@
 ## main
+- Text a tile was drawn without because its glyph range failed to load is drawn as soon as the range loads, instead of when the tile is next reloaded.
 ### ✨ Features and improvements
 - _...Add new stuff here..._
 

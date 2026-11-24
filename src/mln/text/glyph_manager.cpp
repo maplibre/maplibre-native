@@ -10,7 +10,10 @@
 #include <mln/util/image.hpp>
 #include <mln/util/logging.hpp>
 
+#include <algorithm>
 #include <fstream>
+#include <utility>
+#include <vector>
 
 namespace mln {
 
@@ -156,12 +159,22 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
         for (auto& pair : request.requestors) {
             GlyphRequestor& requestor = *pair.first;
             const std::shared_ptr<GlyphDependencies>& dependencies = pair.second;
+            if (error && std::ranges::find(request.unanswered, &requestor) == request.unanswered.end()) {
+                request.unanswered.push_back(&requestor);
+            }
             if (dependencies.use_count() == 1) {
                 notify(requestor, *dependencies);
             }
         }
 
         request.requestors.clear();
+
+        if (!error) {
+            // The requestors an earlier failure answered without this range lay out again with it.
+            for (auto* requestor : std::exchange(request.unanswered, {})) {
+                requestor->onLateGlyphsAvailable();
+            }
+        }
     }
 
     if (error) {
@@ -203,6 +216,7 @@ void GlyphManager::removeRequestor(GlyphRequestor& requestor) {
     for (auto& entry : entries) {
         for (auto& range : entry.second.ranges) {
             range.second.requestors.erase(&requestor);
+            std::erase(range.second.unanswered, &requestor);
         }
     }
 }

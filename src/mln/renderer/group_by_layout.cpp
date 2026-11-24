@@ -69,18 +69,19 @@ std::size_t std::hash<mln::LayoutGroupKey>::operator()(const mln::LayoutGroupKey
 
     std::size_t seed = 0;
 
-    // Hash stable pointers and scalars only (NOT layout)
+    // Hash stable pointers and scalars only (NOT filter, NOT layout)
     hash_combine(seed, reinterpret_cast<std::size_t>(key.typeInfo));
     hash_combine(seed, std::hash<std::string>{}(key.source));
     hash_combine(seed, std::hash<std::string>{}(key.sourceLayer));
     hash_combine(seed, std::hash<float>{}(key.minZoom));
     hash_combine(seed, std::hash<float>{}(key.maxZoom));
     hash_combine(seed, static_cast<bool>(key.visibility));
-    hash_combine(seed, reinterpret_cast<std::size_t>(key.filterExpression.get()));
 
-    // Note: We intentionally DON'T hash the layout here
-    // This means keys with same source/zoom/type/filter but different layouts
-    // will hash to the same bucket, then operator== distinguishes them
+    // Note: We intentionally DON'T hash the filter or the layout here. Every layer parses its own
+    // filter, so the address of the expression object differs between layers with equal filters
+    // and would keep them from ever being compared. Keys with the same source/zoom/type but a
+    // different filter or layout hash to the same bucket, then operator== distinguishes them
+    // (cheap fields first, filter and layout last).
 
     return seed;
 }

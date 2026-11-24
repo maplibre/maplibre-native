@@ -55,6 +55,7 @@ android:
   - 'CMakeLists.txt'
   - 'platform/android/**'
   - '.github/workflows/android-ci.yml'
+  - '.github/actions/setup-android-ci/**'
   - 'bin/**'
   - 'expression-test/**'
   - 'include/**'

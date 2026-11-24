@@ -72,6 +72,7 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     numDEMTexturesCreated += r.numDEMTexturesCreated;
     numDEMTexturesRefreshed += r.numDEMTexturesRefreshed;
     numDepthPasses += r.numDepthPasses;
+    numTerrainTiles += r.numTerrainTiles;
     numDrapeTargetsDeferred += r.numDrapeTargetsDeferred;
     numNewTileBuildsDeferred += r.numNewTileBuildsDeferred;
     numTerrainCoverPendingFrames += r.numTerrainCoverPendingFrames;
@@ -137,6 +138,7 @@ std::string RenderingStats::toString(std::string_view sep) const {
     optionalStatLine(ss, numDEMTexturesCreated, "numDEMTexturesCreated", sep);
     optionalStatLine(ss, numDEMTexturesRefreshed, "numDEMTexturesRefreshed", sep);
     optionalStatLine(ss, numDepthPasses, "numDepthPasses", sep);
+    optionalStatLine(ss, numTerrainTiles, "numTerrainTiles", sep);
     optionalStatLine(ss, numDrapeTargetsDeferred, "numDrapeTargetsDeferred", sep);
     optionalStatLine(ss, numNewTileBuildsDeferred, "numNewTileBuildsDeferred", sep);
     optionalStatLine(ss, numTerrainCoverPendingFrames, "numTerrainCoverPendingFrames", sep);
