@@ -6,19 +6,19 @@
 
 #include <Metal/Metal.hpp>
 
+#include <TargetConditionals.h>
+
 namespace mln {
 namespace mtl {
 
 class OffscreenTextureResource final : public RenderableResource {
 public:
-    OffscreenTextureResource(Context& context_,
-                             const Size size_,
-                             const gfx::TextureChannelDataType type_,
-                             bool depth,
-                             [[maybe_unused]] bool stencil)
+    OffscreenTextureResource(
+        Context& context_, const Size size_, const gfx::TextureChannelDataType type_, bool depth, bool stencil)
         : context(context_),
           size(size_),
-          type(type_) {
+          type(type_),
+          stencilInDepthTexture(stencil && TARGET_OS_SIMULATOR) {
         assert(!size.isEmpty());
         colorTexture = context.createTexture2D();
         colorTexture->setSize(size);
@@ -29,7 +29,8 @@ public:
         static_cast<Texture2D*>(colorTexture.get())
             ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
 
-        if (depth) {
+        // On iOS simulator the stencil is in the depth texture, so a stencil-only request needs it too.
+        if (depth || stencilInDepthTexture) {
             depthTexture = context.createTexture2D();
             depthTexture->setSize(size);
             depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
@@ -40,7 +41,8 @@ public:
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
         }
 
-        // On iOS simulator, the depth target is PixelFormatDepth32Float_Stencil8
+        // On iOS simulator, the depth target is PixelFormatDepth32Float_Stencil8 and also serves as the stencil
+        // target (see bind()), so there is no separate stencil texture.
 #if !TARGET_OS_SIMULATOR
         if (stencil) {
             stencilTexture = context.createTexture2D();
@@ -76,8 +78,16 @@ public:
 
         if (depthTexture) {
             depthTexture->create();
+            auto* metalDepthTexture = static_cast<Texture2D*>(depthTexture.get())->getMetalTexture();
             if (auto* depthTarget = renderPassDescriptor->depthAttachment()) {
-                depthTarget->setTexture(static_cast<Texture2D*>(depthTexture.get())->getMetalTexture());
+                depthTarget->setTexture(metalDepthTexture);
+            }
+            // A combined depth/stencil texture has to be attached as the stencil target as well, or the render
+            // pass has no stencil and tile clip masks are not applied.
+            if (stencilInDepthTexture) {
+                if (auto* stencilTarget = renderPassDescriptor->stencilAttachment()) {
+                    stencilTarget->setTexture(metalDepthTexture);
+                }
             }
         }
         if (stencilTexture) {
@@ -130,6 +140,7 @@ private:
     Context& context;
     const Size size;
     const gfx::TextureChannelDataType type;
+    const bool stencilInDepthTexture;
     gfx::Texture2DPtr colorTexture;
     gfx::Texture2DPtr depthTexture;
     gfx::Texture2DPtr stencilTexture;

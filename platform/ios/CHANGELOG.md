@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Fix `MLNMapSnapshotter` in the iOS simulator drawing translucent fills two or three times, so their alpha accumulated. The snapshot's render pass had no stencil attachment, so tile clip masks were not applied ([#5097](https://github.com/maplibre/maplibre-native/issues/5097)).
 - Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).
 - Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
