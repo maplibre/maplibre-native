@@ -23,9 +23,7 @@ struct CustomLayerRenderParameters : mln::style::CustomLayerRenderParameters {
     /// and clamped edges.
     std::uint32_t terrainDepthTexture = 0;
 
-    CustomLayerRenderParameters(const PaintParameters& paintParameters, std::uint32_t terrainDepthTexture_)
-        : mln::style::CustomLayerRenderParameters(paintParameters),
-          terrainDepthTexture(terrainDepthTexture_) {}
+    explicit CustomLayerRenderParameters(const PaintParameters&);
 };
 
 } // namespace gl

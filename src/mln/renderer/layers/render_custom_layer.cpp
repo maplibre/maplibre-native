@@ -22,6 +22,8 @@
 #include <mln/style/layers/vulkan/custom_layer_init_parameters.hpp>
 #include <mln/style/layers/vulkan/custom_layer_render_parameters.hpp>
 #include <mln/vulkan/render_pass.hpp>
+#elif MLN_RENDER_BACKEND_OPENGL
+#include <mln/style/layers/gl/custom_layer_render_parameters.hpp>
 #endif
 
 // TODO: platform agnostic error checks
@@ -61,6 +63,8 @@ void callPreRender(const std::shared_ptr<style::CustomLayerHost>& host,
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);
 #elif MLN_RENDER_BACKEND_VULKAN
     style::vulkan::CustomLayerRenderParameters parameters(paintParameters);
+#elif MLN_RENDER_BACKEND_OPENGL
+    style::gl::CustomLayerRenderParameters parameters(paintParameters);
 #else
     style::CustomLayerRenderParameters parameters(paintParameters);
 #endif

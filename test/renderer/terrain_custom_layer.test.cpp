@@ -1,7 +1,11 @@
+// Custom layers are registered with the default layer manager on OpenGL and Vulkan only
+#if MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN
+
 #include <mln/test/util.hpp>
 #include <mln/test/stub_file_source.hpp>
 #include <mln/test/map_adapter.hpp>
 
+#include <mln/gfx/context.hpp>
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/camera.hpp>
 #include <mln/map/map_options.hpp>
@@ -15,10 +19,8 @@
 #include <mln/platform/gl_functions.hpp>
 #include <mln/gl/defines.hpp>
 #include <mln/style/layers/gl/custom_layer_render_parameters.hpp>
-#elif MLN_RENDER_BACKEND_VULKAN
+#else
 #include <mln/style/layers/vulkan/custom_layer_render_parameters.hpp>
-#elif MLN_RENDER_BACKEND_METAL
-#include <mln/style/layers/mtl/custom_layer_render_parameters.hpp>
 #endif
 
 #include <cmath>
@@ -31,9 +33,9 @@ using namespace mln;
 
 namespace {
 
-// What a custom layer is handed over 3D terrain: the exaggeration on every backend, and the terrain's packed
-// depth texture on OpenGL, Vulkan and Metal. The scene is the occlusion test's: a plain at sea level with a
-// 3000 m ridge across it, the camera looking north at pitch 60.
+// What a custom layer is handed over 3D terrain: the exaggeration, and the terrain's packed depth texture
+// (OpenGL: the texture name, Vulkan: the image view, sampler and layout). The scene is the occlusion test's: a plain at
+// sea level with a 3000 m ridge across it, the camera looking north at pitch 60.
 constexpr double centreLat = 46.0;
 constexpr double centreLon = 10.0;
 constexpr double metresPerDegreeLat = 111195.0;
@@ -80,6 +82,9 @@ struct Seen {
     int draws = 0;
     double terrainExaggeration = -1;
     bool hasDepthTexture = false;
+    // The same, seen by preRender() in the last frame
+    int preRenders = 0;
+    bool preRenderHasDepthTexture = false;
     // OpenGL only: how many depth texture pixels are not the far plane's white
     int coveredPixels = -1;
     // Vulkan only
@@ -96,6 +101,17 @@ public:
     void contextLost() override {}
     void deinitialize() override {}
 
+    void preRender(const gfx::Context&, const style::CustomLayerRenderParameters& parameters) override {
+        seen.preRenders++;
+#if MLN_RENDER_BACKEND_OPENGL
+        seen.preRenderHasDepthTexture =
+            static_cast<const style::gl::CustomLayerRenderParameters&>(parameters).terrainDepthTexture != 0;
+#else
+        seen.preRenderHasDepthTexture = static_cast<bool>(
+            static_cast<const style::vulkan::CustomLayerRenderParameters&>(parameters).terrainDepthImageView);
+#endif
+    }
+
     void render(const style::CustomLayerRenderParameters& parameters) override {
         seen.draws++;
         seen.terrainExaggeration = parameters.terrainExaggeration;
@@ -103,14 +119,11 @@ public:
         const auto& gl = static_cast<const style::gl::CustomLayerRenderParameters&>(parameters);
         seen.hasDepthTexture = gl.terrainDepthTexture != 0;
         seen.coveredPixels = seen.hasDepthTexture ? countCoveredPixels(gl.terrainDepthTexture) : -1;
-#elif MLN_RENDER_BACKEND_VULKAN
+#else
         const auto& vulkan = static_cast<const style::vulkan::CustomLayerRenderParameters&>(parameters);
         seen.hasDepthTexture = static_cast<bool>(vulkan.terrainDepthImageView);
         seen.depthSamplerSet = static_cast<bool>(vulkan.terrainDepthSampler);
         seen.depthLayoutShaderRead = vulkan.terrainDepthImageLayout == vk::ImageLayout::eShaderReadOnlyOptimal;
-#elif MLN_RENDER_BACKEND_METAL
-        const auto& metal = static_cast<const style::mtl::CustomLayerRenderParameters&>(parameters);
-        seen.hasDepthTexture = metal.terrainDepthTexture != nullptr;
 #endif
     }
 
@@ -193,7 +206,6 @@ TEST(TerrainCustomLayer, ReceivesNoExaggerationOrDepthTextureWithoutTerrain) {
     EXPECT_FALSE(seen.hasDepthTexture);
 }
 
-#if MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN || MLN_RENDER_BACKEND_METAL
 TEST(TerrainCustomLayer, ReceivesTheTerrainDepthTexture) {
     const Seen seen = drawCustomLayer(true);
     ASSERT_GT(seen.draws, 0);
@@ -201,9 +213,17 @@ TEST(TerrainCustomLayer, ReceivesTheTerrainDepthTexture) {
 #if MLN_RENDER_BACKEND_OPENGL
     // The terrain covers most of the frame; only the sky above the horizon stays the far plane's white
     EXPECT_GT(seen.coveredPixels, static_cast<int>(frameSize * frameSize / 4));
-#elif MLN_RENDER_BACKEND_VULKAN
+#else
     EXPECT_TRUE(seen.depthSamplerSet);
     EXPECT_TRUE(seen.depthLayoutShaderRead);
 #endif
 }
-#endif
+
+// preRender() is given the same subclass, with the depth texture of the frame before
+TEST(TerrainCustomLayer, PreRenderReceivesTheTerrainDepthTexture) {
+    const Seen seen = drawCustomLayer(true);
+    ASSERT_GT(seen.preRenders, 0);
+    EXPECT_TRUE(seen.preRenderHasDepthTexture);
+}
+
+#endif // MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN

@@ -1886,7 +1886,7 @@ exaggeration (0 with terrain off), and the packed depth texture `RenderTerrain::
 before the main pass (null until it has drawn): `terrainDepthTexture` on the Metal parameters, the
 texture name on `style::gl::CustomLayerRenderParameters`, and the image view, sampler and layout on the
 Vulkan ones. iOS hands them over as `MLNStyleLayerDrawingContext.terrainExaggeration` and
-`MLNCustomStyleLayer.terrainDepthTexture`. WebGPU has no custom layers yet.
+`MLNCustomStyleLayer.terrainDepthTexture`. WebGPU has no custom layers yet, and the default layer manager registers them on OpenGL and Vulkan only.
 
 ## References
 

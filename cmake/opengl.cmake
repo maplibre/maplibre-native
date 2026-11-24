@@ -143,6 +143,7 @@ list(APPEND SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mln/gl/dynamic_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/gl/layer_group_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/gl/texture2d.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/style/layers/gl/custom_layer_render_parameters.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/gl/texture_2d_array.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/gl/texture_2d_array.hpp
         ${PROJECT_SOURCE_DIR}/src/mln/gl/uniform_buffer_gl.cpp
