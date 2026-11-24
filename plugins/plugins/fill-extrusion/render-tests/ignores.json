@@ -1,0 +1,7 @@
+{
+  "render-tests/fill-extrusion-color/global-state": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/fill-extrusion-color/global-state-with-get": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/fill-extrusion-pattern/global-state": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/projection/globe/fill-extrusion": "The plugin does not project onto the globe",
+  "render-tests/projection/globe/fill-extrusion-translate": "The plugin does not project onto the globe"
+}

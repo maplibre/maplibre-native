@@ -89,6 +89,7 @@ public:
                             bool inViewportPixelUnits) const;
 
     void setFeatureState(const LayerFeatureStates&);
+    uint64_t& featureStateVersion();
 
 private:
     Tile& tile;

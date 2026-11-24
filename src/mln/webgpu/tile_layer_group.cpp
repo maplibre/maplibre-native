@@ -131,7 +131,8 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
 
         if (features3d) {
-            const auto depth = (drawable.getEnableDepth() && depthMode3d) ? *depthMode3d : gfx::DepthMode::disabled();
+            auto depth = (drawable.getEnableDepth() && depthMode3d) ? *depthMode3d : gfx::DepthMode::disabled();
+            if (drawable.getEnableDepth() && drawable.getDepthMaskFor3D()) depth.mask = *drawable.getDepthMaskFor3D();
             const auto own = ownStencilModes.find(&drawable);
             if (own != ownStencilModes.end() && !ownStencilModesTaken) {
                 // A clear between two draws draws over the zoom 0 tile with buffers of its own.

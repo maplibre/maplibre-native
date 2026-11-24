@@ -125,7 +125,7 @@ public:
                                                          const gfx::VertexAttributeArray& overrides,
                                                          gfx::BufferUsageType,
                                                          const std::optional<std::chrono::duration<double>>&,
-                                                         std::shared_ptr<webgpu::VertexBufferResource>&) noexcept;
+                                                         std::shared_ptr<webgpu::VertexBufferResource>&);
 
 protected:
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType, Size) override;
@@ -148,8 +148,13 @@ private:
     gfx::ShaderProgramBasePtr clipMaskShader;
     const gfx::Renderable* clipMaskRenderable = nullptr;
     std::optional<std::size_t> clipMaskPipelineHash;
-    std::vector<BufferResource> clipMaskUniformBuffers;
-    std::vector<WGPUBindGroup> clipMaskActiveBindGroups;
+    // One uniform slot and bind group per tile, reused across frames
+    std::optional<BufferResource> clipMaskUniformBuffer;
+    std::vector<WGPUBindGroup> clipMaskBindGroups;
+    WGPUBindGroupLayout clipMaskBindGroupLayout = nullptr;
+    std::size_t clipMaskSlotsUsed = 0;
+
+    void releaseClipMaskBindGroups();
 
     struct GlobeClipMesh {
         BufferResource vertices;
@@ -159,6 +164,8 @@ private:
     gfx::ShaderProgramBasePtr globeClipMaskShader;
     std::optional<std::size_t> globeClipMaskPipelineHash;
     std::map<std::tuple<uint8_t, bool, bool, bool>, GlobeClipMesh> globeClipMeshes;
+    std::vector<BufferResource> globeClipMaskUniformBuffers;
+    std::vector<WGPUBindGroup> globeClipMaskActiveBindGroups;
 };
 
 } // namespace webgpu

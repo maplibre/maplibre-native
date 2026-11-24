@@ -1687,11 +1687,11 @@ void NativeMapView::onSpriteRequested(const std::optional<style::Sprite>& sprite
     });
 }
 
-void NativeMapView::onRenderError(std::exception_ptr) {
+void NativeMapView::onRenderError(std::exception_ptr error) {
     assert(vm != nullptr);
     withNativePeer(javaPeer, [&](auto& env, const jni::Class<NativeMapView>& cls, const auto& peer) {
-        static auto onRenderError = cls.GetMethod<void()>(env, "onRenderError");
-        peer.Call(env, onRenderError);
+        static auto onRenderError = cls.GetMethod<void(jni::String)>(env, "onRenderError");
+        peer.Call(env, onRenderError, jni::Make<jni::String>(env, util::toString(error)));
     });
 }
 

@@ -4,3 +4,5 @@
 **/actual.png
 **/diff.png
 **/actual.json
+**/__pycache__/
+/android/*/build/

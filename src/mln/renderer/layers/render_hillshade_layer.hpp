@@ -46,6 +46,7 @@ private:
 
     void addRenderTarget(const RenderTargetPtr&, UniqueChangeRequestVec&);
     void removeRenderTargets(UniqueChangeRequestVec&);
+    void releaseRenderedTargets(UniqueChangeRequestVec&);
 
     // Paint properties
     style::HillshadePaintProperties::Unevaluated unevaluated;
@@ -60,6 +61,7 @@ private:
 
     using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<HillshadeVertexVector> staticDataSharedVertices;
+    std::shared_ptr<gfx::IndexVector<gfx::Triangles>> staticDataSharedIndices;
     GlobeTileMeshCache<HillshadeLayoutVertex, decltype(&HillshadeBucket::layoutVertex)> globeMeshes;
 
     LayerTweakerPtr prepareLayerTweaker;

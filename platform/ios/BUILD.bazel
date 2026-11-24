@@ -361,7 +361,6 @@ sh_binary(
         "Integration_Test_Harness/Info.plist",
         "Integration_Tests/Info.plist",
         "app/Info.plist",
-        "bench_UITests/Info.plist",
         "framework/Info.plist",
         "framework/Info-static.plist",
         "//platform/ios/benchmark:Info.plist",

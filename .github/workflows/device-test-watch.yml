@@ -1,0 +1,34 @@
+name: device-test-watch
+
+on:
+  workflow_dispatch: # started by scripts/aws-device-farm/aws-device-farm-run.sh
+  schedule:
+    - cron: '23 * * * *' # in case a watcher failed
+
+concurrency: device-test-watch
+
+permissions:
+  actions: write          # needed to start device-test-finish
+  id-token: write         # needed for AWS
+
+jobs:
+  device-test-watch:
+    runs-on: ubuntu-26.04
+    if: github.repository_owner == 'maplibre'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+          role-duration-seconds: 14400
+
+      - run: ./scripts/aws-device-farm/watch-runs.sh
+        env:
+          AWS_DEVICE_FARM_PROJECT_ARN: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          GH_TOKEN: ${{ github.token }}

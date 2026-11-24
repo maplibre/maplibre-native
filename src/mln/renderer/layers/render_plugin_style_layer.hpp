@@ -7,6 +7,8 @@
 
 namespace mln {
 
+struct PluginLayerSnapshot;
+
 class RenderPluginStyleLayer final : public RenderLayer {
 public:
     explicit RenderPluginStyleLayer(Immutable<style::PluginStyleLayer::Impl>);
@@ -35,12 +37,13 @@ private:
                       const Immutable<style::Layer::Impl>&,
                       UniqueChangeRequestVec&) override;
     bool hasTransition() const override;
-    bool hasCrossfade() const override { return false; }
-    bool needsGlobeDepth() const override { return readWriteDepth; }
+    bool is3D() const override;
+    bool hasCrossfade() const override;
+    bool needsGlobeDepth() const override { return is3D() || readWriteDepth; }
 
     std::map<std::string, style::PluginTransitioningPropertyValue> transitioningPaintProperties;
     style::PluginPropertyMap evaluatedPluginProperties;
-    std::shared_ptr<const style::PluginPropertyMap> evaluatedPaintSnapshot;
+    std::shared_ptr<const PluginLayerSnapshot> propertiesSnapshot;
     std::map<std::string, gfx::ShaderGroupPtr> shaderGroups;
     /// True while the layer reports an active animation.
     bool animated = false;
