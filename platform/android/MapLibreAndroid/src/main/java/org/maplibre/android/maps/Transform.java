@@ -332,9 +332,9 @@ public class Transform implements MapView.OnCameraDidChangeListener {
     return nativeMap.getCenterAltitude();
   }
 
+  @UiThread
   void setFieldOfView(double degrees) {
-    nativeMap.setFieldOfView(degrees);
-    invalidateCameraPosition();
+    jumpCamera(() -> nativeMap.setFieldOfView(degrees));
   }
 
   double getFieldOfView() {
@@ -344,10 +344,26 @@ public class Transform implements MapView.OnCameraDidChangeListener {
   @UiThread
   void setCenterFromEye(@NonNull LatLng center, double centerAltitude, @NonNull LatLng eye,
                         double eyeAltitude) {
+    jumpCamera(() -> nativeMap.setCenterFromEye(center.getLatitude(), center.getLongitude(),
+      centerAltitude, eye.getLatitude(), eye.getLongitude(), eyeAltitude));
+  }
+
+  /**
+   * Runs a native camera jump and reports it as moveCamera does: the ongoing transitions are
+   * cancelled (a pending animateCamera or easeCamera callback gets onCancel), the move starts, the
+   * cached camera position is refreshed, and the camera goes idle. Nothing is reported when the
+   * jump leaves the camera as it was, as when the eye and the center are the same point.
+   */
+  @UiThread
+  private void jumpCamera(Runnable nativeJump) {
+    final CameraPosition before = nativeMap.getCameraPosition();
+    nativeJump.run();
+    final CameraPosition after = nativeMap.getCameraPosition();
+    if (after == null || after.equals(before)) {
+      return;
+    }
     cancelTransitions();
     cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
-    nativeMap.setCenterFromEye(center.getLatitude(), center.getLongitude(), centerAltitude,
-      eye.getLatitude(), eye.getLongitude(), eyeAltitude);
     invalidateCameraPosition();
     cameraChangeDispatcher.onCameraIdle();
   }

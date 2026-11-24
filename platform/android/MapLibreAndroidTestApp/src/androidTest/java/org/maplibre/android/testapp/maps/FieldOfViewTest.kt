@@ -192,4 +192,20 @@ class FieldOfViewTest : AppCenter() {
             assertEquals(85.0, position.tilt, 0.001)
         }
     }
+
+    @Test
+    fun testCameraFromAnEyeAtTheCenterLeavesTheCamera() {
+        onUiThread {
+            map.cameraPosition = CameraPosition.Builder()
+                .target(LatLng(38.7, -120.07)).zoom(12.0).tilt(30.0).bearing(10.0).build()
+            val before = map.cameraPosition
+            var moves = 0
+            map.addOnCameraMoveStartedListener { moves++ }
+
+            map.setCameraFromEye(LatLng(38.7, -120.07), 1000.0, LatLng(38.7, -120.07), 1000.0)
+
+            assertEquals(before, map.cameraPosition)
+            assertEquals(0, moves)
+        }
+    }
 }
