@@ -49,7 +49,7 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
         addGeometry(line, feature, canonical);
 
         if (intersectionRoundedCornerEnabled) {
-            for (uint i = 1; i < line.size(); i++) {
+            for (size_t i = 1; i < line.size(); i++) {
                 auto& point = line[i];
                 auto& prev = line[i - 1];
                 if (point == prev) {
@@ -83,7 +83,7 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
                 });
             [[maybe_unused]] auto maxCornerDistance = static_cast<uint32_t>(
                 util::dist<double>(cornerPoint, minInterator->first) / 2.0);
-            for (uint i = 0; i < neighbors.size(); i++) {
+            for (size_t i = 0; i < neighbors.size(); i++) {
                 auto nextIndex = (i + 1) % neighbors.size();
                 auto& prevPoint = neighbors[i].first;
                 auto& nextPoint = neighbors[nextIndex].first;
