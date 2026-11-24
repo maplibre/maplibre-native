@@ -312,6 +312,27 @@ MLN_EXPORT
        completionHandler:(nullable MLNOfflinePackAdditionCompletionHandler)completion;
 
 /**
+ Retrieves the offline pack with the given region identifier, as returned by
+ ``MLNOfflinePack/regionId``, from offline storage.
+
+ The pack passed to the completion handler is the same object that is in the
+ `packs` property; this method does not create a new pack.
+
+ If no pack has the given identifier, the completion handler is called with a
+ `nil` pack and a `nil` error. If the pack exists but the `packs` property has
+ not finished loading yet, the completion handler is called with a `nil` pack
+ and an error. Observe KVO change notifications on the `packs` key path to
+ detect when loading has finished.
+
+ @param regionId The identifier of the offline region associated with the pack.
+ @param completion The completion handler to call with the pack. This handler is
+    executed asynchronously on the main queue.
+ */
+- (void)getPackWithRegionId:(int64_t)regionId
+          completionHandler:(nullable void (^)(MLNOfflinePack *_Nullable pack,
+                                               NSError *_Nullable error))completion;
+
+/**
  Unregisters the given offline pack and allows resources that are no longer
  required by any remaining packs to be potentially freed.
 
