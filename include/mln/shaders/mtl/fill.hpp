@@ -150,7 +150,7 @@ union FillTilePropsUnionUBO {
     FillOutlinePatternTilePropsUBO fillOutlinePatternTilePropsUBO;
 };
 
-#if !defined(HAS_UNIFORM_u_neighbor_vertex) && !defined(HAS_UNIFORM_u_triangle_instance)
+#if !defined(HAS_UNIFORM_u_neighbor_vertex) && !defined(HAS_UNIFORM_u_triangle_indices)
 #define ROUNDED_CORNER_ENABLED
 #endif
 

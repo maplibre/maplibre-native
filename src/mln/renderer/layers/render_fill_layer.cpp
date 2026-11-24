@@ -47,7 +47,7 @@ constexpr auto FillOutlineTriangulatedShaderName = "FillOutlineTriangulatedShade
 #endif
 
 constexpr auto neighborVertexUniformName = "neighbor_vertex";
-constexpr auto triangleInstanceUniformName = "triangle_instance";
+constexpr auto triangleIndicesUniformName = "triangle_indices";
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == FillLayer::Impl::staticTypeInfo());
@@ -364,7 +364,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             instanceAttrs = context.createVertexAttributeArray();
-            if (const auto& attr = instanceAttrs->set(idFillTriangleInstanceAttribute)) {
+            if (const auto& attr = instanceAttrs->set(idFillTriangleIndicesAttribute)) {
                 attr->setSharedRawData(bucket.sharedTriangleInstances,
                                        offsetof(FillTriangleInstance, a1),
                                        /*vertexOffset=*/0,
@@ -375,8 +375,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             propertiesAsUniforms.first.emplace(neighborVertexUniformName);
             propertiesAsUniforms.second.emplace(idFillNeighborVertexAttribute);
 
-            propertiesAsUniforms.first.emplace(triangleInstanceUniformName);
-            propertiesAsUniforms.second.emplace(idFillTriangleInstanceAttribute);
+            propertiesAsUniforms.first.emplace(triangleIndicesUniformName);
+            propertiesAsUniforms.second.emplace(idFillTriangleIndicesAttribute);
         }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES

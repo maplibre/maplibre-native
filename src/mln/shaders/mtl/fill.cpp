@@ -21,7 +21,7 @@ const std::array<AttributeInfo, 4> FillShaderSource::attributes = {
 };
 const std::array<AttributeInfo, 1> FillShaderSource::instanceAttributes = {
     // Used only in rounded corners
-    AttributeInfo{4, gfx::AttributeDataType::UInt3, fillUBOCount + 3, idFillTriangleInstanceAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::UInt3, fillUBOCount + 3, idFillTriangleIndicesAttribute},
 };
 const std::array<TextureInfo, 0> FillShaderSource::textures = {};
 
@@ -58,7 +58,7 @@ const std::array<AttributeInfo, 6> FillPatternShaderSource::attributes = {
 };
 const std::array<AttributeInfo, 1> FillPatternShaderSource::instanceAttributes = {
     // Used only in rounded corners
-    AttributeInfo{6, gfx::AttributeDataType::UInt3, fillUBOCount + 3, idFillTriangleInstanceAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::UInt3, fillUBOCount + 3, idFillTriangleIndicesAttribute},
 };
 const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {
     TextureInfo{0, idFillImageTexture},
