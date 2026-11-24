@@ -40,7 +40,7 @@ public:
     float getQueryRadius(const RenderLayer&) const override;
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
-    
+
     bool isIntersectionRoundedCornerEnabled() const { return intersectionRoundedCornerEnabled; }
 
     /*
@@ -73,13 +73,16 @@ public:
                     static_cast<uint8_t>(((dir == 0 ? 0 : (dir < 0 ? -1 : 1)) + 1) | ((linesofar & 0x3F) << 2)),
                     static_cast<uint8_t>(linesofar >> 6)}}};
     }
-    static LineTriangleInstance triangleInstance(Point<int16_t> prevPoint, Point<int16_t> cornerPoint, Point<int16_t> nextPoint, uint32_t prevDataIndex, uint32_t nextDataIndex) {
+    static LineTriangleInstance triangleInstance(Point<int16_t> prevPoint,
+                                                 Point<int16_t> cornerPoint,
+                                                 Point<int16_t> nextPoint,
+                                                 uint32_t prevDataIndex,
+                                                 uint32_t nextDataIndex) {
         return LineTriangleInstance{
             {{(static_cast<uint32_t>(prevPoint.x) << 16) | (static_cast<uint16_t>(prevPoint.y)),
-            (static_cast<uint32_t>(cornerPoint.x) << 16) | (static_cast<uint16_t>(cornerPoint.y)),
-            (static_cast<uint32_t>(nextPoint.x) << 16) | (static_cast<uint16_t>(nextPoint.y))}},
-            {{prevDataIndex, nextDataIndex}}
-        };
+              (static_cast<uint32_t>(cornerPoint.x) << 16) | (static_cast<uint16_t>(cornerPoint.y)),
+              (static_cast<uint32_t>(nextPoint.x) << 16) | (static_cast<uint16_t>(nextPoint.y))}},
+            {{prevDataIndex, nextDataIndex}}};
     }
 
     /*
@@ -102,14 +105,14 @@ public:
     TriangleIndexVector& triangles = *sharedTriangles;
 
     SegmentVector segments;
-    
+
     using TriangleInstanceVector = gfx::VertexVector<LineTriangleInstance>;
     const std::shared_ptr<TriangleInstanceVector> sharedTriangleInstances = std::make_shared<TriangleInstanceVector>();
     TriangleInstanceVector& triangleInstances = *sharedTriangleInstances;
-    
+
     const std::shared_ptr<TriangleIndexVector> sharedIntersectionTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& intersectionTriangles = *sharedIntersectionTriangles;
-    
+
     SegmentVector intersectionSegments;
 
     std::map<std::string, LineBinders> paintPropertyBinders;
@@ -120,11 +123,11 @@ private:
     const float zoom;
     const uint32_t overscaling;
     int count = 0;
-    
+
     struct CoordinateHasher {
         size_t operator()(const GeometryCoordinate& coord) const { return util::hash(coord.x, coord.y); }
     };
-    
+
     using CoordIndexPair = std::pair<GeometryCoordinate, uint32_t>;
     std::unordered_map<GeometryCoordinate, std::vector<CoordIndexPair>, CoordinateHasher> neighborsMap;
     bool intersectionRoundedCornerEnabled = false;

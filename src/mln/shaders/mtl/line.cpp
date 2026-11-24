@@ -30,7 +30,7 @@ using LineIntersectionShaderSource = ShaderSource<BuiltIn::LineIntersectionShade
 
 const std::array<AttributeInfo, 7> LineIntersectionShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, lineUBOCount + 0, idLinePosNormalVertexAttribute},
-    
+
     // Data driven
     AttributeInfo{1, gfx::AttributeDataType::Float4, lineUBOCount + 1, idLineColorVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Float2, lineUBOCount + 1, idLineBlurVertexAttribute},

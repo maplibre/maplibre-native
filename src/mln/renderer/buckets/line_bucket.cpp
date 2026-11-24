@@ -22,7 +22,8 @@ LineBucket::LineBucket(LineBucket::PossiblyEvaluatedLayoutProperties layout_,
     for (const auto& pair : layerPaintProperties) {
         const auto& lineProps = static_cast<const LineLayerProperties&>(*pair.second);
 #if MLN_USE_LINE_INTERSECTION_ROUNDED_CORNER
-        const auto& intersectionRoundedCornerProperty = lineProps.layerImpl().paint.get<LineIntersectionRoundedCornerDistance>().value;
+        const auto& intersectionRoundedCornerProperty =
+            lineProps.layerImpl().paint.get<LineIntersectionRoundedCornerDistance>().value;
         intersectionRoundedCornerEnabled |= !intersectionRoundedCornerProperty.isUndefined();
 #endif
         paintPropertyBinders.emplace(std::piecewise_construct,
@@ -46,9 +47,9 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
 
     for (auto& line : geometryCollection) {
         addGeometry(line, feature, canonical);
-        
+
         if (intersectionRoundedCornerEnabled) {
-            for(uint i = 1; i < line.size(); i++) {
+            for (uint i = 1; i < line.size(); i++) {
                 auto& point = line[i];
                 auto& prev = line[i - 1];
                 if (point == prev) {
@@ -72,31 +73,34 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
                 continue;
             }
             auto& cornerPoint = pair.first;
-            std::sort(neighbors.begin(), neighbors.end(), [cornerPoint](const CoordIndexPair& a, const CoordIndexPair& b) {
-                return util::angle_to(cornerPoint, a.first) > util::angle_to(cornerPoint, b.first);
-            });
-            auto minInterator = std::min_element(neighbors.begin(), neighbors.end(), [cornerPoint](const CoordIndexPair& a, const CoordIndexPair& b) {
-                return util::distSqr<float>(cornerPoint, a.first) > util::distSqr<float>(cornerPoint, b.first);
-            });
+            std::sort(
+                neighbors.begin(), neighbors.end(), [cornerPoint](const CoordIndexPair& a, const CoordIndexPair& b) {
+                    return util::angle_to(cornerPoint, a.first) > util::angle_to(cornerPoint, b.first);
+                });
+            auto minInterator = std::min_element(
+                neighbors.begin(), neighbors.end(), [cornerPoint](const CoordIndexPair& a, const CoordIndexPair& b) {
+                    return util::distSqr<float>(cornerPoint, a.first) > util::distSqr<float>(cornerPoint, b.first);
+                });
             auto maxCornerDistance = static_cast<uint32_t>(util::dist<double>(cornerPoint, minInterator->first) / 2.0);
             for (uint i = 0; i < neighbors.size(); i++) {
                 auto nextIndex = (i + 1) % neighbors.size();
                 auto& prevPoint = neighbors[i].first;
                 auto& nextPoint = neighbors[nextIndex].first;
-                
+
                 auto angle = abs(util::rad2deg(util::angle_between(prevPoint - cornerPoint, nextPoint - cornerPoint)));
                 if (angle > 170.0 && angle < 190.0) {
                     continue;
                 }
                 auto& prevDataIndex = neighbors[i].second;
                 auto& nextDataIndex = neighbors[nextIndex].second;
-                
-                triangleInstances.emplace_back(triangleInstance(prevPoint, cornerPoint, nextPoint, prevDataIndex, nextDataIndex));
-                intersectionSegments.back().instanceCount ++;
+
+                triangleInstances.emplace_back(
+                    triangleInstance(prevPoint, cornerPoint, nextPoint, prevDataIndex, nextDataIndex));
+                intersectionSegments.back().instanceCount++;
             }
         }
     }
-        
+
     if (retainFeaturesById) {
         if (const auto vertexCount = vertices.elements() - vertexOffset; vertexCount > 0) {
             retainFeature(feature, vertexOffset, vertexCount);
