@@ -290,28 +290,26 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    // The DEM pixels only change when a tile (re)loads - which brings a new bucket - or when
-    // a neighbour backfills the border, which clears this cache. Uploading per frame instead
-    // re-sent the whole image for every visible tile, every frame; hillshade and terrain both
-    // already guard their upload of this same image.
-    const auto demTextureFor = [&](HillshadeBucket& demBucket) -> std::shared_ptr<gfx::Texture2D> {
-        if (demBucket.colorReliefDEMTexture) {
-            return demBucket.colorReliefDEMTexture;
+    std::unique_ptr<gfx::DrawableBuilder> builder;
+
+    // The bucket remembers its DEM texture weakly: the tile's drawables own it, so it is shared by the layers
+    // that draw the tile and freed with the drawables, while the bucket stays in the tile cache.
+    const auto getDEMTexture = [&](HillshadeBucket& bucket) -> std::shared_ptr<gfx::Texture2D> {
+        if (auto demTexture = bucket.demTexture.lock()) {
+            return demTexture;
         }
-        const auto& demImagePtr = demBucket.getDEMData().getImagePtr();
+        auto demImagePtr = bucket.getDEMData().getImagePtr();
         if (!demImagePtr || !demImagePtr->valid()) {
             return nullptr;
         }
-        auto texture = context.createTexture2D();
-        texture->setImage(demImagePtr);
-        texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
-                                          .wrapU = gfx::TextureWrapType::Clamp,
-                                          .wrapV = gfx::TextureWrapType::Clamp});
-        demBucket.colorReliefDEMTexture = std::move(texture);
-        return demBucket.colorReliefDEMTexture;
+        auto demTexture = context.createTexture2D();
+        demTexture->setImage(std::move(demImagePtr));
+        demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                             .wrapU = gfx::TextureWrapType::Clamp,
+                                             .wrapV = gfx::TextureWrapType::Clamp});
+        bucket.demTexture = demTexture;
+        return demTexture;
     };
-
-    std::unique_ptr<gfx::DrawableBuilder> builder;
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -385,11 +383,11 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                             segments->size());
 
             // Update textures
-            auto demTexture = demTextureFor(bucket);
+            const auto demTexture = getDEMTexture(bucket);
             if (!demTexture) {
                 return false;
             }
-            drawable.setTexture(std::move(demTexture), idColorReliefImageTexture);
+            drawable.setTexture(demTexture, idColorReliefImageTexture);
 
             if (elevationStopsTexture) {
                 drawable.setTexture(elevationStopsTexture, idColorReliefElevationStopsTexture);
@@ -415,7 +413,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         builder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
 
         // Bind DEM texture
-        auto demTexture = demTextureFor(bucket);
+        const auto demTexture = getDEMTexture(bucket);
         if (!demTexture) {
             mln::Log::Warning(mln::Event::Render, "ColorRelief: DEM image not valid for tile");
             continue; // Skip this tile if DEM data is not ready
@@ -423,7 +421,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto& demData = bucket.getDEMData();
 
-        builder->setTexture(std::move(demTexture), idColorReliefImageTexture);
+        builder->setTexture(demTexture, idColorReliefImageTexture);
 
         // Bind color ramp textures
         if (elevationStopsTexture) {
