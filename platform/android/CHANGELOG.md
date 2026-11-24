@@ -3,12 +3,15 @@
 ## main
 
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
+- Make `LocationIndicatorLayer` and `LocationPropertyFactory` public, so apps can add and style a location indicator layer themselves instead of only through `LocationComponent` ([#5026](https://github.com/maplibre/maplibre-native/pull/5026)).
 - Support `oklch()` colors and the `interpolate-oklch` expression. There is no `Expression` builder for `interpolate-oklch` yet; use it in style JSON or with `Expression.raw()` ([#4970](https://github.com/maplibre/maplibre-native/pull/4970)).
 - Support `oklab()` colors and the `interpolate-oklab` expression. There is no `Expression` builder for `interpolate-oklab` yet; use it in style JSON or with `Expression.raw()` ([#5000](https://github.com/maplibre/maplibre-native/pull/5000)).
 
 ### 🐞 Bug fixes
 
 - `raster` and `raster-dem` sources loaded from a `url` take the style's inline `minzoom` and `maxzoom` over the TileJSON's, as `vector` sources and maplibre-gl-js already do. A `raster-dem` source with an invalid `encoding`, `minzoom` or `maxzoom`, or a `raster` source with an invalid `minzoom` or `maxzoom`, is now rejected with an error, as a `vector` source is. Before, such a `raster-dem` source still loaded, decoded as Mapbox whatever its `encoding` ([#4557](https://github.com/maplibre/maplibre-native/pull/4557)).
+- Color property getters return whole-number channels, as MapLibre GL JS prints colors: a color set to `rgba(240,245,255,1)` reads back as set instead of `rgba(240.00001525878906,245.00001525878906,255,1)` ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
+- Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).
 
 ## 13.7.1
 
