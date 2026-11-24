@@ -171,7 +171,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .width = evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
             .floorwidth = evaluated.get<LineFloorWidth>().constantOr(LineFloorWidth::defaultValue()),
             .expressionMask = expressionMask,
-            .pad1 = 0};
+            .intersection_rounded_corner_distance = evaluated.get<LineIntersectionRoundedCornerDistance>()};
 #else
         const LineEvaluatedPropsUBO propsUBO{.color = evaluate<LineColor>(parameters),
                                              .blur = evaluate<LineBlur>(parameters),
@@ -181,7 +181,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                                              .width = evaluate<LineWidth>(parameters),
                                              .floorwidth = evaluate<LineFloorWidth>(parameters),
                                              .expressionMask = LineExpressionMask::None,
-                                             .pad1 = 0};
+                                             .intersection_rounded_corner_distance = evaluated.get<LineIntersectionRoundedCornerDistance>()};
 #endif // MLN_RENDER_BACKEND_METAL
 
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
