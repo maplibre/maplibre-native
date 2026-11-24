@@ -12,6 +12,10 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL> {
 layout (location = 1) in vec2 a_decimals_ed;
 layout (location = 2) in vec2 a_normal2d;
 out vec4 v_color;
+// Height of walls above the ground in meters, for the ambient occlusion. Negative on roofs.
+out highp float v_wall_z;
+// The lit color without the ambient part of the lighting, for the ambient occlusion
+out vec3 v_color_without_ambient;
 
 layout (std140) uniform FillExtrusionDrawableUBO {
     highp mat4 u_matrix;
@@ -39,7 +43,7 @@ layout (std140) uniform FillExtrusionTilePropsUBO {
 layout (std140) uniform FillExtrusionPropsUBO {
     highp vec4 u_color;
     highp vec3 u_lightcolor;
-    lowp float props_pad1;
+    highp float u_ambient_occlusion_wall_intensity;
     highp vec3 u_lightpos;
     highp float u_base;
     highp float u_height;
@@ -49,7 +53,7 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad2;
+    highp float u_ambient_occlusion_wall_radius;
 };
 
 #ifndef HAS_UNIFORM_u_base
@@ -89,6 +93,7 @@ highp vec4 color = u_color;
     vec2 decimals = unpack_float(floor(a_decimals_ed.x / 2.0)) / 128.0;
 
     gl_Position = u_matrix * vec4(a_pos + decimals, z, 1);
+    v_wall_z = normal.z == 0.0 ? z : -1.0;
 
     // Relative luminance (how dark/bright is the surface color?)
     float colorvalue = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
@@ -109,13 +114,15 @@ highp vec4 color = u_color;
     directional = mix((1.0 - u_lightintensity), max((1.0 - colorvalue + u_lightintensity), 1.0), directional);
 
     // Add gradient along z axis of side surfaces
+    float gradient = 1.0;
     if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
         // and otherwise calculates the gradient based on base + height
         float fMin = mix(0.7, 0.98, 1.0 - u_lightintensity);
         float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - u_vertical_gradient) + (u_vertical_gradient * factor);
+        gradient = (1.0 - u_vertical_gradient) + (u_vertical_gradient * factor);
     }
+    directional *= gradient;
 
     // Assign final color based on surface + ambient light color, diffuse light directional, and light color
     // with lower bounds adjusted to hue of light
@@ -124,12 +131,46 @@ highp vec4 color = u_color;
     v_color.g += clamp(color.g * directional * u_lightcolor.g, mix(0.0, 0.3, 1.0 - u_lightcolor.g), 1.0);
     v_color.b += clamp(color.b * directional * u_lightcolor.b, mix(0.0, 0.3, 1.0 - u_lightcolor.b), 1.0);
     v_color *= u_opacity;
+
+    // The same without the ambient part of the lighting, 1 - u_lightintensity, which the ambient occlusion takes away
+    float directionalWithoutAmbient = directional - (1.0 - u_lightintensity) * gradient;
+    v_color_without_ambient = clamp(color.rgb * directionalWithoutAmbient * u_lightcolor, mix(vec3(0.0), vec3(0.3), 1.0 - u_lightcolor), vec3(1.0)) * u_opacity;
 }
 )";
     static constexpr const char* fragment = R"(in vec4 v_color;
+in highp float v_wall_z;
+in vec3 v_color_without_ambient;
+
+layout (std140) uniform FillExtrusionPropsUBO {
+    highp vec4 u_color;
+    highp vec3 u_lightcolor;
+    highp float u_ambient_occlusion_wall_intensity;
+    highp vec3 u_lightpos;
+    highp float u_base;
+    highp float u_height;
+    highp float u_lightintensity;
+    highp float u_vertical_gradient;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_from_scale;
+    highp float u_to_scale;
+    highp float u_ambient_occlusion_wall_radius;
+};
+
+// Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
+// 0 leaves the color as is. (1 - s)^1.5, with s the height over the radius, follows the share of the rays that hit
+// the ground within the radius. Roofs are left alone.
+highp float wallAmbientOcclusion(highp float z) {
+    if (z < 0.0 || u_ambient_occlusion_wall_intensity <= 0.0 || u_ambient_occlusion_wall_radius <= 0.0) {
+        return 0.0;
+    }
+    highp float s = clamp(z / u_ambient_occlusion_wall_radius, 0.0, 1.0);
+    return u_ambient_occlusion_wall_intensity * (1.0 - s) * sqrt(1.0 - s);
+}
 
 void main() {
-    fragColor = v_color;
+    // Take ambient light away from the bottom of the walls. Both colors are premultiplied.
+    fragColor = vec4(mix(v_color.rgb, v_color_without_ambient, wallAmbientOcclusion(v_wall_z)), v_color.a);
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

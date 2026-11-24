@@ -259,6 +259,150 @@ jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionVerticalGradient(j
         *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionVerticalGradient()));
 }
 
+jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallIntensity(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(
+            env, style::FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionWallIntensity()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(
+        env, toFillExtrusionLayer(*layer).getFillExtrusionAmbientOcclusionWallIntensity()));
+}
+
+jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallIntensityTransition(
+    jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
+    }
+    mln::style::TransitionOptions options =
+        toFillExtrusionLayer(*layer).getFillExtrusionAmbientOcclusionWallIntensityTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionWallIntensityTransition(jni::JNIEnv&,
+                                                                                 jlong duration,
+                                                                                 jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
+    toFillExtrusionLayer(*layer).setFillExtrusionAmbientOcclusionWallIntensityTransition(options);
+}
+
+jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallRadius(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(
+            env, style::FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionWallRadius()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(
+        env, toFillExtrusionLayer(*layer).getFillExtrusionAmbientOcclusionWallRadius()));
+}
+
+jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallRadiusTransition(
+    jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
+    }
+    mln::style::TransitionOptions options =
+        toFillExtrusionLayer(*layer).getFillExtrusionAmbientOcclusionWallRadiusTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionWallRadiusTransition(jni::JNIEnv&,
+                                                                              jlong duration,
+                                                                              jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
+    toFillExtrusionLayer(*layer).setFillExtrusionAmbientOcclusionWallRadiusTransition(options);
+}
+
+jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundIntensity(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(
+            env, style::FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionGroundIntensity()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(
+        env, toFillExtrusionLayer(*layer).getFillExtrusionAmbientOcclusionGroundIntensity()));
+}
+
+jni::Local<jni::Object<TransitionOptions>>
+FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundIntensityTransition(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
+    }
+    mln::style::TransitionOptions options =
+        toFillExtrusionLayer(*layer).getFillExtrusionAmbientOcclusionGroundIntensityTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionGroundIntensityTransition(jni::JNIEnv&,
+                                                                                   jlong duration,
+                                                                                   jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
+    toFillExtrusionLayer(*layer).setFillExtrusionAmbientOcclusionGroundIntensityTransition(options);
+}
+
+jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundRadius(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(
+            env, style::FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionGroundRadius()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(
+        env, toFillExtrusionLayer(*layer).getFillExtrusionAmbientOcclusionGroundRadius()));
+}
+
+jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundRadiusTransition(
+    jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
+    }
+    mln::style::TransitionOptions options =
+        toFillExtrusionLayer(*layer).getFillExtrusionAmbientOcclusionGroundRadiusTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionGroundRadiusTransition(jni::JNIEnv&,
+                                                                                jlong duration,
+                                                                                jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
+    toFillExtrusionLayer(*layer).setFillExtrusionAmbientOcclusionGroundRadiusTransition(options);
+}
+
 // FillExtrusionJavaLayerPeerFactory
 
 FillExtrusionJavaLayerPeerFactory::~FillExtrusionJavaLayerPeerFactory() = default;
@@ -320,7 +464,31 @@ void FillExtrusionJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&FillExtrusionLayer::getFillExtrusionBaseTransition, "nativeGetFillExtrusionBaseTransition"),
         METHOD(&FillExtrusionLayer::setFillExtrusionBaseTransition, "nativeSetFillExtrusionBaseTransition"),
         METHOD(&FillExtrusionLayer::getFillExtrusionBase, "nativeGetFillExtrusionBase"),
-        METHOD(&FillExtrusionLayer::getFillExtrusionVerticalGradient, "nativeGetFillExtrusionVerticalGradient"));
+        METHOD(&FillExtrusionLayer::getFillExtrusionVerticalGradient, "nativeGetFillExtrusionVerticalGradient"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallIntensityTransition,
+               "nativeGetFillExtrusionAmbientOcclusionWallIntensityTransition"),
+        METHOD(&FillExtrusionLayer::setFillExtrusionAmbientOcclusionWallIntensityTransition,
+               "nativeSetFillExtrusionAmbientOcclusionWallIntensityTransition"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallIntensity,
+               "nativeGetFillExtrusionAmbientOcclusionWallIntensity"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallRadiusTransition,
+               "nativeGetFillExtrusionAmbientOcclusionWallRadiusTransition"),
+        METHOD(&FillExtrusionLayer::setFillExtrusionAmbientOcclusionWallRadiusTransition,
+               "nativeSetFillExtrusionAmbientOcclusionWallRadiusTransition"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallRadius,
+               "nativeGetFillExtrusionAmbientOcclusionWallRadius"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundIntensityTransition,
+               "nativeGetFillExtrusionAmbientOcclusionGroundIntensityTransition"),
+        METHOD(&FillExtrusionLayer::setFillExtrusionAmbientOcclusionGroundIntensityTransition,
+               "nativeSetFillExtrusionAmbientOcclusionGroundIntensityTransition"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundIntensity,
+               "nativeGetFillExtrusionAmbientOcclusionGroundIntensity"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundRadiusTransition,
+               "nativeGetFillExtrusionAmbientOcclusionGroundRadiusTransition"),
+        METHOD(&FillExtrusionLayer::setFillExtrusionAmbientOcclusionGroundRadiusTransition,
+               "nativeSetFillExtrusionAmbientOcclusionGroundRadiusTransition"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundRadius,
+               "nativeGetFillExtrusionAmbientOcclusionGroundRadius"));
 }
 
 } // namespace android

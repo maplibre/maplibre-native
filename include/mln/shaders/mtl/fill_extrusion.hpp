@@ -56,10 +56,22 @@ struct alignas(16) FillExtrusionPropsUBO {
     /* 64 */ float fade;
     /* 68 */ float from_scale;
     /* 72 */ float to_scale;
-    /* 76 */ float pad2;
+    /* 76 */ float ambient_occlusion_wall_radius;
     /* 80 */
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "wrong size");
+
+// `light_color_pad.w` holds fill-extrusion-ambient-occlusion-wall-intensity.
+
+/// Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
+/// 0 leaves the color as is.
+float wallAmbientOcclusion(float z, device const FillExtrusionPropsUBO& props) {
+    const float intensity = props.light_color_pad.w;
+    if (intensity <= 0.0 || props.ambient_occlusion_wall_radius <= 0.0) {
+        return 0.0;
+    }
+    return intensity * ambientOcclusionFalloff(z / props.ambient_occlusion_wall_radius);
+}
 
 )";
 
@@ -109,12 +121,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    const auto base   = max(props.light_position_base.w, 0.0);
 #else
     const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    const auto height = max(props.height, 0.0);
 #else
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
@@ -221,6 +233,10 @@ struct OutlineInstance {
 struct FragmentStage {
     float4 position [[position, invariant]];
     half4 color;
+    // Height above the ground in meters, and the color without the ambient part of the lighting, for the
+    // ambient occlusion
+    float z;
+    half3 colorWithoutAmbient;
 };
 
 struct FragmentOutput {
@@ -240,18 +256,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         return {
             .position = float4(0.0),
             .color    = half4(0.0),
+            .z        = 0.0,
+            .colorWithoutAmbient = half3(0.0),
         };
     }
 
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    const auto base   = max(props.light_position_base.w, 0.0);
 #else
     const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    const auto height = max(props.height, 0.0);
 #else
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
@@ -270,6 +288,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position = position,
         .color    = half4(1.0),
+        .z        = z,
+        .colorWithoutAmbient = half3(1.0),
     };
 #endif
 
@@ -297,6 +317,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float directional = mix(minDirectional, maxDirectional, directionalFraction);
 
     // Add gradient along z axis of side surfaces
+    float gradient = 1.0;
     if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no
         // vertical gradient, and otherwise calculates the gradient based on base + height
@@ -304,8 +325,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         //       the square root when height is a uniform.
         const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        gradient = (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
     }
+    directional *= gradient;
 
     // Assign final color based on surface + ambient light color, diffuse light directional,
     // and light color with lower bounds adjusted to hue of light so that shading is tinted
@@ -314,14 +336,26 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float3 minLight = mix(0.0, 0.3, 1.0 - light_color.rgb);
     vcolor += float4(clamp(color.rgb * directional * light_color.rgb, minLight, 1.0), 0.0);
 
+    // The same without the ambient part of the lighting, 1 - light_intensity, which the ambient occlusion takes away
+    const float directionalWithoutAmbient = directional - (1.0 - props.light_intensity) * gradient;
+    const float3 colorWithoutAmbient = clamp(color.rgb * directionalWithoutAmbient * light_color.rgb, minLight, 1.0);
+
     return {
         .position = position,
         .color    = half4(vcolor * props.opacity),
+        .z        = z,
+        .colorWithoutAmbient = half3(colorWithoutAmbient * props.opacity),
     };
 }
 
-fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]]) {
-    return { in.color/*, in.position.z*/ };
+fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
+                                     device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]]) {
+#if defined(OVERDRAW_INSPECTOR)
+    return { half4(1.0) };
+#endif
+    // Take ambient light away from the bottom of the walls. Both colors are premultiplied.
+    const half occlusion = half(wallAmbientOcclusion(in.z, props));
+    return { half4(mix(in.color.rgb, in.colorWithoutAmbient, occlusion), in.color.a)/*, in.position.z*/ };
 }
 )";
 };
@@ -387,12 +421,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillExtrusionTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    const auto base   = max(props.light_position_base.w, 0.0);
 #else
     const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    const auto height = max(props.height, 0.0);
 #else
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
@@ -553,6 +587,9 @@ struct FragmentStage {
     float4 lighting;
     float2 pos_a;
     float2 pos_b;
+    // Height above the ground in meters, and the lighting without its ambient part, for the ambient occlusion
+    float z;
+    float3 lightingWithoutAmbient;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
     half4 pattern_from;
@@ -583,6 +620,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             .lighting       = float4(0.0),
             .pos_a          = float2(0.0),
             .pos_b          = float2(0.0),
+            .z              = 0.0,
+            .lightingWithoutAmbient = float3(0.0),
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
             .pattern_from   = half4(0.0),
@@ -597,12 +636,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillExtrusionTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    const auto base   = max(props.light_position_base.w, 0.0);
 #else
     const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    const auto height = max(props.height, 0.0);
 #else
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
@@ -624,6 +663,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .lighting       = float4(1.0),
         .pos_a          = float2(1.0),
         .pos_b          = float2(1.0),
+        .z              = z,
+        .lightingWithoutAmbient = float3(1.0),
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(1.0),
@@ -664,6 +705,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
+    float gradient = 1.0;
     if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
         // and otherwise calculates the gradient based on base + height
@@ -671,17 +713,25 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         //       the square root when height is a uniform.
         const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        gradient = (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
     }
+    directional *= gradient;
 
-    lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(float3(0.0), float3(0.3), 1.0 - props.light_color_pad.rgb), float3(1.0));
+    const float3 minLight = mix(float3(0.0), float3(0.3), 1.0 - props.light_color_pad.rgb);
+    lighting.rgb += clamp(directional * props.light_color_pad.rgb, minLight, float3(1.0));
     lighting *= props.opacity;
+
+    // The same without the ambient part of the lighting, 1 - light_intensity, which the ambient occlusion takes away
+    const float directionalWithoutAmbient = directional - (1.0 - props.light_intensity) * gradient;
+    const float3 lightingWithoutAmbient = clamp(directionalWithoutAmbient * props.light_color_pad.rgb, minLight, float3(1.0));
 
     return {
         .position       = position,
         .lighting       = lighting,
         .pos_a          = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, pos),
         .pos_b          = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos),
+        .z              = z,
+        .lightingWithoutAmbient = lightingWithoutAmbient * props.opacity,
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),
@@ -728,7 +778,10 @@ fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
     const float2 pos2 = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
     const float4 color2 = image0.sample(image0_sampler, pos2);
 
-    return {half4(mix(color1, color2, props.fade) * in.lighting)/*, in.position.z*/};
+    // Take ambient light away from the bottom of the walls. Both are premultiplied.
+    const float occlusion = wallAmbientOcclusion(in.z, props);
+    const float4 lighting = float4(mix(in.lighting.rgb, in.lightingWithoutAmbient, occlusion), in.lighting.a);
+    return {half4(mix(color1, color2, props.fade) * lighting)/*, in.position.z*/};
 }
 )";
 };

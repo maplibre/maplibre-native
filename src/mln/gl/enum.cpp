@@ -35,6 +35,10 @@ gfx::ColorBlendEquationType Enum<gfx::ColorBlendEquationType>::from(const platfo
             return gfx::ColorBlendEquationType::Subtract;
         case GL_FUNC_REVERSE_SUBTRACT:
             return gfx::ColorBlendEquationType::ReverseSubtract;
+        case GL_MIN:
+            return gfx::ColorBlendEquationType::Min;
+        case GL_MAX:
+            return gfx::ColorBlendEquationType::Max;
         default:
             return {};
     }
@@ -49,6 +53,10 @@ platform::GLenum Enum<gfx::ColorBlendEquationType>::to(const gfx::ColorBlendEqua
             return GL_FUNC_SUBTRACT;
         case gfx::ColorBlendEquationType::ReverseSubtract:
             return GL_FUNC_REVERSE_SUBTRACT;
+        case gfx::ColorBlendEquationType::Min:
+            return GL_MIN;
+        case gfx::ColorBlendEquationType::Max:
+            return GL_MAX;
     }
     return GL_INVALID_ENUM;
 }

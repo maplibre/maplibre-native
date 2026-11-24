@@ -88,7 +88,8 @@ public:
 
     gfx::ShaderRegistry& shaders;
 
-    gfx::DepthMode depthModeForSublayer(uint8_t n, gfx::DepthMaskType) const;
+    /// Depth is off for the 2D layers above the lowest 3D layer (`opaquePassCutoff`), unless `aboveCutoff`
+    gfx::DepthMode depthModeForSublayer(uint8_t n, gfx::DepthMaskType, bool aboveCutoff = false) const;
     gfx::DepthMode depthModeFor3D() const;
     gfx::ColorMode colorModeForRenderPass() const;
 

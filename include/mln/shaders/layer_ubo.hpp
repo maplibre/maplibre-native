@@ -73,6 +73,10 @@ enum {
 #define MLN_UBO_CONSOLIDATION (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN || MLN_RENDER_BACKEND_WEBGPU)
 #define MLN_USE_FILL_EXTRUSION_INSTANCING (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN)
 #define MLN_USE_SYMBOL_INSTANCING (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN)
+/// The fill-extrusion ground ambient occlusion draws one instanced quad per outline edge: from the bucket's outline
+/// where fill-extrusions are instanced, and from the vertices of the bucket's mesh on WebGPU. The OpenGL backend has no
+/// instancing, so it leaves the ground as is.
+#define MLN_USE_FILL_EXTRUSION_GROUND_OCCLUSION (MLN_USE_FILL_EXTRUSION_INSTANCING || MLN_RENDER_BACKEND_WEBGPU)
 
 } // namespace shaders
 } // namespace mln

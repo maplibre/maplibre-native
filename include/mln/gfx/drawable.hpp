@@ -161,6 +161,13 @@ public:
     /// Set depth type
     virtual void setDepthType(DepthMaskType value) { depthType = value; }
 
+    /// Whether a 2D drawable is depth tested in a layer above the lowest 3D layer, where 2D drawables are otherwise
+    /// drawn without depth, over the buildings. For one that has to be hidden behind them, like the ground under them.
+    bool getDepthTestAbove3D() const { return depthTestAbove3D; }
+
+    /// Set whether a 2D drawable is depth tested in a layer above the lowest 3D layer
+    virtual void setDepthTestAbove3D(bool value) { depthTestAbove3D = value; }
+
     /// Uses 3D depth mode
     bool getIs3D() const { return is3D; }
 
@@ -288,6 +295,7 @@ protected:
     bool enableStencil = false;
     bool enableDepth = true;
     bool is3D = false;
+    bool depthTestAbove3D = false;
     bool isCustom = false;
     std::string name;
     const util::SimpleIdentity uniqueID;

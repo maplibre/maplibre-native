@@ -1,0 +1,98 @@
+{
+  "version": 8,
+  "metadata": {"test": {"width": 512, "height": 256}},
+  "center": [0.0, 0.0],
+  "zoom": 17.2,
+  "pitch": 30,
+  "bearing": 0,
+  "transition": {"duration": 0},
+  "sources": {
+    "buildings": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {"group": "left-a"},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [[-0.0009, -0.00015], [-0.0009, 0.00015], [-0.0006, 0.00015], [-0.0006, -0.00015], [-0.0009, -0.00015]]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {"group": "left-b"},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [[-0.00045, -0.00015], [-0.00045, 0.00015], [-0.00015, 0.00015], [-0.00015, -0.00015], [-0.00045, -0.00015]]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {"group": "right"},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [[0.00015, -0.00015], [0.00015, 0.00015], [0.00045, 0.00015], [0.00045, -0.00015], [0.00015, -0.00015]]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {"group": "right"},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [[0.0006, -0.00015], [0.0006, 0.00015], [0.0009, 0.00015], [0.0009, -0.00015], [0.0006, -0.00015]]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {"id": "background", "type": "background", "paint": {"background-color": "#e0e0e0"}},
+    {
+      "id": "left-a",
+      "type": "fill-extrusion",
+      "source": "buildings",
+      "filter": ["==", ["get", "group"], "left-a"],
+      "paint": {
+        "fill-extrusion-color": "#c8c8d8",
+        "fill-extrusion-height": 15,
+        "fill-extrusion-ambient-occlusion-ground-intensity": 0.8,
+        "fill-extrusion-ambient-occlusion-ground-radius": 12
+      }
+    },
+    {
+      "id": "left-b",
+      "type": "fill-extrusion",
+      "source": "buildings",
+      "filter": ["==", ["get", "group"], "left-b"],
+      "paint": {
+        "fill-extrusion-color": "#d8c0c0",
+        "fill-extrusion-height": 15,
+        "fill-extrusion-ambient-occlusion-ground-intensity": 0.8,
+        "fill-extrusion-ambient-occlusion-ground-radius": 12
+      }
+    },
+    {
+      "id": "right",
+      "type": "fill-extrusion",
+      "source": "buildings",
+      "filter": ["==", ["get", "group"], "right"],
+      "paint": {
+        "fill-extrusion-color": "#c8c8d8",
+        "fill-extrusion-height": 15,
+        "fill-extrusion-ambient-occlusion-ground-intensity": 0.8,
+        "fill-extrusion-ambient-occlusion-ground-radius": 12
+      }
+    }
+  ]
+}

@@ -79,6 +79,9 @@ struct MapLibreNavigationView: View {
                     NavigationLink("AnnotationViewExample") {
                         AnnotationViewExampleUIViewControllerRepresentable()
                     }
+                    NavigationLink("AmbientOcclusionExample") {
+                        AmbientOcclusionExampleUIViewControllerRepresentable()
+                    }
                     NavigationLink("BuildingLightExample") {
                         BuildingLightExampleUIViewControllerRepresentable()
                     }

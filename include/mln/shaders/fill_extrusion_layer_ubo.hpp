@@ -39,7 +39,8 @@ static_assert(sizeof(FillExtrusionTilePropsUBO) == 3 * 16);
 struct alignas(16) FillExtrusionPropsUBO {
     /*  0 */ Color color;
     /* 16 */ std::array<float, 3> light_color;
-    /* 28 */ float pad1;
+    /// fill-extrusion-ambient-occlusion-wall-intensity, 0 when off
+    /* 28 */ float ambient_occlusion_wall_intensity;
     /* 32 */ std::array<float, 3> light_position;
     /* 44 */ float base;
     /* 48 */ float height;
@@ -49,7 +50,8 @@ struct alignas(16) FillExtrusionPropsUBO {
     /* 64 */ float fade;
     /* 68 */ float from_scale;
     /* 72 */ float to_scale;
-    /* 76 */ float pad2;
+    /// fill-extrusion-ambient-occlusion-wall-radius in meters
+    /* 76 */ float ambient_occlusion_wall_radius;
     /* 80 */
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16);

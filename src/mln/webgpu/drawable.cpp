@@ -266,6 +266,14 @@ void Drawable::setDepthType(gfx::DepthMaskType value) {
     impl->pipelineState = nullptr; // Reset pipeline to force recreation with new depth mask
 }
 
+void Drawable::setDepthTestAbove3D(bool value) {
+    if (getDepthTestAbove3D() == value) {
+        return;
+    }
+    gfx::Drawable::setDepthTestAbove3D(value);
+    impl->pipelineState = nullptr; // Reset pipeline to force recreation with new depth state
+}
+
 void Drawable::setDepthModeFor3D(const gfx::DepthMode& value) {
     if (impl->depthMode.func != value.func || impl->depthMode.mask != value.mask) {
         impl->pipelineState = nullptr;
@@ -369,9 +377,10 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         (instanceAttributes && (!attributeUpdateTime || instanceAttributes->isModifiedAfter(*attributeUpdateTime)));
 
     if (buildInstanceBuffer) {
-        // Apply instance values to shader defaults (matching Metal's approach)
+        // Apply instance values to shader defaults (matching Metal's approach). The buffers made for
+        // the attributes left out hold one value per instance, as many as the draw below uses.
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
-        auto instanceBindings_ = webgpuUploadPass.buildAttributeBindings(impl->vertexCount,
+        auto instanceBindings_ = webgpuUploadPass.buildAttributeBindings(instanceAttributes->getMinCount(),
                                                                          impl->vertexType,
                                                                          /*vertexAttributeIndex=*/-1,
                                                                          /*vertexData=*/{},
@@ -659,7 +668,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         stencilMode = impl->stencilMode;
     } else {
         if (getEnableDepth()) {
-            depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+            depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType(), getDepthTestAbove3D());
         }
         if (getEnableStencil() && drawableTileID) {
             stencilMode = parameters.stencilModeForClipping(drawableTileID->toUnwrapped());
@@ -710,9 +719,11 @@ void Drawable::draw(PaintParameters& parameters) const {
 
             const uint64_t bindingByteOffset = static_cast<uint64_t>(binding->vertexOffset) * binding->vertexStride;
 
+            // Attributes at another vertex offset of the same buffer get their own binding, as an
+            // attribute's offset within a binding must stay below the stride
             auto it = std::find_if(out.begin(), out.end(), [&](const UniqueBinding& entry) {
                 return entry.vertexResource == vertexBufferRes && entry.stride == binding->vertexStride &&
-                       entry.stepMode == stepMode;
+                       entry.stepMode == stepMode && entry.baseOffset == bindingByteOffset;
             });
 
             if (it == out.end()) {
@@ -924,7 +935,8 @@ void Drawable::draw(PaintParameters& parameters) const {
 
         if (getEnableDepth()) {
 #if !defined(NDEBUG)
-            const auto expectedDepth = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+            const auto expectedDepth = parameters.depthModeForSublayer(
+                getSubLayerIndex(), getDepthType(), getDepthTestAbove3D());
             assert(expectedDepth.func == impl->depthMode.func);
             assert(expectedDepth.mask == impl->depthMode.mask);
 #endif

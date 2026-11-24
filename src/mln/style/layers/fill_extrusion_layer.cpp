@@ -82,6 +82,118 @@ void FillExtrusionLayer::setFillExtrusionRoundedCornerDistance(const PropertyVal
 
 // Paint properties
 
+PropertyValue<float> FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionGroundIntensity() {
+    return {0.f};
+}
+
+const PropertyValue<float>& FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundIntensity() const {
+    return impl().paint.template get<FillExtrusionAmbientOcclusionGroundIntensity>().value;
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionGroundIntensity(const PropertyValue<float>& value) {
+    if (value == getFillExtrusionAmbientOcclusionGroundIntensity())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionAmbientOcclusionGroundIntensity>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionGroundIntensityTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionAmbientOcclusionGroundIntensity>().options = options;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+TransitionOptions FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundIntensityTransition() const {
+    return impl().paint.template get<FillExtrusionAmbientOcclusionGroundIntensity>().options;
+}
+
+PropertyValue<float> FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionGroundRadius() {
+    return {3.f};
+}
+
+const PropertyValue<float>& FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundRadius() const {
+    return impl().paint.template get<FillExtrusionAmbientOcclusionGroundRadius>().value;
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionGroundRadius(const PropertyValue<float>& value) {
+    if (value == getFillExtrusionAmbientOcclusionGroundRadius())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionAmbientOcclusionGroundRadius>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionGroundRadiusTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionAmbientOcclusionGroundRadius>().options = options;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+TransitionOptions FillExtrusionLayer::getFillExtrusionAmbientOcclusionGroundRadiusTransition() const {
+    return impl().paint.template get<FillExtrusionAmbientOcclusionGroundRadius>().options;
+}
+
+PropertyValue<float> FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionWallIntensity() {
+    return {0.f};
+}
+
+const PropertyValue<float>& FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallIntensity() const {
+    return impl().paint.template get<FillExtrusionAmbientOcclusionWallIntensity>().value;
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionWallIntensity(const PropertyValue<float>& value) {
+    if (value == getFillExtrusionAmbientOcclusionWallIntensity())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionAmbientOcclusionWallIntensity>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionWallIntensityTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionAmbientOcclusionWallIntensity>().options = options;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+TransitionOptions FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallIntensityTransition() const {
+    return impl().paint.template get<FillExtrusionAmbientOcclusionWallIntensity>().options;
+}
+
+PropertyValue<float> FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionWallRadius() {
+    return {3.f};
+}
+
+const PropertyValue<float>& FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallRadius() const {
+    return impl().paint.template get<FillExtrusionAmbientOcclusionWallRadius>().value;
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionWallRadius(const PropertyValue<float>& value) {
+    if (value == getFillExtrusionAmbientOcclusionWallRadius())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionAmbientOcclusionWallRadius>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void FillExtrusionLayer::setFillExtrusionAmbientOcclusionWallRadiusTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionAmbientOcclusionWallRadius>().options = options;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+TransitionOptions FillExtrusionLayer::getFillExtrusionAmbientOcclusionWallRadiusTransition() const {
+    return impl().paint.template get<FillExtrusionAmbientOcclusionWallRadius>().options;
+}
+
 PropertyValue<float> FillExtrusionLayer::getDefaultFillExtrusionBase() {
     return {0.f};
 }
@@ -310,9 +422,13 @@ using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 16u;
+constexpr uint8_t kPaintPropertyCount = 24u;
 
 enum class Property : uint8_t {
+    FillExtrusionAmbientOcclusionGroundIntensity,
+    FillExtrusionAmbientOcclusionGroundRadius,
+    FillExtrusionAmbientOcclusionWallIntensity,
+    FillExtrusionAmbientOcclusionWallRadius,
     FillExtrusionBase,
     FillExtrusionColor,
     FillExtrusionHeight,
@@ -321,6 +437,10 @@ enum class Property : uint8_t {
     FillExtrusionTranslate,
     FillExtrusionTranslateAnchor,
     FillExtrusionVerticalGradient,
+    FillExtrusionAmbientOcclusionGroundIntensityTransition,
+    FillExtrusionAmbientOcclusionGroundRadiusTransition,
+    FillExtrusionAmbientOcclusionWallIntensityTransition,
+    FillExtrusionAmbientOcclusionWallRadiusTransition,
     FillExtrusionBaseTransition,
     FillExtrusionColorTransition,
     FillExtrusionHeightTransition,
@@ -338,7 +458,11 @@ constexpr uint8_t toUint8(T t) noexcept {
 }
 
 constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
-    {{"fill-extrusion-base", toUint8(Property::FillExtrusionBase)},
+    {{"fill-extrusion-ambient-occlusion-ground-intensity", toUint8(Property::FillExtrusionAmbientOcclusionGroundIntensity)},
+     {"fill-extrusion-ambient-occlusion-ground-radius", toUint8(Property::FillExtrusionAmbientOcclusionGroundRadius)},
+     {"fill-extrusion-ambient-occlusion-wall-intensity", toUint8(Property::FillExtrusionAmbientOcclusionWallIntensity)},
+     {"fill-extrusion-ambient-occlusion-wall-radius", toUint8(Property::FillExtrusionAmbientOcclusionWallRadius)},
+     {"fill-extrusion-base", toUint8(Property::FillExtrusionBase)},
      {"fill-extrusion-color", toUint8(Property::FillExtrusionColor)},
      {"fill-extrusion-height", toUint8(Property::FillExtrusionHeight)},
      {"fill-extrusion-opacity", toUint8(Property::FillExtrusionOpacity)},
@@ -346,6 +470,10 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"fill-extrusion-translate", toUint8(Property::FillExtrusionTranslate)},
      {"fill-extrusion-translate-anchor", toUint8(Property::FillExtrusionTranslateAnchor)},
      {"fill-extrusion-vertical-gradient", toUint8(Property::FillExtrusionVerticalGradient)},
+     {"fill-extrusion-ambient-occlusion-ground-intensity-transition", toUint8(Property::FillExtrusionAmbientOcclusionGroundIntensityTransition)},
+     {"fill-extrusion-ambient-occlusion-ground-radius-transition", toUint8(Property::FillExtrusionAmbientOcclusionGroundRadiusTransition)},
+     {"fill-extrusion-ambient-occlusion-wall-intensity-transition", toUint8(Property::FillExtrusionAmbientOcclusionWallIntensityTransition)},
+     {"fill-extrusion-ambient-occlusion-wall-radius-transition", toUint8(Property::FillExtrusionAmbientOcclusionWallRadiusTransition)},
      {"fill-extrusion-base-transition", toUint8(Property::FillExtrusionBaseTransition)},
      {"fill-extrusion-color-transition", toUint8(Property::FillExtrusionColorTransition)},
      {"fill-extrusion-height-transition", toUint8(Property::FillExtrusionHeightTransition)},
@@ -358,6 +486,14 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
 
 StyleProperty getLayerProperty(const FillExtrusionLayer& layer, Property property) {
     switch (property) {
+        case Property::FillExtrusionAmbientOcclusionGroundIntensity:
+            return makeStyleProperty(layer.getFillExtrusionAmbientOcclusionGroundIntensity());
+        case Property::FillExtrusionAmbientOcclusionGroundRadius:
+            return makeStyleProperty(layer.getFillExtrusionAmbientOcclusionGroundRadius());
+        case Property::FillExtrusionAmbientOcclusionWallIntensity:
+            return makeStyleProperty(layer.getFillExtrusionAmbientOcclusionWallIntensity());
+        case Property::FillExtrusionAmbientOcclusionWallRadius:
+            return makeStyleProperty(layer.getFillExtrusionAmbientOcclusionWallRadius());
         case Property::FillExtrusionBase:
             return makeStyleProperty(layer.getFillExtrusionBase());
         case Property::FillExtrusionColor:
@@ -374,6 +510,14 @@ StyleProperty getLayerProperty(const FillExtrusionLayer& layer, Property propert
             return makeStyleProperty(layer.getFillExtrusionTranslateAnchor());
         case Property::FillExtrusionVerticalGradient:
             return makeStyleProperty(layer.getFillExtrusionVerticalGradient());
+        case Property::FillExtrusionAmbientOcclusionGroundIntensityTransition:
+            return makeStyleProperty(layer.getFillExtrusionAmbientOcclusionGroundIntensityTransition());
+        case Property::FillExtrusionAmbientOcclusionGroundRadiusTransition:
+            return makeStyleProperty(layer.getFillExtrusionAmbientOcclusionGroundRadiusTransition());
+        case Property::FillExtrusionAmbientOcclusionWallIntensityTransition:
+            return makeStyleProperty(layer.getFillExtrusionAmbientOcclusionWallIntensityTransition());
+        case Property::FillExtrusionAmbientOcclusionWallRadiusTransition:
+            return makeStyleProperty(layer.getFillExtrusionAmbientOcclusionWallRadiusTransition());
         case Property::FillExtrusionBaseTransition:
             return makeStyleProperty(layer.getFillExtrusionBaseTransition());
         case Property::FillExtrusionColorTransition:
@@ -423,6 +567,47 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
 
     auto property = static_cast<Property>(it->second);
 
+    if (property == Property::FillExtrusionAmbientOcclusionGroundIntensity ||
+        property == Property::FillExtrusionAmbientOcclusionGroundRadius ||
+        property == Property::FillExtrusionAmbientOcclusionWallIntensity ||
+        property == Property::FillExtrusionAmbientOcclusionWallRadius || property == Property::FillExtrusionOpacity ||
+        property == Property::FillExtrusionRoundedCornerDistance) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        if (property == Property::FillExtrusionAmbientOcclusionGroundIntensity) {
+            setFillExtrusionAmbientOcclusionGroundIntensity(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::FillExtrusionAmbientOcclusionGroundRadius) {
+            setFillExtrusionAmbientOcclusionGroundRadius(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::FillExtrusionAmbientOcclusionWallIntensity) {
+            setFillExtrusionAmbientOcclusionWallIntensity(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::FillExtrusionAmbientOcclusionWallRadius) {
+            setFillExtrusionAmbientOcclusionWallRadius(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::FillExtrusionOpacity) {
+            setFillExtrusionOpacity(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::FillExtrusionRoundedCornerDistance) {
+            setFillExtrusionRoundedCornerDistance(*typedValue);
+            return std::nullopt;
+        }
+    }
     if (property == Property::FillExtrusionBase || property == Property::FillExtrusionHeight) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, true, false);
@@ -449,23 +634,6 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
 
         setFillExtrusionColor(*typedValue);
         return std::nullopt;
-    }
-    if (property == Property::FillExtrusionOpacity || property == Property::FillExtrusionRoundedCornerDistance) {
-        Error error;
-        const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
-        if (!typedValue) {
-            return error;
-        }
-
-        if (property == Property::FillExtrusionOpacity) {
-            setFillExtrusionOpacity(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::FillExtrusionRoundedCornerDistance) {
-            setFillExtrusionRoundedCornerDistance(*typedValue);
-            return std::nullopt;
-        }
     }
     if (property == Property::FillExtrusionPattern) {
         Error error;
@@ -512,6 +680,26 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
     std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
     if (!transition) {
         return error;
+    }
+
+    if (property == Property::FillExtrusionAmbientOcclusionGroundIntensityTransition) {
+        setFillExtrusionAmbientOcclusionGroundIntensityTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::FillExtrusionAmbientOcclusionGroundRadiusTransition) {
+        setFillExtrusionAmbientOcclusionGroundRadiusTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::FillExtrusionAmbientOcclusionWallIntensityTransition) {
+        setFillExtrusionAmbientOcclusionWallIntensityTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::FillExtrusionAmbientOcclusionWallRadiusTransition) {
+        setFillExtrusionAmbientOcclusionWallRadiusTransition(*transition);
+        return std::nullopt;
     }
 
     if (property == Property::FillExtrusionBaseTransition) {

@@ -117,6 +117,20 @@
         "uses_ubos": true
     },
     {
+        "name": "FillExtrusionGroundOcclusionShader",
+        "header": "fill_extrusion_ground_occlusion",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "FillExtrusionGroundOcclusionResolveShader",
+        "header": "fill_extrusion_ground_occlusion_resolve",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "HeatmapShader",
         "header": "heatmap",
         "glsl_vert": "heatmap.vertex.glsl",

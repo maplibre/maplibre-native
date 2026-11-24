@@ -1,6 +1,8 @@
 in vec2 v_pos_a;
 in vec2 v_pos_b;
 in vec4 v_lighting;
+in highp float v_wall_z;
+in vec3 v_lighting_without_ambient;
 
 layout (std140) uniform FillExtrusionTilePropsUBO {
     highp vec4 u_pattern_from;
@@ -13,7 +15,7 @@ layout (std140) uniform FillExtrusionTilePropsUBO {
 layout (std140) uniform FillExtrusionPropsUBO {
     highp vec4 u_color;
     highp vec3 u_lightcolor;
-    lowp float props_pad1;
+    highp float u_ambient_occlusion_wall_intensity;
     highp vec3 u_lightpos;
     highp float u_base;
     highp float u_height;
@@ -23,10 +25,21 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad2;
+    highp float u_ambient_occlusion_wall_radius;
 };
 
 uniform sampler2D u_image;
+
+// Ambient occlusion of a wall at `z` meters above the ground: the share of the ambient light that is taken away,
+// 0 leaves the color as is. (1 - s)^1.5, with s the height over the radius, follows the share of the rays that hit
+// the ground within the radius. Roofs are left alone.
+highp float wallAmbientOcclusion(highp float z) {
+    if (z < 0.0 || u_ambient_occlusion_wall_intensity <= 0.0 || u_ambient_occlusion_wall_radius <= 0.0) {
+        return 0.0;
+    }
+    highp float s = clamp(z / u_ambient_occlusion_wall_radius, 0.0, 1.0);
+    return u_ambient_occlusion_wall_intensity * (1.0 - s) * sqrt(1.0 - s);
+}
 
 #pragma mapbox: define lowp float base
 #pragma mapbox: define lowp float height
@@ -54,7 +67,9 @@ void main() {
 
     vec4 mixedColor = mix(color1, color2, u_fade);
 
-    fragColor = mixedColor * v_lighting;
+    // Take ambient light away from the bottom of the walls. Both are premultiplied.
+    vec4 lighting = vec4(mix(v_lighting.rgb, v_lighting_without_ambient, wallAmbientOcclusion(v_wall_z)), v_lighting.a);
+    fragColor = mixedColor * lighting;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

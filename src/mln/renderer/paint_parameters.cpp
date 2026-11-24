@@ -119,8 +119,10 @@ mat4 PaintParameters::matrixForTile(const UnwrappedTileID& tileID, bool aligned)
     return matrix;
 }
 
-gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n, gfx::DepthMaskType mask) const {
-    if (currentLayer < opaquePassCutoff) {
+gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n,
+                                                     gfx::DepthMaskType mask,
+                                                     bool aboveCutoff) const {
+    if (currentLayer < opaquePassCutoff && !aboveCutoff) {
         return gfx::DepthMode::disabled();
     }
 
