@@ -159,6 +159,13 @@
         "uses_ubos": true
     },
     {
+        "name": "LineIntersectionShader",
+        "header": "line_intersection",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "LineGradientShader",
         "header": "line_gradient",
         "glsl_vert": "line_gradient.vertex.glsl",

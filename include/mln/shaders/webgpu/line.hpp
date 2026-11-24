@@ -56,7 +56,7 @@ struct LineEvaluatedPropsUBO {
     width: f32,
     floorwidth: f32,
     expressionMask: u32,
-    pad1: f32,
+    intersection_rounded_corner_distance: f32,
 };
 
 struct GlobalPaintParamsUBO {
@@ -275,7 +275,7 @@ struct LineEvaluatedPropsUBO {
     width: f32,
     floorwidth: f32,
     expressionMask: u32,
-    pad1: f32,
+    intersection_rounded_corner_distance: f32,
 };
 
 struct GlobalPaintParamsUBO {
@@ -498,7 +498,7 @@ struct LineEvaluatedPropsUBO {
     width: f32,
     floorwidth: f32,
     expressionMask: u32,
-    pad1: f32,
+    intersection_rounded_corner_distance: f32,
 };
 
 struct GlobalPaintParamsUBO {
@@ -817,7 +817,7 @@ struct LineEvaluatedPropsUBO {
     width: f32,
     floorwidth: f32,
     expressionMask: u32,
-    pad1: f32,
+    intersection_rounded_corner_distance: f32,
 };
 
 struct GlobalPaintParamsUBO {
@@ -1103,7 +1103,7 @@ struct LineEvaluatedPropsUBO {
     width: f32,
     floorwidth: f32,
     expressionMask: u32,
-    pad1: f32,
+    intersection_rounded_corner_distance: f32,
 };
 
 struct GlobalPaintParamsUBO {

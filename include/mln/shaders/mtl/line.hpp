@@ -649,10 +649,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .triangle_corner_radius = triangle_corner_radius,
 
 #if !defined(HAS_UNIFORM_u_color)
-        //.color1        = unpack_mix_color(data[dataIndex1].color, drawable.color_t),
-        //.color2        = unpack_mix_color(data[dataIndex2].color, drawable.color_t),
-        .color1        = float4(1.0, 0.0, 0.0, 1.0),
-        .color2        = float4(0.0, 1.0, 0.0, 1.0),
+        .color1        = unpack_mix_color(data[dataIndex1].color, drawable.color_t),
+        .color2        = unpack_mix_color(data[dataIndex2].color, drawable.color_t),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity1      = unpack_mix_float(data[dataIndex1].opacity, drawable.opacity_t),

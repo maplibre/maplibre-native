@@ -68,8 +68,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     lowp float u_offset;
     mediump float u_width;
     lowp float u_floorwidth;
-    lowp float props_pad1;
-    lowp float props_pad2;
+    highp uint u_expression_mask;
+    lowp float intersection_rounded_corner_distance;
 };
 
 out vec2 v_normal;
@@ -214,8 +214,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     lowp float u_offset;
     mediump float u_width;
     lowp float u_floorwidth;
-    lowp float props_pad1;
-    lowp float props_pad2;
+    highp uint u_expression_mask;
+    lowp float intersection_rounded_corner_distance;
 };
 
 uniform sampler2D u_image;

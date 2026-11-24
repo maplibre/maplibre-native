@@ -26,6 +26,7 @@
 #include <mln/shaders/gl/color_relief.hpp>
 #include <mln/shaders/gl/hillshade.hpp>
 #include <mln/shaders/gl/line.hpp>
+#include <mln/shaders/gl/line_intersection.hpp>
 #include <mln/shaders/gl/line_gradient.hpp>
 #include <mln/shaders/gl/line_pattern.hpp>
 #include <mln/shaders/gl/location_indicator.hpp>

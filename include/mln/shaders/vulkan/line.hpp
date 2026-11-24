@@ -84,7 +84,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(location = 0) out lowp vec2 frag_normal;
@@ -211,7 +211,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 void main() {
@@ -319,7 +319,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(location = 0) out lowp vec2 frag_normal;
@@ -439,7 +439,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 void main() {
@@ -556,7 +556,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(location = 0) out lowp vec2 frag_normal;
@@ -723,7 +723,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
@@ -886,7 +886,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(location = 0) out lowp vec2 frag_normal;
@@ -1055,7 +1055,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
@@ -1185,7 +1185,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(location = 0) out lowp vec2 frag_normal;
@@ -1345,7 +1345,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
