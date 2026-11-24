@@ -173,15 +173,16 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .expressionMask = expressionMask,
             .intersection_rounded_corner_distance = evaluated.get<LineIntersectionRoundedCornerDistance>()};
 #else
-        const LineEvaluatedPropsUBO propsUBO{.color = evaluate<LineColor>(parameters),
-                                             .blur = evaluate<LineBlur>(parameters),
-                                             .opacity = evaluate<LineOpacity>(parameters),
-                                             .gapwidth = evaluate<LineGapWidth>(parameters),
-                                             .offset = evaluate<LineOffset>(parameters),
-                                             .width = evaluate<LineWidth>(parameters),
-                                             .floorwidth = evaluate<LineFloorWidth>(parameters),
-                                             .expressionMask = LineExpressionMask::None,
-                                             .intersection_rounded_corner_distance = evaluated.get<LineIntersectionRoundedCornerDistance>()};
+        const LineEvaluatedPropsUBO propsUBO{
+            .color = evaluate<LineColor>(parameters),
+            .blur = evaluate<LineBlur>(parameters),
+            .opacity = evaluate<LineOpacity>(parameters),
+            .gapwidth = evaluate<LineGapWidth>(parameters),
+            .offset = evaluate<LineOffset>(parameters),
+            .width = evaluate<LineWidth>(parameters),
+            .floorwidth = evaluate<LineFloorWidth>(parameters),
+            .expressionMask = LineExpressionMask::None,
+            .intersection_rounded_corner_distance = evaluated.get<LineIntersectionRoundedCornerDistance>()};
 #endif // MLN_RENDER_BACKEND_METAL
 
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
