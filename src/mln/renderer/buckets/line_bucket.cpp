@@ -77,12 +77,6 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
                 neighbors.begin(), neighbors.end(), [cornerPoint](const CoordIndexPair& a, const CoordIndexPair& b) {
                     return util::angle_to(cornerPoint, a.first) > util::angle_to(cornerPoint, b.first);
                 });
-            auto minInterator = std::min_element(
-                neighbors.begin(), neighbors.end(), [cornerPoint](const CoordIndexPair& a, const CoordIndexPair& b) {
-                    return util::distSqr<float>(cornerPoint, a.first) > util::distSqr<float>(cornerPoint, b.first);
-                });
-            [[maybe_unused]] auto maxCornerDistance = static_cast<uint32_t>(
-                util::dist<double>(cornerPoint, minInterator->first) / 2.0);
             for (size_t i = 0; i < neighbors.size(); i++) {
                 auto nextIndex = (i + 1) % neighbors.size();
                 auto& prevPoint = neighbors[i].first;
