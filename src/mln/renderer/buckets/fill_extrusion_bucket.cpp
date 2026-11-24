@@ -24,6 +24,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <concepts>
+#include <ranges>
 
 namespace mapbox {
 namespace util {
@@ -59,8 +61,10 @@ namespace {
 
 // True when every vertex of the ring is beyond the same edge of the tile, so the ring
 // lies wholly in the buffer. The neighbouring tile holds the same feature and draws it.
-bool isEntirelyOutside(const GeometryCoordinates& ring) {
-    const auto all = [&ring](auto outside) {
+template <std::ranges::input_range Ring>
+bool isEntirelyOutside(const Ring& ring) {
+    using Coordinate = std::ranges::range_value_t<Ring>;
+    const auto all = [&ring](std::predicate<const Coordinate&> auto outside) {
         return std::ranges::all_of(ring, outside);
     };
     return all([](const auto& p) { return p.x < 0; }) || all([](const auto& p) { return p.x > util::EXTENT; }) ||
@@ -123,23 +127,24 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         if (totalVertices == 0) continue;
 
-        // Polygon centroid (outer ring), so the whole extrusion is raised by a
-        // single terrain elevation instead of shearing across a slope (as gl-js does)
+        // Polygon centroid, so the whole extrusion is raised by a single terrain elevation
+        // instead of shearing across a slope (as gl-js does). Every ring takes part, holes included.
         Point<int16_t> centroid{0, 0};
-        if (!polygon.empty() && !polygon.front().empty()) {
-            // A closed ring repeats its first vertex at the end. Counting it twice pulls the
-            // centroid towards wherever the ring happens to start, so leave it out.
-            const auto& ring = polygon.front();
-            const auto closed = ring.size() > 1 && ring.front() == ring.back();
-            const auto sampled = ring.size() - (closed ? 1 : 0);
-            Point<double> accum{0.0, 0.0};
-            for (std::size_t i = 0; i < sampled; ++i) {
+        Point<double> accum{0.0, 0.0};
+        std::size_t sampled = 0;
+        for (const auto& ring : polygon) {
+            for (std::size_t i = 0; i < ring.size(); ++i) {
+                // A closed ring repeats its first vertex at the end. Counting it twice pulls the
+                // centroid towards wherever the ring happens to start, so leave it out.
+                if (i + 1 == ring.size() && ring.size() > 1 && ring.front() == ring.back()) continue;
                 accum.x += ring[i].x;
                 accum.y += ring[i].y;
+                ++sampled;
             }
-            const auto count = static_cast<double>(sampled);
-            centroid.x = static_cast<int16_t>(std::floor(accum.x / count));
-            centroid.y = static_cast<int16_t>(std::floor(accum.y / count));
+        }
+        if (sampled > 0) {
+            centroid.x = static_cast<int16_t>(std::floor(accum.x / static_cast<double>(sampled)));
+            centroid.y = static_cast<int16_t>(std::floor(accum.y / static_cast<double>(sampled)));
         }
 
         std::vector<uint32_t> flatIndices;
@@ -158,59 +163,66 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         assert(triangleIndex + (5 * (totalVertices - 1) + 1) <= std::numeric_limits<uint16_t>::max());
 
-        const auto processRingPoints =
-            [&](const Point<double>& p1, const std::optional<Point<double>>& p2, std::size_t& edgeDistance) {
+        const auto processRingPoints = [&](const Point<double>& p1,
+                                           const std::optional<Point<double>>& p2,
+                                           std::size_t& edgeDistance,
+                                           bool ringOutside) {
+            // No wall on a ring that lies wholly outside the tile.
+            const bool skipWall = p2 && ringOutside;
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-                vertices.emplace_back(layoutVertex(p1, edgeDistance, !p2, centroid));
-                flatIndices.emplace_back(triangleIndex);
-                triangleIndex++;
+            vertices.emplace_back(layoutVertex(p1, edgeDistance, !p2 || skipWall, centroid));
+            flatIndices.emplace_back(triangleIndex);
+            triangleIndex++;
 
-                if (p2) {
-                    const size_t dist = util::dist<uint16_t>(p1, *p2);
-                    if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<uint16_t>::max())) {
-                        edgeDistance = 0;
-                    }
-
-                    edgeDistance += dist;
+            if (p2) {
+                const size_t dist = util::dist<uint16_t>(p1, *p2);
+                if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<uint16_t>::max())) {
+                    edgeDistance = 0;
                 }
+
+                edgeDistance += dist;
+            }
 #else
-                vertices.emplace_back(FillExtrusionBucket::layoutVertex(p1, 0, 0, 1, edgeDistance, centroid));
-                flatIndices.emplace_back(triangleIndex);
-                triangleIndex++;
+            vertices.emplace_back(FillExtrusionBucket::layoutVertex(p1, 0, 0, 1, edgeDistance, centroid));
+            flatIndices.emplace_back(triangleIndex);
+            triangleIndex++;
 
-                if (p2) {
-                    const Point<double> perp = util::unit(util::perp(*p2 - p1));
+            if (p2) {
+                const Point<double> perp = util::unit(util::perp(*p2 - p1));
 
-                    const size_t dist = util::dist<uint16_t>(p1, *p2);
-                    if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<uint16_t>::max())) {
-                        edgeDistance = 0;
-                    }
-
-                    vertices.emplace_back(
-                        FillExtrusionBucket::layoutVertex(*p2, perp.x, perp.y, 0, edgeDistance, centroid));
-                    vertices.emplace_back(
-                        FillExtrusionBucket::layoutVertex(*p2, perp.x, perp.y, 1, edgeDistance, centroid));
-
-                    edgeDistance += dist;
-
-                    vertices.emplace_back(
-                        FillExtrusionBucket::layoutVertex(p1, perp.x, perp.y, 0, edgeDistance, centroid));
-                    vertices.emplace_back(
-                        FillExtrusionBucket::layoutVertex(p1, perp.x, perp.y, 1, edgeDistance, centroid));
-
-                    // ┌──────┐
-                    // │ 0  1 │ Counter-Clockwise winding order.
-                    // │      │ Triangle 1: 0 => 2 => 1
-                    // │ 2  3 │ Triangle 2: 1 => 2 => 3
-                    // └──────┘
-                    triangles.emplace_back(triangleIndex, triangleIndex + 2, triangleIndex + 1);
-                    triangles.emplace_back(triangleIndex + 1, triangleIndex + 2, triangleIndex + 3);
-                    triangleIndex += 4;
-                    triangleSegment.vertexLength += 4;
-                    triangleSegment.indexLength += 6;
+                const size_t dist = util::dist<uint16_t>(p1, *p2);
+                if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<uint16_t>::max())) {
+                    edgeDistance = 0;
                 }
+
+                if (skipWall) {
+                    edgeDistance += dist;
+                    return;
+                }
+
+                vertices.emplace_back(
+                    FillExtrusionBucket::layoutVertex(*p2, perp.x, perp.y, 0, edgeDistance, centroid));
+                vertices.emplace_back(
+                    FillExtrusionBucket::layoutVertex(*p2, perp.x, perp.y, 1, edgeDistance, centroid));
+
+                edgeDistance += dist;
+
+                vertices.emplace_back(FillExtrusionBucket::layoutVertex(p1, perp.x, perp.y, 0, edgeDistance, centroid));
+                vertices.emplace_back(FillExtrusionBucket::layoutVertex(p1, perp.x, perp.y, 1, edgeDistance, centroid));
+
+                // ┌──────┐
+                // │ 0  1 │ Counter-Clockwise winding order.
+                // │      │ Triangle 1: 0 => 2 => 1
+                // │ 2  3 │ Triangle 2: 1 => 2 => 3
+                // └──────┘
+                triangles.emplace_back(triangleIndex, triangleIndex + 2, triangleIndex + 1);
+                triangles.emplace_back(triangleIndex + 1, triangleIndex + 2, triangleIndex + 3);
+                triangleIndex += 4;
+                triangleSegment.vertexLength += 4;
+                triangleSegment.indexLength += 6;
+            }
 #endif
-            };
+        };
 
         std::vector<uint32_t> indices;
         std::visit(
@@ -219,6 +231,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                     std::size_t nVertices = ring.size();
 
                     if (nVertices == 0) continue;
+
+                    const bool ringOutside = isEntirelyOutside(ring);
 
                     std::size_t edgeDistance = 0;
 
@@ -229,7 +243,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                         if (i < nVertices - 1) {
                             p2 = convertPoint<double>(ring[i + 1]);
                         }
-                        processRingPoints(p1, p2, edgeDistance);
+                        processRingPoints(p1, p2, edgeDistance, ringOutside);
                     }
                 }
 
