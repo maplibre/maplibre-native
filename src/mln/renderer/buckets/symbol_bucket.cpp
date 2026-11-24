@@ -5,6 +5,7 @@
 #include <mln/style/layers/symbol_layer_impl.hpp>
 #include <mln/text/cross_tile_symbol_index.hpp>
 #include <mln/text/placement.hpp>
+#include <mln/util/mat4.hpp>
 
 #include <algorithm>
 #include <utility>
@@ -345,6 +346,17 @@ bool SymbolBucket::hasVariableTextAnchors() const {
     };
 
     return hasTextVariableAnchorOffset() || !layout->get<TextVariableAnchor>().empty();
+}
+
+mat4 SymbolBucket::elevatedMatrix(const mat4& matrix) const {
+    const float height = layout->get<style::SymbolHeightOffset>();
+    if (height == 0.0f) {
+        return matrix;
+    }
+    // Tile matrices take z in meters, as fill-extrusion heights do
+    mat4 elevated;
+    matrix::translate(elevated, matrix, 0, 0, height);
+    return elevated;
 }
 
 std::pair<uint32_t, bool> SymbolBucket::registerAtCrossTileIndex(CrossTileSymbolLayerIndex& index,

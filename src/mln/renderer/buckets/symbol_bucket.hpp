@@ -279,6 +279,11 @@ public:
     bool hasData() const override;
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
     std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&, const RenderTile&) override;
+
+    /// Returns `matrix` translated up by `symbol-height-offset` meters, so that the anchors of this bucket's
+    /// symbols are projected at that height. Used for drawing, placement and collision alike.
+    mat4 elevatedMatrix(const mat4& matrix) const;
+
     void place(Placement&, const BucketPlacementData&, std::set<uint32_t>&) override;
     void updateVertices(
         const Placement&, bool updateOpacities, const TransformState&, const RenderTile&, std::set<uint32_t>&) override;

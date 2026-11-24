@@ -4,6 +4,7 @@
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/layer.hpp>
 #include <mln/style/layers/background_layer_impl.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
 
 #include <rapidjson/prettywriter.h>
 
@@ -162,4 +163,42 @@ TEST(StyleConversion, SetGenericProperties) {
     const JSValue newMaxZoom(22.0f);
     layer->setProperty("maxzoom", Convertible(&newMaxZoom));
     EXPECT_EQ(22.0f, layer->getMaxZoom());
+}
+
+TEST(StyleConversion, SymbolHeightOffset) {
+    auto layer = parseLayer(R"JSON({
+        "type": "symbol",
+        "id": "symbol",
+        "source": "composite",
+        "layout": {
+            "symbol-height-offset": 30
+        }
+    })JSON");
+
+    ASSERT_NE(nullptr, layer);
+    auto& symbolLayer = static_cast<SymbolLayer&>(*layer);
+    EXPECT_EQ(0.0f, SymbolLayer::getDefaultSymbolHeightOffset().asConstant());
+    ASSERT_TRUE(symbolLayer.getSymbolHeightOffset().isConstant());
+    EXPECT_EQ(30.0f, symbolLayer.getSymbolHeightOffset().asConstant());
+    EXPECT_EQ(30.0, *layer->getProperty("symbol-height-offset").getValue().getDouble());
+
+    auto roundTripped = parseLayer(stringifyLayer(layer->serialize()));
+    ASSERT_NE(nullptr, roundTripped);
+    EXPECT_EQ(symbolLayer.getSymbolHeightOffset(), static_cast<SymbolLayer&>(*roundTripped).getSymbolHeightOffset());
+
+    rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> document;
+    const JSValue* json = &document;
+
+    // Zoom-dependent values are supported.
+    document.Parse<0>(R"(["interpolate", ["linear"], ["zoom"], 15, 0, 18, 60])");
+    ASSERT_FALSE(document.HasParseError());
+    EXPECT_FALSE(layer->setProperty("symbol-height-offset", Convertible(json)));
+    ASSERT_TRUE(symbolLayer.getSymbolHeightOffset().isExpression());
+    EXPECT_FALSE(symbolLayer.getSymbolHeightOffset().isZoomConstant());
+
+    // Feature-dependent values are not supported yet.
+    document.Parse<0>(R"(["get", "height"])");
+    ASSERT_FALSE(document.HasParseError());
+    EXPECT_TRUE(layer->setProperty("symbol-height-offset", Convertible(json)));
+    EXPECT_FALSE(symbolLayer.getSymbolHeightOffset().isZoomConstant());
 }

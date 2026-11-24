@@ -110,6 +110,8 @@ public:
 
     jni::Local<jni::Object<jni::ObjectTag>> getTextOptional(jni::JNIEnv&);
 
+    jni::Local<jni::Object<jni::ObjectTag>> getSymbolHeightOffset(jni::JNIEnv&);
+
     jni::Local<jni::Object<jni::ObjectTag>> getSymbolScreenSpace(jni::JNIEnv&);
 
     jni::Local<jni::Object<jni::ObjectTag>> getIconOpacity(jni::JNIEnv&);

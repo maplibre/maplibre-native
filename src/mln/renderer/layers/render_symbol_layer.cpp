@@ -560,10 +560,12 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
                                            inViewportPixelUnits,
                                            aligned);
     };
-    const mat4 textDrawableMatrix = isScreenSpace ? getScreenMatrix(textTranslation)
-                                                  : getTileMatrix(textTranslation, textTranslationAnchor);
-    const mat4 iconDrawableMatrix = isScreenSpace ? getScreenMatrix(iconTranslation)
-                                                  : getTileMatrix(iconTranslation, iconTranslationAnchor);
+    const mat4 textDrawableMatrix = isScreenSpace
+                                        ? getScreenMatrix(textTranslation)
+                                        : bucket.elevatedMatrix(getTileMatrix(textTranslation, textTranslationAnchor));
+    const mat4 iconDrawableMatrix = isScreenSpace
+                                        ? getScreenMatrix(iconTranslation)
+                                        : bucket.elevatedMatrix(getTileMatrix(iconTranslation, iconTranslationAnchor));
 
     const auto computeBufferBounds = [&](const SymbolBucket::Buffer& buffer, bool isText) {
         const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
@@ -928,7 +930,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setTileID(tileID);
                 drawable->setLayerTweaker(collisionLayerTweaker);
 
-                auto drawData = std::make_unique<gfx::CollisionDrawableData>(values.translate, values.translateAnchor);
+                auto drawData = std::make_unique<gfx::CollisionDrawableData>(
+                    values.translate, values.translateAnchor, bucket.layout->get<SymbolHeightOffset>());
                 drawable->setData(std::move(drawData));
                 collisionGroup->addDrawable(passes, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
