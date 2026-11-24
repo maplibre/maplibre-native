@@ -42,6 +42,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_drape_zoom_out.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_dem_cache.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_occlusion.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/terrain_custom_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_elevation.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_exaggeration.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/terrain_line_drape.test.cpp

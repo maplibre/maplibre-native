@@ -1078,6 +1078,7 @@ MLN_DRAWABLES_GL_HEADERS = [
     "include/mln/gl/uniform_buffer_gl.hpp",
     "include/mln/gl/vertex_attribute_gl.hpp",
     "include/mln/gl/texture2d.hpp",
+    "include/mln/style/layers/gl/custom_layer_render_parameters.hpp",
     "include/mln/shaders/gl/shader_info.hpp",
     "include/mln/shaders/gl/shader_program_gl.hpp",
     "include/mln/shaders/gl/shader_group_gl.hpp",

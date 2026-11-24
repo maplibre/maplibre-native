@@ -12,6 +12,10 @@
 #elif MLN_RENDER_BACKEND_VULKAN
 #include <mln/style/layers/vulkan/custom_layer_render_parameters.hpp>
 #include <mln/vulkan/render_pass.hpp>
+#elif MLN_RENDER_BACKEND_OPENGL
+#include <mln/style/layers/gl/custom_layer_render_parameters.hpp>
+#include <mln/gl/texture2d.hpp>
+#include <mln/renderer/render_terrain.hpp>
 #endif
 
 #include <memory>
@@ -39,6 +43,15 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);
 #elif MLN_RENDER_BACKEND_VULKAN
     style::vulkan::CustomLayerRenderParameters parameters(paintParameters);
+#elif MLN_RENDER_BACKEND_OPENGL
+    std::uint32_t terrainDepthTexture = 0;
+    if (auto* terrain = paintParameters.terrain) {
+        if (auto* depthTexture = terrain->getDrawnDepthTexture(
+                context, paintParameters.backend.getDefaultRenderable().getSize())) {
+            terrainDepthTexture = static_cast<mln::gl::Texture2D&>(*depthTexture).getTextureID();
+        }
+    }
+    style::gl::CustomLayerRenderParameters parameters(paintParameters, terrainDepthTexture);
 #else
     style::CustomLayerRenderParameters parameters(paintParameters);
 #endif

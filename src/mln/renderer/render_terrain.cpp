@@ -1414,6 +1414,15 @@ const std::shared_ptr<gfx::Texture2D>& RenderTerrain::getDepthTexture(gfx::Conte
     return placeholderDepthTexture;
 }
 
+gfx::Texture2D* RenderTerrain::getDrawnDepthTexture(gfx::Context& context, const Size& size) {
+    // renderDepth draws the depth target before the main pass whenever the terrain has depth drawables
+    if (!depthLayerGroup || depthLayerGroup->empty()) {
+        return nullptr;
+    }
+    const auto& texture = getDepthTexture(context);
+    return texture && texture->getSize() == size ? texture.get() : nullptr;
+}
+
 RenderTerrain::Haze RenderTerrain::getHaze(const TransformState& state) const {
     // Distance haze (Map::setTerrainHaze), as maplibre-gl-js's terrain fog with fog-ground-blend 0.5, its
     // near plane at n, the camera-to-center distance, and its far plane where the haze is to be full,
