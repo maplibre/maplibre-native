@@ -299,6 +299,11 @@ interface NativeMap {
 
   double getCenterAltitude();
 
+  /**
+   * Returns the rendered terrain height at a coordinate, or NaN when there is none.
+   */
+  double getTerrainElevation(double latitude, double longitude);
+
   void setTerrainSkirtLength(int length);
 
   int getTerrainSkirtLength();
