@@ -6,7 +6,7 @@ Extend MapLibre iOS with native code.
 
 ## Overview
 
-MapLibre Native has a C plugin API for extending it with native code. Currently, plugins can add style layer types. After a plugin registers its layer types, styles can use them like the built-in layer types, for example `"type": "ngon"`. Layers of plugin types appear as ``MLNStyleLayer`` in `MLNStyle.layers`. The API is defined in [`plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h), which documents the ownership and threading rules that plugins must follow.
+MapLibre Native has a C plugin API for extending it with native code. Currently, plugins can add style layer types. After a plugin registers its layer types, styles can use them like the built-in layer types, for example `"type": "org.maplibre.ngon"`. Layers of plugin types appear as ``MLNStyleLayer`` in `MLNStyle.layers`. The API is defined in [`plugin_api.h`](https://github.com/maplibre/maplibre-native/blob/main/include/mln/plugin/plugin_api.h), which documents the ownership and threading rules that plugins must follow.
 
 A plugin describes a layer type with the structures of `plugin_api.h`:
 

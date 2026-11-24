@@ -342,6 +342,7 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult>&& result, const uint64
     const ErrorScope errorScope{observer};
 
     layoutResult = std::move(result);
+    featureStateVersion = 0;
     if (!atlasTextures) {
         atlasTextures = std::make_shared<TileAtlasTextures>();
     }

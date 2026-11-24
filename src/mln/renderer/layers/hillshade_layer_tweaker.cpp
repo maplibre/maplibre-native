@@ -172,8 +172,14 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        const auto matrix = getTileMatrix(
-            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable, true);
+        const auto matrix = getTileMatrix(tileID,
+                                          parameters,
+                                          {0.f, 0.f},
+                                          TranslateAnchorType::Viewport,
+                                          false,
+                                          false,
+                                          drawable,
+                                          !parameters.state.isChanging());
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
