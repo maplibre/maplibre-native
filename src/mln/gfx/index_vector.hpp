@@ -30,6 +30,7 @@ public:
           buffer(std::move(other.buffer)),
           dirty(other.dirty),
           released(other.released),
+          rawFreed(other.rawFreed),
           freedCount(other.freedCount) {}
     virtual ~IndexVectorBase() = default;
 
@@ -47,21 +48,33 @@ public:
 
     bool isReleased() const { return released; }
 
+    bool hasRawData() const { return !rawFreed; }
+
+    /// Throw if a caller is about to read or write the CPU copy after it was discarded.
+    void requireRawData() const {
+        if (!hasRawData()) {
+            throw std::logic_error("CPU index data was discarded after upload");
+        }
+    }
+
     void reserve(std::size_t count) { v.reserve(count); }
 
     void extend(std::size_t n, const uint16_t val) {
+        requireRawData();
         assert(!released);
         v.resize(v.size() + n, val);
         dirty = true;
     }
 
     uint16_t& at(std::size_t n) {
+        requireRawData();
         assert(n < v.size());
         assert(!released);
         dirty = true;
         return v.at(n);
     }
     const uint16_t& at(std::size_t n) const {
+        requireRawData();
         assert(n < v.size());
         return v.at(n);
     }
@@ -76,6 +89,7 @@ public:
         dirty = true;
         v.clear();
         freedCount = 0;
+        rawFreed = false;
         buffer.reset();
     }
 
@@ -88,7 +102,10 @@ public:
         }
     }
 
-    const uint16_t* data() const { return v.data(); }
+    const uint16_t* data() const {
+        requireRawData();
+        return v.data();
+    }
 
     const std::vector<uint16_t>& vector() const { return v; }
 
@@ -96,11 +113,13 @@ protected:
     void freeRawData() {
         freedCount += v.size();
         std::vector<uint16_t>().swap(v);
+        rawFreed = true;
     }
 
     std::unique_ptr<IndexBufferBase> buffer;
     bool dirty = true;
     bool released = false;
+    bool rawFreed = false;
     std::size_t freedCount = 0;
 };
 
@@ -114,6 +133,7 @@ public:
     template <class... Args>
     void emplace_back(Args&&... args) {
         static_assert(sizeof...(args) % groupSize == 0, "wrong buffer element count");
+        requireRawData();
         assert(!released);
         util::ignore({(v.emplace_back(std::forward<Args>(args)), 0)...});
         dirty = true;
