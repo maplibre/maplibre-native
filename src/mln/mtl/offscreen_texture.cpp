@@ -91,6 +91,7 @@ public:
     void swap() override {
         assert(commandBuffer);
         commandBuffer->commit();
+        lastCommitted = commandBuffer;
         commandBuffer.reset();
         renderPassDescriptor.reset();
     }
@@ -98,10 +99,12 @@ public:
     PremultipliedImage readStillImage() {
         assert(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
 
-        // The queue runs command buffers in order, so an empty one completes after every pass committed so far.
-        const auto fence = NS::RetainPtr(context.getBackend().getCommandQueue()->commandBuffer());
-        fence->commit();
-        fence->waitUntilCompleted();
+        // Wait for the last pass committed on this texture. Metal tracks the texture, so the passes that
+        // wrote it before that one have finished too.
+        if (lastCommitted) {
+            lastCommitted->waitUntilCompleted();
+            lastCommitted.reset();
+        }
 
         auto data = std::make_unique<uint8_t[]>(colorTexture->getDataSize());
         MTL::Region region = MTL::Region::Make2D(0, 0, size.width, size.height);
@@ -138,6 +141,7 @@ private:
     gfx::Texture2DPtr depthTexture;
     gfx::Texture2DPtr stencilTexture;
     MTLCommandBufferPtr commandBuffer;
+    MTLCommandBufferPtr lastCommitted;
     MTLRenderPassDescriptorPtr renderPassDescriptor;
 };
 
