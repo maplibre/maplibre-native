@@ -16,6 +16,6 @@
     "render-tests/sprites/1x-screen-2x-pattern": "Needs to be investigated and fixed.",
     "render-tests/text-field/formatted-images": "Needs to be investigated and fixed.",
     "render-tests/symbol-visibility/visible": "Needs to be investigated and fixed.",
-    "render-tests/terrain/fill-extrusion-multiple": "since #4971 (DEM sampled at pixel centres) a fill-extrusion on terrain shows a step across its roof, about 2 px at exaggeration 1 and in proportion to the exaggeration; seen on macOS Metal and WebGPU, cause not found yet",
+    "render-tests/terrain/fill-extrusion-multiple": "not run on this backend after the centroid fix; baseline unchecked",
     "render-tests/terrain/fill-extrusion-occluded": "block height changed by the centroid fix; new baseline to come from the CI actual image"
 }
