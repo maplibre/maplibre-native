@@ -44,6 +44,7 @@ private:
     void prepare(const LayerPrepareParameters&) override;
 
     void removeRenderTargets(UniqueChangeRequestVec&);
+    void releaseRenderedTargets(UniqueChangeRequestVec&);
 
     // Paint properties
     style::HillshadePaintProperties::Unevaluated unevaluated;

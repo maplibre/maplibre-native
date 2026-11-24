@@ -1,5 +1,9 @@
 #include <mln/test/util.hpp>
 
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/headless_backend.hpp>
+
 #include <mln/map/camera.hpp>
 #include <mln/map/transform.hpp>
 #include <mln/math/angles.hpp>
@@ -540,6 +544,51 @@ TEST(TerrainMeshCover, DilationSkipsNeighboursOverTilesTheCoverHas) {
     EXPECT_TRUE(dilated.contains(UnwrappedTileID(0, CanonicalTileID(2, 1, 0))));
     EXPECT_TRUE(dilated.contains(coarse));
     EXPECT_TRUE(dilated.contains(fine));
+}
+
+namespace {
+class TerrainMeshBuffers : public ::testing::Test {
+protected:
+    std::unique_ptr<gfx::HeadlessBackend> backend = gfx::HeadlessBackend::Create({64, 64});
+    gfx::BackendScope scope{*backend->getRendererBackend()};
+    gfx::Context& context = backend->getRendererBackend()->getContext();
+    RenderTerrain terrain{makeMutable<style::Terrain::Impl>("dem", 1.0f)};
+};
+
+struct TestTerrainIndexBuffer : gfx::IndexBufferBase {};
+} // namespace
+
+TEST_F(TerrainMeshBuffers, SurfaceAndDepthTilesShareTheSameTopology) {
+    const auto& mesh = terrain.getMesh(context);
+    ASSERT_TRUE(mesh.indices);
+    EXPECT_TRUE(mesh.indices->isReleased());
+    EXPECT_EQ(mesh.indices->elements(), mesh.indexCount);
+    EXPECT_EQ(mesh.indices->bytes(), mesh.indexCount * sizeof(uint16_t));
+    EXPECT_EQ(mesh.indexCount, 6u * (128u * 128u + 4u * 128u));
+    for (const auto index : mesh.indices->vector()) {
+        EXPECT_LT(index, mesh.vertexCount);
+    }
+    for (int tile = 0; tile < 64; ++tile) {
+        EXPECT_EQ(mesh.indices, terrain.getMesh(context).indices);
+        EXPECT_EQ(mesh.indices, terrain.getDepthMesh(context).indices);
+    }
+}
+
+TEST_F(TerrainMeshBuffers, LaterTilesReuseTheUploadAfterTheCpuCopyIsFreed) {
+    const auto indexes = terrain.getMesh(context).indices;
+    const auto count = indexes->elements();
+    // Simulate the backend's first upload, which stores the GPU resource on the vector.
+    auto buffer = std::make_unique<TestTerrainIndexBuffer>();
+    const auto* uploaded = buffer.get();
+    indexes->setBuffer(std::move(buffer));
+    indexes->setDirty(false);
+    EXPECT_TRUE(indexes->vector().empty());
+    EXPECT_EQ(indexes->elements(), count);
+    EXPECT_FALSE(indexes->empty());
+    const auto& depth = terrain.getDepthMesh(context);
+    EXPECT_EQ(depth.indices->getBuffer(), uploaded);
+    EXPECT_FALSE(depth.indices->getDirty());
+    EXPECT_EQ(depth.indexCount, count);
 }
 
 // The cap is for the far tiles a steep pitch or a wide field of view pulls in. A view with one
