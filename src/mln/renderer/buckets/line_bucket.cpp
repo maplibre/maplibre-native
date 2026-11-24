@@ -55,8 +55,8 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
                 if (point == prev) {
                     continue;
                 }
-                neighborsMap[point].emplace_back(std::make_pair(prev, vertexOffset * 2.0 + 0));
-                neighborsMap[prev].emplace_back(std::make_pair(point, vertexOffset * 2.0 + 1));
+                neighborsMap[point].emplace_back(std::make_pair(prev, vertexOffset * 2 + 0));
+                neighborsMap[prev].emplace_back(std::make_pair(point, vertexOffset * 2 + 1));
             }
         }
     }
