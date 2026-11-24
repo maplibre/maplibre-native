@@ -26,6 +26,10 @@ public:
     ~RasterDEMSource() override;
     bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 
+    /// The encoding the source's tiles are decoded with: the loaded tileset's, else the
+    /// constructor's `options` or tileset, else `Mapbox`.
+    Tileset::RasterEncoding getEncoding() const;
+
 protected:
     void setTilesetOverrides(Tileset& tileset) override;
 

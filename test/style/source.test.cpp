@@ -696,6 +696,19 @@ TEST(Source, RasterDEMInlineZoomOverridesTileJSON) {
     test.run();
 }
 
+TEST(Source, RasterDEMEncoding) {
+    const std::string url = "url";
+    EXPECT_EQ(Tileset::RasterEncoding::Mapbox, RasterDEMSource("source", url, 512).getEncoding());
+
+    const SourceOptions terrarium{.rasterEncoding = Tileset::RasterEncoding::Terrarium};
+    EXPECT_EQ(Tileset::RasterEncoding::Terrarium, RasterDEMSource("source", url, 512, terrarium).getEncoding());
+
+    Tileset tileset({"tiles"});
+    EXPECT_EQ(Tileset::RasterEncoding::Mapbox, RasterDEMSource("source", tileset, 512).getEncoding());
+    tileset.rasterEncoding = Tileset::RasterEncoding::Terrarium;
+    EXPECT_EQ(Tileset::RasterEncoding::Terrarium, RasterDEMSource("source", tileset, 512).getEncoding());
+}
+
 TEST(Source, RasterInlineZoomOverridesTileJSON) {
     SourceTest test;
 

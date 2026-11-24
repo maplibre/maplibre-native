@@ -146,25 +146,11 @@ mln::Tileset MLNTileSetFromTileURLTemplates(
     }
   }
 
-  NSNumber *encodingNumber = options[MLNTileSourceOptionDEMEncoding];
-  if (encodingNumber) {
-    if (![encodingNumber isKindOfClass:[NSValue class]]) {
-      [NSException raise:NSInvalidArgumentException
-                  format:@"MLNTileSourceOptionDEMEncoding must be set to an NSValue or NSNumber."];
-    }
-    MLNDEMEncoding encoding;
-    [encodingNumber getValue:&encoding];
-    switch (encoding) {
-      case MLNDEMEncodingMapbox:
-        tileSet.rasterEncoding = mln::Tileset::RasterEncoding::Mapbox;
-        break;
-      case MLNDEMEncodingTerrarium:
-        tileSet.rasterEncoding = mln::Tileset::RasterEncoding::Terrarium;
-        break;
-    }
+  if (auto rasterEncoding = MLNRasterEncodingFromOptions(options)) {
+    tileSet.rasterEncoding = rasterEncoding;
   }
 
-  encodingNumber = options[MLNVectorTileSourceOptionEncoding];
+  NSNumber *encodingNumber = options[MLNVectorTileSourceOptionEncoding];
   if (encodingNumber) {
     if (![encodingNumber isKindOfClass:[NSValue class]]) {
       [NSException
@@ -184,4 +170,25 @@ mln::Tileset MLNTileSetFromTileURLTemplates(
   }
 
   return tileSet;
+}
+
+std::optional<mln::Tileset::RasterEncoding> MLNRasterEncodingFromOptions(
+    NSDictionary<MLNTileSourceOption, id> *options) {
+  NSNumber *encodingNumber = options[MLNTileSourceOptionDEMEncoding];
+  if (!encodingNumber) {
+    return std::nullopt;
+  }
+  if (![encodingNumber isKindOfClass:[NSValue class]]) {
+    [NSException raise:NSInvalidArgumentException
+                format:@"MLNTileSourceOptionDEMEncoding must be set to an NSValue or NSNumber."];
+  }
+  MLNDEMEncoding encoding;
+  [encodingNumber getValue:&encoding];
+  switch (encoding) {
+    case MLNDEMEncodingMapbox:
+      return mln::Tileset::RasterEncoding::Mapbox;
+    case MLNDEMEncodingTerrarium:
+      return mln::Tileset::RasterEncoding::Terrarium;
+  }
+  return std::nullopt;
 }

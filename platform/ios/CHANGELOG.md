@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Add `MLNRasterDEMSource -initWithIdentifier:configurationURL:tileSize:options:` and `MLNRasterDEMSource.encoding`, so `MLNTileSourceOptionDEMEncoding` also applies to a source created from a configuration or `pmtiles://` URL. Before, such a source decoded as Mapbox Terrain-RGB whatever the tiles were.
 - Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).
 - Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).

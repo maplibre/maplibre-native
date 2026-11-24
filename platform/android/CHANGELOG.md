@@ -2,6 +2,7 @@
 
 ## main
 
+- Add `RasterDemSource(id, uri, tileSize, encoding)` and `RasterDemSource.getEncoding()`, with the `ENCODING_MAPBOX` and `ENCODING_TERRARIUM` constants, so a `raster-dem` source created in code from a `url` or `pmtiles://` URI can decode Terrarium tiles. Before, only style JSON and `TileSet.encoding` could set it, and such a source decoded as Mapbox.
 - Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 
 ### 🐞 Bug fixes

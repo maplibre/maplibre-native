@@ -33,6 +33,21 @@ bool RasterDEMSource::supportsLayerType(const mln::style::LayerTypeInfo* info) c
     return mln::underlying_type(Tile::Kind::RasterDEM) == mln::underlying_type(info->tileKind);
 }
 
+Tileset::RasterEncoding RasterDEMSource::getEncoding() const {
+    if (const auto& tileset = impl().tileset; tileset && tileset->rasterEncoding) {
+        return *tileset->rasterEncoding;
+    }
+    if (options && options->rasterEncoding) {
+        return *options->rasterEncoding;
+    }
+    if (const auto& urlOrTileset = getURLOrTileset(); urlOrTileset.is<Tileset>()) {
+        if (const auto& encoding = urlOrTileset.get<Tileset>().rasterEncoding) {
+            return *encoding;
+        }
+    }
+    return Tileset::RasterEncoding::Mapbox;
+}
+
 void RasterDEMSource::setTilesetOverrides(Tileset& tileset) {
     RasterSource::setTilesetOverrides(tileset); // the inline zoom range
     if (options) {
