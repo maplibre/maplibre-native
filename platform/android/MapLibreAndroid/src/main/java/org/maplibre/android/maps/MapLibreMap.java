@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
@@ -467,6 +468,56 @@ public final class MapLibreMap {
   @NonNull
   public TerrainSkirtLength getTerrainSkirtLength() {
     return TerrainSkirtLength.values()[nativeMapView.getTerrainSkirtLength()];
+  }
+
+  /**
+   * Sets the color far 3D terrain fades toward: distance haze that blends the far edge of the
+   * terrain into whatever is drawn behind the map, such as a sky the app paints under a
+   * transparent map view.
+   * <p>
+   * The color's alpha is the most the ground is blended toward it. The haze shows only while
+   * {@link #setTerrainHazeRange(float)} is above 1. The default is transparent, no haze. Has no
+   * effect when terrain is not enabled.
+   *
+   * @param color the haze color, as an ARGB color int
+   */
+  public void setTerrainHazeColor(@ColorInt int color) {
+    nativeMapView.setTerrainHazeColor(color);
+  }
+
+  /**
+   * @return the color far 3D terrain fades toward, as an ARGB color int
+   * @see MapLibreMap#setTerrainHazeColor(int)
+   */
+  @ColorInt
+  public int getTerrainHazeColor() {
+    return nativeMapView.getTerrainHazeColor();
+  }
+
+  /**
+   * Sets how far the distance haze reaches, in multiples of the map center's distance from the
+   * camera.
+   * <p>
+   * Ground that far away and beyond takes the full {@link #setTerrainHazeColor(int) haze color};
+   * nearer ground fades toward it as in maplibre-gl-js's terrain fog with a
+   * {@code fog-ground-blend} of 0.5, so with 3 the haze begins at one and a half times the
+   * center's distance. As in maplibre-gl-js, the haze fades in between pitches of 60 and 70
+   * degrees. A value of 1 or less turns the haze off, and one above 1000 is held at 1000; the
+   * default is 0. Has no effect when terrain is not enabled.
+   *
+   * @param range the haze range, in multiples of the center's distance from the camera
+   */
+  public void setTerrainHazeRange(float range) {
+    nativeMapView.setTerrainHazeRange(range);
+  }
+
+  /**
+   * @return the haze range as the map holds it: 0 when the haze is off, otherwise between above 1
+   * and 1000
+   * @see MapLibreMap#setTerrainHazeRange(float)
+   */
+  public float getTerrainHazeRange() {
+    return nativeMapView.getTerrainHazeRange();
   }
 
   /**

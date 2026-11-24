@@ -9,6 +9,8 @@
 
 - With 3D terrain, markers, view annotations, line-placed labels and the collision index sit on the terrain surface instead of at sea level, and `Projection.toScreenLocation` / `fromScreenLocation` and their batch versions answer on the terrain surface, from a copy of the terrain heights kept on the map side, without waiting on the render thread. Add `Projection.fromScreenLocationAtCenterAltitude` for code that turns a screen point into a camera target ([#4558](https://github.com/maplibre/maplibre-native/pull/4558)).
 
+- With 3D terrain, add `MapLibreMap.setTerrainHazeColor(int)` and `setTerrainHazeRange(float)` (and their getters): distance haze that fades the far edge of the terrain toward a color, so it blends into what is drawn behind a transparent map instead of ending at a hard edge. The haze is off by default.
+
 ### 🐞 Bug fixes
 
 - Text a tile was drawn without because its glyph range failed to load is drawn as soon as the range loads, instead of when the tile is next reloaded.

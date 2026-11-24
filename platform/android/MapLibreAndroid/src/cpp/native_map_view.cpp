@@ -47,7 +47,10 @@
 
 #include <android/native_window_jni.h>
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <ctime>
 
@@ -1371,6 +1374,36 @@ jni::jint NativeMapView::getTerrainSkirtLength(JNIEnv&) {
     return jni::jint(static_cast<int>(map->getTerrainSkirtLength()));
 }
 
+void NativeMapView::setTerrainHazeColor(JNIEnv&, jni::jint argb) {
+    // An Android color is non-premultiplied ARGB, and mln::Color is premultiplied.
+    const auto bits = static_cast<std::uint32_t>(argb);
+    const float a = static_cast<float>((bits >> 24) & 0xFF) / 255.0f;
+    const float r = static_cast<float>((bits >> 16) & 0xFF) / 255.0f;
+    const float g = static_cast<float>((bits >> 8) & 0xFF) / 255.0f;
+    const float b = static_cast<float>(bits & 0xFF) / 255.0f;
+    map->setTerrainHaze(mln::Color{r * a, g * a, b * a, a}, map->getTerrainHazeRange());
+}
+
+jni::jint NativeMapView::getTerrainHazeColor(JNIEnv&) {
+    const mln::Color color = map->getTerrainHazeColor();
+    // Back to non-premultiplied ARGB, rounded so a color set from an Android color reads back as set.
+    const auto channel = [&](float premultiplied) {
+        const float value = color.a > 0.0f ? premultiplied / color.a : premultiplied;
+        return static_cast<std::uint32_t>(std::lround(std::clamp(value, 0.0f, 1.0f) * 255.0f));
+    };
+    const auto alpha = static_cast<std::uint32_t>(std::lround(std::clamp(color.a, 0.0f, 1.0f) * 255.0f));
+    return jni::jint(static_cast<std::int32_t>((alpha << 24) | (channel(color.r) << 16) | (channel(color.g) << 8) |
+                                               channel(color.b)));
+}
+
+void NativeMapView::setTerrainHazeRange(JNIEnv&, jni::jfloat range) {
+    map->setTerrainHaze(map->getTerrainHazeColor(), range);
+}
+
+jni::jfloat NativeMapView::getTerrainHazeRange(JNIEnv&) {
+    return jni::jfloat(map->getTerrainHazeRange());
+}
+
 void NativeMapView::setCenterClampedToGround(JNIEnv&, jni::jboolean clamped) {
     map->setCenterClampedToGround(clamped);
 }
@@ -1569,6 +1602,10 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getCenterAltitude, "nativeGetCenterAltitude"),
         METHOD(&NativeMapView::setTerrainSkirtLength, "nativeSetTerrainSkirtLength"),
         METHOD(&NativeMapView::getTerrainSkirtLength, "nativeGetTerrainSkirtLength"),
+        METHOD(&NativeMapView::setTerrainHazeColor, "nativeSetTerrainHazeColor"),
+        METHOD(&NativeMapView::getTerrainHazeColor, "nativeGetTerrainHazeColor"),
+        METHOD(&NativeMapView::setTerrainHazeRange, "nativeSetTerrainHazeRange"),
+        METHOD(&NativeMapView::getTerrainHazeRange, "nativeGetTerrainHazeRange"),
         METHOD(&NativeMapView::setCenterClampedToGround, "nativeSetCenterClampedToGround"),
         METHOD(&NativeMapView::getCenterClampedToGround, "nativeGetCenterClampedToGround"),
         METHOD(&NativeMapView::setDebugAboveGroundLog, "nativeSetDebugAboveGroundLog"),

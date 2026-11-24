@@ -262,4 +262,27 @@ class MapLibreMapTest : BaseTest() {
         verify { nativeMapView.setZoom(2.0, target, 0) }
     }
 
+    @Test
+    fun testSetTerrainHazeColor() {
+        maplibreMap.setTerrainHazeColor(0x80FF8000.toInt())
+        verify { nativeMapView.setTerrainHazeColor(0x80FF8000.toInt()) }
+    }
+
+    @Test
+    fun testGetTerrainHazeColor() {
+        every { nativeMapView.terrainHazeColor } returns 0x80FF8000.toInt()
+        assertEquals(0x80FF8000.toInt(), maplibreMap.terrainHazeColor)
+    }
+
+    @Test
+    fun testSetTerrainHazeRange() {
+        maplibreMap.setTerrainHazeRange(3.5f)
+        verify { nativeMapView.setTerrainHazeRange(3.5f) }
+    }
+
+    @Test
+    fun testGetTerrainHazeRange() {
+        every { nativeMapView.terrainHazeRange } returns 3.5f
+        assertEquals(3.5f, maplibreMap.terrainHazeRange, 0.0f)
+    }
 }

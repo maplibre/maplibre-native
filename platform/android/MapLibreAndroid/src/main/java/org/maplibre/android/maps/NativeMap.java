@@ -303,6 +303,14 @@ interface NativeMap {
 
   int getTerrainSkirtLength();
 
+  void setTerrainHazeColor(int color);
+
+  int getTerrainHazeColor();
+
+  void setTerrainHazeRange(float range);
+
+  float getTerrainHazeRange();
+
   void setCenterClampedToGround(boolean clamped);
 
   boolean getCenterClampedToGround();
