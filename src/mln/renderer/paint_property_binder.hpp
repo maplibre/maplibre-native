@@ -792,6 +792,10 @@ public:
                              const GeometryTileLayer& layer,
                              const ImagePositions& imagePositions) {
         if (!interleavedVertexBuffer.sharedVertexVector->hasRawData()) {
+            // Feature-state update rewrites these, make sure they weren't released.
+            if ((false || ... || binders.template get<Ps>()->dependsOnFeatureState())) {
+                interleavedVertexBuffer.sharedVertexVector->requireRawData();
+            }
             return;
         }
         util::ignore({(binders.template get<Ps>()->updateVertexVectors(states, layer, imagePositions), 0)...});
