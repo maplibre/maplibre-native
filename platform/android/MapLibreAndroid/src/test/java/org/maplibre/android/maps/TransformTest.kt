@@ -248,4 +248,44 @@ class TransformTest : BaseTest() {
         assertFalse(transform.setCenterAltitudeKeepingView(0.0))
         verify(exactly = 1) { nativeMapView.cameraPosition }
     }
+
+    @Test
+    fun testSetFieldOfViewRefreshesCameraPosition() {
+        transform.cameraPosition // cache the default camera
+        val wide = CameraPosition.Builder().target(LatLng(1.0, 2.0)).fov(70.0).build()
+        every { nativeMapView.setFieldOfView(70.0) } answers {
+            every { nativeMapView.cameraPosition } returns wide
+        }
+
+        transform.setFieldOfView(70.0)
+
+        verify(exactly = 1) { nativeMapView.setFieldOfView(70.0) }
+        assertEquals(wide, transform.cameraPosition)
+    }
+
+    @Test
+    fun testGetFieldOfViewAsksTheNativeMap() {
+        every { nativeMapView.fieldOfView } returns 55.0
+        assertEquals(55.0, transform.fieldOfView, 0.0)
+    }
+
+    @Test
+    fun testSetCenterFromEyeMovesTheCameraAndRefreshesCameraPosition() {
+        transform.cameraPosition // cache the default camera
+        val moved = CameraPosition.Builder().target(LatLng(38.72, -120.07)).tilt(48.0).build()
+        every { nativeMapView.setCenterFromEye(any(), any(), any(), any(), any(), any()) } answers {
+            every { nativeMapView.cameraPosition } returns moved
+        }
+
+        transform.setCenterFromEye(LatLng(38.72, -120.07), 1000.0, LatLng(38.70, -120.07), 3000.0)
+
+        verifyOrder {
+            nativeMapView.cancelTransitions()
+            nativeMapView.setCenterFromEye(38.72, -120.07, 1000.0, 38.70, -120.07, 3000.0)
+        }
+        verify(exactly = 1) { cameraChangeDispatcher.onCameraMoveStarted(any()) }
+        // Two idle notifications: one from cancelTransitions(), one from the end of the eye move.
+        verify(exactly = 2) { cameraChangeDispatcher.onCameraIdle() }
+        assertEquals(moved, transform.cameraPosition)
+    }
 }

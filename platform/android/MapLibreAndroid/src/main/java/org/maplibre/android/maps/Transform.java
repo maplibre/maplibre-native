@@ -332,6 +332,26 @@ public class Transform implements MapView.OnCameraDidChangeListener {
     return nativeMap.getCenterAltitude();
   }
 
+  void setFieldOfView(double degrees) {
+    nativeMap.setFieldOfView(degrees);
+    invalidateCameraPosition();
+  }
+
+  double getFieldOfView() {
+    return nativeMap.getFieldOfView();
+  }
+
+  @UiThread
+  void setCenterFromEye(@NonNull LatLng center, double centerAltitude, @NonNull LatLng eye,
+                        double eyeAltitude) {
+    cancelTransitions();
+    cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
+    nativeMap.setCenterFromEye(center.getLatitude(), center.getLongitude(), centerAltitude,
+      eye.getLatitude(), eye.getLongitude(), eyeAltitude);
+    invalidateCameraPosition();
+    cameraChangeDispatcher.onCameraIdle();
+  }
+
   void moveBy(double offsetX, double offsetY, long duration) {
     if (duration > 0) {
       mapView.addOnCameraDidChangeListener(moveByChangeListener);

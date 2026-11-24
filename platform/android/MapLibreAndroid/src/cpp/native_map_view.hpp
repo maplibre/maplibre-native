@@ -352,6 +352,12 @@ public:
 
     jni::jdouble getCenterAltitude(JNIEnv&);
 
+    void setFieldOfView(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getFieldOfView(JNIEnv&);
+
+    void setCenterFromEye(JNIEnv&, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble);
+
     void setTerrainSkirtLength(JNIEnv&, jni::jint);
 
     jni::jint getTerrainSkirtLength(JNIEnv&);

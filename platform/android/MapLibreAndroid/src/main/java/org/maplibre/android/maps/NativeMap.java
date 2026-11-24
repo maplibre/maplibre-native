@@ -299,6 +299,13 @@ interface NativeMap {
 
   double getCenterAltitude();
 
+  void setFieldOfView(double degrees);
+
+  double getFieldOfView();
+
+  void setCenterFromEye(double centerLatitude, double centerLongitude, double centerAltitude,
+                        double eyeLatitude, double eyeLongitude, double eyeAltitude);
+
   void setTerrainSkirtLength(int length);
 
   int getTerrainSkirtLength();
