@@ -11,6 +11,7 @@
 
 ### 🐞 Bug fixes
 
+- With 3D terrain, a fill-extrusion near a tile edge no longer shows a step across its roof, and one stands at the height of the ground under its middle. The height came from the mean of the corners of its ring with the first corner counted twice, and the part of the polygon in a neighboring tile's buffer was drawn at a height of its own.
 - Text a tile was drawn without because its glyph range failed to load is drawn as soon as the range loads, instead of when the tile is next reloaded.
 - With 3D terrain, a map pitched at or just under the level-of-detail pitch threshold (60 degrees) no longer shows the sky through the far corners of the view. Such a view needs more mesh tiles than the load mode's cap when the mesh is no deeper than the DEM, and the farthest were dropped.
 - With 3D terrain on, a `GeoJsonSource` updated with `setGeoJson` or emptied of its features shows the change on the terrain at once, instead of keeping its old content until the next zoom level ([#4816](https://github.com/maplibre/maplibre-native/pull/4816)).

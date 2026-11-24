@@ -21,6 +21,7 @@
 #pragma warning(pop)
 #endif
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 
@@ -54,6 +55,20 @@ using namespace style;
 
 struct GeometryTooLongException : std::exception {};
 
+namespace {
+
+// True when every vertex of the ring is beyond the same edge of the tile, so the ring
+// lies wholly in the buffer. The neighbouring tile holds the same feature and draws it.
+bool isEntirelyOutside(const GeometryCoordinates& ring) {
+    const auto all = [&ring](auto outside) {
+        return std::ranges::all_of(ring, outside);
+    };
+    return all([](const auto& p) { return p.x < 0; }) || all([](const auto& p) { return p.x > util::EXTENT; }) ||
+           all([](const auto& p) { return p.y < 0; }) || all([](const auto& p) { return p.y > util::EXTENT; });
+}
+
+} // namespace
+
 FillExtrusionBucket::FillExtrusionBucket(
     const FillExtrusionBucket::PossiblyEvaluatedLayoutProperties& layout_,
     const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
@@ -81,6 +96,11 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
     const auto vertexOffset = vertices.elements();
 
     for (auto& polygon : classifyRings(geometry)) {
+        // A copy of a polygon that lies wholly in the tile buffer is cut off at the buffer edge, so
+        // its centroid, and with it its terrain elevation, differs from the copy in the tile that
+        // holds it. Drawn together they step across the roof. Like maplibre-gl-js, draw it only there.
+        if (polygon.empty() || isEntirelyOutside(polygon.front())) continue;
+
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
@@ -107,12 +127,17 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         // single terrain elevation instead of shearing across a slope (as gl-js does)
         Point<int16_t> centroid{0, 0};
         if (!polygon.empty() && !polygon.front().empty()) {
+            // A closed ring repeats its first vertex at the end. Counting it twice pulls the
+            // centroid towards wherever the ring happens to start, so leave it out.
+            const auto& ring = polygon.front();
+            const auto closed = ring.size() > 1 && ring.front() == ring.back();
+            const auto sampled = ring.size() - (closed ? 1 : 0);
             Point<double> accum{0.0, 0.0};
-            for (const auto& pt : polygon.front()) {
-                accum.x += pt.x;
-                accum.y += pt.y;
+            for (std::size_t i = 0; i < sampled; ++i) {
+                accum.x += ring[i].x;
+                accum.y += ring[i].y;
             }
-            const auto count = static_cast<double>(polygon.front().size());
+            const auto count = static_cast<double>(sampled);
             centroid.x = static_cast<int16_t>(std::floor(accum.x / count));
             centroid.y = static_cast<int16_t>(std::floor(accum.y / count));
         }
