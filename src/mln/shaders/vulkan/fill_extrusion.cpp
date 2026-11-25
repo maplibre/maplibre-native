@@ -57,7 +57,7 @@ const std::array<TextureInfo, 1> FillExtrusionInstancedShaderSource::textures = 
 
 using FillExtrusionPatternShaderSource = ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<AttributeInfo, 6> FillExtrusionPatternShaderSource::attributes = {
+const std::array<AttributeInfo, 7> FillExtrusionPatternShaderSource::attributes = {
     AttributeInfo{
         0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute, idFillExtrusionInstancedDrawableUBO},
     AttributeInfo{
@@ -66,9 +66,12 @@ const std::array<AttributeInfo, 6> FillExtrusionPatternShaderSource::attributes 
     AttributeInfo{3, gfx::AttributeDataType::Float2, idFillExtrusionHeightVertexAttribute},
     AttributeInfo{4, gfx::AttributeDataType::UShort4, idFillExtrusionPatternFromVertexAttribute},
     AttributeInfo{5, gfx::AttributeDataType::UShort4, idFillExtrusionPatternToVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Short2, idFillExtrusionCentroidVertexAttribute},
 };
-const std::array<TextureInfo, 1> FillExtrusionPatternShaderSource::textures = {
+// The DEM binding is the texture-id slot (1), see the plain shader source note.
+const std::array<TextureInfo, 2> FillExtrusionPatternShaderSource::textures = {
     TextureInfo{0, idFillExtrusionImageTexture},
+    TextureInfo{1, idFillExtrusionDEMTexture},
 };
 
 //
@@ -92,8 +95,9 @@ const std::array<AttributeInfo, 6> FillExtrusionPatternInstancedShaderSource::in
     AttributeInfo{5, gfx::AttributeDataType::UShort4, idFillExtrusionPatternFromVertexAttribute},
     AttributeInfo{6, gfx::AttributeDataType::UShort4, idFillExtrusionPatternToVertexAttribute},
 };
-const std::array<TextureInfo, 1> FillExtrusionPatternInstancedShaderSource::textures = {
+const std::array<TextureInfo, 2> FillExtrusionPatternInstancedShaderSource::textures = {
     TextureInfo{0, idFillExtrusionImageTexture},
+    TextureInfo{1, idFillExtrusionDEMTexture},
 };
 
 } // namespace shaders

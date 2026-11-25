@@ -28,6 +28,9 @@ MBGL_DEFINE_ATTRIBUTE(int16_t, 2, normal2d);
 // per building so extrusions don't shear across a slope (see fill_extrusion)
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, centroid);
 
+MBGL_DEFINE_ATTRIBUTE(uint32_t, 3, triangle_indices);
+MBGL_DEFINE_ATTRIBUTE(int16_t, 2, prev_next_offset);
+
 #if MLN_USE_SYMBOL_INSTANCING
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 1, sorted_instance);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 4, pos_scale);

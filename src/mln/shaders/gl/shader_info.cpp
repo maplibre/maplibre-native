@@ -231,6 +231,7 @@ const std::vector<AttributeInfo> FillExtrusionPatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
     AttributeInfo{"a_decimals_ed", idFillExtrusionDecimalsEdAttribute},
     AttributeInfo{"a_normal2d", idFillExtrusionNormal2DVertexAttribute},
+    AttributeInfo{"a_centroid", idFillExtrusionCentroidVertexAttribute},
     AttributeInfo{"a_base", idFillExtrusionBaseVertexAttribute},
     AttributeInfo{"a_height", idFillExtrusionHeightVertexAttribute},
     AttributeInfo{"a_pattern_from", idFillExtrusionPatternFromVertexAttribute},
@@ -238,6 +239,7 @@ const std::vector<AttributeInfo> FillExtrusionPatternShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> FillExtrusionPatternShaderInfo::textures = {
     TextureInfo{"u_image", idFillExtrusionImageTexture},
+    TextureInfo{"u_dem", idFillExtrusionDEMTexture},
 };
 
 // Heatmap

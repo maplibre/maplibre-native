@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "centerClampedToGround": true,
+      "height": 512,
+      "width": 512,
+      "description": "A patterned fill-extrusion standing on high ground, seen from straight above so only its roof shows: the pattern has to be drawn on top of the terrain, not under it at sea level.",
+      "threshold": 0.02,
+      "allowed": 0.005
+    }
+  },
+  "center": [
+    11.43402,
+    47.36645
+  ],
+  "zoom": 14,
+  "pitch": 0,
+  "bearing": 0,
+  "sprite": "local://sprites/emerald",
+  "sources": {
+    "terrain": {
+      "type": "raster-dem",
+      "tiles": [
+        "local://tiles/terrain-shading/{z}-{x}-{y}.terrain.png"
+      ],
+      "maxzoom": 12,
+      "tileSize": 256
+    },
+    "buildings": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                11.43152,
+                47.36795
+              ],
+              [
+                11.43652,
+                47.36795
+              ],
+              [
+                11.43652,
+                47.372949999999996
+              ],
+              [
+                11.43152,
+                47.372949999999996
+              ],
+              [
+                11.43152,
+                47.36795
+              ]
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "building",
+      "type": "fill-extrusion",
+      "source": "buildings",
+      "paint": {
+        "fill-extrusion-pattern": "generic_icon",
+        "fill-extrusion-height": 400,
+        "fill-extrusion-base": 0,
+        "fill-extrusion-vertical-gradient": false,
+        "fill-extrusion-opacity": 1
+      }
+    }
+  ],
+  "terrain": {
+    "source": "terrain",
+    "exaggeration": 1
+  }
+}

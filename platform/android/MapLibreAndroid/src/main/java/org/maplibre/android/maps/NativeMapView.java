@@ -1600,9 +1600,9 @@ final class NativeMapView implements NativeMap {
   }
 
   @Keep
-  private void onRenderError() {
+  private void onRenderError(String message) {
     if (stateCallback != null) {
-      stateCallback.onRenderError();
+      stateCallback.onRenderError(message);
     }
   }
 
@@ -2188,7 +2188,7 @@ final class NativeMapView implements NativeMap {
 
     void onSpriteRequested(String id, String url);
 
-    void onRenderError();
+    void onRenderError(String message);
 
     void onSymbolError(String message);
   }

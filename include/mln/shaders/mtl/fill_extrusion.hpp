@@ -371,9 +371,9 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto source = R"(
@@ -394,6 +394,9 @@ struct VertexStage {
 #if !defined(HAS_UNIFORM_u_pattern_to)
     ushort4 pattern_to [[attribute(5)]];
 #endif
+
+    // Polygon centroid, for the terrain elevation lookup
+    short2 centroid [[attribute(6)]];
 };
 
 struct FragmentStage {
@@ -420,7 +423,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
                                 device const FillExtrusionTilePropsUBO* tilePropsVector [[buffer(idFillExtrusionTilePropsUBO)]],
-                                device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]]) {
+                                device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
+                                texture2d<float, access::sample> demTexture [[texture(1)]],
+                                sampler demSampler [[sampler(1)]]) {
 
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
     device const FillExtrusionTilePropsUBO& tileProps = tilePropsVector[uboIndex];
@@ -441,7 +446,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
     const float2 decimals = unpack_float(float(vertx.decimals_ed.x / 2)) / 128.0;
 
-    const float4 position = drawable.matrix * float4(float2(vertx.pos) + decimals, z, 1);
+    // Raise the extrusion by the terrain elevation sampled once at the polygon centroid, and
+    // drop ground-level floors slightly so buildings don't hang off a slope (as the plain
+    // extrusion shader does). The pattern position and the side gradient keep the height
+    // above the ground, so the pattern does not shift with the terrain.
+    const float ele = get_elevation(float2(vertx.centroid), demTexture, demSampler, drawable.dem_coords,
+                                    drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration,
+                                    drawable.dem_enabled);
+    const float lifted_z = z + ele - (t != 0.0 || base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+
+    const float4 position = drawable.matrix * float4(float2(vertx.pos) + decimals, lifted_z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -560,7 +574,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternInstancedShader, gfx::Backend::
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 6> instanceAttributes;
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto source = R"(
@@ -618,7 +632,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillExtrusionTilePropsUBO* tilePropsVector [[buffer(idFillExtrusionTilePropsUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
                                 uint instanceID [[ instance_id ]],
-                                device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]]) {
+                                device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]],
+                                texture2d<float, access::sample> demTexture [[texture(1)]],
+                                sampler demSampler [[sampler(1)]]) {
 
     bool isDiscarded = glMod(float(outline[instanceID].decimals_ed.x), 2.0) > 0.0;
     if (isDiscarded) {
@@ -660,7 +676,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float t = float(vertx.pos.y);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
 
-    const float4 position = drawable.matrix * float4(vertx.pos.x == 0.0 ? p1 : p2, z, 1);
+    // Same rigid whole-building lift as the plain instanced shader: elevation at the polygon
+    // centroid (from the aliased instance record). The pattern position and the side gradient
+    // keep the height above the ground, so the pattern does not shift with the terrain.
+    const float ele = get_elevation(float2(outline[instanceID].centroid_pos), demTexture, demSampler,
+                                    drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim,
+                                    drawable.dem_exaggeration, drawable.dem_enabled);
+    const float lifted_z = z + ele - (t != 0.0 || base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+
+    const float4 position = drawable.matrix * float4(vertx.pos.x == 0.0 ? p1 : p2, lifted_z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
