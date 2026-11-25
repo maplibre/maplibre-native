@@ -356,6 +356,7 @@ objc_library(
     ],
     visibility = ["//platform/ios:__pkg__"],
     deps = [
+        ":ios-sdk",
         ":objc-headers",
         "//:mbgl-core",
     ],

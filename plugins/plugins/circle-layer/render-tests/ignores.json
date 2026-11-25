@@ -1,0 +1,14 @@
+{
+  "render-tests/circle-color/global-state": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/circle-color/global-state-with-get": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/circle-radius/global-state": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/circle-radius/global-state-with-get": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/circle-sort-key/literal": "Plugin layout properties support camera expressions only, so there is no circle-sort-key",
+  "render-tests/feature-state/with-global-state": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/global-state/basic": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/global-state/set-property": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/global-state/with-feature-state/basic": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/global-state/with-feature-state/set-and-remove": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/global-state/with-get": "Plugin properties are not evaluated with the style's global state",
+  "render-tests/within/paint-circle": "Plugin properties are not evaluated with the canonical id of the tile, which `within` needs"
+}

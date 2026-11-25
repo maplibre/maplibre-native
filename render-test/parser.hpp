@@ -2,6 +2,7 @@
 
 #include "metadata.hpp"
 
+#include <mln/render_test.hpp>
 #include <mln/util/rapidjson.hpp>
 #include <mln/util/variant.hpp>
 
@@ -24,7 +25,7 @@ std::vector<std::string> readExpectedJSONEntries(const mln::filesystem::path& ba
 
 TestMetrics readExpectedMetrics(const mln::filesystem::path& path);
 
-TestMetadata parseTestMetadata(const TestPaths& paths);
+TestMetadata parseTestMetadata(const TestPaths& paths, const mln::TestStyleTransform& transformStyle);
 TestOperations parseTestOperations(TestMetadata& metadata);
 
 // Continuous mode: renders frames until the map is idle (no still image can be requested in that mode).

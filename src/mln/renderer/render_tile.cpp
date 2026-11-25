@@ -145,4 +145,8 @@ void RenderTile::setFeatureState(const LayerFeatureStates& states) {
     tile.setFeatureState(states);
 }
 
+uint64_t& RenderTile::featureStateVersion() {
+    return tile.featureStateVersion;
+}
+
 } // namespace mln

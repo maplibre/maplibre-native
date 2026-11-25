@@ -78,11 +78,15 @@ public:
     /// Render the layer groups
     void render(RenderOrchestrator&, const RenderTree&, PaintParameters&);
 
+    /// Whether `render` has run at least once, so the texture holds the result
+    bool hasBeenRendered() const noexcept { return rendered; }
+
 protected:
     gfx::Context& context;
     std::unique_ptr<gfx::OffscreenTexture> offscreenTexture;
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
+    bool rendered = false;
 };
 
 } // namespace mln
