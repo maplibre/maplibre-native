@@ -56,6 +56,18 @@ std::optional<uint8_t> Source::getPrefetchZoomDelta() const noexcept {
     return baseImpl->getPrefetchZoomDelta();
 }
 
+void Source::setCachedTileFallbackEnabled(std::optional<bool> enabled) noexcept {
+    if (getCachedTileFallbackEnabled() == enabled) return;
+    auto newImpl = createMutable();
+    newImpl->setCachedTileFallbackEnabled(enabled);
+    baseImpl = std::move(newImpl);
+    observer->onSourceChanged(*this);
+}
+
+std::optional<bool> Source::getCachedTileFallbackEnabled() const noexcept {
+    return baseImpl->getCachedTileFallbackEnabled();
+}
+
 void Source::setMinimumTileUpdateInterval(Duration interval) noexcept {
     if (getMinimumTileUpdateInterval() == interval) return;
     auto newImpl = createMutable();

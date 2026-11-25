@@ -1409,3 +1409,177 @@ TEST(UpdateRenderables, MaxParentOverscaleFactor) {
                          GetTileDataAction{{5, 0, {5, 3, 1}}, NotFound}}),
               log);
 }
+
+namespace {
+
+/// Tiles held in a mock in-memory tile cache, apart from the source's tiles.
+struct MockTileCache {
+    std::map<OverscaledTileID, std::unique_ptr<MockTileData>> tiles;
+
+    MockTileData* add(const OverscaledTileID& tileID) {
+        auto& tile = tiles[tileID] = std::make_unique<MockTileData>(tileID);
+        tile->renderable = true;
+        return tile.get();
+    }
+};
+
+auto getCachedTileFn(MockSource& source, MockTileCache& cache) {
+    return [&](const OverscaledTileID& id) -> MockTileData* {
+        if (auto it = source.dataTiles.find(id); it != source.dataTiles.end()) {
+            return it->second->isRenderable() ? it->second.get() : nullptr;
+        }
+        auto it = cache.tiles.find(id);
+        return it != cache.tiles.end() ? it->second.get() : nullptr;
+    };
+}
+
+ActionLog renderActions(const ActionLog& log) {
+    ActionLog result;
+    for (const auto& entry : log) {
+        if (entry.is<RenderTileAction>()) {
+            result.push_back(entry);
+        }
+    }
+    return result;
+}
+
+void runWithCachedFallback(ActionLog& log,
+                           MockSource& source,
+                           MockTileCache& cache,
+                           algorithm::CachedTileFallbackLimits limits) {
+    algorithm::updateRenderables(getTileDataFn(log, source.dataTiles),
+                                 createTileDataFn(log, source.dataTiles),
+                                 retainTileDataFn(log),
+                                 renderTileFn(log),
+                                 source.idealTiles,
+                                 source.dataTiles,
+                                 source.zoomRange,
+                                 std::nullopt,
+                                 getCachedTileFn(source, cache),
+                                 limits);
+}
+
+} // namespace
+
+TEST(UpdateRenderables, CachedFallbackDisabledIgnoresCache) {
+    ActionLog log;
+    MockSource source;
+    MockTileCache cache;
+    cache.add(OverscaledTileID{1, 0, 0});
+    source.idealTiles.emplace(OverscaledTileID{3, 0, 0});
+
+    algorithm::updateRenderables(getTileDataFn(log, source.dataTiles),
+                                 createTileDataFn(log, source.dataTiles),
+                                 retainTileDataFn(log),
+                                 renderTileFn(log),
+                                 source.idealTiles,
+                                 source.dataTiles,
+                                 source.zoomRange);
+    EXPECT_EQ(ActionLog(), renderActions(log));
+}
+
+TEST(UpdateRenderables, CachedFallbackParent) {
+    ActionLog log;
+    MockSource source;
+    MockTileCache cache;
+    auto* tile_1_0_0 = cache.add(OverscaledTileID{1, 0, 0});
+    cache.add(OverscaledTileID{0, 0, 0});
+    source.idealTiles.emplace(OverscaledTileID{3, 0, 0});
+
+    // The ideal tile was just created and has not tried its cache request, so
+    // the regular parent search does not take parents from the cache. The
+    // fallback draws the nearest cached parent and does not request it.
+    runWithCachedFallback(log, source, cache, {.maxParentZoomDelta = 255, .maxChildZoomDelta = 2});
+    EXPECT_EQ(ActionLog({RenderTileAction{{1, 0, 0}, *tile_1_0_0}}), renderActions(log));
+    EXPECT_NE(log.end(),
+              std::ranges::find(log, ActionLogEntry{RetainTileDataAction{{1, 0, {1, 0, 0}}, TileNecessity::Optional}}));
+
+    // Limited to one level up, the parent two levels up is not used.
+    log.clear();
+    runWithCachedFallback(log, source, cache, {.maxParentZoomDelta = 1, .maxChildZoomDelta = 2});
+    EXPECT_EQ(ActionLog(), renderActions(log));
+}
+
+TEST(UpdateRenderables, CachedFallbackChildrenCover) {
+    ActionLog log;
+    MockSource source;
+    MockTileCache cache;
+    cache.add(OverscaledTileID{0, 0, 0});
+    auto* c_2_0_0 = cache.add(OverscaledTileID{2, 0, 0});
+    auto* c_2_0_1 = cache.add(OverscaledTileID{2, 0, 1});
+    auto* c_2_1_0 = cache.add(OverscaledTileID{2, 1, 0});
+    // The fourth child {2, 1, 1} is covered by its four children.
+    auto* g_3_2_2 = cache.add(OverscaledTileID{3, 2, 2});
+    auto* g_3_2_3 = cache.add(OverscaledTileID{3, 2, 3});
+    auto* g_3_3_2 = cache.add(OverscaledTileID{3, 3, 2});
+    auto* g_3_3_3 = cache.add(OverscaledTileID{3, 3, 3});
+    source.idealTiles.emplace(OverscaledTileID{1, 0, 0});
+
+    // The children cover the ideal tile, so no parent is drawn.
+    runWithCachedFallback(log, source, cache, {.maxParentZoomDelta = 255, .maxChildZoomDelta = 2});
+    EXPECT_EQ(ActionLog({
+                  RenderTileAction{{2, 0, 0}, *c_2_0_0},
+                  RenderTileAction{{2, 0, 1}, *c_2_0_1},
+                  RenderTileAction{{2, 1, 0}, *c_2_1_0},
+                  RenderTileAction{{3, 2, 2}, *g_3_2_2},
+                  RenderTileAction{{3, 2, 3}, *g_3_2_3},
+                  RenderTileAction{{3, 3, 2}, *g_3_3_2},
+                  RenderTileAction{{3, 3, 3}, *g_3_3_3},
+              }),
+              renderActions(log));
+}
+
+TEST(UpdateRenderables, CachedFallbackChildrenAndParent) {
+    ActionLog log;
+    MockSource source;
+    MockTileCache cache;
+    auto* p_0_0_0 = cache.add(OverscaledTileID{0, 0, 0});
+    auto* c_2_0_0 = cache.add(OverscaledTileID{2, 0, 0});
+    auto* g_3_2_2 = cache.add(OverscaledTileID{3, 2, 2});
+    source.idealTiles.emplace(OverscaledTileID{1, 0, 0});
+
+    // The children leave gaps, so the parent is drawn under them.
+    runWithCachedFallback(log, source, cache, {.maxParentZoomDelta = 255, .maxChildZoomDelta = 2});
+    EXPECT_EQ(ActionLog({
+                  RenderTileAction{{2, 0, 0}, *c_2_0_0},
+                  RenderTileAction{{3, 2, 2}, *g_3_2_2},
+                  RenderTileAction{{0, 0, 0}, *p_0_0_0},
+              }),
+              renderActions(log));
+
+    // With one level down, the grandchild is not used.
+    log.clear();
+    runWithCachedFallback(log, source, cache, {.maxParentZoomDelta = 255, .maxChildZoomDelta = 1});
+    EXPECT_EQ(ActionLog({
+                  RenderTileAction{{2, 0, 0}, *c_2_0_0},
+                  RenderTileAction{{0, 0, 0}, *p_0_0_0},
+              }),
+              renderActions(log));
+}
+
+TEST(UpdateRenderables, CachedFallbackOverscaledChild) {
+    ActionLog log;
+    MockSource source;
+    source.zoomRange = {0, 2};
+    MockTileCache cache;
+    // Past the source max zoom, the child of {2, 0, 0} at overscaled zoom 4 is
+    // the overscaled tile {4, 0, {2, 0, 0}}.
+    auto* overscaled = cache.add(OverscaledTileID{4, 0, {2, 0, 0}});
+    source.idealTiles.emplace(OverscaledTileID{2, 0, {2, 0, 0}});
+
+    runWithCachedFallback(log, source, cache, {.maxParentZoomDelta = 255, .maxChildZoomDelta = 2});
+    EXPECT_EQ(ActionLog({RenderTileAction{{2, 0, 0}, *overscaled}}), renderActions(log));
+}
+
+TEST(UpdateRenderables, CachedFallbackNotUsedWhenIdealRenderable) {
+    ActionLog log;
+    MockSource source;
+    MockTileCache cache;
+    cache.add(OverscaledTileID{0, 0, 0});
+    source.idealTiles.emplace(OverscaledTileID{1, 0, 0});
+    auto* ideal = source.createTileData(OverscaledTileID{1, 0, 0});
+    ideal->renderable = true;
+
+    runWithCachedFallback(log, source, cache, {.maxParentZoomDelta = 255, .maxChildZoomDelta = 2});
+    EXPECT_EQ(ActionLog({RenderTileAction{{1, 0, 0}, *ideal}}), renderActions(log));
+}

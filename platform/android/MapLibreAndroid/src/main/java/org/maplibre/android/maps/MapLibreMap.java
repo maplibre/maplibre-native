@@ -351,6 +351,81 @@ public final class MapLibreMap {
   }
 
   /**
+   * Enable or disable the cached tile fallback. When enabled, a tile that is still loading
+   * is replaced on screen by the tiles closest in zoom that already sit in the in-memory
+   * tile cache for the same area: cached child tiles up to
+   * {@link #setCachedTileFallbackMaxChildZoomDelta(int)} levels below, and under them the
+   * nearest cached parent tile up to {@link #setCachedTileFallbackMaxParentZoomDelta(int)}
+   * levels above. The loading tile replaces them once it can be drawn. This avoids empty
+   * areas after a camera jump to a place or zoom seen before. No network requests are made
+   * for the cached tiles. Needs the tile cache, see {@link #setTileCacheEnabled(boolean)}.
+   * The default value is `false`. A source can override it with
+   * {@link org.maplibre.android.style.sources.Source#setCachedTileFallbackEnabled(Boolean)}.
+   *
+   * @param enabled true to enable
+   */
+  public void setCachedTileFallbackEnabled(boolean enabled) {
+    nativeMapView.setCachedTileFallbackEnabled(enabled);
+  }
+
+  /**
+   * Check whether the cached tile fallback is enabled.
+   *
+   * @return true if enabled
+   * @see MapLibreMap#setCachedTileFallbackEnabled(boolean)
+   */
+  public boolean getCachedTileFallbackEnabled() {
+    return nativeMapView.getCachedTileFallbackEnabled();
+  }
+
+  /**
+   * Set how many zoom levels above a loading tile the cached tile fallback looks for a
+   * cached parent tile. The search also stops at the source's minimum zoom. The default
+   * value is 255, which means all levels.
+   *
+   * @param delta zoom delta
+   * @see MapLibreMap#setCachedTileFallbackEnabled(boolean)
+   */
+  public void setCachedTileFallbackMaxParentZoomDelta(@IntRange(from = 0, to = 255) int delta) {
+    nativeMapView.setCachedTileFallbackMaxParentZoomDelta(delta);
+  }
+
+  /**
+   * Get how many zoom levels above a loading tile the cached tile fallback looks for a
+   * cached parent tile.
+   *
+   * @return zoom delta
+   * @see MapLibreMap#setCachedTileFallbackMaxParentZoomDelta(int)
+   */
+  @IntRange(from = 0, to = 255)
+  public int getCachedTileFallbackMaxParentZoomDelta() {
+    return nativeMapView.getCachedTileFallbackMaxParentZoomDelta();
+  }
+
+  /**
+   * Set how many zoom levels below a loading tile the cached tile fallback looks for
+   * cached child tiles. The default value is 2.
+   *
+   * @param delta zoom delta
+   * @see MapLibreMap#setCachedTileFallbackEnabled(boolean)
+   */
+  public void setCachedTileFallbackMaxChildZoomDelta(@IntRange(from = 0, to = 255) int delta) {
+    nativeMapView.setCachedTileFallbackMaxChildZoomDelta(delta);
+  }
+
+  /**
+   * Get how many zoom levels below a loading tile the cached tile fallback looks for
+   * cached child tiles.
+   *
+   * @return zoom delta
+   * @see MapLibreMap#setCachedTileFallbackMaxChildZoomDelta(int)
+   */
+  @IntRange(from = 0, to = 255)
+  public int getCachedTileFallbackMaxChildZoomDelta() {
+    return nativeMapView.getCachedTileFallbackMaxChildZoomDelta();
+  }
+
+  /**
    * Indicating whether the map may cache tiles for different zoom levels or not.
    *
    * @param enabled true causes the map view to consume more memory and have a smoother user

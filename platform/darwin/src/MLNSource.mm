@@ -125,6 +125,18 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
   self.rawSource->setVolatile(isVolatile);
 }
 
+- (NSNumber *)cachedTileFallbackEnabled {
+  MLNAssertStyleSourceIsValid();
+  auto enabled = self.rawSource->getCachedTileFallbackEnabled();
+  return enabled ? @(*enabled) : nil;
+}
+
+- (void)setCachedTileFallbackEnabled:(NSNumber *)cachedTileFallbackEnabled {
+  MLNAssertStyleSourceIsValid();
+  self.rawSource->setCachedTileFallbackEnabled(
+      cachedTileFallbackEnabled ? std::optional<bool>(cachedTileFallbackEnabled.boolValue) : std::nullopt);
+}
+
 // MARK: - Feature state
 
 /**

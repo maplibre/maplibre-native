@@ -68,6 +68,14 @@ MLN_EXPORT
  */
 @property (nonatomic, getter=isVolatile, setter=setVolatile:) BOOL isVolatile;
 
+/**
+ Overrides the map view’s `cachedTileFallbackEnabled` for this source.
+
+ An `NSNumber` containing a Boolean value, or `nil` (the default) to follow the
+ map view’s setting.
+ */
+@property (nonatomic, nullable) NSNumber *cachedTileFallbackEnabled;
+
 @end
 
 NS_ASSUME_NONNULL_END

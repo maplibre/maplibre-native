@@ -320,6 +320,18 @@ public:
 
     jni::jint getPrefetchZoomDelta(JNIEnv&);
 
+    void setCachedTileFallbackEnabled(JNIEnv&, jni::jboolean);
+
+    jni::jboolean getCachedTileFallbackEnabled(JNIEnv&);
+
+    void setCachedTileFallbackMaxParentZoomDelta(JNIEnv&, jni::jint);
+
+    jni::jint getCachedTileFallbackMaxParentZoomDelta(JNIEnv&);
+
+    void setCachedTileFallbackMaxChildZoomDelta(JNIEnv&, jni::jint);
+
+    jni::jint getCachedTileFallbackMaxChildZoomDelta(JNIEnv&);
+
     void setTileCacheEnabled(JNIEnv&, jni::jboolean);
 
     jni::jboolean getTileCacheEnabled(JNIEnv&);

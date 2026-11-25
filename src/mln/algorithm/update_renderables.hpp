@@ -4,18 +4,117 @@
 #include <mln/tile/tile_necessity.hpp>
 #include <mln/util/range.hpp>
 
-#include <unordered_set>
+#include <algorithm>
+#include <cstddef>
+#include <limits>
 #include <optional>
+#include <type_traits>
+#include <unordered_set>
 
 namespace mln {
 namespace algorithm {
 
+/// Zoom limits of the cached tile fallback in `updateRenderables`.
+struct CachedTileFallbackLimits {
+    uint8_t maxParentZoomDelta;
+    uint8_t maxChildZoomDelta;
+};
+
+namespace detail {
+
+/// Draws the renderable cached descendants of `tileID` down to `depthLeft`
+/// levels. Returns whether they cover `tileID` completely.
+template <typename GetCachedTileFn, typename RetainTileFn, typename RenderTileFn>
+bool renderCachedChildren(GetCachedTileFn& getCachedTile,
+                          RetainTileFn& retainTile,
+                          RenderTileFn& renderTile,
+                          const OverscaledTileID& tileID,
+                          const Range<uint8_t>& zoomRange,
+                          uint8_t depthLeft) {
+    if (depthLeft == 0 || tileID.overscaledZ == std::numeric_limits<uint8_t>::max()) {
+        return false;
+    }
+    const auto childZ = static_cast<uint8_t>(tileID.overscaledZ + 1);
+    auto visit = [&](const OverscaledTileID& childID) -> bool {
+        if (auto* tile = getCachedTile(childID)) {
+            retainTile(*tile, TileNecessity::Optional);
+            renderTile(childID.toUnwrapped(), *tile);
+            return true;
+        }
+        return renderCachedChildren(
+            getCachedTile, retainTile, renderTile, childID, zoomRange, static_cast<uint8_t>(depthLeft - 1));
+    };
+    if (childZ > zoomRange.max) {
+        // Past the source max zoom, the only child is the overscaled tile.
+        return visit(OverscaledTileID(childZ, tileID.wrap, tileID.canonical));
+    }
+    bool covered = true;
+    for (const auto& child : tileID.canonical.children()) {
+        covered &= visit(OverscaledTileID(childZ, tileID.wrap, child));
+    }
+    return covered;
+}
+
+/// Cached tile fallback for an ideal tile that is not renderable. Returns
+/// whether any tile was drawn.
+template <typename GetCachedTileFn, typename RetainTileFn, typename RenderTileFn>
+bool renderCachedFallback(GetCachedTileFn& getCachedTile,
+                          RetainTileFn& retainTile,
+                          RenderTileFn& renderTile,
+                          const OverscaledTileID& idealTileID,
+                          const Range<uint8_t>& zoomRange,
+                          const std::optional<uint8_t>& maxParentOverscaleFactor,
+                          const CachedTileFallbackLimits& limits) {
+    bool rendered = false;
+    auto renderAndMark = [&](const UnwrappedTileID& renderID, auto& tile) {
+        renderTile(renderID, tile);
+        rendered = true;
+    };
+    // Children first: they are drawn above a parent, so a parent is only
+    // needed where they leave gaps.
+    if (renderCachedChildren(
+            getCachedTile, retainTile, renderAndMark, idealTileID, zoomRange, limits.maxChildZoomDelta)) {
+        return true;
+    }
+
+    uint8_t maxParentDelta = limits.maxParentZoomDelta;
+    if (maxParentOverscaleFactor) {
+        maxParentDelta = std::min(maxParentDelta, *maxParentOverscaleFactor);
+    }
+    for (int32_t delta = 1; delta <= maxParentDelta; ++delta) {
+        const int32_t parentZ = idealTileID.overscaledZ - delta;
+        if (parentZ < zoomRange.min) {
+            break;
+        }
+        const auto parentID = idealTileID.scaledTo(static_cast<uint8_t>(parentZ));
+        if (auto* tile = getCachedTile(parentID)) {
+            retainTile(*tile, TileNecessity::Optional);
+            renderTile(parentID.toUnwrapped(), *tile);
+            rendered = true;
+            break;
+        }
+    }
+    return rendered;
+}
+
+} // namespace detail
+
+/// Selects the tiles to render for the given ideal tiles.
+///
+/// `getCachedTile`, when given, enables the cached tile fallback: it returns a
+/// renderable tile for the ID that can be drawn without loading it (one already
+/// held or one in the tile cache), or `nullptr`. When an ideal tile is not
+/// renderable and the regular child and parent search does not find a parent,
+/// cached children up to `maxChildZoomDelta` levels below are drawn and, if
+/// they do not cover the ideal tile, the nearest cached parent up to
+/// `maxParentZoomDelta` levels above is drawn under them.
 template <typename GetTileFn,
           typename CreateTileFn,
           typename RetainTileFn,
           typename RenderTileFn,
           typename IdealTileIDs,
-          typename PrefetchedTileMap>
+          typename PrefetchedTileMap,
+          typename GetCachedTileFn = std::nullptr_t>
 void updateRenderables(GetTileFn getTile,
                        CreateTileFn createTile,
                        RetainTileFn retainTile,
@@ -23,10 +122,13 @@ void updateRenderables(GetTileFn getTile,
                        const IdealTileIDs& idealTileIDs,
                        const PrefetchedTileMap& prefetchedTiles,
                        const Range<uint8_t>& zoomRange,
-                       const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt) {
+                       const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt,
+                       GetCachedTileFn getCachedTile = nullptr,
+                       const CachedTileFallbackLimits& fallbackLimits = {}) {
     std::unordered_set<OverscaledTileID> checked;
     bool covered = false;
     bool parentOrChildTileFound = false;
+    bool parentTileFound = false;
     int32_t overscaledZ = 0;
 
     // for (all in the set of ideal tiles of the source) {
@@ -59,6 +161,7 @@ void updateRenderables(GetTileFn getTile,
             retainTile(*tile, TileNecessity::Required);
             covered = true;
             parentOrChildTileFound = false;
+            parentTileFound = false;
             overscaledZ = idealDataTileID.overscaledZ + 1;
             if (std::cmp_greater(overscaledZ, zoomRange.max)) {
                 // We're looking for an overzoomed child tile.
@@ -135,9 +238,22 @@ void updateRenderables(GetTileFn getTile,
                         if (tile->isRenderable()) {
                             renderTile(parentDataTileID.toUnwrapped(), *tile);
                             parentOrChildTileFound = true;
+                            parentTileFound = true;
                             // Break parent tile ascent, since we found one.
                             break;
                         }
+                    }
+                }
+
+                if constexpr (!std::is_same_v<GetCachedTileFn, std::nullptr_t>) {
+                    if (!parentTileFound) {
+                        parentOrChildTileFound |= detail::renderCachedFallback(getCachedTile,
+                                                                               retainTile,
+                                                                               renderTile,
+                                                                               idealDataTileID,
+                                                                               zoomRange,
+                                                                               maxParentOverscaleFactor,
+                                                                               fallbackLimits);
                     }
                 }
 

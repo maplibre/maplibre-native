@@ -218,14 +218,44 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             maxParentTileOverscaleFactor);
     }
 
-    algorithm::updateRenderables(getTileFn,
-                                 createTileFn,
-                                 retainTileFn,
-                                 renderTileFn,
-                                 idealTiles,
-                                 tiles,
-                                 zoomRange,
-                                 maxParentTileOverscaleFactor);
+    const bool cachedTileFallbackEnabled = parameters.mode == MapMode::Continuous && type != SourceType::Annotations &&
+                                           sourceImpl.getCachedTileFallbackEnabled().value_or(
+                                               parameters.cachedTileFallbackOptions.enabled);
+    if (cachedTileFallbackEnabled) {
+        // Returns a tile that can be drawn right away: a renderable tile we
+        // already hold, or one moved out of the cache. Never creates a tile.
+        auto getCachedTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
+            if (Tile* tile = getTileFn(tileID)) {
+                return tile->isRenderable() ? tile : nullptr;
+            }
+            std::unique_ptr<Tile> tile = cache.pop(tileID);
+            if (!tile) {
+                return nullptr;
+            }
+            return tiles.emplace(tileID, std::move(tile)).first->second.get();
+        };
+        algorithm::updateRenderables(getTileFn,
+                                     createTileFn,
+                                     retainTileFn,
+                                     renderTileFn,
+                                     idealTiles,
+                                     tiles,
+                                     zoomRange,
+                                     maxParentTileOverscaleFactor,
+                                     getCachedTileFn,
+                                     algorithm::CachedTileFallbackLimits{
+                                         .maxParentZoomDelta = parameters.cachedTileFallbackOptions.maxParentZoomDelta,
+                                         .maxChildZoomDelta = parameters.cachedTileFallbackOptions.maxChildZoomDelta});
+    } else {
+        algorithm::updateRenderables(getTileFn,
+                                     createTileFn,
+                                     retainTileFn,
+                                     renderTileFn,
+                                     idealTiles,
+                                     tiles,
+                                     zoomRange,
+                                     maxParentTileOverscaleFactor);
+    }
 
     for (auto previouslyRenderedTile : previouslyRenderedTiles) {
         Tile& tile = previouslyRenderedTile.second;

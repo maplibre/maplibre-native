@@ -123,6 +123,22 @@ void Source::setPrefetchZoomDelta(jni::JNIEnv& env, jni::Integer& delta) {
     }
 }
 
+void Source::setCachedTileFallbackEnabled(jni::JNIEnv& env, jni::Boolean& enabled) {
+    if (!enabled) {
+        source.setCachedTileFallbackEnabled(std::nullopt);
+    } else {
+        source.setCachedTileFallbackEnabled(static_cast<bool>(jni::Unbox(env, enabled)));
+    }
+}
+
+jni::Local<jni::Boolean> Source::getCachedTileFallbackEnabled(jni::JNIEnv& env) {
+    auto enabled = source.getCachedTileFallbackEnabled();
+    if (enabled.has_value()) {
+        return jni::Box(env, jni::jboolean(*enabled));
+    }
+    return jni::Local<jni::Boolean>(env, nullptr);
+}
+
 jni::Local<jni::Integer> Source::getPrefetchZoomDelta(jni::JNIEnv& env) {
     auto delta = source.getPrefetchZoomDelta();
     if (delta.has_value()) {
@@ -304,6 +320,8 @@ void Source::registerNative(jni::JNIEnv& env) {
         METHOD(&Source::getAttribution, "nativeGetAttribution"),
         METHOD(&Source::setPrefetchZoomDelta, "nativeSetPrefetchZoomDelta"),
         METHOD(&Source::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
+        METHOD(&Source::setCachedTileFallbackEnabled, "nativeSetCachedTileFallbackEnabled"),
+        METHOD(&Source::getCachedTileFallbackEnabled, "nativeGetCachedTileFallbackEnabled"),
         METHOD(&Source::setMaxOverscaleFactorForParentTiles, "nativeSetMaxOverscaleFactorForParentTiles"),
         METHOD(&Source::getMaxOverscaleFactorForParentTiles, "nativeGetMaxOverscaleFactorForParentTiles"),
         METHOD(&Source::isVolatile, "nativeIsVolatile"),

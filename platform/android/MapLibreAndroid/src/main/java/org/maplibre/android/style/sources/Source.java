@@ -94,6 +94,29 @@ public abstract class Source {
   }
 
   /**
+   * Override the map's cached tile fallback setting for this source.
+   * If not set or set to null, the source follows
+   * {@link org.maplibre.android.maps.MapLibreMap#setCachedTileFallbackEnabled(boolean)}.
+   *
+   * @param enabled true or false to override, null to follow the map setting
+   */
+  public void setCachedTileFallbackEnabled(@Nullable Boolean enabled) {
+    checkThread();
+    nativeSetCachedTileFallbackEnabled(enabled);
+  }
+
+  /**
+   * Retrieve this source's override of the cached tile fallback setting.
+   *
+   * @return the override, or null if the source follows the map setting
+   */
+  @Nullable
+  public Boolean getCachedTileFallbackEnabled() {
+    checkThread();
+    return nativeGetCachedTileFallbackEnabled();
+  }
+
+  /**
    * When a set of tiles for a current zoom level is being rendered and some of the
    * ideal tiles that cover the screen are not yet loaded, parent tile could be
    * used instead. This might introduce unwanted rendering side-effects, especially
@@ -177,6 +200,13 @@ public abstract class Source {
 
   @Keep
   protected native void nativeSetPrefetchZoomDelta(@Nullable  Integer delta);
+
+  @Nullable
+  @Keep
+  protected native Boolean nativeGetCachedTileFallbackEnabled();
+
+  @Keep
+  protected native void nativeSetCachedTileFallbackEnabled(@Nullable Boolean enabled);
 
   @Keep
   protected native void nativeSetMaxOverscaleFactorForParentTiles(@Nullable Integer maxOverscaleFactor);

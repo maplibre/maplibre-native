@@ -753,6 +753,36 @@ public:
   return _mbglMap->getPrefetchZoomDelta() > 0 ? YES : NO;
 }
 
+- (void)setCachedTileFallbackEnabled:(BOOL)enabled {
+  auto options = _mbglMap->getCachedTileFallbackOptions();
+  options.enabled = enabled;
+  _mbglMap->setCachedTileFallbackOptions(options);
+}
+
+- (BOOL)cachedTileFallbackEnabled {
+  return _mbglMap->getCachedTileFallbackOptions().enabled;
+}
+
+- (void)setCachedTileFallbackMaxParentZoomDelta:(NSUInteger)delta {
+  auto options = _mbglMap->getCachedTileFallbackOptions();
+  options.maxParentZoomDelta = static_cast<uint8_t>(std::min<NSUInteger>(delta, 255));
+  _mbglMap->setCachedTileFallbackOptions(options);
+}
+
+- (NSUInteger)cachedTileFallbackMaxParentZoomDelta {
+  return _mbglMap->getCachedTileFallbackOptions().maxParentZoomDelta;
+}
+
+- (void)setCachedTileFallbackMaxChildZoomDelta:(NSUInteger)delta {
+  auto options = _mbglMap->getCachedTileFallbackOptions();
+  options.maxChildZoomDelta = static_cast<uint8_t>(std::min<NSUInteger>(delta, 255));
+  _mbglMap->setCachedTileFallbackOptions(options);
+}
+
+- (NSUInteger)cachedTileFallbackMaxChildZoomDelta {
+  return _mbglMap->getCachedTileFallbackOptions().maxChildZoomDelta;
+}
+
 - (void)setTileLodMinRadius:(double)tileLodMinRadius {
   _mbglMap->setTileLodMinRadius(tileLodMinRadius);
 }

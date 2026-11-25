@@ -843,6 +843,56 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setCachedTileFallbackEnabled(boolean enabled) {
+    if (checkState("setCachedTileFallbackEnabled")) {
+      return;
+    }
+    nativeSetCachedTileFallbackEnabled(enabled);
+  }
+
+  @Override
+  public boolean getCachedTileFallbackEnabled() {
+    if (checkState("getCachedTileFallbackEnabled")) {
+      return false;
+    }
+    return nativeGetCachedTileFallbackEnabled();
+  }
+
+  @Override
+  public void setCachedTileFallbackMaxParentZoomDelta(@IntRange(from = 0, to = 255) int delta) {
+    if (checkState("setCachedTileFallbackMaxParentZoomDelta")) {
+      return;
+    }
+    nativeSetCachedTileFallbackMaxParentZoomDelta(delta);
+  }
+
+  @Override
+  @IntRange(from = 0, to = 255)
+  public int getCachedTileFallbackMaxParentZoomDelta() {
+    if (checkState("getCachedTileFallbackMaxParentZoomDelta")) {
+      return 0;
+    }
+    return nativeGetCachedTileFallbackMaxParentZoomDelta();
+  }
+
+  @Override
+  public void setCachedTileFallbackMaxChildZoomDelta(@IntRange(from = 0, to = 255) int delta) {
+    if (checkState("setCachedTileFallbackMaxChildZoomDelta")) {
+      return;
+    }
+    nativeSetCachedTileFallbackMaxChildZoomDelta(delta);
+  }
+
+  @Override
+  @IntRange(from = 0, to = 255)
+  public int getCachedTileFallbackMaxChildZoomDelta() {
+    if (checkState("getCachedTileFallbackMaxChildZoomDelta")) {
+      return 0;
+    }
+    return nativeGetCachedTileFallbackMaxChildZoomDelta();
+  }
+
+  @Override
   public void setTileCacheEnabled(boolean enabled) {
     if (checkState("setTileCacheEnabled")) {
       return;
@@ -1822,6 +1872,24 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeSetPrefetchZoomDelta(int delta);
+
+  @Keep
+  private native void nativeSetCachedTileFallbackEnabled(boolean enabled);
+
+  @Keep
+  private native boolean nativeGetCachedTileFallbackEnabled();
+
+  @Keep
+  private native void nativeSetCachedTileFallbackMaxParentZoomDelta(int delta);
+
+  @Keep
+  private native int nativeGetCachedTileFallbackMaxParentZoomDelta();
+
+  @Keep
+  private native void nativeSetCachedTileFallbackMaxChildZoomDelta(int delta);
+
+  @Keep
+  private native int nativeGetCachedTileFallbackMaxChildZoomDelta();
 
   @Keep
   private native void nativeSetTileCacheEnabled(boolean enabled);
