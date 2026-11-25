@@ -134,7 +134,8 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
 - (void)setCachedTileFallbackEnabled:(NSNumber *)cachedTileFallbackEnabled {
   MLNAssertStyleSourceIsValid();
   self.rawSource->setCachedTileFallbackEnabled(
-      cachedTileFallbackEnabled ? std::optional<bool>(cachedTileFallbackEnabled.boolValue) : std::nullopt);
+      cachedTileFallbackEnabled ? std::optional<bool>(cachedTileFallbackEnabled.boolValue)
+                                : std::nullopt);
 }
 
 // MARK: - Feature state
