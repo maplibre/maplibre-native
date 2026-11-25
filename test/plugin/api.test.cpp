@@ -740,8 +740,7 @@ TEST(PluginApi, WaitsForResourcesWhenAnImageIsAnsweredDuringParse) {
 
     style::conversion::Error error;
     const auto models = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
-        R"({"id":"models","source":"points","type":")" + input.type +
-            R"(","layout":{"test-model":["get","url"]}})",
+        R"({"id":"models","source":"points","type":")" + input.type + R"(","layout":{"test-model":["get","url"]}})",
         error);
     ASSERT_TRUE(models) << error.message;
     const auto pins = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
