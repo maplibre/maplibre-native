@@ -5,5 +5,6 @@
   "render-tests/terrain/fill-extrusion-occluded": "The terrain elevation is sampled in the shaders of the built-in layer, and the plugin API gives a plugin no elevation, so the extrusion sits at sea level, under the terrain",
   "render-tests/terrain/fill-extrusion-multiple": "The terrain elevation is sampled in the shaders of the built-in layer, and the plugin API gives a plugin no elevation, so the extrusion sits at sea level, under the terrain",
   "render-tests/terrain/fill-extrusion-multipolygon": "The terrain elevation is sampled in the shaders of the built-in layer, and the plugin API gives a plugin no elevation, so the extrusion sits at sea level, under the terrain",
-  "render-tests/terrain/fill-extrusion-vertical-gradient": "The terrain elevation is sampled in the shaders of the built-in layer, and the plugin API gives a plugin no elevation, so the extrusion sits at sea level, under the terrain"
+  "render-tests/terrain/fill-extrusion-vertical-gradient": "The terrain elevation is sampled in the shaders of the built-in layer, and the plugin API gives a plugin no elevation, so the extrusion sits at sea level, under the terrain",
+  "render-tests/terrain/fill-extrusion-pattern-roof": "The terrain elevation is sampled in the shaders of the built-in layer, and the plugin API gives a plugin no elevation, so the extrusion sits at sea level, under the terrain"
 }

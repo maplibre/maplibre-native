@@ -14,6 +14,7 @@
 #include <mln/map/map_options.hpp>
 #include <mln/map/map_projection.hpp>
 #include <mln/math/log2.hpp>
+#include <mln/renderer/query.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source_manager.hpp>
@@ -2498,4 +2499,48 @@ TEST(Map, TileSelectionOptionsPublishUpdates) {
     check(&Map::setTileLodPitchThreshold, &UpdateParameters::tileLodPitchThreshold, 0.5);
     check(&Map::setTileLodZoomShift, &UpdateParameters::tileLodZoomShift, 1.0);
     check(&Map::setTileLodMode, &UpdateParameters::tileLodMode, TileLodMode::Distance);
+}
+
+TEST(Map, TileDrawsItsMissingTextOnceTheGlyphRangeLoads) {
+    MapTest<> test;
+    bool fail = true;
+    test.fileSource->glyphsResponse = [&](const Resource&) {
+        Response response;
+        if (fail) {
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                               "Failed by the test case");
+        } else {
+            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        }
+        return response;
+    };
+
+    test.map.getStyle().loadJSON(R"({
+      "version": 8,
+      "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+      "sources": {
+        "a": {"type": "geojson", "data": {"type": "Point", "coordinates": [-60, 0]}},
+        "b": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}
+      },
+      "layers": [
+        {"id": "a", "type": "symbol", "source": "a", "layout": {"text-field": "a", "text-font": ["Test Stack"]}},
+        {"id": "b", "type": "symbol", "source": "b", "layout": {"text-field": "a", "text-font": ["Test Stack"]}}
+      ]
+    })");
+
+    // Source "a"'s tile is laid out while the glyph range fails to load, and the still render fails.
+    EXPECT_ANY_THROW(test.frontend.render(test.map));
+
+    // Source "b"'s new tile needs the range too, so the next still render waits until it loads.
+    fail = false;
+    static_cast<GeoJSONSource*>(test.map.getStyle().getSource("b"))->setGeoJSON(Geometry<double>{Point<double>{60, 0}});
+    test.frontend.render(test.map);
+
+    const auto size = test.frontend.getSize();
+    const ScreenBox screen{{0, 0}, {static_cast<double>(size.width), static_cast<double>(size.height)}};
+    const auto drawn = [&](const std::string& layer) {
+        return test.frontend.getRenderer()->queryRenderedFeatures(screen, {std::vector<std::string>{layer}}).size();
+    };
+    EXPECT_EQ(drawn("b"), 1u);
+    EXPECT_EQ(drawn("a"), 1u);
 }
