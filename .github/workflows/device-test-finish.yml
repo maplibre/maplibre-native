@@ -11,7 +11,10 @@ on:
         description: Name of the test, for the list of workflow runs
 
 permissions:
+  actions: read           # needed for ci-passed.sh
+  checks: read            # needed for ci-passed.sh
   id-token: write         # needed for AWS
+  statuses: write         # needed for ci-passed.sh
 
 jobs:
   device-test-finish:
@@ -86,3 +89,9 @@ jobs:
           check_id: ${{ env.check_id }}
           details_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           conclusion: ${{ job.status == 'success' && env.conclusion || job.status }}
+
+      - name: Set the ci-passed status
+        if: always() && env.check_id
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/ci-passed.sh "$(gh api "repos/$GITHUB_REPOSITORY/check-runs/$check_id" --jq .head_sha)"

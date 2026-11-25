@@ -1,0 +1,51 @@
+name: ci-passed
+
+# Sets the ci-passed commit status, the one check for branch protection to require,
+# whenever a workflow that runs for pull requests completes (device-test-finish sets it
+# as well). A new pull request workflow belongs in this list, or the status can stay
+# pending when that workflow completes last.
+on:
+  workflow_run:
+    workflows:
+      - android-ci
+      - android-device-test
+      - core-release
+      - gh-pages-mdbook
+      - ios-ci
+      - ios-device-test
+      - linux-ci
+      - macos-ci
+      - node-ci
+      - ohos-ci
+      - plugins-ci
+      - Pull Request Labeler
+      - qt-ci
+      - rust-ci
+      - validate-scripts
+    types:
+      - completed
+
+permissions:
+  actions: read
+  checks: read
+  statuses: write
+
+jobs:
+  ci-passed:
+    runs-on: ubuntu-26.04
+    if: github.repository_owner == 'maplibre'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts/ci-passed.sh
+          sparse-checkout-cone-mode: false
+
+      - name: Set the ci-passed status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event.workflow_run.event }}
+          TITLE: ${{ github.event.workflow_run.display_title }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        # a device test workflow runs on the default branch, its run name ends with the commit
+        run: .github/scripts/ci-passed.sh "$([[ $EVENT == workflow_run ]] && echo "${TITLE##* }" || echo "$SHA")"

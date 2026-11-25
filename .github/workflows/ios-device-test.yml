@@ -1,4 +1,5 @@
 name: ios-device-test
+run-name: ${{ github.workflow }} ${{ github.event.workflow_run.head_sha }} # read by .github/scripts/ci-passed.sh
 
 on:
   workflow_run:
