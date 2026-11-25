@@ -48,7 +48,9 @@ class MLNMapSnapshotterFillTests: XCTestCase {
         ))
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
         var counts: [UInt8: Int] = [:]
-        for i in stride(from: 3, to: pixels.count, by: 4) { counts[pixels[i], default: 0] += 1 }
+        for i in stride(from: 3, to: pixels.count, by: 4) {
+            counts[pixels[i], default: 0] += 1
+        }
         return counts
     }
 
