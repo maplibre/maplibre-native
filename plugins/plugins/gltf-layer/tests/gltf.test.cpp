@@ -66,13 +66,13 @@ std::vector<uint8_t> triangleGLB(const std::string& baseColor = "1,0.5,0.25,1") 
     return glb;
 }
 
-mln_plugin_property_value_v1 modelID(void* model) {
+mln_plugin_property_value_v1 modelURL(void* model) {
     mln_plugin_property_value_v1 property{};
     property.struct_size = sizeof(property);
-    property.name = {"model-id", 8};
+    property.name = {"model-url", 9};
     property.value.struct_size = sizeof(property.value);
     property.value.type = MLN_PLUGIN_VALUE_RESOURCE;
-    property.value.data.resource_value = {{"model", 5}, model};
+    property.value.data.resource_value = {{"test://model.glb", 16}, model};
     return property;
 }
 
@@ -91,7 +91,7 @@ mln_plugin_bucket_v1 layOut(const mln_plugin_layer_type_v1& layer,
     instance = nullptr;
     CHECK(layer.create_layout(&context, &instance) == MLN_PLUGIN_STATUS_OK);
     for (size_t i = 0; i < models.size(); ++i) {
-        const auto property = modelID(models[i]);
+        const auto property = modelURL(models[i]);
         mln_plugin_feature_v1 feature{};
         feature.struct_size = sizeof(feature);
         feature.geometry_type = MLN_PLUGIN_GEOMETRY_POINT;
@@ -125,16 +125,16 @@ TEST(GltfLayer, DescriptorParserAndLayout) {
     CHECK(layer.backend_mask == MLN_PLUGIN_BACKEND_METAL && layer.enable_near_clipped_matrix);
     CHECK(layer.create_resource && layer.destroy_resource);
 
-    // `models` maps names to .glb files and `model-id` names one of them; both are layout properties.
-    CHECK(layer.properties[0].type == MLN_PLUGIN_VALUE_RESOURCES && layer.properties[0].is_layout);
-    CHECK(layer.properties[1].type == MLN_PLUGIN_VALUE_RESOURCE && layer.properties[1].is_layout);
-    CHECK(std::string_view(layer.properties[1].resources.data, layer.properties[1].resources.size) == "models");
-    CHECK(std::string_view(layer.properties[2].name.data, layer.properties[2].name.size) == "model-occlusion" &&
-          layer.properties[2].type == MLN_PLUGIN_VALUE_FLOAT && layer.properties[2].is_layout);
+    // `model-url` is the .glb file a feature is drawn as; it and `model-occlusion` are layout properties.
+    CHECK(std::string_view(layer.properties[0].name.data, layer.properties[0].name.size) == "model-url" &&
+          layer.properties[0].type == MLN_PLUGIN_VALUE_RESOURCE && layer.properties[0].is_layout &&
+          (layer.properties[0].expression_capabilities & MLN_PLUGIN_EXPRESSION_FEATURE));
+    CHECK(std::string_view(layer.properties[1].name.data, layer.properties[1].name.size) == "model-occlusion" &&
+          layer.properties[1].type == MLN_PLUGIN_VALUE_FLOAT && layer.properties[1].is_layout);
 
     // Every paint property is bound to the shader, and the binding offsets stay inside the uniform block.
     const auto& shader = layer.shaders[0];
-    CHECK(shader.property_binding_count + 3 == layer.property_count);
+    CHECK(shader.property_binding_count + 2 == layer.property_count);
     CHECK(shader.attribute_count <= MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES);
     std::set<uint32_t> locations;
     for (size_t i = 0; i < shader.attribute_count; ++i) {
@@ -161,7 +161,7 @@ TEST(GltfLayer, DescriptorParserAndLayout) {
     CHECK(layer.create_resource({"test://empty.glb", 16}, nullptr, 0, &handle) == MLN_PLUGIN_STATUS_CALLBACK_ERROR);
     CHECK(handle == nullptr);
 
-    // A feature without a model (its name is not in `models`, or the model failed to load) is skipped.
+    // A feature without a model (its URL is empty, or the model failed to load) is skipped.
     void* instance = nullptr;
     auto bucket = layOut(layer, {{10, 10}}, {nullptr}, instance);
     CHECK(bucket.drawable_count == 0 && bucket.index_count == 0);
@@ -217,7 +217,7 @@ TEST(GltfLayer, DescriptorParserAndLayout) {
     CHECK(layer.update_uniform_block(&uniformContext, 0, output.data(), output.size()) == MLN_PLUGIN_STATUS_OK);
     CHECK(reinterpret_cast<const float*>(output.data())[20 + 2] == 4.5f);
 
-    // One layer, one tile, many models: every feature draws the model its `model-id` resolved to, and each
+    // One layer, one tile, many models: every feature draws the model at its `model-url`, and each
     // feature's vertices carry its own model's material.
     constexpr int modelCount = 100;
     std::vector<void*> models;

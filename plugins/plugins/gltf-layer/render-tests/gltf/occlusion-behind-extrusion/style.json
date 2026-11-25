@@ -119,13 +119,17 @@
       "type": "gltf",
       "source": "boxes",
       "layout": {
-        "models": {
-          "red": "asset://plugins/gltf-layer/render-tests/assets/box-red.glb",
-          "blue": "asset://plugins/gltf-layer/render-tests/assets/box-blue.glb"
-        },
-        "model-id": [
-          "get",
-          "kind"
+        "model-url": [
+          "match",
+          [
+            "get",
+            "kind"
+          ],
+          "red",
+          "asset://plugins/gltf-layer/render-tests/assets/box-red.glb",
+          "blue",
+          "asset://plugins/gltf-layer/render-tests/assets/box-blue.glb",
+          ""
         ]
       },
       "paint": {

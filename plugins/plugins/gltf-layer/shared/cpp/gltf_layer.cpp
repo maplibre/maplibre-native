@@ -304,14 +304,14 @@ void startSegment(Layout& layout) {
     layout.segments.push_back(segment);
 }
 
-// The model a feature is drawn as: the one its `model-id` names in the layer's `models`, which the host has
-// loaded and create_resource has parsed. Null when the name is unknown or the model could not be loaded, in
+// The model a feature is drawn as: the one at its `model-url`, which the host has loaded and create_resource
+// has parsed. Null when the URL is empty or the model could not be loaded, in
 // which case the feature is skipped rather than failing every other feature in the tile. The model is chosen
 // at layout time, which is why it can differ per feature but not per frame.
 const Model* modelForFeature(const mln_plugin_feature_v1& feature) {
     for (size_t i = 0; i < feature.layout_property_count; ++i) {
         const auto& property = feature.layout_properties[i];
-        if (std::string_view(property.name.data, property.name.size) != "model-id") continue;
+        if (std::string_view(property.name.data, property.name.size) != "model-url") continue;
         if (property.value.type != MLN_PLUGIN_VALUE_RESOURCE) return nullptr;
         return static_cast<const Model*>(property.value.data.resource_value.handle);
     }
@@ -531,22 +531,10 @@ constexpr mln_plugin_value number(float n) {
     return v;
 }
 
-// Names and the .glb URLs they stand for, e.g. {"car": "asset://car.glb"}. The host loads the ones that
-// `model-id` names; the plugin only sees them parsed, through create_resource.
-constexpr mln_plugin_property_descriptor_v1 resourcesProperty(mln_plugin_string name) {
-    mln_plugin_property_descriptor_v1 p{};
-    p.struct_size = sizeof(p);
-    p.name = name;
-    p.type = MLN_PLUGIN_VALUE_RESOURCES;
-    p.default_value.struct_size = sizeof(p.default_value);
-    p.default_value.type = MLN_PLUGIN_VALUE_RESOURCES;
-    p.is_layout = 1;
-    return p;
-}
-
-// A name in `resources`, evaluated when a tile is laid out, for each feature; it takes camera and feature
-// expressions, but no feature state or transitions.
-constexpr mln_plugin_property_descriptor_v1 resourceProperty(mln_plugin_string name, mln_plugin_string resources) {
+// The URL of a .glb file, evaluated when a tile is laid out, for each feature; it takes camera and feature
+// expressions, but no feature state or transitions. The host loads it; the plugin only sees it parsed, through
+// create_resource.
+constexpr mln_plugin_property_descriptor_v1 resourceProperty(mln_plugin_string name) {
     mln_plugin_property_descriptor_v1 p{};
     p.struct_size = sizeof(p);
     p.name = name;
@@ -556,7 +544,6 @@ constexpr mln_plugin_property_descriptor_v1 resourceProperty(mln_plugin_string n
     p.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
                                 MLN_PLUGIN_EXPRESSION_COMPOSITE;
     p.is_layout = 1;
-    p.resources = resources;
     return p;
 }
 
@@ -599,12 +586,11 @@ constexpr mln_plugin_property_descriptor_v1 property(mln_plugin_string name,
 }
 
 const mln_plugin_property_descriptor_v1 properties[] = {
-    // The models the layer can draw: names mapped to .glb files with embedded buffers, loaded through the
-    // host's file source (asset://, file:// or https://).
-    resourcesProperty(str("models")),
-    // The name in `models` a feature is drawn as; usually a feature expression such as ["get", "kind"], so
-    // one layer draws several models. A feature whose name is not in `models` is not drawn.
-    resourceProperty(str("model-id"), str("models")),
+    // The .glb file, with embedded buffers, a feature is drawn as, loaded through the host's file source
+    // (asset://, file:// or https://). Usually a feature expression, such as ["get", "model_url"] for a model
+    // per feature or a match on ["get", "kind"] for shared ones, so one layer draws several models. A feature
+    // whose URL is empty or fails to load is not drawn.
+    resourceProperty(str("model-url")),
     // 1 draws the mesh depth tested against the map, so extrusions can hide it. 0 draws it above everything
     // beneath it in the layer order.
     layoutProperty(str("model-occlusion"), number(1), 0, 1),

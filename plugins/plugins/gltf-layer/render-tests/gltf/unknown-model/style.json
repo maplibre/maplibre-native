@@ -4,7 +4,7 @@
     "test": {
       "width": 256,
       "height": 256,
-      "description": "A feature that names a model the layer does not have is not drawn"
+      "description": "A feature without a model URL is not drawn"
     }
   },
   "center": [
@@ -23,7 +23,7 @@
           {
             "type": "Feature",
             "properties": {
-              "kind": "blue"
+              "model_url": "asset://plugins/gltf-layer/render-tests/assets/box-blue.glb"
             },
             "geometry": {
               "type": "Point",
@@ -63,12 +63,9 @@
       "type": "gltf",
       "source": "boxes",
       "layout": {
-        "models": {
-          "blue": "asset://plugins/gltf-layer/render-tests/assets/box-blue.glb"
-        },
-        "model-id": [
+        "model-url": [
           "get",
-          "kind"
+          "model_url"
         ]
       },
       "paint": {

@@ -12,9 +12,8 @@ extern "C" {
 #endif
 
 /*
- * 3D models drawn at the points of a GeoJSON or vector source: `"type": "gltf"`. The layer's `models` layout
- * property maps names to .glb files, and `model-id` (a name, usually a feature expression) picks the model
- * each feature is drawn as.
+ * 3D models drawn at the points of a GeoJSON or vector source: `"type": "gltf"`. The layer's `model-url` layout
+ * property (a .glb URL, usually a feature expression) picks the model each feature is drawn as.
  */
 MLN_GLTF_EXPORT mln_plugin_status mln_gltf_layer_register(mln_plugin_register_function_v1 register_plugin,
                                                           char* error_message,
