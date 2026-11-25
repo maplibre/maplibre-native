@@ -1,15 +1,42 @@
 # Changelog MapLibre Native for Android
 
-## main
+## 13.8.0
 
-- Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
+### ✨ Features and improvements
+
+- Add the `fill-rounded-corner-distance` paint property, which rounds the corners of fill polygons: the given distance in meters on each side of a corner is cut off and replaced by a curve. Set it with `PropertyFactory.fillRoundedCornerDistance()`. A fill layer that uses it can take up to twice as much memory ([#4670](https://github.com/maplibre/maplibre-native/pull/4670)).
 - Make `LocationIndicatorLayer` and `LocationPropertyFactory` public, so apps can add and style a location indicator layer themselves instead of only through `LocationComponent` ([#5026](https://github.com/maplibre/maplibre-native/pull/5026)).
+- `MapView.OnRenderErrorListener` gets the error's message: override its new default method `onRenderError(String message)`. Listeners that only implement `onRenderError()` are still called. The error is also logged ([#5070](https://github.com/maplibre/maplibre-native/pull/5070), [#5115](https://github.com/maplibre/maplibre-native/pull/5115)).
+- Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads ([#4871](https://github.com/maplibre/maplibre-native/pull/4871)).
+- Performance improvements: tiles free the CPU copy of their vertices and indices once these are uploaded to the GPU, as MapLibre GL JS does ([#4828](https://github.com/maplibre/maplibre-native/pull/4828)); feature state is applied to a tile once, then only its changes ([#4919](https://github.com/maplibre/maplibre-native/pull/4919)); `fill` layers no longer upload their vertex data on every frame ([#4765](https://github.com/maplibre/maplibre-native/pull/4765)); hillshade and color-relief layers no longer redo work on every frame ([#5001](https://github.com/maplibre/maplibre-native/pull/5001), [#5052](https://github.com/maplibre/maplibre-native/pull/5052), [#5053](https://github.com/maplibre/maplibre-native/pull/5053)); and each tile of an `mbtiles://` source is read and decoded once instead of twice ([#4985](https://github.com/maplibre/maplibre-native/pull/4985)).
+- Draw hillshade layers without pixel snapping while the camera moves, so the shading moves smoothly with the map instead of in whole-pixel steps ([#4688](https://github.com/maplibre/maplibre-native/pull/4688)).
+- A request for a missing local file (`file://` or `asset://`) now fails with `Cannot find file <path>` or `Cannot read directory <path>` instead of an empty error message ([#4930](https://github.com/maplibre/maplibre-native/pull/4930)).
 
 ### 🐞 Bug fixes
 
 - `raster` and `raster-dem` sources loaded from a `url` take the style's inline `minzoom` and `maxzoom` over the TileJSON's, as `vector` sources and maplibre-gl-js already do. A `raster-dem` source with an invalid `encoding`, `minzoom` or `maxzoom`, or a `raster` source with an invalid `minzoom` or `maxzoom`, is now rejected with an error, as a `vector` source is. Before, such a `raster-dem` source still loaded, decoded as Mapbox whatever its `encoding` ([#4557](https://github.com/maplibre/maplibre-native/pull/4557)).
 - Color property getters return whole-number channels, as MapLibre GL JS prints colors: a color set to `rgba(240,245,255,1)` reads back as set instead of `rgba(240.00001525878906,245.00001525878906,255,1)` ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
 - Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).
+- With Vulkan, draw every layer at one constant depth, as OpenGL ES does. This fixes hillshade and color-relief layers that were invisible above fill layers ([#4149](https://github.com/maplibre/maplibre-native/issues/4149)), circle layers partly hidden behind fill layers and missing fill outline edges on pitched maps ([#4851](https://github.com/maplibre/maplibre-native/issues/4851)), and z-fighting ([#3704](https://github.com/maplibre/maplibre-native/issues/3704)) ([#4868](https://github.com/maplibre/maplibre-native/pull/4868)).
+- With Vulkan, translucent fill layers above an opaque fill no longer vanish for a frame on a pitched, moving map ([#4627](https://github.com/maplibre/maplibre-native/pull/4627)).
+- With Vulkan, vertex buffers no longer stop updating because of an uninitialized timestamp. Changes to symbol opacity, feature state and data-driven paint properties could fail to show ([#4958](https://github.com/maplibre/maplibre-native/pull/4958)).
+- With Vulkan, recreate the framebuffer of an offscreen render target, such as a heatmap layer's, when its texture is resized, for example when the map view changes size ([#5035](https://github.com/maplibre/maplibre-native/pull/5035)).
+- With Vulkan, skip the cleanup of descriptor sets that were never allocated, and record the descriptor pool index only after allocation succeeds ([#4818](https://github.com/maplibre/maplibre-native/pull/4818)).
+- With Vulkan, back vertex attributes that a shader reads but that have no data with a zero-stride dummy buffer, instead of leaving them unbound ([#4788](https://github.com/maplibre/maplibre-native/pull/4788)).
+- Fix a race condition when releasing unused dynamic textures, so the last reference is always dropped on the render thread ([#4817](https://github.com/maplibre/maplibre-native/pull/4817)).
+- Recreate the drawables of a location indicator layer when a render error dropped one of them, to mitigate a crash on the render thread ([#5037](https://github.com/maplibre/maplibre-native/issues/5037), [#5070](https://github.com/maplibre/maplibre-native/pull/5070)).
+- Replacing a style image with another image of the same name now shows the new image, also when a GeoJSON source is updated synchronously ([#4326](https://github.com/maplibre/maplibre-native/issues/4326), [#4543](https://github.com/maplibre/maplibre-native/pull/4543)).
+- Adding a source that a layer already refers to, removing a source, and removing a style image now reach the renderer right away instead of at the next unrelated style change ([#4676](https://github.com/maplibre/maplibre-native/pull/4676)).
+- Changes to `MapLibreMap.setPrefetchZoomDelta()` and the `setTileLod…()` options take effect right away on an idle map instead of at the next map update ([#4678](https://github.com/maplibre/maplibre-native/pull/4678)).
+- Hide a layer at a zoom equal to its `maxzoom`, as the style specification and MapLibre GL JS do. Background, raster, hillshade, color-relief and custom layers were still drawn there ([#4766](https://github.com/maplibre/maplibre-native/pull/4766)).
+- After a pinch zoom across the antimeridian, the camera reported a longitude past 180° and `Projection.toScreenLocation()` put every location a world away. Screen locations and the location puck are now also right while a fling or `flyTo` crosses the antimeridian ([#4746](https://github.com/maplibre/maplibre-native/pull/4746), [#4776](https://github.com/maplibre/maplibre-native/pull/4776)).
+- `queryRenderedFeatures()` finds a line with `line-offset` up to its end. The final point of the line was not offset ([#4702](https://github.com/maplibre/maplibre-native/pull/4702)).
+- Stop custom geometry source callbacks from running for tiles that were already cancelled ([#4815](https://github.com/maplibre/maplibre-native/pull/4815)).
+- Draw `line-gradient` together with `line-dasharray`. The dashes were drawn in `line-color` ([#4725](https://github.com/maplibre/maplibre-native/pull/4725)).
+- With OpenGL ES and Vulkan, `line-pattern` lines no longer swap the zoom interpolation factors of `line-offset` and `line-gap-width` ([#4831](https://github.com/maplibre/maplibre-native/pull/4831)).
+- A `%` that is not followed by two hex digits stays literal in `file://`, `asset://` and `mbtiles://` URLs, so a file such as `100%.json` is found ([#4926](https://github.com/maplibre/maplibre-native/pull/4926)).
+- Retry a rate-limited request right away when its `Retry-After` or `X-RateLimit-Reset` time has already passed. It was never retried ([#4923](https://github.com/maplibre/maplibre-native/pull/4923)).
+- Plugin layers: filters use the style's global state ([#4807](https://github.com/maplibre/maplibre-native/pull/4807)), properties that do not opt in to transitions update immediately ([#4808](https://github.com/maplibre/maplibre-native/pull/4808)), and drawables with read-write depth are depth tested when the layer is above a `fill-extrusion` layer ([#4820](https://github.com/maplibre/maplibre-native/pull/4820)).
 
 ## 13.7.1
 
