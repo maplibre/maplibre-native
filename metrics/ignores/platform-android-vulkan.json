@@ -1,4 +1,5 @@
 {
   "render-tests/fill-extrusion-color/function": "Layer Z Fighting: https://github.com/maplibre/maplibre-native/issues/1847",
-  "render-tests/combinations/fill-opaque--image-translucent": "investigate"
+  "render-tests/combinations/fill-opaque--image-translucent": "investigate",
+  "render-tests/terrain/center-clamped-to-ground": "Vulkan drape targets have no mipmaps, so the outline is sharper than the shared image; Android baseline to come from the CI actual image"
 }
