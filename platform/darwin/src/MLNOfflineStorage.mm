@@ -519,6 +519,56 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
       });
 }
 
+- (void)getPackWithRegionId:(int64_t)regionId
+          completionHandler:
+              (void (^)(MLNOfflinePack *_Nullable pack, NSError *_Nullable error))completion {
+  MLNLogDebug(@"Getting pack with regionId: %lld completionHandler: %@", regionId, completion);
+  __weak MLNOfflineStorage *weakSelf = self;
+  _mbglDatabaseFileSource->getOfflineRegion(
+      regionId, [weakSelf, regionId, completion](
+                    mln::expected<std::optional<mln::OfflineRegion>, std::exception_ptr> result) {
+        if (!completion) {
+          return;
+        }
+        NSError *error;
+        bool found = false;
+        if (!result) {
+          error = [NSError
+              errorWithDomain:MLNErrorDomain
+                         code:MLNErrorCodeUnknown
+                     userInfo:@{
+                       NSLocalizedDescriptionKey : @(mln::util::toString(result.error()).c_str()),
+                     }];
+        } else {
+          found = result.value().has_value();
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+          MLNOfflinePack *pack;
+          NSError *resultError = error;
+          if (found) {
+            for (MLNOfflinePack *candidate in weakSelf.packs) {
+              if ([candidate.regionId isEqualToNumber:@(regionId)]) {
+                pack = candidate;
+                break;
+              }
+            }
+            if (!pack) {
+              resultError =
+                  [NSError errorWithDomain:MLNErrorDomain
+                                      code:MLNErrorCodeUnknown
+                                  userInfo:@{
+                                    NSLocalizedDescriptionKey : NSLocalizedStringWithDefaultValue(
+                                        @"OFFLINE_PACKS_NOT_LOADED_DESC", @"Foundation", nil,
+                                        @"The offline packs have not finished loading.",
+                                        @"User-friendly error description"),
+                                  }];
+            }
+          }
+          completion(pack, resultError);
+        });
+      });
+}
+
 - (void)removePack:(MLNOfflinePack *)pack
     withCompletionHandler:(MLNOfflinePackRemovalCompletionHandler)completion {
   MLNLogDebug(@"Removing pack: %@ completionHandler: %@", pack, completion);
