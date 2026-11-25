@@ -40,8 +40,8 @@ Tileset::RasterEncoding RasterDEMSource::getEncoding() const {
     if (options && options->rasterEncoding) {
         return *options->rasterEncoding;
     }
-    if (const auto& urlOrTileset = getURLOrTileset(); urlOrTileset.is<Tileset>()) {
-        if (const auto& encoding = urlOrTileset.get<Tileset>().rasterEncoding) {
+    if (const auto& location = getURLOrTileset(); location.is<Tileset>()) {
+        if (const auto& encoding = location.get<Tileset>().rasterEncoding) {
             return *encoding;
         }
     }
