@@ -32,24 +32,22 @@ public:
                       const CanonicalTileID&) override;
 
 private:
-    // The URL that a RESOURCE property's name maps to in the layer's RESOURCES property, or null.
-    const std::string* resourceURL(const plugin::PropertyDefinition&, const std::string& name) const;
-    // The handle of the resource that a RESOURCE property's name maps to, or null.
-    void* resourceHandle(const plugin::PropertyDefinition&, const std::string& name) const;
+    // The handle made from the resource at a URL, or null.
+    void* resourceHandle(const std::string& url) const;
 
-    // A feature that passes the layer's filter, with the names its feature-dependent RESOURCE values evaluated to, in
+    // A feature that passes the layer's filter, with the URLs its feature-dependent RESOURCE values evaluated to, in
     // the order of featureResourceDefinitions. The constructor finds them while it collects the resources, so that
     // createBucket evaluates neither the filter nor these values again.
     struct DrawnFeature {
         std::size_t index;
-        std::vector<std::string> resourceNames;
+        std::vector<std::string> urls;
     };
     std::vector<const plugin::PropertyDefinition*> featureResourceDefinitions;
     // Set only when the layer has a feature-dependent RESOURCE value.
     std::optional<std::vector<DrawnFeature>> drawnFeatures;
 
     bool needsImages = false;
-    // The URLs that the RESOURCE properties of the layer name in this tile, and the handles made from them.
+    // The URLs that the RESOURCE properties of the layer evaluate to in this tile, and the handles made from them.
     LayoutResourceDependencies resourceURLs;
     std::map<std::string, std::shared_ptr<void>> resourceHandles;
     const float zoom;

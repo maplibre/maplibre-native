@@ -177,7 +177,7 @@ struct ResourceRecord {
     unsigned destroyed = 0;
     std::vector<void*> tileHandles;
     std::vector<size_t> tilePropertyCounts;
-    std::vector<std::string> featureNames;
+    std::vector<std::string> featureURLs;
     std::vector<void*> featureHandles;
 };
 ResourceRecord* resourceRecord = nullptr;
@@ -214,9 +214,7 @@ mln_plugin_status layOutResourceFeature(void*, const mln_plugin_feature_v1* inpu
     const auto* model = find(input->layout_properties, input->layout_property_count, "test-model");
     EXPECT_TRUE(model);
     if (!model) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
-    // Callbacks never see the RESOURCES property itself.
-    EXPECT_FALSE(find(input->layout_properties, input->layout_property_count, "test-models"));
-    resourceRecord->featureNames.push_back(toString(model->value.data.resource_value.name));
+    resourceRecord->featureURLs.push_back(toString(model->value.data.resource_value.url));
     resourceRecord->featureHandles.push_back(model->value.data.resource_value.handle);
     return MLN_PLUGIN_STATUS_OK;
 }
@@ -233,20 +231,12 @@ plugin::LayerType resourceLayerType() {
     registration.createResource = createResource;
     registration.destroyResource = destroyResource;
 
-    plugin::PropertyDefinition models;
-    models.name = "test-models";
-    models.type = MLN_PLUGIN_VALUE_RESOURCES;
-    models.defaultValue = std::string();
-    models.isLayout = true;
-    registration.properties.push_back(models);
-
     plugin::PropertyDefinition model;
     model.name = "test-model";
     model.type = MLN_PLUGIN_VALUE_RESOURCE;
     model.defaultValue = std::string();
     model.expressionCapabilities = MLN_PLUGIN_EXPRESSION_FEATURE;
     model.isLayout = true;
-    model.resources = "test-models";
     registration.properties.push_back(model);
     return registration;
 }
@@ -259,14 +249,10 @@ struct ResourceLayout {
                                  : std::make_shared<const plugin::RegisteredLayer>(resourceLayerType())),
           features(std::make_shared<mapbox::feature::feature_collection<int16_t>>()) {
         auto impl = makeMutable<style::PluginStyleLayer::Impl>("test-layer", "points", registration);
-        impl->pluginResources["test-models"] = {{"car", "asset://car.glb"},
-                                                {"truck", "asset://truck.glb"},
-                                                {"bus", "asset://bus.glb"},
-                                                {"van", "asset://van.glb"}};
         impl->pluginProperties.emplace("test-model", parse(*registration->findProperty("test-model"), modelJSON));
         for (const auto* kind : kinds) {
             mapbox::feature::feature<int16_t> point{mapbox::geometry::point<int16_t>(10, 20)};
-            if (*kind) point.properties = {{"kind", std::string(kind)}};
+            if (*kind) point.properties = {{"url", "asset://" + std::string(kind) + ".glb"}};
             features->push_back(std::move(point));
         }
         std::vector<Immutable<style::LayerProperties>> layers = {
@@ -310,8 +296,8 @@ TEST(PluginLayoutResources, DependsOnTheResourcesThatItsFeaturesName) {
     ResourceRecord record;
     resourceRecord = &record;
     {
-        ResourceLayout tile(R"(["get", "kind"])");
-        // "van" is in the layer's resources but no feature names it; the last feature names none.
+        ResourceLayout tile(R"(["get", "url"])");
+        // The last feature has no URL, so it names no resource.
         EXPECT_EQ((LayoutResourceDependencies{"asset://bus.glb", "asset://car.glb", "asset://truck.glb"}),
                   tile.resourceDependencies);
         EXPECT_TRUE(tile.layout->hasDependencies());
@@ -326,10 +312,11 @@ TEST(PluginLayoutResources, DependsOnTheResourcesThatItsFeaturesName) {
                   record.created);
 
         tile.build();
-        // create_layout gets no handle for a feature-dependent value, and no RESOURCES property.
+        // create_layout gets no handle for a feature-dependent value.
         EXPECT_EQ((std::vector<void*>{nullptr}), record.tileHandles);
         EXPECT_EQ((std::vector<size_t>{1}), record.tilePropertyCounts);
-        EXPECT_EQ((std::vector<std::string>{"car", "truck", "bus", ""}), record.featureNames);
+        EXPECT_EQ((std::vector<std::string>{"asset://car.glb", "asset://truck.glb", "asset://bus.glb", ""}),
+                  record.featureURLs);
         ASSERT_EQ(4u, record.featureHandles.size());
         ASSERT_NE(nullptr, record.featureHandles[0]);
         EXPECT_EQ("car bytes", static_cast<Model*>(record.featureHandles[0])->bytes);
@@ -338,7 +325,7 @@ TEST(PluginLayoutResources, DependsOnTheResourcesThatItsFeaturesName) {
         EXPECT_EQ(nullptr, record.featureHandles[3]); // Names no resource.
 
         // Another layout of the layer type shares the handle made from a resource.
-        ResourceLayout other(R"(["get", "kind"])", {"car"}, tile.registration);
+        ResourceLayout other(R"(["get", "url"])", {"car"}, tile.registration);
         other.layout->prepareResources(resources);
         EXPECT_EQ(2u, record.created.size());
         other.build();
@@ -354,7 +341,7 @@ TEST(PluginLayoutResources, PassesTheHandleOfAConstantResourceToCreateLayout) {
     ResourceRecord record;
     resourceRecord = &record;
     {
-        ResourceLayout tile(R"("van")", {"car", "truck"});
+        ResourceLayout tile(R"("asset://van.glb")", {"car", "truck"});
         EXPECT_EQ((LayoutResourceDependencies{"asset://van.glb"}), tile.resourceDependencies);
         tile.layout->prepareResources({{"asset://van.glb", loaded("van bytes")}});
         tile.build();
@@ -370,7 +357,7 @@ TEST(PluginLayoutResources, PassesTheHandleOfAConstantResourceToCreateLayout) {
 TEST(PluginLayoutResources, HasNoDependenciesWhenNoResourceIsNamed) {
     ResourceRecord record;
     resourceRecord = &record;
-    ResourceLayout tile(R"("plane")", {"car"});
+    ResourceLayout tile(R"("")", {"car"});
     EXPECT_TRUE(tile.resourceDependencies.empty());
     EXPECT_FALSE(tile.layout->hasDependencies());
     tile.build();

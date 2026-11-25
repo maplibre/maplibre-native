@@ -71,15 +71,11 @@ typedef enum mln_plugin_value_type {
      * its features when it is laid out, and feature state changes without a
      * new layout. */
     MLN_PLUGIN_VALUE_IMAGE = 6,
-    /* Layout only, no expressions. In the style, an object that maps names to
-     * the URLs of the resources the layer may use, such as
-     * {"car": "asset://car.glb"}. The host loads the ones that RESOURCE
-     * properties name. Callbacks never receive this property. */
-    MLN_PLUGIN_VALUE_RESOURCES = 7,
-    /* Layout only. The name of a resource in the RESOURCES property that the
-     * descriptor's `resources` field names, possibly through a feature
-     * expression. Represented by data.resource_value. */
-    MLN_PLUGIN_VALUE_RESOURCE = 8,
+    /* Layout only. The URL of a resource for the host to load, such as
+     * "asset://car.glb", possibly through a feature expression such as
+     * ["get", "model_url"]. An empty URL names no resource. Represented by
+     * data.resource_value. */
+    MLN_PLUGIN_VALUE_RESOURCE = 7,
 } mln_plugin_value_type;
 
 /* Expression dependencies accepted by a plugin property. */
@@ -119,14 +115,14 @@ typedef struct mln_plugin_color {
     float a;
 } mln_plugin_color;
 
-/* A RESOURCE value. name comes first, so that it shares its place with
+/* A RESOURCE value. url comes first, so that it shares its place with
  * string_value. */
 typedef struct mln_plugin_resource_value {
-    mln_plugin_string name;
-    /* What create_resource returned for the resource that name maps to. Null
-     * when the name is not in the layer's resources, when the resource failed
-     * to load or to be created, in create_layout for a value that depends on
-     * the feature, and outside layout callbacks. */
+    mln_plugin_string url;
+    /* What create_resource returned for the resource at url. Null when url is
+     * empty, when the resource failed to load or to be created, in
+     * create_layout for a value that depends on the feature, and outside
+     * layout callbacks. */
     void* handle;
 } mln_plugin_resource_value;
 
@@ -168,9 +164,6 @@ typedef struct mln_plugin_property_descriptor_v1 {
      * may use camera, feature and composite expressions, but not feature
      * state, and never transition. */
     uint8_t is_layout;
-    /* For a RESOURCE property, the name of the RESOURCES property of the same
-     * layer type that its names are looked up in. Empty for any other type. */
-    mln_plugin_string resources;
 } mln_plugin_property_descriptor_v1;
 
 typedef struct mln_plugin_property_value_v1 {
@@ -573,7 +566,7 @@ typedef mln_plugin_status (*mln_plugin_evaluate_layer_fn)(const mln_plugin_prope
 typedef uint8_t (*mln_plugin_should_animate_fn)(const mln_plugin_property_value_v1* properties, size_t property_count);
 
 /*
- * Resources that RESOURCE properties name. The host loads each URL through its
+ * Resources at the URLs of RESOURCE properties. The host loads each URL through its
  * file source (cache, URL transformation, asset://, file://) on the render
  * thread, and lays a tile out only after the resources its features name have
  * arrived, as it does for sprite images. Before the layout, on a tile worker,

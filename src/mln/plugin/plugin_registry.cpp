@@ -37,9 +37,6 @@ Value copyValue(const mln_plugin_value& value) {
         case MLN_PLUGIN_VALUE_STRING:
         case MLN_PLUGIN_VALUE_RESOURCE:
             return Value{copyString(value.data.string_value)};
-        case MLN_PLUGIN_VALUE_RESOURCES:
-            // The style supplies the names and URLs; there is no default to copy.
-            return Value{std::string{}};
     }
     return {};
 }
@@ -328,7 +325,6 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
             ((property.type == MLN_PLUGIN_VALUE_STRING || property.type == MLN_PLUGIN_VALUE_IMAGE ||
               property.type == MLN_PLUGIN_VALUE_RESOURCE) &&
              !validOptionalString(property.default_value.data.string_value)) ||
-            !validOptionalString(property.resources) ||
             (property.expression_capabilities & ~validExpressionCapabilities) != 0) {
             error = "plugin property descriptor is malformed";
             return false;
@@ -344,18 +340,8 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
             error = "plugin image properties cannot depend on feature state";
             return false;
         }
-        const bool resourceType = property.type == MLN_PLUGIN_VALUE_RESOURCES ||
-                                  property.type == MLN_PLUGIN_VALUE_RESOURCE;
-        if (resourceType && !property.is_layout) {
+        if (property.type == MLN_PLUGIN_VALUE_RESOURCE && !property.is_layout) {
             error = "plugin resource properties must be layout properties";
-            return false;
-        }
-        if (property.type == MLN_PLUGIN_VALUE_RESOURCES && property.expression_capabilities != 0) {
-            error = "plugin resources properties cannot use expressions";
-            return false;
-        }
-        if ((property.type == MLN_PLUGIN_VALUE_RESOURCE) != validString(property.resources)) {
-            error = "a plugin resource property must name its resources property, and only it may";
             return false;
         }
         const bool transitionableType = property.type == MLN_PLUGIN_VALUE_FLOAT ||
@@ -429,18 +415,7 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
                                property.has_minimum ? std::optional<float>{property.minimum} : std::nullopt,
                                property.has_maximum ? std::optional<float>{property.maximum} : std::nullopt,
                                std::move(enumValues),
-                               property.is_layout != 0,
-                               copyString(property.resources)});
-    }
-    for (const auto& definition : output) {
-        if (definition.type != MLN_PLUGIN_VALUE_RESOURCE) continue;
-        const auto resources = std::find_if(output.begin(), output.end(), [&](const auto& candidate) {
-            return candidate.name == definition.resources;
-        });
-        if (resources == output.end() || resources->type != MLN_PLUGIN_VALUE_RESOURCES) {
-            error = "plugin resource property '" + definition.name + "' names no resources property";
-            return false;
-        }
+                               property.is_layout != 0});
     }
     return true;
 }
@@ -666,7 +641,6 @@ bool PluginRegistry::valueMatches(mln_plugin_value_type type, const Value& value
             return numeric();
         case MLN_PLUGIN_VALUE_IMAGE:
         case MLN_PLUGIN_VALUE_STRING:
-        case MLN_PLUGIN_VALUE_RESOURCES:
         case MLN_PLUGIN_VALUE_RESOURCE:
             return value.getString() != nullptr;
         case MLN_PLUGIN_VALUE_FLOAT2:

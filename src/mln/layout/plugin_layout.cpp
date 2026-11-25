@@ -68,11 +68,11 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
     }
 
     if (layers.empty()) return;
-    // The resources that the RESOURCE properties name, at tile zoom: for the tile, or for each feature drawn.
+    // The URLs of the RESOURCE properties, at tile zoom: for the tile, or for each feature drawn.
     const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
-    const auto nameOf = [](const mln_plugin_value& value) {
-        const auto& name = value.data.resource_value.name;
-        return name.size ? std::string(name.data, name.size) : std::string{};
+    const auto urlOf = [](const mln_plugin_value& value) {
+        const auto& url = value.data.resource_value.url;
+        return url.size ? std::string(url.data, url.size) : std::string{};
     };
     std::vector<style::PluginPropertyValue> featureResourceValues;
     for (const auto& definition : registration->properties) {
@@ -84,9 +84,8 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
             continue;
         }
         style::PluginPropertyValue::EvaluationStorage storage;
-        if (const auto* url = resourceURL(definition, nameOf(value.evaluate(zoom, definition, storage)))) {
-            resourceURLs.insert(*url);
-        }
+        auto url = urlOf(value.evaluate(zoom, definition, storage));
+        if (!url.empty()) resourceURLs.insert(std::move(url));
     }
     if (!featureResourceDefinitions.empty()) {
         drawnFeatures.emplace();
@@ -102,14 +101,12 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                                    .withGlobalState(globalState.get()))) {
                 continue;
             }
-            DrawnFeature drawn{.index = i, .resourceNames = {}};
-            drawn.resourceNames.reserve(featureResourceValues.size());
+            DrawnFeature drawn{.index = i, .urls = {}};
+            drawn.urls.reserve(featureResourceValues.size());
             for (size_t r = 0; r < featureResourceValues.size(); ++r) {
-                drawn.resourceNames.push_back(nameOf(featureResourceValues[r].evaluate(
+                drawn.urls.push_back(urlOf(featureResourceValues[r].evaluate(
                     zoom, *feature, noFeatureState, *featureResourceDefinitions[r], storage[r])));
-                if (const auto* url = resourceURL(*featureResourceDefinitions[r], drawn.resourceNames.back())) {
-                    resourceURLs.insert(*url);
-                }
+                if (!drawn.urls.back().empty()) resourceURLs.insert(drawn.urls.back());
             }
             drawnFeatures->push_back(std::move(drawn));
         }
@@ -141,19 +138,9 @@ void PluginLayout::prepareResources(const LayoutResourceMap& resources) {
     }
 }
 
-const std::string* PluginLayout::resourceURL(const plugin::PropertyDefinition& definition,
-                                             const std::string& name) const {
-    const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
-    const auto resources = leader.pluginResources.find(definition.resources);
-    if (resources == leader.pluginResources.end()) return nullptr;
-    const auto url = resources->second.find(name);
-    return url == resources->second.end() ? nullptr : &url->second;
-}
-
-void* PluginLayout::resourceHandle(const plugin::PropertyDefinition& definition, const std::string& name) const {
-    const auto* url = resourceURL(definition, name);
-    if (!url) return nullptr;
-    const auto handle = resourceHandles.find(*url);
+void* PluginLayout::resourceHandle(const std::string& url) const {
+    if (url.empty()) return nullptr;
+    const auto handle = resourceHandles.find(url);
     return handle == resourceHandles.end() ? nullptr : handle->second.get();
 }
 
@@ -175,8 +162,7 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
     std::vector<const plugin::PropertyDefinition*> layoutDefinitions;
     std::vector<style::PluginPropertyValue> layoutValues;
     for (const auto& definition : registration->properties) {
-        // Callbacks never receive a RESOURCES property: the names it maps reach them through RESOURCE values.
-        if (!definition.isLayout || definition.type == MLN_PLUGIN_VALUE_RESOURCES) continue;
+        if (!definition.isLayout) continue;
         layoutDefinitions.push_back(&definition);
         layoutValues.push_back(style::pluginPropertyValue(definition, leader.pluginProperties));
     }
@@ -193,7 +179,7 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
         if (definition.type == MLN_PLUGIN_VALUE_RESOURCE && !layoutValues[i].isDataDriven()) {
             auto& resource = layoutProperties.back().value.data.resource_value;
             resource.handle = resourceHandle(
-                definition, resource.name.size ? std::string(resource.name.data, resource.name.size) : std::string{});
+                resource.url.size ? std::string(resource.url.data, resource.url.size) : std::string{});
         }
     }
     context.properties = layoutProperties.data();
@@ -212,7 +198,7 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
         return;
     }
 
-    // The slot of each feature-dependent RESOURCE value in DrawnFeature::resourceNames.
+    // The slot of each feature-dependent RESOURCE value in DrawnFeature::urls.
     std::vector<std::optional<std::size_t>> resourceSlots(layoutDefinitions.size());
     for (size_t p = 0; p < layoutDefinitions.size(); ++p) {
         const auto found = std::find(
@@ -242,12 +228,12 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
             if (!layoutValues[p].isDataDriven()) continue;
             auto& value = featureProperties[p].value;
             if (drawnFeatures && resourceSlots[p]) {
-                const auto& name = (*drawnFeatures)[n].resourceNames[*resourceSlots[p]];
+                const auto& url = (*drawnFeatures)[n].urls[*resourceSlots[p]];
                 value = {};
                 value.struct_size = sizeof(value);
                 value.type = MLN_PLUGIN_VALUE_RESOURCE;
-                value.data.resource_value.name = {name.data(), name.size()};
-                value.data.resource_value.handle = resourceHandle(*layoutDefinitions[p], name);
+                value.data.resource_value.url = {url.data(), url.size()};
+                value.data.resource_value.handle = resourceHandle(url);
                 continue;
             }
             value = layoutValues[p].evaluate(zoom, *feature, noFeatureState, *layoutDefinitions[p], featureStorage[p]);

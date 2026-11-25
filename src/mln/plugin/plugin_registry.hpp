@@ -24,8 +24,6 @@ struct PropertyDefinition {
     std::optional<float> maximum;
     std::vector<std::string> enumValues;
     bool isLayout = false;
-    // For a RESOURCE property, the RESOURCES property that its names are looked up in.
-    std::string resources;
     bool operator==(const PropertyDefinition&) const = default;
 };
 

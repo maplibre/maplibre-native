@@ -546,7 +546,6 @@ void PluginBucket::updateQueryRadius(const std::string& layerID,
     cameraProperties.reserve(definitions.size());
     for (std::size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
-        if (definition.type == MLN_PLUGIN_VALUE_RESOURCES) continue;
         const auto current = style::pluginPropertyValue(definition, definition.isLayout ? layerProperties : paint);
         cameraProperties.push_back({sizeof(mln_plugin_property_value_v1),
                                     {definition.name.data(), definition.name.size()},

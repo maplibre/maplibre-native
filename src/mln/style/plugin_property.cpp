@@ -114,9 +114,7 @@ auto withPropertyType(mln_plugin_value_type type, Fn&& fn) {
         case MLN_PLUGIN_VALUE_COLOR:
             return fn.template operator()<Color>();
         case MLN_PLUGIN_VALUE_STRING:
-        // A RESOURCE is held as its name. The names and URLs of a RESOURCES property are held by the layer
-        // (PluginStyleLayer::Impl::pluginResources); here it is only an empty string.
-        case MLN_PLUGIN_VALUE_RESOURCES:
+        // A RESOURCE is held as its URL.
         case MLN_PLUGIN_VALUE_RESOURCE:
             return fn.template operator()<std::string>();
     }
@@ -247,12 +245,9 @@ mln_plugin_value PluginPropertyValue::evaluate(const expression::EvaluationConte
         [&](const auto& typed) { return toPluginValue(evaluateTyped(typed, context, definition), storage); }, value);
     if (definition.type == MLN_PLUGIN_VALUE_RESOURCE) {
         // The layout, which has the loaded resources, fills in the handle.
-        const auto name = result.data.string_value;
+        const auto url = result.data.string_value;
         result.type = MLN_PLUGIN_VALUE_RESOURCE;
-        result.data.resource_value = {name, nullptr};
-    } else if (definition.type == MLN_PLUGIN_VALUE_RESOURCES) {
-        result.type = MLN_PLUGIN_VALUE_RESOURCES;
-        result.data.string_value = {};
+        result.data.resource_value = {url, nullptr};
     }
     return result;
 }

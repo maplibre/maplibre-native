@@ -486,18 +486,12 @@ namespace {
 struct ResourceDescriptor : Descriptor {
     explicit ResourceDescriptor(std::string id_)
         : Descriptor(std::move(id_)) {
-        for (auto& resourceProperty : properties) {
-            resourceProperty.struct_size = sizeof(resourceProperty);
-            resourceProperty.is_layout = 1;
-        }
-        properties[0].name = view(modelsName);
-        properties[0].type = MLN_PLUGIN_VALUE_RESOURCES;
-        properties[0].default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_RESOURCES, {}};
-        properties[1].name = view(modelName);
-        properties[1].type = MLN_PLUGIN_VALUE_RESOURCE;
-        properties[1].default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_RESOURCE, {}};
-        properties[1].expression_capabilities = MLN_PLUGIN_EXPRESSION_FEATURE;
-        properties[1].resources = view(modelsName);
+        properties[0].struct_size = sizeof(properties[0]);
+        properties[0].is_layout = 1;
+        properties[0].name = view(modelName);
+        properties[0].type = MLN_PLUGIN_VALUE_RESOURCE;
+        properties[0].default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_RESOURCE, {}};
+        properties[0].expression_capabilities = MLN_PLUGIN_EXPRESSION_FEATURE;
         layer.properties = properties.data();
         layer.property_count = properties.size();
         shader.property_binding_count = 0;
@@ -508,8 +502,8 @@ struct ResourceDescriptor : Descriptor {
         };
     }
 
-    std::string modelsName = "test-models", modelName = "test-model", otherName = "test-other";
-    std::array<mln_plugin_property_descriptor_v1, 2> properties{};
+    std::string modelName = "test-model";
+    std::array<mln_plugin_property_descriptor_v1, 1> properties{};
 };
 
 } // namespace
@@ -520,30 +514,13 @@ TEST(PluginApi, ResourcePropertiesValidateTheirDescriptorAndCallbacks) {
     input.expectRejected(); // A RESOURCE property needs both callbacks.
     input.layer.create_resource = ResourceDescriptor("test.resources.callbacks").layer.create_resource;
 
-    input.properties[1].resources = {};
-    input.expectRejected(); // A RESOURCE property names its RESOURCES property.
-    input.properties[1].resources = view(input.otherName);
-    input.expectRejected(); // ... which must exist.
-    input.properties[1].resources = view(input.modelName);
-    input.expectRejected(); // ... and be a RESOURCES property.
-    input.properties[1].resources = view(input.modelsName);
-
-    input.properties[0].resources = view(input.modelsName);
-    input.expectRejected(); // Only a RESOURCE property names one.
-    input.properties[0].resources = {};
-
-    input.properties[0].expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
-    input.expectRejected(); // RESOURCES takes no expressions.
-    input.properties[0].expression_capabilities = MLN_PLUGIN_EXPRESSION_NONE;
-
-    input.properties[1].is_layout = 0;
+    input.properties[0].is_layout = 0;
     input.expectRejected(); // Resource properties are layout properties.
-    input.properties[1].is_layout = 1;
+    input.properties[0].is_layout = 1;
 
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
     const auto registration = plugin::PluginRegistry::get().findLayerType(input.type);
     ASSERT_TRUE(registration);
-    EXPECT_EQ("test-models", registration->findProperty("test-model")->resources);
     EXPECT_TRUE(registration->createResource);
     EXPECT_TRUE(registration->destroyResource);
 
@@ -554,7 +531,7 @@ TEST(PluginApi, ResourcePropertiesValidateTheirDescriptorAndCallbacks) {
     plain.expectRejected();
 }
 
-TEST(PluginApi, ResourcesPropertyParsesSerializesAndInvalidatesLayout) {
+TEST(PluginApi, ResourcePropertyParsesSerializesAndInvalidatesLayout) {
     ResourceDescriptor input("test.resources-style");
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
     style::conversion::Error error;
@@ -562,29 +539,30 @@ TEST(PluginApi, ResourcesPropertyParsesSerializesAndInvalidatesLayout) {
         return style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
             R"({"id":"test","source":"s","type":")" + input.type + R"(","layout":)" + layout + "}", error);
     };
-    EXPECT_FALSE(parse(R"({"test-models":"asset://car.glb"})"));
-    EXPECT_FALSE(parse(R"({"test-models":{"car":""}})"));
-    EXPECT_FALSE(parse(R"({"test-models":{"car":"asset://car.glb"},"test-model":["feature-state","kind"]})"));
+    EXPECT_FALSE(parse(R"({"test-model":{"car":"asset://car.glb"}})"));
+    EXPECT_FALSE(parse(R"({"test-model":["feature-state","url"]})"));
 
-    auto a = parse(R"({"test-models":{"car":"asset://car.glb"},"test-model":["get","kind"]})");
-    auto b = parse(R"({"test-models":{"car":"asset://truck.glb"},"test-model":["get","kind"]})");
+    auto a = parse(R"({"test-model":"asset://car.glb"})");
+    auto b = parse(R"({"test-model":"asset://truck.glb"})");
+    auto c = parse(R"({"test-model":["get","url"]})");
     ASSERT_TRUE(a) << error.message;
     ASSERT_TRUE(b) << error.message;
+    ASSERT_TRUE(c) << error.message;
     const auto& ai = static_cast<style::PluginStyleLayer&>(**a).impl();
     const auto& bi = static_cast<style::PluginStyleLayer&>(**b).impl();
-    EXPECT_EQ((std::map<std::string, std::string>{{"car", "asset://car.glb"}}), ai.pluginResources.at("test-models"));
+    const auto& ci = static_cast<style::PluginStyleLayer&>(**c).impl();
     EXPECT_TRUE(ai.hasLayoutDifference(bi));
+    EXPECT_TRUE(ai.hasLayoutDifference(ci));
     EXPECT_FALSE(ai.hasLayoutDifference(ai));
 
-    const auto property = (*a)->getProperty("test-models");
+    const auto property = (*a)->getProperty("test-model");
     EXPECT_EQ(style::StyleProperty::Kind::Constant, property.getKind());
-    ASSERT_TRUE(property.getValue().getObject());
-    EXPECT_EQ("asset://car.glb", *property.getValue().getObject()->at("car").getString());
+    ASSERT_TRUE(property.getValue().getString());
+    EXPECT_EQ("asset://car.glb", *property.getValue().getString());
 
     const auto serialized = (*a)->serialize();
     const auto& layout = *serialized.getObject()->at("layout").getObject();
-    EXPECT_EQ("asset://car.glb", *layout.at("test-models").getObject()->at("car").getString());
-    EXPECT_TRUE(layout.contains("test-model"));
+    EXPECT_EQ("asset://car.glb", *layout.at("test-model").getString());
 }
 
 namespace {
@@ -667,8 +645,8 @@ TEST(PluginApi, LaysATileOutOnceTheResourcesItsFeaturesNameHaveLoaded) {
     style::conversion::Error error;
     const auto layer = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
         R"({"id":"models","source":"points","type":")" + input.type +
-            R"(","layout":{"test-models":{"car":"asset://car.glb","truck":"asset://truck.glb"},)"
-            R"("test-model":["get","kind"]}})",
+            R"(","layout":{"test-model":)"
+            R"(["match",["get","kind"],"car","asset://car.glb","truck","asset://truck.glb",""]}})",
         error);
     ASSERT_TRUE(layer) << error.message;
     const std::vector<Immutable<style::LayerProperties>> layers{makeMutable<style::PluginStyleLayerProperties>(
@@ -678,6 +656,10 @@ TEST(PluginApi, LaysATileOutOnceTheResourcesItsFeaturesNameHaveLoaded) {
     mapbox::feature::feature<int16_t> car{mapbox::geometry::point<int16_t>(100, 100)};
     car.properties = {{"kind", std::string("car")}};
     features.push_back(std::move(car));
+    // A feature whose URL evaluates to the empty string names no resource.
+    mapbox::feature::feature<int16_t> unknown{mapbox::geometry::point<int16_t>(200, 200)};
+    unknown.properties = {{"kind", std::string("bus")}};
+    features.push_back(std::move(unknown));
     {
         GeoJSONTile tile(OverscaledTileID(0, 0, 0), "points", parameters, std::make_shared<PointData>(features));
         tile.setLayers(layers, nullptr);
@@ -689,9 +671,10 @@ TEST(PluginApi, LaysATileOutOnceTheResourcesItsFeaturesNameHaveLoaded) {
         EXPECT_EQ((std::vector<std::string>{"asset://car.glb"}), requested);
         EXPECT_TRUE(tile.isComplete());
         EXPECT_EQ((std::vector<std::string>{"glb of asset://car.glb"}), tileResources.created);
-        ASSERT_EQ(1u, tileResources.featureHandles.size());
+        ASSERT_EQ(2u, tileResources.featureHandles.size());
         ASSERT_NE(nullptr, tileResources.featureHandles[0]);
         EXPECT_EQ("glb of asset://car.glb", *static_cast<std::string*>(tileResources.featureHandles[0]));
+        EXPECT_EQ(nullptr, tileResources.featureHandles[1]);
         EXPECT_EQ(0u, tileResources.destroyed);
     }
     // No tile uses the model any more.
@@ -758,7 +741,7 @@ TEST(PluginApi, WaitsForResourcesWhenAnImageIsAnsweredDuringParse) {
     style::conversion::Error error;
     const auto models = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
         R"({"id":"models","source":"points","type":")" + input.type +
-            R"(","layout":{"test-models":{"car":"asset://car.glb"},"test-model":["get","kind"]}})",
+            R"(","layout":{"test-model":["get","url"]}})",
         error);
     ASSERT_TRUE(models) << error.message;
     const auto pins = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
@@ -771,7 +754,7 @@ TEST(PluginApi, WaitsForResourcesWhenAnImageIsAnsweredDuringParse) {
 
     mapbox::feature::feature_collection<int16_t> features;
     mapbox::feature::feature<int16_t> car{mapbox::geometry::point<int16_t>(100, 100)};
-    car.properties = {{"kind", std::string("car")}};
+    car.properties = {{"url", std::string("asset://car.glb")}};
     features.push_back(std::move(car));
     {
         GeoJSONTile tile(OverscaledTileID(0, 0, 0), "points", parameters, std::make_shared<PointData>(features));
