@@ -64,6 +64,9 @@ class FieldOfViewTest : AppCenter() {
         return Math.ceil(view.height / rule.activity.resources.displayMetrics.density.toDouble())
     }
 
+    // Projection.getMetersPerPixelAtLatitude is per physical pixel, so pair it with the height in physical pixels.
+    private fun mapHeightInPixels(): Double = rule.activity.mapView.height.toDouble()
+
     @Test
     fun testDefaultFieldOfView() {
         onUiThread {
@@ -141,7 +144,7 @@ class FieldOfViewTest : AppCenter() {
             // The camera is 1.5 times the map height from the center at the default field of view,
             // and that is the 2,991 m line of sight.
             val metersPerPixel = map.projection.getMetersPerPixelAtLatitude(center.latitude)
-            assertEquals(2991.0, metersPerPixel * 1.5 * mapHeight(), 15.0)
+            assertEquals(2991.0, metersPerPixel * 1.5 * mapHeightInPixels(), 15.0)
         }
     }
 
@@ -158,7 +161,7 @@ class FieldOfViewTest : AppCenter() {
             // At 90 degrees the camera is half the map height from the center.
             val position = map.cameraPosition
             val metersPerPixel = map.projection.getMetersPerPixelAtLatitude(center.latitude)
-            assertEquals(2991.0, metersPerPixel * 0.5 * mapHeight(), 15.0)
+            assertEquals(2991.0, metersPerPixel * 0.5 * mapHeightInPixels(), 15.0)
             assertEquals(48.03, position.tilt, 0.1)
             // The same eye with the default field of view needs a zoom level 1.585 higher.
             assertEquals(-ln(tan(Math.toRadians(90.0 / 2)) / tan(Math.toRadians(36.8699 / 2))) / ln(2.0), position.zoom - zoomAtDefaultFieldOfView(eye, center), 0.01)
