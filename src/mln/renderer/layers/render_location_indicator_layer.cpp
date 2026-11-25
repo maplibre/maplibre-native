@@ -1119,6 +1119,12 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
 
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
 
+    // recreate drawables if any is dropped
+    constexpr std::size_t locationIndicatorDrawables = 5;
+    if (localLayerGroup->getDrawableCount() != locationIndicatorDrawables) {
+        removeAllDrawables();
+    }
+
     if (localLayerGroup->getDrawableCount() == 0) {
         // create empty drawable using a builder
         const gfx::UniqueDrawableBuilder& builder = context.createDrawableBuilder(getID());

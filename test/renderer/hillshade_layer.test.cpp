@@ -5,6 +5,7 @@
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/camera.hpp>
 #include <mln/map/map_options.hpp>
+#include <mln/renderer/renderer.hpp>
 #include <mln/style/style.hpp>
 #include <mln/util/image.hpp>
 #include <mln/util/run_loop.hpp>
@@ -149,4 +150,60 @@ TEST(HillshadeLayer, AStillFrameAfterMovingRunsNoPreparePass) {
     fixture.map.jumpTo(secondView);
     (void)fixture.settle();
     EXPECT_EQ(expected, drawCallsOfOneMoreFrame(fixture));
+}
+
+namespace {
+
+// Offscreen frame buffers alive once the layer has settled on `camera`, coming from `before` if given:
+// then the tile cache is emptied too, and frames drawn after it. Frame buffers are released with the
+// targets that own them.
+int frameBuffersAfterSettling(const char* layerType, const CameraOptions& camera, const CameraOptions* before) {
+    Fixture fixture(layerType);
+    if (before) {
+        fixture.map.jumpTo(*before);
+        (void)fixture.settle();
+    }
+    fixture.map.jumpTo(camera);
+    (void)fixture.settle();
+    if (before) {
+        // Tiles that left the cover stay in the tile cache, and the buckets there own their targets
+        // (and their frame buffers) in turn; empty the cache, so that only a target someone else still
+        // holds survives.
+        fixture.frontend.getRenderer()->reduceMemoryUse();
+        for (int i = 0; i < 4; ++i) {
+            fixture.loop.runOnce();
+            (void)fixture.frontend.render(fixture.map);
+        }
+    }
+    return fixture.settle().numFrameBuffers;
+}
+
+} // namespace
+
+// A tile's prepare target (and its frame buffer and DEM texture) is released once the tile has left the
+// cover: the layer tells the renderer to drop it. Otherwise the renderer keeps every target the layer ever
+// made, long after the tile's bucket is gone, and a long pan runs the device out of memory.
+// Two places do this release (the layer's request to the renderer, and the renderer's own sweep of targets
+// only its list still holds), so the test fails only when both are broken.
+TEST(HillshadeLayer, PrepareTargetsOfTilesThatLeftTheCoverAreReleased) {
+    const int colorReliefHere = frameBuffersAfterSettling("color-relief", secondView, nullptr);
+    const int hillshadeHere = frameBuffersAfterSettling("hillshade", secondView, nullptr);
+    // The test only means something if the layer holds targets at all
+    ASSERT_GT(hillshadeHere, colorReliefHere);
+
+    // After a visit to another place, the layer holds what a layer that started here holds.
+    EXPECT_LE(frameBuffersAfterSettling("hillshade", secondView, &firstView), hillshadeHere);
+}
+
+// The elevation tile of a color relief tile only has to be uploaded once.
+TEST(ColorReliefLayer, AStillFrameCreatesNoTextures) {
+    Fixture fixture("color-relief");
+    (void)fixture.settle();
+    const auto settled = fixture.frontend.render(fixture.map).stats;
+    if (settled.numCreatedTextures == 0) {
+        GTEST_SKIP() << "this backend does not count the textures it creates";
+    }
+    const auto still = fixture.frontend.render(fixture.map).stats;
+    EXPECT_EQ(0, still.numCreatedTextures - settled.numCreatedTextures);
+    EXPECT_EQ(0u, still.textureUpdateBytes - settled.textureUpdateBytes);
 }
