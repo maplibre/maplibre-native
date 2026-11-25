@@ -3,6 +3,7 @@
 #include <mln/test/util.hpp>
 
 #include <algorithm>
+#include <optional>
 #include <vector>
 
 using namespace mln;
@@ -114,7 +115,8 @@ TEST(GridIndex, EveryCollidingBoxIsReportedOnce) {
         const auto odd = [](const uint32_t& id) {
             return id % 2 == 1;
         };
-        EXPECT_EQ(std::any_of(expected.begin(), expected.end(), odd), grid.hitTest(query, odd)) << "query " << i;
+        EXPECT_EQ(std::any_of(expected.begin(), expected.end(), odd), grid.hitTest(query, std::optional{odd}))
+            << "query " << i;
         EXPECT_EQ(!expected.empty(), grid.hitTest(query)) << "query " << i;
     }
 }
@@ -131,7 +133,7 @@ TEST(GridIndex, CoveringCircleTestsEveryElementOnce) {
         tested.push_back(id);
         return false;
     };
-    EXPECT_FALSE(grid.hitTest(Circle{{50, 50}, 500}, record));
+    EXPECT_FALSE(grid.hitTest(Circle{{50, 50}, 500}, std::optional{record}));
     std::sort(tested.begin(), tested.end());
     EXPECT_EQ((std::vector<uint32_t>{0, 1, 2}), tested);
 }
@@ -148,7 +150,7 @@ TEST(GridIndex, CircleTestsEveryCollidingElementOnce) {
         tested.push_back(id);
         return false;
     };
-    EXPECT_FALSE(grid.hitTest(Circle{{40, 40}, 22}, record));
+    EXPECT_FALSE(grid.hitTest(Circle{{40, 40}, 22}, std::optional{record}));
     std::sort(tested.begin(), tested.end());
     EXPECT_EQ((std::vector<uint32_t>{0, 1}), tested);
 }
