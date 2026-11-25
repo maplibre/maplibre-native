@@ -115,6 +115,10 @@ void RenderTarget::updateDrapeGlobalUBO(const shaders::GlobalPaintParamsUBO& par
     }
     shaders::GlobalPaintParamsUBO drapeParams = params;
     drapeParams.drape_tile = drapeTileValues;
+    // The shaders that compare a position with gl_FragCoord (fill outlines) need the size
+    // of the target they draw into, which is the drape texture rather than the screen.
+    const Size targetSize = offscreenTexture->getSize();
+    drapeParams.world_size = {static_cast<float>(targetSize.width), static_cast<float>(targetSize.height)};
     if (!drapeGlobalUniformBuffer) {
         drapeGlobalUniformBuffer = context_.createUniformBuffer(&drapeParams, sizeof(drapeParams), true);
     } else {
