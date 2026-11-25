@@ -16,10 +16,12 @@ import org.maplibre.android.style.layers.PropertyValue;
 
 /**
  * Constructs paint/layout properties for Layers
+ * <p>
+ * The properties built here are for {@link LocationIndicatorLayer}.
  *
  * @see <a href="https://maplibre.org/maplibre-style-spec/#layers">Layer style documentation</a>
  */
-class LocationPropertyFactory {
+public class LocationPropertyFactory {
 
   /**
    * Set the property visibility.
