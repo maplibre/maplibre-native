@@ -556,8 +556,8 @@ public final class MapLibreMap {
    * degrees) and the zoom by the minimum and maximum zoom; where a limit applies, the camera is not
    * at the eye position, so a center above the eye is looked at from a tilt of at most 85 degrees.
    * With 3D terrain, altitudes are in metres with the terrain exaggeration applied, and with
-   * {@link #setCenterClampedToGround(boolean) setCenterClampedToGround(true)} the center is moved onto the terrain after this call;
-   * turn it off to keep the camera where this method put it.
+   * {@link #setCenterClampedToGround(boolean) setCenterClampedToGround(true)} the center is moved
+   * onto the terrain after this call; turn it off to keep the camera where this method put it.
    * <p>
    * Set the field of view first; changing it afterwards moves the camera off the eye.
    * Nothing moves if {@code eye} and {@code center} are the same point.
