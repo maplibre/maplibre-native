@@ -4,7 +4,7 @@
 
 ### ✨ Features and improvements
 
-- Add `MapLibreMap.setCachedTileFallbackEnabled()`: while a tile is loading, the map draws the tiles closest in zoom that are already in the in-memory tile cache for the same area, so a camera jump to a place or zoom seen before shows no empty areas. Cached child tiles are drawn up to `setCachedTileFallbackMaxChildZoomDelta()` levels below (default 2), over the nearest cached parent tile up to `setCachedTileFallbackMaxParentZoomDelta()` levels above (default all). No network requests are made for them. Off by default; `Source.setCachedTileFallbackEnabled()` overrides it per source.
+- Add `MapLibreMap.setCachedTileFallbackEnabled()`: while a tile is loading, the map draws the tiles closest in zoom that are already in the in-memory tile cache for the same area, so a camera jump to a place or zoom seen before shows no empty areas. Cached child tiles are drawn up to `setCachedTileFallbackMaxChildZoomDelta()` levels below (default 2), over the nearest cached parent tile up to `setCachedTileFallbackMaxParentZoomDelta()` levels above (default all). No network requests are made for them. Off by default; `Source.setCachedTileFallbackEnabled()` overrides it per source ([#5125](https://github.com/maplibre/maplibre-native/pull/5125)).
 
 ## 13.8.0
 

@@ -4,7 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-- Add `MLNMapView.cachedTileFallbackEnabled`, `cachedTileFallbackMaxParentZoomDelta`, `cachedTileFallbackMaxChildZoomDelta` and `MLNSource.cachedTileFallbackEnabled`: while a tile is loading, the map draws the tiles closest in zoom that are already in the in-memory tile cache for the same area. Off by default.
+- Add `MLNMapView.cachedTileFallbackEnabled`, `cachedTileFallbackMaxParentZoomDelta`, `cachedTileFallbackMaxChildZoomDelta` and `MLNSource.cachedTileFallbackEnabled`: while a tile is loading, the map draws the tiles closest in zoom that are already in the in-memory tile cache for the same area. Off by default ([#5125](https://github.com/maplibre/maplibre-native/pull/5125)).
 - 💥 Breaking: Replace the `Mapbox.h` umbrella header with `MapLibre.h`. `MapLibre.xcframework` no longer ships `Mapbox.h` ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
 
   <details>
