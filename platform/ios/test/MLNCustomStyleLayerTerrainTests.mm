@@ -46,6 +46,11 @@
 @property (nonatomic) NSUInteger belowGroundFragments;
 // How many frames drawn with terrain the two counts above have been read from.
 @property (nonatomic) NSUInteger countedFrames;
+// How many frames the layer has been asked to draw, with terrain or not.
+@property (nonatomic) NSUInteger drawnFrames;
+// Seconds the layer holds the main thread for in the first frame it is asked to draw, standing in
+// for a frame that is slow to render.
+@property (nonatomic) NSTimeInterval firstFrameDelay;
 @end
 
 @implementation MLNTerrainDepthProbeStyleLayer {
@@ -92,6 +97,9 @@ static float MLNDepthOverCenter(MLNStyleLayerDrawingContext context, double mete
 }
 
 - (void)drawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
+  if (self.drawnFrames++ == 0 && self.firstFrameDelay > 0) {
+    [NSThread sleepForTimeInterval:self.firstFrameDelay];
+  }
   id<MTLRenderCommandEncoder> encoder = self.renderEncoder;
   MTLRenderPassDescriptor *pass = self.renderPassDesc;
   if (!encoder || !pass.colorAttachments[0].texture || context.terrainExaggeration == 0) {
@@ -257,6 +265,17 @@ static float MLNDepthOverCenter(MLNStyleLayerDrawingContext context, double mete
 // the mesh does compares with it: what it draws just above the ground passes a less-or-equal
 // depth test, and what it draws below the ground does not.
 - (void)testDepthComparesWithTheTerrainMesh {
+  [self checkDepthWithFirstFrameDelay:0 stall:20];
+}
+
+// The first frame drawn with terrain compiles the terrain's shaders, which can take far longer on
+// a loaded machine than any fixed wait, and what a frame counted reaches the main queue only once
+// the frame is over.
+- (void)testDepthComparesWithTheTerrainMeshAfterASlowFirstFrame {
+  [self checkDepthWithFirstFrameDelay:3 stall:2];
+}
+
+- (void)checkDepthWithFirstFrameDelay:(NSTimeInterval)delay stall:(NSTimeInterval)stall {
   // A flat elevation tile at sea level in the Mapbox encoding, the same for every tile.
   CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
   CGContextRef bitmap = CGBitmapContextCreate(NULL, 256, 256, 8, 0, colorSpace,
@@ -284,17 +303,25 @@ static float MLNDepthOverCenter(MLNStyleLayerDrawingContext context, double mete
   [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:10 animated:NO];
   MLNTerrainDepthProbeStyleLayer *probe =
       [[MLNTerrainDepthProbeStyleLayer alloc] initWithIdentifier:@"terrain-depth-probe"];
+  probe.firstFrameDelay = delay;
   [self.mapView.style addLayer:probe];
   self.mapView.mbglMap.getStyle().setTerrain(std::make_unique<mln::style::Terrain>("dem", 1.0f));
 
   // The mesh is drawn once its elevation tile is in: until then nothing hides the quad below
-  // the ground either.
-  NSDate *deadline = [NSDate dateWithTimeIntervalSinceNow:20];
-  while ([deadline timeIntervalSinceNow] > 0 &&
-         !(probe.countedFrames > 0 && probe.belowGroundFragments == 0 &&
-           probe.aboveGroundFragments > 0)) {
+  // the ground either. A frame can take any time to render, so the wait ends when the layer has
+  // gone `stall` seconds without a frame drawn or counted, not a fixed time after it began; a map
+  // that keeps drawing without the mesh ever hiding the quad ends it after a thousand frames.
+  NSUInteger progress = 0;
+  NSDate *lastProgress = [NSDate date];
+  while (!(probe.countedFrames > 0 && probe.belowGroundFragments == 0 &&
+           probe.aboveGroundFragments > 0) &&
+         [lastProgress timeIntervalSinceNow] > -stall && probe.drawnFrames < 1000) {
     [probe setNeedsDisplay];
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+    if (probe.drawnFrames + probe.countedFrames != progress) {
+      progress = probe.drawnFrames + probe.countedFrames;
+      lastProgress = [NSDate date];
+    }
   }
   XCTAssertGreaterThan(probe.countedFrames, 0u);
   XCTAssertEqual(probe.belowGroundFragments, 0u, @"the mesh hides what is under the ground");

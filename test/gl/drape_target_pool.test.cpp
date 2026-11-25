@@ -197,4 +197,68 @@ TEST(DrapeTargetPool, AFailureThatGoesOnIsReportedOncePerWindow) {
     EXPECT_FALSE(f.pool.renderTargetFailed(tile(0)));
 }
 
+// A tile whose own drape is missing is drawn with the nearest relative's: the deepest ancestor or
+// descendant in the pool.
+TEST(DrapeTargetPool, AMissingTargetFallsBackToTheDeepestRelative) {
+    Fixture f;
+    const UnwrappedTileID grandparent(13, 4250, 2500);
+    const UnwrappedTileID parent(14, 8500, 5000);
+    const UnwrappedTileID missing(15, 17000, 10000);
+    const UnwrappedTileID child(16, 34000, 20000);
+    const UnwrappedTileID grandchild(17, 68000, 40000);
+    ASSERT_TRUE(parent.isChildOf(grandparent));
+    ASSERT_TRUE(missing.isChildOf(parent));
+    ASSERT_TRUE(child.isChildOf(missing));
+    ASSERT_TRUE(grandchild.isChildOf(child));
+
+    f.create({grandparent, parent}, {});
+    std::optional<UnwrappedTileID> found;
+
+    // Only ancestors: the deeper one wins, not the first or the shallowest.
+    auto target = f.pool.getRenderTargetAncestorOrDescendant(missing, found);
+    ASSERT_TRUE(found);
+    EXPECT_EQ(parent, *found);
+    EXPECT_EQ(f.pool.getRenderTarget(parent), target);
+
+    // A descendant is deeper still, and wins over the ancestors. The deepest descendant wins over
+    // a shallower one.
+    f.create({grandparent, parent, child, grandchild}, {});
+    target = f.pool.getRenderTargetAncestorOrDescendant(missing, found);
+    ASSERT_TRUE(found);
+    EXPECT_EQ(grandchild, *found);
+    EXPECT_EQ(f.pool.getRenderTarget(grandchild), target);
+
+    // With the tile's own target and only ancestors above it, the tile's own is the deepest.
+    Fixture g;
+    g.create({grandparent, parent, missing}, {});
+    target = g.pool.getRenderTargetAncestorOrDescendant(missing, found);
+    ASSERT_TRUE(found);
+    EXPECT_EQ(missing, *found);
+    EXPECT_EQ(g.pool.getRenderTarget(missing), target);
+}
+
+TEST(DrapeTargetPool, AFallbackNeedsARelative) {
+    Fixture f;
+    const UnwrappedTileID parent(14, 8500, 5000);
+    const UnwrappedTileID child(15, 17000, 10000);
+    f.create({parent}, {});
+
+    // A relative is found, so that the misses below are not just an empty pool.
+    std::optional<UnwrappedTileID> found;
+    EXPECT_TRUE(f.pool.getRenderTargetAncestorOrDescendant(child, found));
+    EXPECT_EQ(parent, found);
+
+    // A tile under no target in the pool gets none, and the answer left by the earlier call is
+    // cleared rather than kept.
+    const UnwrappedTileID elsewhere(15, 3000, 10000);
+    EXPECT_FALSE(f.pool.getRenderTargetAncestorOrDescendant(elsewhere, found));
+    EXPECT_FALSE(found);
+
+    // The same tile one world over is not under the parent either.
+    found = parent;
+    const UnwrappedTileID otherWorld(1, CanonicalTileID(15, 17000, 10000));
+    EXPECT_FALSE(f.pool.getRenderTargetAncestorOrDescendant(otherWorld, found));
+    EXPECT_FALSE(found);
+}
+
 #endif

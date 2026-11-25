@@ -44,7 +44,8 @@ public:
           descriptorStartIndex(other.descriptorStartIndex),     // NOLINT(bugprone-use-after-move)
           descriptorStorageCount(other.descriptorStorageCount), // NOLINT(bugprone-use-after-move)
           descriptorUniformCount(other.descriptorUniformCount), // NOLINT(bugprone-use-after-move)
-          descriptorSet(std::move(other.descriptorSet)) {}      // NOLINT(bugprone-use-after-move)
+          descriptorSet(std::move(other.descriptorSet)),        // NOLINT(bugprone-use-after-move)
+          bufferSets(std::move(other.bufferSets)) {}            // NOLINT(bugprone-use-after-move)
 
     UniformBufferArray(const UniformBufferArray&) = delete;
 
@@ -71,7 +72,10 @@ public:
     void bind(gfx::RenderPass& renderPass) override;
 
     void bindDescriptorSets(CommandEncoder& encoder);
-    void freeDescriptorSets() { descriptorSet.reset(); }
+    void freeDescriptorSets() {
+        descriptorSet.reset();
+        bufferSets.clear();
+    }
 
 private:
     gfx::UniqueUniformBuffer copy(const gfx::UniformBuffer& buffer) override {
@@ -83,7 +87,22 @@ private:
     const uint32_t descriptorStorageCount{0};
     const uint32_t descriptorUniformCount{0};
 
+    /// The descriptor set for the buffers the array holds right now. The global array is
+    /// re-pointed between passes (a terrain drape target binds its own global block) while
+    /// earlier passes are only recorded, not yet submitted: rewriting one descriptor set
+    /// would make every recorded pass read the last block written. So it keeps one
+    /// descriptor set per distinct set of buffers instead.
+    UniformDescriptorSet& getDescriptorSetForBuffers(CommandEncoder& encoder);
+    void updateBufferResources(CommandEncoder& encoder);
+
+    struct BufferSet {
+        std::vector<const gfx::UniformBuffer*> buffers;
+        std::vector<std::weak_ptr<gfx::UniformBuffer>> owners;
+        std::unique_ptr<UniformDescriptorSet> descriptorSet;
+    };
+
     std::unique_ptr<UniformDescriptorSet> descriptorSet;
+    std::vector<BufferSet> bufferSets;
 };
 
 } // namespace vulkan
