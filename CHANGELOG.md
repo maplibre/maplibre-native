@@ -35,10 +35,10 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
+- [ios] Fix a crash when the offline storage delegate is handed a resource whose identifier is not a valid URL. The transform now passes such a resource through unchanged instead of invoking the delegate with a nil `NSURL`.
 - [core] Apply feature state to a tile once, then only its changes, instead of re-applying the whole stored state to every rendered tile on every frame.
 - [core] Stop custom geometry tile callbacks before cancelled tiles are released on a worker thread.
 - [core] Fix rendered-feature queries near the final endpoint of an offset line.
-- [ios] Fix a crash when the offline storage delegate is handed a resource whose identifier is not a valid URL. The transform now passes such a resource through unchanged instead of invoking the delegate with a nil `NSURL`.
 - [core] Fix plugin layer filters ignoring the style's global state.
 - [core] Fix plugin layers with read-write depth drawables not depth testing when drawn above a `fill-extrusion` layer.
 - [core] Fix a crash in `RenderImageSource::update` when an image source's coordinates give an empty tile cover, such as an image wholly beyond the latitudes Web Mercator can show.
