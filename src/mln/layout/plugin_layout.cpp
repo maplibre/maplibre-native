@@ -178,8 +178,8 @@ void PluginLayout::createBucket(const ImagePositions& imagePositions,
         // A RESOURCE value that depends on the feature has its handle in layout_feature only.
         if (definition.type == MLN_PLUGIN_VALUE_RESOURCE && !layoutValues[i].isDataDriven()) {
             auto& resource = layoutProperties.back().value.data.resource_value;
-            resource.handle = resourceHandle(
-                resource.url.size ? std::string(resource.url.data, resource.url.size) : std::string{});
+            resource.handle = resourceHandle(resource.url.size ? std::string(resource.url.data, resource.url.size)
+                                                               : std::string{});
         }
     }
     context.properties = layoutProperties.data();
