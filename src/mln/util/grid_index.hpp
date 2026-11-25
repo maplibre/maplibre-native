@@ -71,8 +71,12 @@ public:
     std::vector<T> query(const BBox&) const;
     std::vector<std::pair<T, BBox>> queryWithBoxes(const BBox&) const;
 
-    bool hitTest(const BBox&, const std::optional<std::function<bool(const T&)>>& predicate = std::nullopt) const;
-    bool hitTest(const BCircle&, const std::optional<std::function<bool(const T&)>>& predicate = std::nullopt) const;
+    /// The predicate type is a template parameter so that a predicate over a base class of T, like the
+    /// collision group predicate, is called as is rather than wrapped in a new std::function on every call.
+    template <std::predicate<const T&> Predicate = std::function<bool(const T&)>>
+    bool hitTest(const BBox&, const std::optional<Predicate>& predicate = std::nullopt) const;
+    template <std::predicate<const T&> Predicate = std::function<bool(const T&)>>
+    bool hitTest(const BCircle&, const std::optional<Predicate>& predicate = std::nullopt) const;
 
     bool empty() const;
 
@@ -197,7 +201,8 @@ std::vector<std::pair<T, typename GridIndex<T>::BBox>> GridIndex<T>::queryWithBo
 }
 
 template <class T>
-bool GridIndex<T>::hitTest(const BBox& queryBBox, const std::optional<std::function<bool(const T&)>>& predicate) const {
+template <std::predicate<const T&> Predicate>
+bool GridIndex<T>::hitTest(const BBox& queryBBox, const std::optional<Predicate>& predicate) const {
     bool hit = false;
     visit(queryBBox, [&](const T& t, const BBox&) -> bool {
         if (!predicate || (*predicate)(t)) {
@@ -211,8 +216,8 @@ bool GridIndex<T>::hitTest(const BBox& queryBBox, const std::optional<std::funct
 }
 
 template <class T>
-bool GridIndex<T>::hitTest(const BCircle& queryBCircle,
-                           const std::optional<std::function<bool(const T&)>>& predicate) const {
+template <std::predicate<const T&> Predicate>
+bool GridIndex<T>::hitTest(const BCircle& queryBCircle, const std::optional<Predicate>& predicate) const {
     bool hit = false;
     visit(queryBCircle, [&](const T& t, const BBox&) -> bool {
         if (!predicate || (*predicate)(t)) {
