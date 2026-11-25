@@ -51,6 +51,8 @@ public:
             depthTexture->setSamplerConfiguration(
                 {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         }
+
+        context.renderingStats().numFrameBuffers++;
     }
 
     ~OffscreenTextureResource() noexcept override { context.renderingStats().numFrameBuffers--; }
