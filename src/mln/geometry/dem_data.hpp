@@ -16,7 +16,11 @@ public:
     DEMData(const PremultipliedImage& image, Tileset::RasterEncoding encoding);
     void backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy);
 
+    /// Height of pixel (x, y) in whole meters, cut towards zero: for the tile's elevation range.
     int32_t get(int32_t x, int32_t y) const;
+    /// Height of pixel (x, y) in meters, decoded as the terrain shaders decode it (Terrain-RGB
+    /// holds tenths of a meter). Heights that stand for the drawn ground read this one.
+    float getElevation(int32_t x, int32_t y) const;
     const std::array<float, 4>& getUnpackVector() const;
 
     const PremultipliedImage* getImage() const { return &*image; }

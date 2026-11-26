@@ -101,7 +101,7 @@ struct TerrainProjectionTest {
 
 } // namespace
 
-// The copy samples like the renderer: whole metres, scaled by the exaggeration.
+// The copy samples like the renderer: metres, scaled by the exaggeration.
 TEST(TerrainElevationIndex, SamplesTheTileUnderTheLocation) {
     const UnwrappedTileID id(2, 2, 1); // covers Innsbruck at z2
     TerrainElevationIndex index({{id, makeGrid(1234.0)}}, 1.5f);
@@ -112,6 +112,19 @@ TEST(TerrainElevationIndex, SamplesTheTileUnderTheLocation) {
 
     // A location no tile covers has no height, rather than sea level.
     EXPECT_FALSE(index.getElevation(LatLng{-33.87, 151.21}));
+}
+
+// Terrain-RGB holds tenths of a metre, and the terrain shaders draw the ground at them. Cut to
+// whole metres, the copy answered up to a metre under the drawn ground, so a camera stood on the
+// height it gave was inside the ground.
+TEST(TerrainElevationIndex, AHeightKeepsItsTenthsOfAMetre) {
+    const UnwrappedTileID id(2, 2, 1); // covers Innsbruck at z2
+    TerrainElevationIndex index({{id, makeGrid(2618.7)}}, 1.0f);
+
+    const auto elevation = index.getElevation(innsbruck);
+    ASSERT_TRUE(elevation);
+    EXPECT_NEAR(*elevation, 2618.7, 0.01);
+    EXPECT_NEAR(index.getMaxElevation(), 2618.7, 0.01);
 }
 
 // A DEM pixel holds the height of its whole cell, and hillshade and color-relief draw it over that

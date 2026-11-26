@@ -114,10 +114,10 @@ float sampleDEM(const DEMData& demData, const DEMSubTileOffset& off, float x, fl
     const auto y0 = static_cast<int32_t>(std::floor(py));
     const float fx = px - static_cast<float>(x0);
     const float fy = py - static_cast<float>(y0);
-    const auto tl = static_cast<float>(demData.get(x0, y0));
-    const auto tr = static_cast<float>(demData.get(x0 + 1, y0));
-    const auto bl = static_cast<float>(demData.get(x0, y0 + 1));
-    const auto br = static_cast<float>(demData.get(x0 + 1, y0 + 1));
+    const auto tl = demData.getElevation(x0, y0);
+    const auto tr = demData.getElevation(x0 + 1, y0);
+    const auto bl = demData.getElevation(x0, y0 + 1);
+    const auto br = demData.getElevation(x0 + 1, y0 + 1);
     const float top = tl + (tr - tl) * fx;
     const float bottom = bl + (br - bl) * fx;
     return top + (bottom - top) * fy;

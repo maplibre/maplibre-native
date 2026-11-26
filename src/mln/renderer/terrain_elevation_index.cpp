@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <limits>
 
 namespace mln {
 
@@ -17,11 +16,9 @@ TerrainElevationIndex::Grid::Grid(const DEMData& dem)
     heights.resize(static_cast<size_t>(side) * side);
     for (int32_t y = -1; y <= dim; ++y) {
         for (int32_t x = -1; x <= dim; ++x) {
-            const int32_t h = util::clamp(dem.get(x, y),
-                                          static_cast<int32_t>(std::numeric_limits<int16_t>::min()),
-                                          static_cast<int32_t>(std::numeric_limits<int16_t>::max()));
-            heights[static_cast<size_t>(y + 1) * side + static_cast<size_t>(x + 1)] = static_cast<int16_t>(h);
-            maxHeight = std::max(maxHeight, static_cast<int16_t>(h));
+            const float h = dem.getElevation(x, y);
+            heights[static_cast<size_t>(y + 1) * side + static_cast<size_t>(x + 1)] = h;
+            maxHeight = std::max(maxHeight, h);
         }
     }
 }

@@ -305,3 +305,53 @@ TEST(TerrainElevation, ANeighbourLoadingLaterChangesTheHeightsNextToTheSharedEdg
     EXPECT_NEAR(*after, 0.75 * 1000.0 + 0.25 * 3000.0, 0.5)
         << "the map kept the heights of tile 2/2/1 from before its west neighbour backfilled its border";
 }
+
+// Terrain-RGB holds tenths of a metre, and the terrain shaders draw the ground at them. The heights
+// the renderer reads for the map (the centre's ground under the clamp, and getTerrainElevation)
+// were cut to whole metres, up to a metre under the drawn ground: a camera stood on them was inside
+// the ground and drew the underside of the terrain.
+TEST(TerrainElevation, HeightsKeepTheTenthsOfAMetreTheGroundIsDrawnAt) {
+    constexpr double metres = 2618.7;
+    // Terrain-RGB: -10000 + (R * 65536 + G * 256 + B) * 0.1
+    const auto encoded = static_cast<uint32_t>(std::lround((metres + 10000.0) * 10.0));
+    PremultipliedImage image({rampTileSize, rampTileSize});
+    for (uint32_t i = 0; i < rampTileSize * rampTileSize; ++i) {
+        uint8_t* px = image.data.get() + i * 4;
+        px[0] = static_cast<uint8_t>((encoded >> 16) & 0xff);
+        px[1] = static_cast<uint8_t>((encoded >> 8) & 0xff);
+        px[2] = static_cast<uint8_t>(encoded & 0xff);
+        px[3] = 255;
+    }
+    const std::string tile = encodePNG(image);
+
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+    fileSource->tileResponse = [&](const Resource&) {
+        Response res;
+        res.data = std::make_shared<std::string>(tile);
+        return res;
+    };
+    HeadlessFrontend frontend{{256, 256}, 1};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    std::string style = rampStyle;
+    style.replace(style.find("terrarium"), std::string("terrarium").size(), "mapbox");
+    map.getStyle().loadJSON(style);
+    map.setCenterClampedToGround(true);
+
+    const LatLng centre = Projection::unproject(Point<double>{2.5, 1.5} * util::tileSize_D, 4.0);
+    map.jumpTo(CameraOptions().withCenter(centre).withZoom(2.0).withPitch(0.0));
+    const auto centreAltitude = [&] {
+        return map.getCameraOptions({}).centerAltitude.value_or(0.0);
+    };
+    for (int i = 0; i < 100 && std::abs(centreAltitude() - metres) > 1.5; ++i) {
+        loop.runOnce();
+        frontend.render(map);
+    }
+    EXPECT_NEAR(centreAltitude(), metres, 0.01);
+    const auto elevation = map.getTerrainElevation(centre);
+    ASSERT_TRUE(elevation);
+    EXPECT_NEAR(*elevation, metres, 0.01);
+}
