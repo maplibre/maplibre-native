@@ -1,0 +1,28 @@
+{
+  "expression": ["interpolate-oklch", ["linear"], ["get", "t"], 0, ["get", "from"], 1, ["get", "to"]],
+  "inputs": [
+    [{}, {"properties": {"t": 0.5, "from": "oklch(0.7 0.1 30 / 0.2)", "to": "oklch(0.5 0.1 250)"}}],
+    [{}, {"properties": {"t": 0.4, "from": "oklch(0.9 0.05 100)", "to": "oklch(0.4 0.12 300 / 0.5)"}}]
+  ],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": false,
+      "isZoomConstant": true,
+      "type": "color"
+    },
+    "outputs": [
+      [0.315825, 0.208495, 0.340319, 0.6],
+      [0.693458, 0.52439, 0.477671, 0.8]
+    ],
+    "serialized": [
+      "interpolate-oklch",
+      ["linear"],
+      ["number", ["get", "t"]],
+      0,
+      ["to-color", ["get", "from"]],
+      1,
+      ["to-color", ["get", "to"]]
+    ]
+  }
+}
