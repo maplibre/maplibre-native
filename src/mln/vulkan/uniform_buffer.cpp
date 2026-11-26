@@ -7,6 +7,8 @@
 
 #include <cassert>
 
+#include <algorithm>
+
 namespace mln {
 namespace vulkan {
 
@@ -74,12 +76,54 @@ void UniformBufferArray::bind(gfx::RenderPass& renderPass) {
 }
 
 void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {
+    if (descriptorSetType == DescriptorSetType::Global) {
+        auto& boundSet = getDescriptorSetForBuffers(encoder);
+        boundSet.update(*this, descriptorStartIndex, descriptorStorageCount, descriptorUniformCount);
+        updateBufferResources(encoder);
+        boundSet.bind(encoder);
+        return;
+    }
+
     if (!descriptorSet) {
         descriptorSet = std::make_unique<UniformDescriptorSet>(encoder.getContext(), descriptorSetType);
     }
 
     descriptorSet->update(*this, descriptorStartIndex, descriptorStorageCount, descriptorUniformCount);
+    updateBufferResources(encoder);
+    descriptorSet->bind(encoder);
+}
 
+UniformDescriptorSet& UniformBufferArray::getDescriptorSetForBuffers(CommandEncoder& encoder) {
+    // Forget the sets of buffers that no longer exist (their deletion is deferred past
+    // the frames in flight by the descriptor set itself).
+    std::erase_if(bufferSets, [](const BufferSet& entry) {
+        return std::ranges::any_of(entry.owners, [](const auto& owner) { return owner.expired(); });
+    });
+
+    const uint32_t count = descriptorStorageCount + descriptorUniformCount;
+    std::vector<const gfx::UniformBuffer*> buffers(count);
+    for (uint32_t i = 0; i < count; ++i) {
+        buffers[i] = uniformBufferVector[descriptorStartIndex + i].get();
+    }
+
+    for (auto& entry : bufferSets) {
+        if (entry.buffers == buffers) {
+            return *entry.descriptorSet;
+        }
+    }
+
+    BufferSet entry;
+    entry.buffers = std::move(buffers);
+    for (uint32_t i = 0; i < count; ++i) {
+        if (entry.buffers[i]) {
+            entry.owners.emplace_back(uniformBufferVector[descriptorStartIndex + i]);
+        }
+    }
+    entry.descriptorSet = std::make_unique<UniformDescriptorSet>(encoder.getContext(), descriptorSetType);
+    return *bufferSets.emplace_back(std::move(entry)).descriptorSet;
+}
+
+void UniformBufferArray::updateBufferResources(CommandEncoder& encoder) {
     const auto frameCount = encoder.getContext().getBackend().getMaxFrames();
     const int32_t currentIndex = encoder.getContext().getCurrentFrameResourceIndex();
     const int32_t prevIndex = currentIndex == 0 ? frameCount - 1 : currentIndex - 1;
@@ -94,8 +138,6 @@ void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {
         auto& buff = static_cast<UniformBuffer*>(uniformBufferVector[index].get())->mutableBufferResource();
         buff.updateVulkanBuffer(currentIndex, prevIndex);
     }
-
-    descriptorSet->bind(encoder);
 }
 
 } // namespace vulkan

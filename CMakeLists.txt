@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
 option(MLN_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MLN_WITH_PLUGINS "Build source-bound native plugin layers" OFF)
+option(MLN_WITH_LEGACY_ANNOTATIONS "Build the legacy annotation API and add its source and layer to every style" ON)
 option(MLN_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
 option(MLN_WITH_COVERAGE "Enable code coverage collection" OFF)
 option(MLN_WITH_QT "Build MapLibre Native Qt bindings" OFF)
@@ -146,6 +147,13 @@ else()
 endif()
 
 include(cmake/plugins.cmake)
+
+if(NOT MLN_WITH_LEGACY_ANNOTATIONS)
+    target_compile_definitions(
+        mbgl-core
+        PUBLIC MLN_LEGACY_ANNOTATIONS_DISABLED
+    )
+endif()
 
 # Override visibility for mbgl-core when building amalgamation
 if(MLN_CREATE_AMALGAMATION)
@@ -1255,6 +1263,7 @@ if(_can_export)
 endif()
 
 if(MLN_WITH_VULKAN)
+    include(${PROJECT_SOURCE_DIR}/vendor/glslang.cmake)
     include(${PROJECT_SOURCE_DIR}/vendor/vulkan.cmake)
 
     target_link_libraries(
