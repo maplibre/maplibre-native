@@ -264,6 +264,28 @@ class MapLibreMapTest : BaseTest() {
     }
 
     @Test
+    fun testSetFieldOfView() {
+        maplibreMap.setFieldOfView(70.0)
+        verify { developerAnimationListener.onDeveloperAnimationStarted() }
+        verify { transform.setFieldOfView(70.0) }
+    }
+
+    @Test
+    fun testGetFieldOfView() {
+        every { transform.fieldOfView } returns 70.0
+        assertEquals(70.0, maplibreMap.fieldOfView, 0.0)
+    }
+
+    @Test
+    fun testSetCameraFromEye() {
+        val center = LatLng(38.72, -120.07)
+        val eye = LatLng(38.70, -120.07)
+        maplibreMap.setCameraFromEye(center, 1000.0, eye, 3000.0)
+        verify { developerAnimationListener.onDeveloperAnimationStarted() }
+        verify { transform.setCenterFromEye(center, 1000.0, eye, 3000.0) }
+    }
+
+    @Test
     fun testSetTerrainHazeColor() {
         maplibreMap.setTerrainHazeColor(0x80FF8000.toInt())
         verify { nativeMapView.setTerrainHazeColor(0x80FF8000.toInt()) }
