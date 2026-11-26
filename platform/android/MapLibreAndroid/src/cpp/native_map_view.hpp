@@ -358,6 +358,8 @@ public:
 
     void setCenterFromEye(JNIEnv&, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble, jni::jdouble);
 
+    jni::jdouble getTerrainElevation(JNIEnv&, jni::jdouble, jni::jdouble);
+
     void setTerrainSkirtLength(JNIEnv&, jni::jint);
 
     jni::jint getTerrainSkirtLength(JNIEnv&);

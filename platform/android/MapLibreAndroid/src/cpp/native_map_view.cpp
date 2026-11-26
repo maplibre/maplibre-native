@@ -51,6 +51,8 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <limits>
+#include <optional>
 
 namespace mln::android {
 
@@ -1418,6 +1420,13 @@ void NativeMapView::setCenterFromEye(JNIEnv&,
     map->jumpTo(cameraOptions);
 }
 
+jni::jdouble NativeMapView::getTerrainElevation(JNIEnv&, jni::jdouble latitude, jni::jdouble longitude) {
+    // The map's own copy of the terrain heights (Map::getTerrainElevation): no wait on the render
+    // thread. NaN stands for "no height": terrain is off or the DEM under the coordinate has not loaded.
+    const std::optional<double> elevation = map->getTerrainElevation(mln::LatLng(latitude, longitude));
+    return jni::jdouble(elevation ? *elevation : std::numeric_limits<double>::quiet_NaN());
+}
+
 void NativeMapView::setTerrainSkirtLength(JNIEnv&, jni::jint length) {
     map->setTerrainSkirtLength(static_cast<mln::TerrainSkirtLength>(length));
 }
@@ -1625,6 +1634,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setFieldOfView, "nativeSetFieldOfView"),
         METHOD(&NativeMapView::getFieldOfView, "nativeGetFieldOfView"),
         METHOD(&NativeMapView::setCenterFromEye, "nativeSetCenterFromEye"),
+        METHOD(&NativeMapView::getTerrainElevation, "nativeGetTerrainElevation"),
         METHOD(&NativeMapView::setTerrainSkirtLength, "nativeSetTerrainSkirtLength"),
         METHOD(&NativeMapView::getTerrainSkirtLength, "nativeGetTerrainSkirtLength"),
         METHOD(&NativeMapView::setCenterClampedToGround, "nativeSetCenterClampedToGround"),

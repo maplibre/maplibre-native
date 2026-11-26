@@ -974,6 +974,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public double getTerrainElevation(double latitude, double longitude) {
+    if (checkState("getTerrainElevation")) {
+      return Double.NaN;
+    }
+    return nativeGetTerrainElevation(latitude, longitude);
+  }
+
+  @Override
   public void setTerrainSkirtLength(int length) {
     if (checkState("setTerrainSkirtLength")) {
       return;
@@ -2028,6 +2036,9 @@ final class NativeMapView implements NativeMap {
   private native void nativeSetCenterFromEye(double centerLatitude, double centerLongitude,
                                              double centerAltitude, double eyeLatitude,
                                              double eyeLongitude, double eyeAltitude);
+
+  @Keep
+  private native double nativeGetTerrainElevation(double latitude, double longitude);
 
   @Keep
   private native void nativeSetTerrainSkirtLength(int length);
