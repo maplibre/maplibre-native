@@ -299,9 +299,29 @@ interface NativeMap {
 
   double getCenterAltitude();
 
+  void setFieldOfView(double degrees);
+
+  double getFieldOfView();
+
+  void setCenterFromEye(double centerLatitude, double centerLongitude, double centerAltitude,
+                        double eyeLatitude, double eyeLongitude, double eyeAltitude);
+
+  /**
+   * Returns the rendered terrain height at a coordinate, or NaN when there is none.
+   */
+  double getTerrainElevation(double latitude, double longitude);
+
   void setTerrainSkirtLength(int length);
 
   int getTerrainSkirtLength();
+
+  void setTerrainHazeColor(int color);
+
+  int getTerrainHazeColor();
+
+  void setTerrainHazeRange(float range);
+
+  float getTerrainHazeRange();
 
   void setCenterClampedToGround(boolean clamped);
 

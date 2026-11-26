@@ -948,6 +948,40 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setFieldOfView(double degrees) {
+    if (checkState("setFieldOfView")) {
+      return;
+    }
+    nativeSetFieldOfView(degrees);
+  }
+
+  @Override
+  public double getFieldOfView() {
+    if (checkState("getFieldOfView")) {
+      return 0;
+    }
+    return nativeGetFieldOfView();
+  }
+
+  @Override
+  public void setCenterFromEye(double centerLatitude, double centerLongitude, double centerAltitude,
+                               double eyeLatitude, double eyeLongitude, double eyeAltitude) {
+    if (checkState("setCenterFromEye")) {
+      return;
+    }
+    nativeSetCenterFromEye(centerLatitude, centerLongitude, centerAltitude, eyeLatitude, eyeLongitude,
+      eyeAltitude);
+  }
+
+  @Override
+  public double getTerrainElevation(double latitude, double longitude) {
+    if (checkState("getTerrainElevation")) {
+      return Double.NaN;
+    }
+    return nativeGetTerrainElevation(latitude, longitude);
+  }
+
+  @Override
   public void setTerrainSkirtLength(int length) {
     if (checkState("setTerrainSkirtLength")) {
       return;
@@ -961,6 +995,38 @@ final class NativeMapView implements NativeMap {
       return 0;
     }
     return nativeGetTerrainSkirtLength();
+  }
+
+  @Override
+  public void setTerrainHazeColor(int color) {
+    if (checkState("setTerrainHazeColor")) {
+      return;
+    }
+    nativeSetTerrainHazeColor(color);
+  }
+
+  @Override
+  public int getTerrainHazeColor() {
+    if (checkState("getTerrainHazeColor")) {
+      return 0;
+    }
+    return nativeGetTerrainHazeColor();
+  }
+
+  @Override
+  public void setTerrainHazeRange(float range) {
+    if (checkState("setTerrainHazeRange")) {
+      return;
+    }
+    nativeSetTerrainHazeRange(range);
+  }
+
+  @Override
+  public float getTerrainHazeRange() {
+    if (checkState("getTerrainHazeRange")) {
+      return 0;
+    }
+    return nativeGetTerrainHazeRange();
   }
 
   @Override
@@ -1993,10 +2059,36 @@ final class NativeMapView implements NativeMap {
   private native double nativeGetCenterAltitude();
 
   @Keep
+  private native void nativeSetFieldOfView(double degrees);
+
+  @Keep
+  private native double nativeGetFieldOfView();
+
+  @Keep
+  private native void nativeSetCenterFromEye(double centerLatitude, double centerLongitude,
+                                             double centerAltitude, double eyeLatitude,
+                                             double eyeLongitude, double eyeAltitude);
+
+  @Keep
+  private native double nativeGetTerrainElevation(double latitude, double longitude);
+
+  @Keep
   private native void nativeSetTerrainSkirtLength(int length);
 
   @Keep
   private native int nativeGetTerrainSkirtLength();
+
+  @Keep
+  private native void nativeSetTerrainHazeColor(int color);
+
+  @Keep
+  private native int nativeGetTerrainHazeColor();
+
+  @Keep
+  private native void nativeSetTerrainHazeRange(float range);
+
+  @Keep
+  private native float nativeGetTerrainHazeRange();
 
   @Keep
   private native void nativeSetCenterClampedToGround(boolean clamped);

@@ -47,9 +47,14 @@
 
 #include <android/native_window_jni.h>
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <ctime>
+#include <limits>
+#include <optional>
 
 namespace mln::android {
 
@@ -1363,12 +1368,103 @@ jni::jdouble NativeMapView::getCenterAltitude(JNIEnv&) {
     return jni::jdouble(map->getCameraOptions().centerAltitude.value_or(0.0));
 }
 
+void NativeMapView::setFieldOfView(JNIEnv&, jni::jdouble degrees) {
+    map->jumpTo(mln::CameraOptions().withFov(degrees));
+}
+
+jni::jdouble NativeMapView::getFieldOfView(JNIEnv&) {
+    return jni::jdouble(map->getCameraOptions().fov.value_or(mln::util::rad2deg(mln::util::DEFAULT_FOV)));
+}
+
+void NativeMapView::setCenterFromEye(JNIEnv&,
+                                     jni::jdouble centerLatitude,
+                                     jni::jdouble centerLongitude,
+                                     jni::jdouble centerAltitude,
+                                     jni::jdouble eyeLatitude,
+                                     jni::jdouble eyeLongitude,
+                                     jni::jdouble eyeAltitude) {
+    const mln::LatLng center{centerLatitude, centerLongitude};
+    const mln::LatLng eye{eyeLatitude, eyeLongitude};
+    // The camera sits `cameraToCenter` points from the center along the line of sight, and a point is
+    // as many meters up as along the ground at the center's latitude. So measure the eye's offset
+    // from the center in points of the world at zoom level 0, and the zoom level is the one that
+    // scales that offset to `cameraToCenter`.
+    const mln::Point<double> centerPoint = mln::Projection::project(center, 1.0);
+    const mln::Point<double> eyePoint = mln::Projection::project(eye, 1.0);
+    const double worldSize = mln::Projection::worldSize(1.0);
+    double east = centerPoint.x - eyePoint.x;
+    if (east > worldSize / 2) {
+        east -= worldSize;
+    } else if (east < -worldSize / 2) {
+        east += worldSize;
+    }
+    const double north = eyePoint.y - centerPoint.y;
+    const double along = std::hypot(east, north);
+    const double up = (eyeAltitude - centerAltitude) /
+                      mln::Projection::getMetersPerPixelAtLatitude(center.latitude(), 0);
+    const double offset = std::hypot(along, up);
+    const double fieldOfView = mln::util::deg2rad(
+        map->getCameraOptions().fov.value_or(mln::util::rad2deg(mln::util::DEFAULT_FOV)));
+    const double cameraToCenter = 0.5 * static_cast<double>(map->getMapOptions().size().height) /
+                                  std::tan(fieldOfView / 2);
+    if (!(offset > 0) || !(cameraToCenter > 0) || !std::isfinite(offset)) {
+        return;
+    }
+
+    mln::CameraOptions cameraOptions;
+    cameraOptions.center = center;
+    cameraOptions.centerAltitude = centerAltitude;
+    cameraOptions.zoom = std::log2(cameraToCenter / offset);
+    cameraOptions.pitch = mln::util::rad2deg(std::atan2(along, up));
+    if (along > 0) {
+        cameraOptions.bearing = mln::util::rad2deg(std::atan2(east, north));
+    }
+    map->jumpTo(cameraOptions);
+}
+
+jni::jdouble NativeMapView::getTerrainElevation(JNIEnv&, jni::jdouble latitude, jni::jdouble longitude) {
+    // The map's own copy of the terrain heights (Map::getTerrainElevation): no wait on the render
+    // thread. NaN stands for "no height": terrain is off or the DEM under the coordinate has not loaded.
+    const std::optional<double> elevation = map->getTerrainElevation(mln::LatLng(latitude, longitude));
+    return jni::jdouble(elevation ? *elevation : std::numeric_limits<double>::quiet_NaN());
+}
+
 void NativeMapView::setTerrainSkirtLength(JNIEnv&, jni::jint length) {
     map->setTerrainSkirtLength(static_cast<mln::TerrainSkirtLength>(length));
 }
 
 jni::jint NativeMapView::getTerrainSkirtLength(JNIEnv&) {
     return jni::jint(static_cast<int>(map->getTerrainSkirtLength()));
+}
+
+void NativeMapView::setTerrainHazeColor(JNIEnv&, jni::jint argb) {
+    // An Android color is non-premultiplied ARGB, and mln::Color is premultiplied.
+    const auto bits = static_cast<std::uint32_t>(argb);
+    const float a = static_cast<float>((bits >> 24) & 0xFF) / 255.0f;
+    const float r = static_cast<float>((bits >> 16) & 0xFF) / 255.0f;
+    const float g = static_cast<float>((bits >> 8) & 0xFF) / 255.0f;
+    const float b = static_cast<float>(bits & 0xFF) / 255.0f;
+    map->setTerrainHaze(mln::Color{r * a, g * a, b * a, a}, map->getTerrainHazeRange());
+}
+
+jni::jint NativeMapView::getTerrainHazeColor(JNIEnv&) {
+    const mln::Color color = map->getTerrainHazeColor();
+    // Back to non-premultiplied ARGB, rounded so a color set from an Android color reads back as set.
+    const auto channel = [&](float premultiplied) {
+        const float value = color.a > 0.0f ? premultiplied / color.a : premultiplied;
+        return static_cast<std::uint32_t>(std::lround(std::clamp(value, 0.0f, 1.0f) * 255.0f));
+    };
+    const auto alpha = static_cast<std::uint32_t>(std::lround(std::clamp(color.a, 0.0f, 1.0f) * 255.0f));
+    return jni::jint(static_cast<std::int32_t>((alpha << 24) | (channel(color.r) << 16) | (channel(color.g) << 8) |
+                                               channel(color.b)));
+}
+
+void NativeMapView::setTerrainHazeRange(JNIEnv&, jni::jfloat range) {
+    map->setTerrainHaze(map->getTerrainHazeColor(), range);
+}
+
+jni::jfloat NativeMapView::getTerrainHazeRange(JNIEnv&) {
+    return jni::jfloat(map->getTerrainHazeRange());
 }
 
 void NativeMapView::setCenterClampedToGround(JNIEnv&, jni::jboolean clamped) {
@@ -1567,8 +1663,16 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::anchorCenterOnTerrain, "nativeAnchorCenterOnTerrain"),
         METHOD(&NativeMapView::setCenterAltitudeKeepingView, "nativeSetCenterAltitudeKeepingView"),
         METHOD(&NativeMapView::getCenterAltitude, "nativeGetCenterAltitude"),
+        METHOD(&NativeMapView::setFieldOfView, "nativeSetFieldOfView"),
+        METHOD(&NativeMapView::getFieldOfView, "nativeGetFieldOfView"),
+        METHOD(&NativeMapView::setCenterFromEye, "nativeSetCenterFromEye"),
+        METHOD(&NativeMapView::getTerrainElevation, "nativeGetTerrainElevation"),
         METHOD(&NativeMapView::setTerrainSkirtLength, "nativeSetTerrainSkirtLength"),
         METHOD(&NativeMapView::getTerrainSkirtLength, "nativeGetTerrainSkirtLength"),
+        METHOD(&NativeMapView::setTerrainHazeColor, "nativeSetTerrainHazeColor"),
+        METHOD(&NativeMapView::getTerrainHazeColor, "nativeGetTerrainHazeColor"),
+        METHOD(&NativeMapView::setTerrainHazeRange, "nativeSetTerrainHazeRange"),
+        METHOD(&NativeMapView::getTerrainHazeRange, "nativeGetTerrainHazeRange"),
         METHOD(&NativeMapView::setCenterClampedToGround, "nativeSetCenterClampedToGround"),
         METHOD(&NativeMapView::getCenterClampedToGround, "nativeGetCenterClampedToGround"),
         METHOD(&NativeMapView::setDebugAboveGroundLog, "nativeSetDebugAboveGroundLog"),

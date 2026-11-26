@@ -756,6 +756,34 @@ class MapChangeReceiverTest : BaseTest() {
         }
     }
 
+    @Test
+    fun testOnRenderErrorListener() {
+        // A listener that only implements onRenderError(), as before 13.8.0, is still called.
+        var calls = 0
+        val listener = OnRenderErrorListener { calls++ }
+        mapChangeEventManager!!.addOnRenderErrorListener(listener)
+        mapChangeEventManager!!.onRenderError(TEST_STRING)
+        Assert.assertEquals(1, calls)
+        mapChangeEventManager!!.removeOnRenderErrorListener(listener)
+        mapChangeEventManager!!.onRenderError(TEST_STRING)
+        Assert.assertEquals(1, calls)
+
+        // A listener that overrides onRenderError(String) gets the message instead.
+        val messages = mutableListOf<String>()
+        val messageListener = object : OnRenderErrorListener {
+            override fun onRenderError() {
+                Assert.fail("onRenderError() should not be called when onRenderError(String) is overridden.")
+            }
+
+            override fun onRenderError(message: String) {
+                messages.add(message)
+            }
+        }
+        mapChangeEventManager!!.addOnRenderErrorListener(messageListener)
+        mapChangeEventManager!!.onRenderError(TEST_STRING)
+        Assert.assertEquals(listOf(TEST_STRING), messages)
+    }
+
     companion object {
         private const val TEST_STRING = "mapChangeRandom"
         private val TEST_RENDERING_STATS = RenderingStats();
