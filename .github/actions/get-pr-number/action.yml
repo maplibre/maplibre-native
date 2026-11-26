@@ -1,8 +1,8 @@
 name: 'get-pr-number'
-description: 'Gets the PR number from an artifact as the pr-number output and the PR_NUMBER environment variable'
+description: 'Gets the PR number from an artifact'
 outputs:
   pr-number:
-    description: "PR number or empty string"
+    description: "PR number, or empty when there is none or the PR is no longer at the commit the triggering run built"
     value: ${{ steps.cat.outputs.pr-number }}
 runs:
   using: "composite"
@@ -23,12 +23,14 @@ runs:
           echo "::error::pr-number artifact does not contain a PR number"
           exit 1
         fi
-        if [ -n "$pr_number" ] && [ "$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr_number" --jq .head.sha)" != "$RUN_HEAD_SHA" ]; then
-          echo "::error::PR #$pr_number is not at $RUN_HEAD_SHA, the commit the triggering run built"
-          exit 1
+        if [ -n "$pr_number" ]; then
+          pr_head="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr_number" --jq .head.sha)"
+          if [ "$pr_head" != "$RUN_HEAD_SHA" ]; then
+            echo "::notice::Ignoring PR #$pr_number, which is at $pr_head, not at $RUN_HEAD_SHA, the commit the triggering run built"
+            pr_number=
+          fi
         fi
         echo "pr-number=$pr_number" >> "$GITHUB_OUTPUT"
-        echo "PR_NUMBER=$pr_number" >> "$GITHUB_ENV"
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}

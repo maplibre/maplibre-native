@@ -199,9 +199,11 @@ jobs:
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
   linux-benchmark:
-    if: github.event_name == 'pull_request'
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.linux-build-and-test.result != 'skipped' }}
     needs: linux-build-and-test
     runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    continue-on-error: true  # a failed report must not fail linux-ci
     permissions:
       contents: read
     steps:
@@ -238,13 +240,15 @@ jobs:
           path: benchmark_out.txt
 
   linux-bloaty:
-    if: github.event_name == 'pull_request'
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.linux-build-and-test.result != 'skipped' }}
     needs: linux-build-and-test
     runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    continue-on-error: true  # a failed report must not fail linux-ci
     permissions:
       contents: read
     env:
-      legacy_maplibre_sha: d38709084a9865fe0bb8300aec70ebf8243b3d43
+      legacy_maplibre_sha: d38709084a9865fe0bb8300aec70ebf8243b3d43  # also in pr-linux-tests.yml
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

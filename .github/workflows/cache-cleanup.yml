@@ -19,7 +19,7 @@ jobs:
             --jq '[.[].ref | capture("^refs/pull/(?<n>[0-9]+)/merge$").n] | unique | .[]')
 
           for pr in $prs; do
-            state=$(gh pr view "$pr" --json state --jq .state)
+            state=$(gh pr view "$pr" --json state --jq .state) || continue
             if [ "$state" != OPEN ]; then
               echo "Deleting caches of #$pr ($state)"
               gh cache delete --all --ref "refs/pull/$pr/merge" --succeed-on-no-caches

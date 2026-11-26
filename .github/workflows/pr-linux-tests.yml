@@ -12,7 +12,7 @@ concurrency:
 
 env:
   download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com
-  legacy_maplibre_sha: d38709084a9865fe0bb8300aec70ebf8243b3d43
+  legacy_maplibre_sha: d38709084a9865fe0bb8300aec70ebf8243b3d43  # also in linux-ci.yml
 
 permissions:
   pull-requests: write
@@ -23,7 +23,8 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-26.04
     outputs:
-      should_skip: ${{ steps.parent_workflow.outputs.was_skipped_or_cancelled }}
+      # empty when the results job was skipped or cancelled, or there is no PR to report to
+      pr-number: ${{ steps.parent_workflow.outputs.was_skipped_or_cancelled == 'false' && steps.get-pr-number.outputs.pr-number || '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -46,10 +47,15 @@ jobs:
           TEST_RUN_ID: ${{ github.event.workflow_run.id }}
           JOB_NAME: linux-bloaty
 
+      - uses: ./.github/actions/get-pr-number
+        id: get-pr-number
+
   pr-bloaty:
     needs: pre_job
-    if: needs.pre_job.outputs.should_skip == 'false'
+    if: needs.pre_job.outputs.pr-number
     runs-on: ubuntu-26.04
+    env:
+      PR_NUMBER: ${{ needs.pre_job.outputs.pr-number }}
     environment:
       name: workflow-run
       deployment: false
@@ -59,13 +65,11 @@ jobs:
           sparse-checkout: .github/actions
           persist-credentials: false
 
-      - uses: ./.github/actions/get-pr-number
-        id: get-pr-number
-
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: bloaty-results
           files: "tlus_diff_main.txt,tlus_diff_legacy.txt"
+          optional: 'true'  # linux-bloaty skips the legacy comparison when its binary can't be downloaded
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
@@ -83,20 +87,21 @@ jobs:
             echo "# Bloaty Results 🐋"
             echo 'Compared to main'
             echo '```'
-            awk 'NR <= 2; END { print }' tlus_diff_main.txt
+            tr -d '`' < tlus_diff_main.txt | awk 'NR <= 2; END { print }'
             echo '```'
             echo "Full report: $download_url/$report_path"
             echo "---"
           } >> message.md
 
       - name: Prepare Bloaty message (legacy)
+        if: hashFiles('tlus_diff_legacy.txt') != ''
         run: |
           report_path="bloaty-results/pr-${PR_NUMBER}-compared-to-legacy.txt"
           aws s3 cp tlus_diff_legacy.txt s3://maplibre-native/"$report_path"
           {
             echo "Compared to $legacy_maplibre_sha (legacy)"
             echo '```'
-            awk 'NR <= 2; END { print }' tlus_diff_legacy.txt
+            tr -d '`' < tlus_diff_legacy.txt | awk 'NR <= 2; END { print }'
             echo '```'
             echo "Full report: $download_url/$report_path"
           } >> message.md
@@ -104,14 +109,16 @@ jobs:
       - name: Leave a comment with Bloaty results
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
-          number: ${{ steps.get-pr-number.outputs.pr-number }}
+          number: ${{ env.PR_NUMBER }}
           header: bloaty
           path: message.md
 
   pr-benchmark:
     needs: pre_job
-    if: needs.pre_job.outputs.should_skip == 'false'
+    if: needs.pre_job.outputs.pr-number
     runs-on: ubuntu-26.04
+    env:
+      PR_NUMBER: ${{ needs.pre_job.outputs.pr-number }}
     environment:
       name: workflow-run
       deployment: false
@@ -120,9 +127,6 @@ jobs:
         with:
           sparse-checkout: .github/actions
           persist-credentials: false
-
-      - uses: ./.github/actions/get-pr-number
-        id: get-pr-number
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
@@ -145,7 +149,7 @@ jobs:
           {
             echo "Benchmark Results ⚡"
             echo '```'
-            awk 'NR <= 2; END { print }' benchmark_diff.txt
+            tr -d '`' < benchmark_diff.txt | awk 'NR <= 2; END { print }'
             echo '```'
             echo "Full report: $download_url/$report_path"
           } >> message.md
@@ -153,6 +157,6 @@ jobs:
       - name: Leave a comment with Benchmark results
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
-          number: ${{ steps.get-pr-number.outputs.pr-number }}
+          number: ${{ env.PR_NUMBER }}
           header: benchmark
           path: message.md

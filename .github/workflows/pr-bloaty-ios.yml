@@ -21,7 +21,8 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-26.04
     outputs:
-      should_skip: ${{ steps.parent_workflow.outputs.was_skipped_or_cancelled }}
+      # empty when the results job was skipped or cancelled, or there is no PR to report to
+      pr-number: ${{ steps.parent_workflow.outputs.was_skipped_or_cancelled == 'false' && steps.get-pr-number.outputs.pr-number || '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -44,10 +45,15 @@ jobs:
           TEST_RUN_ID: ${{ github.event.workflow_run.id }}
           JOB_NAME: ios-bloaty
 
+      - uses: ./.github/actions/get-pr-number
+        id: get-pr-number
+
   pr-bloaty-ios:
     needs: pre_job
-    if: needs.pre_job.outputs.should_skip == 'false'
+    if: needs.pre_job.outputs.pr-number
     runs-on: ubuntu-26.04
+    env:
+      PR_NUMBER: ${{ needs.pre_job.outputs.pr-number }}
     environment:
       name: workflow-run
       deployment: false
@@ -56,9 +62,6 @@ jobs:
         with:
           sparse-checkout: .github/actions
           persist-credentials: false
-
-      - uses: ./.github/actions/get-pr-number
-        id: get-pr-number
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
@@ -81,7 +84,7 @@ jobs:
             echo "# Bloaty Results (iOS) 🐋"
             echo 'Compared to main'
             echo '```'
-            awk 'NR <= 2; END { print }' bloaty_diff.txt
+            tr -d '`' < bloaty_diff.txt | awk 'NR <= 2; END { print }'
             echo '```'
             echo "Full report: $download_url/$report_path"
             echo "---"
@@ -90,6 +93,6 @@ jobs:
       - name: Leave a comment with Bloaty results
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
-          number: ${{ steps.get-pr-number.outputs.pr-number }}
+          number: ${{ env.PR_NUMBER }}
           header: bloaty-ios
           path: message.md

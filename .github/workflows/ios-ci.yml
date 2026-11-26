@@ -279,9 +279,11 @@ jobs:
           df -h "$HOME"
 
   ios-bloaty:
-    if: github.event_name == 'pull_request'
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.ios-build.result != 'skipped' }}
     needs: ios-build
     runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    continue-on-error: true  # a failed ios-ci run skips ios-device-test
     permissions:
       contents: read
     env:
