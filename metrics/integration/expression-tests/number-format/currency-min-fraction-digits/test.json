@@ -1,0 +1,33 @@
+{
+  "expression": [
+    "number-format",
+    12.3,
+    {
+        "locale": "en-US",
+        "currency": ["get", "currency"],
+        "min-fraction-digits": ["get", "min"]
+    }
+  ],
+  "inputs": [
+    [{}, {"properties": {"currency": "USD", "min": 3}}],
+    [{}, {"properties": {"currency": "JPY", "min": 2}}]
+  ],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": false,
+      "isZoomConstant": true,
+      "type": "string"
+    },
+    "outputs": ["$12.300", "¥12.30"],
+    "serialized": [
+      "number-format",
+      12.3,
+      {
+          "locale": "en-US",
+          "currency": ["string", ["get", "currency"]],
+          "min-fraction-digits": ["number", ["get", "min"]]
+      }
+    ]
+  }
+}
