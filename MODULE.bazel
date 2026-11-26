@@ -35,11 +35,10 @@ single_version_override(
 # Thread Sanitizer fails with "Interceptors are not working".
 # TODO: Remove this override once the upstream fix is released:
 # https://github.com/bazelbuild/rules_apple/pull/3149
-single_version_override(
+git_override(
     module_name = "rules_apple",
-    patch_strip = 1,
-    patches = ["//bazel/patches/rules_apple:ui-test-sanitizers.patch"],
-    version = "5.2.0",
+    commit = "ece83eb3493e8252d71d7a18afa6605d92938f93",
+    remote = "https://github.com/bazelbuild/rules_apple.git",
 )
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
