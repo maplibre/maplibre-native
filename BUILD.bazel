@@ -175,6 +175,7 @@ cc_library(
         ":mbgl-core-generated-private-artifacts",
         ":mbgl-core-generated-public-artifacts",
         "//vendor:boost",
+        "//vendor:csscolorparser",
         "//vendor:earcut.hpp",
         "//vendor:eternal",
         "//vendor:expected-lite",
@@ -212,13 +213,6 @@ cc_library(
             "//vendor:harfbuzz",
         ],
         "//conditions:default": [],
-    }) + select({
-        ":rust": [
-            "//rustutils:rustutilslib",
-        ],
-        "//conditions:default": [
-            "//vendor:csscolorparser",
-        ],
     }),
 )
 
@@ -277,19 +271,6 @@ config_setting(
     name = "legacy_text_shaping",
     flag_values = {
         ":shaping": "legacy",
-    },
-)
-
-bool_flag(
-    name = "use_rust",
-    build_setting_default = False,
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "rust",
-    flag_values = {
-        "//:use_rust": "true",
     },
 )
 

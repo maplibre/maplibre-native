@@ -12,7 +12,6 @@
       "allowedVersions": "<8.7.0"
     }
   ],
-  "ignoreDeps": ["cxx.rs"],
   "schedule": "* * 1,15 * *",
   "dependencyDashboard": true,
   "minimumReleaseAge": "3 days"

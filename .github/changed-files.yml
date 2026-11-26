@@ -1,6 +1,5 @@
 linux:
   - 'src/**'
-  - 'rustutils/**'
   - 'test/**'
   - 'render-test/**'
   - 'expression-test/**'

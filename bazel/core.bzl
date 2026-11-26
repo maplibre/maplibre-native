@@ -557,6 +557,7 @@ MLN_CORE_SOURCE = [
     "src/mln/util/bounding_volumes.cpp",
     "src/mln/util/chrono.cpp",
     "src/mln/util/client_options.cpp",
+    "src/mln/util/color.cpp",
     "src/mln/util/constants.cpp",
     "src/mln/util/convert.cpp",
     "src/mln/util/error_sink.hpp",
@@ -628,14 +629,7 @@ MLN_CORE_SOURCE = [
     "src/mln/util/version.cpp",
     "src/mln/util/version.hpp",
     "src/mln/util/work_request.cpp",
-] + select({
-    "//:rust": [
-        "src/mln/util/color.rs.cpp",
-    ],
-    "//conditions:default": [
-        "src/mln/util/color.cpp",
-    ],
-})
+]
 
 MLN_CORE_HEADERS = [
     "include/mln/gfx/command_encoder.hpp",
