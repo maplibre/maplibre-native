@@ -55,7 +55,7 @@ const std::array<TextureInfo, 1> FillExtrusionInstancedShaderSource::textures = 
 
 using FillExtrusionPatternShaderSource = ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>;
 
-const std::array<AttributeInfo, 6> FillExtrusionPatternShaderSource::attributes = {
+const std::array<AttributeInfo, 7> FillExtrusionPatternShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillExtrusionUBOCount + 0, idFillExtrusionPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::UShort2, fillExtrusionUBOCount + 0, idFillExtrusionDecimalsEdAttribute},
 
@@ -66,9 +66,16 @@ const std::array<AttributeInfo, 6> FillExtrusionPatternShaderSource::attributes 
         4, gfx::AttributeDataType::UShort4, fillExtrusionUBOCount + 1, idFillExtrusionPatternFromVertexAttribute},
     AttributeInfo{
         5, gfx::AttributeDataType::UShort4, fillExtrusionUBOCount + 1, idFillExtrusionPatternToVertexAttribute},
+
+    // Polygon centroid for the terrain elevation lookup, interleaved in the same shared vertex
+    // buffer as pos/decimals_ed, so it shares their buffer index.
+    AttributeInfo{6, gfx::AttributeDataType::Short2, fillExtrusionUBOCount + 0, idFillExtrusionCentroidVertexAttribute},
 };
-const std::array<TextureInfo, 1> FillExtrusionPatternShaderSource::textures = {
+// The image is sampled in the fragment stage, the DEM in the vertex stage; Metal binds both
+// textures to both stages, so they need different slots.
+const std::array<TextureInfo, 2> FillExtrusionPatternShaderSource::textures = {
     TextureInfo{0, idFillExtrusionImageTexture},
+    TextureInfo{1, idFillExtrusionDEMTexture},
 };
 
 //
@@ -92,8 +99,9 @@ const std::array<AttributeInfo, 6> FillExtrusionPatternInstancedShaderSource::in
     AttributeInfo{
         6, gfx::AttributeDataType::UShort4, fillExtrusionUBOCount + 2, idFillExtrusionPatternToVertexAttribute},
 };
-const std::array<TextureInfo, 1> FillExtrusionPatternInstancedShaderSource::textures = {
+const std::array<TextureInfo, 2> FillExtrusionPatternInstancedShaderSource::textures = {
     TextureInfo{0, idFillExtrusionImageTexture},
+    TextureInfo{1, idFillExtrusionDEMTexture},
 };
 
 } // namespace shaders

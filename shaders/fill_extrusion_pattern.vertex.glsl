@@ -1,6 +1,7 @@
 layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_decimals_ed;
 layout (location = 2) in vec2 a_normal2d;
+layout (location = 3) in vec2 a_centroid;
 
 out vec2 v_pos_a;
 out vec2 v_pos_b;
@@ -31,7 +32,16 @@ layout (std140) uniform FillExtrusionDrawableUBO {
     highp float u_pattern_from_t;
     highp float u_pattern_to_t;
     lowp float drawable_pad1;
+    // 3D terrain elevation
+    highp vec4 u_dem_coords;
+    highp vec4 u_dem_unpack;
+    highp float u_dem_dim;
+    highp float u_dem_exaggeration;
+    lowp float u_dem_enabled;
+    lowp float drawable_pad2;
 };
+
+uniform sampler2D u_dem;
 
 layout (std140) uniform FillExtrusionTilePropsUBO {
     highp vec4 u_pattern_from;
@@ -91,7 +101,14 @@ void main() {
     float z = t > 0.0 ? height : base;
     vec2 decimals = unpack_float(floor(a_decimals_ed.x / 2.0)) / 128.0;
 
-    gl_Position = u_matrix * vec4(a_pos + decimals, z, 1);
+    // Raise the extrusion by the terrain elevation sampled once at the polygon centroid, and
+    // drop ground-level floors slightly so buildings don't hang off a slope (as the plain
+    // extrusion shader does, and maplibre-gl-js). The pattern position and the side gradient
+    // keep the height above the ground, so the pattern does not shift with the terrain.
+    float ele = get_elevation(a_centroid, u_dem, u_dem_coords, u_dem_unpack, u_dem_dim, u_dem_exaggeration, u_dem_enabled);
+    float lifted_z = z + ele - (t > 0.0 || base > 0.0 ? 0.0 : 10.0) * u_dem_enabled;
+
+    gl_Position = u_matrix * vec4(a_pos + decimals, lifted_z, 1);
 
     // extrusion top or side
     vec2 pos = normal.z == 1.0 ? a_pos : vec2(edgedistance, z * u_height_factor);

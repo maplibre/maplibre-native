@@ -81,6 +81,11 @@ struct Random {
 
 } // namespace
 
+// hitTest takes only a callable that tells whether an element counts.
+static_assert(GridIndexPredicate<std::function<bool(const uint32_t&)>, uint32_t>);
+static_assert(!GridIndexPredicate<int, uint32_t>);
+static_assert(!GridIndexPredicate<std::function<void(const uint32_t&)>, uint32_t>);
+
 // Boxes that span many cells, reach outside the grid or cover it completely must be reported exactly once.
 TEST(GridIndex, EveryCollidingBoxIsReportedOnce) {
     GridIndex<uint32_t> grid(200, 100, 10);

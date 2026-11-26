@@ -12,6 +12,7 @@ import org.maplibre.android.style.layers.TransitionOptions
 import org.maplibre.android.utils.ConfigUtils
 import io.mockk.*
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -262,4 +263,72 @@ class MapLibreMapTest : BaseTest() {
         verify { nativeMapView.setZoom(2.0, target, 0) }
     }
 
+    @Test
+    fun testSetFieldOfView() {
+        maplibreMap.setFieldOfView(70.0)
+        verify { developerAnimationListener.onDeveloperAnimationStarted() }
+        verify { transform.setFieldOfView(70.0) }
+    }
+
+    @Test
+    fun testGetFieldOfView() {
+        every { transform.fieldOfView } returns 70.0
+        assertEquals(70.0, maplibreMap.fieldOfView, 0.0)
+    }
+
+    @Test
+    fun testSetCameraFromEye() {
+        val center = LatLng(38.72, -120.07)
+        val eye = LatLng(38.70, -120.07)
+        maplibreMap.setCameraFromEye(center, 1000.0, eye, 3000.0)
+        verify { developerAnimationListener.onDeveloperAnimationStarted() }
+        verify { transform.setCenterFromEye(center, 1000.0, eye, 3000.0) }
+    }
+
+    @Test
+    fun testSetTerrainHazeColor() {
+        maplibreMap.setTerrainHazeColor(0x80FF8000.toInt())
+        verify { nativeMapView.setTerrainHazeColor(0x80FF8000.toInt()) }
+    }
+
+    @Test
+    fun testGetTerrainHazeColor() {
+        every { nativeMapView.terrainHazeColor } returns 0x80FF8000.toInt()
+        assertEquals(0x80FF8000.toInt(), maplibreMap.terrainHazeColor)
+    }
+
+    @Test
+    fun testSetTerrainHazeRange() {
+        maplibreMap.setTerrainHazeRange(3.5f)
+        verify { nativeMapView.setTerrainHazeRange(3.5f) }
+    }
+
+    @Test
+    fun testGetTerrainHazeRange() {
+        every { nativeMapView.terrainHazeRange } returns 3.5f
+        assertEquals(3.5f, maplibreMap.terrainHazeRange, 0.0f)
+    }
+
+    @Test
+    fun testGetTerrainElevationReturnsTheNativeHeight() {
+        every { nativeMapView.getTerrainElevation(47.5, 11.5) } returns 1234.5
+        assertEquals(1234.5, maplibreMap.getTerrainElevation(LatLng(47.5, 11.5))!!, 0.0)
+    }
+
+    @Test
+    fun testGetTerrainElevationIsNullWhenThereIsNoHeight() {
+        // Core answers "no height" (terrain off, DEM tile not loaded) with NaN, as iOS answers nil.
+        every { nativeMapView.getTerrainElevation(any(), any()) } returns Double.NaN
+        assertNull(maplibreMap.getTerrainElevation(LatLng(47.5, 11.5)))
+    }
+
+    @Test
+    fun testGetTerrainElevationIsNullForAnInvalidLongitude() {
+        every { nativeMapView.getTerrainElevation(any(), any()) } returns 1000.0
+        assertNull(maplibreMap.getTerrainElevation(LatLng(47.0, 181.0)))
+        assertNull(maplibreMap.getTerrainElevation(LatLng(47.0, -181.0)))
+        verify(exactly = 0) { nativeMapView.getTerrainElevation(any(), any()) }
+        // The edges of the valid range are valid.
+        assertEquals(1000.0, maplibreMap.getTerrainElevation(LatLng(90.0, 180.0))!!, 0.0)
+    }
 }
