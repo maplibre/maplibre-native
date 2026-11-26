@@ -57,6 +57,12 @@ public:
     void setFillPatternTransition(const TransitionOptions&);
     TransitionOptions getFillPatternTransition() const;
 
+    static PropertyValue<float> getDefaultFillRoundedCornerDistance();
+    const PropertyValue<float>& getFillRoundedCornerDistance() const;
+    void setFillRoundedCornerDistance(const PropertyValue<float>&);
+    void setFillRoundedCornerDistanceTransition(const TransitionOptions&);
+    TransitionOptions getFillRoundedCornerDistanceTransition() const;
+
     static PropertyValue<std::array<float, 2>> getDefaultFillTranslate();
     const PropertyValue<std::array<float, 2>>& getFillTranslate() const;
     void setFillTranslate(const PropertyValue<std::array<float, 2>>&);
