@@ -44,11 +44,6 @@ bool WeakScheduler::schedule(const util::SimpleIdentity tag, std::function<void(
 Scheduler::Scheduler()
     : anchor(std::make_shared<WeakScheduler::Anchor>(*this)) {}
 
-Scheduler::~Scheduler() {
-    assert(!anchor && "Call expireWeakSchedulers() first in the destructor of every concrete scheduler");
-    expireWeakSchedulers();
-}
-
 void Scheduler::expireWeakSchedulers() {
     if (!anchor) {
         return;

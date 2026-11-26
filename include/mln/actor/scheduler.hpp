@@ -70,7 +70,12 @@ public:
     Scheduler();
     Scheduler(const Scheduler&) = delete;
     Scheduler& operator=(const Scheduler&) = delete;
-    virtual ~Scheduler();
+
+    // Inline, so that Scheduler has no key function and code built with RTTI emits its type info.
+    virtual ~Scheduler() {
+        assert(!anchor && "Call expireWeakSchedulers() first in the destructor of every concrete scheduler");
+        expireWeakSchedulers();
+    }
 
     /// Enqueues a function for execution.
     virtual void schedule(std::function<void()>&&) = 0;
