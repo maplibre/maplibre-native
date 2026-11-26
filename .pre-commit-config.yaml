@@ -52,6 +52,7 @@ repos:
         types: [ rust ]
 
 ci:
-  # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
-  skip: [ buildifier ]
+  # buildifier sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
+  # swiftformat does not build within the install timeout
+  skip: [ buildifier, swiftformat ]
   autoupdate_schedule: monthly
