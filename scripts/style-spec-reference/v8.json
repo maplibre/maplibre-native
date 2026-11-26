@@ -6241,7 +6241,7 @@
       "doc": "The distance from the corner that will be cut and replaced with rounded corner.",
       "sdk-support": {
         "basic functionality": {
-          "android": "13.7.0",
+          "android": "13.8.0",
           "ios": "7.1.0"
         }
       },
