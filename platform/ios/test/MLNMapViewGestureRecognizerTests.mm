@@ -86,7 +86,7 @@
   [self waitForExpectations:@[ transitionExpectation ] timeout:1.0];
 
   auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
-  mbgl::EdgeInsets expectedPadding = MLNEdgeInsetsFromNSEdgeInsets(expectedEdgePadding);
+  mln::EdgeInsets expectedPadding = MLNEdgeInsetsFromNSEdgeInsets(expectedEdgePadding);
   XCTAssertEqual(expectedPadding, cameraPadding,
                  @"flyToCamera should apply edgePadding relative to contentInset.");
 }
