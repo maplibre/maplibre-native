@@ -24,5 +24,5 @@ abstract class AndroidNitpickTask @Inject constructor(
 }
 
 tasks.register<AndroidNitpickTask>("androidNitpick") {
-    workingDirectory.set(rootDir)
+    workingDirectory.set(project.rootDir)
 }
