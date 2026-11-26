@@ -13,9 +13,7 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     const auto& rect = texHandle.getRectangle();
     const auto imageSize = Size(rect.w, rect.h);
 
-    // Worker threads upload into a texture the render thread is drawing with. The mutex only orders the uploads,
-    // so leave the sampler state to the render thread, which updates it in `Texture2D::bind`.
-    static_cast<Texture2D&>(*texture).createTexture();
+    texture->create();
     texture->uploadSubRegion(pixelData, imageSize, rect.x, rect.y);
 
     gfx::DynamicTexture::uploadImage(pixelData, texHandle);
