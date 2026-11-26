@@ -15,6 +15,7 @@
 #include <mln/style/source_impl.hpp>
 #include <mln/style/sources/tile_source_impl.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/style/sources/custom_vector_source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/sources/image_source.hpp>
 #include <mln/style/sources/raster_dem_source.hpp>
@@ -1182,5 +1183,28 @@ TEST(Source, RasterDEMTileRoundsCoveringZoom) {
     ASSERT_FALSE(requestedZooms.empty());
     for (const auto z : requestedZooms) {
         EXPECT_EQ(5, z);
+    }
+}
+
+TEST(Source, TrackedPtrIsNullOnceDestroyed) {
+    util::RunLoop loop;
+
+    std::vector<std::unique_ptr<style::Source>> sources;
+    sources.push_back(std::make_unique<style::VectorSource>("vector", "mapbox://vector"));
+    sources.push_back(std::make_unique<style::RasterSource>("raster", "mapbox://raster", 512));
+    sources.push_back(std::make_unique<style::RasterDEMSource>("raster-dem", "mapbox://raster-dem", 512));
+    sources.push_back(std::make_unique<style::GeoJSONSource>("geojson"));
+    sources.push_back(std::make_unique<style::ImageSource>("image", std::array<LatLng, 4>{}));
+    sources.push_back(
+        std::make_unique<style::CustomGeometrySource>("custom-geometry", style::CustomGeometrySource::Options()));
+    sources.push_back(
+        std::make_unique<style::CustomVectorSource>("custom-vector", style::CustomVectorSource::Options()));
+    sources.push_back(std::make_unique<AnnotationSource>());
+
+    for (auto& source : sources) {
+        const auto tracked = source->makeTrackedPtr();
+        EXPECT_EQ(source.get(), tracked.get());
+        source.reset();
+        EXPECT_EQ(nullptr, tracked.get());
     }
 }

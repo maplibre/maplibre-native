@@ -19,21 +19,24 @@ GeoJSONTile::GeoJSONTile(const OverscaledTileID& overscaledTileID,
     updateData(std::move(data_), false /*needsRelayout*/, parameters.isUpdateSynchronous);
 }
 
+GeoJSONTile::~GeoJSONTile() {
+    callbacks.close();
+}
+
 void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool needsRelayout, bool runSynchronously) {
     MLN_TRACE_FUNC();
 
     assert(data_);
     data = std::move(data_);
     if (needsRelayout) reset();
-    data->getTile(
-        id.canonical,
-        [this, self = weakFactory.makeWeakPtr(), capturedData = data.get()](TileFeatures features) {
-            // If the data has changed, a new request is being processed, ignore this one
-            if (auto guard = self.lock(); self && data.get() == capturedData) {
-                setData(std::make_unique<GeoJSONTileData>(std::move(features)));
-            }
-        },
-        runSynchronously);
+    data->getTile(id.canonical,
+                  callbacks.bind([this, capturedData = data.get()](TileFeatures features) {
+                      // If the data has changed, a new request is being processed, ignore this one
+                      if (data.get() == capturedData) {
+                          setData(std::make_unique<GeoJSONTileData>(std::move(features)));
+                      }
+                  }),
+                  runSynchronously);
 }
 
 void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result,

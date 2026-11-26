@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/tile/geometry_tile.hpp>
+#include <mln/util/callback_scope.hpp>
 #include <mln/util/feature.hpp>
 
 namespace mln {
@@ -10,7 +11,6 @@ class GeoJSONData;
 
 class TileParameters;
 
-// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class GeoJSONTile final : public GeometryTile {
 public:
     GeoJSONTile(const OverscaledTileID&,
@@ -18,6 +18,7 @@ public:
                 const TileParameters&,
                 std::shared_ptr<style::GeoJSONData>,
                 TileObserver* observer = nullptr);
+    ~GeoJSONTile() override;
 
     void updateData(std::shared_ptr<style::GeoJSONData> data, bool needsRelayout, bool runSynchronously);
 
@@ -27,8 +28,7 @@ public:
 
 private:
     std::shared_ptr<style::GeoJSONData> data;
-    mapbox::base::WeakPtrFactory<GeoJSONTile> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
+    util::CallbackScope callbacks;
 };
 
 } // namespace mln

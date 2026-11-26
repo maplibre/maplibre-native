@@ -11,7 +11,6 @@ class AsyncRequest;
 
 namespace style {
 
-// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class ImageSource final : public Source {
 public:
     ImageSource(std::string id, std::array<LatLng, 4>);
@@ -32,16 +31,12 @@ public:
 
     bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
-
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
 private:
     std::optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
-    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
 };
 
 template <>

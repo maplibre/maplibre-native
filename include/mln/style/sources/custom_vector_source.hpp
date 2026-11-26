@@ -46,14 +46,12 @@ public:
     class Impl;
     const Impl& impl() const;
     bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
 private:
     std::unique_ptr<Actor<CustomVectorTileLoader>> loader;
-    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
 };
 
 template <>

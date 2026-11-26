@@ -29,13 +29,13 @@ namespace android {
  */
 Layer::Layer(std::unique_ptr<mln::style::Layer> coreLayer)
     : ownedLayer(std::move(coreLayer)),
-      layerPtr(ownedLayer->makeWeakPtr()) {}
+      layerPtr(ownedLayer->makeTrackedPtr()) {}
 
 /**
  * Takes a non-owning reference. For lookup methods
  */
 Layer::Layer(mln::style::Layer& coreLayer)
-    : layerPtr(coreLayer.makeWeakPtr()) {}
+    : layerPtr(coreLayer.makeTrackedPtr()) {}
 
 Layer::~Layer() {}
 

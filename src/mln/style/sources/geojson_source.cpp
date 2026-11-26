@@ -24,7 +24,12 @@ GeoJSONSource::GeoJSONSource(std::string id, Immutable<GeoJSONOptions> options)
     : Source(makeMutable<Impl>(std::move(id), std::move(options))),
       sequencedScheduler(Scheduler::GetSequenced()) {}
 
-GeoJSONSource::~GeoJSONSource() = default;
+GeoJSONSource::~GeoJSONSource() {
+    endTracking();
+    callbacks.close();
+    // The response callback uses the members, so cancel the request before they are destroyed.
+    req.reset();
+}
 
 const GeoJSONSource::Impl& GeoJSONSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
@@ -104,18 +109,15 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
                     return makeMutable<Impl>(current, std::move(geoJSONData));
                 },
                 /* onImplReady */
-                [this, self = makeWeakPtr(), capturedReqGeneration = ++requestGeneration](
-                    Immutable<Source::Impl> newImpl) {
+                callbacks.bind([this, capturedReqGeneration = ++requestGeneration](Immutable<Source::Impl> newImpl) {
                     assert(capturedReqGeneration);
-                    if (auto guard = self.lock(); self) {
-                        if (capturedReqGeneration ==
-                            requestGeneration) { // If a new request is being processed, ignore this impl.
-                            baseImpl = std::move(newImpl);
-                            loaded = true;
-                            observer->onSourceLoaded(*this);
-                        }
+                    if (capturedReqGeneration ==
+                        requestGeneration) { // If a new request is being processed, ignore this impl.
+                        baseImpl = std::move(newImpl);
+                        loaded = true;
+                        observer->onSourceLoaded(*this);
                     }
-                });
+                }));
         }
     });
 }

@@ -39,9 +39,7 @@ ColorReliefLayer::ColorReliefLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-ColorReliefLayer::~ColorReliefLayer() {
-    weakFactory.invalidateWeakPtrs();
-}
+ColorReliefLayer::~ColorReliefLayer() = default;
 
 const ColorReliefLayer::Impl& ColorReliefLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

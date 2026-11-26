@@ -19,7 +19,9 @@ CustomGeometrySource::CustomGeometrySource(std::string id, const CustomGeometryS
       loader(std::make_unique<Actor<CustomTileLoader>>(
           Scheduler::GetBackground(), options.fetchTileFunction, options.cancelTileFunction)) {}
 
-CustomGeometrySource::~CustomGeometrySource() = default;
+CustomGeometrySource::~CustomGeometrySource() {
+    endTracking();
+}
 
 const CustomGeometrySource::Impl& CustomGeometrySource::impl() const {
     return static_cast<const CustomGeometrySource::Impl&>(*baseImpl);

@@ -2,6 +2,7 @@
 #include <mln/test/fake_file_source.hpp>
 #include <mln/test/stub_tile_observer.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/style/sources/custom_geometry_source_impl.hpp>
 #include <mln/tile/custom_geometry_tile.hpp>
 #include <mln/style/custom_tile_loader.hpp>
 
@@ -17,10 +18,15 @@
 #include <mln/text/glyph_manager.hpp>
 #include <mln/gfx/dynamic_texture_atlas.hpp>
 
+#include <atomic>
+#include <chrono>
+#include <future>
 #include <memory>
+#include <thread>
 
 using namespace mln;
 using namespace mln::style;
+using namespace std::chrono_literals;
 
 class CustomTileTest {
 public:
@@ -199,4 +205,44 @@ TEST(CustomGeometryTile, CancellationDiscardsLateInvalidation) {
     test.loop.runOnce();
 
     EXPECT_EQ(changes, 0u);
+}
+
+TEST(CustomGeometryTile, SourcePointerIsNullWhileSourceWaitsForFetch) {
+    CustomTileTest test;
+
+    // Destroying the source waits for a fetch that runs on a worker thread. A platform binding that reads the source
+    // from that fetch must already see it as gone.
+    std::atomic<bool> fetched{false};
+    std::promise<void> fetching;
+    std::atomic<bool> sawNull{false};
+    util::TrackedPtr<Source> tracked;
+
+    CustomGeometrySource::Options options;
+    options.fetchTileFunction = [&](const CanonicalTileID&) {
+        if (fetched.exchange(true)) {
+            return;
+        }
+        fetching.set_value();
+        for (int i = 0; i < 100 && !sawNull; ++i) {
+            if (tracked.get()) {
+                std::this_thread::sleep_for(10ms);
+            } else {
+                sawNull = true;
+            }
+        }
+    };
+    auto source = std::make_unique<CustomGeometrySource>("source", options);
+    tracked = source->makeTrackedPtr();
+    source->loadDescription(*test.fileSource);
+
+    CustomGeometryTile tile(OverscaledTileID(0, 0, 0),
+                            "source",
+                            test.tileParameters,
+                            makeMutable<CustomGeometrySource::TileOptions>(),
+                            *source->impl().getTileLoader());
+    tile.setNecessity(TileNecessity::Required);
+
+    fetching.get_future().wait();
+    source.reset();
+    EXPECT_TRUE(sawNull);
 }

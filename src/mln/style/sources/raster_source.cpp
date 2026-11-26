@@ -23,6 +23,10 @@ RasterSource::RasterSource(std::string id,
       minzoomOverride(minzoom),
       maxzoomOverride(maxzoom) {}
 
+RasterSource::~RasterSource() {
+    endTracking();
+}
+
 void RasterSource::setTilesetOverrides(Tileset& tileset) {
     // The style's inline zoom range wins over the TileJSON's, as in maplibre-gl-js
     if (minzoomOverride) {

@@ -78,8 +78,8 @@ protected:
     // Owned layer is set when creating a new layer, before adding it to the map
     std::unique_ptr<mln::style::Layer> ownedLayer;
 
-    // Raw reference to the layer
-    mapbox::base::WeakPtr<mln::style::Layer> layerPtr;
+    // The layer, or null once it is destroyed
+    mln::util::TrackedPtr<mln::style::Layer> layerPtr;
 };
 
 /**

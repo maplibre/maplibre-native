@@ -39,9 +39,7 @@ SymbolLayer::SymbolLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-SymbolLayer::~SymbolLayer() {
-    weakFactory.invalidateWeakPtrs();
-}
+SymbolLayer::~SymbolLayer() = default;
 
 const SymbolLayer::Impl& SymbolLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

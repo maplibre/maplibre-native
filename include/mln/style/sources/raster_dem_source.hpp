@@ -16,7 +16,6 @@ struct SourceOptions {
     std::optional<uint8_t> maxzoom = std::nullopt;
 };
 
-// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class RasterDEMSource final : public RasterSource {
 public:
     RasterDEMSource(std::string id,

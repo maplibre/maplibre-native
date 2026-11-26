@@ -39,9 +39,7 @@ HeatmapLayer::HeatmapLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-HeatmapLayer::~HeatmapLayer() {
-    weakFactory.invalidateWeakPtrs();
-}
+HeatmapLayer::~HeatmapLayer() = default;
 
 const HeatmapLayer::Impl& HeatmapLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

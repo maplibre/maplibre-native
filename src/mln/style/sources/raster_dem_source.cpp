@@ -25,8 +25,7 @@ RasterDEMSource::RasterDEMSource(std::string id,
       options(std::move(options_)) {}
 
 RasterDEMSource::~RasterDEMSource() {
-    // Invalidate weak pointers before RasterDEMSource members are destroyed
-    invalidateWeakPtrsEarly();
+    endTracking();
 }
 
 bool RasterDEMSource::supportsLayerType(const mln::style::LayerTypeInfo* info) const {

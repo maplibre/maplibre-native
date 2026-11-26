@@ -25,6 +25,10 @@ VectorSource::VectorSource(std::string id,
       minZoom(std::move(minZoom_)),
       encoding(encoding_) {}
 
+VectorSource::~VectorSource() {
+    endTracking();
+}
+
 void VectorSource::setTilesetOverrides(Tileset& tileset) {
     if (maxZoom) {
         tileset.zoomRange.max = static_cast<uint8_t>(*maxZoom);

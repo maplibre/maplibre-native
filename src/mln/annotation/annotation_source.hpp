@@ -5,10 +5,10 @@
 
 namespace mln {
 
-// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class AnnotationSource final : public style::Source {
 public:
     AnnotationSource();
+    ~AnnotationSource() override;
 
     class Impl;
     const Impl& impl() const;
@@ -19,9 +19,6 @@ protected:
 private:
     void loadDescription(FileSource&) final;
     bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
-    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
 };
 
 class AnnotationSource::Impl : public style::Source::Impl {

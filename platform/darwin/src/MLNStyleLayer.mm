@@ -17,13 +17,13 @@ const MLNExceptionName MLNInvalidStyleLayerException = @"MLNInvalidStyleLayerExc
 
 @implementation MLNStyleLayer {
   std::unique_ptr<mln::style::Layer> _pendingLayer;
-  mapbox::base::WeakPtr<mln::style::Layer> _weakLayer;
+  mln::util::TrackedPtr<mln::style::Layer> _trackedLayer;
 }
 
 - (instancetype)initWithRawLayer:(mln::style::Layer *)rawLayer {
   if (self = [super init]) {
     _identifier = @(rawLayer->getID().c_str());
-    _weakLayer = rawLayer->makeWeakPtr();
+    _trackedLayer = rawLayer->makeTrackedPtr();
     rawLayer->peer = LayerWrapper{self};
   }
   return self;
@@ -37,7 +37,7 @@ const MLNExceptionName MLNInvalidStyleLayerException = @"MLNInvalidStyleLayerExc
 }
 
 - (mln::style::Layer *)rawLayer {
-  return _weakLayer.get();
+  return _trackedLayer.get();
 }
 
 - (void)addToStyle:(MLNStyle *)style belowLayer:(MLNStyleLayer *)otherLayer {
