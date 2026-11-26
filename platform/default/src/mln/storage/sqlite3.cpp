@@ -104,7 +104,7 @@ void logSqlMessage(void*, const int err, const char* msg) {
 #endif
 
 // NOLINTBEGIN(misc-use-anonymous-namespace)
-const int initialize = [] {
+[[maybe_unused]] const bool initialized = [] {
     if (sqlite3_libversion_number() / 1000000 != SQLITE_VERSION_NUMBER / 1000000) {
         char message[96];
         (void)snprintf(message,
@@ -121,7 +121,7 @@ const int initialize = [] {
     sqlite3_config(SQLITE_CONFIG_LOG, &logSqlMessage, nullptr);
 #endif
 
-    return 0; // Return value unused, but required as lambda must return something.
+    return true;
 }();
 // NOLINTEND(misc-use-anonymous-namespace)
 

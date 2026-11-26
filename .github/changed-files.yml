@@ -5,6 +5,8 @@ linux:
   - 'render-test/**'
   - 'expression-test/**'
   - 'include/**'
+  - 'platform/default/**'
+  - 'platform/linux/**'
   - '.github/workflows/linux-ci.yml'
   - 'vendor/**'
   - 'CMakeLists.txt'
