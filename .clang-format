@@ -7,6 +7,7 @@ AllowShortLambdasOnASingleLine: Inline
 BinPackArguments: false
 BinPackParameters: false
 ColumnLimit: 120
+DerivePointerAlignment: true
 IncludeBlocks: Preserve
 IndentWidth: 4
 PackConstructorInitializers: Never
@@ -21,4 +22,5 @@ Language: ObjC
 BasedOnStyle: Google
 ObjCSpaceAfterProperty: true
 AccessModifierOffset: -2
+PointerAlignment: Right
 ...
