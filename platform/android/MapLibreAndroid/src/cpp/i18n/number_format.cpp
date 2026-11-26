@@ -105,6 +105,15 @@ std::string formatNumber(double number,
             *env, formatter, static_cast<jni::jint>(maxFractionDigits.value_or(3)));
     } else {
         formatter = jni::NewGlobal(*env, android::NumberFormat::getCurrencyInstance(*env, locale));
+        // NumberFormat raises or lowers the other limit to keep them in order.
+        if (minFractionDigits) {
+            android::NumberFormat::setMinimumFractionDigits(
+                *env, formatter, static_cast<jni::jint>(*minFractionDigits));
+        }
+        if (maxFractionDigits) {
+            android::NumberFormat::setMaximumFractionDigits(
+                *env, formatter, static_cast<jni::jint>(*maxFractionDigits));
+        }
     }
 
     auto result = android::NumberFormat::format(*env, formatter, static_cast<jni::jdouble>(number));

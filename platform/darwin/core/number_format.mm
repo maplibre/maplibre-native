@@ -21,6 +21,12 @@ std::string formatNumber(double number, const std::string& localeId, const std::
     numberFormatter.numberStyle = NSNumberFormatterDecimalStyle;
   } else {
     numberFormatter.numberStyle = NSNumberFormatterCurrencyStyle;
+    if (minFractionDigits) {
+      numberFormatter.minimumFractionDigits = *minFractionDigits;
+    }
+    if (maxFractionDigits) {
+      numberFormatter.maximumFractionDigits = *maxFractionDigits;
+    }
   }
   NSString* formatted = [numberFormatter stringFromNumber:@(number)];
   std::string result = std::string([formatted UTF8String]);

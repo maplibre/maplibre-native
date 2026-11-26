@@ -17,7 +17,7 @@ std::string formatNumber(double number,
     QLocale locale = QLocale(QString::fromStdString(localeId));
 
     if (!currency.empty()) {
-        formatted = locale.toCurrencyString(number);
+        formatted = locale.toCurrencyString(number, {}, maxFractionDigits ? *maxFractionDigits : -1);
     } else {
         formatted = locale.toString(number, 'f', maxFractionDigits.value_or(3));
     }
