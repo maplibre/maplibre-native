@@ -131,10 +131,12 @@ public:
     virtual void markRenderedIdeal() {}
     // Set when the tile is removed from the ideal render set but may still be held for fading
     virtual void markRenderedPreviously() {}
-    // Placement operation performed while this tile is fading
-    // We hold onto a tile for two placements: fading starts with the first
-    // placement and will have time to finish by the second placement.
-    virtual void performedFadePlacement() {}
+    // Placement operation performed while this tile is fading.
+    // Fading starts with the first placement. We hold onto the tile until a
+    // later placement runs at least `fadeDuration` after that first one, so
+    // that its symbols have time to fade out. Placements can run much more
+    // often than once per fade duration, for example while new tiles arrive.
+    virtual void performedFadePlacement(TimePoint /*placementTime*/, Duration /*fadeDuration*/) {}
 
     virtual void setFeatureState(const LayerFeatureStates&) {}
     // The SourceFeatureState version this tile's buckets hold; 0: none (new buckets).

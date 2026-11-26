@@ -70,7 +70,7 @@ public:
     const std::map<OverscaledTileID, std::unique_ptr<Tile>>& getTiles() const { return tiles; }
     void clearAll();
 
-    void updateFadingTiles();
+    void updateFadingTiles(TimePoint placementTime, Duration fadeDuration);
     bool hasFadingTiles() const { return fadingTiles; }
 
 private:

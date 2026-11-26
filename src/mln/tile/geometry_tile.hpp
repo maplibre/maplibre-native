@@ -102,7 +102,7 @@ public:
     bool holdForFade() const override;
     void markRenderedIdeal() override;
     void markRenderedPreviously() override;
-    void performedFadePlacement() override;
+    void performedFadePlacement(TimePoint placementTime, Duration fadeDuration) override;
     std::shared_ptr<FeatureIndex> getFeatureIndex() const;
 
     void setFeatureState(const LayerFeatureStates&) override;
@@ -138,11 +138,13 @@ private:
     enum class FadeState {
         Loaded,
         NeedsFirstPlacement,
-        NeedsSecondPlacement,
+        Fading,
         CanRemove
     };
 
     FadeState fadeState = FadeState::Loaded;
+    // Time of the first placement after the tile stopped being ideal.
+    TimePoint fadeStartTime;
 };
 
 } // namespace mln

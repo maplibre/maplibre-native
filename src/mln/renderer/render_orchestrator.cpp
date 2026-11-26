@@ -567,8 +567,13 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             placement->placeLayers(layersNeedPlacement);
             placementController.setPlacement(std::move(placement));
             crossTileSymbolIndex.pruneUnusedLayers(usedSymbolLayers);
+            // Tiles that left the ideal set are held until their symbols have faded out.
+            const Duration symbolFadeDuration = transitionOptions.enablePlacementTransitions
+                                                    ? transitionOptions.duration.value_or(
+                                                          util::DEFAULT_TRANSITION_DURATION)
+                                                    : Duration::zero();
             for (const auto& entry : renderSources) {
-                entry.second->updateFadingTiles();
+                entry.second->updateFadingTiles(updateParameters->timePoint, symbolFadeDuration);
             }
         } else {
             placementController.setPlacementStale();

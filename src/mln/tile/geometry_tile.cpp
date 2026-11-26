@@ -571,7 +571,7 @@ void GeometryTile::querySourceFeatures(std::vector<Feature>& result,
 
 bool GeometryTile::holdForFade() const {
     return mode == MapMode::Continuous &&
-           (fadeState == FadeState::NeedsFirstPlacement || fadeState == FadeState::NeedsSecondPlacement);
+           (fadeState == FadeState::NeedsFirstPlacement || fadeState == FadeState::Fading);
 }
 
 void GeometryTile::markRenderedIdeal() {
@@ -582,10 +582,11 @@ void GeometryTile::markRenderedPreviously() {
         fadeState = FadeState::NeedsFirstPlacement;
     }
 }
-void GeometryTile::performedFadePlacement() {
+void GeometryTile::performedFadePlacement(TimePoint placementTime, Duration fadeDuration) {
     if (fadeState == FadeState::NeedsFirstPlacement) {
-        fadeState = FadeState::NeedsSecondPlacement;
-    } else if (fadeState == FadeState::NeedsSecondPlacement) {
+        fadeState = FadeState::Fading;
+        fadeStartTime = placementTime;
+    } else if (fadeState == FadeState::Fading && placementTime - fadeStartTime >= fadeDuration) {
         fadeState = FadeState::CanRemove;
     }
 }
