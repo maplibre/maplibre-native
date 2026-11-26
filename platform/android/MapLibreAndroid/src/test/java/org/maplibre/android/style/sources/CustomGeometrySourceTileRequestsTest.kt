@@ -88,6 +88,72 @@ class CustomGeometrySourceTileRequestsTest {
     }
 
     @Test
+    fun nativeSubmissionDoesNotBlockTileRequestsOrOtherSubmissions() {
+        val submitting = gate()
+        val resume = gate()
+        val requested = gate()
+        val other = FeatureCollection.fromFeatures(emptyList())
+        createRequests(submit = { collection ->
+            if (collection === data) {
+                submitting.countDown()
+                awaitIgnoringInterrupts(resume)
+            }
+            submitted.add(collection)
+        }) { data }
+        requests.start()
+        requests.fetchTile(0, 0, 0)
+        await(submitting)
+        val requestThread =
+            Thread {
+                requests.fetchTile(1, 0, 0)
+                requests.cancelTile(1, 0, 0)
+                requests.setTileData(1, 0, 0, other)
+                requested.countDown()
+            }
+        requestThread.start()
+        try {
+            assertTrue("Tile requests waited for a native submission", requested.await(1, TimeUnit.SECONDS))
+            assertEquals(listOf(other), submitted)
+            resume.countDown()
+            requests.release()
+            assertEquals(listOf(other, data), submitted)
+        } finally {
+            resume.countDown()
+            requestThread.join(5_000)
+        }
+    }
+
+    @Test
+    fun providerInterruptedByReleaseDoesNotFailWorker() {
+        val entered = gate()
+        createRequests {
+            entered.countDown()
+            Thread.sleep(5_000)
+            data
+        }
+        requests.start()
+        requests.fetchTile(0, 0, 0)
+        await(entered)
+
+        requests.release()
+        assertTrue(pools.single().awaitTermination(5, TimeUnit.SECONDS))
+        assertTrue(submitted.isEmpty())
+    }
+
+    @Test
+    fun providerFailureWhileAttachedReachesWorker() {
+        val failure = IllegalStateException("provider failed")
+        createRequests { throw failure }
+        requests.start()
+        requests.fetchTile(0, 0, 0)
+
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
+        while (failures.isEmpty() && System.nanoTime() < deadline) Thread.sleep(10)
+        assertEquals(listOf<Throwable>(failure), failures.toList())
+        failures.clear()
+    }
+
+    @Test
     fun releaseDiscardsCoalescedRequestWithoutResubmittingToStoppedExecutor() {
         val entered = gate()
         val resume = gate()

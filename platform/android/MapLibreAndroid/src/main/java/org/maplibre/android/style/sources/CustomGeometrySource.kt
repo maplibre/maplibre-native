@@ -72,9 +72,11 @@ class CustomGeometrySource
         }
 
         /**
-         * Set or update geometry contents of a specific tile. Use this method to update tiles
-         * for which `GeometryTileProvider` was previously invoked. This method can be called from
-         * background threads. Calls after the source is removed or detached are ignored.
+         * Set or update geometry contents of a specific tile. This method can be called from
+         * background threads. Data is only applied to a tile that `GeometryTileProvider` is currently
+         * producing; other calls, including calls after the source is removed or detached, are ignored.
+         * To change a tile that has already loaded, call `invalidateTile` so the provider is asked for
+         * it again.
          *
          * @param zoomLevel Tile zoom level.
          * @param x         Tile X coordinate.

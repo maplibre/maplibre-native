@@ -1,11 +1,5 @@
 # Changelog MapLibre Native for Android
 
-## main
-
-### 🐞 Bug fixes
-
-- Prevent custom geometry tile requests from submitting results after source removal, style replacement, or map destruction.
-
 ## 13.6.1
 
 ### 🐞 Bug fixes

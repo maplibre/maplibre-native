@@ -9,36 +9,47 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.read
 import kotlin.concurrent.withLock
+import kotlin.concurrent.write
 
 /**
- * Serializes native submissions with source detachment, without holding the lock while invoking
+ * Keeps native submissions from overlapping source detachment, without holding a lock while invoking
  * the application's provider. Each attachment has separate request state so a worker from an old
  * executor cannot submit data or change the bookkeeping of a newly attached source.
+ *
+ * Submissions hold the read side of [attachment], so workers convert and submit tiles in parallel
+ * while start() and release() wait for the submissions in flight. Request bookkeeping uses [lock],
+ * which is only held briefly, so tile requests from the core tile loader don't wait for a submission.
+ * A thread that needs both acquires [attachment] first.
  */
 internal class CustomGeometrySourceTileRequests(
     private val provider: GeometryTileProvider?,
     private val submit: (Int, Int, Int, FeatureCollection) -> Unit,
     private val createExecutor: () -> ThreadPoolExecutor = ::newExecutor,
 ) {
+    private val attachment = ReentrantReadWriteLock()
     private val lock = ReentrantLock()
     private var state: State? = null
 
     fun start() {
-        lock.withLock {
+        attachment.write {
             release()
-            state = State(createExecutor())
+            lock.withLock { state = State(createExecutor()) }
         }
     }
 
     fun release() {
-        lock.withLock {
-            val previous = state ?: return
-            state = null
-            previous.inProgress.values.forEach { it.set(true) }
-            previous.inProgress.clear()
-            previous.awaiting.clear()
-            previous.executor.shutdownNow()
+        attachment.write {
+            lock.withLock {
+                val previous = state ?: return
+                state = null
+                previous.inProgress.values.forEach { it.set(true) }
+                previous.inProgress.clear()
+                previous.awaiting.clear()
+                previous.executor.shutdownNow()
+            }
         }
     }
 
@@ -85,12 +96,12 @@ internal class CustomGeometrySourceTileRequests(
         y: Int,
         data: FeatureCollection,
     ) {
-        lock.withLock {
+        attachment.read {
             if (state != null) submit(z, x, y, data)
         }
     }
 
-    // Native submission calls back here while holding lock; the lock must be reentrant.
+    // Native submission calls back here while holding the read side of [attachment].
     fun isCancelled(
         z: Int,
         x: Int,
@@ -117,12 +128,16 @@ internal class CustomGeometrySourceTileRequests(
             if (!request.cancelled.get()) {
                 val id = request.id
                 val data = provider!!.getFeaturesForBounds(LatLngBounds.from(id.z, id.x, id.y), id.z)
-                lock.withLock {
+                attachment.read {
                     if (state === request.state && !request.cancelled.get()) {
                         submit(id.z, id.x, id.y, data)
                     }
                 }
             }
+        } catch (e: Exception) {
+            // release() interrupts workers, which providers may surface as an exception. A failure only
+            // matters for a request whose result is still wanted.
+            if (lock.withLock { state === request.state && !request.cancelled.get() }) throw e
         } finally {
             lock.withLock {
                 val current = state
