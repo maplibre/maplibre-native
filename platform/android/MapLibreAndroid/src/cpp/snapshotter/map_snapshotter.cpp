@@ -38,7 +38,7 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
         return;
     }
 
-    weakScheduler = mln::Scheduler::GetCurrent()->makeWeakPtr();
+    weakScheduler = mln::Scheduler::GetCurrent()->makeWeak();
 
     jFileSource = FileSource::getNativePeer(_env, _jFileSource);
     auto size = mln::Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
@@ -76,9 +76,12 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
 }
 
 MapSnapshotter::~MapSnapshotter() {
-    if (auto guard = weakScheduler.lock(); weakScheduler && weakScheduler.get() != Scheduler::GetCurrent()) {
+    if (!weakScheduler.expired() && weakScheduler != Scheduler::GetCurrent()->makeWeak()) {
         snapshotter->cancel();
-        weakScheduler->schedule([ptr = snapshotter.release()]() { delete ptr; });
+        // If the scheduler is gone by now, the snapshotter is destroyed on this thread.
+        if (weakScheduler.schedule([ptr = snapshotter.get()]() { delete ptr; })) {
+            snapshotter.release();
+        }
     }
 }
 

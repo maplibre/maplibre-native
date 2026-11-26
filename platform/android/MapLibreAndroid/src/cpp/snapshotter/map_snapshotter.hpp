@@ -1,7 +1,7 @@
 #pragma once
 
 #include <jni/jni.hpp>
-#include <mapbox/std/weak.hpp>
+#include <mln/actor/scheduler.hpp>
 #include <mln/map/map_snapshotter.hpp>
 #include <mln/util/util.hpp>
 
@@ -92,7 +92,7 @@ private:
     void activateFilesource(JNIEnv&);
     void deactivateFilesource(JNIEnv&);
     bool activatedFilesource = false;
-    mapbox::base::WeakPtr<mln::Scheduler> weakScheduler;
+    mln::WeakScheduler weakScheduler;
     std::unique_ptr<mln::MapSnapshotter> snapshotter;
 };
 

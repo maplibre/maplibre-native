@@ -6,6 +6,7 @@
 #include <mln/util/run_loop.hpp>
 
 #include <atomic>
+#include <condition_variable>
 #include <list>
 #include <memory>
 #include <mutex>

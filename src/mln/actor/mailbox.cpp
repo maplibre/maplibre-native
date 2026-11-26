@@ -11,20 +11,20 @@ namespace mln {
 Mailbox::Mailbox() = default;
 
 Mailbox::Mailbox(Scheduler& scheduler_)
-    : weakScheduler(scheduler_.makeWeakPtr()) {}
+    : weakScheduler(scheduler_.makeWeak()) {}
 
 Mailbox::Mailbox(const TaggedScheduler& scheduler_)
     : schedulerTag(scheduler_.tag),
-      weakScheduler(scheduler_.get()->makeWeakPtr()) {}
+      weakScheduler(scheduler_.get()->makeWeak()) {}
 
 void Mailbox::open(const TaggedScheduler& scheduler_) {
-    assert(!weakScheduler);
+    assert(weakScheduler.expired());
     schedulerTag = scheduler_.tag;
     open(*scheduler_.get());
 }
 
 void Mailbox::open(Scheduler& scheduler_) {
-    assert(!weakScheduler);
+    assert(weakScheduler.expired());
 
     // As with close(), block until neither receive() nor push() are in
     // progress, and acquire the two mutexes in the same order.
@@ -35,7 +35,7 @@ void Mailbox::open(Scheduler& scheduler_) {
         return;
     }
 
-    weakScheduler = scheduler_.makeWeakPtr();
+    weakScheduler = scheduler_.makeWeak();
 
     if (!queue.empty()) {
         scheduleToRecieve();
@@ -69,7 +69,7 @@ void Mailbox::abandon() {
 }
 
 bool Mailbox::isOpen() const {
-    return !closed && weakScheduler;
+    return !closed && !weakScheduler.expired();
 }
 
 void Mailbox::push(std::unique_ptr<Message> message) {
@@ -152,18 +152,19 @@ void Mailbox::receive() {
 }
 
 void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
-    if (auto guard = weakScheduler.lock(); weakScheduler) {
-        std::weak_ptr<Mailbox> mailbox = shared_from_this();
-        auto setToRecieve = [mbox = std::move(mailbox)] {
-            if (auto locked = mbox.lock()) {
-                locked->receive();
-            }
-        };
-        if (tag) {
-            weakScheduler->schedule(*tag, std::move(setToRecieve));
-        } else {
-            weakScheduler->schedule(std::move(setToRecieve));
+    if (weakScheduler.expired()) {
+        return;
+    }
+    std::weak_ptr<Mailbox> mailbox = shared_from_this();
+    auto setToRecieve = [mbox = std::move(mailbox)] {
+        if (auto locked = mbox.lock()) {
+            locked->receive();
         }
+    };
+    if (tag) {
+        weakScheduler.schedule(*tag, std::move(setToRecieve));
+    } else {
+        weakScheduler.schedule(std::move(setToRecieve));
     }
 }
 

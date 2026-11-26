@@ -5,6 +5,7 @@
 #include <mln/util/platform.hpp>
 #include <mln/util/traits.hpp>
 
+#include <atomic>
 #include <cstdio>
 #include <cstdarg>
 #include <exception>

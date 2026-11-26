@@ -37,8 +37,6 @@ public:
  * performed on the GL Thread.
  *
  * The public methods are safe to call from the main thread, others are not.
- *
- * NOTE: Any derived class must invalidate `weakFactory` in the destructor
  */
 class MapRenderer final : public Scheduler {
 public:
@@ -77,8 +75,6 @@ public:
     void schedule(std::function<void()>&& scheduled) override;
     void schedule(const util::SimpleIdentity, std::function<void()>&& fn) override { schedule(std::move(fn)); };
 
-    mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
-
     // Wait for the queue to be empty
     void waitForEmpty(const util::SimpleIdentity tag) override;
 
@@ -98,10 +94,6 @@ protected:
     // Called from the GL Thread //
 
     void scheduleSnapshot(std::unique_ptr<SnapshotCallback>);
-
-    // Allows derived classes to invalidate weak pointers in
-    // their destructor before their own members are torn down.
-    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
 
 private:
     struct MailboxData {
@@ -164,9 +156,6 @@ private:
     bool framebufferSizeChanged = false;
     bool swapBehaviorFlush = false;
     bool asyncRendererCleanup = false;
-
-    mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace android

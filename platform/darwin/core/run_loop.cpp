@@ -27,6 +27,7 @@ RunLoop::RunLoop(Type)
 }
 
 RunLoop::~RunLoop() {
+    expireWeakSchedulers();
     Scheduler::SetCurrent(nullptr);
 }
 
