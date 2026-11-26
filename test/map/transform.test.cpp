@@ -1636,6 +1636,24 @@ TEST(GlobeTransform, ScreenCoordinateToLatLngBeforeTheMapHasASize) {
     EXPECT_EQ(mercator.screenCoordinateToLatLng({0, 0}), latLng);
 }
 
+TEST(GlobeTransform, AFlippedViewportDrawsTheGlobeInMercator) {
+    Transform transform;
+    setUpGlobe(transform, {20.0, -40.0}, 2.5);
+    transform.setProjectionForZoom([](double) { return ProjectionDefinition("vertical-perspective"); });
+    ASSERT_TRUE(transform.getState().isGlobeRendering());
+
+    transform.setViewportMode(ViewportMode::FlippedY);
+    EXPECT_FALSE(transform.getState().isGlobeRendering());
+    EXPECT_EQ(0.0, transform.getState().getProjectionTransition());
+    // An ease below Mercator's least zoom heads for that zoom, not the globe's.
+    transform.easeTo(CameraOptions().withZoom(-1.0), linearSecond());
+    runTo(transform, 0.5);
+    EXPECT_NEAR((2.5 + transform.getState().getMinZoomAtLatitude(20.0, false)) / 2.0, transform.getZoom(), 1e-9);
+
+    transform.setViewportMode(ViewportMode::Default);
+    EXPECT_TRUE(transform.getState().isGlobeRendering());
+}
+
 TEST(GlobeTransform, OffGlobePixelsSnapToTheHorizon) {
     Transform transform;
     setUpGlobe(transform, {0.0, 0.0}, 0.5);

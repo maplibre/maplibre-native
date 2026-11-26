@@ -174,7 +174,9 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
 
     // Constrain camera options.
     // The target is drawn in the projection the style gives at its zoom, which the animation may cross into.
-    const bool targetGlobe = projectionForZoom ? projectionForZoom(zoom).transitionState() > 0 : globe;
+    const bool targetGlobe = projectionForZoom
+                                 ? state.drawnProjectionTransition(projectionForZoom(zoom).transitionState()) > 0
+                                 : globe;
     zoom = util::clamp(zoom, state.getMinZoomAtLatitude(latLng.latitude(), targetGlobe), state.getMaxZoom());
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
     fov = util::clamp(fov, state.getMinFieldOfView(), state.getMaxFieldOfView());
@@ -314,7 +316,9 @@ void Transform::flyTo(const CameraOptions& inputCamera,
 
     // Constrain camera options.
     // The target is drawn in the projection the style gives at its zoom, which the animation may cross into.
-    const bool targetGlobe = projectionForZoom ? projectionForZoom(zoom).transitionState() > 0 : globe;
+    const bool targetGlobe = projectionForZoom
+                                 ? state.drawnProjectionTransition(projectionForZoom(zoom).transitionState()) > 0
+                                 : globe;
     zoom = util::clamp(zoom, state.getMinZoomAtLatitude(latLng.latitude(), targetGlobe), state.getMaxZoom());
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
     fov = util::clamp(fov, state.getMinFieldOfView(), state.getMaxFieldOfView());

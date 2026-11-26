@@ -116,7 +116,16 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
 // MARK: - Projection
 
 void TransformState::setProjectionDefinition(const ProjectionDefinition& definition) {
-    const double transition = util::GLOBE_ENABLED ? definition.transitionState() : 0.0;
+    requestedProjectionTransition = definition.transitionState();
+    updateProjectionTransition();
+}
+
+double TransformState::drawnProjectionTransition(double transition) const {
+    return util::GLOBE_ENABLED && viewportMode != ViewportMode::FlippedY ? transition : 0.0;
+}
+
+void TransformState::updateProjectionTransition() {
+    const double transition = drawnProjectionTransition(requestedProjectionTransition);
     if (transition == projectionTransition) {
         return;
     }
@@ -534,6 +543,7 @@ void TransformState::setViewportMode(ViewportMode val) {
     if (viewportMode != val) {
         viewportMode = val;
         requestMatricesUpdate = true;
+        updateProjectionTransition();
     }
 }
 

@@ -135,6 +135,9 @@ public:
 
     // Projection
     void setProjectionDefinition(const ProjectionDefinition&);
+    /// The transition the map draws for a projection's: Mercator's in a build without the globe, and in a flipped
+    /// viewport, which the globe doesn't draw into yet.
+    double drawnProjectionTransition(double transition) const;
     /// 0 is Mercator, 1 is the globe, in between is the transition.
     double getProjectionTransition() const { return util::GLOBE_ENABLED ? projectionTransition : 0.0; }
 
@@ -335,7 +338,10 @@ private:
     const mat4& getInvertedMatrix() const;
 
 private:
+    void updateProjectionTransition();
+
     std::shared_ptr<const ProjectionBase> projection;
+    double requestedProjectionTransition = 0;
     double projectionTransition = 0;
 
     ConstrainMode constrainMode;
