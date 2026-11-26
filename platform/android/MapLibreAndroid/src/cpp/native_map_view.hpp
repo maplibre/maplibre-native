@@ -352,6 +352,8 @@ public:
 
     jni::jdouble getCenterAltitude(JNIEnv&);
 
+    jni::jdouble getTerrainElevation(JNIEnv&, jni::jdouble, jni::jdouble);
+
     void setTerrainSkirtLength(JNIEnv&, jni::jint);
 
     jni::jint getTerrainSkirtLength(JNIEnv&);

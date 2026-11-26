@@ -572,6 +572,33 @@ public final class MapLibreMap {
   }
 
   /**
+   * Returns the height of the rendered 3D terrain under a coordinate, in metres with the style's
+   * terrain exaggeration applied, as the renderer last loaded it.
+   * <p>
+   * Returns null when terrain is not enabled, the DEM tile under the coordinate has not loaded
+   * yet, or the coordinate is not valid (a latitude outside -90 to 90, or a longitude outside
+   * -180 to 180). The same lookup positions markers and view annotations on the draped surface;
+   * a caller that needs the true elevation divides by the terrain's exaggeration.
+   * <p>
+   * The answer comes from a copy of the terrain heights kept on the map side, so the call does not
+   * wait on the render thread. Call it on the main thread.
+   *
+   * @param latLng the coordinate to sample
+   * @return the terrain height in metres, or null when there is none
+   */
+  @UiThread
+  @Nullable
+  public Double getTerrainElevation(@NonNull LatLng latLng) {
+    double latitude = latLng.getLatitude();
+    double longitude = latLng.getLongitude();
+    if (!(latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180)) {
+      return null;
+    }
+    double elevation = nativeMapView.getTerrainElevation(latitude, longitude);
+    return Double.isNaN(elevation) ? null : elevation;
+  }
+
+  /**
    * Camera based tile level of detail controls
    *
    * @param threshold pitch angle in radians above which LOD calculation is performed

@@ -12,6 +12,7 @@ import org.maplibre.android.style.layers.TransitionOptions
 import org.maplibre.android.utils.ConfigUtils
 import io.mockk.*
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -284,5 +285,28 @@ class MapLibreMapTest : BaseTest() {
     fun testGetTerrainHazeRange() {
         every { nativeMapView.terrainHazeRange } returns 3.5f
         assertEquals(3.5f, maplibreMap.terrainHazeRange, 0.0f)
+    }
+
+    @Test
+    fun testGetTerrainElevationReturnsTheNativeHeight() {
+        every { nativeMapView.getTerrainElevation(47.5, 11.5) } returns 1234.5
+        assertEquals(1234.5, maplibreMap.getTerrainElevation(LatLng(47.5, 11.5))!!, 0.0)
+    }
+
+    @Test
+    fun testGetTerrainElevationIsNullWhenThereIsNoHeight() {
+        // Core answers "no height" (terrain off, DEM tile not loaded) with NaN, as iOS answers nil.
+        every { nativeMapView.getTerrainElevation(any(), any()) } returns Double.NaN
+        assertNull(maplibreMap.getTerrainElevation(LatLng(47.5, 11.5)))
+    }
+
+    @Test
+    fun testGetTerrainElevationIsNullForAnInvalidLongitude() {
+        every { nativeMapView.getTerrainElevation(any(), any()) } returns 1000.0
+        assertNull(maplibreMap.getTerrainElevation(LatLng(47.0, 181.0)))
+        assertNull(maplibreMap.getTerrainElevation(LatLng(47.0, -181.0)))
+        verify(exactly = 0) { nativeMapView.getTerrainElevation(any(), any()) }
+        // The edges of the valid range are valid.
+        assertEquals(1000.0, maplibreMap.getTerrainElevation(LatLng(90.0, 180.0))!!, 0.0)
     }
 }
