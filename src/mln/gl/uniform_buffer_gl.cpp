@@ -84,14 +84,19 @@ UniformBufferGL::UniformBufferGL(const UniformBufferGL& other)
 #endif
       managedBuffer(other.managedBuffer.allocator, this) {
     MLN_TRACE_ALLOC_CONST_BUFFER(uniqueDebugId, other.size);
+    context.renderingStats().numUniformBuffers++;
+    context.renderingStats().memUniformBuffers += size;
+    context.renderingStats().totalBuffers++;
+    context.renderingStats().numBuffers++;
+    context.renderingStats().memBuffers += size;
     managedBuffer.setOwner(this);
     if (other.isManagedAllocation) {
         managedBuffer.allocate(other.managedBuffer.getContents().data(), other.size);
     } else {
         MBGL_CHECK_ERROR(glGenBuffers(1, &localID));
-        MBGL_CHECK_ERROR(glCopyBufferSubData(other.localID, localID, 0, 0, size));
         MBGL_CHECK_ERROR(glBindBuffer(GL_COPY_READ_BUFFER, other.localID));
         MBGL_CHECK_ERROR(glBindBuffer(GL_COPY_WRITE_BUFFER, localID));
+        MBGL_CHECK_ERROR(glBufferData(GL_COPY_WRITE_BUFFER, size, nullptr, GL_DYNAMIC_DRAW));
         MBGL_CHECK_ERROR(glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size));
     }
 }
