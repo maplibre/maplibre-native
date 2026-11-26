@@ -29,7 +29,7 @@ class POIAlongRouteExample: UIViewController, MLNMapViewDelegate {
         mapView.delegate = self
     }
 
-    // Wait until the map is loaded before adding to the map.
+    /// Wait until the map is loaded before adding to the map.
     func mapView(_: MLNMapView, didFinishLoading _: MLNStyle) {
         loadGeoJson()
         restrictPOIVisibleShape()

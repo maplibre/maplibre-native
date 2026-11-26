@@ -168,7 +168,9 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
             notifyOnMapLoad = false
             onDidFinishLoadingMap?()
         }
-        if styleReady { return }
+        if styleReady {
+            return
+        }
 
         let gate = Gate()
         styleGate = gate
@@ -287,8 +289,7 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
     }
 
     func cycleToNextStyle() {
-        guard specifiedStyleURL == nil, !stopped else { return }
-        guard let next = pendingStyle() else { return }
+        guard specifiedStyleURL == nil, !stopped, let next = pendingStyle() else { return }
 
         styleTask?.cancel()
         let routeTask = task
@@ -448,9 +449,8 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
                     await waitForStyle()
                     waitedForInitialStyle = true
                 }
-                guard !stopped, !Task.isCancelled else { return }
-
-                guard let routeFile = config.selectRandomRouteFile(),
+                guard !stopped, !Task.isCancelled,
+                      let routeFile = config.selectRandomRouteFile(),
                       let routeJson = config.getRouteJson(filename: routeFile)
                 else { return }
 

@@ -25,10 +25,10 @@ extension MLNMapView {
     }
 }
 
+@MainActor
 extension MLNStyle {
     /// The GeoJSON source `identifier` that a bundled style declares empty, for the demo to fill. Plugin layers have no
     /// Objective-C class, so they come from the style document, and the demo only feeds their sources.
-    @MainActor
     func demoSource(_ identifier: String, status: DemoStatus) -> MLNShapeSource? {
         let source = source(withIdentifier: identifier) as? MLNShapeSource
         if source == nil {

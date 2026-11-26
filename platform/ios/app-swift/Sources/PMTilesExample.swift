@@ -2,7 +2,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(PMTilesStyleURL)
+/// #-example-code(PMTilesStyleURL)
 class PMTilesStyleURL: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -18,7 +18,7 @@ class PMTilesStyleURL: UIViewController {
 
 // #-end-example-code
 
-// #-example-code(PMTilesAddSource)
+/// #-example-code(PMTilesAddSource)
 class PMTilesAddSource: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
@@ -55,7 +55,7 @@ class PMTilesAddSource: UIViewController, MLNMapViewDelegate {
 
 // #-end-example-code
 
-// #-example-code(PMTilesRasterSource)
+/// #-example-code(PMTilesRasterSource)
 class PMTilesRasterSource: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
@@ -78,7 +78,7 @@ class PMTilesRasterSource: UIViewController, MLNMapViewDelegate {
 
 // #-end-example-code
 
-// #-example-code(PMTilesLocalFile)
+/// #-example-code(PMTilesLocalFile)
 class PMTilesLocalFile: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
@@ -105,21 +105,33 @@ class PMTilesLocalFile: UIViewController, MLNMapViewDelegate {
 // #-end-example-code
 
 struct PMTilesStyleURLRepresentable: UIViewControllerRepresentable {
-    func makeUIViewController(context _: Context) -> PMTilesStyleURL { PMTilesStyleURL() }
+    func makeUIViewController(context _: Context) -> PMTilesStyleURL {
+        PMTilesStyleURL()
+    }
+
     func updateUIViewController(_: PMTilesStyleURL, context _: Context) {}
 }
 
 struct PMTilesAddSourceRepresentable: UIViewControllerRepresentable {
-    func makeUIViewController(context _: Context) -> PMTilesAddSource { PMTilesAddSource() }
+    func makeUIViewController(context _: Context) -> PMTilesAddSource {
+        PMTilesAddSource()
+    }
+
     func updateUIViewController(_: PMTilesAddSource, context _: Context) {}
 }
 
 struct PMTilesRasterSourceRepresentable: UIViewControllerRepresentable {
-    func makeUIViewController(context _: Context) -> PMTilesRasterSource { PMTilesRasterSource() }
+    func makeUIViewController(context _: Context) -> PMTilesRasterSource {
+        PMTilesRasterSource()
+    }
+
     func updateUIViewController(_: PMTilesRasterSource, context _: Context) {}
 }
 
 struct PMTilesLocalFileRepresentable: UIViewControllerRepresentable {
-    func makeUIViewController(context _: Context) -> PMTilesLocalFile { PMTilesLocalFile() }
+    func makeUIViewController(context _: Context) -> PMTilesLocalFile {
+        PMTilesLocalFile()
+    }
+
     func updateUIViewController(_: PMTilesLocalFile, context _: Context) {}
 }

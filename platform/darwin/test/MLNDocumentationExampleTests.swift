@@ -22,7 +22,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
     var styleLoadingExpectation: XCTestExpectation!
     static let styleURL = Bundle(for: MLNDocumentationExampleTests.self).url(forResource: "one-liner", withExtension: "json")!
 
-    // Mock MLNOfflineStorage singleton so that it doesn't start long-running tasks that could interfere with other tests.
+    /// Mock MLNOfflineStorage singleton so that it doesn't start long-running tasks that could interfere with other tests.
     fileprivate class MLNOfflineStorageMock {
         static let shared = MLNOfflineStorageMock()
         func addPack(for _: MLNOfflineRegion, withContext _: Data, completionHandler: MLNOfflinePackAdditionCompletionHandler? = nil) {
@@ -63,7 +63,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(mapView.style?.light)
     }
 
-    func testMLNTilePyramidOfflineRegion() {
+    func testMLNTilePyramidOfflineRegion() throws {
         class MLNStyle {
             static var lightStyleURL: URL {
                 MLNDocumentationExampleTests.styleURL
@@ -79,13 +79,13 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
 
         let region = MLNTilePyramidOfflineRegion(styleURL: MLNStyle.lightStyleURL, bounds: bbox, fromZoomLevel: 11, toZoomLevel: 14)
         let context = "Tile Pyramid Region".data(using: .utf8)
-        MLNOfflineStorage.shared.addPack(for: region, withContext: context!)
+        try MLNOfflineStorage.shared.addPack(for: region, withContext: XCTUnwrap(context))
         // #-end-example-code
 
         XCTAssertNotNil(region)
     }
 
-    func testMLNShapeOfflineRegion() {
+    func testMLNShapeOfflineRegion() throws {
         class MLNStyle {
             static var lightStyleURL: URL {
                 MLNDocumentationExampleTests.styleURL
@@ -104,20 +104,20 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         let triangle = MLNPolygon(coordinates: &coordinates, count: UInt(coordinates.count))
         let region = MLNShapeOfflineRegion(styleURL: MLNStyle.lightStyleURL, shape: triangle, fromZoomLevel: 11, toZoomLevel: 14)
         let context = "Triangle Region".data(using: .utf8)
-        MLNOfflineStorage.shared.addPack(for: region, withContext: context!)
+        try MLNOfflineStorage.shared.addPack(for: region, withContext: XCTUnwrap(context))
         // #-end-example-code
 
         XCTAssertNotNil(region)
     }
 
-    func testMLNOfflinePack() {
+    func testMLNOfflinePack() throws {
         typealias MLNOfflineStorage = MLNOfflineStorageMock
 
         let northeast = CLLocationCoordinate2D(latitude: 40.989329, longitude: -102.062592)
         let southwest = CLLocationCoordinate2D(latitude: 36.986207, longitude: -109.049896)
         let bbox = MLNCoordinateBounds(sw: southwest, ne: northeast)
         let region = MLNTilePyramidOfflineRegion(styleURL: MLNDocumentationExampleTests.styleURL, bounds: bbox, fromZoomLevel: 11, toZoomLevel: 14)
-        let context = "Tile Pyramid Region".data(using: .utf8)!
+        let context = try XCTUnwrap("Tile Pyramid Region".data(using: .utf8))
 
         // #-example-code
         MLNOfflineStorage.shared.addPack(for: region, withContext: context) { pack, error in
@@ -133,13 +133,13 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         // #-end-example-code
     }
 
-    func testMLNShape$shapeWithData_encoding_error_() {
+    func testMLNShape$shapeWithData_encoding_error_() throws {
         let mainBundle = Bundle(for: MLNDocumentationExampleTests.self)
 
         // #-example-code
-        let url = mainBundle.url(forResource: "amsterdam", withExtension: "geojson")!
-        let data = try! Data(contentsOf: url)
-        let feature = try! MLNShape(data: data, encoding: String.Encoding.utf8.rawValue) as! MLNShapeCollectionFeature
+        let url = try XCTUnwrap(mainBundle.url(forResource: "amsterdam", withExtension: "geojson"))
+        let data = try Data(contentsOf: url)
+        let feature = try XCTUnwrap(try MLNShape(data: data, encoding: String.Encoding.utf8.rawValue) as? MLNShapeCollectionFeature)
         // #-end-example-code
 
         XCTAssertNotNil(feature.shapes.first as? MLNPolygonFeature)
@@ -175,19 +175,19 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(mapView.style?.source(withIdentifier: "clouds"))
     }
 
-    func testMLNRasterDEMSource() {
+    func testMLNRasterDEMSource() throws {
         // We want to use mapbox.terrain-rgb in the example, but using a mapbox:
         // URL requires setting an access token. So this identically named
         // subclass of MLNRasterDEMSource swaps in a nonexistent URL.
         class MLNRasterDEMSource: MapLibre.MLNRasterDEMSource {
             override init(identifier: String, configurationURL _: URL, tileSize: CGFloat = 256) {
-                let bogusURL = URL(string: "https://example.com/raster-rgb.json")!
+                let bogusURL = try XCTUnwrap(URL(string: "https://example.com/raster-rgb.json"))
                 super.init(identifier: identifier, configurationURL: bogusURL, tileSize: tileSize)
             }
         }
 
         // #-example-code
-        let terrainRGBURL = URL(string: "maptiler://sources/terrain-rgb")!
+        let terrainRGBURL = try XCTUnwrap(URL(string: "maptiler://sources/terrain-rgb"))
         let source = MLNRasterDEMSource(identifier: "hills", configurationURL: terrainRGBURL)
         mapView.style?.addSource(source)
         // #-end-example-code
@@ -222,7 +222,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(polyline)
     }
 
-    func testMLNImageSource() {
+    func testMLNImageSource() throws {
         // #-example-code
         let coordinates = MLNCoordinateQuad(
             topLeft: CLLocationCoordinate2D(latitude: 46.437, longitude: -80.425),
@@ -230,15 +230,15 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
             bottomRight: CLLocationCoordinate2D(latitude: 37.936, longitude: -71.516),
             topRight: CLLocationCoordinate2D(latitude: 46.437, longitude: -71.516)
         )
-        let source = MLNImageSource(identifier: "radar", coordinateQuad: coordinates, url: URL(string: "https://maplibre.org/maplibre-gl-js-docs/assets/radar.gif")!)
+        let source = try MLNImageSource(identifier: "radar", coordinateQuad: coordinates, url: XCTUnwrap(URL(string: "https://maplibre.org/maplibre-gl-js-docs/assets/radar.gif")))
         mapView.style?.addSource(source)
         // #-end-example-code
 
         XCTAssertNotNil(mapView.style?.source(withIdentifier: "radar"))
     }
 
-    func testMLNCircleStyleLayer() {
-        let population = MLNVectorTileSource(identifier: "population", configurationURL: URL(string: "https://example.com/style.json")!)
+    func testMLNCircleStyleLayer() throws {
+        let population = try MLNVectorTileSource(identifier: "population", configurationURL: XCTUnwrap(URL(string: "https://example.com/style.json")))
         mapView.style?.addSource(population)
 
         // #-example-code
@@ -265,8 +265,8 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(mapView.style?.layer(withIdentifier: "circles"))
     }
 
-    func testMLNLineStyleLayer() {
-        let trails = MLNVectorTileSource(identifier: "trails", configurationURL: URL(string: "https://example.com/style.json")!)
+    func testMLNLineStyleLayer() throws {
+        let trails = try MLNVectorTileSource(identifier: "trails", configurationURL: XCTUnwrap(URL(string: "https://example.com/style.json")))
         mapView.style?.addSource(trails)
 
         // #-example-code
@@ -293,8 +293,8 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(mapView.style?.layer(withIdentifier: "trails-path"))
     }
 
-    func testMLNFillStyleLayer() {
-        let parks = MLNVectorTileSource(identifier: "parks", configurationURL: URL(string: "https://example.com/style.json")!)
+    func testMLNFillStyleLayer() throws {
+        let parks = try MLNVectorTileSource(identifier: "parks", configurationURL: XCTUnwrap(URL(string: "https://example.com/style.json")))
         mapView.style?.addSource(parks)
 
         // #-example-code
@@ -312,8 +312,8 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(mapView.style?.layer(withIdentifier: "parks"))
     }
 
-    func testMLNFillExtrusionStyleLayer() {
-        let buildings = MLNVectorTileSource(identifier: "buildings", configurationURL: URL(string: "https://example.com/style.json")!)
+    func testMLNFillExtrusionStyleLayer() throws {
+        let buildings = try MLNVectorTileSource(identifier: "buildings", configurationURL: XCTUnwrap(URL(string: "https://example.com/style.json")))
         mapView.style?.addSource(buildings)
 
         // #-example-code
@@ -328,8 +328,8 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(mapView.style?.layer(withIdentifier: "buildings"))
     }
 
-    func testMLNHeatmapStyleLayer() {
-        let earthquakes = MLNShapeSource(identifier: "earthquakes", url: URL(string: "https://example.com/earthquakes.json")!, options: [:])
+    func testMLNHeatmapStyleLayer() throws {
+        let earthquakes = try MLNShapeSource(identifier: "earthquakes", url: XCTUnwrap(URL(string: "https://example.com/earthquakes.json")), options: [:])
         mapView.style?.addSource(earthquakes)
 
         // #-example-code
@@ -353,8 +353,8 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(mapView.style?.layer(withIdentifier: "earthquake-heat"))
     }
 
-    func testMLNSymbolStyleLayer() {
-        let pois = MLNVectorTileSource(identifier: "pois", configurationURL: URL(string: "https://example.com/style.json")!)
+    func testMLNSymbolStyleLayer() throws {
+        let pois = try MLNVectorTileSource(identifier: "pois", configurationURL: XCTUnwrap(URL(string: "https://example.com/style.json")))
         mapView.style?.addSource(pois)
 
         // #-example-code
@@ -398,7 +398,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(mapView.style?.layer(withIdentifier: "clouds"))
     }
 
-    func testMLNHillshadeStyleLayer() {
+    func testMLNHillshadeStyleLayer() throws {
         let source = MLNRasterDEMSource(identifier: "dem", tileURLTemplates: ["https://example.com/raster-rgb/{z}/{x}/{y}.png"], options: [
             .minimumZoomLevel: 9,
             .maximumZoomLevel: 16,
@@ -409,7 +409,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         ])
         mapView.style?.addSource(source)
 
-        let canals = MLNVectorTileSource(identifier: "canals", configurationURL: URL(string: "https://example.com/style.json")!)
+        let canals = try MLNVectorTileSource(identifier: "canals", configurationURL: XCTUnwrap(URL(string: "https://example.com/style.json")))
         mapView.style?.addSource(canals)
         let canalShadowLayer = MLNLineStyleLayer(identifier: "waterway-river-canal-shadow", source: canals)
         mapView.style?.addLayer(canalShadowLayer)
@@ -425,8 +425,8 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(mapView.style?.layer(withIdentifier: "hills"))
     }
 
-    func testMLNVectorStyleLayer$predicate() {
-        let terrain = MLNVectorTileSource(identifier: "terrain", configurationURL: URL(string: "https://example.com/style.json")!)
+    func testMLNVectorStyleLayer$predicate() throws {
+        let terrain = try MLNVectorTileSource(identifier: "terrain", configurationURL: XCTUnwrap(URL(string: "https://example.com/style.json")))
         mapView.style?.addSource(terrain)
 
         // #-example-code
@@ -439,7 +439,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(mapView.style?.layer(withIdentifier: "contour"))
     }
 
-    func testMLNMapView() {
+    func testMLNMapView() throws {
         // #-example-code
         #if os(macOS)
             class MapClickGestureRecognizer: NSClickGestureRecognizer {
@@ -449,7 +449,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
             }
         #else
             let mapTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(myCustomFunction))
-            for recognizer in mapView.gestureRecognizers! where recognizer is UITapGestureRecognizer {
+            for recognizer in try XCTUnwrap(mapView.gestureRecognizers) where recognizer is UITapGestureRecognizer {
                 mapTapGestureRecognizer.require(toFail: recognizer)
             }
             mapView.addGestureRecognizer(mapTapGestureRecognizer)
@@ -501,7 +501,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         _ = image
     }
 
-    func testMLNCluster() {
+    func testMLNCluster() throws {
         enum ExampleError: Error {
             case unexpectedFeatureType
             case featureIsNotACluster
@@ -524,11 +524,11 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
             ] as [String: Any],
         ]
 
-        let clusterShapeData = try! JSONSerialization.data(withJSONObject: geoJSON, options: [])
+        let clusterShapeData = try JSONSerialization.data(withJSONObject: geoJSON, options: [])
 
         do {
             // #-example-code
-            let shape = try! MLNShape(data: clusterShapeData, encoding: String.Encoding.utf8.rawValue)
+            let shape = try MLNShape(data: clusterShapeData, encoding: String.Encoding.utf8.rawValue)
 
             guard let pointFeature = shape as? MLNPointFeature else {
                 throw ExampleError.unexpectedFeatureType
@@ -572,7 +572,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         XCTAssertNotNil(attributedExpression)
     }
 
-    func testMLNShapeSourceOptionClusterProperties() {
+    func testMLNShapeSourceOptionClusterProperties() throws {
         // #-example-code
         let firstExpression = NSExpression(format: "sum:({$featureAccumulated, sumValue})")
         let secondExpression = NSExpression(forKeyPath: "magnitude")
@@ -598,12 +598,12 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
             ] as [String: Any],
         ]
 
-        let clusterShapeData = try! JSONSerialization.data(withJSONObject: geoJSON, options: [])
-        let shape = try! MLNShape(data: clusterShapeData, encoding: String.Encoding.utf8.rawValue)
+        let clusterShapeData = try JSONSerialization.data(withJSONObject: geoJSON, options: [])
+        let shape = try MLNShape(data: clusterShapeData, encoding: String.Encoding.utf8.rawValue)
         let source = MLNShapeSource(identifier: "source", shape: shape, options: options)
         mapView.style?.addSource(source)
     }
 
-    // For testMLNMapView().
+    /// For testMLNMapView().
     func myCustomFunction() {}
 }

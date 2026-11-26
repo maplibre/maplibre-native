@@ -7,7 +7,9 @@ struct RoutePath {
     /// Distance along the route from the start to coordinate `i`.
     let prefixDistance: [Double]
 
-    var totalDistance: Double { prefixDistance.last ?? 0 }
+    var totalDistance: Double {
+        prefixDistance.last ?? 0
+    }
 
     init(coordinates: [CLLocationCoordinate2D]) {
         self.coordinates = coordinates
@@ -24,8 +26,12 @@ struct RoutePath {
     func point(at distance: Double) -> CLLocationCoordinate2D {
         guard let last = coordinates.last else { return CLLocationCoordinate2D() }
         guard coordinates.count >= 2 else { return last }
-        if distance <= 0 { return coordinates[0] }
-        if distance >= totalDistance { return last }
+        if distance <= 0 {
+            return coordinates[0]
+        }
+        if distance >= totalDistance {
+            return last
+        }
 
         let i = vertexIndex(at: distance)
         let next = min(i + 1, coordinates.count - 1)
@@ -35,7 +41,7 @@ struct RoutePath {
     }
 
     /// Greatest vertex index with `prefixDistance` at most `distance`.
-    // Really, no built-in binary search?
+    /// Really, no built-in binary search?
     func vertexIndex(at distance: Double) -> Int {
         guard prefixDistance.count > 1 else { return 0 }
         var low = 0

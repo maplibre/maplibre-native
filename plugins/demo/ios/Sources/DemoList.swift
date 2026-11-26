@@ -29,9 +29,13 @@ struct Demo: Identifiable, Hashable {
         self.destination = { AnyView(RegisteredDemo(title: title, register: register, content: destination)) }
     }
 
-    static func == (lhs: Demo, rhs: Demo) -> Bool { lhs.id == rhs.id }
+    static func == (lhs: Demo, rhs: Demo) -> Bool {
+        lhs.id == rhs.id
+    }
 
-    func hash(into hasher: inout Hasher) { hasher.combine(id) }
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 
     static let all = [
         Demo(
