@@ -443,7 +443,7 @@ float cross2(float2 a, float2 b) {
 }
 
 float computeRadius(float2 prevPoint, float2 cornerPoint, float2 nextPoint, float desiredCornerDistance) {
-    float maxEdgeLenPercent = 0.5;
+    float maxEdgeLenPercent = 1.0;
     float sinParallelTreshold = sin(5 * M_PI_F / 180);
 
     float edge1Len = distance(prevPoint, cornerPoint);
@@ -553,41 +553,47 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     device const LineDrawableUBO& drawable = drawableVector[uboIndex].lineDrawableUBO;
 
-    if (props.intersection_rounded_corner_distance == 0) {
-        return {
-            .position = float4(0.0),
+    const FragmentStage emptyFragmentStage = {
+        .position = float4(0.0),
 
-            .triangle_pos = float2(0.0),
+        .triangle_pos = float2(0.0),
 
-            .triangle_corner_prev = float2(0.0),
-            .triangle_corner_pos = float2(0.0),
-            .triangle_corner_next = float2(0.0),
-            .triangle_corner_radius = 0.0,
+        .triangle_corner_prev = float2(0.0),
+        .triangle_corner_pos = float2(0.0),
+        .triangle_corner_next = float2(0.0),
+        .triangle_corner_radius = 0.0,
 
 #if !defined(HAS_UNIFORM_u_color)
-            .color1        = float4(0.0),
-            .color2        = float4(0.0),
+        .color1        = float4(0.0),
+        .color2        = float4(0.0),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-            .opacity1      = 0.0,
-            .opacity2      = 0.0,
+        .opacity1      = 0.0,
+        .opacity2      = 0.0,
 #endif
-        };
+    };
+
+    if (props.intersection_rounded_corner_distance == 0) {
+        return emptyFragmentStage;
     }
 
-
+    float2 initial_vertex_pos[3];
     float2 triangle_vertex_pos[3];
     float triangle_corner_radius;
 
     for (int i = 0; i < 3; i++) {
         int16_t pos_x = int16_t(vertx.triangle_vertices[i] >> 16);
         int16_t pos_y = int16_t(vertx.triangle_vertices[i] & 0xFFFF);
-        triangle_vertex_pos[i] = float2(pos_x, pos_y);
+        initial_vertex_pos[i] = float2(pos_x, pos_y);
+        triangle_vertex_pos[i] = initial_vertex_pos[i];
     }
 
     float2 edgePrev = normalize(triangle_vertex_pos[0] - triangle_vertex_pos[1]);
     float2 edgeNext = normalize(triangle_vertex_pos[2] - triangle_vertex_pos[1]);
     float sinAngle = cross2(edgeNext, edgePrev);
+
+    float2 perpEdgePrev = float2(-edgePrev.y, edgePrev.x);
+    float2 perpEdgeNext = float2(-edgeNext.y, edgeNext.x);
 
     for (int i = 0; i < 2; i++) {
         uint dataIndex = vertx.data_indices[i] / 2;
@@ -626,10 +632,28 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
         float2 outsetVector = (i == 0 ? edgeNext : edgePrev);
         float2 offsetVector = (i == 0 ? -edgeNext : edgePrev);
-        const float2 dist = (outset * outsetVector + offset * direction * offsetVector) / sinAngle;
+        const float2 distCorner = (outset * outsetVector + offset * direction * offsetVector) / sinAngle;
 
-        triangle_vertex_pos[i] = triangle_vertex_pos[i] + dist / drawable.ratio;
-        triangle_vertex_pos[i + 1] = triangle_vertex_pos[i + 1] + dist / drawable.ratio;
+        triangle_vertex_pos[1] = triangle_vertex_pos[1] + distCorner / drawable.ratio;
+
+        float2 outsetPerpVector = (i == 0 ? -perpEdgePrev : perpEdgeNext);
+        float2 offsetPerpVector = (i == 0 ? perpEdgePrev : perpEdgeNext);
+        const float2 distPerp = outset * outsetPerpVector + offset * direction * offsetPerpVector;
+
+        triangle_vertex_pos[i * 2] = triangle_vertex_pos[i * 2] + distPerp / drawable.ratio;
+    }
+
+    for (int i = 0; i < 3; i+=2) {
+        float2 perpEdgeVector = triangle_vertex_pos[i] - initial_vertex_pos[i];
+        float2 initialCornerVector = initial_vertex_pos[1] - initial_vertex_pos[i];
+        float2 finalCornerVector = triangle_vertex_pos[1] - initial_vertex_pos[i];
+
+        float initialCornerSide = cross2(perpEdgeVector, initialCornerVector);
+        float finalCornerSide = cross2(perpEdgeVector, finalCornerVector);
+
+        if (initialCornerSide * finalCornerSide <= 0) {
+            return emptyFragmentStage;
+        }
     }
 
     triangle_corner_radius = computeRadius(triangle_vertex_pos[0], triangle_vertex_pos[1], triangle_vertex_pos[2], props.intersection_rounded_corner_distance);
