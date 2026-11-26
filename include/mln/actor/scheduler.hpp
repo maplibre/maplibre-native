@@ -105,7 +105,7 @@ public:
     /// current task queue.
     ///
     /// The |TaskFn| return type must be compatible with the |ReplyFn| argument
-    /// type. Note: the task result is copied and passed by value.
+    /// type. Note: the task result is moved to the reply.
     template <typename TaskFn, typename ReplyFn>
     void scheduleAndReplyValue(const util::SimpleIdentity tag, TaskFn&& task, ReplyFn&& reply) {
         assert(GetCurrent());
@@ -157,12 +157,17 @@ private:
                                TaskFn&& task,
                                ReplyFn&& reply,
                                WeakScheduler replyScheduler) {
-        schedule(tag, [replyScheduler = std::move(replyScheduler), tag, task, reply] {
-            if (replyScheduler.expired()) {
-                return;
-            }
-            replyScheduler.schedule(tag, [reply, result = task()] { reply(result); });
-        });
+        schedule(tag,
+                 [replyScheduler = std::move(replyScheduler),
+                  tag,
+                  task = std::forward<TaskFn>(task),
+                  reply = std::forward<ReplyFn>(reply)]() mutable {
+                     if (replyScheduler.expired()) {
+                         return;
+                     }
+                     replyScheduler.schedule(
+                         tag, [reply = std::move(reply), result = task()]() mutable { reply(std::move(result)); });
+                 });
     }
 
     std::shared_ptr<WeakScheduler::Anchor> anchor;
@@ -187,10 +192,10 @@ public:
     void runRenderJobs(bool closeQueue = false) { scheduler->runRenderJobs(tag, closeQueue); }
     void waitForEmpty() const noexcept { scheduler->waitForEmpty(tag); }
 
-    /// type. Note: the task result is copied and passed by value.
+    /// type. Note: the task result is moved to the reply.
     template <typename TaskFn, typename ReplyFn>
     void scheduleAndReplyValue(TaskFn&& task, ReplyFn&& reply) {
-        scheduler->scheduleAndReplyValue(tag, task, reply);
+        scheduler->scheduleAndReplyValue(tag, std::forward<TaskFn>(task), std::forward<ReplyFn>(reply));
     }
 
     const mln::util::SimpleIdentity tag;
