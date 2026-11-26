@@ -2,14 +2,36 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
-## main
+## 7.1.0
+
+### Features
+
+- Add `MLNFillStyleLayer.fillRoundedCornerDistance` for the new `fill-rounded-corner-distance` paint property, which rounds the corners of fill polygons: the given distance in meters on each side of a corner is cut off and replaced by a curve. A fill layer that uses it can take up to twice as much memory ([#4670](https://github.com/maplibre/maplibre-native/pull/4670)).
+- Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
+- Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads ([#4871](https://github.com/maplibre/maplibre-native/pull/4871)).
+- Performance improvements: tiles free the CPU copy of their vertices and indices once these are uploaded to the GPU, as MapLibre GL JS does ([#4828](https://github.com/maplibre/maplibre-native/pull/4828)); feature state is applied to a tile once, then only its changes ([#4919](https://github.com/maplibre/maplibre-native/pull/4919)); hillshade and color-relief layers no longer redo work on every frame ([#5001](https://github.com/maplibre/maplibre-native/pull/5001), [#5052](https://github.com/maplibre/maplibre-native/pull/5052), [#5053](https://github.com/maplibre/maplibre-native/pull/5053)); with view annotations or an anchored callout on the map, `MLNMapView` presents a frame once the GPU has scheduled it instead of waiting on the main thread until the GPU has finished it ([#4987](https://github.com/maplibre/maplibre-native/pull/4987)); and each tile of an `mbtiles://` source is read and decoded once instead of twice ([#4985](https://github.com/maplibre/maplibre-native/pull/4985)).
+- Draw hillshade layers without pixel snapping while the camera moves, so the shading moves smoothly with the map instead of in whole-pixel steps ([#4688](https://github.com/maplibre/maplibre-native/pull/4688)).
+- A request for a missing `file://` URL now fails with `Cannot find file <path>` or `Cannot read directory <path>` instead of an empty error message ([#4930](https://github.com/maplibre/maplibre-native/pull/4930)).
+
+### Bug fixes
 
 - Fix `MLNMapSnapshotter` in the iOS simulator drawing translucent fills two or three times, so their alpha accumulated. The snapshot's render pass had no stencil attachment, so tile clip masks were not applied ([#5097](https://github.com/maplibre/maplibre-native/issues/5097)).
 - Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).
-- Add `MLNSource.isVolatile`: a source whose tiles are never written to the ambient cache on disk, as `Source.setVolatile()` on Android ([#4843](https://github.com/maplibre/maplibre-native/issues/4843)).
-- Make symbol guard checks opt-in, so symbol-dense tiles load faster. To keep them, set the environment variable `MLN_SYMBOL_GUARDS=1` before the first map loads.
 - An `MLNColor` passed into a style value or an expression is written with whole-number channels, as MapLibre GL JS prints colors, so a fractional channel rounds to the nearest of 0-255 ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
+- Draw every layer at one constant depth on Metal, as OpenGL does. This fixes hillshade and color-relief layers that were invisible above fill layers ([#4149](https://github.com/maplibre/maplibre-native/issues/4149), [#4868](https://github.com/maplibre/maplibre-native/pull/4868)).
+- Translucent fill layers above an opaque fill no longer vanish for a frame on a pitched, moving map ([#4627](https://github.com/maplibre/maplibre-native/pull/4627)).
+- Vertex buffers no longer stop updating because of an uninitialized timestamp. Changes to symbol opacity, feature state and data-driven paint properties could fail to show ([#4958](https://github.com/maplibre/maplibre-native/pull/4958)).
+- Headless rendering with Metal, which `MLNMapSnapshotter` uses, no longer blocks forever after about 64 frames ([#4839](https://github.com/maplibre/maplibre-native/pull/4839)).
+- Replacing a style image with another image of the same name now shows the new image, also when a GeoJSON source is updated synchronously ([#4326](https://github.com/maplibre/maplibre-native/issues/4326), [#4543](https://github.com/maplibre/maplibre-native/pull/4543)).
+- Adding a source that a layer already refers to, removing a source, and removing a style image now reach the renderer right away instead of at the next unrelated style change ([#4676](https://github.com/maplibre/maplibre-native/pull/4676)).
+- Changes to `MLNMapView.prefetchesTiles` and the `tileLod…` properties take effect right away on an idle map instead of at the next map update ([#4678](https://github.com/maplibre/maplibre-native/pull/4678)).
+- Hide a layer at a zoom equal to its `maximumZoomLevel`, as the style specification and MapLibre GL JS do. Background, raster, hillshade, color-relief and custom layers were still drawn there ([#4766](https://github.com/maplibre/maplibre-native/pull/4766)).
+- After a pinch zoom across the antimeridian, the camera reported a longitude past 180° and `-[MLNMapView convertCoordinate:toPointToView:]` put every coordinate a world away. Points are now also right while a fling or `flyToCamera:` crosses the antimeridian, so annotation views no longer vanish or flicker there ([#3580](https://github.com/maplibre/maplibre-native/issues/3580), [#4746](https://github.com/maplibre/maplibre-native/pull/4746), [#4776](https://github.com/maplibre/maplibre-native/pull/4776)).
+- `-[MLNMapView visibleFeaturesAtPoint:]` finds a line with `line-offset` up to its end. The final point of the line was not offset ([#4702](https://github.com/maplibre/maplibre-native/pull/4702)).
+- Stop custom geometry source callbacks from running for tiles that were already cancelled ([#4815](https://github.com/maplibre/maplibre-native/pull/4815)).
+- A `%` that is not followed by two hex digits stays literal in `file://` and `mbtiles://` URLs, so a file such as `100%.json` is found ([#4926](https://github.com/maplibre/maplibre-native/pull/4926)).
+- Retry a rate-limited request right away when its `Retry-After` or `X-RateLimit-Reset` time has already passed. It was never retried ([#4923](https://github.com/maplibre/maplibre-native/pull/4923)).
 
 ## 7.0.0
 
