@@ -56,7 +56,8 @@ function getArgs() {
   /** @type {() => ArtifactType[]} **/
   function getArtifactsToDownload() {
     if (values.customerArtifacts) return ["CUSTOMER_ARTIFACT"];
-    return ['TESTSPEC_OUTPUT', 'CUSTOMER_ARTIFACT', 'CUSTOMER_ARTIFACT_LOG', 'DEVICE_LOG'];
+    // AUTOMATION_OUTPUT has the output of iOS XCTest runs, which contains the iOS benchmark results
+    return ['TESTSPEC_OUTPUT', 'CUSTOMER_ARTIFACT', 'CUSTOMER_ARTIFACT_LOG', 'DEVICE_LOG', 'AUTOMATION_OUTPUT'];
   }
 
   return {

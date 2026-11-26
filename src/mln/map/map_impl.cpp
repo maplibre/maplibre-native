@@ -436,6 +436,8 @@ void Map::Impl::onTileAction(TileOperation op, const OverscaledTileID& id, const
 }
 
 void Map::Impl::onRenderError(std::exception_ptr error) {
+    mln::Log::Error(mln::Event::Render, "Render error: " + util::toString(error));
+
     observer.onRenderError(error);
 
     if (actionJournal) {

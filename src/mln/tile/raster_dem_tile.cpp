@@ -134,6 +134,8 @@ void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTil
         // render pass with the new texture data we just backfilled
         bucket->setPrepared(false);
         bucket->renderTargetPrepared = false;
+        // the color relief layer has to upload the backfilled data again
+        bucket->demTexture.reset();
     }
 }
 

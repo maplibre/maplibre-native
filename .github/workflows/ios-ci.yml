@@ -18,6 +18,7 @@ concurrency:
 
 permissions:
   id-token: write         # needed for AWS
+  pull-requests: read     # needed to check for a '!benchmark ios' comment
 
 jobs:
   pre_job:
@@ -131,6 +132,37 @@ jobs:
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
 
+      # benchmark (built on pushes to main and for PRs with a '!benchmark ios' comment, see ios-device-test.yml)
+
+      - name: Check if comment on PR contains '!benchmark ios'
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        id: benchmark_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-regex: '/^!benchmark.*\bios\b/im'
+
+      - name: Should we build the benchmark?
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || steps.benchmark_comment.outputs.comment-id
+        run: echo "build_benchmark=true" >> "$GITHUB_ENV"
+
+      - name: Build BenchmarkApp .ipa and BenchmarkTests .xctest for AWS Device Farm
+        if: env.build_benchmark == 'true'
+        run: |
+          benchmark_artifacts_dir="$(mktemp -d)"
+          scripts/build-benchmark-for-device-farm.sh "$benchmark_artifacts_dir"
+          echo benchmark_artifacts_dir="$benchmark_artifacts_dir" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: env.build_benchmark == 'true'
+        with:
+          name: ios-benchmark
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            ${{ env.benchmark_artifacts_dir }}/BenchmarkApp.ipa
+            ${{ env.benchmark_artifacts_dir }}/BenchmarkTests.xctest.zip
+
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
 
@@ -200,9 +232,9 @@ jobs:
 
       - name: Build dynamic library for size test (Bloaty)
         run: |
-          bazel build //platform/ios:MapLibre.dynamic --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --apple_generate_dsym
+          bazel build //platform/ios:MapLibre.dynamic.device --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --apple_generate_dsym
           bazel_bin="$(bazel info --compilation_mode="opt" bazel-bin)"
-          unzip "$bazel_bin"/platform/ios/MapLibre.dynamic.xcframework.zip
+          unzip "$bazel_bin"/platform/ios/MapLibre.dynamic.device.xcframework.zip
           cp MapLibre.xcframework/ios-arm64/dSYMs/MapLibre_ios_device.framework.dSYM/Contents/Resources/DWARF/MapLibre_ios_device MapLibre_DWARF
           cp MapLibre.xcframework/ios-arm64/MapLibre.framework/MapLibre MapLibre_dynamic
 
