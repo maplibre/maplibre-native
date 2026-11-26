@@ -52,6 +52,8 @@ public:
     void setFillPatternTransition(jni::JNIEnv&, jlong duration, jlong delay);
     jni::Local<jni::Object<TransitionOptions>> getFillPatternTransition(jni::JNIEnv&);
 
+    jni::Local<jni::Object<jni::ObjectTag>> getFillRoundedCornerDistance(jni::JNIEnv&);
+
 }; // class FillLayer
 
 class FillJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::FillLayerFactory {

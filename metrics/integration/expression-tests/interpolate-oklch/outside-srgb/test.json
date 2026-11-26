@@ -1,0 +1,34 @@
+{
+  "expression": ["interpolate-oklch", ["linear"], ["get", "t"], 0, ["get", "from"], 1, ["get", "to"]],
+  "inputs": [
+    [{}, {"properties": {"t": 0.2, "from": "#11aa11", "to": "#2233ff"}}],
+    [{}, {"properties": {"t": 0.45, "from": "#11aa11", "to": "#2233ff"}}],
+    [{}, {"properties": {"t": 0.75, "from": "#11aa11", "to": "#2233ff"}}],
+    [{}, {"properties": {"t": 0.5, "from": "red", "to": "blue"}}],
+    [{}, {"properties": {"t": 0.5, "from": "oklch(0.7 0.1 30 / 0.2)", "to": "oklch(0.5 0.15 250)"}}]
+  ],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": false,
+      "isZoomConstant": true,
+      "type": "color"
+    },
+    "outputs": [
+      [0, 0.6663, 0.401568, 1],
+      [0, 0.610393, 0.679731, 1],
+      [0, 0.444121, 0.930316, 1],
+      [0.729906, 0, 0.760082, 1],
+      [0.340181, 0.183684, 0.371756, 0.6]
+    ],
+    "serialized": [
+      "interpolate-oklch",
+      ["linear"],
+      ["number", ["get", "t"]],
+      0,
+      ["to-color", ["get", "from"]],
+      1,
+      ["to-color", ["get", "to"]]
+    ]
+  }
+}
