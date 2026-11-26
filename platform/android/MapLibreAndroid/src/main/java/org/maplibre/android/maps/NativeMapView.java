@@ -998,6 +998,38 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setTerrainHazeColor(int color) {
+    if (checkState("setTerrainHazeColor")) {
+      return;
+    }
+    nativeSetTerrainHazeColor(color);
+  }
+
+  @Override
+  public int getTerrainHazeColor() {
+    if (checkState("getTerrainHazeColor")) {
+      return 0;
+    }
+    return nativeGetTerrainHazeColor();
+  }
+
+  @Override
+  public void setTerrainHazeRange(float range) {
+    if (checkState("setTerrainHazeRange")) {
+      return;
+    }
+    nativeSetTerrainHazeRange(range);
+  }
+
+  @Override
+  public float getTerrainHazeRange() {
+    if (checkState("getTerrainHazeRange")) {
+      return 0;
+    }
+    return nativeGetTerrainHazeRange();
+  }
+
+  @Override
   public void setCenterClampedToGround(boolean clamped) {
     if (checkState("setCenterClampedToGround")) {
       return;
@@ -2045,6 +2077,18 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native int nativeGetTerrainSkirtLength();
+
+  @Keep
+  private native void nativeSetTerrainHazeColor(int color);
+
+  @Keep
+  private native int nativeGetTerrainHazeColor();
+
+  @Keep
+  private native void nativeSetTerrainHazeRange(float range);
+
+  @Keep
+  private native float nativeGetTerrainHazeRange();
 
   @Keep
   private native void nativeSetCenterClampedToGround(boolean clamped);
