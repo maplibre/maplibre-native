@@ -526,8 +526,8 @@ struct FragmentStage {
 
     float2 triangle_pos;
 
-    float2 triangle_corner_pos [[flat]];
     float2 triangle_corner_prev [[flat]];
+    float2 triangle_corner_pos [[flat]];
     float2 triangle_corner_next [[flat]];
     float triangle_corner_radius [[flat]];
 
@@ -573,7 +573,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #endif
     };
 
-    if (props.intersection_rounded_corner_distance == 0) {
+    if (props.intersection_rounded_corner_distance <= 0.0) {
         return emptyFragmentStage;
     }
 
@@ -656,7 +656,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         }
     }
 
-    triangle_corner_radius = computeRadius(triangle_vertex_pos[0], triangle_vertex_pos[1], triangle_vertex_pos[2], props.intersection_rounded_corner_distance);
+    triangle_corner_radius = computeRadius(triangle_vertex_pos[0],
+                                           triangle_vertex_pos[1],
+                                           triangle_vertex_pos[2],
+                                           props.intersection_rounded_corner_distance);
 
     float2 position = triangle_vertex_pos[vertexID];
     uint dataIndex1 = vertx.data_indices[0] / 2;
@@ -691,7 +694,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(1.0);
 #endif
 
-    if (props.intersection_rounded_corner_distance == 0) {
+    if (in.triangle_corner_radius <= 0.0) {
         return half4(0.0);
     }
 
@@ -720,10 +723,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     float dTri = -1.0;
 
-    if (in.triangle_corner_radius > 0.0) {
-        float d0 = dRoundedTri(in.triangle_pos, dTri, in.triangle_corner_pos, in.triangle_corner_prev, in.triangle_corner_next, in.triangle_corner_radius);
-        dTri = opUnion(dTri, d0);
-    }
+    float d0 = dRoundedTri(in.triangle_pos, dTri, in.triangle_corner_pos, in.triangle_corner_prev, in.triangle_corner_next, in.triangle_corner_radius);
+    dTri = opUnion(dTri, d0);
 
     if (dTri < 0.0) {
         return half4(0.0);

@@ -8,12 +8,12 @@ namespace shaders {
 
 constexpr auto fillShaderPrelude = R"(
 
-#define idFillDrawableUBO           idDrawableReservedVertexOnlyUBO
-#define idFillTilePropsUBO          drawableReservedUBOCount
-#define idFillEvaluatedPropsUBO     layerUBOStartId
-#define idFillPosVertexDrawableUBO        drawableSSBOStartId
-#define idFillNeighborVertexDrawableUBO   drawableSSBOStartId + 1
-#define idFillDataVertexDrawableUBO       drawableSSBOStartId + 2
+#define idFillDrawableUBO                   idDrawableReservedVertexOnlyUBO
+#define idFillTilePropsUBO                  drawableReservedUBOCount
+#define idFillEvaluatedPropsUBO             layerUBOStartId
+#define idFillPosVertexDrawableUBO          drawableSSBOStartId
+#define idFillNeighborVertexDrawableUBO     drawableSSBOStartId + 1
+#define idFillDataVertexDrawableUBO         drawableSSBOStartId + 2
 
 #if !defined(HAS_UNIFORM_u_neighbor_vertex) && !defined(HAS_UNIFORM_u_triangle_instance)
 #define ROUNDED_CORNER_ENABLED

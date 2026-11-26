@@ -712,6 +712,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::HillshadeShader,
                   shaders::BuiltIn::HillshadePrepareShader,
                   shaders::BuiltIn::LineShader,
+                  shaders::BuiltIn::LineIntersectionShader,
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LineSDFShader,
                   shaders::BuiltIn::LineGradientSDFShader,
