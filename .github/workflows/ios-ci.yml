@@ -161,7 +161,6 @@ jobs:
         run: |
           bazel test //platform/ios/iosapp-UITests:uitest \
             --test_output=errors \
-            --flaky_test_attempts=5 \
             --//:renderer=metal \
             --features=tsan
 
