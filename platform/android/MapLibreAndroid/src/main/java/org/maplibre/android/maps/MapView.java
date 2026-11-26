@@ -1561,10 +1561,21 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   public interface OnRenderErrorListener {
     /**
      * Called when an error occurs while trying to render a layer or drawable.
+     * <p>
+     * To get the error's message, override {@link #onRenderError(String)} as well.
+     * </p>
+     */
+    void onRenderError();
+
+    /**
+     * Called when an error occurs while trying to render a layer or drawable.
+     * The default implementation calls {@link #onRenderError()}.
      *
      * @param message the error's description, e.g. the message of the native exception
      */
-    void onRenderError(@NonNull String message);
+    default void onRenderError(@NonNull String message) {
+      onRenderError();
+    }
   }
 
   /**
