@@ -59,8 +59,12 @@ struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {
     const VertexArray& getVertexArray() const { return vertexArray; }
     void setVertexArray(VertexArray&& value) { vertexArray = std::move(value); }
 
+    std::uint64_t getIndexBufferSerial() const { return indexBufferSerial; }
+    void setIndexBufferSerial(std::uint64_t value) { indexBufferSerial = value; }
+
 protected:
     VertexArray vertexArray;
+    std::uint64_t indexBufferSerial = 0;
 };
 
 } // namespace gl
