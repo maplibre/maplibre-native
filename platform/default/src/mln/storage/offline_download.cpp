@@ -68,9 +68,7 @@ void tileCover(const OfflineRegionDefinition& definition,
 
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
         std::visit(overloaded{[&](const OfflineTilePyramidRegionDefinition& reg) { tileCover(reg.bounds, z, fn); },
-                              [&](const OfflineGeometryRegionDefinition& reg) {
-                                  tileCover(reg.geometry, z, fn);
-                              }},
+                              [&](const OfflineGeometryRegionDefinition& reg) { tileCover(reg.geometry, z, fn); }},
                    definition);
     }
 }
@@ -86,9 +84,7 @@ uint64_t tileCount(const OfflineRegionDefinition& definition,
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
         result += std::visit(
             overloaded{[&](const OfflineTilePyramidRegionDefinition& reg) { return util::tileCount(reg.bounds, z); },
-                       [&](const OfflineGeometryRegionDefinition& reg) {
-                           return util::tileCount(reg.geometry, z);
-                       }},
+                       [&](const OfflineGeometryRegionDefinition& reg) { return util::tileCount(reg.geometry, z); }},
             definition);
     }
 

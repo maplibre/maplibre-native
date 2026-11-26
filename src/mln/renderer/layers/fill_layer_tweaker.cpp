@@ -123,8 +123,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
                     .pad1 = 0,
-                    .pad2 = 0
-                };
+                    .pad2 = 0};
 
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
@@ -142,8 +141,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .outline_color_t = std::get<0>(binders->get<FillOutlineColor>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
                     .pad1 = 0,
-                    .pad2 = 0
-                };
+                    .pad2 = 0};
 
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
@@ -168,8 +166,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
                     .pad1 = 0,
                     .pad2 = 0,
-                    .pad3 = 0
-                };
+                    .pad3 = 0};
 
 #if MLN_UBO_CONSOLIDATION
                 tilePropsUBOVector[i].fillPatternTilePropsUBO = FillPatternTilePropsUBO {
@@ -208,8 +205,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
                     .pad1 = 0,
                     .pad2 = 0,
-                    .pad3 = 0
-                };
+                    .pad3 = 0};
 
 #if MLN_UBO_CONSOLIDATION
                 tilePropsUBOVector[i].fillOutlinePatternTilePropsUBO = FillOutlinePatternTilePropsUBO {
@@ -240,8 +236,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, parameters.state.getZoom()),
                     .pad1 = 0,
                     .pad2 = 0,
-                    .pad3 = 0
-                };
+                    .pad3 = 0};
 
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);

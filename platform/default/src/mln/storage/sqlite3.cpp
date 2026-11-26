@@ -14,9 +14,7 @@
 #define MBGL_CONSTRUCTOR(f) \
     static void f();        \
     struct f##_t_ {         \
-        f##_t_() {          \
-            f();            \
-        }                   \
+        f##_t_() { f(); }   \
     };                      \
     static f##_t_ f##_;     \
     static void f()
