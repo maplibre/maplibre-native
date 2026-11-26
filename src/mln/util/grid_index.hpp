@@ -71,8 +71,6 @@ public:
     std::vector<T> query(const BBox&) const;
     std::vector<std::pair<T, BBox>> queryWithBoxes(const BBox&) const;
 
-    /// The predicate type is a template parameter so that a predicate over a base class of T, like the
-    /// collision group predicate, is called as is rather than wrapped in a new std::function on every call.
     template <std::predicate<const T&> Predicate = std::function<bool(const T&)>>
     bool hitTest(const BBox&, const std::optional<Predicate>& predicate = std::nullopt) const;
     template <std::predicate<const T&> Predicate = std::function<bool(const T&)>>
