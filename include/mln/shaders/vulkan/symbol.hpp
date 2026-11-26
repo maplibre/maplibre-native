@@ -8,9 +8,13 @@ namespace shaders {
 
 constexpr auto symbolShaderPrelude = R"(
 
-#define idSymbolDrawableUBO         idDrawableReservedVertexOnlyUBO
-#define idSymbolTilePropsUBO        idDrawableReservedFragmentOnlyUBO
-#define idSymbolEvaluatedPropsUBO   layerUBOStartId
+#define idSymbolDrawableUBO                     idDrawableReservedVertexOnlyUBO
+#define idSymbolTilePropsUBO                    idDrawableReservedFragmentOnlyUBO
+#define idSymbolEvaluatedPropsUBO               layerUBOStartId
+#define idSymbolInstancedDrawableUBO            drawableSSBOStartId
+#define idSymbolDynamicInstancedDrawableUBO     drawableSSBOStartId + 1
+#define idSymbolOpacityInstancedDrawableUBO     drawableSSBOStartId + 2
+#define idSymbolDataInstancedDrawableUBO        drawableSSBOStartId + 3
 
 )";
 
@@ -18,21 +22,17 @@ template <>
 struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "SymbolIconShader";
 
-    static const std::array<AttributeInfo, 6> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 10> instanceAttributes;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto vertex = R"(
 
-layout(location = 0) in ivec4 in_pos_offset;
-layout(location = 1) in uvec4 in_data;
-layout(location = 2) in ivec4 in_pixeloffset;
-layout(location = 3) in vec3 in_projected_pos;
-layout(location = 4) in float in_fade_opacity;
+layout(location = 0) in ivec2 in_pos;
 
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 5) in vec2 in_opacity;
+#if !defined(HAS_UNIFORM_u_sorted_instance)
+layout(location = 1) in uint in_sorted_instance;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -69,23 +69,72 @@ layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly bu
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
 
+struct SymbolInstance {
+    int pos_scale[2];
+    int offset_tltr[2];
+    int offset_blbr[2];
+    uint texture_rect[2];
+    int pixeloffset[2];
+    uint size_sdf;
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolInstancedDrawableUBO) readonly buffer SymbolInstanceDrawableUBOVector {
+    SymbolInstance instance[];
+} symbolInstanceVector;
+
+struct DynamicInstance {
+    float projected_pos[3];
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDynamicInstancedDrawableUBO) readonly buffer DynamicInstanceDrawableUBOVector {
+    DynamicInstance instance[];
+} dynamicInstanceVector;
+
+struct OpacityInstance {
+    float fade_opacity;
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolOpacityInstancedDrawableUBO) readonly buffer OpacityInstanceDrawableUBOVector {
+    OpacityInstance instance[];
+} opacityInstanceVector;
+
+#if !defined(HAS_UNIFORM_u_opacity)
+struct DataInstance {
+    float opacity[2];
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDataInstancedDrawableUBO) readonly buffer DataInstanceDrawableUBOVector {
+    DataInstance instance[];
+} dataInstanceVector;
+#endif
+
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_opacity;
 
 void main() {
+#if defined(HAS_UNIFORM_u_sorted_instance)
+    const uint instance = gl_InstanceIndex;
+#else
+    const uint instance = in_sorted_instance;
+#endif
+
     const SymbolDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+    const SymbolInstance symbol = symbolInstanceVector.instance[instance];
+    const DynamicInstance dynamic = dynamicInstanceVector.instance[instance];
+    const OpacityInstance opacity = opacityInstanceVector.instance[instance];
 
-    const vec2 a_pos = in_pos_offset.xy;
-    const vec2 a_offset = in_pos_offset.zw;
+    const vec2 a_pos = unpack_int(symbol.pos_scale[0]);
+    const vec2 offset_tb[2] = {unpack_int(symbol.offset_tltr[in_pos.x]), unpack_int(symbol.offset_blbr[in_pos.x])};
+    const vec2 a_offset = offset_tb[in_pos.y];
 
-    const vec2 a_tex = in_data.xy;
-    const vec2 a_size = in_data.zw;
+    const vec2 a_tex = unpack_uint(symbol.texture_rect[0]) + in_pos * unpack_uint(symbol.texture_rect[1]);
+    const vec2 a_size = unpack_uint(symbol.size_sdf);
 
     const float a_size_min = floor(a_size[0] * 0.5);
-    const vec2 a_pxoffset = in_pixeloffset.xy;
-    const vec2 a_minFontScale = in_pixeloffset.zw / 256.0;
+    const vec2 a_pxoffset = unpack_int(symbol.pixeloffset[0]) + in_pos * (unpack_int(symbol.pixeloffset[1]) - unpack_int(symbol.pixeloffset[0]));
+    const vec2 a_minFontScale = unpack_int(symbol.pos_scale[1]) / 256.0;
 
-    const float segment_angle = -in_projected_pos[2];
+    const float segment_angle = -dynamic.projected_pos[2];
 
     float size;
     if (!drawable.is_size_zoom_constant && !drawable.is_size_feature_constant) {
@@ -127,13 +176,13 @@ void main() {
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const vec4 projected_pos = drawable.label_plane_matrix * vec4(in_projected_pos.xy, 0.0, 1.0);
+    const vec4 projected_pos = drawable.label_plane_matrix * vec4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
     const vec2 pos0 = projected_pos.xy / projected_pos.w;
     const vec2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     gl_Position = drawable.coord_matrix * vec4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
     applySurfaceTransform();
 
-    const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
+    const vec2 raw_fade_opacity = unpack_opacity(opacity.fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
 
@@ -142,7 +191,7 @@ void main() {
 #if defined(HAS_UNIFORM_u_opacity)
     frag_opacity = fade_opacity;
 #else
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t) * fade_opacity;
+    frag_opacity = unpack_mix_float(dataInstanceVector.instance[instance].opacity, drawable.opacity_t) * fade_opacity;
 #endif
 }
 )";
@@ -209,37 +258,17 @@ template <>
 struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "SymbolSDFShader";
 
-    static const std::array<AttributeInfo, 10> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 14> instanceAttributes;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto vertex = R"(
 
-layout(location = 0) in ivec4 in_pos_offset;
-layout(location = 1) in uvec4 in_data;
-layout(location = 2) in ivec4 in_pixeloffset;
-layout(location = 3) in vec3 in_projected_pos;
-layout(location = 4) in float in_fade_opacity;
+layout(location = 0) in ivec2 in_pos;
 
-#if !defined(HAS_UNIFORM_u_fill_color)
-layout(location = 5) in vec4 in_fill_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_halo_color)
-layout(location = 6) in vec4 in_halo_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 7) in vec2 in_opacity;
-#endif
-
-#if !defined(HAS_UNIFORM_u_halo_width)
-layout(location = 8) in vec2 in_halo_width;
-#endif
-
-#if !defined(HAS_UNIFORM_u_halo_blur)
-layout(location = 9) in vec2 in_halo_blur;
+#if !defined(HAS_UNIFORM_u_sorted_instance)
+layout(location = 1) in uint in_sorted_instance;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -276,6 +305,59 @@ layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly bu
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
 
+struct SymbolInstance {
+    int pos_scale[2];
+    int offset_tltr[2];
+    int offset_blbr[2];
+    uint texture_rect[2];
+    int pixeloffset[2];
+    uint size_sdf;
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolInstancedDrawableUBO) readonly buffer SymbolInstanceDrawableUBOVector {
+    SymbolInstance instance[];
+} symbolInstanceVector;
+
+struct DynamicInstance {
+    float projected_pos[3];
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDynamicInstancedDrawableUBO) readonly buffer DynamicInstanceDrawableUBOVector {
+    DynamicInstance instance[];
+} dynamicInstanceVector;
+
+struct OpacityInstance {
+    float fade_opacity;
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolOpacityInstancedDrawableUBO) readonly buffer OpacityInstanceDrawableUBOVector {
+    OpacityInstance instance[];
+} opacityInstanceVector;
+
+#if !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_fill_color) || !defined(HAS_UNIFORM_u_halo_color) || !defined(HAS_UNIFORM_u_halo_width) || !defined(HAS_UNIFORM_u_halo_blur)
+struct DataInstance {
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_fill_color)
+    float fill_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_halo_color)
+    float halo_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_halo_width)
+    float halo_width[2];
+#endif
+#if !defined(HAS_UNIFORM_u_halo_blur)
+    float halo_blur[2];
+#endif
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDataInstancedDrawableUBO) readonly buffer DataInstanceDrawableUBOVector {
+    DataInstance instance[];
+} dataInstanceVector;
+#endif
+
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_fade_opacity;
 layout(location = 2) out mediump float frag_font_scale;
@@ -302,17 +384,27 @@ layout(location = 8) out mediump float frag_halo_blur;
 #endif
 
 void main() {
+#if defined(HAS_UNIFORM_u_sorted_instance)
+    const uint instance = gl_InstanceIndex;
+#else
+    const uint instance = in_sorted_instance;
+#endif
+
     const SymbolDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+    const SymbolInstance symbol = symbolInstanceVector.instance[instance];
+    const DynamicInstance dynamic = dynamicInstanceVector.instance[instance];
+    const OpacityInstance opacity = opacityInstanceVector.instance[instance];
 
-    const vec2 a_pos = in_pos_offset.xy;
-    const vec2 a_offset = in_pos_offset.zw;
+    const vec2 a_pos = unpack_int(symbol.pos_scale[0]);
+    const vec2 offset_tb[2] = {unpack_int(symbol.offset_tltr[in_pos.x]), unpack_int(symbol.offset_blbr[in_pos.x])};
+    const vec2 a_offset = offset_tb[in_pos.y];
 
-    const vec2 a_tex = in_data.xy;
-    const vec2 a_size = in_data.zw;
+    const vec2 a_tex = unpack_uint(symbol.texture_rect[0]) + in_pos * unpack_uint(symbol.texture_rect[1]);
+    const vec2 a_size = unpack_uint(symbol.size_sdf);
 
     const float a_size_min = floor(a_size[0] * 0.5);
-    const vec2 a_pxoffset = in_pixeloffset.xy;
-    const float segment_angle = -in_projected_pos[2];
+    const vec2 a_pxoffset = unpack_int(symbol.pixeloffset[0]) + in_pos * (unpack_int(symbol.pixeloffset[1]) - unpack_int(symbol.pixeloffset[0]));
+    const float segment_angle = -dynamic.projected_pos[2];
 
     float size;
     if (!drawable.is_size_zoom_constant && !drawable.is_size_feature_constant) {
@@ -361,13 +453,13 @@ void main() {
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const vec4 projected_pos = drawable.label_plane_matrix * vec4(in_projected_pos.xy, 0.0, 1.0);
+    const vec4 projected_pos = drawable.label_plane_matrix * vec4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
     const vec2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
     const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
     applySurfaceTransform();
 
-    const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
+    const vec2 raw_fade_opacity = unpack_opacity(opacity.fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
 
     frag_tex = a_tex / drawable.texsize;
@@ -376,19 +468,19 @@ void main() {
     frag_gamma_scale = gl_Position.w;
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    frag_fill_color = unpack_mix_color(in_fill_color, drawable.fill_color_t);
+    frag_fill_color = unpack_mix_color(dataInstanceVector.instance[instance].fill_color, drawable.fill_color_t);
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    frag_halo_color = unpack_mix_color(in_halo_color, drawable.halo_color_t);
+    frag_halo_color = unpack_mix_color(dataInstanceVector.instance[instance].halo_color, drawable.halo_color_t);
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    frag_halo_width = unpack_mix_float(in_halo_width, drawable.halo_width_t);
+    frag_halo_width = unpack_mix_float(dataInstanceVector.instance[instance].halo_width, drawable.halo_width_t);
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    frag_halo_blur = unpack_mix_float(in_halo_blur, drawable.halo_blur_t);
+    frag_halo_blur = unpack_mix_float(dataInstanceVector.instance[instance].halo_blur, drawable.halo_blur_t);
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(dataInstanceVector.instance[instance].opacity, drawable.opacity_t);
 #endif
 }
 )";
@@ -517,8 +609,8 @@ template <>
 struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "SymbolTextAndIconShader";
 
-    static const std::array<AttributeInfo, 9> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 14> instanceAttributes;
     static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
@@ -527,29 +619,10 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan
 #define SDF 1.0
 #define ICON 0.0
 
-layout(location = 0) in ivec4 in_pos_offset;
-layout(location = 1) in uvec4 in_data;
-layout(location = 2) in vec3 in_projected_pos;
-layout(location = 3) in float in_fade_opacity;
+layout(location = 0) in ivec2 in_pos;
 
-#if !defined(HAS_UNIFORM_u_fill_color)
-layout(location = 4) in vec4 in_fill_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_halo_color)
-layout(location = 5) in vec4 in_halo_color;
-#endif
-
-#if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 6) in vec2 in_opacity;
-#endif
-
-#if !defined(HAS_UNIFORM_u_halo_width)
-layout(location = 7) in vec2 in_halo_width;
-#endif
-
-#if !defined(HAS_UNIFORM_u_halo_blur)
-layout(location = 8) in vec2 in_halo_blur;
+#if !defined(HAS_UNIFORM_u_sorted_instance)
+layout(location = 1) in uint in_sorted_instance;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -586,6 +659,59 @@ layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly bu
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
 
+struct SymbolInstance {
+    int pos_scale[2];
+    int offset_tltr[2];
+    int offset_blbr[2];
+    uint texture_rect[2];
+    int pixeloffset[2];
+    uint size_sdf;
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolInstancedDrawableUBO) readonly buffer SymbolInstanceDrawableUBOVector {
+    SymbolInstance instance[];
+} symbolInstanceVector;
+
+struct DynamicInstance {
+    float projected_pos[3];
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDynamicInstancedDrawableUBO) readonly buffer DynamicInstanceDrawableUBOVector {
+    DynamicInstance instance[];
+} dynamicInstanceVector;
+
+struct OpacityInstance {
+    float fade_opacity;
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolOpacityInstancedDrawableUBO) readonly buffer OpacityInstanceDrawableUBOVector {
+    OpacityInstance instance[];
+} opacityInstanceVector;
+
+#if !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_fill_color) || !defined(HAS_UNIFORM_u_halo_color) || !defined(HAS_UNIFORM_u_halo_width) || !defined(HAS_UNIFORM_u_halo_blur)
+struct DataInstance {
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_fill_color)
+    float fill_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_halo_color)
+    float halo_color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_halo_width)
+    float halo_width[2];
+#endif
+#if !defined(HAS_UNIFORM_u_halo_blur)
+    float halo_blur[2];
+#endif
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDataInstancedDrawableUBO) readonly buffer DataInstanceDrawableUBOVector {
+    DataInstance instance[];
+} dataInstanceVector;
+#endif
+
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_fade_opacity;
 layout(location = 2) out mediump float frag_font_scale;
@@ -614,17 +740,27 @@ layout(location = 8) out mediump float frag_halo_blur;
 layout(location = 9) out int frag_is_icon;
 
 void main() {
+#if defined(HAS_UNIFORM_u_sorted_instance)
+    const uint instance = gl_InstanceIndex;
+#else
+    const uint instance = in_sorted_instance;
+#endif
+
     const SymbolDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+    const SymbolInstance symbol = symbolInstanceVector.instance[instance];
+    const DynamicInstance dynamic = dynamicInstanceVector.instance[instance];
+    const OpacityInstance opacity = opacityInstanceVector.instance[instance];
 
-    const vec2 a_pos = in_pos_offset.xy;
-    const vec2 a_offset = in_pos_offset.zw;
+    const vec2 a_pos = unpack_int(symbol.pos_scale[0]);
+    const vec2 offset_tb[2] = {unpack_int(symbol.offset_tltr[in_pos.x]), unpack_int(symbol.offset_blbr[in_pos.x])};
+    const vec2 a_offset = offset_tb[in_pos.y];
 
-    const vec2 a_tex = in_data.xy;
-    const vec2 a_size = in_data.zw;
+    const vec2 a_tex = unpack_uint(symbol.texture_rect[0]) + in_pos * unpack_uint(symbol.texture_rect[1]);
+    const vec2 a_size = unpack_uint(symbol.size_sdf);
 
     const float a_size_min = floor(a_size[0] * 0.5);
     const float is_sdf = a_size[0] - 2.0 * a_size_min;
-    const float segment_angle = -in_projected_pos[2];
+    const float segment_angle = -dynamic.projected_pos[2];
 
     float size;
     if (!drawable.is_size_zoom_constant && !drawable.is_size_feature_constant) {
@@ -673,13 +809,13 @@ void main() {
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const vec4 projected_pos = drawable.label_plane_matrix * vec4(in_projected_pos.xy, 0.0, 1.0);
+    const vec4 projected_pos = drawable.label_plane_matrix * vec4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
     const vec2 pos_rot = a_offset / 32.0 * fontScale;
     const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
     applySurfaceTransform();
 
-    const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
+    const vec2 raw_fade_opacity = unpack_opacity(opacity.fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
 
     const bool is_icon = (is_sdf == ICON);
@@ -691,19 +827,19 @@ void main() {
     frag_gamma_scale = gl_Position.w;
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    frag_fill_color = unpack_mix_color(in_fill_color, drawable.fill_color_t);
+    frag_fill_color = unpack_mix_color(dataInstanceVector.instance[instance].fill_color, drawable.fill_color_t);
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    frag_halo_color = unpack_mix_color(in_halo_color, drawable.halo_color_t);
+    frag_halo_color = unpack_mix_color(dataInstanceVector.instance[instance].halo_color, drawable.halo_color_t);
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    frag_halo_width = unpack_mix_float(in_halo_width, drawable.halo_width_t);
+    frag_halo_width = unpack_mix_float(dataInstanceVector.instance[instance].halo_width, drawable.halo_width_t);
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    frag_halo_blur = unpack_mix_float(in_halo_blur, drawable.halo_blur_t);
+    frag_halo_blur = unpack_mix_float(dataInstanceVector.instance[instance].halo_blur, drawable.halo_blur_t);
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+    frag_opacity = unpack_mix_float(dataInstanceVector.instance[instance].opacity, drawable.opacity_t);
 #endif
 }
 )";

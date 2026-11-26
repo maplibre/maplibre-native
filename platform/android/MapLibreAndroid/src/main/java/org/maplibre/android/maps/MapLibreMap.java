@@ -2285,10 +2285,23 @@ public final class MapLibreMap {
     return nativeMapView.queryRenderedFeatures(coordinates, layerIds, filter);
   }
 
+  /**
+   * If rendered feature info is enabled via {@link MapLibreMapOptions}, returns the number of
+   * features matching the specified filter criteria that were rendered in the last completed frame.
+   * @param featureId Feature ID to match, or null for any feature
+   * @param layerId Layer ID to match, or null for any layer
+   * @param sourceId Source ID to match, or null for any source
+   * @return The number of matching features
+   */
+  public int getRenderedFeatureCount(@Nullable String featureId,
+                                     @Nullable String layerId,
+                                     @Nullable String sourceId) {
+    return nativeMapView.getRenderedFeatureCount(featureId, layerId, sourceId);
+  }
+
   //
   // LocationComponent
   //
-
   void injectLocationComponent(LocationComponent locationComponent) {
     this.locationComponent = locationComponent;
   }

@@ -51,7 +51,7 @@ public:
     void notifyIfMissingImageAdded();
     void reduceMemoryUse();
     void reduceMemoryUseIfCacheSizeExceedsLimit();
-    std::set<std::string> getAvailableImages() const;
+    Immutable<std::set<std::string>> getAvailableImages() const;
 
     ImageVersionMap updatedImageVersions;
 
@@ -71,7 +71,7 @@ private:
     std::size_t requestedImagesCacheSize = 0ul;
     ImageMap images;
     // Mirror of 'ImageMap images;' keys.
-    std::set<std::string> availableImages;
+    Immutable<std::set<std::string>> availableImages = makeMutable<std::set<std::string>>();
 
     ImageManagerObserver* observer = nullptr;
 

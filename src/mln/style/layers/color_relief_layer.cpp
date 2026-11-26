@@ -87,6 +87,7 @@ void ColorReliefLayer::setColorReliefColorTransition(const TransitionOptions& op
     auto impl_ = mutableImpl();
     impl_->paint.template get<ColorReliefColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions ColorReliefLayer::getColorReliefColorTransition() const {
@@ -114,6 +115,7 @@ void ColorReliefLayer::setColorReliefOpacityTransition(const TransitionOptions& 
     auto impl_ = mutableImpl();
     impl_->paint.template get<ColorReliefOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions ColorReliefLayer::getColorReliefOpacityTransition() const {

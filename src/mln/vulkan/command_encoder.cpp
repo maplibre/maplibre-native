@@ -13,7 +13,7 @@ CommandEncoder::CommandEncoder(Context& context_, const vk::UniqueCommandBuffer&
     : context(context_),
       commandBuffer(buffer_) {}
 
-CommandEncoder::~CommandEncoder() {}
+CommandEncoder::~CommandEncoder() = default;
 
 std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name, gfx::Renderable& renderable) {
     return std::make_unique<UploadPass>(renderable, *this, name);

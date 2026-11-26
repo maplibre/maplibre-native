@@ -12,7 +12,7 @@ using namespace platform;
 
 namespace {
 std::string glErrors() {
-    std::string error_list = "";
+    std::string error_list;
     for (auto error = glGetError(); error != GL_NO_ERROR; error = glGetError()) {
         error_list += std::to_string(error) + " ";
     }
@@ -23,7 +23,7 @@ std::string glErrors() {
 }
 } // namespace
 
-Fence::Fence() {}
+Fence::Fence() = default;
 
 Fence::~Fence() {
     MLN_TRACE_FUNC();

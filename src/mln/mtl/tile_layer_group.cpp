@@ -43,7 +43,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     auto& context = static_cast<Context&>(parameters.context);
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
-    const auto& encoder = renderPass.getMetalEncoder();
     const auto& renderable = renderPass.getDescriptor().renderable;
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
@@ -75,7 +74,8 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     // a different value.
     // We can keep the depth-based descriptors, but the stencil-based ones can change
     // every time, as a new value is assigned in each call to `stencilModeFor3D`.
-    std::optional<MTLDepthStencilStatePtr> stateStencil, stateDepthStencil;
+    std::optional<MTLDepthStencilStatePtr> stateStencil, stateDepthStencil, stateReadOnlyDepth,
+        stateReadOnlyDepthStencil;
     std::function<const MTLDepthStencilStatePtr&(bool, bool)> getDepthStencilState;
     if (features3d) {
         // If we're using group-wide states, build only the ones that actually get used
@@ -113,7 +113,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         if (stencil3d) {
             stencilMode3d = parameters.stencilModeFor3D();
-            encoder->setStencilReferenceValue(stencilMode3d.ref);
+            renderPass.setStencilReference(stencilMode3d.ref);
         }
     } else if (stencilTiles && !stencilTiles->empty()) {
         parameters.renderTileClippingMasks(stencilTiles);
@@ -138,8 +138,20 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // stencil mode for features with stencil enabled or disable stenciling.
         // 2D drawables will set their own stencil mode within `draw`.
         if (features3d) {
-            const auto& state = getDepthStencilState(drawable.getEnableDepth(), drawable.getEnableStencil());
-            renderPass.setDepthStencilState(state);
+            const auto mask = drawable.getDepthMaskFor3D();
+            if (mask && drawable.getEnableDepth() && *mask != parameters.depthModeFor3D().mask) {
+                auto& state = drawable.getEnableStencil() ? stateReadOnlyDepthStencil : stateReadOnlyDepth;
+                if (!state) {
+                    auto depth = parameters.depthModeFor3D();
+                    depth.mask = *mask;
+                    state = context.makeDepthStencilState(
+                        depth, drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled(), renderable);
+                }
+                renderPass.setDepthStencilState(*state);
+            } else {
+                const auto& state = getDepthStencilState(drawable.getEnableDepth(), drawable.getEnableStencil());
+                renderPass.setDepthStencilState(state);
+            }
         }
 
         drawable.draw(parameters);

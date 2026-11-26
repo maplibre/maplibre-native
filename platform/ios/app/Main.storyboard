@@ -58,6 +58,9 @@
                                     <constraint firstAttribute="trailing" secondItem="BHE-Wn-x69" secondAttribute="trailing" id="lZL-gi-2XC"/>
                                     <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="58y-pX-YyB" secondAttribute="trailing" id="txU-Gp-2du"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="featureInfoEnabled" value="YES"/>
+                                </userDefinedRuntimeAttributes>
                                 <connections>
                                     <outlet property="delegate" destination="WaX-pd-UZQ" id="za0-3B-qR6"/>
                                     <outletCollection property="gestureRecognizers" destination="lfd-mn-7en" appends="YES" id="0PH-gH-GRm"/>

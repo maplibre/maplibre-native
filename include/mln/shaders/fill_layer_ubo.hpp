@@ -48,15 +48,19 @@ struct alignas(16) FillPatternDrawableUBO {
     /* 84 */ float pattern_from_t;
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
-    /* 96 */
+    /* 96 */ float color_t;
+    /*100 */ float pad1;
+    /*104 */ float pad2;
+    /*108 */ float pad3;
+    /*112 */
 };
-static_assert(sizeof(FillPatternDrawableUBO) == 6 * 16);
+static_assert(sizeof(FillPatternDrawableUBO) == 7 * 16);
 
 struct alignas(16) FillPatternTilePropsUBO {
     /*  0 */ std::array<float, 4> pattern_from;
     /* 16 */ std::array<float, 4> pattern_to;
     /* 32 */ std::array<float, 2> texsize;
-    /* 40 */ float pad1;
+    /* 40 */ float sdf;
     /* 44 */ float pad2;
     /* 48 */
 };
@@ -75,15 +79,19 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     /* 84 */ float pattern_from_t;
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
-    /* 96 */
+    /* 96 */ float color_t;
+    /*100 */ float pad1;
+    /*104 */ float pad2;
+    /*108 */ float pad3;
+    /*112 */
 };
-static_assert(sizeof(FillOutlinePatternDrawableUBO) == 6 * 16);
+static_assert(sizeof(FillOutlinePatternDrawableUBO) == 7 * 16);
 
 struct alignas(16) FillOutlinePatternTilePropsUBO {
     /*  0 */ std::array<float, 4> pattern_from;
     /* 16 */ std::array<float, 4> pattern_to;
     /* 32 */ std::array<float, 2> texsize;
-    /* 40 */ float pad1;
+    /* 40 */ float sdf;
     /* 44 */ float pad2;
     /* 48 */
 };
@@ -107,12 +115,16 @@ struct alignas(16) FillEvaluatedPropsUBO {
     /*  0 */ Color color;
     /* 16 */ Color outline_color;
     /* 32 */ float opacity;
-    /* 36 */ float fade;
-    /* 40 */ float from_scale;
-    /* 44 */ float to_scale;
-    /* 48 */
+    /* 36 */ float rounded_corner_distance;
+    /* 40 */ float fade;
+    /* 44 */ float from_scale;
+    /* 48 */ float to_scale;
+    /* 52 */ float pad1;
+    /* 56 */ float pad2;
+    /* 60 */ float pad3;
+    /* 64 */
 };
-static_assert(sizeof(FillEvaluatedPropsUBO) == 3 * 16);
+static_assert(sizeof(FillEvaluatedPropsUBO) == 4 * 16);
 
 #if MLN_UBO_CONSOLIDATION
 
@@ -123,6 +135,7 @@ union FillDrawableUnionUBO {
     FillOutlinePatternDrawableUBO fillOutlinePatternDrawableUBO;
     FillOutlineTriangulatedDrawableUBO fillOutlineTriangulatedDrawableUBO;
 };
+static_assert(sizeof(FillDrawableUnionUBO) == 7 * 16);
 
 union FillTilePropsUnionUBO {
     FillPatternTilePropsUBO fillPatternTilePropsUBO;

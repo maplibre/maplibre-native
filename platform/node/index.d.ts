@@ -169,14 +169,29 @@ declare module '@maplibre/maplibre-gl-native' {
     setLayerZoomRange: (layerId: string, minZoom: number, maxZoom: number) => void;
 
     /**
-     * Set the value for a layer's property
+     * Set the value for a layer's property.
+     * The value may also be an expression, such as
+     * `["case", ["global-state", "show"], "visible", "none"]` for `visibility`.
      */
-    setLayoutProperty: (layerId: string, name: string, value: string) => void;
+    setLayoutProperty: (layerId: string, name: string, value: string | number | boolean | unknown[]) => void;
 
     /**
      * Set filter for specified style layer
      */
     setFilter: (layerId: string, filter: [] | null | undefined) => void;
+
+    /**
+     * Set a property of the map's global state, used by the `global-state` expression.
+     * A `null` value resets the property to the default defined in the style's
+     * root `state` property, or to null if there is none.
+     * @throws If the style has not finished loading.
+     */
+    setGlobalStateProperty: (name: string, value: unknown) => void;
+
+    /**
+     * Get a snapshot of the map's current global state, used by the `global-state` expression.
+     */
+    getGlobalState: () => Record<string, unknown>;
 
     /**
      * Set size of the tile

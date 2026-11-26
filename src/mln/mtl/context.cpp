@@ -123,7 +123,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     auto options = NS::TransferPtr(MTL::CompileOptions::alloc()->init());
     options->setPreprocessorMacros(nsDefines);
     options->setFastMathEnabled(true);
-    options->setLanguageVersion(MTL::LanguageVersion2_1);
+    options->setLanguageVersion(MTL::LanguageVersion2_4);
 
     // TODO: Compile common code into a `LibraryTypeDynamic` to be used by other shaders
     // instead of duplicating that code in each and every shader compilation.
@@ -133,7 +133,11 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     // Allows use of the [[invariant]] attribute on position outputs to
     // guarantee that the GPU performs the calculations the same way.
     // requires a check for iOS 14+
-    // options->setPreserveInvariance(true);
+#if MLN_WITH_PLUGINS
+    // Multi-pass plugin layers rely on it: a depth-only pass and a color pass of the
+    // same geometry come from separately compiled shaders.
+    options->setPreserveInvariance(true);
+#endif
 
     // TODO: Allow use of `LibraryOptimizationLevelSize` which "may also reduce compile time"
     // requires a check for iOS 16+
@@ -305,8 +309,8 @@ const auto clipMaskStencilMode = gfx::StencilMode{
     .depthFail = gfx::StencilOpType::Keep,
     .pass = gfx::StencilOpType::Replace,
 };
-const auto clipMaskDepthMode = gfx::DepthMode{.func = gfx::DepthFunctionType::Always,
-                                              .mask = gfx::DepthMaskType::ReadOnly};
+const auto clipMaskDepthMode = gfx::DepthMode{
+    .func = gfx::DepthFunctionType::Always, .mask = gfx::DepthMaskType::ReadOnly, .range = {0.0f, 1.0f}};
 } // namespace
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
@@ -438,7 +442,10 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()));
 #else
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
-        encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
+        // Through the render pass so its cached reference value stays in step with the encoder;
+        // writing the encoder directly left the cache stale, and the next drawable whose
+        // reference equalled the stale value was drawn against the last mask's ID instead.
+        mtlRenderPass.setStencilReference(static_cast<int32_t>(tileUBOs[ii].stencil_ref));
         mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, shaders::idClippingMaskUBO, /*size=*/uboSize);
         encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                        indexCount,

@@ -2,7 +2,7 @@ layout (std140) uniform FillOutlinePatternTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
     highp vec2 u_texsize;
-    lowp float tileprops_pad1;
+    lowp float u_sdf;
     lowp float tileprops_pad2;
 };
 
@@ -10,9 +10,13 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
     highp vec4 u_outline_color;
     highp float u_opacity;
+    highp float u_rounded_corner_distance;
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
+    lowp float props_pad1;
+    lowp float props_pad2;
+    lowp float props_pad3;
 };
 
 uniform sampler2D u_image;
@@ -21,11 +25,13 @@ in vec2 v_pos_a;
 in vec2 v_pos_b;
 in vec2 v_pos;
 
+#pragma mapbox: define highp vec4 color
 #pragma mapbox: define lowp float opacity
 #pragma mapbox: define lowp vec4 pattern_from
 #pragma mapbox: define lowp vec4 pattern_to
 
 void main() {
+    #pragma mapbox: initialize highp vec4 color
     #pragma mapbox: initialize lowp float opacity
     #pragma mapbox: initialize mediump vec4 pattern_from
     #pragma mapbox: initialize mediump vec4 pattern_to
@@ -49,7 +55,16 @@ void main() {
     float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
 
-    fragColor = mix(color1, color2, u_fade) * alpha * opacity;
+    if (u_sdf > 0.5) {
+        highp float sdf_edge = (256.0 - 64.0) / 256.0;
+        highp float sdf_gamma_a = max(fwidth(color1.a) * 0.5, 1.0 / 255.0 / 16.0);
+        highp float sdf_gamma_b = max(fwidth(color2.a) * 0.5, 1.0 / 255.0 / 16.0);
+        float sdf_alpha_a = smoothstep(sdf_edge - sdf_gamma_a, sdf_edge + sdf_gamma_a, color1.a);
+        float sdf_alpha_b = smoothstep(sdf_edge - sdf_gamma_b, sdf_edge + sdf_gamma_b, color2.a);
+        fragColor = mix(color * sdf_alpha_a, color * sdf_alpha_b, u_fade) * alpha * opacity;
+    } else {
+        fragColor = mix(color1, color2, u_fade) * alpha * opacity;
+    }
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

@@ -107,16 +107,28 @@ public:
     wgpu::TextureView offscreenTextureView;
     wgpu::Texture depthTexture;
     wgpu::TextureView depthTextureView;
-    Size framebufferSize;
+    Size offscreenTextureSize;
 };
+
+namespace {
+// Drop a handle. Dawn's handles release their object when reset, while webgpu.hpp handles
+// (used with wgpu-native) don't own theirs, so release it explicitly.
+template <typename Handle>
+void releaseHandle(Handle& handle) {
+#if MLN_WEBGPU_IMPL_WGPU
+    if (handle) {
+        handle.release();
+    }
+#endif
+    handle = nullptr;
+}
+} // namespace
 
 HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::ContextMode mode)
     : webgpu::RendererBackend(mode),
       gfx::HeadlessBackend(size_),
       impl(std::make_unique<Impl>()) {
     static_cast<void>(swapBehaviour_);
-
-    impl->framebufferSize = size_;
 
 #if MLN_WEBGPU_IMPL_DAWN
     // Initialize Dawn instance with TimedWaitAny feature enabled
@@ -206,26 +218,34 @@ HeadlessBackend::~HeadlessBackend() {
 
     if (impl) {
         // Clean up textures
-        impl->offscreenTextureView = nullptr;
-        impl->offscreenTexture = nullptr;
-        impl->depthTextureView = nullptr;
-        impl->depthTexture = nullptr;
+        releaseHandle(impl->offscreenTextureView);
+        releaseHandle(impl->offscreenTexture);
+        releaseHandle(impl->depthTextureView);
+        releaseHandle(impl->depthTexture);
 
         // Clean up device and queue
-        impl->queue = nullptr;
-        impl->device = nullptr;
+        releaseHandle(impl->queue);
+        releaseHandle(impl->device);
+#if MLN_WEBGPU_IMPL_WGPU
+        releaseHandle(impl->adapter);
+        releaseHandle(impl->instance);
+#else
         impl->instance = nullptr;
+#endif
     }
 }
 
 void HeadlessBackend::createOffscreenTextures() {
     if (!impl->device) return;
 
+    const auto renderableSize = getSize();
+    impl->offscreenTextureSize = renderableSize;
+
     // Release old textures if they exist
-    impl->offscreenTextureView = nullptr;
-    impl->offscreenTexture = nullptr;
-    impl->depthTextureView = nullptr;
-    impl->depthTexture = nullptr;
+    releaseHandle(impl->offscreenTextureView);
+    releaseHandle(impl->offscreenTexture);
+    releaseHandle(impl->depthTextureView);
+    releaseHandle(impl->depthTexture);
 
     // Create offscreen color texture
     wgpu::TextureDescriptor colorDesc = {};
@@ -236,8 +256,7 @@ void HeadlessBackend::createOffscreenTextures() {
 #elif MLN_WEBGPU_IMPL_WGPU
     colorDesc.dimension = wgpu::TextureDimension::_2D;
 #endif
-    colorDesc.size = {
-        static_cast<uint32_t>(impl->framebufferSize.width), static_cast<uint32_t>(impl->framebufferSize.height), 1};
+    colorDesc.size = {renderableSize.width, renderableSize.height, 1};
     colorDesc.format = wgpu::TextureFormat::RGBA8Unorm;
     colorDesc.mipLevelCount = 1;
     colorDesc.sampleCount = 1;
@@ -282,8 +301,7 @@ void HeadlessBackend::createOffscreenTextures() {
 #elif MLN_WEBGPU_IMPL_WGPU
     depthDesc.dimension = wgpu::TextureDimension::_2D;
 #endif
-    depthDesc.size = {
-        static_cast<uint32_t>(impl->framebufferSize.width), static_cast<uint32_t>(impl->framebufferSize.height), 1};
+    depthDesc.size = {renderableSize.width, renderableSize.height, 1};
     depthDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
     depthDesc.mipLevelCount = 1;
     depthDesc.sampleCount = 1;
@@ -323,8 +341,8 @@ void HeadlessBackend::createOffscreenTextures() {
 
 gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
     if (!hasResource()) {
-        setResource(
-            std::make_unique<HeadlessRenderableResource>(*this, static_cast<webgpu::Context&>(getContext()), size));
+        setResource(std::make_unique<HeadlessRenderableResource>(
+            *this, static_cast<webgpu::Context&>(getContext()), getSize()));
     }
     return *this;
 }
@@ -350,8 +368,7 @@ RendererBackend* HeadlessBackend::getRendererBackend() {
 void HeadlessBackend::activate() {
     active = true;
     // Ensure textures are created if size changed
-    if (impl && impl->framebufferSize != getSize()) {
-        impl->framebufferSize = getSize();
+    if (impl && impl->offscreenTextureSize != getSize()) {
         createOffscreenTextures();
     }
 }
@@ -375,9 +392,6 @@ void* HeadlessBackend::getDepthStencilView() {
 }
 
 mln::Size HeadlessBackend::getFramebufferSize() const {
-    if (impl) {
-        return impl->framebufferSize;
-    }
     return getSize();
 }
 

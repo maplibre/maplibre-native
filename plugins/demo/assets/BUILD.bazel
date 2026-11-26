@@ -1,0 +1,6 @@
+# Styles of the demo apps. An app bundles them at its root.
+filegroup(
+    name = "styles",
+    srcs = glob(["styles/*.json"]),
+    visibility = ["//visibility:public"],
+)

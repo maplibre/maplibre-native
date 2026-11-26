@@ -46,7 +46,7 @@ RasterDEMTile::~RasterDEMTile() {
 
     // The bucket has resources that need to be released on the render thread.
     if (bucket) {
-        threadPool.runOnRenderThread([bucket_{std::move(bucket)}]() {});
+        threadPool.runOnRenderThread([bucket_{std::move(bucket)}] {});
     }
 }
 
@@ -134,6 +134,8 @@ void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTil
         // render pass with the new texture data we just backfilled
         bucket->setPrepared(false);
         bucket->renderTargetPrepared = false;
+        // the color relief layer has to upload the backfilled data again
+        bucket->demTexture.reset();
     }
 }
 

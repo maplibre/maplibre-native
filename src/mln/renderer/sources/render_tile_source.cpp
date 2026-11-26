@@ -397,7 +397,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     }
 
     // Tile Borders
-    if (parameters.debugOptions & (MapDebugOptions::TileBorders)) {
+    if (parameters.debugOptions & MapDebugOptions::TileBorders) {
         TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(
             addOrGetLayerGroupForType(DebugType::Border, "debug-border")->second.get());
 
@@ -421,12 +421,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 addPolylineDrawable(tileLayerGroup, tile);
             }
 #else
-            const DebugUBO debugUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
-                                       /* .color = */ Color::red(),
-                                       /* .overlay_scale = */ 1.0f,
-                                       /* .pad1 = */ 0,
-                                       /* .pad2 = */ 0,
-                                       /* .pad3 = */ 0};
+            const DebugUBO debugUBO = {.matrix = util::cast<float>(tile.matrix),
+                                       .color = Color::red(),
+                                       .overlay_scale = 1.0f,
+                                       .pad1 = 0,
+                                       .pad2 = 0,
+                                       .pad3 = 0};
 
             if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
                 addDrawable(tileLayerGroup,
@@ -532,12 +532,15 @@ std::unordered_map<std::string, std::vector<Feature>> RenderTileSource::queryRen
     const TransformState& transformState,
     const std::unordered_map<std::string, const RenderLayer*>& layers,
     const RenderedQueryOptions& options,
+    const GlobalStateMap* globalState,
     const mat4& projMatrix) const {
-    return tilePyramid.queryRenderedFeatures(geometry, transformState, layers, options, projMatrix, featureState);
+    return tilePyramid.queryRenderedFeatures(
+        geometry, transformState, layers, options, globalState, projMatrix, featureState);
 }
 
-std::vector<Feature> RenderTileSource::querySourceFeatures(const SourceQueryOptions& options) const {
-    return tilePyramid.querySourceFeatures(options);
+std::vector<Feature> RenderTileSource::querySourceFeatures(const SourceQueryOptions& options,
+                                                           const GlobalStateMap* globalState) const {
+    return tilePyramid.querySourceFeatures(options, globalState);
 }
 
 void RenderTileSource::setFeatureState(const std::optional<std::string>& sourceLayerID,

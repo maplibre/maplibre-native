@@ -70,6 +70,30 @@ GLint getMaxVertexAttribs() {
     return value;
 }
 
+/// Space separated extension names, the format glGetString(GL_EXTENSIONS)
+/// returns on contexts that still support that query.
+std::string getExtensionList() {
+    // Report earlier errors separately so they cannot select the legacy query.
+    for (auto error = glGetError(); error != GL_NO_ERROR; error = glGetError()) {
+        Log::Warning(Event::GraphicsBackend, "OpenGL error before extension enumeration: " + std::to_string(error));
+    }
+    GLint count = 0;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &count);
+    if (glGetError() != GL_NO_ERROR) {
+        // Older contexts do not know GL_NUM_EXTENSIONS; glGetString still works there.
+        const auto* list = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_EXTENSIONS)));
+        return list ? list : "";
+    }
+    std::string extensions;
+    for (GLint index = 0; index < count; ++index) {
+        if (const auto* name = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetStringi(GL_EXTENSIONS, index)))) {
+            extensions += name;
+            extensions += ' ';
+        }
+    }
+    return extensions;
+}
+
 // Currently renderBufferByteSize is only used when Tracy profiling is enabled
 #ifdef MLN_TRACY_ENABLE
 constexpr size_t renderBufferByteSize(const gfx::RenderbufferPixelType type, const Size size) noexcept {
@@ -151,10 +175,12 @@ void Context::endFrame() {
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
     MLN_TRACE_FUNC();
 
-    if (const auto* extensions = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_EXTENSIONS)))) {
+    const std::string extensions = getExtensionList();
+
+    if (!extensions.empty()) {
         auto fn = [&](std::initializer_list<std::pair<const char*, const char*>> probes) -> ProcAddress {
             for (auto probe : probes) {
-                if (strstr(extensions, probe.first) != nullptr) {
+                if (extensions.find(probe.first) != std::string::npos) {
                     if (ProcAddress ptr = getProcAddress(probe.second)) {
                         return ptr;
                     }
@@ -163,14 +189,14 @@ void Context::initializeExtensions(const std::function<gl::ProcAddress(const cha
             return nullptr;
         };
 
-        static const std::string renderer = []() {
+        static const std::string renderer = [] {
             std::string r = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_RENDERER)));
             Log::Info(Event::General, "GPU Identifier: " + r);
             return r;
         }();
 
         // Block ANGLE on Direct3D since the debugging extension is causing crashes
-        if (!(renderer.find("ANGLE") != std::string::npos && renderer.find("Direct3D") != std::string::npos)) {
+        if (renderer.find("ANGLE") == std::string::npos || renderer.find("Direct3D") == std::string::npos) {
             debugging = std::make_unique<extension::Debugging>(fn);
         }
 
@@ -417,7 +443,7 @@ Framebuffer Context::createFramebuffer(
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorResource.renderbuffer));
     bindDepthStencilRenderbuffer(depthStencil);
     checkFramebuffer();
-    return {color.getSize(), std::move(fbo)};
+    return {.size = color.getSize(), .framebuffer = std::move(fbo)};
 }
 
 Framebuffer Context::createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>& color) {
@@ -429,7 +455,7 @@ Framebuffer Context::createFramebuffer(const gfx::Renderbuffer<gfx::Renderbuffer
     MBGL_CHECK_ERROR(
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorResource.renderbuffer));
     checkFramebuffer();
-    return {color.getSize(), std::move(fbo)};
+    return {.size = color.getSize(), .framebuffer = std::move(fbo)};
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Size size,
@@ -464,7 +490,7 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setStencilMode(gfx::StencilMode::disabled());
     setColorMode(colorMode);
     setCullFaceMode(gfx::CullFaceMode::disabled());
-    setScissorTest({0, 0, 0, 0});
+    setScissorTest({.x = 0, .y = 0, .width = 0, .height = 0});
 }
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
@@ -608,7 +634,7 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
                                             static_cast<const gl::Texture2D&>(color).getTextureID(),
                                             0));
     checkFramebuffer();
-    return {color.getSize(), std::move(fbo)};
+    return {.size = color.getSize(), .framebuffer = std::move(fbo)};
 }
 
 gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
@@ -688,7 +714,7 @@ void Context::setStencilMode(const gfx::StencilMode& stencil) {
     } else {
         stencilTest = true;
         stencilMask = stencil.mask;
-        stencilOp = {stencil.fail, stencil.depthFail, stencil.pass};
+        stencilOp = {.sfail = stencil.fail, .dpfail = stencil.depthFail, .dppass = stencil.pass};
         apply_visitor([&](const auto& test) { stencilFunc = {test.func, stencil.ref, test.mask}; }, stencil.test);
     }
 }

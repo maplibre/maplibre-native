@@ -37,10 +37,10 @@ using ValueBase = variant<NullValue,
                           mapbox::util::recursive_wrapper<std::vector<Value>>,
                           mapbox::util::recursive_wrapper<std::unordered_map<std::string, Value>>>;
 struct Value : ValueBase {
-    VARIANT_INLINE Value() noexcept {}
+    VARIANT_INLINE Value() noexcept = default;
 
     template <typename T>
-    VARIANT_INLINE Value(T&& val)
+    VARIANT_INLINE Value(T&& val) // NOLINT(bugprone-forwarding-reference-overload)
         : ValueBase(std::forward<T>(val)) {}
 
     template <typename T>

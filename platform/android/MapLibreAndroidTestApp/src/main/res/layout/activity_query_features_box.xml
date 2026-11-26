@@ -11,7 +11,8 @@
         android:layout_height="match_parent"
         app:maplibre_cameraTargetLat="52.0907"
         app:maplibre_cameraTargetLng="5.1214"
-        app:maplibre_cameraZoom="16"/>
+        app:maplibre_cameraZoom="16"
+        app:maplibre_featureInfoEnabled="true" />
 
     <FrameLayout
         android:id="@+id/selection_box"

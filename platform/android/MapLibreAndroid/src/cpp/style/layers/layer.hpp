@@ -62,6 +62,7 @@ public:
     // Property getters
 
     jni::Local<jni::Object<jni::ObjectTag>> getVisibility(jni::JNIEnv&);
+    jni::Local<jni::Object<gson::JsonElement>> getVisibilityExpression(jni::JNIEnv&);
 
 protected:
     /*

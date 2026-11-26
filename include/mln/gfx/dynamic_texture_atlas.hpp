@@ -3,6 +3,9 @@
 #include <mln/gfx/dynamic_texture.hpp>
 #include <mln/text/glyph.hpp>
 #include <mln/style/image_impl.hpp>
+#include <mln/util/hash.hpp>
+
+#include <unordered_map>
 
 namespace mln {
 
@@ -15,6 +18,10 @@ public:
     GlyphPositions glyphPositions;
     std::vector<TextureHandle> textureHandles;
     DynamicTexturePtr dynamicTexture;
+
+    int32_t generateUniqueId(const FontStackHash& fontStack, const GlyphID& glyphId) const;
+
+    void uploadGlyph(const Immutable<Glyph>& glyph, TextureHandle& texHandle);
 };
 
 class ImageAtlas {
@@ -23,6 +30,11 @@ public:
     ImagePositions patternPositions;
     std::vector<TextureHandle> textureHandles;
     DynamicTexturePtr dynamicTexture;
+
+    int32_t generateUniqueId(const std::string& imageId, Size size) const;
+
+    void uploadIcon(const Immutable<style::Image::Impl>& icon, TextureHandle& texHandle);
+    void uploadPattern(const Immutable<style::Image::Impl>& pattern, TextureHandle& texHandle);
 };
 
 class DynamicTextureAtlas {

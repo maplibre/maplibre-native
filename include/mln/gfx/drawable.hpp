@@ -151,6 +151,10 @@ public:
     /// Set sub-layer index
     virtual void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
+    /// Depth writability for 3D drawables, in place of that of the 3D depth mode
+    std::optional<DepthMaskType> getDepthMaskFor3D() const { return depthMaskFor3D; }
+    void setDepthMaskFor3D(DepthMaskType value) { depthMaskFor3D = value; }
+
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
 
@@ -293,6 +297,7 @@ protected:
     DrawPriority drawPriority = 0;
     int32_t lineWidth = 1;
     int32_t subLayerIndex = 0;
+    std::optional<DepthMaskType> depthMaskFor3D;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
     UniqueDrawableData drawableData{};
     gfx::VertexAttributeArrayPtr vertexAttributes;

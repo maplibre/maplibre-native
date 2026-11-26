@@ -15,6 +15,7 @@
 #include <mln/gl/texture2d.hpp>
 
 #include <algorithm>
+#include <utility>
 
 namespace mln {
 namespace gl {
@@ -95,7 +96,6 @@ const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
                                                              const gfx::BufferUsageType usage) {
     if (vec) {
-        const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = static_cast<int>(vec->getRawCount() * vec->getRawSize());
 
         // If we already have a buffer...
@@ -106,7 +106,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
             if (rawBufSize <= resource.getByteSize()) {
                 // If the source changed, update the buffer contents
                 if (vec->isModifiedAfter(resource.getLastUpdated())) {
-                    updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
+                    updateVertexBufferResource(resource, vec->getRawData(), rawBufSize);
                     resource.setLastUpdated(vec->getLastModified());
                 }
                 return rawData->resource;
@@ -115,7 +115,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         // Otherwise, create a new one
         if (rawBufSize > 0) {
             auto buffer = std::make_unique<VertexBufferGL>();
-            buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
+            buffer->resource = createVertexBufferResource(vec->getRawData(), rawBufSize, usage, /*persistent=*/false);
             vec->setBuffer(std::move(buffer));
             return static_cast<VertexBufferGL*>(vec->getBuffer())->resource;
         }
@@ -155,7 +155,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     std::vector<std::uint8_t> allData;
 
     uint32_t vertexStride = 0;
-    if (vertexAttributeIndex != static_cast<std::size_t>(-1) && !vertexData.empty()) {
+    if (std::cmp_not_equal(vertexAttributeIndex, -1) && !vertexData.empty()) {
         allData.reserve(vertexData.size() + (defaults.getTotalSize() + align) * vertexCount);
 
         // Fill in vertices
@@ -163,11 +163,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         bindings.resize(vertexAttributeIndex + 1);
         vertexStride = static_cast<uint32_t>(vertexData.size() / vertexCount);
         bindings[vertexAttributeIndex] = {
-            /*.attribute = */ {vertexType, 0},
-            /* vertexStride = */ vertexStride,
-            /* vertexBufferResource = */ nullptr, // buffer details established later
-            /* vertexOffset = */ 0,
-            /*.bufferIndex = */ 0,
+            .attribute = {.dataType = vertexType, .offset = 0},
+            .vertexStride = vertexStride,
+            .vertexBufferResource = nullptr, // buffer details established later
+            .vertexOffset = 0,
+            .bufferIndex = 0,
         };
     }
 

@@ -10,6 +10,10 @@ namespace i18n {
     by the given Unicode codepoint due to word breaking. */
 bool allowsWordBreaking(char16_t chr);
 
+/** Returns whether a line break can be inserted before the character indicated
+    by the given Unicode codepoint due to word breaking. */
+bool allowsWordBreakingBefore(char16_t chr);
+
 /** Returns whether the given string can be displayed with letter-spacing.
     False for Arabic scripts, where letter-spacing will break ligatures. */
 bool allowsLetterSpacing(const std::u16string& string);
@@ -82,6 +86,12 @@ bool isStringInSupportedScript(const std::string& input);
 bool isCharInComplexShapingScript(char16_t chr);
 
 bool isWhitespace(char16_t chr);
+
+bool isDigit(char16_t chr);
+
+bool isUppercase(char16_t chr);
+
+bool isPunctuationOrSymbol(char16_t chr);
 
 bool isVariationSelector1(char16_t chr);
 

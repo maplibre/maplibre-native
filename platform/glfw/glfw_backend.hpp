@@ -23,6 +23,6 @@ public:
     }
 
     virtual mln::gfx::RendererBackend& getRendererBackend() = 0;
-    virtual mln::Size getSize() const = 0;
-    virtual void setSize(mln::Size) = 0;
+    virtual mln::Size getFramebufferSize() const = 0;
+    virtual void setFramebufferSize(mln::Size) = 0;
 };

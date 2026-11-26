@@ -74,7 +74,7 @@ public:
     if (currentDrawable) {
       if (presentsWithTransaction) {
         [commandBuffer commit];
-        [commandBuffer waitUntilCompleted];
+        [commandBuffer waitUntilScheduled];
         [currentDrawable present];
       } else {
         [commandBuffer presentDrawable:currentDrawable];
@@ -133,10 +133,8 @@ void MLNMapViewMetalImpl::setPresentsWithTransaction(const bool value) {
   auto& resource = getResource<MLNMapViewMetalRenderableResource>();
   resource.presentsWithTransaction = value;
 
-  if (@available(iOS 13.0, *)) {
-    if (CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer)) {
-      metalLayer.presentsWithTransaction = value;
-    }
+  if (CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer)) {
+    metalLayer.presentsWithTransaction = value;
   }
 }
 
@@ -176,10 +174,8 @@ void MLNMapViewMetalImpl::createView() {
   resource.mtlView.opaque = mapView.opaque;
   resource.mtlView.layer.opaque = mapView.opaque;
   resource.mtlView.enableSetNeedsDisplay = YES;
-  if (@available(iOS 13.0, *)) {
-    CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
-    metalLayer.presentsWithTransaction = resource.presentsWithTransaction;
-  }
+  CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
+  metalLayer.presentsWithTransaction = resource.presentsWithTransaction;
 
   [mapView insertSubview:resource.mtlView atIndex:0];
 }
@@ -206,15 +202,6 @@ void MLNMapViewMetalImpl::deactivate() {
   if (--resource.activationCount) {
     return;
   }
-}
-
-/// This function is called before we start rendering, when iOS invokes our rendering method.
-/// iOS already sets the correct framebuffer and viewport for us, so we need to update the
-/// context state with the anticipated values.
-void MLNMapViewMetalImpl::updateAssumedState() {
-  auto& resource = getResource<MLNMapViewMetalRenderableResource>();
-  assumeFramebufferBinding(ImplicitFramebufferBinding);
-  assumeViewport(0, 0, resource.framebufferSize());
 }
 
 UIImage* MLNMapViewMetalImpl::snapshot() {
@@ -244,7 +231,7 @@ void MLNMapViewMetalImpl::layoutChanged() {
     resource.mtlView.drawableSize = resource.lastAppliedDrawableSize = target;
   }
 
-  size = {static_cast<uint32_t>(target.width), static_cast<uint32_t>(target.height)};
+  setRenderableSize({static_cast<uint32_t>(target.width), static_cast<uint32_t>(target.height)});
 }
 
 MLNBackendResource* MLNMapViewMetalImpl::getObject() {

@@ -1,3 +1,7 @@
+if(NOT MLN_WITH_TOOLS)
+    return()
+endif()
+
 add_executable(
     mbgl-cache
     ${PROJECT_SOURCE_DIR}/bin/cache.cpp

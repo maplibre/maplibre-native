@@ -5,6 +5,7 @@
 #include <mln/style/source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/style_impl.hpp>
+#include <mln/util/exception.hpp>
 #include <mln/util/instrumentation.hpp>
 
 namespace mln {
@@ -39,6 +40,10 @@ std::string Style::getURL() const {
     return impl->getURL();
 }
 
+bool Style::isLoaded() const {
+    return impl->loaded;
+}
+
 std::string Style::getName() const {
     return impl->getName();
 }
@@ -69,6 +74,19 @@ void Style::setLight(std::unique_ptr<Light> light) {
 Light* Style::getLight() {
     impl->mutated = true;
     return impl->getLight();
+}
+
+GlobalStateMap Style::getGlobalState() const {
+    return impl->getGlobalState();
+}
+
+void Style::setGlobalStateProperty(const std::string& name, const Value& value) {
+    if (!impl->loaded) {
+        throw util::MisuseException("Style is not done loading.");
+    }
+
+    impl->mutated = true;
+    impl->setGlobalStateProperty(name, value);
 }
 
 const Light* Style::getLight() const {

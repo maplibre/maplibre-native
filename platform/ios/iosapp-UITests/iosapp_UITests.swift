@@ -29,7 +29,7 @@ class iosapp_UITests: XCTestCase {
     /// Launch `iosapp`, reset to XYZ = (0, 0, 0) and take a screenshot
     func test_iosappScheme() throws {
         /// Launch and take a screenshot
-        app.navigationBars["MapLibre Basic"].buttons["Map settings"].tap()
+        mapSettingsButton.tap()
         app.tables/*@START_MENU_TOKEN@*/ .staticTexts["Reset position"]/*[[".cells.staticTexts[\"Reset position\"]",".staticTexts[\"Reset position\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
         sleep(1)
         add(screenshot())
@@ -40,7 +40,6 @@ class iosapp_UITests: XCTestCase {
     func testDebugBoundaryTiles() {
         app.windows.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.doubleTap()
 
-        let mapSettingsButton = app.navigationBars["MapLibre Basic"].buttons["Map settings"]
         mapSettingsButton.tap()
 
         /// setup initial conditions for position (0,0) and debug settings
@@ -65,7 +64,8 @@ class iosapp_UITests: XCTestCase {
         add(screenshot(name: "Null Island, Zoom=0"))
     }
 
-    var mapSettingsButton: XCUIElement { app.navigationBars["MapLibre Basic"].buttons["Map settings"] }
+    // The navigation bar is titled after the current style, so do not match on it.
+    var mapSettingsButton: XCUIElement { app.navigationBars.firstMatch.buttons["Map settings"] }
 
     /// Open and close the secondary map view a few times to ensure that the dynamic layout adjustment doesn't crash
     func testSecondMap() {
@@ -181,12 +181,6 @@ class iosapp_UITests: XCTestCase {
             mapSettingsButton.tap()
         }
 
-        if let customLayer = staticItemIfExists("Add Custom Drawable Layer") {
-            customLayer.tap()
-            sleep(1)
-            mapSettingsButton.tap()
-        }
-
         // See `bestLanguageForUser`
         for loc in ["ar", "de", "en", "es", "fr", "ja", "ko", "pt", "ru", "zh", "zh-Hans", "zh-Hant"] {
             if let name = NSLocale(localeIdentifier: loc).displayName(forKey: .identifier, value: loc) {
@@ -246,17 +240,5 @@ class iosapp_UITests: XCTestCase {
                 XCUIApplication().launch()
             }
         }
-    }
-
-    /// Make sure the Custom Drawable Layer does not crash
-    func testCustomDrawableLayer() {
-        app.windows.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.doubleTap()
-
-        let mapSettingsButton = app.navigationBars["MapLibre Basic"].buttons["Map settings"]
-        mapSettingsButton.tap()
-
-        let tablesQuery = app.tables
-        tablesQuery.staticTexts["Add Custom Drawable Layer"].tap()
-        sleep(5)
     }
 }

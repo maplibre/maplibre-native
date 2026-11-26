@@ -44,7 +44,7 @@ public:
 
     // external values (used in hash)
     vk::RenderPass renderPass{};
-    vk::Extent2D viewExtent{};
+    vk::Viewport viewport{};
     vk::Rect2D scissorRect{};
 
     // dynamic values (not part of the pipeline/ignored in hash)

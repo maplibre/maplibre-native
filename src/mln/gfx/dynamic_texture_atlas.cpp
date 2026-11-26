@@ -19,12 +19,61 @@ Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
 }
 } // namespace
 
+int32_t GlyphAtlas::generateUniqueId(const FontStackHash& fontStack, const GlyphID& glyphId) const {
+    int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyphId.hash);
+    return uniqueId;
+}
+
+void GlyphAtlas::uploadGlyph(const Immutable<Glyph>& glyph, TextureHandle& texHandle) {
+    const auto& rect = texHandle.getRectangle();
+    AlphaImage paddedImage(Size{rect.w, rect.h});
+    paddedImage.fill(0);
+    AlphaImage::copy(glyph->bitmap, paddedImage, {0, 0}, {padding, padding}, glyph->bitmap.size);
+
+    dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+}
+
+int32_t ImageAtlas::generateUniqueId(const std::string& imageId, Size size) const {
+    auto imageHash = util::hash(imageId);
+    int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2 + size.area());
+    return uniqueId;
+}
+
+void ImageAtlas::uploadIcon(const Immutable<style::Image::Impl>& icon, TextureHandle& texHandle) {
+    const auto& rect = texHandle.getRectangle();
+    PremultipliedImage paddedImage(Size{rect.w, rect.h});
+    paddedImage.fill(0);
+    PremultipliedImage::copy(icon->image, paddedImage, {0, 0}, {padding, padding}, icon->image.size);
+
+    dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+}
+
+void ImageAtlas::uploadPattern(const Immutable<style::Image::Impl>& pattern, TextureHandle& texHandle) {
+    const auto& rect = texHandle.getRectangle();
+    PremultipliedImage paddedImage(Size{rect.w, rect.h});
+    paddedImage.fill(0);
+    PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {padding, padding}, pattern->image.size);
+
+    const uint32_t x = padding;
+    const uint32_t y = padding;
+    const uint32_t w = pattern->image.size.width;
+    const uint32_t h = pattern->image.size.height;
+
+    // Add 1 pixel wrapped padding on each side of the image.
+    PremultipliedImage::copy(pattern->image, paddedImage, {0, h - 1}, {x, y - 1}, {w, 1}); // T
+    PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x, y + h}, {w, 1});     // B
+    PremultipliedImage::copy(pattern->image, paddedImage, {w - 1, 0}, {x - 1, y}, {1, h}); // L
+    PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x + w, y}, {1, h});     // R
+
+    dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+}
+
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
     using GlyphsToUpload = std::vector<std::tuple<TextureHandle, Immutable<Glyph>, FontStackHash>>;
     std::scoped_lock lock(mutex);
 
     GlyphAtlas glyphAtlas;
-    if (!glyphs.size()) {
+    if (glyphs.empty()) {
         glyphAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::Alpha];
         if (!glyphAtlas.dynamicTexture) {
             AlphaImage dummyImage(dummySize);
@@ -62,7 +111,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
                 const auto& glyph = glyphEntry.second;
 
                 if (glyph.has_value() && glyph.value()->bitmap.valid()) {
-                    int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyph.value()->id.hash);
+                    int32_t uniqueId = glyphAtlas.generateUniqueId(fontStack, glyph.value()->id);
                     const auto size = Size(glyph.value()->bitmap.size.width + 2 * padding,
                                            glyph.value()->bitmap.size.height + 2 * padding);
                     const auto& texHandle = glyphAtlas.dynamicTexture->reserveSize(size, uniqueId);
@@ -91,11 +140,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
         const auto& rect = texHandle.getRectangle();
 
         if (texHandle.isUploadNeeded()) {
-            AlphaImage paddedImage(Size{rect.w, rect.h});
-            paddedImage.fill(0);
-            AlphaImage::copy(glyph->bitmap, paddedImage, {0, 0}, {padding, padding}, glyph->bitmap.size);
-
-            glyphAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+            glyphAtlas.uploadGlyph(glyph, texHandle);
         }
         glyphAtlas.textureHandles.emplace_back(texHandle);
         glyphAtlas.glyphPositions[fontStack].emplace(
@@ -111,7 +156,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
     std::scoped_lock lock(mutex);
 
     ImageAtlas imageAtlas;
-    if (!icons.size() && !patterns.size()) {
+    if (icons.empty() && patterns.empty()) {
         imageAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::RGBA];
         if (!imageAtlas.dynamicTexture) {
             PremultipliedImage dummyImage(dummySize);
@@ -147,9 +192,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         bool hasSpace = true;
         for (const auto& iconEntry : icons) {
             const auto& icon = iconEntry.second;
-
-            auto imageHash = util::hash(icon->id);
-            int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2 + icon->image.size.area());
+            int32_t uniqueId = imageAtlas.generateUniqueId(icon->id, icon->image.size);
             const auto size = Size(icon->image.size.width + 2 * padding, icon->image.size.height + 2 * padding);
             const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
             if (!texHandle) {
@@ -161,9 +204,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         if (hasSpace) {
             for (const auto& patternEntry : patterns) {
                 const auto& pattern = patternEntry.second;
-
-                auto patternHash = util::hash(pattern->id);
-                int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2 + pattern->image.size.area());
+                int32_t uniqueId = imageAtlas.generateUniqueId(pattern->id, pattern->image.size);
                 const auto size = Size(pattern->image.size.width + 2 * padding,
                                        pattern->image.size.height + 2 * padding);
                 const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
@@ -194,47 +235,29 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
     imageAtlas.iconPositions.reserve(icons.size());
     for (auto& [texHandle, icon] : iconsToUpload) {
         const auto& rect = texHandle.getRectangle();
+        const auto it = versionMap.find(icon->id);
+        const auto iconVersion = it != versionMap.end() ? it->second : 0;
+        const auto texVersion = imageAtlas.dynamicTexture->getVersion(texHandle.getId());
 
-        if (texHandle.isUploadNeeded()) {
-            PremultipliedImage paddedImage(Size{rect.w, rect.h});
-            paddedImage.fill(0);
-            PremultipliedImage::copy(icon->image, paddedImage, {0, 0}, {padding, padding}, icon->image.size);
-
-            imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+        if (texHandle.isUploadNeeded() || iconVersion > texVersion) {
+            imageAtlas.uploadIcon(icon, texHandle);
         }
         imageAtlas.textureHandles.emplace_back(texHandle);
-        const auto it = versionMap.find(icon->id);
-        const auto version = it != versionMap.end() ? it->second : 0;
-        imageAtlas.iconPositions.emplace(icon->id, ImagePosition{rectWithoutExtraPadding(rect), *icon, version});
+        imageAtlas.iconPositions.emplace(icon->id, ImagePosition{rectWithoutExtraPadding(rect), *icon});
     }
 
     imageAtlas.patternPositions.reserve(patterns.size());
     for (auto& [texHandle, pattern] : patternsToUpload) {
         const auto& rect = texHandle.getRectangle();
+        const auto it = versionMap.find(pattern->id);
+        const auto patternVersion = it != versionMap.end() ? it->second : 0;
+        const auto texVersion = imageAtlas.dynamicTexture->getVersion(texHandle.getId());
 
-        if (texHandle.isUploadNeeded()) {
-            PremultipliedImage paddedImage(Size{rect.w, rect.h});
-            paddedImage.fill(0);
-            PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {padding, padding}, pattern->image.size);
-
-            const uint32_t x = padding;
-            const uint32_t y = padding;
-            const uint32_t w = pattern->image.size.width;
-            const uint32_t h = pattern->image.size.height;
-
-            // Add 1 pixel wrapped padding on each side of the image.
-            PremultipliedImage::copy(pattern->image, paddedImage, {0, h - 1}, {x, y - 1}, {w, 1}); // T
-            PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x, y + h}, {w, 1});     // B
-            PremultipliedImage::copy(pattern->image, paddedImage, {w - 1, 0}, {x - 1, y}, {1, h}); // L
-            PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x + w, y}, {1, h});     // R
-
-            imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+        if (texHandle.isUploadNeeded() || patternVersion > texVersion) {
+            imageAtlas.uploadPattern(pattern, texHandle);
         }
         imageAtlas.textureHandles.emplace_back(texHandle);
-        const auto it = versionMap.find(pattern->id);
-        const auto version = it != versionMap.end() ? it->second : 0;
-        imageAtlas.patternPositions.emplace(pattern->id,
-                                            ImagePosition{rectWithoutExtraPadding(rect), *pattern, version});
+        imageAtlas.patternPositions.emplace(pattern->id, ImagePosition{rectWithoutExtraPadding(rect), *pattern});
     }
 
     return imageAtlas;
@@ -256,7 +279,10 @@ void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textu
 void DynamicTextureAtlas::removeUnusedDynamicTextures() {
     std::scoped_lock lock(mutex);
 
-    std::erase_if(dynamicTextures, [](auto& dynamicTexture) { return dynamicTexture->isEmpty(); });
+    // release textures not referenced elsewhere (by an atlas still alive on a
+    // worker thread), so the last reference is always dropped on the render thread
+    std::erase_if(dynamicTextures,
+                  [](auto& dynamicTexture) { return dynamicTexture.use_count() == 1 && dynamicTexture->isEmpty(); });
 }
 
 } // namespace gfx

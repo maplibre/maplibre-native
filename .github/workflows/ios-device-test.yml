@@ -6,33 +6,102 @@ on:
     types:
       - completed
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
 permissions:
+  actions: write          # needed to start device-test-watch
   id-token: write         # needed for AWS
 
 jobs:
   ios-device-test:
     strategy:
+      fail-fast: false
       matrix:
         test: [
-          {artifactName: ios-render-test, xcTestFile: RenderTest.xctest.zip, ipaFile: RenderTestApp.ipa, name: "iOS Render Tests"},
-          {artifactName: ios-cpp-unit-tests, xcTestFile: CppUnitTests.xctest.zip, ipaFile: CppUnitTestsApp.ipa, name: "iOS C++ Unit Tests"},
+          {
+            artifactName: ios-render-test,
+            testFile: RenderTest.xctest.zip,
+            appFile: RenderTestApp.ipa,
+            name: "iOS Render Tests",
+            # one available iPhone 14 Pro or iPhone 14 Pro Max, any iOS version
+            # query with `aws devicefarm get-device-pool --arn <device_pool_arn>`
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/d84a2883-0000-44b5-afc4-af22084caf85"
+          },
+          {
+            artifactName: ios-cpp-unit-tests,
+            testFile: CppUnitTests.xctest.zip,
+            appFile: CppUnitTestsApp.ipa,
+            name: "iOS C++ Unit Tests",
+            # one available iPhone 14 Pro or iPhone 14 Pro Max, any iOS version
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/d84a2883-0000-44b5-afc4-af22084caf85"
+          },
+          {
+            artifactName: ios-benchmark,
+            testFile: BenchmarkTests.xctest.zip,
+            appFile: BenchmarkApp.ipa,
+            name: "iOS Benchmark",
+            benchmark: true,
+            # Apple iPhone 18 Pro (iOS 27.0)
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/01e1bf69-08a2-4912-8413-808399c7920f"
+          }
         ]
-      fail-fast: true
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: '.nvmrc'
+
+      - run: npm install
+
+      - name: Check if ios-build was skipped
+        id: parent_workflow
+        run: node .github/scripts/check-job-skipped.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_RUN_ID: ${{ github.event.workflow_run.id }}
+          JOB_NAME: ios-build
+
+      # get comment from PR
+
+      - uses: ./.github/actions/get-pr-number
+        id: get-pr-number
+
       - name: Generate token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         id: generate_token
         with:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
+      - name: Check if comment on PR contains '!benchmark ios'
+        if: matrix.test.benchmark && steps.get-pr-number.outputs.pr-number
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        id: benchmark_comment
+        with:
+          issue-number: ${{ steps.get-pr-number.outputs.pr-number }}
+          body-regex: '/^!benchmark.*\bios\b/im'
+
+      - name: Should we run this device test?
+        # always run when something was merged into main
+        # run benchmark when comment with '!benchmark ios' exists in PR
+        # (ios-ci only builds the benchmark for a PR if the comment existed when it ran)
+        if: |
+          steps.parent_workflow.outputs.was_skipped == 'false' &&
+          ((github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push') ||
+          matrix.test.benchmark && steps.benchmark_comment.outputs.comment-id ||
+          !matrix.test.benchmark)
+        run:
+          echo "run_device_test=true" >> "$GITHUB_ENV"
+
       - uses: LouisBrunner/checks-action@937cbbcde3259005b50746dc91cde29098aac2ff # v3.1.0
+        if: env.run_device_test == 'true'
         id: create_check
         with:
           token: ${{ steps.generate_token.outputs.token }}
@@ -42,50 +111,39 @@ jobs:
           sha: ${{ github.event.workflow_run.head_sha }}
 
       - uses: ./.github/actions/download-workflow-run-artifact
+        if: env.run_device_test == 'true'
         with:
           artifact-name: ${{ matrix.test.artifactName }}
-
-      - name: Check if test files exist (otherwise the parent workflow was skipped)
-        id: check_files
-        uses: andstor/file-existence-action@558493d6c74bf472d87c84eab196434afc2fa029 # v3.1.0
-        with:
-          files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
+          expect-files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6.2.2
+        if: env.run_device_test == 'true'
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ github.run_id }}
-          role-duration-seconds: 14400
 
-      - name: Run ${{ matrix.test.name }} on AWS Device Farm
-        if: steps.check_files.outputs.files_exists == 'true'
-        run: |
-          export name="${{ matrix.test.name }}"
-          export appType=IOS_APP
-          export appFile="${{ matrix.test.ipaFile }}"
-          export testFile="${{ matrix.test.xcTestFile }}"
-          export testPackageType=XCTEST_TEST_PACKAGE
-          export testType=XCTEST
-          export AWS_DEVICE_FARM_PROJECT_ARN="${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}"
-          export AWS_DEVICE_FARM_DEVICE_POOL_ARN="${{ vars.AWS_DEVICE_FARM_IPHONE_DEVICE_POOL_ARN }}"
-          export wait_for_completion=true
+      - name: Schedule ${{ matrix.test.name }} on AWS Device Farm
+        if: env.run_device_test == 'true'
+        env:
+          name: ${{ matrix.test.name }}
+          appType: IOS_APP
+          appFile: ${{ matrix.test.appFile }}
+          testFile: ${{ matrix.test.testFile }}
+          testPackageType: XCTEST_TEST_PACKAGE
+          testType: XCTEST
+          AWS_DEVICE_FARM_PROJECT_ARN: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ matrix.test.devicePool }}
+          checkId: ${{ steps.create_check.outputs.check_id }}
+          supersedeKey: ${{ github.event.workflow_run.event == 'pull_request' && format('{0}:{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) || '' }}
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/aws-device-farm/aws-device-farm-run.sh
 
-          ./scripts/aws-device-farm/aws-device-farm-run.sh
-
-      - name: Generate another token (previous one could have expired)
-        if: always()
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        id: generate_token_2
-        with:
-          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
-          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
-
+      # the device-test-finish workflow reports the result of a scheduled test
       - uses: LouisBrunner/checks-action@937cbbcde3259005b50746dc91cde29098aac2ff # v3.1.0
-        if: always()
+        if: (failure() || cancelled()) && steps.create_check.outputs.check_id
         with:
-          token: ${{ steps.generate_token_2.outputs.token }}
+          token: ${{ steps.generate_token.outputs.token }}
           check_id: ${{ steps.create_check.outputs.check_id }}
           conclusion: ${{ job.status }}
-          sha: ${{ github.event.workflow_run.sha }}

@@ -8,6 +8,7 @@
 #include <mln/style/layer.hpp>
 #include <mln/text/glyph.hpp>
 #include <mln/util/chrono.hpp>
+#include <mln/util/feature.hpp>
 #include <mln/util/immutable.hpp>
 
 #include <numbers>
@@ -38,6 +39,9 @@ public:
     const Immutable<std::vector<Immutable<style::Source::Impl>>> sources;
     const Immutable<std::vector<Immutable<style::Layer::Impl>>> layers;
 
+    // The style's global state, used by "global-state" expressions.
+    const std::shared_ptr<const GlobalStateMap> globalState;
+
     mapbox::base::WeakPtr<AnnotationManager> annotationManager;
     std::shared_ptr<FileSource> fileSource;
 
@@ -49,6 +53,8 @@ public:
     const bool crossSourceCollisions;
 
     const bool fastPFOREnabled = false;
+
+    const bool captureRenderedFeatures = false;
 
     double tileLodMinRadius = 3;
     double tileLodScale = 1;

@@ -139,7 +139,8 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
 }
 
 void MLNMapViewMetalImpl::drawableSizeChanged(CGSize drawableSize) {
-  size = {static_cast<uint32_t>(drawableSize.width), static_cast<uint32_t>(drawableSize.height)};
+  setRenderableSize(
+      {static_cast<uint32_t>(drawableSize.width), static_cast<uint32_t>(drawableSize.height)});
 }
 
 MLNMapViewMetalImpl::~MLNMapViewMetalImpl() = default;
@@ -156,15 +157,6 @@ void MLNMapViewMetalImpl::deactivate() {
   if (--resource.activationCount) {
     return;
   }
-}
-
-/// This function is called before we start rendering, when iOS invokes our rendering method.
-/// iOS already sets the correct framebuffer and viewport for us, so we need to update the
-/// context state with the anticipated values.
-void MLNMapViewMetalImpl::updateAssumedState() {
-  auto& resource = getResource<MLNMapViewMetalRenderableResource>();
-  assumeFramebufferBinding(ImplicitFramebufferBinding);
-  assumeViewport(0, 0, resource.framebufferSize());
 }
 
 mln::PremultipliedImage MLNMapViewMetalImpl::readStillImage() {

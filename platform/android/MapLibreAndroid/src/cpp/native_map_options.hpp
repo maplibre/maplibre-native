@@ -21,6 +21,7 @@ public:
     static bool crossSourceCollisions(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
     static bool asyncRendererCleanup(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
     static bool fastPFOREnabled(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
+    static bool featureInfoEnabled(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
 };
 
 } // namespace android

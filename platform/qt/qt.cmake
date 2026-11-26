@@ -79,31 +79,12 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<PLATFORM_ID:Linux>,default/src/mln/text/bidi.cpp,qt/src/mln/bidi.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/include/mln/gfx/headless_backend.hpp
         ${PROJECT_SOURCE_DIR}/platform/default/include/mln/gfx/headless_frontend.hpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_frontend.cpp
-        $<$<BOOL:${MLN_WITH_OPENGL}>:${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend.cpp>
-        $<$<BOOL:${MLN_WITH_METAL}>:${PROJECT_SOURCE_DIR}/platform/default/src/mln/mtl/headless_backend.cpp>
-        $<$<BOOL:${MLN_WITH_VULKAN}>:${PROJECT_SOURCE_DIR}/platform/default/src/mln/vulkan/headless_backend.cpp>
+        ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
+        ${MLN_DEFAULT_HEADLESS_SOURCES}
+        ${MLN_DEFAULT_UTIL_SOURCES}
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/i18n/collator.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/layermanager/layer_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/platform/time.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/asset_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/database_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/main_resource_loader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/mbtiles_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_database.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_download.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/online_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,default/src/mln/storage/sqlite3.cpp,qt/src/mln/sqlite3.cpp>
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/compression.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/filesystem.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/monotonic_timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/gl_functions.cpp
@@ -112,6 +93,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_file_source.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_request.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_request.hpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/i18n.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/number_format.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/local_glyph_rasterizer.cpp
@@ -155,7 +137,6 @@ target_link_libraries(
         $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
         $<BUILD_INTERFACE:mlt-cpp>
         $<BUILD_INTERFACE:fastpfor-lib>
-        $<$<PLATFORM_ID:iOS>:$<BUILD_INTERFACE:mbgl-vendor-filesystem>>
         $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
         $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,$<BUILD_INTERFACE:mbgl-vendor-sqlite>,Qt${QT_VERSION_MAJOR}::Sql>
     PRIVATE
@@ -183,7 +164,6 @@ if(MLN_QT_HAS_PARENT)
         mbgl-vendor-csscolorparser
         mlt-cpp
         fastpfor-lib
-        $<$<PLATFORM_ID:iOS>:mbgl-vendor-filesystem>
         $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:mbgl-vendor-sqlite>
         $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>>:mbgl-vendor-icu>
         PARENT_SCOPE
@@ -191,44 +171,5 @@ if(MLN_QT_HAS_PARENT)
 endif()
 
 if(NOT MLN_QT_LIBRARY_ONLY)
-    # test runner
-    add_executable(
-        mbgl-test-runner
-        ${PROJECT_SOURCE_DIR}/platform/qt/test/main.cpp
-    )
-
-    target_include_directories(
-        mbgl-test-runner
-        PRIVATE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/test/include
-    )
-
-    target_compile_definitions(
-        mbgl-test-runner
-        PRIVATE
-            WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
-            $<$<PLATFORM_ID:Windows>:MBGL_BUILDING_LIB>
-    )
-
-    target_link_libraries(
-        mbgl-test-runner
-        PRIVATE
-            Qt${QT_VERSION_MAJOR}::Gui
-            mbgl-compiler-options
-    )
-
-    if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
-        target_link_libraries(
-            mbgl-test-runner
-            PRIVATE
-                -Wl,-force_load mbgl-test
-        )
-    else()
-        target_link_libraries(
-            mbgl-test-runner
-            PRIVATE
-                $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
-        )
-    endif()
-
-    add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/test)
 endif()

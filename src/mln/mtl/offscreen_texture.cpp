@@ -61,7 +61,12 @@ public:
 
     void bind() override {
         assert(context.getBackend().getCommandQueue());
-        commandBuffer = NS::RetainPtr(context.getBackend().getCommandQueue()->commandBuffer());
+        // An upload pass and a render pass both bind this resource in one frame, and only the swap
+        // after the render pass commits. Keep the pending command buffer: a new one per bind leaves
+        // the previous one uncommitted, one per frame, until the queue has none left to hand out.
+        if (!commandBuffer) {
+            commandBuffer = NS::RetainPtr(context.getBackend().getCommandQueue()->commandBuffer());
+        }
         colorTexture->create();
 
         renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::alloc()->init());
@@ -134,7 +139,7 @@ private:
 
 OffscreenTexture::OffscreenTexture(
     Context& context, const Size size_, const gfx::TextureChannelDataType type, bool depth, bool stencil)
-    : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context, size_, type, depth, stencil)) {}
+    : gfx::OffscreenTexture(size_, std::make_unique<OffscreenTextureResource>(context, size_, type, depth, stencil)) {}
 
 bool OffscreenTexture::isRenderable() {
     assert(false);

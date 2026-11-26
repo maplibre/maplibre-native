@@ -43,8 +43,10 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     }
 
     if (enableDepth) {
-        context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
-                                       : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
+        auto depth = getIs3D() ? parameters.depthModeFor3D()
+                               : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+        if (getIs3D() && getDepthMaskFor3D()) depth.mask = *getDepthMaskFor3D();
+        context.setDepthMode(depth);
     } else {
         context.setDepthMode(gfx::DepthMode::disabled());
     }
@@ -104,6 +106,8 @@ void DrawableGL::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
             seg.indexOffset,
             seg.vertexLength,
             seg.indexLength,
+            seg.baseInstance,
+            seg.instanceCount,
             seg.sortKey,
         };
         auto drawSeg = std::make_unique<DrawableGL::DrawSegmentGL>(

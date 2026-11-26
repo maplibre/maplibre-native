@@ -181,7 +181,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     const auto& renderTreeParameters = renderTree.getParameters();
     staticData->has3D = renderTreeParameters.has3D;
-    staticData->backendSize = backend.getDefaultRenderable().getSize();
+    const Size renderableSize = backend.getDefaultRenderable().getSize();
 
     if (renderState == RenderState::Never) {
         observer->onWillStartRenderingMap();
@@ -190,7 +190,6 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     observer->onWillStartRenderingFrame();
 
     const TransformState& state = renderTreeParameters.transformParams.state;
-    const Size& size = staticData->backendSize;
     const EdgeInsets& frustumOffset = state.getFrustumOffset();
     const gfx::ScissorRect scissorRect = {
         .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
@@ -199,8 +198,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 #else
         .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
 #endif
-        .width = size.width - static_cast<uint32_t>((frustumOffset.left() + frustumOffset.right()) * pixelRatio),
-        .height = size.height - static_cast<uint32_t>((frustumOffset.top() + frustumOffset.bottom()) * pixelRatio),
+        .width = renderableSize.width -
+                 static_cast<uint32_t>((frustumOffset.left() + frustumOffset.right()) * pixelRatio),
+        .height = renderableSize.height -
+                  static_cast<uint32_t>((frustumOffset.top() + frustumOffset.bottom()) * pixelRatio),
     };
 
     PaintParameters parameters{
@@ -220,7 +221,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         updateParameters->tileLodScale,
         updateParameters->tileLodPitchThreshold,
         updateParameters->tileLodMode,
+        renderableSize,
         scissorRect,
+        updateParameters->captureRenderedFeatures,
     };
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
@@ -297,7 +300,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     }
 
     const Size atlasSize = parameters.patternAtlas.getPixelSize();
-    const auto& worldSize = parameters.staticData.backendSize;
+    const auto& worldSize = parameters.renderableSize;
     const shaders::GlobalPaintParamsUBO globalPaintParamsUBO = {
         .pattern_atlas_texsize = {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)},
         .units_to_pixels = {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
@@ -318,8 +321,6 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // attachments, but share the same depth rbo between them.
     const auto common3DPass = [&] {
         if (parameters.staticData.has3D) {
-            parameters.staticData.backendSize = parameters.backend.getDefaultRenderable().getSize();
-
             const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
             parameters.pass = RenderPass::Pass3D;
 #if MLN_RENDER_BACKEND_OPENGL
@@ -328,10 +329,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
             // TODO is this needed?
             // if (!parameters.staticData.depthRenderbuffer ||
-            //    parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
+            //    parameters.staticData.depthRenderbuffer->getSize() != parameters.renderableSize) {
             //    parameters.staticData.depthRenderbuffer =
             //        parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
-            //            parameters.staticData.backendSize);
+            //            parameters.renderableSize);
             //}
             // parameters.staticData.depthRenderbuffer->setShouldClear(true);
         }
@@ -340,6 +341,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     const auto drawable3DPass = [&] {
         const auto debugGroup(parameters.encoder->createDebugGroup("drawables-3d"));
         assert(parameters.pass == RenderPass::Pass3D);
+        // `depthModeFor3D` uses this, and the 3D pass runs before the opaque pass sets it
+        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
+                                            PaintParameters::depthEpsilon;
 
         // draw layer groups, 3D pass
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
@@ -479,11 +483,16 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     context.renderingStats().encodingTime = renderTree.getElapsedTime() - context.renderingStats().renderingTime;
 
+    auto stats = std::make_shared<gfx::RenderingStats>(context.threadSafeCopyRenderingStats());
+
+    // Add the feature info from the render orchestrator
+    stats->frameRenderedFeatures = std::move(orchestrator.moveFrameRenderedFeatures());
+
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
         renderTreeParameters.placementChanged,
-        context.threadSafeCopyRenderingStats());
+        std::move(stats));
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

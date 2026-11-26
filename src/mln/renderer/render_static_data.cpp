@@ -56,6 +56,15 @@ gfx::VertexVector<FillExtrusionStaticVertex> RenderStaticData::fillExtrusionVert
     return vertices;
 }
 
+gfx::VertexVector<SymbolStaticVertexAttributes> RenderStaticData::symbolVertices() {
+    gfx::VertexVector<HeatmapTextureLayoutVertex> vertices;
+    vertices.emplace_back(FillExtrusionStaticVertex{0, 0});
+    vertices.emplace_back(FillExtrusionStaticVertex{1, 0});
+    vertices.emplace_back(FillExtrusionStaticVertex{0, 1});
+    vertices.emplace_back(FillExtrusionStaticVertex{1, 1});
+    return vertices;
+}
+
 gfx::IndexVector<gfx::Triangles> RenderStaticData::quadTriangleIndices() {
     gfx::IndexVector<gfx::Triangles> indices;
     indices.emplace_back(0, 1, 2);
@@ -85,6 +94,13 @@ gfx::IndexVector<gfx::Triangles> RenderStaticData::fillExtrusionTriangleIndices(
     return indices;
 }
 
+gfx::IndexVector<gfx::Triangles> RenderStaticData::symbolTriangleIndices() {
+    gfx::IndexVector<gfx::Triangles> indices;
+    indices.emplace_back(0, 1, 2);
+    indices.emplace_back(1, 2, 3);
+    return indices;
+}
+
 SegmentVector RenderStaticData::tileTriangleSegments() {
     SegmentVector segments;
     segments.emplace_back(0, 0, 4, 6);
@@ -109,10 +125,12 @@ SegmentVector RenderStaticData::heatmapTextureSegments() {
     return segments;
 }
 
-SegmentVector RenderStaticData::fillExtrusionSegments() {
-    SegmentVector segments;
-    segments.emplace_back(0, 0, 4, 6);
-    return segments;
+SegmentBase RenderStaticData::fillExtrusionSegment() {
+    return SegmentBase(0, 0, 4, 6, 0, 0);
+}
+
+SegmentBase RenderStaticData::symbolSegment(std::size_t baseInstance, float sortKey) {
+    return SegmentBase(0, 0, 4, 6, baseInstance, 0, sortKey);
 }
 
 } // namespace mln

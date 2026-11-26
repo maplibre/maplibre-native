@@ -40,7 +40,7 @@ vec2 unpack_opacity(const float packedOpacity) {
 // To minimize the number of attributes needed, we encode a 4-component
 // color into a pair of floats (i.e. a vec2) as follows:
 // [ floor(color.r * 255) * 256 + color.g * 255,
-//   floor(color.b * 255) * 256 + color.g * 255 ]
+//   floor(color.b * 255) * 256 + color.a * 255 ]
 vec4 decode_color(const vec2 encodedColor) {
     return vec4(
         unpack_float(encodedColor[0]) / 255.0,
@@ -49,11 +49,19 @@ vec4 decode_color(const vec2 encodedColor) {
 }
 
 // Unpack a pair of paint values and interpolate between them.
+float unpack_mix_float(const float packedValue[2], const float t) {
+    return mix(packedValue[0], packedValue[1], t);
+}
 float unpack_mix_float(const vec2 packedValue, const float t) {
     return mix(packedValue[0], packedValue[1], t);
 }
 
 // Unpack a pair of paint values and interpolate between them.
+vec4 unpack_mix_color(const float packedColors[4], const float t) {
+    vec4 minColor = decode_color(vec2(packedColors[0], packedColors[1]));
+    vec4 maxColor = decode_color(vec2(packedColors[2], packedColors[3]));
+    return mix(minColor, maxColor, t);
+}
 vec4 unpack_mix_color(const vec4 packedColors, const float t) {
     vec4 minColor = decode_color(vec2(packedColors[0], packedColors[1]));
     vec4 maxColor = decode_color(vec2(packedColors[2], packedColors[3]));
@@ -65,6 +73,16 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
                         const vec2 pattern_size, const float tile_units_to_pixels, const vec2 pos) {
     const vec2 offset = mod(mod(mod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
+}
+
+int unpack_low_int(int value) {
+    const int low = (value << 16) >> 16;
+    return low;
+}
+
+int unpack_high_int(int value) {
+    const int high = value >> 16;
+    return high;
 }
 
 vec2 unpack_int(int value) {
@@ -89,7 +107,7 @@ vec2 unpack_uint(uint value) {
 #define layerSSBOStartId                    0
 #define layerUBOStartId                     3
 #define drawableSSBOStartId                 0
-#define drawableUBOStartId                  1
+#define drawableUBOStartId                  4
 
 #define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
 #define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
@@ -140,7 +158,7 @@ void applySurfaceTransform() {
 #define layerSSBOStartId                    0
 #define layerUBOStartId                     3
 #define drawableSSBOStartId                 0
-#define drawableUBOStartId                  1
+#define drawableUBOStartId                  4
 
 #define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
 #define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
@@ -157,6 +175,9 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     float map_zoom;
     float pad1;
 } paintParams;
+
+// using lod bias variant for sampling as a workaround for Adreno 600 series
+#define texture(sampler, uv)    texture(sampler, uv, 0.0)
 
 )";
 };

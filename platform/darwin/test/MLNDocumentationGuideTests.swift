@@ -119,21 +119,12 @@ class MLNDocumentationGuideTests: XCTestCase, MLNMapViewDelegate {
 
         let layer = MLNCircleStyleLayer(identifier: "circles", source: source)
 
-        let circleExpression: NSExpression
-        if #available(iOS 15, *) {
-            circleExpression = NSExpression(
-                forMLNInterpolating: NSExpression(forConstantValue: mag),
-                curveType: .linear,
-                parameters: nil,
-                stops: NSExpression(forConstantValue: stops)
-            )
-        } else {
-            // This works up to iOS 14.5
-            circleExpression = NSExpression(
-                format: "mgl_interpolate:withCurveType:parameters:stops:(mag, 'linear', nil, %@)",
-                stops
-            )
-        }
+        let circleExpression = NSExpression(
+            forMLNInterpolating: NSExpression(forConstantValue: mag),
+            curveType: .linear,
+            parameters: nil,
+            stops: NSExpression(forConstantValue: stops)
+        )
 
         layer.circleColor = circleExpression
         layer.circleRadius = NSExpression(forConstantValue: 10)

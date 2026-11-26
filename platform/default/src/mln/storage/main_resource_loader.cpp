@@ -172,9 +172,8 @@ public:
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
-        req->onCancel([actorRef = thread->actor(), req = req.get()]() {
-            actorRef.invoke(&MainResourceLoaderThread::cancel, req);
-        });
+        req->onCancel(
+            [actorRef = thread->actor(), req = req.get()] { actorRef.invoke(&MainResourceLoaderThread::cancel, req); });
         thread->actor().invoke(&MainResourceLoaderThread::request, req.get(), resource, req->actor());
         return req;
     }

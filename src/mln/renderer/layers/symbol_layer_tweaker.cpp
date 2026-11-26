@@ -10,6 +10,7 @@
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/paint_property_binder.hpp>
+#include <mln/renderer/layers/render_symbol_layer.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/shaders/symbol_layer_ubo.hpp>

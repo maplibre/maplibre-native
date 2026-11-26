@@ -8,5 +8,8 @@ title = "MapLibre Native Developer Documentation"
 additional-css = ["diff.css"]
 additional-js = []
 
+[output.html.redirect]
+"/platforms/android/android-rendering-backends.html" = "android-build-flavors.html"
+
 [preprocessor.mermaid]
 command = "mdbook-mermaid"

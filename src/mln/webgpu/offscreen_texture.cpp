@@ -51,6 +51,8 @@ public:
             depthTexture->setSamplerConfiguration(
                 {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         }
+
+        context.renderingStats().numFrameBuffers++;
     }
 
     ~OffscreenTextureResource() noexcept override { context.renderingStats().numFrameBuffers--; }
@@ -354,7 +356,7 @@ OffscreenTexture::OffscreenTexture(
     Context& context, const Size size_, const gfx::TextureChannelDataType type, bool depth, bool stencil)
     : gfx::OffscreenTexture(size_, std::make_unique<OffscreenTextureResource>(context, size_, type, depth, stencil)) {
     auto& offscreenResource = getResource<OffscreenTextureResource>();
-    offscreenResource.setSizeListener([this](const Size& newSize) { size = newSize; });
+    offscreenResource.setSizeListener([this](const Size& newSize) { setRenderableSize(newSize); });
 }
 
 bool OffscreenTexture::isRenderable() {

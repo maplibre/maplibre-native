@@ -27,7 +27,16 @@ public:
         }
 
         return defaultValue.match(
-            [&context](const style::PropertyExpression<T>& e) { return e.getExpression().evaluate(context); },
+            [&context](const style::PropertyExpression<T>& e) {
+                // Binder contexts do not carry global state, so the captured state is used as a
+                // fallback. If the caller explicitly provides context state, it takes precedence.
+                if (context.globalState == nullptr && e.getCapturedGlobalState() != nullptr) {
+                    EvaluationContext contextWithState = context;
+                    contextWithState.globalState = e.getCapturedGlobalState().get();
+                    return e.getExpression().evaluate(contextWithState);
+                }
+                return e.getExpression().evaluate(context);
+            },
             [](const T& t) -> EvaluationResult { return t; });
     }
 

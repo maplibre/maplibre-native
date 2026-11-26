@@ -9,7 +9,7 @@ HeadlessBackend::HeadlessBackend(Size size_)
     : mln::gfx::Renderable(size_, nullptr) {}
 
 void HeadlessBackend::setSize(Size size_) {
-    size = size_;
+    setRenderableSize(size_);
     resource.reset();
 }
 

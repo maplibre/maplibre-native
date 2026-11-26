@@ -84,6 +84,7 @@ public:
     ~Database();
     Database& operator=(Database&&) noexcept;
 
+    std::string getFilename() const;
     void setBusyTimeout(std::chrono::milliseconds);
     void exec(const std::string& sql);
 
