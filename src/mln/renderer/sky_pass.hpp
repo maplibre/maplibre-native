@@ -6,6 +6,7 @@
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/util/size.hpp>
 
+#include <array>
 #include <optional>
 
 namespace mln {
@@ -30,6 +31,9 @@ public:
                 float pixelRatio,
                 const std::optional<EvaluatedSky>&,
                 const EvaluatedLight&);
+
+    /// The atmosphere's sun direction in the view space it traces rays in, with `blend` as its w.
+    static std::array<float, 4> sunPosition(const EvaluatedLight&, const TransformState&, float blend);
 
     LayerGroupBase* getSkyLayerGroup() const { return skyLayerGroup.get(); }
     LayerGroupBase* getAtmosphereLayerGroup() const { return atmosphereLayerGroup.get(); }

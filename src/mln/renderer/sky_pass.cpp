@@ -63,8 +63,11 @@ LayerGroupPtr makeFullscreenLayerGroup(gfx::Context& context,
     return layerGroup;
 }
 
-// GL JS `getSunPos`: the atmosphere traces rays in view space, so a map-anchored light turns with the globe.
-std::array<float, 4> sunPosition(const EvaluatedLight& light, const TransformState& state, float blend) {
+} // namespace
+
+// GL JS `getSunPos`: the atmosphere traces rays in view space, so a map-anchored light turns with the globe, as
+// globeViewProjectionMatrix turns it.
+std::array<float, 4> SkyPass::sunPosition(const EvaluatedLight& light, const TransformState& state, float blend) {
     const auto position = light.get<style::LightPosition>().getCartesian();
     vec4 sun = {{-position[0], -position[1], -position[2], 0.0}};
 
@@ -72,6 +75,9 @@ std::array<float, 4> sunPosition(const EvaluatedLight& light, const TransformSta
         const auto center = state.getLatLng();
         mat4 matrix;
         matrix::identity(matrix);
+        if (state.getNorthOrientation() != NorthOrientation::Upwards) {
+            matrix::rotate_z(matrix, matrix, -state.getNorthOrientationAngle());
+        }
         matrix::rotate_z(matrix, matrix, state.getRoll());
         matrix::rotate_x(matrix, matrix, -state.getPitch());
         matrix::rotate_z(matrix, matrix, -state.getBearing());
@@ -82,6 +88,8 @@ std::array<float, 4> sunPosition(const EvaluatedLight& light, const TransformSta
 
     return {{static_cast<float>(sun[0]), static_cast<float>(sun[1]), static_cast<float>(sun[2]), blend}};
 }
+
+namespace {
 
 // GL JS `ATMOSPHERE_HEIGHT_TO_GLOBE_RADIUS`: the atmosphere is 100 km deep on a 6371 km planet.
 constexpr double atmosphereHeightToGlobeRadius = 100000.0 / 6371000.0;
