@@ -42,8 +42,7 @@ bool WeakScheduler::schedule(const util::SimpleIdentity tag, std::function<void(
 }
 
 Scheduler::Scheduler()
-    : anchor(std::make_shared<WeakScheduler::Anchor>(*this)),
-      weakAnchor(anchor) {}
+    : anchor(std::make_shared<WeakScheduler::Anchor>(*this)) {}
 
 Scheduler::~Scheduler() {
     assert(!anchor && "Call expireWeakSchedulers() first in the destructor of every concrete scheduler");
@@ -60,7 +59,7 @@ void Scheduler::expireWeakSchedulers() {
     released.wait();
 }
 
-std::function<void()> Scheduler::bindOnce(std::function<void()> fn) {
+std::function<void()> Scheduler::bindOnce(std::function<void()> fn) const {
     assert(fn);
     return [scheduler = makeWeak(), scheduled = std::move(fn)]() mutable {
         if (!scheduled) return; // Repeated call.

@@ -152,11 +152,7 @@ void Mailbox::receive() {
 }
 
 void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
-    if (weakScheduler.expired()) {
-        return;
-    }
-    std::weak_ptr<Mailbox> mailbox = shared_from_this();
-    auto setToRecieve = [mbox = std::move(mailbox)] {
+    auto setToRecieve = [mbox = weak_from_this()] {
         if (auto locked = mbox.lock()) {
             locked->receive();
         }

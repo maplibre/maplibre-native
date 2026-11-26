@@ -1,7 +1,6 @@
 #pragma once
 
 #include <atomic>
-#include <cassert>
 #include <memory>
 
 namespace mln {
@@ -32,27 +31,21 @@ private:
     T* object = nullptr;
 };
 
-/// Hands out `TrackedPtr`s to the object that owns it.
-///
-/// The owner calls `end()` first in its destructor, so that the pointers turn null before any of its members is
-/// destroyed.
+/// Hands out `TrackedPtr`s to the object that owns it, and turns them null when it is destroyed.
 class PointerTracker {
 public:
     PointerTracker() = default;
     PointerTracker(const PointerTracker&) = delete;
     PointerTracker& operator=(const PointerTracker&) = delete;
-
-    ~PointerTracker() {
-        assert(!*alive && "Call end() first in the owner's destructor");
-        end();
-    }
+    ~PointerTracker() { end(); }
 
     template <typename T>
     TrackedPtr<T> track(T& object) const {
         return TrackedPtr<T>(alive, &object);
     }
 
-    /// Turns every `TrackedPtr` handed out by this tracker null.
+    /// Turns every `TrackedPtr` handed out by this tracker null before the tracker is destroyed. An owner whose
+    /// destructor waits for work that reads it on another thread calls this first in its destructor.
     void end() noexcept { *alive = false; }
 
 private:

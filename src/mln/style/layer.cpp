@@ -38,9 +38,7 @@ Layer::Layer(Immutable<Impl> impl)
     : baseImpl(std::move(impl)),
       observer(&nullObserver) {}
 
-Layer::~Layer() {
-    tracker.end();
-}
+Layer::~Layer() = default;
 
 std::string Layer::getID() const {
     return baseImpl->id;

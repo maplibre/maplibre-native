@@ -77,7 +77,7 @@ public:
     virtual void schedule(const util::SimpleIdentity, std::function<void()>&&) = 0;
 
     /// Makes a handle that schedules work on this scheduler for as long as it exists.
-    WeakScheduler makeWeak() const noexcept { return WeakScheduler(weakAnchor); }
+    WeakScheduler makeWeak() const noexcept { return WeakScheduler(anchor); }
     /// Enqueues a function for execution on the render thread owned by the given tag.
     virtual void runOnRenderThread(const util::SimpleIdentity, std::function<void()>&&) {}
     /// Run render thread jobs for the given tag
@@ -93,7 +93,7 @@ public:
     ///
     /// If this scheduler is already deleted by the time the returnded closure
     /// is first invoked, the call is ignored.
-    std::function<void()> bindOnce(std::function<void()>);
+    std::function<void()> bindOnce(std::function<void()>) const;
 
     /// Enqueues the given |task| for execution into this scheduler's task queue
     /// and then enqueues the |reply| with the captured task result to the
@@ -161,7 +161,6 @@ private:
     }
 
     std::shared_ptr<WeakScheduler::Anchor> anchor;
-    const std::weak_ptr<WeakScheduler::Anchor> weakAnchor;
 };
 
 /// @brief A TaggedScheduler pairs a scheduler with an identifier. Tasklets submitted via a TaggedScheduler

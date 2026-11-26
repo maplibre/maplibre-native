@@ -17,7 +17,6 @@ public:
                  SourceType sourceType = SourceType::Raster,
                  std::optional<uint8_t> minzoom = std::nullopt,
                  std::optional<uint8_t> maxzoom = std::nullopt);
-    ~RasterSource() override;
 
     bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 

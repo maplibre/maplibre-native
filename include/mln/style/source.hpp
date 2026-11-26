@@ -135,8 +135,8 @@ protected:
     explicit Source(Immutable<Impl>);
     virtual Mutable<Impl> createMutable() const noexcept = 0;
 
-    /// Turns the pointers from `makeTrackedPtr()` null. Every concrete source calls it first in its destructor, so that
-    /// they are null before any of its members is destroyed.
+    /// Turns the pointers from `makeTrackedPtr()` null before the source is destroyed. A source whose destructor waits
+    /// for work that reads it on another thread calls this first in its destructor.
     void endTracking() noexcept { tracker.end(); }
 
 private:

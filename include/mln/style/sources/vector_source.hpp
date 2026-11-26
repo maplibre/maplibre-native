@@ -17,7 +17,6 @@ public:
                  std::optional<float> maxZoom = std::nullopt,
                  std::optional<float> minZoom = std::nullopt,
                  Tileset::VectorEncoding encoding = Tileset::VectorEncoding::Mapbox);
-    ~VectorSource() override;
 
     void setTilesetOverrides(Tileset& tileset) override;
 

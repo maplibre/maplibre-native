@@ -8,7 +8,6 @@ namespace mln {
 class AnnotationSource final : public style::Source {
 public:
     AnnotationSource();
-    ~AnnotationSource() override;
 
     class Impl;
     const Impl& impl() const;

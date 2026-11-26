@@ -33,9 +33,7 @@ SpriteLoader::SpriteLoader(float pixelRatio_, const TaggedScheduler& threadPool_
       observer(&nullObserver),
       threadPool(threadPool_) {}
 
-SpriteLoader::~SpriteLoader() {
-    callbacks.close();
-}
+SpriteLoader::~SpriteLoader() = default;
 
 void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& fileSource) {
     if (!sprite) {

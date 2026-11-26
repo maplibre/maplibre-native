@@ -25,6 +25,16 @@ TEST(CallbackScope, CallsUntilClosed) {
     EXPECT_EQ(3, calls);
 }
 
+TEST(CallbackScope, ClosesWhenDestroyed) {
+    auto scope = std::make_unique<CallbackScope>();
+    int calls = 0;
+    const auto callback = scope->bind([&] { ++calls; });
+
+    scope.reset();
+    callback();
+    EXPECT_EQ(0, calls);
+}
+
 TEST(CallbackScope, ForwardsArguments) {
     struct CopyCounter {
         explicit CopyCounter(int& copies_)
@@ -47,8 +57,6 @@ TEST(CallbackScope, ForwardsArguments) {
     const CopyCounter counter(copies);
     callback(counter);
     EXPECT_EQ(1, copies);
-
-    scope.close();
 }
 
 TEST(CallbackScope, CloseWaitsForCallbackOnAnotherThread) {
@@ -70,7 +78,6 @@ TEST(CallbackScope, CloseWaitsForCallbackOnAnotherThread) {
 
 TEST(CallbackScope, CallbackDestroysItsOwner) {
     struct Owner {
-        ~Owner() { callbacks.close(); }
         CallbackScope callbacks;
     };
 

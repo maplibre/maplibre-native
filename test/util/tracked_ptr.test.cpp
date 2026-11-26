@@ -28,7 +28,6 @@ TEST(TrackedPtr, NullOnceTrackingEnds) {
 
 TEST(TrackedPtr, OutlivesTracker) {
     struct Owner {
-        ~Owner() { tracker.end(); }
         PointerTracker tracker;
     };
 

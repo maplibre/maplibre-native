@@ -20,6 +20,7 @@ GeoJSONTile::GeoJSONTile(const OverscaledTileID& overscaledTileID,
 }
 
 GeoJSONTile::~GeoJSONTile() {
+    // Tiles can be destroyed on a worker thread while their reply runs on the render thread, and it uses the members.
     callbacks.close();
 }
 

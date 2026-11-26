@@ -14,9 +14,7 @@ namespace style {
 ImageSource::ImageSource(std::string id, const std::array<LatLng, 4> coords_)
     : Source(makeMutable<Impl>(std::move(id), coords_)) {}
 
-ImageSource::~ImageSource() {
-    endTracking();
-}
+ImageSource::~ImageSource() = default;
 
 const ImageSource::Impl& ImageSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);

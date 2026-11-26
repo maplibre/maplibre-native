@@ -20,6 +20,8 @@ CustomGeometrySource::CustomGeometrySource(std::string id, const CustomGeometryS
           Scheduler::GetBackground(), options.fetchTileFunction, options.cancelTileFunction)) {}
 
 CustomGeometrySource::~CustomGeometrySource() {
+    // Destroying the loader waits for a tile fetch, which a platform binding may use to read this source on another
+    // thread.
     endTracking();
 }
 

@@ -25,9 +25,9 @@ GeoJSONSource::GeoJSONSource(std::string id, Immutable<GeoJSONOptions> options)
       sequencedScheduler(Scheduler::GetSequenced()) {}
 
 GeoJSONSource::~GeoJSONSource() {
-    endTracking();
+    // A source removed from its style can be destroyed on another thread than the one its callbacks run on, and they
+    // use the members.
     callbacks.close();
-    // The response callback uses the members, so cancel the request before they are destroyed.
     req.reset();
 }
 

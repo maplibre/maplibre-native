@@ -18,9 +18,7 @@ CustomVectorSource::CustomVectorSource(std::string id, const CustomVectorSource:
       loader(std::make_unique<Actor<CustomVectorTileLoader>>(
           Scheduler::GetBackground(), options.fetchTileFunction, options.cancelTileFunction)) {}
 
-CustomVectorSource::~CustomVectorSource() {
-    endTracking();
-}
+CustomVectorSource::~CustomVectorSource() = default;
 
 const CustomVectorSource::Impl& CustomVectorSource::impl() const {
     return static_cast<const CustomVectorSource::Impl&>(*baseImpl);

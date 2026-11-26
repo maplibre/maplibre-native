@@ -9,10 +9,6 @@ using namespace style;
 AnnotationSource::AnnotationSource()
     : Source(makeMutable<Impl>()) {}
 
-AnnotationSource::~AnnotationSource() {
-    endTracking();
-}
-
 AnnotationSource::Impl::Impl()
     : Source::Impl(SourceType::Annotations, AnnotationManager::SourceID) {}
 
