@@ -19,6 +19,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <numbers>
 #include <array>
 #include <optional>
 #include <span>
@@ -412,10 +413,21 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         return result;
     }
 
-    const auto toWorld = [&](const ScreenCoordinate& p) {
-        return TileCoordinate::fromScreenCoordinate(transformState, 0, {p.x, transformState.getSize().height - p.y}).p;
-    };
     const bool globe = transformState.isGlobeRendering();
+    const auto toWorld = [&](const ScreenCoordinate& p) -> TileCoordinatePoint {
+        const ScreenCoordinate point{p.x, transformState.getSize().height - p.y};
+        if (globe) {
+            // As in GL JS, a point on a polar cap keeps its latitude past Web Mercator's square, where no tile is.
+            const LatLng latLng = transformState.screenCoordinateToLatLng(point, LatLng::Unwrapped);
+            if (std::abs(latLng.latitude()) > util::LATITUDE_MAX) {
+                return {(util::LONGITUDE_MAX + latLng.longitude()) / util::DEGREES_MAX,
+                        0.5 - std::log(std::tan(std::numbers::pi / 4.0 + util::deg2rad(latLng.latitude()) / 2.0)) /
+                                  (2.0 * std::numbers::pi)};
+            }
+            return TileCoordinate::fromLatLng(0, latLng).p;
+        }
+        return TileCoordinate::fromScreenCoordinate(transformState, 0, point).p;
+    };
     const auto onPlanet = [&](const ScreenCoordinate& p) {
         return VerticalPerspectiveProjection::screenCoordinateHitsGlobe(transformState,
                                                                         {p.x, transformState.getSize().height - p.y});
