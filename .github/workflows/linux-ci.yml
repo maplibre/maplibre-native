@@ -263,9 +263,7 @@ jobs:
         run: wget -O mbgl-render-main "${download_url}/mbgl-render-main"
 
       - name: Download mbgl-render-legacy
-        id: download-mbgl-render-legacy
         run: wget -O mbgl-render-legacy "${download_url}/mbgl-render-${legacy_maplibre_sha}"
-        continue-on-error: true
 
       - uses: ./.github/actions/setup-bloaty
 
@@ -273,7 +271,6 @@ jobs:
         run: bloaty/build/bloaty mbgl-render -- mbgl-render-main -n 0 -s vm -d compileunits > tlus_diff_main.txt
 
       - name: Run Bloaty McBloatface on legacy
-        if: steps.download-mbgl-render-legacy.outcome == 'success'
         run: bloaty/build/bloaty mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff_legacy.txt
 
       - name: Upload Bloaty results
@@ -354,11 +351,6 @@ jobs:
       - linux-build-and-test
       - linux-coverage
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - if: github.event_name == 'pull_request'
-        uses: ./.github/actions/save-pr-number
-
       - name: Mark result as failed
         if: needs.linux-build-and-test.result != 'success' || needs.linux-coverage.result != 'success'
         run: exit 1

@@ -263,9 +263,6 @@ jobs:
           aws s3 cp MapLibre_DWARF s3://maplibre-native/size-test-ios/MapLibre_DWARF-main
           aws s3 cp MapLibre_dynamic s3://maplibre-native/size-test-ios/MapLibre_dynamic-main
 
-      - if: github.event_name == 'pull_request'
-        uses: ./.github/actions/save-pr-number
-
       - name: Build DocC documentation
         working-directory: .
         run: |

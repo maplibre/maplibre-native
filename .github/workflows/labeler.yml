@@ -9,7 +9,6 @@ jobs:
   labeler:
     if: github.event.workflow_run.conclusion == 'success'
     permissions:
-      actions: read
       contents: read
       pull-requests: write
     runs-on: ubuntu-26.04

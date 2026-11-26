@@ -158,9 +158,6 @@ jobs:
             platform/android/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk
             platform/android/MapLibreAndroidTestApp-${{ matrix.renderer }}-release-androidTest.apk
 
-      - if: github.event_name == 'pull_request' && matrix.renderer == 'opengl'
-        uses: ./.github/actions/save-pr-number
-
       - name: Set renderer env var (OpenGL or Vulkan)
         shell: bash
         run: |

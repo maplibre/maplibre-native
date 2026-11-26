@@ -21,36 +21,28 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-26.04
     outputs:
-      # empty when the results job was skipped or cancelled, or there is no PR to report to
-      pr-number: ${{ steps.parent_workflow.outputs.was_skipped_or_cancelled == 'false' && steps.get-pr-number.outputs.pr-number || '' }}
+      pr-number: ${{ steps.get-pr-number.outputs.pr-number }}
+      artifacts: ${{ steps.artifacts.outputs.names }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          sparse-checkout: |
-            .github
-            .nvmrc
+          sparse-checkout: .github/actions
           persist-credentials: false
-
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: '.nvmrc'
-
-      - run: npm install
-
-      - name: Get parent workflow result
-        id: parent_workflow
-        run: node .github/scripts/check-job-skipped.ts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TEST_RUN_ID: ${{ github.event.workflow_run.id }}
-          JOB_NAME: ios-bloaty
 
       - uses: ./.github/actions/get-pr-number
         id: get-pr-number
 
+      # results jobs that were skipped, cancelled or failed uploaded nothing
+      - name: List the results ios-ci uploaded
+        id: artifacts
+        run: echo "names=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts?per_page=100" --jq '[.artifacts[].name]')" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+
   pr-bloaty-ios:
     needs: pre_job
-    if: needs.pre_job.outputs.pr-number
+    if: needs.pre_job.outputs.pr-number && contains(fromJSON(needs.pre_job.outputs.artifacts), 'ios-bloaty-results')
     runs-on: ubuntu-26.04
     env:
       PR_NUMBER: ${{ needs.pre_job.outputs.pr-number }}

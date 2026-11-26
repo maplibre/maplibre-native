@@ -1,23 +1,12 @@
+# labeler.yml runs when this completes, with a token that can label fork PRs
 name: labeler-trigger
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+on: pull_request
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
-  save-pr-number:
+  trigger:
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          sparse-checkout: .github/actions
-          persist-credentials: false
-
-      - uses: ./.github/actions/save-pr-number
+      - run: echo "labeler.yml labels this PR"
