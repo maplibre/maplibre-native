@@ -89,6 +89,7 @@ void HeatmapLayer::setHeatmapColorTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<HeatmapColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions HeatmapLayer::getHeatmapColorTransition() const {
@@ -116,6 +117,7 @@ void HeatmapLayer::setHeatmapIntensityTransition(const TransitionOptions& option
     auto impl_ = mutableImpl();
     impl_->paint.template get<HeatmapIntensity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions HeatmapLayer::getHeatmapIntensityTransition() const {
@@ -143,6 +145,7 @@ void HeatmapLayer::setHeatmapOpacityTransition(const TransitionOptions& options)
     auto impl_ = mutableImpl();
     impl_->paint.template get<HeatmapOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions HeatmapLayer::getHeatmapOpacityTransition() const {
@@ -170,6 +173,7 @@ void HeatmapLayer::setHeatmapRadiusTransition(const TransitionOptions& options) 
     auto impl_ = mutableImpl();
     impl_->paint.template get<HeatmapRadius>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions HeatmapLayer::getHeatmapRadiusTransition() const {
@@ -197,6 +201,7 @@ void HeatmapLayer::setHeatmapWeightTransition(const TransitionOptions& options) 
     auto impl_ = mutableImpl();
     impl_->paint.template get<HeatmapWeight>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions HeatmapLayer::getHeatmapWeightTransition() const {

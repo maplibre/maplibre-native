@@ -91,7 +91,7 @@ LayerManagerDefault::LayerManagerDefault() {
 void LayerManagerDefault::addLayerType(std::unique_ptr<LayerFactory> factory) {
     std::string type{factory->getTypeInfo()->type};
     if (!type.empty()) {
-        typeToFactory.emplace(std::make_pair(std::move(type), factory.get()));
+        typeToFactory.emplace(std::move(type), factory.get());
     } else {
         Log::Warning(Event::Setup,
                      "Failure adding layer factory. getTypeInfo() returned an empty "
@@ -123,7 +123,7 @@ LayerManager* LayerManager::get() noexcept {
 }
 
 #if defined(MBGL_LAYER_LINE_DISABLE_ALL) || defined(MBGL_LAYER_SYMBOL_DISABLE_ALL) || \
-    defined(MBGL_LAYER_FILL_DISABLE_ALL)
+    defined(MBGL_LAYER_FILL_DISABLE_ALL) || defined(MLN_LEGACY_ANNOTATIONS_DISABLED)
 const bool LayerManager::annotationsEnabled = false;
 #else
 const bool LayerManager::annotationsEnabled = true;

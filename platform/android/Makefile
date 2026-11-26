@@ -14,11 +14,9 @@ else
   $(error BUILDTYPE must be Debug, Sanitize, Release or RelWithDebInfo)
 endif
 
-ifeq ($(RENDERER), opengl)
-else ifeq ($(RENDERER), vulkan)
-else ifeq ($(RENDERER), multiBackend)
-else
-  $(error RENDERER must be 'opengl' or 'vulkan' or 'multiBackend')
+# A product flavor: the renderer, optionally followed by WithPluginApi (e.g. openglWithPluginApi)
+ifeq ($(filter $(patsubst %WithPluginApi,%,$(RENDERER)),opengl vulkan multiBackend),)
+  $(error RENDERER must be 'opengl', 'vulkan' or 'multiBackend', optionally followed by 'WithPluginApi')
 endif
 
 buildtype := $(shell echo "$(BUILDTYPE)" | tr "[A-Z]" "[a-z]")
@@ -223,16 +221,17 @@ run-android-unit-test:
 run-android-unit-test-%:
 	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:test$(RENDERER)DebugUnitTest --info --tests "$*"
 
-DEBUG_TAR_FILE_NAME := $(if $(findstring opengl,$(RENDERER)),debug-symbols-opengl-$(MLN_ANDROID_APK_SUFFIX).tar.gz,debug-symbols-$(RENDERER)-$(MLN_ANDROID_APK_SUFFIX).tar.gz)
+DEBUG_TAR_FILE_NAME := debug-symbols-$(RENDERER)-$(MLN_ANDROID_APK_SUFFIX).tar.gz
 
 # Builds a release package and .tar.gz with debug symbols of the Android SDK
+# (the native libraries of the variant before they are stripped)
 .PHONY: apackage
 apackage:
 	echo "Building for $(RENDERER)"
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all assemble$(RENDERER)$(BUILDTYPE)
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all :MapLibreAndroid:assemble$(RENDERER)$(BUILDTYPE)
 	mkdir -p build
-	tar -czvf build/$(DEBUG_TAR_FILE_NAME) -C MapLibreAndroid/build/intermediates/library_jni/$(RENDERER)$(BUILDTYPE)/*JniLibsProjectOnly/jni .
+	tar -czvf build/$(DEBUG_TAR_FILE_NAME) -C MapLibreAndroid/build/intermediates/merged_native_libs/$(RENDERER)$(BUILDTYPE)/*/out/lib .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test

@@ -61,6 +61,17 @@ void RenderColorReliefLayer::transition(const TransitionParameters& parameters) 
 }
 
 void RenderColorReliefLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    if (colorRampGlobalState != parameters.globalState) {
+        const auto& rampValue = unevaluated.get<ColorReliefColor>().getValue();
+        const bool rampAffected = (rampValue.getDependencies() & style::expression::Dependency::GlobalState) &&
+                                  style::expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
+                                                                              parameters.changedGlobalStateKeys.get());
+        colorRampGlobalState = parameters.globalState;
+        if (rampAffected) {
+            updateColorRamp();
+        }
+    }
+
     const auto previousProperties = staticImmutableCast<ColorReliefLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<ColorReliefLayerProperties>(
         staticImmutableCast<ColorReliefLayer::Impl>(baseImpl),
@@ -134,6 +145,7 @@ void RenderColorReliefLayer::updateColorRamp() {
 
             // Create evaluation context with elevation as color ramp parameter
             expression::EvaluationContext context(std::nullopt, nullptr, static_cast<double>(elevation));
+            context.globalState = colorRampGlobalState.get();
 
             expression::EvaluationResult result = expr.evaluate(context);
 
@@ -158,7 +170,7 @@ void RenderColorReliefLayer::updateColorRamp() {
             float elevation = minElevation + t * (maxElevation - minElevation);
             elevationStopsVector.push_back(elevation);
 
-            Color color = colorValue.evaluate(static_cast<double>(elevation));
+            Color color = colorValue.evaluate(static_cast<double>(elevation), colorRampGlobalState.get());
             colorStopsVector.push_back(color);
         }
     }
@@ -242,7 +254,10 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     if (!staticDataSharedVertices) {
         staticDataSharedVertices = std::make_shared<ColorReliefVertexVector>(RenderStaticData::rasterVertices());
     }
-    const auto staticDataIndices = RenderStaticData::quadTriangleIndices();
+    if (!staticDataSharedIndices) {
+        staticDataSharedIndices = std::make_shared<gfx::IndexVector<gfx::Triangles>>(
+            RenderStaticData::quadTriangleIndices());
+    }
     const auto staticDataSegments = RenderStaticData::rasterSegments();
 
     // Update color ramp textures if changed
@@ -277,6 +292,25 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
+    // The bucket remembers its DEM texture weakly: the tile's drawables own it, so it is shared by the layers
+    // that draw the tile and freed with the drawables, while the bucket stays in the tile cache.
+    const auto getDEMTexture = [&](HillshadeBucket& bucket) -> std::shared_ptr<gfx::Texture2D> {
+        if (auto demTexture = bucket.demTexture.lock()) {
+            return demTexture;
+        }
+        auto demImagePtr = bucket.getDEMData().getImagePtr();
+        if (!demImagePtr || !demImagePtr->valid()) {
+            return nullptr;
+        }
+        auto demTexture = context.createTexture2D();
+        demTexture->setImage(std::move(demImagePtr));
+        demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                             .wrapU = gfx::TextureWrapType::Clamp,
+                                             .wrapV = gfx::TextureWrapType::Clamp});
+        bucket.demTexture = demTexture;
+        return demTexture;
+    };
+
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -305,7 +339,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             segments = &bucket.segments;
         } else {
             vertices = staticDataSharedVertices;
-            indices = std::make_shared<gfx::IndexVector<gfx::Triangles>>(staticDataIndices);
+            indices = staticDataSharedIndices;
         }
 
         if (!builder) {
@@ -349,15 +383,10 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                             segments->size());
 
             // Update textures
-            auto demImagePtr = bucket.getDEMData().getImagePtr();
-            if (!demImagePtr || !demImagePtr->valid()) {
+            const auto demTexture = getDEMTexture(bucket);
+            if (!demTexture) {
                 return false;
             }
-            std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
-            demTexture->setImage(demImagePtr);
-            demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
-                                                 .wrapU = gfx::TextureWrapType::Clamp,
-                                                 .wrapV = gfx::TextureWrapType::Clamp});
             drawable.setTexture(demTexture, idColorReliefImageTexture);
 
             if (elevationStopsTexture) {
@@ -384,19 +413,14 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         builder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
 
         // Bind DEM texture
-        auto demImagePtr = bucket.getDEMData().getImagePtr();
-        if (!demImagePtr || !demImagePtr->valid()) {
+        const auto demTexture = getDEMTexture(bucket);
+        if (!demTexture) {
             mln::Log::Warning(mln::Event::Render, "ColorRelief: DEM image not valid for tile");
             continue; // Skip this tile if DEM data is not ready
         }
 
         const auto& demData = bucket.getDEMData();
 
-        std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
-        demTexture->setImage(demImagePtr);
-        demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
-                                             .wrapU = gfx::TextureWrapType::Clamp,
-                                             .wrapV = gfx::TextureWrapType::Clamp});
         builder->setTexture(demTexture, idColorReliefImageTexture);
 
         // Bind color ramp textures

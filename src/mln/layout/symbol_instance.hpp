@@ -115,6 +115,8 @@ public:
     std::vector<style::SymbolAnchorType> getTextAnchors() const;
 
 #if MLN_SYMBOL_GUARDS
+    /// True only with the environment variable `MLN_SYMBOL_GUARDS=1`, read once on the first check.
+    static bool guardsEnabled();
     /// Check all guard blocks
     bool check(const source_location&) const;
     /// Check that an index is in the valid range

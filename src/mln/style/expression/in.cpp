@@ -123,7 +123,7 @@ ParseResult In::parse(const Convertible& value, ParsingContext& ctx) {
 bool In::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::In) {
         auto rhs = static_cast<const In*>(&e);
-        return *needle == *(rhs->needle) && *haystack == *(rhs->haystack);
+        return *needle == *rhs->needle && *haystack == *rhs->haystack;
     }
     return false;
 }

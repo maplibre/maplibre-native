@@ -53,9 +53,10 @@ public:
         const TransformState& transformState,
         const std::unordered_map<std::string, const RenderLayer*>& layers,
         const RenderedQueryOptions& options,
+        const GlobalStateMap* globalState,
         const mat4& projMatrix) const final;
 
-    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const final;
+    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const final;
 
     void reduceMemoryUse() final {}
     void dumpDebugLogs() const final;

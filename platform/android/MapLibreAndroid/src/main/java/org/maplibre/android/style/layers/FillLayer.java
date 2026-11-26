@@ -213,7 +213,7 @@ public class FillLayer extends Layer {
   }
 
   /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
    *
    * @return int representation of a rgba string color
    * @throws RuntimeException thrown if property isn't a value
@@ -378,6 +378,18 @@ public class FillLayer extends Layer {
     nativeSetFillPatternTransition(options.getDuration(), options.getDelay());
   }
 
+  /**
+   * Get the FillRoundedCornerDistance property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getFillRoundedCornerDistance() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("fill-rounded-corner-distance", nativeGetFillRoundedCornerDistance());
+  }
+
   @NonNull
   @Keep
   private native Object nativeGetFillSortKey();
@@ -444,6 +456,10 @@ public class FillLayer extends Layer {
 
   @Keep
   private native void nativeSetFillPatternTransition(long duration, long delay);
+
+  @NonNull
+  @Keep
+  private native Object nativeGetFillRoundedCornerDistance();
 
   @Override
   @Keep

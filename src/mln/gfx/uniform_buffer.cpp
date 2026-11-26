@@ -16,6 +16,9 @@ UniformBufferArray& UniformBufferArray::operator=(UniformBufferArray&& other) {
 }
 
 UniformBufferArray& UniformBufferArray::operator=(const UniformBufferArray& other) {
+    if (this == &other) {
+        return *this;
+    }
     for (size_t id = 0; id < other.uniformBufferVector.size(); id++) {
         uniformBufferVector[id] = other.uniformBufferVector[id];
     }

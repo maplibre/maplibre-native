@@ -177,6 +177,24 @@ TEST(Transform, UnwrappedLatLng) {
     ASSERT_NEAR(wrappedLeftwards.longitude(), -77.0, 1e-8);
 }
 
+// The copy unwrapForShortestPath finds for a wrapped center, a point 180 degrees away included, and that copy moved
+// into the center's own world when bounds keep the center past the antimeridian.
+TEST(Transform, LatLngNearCenter) {
+    Transform transform;
+    transform.resize({512, 512});
+
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, -10.0}).withZoom(4.0));
+    EXPECT_NEAR(-181.0, transform.getState().latLngNearCenter({0.0, 179.0}).longitude(), 1e-9);
+    EXPECT_NEAR(170.0, transform.getState().latLngNearCenter({0.0, 170.0}).longitude(), 1e-9);
+
+    transform.setLatLngBounds(LatLngBounds::hull({-10.0, 170.0}, {10.0, 190.0}));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 181.0}));
+    ASSERT_NEAR(181.0, transform.getState().getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(179.0, transform.getState().latLngNearCenter({0.0, 179.0}).longitude(), 1e-9);
+    EXPECT_NEAR(180.2, transform.getState().latLngNearCenter({0.0, -179.8}).longitude(), 1e-9);
+    EXPECT_NEAR(350.0, transform.getState().latLngNearCenter({0.0, -10.0}).longitude(), 1e-9);
+}
+
 TEST(Transform, ConstrainHeightOnly) {
     Transform transform(TransformObserver::nullObserver(), ConstrainMode::HeightOnly);
     transform.resize({2, 2});
@@ -463,6 +481,30 @@ TEST(Transform, Antimeridian) {
     coordinateFromPixel = transform.screenCoordinateToLatLng(pixelWaikiriShortest);
     ASSERT_NEAR(coordinateWaikiri.latitude(), coordinateFromPixel.latitude(), 1e-4);
     ASSERT_NEAR(coordinateWaikiri.longitude(), coordinateFromPixel.longitude(), 1e-4);
+}
+
+// A zoom around a point across the antimeridian leaves the center wrapped, as GL JS's setLocationAtPoint does. Bounds
+// across the antimeridian keep it in their range, as easeTo does.
+TEST(Transform, ZoomAroundAPointAcrossTheAntimeridian) {
+    for (const bool bounded : {false, true}) {
+        SCOPED_TRACE(bounded ? "bounds from 170 to 190 degrees" : "no bounds");
+        Transform transform;
+        transform.resize({256, 256});
+        if (bounded) {
+            transform.setLatLngBounds(LatLngBounds::hull({-10.0, 170.0}, {10.0, 190.0}));
+        }
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 179.9}).withZoom(5.0));
+        transform.jumpTo(CameraOptions().withZoom(6.0).withAnchor(ScreenCoordinate{230.0, 128.0}));
+
+        const double longitude = transform.getLatLng(LatLng::Unwrapped).longitude();
+        if (bounded) {
+            EXPECT_GT(longitude, 180.0);
+            EXPECT_LT(longitude, 190.0);
+        } else {
+            EXPECT_GT(longitude, -180.0);
+            EXPECT_LT(longitude, -178.0);
+        }
+    }
 }
 
 TEST(Transform, Camera) {

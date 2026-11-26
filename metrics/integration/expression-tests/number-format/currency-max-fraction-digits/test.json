@@ -1,0 +1,33 @@
+{
+  "expression": [
+    "number-format",
+    12.3,
+    {
+        "locale": "en-US",
+        "currency": ["get", "currency"],
+        "max-fraction-digits": ["get", "max"]
+    }
+  ],
+  "inputs": [
+    [{}, {"properties": {"currency": "USD", "max": 0}}],
+    [{}, {"properties": {"currency": "USD", "max": 1}}]
+  ],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": false,
+      "isZoomConstant": true,
+      "type": "string"
+    },
+    "outputs": ["$12", "$12.3"],
+    "serialized": [
+      "number-format",
+      12.3,
+      {
+          "locale": "en-US",
+          "currency": ["string", ["get", "currency"]],
+          "max-fraction-digits": ["number", ["get", "max"]]
+      }
+    ]
+  }
+}

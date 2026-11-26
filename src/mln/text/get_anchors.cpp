@@ -15,7 +15,7 @@ float getAngleWindowSize(const float textLeft, const float textRight, const floa
 float getLineLength(const GeometryCoordinates& line) {
     float lineLength = 0;
     for (auto it = line.begin(), end = line.end() - 1; it != end; it++) {
-        lineLength += util::dist<float>(*(it), *(it + 1));
+        lineLength += util::dist<float>(*it, *(it + 1));
     }
     return lineLength;
 }
@@ -42,7 +42,7 @@ Anchors resample(const GeometryCoordinates& line,
 
     std::size_t i = 0u;
     for (auto it = line.begin(), end = line.end() - 1; it != end; it++, i++) {
-        const GeometryCoordinate& a = *(it);
+        const GeometryCoordinate& a = *it;
         const GeometryCoordinate& b = *(it + 1);
 
         const auto segmentDist = util::dist<float>(a, b);
@@ -153,7 +153,7 @@ std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
 
     std::size_t i = 0u;
     for (auto it = line.begin(), end = line.end() - 1; it != end; it++, i++) {
-        const GeometryCoordinate& a = *(it);
+        const GeometryCoordinate& a = *it;
         const GeometryCoordinate& b = *(it + 1);
 
         const auto segmentDistance = util::dist<float>(a, b);

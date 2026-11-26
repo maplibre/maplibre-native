@@ -46,10 +46,10 @@ public:
     static int startTimeout(CURLM *multi, long timeout_ms, void *userp);
     static void onTimeout(HTTPFileSource::Impl *context);
 
-    void perform(curl_socket_t s, util::RunLoop::Event event);
+    void perform(curl_socket_t s, util::RunLoop::Event event) const;
     CURL *getHandle();
     void returnHandle(CURL *handle);
-    void checkMultiInfo();
+    void checkMultiInfo() const;
 
     // Used as the CURL timer function to periodically check for socket updates.
     util::Timer timeout;
@@ -152,7 +152,7 @@ void HTTPFileSource::Impl::returnHandle(CURL *handle) {
     handles.push(handle);
 }
 
-void HTTPFileSource::Impl::checkMultiInfo() {
+void HTTPFileSource::Impl::checkMultiInfo() const {
     CURLMsg *message = nullptr;
     int pending = 0;
 
@@ -172,7 +172,7 @@ void HTTPFileSource::Impl::checkMultiInfo() {
     }
 }
 
-void HTTPFileSource::Impl::perform(curl_socket_t s, util::RunLoop::Event events) {
+void HTTPFileSource::Impl::perform(curl_socket_t s, util::RunLoop::Event events) const {
     int flags = 0;
 
     if (events == util::RunLoop::Event::Read) {
@@ -245,7 +245,7 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
 
 void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
     std::scoped_lock lock(resourceOptionsMutex);
-    resourceOptions = options;
+    resourceOptions = std::move(options);
 }
 
 ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
@@ -255,7 +255,7 @@ ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
 
 void HTTPFileSource::Impl::setClientOptions(ClientOptions options) {
     std::scoped_lock lock(clientOptionsMutex);
-    clientOptions = options;
+    clientOptions = std::move(options);
 }
 
 ClientOptions HTTPFileSource::Impl::getClientOptions() {

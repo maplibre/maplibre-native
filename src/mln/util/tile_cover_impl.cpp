@@ -327,7 +327,7 @@ void TileCover::Impl::nextRow() {
     int32_t nzRule = xps[0].winding ? 1 : -1;
     for (size_t i = 1; i < xps.size(); i++) {
         auto xp = xps[i];
-        if (!(isClosed && nzRule != 0)) {
+        if (!isClosed || nzRule == 0) {
             if (xp.xmin > x_max && xp.xmax >= x_max) {
                 tileXSpans.emplace(x_min, x_max);
                 x_min = xp.xmin;

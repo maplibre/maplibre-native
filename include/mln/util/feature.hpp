@@ -8,14 +8,15 @@
 
 namespace mln {
 
-using Value = mapbox::base::Value;
-using NullValue = mapbox::base::NullValue;
+using mapbox::base::NullValue;
+using mapbox::base::Value;
 using PropertyMap = mapbox::base::ValueObject;
 using FeatureIdentifier = mapbox::feature::identifier;
 using GeoJSONFeature = mapbox::feature::feature<double>;
 using FeatureState = mapbox::base::ValueObject;
 using FeatureStates = std::unordered_map<std::string, FeatureState>;       // <featureID, FeatureState>
 using LayerFeatureStates = std::unordered_map<std::string, FeatureStates>; // <sourceLayer, FeatureStates>
+using GlobalStateMap = mapbox::base::ValueObject;                          // <property name, value>
 
 class Feature : public GeoJSONFeature {
 public:

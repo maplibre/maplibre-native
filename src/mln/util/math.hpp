@@ -1,14 +1,13 @@
 #pragma once
 
-#include <cmath>
+#include <mln/util/geometry.hpp>
+
 #include <array>
+#include <cmath>
 #include <limits>
 #include <numbers>
 
-#include <mln/util/geometry.hpp>
-
-namespace mln {
-namespace util {
+namespace mln::util {
 
 // TODO: split this file up into individual headers, following mln/math/*.hpp.
 
@@ -125,5 +124,11 @@ inline T division(const T dividend, const T divisor, const T nan) {
     }
 }
 
-} // namespace util
-} // namespace mln
+/// Equivalent to the GLSL-style mod function, using floor instead of truncation.
+/// Unlike the C++ or HLSL versions, the result is always positive.
+template <typename TDividend, typename TDivisor>
+inline auto gl_fmod(TDividend x, TDivisor y) {
+    return x - y * std::floor(x / y);
+}
+
+} // namespace mln::util

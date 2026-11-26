@@ -70,6 +70,21 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
                 setupNavigationView(maplibreMap.style!!.layers)
             }
         }
+        mapView.addOnDidFinishRenderingFrameListener { complete, stats ->
+            if (complete) {
+                Timber.d("onDidFinishRenderingFrame: %s",
+                    stats.renderedFeatures
+                                 .entries
+                                 .sortedBy { it.key.layerID }
+                                 .joinToString(", ") {
+                        "${it.key.layerID}: ${it.value.size}"
+                    })
+                mapView.getMapAsync { map ->
+                    Timber.d("Rendered feature count: %d",
+                    map.getRenderedFeatureCount(null, null, null))
+                }
+            }
+        }
         mapView.tag = true
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
@@ -78,6 +93,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     protected open fun setupMapLibreMapOptions(): MapLibreMapOptions {
         return MapLibreMapOptions.createFromAttributes(this, null)
+            .featureInfoEnabled(true)
     }
 
     override fun onMapReady(map: MapLibreMap) {

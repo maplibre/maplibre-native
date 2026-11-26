@@ -20,7 +20,8 @@
 #define MBGL_CHECK_ERROR(cmd) (cmd)
 #endif
 
-struct __GLsync;
+// The tag name is defined by the GL headers.
+struct __GLsync; // NOLINT(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp)
 
 namespace mln {
 namespace platform {

@@ -18,7 +18,7 @@ bool PluginLayer::Impl::hasLayoutDifference([[maybe_unused]] const Layer::Impl& 
 }
 
 // Return this property as json
-std::string PluginLayerProperty::asJSON() {
+std::string PluginLayerProperty::asJSON() const {
     std::string tempResult;
 
     if (_propertyType == PropertyType::SingleFloat) {
@@ -60,7 +60,7 @@ std::string PluginLayerPropertyManager::propertiesAsJSON() {
     std::string tempResult = "{";
 
     bool firstItem = true;
-    for (auto d : _properties) {
+    for (const auto& d : _properties) {
         if (!firstItem) {
             tempResult.append(", ");
         }

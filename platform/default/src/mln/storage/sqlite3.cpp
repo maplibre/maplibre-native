@@ -11,16 +11,6 @@
 #include <mln/util/traits.hpp>
 #include <mln/util/logging.hpp>
 
-#define MBGL_CONSTRUCTOR(f) \
-    static void f(void);    \
-    struct f##_t_ {         \
-        f##_t_(void) {      \
-            f();            \
-        }                   \
-    };                      \
-    static f##_t_ f##_;     \
-    static void f(void)
-
 namespace mapbox {
 namespace sqlite {
 
@@ -74,8 +64,8 @@ public:
         }
     }
 
-    void setBusyTimeout(std::chrono::milliseconds timeout);
-    void exec(const std::string& sql);
+    void setBusyTimeout(std::chrono::milliseconds timeout) const;
+    void exec(const std::string& sql) const;
 
     sqlite3* db;
 };
@@ -96,7 +86,7 @@ public:
         sqlite3_finalize(stmt);
     }
 
-    void check(int err) {
+    void check(int err) const {
         if (err != SQLITE_OK) {
             throw Exception{err, sqlite3_errmsg(sqlite3_db_handle(stmt))};
         }
@@ -114,15 +104,15 @@ void logSqlMessage(void*, const int err, const char* msg) {
 #endif
 
 // NOLINTBEGIN(misc-use-anonymous-namespace)
-MBGL_CONSTRUCTOR(initialize) {
+[[maybe_unused]] const bool initialized = [] {
     if (sqlite3_libversion_number() / 1000000 != SQLITE_VERSION_NUMBER / 1000000) {
         char message[96];
-        snprintf(message,
-                 96,
-                 "sqlite3 libversion mismatch: headers report %d, but library "
-                 "reports %d",
-                 SQLITE_VERSION_NUMBER,
-                 sqlite3_libversion_number());
+        (void)snprintf(message,
+                       96,
+                       "sqlite3 libversion mismatch: headers report %d, but library "
+                       "reports %d",
+                       SQLITE_VERSION_NUMBER,
+                       sqlite3_libversion_number());
         throw std::runtime_error(message);
     }
 
@@ -130,7 +120,9 @@ MBGL_CONSTRUCTOR(initialize) {
     // Enable SQLite logging before initializing the database.
     sqlite3_config(SQLITE_CONFIG_LOG, &logSqlMessage, nullptr);
 #endif
-}
+
+    return true;
+}();
 // NOLINTEND(misc-use-anonymous-namespace)
 
 std::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
@@ -166,12 +158,18 @@ Database& Database::operator=(Database&& other) noexcept {
 
 Database::~Database() = default;
 
+std::string Database::getFilename() const {
+    assert(impl);
+    const auto* filename = sqlite3_db_filename(impl->db, "main");
+    return filename ? filename : "";
+}
+
 void Database::setBusyTimeout(std::chrono::milliseconds timeout) {
     assert(impl);
     impl->setBusyTimeout(timeout);
 }
 
-void DatabaseImpl::setBusyTimeout(std::chrono::milliseconds timeout) {
+void DatabaseImpl::setBusyTimeout(std::chrono::milliseconds timeout) const {
     const int err = sqlite3_busy_timeout(
         db, int(std::min<std::chrono::milliseconds::rep>(timeout.count(), std::numeric_limits<int>::max())));
     if (err != SQLITE_OK) {
@@ -184,7 +182,7 @@ void Database::exec(const std::string& sql) {
     impl->exec(sql);
 }
 
-void DatabaseImpl::exec(const std::string& sql) {
+void DatabaseImpl::exec(const std::string& sql) const {
     char* msg = nullptr;
     const int err = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &msg);
     if (msg) {
@@ -327,7 +325,7 @@ void Query::bindBlob(int offset, const std::vector<uint8_t>& value, bool retain)
 template <>
 void Query::bind(int offset, std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds> value) {
     assert(stmt.impl);
-    stmt.impl->check(sqlite3_bind_int64(stmt.impl->stmt, offset, std::chrono::system_clock::to_time_t(value)));
+    stmt.impl->check(sqlite3_bind_int64(stmt.impl->stmt, offset, value.time_since_epoch().count()));
 }
 
 template <>
@@ -407,8 +405,8 @@ std::vector<uint8_t> Query::get(int offset) {
 template <>
 std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds> Query::get(int offset) {
     assert(stmt.impl);
-    return std::chrono::time_point_cast<std::chrono::seconds>(
-        std::chrono::system_clock::from_time_t(sqlite3_column_int64(stmt.impl->stmt, offset)));
+    return std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>(
+        std::chrono::seconds(sqlite3_column_int64(stmt.impl->stmt, offset)));
 }
 
 template <>

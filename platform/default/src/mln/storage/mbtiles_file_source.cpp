@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <sstream>
 #include <map>
 
@@ -50,7 +51,7 @@ public:
         std::stringstream ss(s);
         std::string item;
         while (std::getline(ss, item, delim)) {
-            double value = atof(item.c_str());
+            double value = std::strtod(item.c_str(), nullptr);
             elems.push_back(value);
         }
         return elems;
@@ -188,12 +189,22 @@ public:
 
     // Load data for specific tile
     void request_tile(const Resource &resource, ActorRef<FileSourceRequest> req) {
+        // A matching etag means the loader already has this tile, so skip the re-read and re-decode
+        if (resource.priorEtag && *resource.priorEtag == resource.url) {
+            Response response;
+            response.notModified = true;
+            response.expires = Timestamp::max();
+            response.etag = resource.url;
+            req.invoke(&FileSourceRequest::setResponse, response);
+            return;
+        }
+
         std::string base_path = url_to_path(resource.url);
         std::string path = db_path(base_path);
         auto &db = get_db(path);
 
         int iy = resource.tileData->y;
-        int iz = resource.tileData->z;
+        int iz = static_cast<unsigned char>(resource.tileData->z);
 
         auto x = std::to_string(resource.tileData->x);
         auto y = std::to_string((int)(pow(2, iz) - 1) - iy);
@@ -224,7 +235,7 @@ public:
 
     void setResourceOptions(ResourceOptions options) {
         std::scoped_lock lock(resourceOptionsMutex);
-        resourceOptions = options;
+        resourceOptions = std::move(options);
     }
 
     ResourceOptions getResourceOptions() {
@@ -234,7 +245,7 @@ public:
 
     void setClientOptions(ClientOptions options) {
         std::scoped_lock lock(clientOptionsMutex);
-        clientOptions = options;
+        clientOptions = std::move(options);
     }
 
     ClientOptions getClientOptions() {

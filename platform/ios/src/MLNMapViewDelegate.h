@@ -3,7 +3,7 @@
 #import "MLNCameraChangeReason.h"
 #import "MLNRenderingStats.h"
 #import "MLNTileOperation.h"
-#import "Mapbox.h"
+#import "MapLibre.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

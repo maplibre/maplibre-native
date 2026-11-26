@@ -2,6 +2,10 @@
 
 #include <mln/shaders/layer_ubo.hpp>
 
+#if MLN_WITH_PLUGINS
+#include <mln/plugin/plugin_api.h>
+#endif
+
 #include <algorithm>
 
 namespace mln {
@@ -162,6 +166,13 @@ static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(
                                                           static_cast<uint32_t>(symbolLayerUBOCount)});
 
 enum {
+    idFillPosVertexDrawableUBO = getEnumValue(fillLayerUBOCount, drawableSSBOStartId),
+    idFillNeighborVertexDrawableUBO,
+    idFillDataVertexDrawableUBO,
+    fillDrawableSSBOCount
+};
+
+enum {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
     idFillExtrusionInstancedDrawableUBO = getEnumValue(fillExtrusionLayerUBOCount, drawableSSBOStartId),
 #endif
@@ -181,6 +192,7 @@ enum {
 // drawable UBOs
 
 static constexpr uint32_t drawableUBOStartId = std::max({static_cast<uint32_t>(drawableSSBOStartId),
+                                                         static_cast<uint32_t>(fillDrawableSSBOCount),
                                                          static_cast<uint32_t>(fillExtrusionDrawableSSBOCount),
                                                          static_cast<uint32_t>(symbolDrawableSSBOCount)});
 
@@ -341,6 +353,7 @@ enum {
 
 enum {
     idLineImageTexture,
+    idLineDashTexture,
     lineTextureCount
 };
 
@@ -413,6 +426,8 @@ enum {
 
 enum {
     idFillPosVertexAttribute,
+    idFillNeighborVertexAttribute,
+    idFillTriangleIndicesAttribute,
 
     // Data driven
     idFillColorVertexAttribute,
@@ -545,6 +560,9 @@ enum {
 };
 
 static constexpr uint32_t maxAttributeCountPerShader = std::max({
+#if MLN_WITH_PLUGINS
+    static_cast<uint32_t>(MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES),
+#endif
     static_cast<uint32_t>(backgroundVertexAttributeCount),
     static_cast<uint32_t>(circleVertexAttributeCount),
     static_cast<uint32_t>(clippingMaskVertexAttributeCount),

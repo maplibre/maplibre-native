@@ -30,7 +30,7 @@ public:
     void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) try {
         if (useThread[underlying_type(severity)]) {
             auto threadName = platform::getCurrentThreadName();
-            scheduler->schedule([=]() { Log::record(severity, event, code, msg, threadName); });
+            scheduler->schedule([=] { Log::record(severity, event, code, msg, threadName); });
         } else {
             Log::record(severity, event, code, msg, {});
         }

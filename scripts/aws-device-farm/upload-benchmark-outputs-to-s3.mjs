@@ -7,8 +7,8 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
  * @returns {never}
  */
 function usage() {
-  console.error("Uploads a directory of benchmark results (JSON files) to S3");
-  console.error("Usage: node upload-benchmark-outputs-to-s3.mjs --dir DIR");
+  console.error("Uploads a directory of benchmark results (JSON files) to s3://maplibre-native/PLATFORM-benchmark-render/");
+  console.error("Usage: node upload-benchmark-outputs-to-s3.mjs --dir DIR --platform android|ios");
   process.exit(1);
 }
 
@@ -20,17 +20,22 @@ function getArgs() {
       dir: {
         type: "string",
       },
+      platform: {
+        type: "string",
+      },
     },
   });
-  const { dir } = values;
+  const { dir, platform } = values;
   if (typeof dir !== 'string') usage();
+  if (platform !== 'android' && platform !== 'ios') usage();
 
   return {
-    dir
+    dir,
+    platform
   }
 }
 
-const { dir } = getArgs();
+const { dir, platform } = getArgs();
 
 processFiles(dir);
 
@@ -45,7 +50,7 @@ processFiles(dir);
 async function uploadFileToS3(filePath, gitRevision, filename) {
   const s3Client = new S3Client({ region: "eu-central-1" });
   const bucket = "maplibre-native";
-  const key = `android-benchmark-render/${gitRevision}/${filename}`;
+  const key = `${platform}-benchmark-render/${gitRevision}/${filename}`;
 
   try {
     const fileContent = await fs.readFile(filePath);

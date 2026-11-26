@@ -45,8 +45,8 @@ namespace style {
 namespace expression {
 
 namespace {
-const auto requiredProps = std::array<std::string_view, 5>{
-    "zoom", "heatmap-density", "line-progress", "accumulated", "elevation"};
+const auto requiredProps = std::array<std::string_view, 6>{
+    "zoom", "heatmap-density", "line-progress", "accumulated", "elevation", "global-state"};
 
 bool isConstant(const Expression& expression) {
     const auto kind = expression.getKind();
@@ -125,6 +125,9 @@ constexpr const auto expressionRegistry = mapbox::eternal::hash_map<mapbox::eter
      {"format", FormatExpression::parse},
      {"image", ImageExpression::parse},
      {"interpolate", parseInterpolate},
+     {"interpolate-hcl", parseInterpolate},
+     {"interpolate-lab", parseInterpolate},
+     {"interpolate-oklch", parseInterpolate},
      {"length", Length::parse},
      {"let", Let::parse},
      {"literal", Literal::parse},
@@ -285,7 +288,7 @@ std::string ParsingContext::getCombinedErrors() const {
     std::string combinedError;
     for (const ParsingError& parsingError : *errors) {
         if (!combinedError.empty()) {
-            combinedError += "\n";
+            combinedError += '\n';
         }
         if (!parsingError.key.empty()) {
             combinedError += parsingError.key + ": ";

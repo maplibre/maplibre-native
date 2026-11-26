@@ -155,7 +155,10 @@ if(NOT WIN32 AND MLN_WITH_OPENGL)
     )
 endif()
 
-
+if(MLN_WITH_PLUGINS)
+    target_compile_definitions(mbgl-glfw PRIVATE MLN_GLFW_PLUGINS=1)
+    target_link_libraries(mbgl-glfw PRIVATE mln-ngon-layer mln-fill-extrusion)
+endif()
 
 set_property(TARGET mbgl-glfw PROPERTY FOLDER MapLibre)
 

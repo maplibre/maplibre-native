@@ -47,11 +47,12 @@ std::unordered_map<std::string, std::vector<Feature>> RenderRasterSource::queryR
     const TransformState&,
     const std::unordered_map<std::string, const RenderLayer*>&,
     const RenderedQueryOptions&,
+    const GlobalStateMap*,
     const mat4&) const {
     return std::unordered_map<std::string, std::vector<Feature>>{};
 }
 
-std::vector<Feature> RenderRasterSource::querySourceFeatures(const SourceQueryOptions&) const {
+std::vector<Feature> RenderRasterSource::querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const {
     return {};
 }
 

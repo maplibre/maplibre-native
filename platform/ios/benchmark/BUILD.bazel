@@ -1,3 +1,5 @@
+load("@rules_apple//apple:ios.bzl", "ios_unit_test")
+load("@rules_cc//cc:defs.bzl", "objc_library")
 load("//platform/ios/bazel:macros.bzl", "info_plist")
 
 filegroup(
@@ -37,6 +39,21 @@ info_plist(
     out = "Info-benchmark.plist",
     base_info_plist = "Info.plist",
     visibility = ["//platform/ios:__pkg__"],
+)
+
+objc_library(
+    name = "benchmark_tests_srcs",
+    testonly = True,
+    srcs = ["BenchmarkTests.m"],
+)
+
+# Runs the benchmark on a device; see platform/ios/scripts/run-benchmark.sh.
+ios_unit_test(
+    name = "BenchmarkTests",
+    minimum_os_version = "15.5",
+    provisioning_profile = "//platform/ios:xcode_profile",
+    test_host = "//platform/ios:BenchmarkApp",
+    deps = [":benchmark_tests_srcs"],
 )
 
 exports_files(["Info.plist"])

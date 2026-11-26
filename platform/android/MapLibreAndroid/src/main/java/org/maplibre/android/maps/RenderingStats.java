@@ -1,5 +1,11 @@
 package org.maplibre.android.maps;
 
+import androidx.annotation.NonNull;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class RenderingStats {
   /// Frame CPU encoding time (seconds)
   public double encodingTime = 0.0;
@@ -72,4 +78,92 @@ public class RenderingStats {
   public int stencilClears = 0;
   /// Number of stencil buffer updates
   public int stencilUpdates = 0;
+  private Map<SourceLayerID, List<FeatureInfo>> renderedFeatures;
+
+  public Map<SourceLayerID, List<FeatureInfo>> getRenderedFeatures() {
+    return renderedFeatures;
+  }
+
+  public static class NDCBound {
+    public final double minX;
+    public final double maxX;
+    public final double minY;
+    public final double maxY;
+
+    public NDCBound(double minX, double maxX, double minY, double maxY) {
+      this.minX = minX;
+      this.maxX = maxX;
+      this.minY = minY;
+      this.maxY = maxY;
+    }
+
+    public double getMidX() {
+      return (minX + maxX) / 2.0;
+    }
+
+    public double getMidY() {
+      return (minY + maxY) / 2.0;
+    }
+  }
+
+  public static class TileID {
+    public final int x;
+    public final int y;
+    public final int z;
+    public final int overscaledZ;
+    public final int wrap;
+
+    public TileID(int z, int x, int y, int overscaledZ, int wrap) {
+      this.z = z;
+      this.x = x;
+      this.y = y;
+      this.overscaledZ = overscaledZ;
+      this.wrap = wrap;
+    }
+  }
+
+  public static class FeatureInfo {
+    public final String featureID;
+    public final NDCBound ndcBound;
+    public final Set<TileID> tileIDs;
+
+    public FeatureInfo(String featureID, NDCBound ndcBound, Set<TileID> tileIDs) {
+      this.featureID = featureID;
+      this.ndcBound = ndcBound;
+      this.tileIDs = tileIDs;
+    }
+  }
+
+  public static class SourceLayerID {
+    public final String sourceID;
+    public final String layerID;
+
+    public SourceLayerID(String sourceID, String layerID) {
+      this.sourceID = sourceID;
+      this.layerID = layerID;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      SourceLayerID that = (SourceLayerID) o;
+      return sourceID.equals(that.sourceID) && layerID.equals(that.layerID);
+    }
+
+    @Override
+    public int hashCode() {
+      return 31 * sourceID.hashCode() + layerID.hashCode();
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+      return sourceID + '/' + layerID;
+    }
+  }
 }

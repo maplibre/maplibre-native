@@ -52,6 +52,8 @@ private:
     // Color ramp data
     uint32_t colorRampSize = 256;
     bool colorRampChanged = true;
+    // The global-state snapshot used to generate the cached color ramp and detect when it needs to be rebuilt.
+    std::shared_ptr<const GlobalStateMap> colorRampGlobalState;
 
     // FIX 1: Changed type and name to correctly hold float elevation data
     std::shared_ptr<std::vector<float>> elevationStopsData; // Elevation values for each stop
@@ -68,6 +70,7 @@ private:
     // Vertex data
     using ColorReliefVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<ColorReliefVertexVector> staticDataSharedVertices;
+    std::shared_ptr<gfx::IndexVector<gfx::Triangles>> staticDataSharedIndices;
 };
 
 } // namespace mln

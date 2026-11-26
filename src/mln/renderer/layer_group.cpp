@@ -26,6 +26,10 @@ void LayerGroupBase::runTweakers(const RenderTree&, PaintParameters& parameters)
     }
 }
 
+void LayerGroupBase::setObserver(gfx::ContextObserver* observer_) {
+    observer = observer_ ? observer_ : &gfx::Context::nullObserver;
+}
+
 LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t /*initialCapacity*/, std::string name_)
     : LayerGroupBase(layerIndex_, std::move(name_), LayerGroupBase::Type::LayerGroup) {}
 

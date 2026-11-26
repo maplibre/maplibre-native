@@ -43,34 +43,33 @@ LayerRenderData* GeometryTile::LayoutResult::getLayerRenderData(const style::Lay
     return &result;
 }
 
-class ImagePatch {
-public:
-    ImagePatch(Immutable<style::Image::Impl> image_, const Rect<uint16_t>& paddedRect_)
-        : image(std::move(image_)),
-          paddedRect(paddedRect_) {}
-    Immutable<style::Image::Impl> image;
-    Rect<uint16_t> paddedRect;
-};
-
-void populateImagePatches(ImagePositions& imagePositions,
-                          const ImageManager& imageManager,
-                          std::vector<ImagePatch>& /*out*/ patches) {
-    if (imagePositions.empty()) {
-        imagePositions.reserve(imageManager.updatedImageVersions.size());
-    }
+void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager, bool icons) {
     for (auto& updatedImageVersion : imageManager.updatedImageVersions) {
-        const std::string& name = updatedImageVersion.first;
-        const uint32_t version = updatedImageVersion.second;
-        const auto it = imagePositions.find(updatedImageVersion.first);
+        const std::string& imageId = updatedImageVersion.first;
+        const int32_t imageVersion = updatedImageVersion.second;
+
+        const auto& imagePositions = icons ? imageAtlas.iconPositions : imageAtlas.patternPositions;
+        const auto it = imagePositions.find(imageId);
         if (it != imagePositions.end()) {
-            auto& position = it->second;
-            if (position.version == version) continue;
+            auto& imagePos = it->second;
+            int32_t texHandleId = imageAtlas.generateUniqueId(imageId, imagePos.imageSize());
+            auto texVersion = imageAtlas.dynamicTexture->getVersion(texHandleId);
+            if (imageVersion <= texVersion) {
+                continue;
+            }
 
-            const auto updatedImage = imageManager.getSharedImage(name);
-            if (updatedImage == nullptr) continue;
+            const auto updatedImage = imageManager.getSharedImage(imageId);
+            if (updatedImage == nullptr) {
+                continue;
+            }
 
-            patches.emplace_back(*updatedImage, position.paddedRect);
-            position.version = version;
+            if (auto texHandle = imageAtlas.dynamicTexture->getTexHandle(texHandleId)) {
+                if (icons) {
+                    imageAtlas.uploadIcon(*updatedImage, *texHandle);
+                } else {
+                    imageAtlas.uploadPattern(*updatedImage, *texHandle);
+                }
+            }
         }
     }
 }
@@ -91,7 +90,6 @@ private:
     void prepare(const SourcePrepareParameters&) override;
 
     std::shared_ptr<GeometryTile::LayoutResult> layoutResult;
-    std::vector<ImagePatch> imagePatches;
 };
 
 using namespace style;
@@ -134,24 +132,14 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
         imageDynamicTexture->uploadDeferredImages(uploadPass);
         atlasTextures->icon = imageDynamicTexture->getTexture();
     }
-
-    if (!imagePatches.empty()) {
-        for (const auto& imagePatch : imagePatches) { // patch updated images.
-            atlasTextures->icon->uploadSubRegion(imagePatch.image->image,
-                                                 imagePatch.paddedRect.x + ImagePosition::padding,
-                                                 imagePatch.paddedRect.y + ImagePosition::padding);
-        }
-        imagePatches.clear();
-    }
 }
 
 void GeometryTileRenderData::prepare(const SourcePrepareParameters& parameters) {
     MLN_TRACE_FUNC();
 
     if (!layoutResult) return;
-    imagePatches.clear();
-    populateImagePatches(layoutResult->imageAtlas.iconPositions, parameters.imageManager, imagePatches);
-    populateImagePatches(layoutResult->imageAtlas.patternPositions, parameters.imageManager, imagePatches);
+    updateImages(layoutResult->imageAtlas, parameters.imageManager, true);
+    updateImages(layoutResult->imageAtlas, parameters.imageManager, false);
 }
 
 Bucket* GeometryTileRenderData::getBucket(const Layer::Impl& layer) const {
@@ -206,6 +194,7 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
              parameters.debugOptions & MapDebugOptions::Collision,
              parameters.dynamicTextureAtlas,
              parameters.glyphManager->getFontFaces(),
+             parameters.captureRenderedFeatures,
              observer),
       fileSource(parameters.fileSource),
       glyphManager(parameters.glyphManager),
@@ -228,7 +217,7 @@ GeometryTile::~GeometryTile() {
 
     if (layoutResult) {
         threadPool.runOnRenderThread(
-            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {
+            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}] {
                 layoutResult_->dynamicTextureAtlas->removeUnusedDynamicTextures();
             });
     }
@@ -293,7 +282,8 @@ std::unique_ptr<TileRenderData> GeometryTile::createRenderData() {
     return std::make_unique<GeometryTileRenderData>(layoutResult, atlasTextures);
 }
 
-void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& layers) {
+void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& layers,
+                             std::shared_ptr<const GlobalStateMap> globalState) {
     MLN_TRACE_FUNC();
 
     // Mark the tile as pending again if it was complete before to prevent
@@ -322,8 +312,11 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
     }
 
     ++correlationID;
-    worker.self().invoke(
-        &GeometryTileWorker::setLayers, std::move(impls), imageManager->getAvailableImages(), correlationID);
+    worker.self().invoke(&GeometryTileWorker::setLayers,
+                         std::move(impls),
+                         std::move(globalState),
+                         imageManager->getAvailableImages(),
+                         correlationID);
 }
 
 void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
@@ -349,6 +342,7 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult>&& result, const uint64
     const ErrorScope errorScope{observer};
 
     layoutResult = std::move(result);
+    featureStateVersion = 0;
     if (!atlasTextures) {
         atlasTextures = std::make_shared<TileAtlasTextures>();
     }
@@ -509,6 +503,7 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
                                          const TransformState& transformState,
                                          const std::unordered_map<std::string, const RenderLayer*>& layers,
                                          const RenderedQueryOptions& options,
+                                         const GlobalStateMap* globalState,
                                          const mat4& projMatrix,
                                          const SourceFeatureState& featureState) {
     MLN_TRACE_FUNC();
@@ -528,13 +523,16 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
                                       util::tileSize_D * id.overscaleFactor(),
                                       std::pow(2, transformState.getZoom() - id.overscaledZ),
                                       options,
+                                      globalState,
                                       id.toUnwrapped(),
                                       layers,
                                       queryPadding * transformState.maxPitchScaleFactor(),
                                       featureState);
 }
 
-void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {
+void GeometryTile::querySourceFeatures(std::vector<Feature>& result,
+                                       const SourceQueryOptions& options,
+                                       const GlobalStateMap* globalState) {
     MLN_TRACE_FUNC();
 
     // Data not yet available, or tile is empty
@@ -560,7 +558,8 @@ void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const Sourc
 
                 // Apply filter, if any
                 if (options.filter && !(*options.filter)(style::expression::EvaluationContext{
-                                          static_cast<float>(this->id.overscaledZ), feature.get()})) {
+                                          static_cast<float>(this->id.overscaledZ), feature.get()}
+                                                             .withGlobalState(globalState))) {
                     continue;
                 }
 

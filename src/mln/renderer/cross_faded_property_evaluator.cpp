@@ -18,9 +18,11 @@ Faded<T> CrossFadedPropertyEvaluator<T>::operator()(const T& constant) const {
 
 template <typename T>
 Faded<T> CrossFadedPropertyEvaluator<T>::operator()(const style::PropertyExpression<T>& expression) const {
-    return calculate(expression.evaluate(parameters.z - 1.0f),
-                     expression.evaluate(parameters.z),
-                     expression.evaluate(parameters.z + 1.0f));
+    using style::expression::EvaluationContext;
+    const auto* globalState = parameters.globalState.get();
+    return calculate(expression.evaluate(EvaluationContext(parameters.z - 1.0f).withGlobalState(globalState)),
+                     expression.evaluate(EvaluationContext(parameters.z).withGlobalState(globalState)),
+                     expression.evaluate(EvaluationContext(parameters.z + 1.0f).withGlobalState(globalState)));
 }
 
 template <typename T>

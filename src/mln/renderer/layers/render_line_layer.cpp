@@ -3,14 +3,23 @@
 #include <mln/geometry/feature_index.hpp>
 #include <mln/geometry/line_atlas.hpp>
 #include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/drawable_atlases_tweaker.hpp>
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/line_drawable_data.hpp>
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/renderer/buckets/line_bucket.hpp>
 #include <mln/renderer/image_manager.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/layers/line_layer_tweaker.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/tile_render_data.hpp>
+#include <mln/renderer/update_parameters.hpp>
 #include <mln/renderer/upload_parameters.hpp>
+#include <mln/shaders/line_layer_ubo.hpp>
+#include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/expression/image.hpp>
 #include <mln/style/layers/line_layer_impl.hpp>
 #include <mln/tile/geometry_tile.hpp>
@@ -19,15 +28,6 @@
 #include <mln/util/intersection_tests.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/math.hpp>
-
-#include <mln/gfx/drawable_atlases_tweaker.hpp>
-#include <mln/gfx/drawable_builder.hpp>
-#include <mln/gfx/line_drawable_data.hpp>
-#include <mln/renderer/layer_group.hpp>
-#include <mln/renderer/layers/line_layer_tweaker.hpp>
-#include <mln/renderer/update_parameters.hpp>
-#include <mln/shaders/line_layer_ubo.hpp>
-#include <mln/shaders/shader_program_base.hpp>
 
 namespace mln {
 
@@ -67,6 +67,17 @@ void RenderLineLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    if (colorRampGlobalState != parameters.globalState) {
+        const auto& rampValue = unevaluated.get<LineGradient>().getValue();
+        const bool rampAffected = (rampValue.getDependencies() & style::expression::Dependency::GlobalState) &&
+                                  style::expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
+                                                                              parameters.changedGlobalStateKeys.get());
+        colorRampGlobalState = parameters.globalState;
+        if (rampAffected) {
+            updateColorRamp();
+        }
+    }
+
     const auto previousProperties = staticImmutableCast<LineLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(baseImpl),
                                                        parameters.getCrossfadeParameters(),
@@ -134,7 +145,8 @@ GeometryCollection offsetLine(const GeometryCollection& rings, double offset) {
             auto& p = *i;
 
             Point<double> aToB = i == ring.begin() ? zero : util::perp(util::unit(convertPoint<double>(p - *(i - 1))));
-            Point<double> bToC = i + 1 == ring.end() ? zero
+            // At the last vertex, use the incoming normal so the endpoint receives the full offset.
+            Point<double> bToC = i + 1 == ring.end() ? aToB
                                                      : util::perp(util::unit(convertPoint<double>(*(i + 1) - p)));
             Point<double> extrude = util::unit(aToB + bToC);
 
@@ -149,6 +161,84 @@ GeometryCollection offsetLine(const GeometryCollection& rings, double offset) {
 }
 
 } // namespace
+
+void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
+                                              const RenderTile& tile,
+                                              const LineBinders& binders,
+                                              const style::LinePaintProperties::PossiblyEvaluated& evaluated,
+                                              const TransformState& state,
+                                              const TransformParameters& transformParams) {
+    const auto& tileID = tile.getOverscaledTileID();
+
+    const bool alphaIsConstant = evaluated.template get<LineOpacity>().isConstant();
+    const auto& alphaBinder = binders.template get<LineOpacity>();
+    if (alphaIsConstant && std::get<0>(alphaBinder->uniformValue(evaluated.get<LineOpacity>())) == 0) {
+        return;
+    }
+
+    const bool colorIsConstant = evaluated.template get<LineColor>().isConstant();
+    const auto& colorBinder = binders.template get<LineColor>();
+    if (colorIsConstant && std::get<0>(colorBinder->uniformValue(evaluated.get<LineColor>())).a == 0) {
+        return;
+    }
+
+    constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
+    constexpr bool nearClipped = false;
+    constexpr bool aligned = false;
+    const auto translation = evaluated.get<LineTranslate>();
+    const auto translationAnchor = evaluated.get<LineTranslateAnchor>();
+    const std::optional<mln::Point<double>> origin = std::nullopt;
+    const auto zoomFraction = state.getZoomFraction();
+    std::optional<mat4> tileMatrix;
+
+    const auto& features = bucket.getRetainedFeatures();
+    stats.renderedFeatures.reserve(features.size());
+
+    for (std::size_t i = 0; i < features.size(); ++i) {
+        const auto& featureEntry = features[i];
+        const auto& featureID = featureEntry.featureId;
+        assert(!featureID.empty());
+
+        // Consider only the value for the first vertex of this feature, for now.
+        const auto vertexOffset = featureEntry.vertexOffset;
+
+        if (!alphaIsConstant) {
+            const auto& [vertex] = alphaBinder->getVertexValue(vertexOffset);
+            if (mln::util::interpolate(vertex.a1[0], vertex.a1[1], zoomFraction) == 0) {
+                continue;
+            }
+        }
+        if (!colorIsConstant) {
+            const auto& [vertex] = colorBinder->getVertexValue(vertexOffset);
+            if (unpack_mix_alpha(vertex.a1, zoomFraction) == 0) {
+                continue;
+            }
+        }
+
+        // Compute the tile matrix once
+        if (!tileMatrix.has_value()) {
+            tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
+                                                     state,
+                                                     transformParams,
+                                                     translation,
+                                                     translationAnchor,
+                                                     origin,
+                                                     nearClipped,
+                                                     inViewportPixelUnits,
+                                                     aligned);
+        }
+
+        const auto getVertex = [&bucket, vertexOffset](std::size_t vi) {
+            // Not considering line width yet
+            const auto& vertex = bucket.vertices.at(vertexOffset + vi).a1;
+            return vec3{vertex[0] / 2.0, vertex[1] / 2.0, 0};
+        };
+
+        if (const auto bound = computeFeatureNDCBound(featureEntry.vertexCount, *tileMatrix, getVertex)) {
+            stats.addRenderedFeature(featureID, *bound, {tileID});
+        }
+    }
+}
 
 bool RenderLineLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
                                              const GeometryTileFeature& feature,
@@ -184,7 +274,7 @@ bool RenderLineLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 
 void RenderLineLayer::updateColorRamp() {
     const style::ColorRampPropertyValue colorValue = unevaluated.get<LineGradient>().getValue();
-    if (!colorRamp || !applyColorRamp(colorValue, *colorRamp)) {
+    if (!colorRamp || !applyColorRamp(colorValue, *colorRamp, colorRampGlobalState.get())) {
         return;
     }
 
@@ -224,11 +314,13 @@ inline void setSegments(std::unique_ptr<gfx::DrawableBuilder>& builder, const Li
 
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState&,
-                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& parameters,
+                             const TransformState& state,
+                             const std::shared_ptr<UpdateParameters>& parameters,
                              [[maybe_unused]] const PaintParameters& paintParameters,
-                             const RenderTree&,
+                             const RenderTree& renderTree,
                              UniqueChangeRequestVec& changes) {
+    stats.renderedFeatures.clear();
+
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -260,10 +352,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-            return true;
-        }
-        return false;
+        return drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID));
     });
 
     auto createLineBuilder = [&](const std::string& name,
@@ -307,6 +396,17 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
     tileLayerGroup->setStencilTiles(renderTiles);
 
+    // The ramp texture is shared by every tile of the layer.
+    const auto ensureColorRampTexture = [&] {
+        if (!colorRampTexture2D && colorRamp->valid()) {
+            colorRampTexture2D = context.createTexture2D();
+            colorRampTexture2D->setImage(colorRamp);
+            colorRampTexture2D->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                         .wrapU = gfx::TextureWrapType::Clamp,
+                                                         .wrapV = gfx::TextureWrapType::Clamp});
+        }
+    };
+
     StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -326,6 +426,11 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
 
+        if (parameters->captureRenderedFeatures) {
+            const auto& params = renderTree.getParameters().transformParams;
+            captureRenderedFeatures(bucket, tile, paintPropertyBinders, evaluated, state, params);
+        }
+
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
             // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
@@ -334,11 +439,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         setRenderTileBucketID(tileID, bucket.getID());
 
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-            return true;
+            // A drawable produced on a previous style/bucket should not be updated.
+            return drawable.getLayerTweaker() == layerTweaker;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
@@ -373,7 +475,38 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                    LinePattern>(
             paintPropertyBinders, evaluated, propertiesAsUniforms, idLineColorVertexAttribute);
 
-        if (!evaluated.get<LineDasharray>().from.empty()) {
+        if (!evaluated.get<LineDasharray>().from.empty() && !unevaluated.get<LineGradient>().getValue().isUndefined()) {
+            // dash array over a gradient
+            if (!lineGradientSDFShaderGroup) {
+                lineGradientSDFShaderGroup = shaders.getShaderGroup("LineGradientSDFShader");
+                if (!lineGradientSDFShaderGroup) {
+                    continue;
+                }
+            }
+
+            auto shader = lineGradientSDFShaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, posNormalAttribName);
+            if (!shader) {
+                continue;
+            }
+
+            auto builder = createLineBuilder("lineGradientSDF", std::move(shader));
+
+            // vertices and attributes
+            addAttributes(*builder, bucket, std::move(vertexAttrs));
+
+            ensureColorRampTexture();
+            if (colorRampTexture2D) {
+                builder->setTexture(colorRampTexture2D, idLineImageTexture);
+
+                setSegments(builder, bucket);
+
+                builder->flush(context);
+                for (auto& drawable : builder->clearDrawables()) {
+                    addDrawable(std::move(drawable), LineLayerTweaker::LineType::GradientSDF);
+                }
+            }
+        } else if (!evaluated.get<LineDasharray>().from.empty()) {
             // dash array line (SDF)
             if (!lineSDFShaderGroup) {
                 lineSDFShaderGroup = shaders.getShaderGroup("LineSDFShader");
@@ -457,16 +590,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             // vertices and attributes
             addAttributes(*builder, bucket, std::move(vertexAttrs));
 
-            // texture
-            if (!colorRampTexture2D && colorRamp->valid()) {
-                // create texture. to be reused for all the tiles of the layer
-                colorRampTexture2D = context.createTexture2D();
-                colorRampTexture2D->setImage(colorRamp);
-                colorRampTexture2D->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
-                                                             .wrapU = gfx::TextureWrapType::Clamp,
-                                                             .wrapV = gfx::TextureWrapType::Clamp});
-            }
-
+            ensureColorRampTexture();
             if (colorRampTexture2D) {
                 builder->setTexture(colorRampTexture2D, idLineImageTexture);
 

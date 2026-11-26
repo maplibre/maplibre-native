@@ -65,5 +65,22 @@ const std::array<AttributeInfo, 9> LineSDFShaderSource::attributes = {
 };
 const std::array<TextureInfo, 1> LineSDFShaderSource::textures = {TextureInfo{0, idLineImageTexture}};
 
+// Line gradient SDF
+using LineGradientSDFShaderSource = ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::WebGPU>;
+
+const std::array<AttributeInfo, 8> LineGradientSDFShaderSource::attributes = {
+    AttributeInfo{4, gfx::AttributeDataType::Short2, idLinePosNormalVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::UByte4, idLineDataVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idLineBlurVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::Float2, idLineOpacityVertexAttribute},
+    AttributeInfo{8, gfx::AttributeDataType::Float2, idLineGapWidthVertexAttribute},
+    AttributeInfo{9, gfx::AttributeDataType::Float2, idLineOffsetVertexAttribute},
+    AttributeInfo{10, gfx::AttributeDataType::Float2, idLineWidthVertexAttribute},
+    AttributeInfo{11, gfx::AttributeDataType::Float2, idLineFloorWidthVertexAttribute},
+};
+// A texture at location L binds its sampler at L and the texture at L + 1, so the dash atlas sits at 2.
+const std::array<TextureInfo, 2> LineGradientSDFShaderSource::textures = {TextureInfo{0, idLineImageTexture},
+                                                                          TextureInfo{2, idLineDashTexture}};
+
 } // namespace shaders
 } // namespace mln

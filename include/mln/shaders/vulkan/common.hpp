@@ -40,7 +40,7 @@ vec2 unpack_opacity(const float packedOpacity) {
 // To minimize the number of attributes needed, we encode a 4-component
 // color into a pair of floats (i.e. a vec2) as follows:
 // [ floor(color.r * 255) * 256 + color.g * 255,
-//   floor(color.b * 255) * 256 + color.g * 255 ]
+//   floor(color.b * 255) * 256 + color.a * 255 ]
 vec4 decode_color(const vec2 encodedColor) {
     return vec4(
         unpack_float(encodedColor[0]) / 255.0,
@@ -73,6 +73,16 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
                         const vec2 pattern_size, const float tile_units_to_pixels, const vec2 pos) {
     const vec2 offset = mod(mod(mod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
+}
+
+int unpack_low_int(int value) {
+    const int low = (value << 16) >> 16;
+    return low;
+}
+
+int unpack_high_int(int value) {
+    const int high = value >> 16;
+    return high;
 }
 
 vec2 unpack_int(int value) {
@@ -165,6 +175,9 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     float map_zoom;
     float pad1;
 } paintParams;
+
+// using lod bias variant for sampling as a workaround for Adreno 600 series
+#define texture(sampler, uv)    texture(sampler, uv, 0.0)
 
 )";
 };

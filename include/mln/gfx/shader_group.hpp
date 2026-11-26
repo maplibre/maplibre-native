@@ -4,9 +4,7 @@
 #include <mln/util/containers.hpp>
 #include <mln/util/hash.hpp>
 
-#include <iomanip>
 #include <memory>
-#include <mutex>
 #include <shared_mutex>
 #include <sstream>
 #include <string>

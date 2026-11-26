@@ -1,3 +1,5 @@
+#import <Foundation/Foundation.h>
+
 #include <mln/style/conversion_impl.hpp>
 
 NS_ASSUME_NONNULL_BEGIN

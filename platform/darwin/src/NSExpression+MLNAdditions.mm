@@ -81,6 +81,7 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
   INSTALL_METHOD(mgl_tan:);
   INSTALL_METHOD(mgl_log2:);
   INSTALL_METHOD(mgl_distanceFrom:);
+  INSTALL_METHOD(mgl_globalState:);
   INSTALL_METHOD(mgl_attributed:);
 
   // Install functions that resemble control structures, taking arbitrary
@@ -172,6 +173,15 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
 - (NSNumber *)mgl_distanceFrom:(id)object {
   [NSException raise:NSInvalidArgumentException
               format:@"Shape distance expressions lack underlying Objective-C implementations."];
+  return nil;
+}
+
+/**
+ Returns the value of the given property in the map's global state.
+ */
+- (id)mgl_globalState:(NSString *)property {
+  [NSException raise:NSInvalidArgumentException
+              format:@"Global state expressions lack underlying Objective-C implementations."];
   return nil;
 }
 
@@ -574,12 +584,10 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
 
 + (NSExpression *)expressionForFunctionHelper:(NSString *)name arguments:(NSArray *)parameters {
   if (parameters.count) {
-    if (@available(iOS 15.5, macOS 12, *)) {
-      NSExpression *functionExpression = [NSExpression expressionWithFormat:@"sum({})"];
-      return [NSExpression expressionForFunction:functionExpression.operand
-                                    selectorName:name
-                                       arguments:parameters];
-    }
+    NSExpression *functionExpression = [NSExpression expressionWithFormat:@"sum({})"];
+    return [NSExpression expressionForFunction:functionExpression.operand
+                                  selectorName:name
+                                     arguments:parameters];
   }
   return [NSExpression expressionForFunction:name arguments:parameters];
 }
@@ -725,6 +733,7 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
       @"ceil" : @"ceiling:",
       @"^" : @"raise:toPower:",
       @"distance" : @"mgl_distanceFrom:",
+      @"global-state" : @"mgl_globalState:",
       @"upcase" : @"uppercase:",
       @"downcase" : @"lowercase:",
       @"let" : @"MLN_LET",
@@ -1086,6 +1095,7 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
       @"mgl_tan:" : @"tan",
       @"mgl_log2:" : @"log2",
       @"mgl_distanceFrom:" : @"distance",
+      @"mgl_globalState:" : @"global-state",
       // Vararg aftermarket expressions need to be declared with an explicit and implicit first
       // argument.
       @"MLN_LET" : @"let",
@@ -1585,7 +1595,7 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
   }
 
   if (firstCondition.expressionType == NSConstantValueExpressionType &&
-      [firstCondition.constantValue isKindOfClass:[NSComparisonPredicate class]]) {
+      [firstCondition.constantValue isKindOfClass:[NSPredicate class]]) {
     NSPredicate *predicate = (NSPredicate *)firstCondition.constantValue;
     condition = predicate.mgl_jsonExpressionObject;
   } else {
@@ -1598,7 +1608,7 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
 
   for (NSUInteger index = minimumIndex; index < arguments.count; index++) {
     if (arguments[index].expressionType == NSConstantValueExpressionType &&
-        [arguments[index].constantValue isKindOfClass:[NSComparisonPredicate class]]) {
+        [arguments[index].constantValue isKindOfClass:[NSPredicate class]]) {
       NSPredicate *predicate = (NSPredicate *)arguments[index].constantValue;
       [expressionObject addObject:predicate.mgl_jsonExpressionObject];
     } else {

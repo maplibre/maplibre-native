@@ -1,18 +1,22 @@
 #pragma once
 
-#include <mln/gfx/index_buffer.hpp>
-#include <mln/renderer/paint_property_binder.hpp>
-#include <mln/gfx/vertex_buffer.hpp>
 #include <mln/geometry/dem_data.hpp>
-#include <mln/shaders/segment.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
 #include <mln/renderer/bucket.hpp>
+#include <mln/renderer/paint_property_binder.hpp>
 #include <mln/renderer/tile_mask.hpp>
+#include <mln/shaders/segment.hpp>
 #include <mln/style/layers/hillshade_layer_properties.hpp>
-#include <mln/util/tileset.hpp>
 #include <mln/util/image.hpp>
 #include <mln/util/mat4.hpp>
+#include <mln/util/tileset.hpp>
 
 namespace mln {
+
+namespace gfx {
+class Texture2D;
+} // namespace gfx
 
 using HillshadeBinders = PaintPropertyBinders<style::HillshadePaintProperties::DataDrivenProperties>;
 using HillshadeLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::texture_pos>>;
@@ -33,6 +37,9 @@ public:
     RenderTargetPtr renderTarget;
     bool renderTargetPrepared = false;
 
+    /// DEM texture of the color relief layer for the current DEM data. Owned by the tile drawables.
+    std::weak_ptr<gfx::Texture2D> demTexture;
+
     TileMask mask{{0, 0, 0}};
 
     const DEMData& getDEMData() const;
@@ -43,7 +50,7 @@ public:
     void setPrepared(bool preparedState) { prepared = preparedState; }
 
     static HillshadeLayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
-        return HillshadeLayoutVertex{{{p.x, p.y}}, {{t.x, t.y}}};
+        return HillshadeLayoutVertex{.a1 = {{p.x, p.y}}, .a2 = {{t.x, t.y}}};
     }
 
     // Raster-DEM Tile Sources use the default buffers from Painter
