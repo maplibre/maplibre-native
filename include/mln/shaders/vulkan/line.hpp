@@ -11,6 +11,7 @@ constexpr auto lineShadePrelude = R"(
 #define idLineDrawableUBO           idDrawableReservedVertexOnlyUBO
 #define idLineTilePropsUBO          idDrawableReservedFragmentOnlyUBO
 #define idLineEvaluatedPropsUBO     layerUBOStartId
+#define idLineFadeZoomUBO          layerUBOStartId + 2
 
 )";
 
@@ -18,7 +19,7 @@ template <>
 struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineShader";
 
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -52,6 +53,10 @@ layout(location = 6) in vec2 in_offset;
 layout(location = 7) in vec2 in_width;
 #endif
 
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+layout(location = 8) in vec2 in_fade_zoom;
+#endif
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -66,7 +71,7 @@ struct LineDrawableUBO {
     float gapwidth_t;
     float offset_t;
     float width_t;
-    float pad1;
+    float fade_zoom_t;
     vec4 pad2;
     vec4 pad3;
 };
@@ -84,8 +89,12 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float fade_zoom;
 } props;
+
+layout(set = LAYER_SET_INDEX, binding = idLineFadeZoomUBO) uniform LineFadeZoomUBO {
+    vec4 opacity[104];
+} fadeZoomTable;
 
 layout(location = 0) out lowp vec2 frag_normal;
 layout(location = 1) out lowp vec2 frag_width2;
@@ -99,9 +108,7 @@ layout(location = 3) out lowp vec4 frag_color;
 layout(location = 4) out lowp float frag_blur;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 5) out lowp float frag_opacity;
-#endif
 
 void main() {
     const LineDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
@@ -114,8 +121,10 @@ void main() {
     frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
 #endif
 
-#ifndef HAS_UNIFORM_u_opacity
+#if !defined(HAS_UNIFORM_u_opacity)
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+#else
+    frag_opacity = props.opacity;
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
@@ -179,6 +188,15 @@ void main() {
     frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
     frag_width2 = vec2(outset, inset);
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    const float fade_zoom = unpack_mix_float(in_fade_zoom, drawable.fade_zoom_t);
+#else
+    const float fade_zoom = props.fade_zoom;
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    const int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    frag_opacity *= fadeZoomTable.opacity[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
 
@@ -196,9 +214,7 @@ layout(location = 3) in lowp vec4 frag_color;
 layout(location = 4) in lowp float frag_blur;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 5) in lowp float frag_opacity;
-#endif
 
 layout(location = 0) out vec4 out_color;
 
@@ -211,7 +227,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float fade_zoom;
 } props;
 
 void main() {
@@ -233,11 +249,7 @@ void main() {
     lowp float blur = frag_blur;
 #endif
 
-#ifdef HAS_UNIFORM_u_opacity
-    lowp float opacity = props.opacity;
-#else
     lowp float opacity = frag_opacity;
-#endif
 
     // Calculate the distance of the pixel from the line in pixels.
     float dist = length(frag_normal) * frag_width2.s;
@@ -257,7 +269,7 @@ template <>
 struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineGradientShader";
 
-    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -287,6 +299,10 @@ layout(location = 5) in vec2 in_offset;
 layout(location = 6) in vec2 in_width;
 #endif
 
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+layout(location = 7) in vec2 in_fade_zoom;
+#endif
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -300,7 +316,7 @@ struct LineGradientDrawableUBO {
     float gapwidth_t;
     float offset_t;
     float width_t;
-    float pad1;
+    float fade_zoom_t;
     float pad2;
     vec4 pad3;
     vec4 pad4;
@@ -319,8 +335,12 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float fade_zoom;
 } props;
+
+layout(set = LAYER_SET_INDEX, binding = idLineFadeZoomUBO) uniform LineFadeZoomUBO {
+    vec4 opacity[104];
+} fadeZoomTable;
 
 layout(location = 0) out lowp vec2 frag_normal;
 layout(location = 1) out lowp vec2 frag_width2;
@@ -331,9 +351,7 @@ layout(location = 3) out float frag_lineprogress;
 layout(location = 4) out lowp float frag_blur;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 5) out lowp float frag_opacity;
-#endif
 
 void main() {
     const LineGradientDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
@@ -342,8 +360,10 @@ void main() {
     frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
 #endif
 
-#ifndef HAS_UNIFORM_u_opacity
+#if !defined(HAS_UNIFORM_u_opacity)
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+#else
+    frag_opacity = props.opacity;
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
@@ -408,6 +428,15 @@ void main() {
     frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
     frag_width2 = vec2(outset, inset);
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    const float fade_zoom = unpack_mix_float(in_fade_zoom, drawable.fade_zoom_t);
+#else
+    const float fade_zoom = props.fade_zoom;
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    const int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    frag_opacity *= fadeZoomTable.opacity[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
 
@@ -422,9 +451,7 @@ layout(location = 3) in float frag_lineprogress;
 layout(location = 4) in lowp float frag_blur;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 5) in lowp float frag_opacity;
-#endif
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
@@ -439,7 +466,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float fade_zoom;
 } props;
 
 void main() {
@@ -455,11 +482,7 @@ void main() {
     lowp float blur = frag_blur;
 #endif
 
-#ifdef HAS_UNIFORM_u_opacity
-    lowp float opacity = props.opacity;
-#else
     lowp float opacity = frag_opacity;
-#endif
 
     // Calculate the distance of the pixel from the line in pixels.
     float dist = length(frag_normal) * frag_width2.s;
@@ -483,7 +506,7 @@ template <>
 struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LinePatternShader";
 
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -521,6 +544,10 @@ layout(location = 7) in uvec4 in_pattern_from;
 layout(location = 8) in uvec4 in_pattern_to;
 #endif
 
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+layout(location = 9) in vec2 in_fade_zoom;
+#endif
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -537,7 +564,7 @@ struct LinePatternDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float floorwidth_t;
-    float pad1;
+    float fade_zoom_t;
     float pad2;
     float pad3;
     vec4 pad4;
@@ -556,8 +583,12 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float fade_zoom;
 } props;
+
+layout(set = LAYER_SET_INDEX, binding = idLineFadeZoomUBO) uniform LineFadeZoomUBO {
+    vec4 opacity[104];
+} fadeZoomTable;
 
 layout(location = 0) out lowp vec2 frag_normal;
 layout(location = 1) out lowp vec2 frag_width2;
@@ -568,9 +599,7 @@ layout(location = 3) out float frag_linesofar;
 layout(location = 4) out lowp float frag_blur;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 5) out lowp float frag_opacity;
-#endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
 layout(location = 6) out mediump vec4 frag_pattern_from;
@@ -588,8 +617,10 @@ void main() {
     frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
 #endif
 
-#ifndef HAS_UNIFORM_u_opacity
+#if !defined(HAS_UNIFORM_u_opacity)
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+#else
+    frag_opacity = props.opacity;
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
@@ -668,6 +699,15 @@ void main() {
 
     frag_width2 = vec2(outset, inset);
     frag_linesofar = (floor(in_data.z / 4.0) + in_data.w * 64.0) * LINE_DISTANCE_SCALE;
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    const float fade_zoom = unpack_mix_float(in_fade_zoom, drawable.fade_zoom_t);
+#else
+    const float fade_zoom = props.fade_zoom;
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    const int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    frag_opacity *= fadeZoomTable.opacity[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
 
@@ -682,9 +722,7 @@ layout(location = 3) in float frag_linesofar;
 layout(location = 4) in lowp float frag_blur;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 5) in lowp float frag_opacity;
-#endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
 layout(location = 6) in mediump vec4 frag_pattern_from;
@@ -723,7 +761,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float fade_zoom;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
@@ -743,11 +781,7 @@ void main() {
     const lowp float blur = frag_blur;
 #endif
 
-#ifdef HAS_UNIFORM_u_opacity
-    const lowp float opacity = props.opacity;
-#else
     const lowp float opacity = frag_opacity;
-#endif
 
 #ifdef HAS_UNIFORM_u_pattern_from
     const lowp vec4 pattern_from = tileProps.pattern_from;
@@ -812,7 +846,7 @@ template <>
 struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineSDFShader";
 
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -850,6 +884,10 @@ layout(location = 7) in vec2 in_width;
 layout(location = 8) in vec2 in_floorwidth;
 #endif
 
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+layout(location = 9) in vec2 in_fade_zoom;
+#endif
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -869,7 +907,7 @@ struct LineSDFDrawableUBO {
     float offset_t;
     float width_t;
     float floorwidth_t;
-    float pad1;
+    float fade_zoom_t;
     float pad2;
 };
 
@@ -886,8 +924,12 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float fade_zoom;
 } props;
+
+layout(set = LAYER_SET_INDEX, binding = idLineFadeZoomUBO) uniform LineFadeZoomUBO {
+    vec4 opacity[104];
+} fadeZoomTable;
 
 layout(location = 0) out lowp vec2 frag_normal;
 layout(location = 1) out lowp vec2 frag_width2;
@@ -903,9 +945,7 @@ layout(location = 5) out lowp vec4 frag_color;
 layout(location = 6) out lowp float frag_blur;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 7) out lowp float frag_opacity;
-#endif
 
 #if !defined(HAS_UNIFORM_u_floorwidth)
 layout(location = 8) out mediump float frag_floorwidth;
@@ -922,8 +962,10 @@ void main() {
     frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
 #endif
 
-#ifndef HAS_UNIFORM_u_opacity
+#if !defined(HAS_UNIFORM_u_opacity)
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+#else
+    frag_opacity = props.opacity;
 #endif
 
 #ifndef HAS_UNIFORM_u_floorwidth
@@ -999,6 +1041,15 @@ void main() {
 
     frag_tex_a = vec2(linesofar * drawable.patternscale_a.x / floorwidth, frag_normal.y * drawable.patternscale_a.y + drawable.tex_y_a);
     frag_tex_b = vec2(linesofar * drawable.patternscale_b.x / floorwidth, frag_normal.y * drawable.patternscale_b.y + drawable.tex_y_b);
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    const float fade_zoom = unpack_mix_float(in_fade_zoom, drawable.fade_zoom_t);
+#else
+    const float fade_zoom = props.fade_zoom;
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    const int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    frag_opacity *= fadeZoomTable.opacity[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
 
@@ -1018,9 +1069,7 @@ layout(location = 5) in lowp vec4 frag_color;
 layout(location = 6) in lowp float frag_blur;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 7) in lowp float frag_opacity;
-#endif
 
 #if !defined(HAS_UNIFORM_u_floorwidth)
 layout(location = 8) in mediump float frag_floorwidth;
@@ -1055,7 +1104,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float fade_zoom;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
@@ -1081,11 +1130,7 @@ void main() {
     const lowp float blur = frag_blur;
 #endif
 
-#ifdef HAS_UNIFORM_u_opacity
-    const lowp float opacity = props.opacity;
-#else
     const lowp float opacity = frag_opacity;
-#endif
 
 #ifdef HAS_UNIFORM_u_floorwidth
     const lowp float floorwidth = props.floorwidth;
@@ -1115,7 +1160,7 @@ template <>
 struct ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineGradientSDFShader";
 
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
@@ -1149,6 +1194,10 @@ layout(location = 6) in vec2 in_width;
 layout(location = 7) in vec2 in_floorwidth;
 #endif
 
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+layout(location = 8) in vec2 in_fade_zoom;
+#endif
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -1168,7 +1217,7 @@ struct LineSDFDrawableUBO {
     float offset_t;
     float width_t;
     float floorwidth_t;
-    float pad1;
+    float fade_zoom_t;
     float pad2;
 };
 
@@ -1185,8 +1234,12 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float fade_zoom;
 } props;
+
+layout(set = LAYER_SET_INDEX, binding = idLineFadeZoomUBO) uniform LineFadeZoomUBO {
+    vec4 opacity[104];
+} fadeZoomTable;
 
 layout(location = 0) out lowp vec2 frag_normal;
 layout(location = 1) out lowp vec2 frag_width2;
@@ -1199,9 +1252,7 @@ layout(location = 5) out float frag_lineprogress;
 layout(location = 6) out lowp float frag_blur;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 7) out lowp float frag_opacity;
-#endif
 
 #if !defined(HAS_UNIFORM_u_floorwidth)
 layout(location = 8) out mediump float frag_floorwidth;
@@ -1214,8 +1265,10 @@ void main() {
     frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
 #endif
 
-#ifndef HAS_UNIFORM_u_opacity
+#if !defined(HAS_UNIFORM_u_opacity)
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+#else
+    frag_opacity = props.opacity;
 #endif
 
 #ifndef HAS_UNIFORM_u_floorwidth
@@ -1292,6 +1345,15 @@ void main() {
 
     frag_tex_a = vec2(linesofar * drawable.patternscale_a.x / floorwidth, frag_normal.y * drawable.patternscale_a.y + drawable.tex_y_a);
     frag_tex_b = vec2(linesofar * drawable.patternscale_b.x / floorwidth, frag_normal.y * drawable.patternscale_b.y + drawable.tex_y_b);
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    const float fade_zoom = unpack_mix_float(in_fade_zoom, drawable.fade_zoom_t);
+#else
+    const float fade_zoom = props.fade_zoom;
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    const int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    frag_opacity *= fadeZoomTable.opacity[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
 
@@ -1308,9 +1370,7 @@ layout(location = 5) in float frag_lineprogress;
 layout(location = 6) in lowp float frag_blur;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 7) in lowp float frag_opacity;
-#endif
 
 #if !defined(HAS_UNIFORM_u_floorwidth)
 layout(location = 8) in mediump float frag_floorwidth;
@@ -1345,7 +1405,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float fade_zoom;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
@@ -1366,11 +1426,7 @@ void main() {
     const lowp float blur = frag_blur;
 #endif
 
-#ifdef HAS_UNIFORM_u_opacity
-    const lowp float opacity = props.opacity;
-#else
     const lowp float opacity = frag_opacity;
-#endif
 
 #ifdef HAS_UNIFORM_u_floorwidth
     const lowp float floorwidth = props.floorwidth;

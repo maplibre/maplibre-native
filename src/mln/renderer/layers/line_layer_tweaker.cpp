@@ -6,6 +6,7 @@
 #include <mln/geometry/line_atlas.hpp>
 #include <mln/renderer/buckets/line_bucket.hpp>
 #include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/shaders/line_layer_ubo.hpp>
@@ -137,7 +138,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .floorwidth = (expressionMask & LineExpressionMask::FloorWidth) ? LineFloorWidth::defaultValue()
                                                                             : evaluate<LineFloorWidth>(parameters),
             .expressionMask = expressionMask,
-            .pad1 = 0};
+            .fade_zoom = evaluated.get<LineFadeZoom>().constantOr(LineFadeZoom::defaultValue())};
 #elif MLN_RENDER_BACKEND_WEBGPU
         expressionMask = LineExpressionMask::None;
         if (evaluated.get<LineColor>().isConstant()) {
@@ -171,17 +172,18 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .width = evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
             .floorwidth = evaluated.get<LineFloorWidth>().constantOr(LineFloorWidth::defaultValue()),
             .expressionMask = expressionMask,
-            .pad1 = 0};
+            .fade_zoom = evaluated.get<LineFadeZoom>().constantOr(LineFadeZoom::defaultValue())};
 #else
-        const LineEvaluatedPropsUBO propsUBO{.color = evaluate<LineColor>(parameters),
-                                             .blur = evaluate<LineBlur>(parameters),
-                                             .opacity = evaluate<LineOpacity>(parameters),
-                                             .gapwidth = evaluate<LineGapWidth>(parameters),
-                                             .offset = evaluate<LineOffset>(parameters),
-                                             .width = evaluate<LineWidth>(parameters),
-                                             .floorwidth = evaluate<LineFloorWidth>(parameters),
-                                             .expressionMask = LineExpressionMask::None,
-                                             .pad1 = 0};
+        const LineEvaluatedPropsUBO propsUBO{
+            .color = evaluate<LineColor>(parameters),
+            .blur = evaluate<LineBlur>(parameters),
+            .opacity = evaluate<LineOpacity>(parameters),
+            .gapwidth = evaluate<LineGapWidth>(parameters),
+            .offset = evaluate<LineOffset>(parameters),
+            .width = evaluate<LineWidth>(parameters),
+            .floorwidth = evaluate<LineFloorWidth>(parameters),
+            .expressionMask = LineExpressionMask::None,
+            .fade_zoom = evaluated.get<LineFadeZoom>().constantOr(LineFadeZoom::defaultValue())};
 #endif // MLN_RENDER_BACKEND_METAL
 
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
@@ -189,6 +191,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idLineEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+    layerUniforms.set(idLineFadeZoomUBO, parameters.staticData.fadeZoomTableBuffer);
 
 #if MLN_RENDER_BACKEND_METAL
     // GPU Expressions
@@ -246,7 +249,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
-                    .pad1 = 0
+                    .fade_zoom_t = std::get<0>(binders->get<LineFadeZoom>()->interpolationFactor(zoom))
                 };
 
 #if !MLN_UBO_CONSOLIDATION
@@ -269,7 +272,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
+                    .fade_zoom_t = std::get<0>(binders->get<LineFadeZoom>()->interpolationFactor(zoom)),
                     .pad2 = 0
                 };
 
@@ -299,7 +302,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_from_t = std::get<0>(binders->get<LinePattern>()->interpolationFactor(zoom)),
                     .pattern_to_t = std::get<1>(binders->get<LinePattern>()->interpolationFactor(zoom)),
                     .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
+                    .fade_zoom_t = std::get<0>(binders->get<LineFadeZoom>()->interpolationFactor(zoom)),
                     .pad2 = 0,
                     .pad3 = 0
                 };
@@ -373,7 +376,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                         .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
                         .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
-                        .pad1 = 0,
+                        .fade_zoom_t = std::get<0>(binders->get<LineFadeZoom>()->interpolationFactor(zoom)),
                         .pad2 = 0
                     };
 

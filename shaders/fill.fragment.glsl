@@ -6,10 +6,12 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad1;
+    highp float u_fade_zoom;
     lowp float props_pad2;
     lowp float props_pad3;
 };
+
+in lowp float v_fade_zoom_opacity;
 
 #pragma mapbox: define highp vec4 color
 #pragma mapbox: define lowp float opacity
@@ -19,6 +21,8 @@ void main() {
     #pragma mapbox: initialize lowp float opacity
 
     fragColor = color * opacity;
+
+    fragColor *= v_fade_zoom_opacity;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

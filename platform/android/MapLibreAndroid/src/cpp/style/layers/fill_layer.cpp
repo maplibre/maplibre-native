@@ -226,6 +226,15 @@ jni::Local<jni::Object<>> FillLayer::getFillRoundedCornerDistance(jni::JNIEnv& e
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillLayer(*layer).getFillRoundedCornerDistance()));
 }
 
+jni::Local<jni::Object<>> FillLayer::getFillFadeZoom(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::FillLayer::getDefaultFillFadeZoom()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillLayer(*layer).getFillFadeZoom()));
+}
+
 // FillJavaLayerPeerFactory
 
 FillJavaLayerPeerFactory::~FillJavaLayerPeerFactory() = default;
@@ -284,7 +293,8 @@ void FillJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&FillLayer::getFillPatternTransition, "nativeGetFillPatternTransition"),
         METHOD(&FillLayer::setFillPatternTransition, "nativeSetFillPatternTransition"),
         METHOD(&FillLayer::getFillPattern, "nativeGetFillPattern"),
-        METHOD(&FillLayer::getFillRoundedCornerDistance, "nativeGetFillRoundedCornerDistance"));
+        METHOD(&FillLayer::getFillRoundedCornerDistance, "nativeGetFillRoundedCornerDistance"),
+        METHOD(&FillLayer::getFillFadeZoom, "nativeGetFillFadeZoom"));
 }
 
 } // namespace android

@@ -29,6 +29,10 @@ struct FillColor : DataDrivenPaintProperty<Color, attributes::color, uniforms::c
     static Color defaultValue() { return Color::black(); }
 };
 
+struct FillFadeZoom : DataDrivenPaintProperty<float, attributes::fade_zoom, uniforms::fade_zoom> {
+    static float defaultValue() { return 0.f; }
+};
+
 struct FillOpacity : DataDrivenPaintProperty<float, attributes::opacity, uniforms::opacity> {
     static float defaultValue() { return 1.f; }
 };
@@ -60,6 +64,7 @@ class FillLayoutProperties : public Properties<
 class FillPaintProperties : public Properties<
     FillAntialias,
     FillColor,
+    FillFadeZoom,
     FillOpacity,
     FillOutlineColor,
     FillPattern,

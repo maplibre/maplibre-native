@@ -15,6 +15,7 @@
 #include <mln/renderer/image_manager_observer.hpp>
 #include <mln/text/placement.hpp>
 #include <mln/renderer/render_tree.hpp>
+#include <mln/renderer/fade_zoom_table.hpp>
 
 #include <map>
 #include <memory>
@@ -228,6 +229,7 @@ private:
 
     CrossTileSymbolIndex crossTileSymbolIndex;
     PlacementController placementController;
+    FadeZoomTable fadeZoomTable;
 
     const bool backgroundLayerAsColor;
     bool contextLost = false;

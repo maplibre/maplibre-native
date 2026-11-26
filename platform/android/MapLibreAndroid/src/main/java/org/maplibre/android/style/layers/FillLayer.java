@@ -390,6 +390,18 @@ public class FillLayer extends Layer {
     return (PropertyValue<Float>) new PropertyValue("fill-rounded-corner-distance", nativeGetFillRoundedCornerDistance());
   }
 
+  /**
+   * Get the FillFadeZoom property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getFillFadeZoom() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("fill-fade-zoom", nativeGetFillFadeZoom());
+  }
+
   @NonNull
   @Keep
   private native Object nativeGetFillSortKey();
@@ -460,6 +472,10 @@ public class FillLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetFillRoundedCornerDistance();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetFillFadeZoom();
 
   @Override
   @Keep

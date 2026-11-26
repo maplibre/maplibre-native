@@ -64,6 +64,12 @@ public:
     void setLineDasharrayTransition(const TransitionOptions&);
     TransitionOptions getLineDasharrayTransition() const;
 
+    static PropertyValue<float> getDefaultLineFadeZoom();
+    const PropertyValue<float>& getLineFadeZoom() const;
+    void setLineFadeZoom(const PropertyValue<float>&);
+    void setLineFadeZoomTransition(const TransitionOptions&);
+    TransitionOptions getLineFadeZoomTransition() const;
+
     static PropertyValue<float> getDefaultLineGapWidth();
     const PropertyValue<float>& getLineGapWidth() const;
     void setLineGapWidth(const PropertyValue<float>&);

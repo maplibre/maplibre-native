@@ -591,6 +591,18 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         renderTreeParameters->needsRepaint = false;
     }
 
+    // Lines and fills whose `*-fade-zoom` the map's zoom has crossed fade in or out as symbols do.
+    {
+        const auto fadeZoomDuration = (isMapModeContinuous && transitionOptions.enablePlacementTransitions)
+                                          ? transitionDuration
+                                          : Duration::zero();
+        if (fadeZoomTable.update(
+                updateParameters->transformState.getZoom(), updateParameters->timePoint, fadeZoomDuration)) {
+            renderTreeParameters->needsRepaint = true;
+        }
+        renderTreeParameters->fadeZoomTable = fadeZoomTable;
+    }
+
     if (!renderTreeParameters->needsRepaint && renderTreeParameters->loaded) {
         MLN_TRACE_ZONE(reduce);
         // Notify observer about unused images when map is fully loaded

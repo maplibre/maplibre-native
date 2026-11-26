@@ -138,6 +138,34 @@ TransitionOptions FillLayer::getFillColorTransition() const {
     return impl().paint.template get<FillColor>().options;
 }
 
+PropertyValue<float> FillLayer::getDefaultFillFadeZoom() {
+    return {0.f};
+}
+
+const PropertyValue<float>& FillLayer::getFillFadeZoom() const {
+    return impl().paint.template get<FillFadeZoom>().value;
+}
+
+void FillLayer::setFillFadeZoom(const PropertyValue<float>& value) {
+    if (value == getFillFadeZoom())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillFadeZoom>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void FillLayer::setFillFadeZoomTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillFadeZoom>().options = options;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+TransitionOptions FillLayer::getFillFadeZoomTransition() const {
+    return impl().paint.template get<FillFadeZoom>().options;
+}
+
 PropertyValue<float> FillLayer::getDefaultFillOpacity() {
     return {1.f};
 }
@@ -310,11 +338,12 @@ using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 16u;
+constexpr uint8_t kPaintPropertyCount = 18u;
 
 enum class Property : uint8_t {
     FillAntialias,
     FillColor,
+    FillFadeZoom,
     FillOpacity,
     FillOutlineColor,
     FillPattern,
@@ -323,6 +352,7 @@ enum class Property : uint8_t {
     FillTranslateAnchor,
     FillAntialiasTransition,
     FillColorTransition,
+    FillFadeZoomTransition,
     FillOpacityTransition,
     FillOutlineColorTransition,
     FillPatternTransition,
@@ -340,6 +370,7 @@ constexpr uint8_t toUint8(T t) noexcept {
 constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
     {{"fill-antialias", toUint8(Property::FillAntialias)},
      {"fill-color", toUint8(Property::FillColor)},
+     {"fill-fade-zoom", toUint8(Property::FillFadeZoom)},
      {"fill-opacity", toUint8(Property::FillOpacity)},
      {"fill-outline-color", toUint8(Property::FillOutlineColor)},
      {"fill-pattern", toUint8(Property::FillPattern)},
@@ -348,6 +379,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"fill-translate-anchor", toUint8(Property::FillTranslateAnchor)},
      {"fill-antialias-transition", toUint8(Property::FillAntialiasTransition)},
      {"fill-color-transition", toUint8(Property::FillColorTransition)},
+     {"fill-fade-zoom-transition", toUint8(Property::FillFadeZoomTransition)},
      {"fill-opacity-transition", toUint8(Property::FillOpacityTransition)},
      {"fill-outline-color-transition", toUint8(Property::FillOutlineColorTransition)},
      {"fill-pattern-transition", toUint8(Property::FillPatternTransition)},
@@ -362,6 +394,8 @@ StyleProperty getLayerProperty(const FillLayer& layer, Property property) {
             return makeStyleProperty(layer.getFillAntialias());
         case Property::FillColor:
             return makeStyleProperty(layer.getFillColor());
+        case Property::FillFadeZoom:
+            return makeStyleProperty(layer.getFillFadeZoom());
         case Property::FillOpacity:
             return makeStyleProperty(layer.getFillOpacity());
         case Property::FillOutlineColor:
@@ -378,6 +412,8 @@ StyleProperty getLayerProperty(const FillLayer& layer, Property property) {
             return makeStyleProperty(layer.getFillAntialiasTransition());
         case Property::FillColorTransition:
             return makeStyleProperty(layer.getFillColorTransition());
+        case Property::FillFadeZoomTransition:
+            return makeStyleProperty(layer.getFillFadeZoomTransition());
         case Property::FillOpacityTransition:
             return makeStyleProperty(layer.getFillOpacityTransition());
         case Property::FillOutlineColorTransition:
@@ -450,11 +486,16 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
             return std::nullopt;
         }
     }
-    if (property == Property::FillOpacity || property == Property::FillSortKey) {
+    if (property == Property::FillFadeZoom || property == Property::FillOpacity || property == Property::FillSortKey) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, true, false);
         if (!typedValue) {
             return error;
+        }
+
+        if (property == Property::FillFadeZoom) {
+            setFillFadeZoom(*typedValue);
+            return std::nullopt;
         }
 
         if (property == Property::FillOpacity) {
@@ -521,6 +562,11 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
 
     if (property == Property::FillColorTransition) {
         setFillColorTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::FillFadeZoomTransition) {
+        setFillFadeZoomTransition(*transition);
         return std::nullopt;
     }
 

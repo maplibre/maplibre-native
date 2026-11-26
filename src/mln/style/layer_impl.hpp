@@ -49,6 +49,11 @@ public:
     // Populates the given \a fontStack with fonts being used by the layer.
     virtual void populateFontStack(std::set<FontStack>& fontStack) const;
 
+    // Whether the layer keeps drawing a tile that has left the ideal set while its content fades out.
+    virtual bool drawsFadingTiles() const noexcept {
+        return getTypeInfo()->fadingTiles == LayerTypeInfo::FadingTiles::Required;
+    }
+
     /// Collect the style dependencies for this layer
     virtual expression::Dependency getDependencies() const noexcept { return expression::Dependency::None; }
 

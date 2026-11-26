@@ -39,6 +39,12 @@ public:
     void setFillColorTransition(const TransitionOptions&);
     TransitionOptions getFillColorTransition() const;
 
+    static PropertyValue<float> getDefaultFillFadeZoom();
+    const PropertyValue<float>& getFillFadeZoom() const;
+    void setFillFadeZoom(const PropertyValue<float>&);
+    void setFillFadeZoomTransition(const TransitionOptions&);
+    TransitionOptions getFillFadeZoomTransition() const;
+
     static PropertyValue<float> getDefaultFillOpacity();
     const PropertyValue<float>& getFillOpacity() const;
     void setFillOpacity(const PropertyValue<float>&);

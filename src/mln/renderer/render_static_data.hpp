@@ -4,6 +4,7 @@
 #include <mln/gfx/index_buffer.hpp>
 #include <mln/gfx/renderbuffer.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#include <mln/gfx/uniform_buffer.hpp>
 #include <mln/renderer/buckets/heatmap_bucket.hpp>
 #include <mln/renderer/buckets/raster_bucket.hpp>
 #include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
@@ -50,6 +51,10 @@ public:
     bool uploaded = false;
 
     std::unique_ptr<gfx::ShaderRegistry> shaders;
+
+    /// GPU copy of the zoom fade table, bound by the line and fill layers.
+    gfx::UniformBufferPtr fadeZoomTableBuffer;
+    std::optional<uint64_t> fadeZoomTableVersion;
 
     const SegmentVector clippingMaskSegments;
 };

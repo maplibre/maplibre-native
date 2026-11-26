@@ -14,8 +14,10 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     mediump float u_width;
     lowp float u_floorwidth;
     lowp float props_pad1;
-    lowp float props_pad2;
+    highp float u_fade_zoom;
 };
+
+in lowp float v_fade_zoom_opacity;
 
 uniform sampler2D u_image;
 
@@ -53,6 +55,8 @@ void main() {
     alpha *= smoothstep(0.5 - u_sdfgamma / floorwidth, 0.5 + u_sdfgamma / floorwidth, sdfdist);
 
     fragColor = color * (alpha * opacity);
+
+    fragColor *= v_fade_zoom_opacity;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

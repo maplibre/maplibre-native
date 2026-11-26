@@ -11,6 +11,7 @@ constexpr auto fillShaderPrelude = R"(
 #define idFillDrawableUBO           idDrawableReservedVertexOnlyUBO
 #define idFillTilePropsUBO          drawableReservedUBOCount
 #define idFillEvaluatedPropsUBO     layerUBOStartId
+#define idFillFadeZoomUBO          layerUBOStartId + 1
 #define idFillPosVertexDrawableUBO        drawableSSBOStartId
 #define idFillNeighborVertexDrawableUBO   drawableSSBOStartId + 1
 #define idFillDataVertexDrawableUBO       drawableSSBOStartId + 2
@@ -142,7 +143,7 @@ template <>
 struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillShader";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static const std::array<AttributeInfo, 1> instanceAttributes;
     static const std::array<TextureInfo, 0> textures;
 
@@ -162,7 +163,7 @@ struct FillDrawableUBO {
     // Interpolations
     float color_t;
     float opacity_t;
-    float pad1;
+    float fade_zoom_t;
     float pad2;
     vec4 pad3;
     vec4 pad4;
@@ -190,11 +191,14 @@ layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillNeighborVertexDrawa
 } neighborVertexVector;
 #endif
 
-#if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_outline_color) || !defined(HAS_UNIFORM_u_pattern_to) || !defined(HAS_UNIFORM_u_pattern_from)
+#if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_outline_color) || !defined(HAS_UNIFORM_u_pattern_to) || !defined(HAS_UNIFORM_u_pattern_from) || !defined(HAS_UNIFORM_u_fade_zoom)
 // Same order as in FillPaintProperties
 struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
     float color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float fade_zoom[2];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity[2];
@@ -223,18 +227,20 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     float fade;
     float from_scale;
     float to_scale;
-    float pad1;
+    float fade_zoom;
     float pad2;
     float pad3;
 } props;
+
+layout(set = LAYER_SET_INDEX, binding = idFillFadeZoomUBO) uniform FillFadeZoomUBO {
+    vec4 opacity[104];
+} fadeZoomTable;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 0) out vec4 frag_color;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 1) out lowp float frag_opacity;
-#endif
 
 #if defined(ROUNDED_CORNER_ENABLED)
 struct FragmentData {
@@ -327,10 +333,21 @@ void main() {
 
 #if !defined(HAS_UNIFORM_u_opacity)
     frag_opacity = unpack_mix_float(dataVertexVector.vertex[vertex_index].opacity, drawable.opacity_t);
+#else
+    frag_opacity = props.opacity;
 #endif
 
     gl_Position = drawable.matrix * vec4(position, 0.0, 1.0);
     applySurfaceTransform();
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    const float fade_zoom = unpack_mix_float(dataVertexVector.vertex[vertex_index].fade_zoom, drawable.fade_zoom_t);
+#else
+    const float fade_zoom = props.fade_zoom;
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    const int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    frag_opacity *= fadeZoomTable.opacity[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
 
@@ -340,9 +357,7 @@ void main() {
 layout(location = 0) in vec4 frag_color;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 1) in lowp float frag_opacity;
-#endif
 
 #if defined(ROUNDED_CORNER_ENABLED)
 struct FragmentData {
@@ -378,7 +393,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     float fade;
     float from_scale;
     float to_scale;
-    float pad1;
+    float fade_zoom;
     float pad2;
     float pad3;
 } props;
@@ -432,11 +447,7 @@ void main() {
     const vec4 color = frag_color;
 #endif
 
-#if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = props.opacity;
-#else
     const float opacity = frag_opacity;
-#endif
 
     out_color = color * opacity;
 }
@@ -447,7 +458,7 @@ template <>
 struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillOutlineShader";
 
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -464,6 +475,10 @@ layout(location = 1) in vec4 in_color;
 layout(location = 2) in vec2 in_opacity;
 #endif
 
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+layout(location = 3) in vec2 in_fade_zoom;
+#endif
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -473,7 +488,7 @@ struct FillOutlineDrawableUBO {
     // Interpolations
     float outline_color_t;
     float opacity_t;
-    float pad1;
+    float fade_zoom_t;
     float pad2;
     vec4 pad3;
     vec4 pad4;
@@ -483,13 +498,28 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buff
     FillOutlineDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEvaluatedPropsUBO {
+    vec4 color;
+    vec4 outline_color;
+    float opacity;
+    float rounded_corner_distance;
+    float fade;
+    float from_scale;
+    float to_scale;
+    float fade_zoom;
+    float pad2;
+    float pad3;
+} props;
+
+layout(set = LAYER_SET_INDEX, binding = idFillFadeZoomUBO) uniform FillFadeZoomUBO {
+    vec4 opacity[104];
+} fadeZoomTable;
+
 #if !defined(HAS_UNIFORM_u_outline_color)
 layout(location = 0) out vec4 frag_color;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 1) out lowp float frag_opacity;
-#endif
 
 layout(location = 2) out vec2 frag_position;
 
@@ -502,12 +532,23 @@ void main() {
 
 #if !defined(HAS_UNIFORM_u_opacity)
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+#else
+    frag_opacity = props.opacity;
 #endif
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
     applySurfaceTransform();
 
     frag_position = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * paintParams.world_size;
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    const float fade_zoom = unpack_mix_float(in_fade_zoom, drawable.fade_zoom_t);
+#else
+    const float fade_zoom = props.fade_zoom;
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    const int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    frag_opacity *= fadeZoomTable.opacity[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
 
@@ -517,9 +558,7 @@ void main() {
 layout(location = 0) in vec4 frag_color;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 1) in float frag_opacity;
-#endif
 
 layout(location = 2) in vec2 frag_position;
 
@@ -533,7 +572,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     float fade;
     float from_scale;
     float to_scale;
-    float pad1;
+    float fade_zoom;
     float pad2;
     float pad3;
 } props;
@@ -551,11 +590,7 @@ void main() {
     const vec4 color = frag_color;
 #endif
 
-#if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = props.opacity;
-#else
     const float opacity = frag_opacity;
-#endif
 
     float dist = length(frag_position - gl_FragCoord.xy);
     float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
@@ -568,7 +603,7 @@ template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillPatternShader";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static const std::array<AttributeInfo, 1> instanceAttributes;
     static const std::array<TextureInfo, 1> textures;
 
@@ -593,7 +628,7 @@ struct FillPatternDrawableUBO {
     float pattern_to_t;
     float opacity_t;
     float color_t;
-    float pad1;
+    float fade_zoom_t;
     float pad2;
     float pad3;
 };
@@ -620,11 +655,14 @@ layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillNeighborVertexDrawa
 } neighborVertexVector;
 #endif
 
-#if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_outline_color) || !defined(HAS_UNIFORM_u_pattern_to) || !defined(HAS_UNIFORM_u_pattern_from)
+#if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_outline_color) || !defined(HAS_UNIFORM_u_pattern_to) || !defined(HAS_UNIFORM_u_pattern_from) || !defined(HAS_UNIFORM_u_fade_zoom)
 // Same order as in FillPaintProperties
 struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
     float color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float fade_zoom[2];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity[2];
@@ -665,10 +703,14 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     float fade;
     float from_scale;
     float to_scale;
-    float pad1;
+    float fade_zoom;
     float pad2;
     float pad3;
 } props;
+
+layout(set = LAYER_SET_INDEX, binding = idFillFadeZoomUBO) uniform FillFadeZoomUBO {
+    vec4 opacity[104];
+} fadeZoomTable;
 
 layout(location = 0) out vec2 frag_pos_a;
 layout(location = 1) out vec2 frag_pos_b;
@@ -677,9 +719,7 @@ layout(location = 1) out vec2 frag_pos_b;
 layout(location = 2) out vec4 frag_color;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 3) out lowp float frag_opacity;
-#endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
 layout(location = 4) out mediump vec4 frag_pattern_from;
@@ -781,6 +821,8 @@ void main() {
 
 #if !defined(HAS_UNIFORM_u_opacity)
     frag_opacity = unpack_mix_float(dataVertexVector.vertex[vertex_index].opacity, drawable.opacity_t);
+#else
+    frag_opacity = props.opacity;
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
@@ -815,6 +857,15 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(position, 0.0, 1.0);
     applySurfaceTransform();
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    const float fade_zoom = unpack_mix_float(dataVertexVector.vertex[vertex_index].fade_zoom, drawable.fade_zoom_t);
+#else
+    const float fade_zoom = props.fade_zoom;
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    const int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    frag_opacity *= fadeZoomTable.opacity[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
 
@@ -827,9 +878,7 @@ layout(location = 1) in vec2 frag_pos_b;
 layout(location = 2) in vec4 frag_color;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 3) in lowp float frag_opacity;
-#endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
 layout(location = 4) in vec4 frag_pattern_from;
@@ -889,7 +938,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     float fade;
     float from_scale;
     float to_scale;
-    float pad1;
+    float fade_zoom;
     float pad2;
     float pad3;
 } props;
@@ -947,11 +996,7 @@ void main() {
     const vec4 color = frag_color;
 #endif
 
-#if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = props.opacity;
-#else
     const float opacity = frag_opacity;
-#endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 pattern_from = tileProps.pattern_from;
@@ -996,7 +1041,7 @@ template <>
 struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillOutlinePatternShader";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -1021,6 +1066,10 @@ layout(location = 3) in mediump uvec4 in_pattern_from;
 layout(location = 4) in mediump uvec4 in_pattern_to;
 #endif
 
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+layout(location = 5) in vec2 in_fade_zoom;
+#endif
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -1035,7 +1084,7 @@ struct FillOutlinePatternDrawableUBO {
     float pattern_to_t;
     float opacity_t;
     float color_t;
-    float pad1;
+    float fade_zoom_t;
     float pad2;
     float pad3;
 };
@@ -1064,10 +1113,14 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     float fade;
     float from_scale;
     float to_scale;
-    float pad1;
+    float fade_zoom;
     float pad2;
     float pad3;
 } props;
+
+layout(set = LAYER_SET_INDEX, binding = idFillFadeZoomUBO) uniform FillFadeZoomUBO {
+    vec4 opacity[104];
+} fadeZoomTable;
 
 layout(location = 0) out vec2 frag_pos_a;
 layout(location = 1) out vec2 frag_pos_b;
@@ -1077,9 +1130,7 @@ layout(location = 2) out vec2 frag_pos;
 layout(location = 3) out vec4 frag_color;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 4) out lowp float frag_opacity;
-#endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
 layout(location = 5) out mediump vec4 frag_pattern_from;
@@ -1099,6 +1150,8 @@ void main() {
 
 #if !defined(HAS_UNIFORM_u_opacity)
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+#else
+    frag_opacity = props.opacity;
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
@@ -1133,6 +1186,15 @@ void main() {
     frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, position2),
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, position2),
     frag_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * paintParams.world_size;
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    const float fade_zoom = unpack_mix_float(in_fade_zoom, drawable.fade_zoom_t);
+#else
+    const float fade_zoom = props.fade_zoom;
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    const int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    frag_opacity *= fadeZoomTable.opacity[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
 
@@ -1146,9 +1208,7 @@ layout(location = 2) in vec2 frag_pos;
 layout(location = 3) in vec4 frag_color;
 #endif
 
-#if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 4) in lowp float frag_opacity;
-#endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
 layout(location = 5) in vec4 frag_pattern_from;
@@ -1184,7 +1244,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     float fade;
     float from_scale;
     float to_scale;
-    float pad1;
+    float fade_zoom;
     float pad2;
     float pad3;
 } props;
@@ -1206,11 +1266,7 @@ void main() {
     const vec4 color = frag_color;
 #endif
 
-#if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = props.opacity;
-#else
     const float opacity = frag_opacity;
-#endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 pattern_from = tileProps.pattern_from;
@@ -1286,11 +1342,30 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buff
     FillOutlineTriangulatedDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEvaluatedPropsUBO {
+    vec4 color;
+    vec4 outline_color;
+    float opacity;
+    float rounded_corner_distance;
+    float fade;
+    float from_scale;
+    float to_scale;
+    float fade_zoom;
+    float pad2;
+    float pad3;
+} props;
+
+layout(set = LAYER_SET_INDEX, binding = idFillFadeZoomUBO) uniform FillFadeZoomUBO {
+    vec4 opacity[104];
+} fadeZoomTable;
+
 layout(location = 0) out float frag_width2;
 layout(location = 1) out vec2 frag_normal;
 layout(location = 2) out float frag_gamma_scale;
+layout(location = 3) out lowp float frag_opacity;
 
 void main() {
+    frag_opacity = props.opacity;
     const FillOutlineTriangulatedDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     // the distance over which the line edge fades out.
@@ -1327,6 +1402,11 @@ void main() {
 
     frag_width2 = outset;
     frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+
+    const float fade_zoom = props.fade_zoom;
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    const int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    frag_opacity *= fadeZoomTable.opacity[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
 
@@ -1335,6 +1415,8 @@ void main() {
 layout(location = 0) in float frag_width2;
 layout(location = 1) in vec2 frag_normal;
 layout(location = 2) in float frag_gamma_scale;
+
+layout(location = 3) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
@@ -1346,7 +1428,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEva
     float fade;
     float from_scale;
     float to_scale;
-    float pad1;
+    float fade_zoom;
     float pad2;
     float pad3;
 } props;
@@ -1366,7 +1448,7 @@ void main() {
     const float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * frag_gamma_scale;
     const float alpha = clamp(min(dist + blur2, frag_width2 - dist) / blur2, 0.0, 1.0);
 
-    out_color = props.outline_color * alpha * props.opacity;
+    out_color = props.outline_color * alpha * frag_opacity;
 }
 )";
 };

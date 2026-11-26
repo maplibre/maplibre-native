@@ -20,7 +20,7 @@ layout (std140) uniform FillOutlinePatternDrawableUBO {
     highp float u_pattern_to_t;
     highp float u_opacity_t;
     highp float u_color_t;
-    lowp float drawable_pad1;
+    lowp float u_fade_zoom_t;
     lowp float drawable_pad2;
     lowp float drawable_pad3;
 };
@@ -41,10 +41,16 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad1;
+    highp float u_fade_zoom;
     lowp float props_pad2;
     lowp float props_pad3;
 };
+
+layout (std140) uniform FillFadeZoomUBO {
+    highp vec4 u_fade_zoom_table[104];
+};
+
+out lowp float v_fade_zoom_opacity;
 
 layout (location = 0) in vec2 a_pos;
 
@@ -56,12 +62,14 @@ out vec2 v_pos;
 #pragma mapbox: define lowp float opacity
 #pragma mapbox: define lowp vec4 pattern_from
 #pragma mapbox: define lowp vec4 pattern_to
+#pragma mapbox: define highp float fade_zoom
 
 void main() {
     #pragma mapbox: initialize highp vec4 color
     #pragma mapbox: initialize lowp float opacity
     #pragma mapbox: initialize mediump vec4 pattern_from
     #pragma mapbox: initialize mediump vec4 pattern_to
+    #pragma mapbox: initialize highp float fade_zoom
 
     vec2 pattern_tl_a = pattern_from.xy;
     vec2 pattern_br_a = pattern_from.zw;
@@ -82,4 +90,8 @@ void main() {
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, toScale * display_size_b, tileRatio, a_pos);
 
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world_size;
+
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    v_fade_zoom_opacity = u_fade_zoom_table[fade_zoom_index / 4][fade_zoom_index % 4];
 }

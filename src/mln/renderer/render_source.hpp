@@ -73,6 +73,8 @@ public:
     // If supported, returns a shared list of RenderTiles, sorted by tile id and
     // excluding tiles hold for fade; returns nullptr otherwise.
     virtual RenderTiles getRenderTiles() const { return nullptr; }
+    // The render tiles together with the tiles held while their content fades out.
+    virtual RenderTiles getRenderTilesWithFadingTiles() const { return getRenderTiles(); }
     // If supported, returns a shared list of RenderTiles, sorted in opposite y
     // position, so tiles with overlapping symbols are drawn on top of each other,
     // with lower symbols being drawn on top of higher symbols; returns nullptr otherwise.

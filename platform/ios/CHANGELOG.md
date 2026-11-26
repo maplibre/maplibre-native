@@ -2,6 +2,12 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+### Features
+
+- New paint properties `line-fade-zoom` and `fill-fade-zoom` fade lines and polygons in and out when the zoom crosses a value read from each feature, over the same duration as symbol fades, so a style no longer needs one layer per first zoom ([#5128](https://github.com/maplibre/maplibre-native/pull/5128)).
+
 ## 7.1.0
 
 ### Features

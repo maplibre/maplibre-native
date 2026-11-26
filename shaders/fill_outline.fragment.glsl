@@ -6,10 +6,12 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad1;
+    highp float u_fade_zoom;
     lowp float props_pad2;
     lowp float props_pad3;
 };
+
+in lowp float v_fade_zoom_opacity;
 
 in vec2 v_pos;
 
@@ -23,6 +25,8 @@ void main() {
     float dist = length(v_pos - gl_FragCoord.xy);
     float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
     fragColor = outline_color * (alpha * opacity);
+
+    fragColor *= v_fade_zoom_opacity;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

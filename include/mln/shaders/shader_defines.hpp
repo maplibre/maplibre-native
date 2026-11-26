@@ -113,6 +113,7 @@ enum {
 
 enum {
     idFillEvaluatedPropsUBO = getEnumValue(fillLayerSSBOCount, layerUBOStartId),
+    idFillFadeZoomUBO,
     fillLayerUBOCount
 };
 
@@ -139,6 +140,7 @@ enum {
 enum {
     idLineEvaluatedPropsUBO = getEnumValue(lineLayerSSBOCount, layerUBOStartId),
     idLineExpressionUBO,
+    idLineFadeZoomUBO,
     lineLayerUBOCount
 };
 
@@ -435,6 +437,7 @@ enum {
     idFillOutlineColorVertexAttribute,
     idFillPatternFromVertexAttribute,
     idFillPatternToVertexAttribute,
+    idFillFadeZoomVertexAttribute,
 
     fillVertexAttributeCount
 };
@@ -495,6 +498,7 @@ enum {
     idLineFloorWidthVertexAttribute,
     idLinePatternFromVertexAttribute,
     idLinePatternToVertexAttribute,
+    idLineFadeZoomVertexAttribute,
 
     lineVertexAttributeCount
 };

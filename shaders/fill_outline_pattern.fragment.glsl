@@ -14,10 +14,12 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad1;
+    highp float u_fade_zoom;
     lowp float props_pad2;
     lowp float props_pad3;
 };
+
+in lowp float v_fade_zoom_opacity;
 
 uniform sampler2D u_image;
 
@@ -65,6 +67,8 @@ void main() {
     } else {
         fragColor = mix(color1, color2, u_fade) * alpha * opacity;
     }
+
+    fragColor *= v_fade_zoom_opacity;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

@@ -50,6 +50,19 @@ struct alignas(16) GlobalPaintParamsUBO {
 };
 static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16);
 
+/// Zoom fade table for `line-fade-zoom` and `fill-fade-zoom`, shared by all line and fill layers.
+/// Entry `i` is the current opacity of the features whose fade zoom rounds to `i / fadeZoomStepsPerZoom`:
+/// it moves towards 1 while the map's zoom is at or above that value and towards 0 below it.
+constexpr std::size_t fadeZoomStepsPerZoom = 16;
+constexpr std::size_t fadeZoomTableSize = 26 * fadeZoomStepsPerZoom; // zoom 0 to 25.9375
+
+struct alignas(16) FadeZoomTableUBO {
+    /* 0 */ std::array<float, fadeZoomTableSize> opacity;
+    /* 1664 */
+};
+static_assert(sizeof(FadeZoomTableUBO) == fadeZoomTableSize * 4);
+static_assert(sizeof(FadeZoomTableUBO) % 16 == 0);
+
 #if MLN_RENDER_BACKEND_VULKAN
 struct alignas(16) GlobalPlatformParamsUBO {
     /*  0 */ std::array<float, 4> surfaceRotation;
