@@ -12,14 +12,14 @@ AnnotationTile::AnnotationTile(const OverscaledTileID& overscaledTileID,
                                TileObserver* observer_)
     : GeometryTile(overscaledTileID, AnnotationManager::SourceID, parameters, observer_),
       annotationManager(parameters.annotationManager) {
-    if (auto guard = annotationManager.lock(); annotationManager) {
-        annotationManager->addTile(*this);
+    if (auto manager = annotationManager.lock()) {
+        manager->addTile(*this);
     }
 }
 
 AnnotationTile::~AnnotationTile() {
-    if (auto guard = annotationManager.lock(); annotationManager) {
-        annotationManager->removeTile(*this);
+    if (auto manager = annotationManager.lock()) {
+        manager->removeTile(*this);
     }
 }
 

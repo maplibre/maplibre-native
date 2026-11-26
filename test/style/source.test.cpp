@@ -64,7 +64,7 @@ public:
     StubRenderSourceObserver renderSourceObserver;
     Transform transform;
     TransformState transformState;
-    AnnotationManager annotationManager{style};
+    std::shared_ptr<AnnotationManager> annotationManager = std::make_shared<AnnotationManager>(style);
     std::shared_ptr<ImageManager> imageManager = ImageManager::create();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
@@ -77,7 +77,7 @@ public:
                 .transformState = transformState,
                 .fileSource = fileSource,
                 .mode = mapMode,
-                .annotationManager = annotationManager.makeWeakPtr(),
+                .annotationManager = annotationManager,
                 .imageManager = imageManager,
                 .glyphManager = glyphManager,
                 .prefetchZoomDelta = 0,

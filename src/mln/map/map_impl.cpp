@@ -58,7 +58,7 @@ Map::Impl::Impl(RendererFrontend& frontend_,
       captureRenderedFeatures(mapOptions.renderedFeatureInfo()),
       fileSource(std::move(fileSource_)),
       style(std::make_unique<style::Style>(fileSource, pixelRatio, frontend_.getThreadPool())),
-      annotationManager(*style) {
+      annotationManager(std::make_shared<AnnotationManager>(*style)) {
     transform.setNorthOrientation(mapOptions.northOrientation());
     style->impl->setObserver(this);
     rendererFrontend.setObserver(*this);
@@ -130,7 +130,7 @@ void Map::Impl::onUpdate() {
                                .sources = style->impl->getSourceImpls(),
                                .layers = style->impl->getLayerImpls(),
                                .globalState = style->impl->getGlobalStateShared(),
-                               .annotationManager = annotationManager.makeWeakPtr(),
+                               .annotationManager = annotationManager,
                                .fileSource = fileSource,
                                .prefetchZoomDelta = prefetchZoomDelta,
                                .stillImageRequest = bool(stillImageRequest),
@@ -161,7 +161,7 @@ void Map::Impl::onStyleLoaded() {
         jumpTo(style->getDefaultCamera());
     }
     if (LayerManager::annotationsEnabled) {
-        annotationManager.onStyleLoaded();
+        annotationManager->onStyleLoaded();
     }
 
     observer.onDidFinishLoadingStyle();

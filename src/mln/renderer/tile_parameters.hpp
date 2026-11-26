@@ -7,8 +7,6 @@
 #include <memory>
 #include <numbers>
 
-#include <mapbox/std/weak.hpp>
-
 namespace mln {
 
 class TransformState;
@@ -29,7 +27,7 @@ public:
     const TransformState& transformState;
     std::shared_ptr<FileSource> fileSource;
     const MapMode mode;
-    mapbox::base::WeakPtr<AnnotationManager> annotationManager;
+    std::weak_ptr<AnnotationManager> annotationManager;
     std::shared_ptr<ImageManager> imageManager;
     std::shared_ptr<GlyphManager> glyphManager;
     const uint8_t prefetchZoomDelta;

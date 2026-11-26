@@ -28,7 +28,7 @@ public:
     std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
     TransformState transformState;
     util::RunLoop loop;
-    AnnotationManager annotationManager{style};
+    std::shared_ptr<AnnotationManager> annotationManager = std::make_shared<AnnotationManager>(style);
     std::shared_ptr<ImageManager> imageManager = ImageManager::create();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
@@ -42,7 +42,7 @@ public:
                          .transformState = transformState,
                          .fileSource = fileSource,
                          .mode = MapMode::Continuous,
-                         .annotationManager = annotationManager.makeWeakPtr(),
+                         .annotationManager = annotationManager,
                          .imageManager = imageManager,
                          .glyphManager = glyphManager,
                          .prefetchZoomDelta = 0,
