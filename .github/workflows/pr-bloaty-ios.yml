@@ -42,7 +42,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST_RUN_ID: ${{ github.event.workflow_run.id }}
-          JOB_NAME: ios-build
+          JOB_NAME: ios-bloaty
 
   pr-bloaty-ios:
     needs: pre_job

@@ -44,7 +44,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST_RUN_ID: ${{ github.event.workflow_run.id }}
-          JOB_NAME: linux-build-and-test
+          JOB_NAME: linux-bloaty
 
   pr-bloaty:
     needs: pre_job

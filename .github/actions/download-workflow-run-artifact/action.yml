@@ -11,10 +11,6 @@ inputs:
     description: 'Do not fail when the artifact or one of the files is missing'
     required: false
     default: 'false'
-outputs:
-  found:
-    description: 'Whether every listed file was taken from the artifact'
-    value: ${{ steps.take.outputs.found }}
 runs:
   using: "composite"
   steps:
@@ -30,22 +26,17 @@ runs:
     # The artifact was uploaded by a run that a fork PR controls, so only the
     # listed files leave the download directory.
     - name: Take ${{ inputs.artifact-name }} files
-      id: take
       shell: bash
       run: |
         read -ra files <<< "${FILES//,/ }"
-        found=true
         for f in "${files[@]}"; do
           if [ -f "$DIR/$f" ]; then
             mv "$DIR/$f" "./$f"
-          elif [ "$OPTIONAL" = true ]; then
-            found=false
-          else
+          elif [ "$OPTIONAL" != true ]; then
             echo "::error::artifact $ARTIFACT has no file $f"
             exit 1
           fi
         done
-        echo "found=$found" >> "$GITHUB_OUTPUT"
       env:
         ARTIFACT: ${{ inputs.artifact-name }}
         FILES: ${{ inputs.files }}
