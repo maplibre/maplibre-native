@@ -12,6 +12,7 @@ namespace style {
 namespace {
 
 using namespace expression;
+
 bool interpolatesInRGB(const ZoomCurvePtr& zoomCurve) {
     return !zoomCurve.is<const Interpolate*>() ||
            zoomCurve.get<const Interpolate*>()->getColorSpace() == ColorSpace::RGB;
