@@ -1030,6 +1030,7 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
     }
 
     // Reset GL state to a known state so the CustomLayer always has a clean slate.
+    glContext.program = 0;
     glContext.bindVertexArray = 0;
     glContext.setDepthMode(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly));
     glContext.setStencilMode(gfx::StencilMode::disabled());
