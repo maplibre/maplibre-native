@@ -196,11 +196,10 @@ void Texture2D::createMetalTexture() {
 }
 
 void Texture2D::create() {
+    // Dynamic texture uploads call this from worker threads, while the render thread changes and replaces the sampler
+    // state without a lock, so the sampler state is left to `bind`.
     if (textureDirty) {
         createMetalTexture();
-    }
-    if (samplerStateDirty) {
-        updateSamplerConfiguration();
     }
 }
 
