@@ -38,13 +38,11 @@ target_sources(
     mbgl-core
     PRIVATE
         $<$<BOOL:${MLN_DARWIN_USE_LIBUV}>:
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
+            ${MLN_DEFAULT_LIBUV_RUN_LOOP_SOURCES}
         >
 
         $<$<NOT:$<BOOL:${MLN_DARWIN_USE_LIBUV}>>:
-            ${PROJECT_SOURCE_DIR}/platform/darwin/core/async_task.cpp
+            ${PROJECT_SOURCE_DIR}/platform/darwin/core/async_task.mm
             ${PROJECT_SOURCE_DIR}/platform/darwin/core/run_loop.cpp
             ${PROJECT_SOURCE_DIR}/platform/darwin/core/timer.cpp
         >
@@ -58,32 +56,15 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/darwin/core/nsthread.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/core/number_format.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/core/string_nsstring.mm
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/asset_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/mbtiles_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/database_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/main_resource_loader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_writer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
+        ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
+        ${MLN_DEFAULT_HEADLESS_SOURCES}
+        ${MLN_DEFAULT_UNICODE_SOURCES}
+        ${MLN_DEFAULT_UTIL_SOURCES}
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/layermanager/layer_manager.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/map/map_snapshotter.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/sqlite3.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_writer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/thread_local.cpp
 )
 
 target_include_directories(
@@ -94,14 +75,6 @@ target_include_directories(
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/darwin/src ${PROJECT_SOURCE_DIR}/platform/macos/src
 )
-
-if(MLN_WITH_METAL)
-    target_sources(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/mtl/headless_backend.cpp
-    )
-endif()
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 
@@ -192,7 +165,6 @@ endfunction()
 # available for WebGPU builds.
 if(NOT MLN_WITH_WEBGPU)
     set(_custom_layer_sources
-        "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
         "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
         "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
     )

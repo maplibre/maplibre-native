@@ -2,8 +2,8 @@
 
 #import "MLNOfflinePack.h"
 
-#include <mbgl/storage/database_file_source.hpp>
-#include <mbgl/storage/online_file_source.hpp>
+#include <mln/storage/database_file_source.hpp>
+#include <mln/storage/online_file_source.hpp>
 
 #include "MLNSettings_Private.h"
 
@@ -16,17 +16,17 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The shared database file source object owned by the shared offline storage object.
  */
-@property (nonatomic) std::shared_ptr<mbgl::DatabaseFileSource> mbglDatabaseFileSource;
+@property (nonatomic) std::shared_ptr<mln::DatabaseFileSource> mbglDatabaseFileSource;
 
 /**
  The shared online file source object owned by the shared offline storage object.
  */
-@property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglOnlineFileSource;
+@property (nonatomic) std::shared_ptr<mln::FileSource> mbglOnlineFileSource;
 
 /**
  The shared resource loader file source object owned by the shared offline storage object.
  */
-@property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglFileSource;
+@property (nonatomic) std::shared_ptr<mln::FileSource> mbglFileSource;
 
 - (void)getPacksWithCompletionHandler:(void (^)(NSArray<MLNOfflinePack *> *packs,
                                                 NSError *_Nullable error))completion;

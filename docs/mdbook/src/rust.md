@@ -22,10 +22,10 @@ rustup target add --toolchain stable-x86_64-unknown-linux-gnu aarch64-linux-andr
 
 See [Platform Support](https://doc.rust-lang.org/nightly/rustc/platform-support.html) in the Rust documentation for more details. You will get a descriptive error message when the correct toolchain is not available, so we don't list all possible combinations here.
 
-You also need to have cxxbridge installed:
+Rust 1.88 or newer is required. You also need to have the matching cxxbridge version installed:
 
 ```shell
-cargo install cxxbridge-cmd@1.0.157 --locked
+cargo install cxxbridge-cmd@1.0.202 --locked
 ```
 
 Set `-DMLN_USE_RUST=ON` when generating a configuration with CMake.
@@ -55,22 +55,22 @@ To create a new module:
 
 1. Add a new source file to `rustutils/src/example.rs`.
 2. Implement it, see the [CXX documentation](https://cxx.rs/index.html) or see `rustutils/src/color.rs` for an example.
-3. Create a C++ source file that will use the generated C++ header. See `src/mbgl/util/color.rs.cpp` for an example. Import the generated header with
+3. Create a C++ source file that will use the generated C++ header. See `src/mln/util/color.rs.cpp` for an example. Import the generated header with
     ```cpp
     #include <rustutils/example.hpp>
     ```
 4. Conditionally include either the `*.rs.cpp` file or the `*.cpp` file it replaces in CMake and Bazel. Here is what it looks like for CMake:
     ```cmake
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/color$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
+    ${PROJECT_SOURCE_DIR}/src/mln/util/color$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
     ```
     And here for Bazel:
     ```bazel
     select({
       "//:rust": [
-          "src/mbgl/util/color.rs.cpp",
+          "src/mln/util/color.rs.cpp",
       ],
       "//conditions:default": [
-          "src/mbgl/util/color.cpp",
+          "src/mln/util/color.cpp",
       ],
     })
     ```

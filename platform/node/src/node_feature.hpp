@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/util/feature.hpp>
+#include <mln/util/feature.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -10,9 +10,9 @@
 
 namespace node_mbgl {
 
-v8::Local<v8::Value> toJS(const mbgl::Value&);
-v8::Local<v8::Object> toJS(const mbgl::Feature&);
-v8::Local<v8::Object> toJS(const mbgl::Feature::geometry_type&);
-v8::Local<v8::Object> toJS(const mbgl::PropertyMap&);
+v8::Local<v8::Value> toJS(const mln::Value&);
+v8::Local<v8::Object> toJS(const mln::Feature&);
+v8::Local<v8::Object> toJS(const mln::Feature::geometry_type&);
+v8::Local<v8::Object> toJS(const mln::PropertyMap&);
 
 } // namespace node_mbgl

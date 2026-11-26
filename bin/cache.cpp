@@ -1,8 +1,8 @@
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <args.hxx>
 #include <mapbox/io/io.hpp>
@@ -25,20 +25,20 @@ int main(int argc, char* argv[]) {
     args::ValueFlag<unsigned long> expiresValue(p, "expires", "Expires date, will use 'now' otherwise", {'e'});
     args::ValueFlag<unsigned long> modifiedValue(p, "modified", "Modified date, will use 'now' otherwise", {'m'});
 
-    std::unordered_map<std::string, mbgl::Resource::Kind> typeMap{{"glyphs", mbgl::Resource::Glyphs},
-                                                                  {"image", mbgl::Resource::Image},
-                                                                  {"source", mbgl::Resource::Source},
-                                                                  {"sprite-image", mbgl::Resource::SpriteImage},
-                                                                  {"sprite-json", mbgl::Resource::SpriteJSON},
-                                                                  {"style", mbgl::Resource::Style},
-                                                                  {"tile", mbgl::Resource::Tile}};
+    std::unordered_map<std::string, mln::Resource::Kind> typeMap{{"glyphs", mln::Resource::Glyphs},
+                                                                 {"image", mln::Resource::Image},
+                                                                 {"source", mln::Resource::Source},
+                                                                 {"sprite-image", mln::Resource::SpriteImage},
+                                                                 {"sprite-json", mln::Resource::SpriteJSON},
+                                                                 {"style", mln::Resource::Style},
+                                                                 {"tile", mln::Resource::Tile}};
 
     std::string typeHelp("One of the following (required):");
     for (const auto& key : typeMap) {
         typeHelp += " " + key.first;
     }
 
-    args::MapFlag<std::string, mbgl::Resource::Kind> typeFlag(
+    args::MapFlag<std::string, mln::Resource::Kind> typeFlag(
         p, "type", typeHelp, {"type"}, typeMap, args::Options::Required);
 
     args::Group tileIdGroup(p, "Coordinates (required for 'tile')", args::Group::Validators::AllOrNone);
@@ -67,15 +67,15 @@ int main(int argc, char* argv[]) {
         exit(3);
     }
 
-    mbgl::Response response;
+    mln::Response response;
     response.data = std::make_shared<std::string>(*file);
     response.etag = etagValue ? args::get(etagValue) : std::string();
-    response.expires = expiresValue ? mbgl::Timestamp(mbgl::Seconds(args::get(expiresValue))) : mbgl::util::now();
-    response.modified = modifiedValue ? mbgl::Timestamp(mbgl::Seconds(args::get(modifiedValue))) : mbgl::util::now();
+    response.expires = expiresValue ? mln::Timestamp(mln::Seconds(args::get(expiresValue))) : mln::util::now();
+    response.modified = modifiedValue ? mln::Timestamp(mln::Seconds(args::get(modifiedValue))) : mln::util::now();
 
-    mbgl::Resource resource(args::get(typeFlag), args::get(urlValue));
+    mln::Resource resource(args::get(typeFlag), args::get(urlValue));
 
-    if (args::get(typeFlag) == mbgl::Resource::Tile) {
+    if (args::get(typeFlag) == mln::Resource::Tile) {
         if (!xValueFlag || !yValueFlag || !zValueFlag) {
             std::cerr << "Error: -x, -y and -z must be provided for tiles" << '\n';
             exit(1);
@@ -88,9 +88,9 @@ int main(int argc, char* argv[]) {
                               .z = static_cast<int8_t>(args::get(zValueFlag))}};
     }
 
-    mbgl::util::RunLoop loop;
-    std::shared_ptr<mbgl::FileSource> dbfs = mbgl::FileSourceManager::get()->getFileSource(
-        mbgl::FileSourceType::Database, mbgl::ResourceOptions().withCachePath(args::get(cacheValue)));
+    mln::util::RunLoop loop;
+    std::shared_ptr<mln::FileSource> dbfs = mln::FileSourceManager::get()->getFileSource(
+        mln::FileSourceType::Database, mln::ResourceOptions().withCachePath(args::get(cacheValue)));
     dbfs->forward(resource, response, [&loop] { loop.stop(); });
     loop.run();
     return 0;

@@ -1,7 +1,7 @@
 #include <GLES3/gl3.h>
 #include <android/log.h>
 #include <jni.h>
-#include <mbgl/style/layers/custom_layer.hpp>
+#include <mln/style/layers/custom_layer.hpp>
 #include <sstream>
 #include <memory>
 
@@ -127,11 +127,11 @@ static const GLchar *fragmentShaderSource =
     "#version 300 es\nuniform highp vec4 fill_color; out highp vec4 fragColor; "
     "void main() { fragColor = fill_color; }";
 
-class ExampleCustomLayer : mbgl::style::CustomLayerHost {
+class ExampleCustomLayer : mln::style::CustomLayerHost {
 public:
     ~ExampleCustomLayer() {}
 
-    void initialize(const mbgl::style::CustomLayerInitParameters &) override {
+    void initialize(const mln::style::CustomLayerInitParameters &) override {
         __android_log_write(ANDROID_LOG_INFO, LOG_TAG, "Initialize");
 
         // Debug info
@@ -163,7 +163,7 @@ public:
         GL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), background, GL_STATIC_DRAW));
     }
 
-    void render(const mbgl::style::CustomLayerRenderParameters &) override {
+    void render(const mln::style::CustomLayerRenderParameters &) override {
         __android_log_write(ANDROID_LOG_INFO, LOG_TAG, "Render");
         glUseProgram(program);
         glBindBuffer(GL_ARRAY_BUFFER, buffer);

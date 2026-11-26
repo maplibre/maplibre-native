@@ -6,8 +6,8 @@
 #import "MLNTileSource_Private.h"
 #import "NSURL+MLNAdditions.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/sources/raster_source.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/sources/raster_source.hpp>
 
 const MLNTileSourceOption MLNTileSourceOptionTileSize = @"MLNTileSourceOptionTileSize";
 
@@ -16,7 +16,7 @@ static const CGFloat MLNRasterTileSourceRetinaTileSize = 512;
 
 @interface MLNRasterTileSource ()
 
-@property (nonatomic, readonly) mbgl::style::RasterSource *rawSource;
+@property (nonatomic, readonly) mln::style::RasterSource *rawSource;
 
 @end
 
@@ -46,19 +46,19 @@ static const CGFloat MLNRasterTileSourceRetinaTileSize = 512;
   return self = [super initWithPendingSource:std::move(source)];
 }
 
-- (std::unique_ptr<mbgl::style::RasterSource>)
+- (std::unique_ptr<mln::style::RasterSource>)
     pendingSourceWithIdentifier:(NSString *)identifier
-                   urlOrTileset:(mbgl::variant<std::string, mbgl::Tileset>)urlOrTileset
+                   urlOrTileset:(mln::variant<std::string, mln::Tileset>)urlOrTileset
                        tileSize:(uint16_t)tileSize {
   auto source =
-      std::make_unique<mbgl::style::RasterSource>(identifier.UTF8String, urlOrTileset, tileSize);
+      std::make_unique<mln::style::RasterSource>(identifier.UTF8String, urlOrTileset, tileSize);
   return source;
 }
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
                   tileURLTemplates:(NSArray<NSString *> *)tileURLTemplates
                            options:(nullable NSDictionary<MLNTileSourceOption, id> *)options {
-  mbgl::Tileset tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, options);
+  mln::Tileset tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, options);
 
   uint16_t tileSize = MLNRasterTileSourceRetinaTileSize;
   if (NSNumber *tileSizeNumber = options[MLNTileSourceOptionTileSize]) {
@@ -75,8 +75,8 @@ static const CGFloat MLNRasterTileSourceRetinaTileSize = 512;
   return self = [super initWithPendingSource:std::move(source)];
 }
 
-- (mbgl::style::RasterSource *)rawSource {
-  return (mbgl::style::RasterSource *)super.rawSource;
+- (mln::style::RasterSource *)rawSource {
+  return (mln::style::RasterSource *)super.rawSource;
 }
 
 - (NSURL *)configurationURL {

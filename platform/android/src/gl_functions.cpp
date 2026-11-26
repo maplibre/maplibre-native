@@ -1,8 +1,8 @@
-#include <mbgl/platform/gl_functions.hpp>
+#include <mln/platform/gl_functions.hpp>
 
 #include <GLES3/gl3.h>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 /* OpenGL ES 2.0 */
@@ -277,4 +277,4 @@ void (*const glTexStorage3D)(GLenum, GLsizei, GLenum, GLsizei, GLsizei, GLsizei)
 void (*const glGetInternalformativ)(GLenum, GLenum, GLenum, GLsizei, GLint*) = ::glGetInternalformativ;
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

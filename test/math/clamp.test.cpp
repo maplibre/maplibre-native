@@ -1,9 +1,9 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/constants.hpp>
-#include <mbgl/math/clamp.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/math/clamp.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(Math, ClampFloatingPoint) {
     double lowestValue = std::numeric_limits<double>::lowest();

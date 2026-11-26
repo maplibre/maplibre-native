@@ -2,7 +2,7 @@
 
 @implementation NSColor (MLNAdditions)
 
-- (mbgl::Color)mgl_color {
+- (mln::Color)mgl_color {
   CGFloat r, g, b, a;
 
   // The MapLibre Style Spec does not specify a color space, but it is
@@ -17,12 +17,12 @@
 
   // NSColor provides non-premultiplied color components, so we have to premultiply each
   // color component with the alpha value to transform it into a valid
-  // mbgl::Color which expects premultiplied color components.
+  // mln::Color which expects premultiplied color components.
   return {static_cast<float>(r * a), static_cast<float>(g * a), static_cast<float>(b * a),
           static_cast<float>(a)};
 }
 
-- (mbgl::Color)mgl_colorForPremultipliedValue {
+- (mln::Color)mgl_colorForPremultipliedValue {
   CGFloat r, g, b, a;
 
   // The MapLibre Style Spec does not specify a color space, but it is
@@ -39,7 +39,7 @@
           static_cast<float>(a)};
 }
 
-+ (NSColor *)mgl_colorWithColor:(mbgl::Color)color {
++ (NSColor *)mgl_colorWithColor:(mln::Color)color {
   // If there is no alpha value, return original color values.
   if (color.a == 0.0f) {
     // macOS 10.12 Sierra and below uses calibrated RGB by default.
@@ -50,7 +50,7 @@
     }
   }
 
-  // mbgl::Color provides premultiplied color components, so we have to convert color
+  // mln::Color provides premultiplied color components, so we have to convert color
   // components to non-premultiplied values to return a valid NSColor object.
   float red = static_cast<float>((color.r / color.a));
   float green = static_cast<float>((color.g / color.a));
@@ -64,8 +64,8 @@
   }
 }
 
-- (mbgl::style::PropertyValue<mbgl::Color>)mgl_colorPropertyValue {
-  mbgl::Color color = self.mgl_color;
+- (mln::style::PropertyValue<mln::Color>)mgl_colorPropertyValue {
+  mln::Color color = self.mgl_color;
   return {{color.r, color.g, color.b, color.a}};
 }
 

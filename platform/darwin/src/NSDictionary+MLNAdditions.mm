@@ -5,8 +5,8 @@
 
 @implementation NSDictionary (MLNAdditions)
 
-- (mbgl::PropertyMap)mgl_propertyMap {
-  mbgl::PropertyMap propertyMap;
+- (mln::PropertyMap)mgl_propertyMap {
+  mln::PropertyMap propertyMap;
   for (NSString *key in self.allKeys) {
     if ([self[key] isKindOfClass:[NSDictionary class]]) {
       propertyMap[[key UTF8String]] = [self[key] mgl_propertyMap];

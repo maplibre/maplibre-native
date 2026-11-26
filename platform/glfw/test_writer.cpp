@@ -20,7 +20,7 @@ public:
 
 class SetCamera final : public TestOperationSerializer {
 public:
-    explicit SetCamera(mbgl::CameraOptions camera_)
+    explicit SetCamera(mln::CameraOptions camera_)
         : camera(std::move(camera_)) {}
 
     void serialize(Writer& writer) const override {
@@ -55,12 +55,12 @@ public:
     }
 
 private:
-    mbgl::CameraOptions camera;
+    mln::CameraOptions camera;
 };
 
 class SetStyle final : public TestOperationSerializer {
 public:
-    explicit SetStyle(const mbgl::style::Style& style)
+    explicit SetStyle(const mln::style::Style& style)
         : url(style.getURL()) {}
 
     void serialize(Writer& writer) const override {
@@ -76,7 +76,7 @@ private:
 
 class SetInitialSize final : public TestOperationSerializer {
 public:
-    explicit SetInitialSize(const mbgl::Size& size)
+    explicit SetInitialSize(const mln::Size& size)
         : width(size.width),
           height(size.height) {}
 
@@ -97,19 +97,19 @@ TestWriter::TestWriter() = default;
 
 TestWriter::~TestWriter() = default;
 
-TestWriter& TestWriter::withCameraOptions(const mbgl::CameraOptions& camera) {
+TestWriter& TestWriter::withCameraOptions(const mln::CameraOptions& camera) {
     operations.emplace_back(std::make_unique<SetCamera>(camera));
 
     return *this;
 }
 
-TestWriter& TestWriter::withStyle(const mbgl::style::Style& style) {
+TestWriter& TestWriter::withStyle(const mln::style::Style& style) {
     operations.emplace_back(std::make_unique<SetStyle>(style));
 
     return *this;
 }
 
-TestWriter& TestWriter::withInitialSize(const mbgl::Size& size) {
+TestWriter& TestWriter::withInitialSize(const mln::Size& size) {
     assert(initialSize == nullptr);
     initialSize = std::make_unique<SetInitialSize>(size);
 

@@ -1,17 +1,17 @@
 #include "android_gl_renderer_backend.hpp"
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/renderable_resource.hpp>
 
 #include <EGL/egl.h>
 
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class AndroidGLRenderableResource final : public mbgl::gl::RenderableResource {
+class AndroidGLRenderableResource final : public mln::gl::RenderableResource {
 public:
     AndroidGLRenderableResource(AndroidGLRendererBackend& backend_)
         : backend(backend_) {}
@@ -35,7 +35,7 @@ private:
 
 AndroidGLRendererBackend::AndroidGLRendererBackend()
     : gl::RendererBackend(gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable({64, 64}, std::make_unique<AndroidGLRenderableResource>(*this)) {}
+      mln::gfx::Renderable({64, 64}, std::make_unique<AndroidGLRenderableResource>(*this)) {}
 
 AndroidGLRendererBackend::~AndroidGLRendererBackend() = default;
 
@@ -46,21 +46,21 @@ gl::ProcAddress AndroidGLRendererBackend::getExtensionFunctionPointer(const char
 
 void AndroidGLRendererBackend::updateViewPort() {
     assert(gfx::BackendScope::exists());
-    setViewport(0, 0, size);
+    setViewport(0, 0, getSize());
 }
 
 void AndroidGLRendererBackend::resizeFramebuffer(int width, int height) {
-    size = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+    setRenderableSize({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
 }
 
 PremultipliedImage AndroidGLRendererBackend::readFramebuffer() {
     assert(gfx::BackendScope::exists());
-    return gl::RendererBackend::readFramebuffer(size);
+    return gl::RendererBackend::readFramebuffer(getSize());
 }
 
 void AndroidGLRendererBackend::updateAssumedState() {
     assumeFramebufferBinding(0);
-    assumeViewport(0, 0, size);
+    assumeViewport(0, 0, getSize());
 }
 
 void AndroidGLRendererBackend::markContextLost() {
@@ -70,15 +70,15 @@ void AndroidGLRendererBackend::markContextLost() {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 template <>
-std::unique_ptr<android::AndroidRendererBackend> Backend::Create<mbgl::gfx::Backend::Type::OpenGL>(ANativeWindow*) {
+std::unique_ptr<android::AndroidRendererBackend> Backend::Create<mln::gfx::Backend::Type::OpenGL>(ANativeWindow*) {
     return std::make_unique<android::AndroidGLRendererBackend>();
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

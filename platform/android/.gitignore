@@ -1,2 +1,3 @@
-MapLibreAndroid/src/vulkanDebug
+MapLibreAndroid/src/vulkanDebug/jniLibs
+MapLibreAndroid/src/multiBackendDebug/jniLibs
 prefab-headers/

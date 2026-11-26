@@ -1,17 +1,17 @@
-#include <mbgl/storage/network_status.hpp>
-#include <mbgl/storage/online_file_source.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/timer.hpp>
+#include <mln/storage/network_status.hpp>
+#include <mln/storage/online_file_source.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/timer.hpp>
 
 #include <gtest/gtest.h>
 
-using namespace mbgl;
+using namespace mln;
 
 #ifdef WIN32
 // Windows doesn't fail immediately like other OS
@@ -309,7 +309,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChange)) {
 
     // After 50 milliseconds, we're going to trigger a NetworkStatus change.
     util::Timer reachableTimer;
-    reachableTimer.start(Milliseconds(50), Duration::zero(), []() { mbgl::NetworkStatus::Reachable(); });
+    reachableTimer.start(Milliseconds(50), Duration::zero(), []() { mln::NetworkStatus::Reachable(); });
 
     loop.run();
 }
@@ -357,7 +357,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChangePreempt)) {
     // After 400 milliseconds + connectionTimeout, we're going to trigger a NetworkStatus change.
     util::Timer reachableTimer;
     reachableTimer.start(Milliseconds(static_cast<int>(connectionTimeout * 1000) + 400), Duration::zero(), []() {
-        mbgl::NetworkStatus::Reachable();
+        mln::NetworkStatus::Reachable();
     });
 
     fs->resume();

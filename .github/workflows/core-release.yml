@@ -12,9 +12,9 @@ on:
 
 jobs:
   create-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
 
@@ -46,13 +46,13 @@ jobs:
     needs: [create-release]
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
 
-      - run: brew install webp libuv
+      - run: brew install webp libuv llvm
 
-      - uses: taiki-e/install-action@2ca9b94c269419b7b0c711c09d0b21c4e1d51145 # v2.83.1
+      - uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2.90.3
         with:
           tool: armerge@2
 
@@ -68,7 +68,7 @@ jobs:
 
       - name: Upload macOS artifacts
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macos-metal-build
           path: |
@@ -92,25 +92,25 @@ jobs:
       matrix:
         include:
           - renderer: opengl
-            runner: { os: ubuntu-latest, arch: x64 }
+            runner: { os: ubuntu-26.04, arch: x64 }
           - renderer: vulkan
-            runner: { os: ubuntu-latest, arch: x64 }
+            runner: { os: ubuntu-26.04, arch: x64 }
           - renderer: wgpu
             preset_renderer: webgpu-wgpu
-            runner: { os: ubuntu-latest, arch: x64 }
+            runner: { os: ubuntu-26.04, arch: x64 }
           - renderer: opengl
-            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+            runner: { os: ubuntu-26.04-arm, arch: arm64 }
           - renderer: vulkan
-            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+            runner: { os: ubuntu-26.04-arm, arch: arm64 }
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@2ca9b94c269419b7b0c711c09d0b21c4e1d51145 # v2.83.1
+      - uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2.90.3
         with:
           tool: armerge@2
 
@@ -131,7 +131,7 @@ jobs:
 
       - name: Upload Linux artifacts
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}-build
           path: |
@@ -156,7 +156,7 @@ jobs:
       - run: |
           git config --system core.longpaths true
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
 
@@ -172,7 +172,7 @@ jobs:
 
       - name: Upload Windows artifact
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: windows-${{ matrix.renderer }}-build
           path: |

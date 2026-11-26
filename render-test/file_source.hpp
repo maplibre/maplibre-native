@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/storage/file_source.hpp>
+#include <mln/storage/file_source.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class ClientOptions;
 class ResourceOptions;
@@ -56,4 +56,4 @@ private:
     ClientOptions clientOptions;
 };
 
-} // namespace mbgl
+} // namespace mln

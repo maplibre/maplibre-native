@@ -31,52 +31,27 @@ endif()
 target_sources(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/asset_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/database_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/mbtiles_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/main_resource_loader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/image.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/jpeg_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/webp_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/logging_stderr.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_writer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/string_stdlib.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
+        ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
+        ${MLN_DEFAULT_HEADLESS_SOURCES}
+        ${MLN_DEFAULT_IMAGE_DECODER_SOURCES}
+        ${MLN_DEFAULT_LIBUV_RUN_LOOP_SOURCES}
+        ${MLN_DEFAULT_LOCALE_SOURCES}
+        ${MLN_DEFAULT_UNICODE_SOURCES}
+        ${MLN_DEFAULT_UTIL_SOURCES}
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/layermanager/layer_manager.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/http_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/sqlite3.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/local_glyph_rasterizer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/logging_stderr.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_writer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/thread.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/thread_local.cpp
 )
 
 if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
             ${PROJECT_SOURCE_DIR}/platform/linux/src/gl_functions.cpp
     )
 endif()
@@ -107,11 +82,6 @@ elseif(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include
     )
 
-    target_sources(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
-    )
 else()
     find_package(OpenGL REQUIRED GLX)
     target_sources(
@@ -150,14 +120,14 @@ target_include_directories(
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 
-if(NOT ${ICUUC_FOUND} OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
+if(NOT ICUUC_FOUND OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
     message(STATUS "ICU not found, too old or MLN_USE_BUILTIN_ICU requestd, using builtin.")
 
     set(MLN_USE_BUILTIN_ICU TRUE)
     include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 
     set_source_files_properties(
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/i18n/number_format.cpp
         PROPERTIES
         COMPILE_DEFINITIONS
         MBGL_USE_BUILTIN_ICU
@@ -182,7 +152,7 @@ target_link_libraries(
 )
 
 if(MLN_CREATE_AMALGAMATION)
-    if ("${ARMERGE}" STREQUAL "MLN_CREATE_AMALGAMATION")
+    if(NOT ARMERGE)
         message(FATAL_ERROR "armerge required when MLN_CREATE_AMALGAMATION=ON")
     endif()
     message(STATUS "Found armerge: ${ARMERGE}")
@@ -218,7 +188,7 @@ if(MLN_CREATE_AMALGAMATION)
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
-        COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
+        COMMAND ${ARMERGE} --keep-symbols 'mln.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
             $<TARGET_FILE:mbgl-freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
@@ -227,6 +197,7 @@ if(MLN_CREATE_AMALGAMATION)
             $<TARGET_FILE:mbgl-vendor-sqlite>
             $<TARGET_FILE:mbgl-vendor-parsedate>
             $<TARGET_FILE:mlt-cpp>
+            $<TARGET_FILE:fastpfor-lib>
             ${ICUUC_LIBRARY_DIRS}/libicuuc.a
             ${ICUUC_LIBRARY_DIRS}/libicudata.a
             ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
@@ -235,7 +206,6 @@ if(MLN_CREATE_AMALGAMATION)
 
 endif()
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 if(MLN_WITH_GLFW)
 	add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
@@ -244,59 +214,6 @@ if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
 endif()
 
-add_executable(
-    mbgl-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/test/main.cpp
-)
-
-target_compile_definitions(
-    mbgl-test-runner
-    PRIVATE
-        WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
-)
-
-if (DEFINED ENV{CI})
-    message("Building for CI")
-    target_compile_definitions(
-        mbgl-test-runner
-        PRIVATE
-            CI_BUILD=1
-    )
-endif()
-
-target_link_libraries(
-    mbgl-test-runner
-    PRIVATE
-        mbgl-compiler-options
-        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
-)
-
-add_executable(
-    mbgl-benchmark-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/benchmark/main.cpp
-)
-
-target_link_libraries(
-    mbgl-benchmark-runner
-    PRIVATE
-        mbgl-compiler-options
-        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
-)
-
-add_executable(
-    mbgl-render-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/render-test/main.cpp
-)
-
-target_link_libraries(
-    mbgl-render-test-runner
-    PRIVATE mbgl-compiler-options mbgl-render-test
-)
-
-# Disable benchmarks in CI as they run in VM environment
-if(NOT DEFINED ENV{CI})
-    add_test(NAME mbgl-benchmark-runner COMMAND mbgl-benchmark-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-endif()
-add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-
-install(TARGETS mbgl-render-test-runner RUNTIME DESTINATION bin)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/test)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark)
+add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test)

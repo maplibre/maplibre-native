@@ -46,5 +46,5 @@ if (!mode || mode == 'android') {
   checkGeneratedFiles('Android', ['platform/android/scripts/generate-style-code.js']);
 }
 if ((!mode || mode == 'darwin') && os.platform() == 'darwin') {
-  checkGeneratedFiles('Darwin', ['platform/darwin/scripts/generate-style-code.js', 'platform/darwin/scripts/update-examples.js']);
+  checkGeneratedFiles('Darwin', ['platform/darwin/scripts/generate-style-code.js']);
 }

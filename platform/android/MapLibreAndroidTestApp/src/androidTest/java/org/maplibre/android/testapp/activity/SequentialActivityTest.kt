@@ -22,6 +22,7 @@ class SequentialActivityTest(private val activity: Class<out Activity>) {
             org.maplibre.android.testapp.activity.benchmark.BenchmarkActivity::class.java,
             org.maplibre.android.testapp.activity.telemetry.PerformanceMeasurementActivity::class.java,
             org.maplibre.android.testapp.activity.stability.LongRunningActivity::class.java,
+            org.maplibre.android.testapp.activity.stability.DisappearingRouteActivity::class.java,
             org.maplibre.android.testapp.activity.stability.UserMapActivity::class.java,
             org.maplibre.android.testapp.activity.stability.NavigationMapActivity::class.java,
 
@@ -62,7 +63,7 @@ class SequentialActivityTest(private val activity: Class<out Activity>) {
                 PackageManager.GET_ACTIVITIES
             )
 
-            val activities = packageInfo.activities
+            val activities = packageInfo.activities!!
                 .filter { info ->
                     info.name.startsWith("org.maplibre.android.testapp.activity")
                 }

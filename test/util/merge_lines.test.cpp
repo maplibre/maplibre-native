@@ -1,14 +1,14 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_geometry_tile_feature.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/stub_geometry_tile_feature.hpp>
 
-#include <mbgl/layout/merge_lines.hpp>
-#include <mbgl/layout/symbol_feature.hpp>
+#include <mln/layout/merge_lines.hpp>
+#include <mln/layout/symbol_feature.hpp>
 #include <utility>
 
 const std::u16string aaa = u"a";
 const std::u16string bbb = u"b";
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 
@@ -38,7 +38,7 @@ public:
 
 TEST(MergeLines, SameText) {
     // merges lines with the same text
-    std::vector<mbgl::SymbolFeature> input1;
+    std::vector<mln::SymbolFeature> input1;
     input1.push_back(
         SymbolFeatureStub({}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}}}, properties, aaa, {}, 0));
     input1.push_back(
@@ -61,7 +61,7 @@ TEST(MergeLines, SameText) {
     expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
     expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
 
-    mbgl::util::mergeLines(input1);
+    mln::util::mergeLines(input1);
 
     for (int i = 0; i < 6; i++) {
         EXPECT_TRUE(input1[i].geometry == expected1[i].getGeometries());
@@ -70,7 +70,7 @@ TEST(MergeLines, SameText) {
 
 TEST(MergeLines, BothEnds) {
     // mergeLines handles merge from both ends
-    std::vector<mbgl::SymbolFeature> input2;
+    std::vector<mln::SymbolFeature> input2;
     input2.push_back(
         SymbolFeatureStub{{}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}}}, properties, aaa, {}, 0});
     input2.push_back(
@@ -84,7 +84,7 @@ TEST(MergeLines, BothEnds) {
     expected2.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
     expected2.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
 
-    mbgl::util::mergeLines(input2);
+    mln::util::mergeLines(input2);
 
     for (int i = 0; i < 3; i++) {
         EXPECT_TRUE(input2[i].geometry == expected2[i].getGeometries());
@@ -93,7 +93,7 @@ TEST(MergeLines, BothEnds) {
 
 TEST(MergeLines, CircularLines) {
     // mergeLines handles circular lines
-    std::vector<mbgl::SymbolFeature> input3;
+    std::vector<mln::SymbolFeature> input3;
     input3.push_back(
         SymbolFeatureStub{{}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}}}, properties, aaa, {}, 0});
     input3.push_back(
@@ -106,7 +106,7 @@ TEST(MergeLines, CircularLines) {
     expected3.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
     expected3.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
 
-    mbgl::util::mergeLines(input3);
+    mln::util::mergeLines(input3);
 
     for (int i = 0; i < 3; i++) {
         EXPECT_TRUE(input3[i].geometry == expected3[i].getGeometries());
@@ -114,23 +114,23 @@ TEST(MergeLines, CircularLines) {
 }
 
 TEST(MergeLines, EmptyOuterGeometry) {
-    std::vector<mbgl::SymbolFeature> input;
+    std::vector<mln::SymbolFeature> input;
     input.push_back(SymbolFeatureStub{{}, FeatureType::LineString, {}, properties, aaa, {}, 0});
 
     const StubGeometryTileFeature expected{{}, FeatureType::LineString, {}, properties};
 
-    mbgl::util::mergeLines(input);
+    mln::util::mergeLines(input);
 
     EXPECT_EQ(input[0].geometry, expected.getGeometries());
 }
 
 TEST(MergeLines, EmptyInnerGeometry) {
-    std::vector<mbgl::SymbolFeature> input;
+    std::vector<mln::SymbolFeature> input;
     input.push_back(SymbolFeatureStub{{}, FeatureType::LineString, {}, properties, aaa, {}, 0});
 
     const StubGeometryTileFeature expected{{}, FeatureType::LineString, {}, properties};
 
-    mbgl::util::mergeLines(input);
+    mln::util::mergeLines(input);
 
     EXPECT_EQ(input[0].geometry, expected.getGeometries());
 }

@@ -1,14 +1,14 @@
-#include <mbgl/util/tile_cover.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/map/transform.hpp>
-#include <mbgl/math/angles.hpp>
+#include <mln/util/tile_cover.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/math/angles.hpp>
 
 #include <algorithm>
 #include <cstdlib> /* srand, rand */
 #include <ctime>   /* time */
 #include <gtest/gtest.h>
 
-using namespace mbgl;
+using namespace mln;
 
 const Range<uint8_t> zoomRange(0, 14);
 
@@ -574,6 +574,16 @@ TEST(TileCount, BoundsCrossingAntimeridian) {
     EXPECT_EQ(1u, util::tileCount(crossingBounds, 0));
     EXPECT_EQ(4u, util::tileCount(crossingBounds, 3));
     EXPECT_EQ(8u, util::tileCount(crossingBounds, 4));
+}
+
+TEST(TileCover, CoveringZoomLevelRoundsForRasterSources) {
+    EXPECT_EQ(4, util::coveringZoomLevel(4.6, style::SourceType::Vector, util::tileSize_I));
+    EXPECT_EQ(4, util::coveringZoomLevel(4.6, style::SourceType::GeoJSON, util::tileSize_I));
+    EXPECT_EQ(5, util::coveringZoomLevel(4.6, style::SourceType::Raster, util::tileSize_I));
+    EXPECT_EQ(5, util::coveringZoomLevel(4.6, style::SourceType::RasterDEM, util::tileSize_I));
+    EXPECT_EQ(5, util::coveringZoomLevel(4.6, style::SourceType::Video, util::tileSize_I));
+    EXPECT_EQ(4, util::coveringZoomLevel(4.4, style::SourceType::RasterDEM, util::tileSize_I));
+    EXPECT_EQ(6, util::coveringZoomLevel(4.6, style::SourceType::RasterDEM, 256));
 }
 
 TEST(TileCover, DISABLED_FuzzPoly) {

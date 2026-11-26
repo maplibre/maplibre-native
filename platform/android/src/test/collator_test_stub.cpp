@@ -1,8 +1,8 @@
-#include <mbgl/i18n/collator.hpp>
+#include <mln/i18n/collator.hpp>
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 class Collator::Impl {
@@ -32,4 +32,4 @@ std::string Collator::resolvedLocale() const {
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

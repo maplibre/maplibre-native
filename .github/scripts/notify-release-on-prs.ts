@@ -74,6 +74,8 @@ async function createOrUpdateReleaseNotification({
       return `MapLibre iOS ${version}`;
     } else if (platform === 'android') {
       return `MapLibre Android ${version}`;
+    } else if (platform === 'macos') {
+      return `MapLibre macOS ${version}`;
     }
     return tag;
   }

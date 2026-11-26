@@ -1,23 +1,23 @@
-#include <mbgl/storage/resource.hpp>
+#include <mln/storage/resource.hpp>
 
 #include <gtest/gtest.h>
 
 TEST(Resource, Style) {
-    using namespace mbgl;
+    using namespace mln;
     Resource resource = Resource::style("http://example.com");
     EXPECT_EQ(Resource::Kind::Style, resource.kind);
     EXPECT_EQ("http://example.com", resource.url);
 }
 
 TEST(Resource, Source) {
-    using namespace mbgl;
+    using namespace mln;
     Resource resource = Resource::source("http://example.com");
     EXPECT_EQ(Resource::Kind::Source, resource.kind);
     EXPECT_EQ("http://example.com", resource.url);
 }
 
 TEST(Resource, Tile) {
-    using namespace mbgl;
+    using namespace mln;
 
     Resource rasterTile = Resource::tile(
         "http://example.com/{z}/{x}/{y}{ratio}.png", 2.0, 1, 2, 3, Tileset::Scheme::XYZ);
@@ -106,14 +106,14 @@ TEST(Resource, Tile) {
 }
 
 TEST(Resource, Glyphs) {
-    using namespace mbgl;
+    using namespace mln;
     Resource resource = Resource::glyphs("http://example.com/{fontstack}/{range}", {{"stack"}}, {0, 255});
     EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
     EXPECT_EQ("http://example.com/stack/0-255", resource.url);
 }
 
 TEST(Resource, SpriteImage) {
-    using namespace mbgl;
+    using namespace mln;
     Resource resource = Resource::spriteImage("http://example.com/sprite", 2.0);
     EXPECT_EQ(Resource::Kind::SpriteImage, resource.kind);
     EXPECT_EQ("http://example.com/sprite@2x.png", resource.url);
@@ -124,14 +124,14 @@ TEST(Resource, SpriteImage) {
 }
 
 TEST(Resource, Image) {
-    using namespace mbgl;
+    using namespace mln;
     Resource resource = Resource::image("http://example.com/sprite.jpg");
     EXPECT_EQ(Resource::Kind::Image, resource.kind);
     EXPECT_EQ("http://example.com/sprite.jpg", resource.url);
 }
 
 TEST(Resource, SpriteJSON) {
-    using namespace mbgl;
+    using namespace mln;
     Resource resource = Resource::spriteJSON("http://example.com/sprite", 2.0);
     EXPECT_EQ(Resource::Kind::SpriteJSON, resource.kind);
     EXPECT_EQ("http://example.com/sprite@2x.json", resource.url);

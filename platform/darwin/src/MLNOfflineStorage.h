@@ -350,7 +350,8 @@ MLN_EXPORT
 
  @param pack The offline pack to be invalidated.
  @param completion The completion handler to call once the pack has been
- removed. This handler is executed asynchronously on the main queue.
+ marked for revalidation in offline storage, or an error occurs. This handler is
+ executed asynchronously on the main queue.
  */
 
 - (void)invalidatePack:(MLNOfflinePack *)pack

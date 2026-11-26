@@ -4,12 +4,12 @@ namespace node_mbgl {
 
 using namespace mapbox::geometry;
 
-using Value = mbgl::Value;
-using Feature = mbgl::Feature;
-using FeatureIdentifier = mbgl::FeatureIdentifier;
-using Geometry = mbgl::Feature::geometry_type;
+using Value = mln::Value;
+using Feature = mln::Feature;
+using FeatureIdentifier = mln::FeatureIdentifier;
+using Geometry = mln::Feature::geometry_type;
 using GeometryCollection = mapbox::geometry::geometry_collection<double>;
-using Properties = mbgl::PropertyMap;
+using Properties = mln::PropertyMap;
 
 template <class T>
 struct ToType {
@@ -64,7 +64,7 @@ public:
 };
 
 struct ToValue {
-    v8::Local<v8::Value> operator()(mbgl::NullValue) {
+    v8::Local<v8::Value> operator()(mln::NullValue) {
         Nan::EscapableHandleScope scope;
         return scope.Escape(Nan::Null());
     }
@@ -88,7 +88,7 @@ struct ToValue {
         return scope.Escape(Nan::New(t).ToLocalChecked());
     }
 
-    v8::Local<v8::Value> operator()(const std::vector<mbgl::Value>& array) {
+    v8::Local<v8::Value> operator()(const std::vector<mln::Value>& array) {
         Nan::EscapableHandleScope scope;
         v8::Local<v8::Array> result = Nan::New<v8::Array>();
         for (std::size_t i = 0; i < array.size(); i++) {
@@ -97,7 +97,7 @@ struct ToValue {
         return scope.Escape(result);
     }
 
-    v8::Local<v8::Value> operator()(const std::unordered_map<std::string, mbgl::Value>& map) { return toJS(map); }
+    v8::Local<v8::Value> operator()(const std::unordered_map<std::string, mln::Value>& map) { return toJS(map); }
 };
 
 v8::Local<v8::Object> toJS(const Geometry& geometry) {
@@ -138,7 +138,7 @@ v8::Local<v8::Object> toJS(const Feature& feature) {
     Nan::Set(result, Nan::New("geometry").ToLocalChecked(), toJS(feature.geometry));
     Nan::Set(result, Nan::New("properties").ToLocalChecked(), toJS(feature.properties));
 
-    if (!feature.id.is<mbgl::NullValue>()) {
+    if (!feature.id.is<mln::NullValue>()) {
         Nan::Set(result, Nan::New("id").ToLocalChecked(), FeatureIdentifier::visit(feature.id, ToValue()));
     }
 

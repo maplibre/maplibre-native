@@ -1,14 +1,14 @@
-#include <mbgl/geometry/anchor.hpp>
-#include <mbgl/layout/symbol_instance.hpp>
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/text/glyph.hpp>
-#include <mbgl/text/quads.hpp>
-#include <mbgl/text/shaping.hpp>
+#include <mln/geometry/anchor.hpp>
+#include <mln/layout/symbol_instance.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/test/util.hpp>
+#include <mln/text/glyph.hpp>
+#include <mln/text/quads.hpp>
+#include <mln/text/shaping.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 // Atlas padding is not scaled with textureScale, so a 2x glyph quad is 1
 // logical pixel smaller than its 1x equivalent. GL JS-style fractional metrics

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/util/variant.hpp>
+#include <mln/util/variant.hpp>
 
 #include <jni/jni.hpp>
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace conversion {
 
@@ -47,4 +47,4 @@ Result<T> convert(jni::JNIEnv& env, const V& value, Args&&... args) {
 
 } // namespace conversion
 } // namespace android
-} // namespace mbgl
+} // namespace mln

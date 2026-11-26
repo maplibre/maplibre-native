@@ -2,22 +2,23 @@
 
 #include <jni/jni.hpp>
 #include <mapbox/std/weak.hpp>
-#include <mbgl/map/map_snapshotter.hpp>
-#include <mbgl/util/util.hpp>
+#include <mln/map/map_snapshotter.hpp>
+#include <mln/util/util.hpp>
 
 #include <memory>
 
 #include "../file_source.hpp"
 #include "../geometry/lat_lng_bounds.hpp"
+#include "../gson/json_object.hpp"
 #include "../map/camera_position.hpp"
 #include "../map/image.hpp"
 #include "../style/layers/layer.hpp"
 #include "../style/sources/source.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class MapSnapshotter final : public mbgl::MapSnapshotterObserver {
+class MapSnapshotter final : public mln::MapSnapshotterObserver {
 public:
     static constexpr auto Name() { return "org/maplibre/android/snapshotter/MapSnapshotter"; };
 
@@ -63,9 +64,14 @@ public:
     void addLayerBelow(JNIEnv&, jlong, const jni::String&);
     void addLayerAbove(JNIEnv&, jlong, const jni::String&);
     void addSource(JNIEnv&, const jni::Object<Source>&, jlong nativePtr);
-    void addImages(JNIEnv&, const jni::Array<jni::Object<mbgl::android::Image>>&);
+    void addImages(JNIEnv&, const jni::Array<jni::Object<mln::android::Image>>&);
     jni::Local<jni::Object<Layer>> getLayer(JNIEnv&, const jni::String&);
     jni::Local<jni::Object<Source>> getSource(JNIEnv&, const jni::String&);
+
+    jni::jboolean isStyleLoaded(JNIEnv&);
+
+    void setGlobalStateProperty(JNIEnv&, const jni::String& name, const jni::Object<gson::JsonElement>& value);
+    jni::Local<jni::Object<gson::JsonObject>> getGlobalState(JNIEnv&);
 
     // MapSnapshotterObserver overrides
     void onDidFailLoadingStyle(const std::string&) override;
@@ -86,9 +92,9 @@ private:
     void activateFilesource(JNIEnv&);
     void deactivateFilesource(JNIEnv&);
     bool activatedFilesource = false;
-    mapbox::base::WeakPtr<mbgl::Scheduler> weakScheduler;
-    std::unique_ptr<mbgl::MapSnapshotter> snapshotter;
+    mapbox::base::WeakPtr<mln::Scheduler> weakScheduler;
+    std::unique_ptr<mln::MapSnapshotter> snapshotter;
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

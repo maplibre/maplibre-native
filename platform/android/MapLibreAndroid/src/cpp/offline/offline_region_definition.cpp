@@ -5,7 +5,7 @@
 
 #include <exception>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 // OfflineRegionDefinition //
@@ -14,7 +14,7 @@ void OfflineRegionDefinition::registerNative(jni::JNIEnv& env) {
     jni::Class<OfflineRegionDefinition>::Singleton(env);
 }
 
-mbgl::OfflineRegionDefinition OfflineRegionDefinition::getDefinition(
+mln::OfflineRegionDefinition OfflineRegionDefinition::getDefinition(
     JNIEnv& env, const jni::Object<OfflineRegionDefinition>& jDefinition) {
     if (jDefinition.IsInstanceOf(env, jni::Class<OfflineTilePyramidRegionDefinition>::Singleton(env))) {
         return OfflineTilePyramidRegionDefinition::getDefinition(
@@ -30,7 +30,7 @@ mbgl::OfflineRegionDefinition OfflineRegionDefinition::getDefinition(
 // OfflineTilePyramidRegionDefinition //
 
 jni::Local<jni::Object<OfflineRegionDefinition>> OfflineTilePyramidRegionDefinition::New(
-    jni::JNIEnv& env, const mbgl::OfflineTilePyramidRegionDefinition& definition) {
+    jni::JNIEnv& env, const mln::OfflineTilePyramidRegionDefinition& definition) {
     static auto& javaClass = jni::Class<OfflineTilePyramidRegionDefinition>::Singleton(env);
     static auto constructor = javaClass.GetConstructor<jni::String,
                                                        jni::Object<LatLngBounds>,
@@ -49,7 +49,7 @@ jni::Local<jni::Object<OfflineRegionDefinition>> OfflineTilePyramidRegionDefinit
                          jni::jboolean(definition.includeIdeographs));
 }
 
-mbgl::OfflineTilePyramidRegionDefinition OfflineTilePyramidRegionDefinition::getDefinition(
+mln::OfflineTilePyramidRegionDefinition OfflineTilePyramidRegionDefinition::getDefinition(
     jni::JNIEnv& env, const jni::Object<OfflineTilePyramidRegionDefinition>& jDefinition) {
     // Field references
     static auto& javaClass = jni::Class<OfflineTilePyramidRegionDefinition>::Singleton(env);
@@ -60,12 +60,12 @@ mbgl::OfflineTilePyramidRegionDefinition OfflineTilePyramidRegionDefinition::get
     static auto pixelRatioF = javaClass.GetField<jni::jfloat>(env, "pixelRatio");
     static auto includeIdeographsF = javaClass.GetField<jni::jboolean>(env, "includeIdeographs");
 
-    return mbgl::OfflineTilePyramidRegionDefinition(jni::Make<std::string>(env, jDefinition.Get(env, styleURLF)),
-                                                    LatLngBounds::getLatLngBounds(env, jDefinition.Get(env, boundsF)),
-                                                    jDefinition.Get(env, minZoomF),
-                                                    jDefinition.Get(env, maxZoomF),
-                                                    jDefinition.Get(env, pixelRatioF),
-                                                    jDefinition.Get(env, includeIdeographsF));
+    return mln::OfflineTilePyramidRegionDefinition(jni::Make<std::string>(env, jDefinition.Get(env, styleURLF)),
+                                                   LatLngBounds::getLatLngBounds(env, jDefinition.Get(env, boundsF)),
+                                                   jDefinition.Get(env, minZoomF),
+                                                   jDefinition.Get(env, maxZoomF),
+                                                   jDefinition.Get(env, pixelRatioF),
+                                                   jDefinition.Get(env, includeIdeographsF));
 }
 
 void OfflineTilePyramidRegionDefinition::registerNative(jni::JNIEnv& env) {
@@ -75,7 +75,7 @@ void OfflineTilePyramidRegionDefinition::registerNative(jni::JNIEnv& env) {
 // OfflineGeometryRegionDefinition //
 
 jni::Local<jni::Object<OfflineRegionDefinition>> OfflineGeometryRegionDefinition::New(
-    jni::JNIEnv& env, const mbgl::OfflineGeometryRegionDefinition& definition) {
+    jni::JNIEnv& env, const mln::OfflineGeometryRegionDefinition& definition) {
     static auto& javaClass = jni::Class<OfflineGeometryRegionDefinition>::Singleton(env);
     static auto constructor = javaClass.GetConstructor<jni::String,
                                                        jni::Object<geojson::Geometry>,
@@ -94,7 +94,7 @@ jni::Local<jni::Object<OfflineRegionDefinition>> OfflineGeometryRegionDefinition
                          jni::jboolean(definition.includeIdeographs));
 }
 
-mbgl::OfflineGeometryRegionDefinition OfflineGeometryRegionDefinition::getDefinition(
+mln::OfflineGeometryRegionDefinition OfflineGeometryRegionDefinition::getDefinition(
     jni::JNIEnv& env, const jni::Object<OfflineGeometryRegionDefinition>& jDefinition) {
     // Field references
     static auto& javaClass = jni::Class<OfflineGeometryRegionDefinition>::Singleton(env);
@@ -105,12 +105,12 @@ mbgl::OfflineGeometryRegionDefinition OfflineGeometryRegionDefinition::getDefini
     static auto pixelRatioF = javaClass.GetField<jni::jfloat>(env, "pixelRatio");
     static auto includeIdeographsF = javaClass.GetField<jni::jboolean>(env, "includeIdeographs");
 
-    return mbgl::OfflineGeometryRegionDefinition(jni::Make<std::string>(env, jDefinition.Get(env, styleURLF)),
-                                                 geojson::Geometry::convert(env, jDefinition.Get(env, geometryF)),
-                                                 jDefinition.Get(env, minZoomF),
-                                                 jDefinition.Get(env, maxZoomF),
-                                                 jDefinition.Get(env, pixelRatioF),
-                                                 jDefinition.Get(env, includeIdeographsF));
+    return mln::OfflineGeometryRegionDefinition(jni::Make<std::string>(env, jDefinition.Get(env, styleURLF)),
+                                                geojson::Geometry::convert(env, jDefinition.Get(env, geometryF)),
+                                                jDefinition.Get(env, minZoomF),
+                                                jDefinition.Get(env, maxZoomF),
+                                                jDefinition.Get(env, pixelRatioF),
+                                                jDefinition.Get(env, includeIdeographsF));
 }
 
 void OfflineGeometryRegionDefinition::registerNative(jni::JNIEnv& env) {
@@ -118,4 +118,4 @@ void OfflineGeometryRegionDefinition::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

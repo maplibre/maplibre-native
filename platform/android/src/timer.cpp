@@ -1,12 +1,12 @@
 #include "run_loop_impl.hpp"
 
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/timer.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/timer.hpp>
 
 #include <atomic>
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class Timer::Impl : public RunLoop::Impl::Runnable {
@@ -74,4 +74,4 @@ void Timer::stop() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

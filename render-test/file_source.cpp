@@ -1,15 +1,15 @@
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/async_request.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/async_request.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/logging.hpp>
 
 #include <atomic>
 
 #include "file_source.hpp"
 
-namespace mbgl {
+namespace mln {
 
 std::atomic_size_t requestCount{0};
 std::atomic_size_t transferredSize{0};
@@ -63,11 +63,11 @@ std::unique_ptr<AsyncRequest> ProxyFileSource::request(const Resource& resource,
     return defaultResourceLoader->request(transformed, [=](Response response) {
         if (transformed.loadingMethod == Resource::LoadingMethod::CacheOnly && response.noContent) {
             if (transformed.kind == Resource::Kind::Tile && transformed.tileData) {
-                mbgl::Log::Info(
-                    mbgl::Event::Database,
+                mln::Log::Info(
+                    mln::Event::Database,
                     "Resource not found in cache: " + transformed.url + "(" + transformed.tileData->urlTemplate + ")");
             } else {
-                mbgl::Log::Info(mbgl::Event::Database, "Resource not found in cache: " + transformed.url);
+                mln::Log::Info(mln::Event::Database, "Resource not found in cache: " + transformed.url);
             }
         }
 
@@ -123,4 +123,4 @@ size_t ProxyFileSource::getTransferredSize() {
     return transferredSize;
 }
 
-} // namespace mbgl
+} // namespace mln

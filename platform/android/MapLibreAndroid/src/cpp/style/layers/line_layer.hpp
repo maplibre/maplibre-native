@@ -4,11 +4,11 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/line_layer_factory.hpp>
-#include <mbgl/style/layers/line_layer.hpp>
+#include <mln/layermanager/line_layer_factory.hpp>
+#include <mln/style/layers/line_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class LineLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     LineLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
-    LineLayer(mbgl::style::LineLayer&);
+    LineLayer(mln::style::LineLayer&);
 
-    LineLayer(std::unique_ptr<mbgl::style::LineLayer>);
+    LineLayer(std::unique_ptr<mln::style::LineLayer>);
 
     ~LineLayer();
 
@@ -78,13 +78,13 @@ public:
 
 }; // class LineLayer
 
-class LineJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::LineLayerFactory {
+class LineJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::LineLayerFactory {
 public:
     ~LineJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -93,4 +93,4 @@ public:
 }; // class LineJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

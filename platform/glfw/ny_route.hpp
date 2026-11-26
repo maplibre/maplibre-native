@@ -1,6 +1,6 @@
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 namespace glfw {
 
@@ -101,4 +101,4 @@ constexpr const char* route = R"route(
 
 } // namespace glfw
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

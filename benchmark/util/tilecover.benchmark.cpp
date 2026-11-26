@@ -1,11 +1,11 @@
 #include <benchmark/benchmark.h>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/tile_coordinate.hpp>
-#include <mbgl/util/tile_cover.hpp>
-#include <mbgl/map/transform.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/tile_coordinate.hpp>
+#include <mln/util/tile_cover.hpp>
+#include <mln/map/transform.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 static const LatLngBounds sanFrancisco = LatLngBounds::hull({37.6609, -122.5744}, {37.8271, -122.3204});
 

@@ -1,10 +1,10 @@
-#include <mbgl/util/lru_cache.hpp>
+#include <mln/util/lru_cache.hpp>
 
 #include <gtest/gtest.h>
 
 #include <stdexcept>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(LRU, LRU) {
     LRU<int> lru;

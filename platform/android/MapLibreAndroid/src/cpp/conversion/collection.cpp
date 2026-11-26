@@ -1,7 +1,7 @@
 #include "collection.hpp"
 #include "constant.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace conversion {
 
@@ -29,4 +29,4 @@ jni::Local<jni::Array<jni::String>> toArray(JNIEnv& env, const std::vector<std::
 
 } // namespace conversion
 } // namespace android
-} // namespace mbgl
+} // namespace mln

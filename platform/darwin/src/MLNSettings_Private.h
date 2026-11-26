@@ -1,5 +1,5 @@
-#import <mbgl/util/default_style.hpp>
-#import <mbgl/util/tile_server_options.hpp>
+#import <mln/util/default_style.hpp>
+#import <mln/util/tile_server_options.hpp>
 #import "MLNSettings.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic, nullable) NSString *apiKey;
 
 /// internal access to tile server options
-@property (atomic, readwrite, nullable) mbgl::TileServerOptions *tileServerOptionsInternal;
+@property (atomic, readwrite, nullable) mln::TileServerOptions *tileServerOptionsInternal;
 
 /// tile server base url
 @property (atomic, readwrite, nullable) NSURL *apiBaseURL;

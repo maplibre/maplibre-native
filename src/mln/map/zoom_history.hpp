@@ -1,0 +1,47 @@
+#pragma once
+
+#include <mln/util/chrono.hpp>
+
+#include <cmath>
+
+namespace mln {
+
+struct ZoomHistory {
+    float lastZoom = 0;
+    float lastFloorZoom = 0;
+    float lastIntegerZoom = 0;
+    TimePoint lastIntegerZoomTime;
+    bool first = true;
+
+    bool update(float z, const TimePoint& now) {
+        constexpr TimePoint zero = TimePoint(Duration::zero());
+        const float floorZ = std::floor(z);
+
+        if (first) {
+            first = false;
+            lastIntegerZoom = floorZ;
+            lastIntegerZoomTime = zero;
+            lastZoom = z;
+            lastFloorZoom = floorZ;
+            return true;
+        }
+
+        if (lastFloorZoom > floorZ) {
+            lastIntegerZoom = floorZ + 1;
+            lastIntegerZoomTime = now == Clock::time_point::max() ? zero : now;
+        } else if (lastFloorZoom < floorZ) {
+            lastIntegerZoom = floorZ;
+            lastIntegerZoomTime = now == Clock::time_point::max() ? zero : now;
+        }
+
+        if (z != lastZoom) {
+            lastZoom = z;
+            lastFloorZoom = floorZ;
+            return true;
+        }
+
+        return false;
+    }
+};
+
+} // namespace mln

@@ -1,22 +1,22 @@
 #pragma once
 
-#include <mbgl/actor/actor.hpp>
-#include <mbgl/annotation/annotation.hpp>
-#include <mbgl/renderer/renderer_frontend.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/actor/actor.hpp>
+#include <mln/annotation/annotation.hpp>
+#include <mln/renderer/renderer_frontend.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <functional>
 #include <memory>
 #include <vector>
 #include <string>
-#include <mbgl/util/geojson.hpp>
+#include <mln/util/geojson.hpp>
 
 #include "map_renderer.hpp"
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RenderedQueryOptions;
 class SourceQueryOptions;
@@ -63,15 +63,15 @@ public:
                             const std::optional<std::string>& sourceLayerID,
                             const std::optional<std::string>& featureID,
                             const std::optional<std::string>& stateKey) const;
-    AnnotationIDs queryPointAnnotations(const ScreenBox& box, const std::chrono::milliseconds& timeout) const;
-    AnnotationIDs queryShapeAnnotations(const ScreenBox& box, const std::chrono::milliseconds& timeout) const;
+    AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
+    AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
 
     // Feature extension query
     FeatureExtensionValue queryFeatureExtensions(const std::string& sourceID,
                                                  const Feature& feature,
                                                  const std::string& extension,
                                                  const std::string& extensionField,
-                                                 const std::optional<std::map<std::string, mbgl::Value>>& args) const;
+                                                 const std::optional<std::map<std::string, mln::Value>>& args) const;
 
     // Memory
     void setTileCacheEnabled(bool);
@@ -86,4 +86,4 @@ private:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

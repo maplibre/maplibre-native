@@ -101,6 +101,8 @@ public class MapLibreMapOptions implements Parcelable {
   private int actionJournalRenderingReportInterval = 60;
 
   private boolean asyncRendererCleanup = false;
+  private boolean fastPFOREnabled = false;
+  private boolean featureInfoEnabled = false;
 
   /**
    * Creates a new MapLibreMapOptions object.
@@ -167,6 +169,9 @@ public class MapLibreMapOptions implements Parcelable {
     actionJournalRenderingReportInterval = in.readInt();
 
     asyncRendererCleanup = in.readByte() != 0;
+
+    fastPFOREnabled = in.readByte() != 0;
+    featureInfoEnabled = in.readByte() != 0;
   }
 
   /**
@@ -339,6 +344,13 @@ public class MapLibreMapOptions implements Parcelable {
 
       maplibreMapOptions.asyncRendererCleanup(
               typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_asyncRendererCleanup, false)
+      );
+
+      maplibreMapOptions.fastPFOREnabled(
+              typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_fastPFOREnabled, false)
+      );
+      maplibreMapOptions.featureInfoEnabled(
+              typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_featureInfoEnabled, false)
       );
     } finally {
       typedArray.recycle();
@@ -853,6 +865,26 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
+   * Enable FastPFOR decompression for vector tiles, defaults to false.
+   * @param enable true to enable, false to disable
+   * @return This
+   */
+  @NonNull public MapLibreMapOptions fastPFOREnabled(boolean enable) {
+    this.fastPFOREnabled = enable;
+    return this;
+  }
+
+  /**
+   * Enable recording the rendered features in each frame
+   * @param enable true to enable, false to disable
+   * @return This
+   */
+  @NonNull public MapLibreMapOptions featureInfoEnabled(boolean enable) {
+    this.featureInfoEnabled = enable;
+    return this;
+  }
+
+  /**
    * Enable local ideograph font family, defaults to true.
    *
    * @param enabled true to enable, false to disable
@@ -997,6 +1029,24 @@ public class MapLibreMapOptions implements Parcelable {
    */
   public boolean getAsyncRendererCleanup() {
     return asyncRendererCleanup;
+  }
+
+  /**
+   * Check whether FastPFOR decompression is enabled for vector tiles.
+   *
+   * @return true if enabled
+   */
+  public boolean getFastPFOREnabled() {
+    return fastPFOREnabled;
+  }
+
+  /**
+   * Check whether feature info recording is enabled
+   *
+   * @return true if enabled
+   */
+  public boolean getFeatureInfoEnabled() {
+    return featureInfoEnabled;
   }
 
   /**
@@ -1391,6 +1441,8 @@ public class MapLibreMapOptions implements Parcelable {
     dest.writeInt(actionJournalRenderingReportInterval);
 
     dest.writeByte((byte) (asyncRendererCleanup ? 1 : 0));
+
+    dest.writeByte((byte) (fastPFOREnabled ? 1 : 0));
   }
 
   @Override
@@ -1535,6 +1587,10 @@ public class MapLibreMapOptions implements Parcelable {
       return false;
     }
 
+    if (fastPFOREnabled != options.fastPFOREnabled) {
+      return false;
+    }
+
     return false;
   }
 
@@ -1588,6 +1644,7 @@ public class MapLibreMapOptions implements Parcelable {
     result = 31 * result + (int) actionJournalLogFileCount;
     result = 31 * result + (int) actionJournalRenderingReportInterval;
     result = 31 * result + (asyncRendererCleanup ? 1 : 0);
+    result = 31 * result + (fastPFOREnabled ? 1 : 0);
     return result;
   }
 }

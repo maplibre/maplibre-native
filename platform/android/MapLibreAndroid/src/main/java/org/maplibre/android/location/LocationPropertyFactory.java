@@ -4,6 +4,8 @@ package org.maplibre.android.location;
 
 import androidx.annotation.ColorInt;
 
+import androidx.annotation.NonNull;
+
 import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.types.Formatted;
 import static org.maplibre.android.utils.ColorUtils.colorToRgbaString;
@@ -14,10 +16,12 @@ import org.maplibre.android.style.layers.PropertyValue;
 
 /**
  * Constructs paint/layout properties for Layers
+ * <p>
+ * The properties built here are for {@link LocationIndicatorLayer}.
  *
  * @see <a href="https://maplibre.org/maplibre-style-spec/#layers">Layer style documentation</a>
  */
-class LocationPropertyFactory {
+public class LocationPropertyFactory {
 
   /**
    * Set the property visibility.
@@ -27,6 +31,19 @@ class LocationPropertyFactory {
    */
   public static PropertyValue<String> visibility(@Property.VISIBILITY String value) {
     return new LayoutPropertyValue<>("visibility", value);
+  }
+
+  /**
+   * Set the property visibility as an expression. Per the style specification,
+   * visibility expressions may only use the
+   * <a href="https://maplibre.org/maplibre-style-spec/expressions/#global-state">global-state</a> expression
+   * and must evaluate to {@code "visible"} or {@code "none"}.
+   *
+   * @param expression the visibility expression
+   * @return property wrapper around visibility
+   */
+  public static PropertyValue<Expression> visibility(@NonNull Expression expression) {
+    return new LayoutPropertyValue<>("visibility", expression);
   }
 
   /**

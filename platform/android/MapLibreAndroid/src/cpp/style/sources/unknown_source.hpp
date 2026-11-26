@@ -1,10 +1,10 @@
 #pragma once
 
 #include "source.hpp"
-#include <mbgl/style/source.hpp>
+#include <mln/style/source.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class UnknownSource : public Source {
@@ -14,7 +14,7 @@ public:
 
     static void registerNative(jni::JNIEnv&);
 
-    UnknownSource(jni::JNIEnv&, mbgl::style::Source&, AndroidRendererFrontend*);
+    UnknownSource(jni::JNIEnv&, mln::style::Source&, AndroidRendererFrontend*);
 
     ~UnknownSource() = default;
 
@@ -24,4 +24,4 @@ private:
 }; // class UnknownSource
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

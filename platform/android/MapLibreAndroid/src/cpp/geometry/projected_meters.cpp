@@ -1,6 +1,6 @@
 #include "projected_meters.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 jni::Local<jni::Object<ProjectedMeters>> ProjectedMeters::New(jni::JNIEnv& env, double northing, double easting) {
@@ -14,4 +14,4 @@ void ProjectedMeters::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

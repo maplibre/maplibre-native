@@ -1,21 +1,21 @@
 #include <algorithm>
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/test/map_adapter.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/test/map_adapter.hpp>
 
-#include <mbgl/annotation/annotation.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
+#include <mln/annotation/annotation.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/image.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/color.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/gfx/headless_frontend.hpp>
 
 #include <algorithm>
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 
@@ -135,7 +135,7 @@ TEST(Annotations, AntimeridianAnnotationLarge) {
     AnnotationTest test;
 
     double antimeridian = 180;
-    test.map.jumpTo(CameraOptions().withCenter(mbgl::LatLng(0.0, antimeridian)).withZoom(0.0));
+    test.map.jumpTo(CameraOptions().withCenter(mln::LatLng(0.0, antimeridian)).withZoom(0.0));
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
 
     LineString<double> line = {{{antimeridian, 20}, {antimeridian, -20}}};
@@ -397,7 +397,7 @@ TEST(Annotations, QueryFractionalZoomLevels) {
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
     test.map.addAnnotationImage(namedMarker("default_marker"));
 
-    std::vector<mbgl::AnnotationID> ids;
+    std::vector<mln::AnnotationID> ids;
     for (int longitude = 0; longitude < 10; longitude += 2) {
         for (int latitude = 0; latitude < 10; latitude += 2) {
             ids.push_back(
@@ -405,7 +405,7 @@ TEST(Annotations, QueryFractionalZoomLevels) {
         }
     }
 
-    test.map.jumpTo(CameraOptions().withCenter(mbgl::LatLng(5.0, 5.0)).withZoom(0.0));
+    test.map.jumpTo(CameraOptions().withCenter(mln::LatLng(5.0, 5.0)).withZoom(0.0));
     for (uint16_t zoomSteps = 10; zoomSteps <= 20; ++zoomSteps) {
         test.map.jumpTo(CameraOptions().withZoom(zoomSteps / 10.0));
         test.frontend.render(test.map);
@@ -434,9 +434,9 @@ TEST(Annotations, VisibleFeatures) {
 
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
     test.map.addAnnotationImage(namedMarker("default_marker"));
-    test.map.jumpTo(CameraOptions().withCenter(mbgl::LatLng(5.0, 5.0)).withZoom(3.0));
+    test.map.jumpTo(CameraOptions().withCenter(mln::LatLng(5.0, 5.0)).withZoom(3.0));
 
-    std::vector<mbgl::AnnotationID> ids;
+    std::vector<mln::AnnotationID> ids;
     for (int longitude = 0; longitude < 10; longitude += 2) {
         for (int latitude = 0; latitude <= 10; latitude += 2) {
             ids.push_back(
@@ -515,7 +515,7 @@ TEST(Annotations, ViewFrustumCulling) {
 
     std::vector<LatLng> latLngs = {tl, bl, tr, br, center};
 
-    std::vector<mbgl::AnnotationID> ids;
+    std::vector<mln::AnnotationID> ids;
     for (auto latLng : latLngs) {
         ids.push_back(
             test.map.addAnnotation(SymbolAnnotation{{latLng.longitude(), latLng.latitude()}, "default_marker"}));

@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/tileset.hpp>
-#include <mbgl/geometry/dem_data.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/tileset.hpp>
+#include <mln/geometry/dem_data.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 auto fakeImage = [](Size s) {
     PremultipliedImage img = PremultipliedImage(s);

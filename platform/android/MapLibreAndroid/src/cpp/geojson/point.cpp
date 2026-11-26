@@ -1,16 +1,16 @@
 #include "point.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
-jni::Local<jni::Object<Point>> Point::New(jni::JNIEnv& env, const mbgl::Point<double>& point) {
+jni::Local<jni::Object<Point>> Point::New(jni::JNIEnv& env, const mln::Point<double>& point) {
     static auto& javaClass = jni::Class<Point>::Singleton(env);
     static auto method = javaClass.GetStaticMethod<jni::Object<Point>(jni::jdouble, jni::jdouble)>(env, "fromLngLat");
     return javaClass.Call(env, method, point.x, point.y);
 }
 
-mbgl::Point<double> Point::convert(jni::JNIEnv& env, const jni::Object<Point>& jPoint) {
+mln::Point<double> Point::convert(jni::JNIEnv& env, const jni::Object<Point>& jPoint) {
     static auto& javaClass = jni::Class<Point>::Singleton(env);
     static auto longitude = javaClass.GetMethod<jni::jdouble()>(env, "longitude");
     static auto latitude = javaClass.GetMethod<jni::jdouble()>(env, "latitude");
@@ -28,4 +28,4 @@ void Point::registerNative(jni::JNIEnv& env) {
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

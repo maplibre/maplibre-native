@@ -1,14 +1,15 @@
-#include <mbgl/gl/headless_backend.hpp>
+#include <mln/gl/headless_backend.hpp>
 
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/logging.hpp>
 
 #include <EGL/egl.h>
 
 #include <cassert>
+#include <memory>
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 // This class provides a singleton that contains information about the
@@ -27,14 +28,16 @@ public:
             throw std::runtime_error("Failed to obtain a valid EGL display.\n");
         }
 
-        EGLint major, minor, numConfigs;
+        EGLint major;
+        EGLint minor;
+        EGLint numConfigs;
         if (!eglInitialize(display, &major, &minor)) {
             throw std::runtime_error("eglInitialize() failed.\n");
         }
 
         if (!eglBindAPI(EGL_OPENGL_ES_API)) {
-            mbgl::Log::Error(mbgl::Event::OpenGL,
-                             "eglBindAPI(EGL_OPENGL_ES_API) returned error " + std::to_string(eglGetError()));
+            mln::Log::Error(mln::Event::GraphicsBackend,
+                            "eglBindAPI(EGL_OPENGL_ES_API) returned error " + std::to_string(eglGetError()));
             throw std::runtime_error("eglBindAPI() failed");
         }
 
@@ -51,17 +54,14 @@ public:
     ~EGLDisplayConfig() { eglTerminate(display); }
 
     static std::shared_ptr<const EGLDisplayConfig> create() {
-        static std::weak_ptr<const EGLDisplayConfig> instance;
-        auto shared = instance.lock();
-        if (!shared) {
-            instance = shared = std::make_shared<EGLDisplayConfig>(Key{});
-        }
-        return shared;
+        // C++11 magic static guarantees thread-safe one-shot initialization.
+        static const auto instance = std::make_shared<EGLDisplayConfig>(Key{});
+        return instance;
     }
 
 public:
     EGLDisplay display = EGL_NO_DISPLAY;
-    EGLConfig config = 0;
+    EGLConfig config = nullptr;
 };
 
 class EGLBackendImpl final : public HeadlessBackend::Impl {
@@ -77,7 +77,7 @@ public:
         if (eglContext == EGL_NO_CONTEXT) {
             std::ostringstream logMsg;
             logMsg << "eglCreateContext() returned error 0x" << std::hex << eglGetError();
-            mbgl::Log::Error(mbgl::Event::OpenGL, logMsg.str());
+            mln::Log::Error(mln::Event::GraphicsBackend, logMsg.str());
 
             throw std::runtime_error("Error creating the EGL context object.\n");
         }
@@ -97,12 +97,12 @@ public:
     ~EGLBackendImpl() final {
         if (eglSurface != EGL_NO_SURFACE) {
             if (!eglDestroySurface(eglDisplay->display, eglSurface)) {
-                Log::Error(Event::OpenGL, "Failed to destroy EGL surface.");
+                Log::Error(Event::GraphicsBackend, "Failed to destroy EGL surface.");
             }
             eglSurface = EGL_NO_SURFACE;
         }
         if (!eglDestroyContext(eglDisplay->display, eglContext)) {
-            Log::Error(Event::OpenGL, "Failed to destroy EGL context.");
+            Log::Error(Event::GraphicsBackend, "Failed to destroy EGL context.");
         }
     }
 
@@ -132,4 +132,4 @@ void HeadlessBackend::createImpl() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

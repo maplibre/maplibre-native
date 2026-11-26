@@ -7,7 +7,7 @@
 #import "MLNFeature.h"
 
 #import <mapbox/polylabel.hpp>
-#import <mbgl/util/geojson.hpp>
+#import <mln/util/geojson.hpp>
 
 @implementation MLNPolygon
 
@@ -77,20 +77,20 @@
   return MLNLocationCoordinate2DFromPoint(poi);
 }
 
-- (mbgl::LinearRing<double>)ring {
+- (mln::LinearRing<double>)ring {
   NSUInteger count = self.pointCount;
   CLLocationCoordinate2D *coordinates = self.coordinates;
 
-  mbgl::LinearRing<double> result;
+  mln::LinearRing<double> result;
   result.reserve(self.pointCount);
   for (NSUInteger i = 0; i < count; i++) {
-    result.push_back(mbgl::Point<double>(coordinates[i].longitude, coordinates[i].latitude));
+    result.push_back(mln::Point<double>(coordinates[i].longitude, coordinates[i].latitude));
   }
   return result;
 }
 
-- (mbgl::Polygon<double>)polygon {
-  mbgl::Polygon<double> geometry;
+- (mln::Polygon<double>)polygon {
+  mln::Polygon<double> geometry;
   geometry.push_back(self.ring);
   for (MLNPolygon *polygon in self.interiorPolygons) {
     geometry.push_back(polygon.ring);
@@ -98,12 +98,12 @@
   return geometry;
 }
 
-- (mbgl::Geometry<double>)geometryObject {
+- (mln::Geometry<double>)geometryObject {
   return [self polygon];
 }
 
-- (mbgl::Annotation)annotationObjectWithDelegate:(id<MLNMultiPointDelegate>)delegate {
-  mbgl::FillAnnotation annotation{[self polygon]};
+- (mln::Annotation)annotationObjectWithDelegate:(id<MLNMultiPointDelegate>)delegate {
+  mln::FillAnnotation annotation{[self polygon]};
   annotation.opacity = {static_cast<float>([delegate alphaForShapeAnnotation:self])};
   annotation.outlineColor = {[delegate strokeColorForShapeAnnotation:self]};
   annotation.color = {[delegate fillColorForPolygonAnnotation:self]};
@@ -164,7 +164,7 @@
   if (self = [super init]) {
     _polygons = polygons;
 
-    mbgl::LatLngBounds bounds = mbgl::LatLngBounds::empty();
+    mln::LatLngBounds bounds = mln::LatLngBounds::empty();
 
     for (MLNPolygon *polygon in _polygons) {
       bounds.extend(MLNLatLngBoundsFromCoordinateBounds(polygon.overlayBounds));
@@ -181,7 +181,7 @@
         [NSSet setWithArray:@[ [NSDictionary class], [NSArray class], [MLNPolygon class] ]];
     _polygons = [decoder decodeObjectOfClasses:polygonsClasses forKey:@"polygons"];
 
-    mbgl::LatLngBounds bounds = mbgl::LatLngBounds::empty();
+    mln::LatLngBounds bounds = mln::LatLngBounds::empty();
 
     for (MLNPolygon *polygon in _polygons) {
       bounds.extend(MLNLatLngBoundsFromCoordinateBounds(polygon.overlayBounds));
@@ -222,11 +222,11 @@
   return MLNCoordinateBoundsIntersectsCoordinateBounds(_overlayBounds, overlayBounds);
 }
 
-- (mbgl::MultiPolygon<double>)multiPolygon {
-  mbgl::MultiPolygon<double> multiPolygon;
+- (mln::MultiPolygon<double>)multiPolygon {
+  mln::MultiPolygon<double> multiPolygon;
   multiPolygon.reserve(self.polygons.count);
   for (MLNPolygon *polygon in self.polygons) {
-    mbgl::Polygon<double> geometry;
+    mln::Polygon<double> geometry;
     geometry.push_back(polygon.ring);
     for (MLNPolygon *interiorPolygon in polygon.interiorPolygons) {
       geometry.push_back(interiorPolygon.ring);
@@ -236,7 +236,7 @@
   return multiPolygon;
 }
 
-- (mbgl::Geometry<double>)geometryObject {
+- (mln::Geometry<double>)geometryObject {
   return [self multiPolygon];
 }
 

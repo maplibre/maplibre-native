@@ -68,7 +68,7 @@
 }
 
 - (instancetype)initWithOfflineRegionDefinition:
-    (const mbgl::OfflineTilePyramidRegionDefinition &)definition {
+    (const mln::OfflineTilePyramidRegionDefinition &)definition {
   NSURL *styleURL = [NSURL URLWithString:@(definition.styleURL.c_str())];
   MLNCoordinateBounds bounds = MLNCoordinateBoundsFromLatLngBounds(definition.bounds);
   MLNTilePyramidOfflineRegion *result = [self initWithStyleURL:styleURL
@@ -79,7 +79,7 @@
   return result;
 }
 
-- (const mbgl::OfflineRegionDefinition)offlineRegionDefinition {
+- (const mln::OfflineRegionDefinition)offlineRegionDefinition {
 #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
   const float scaleFactor = [UIScreen instancesRespondToSelector:@selector(nativeScale)]
                                 ? [[UIScreen mainScreen] nativeScale]
@@ -87,7 +87,7 @@
 #elif TARGET_OS_MAC
   const float scaleFactor = [NSScreen mainScreen].backingScaleFactor;
 #endif
-  return mbgl::OfflineTilePyramidRegionDefinition(
+  return mln::OfflineTilePyramidRegionDefinition(
       _styleURL.absoluteString.UTF8String, MLNLatLngBoundsFromCoordinateBounds(_bounds),
       _minimumZoomLevel, _maximumZoomLevel, scaleFactor, _includesIdeographicGlyphs);
 }

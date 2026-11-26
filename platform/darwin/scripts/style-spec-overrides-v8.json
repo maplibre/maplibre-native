@@ -134,7 +134,7 @@
       "doc": "The geometry's offset."
     },
     "fill-color": {
-      "doc": "The color of the filled part of this layer."
+      "doc": "The color of the filled part of this layer. When used with an SDF fill pattern, this serves as the foreground color of the pattern."
     }
   },
   "paint_symbol": {

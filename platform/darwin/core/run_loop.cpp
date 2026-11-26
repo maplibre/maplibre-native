@@ -1,12 +1,12 @@
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/async_task.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/util/async_task.hpp>
+#include <mln/util/monotonic_timer.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
 
 #include <CoreFoundation/CoreFoundation.h>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class RunLoop::Impl {
@@ -64,4 +64,4 @@ void RunLoop::waitForEmpty([[maybe_unused]] const SimpleIdentity tag) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

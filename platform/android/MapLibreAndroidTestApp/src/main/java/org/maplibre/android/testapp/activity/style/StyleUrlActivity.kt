@@ -34,7 +34,6 @@ class StyleUrlActivity : AppCompatActivity() {
             TestStyles.AMERICANA,
             TestStyles.OPENFREEMAP_LIBERTY,
             TestStyles.OPENFREEMAP_BRIGHT,
-            TestStyles.AWS_OPEN_DATA_STANDARD_LIGHT,
             TestStyles.PROTOMAPS_LIGHT,
             TestStyles.PROTOMAPS_DARK,
             TestStyles.PROTOMAPS_GRAYSCALE,

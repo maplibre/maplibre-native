@@ -10,15 +10,15 @@
 #import "NSPredicate+MLNPrivateAdditions.h"
 #import "NSURL+MLNAdditions.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/style/sources/vector_source.hpp>
+#include <mln/map/map.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/sources/vector_source.hpp>
 
 const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSourceOptionEncoding";
 
 @interface MLNVectorTileSource ()
 
-@property (nonatomic, readonly) mbgl::style::VectorSource *rawSource;
+@property (nonatomic, readonly) mln::style::VectorSource *rawSource;
 
 @end
 
@@ -26,7 +26,7 @@ const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSou
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
                   configurationURL:(NSURL *)configurationURL {
-  auto source = std::make_unique<mbgl::style::VectorSource>(
+  auto source = std::make_unique<mln::style::VectorSource>(
       identifier.UTF8String,
       configurationURL.mgl_URLByStandardizingScheme.absoluteString.UTF8String);
   return self = [super initWithPendingSource:std::move(source)];
@@ -34,8 +34,8 @@ const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSou
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
             configurationURLString:(NSString *)configurationURLString {
-  auto source = std::make_unique<mbgl::style::VectorSource>(identifier.UTF8String,
-                                                            configurationURLString.UTF8String);
+  auto source = std::make_unique<mln::style::VectorSource>(identifier.UTF8String,
+                                                           configurationURLString.UTF8String);
 
   return self = [super initWithPendingSource:std::move(source)];
 }
@@ -43,13 +43,13 @@ const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSou
 - (instancetype)initWithIdentifier:(NSString *)identifier
                   tileURLTemplates:(NSArray<NSString *> *)tileURLTemplates
                            options:(nullable NSDictionary<MLNTileSourceOption, id> *)options {
-  mbgl::Tileset tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, options);
-  auto source = std::make_unique<mbgl::style::VectorSource>(identifier.UTF8String, tileSet);
+  mln::Tileset tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, options);
+  auto source = std::make_unique<mln::style::VectorSource>(identifier.UTF8String, tileSet);
   return self = [super initWithPendingSource:std::move(source)];
 }
 
-- (mbgl::style::VectorSource *)rawSource {
-  return (mbgl::style::VectorSource *)super.rawSource;
+- (mln::style::VectorSource *)rawSource {
+  return (mln::style::VectorSource *)super.rawSource;
 }
 
 - (NSURL *)configurationURL {
@@ -84,18 +84,50 @@ const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSou
     optionalSourceLayerIDs = layerIDs;
   }
 
-  std::optional<mbgl::style::Filter> optionalFilter;
+  std::optional<mln::style::Filter> optionalFilter;
   if (predicate) {
     optionalFilter = predicate.mgl_filter;
   }
 
-  std::vector<mbgl::Feature> features;
+  std::vector<mln::Feature> features;
   if ([self.stylable isKindOfClass:[MLNMapView class]]) {
     MLNMapView *mapView = (MLNMapView *)self.stylable;
     features = mapView.renderer->querySourceFeatures(self.rawSource->getID(),
                                                      {optionalSourceLayerIDs, optionalFilter});
   }
   return MLNFeaturesFromMBGLFeatures(features);
+}
+
+// MARK: - Managing Feature State
+
+- (BOOL)setFeatureStateForSourceLayerID:(NSString *)sourceLayerID
+                              featureID:(NSString *)featureID
+                                  state:(NSDictionary<NSString *, id> *)state {
+  return [self mgl_setFeatureStateForSourceLayerID:sourceLayerID featureID:featureID state:state];
+}
+
+- (nullable NSDictionary<NSString *, id> *)featureStateForSourceLayerID:(NSString *)sourceLayerID
+                                                              featureID:(NSString *)featureID {
+  return [self mgl_featureStateForSourceLayerID:sourceLayerID featureID:featureID];
+}
+
+- (BOOL)removeFeatureStateForSourceLayerID:(NSString *)sourceLayerID
+                                 featureID:(nullable NSString *)featureID
+                                  stateKey:(nullable NSString *)stateKey {
+  return [self mgl_removeFeatureStateForSourceLayerID:sourceLayerID
+                                            featureID:featureID
+                                             stateKey:stateKey];
+}
+
+- (BOOL)removeFeatureStateForSourceLayerID:(NSString *)sourceLayerID
+                                 featureID:(NSString *)featureID {
+  return [self mgl_removeFeatureStateForSourceLayerID:sourceLayerID
+                                            featureID:featureID
+                                             stateKey:nil];
+}
+
+- (BOOL)resetFeatureStatesForSourceLayerID:(NSString *)sourceLayerID {
+  return [self mgl_removeFeatureStateForSourceLayerID:sourceLayerID featureID:nil stateKey:nil];
 }
 
 @end
@@ -161,15 +193,8 @@ static NSArray *const MLNMapboxStreetsAlternativeLanguages = @[
                                                                      NSString *_Nullable language,
                                                                      NSDictionary<NSString *, id>
                                                                          *_Nullable bindings) {
-                          NSString *languageCode;
-
-                          if (@available(iOS 10.0, macOS 10.12.0, *)) {
-                            languageCode =
-                                [NSLocale localeWithLocaleIdentifier:language].languageCode;
-                          } else {
-                            languageCode = [[NSLocale localeWithLocaleIdentifier:language]
-                                objectForKey:NSLocaleLanguageCode];
-                          }
+                          NSString *languageCode =
+                              [NSLocale localeWithLocaleIdentifier:language].languageCode;
 
                           return [languageCode isEqualToString:@"en"];
                         }]]

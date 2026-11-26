@@ -12,8 +12,9 @@
     _styleURL = nil;
     _styleJSON = nil;
     _pluginLayers = nil;
-
     _actionJournalOptions = [[MLNActionJournalOptions alloc] init];
+    _fastPFOREnabled = NO;
+    _featureInfoEnabled = NO;
   }
 
   return self;

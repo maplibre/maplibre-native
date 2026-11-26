@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/types.hpp>
-#include <mbgl/style/position.hpp>
-#include <mbgl/util/constants.hpp>
+#include <mln/style/types.hpp>
+#include <mln/style/position.hpp>
+#include <mln/util/constants.hpp>
 
-using namespace mbgl;
+using namespace mln;
 using namespace style;
 
 void expectArrayEQ(std::array<float, 3> got, std::array<float, 3> expected) {

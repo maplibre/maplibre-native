@@ -1,0 +1,133 @@
+#pragma once
+
+#include <mln/gfx/attribute.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/shaders/attributes.hpp>
+#include <mln/util/literal.hpp>
+
+#include <algorithm>
+#include <optional>
+#include <string>
+#include <type_traits>
+#include <vector>
+
+namespace mln {
+namespace gl {
+
+using AttributeBindingArray = std::vector<std::optional<gfx::AttributeBinding>>;
+using NamedAttributeLocations = std::vector<std::pair<const std::string, AttributeLocation>>;
+
+std::optional<AttributeLocation> queryLocation(ProgramID id, const char* name);
+
+template <class>
+class AttributeLocations;
+
+template <class... As>
+class AttributeLocations<TypeList<As...>> final {
+private:
+    using Locations = IndexedTuple<TypeList<As...>, TypeList<ExpandToType<As, std::optional<AttributeLocation>>...>>;
+
+    Locations locations;
+
+public:
+    AttributeLocations() = default;
+
+    void queryLocations(const ProgramID& id) {
+        locations = Locations{
+            queryLocation(id, concat_literals<&string_literal<'a', '_'>::value, &As::name>::value())...};
+    }
+
+    bool hasExpectedFirstLocation() const {
+        using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
+        const auto location = locations.template get<TypeOfFirst>();
+        return location && *location == 0;
+    }
+
+    static constexpr const char* getFirstAttribName() {
+        // Static assert that attribute list starts with position: we bind it on location 0.
+        using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
+        static_assert(std::is_same_v<attributes::pos, TypeOfFirst> ||
+                          std::is_same_v<attributes::pos_offset, TypeOfFirst> ||
+                          std::is_same_v<attributes::pos_normal, TypeOfFirst>,
+                      "Program must start with position related attribute.");
+        return concat_literals<&string_literal<'a', '_'>::value, TypeOfFirst::name>::value();
+    }
+
+    NamedAttributeLocations getNamedLocations() const {
+        NamedAttributeLocations result;
+
+        auto maybeAddLocation = [&](const std::string& name, const std::optional<AttributeLocation>& location) {
+            if (location) {
+                result.emplace_back(name, *location);
+            }
+        };
+
+        util::ignore({(maybeAddLocation(concat_literals<&string_literal<'a', '_'>::value, &As::name>::value(),
+                                        locations.template get<As>()),
+                       0)...});
+
+        return result;
+    }
+
+    AttributeBindingArray toBindingArray(const gfx::AttributeBindings<TypeList<As...>>& bindings) const {
+        AttributeBindingArray result;
+
+        std::optional<AttributeLocation> maxLocation;
+        auto updateMaxLocation = [&](const std::optional<AttributeLocation>& location) {
+            if (location) {
+                maxLocation = maxLocation ? std::max(*maxLocation, *location) : *location;
+            }
+        };
+
+        util::ignore({(updateMaxLocation(locations.template get<As>()), 0)...});
+
+        if (maxLocation) {
+            result.resize(*maxLocation + 1);
+        }
+
+        auto maybeAddBinding = [&](const std::optional<AttributeLocation>& location,
+                                   const std::optional<gfx::AttributeBinding>& binding) {
+            if (location) {
+                result[*location] = binding;
+            }
+        };
+
+        util::ignore({(maybeAddBinding(locations.template get<As>(), bindings.template get<As>()), 0)...});
+
+        return result;
+    }
+};
+
+template <class>
+class AttributeKey;
+
+constexpr auto attributeDefinePrefix() {
+    return "#define HAS_UNIFORM_u_";
+}
+
+template <class... As>
+class AttributeKey<TypeList<As...>> final {
+public:
+    static_assert(sizeof...(As) <= 32, "attribute count exceeds 32");
+
+    static uint32_t compute(const gfx::AttributeBindings<TypeList<As...>>& bindings) {
+        uint32_t value = 0;
+        util::ignore(
+            {(bindings.template get<As>() ? (void)(value |= 1 << TypeIndex<As, As...>::value) : (void)0, 0)...});
+        return value;
+    }
+
+    static std::string defines(const gfx::AttributeBindings<TypeList<As...>>& bindings) {
+        std::string result;
+        util::ignore(
+            {(!bindings.template get<As>()
+                  ? (void)(result +=
+                           concat_literals<&attributeDefinePrefix, &As::name, &string_literal<'\n'>::value>::value())
+                  : (void)0,
+              0)...});
+        return result;
+    }
+};
+
+} // namespace gl
+} // namespace mln

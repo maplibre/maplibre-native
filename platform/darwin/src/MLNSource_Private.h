@@ -6,16 +6,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol MLNStylable;
 
-namespace mbgl {
+namespace mln {
 namespace style {
 class Source;
 }
-}  // namespace mbgl
+}  // namespace mln
 
-// A struct to be stored in the `peer` member of mbgl::style::Source, in order to implement
+// A struct to be stored in the `peer` member of mln::style::Source, in order to implement
 // object identity. We don't store a MLNSource pointer directly because that doesn't
 // interoperate with ARC. The inner pointer is weak in order to avoid a reference cycle for
-// "pending" MLNSources, which have a strong owning pointer to the mbgl::style::Source.
+// "pending" MLNSources, which have a strong owning pointer to the mln::style::Source.
 struct SourceWrapper {
   __weak MLNSource *source;
 };
@@ -42,23 +42,23 @@ struct SourceWrapper {
  Initializes and returns a source with a raw pointer to the backing store,
  associated with a style.
  */
-- (instancetype)initWithRawSource:(mbgl::style::Source *)rawSource
+- (instancetype)initWithRawSource:(mln::style::Source *)rawSource
                          stylable:(nullable id<MLNStylable>)stylable;
 
 /**
  Initializes and returns a source with an owning pointer to the backing store,
  unassociated from a style.
  */
-- (instancetype)initWithPendingSource:(std::unique_ptr<mbgl::style::Source>)pendingSource;
+- (instancetype)initWithPendingSource:(std::unique_ptr<mln::style::Source>)pendingSource;
 
 /**
  A raw pointer to the mbgl object, which is always initialized, either to the
- value returned by `mbgl::Map getSource`, or for independently created objects,
+ value returned by `mln::Map getSource`, or for independently created objects,
  to the pointer value held in `pendingSource`. In the latter case, this raw
  pointer value stays even after ownership of the object is transferred via
- `mbgl::Map addSource`.
+ `mln::Map addSource`.
  */
-@property (nonatomic, readonly) mbgl::style::Source *rawSource;
+@property (nonatomic, readonly) mln::style::Source *rawSource;
 
 /**
  The stylable object whose style currently contains the source.
@@ -71,8 +71,8 @@ struct SourceWrapper {
 /**
  Adds the mbgl source that this object represents to the mbgl map.
  Once a mbgl source is added, ownership of the object is transferred to the
- `mbgl::Map` and this object no longer has an active unique_ptr reference to the
- `mbgl::Source`. If this object's mbgl source is in that state, the mbgl source
+ `mln::Map` and this object no longer has an active unique_ptr reference to the
+ `mln::Source`. If this object's mbgl source is in that state, the mbgl source
  can still be changed but the changes will not be visible until the ``MLNSource``
  is added back to the map via ``MLNStyle/addSource:`` and styled with a
  ``MLNLayer``.
@@ -86,6 +86,33 @@ struct SourceWrapper {
  safe to add the source back to the style after it is removed.
  */
 - (BOOL)removeFromStylable:(id<MLNStylable>)mapView error:(NSError *__nullable *__nullable)outError;
+
+/**
+ Sets the state of a feature in this source. Shared implementation backing the
+ public feature state methods exposed by ``MLNShapeSource`` and
+ ``MLNVectorTileSource``.
+ */
+- (BOOL)mgl_setFeatureStateForSourceLayerID:(nullable NSString *)sourceLayerID
+                                  featureID:(NSString *)featureID
+                                      state:(NSDictionary<NSString *, id> *)state;
+
+/**
+ Gets the current state of a feature in this source. Shared implementation
+ backing the public feature state methods exposed by ``MLNShapeSource`` and
+ ``MLNVectorTileSource``.
+ */
+- (nullable NSDictionary<NSString *, id> *)mgl_featureStateForSourceLayerID:
+                                               (nullable NSString *)sourceLayerID
+                                                                  featureID:(NSString *)featureID;
+
+/**
+ Removes state from features in this source. Shared implementation backing the
+ public feature state methods exposed by ``MLNShapeSource`` and
+ ``MLNVectorTileSource``.
+ */
+- (BOOL)mgl_removeFeatureStateForSourceLayerID:(nullable NSString *)sourceLayerID
+                                     featureID:(nullable NSString *)featureID
+                                      stateKey:(nullable NSString *)stateKey;
 
 @end
 

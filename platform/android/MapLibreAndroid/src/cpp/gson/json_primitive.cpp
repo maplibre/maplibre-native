@@ -1,6 +1,6 @@
 #include "json_primitive.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace gson {
 
@@ -10,4 +10,4 @@ void JsonPrimitive::registerNative(jni::JNIEnv &env) {
 
 } // namespace gson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

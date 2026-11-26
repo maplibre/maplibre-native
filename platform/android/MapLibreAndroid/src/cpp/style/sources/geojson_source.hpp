@@ -1,15 +1,15 @@
 #pragma once
 
 #include "source.hpp"
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/actor/optional_actor.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/actor/optional_actor.hpp>
 #include "../../geojson/geometry.hpp"
 #include "../../geojson/feature.hpp"
 #include "../../geojson/feature_collection.hpp"
 #include "../../android_renderer_frontend.hpp"
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 using GeoJSONDataCallback = std::function<void(std::shared_ptr<style::GeoJSONData>)>;
@@ -47,7 +47,7 @@ public:
     static void registerNative(jni::JNIEnv&);
 
     GeoJSONSource(jni::JNIEnv&, const jni::String&, const jni::Object<>&);
-    GeoJSONSource(jni::JNIEnv&, mbgl::style::Source&, AndroidRendererFrontend*);
+    GeoJSONSource(jni::JNIEnv&, mln::style::Source&, AndroidRendererFrontend*);
     ~GeoJSONSource();
 
 private:
@@ -86,8 +86,9 @@ private:
     void setCollectionSync(jni::JNIEnv&, const jni::Object<JNIType>&);
 
     jboolean isUpdateSynchronous(jni::JNIEnv&);
+    void setOverrideSynchronousUpdate(jni::JNIEnv&, jni::jboolean);
 
 }; // class GeoJSONSource
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

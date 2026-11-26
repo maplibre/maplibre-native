@@ -5,7 +5,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-namespace mbgl {
+namespace mln {
 class Tileset;
 }
 
@@ -34,7 +34,7 @@ class Tileset;
 @end
 
 MLN_EXPORT
-mbgl::Tileset MLNTileSetFromTileURLTemplates(
+mln::Tileset MLNTileSetFromTileURLTemplates(
     NSArray<NSString *> *tileURLTemplates,
     NSDictionary<MLNTileSourceOption, id> *_Nullable options);
 

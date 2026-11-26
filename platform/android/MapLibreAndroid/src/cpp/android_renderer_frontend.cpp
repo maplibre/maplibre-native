@@ -1,21 +1,37 @@
 #include "android_renderer_frontend.hpp"
 
-#include <mbgl/tile/tile_operation.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/renderer/renderer_observer.hpp>
-#include <mbgl/util/async_task.hpp>
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/thread.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/tile/tile_operation.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/renderer/renderer_observer.hpp>
+#include <mln/util/async_task.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/util/instrumentation.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/thread.hpp>
+#include <mln/util/logging.hpp>
 
 #include "android_renderer_backend.hpp"
 #include "attach_env.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
+
+namespace {
+
+// Check and log broken promises
+template <typename T>
+T getOrDefault(std::future<T> future, const char* function) {
+    try {
+        return future.get();
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android,
+                   std::string("AndroidRendererFrontend::") + function + " failed: " + exception.what());
+        return {};
+    }
+}
+
+} // namespace
 
 // Forwards RendererObserver signals to the given
 // Delegate RendererObserver on the given RunLoop
@@ -25,7 +41,7 @@ public:
         : mailbox(std::make_shared<Mailbox>(mapRunLoop)),
           delegate(delegate_, mailbox) {}
 
-    ~ForwardingRendererObserver() { mailbox->close(); }
+    ~ForwardingRendererObserver() override { mailbox->close(); }
 
     void onInvalidate() override { delegate.invoke(&RendererObserver::onInvalidate); }
 
@@ -38,10 +54,10 @@ public:
     void onDidFinishRenderingFrame(RenderMode mode,
                                    bool repaintNeeded,
                                    bool placementChanged,
-                                   const gfx::RenderingStats& stats) override {
-        void (RendererObserver::*f)(
-            RenderMode, bool, bool, const gfx::RenderingStats&) = &RendererObserver::onDidFinishRenderingFrame;
-        delegate.invoke(f, mode, repaintNeeded, placementChanged, stats);
+                                   std::shared_ptr<gfx::RenderingStats> stats) override {
+        void (RendererObserver::*f)(RenderMode, bool, bool, std::shared_ptr<gfx::RenderingStats>) =
+            &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, std::move(stats));
     }
 
     void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }
@@ -54,33 +70,37 @@ public:
         delegate.invoke(&RendererObserver::onRemoveUnusedStyleImages, ids);
     }
 
-    void onPreCompileShader(mbgl::shaders::BuiltIn id,
-                            mbgl::gfx::Backend::Type type,
+    void onSymbolError(const std::string& message) override {
+        delegate.invoke(&RendererObserver::onSymbolError, message);
+    }
+
+    void onPreCompileShader(mln::shaders::BuiltIn id,
+                            mln::gfx::Backend::Type type,
                             const std::string& additionalDefines) override {
         delegate.invoke(&RendererObserver::onPreCompileShader, id, type, additionalDefines);
     }
 
-    void onPostCompileShader(mbgl::shaders::BuiltIn id,
-                             mbgl::gfx::Backend::Type type,
+    void onPostCompileShader(mln::shaders::BuiltIn id,
+                             mln::gfx::Backend::Type type,
                              const std::string& additionalDefines) override {
         delegate.invoke(&RendererObserver::onPostCompileShader, id, type, additionalDefines);
     }
 
-    void onShaderCompileFailed(mbgl::shaders::BuiltIn id,
-                               mbgl::gfx::Backend::Type type,
+    void onShaderCompileFailed(mln::shaders::BuiltIn id,
+                               mln::gfx::Backend::Type type,
                                const std::string& additionalDefines) override {
         delegate.invoke(&RendererObserver::onShaderCompileFailed, id, type, additionalDefines);
     }
 
-    void onGlyphsLoaded(const mbgl::FontStack& stack, const mbgl::GlyphRange& range) override {
+    void onGlyphsLoaded(const mln::FontStack& stack, const mln::GlyphRange& range) override {
         delegate.invoke(&RendererObserver::onGlyphsLoaded, stack, range);
     }
 
-    void onGlyphsError(const mbgl::FontStack& stack, const mbgl::GlyphRange& range, std::exception_ptr ex) override {
+    void onGlyphsError(const mln::FontStack& stack, const mln::GlyphRange& range, std::exception_ptr ex) override {
         delegate.invoke(&RendererObserver::onGlyphsError, stack, range, ex);
     }
 
-    void onGlyphsRequested(const mbgl::FontStack& stack, const mbgl::GlyphRange& range) override {
+    void onGlyphsRequested(const mln::FontStack& stack, const mln::GlyphRange& range) override {
         delegate.invoke(&RendererObserver::onGlyphsRequested, stack, range);
     }
 
@@ -153,85 +173,110 @@ const TaggedScheduler& AndroidRendererFrontend::getThreadPool() const {
 }
 
 void AndroidRendererFrontend::setTileCacheEnabled(bool enabled) {
-    mapRenderer.actor().invoke(&Renderer::setTileCacheEnabled, enabled);
+    if (const auto& actor = mapRenderer.actor()) {
+        actor->invoke(&Renderer::setTileCacheEnabled, enabled);
+    }
 }
 
 bool AndroidRendererFrontend::getTileCacheEnabled() const {
-    return mapRenderer.actor().ask(&Renderer::getTileCacheEnabled).get();
+    if (const auto& actor = mapRenderer.actor()) {
+        return getOrDefault(actor->ask(&Renderer::getTileCacheEnabled), __func__);
+    }
+
+    return false;
 }
 
 void AndroidRendererFrontend::reduceMemoryUse() {
-    mapRenderer.actor().invoke(&Renderer::reduceMemoryUse);
+    if (const auto& actor = mapRenderer.actor()) {
+        actor->invoke(&Renderer::reduceMemoryUse);
+    }
 }
 
 std::vector<Feature> AndroidRendererFrontend::querySourceFeatures(const std::string& sourceID,
                                                                   const SourceQueryOptions& options) const {
-    // Waits for the result from the orchestration thread and returns
-    return mapRenderer.actor().ask(&Renderer::querySourceFeatures, sourceID, options).get();
+    if (const auto& actor = mapRenderer.actor()) {
+        // Waits for the result from the orchestration thread and returns
+        return getOrDefault(actor->ask(&Renderer::querySourceFeatures, sourceID, options), __func__);
+    }
+
+    return {};
 }
 
 void AndroidRendererFrontend::setFeatureState(const std::string& sourceID,
                                               const std::optional<std::string>& sourceLayerID,
                                               const std::string& featureID,
                                               const FeatureState& state) const {
-    mapRenderer.actor().invoke(&Renderer::setFeatureState, sourceID, sourceLayerID, featureID, state);
+    if (const auto& actor = mapRenderer.actor()) {
+        actor->invoke(&Renderer::setFeatureState, sourceID, sourceLayerID, featureID, state);
+    }
 }
 
 FeatureState AndroidRendererFrontend::getFeatureState(const std::string& sourceID,
                                                       const std::optional<std::string>& sourceLayerID,
                                                       const std::string& featureID) const {
-    auto getFeatureState = static_cast<FeatureState (Renderer::*)(
-        const std::string&, const std::optional<std::string>&, const std::string&) const>(&Renderer::getFeatureState);
-    return mapRenderer.actor().ask(getFeatureState, sourceID, sourceLayerID, featureID).get();
+    if (const auto& actor = mapRenderer.actor()) {
+        auto getFeatureState = static_cast<FeatureState (Renderer::*)(
+            const std::string&, const std::optional<std::string>&, const std::string&) const>(
+            &Renderer::getFeatureState);
+        return getOrDefault(actor->ask(getFeatureState, sourceID, sourceLayerID, featureID), __func__);
+    }
+
+    return {};
 }
 
 void AndroidRendererFrontend::removeFeatureState(const std::string& sourceID,
                                                  const std::optional<std::string>& sourceLayerID,
                                                  const std::optional<std::string>& featureID,
                                                  const std::optional<std::string>& stateKey) const {
-    mapRenderer.actor().invoke(&Renderer::removeFeatureState, sourceID, sourceLayerID, featureID, stateKey);
+    if (const auto& actor = mapRenderer.actor()) {
+        actor->invoke(&Renderer::removeFeatureState, sourceID, sourceLayerID, featureID, stateKey);
+    }
 }
 
 std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const ScreenBox& box,
                                                                     const RenderedQueryOptions& options) const {
-    // Select the right overloaded method
-    std::vector<Feature> (Renderer::*fn)(const ScreenBox&, const RenderedQueryOptions&)
-        const = &Renderer::queryRenderedFeatures;
+    if (const auto& actor = mapRenderer.actor()) {
+        // Select the right overloaded method
+        std::vector<Feature> (Renderer::*fn)(const ScreenBox&, const RenderedQueryOptions&)
+            const = &Renderer::queryRenderedFeatures;
 
-    // Waits for the result from the orchestration thread and returns
-    return mapRenderer.actor().ask(fn, box, options).get();
+        // Waits for the result from the orchestration thread and returns
+        return getOrDefault(actor->ask(fn, box, options), __func__);
+    }
+
+    return {};
 }
 
 std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const ScreenCoordinate& point,
                                                                     const RenderedQueryOptions& options) const {
-    // Select the right overloaded method
-    std::vector<Feature> (Renderer::*fn)(const ScreenCoordinate&, const RenderedQueryOptions&)
-        const = &Renderer::queryRenderedFeatures;
+    if (const auto& actor = mapRenderer.actor()) {
+        // Select the right overloaded method
+        std::vector<Feature> (Renderer::*fn)(const ScreenCoordinate&, const RenderedQueryOptions&)
+            const = &Renderer::queryRenderedFeatures;
 
-    // Waits for the result from the orchestration thread and returns
-    return mapRenderer.actor().ask(fn, point, options).get();
-}
-
-AnnotationIDs AndroidRendererFrontend::queryPointAnnotations(const ScreenBox& box,
-                                                             const std::chrono::milliseconds& timeout) const {
-    // Waits for the result from the orchestration thread and returns
-    auto future = mapRenderer.actor().ask(&Renderer::queryPointAnnotations, box);
-    if (future.wait_for(timeout) != std::future_status::ready) {
-        return {};
+        // Waits for the result from the orchestration thread and returns
+        return getOrDefault(actor->ask(fn, point, options), __func__);
     }
 
-    return future.get();
+    return {};
 }
 
-AnnotationIDs AndroidRendererFrontend::queryShapeAnnotations(const ScreenBox& box,
-                                                             const std::chrono::milliseconds& timeout) const {
+AnnotationIDs AndroidRendererFrontend::queryPointAnnotations(const ScreenBox& box) const {
     // Waits for the result from the orchestration thread and returns
-    auto future = mapRenderer.actor().ask(&Renderer::queryShapeAnnotations, box);
-    if (future.wait_for(timeout) != std::future_status::ready) {
-        return {};
+    if (const auto& actor = mapRenderer.actor()) {
+        return getOrDefault(actor->ask(&Renderer::queryPointAnnotations, box), __func__);
     }
 
-    return future.get();
+    return {};
+}
+
+AnnotationIDs AndroidRendererFrontend::queryShapeAnnotations(const ScreenBox& box) const {
+    // Waits for the result from the orchestration thread and returns
+    if (const auto& actor = mapRenderer.actor()) {
+        return getOrDefault(actor->ask(&Renderer::queryShapeAnnotations, box), __func__);
+    }
+
+    return {};
 }
 
 FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(
@@ -239,11 +284,15 @@ FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(
     const Feature& feature,
     const std::string& extension,
     const std::string& extensionField,
-    const std::optional<std::map<std::string, mbgl::Value>>& args) const {
-    return mapRenderer.actor()
-        .ask(&Renderer::queryFeatureExtensions, sourceID, feature, extension, extensionField, args)
-        .get();
+    const std::optional<std::map<std::string, mln::Value>>& args) const {
+    if (const auto& actor = mapRenderer.actor()) {
+        return getOrDefault(
+            actor->ask(&Renderer::queryFeatureExtensions, sourceID, feature, extension, extensionField, args),
+            __func__);
+    }
+
+    return {};
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

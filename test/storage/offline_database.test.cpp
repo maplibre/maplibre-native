@@ -1,21 +1,22 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/fixture_log_observer.hpp>
-#include <mbgl/test/sqlite3_test_fs.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/fixture_log_observer.hpp>
+#include <mln/test/sqlite3_test_fs.hpp>
 
-#include <mbgl/storage/offline_database.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/response.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/storage/offline_database.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/response.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/scoped.hpp>
 
-#include <mbgl/storage/sqlite3.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/storage/sqlite3.hpp>
+#include <mln/util/variant.hpp>
 #include <thread>
 #include <random>
 #include <variant>
 
 using namespace std::literals::string_literals;
-using namespace mbgl;
+using namespace mln;
 using mapbox::sqlite::ResultCode;
 
 static constexpr const char* filename = "test/fixtures/offline_database/offline.db";
@@ -484,7 +485,7 @@ TEST(OfflineDatabase, UpdateMetadata) {
     ASSERT_TRUE(region);
 
     OfflineRegionMetadata newmetadata{{4, 5, 6}};
-    db.updateMetadata(region->getID(), newmetadata);
+    ASSERT_TRUE(db.updateMetadata(region->getID(), newmetadata));
     auto newRegion = db.getRegion(region->getID()).value();
     EXPECT_EQ(newRegion->getMetadata(), newmetadata);
 
@@ -2042,6 +2043,27 @@ TEST(OfflineDatabase, ResetDatabase) {
         log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
+
+#ifndef WIN32 // Windows filenames cannot contain a colon.
+TEST(OfflineDatabase, ResetInMemoryDatabase) {
+    for (const auto* path :
+         {":memory:", "file::memory:", "file::memory:?cache=shared", "file:reset-test?mode=memory"}) {
+        SCOPED_TRACE(path);
+        FixtureLog log;
+        const Scoped cleanup([path] { util::deleteFile(path); });
+        util::write_file(path, "unrelated file");
+
+        OfflineDatabase db(path, fixture::tileServerOptions);
+        EXPECT_FALSE(db.resetDatabase());
+        EXPECT_EQ("unrelated file", util::read_file(path));
+        EXPECT_EQ(
+            1u,
+            log.count(
+                {EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
+        EXPECT_EQ(0u, log.uncheckedCount());
+    }
+}
+#endif
 
 TEST(OfflineDatabase, PutResourceReadOnlyMode) {
     FixtureLog log;

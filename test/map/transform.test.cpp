@@ -1,16 +1,16 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
 #include <gmock/gmock.h>
 #include <cmath>
-#include <mbgl/map/transform.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/quaternion.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/quaternion.hpp>
 
 #include <numbers>
 
 using namespace std::numbers;
-using namespace mbgl;
+using namespace mln;
 
 TEST(Transform, InvalidZoom) {
     Transform transform;
@@ -136,7 +136,7 @@ TEST(Transform, PerspectiveProjection) {
     ASSERT_NEAR(point.x, 1000.0, 1e-5);
     ASSERT_NEAR(point.y, 0.0, 1e-4);
 
-    mbgl::vec4 p;
+    mln::vec4 p;
     point = transform.getState().latLngToScreenCoordinate({37.692872969426375, -76.75823239205641}, p);
     ASSERT_NEAR(point.x, 1000.0, 1e-5);
     ASSERT_NEAR(point.y, 0.0, 1e-4);
@@ -175,6 +175,24 @@ TEST(Transform, UnwrappedLatLng) {
     ASSERT_NEAR(wrappedLeftwards.longitude(), -437.0, 1e-8);
     wrappedLeftwards.wrap();
     ASSERT_NEAR(wrappedLeftwards.longitude(), -77.0, 1e-8);
+}
+
+// The copy unwrapForShortestPath finds for a wrapped center, a point 180 degrees away included, and that copy moved
+// into the center's own world when bounds keep the center past the antimeridian.
+TEST(Transform, LatLngNearCenter) {
+    Transform transform;
+    transform.resize({512, 512});
+
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, -10.0}).withZoom(4.0));
+    EXPECT_NEAR(-181.0, transform.getState().latLngNearCenter({0.0, 179.0}).longitude(), 1e-9);
+    EXPECT_NEAR(170.0, transform.getState().latLngNearCenter({0.0, 170.0}).longitude(), 1e-9);
+
+    transform.setLatLngBounds(LatLngBounds::hull({-10.0, 170.0}, {10.0, 190.0}));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 181.0}));
+    ASSERT_NEAR(181.0, transform.getState().getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(179.0, transform.getState().latLngNearCenter({0.0, 179.0}).longitude(), 1e-9);
+    EXPECT_NEAR(180.2, transform.getState().latLngNearCenter({0.0, -179.8}).longitude(), 1e-9);
+    EXPECT_NEAR(350.0, transform.getState().latLngNearCenter({0.0, -10.0}).longitude(), 1e-9);
 }
 
 TEST(Transform, ConstrainHeightOnly) {
@@ -465,6 +483,30 @@ TEST(Transform, Antimeridian) {
     ASSERT_NEAR(coordinateWaikiri.longitude(), coordinateFromPixel.longitude(), 1e-4);
 }
 
+// A zoom around a point across the antimeridian leaves the center wrapped, as GL JS's setLocationAtPoint does. Bounds
+// across the antimeridian keep it in their range, as easeTo does.
+TEST(Transform, ZoomAroundAPointAcrossTheAntimeridian) {
+    for (const bool bounded : {false, true}) {
+        SCOPED_TRACE(bounded ? "bounds from 170 to 190 degrees" : "no bounds");
+        Transform transform;
+        transform.resize({256, 256});
+        if (bounded) {
+            transform.setLatLngBounds(LatLngBounds::hull({-10.0, 170.0}, {10.0, 190.0}));
+        }
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 179.9}).withZoom(5.0));
+        transform.jumpTo(CameraOptions().withZoom(6.0).withAnchor(ScreenCoordinate{230.0, 128.0}));
+
+        const double longitude = transform.getLatLng(LatLng::Unwrapped).longitude();
+        if (bounded) {
+            EXPECT_GT(longitude, 180.0);
+            EXPECT_LT(longitude, 190.0);
+        } else {
+            EXPECT_GT(longitude, -180.0);
+            EXPECT_LT(longitude, -178.0);
+        }
+    }
+}
+
 TEST(Transform, Camera) {
     Transform transform;
     transform.resize({1000, 1000});
@@ -567,7 +609,7 @@ TEST(Transform, IsPanning) {
 }
 
 TEST(Transform, DefaultTransform) {
-    struct TransformObserver : public mbgl::TransformObserver {
+    struct TransformObserver : public mln::TransformObserver {
         void onCameraWillChange(MapObserver::CameraChangeMode) final { cameraWillChangeCallback(); };
 
         void onCameraDidChange(MapObserver::CameraChangeMode) final { cameraDidChangeCallback(); };
@@ -767,7 +809,7 @@ TEST(Transform, LatLngBounds) {
     ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), 120.0);
 
     // Simulate swipe to the left.
-    mbgl::AnimationOptions easeOptions(mbgl::Seconds(1));
+    mln::AnimationOptions easeOptions(mln::Seconds(1));
     easeOptions.transitionFrameFn = [&](double /* t */) {
         ASSERT_NEAR(transform.getLatLng().longitude(), 120.0, 1e-4);
     };
@@ -923,6 +965,31 @@ TEST(Transform, InvalidPitch) {
 
     transform.jumpTo(CameraOptions().withPitch(60));
     ASSERT_DOUBLE_EQ(util::deg2rad(60), transform.getPitch());
+}
+
+TEST(Transform, PaddingPreservesMinimumPitch) {
+    for (const uint32_t size : {1u, 64u}) {
+        for (const double minPitch : {0.0, 15.0}) {
+            SCOPED_TRACE(::testing::Message() << "size=" << size << ", minPitch=" << minPitch);
+            Transform transform;
+            transform.resize({size, size});
+            transform.setMinPitch(minPitch);
+            transform.setMaxPitch(60);
+            transform.jumpTo(CameraOptions().withCenter(LatLng{40.7128, -74.006}).withZoom(9.5).withPitch(minPitch));
+
+            transform.jumpTo(CameraOptions().withPadding(EdgeInsets{size * 28.0, 392, 0, 0}));
+            EXPECT_DOUBLE_EQ(util::deg2rad(minPitch), transform.getPitch());
+
+            transform.jumpTo(CameraOptions().withPadding(EdgeInsets{size * 24.0, 392, 0, 0}));
+            EXPECT_DOUBLE_EQ(util::deg2rad(minPitch), transform.getPitch());
+            EXPECT_DOUBLE_EQ(size * 24.0, transform.getState().getEdgeInsets().top());
+
+            transform.resize({800, 600});
+            EXPECT_DOUBLE_EQ(util::deg2rad(minPitch), transform.getPitch());
+            transform.jumpTo(CameraOptions().withPadding(EdgeInsets{}).withPitch(45));
+            EXPECT_DOUBLE_EQ(util::deg2rad(45), transform.getPitch());
+        }
+    }
 }
 
 TEST(Transform, MinMaxPitch) {

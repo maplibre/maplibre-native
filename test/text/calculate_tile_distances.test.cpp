@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/geometry/anchor.hpp>
-#include <mbgl/layout/symbol_layout.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mln/geometry/anchor.hpp>
+#include <mln/layout/symbol_layout.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(calculateTileDistances, Point) {
     const GeometryCoordinates line = {Point<int16_t>{1, 1}};

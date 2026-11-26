@@ -1,18 +1,18 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/map/transform.hpp>
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/tile_coordinate.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/tile_coordinate.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(TileCoordinate, FromLatLng) {
     size_t changeCount = 0;
-    struct TransformObserver : public mbgl::TransformObserver {
+    struct TransformObserver : public mln::TransformObserver {
         void onCameraWillChange(MapObserver::CameraChangeMode mode) final {
             if (mode == MapObserver::CameraChangeMode::Immediate && cameraWillChangeImmediateCallback) {
                 cameraWillChangeImmediateCallback();

@@ -1,22 +1,22 @@
 #import "MLNShape.h"
 
-#import <mbgl/util/geo.hpp>
-#import <mbgl/util/geojson.hpp>
-#import <mbgl/util/geometry.hpp>
+#import <mln/util/geo.hpp>
+#import <mln/util/geojson.hpp>
+#import <mln/util/geometry.hpp>
 
 bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D rhs);
 
 @interface MLNShape (Private)
 
 /**
- Returns an `mbgl::GeoJSON` representation of the ``MLNShape``.
+ Returns an `mln::GeoJSON` representation of the ``MLNShape``.
  */
-- (mbgl::GeoJSON)geoJSONObject;
+- (mln::GeoJSON)geoJSONObject;
 
 /**
- Returns an `mbgl::Geometry<double>` representation of the ``MLNShape``.
+ Returns an `mln::Geometry<double>` representation of the ``MLNShape``.
  */
-- (mbgl::Geometry<double>)geometryObject;
+- (mln::Geometry<double>)geometryObject;
 
 /**
  Returns a dictionary with the GeoJSON geometry member object.

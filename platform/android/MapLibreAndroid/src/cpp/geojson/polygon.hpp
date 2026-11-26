@@ -1,14 +1,14 @@
 #pragma once
 
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/util/noncopyable.hpp>
 
 #include "geometry.hpp"
 #include "../java/util.hpp"
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
@@ -18,7 +18,7 @@ public:
     static constexpr auto Name() { return "org/maplibre/geojson/Polygon"; };
     static constexpr auto Type() { return "Polygon"; };
 
-    static jni::Local<jni::Object<Polygon>> New(jni::JNIEnv &, const mbgl::Polygon<double> &);
+    static jni::Local<jni::Object<Polygon>> New(jni::JNIEnv &, const mln::Polygon<double> &);
 
     static mapbox::geojson::polygon convert(jni::JNIEnv &, const jni::Object<Polygon> &);
 
@@ -32,4 +32,4 @@ public:
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

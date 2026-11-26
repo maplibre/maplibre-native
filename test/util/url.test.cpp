@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/url.hpp>
+#include <mln/util/url.hpp>
 
 #include <memory>
 
-using namespace mbgl::util;
+using namespace mln::util;
 
 TEST(URL, percentEncode) {
     EXPECT_EQ("%22%c3%a9nc%c3%b8%c3%b0ing%22", percentEncode("\"éncøðing\""));
@@ -12,6 +12,9 @@ TEST(URL, percentEncode) {
 
 TEST(URL, percentDecode) {
     EXPECT_EQ("\"éncøðing\"", percentDecode("%22%C3%A9nc%C3%B8%C3%B0ing%22"));
+    EXPECT_EQ("100%", percentDecode("100%"));
+    EXPECT_EQ("%//x", percentDecode("%//x"));
+    EXPECT_EQ("A%4", percentDecode("%41%4"));
 }
 
 TEST(URL, Scheme) {

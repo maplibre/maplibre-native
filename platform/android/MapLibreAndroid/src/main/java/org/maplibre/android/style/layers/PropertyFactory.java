@@ -4,6 +4,8 @@ package org.maplibre.android.style.layers;
 
 import androidx.annotation.ColorInt;
 
+import androidx.annotation.NonNull;
+
 import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.types.Formatted;
 import static org.maplibre.android.utils.ColorUtils.colorToRgbaString;
@@ -23,6 +25,19 @@ public class PropertyFactory {
    */
   public static PropertyValue<String> visibility(@Property.VISIBILITY String value) {
     return new LayoutPropertyValue<>("visibility", value);
+  }
+
+  /**
+   * Set the property visibility as an expression. Per the style specification,
+   * visibility expressions may only use the
+   * <a href="https://maplibre.org/maplibre-style-spec/expressions/#global-state">global-state</a> expression
+   * and must evaluate to {@code "visible"} or {@code "none"}.
+   *
+   * @param expression the visibility expression
+   * @return property wrapper around visibility
+   */
+  public static PropertyValue<Expression> visibility(@NonNull Expression expression) {
+    return new LayoutPropertyValue<>("visibility", expression);
   }
 
   /**
@@ -66,7 +81,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
    *
    * @param value a int color value
    * @return property wrapper around String color
@@ -76,7 +91,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
    *
    * @param value a String value
    * @return property wrapper around String
@@ -86,7 +101,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -183,6 +198,26 @@ public class PropertyFactory {
    */
   public static PropertyValue<Expression> fillPattern(Expression expression) {
     return new PaintPropertyValue<>("fill-pattern", expression);
+  }
+
+  /**
+   * The distance from the corner that will be cut and replaced with rounded corner.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillRoundedCornerDistance(Float value) {
+    return new PaintPropertyValue<>("fill-rounded-corner-distance", value);
+  }
+
+  /**
+   * The distance from the corner that will be cut and replaced with rounded corner.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillRoundedCornerDistance(Expression expression) {
+    return new PaintPropertyValue<>("fill-rounded-corner-distance", expression);
   }
 
   /**
@@ -2765,6 +2800,26 @@ The unit is in density-independent pixels only for SDF sprites that were created
    */
   public static PropertyValue<Expression> circleSortKey(Expression value) {
     return new LayoutPropertyValue<>("circle-sort-key", value);
+  }
+
+  /**
+   * The distance from the corner that will be cut and replaced with rounded corner.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionRoundedCornerDistance(Float value) {
+    return new LayoutPropertyValue<>("fill-extrusion-rounded-corner-distance", value);
+  }
+
+  /**
+   * The distance from the corner that will be cut and replaced with rounded corner.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Expression> fillExtrusionRoundedCornerDistance(Expression value) {
+    return new LayoutPropertyValue<>("fill-extrusion-rounded-corner-distance", value);
   }
 
 }
