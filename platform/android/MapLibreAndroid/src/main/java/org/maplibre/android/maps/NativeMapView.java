@@ -948,6 +948,32 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setFieldOfView(double degrees) {
+    if (checkState("setFieldOfView")) {
+      return;
+    }
+    nativeSetFieldOfView(degrees);
+  }
+
+  @Override
+  public double getFieldOfView() {
+    if (checkState("getFieldOfView")) {
+      return 0;
+    }
+    return nativeGetFieldOfView();
+  }
+
+  @Override
+  public void setCenterFromEye(double centerLatitude, double centerLongitude, double centerAltitude,
+                               double eyeLatitude, double eyeLongitude, double eyeAltitude) {
+    if (checkState("setCenterFromEye")) {
+      return;
+    }
+    nativeSetCenterFromEye(centerLatitude, centerLongitude, centerAltitude, eyeLatitude, eyeLongitude,
+      eyeAltitude);
+  }
+
+  @Override
   public double getTerrainElevation(double latitude, double longitude) {
     if (checkState("getTerrainElevation")) {
       return Double.NaN;
@@ -1999,6 +2025,17 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native double nativeGetCenterAltitude();
+
+  @Keep
+  private native void nativeSetFieldOfView(double degrees);
+
+  @Keep
+  private native double nativeGetFieldOfView();
+
+  @Keep
+  private native void nativeSetCenterFromEye(double centerLatitude, double centerLongitude,
+                                             double centerAltitude, double eyeLatitude,
+                                             double eyeLongitude, double eyeAltitude);
 
   @Keep
   private native double nativeGetTerrainElevation(double latitude, double longitude);

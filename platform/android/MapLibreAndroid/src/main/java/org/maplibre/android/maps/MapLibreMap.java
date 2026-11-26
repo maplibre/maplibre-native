@@ -521,6 +521,59 @@ public final class MapLibreMap {
   }
 
   /**
+   * Sets the vertical field of view of the map's camera, in degrees.
+   * <p>
+   * The map keeps its center, zoom, tilt and bearing: the scale at the center stays the same, and a
+   * wider field of view moves the camera closer to the center, so a tilted map shows more of the
+   * distance, as a wide-angle lens does. The change is immediate.
+   * <p>
+   * The value is limited to the range from 0.1 to 150 degrees. The default is about 36.87 degrees.
+   * {@link CameraPosition#fov} reports the field of view of the camera.
+   *
+   * @param degrees the vertical field of view in degrees
+   */
+  public void setFieldOfView(double degrees) {
+    notifyDeveloperAnimationListeners();
+    transform.setFieldOfView(degrees);
+  }
+
+  /**
+   * @return the vertical field of view of the map's camera, in degrees
+   * @see MapLibreMap#setFieldOfView(double)
+   */
+  public double getFieldOfView() {
+    return transform.getFieldOfView();
+  }
+
+  /**
+   * Puts the camera at an eye position and points it at a point, without animation.
+   * <p>
+   * The map's center becomes {@code center} at {@code centerAltitude}. The zoom, bearing and tilt
+   * become those that place the camera at {@code eye} and {@code eyeAltitude} with the current
+   * {@link #getFieldOfView() field of view}. A center above the eye needs a tilt over 90 degrees.
+   * <p>
+   * The tilt is limited by the maximum pitch ({@link #setMaxPitchPreference(double)}, at most 85
+   * degrees) and the zoom by the minimum and maximum zoom; where a limit applies, the camera is not
+   * at the eye position, so a center above the eye is looked at from a tilt of at most 85 degrees.
+   * With 3D terrain, altitudes are in metres with the terrain exaggeration applied, and with
+   * {@link #setCenterClampedToGround(boolean) setCenterClampedToGround(true)} the center is moved
+   * onto the terrain after this call; turn it off to keep the camera where this method put it.
+   * <p>
+   * Set the field of view first; changing it afterwards moves the camera off the eye.
+   * Nothing moves if {@code eye} and {@code center} are the same point.
+   *
+   * @param center         the point the camera looks at
+   * @param centerAltitude the altitude of that point above sea level, in metres
+   * @param eye            the coordinate the camera is over
+   * @param eyeAltitude    the altitude of the camera above sea level, in metres
+   */
+  public void setCameraFromEye(@NonNull LatLng center, double centerAltitude, @NonNull LatLng eye,
+                               double eyeAltitude) {
+    notifyDeveloperAnimationListeners();
+    transform.setCenterFromEye(center, centerAltitude, eye, eyeAltitude);
+  }
+
+  /**
    * Returns the height of the rendered 3D terrain under a coordinate, in metres with the style's
    * terrain exaggeration applied, as the renderer last loaded it.
    * <p>
