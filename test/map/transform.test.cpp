@@ -581,6 +581,35 @@ TEST(Transform, Camera) {
     ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), 0);
 }
 
+TEST(Transform, EaseToExplicitEasing) {
+    Transform transform;
+    transform.resize({1000, 1000});
+    const LatLng start{0, 0};
+    const LatLng end{0, 0.1};
+
+    // At constant zoom, a linear ease moves the center at constant ground speed.
+    transform.jumpTo(CameraOptions().withCenter(start).withZoom(10.0));
+    AnimationOptions constantZoom(Seconds(1));
+    constantZoom.easing = util::UnitBezier{0, 0, 1, 1};
+    transform.easeTo(CameraOptions().withCenter(end), constantZoom);
+    for (int ms : {250, 500, 750}) {
+        transform.updateTransitions(transform.getTransitionStart() + Milliseconds(ms));
+        EXPECT_NEAR(ms / 1000.0, transform.getLatLng().longitude() / end.longitude(), 1e-3);
+    }
+    transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    ASSERT_FALSE(transform.inTransition());
+
+    // When zooming in, the pan stays ahead of the zoom so the target does not drift away from the center.
+    transform.jumpTo(CameraOptions().withCenter(start).withZoom(10.0));
+    AnimationOptions zoomIn(Seconds(1));
+    zoomIn.easing = util::UnitBezier{0, 0, 1, 1};
+    transform.easeTo(CameraOptions().withCenter(end).withZoom(14.0), zoomIn);
+    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(500));
+    EXPECT_GT(transform.getLatLng().longitude() / end.longitude(), 0.75);
+    transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    ASSERT_FALSE(transform.inTransition());
+}
+
 TEST(Transform, ProjectionMode) {
     Transform transform;
 
