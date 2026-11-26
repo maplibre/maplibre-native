@@ -1623,6 +1623,19 @@ TEST(GlobeTransform, UnprojectRoundTrip) {
     EXPECT_NEAR(-40.0, center.longitude(), 1e-9);
 }
 
+TEST(GlobeTransform, ScreenCoordinateToLatLngBeforeTheMapHasASize) {
+    Transform globe;
+    globe.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    globe.jumpTo(CameraOptions().withCenter(LatLng{20.0, -40.0}).withZoom(2.0));
+    ASSERT_TRUE(globe.getState().getSize().isEmpty());
+    Transform mercator;
+    mercator.jumpTo(CameraOptions().withCenter(LatLng{20.0, -40.0}).withZoom(2.0));
+
+    LatLng latLng;
+    ASSERT_NO_THROW(latLng = globe.screenCoordinateToLatLng({0, 0}));
+    EXPECT_EQ(mercator.screenCoordinateToLatLng({0, 0}), latLng);
+}
+
 TEST(GlobeTransform, OffGlobePixelsSnapToTheHorizon) {
     Transform transform;
     setUpGlobe(transform, {0.0, 0.0}, 0.5);

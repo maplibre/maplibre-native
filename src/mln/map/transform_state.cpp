@@ -938,7 +938,7 @@ TileCoordinate TransformState::mercatorScreenCoordinateToTileCoordinate(const Sc
 }
 
 LatLng TransformState::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng::WrapMode wrapMode) const {
-    if (isGlobeRendering()) {
+    if (isGlobeRendering() && !size.isEmpty()) {
         return VerticalPerspectiveProjection::screenCoordinateToLatLng(*this, point, wrapMode);
     }
     auto coord = screenCoordinateToTileCoordinate(point, 0);
