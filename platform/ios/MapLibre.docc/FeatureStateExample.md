@@ -146,7 +146,7 @@ struct FeatureStateExampleUIViewControllerRepresentable: UIViewControllerReprese
     func updateUIViewController(_: FeatureStateExampleUIKit, context _: Context) {}
 }
 
-// SwiftUI wrapper
+/// SwiftUI wrapper
 struct FeatureStateExample: View {
     var body: some View {
         FeatureStateExampleUIViewControllerRepresentable()

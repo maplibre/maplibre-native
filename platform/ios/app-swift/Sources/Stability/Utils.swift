@@ -1,7 +1,6 @@
 import Foundation
-import MapLibre
-
 import MachO
+import MapLibre
 
 private let stabilityRandomSeedEnvironmentKey = "MLN_STABILITY_RANDOM_SEED"
 private let stabilityRandomSeedDefault: UInt64 = 42
@@ -21,7 +20,7 @@ struct RandomNumberGeneratorWithSeed: RandomNumberGenerator {
     private var s1: UInt64
 
     init(seed: UInt64) {
-        // SplitMix64 expands a single seed into two well-mixed, non-zero states.
+        /// SplitMix64 expands a single seed into two well-mixed, non-zero states.
         func splitmix64(_ z: inout UInt64) -> UInt64 {
             z &+= 0x9E37_79B9_7F4A_7C15
             var result = z
@@ -78,7 +77,9 @@ class Gate {
     private let lock = NSLock()
 
     func wait() async {
-        if isAlreadyOpen { return }
+        if isAlreadyOpen {
+            return
+        }
 
         await withTaskCancellationHandler {
             await withCheckedContinuation { continuation in
@@ -120,15 +121,16 @@ class Gate {
     }
 }
 
+@MainActor
 extension MLNMapView {
-    @MainActor func animate(camera: MLNMapCamera, withDuration duration: TimeInterval, gate: Gate) async {
+    func animate(camera: MLNMapCamera, withDuration duration: TimeInterval, gate: Gate) async {
         beginCameraAnimation(camera, duration: duration, gate: gate)
         await gate.wait()
     }
 
     /// Synchronous so the completion-handler `setCamera` is not called directly
     /// from an async function.
-    @MainActor private func beginCameraAnimation(_ camera: MLNMapCamera, duration: TimeInterval, gate: Gate) {
+    private func beginCameraAnimation(_ camera: MLNMapCamera, duration: TimeInterval, gate: Gate) {
         setCamera(camera, withDuration: duration, animationTimingFunction: nil) {
             gate.open()
         }

@@ -246,8 +246,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
-                    .pad1 = 0
-                };
+                    .pad1 = 0};
 
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
@@ -270,8 +269,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
                     .pad1 = 0,
-                    .pad2 = 0
-                };
+                    .pad2 = 0};
 
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
@@ -301,8 +299,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
                     .pad1 = 0,
                     .pad2 = 0,
-                    .pad3 = 0
-                };
+                    .pad3 = 0};
 
 #if MLN_UBO_CONSOLIDATION
                 tilePropsUBOVector[i].linePatternTilePropsUBO = LinePatternTilePropsUBO {
@@ -374,8 +371,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
                         .floorwidth_t = std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
                         .pad1 = 0,
-                        .pad2 = 0
-                    };
+                        .pad2 = 0};
 
 #if MLN_UBO_CONSOLIDATION
                     tilePropsUBOVector[i].lineSDFTilePropsUBO = LineSDFTilePropsUBO {

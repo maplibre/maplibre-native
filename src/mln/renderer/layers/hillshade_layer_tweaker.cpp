@@ -186,8 +186,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 #else
         const HillshadeDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ util::cast<float>(matrix)
-        };
+            /* .matrix = */ util::cast<float>(matrix)};
 
 #if MLN_UBO_CONSOLIDATION
         tilePropsUBOVector[i] = {
@@ -200,8 +199,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
             .num_lights = static_cast<int32_t>(illumination.numSources()),
             .pad0 = 0.0f,
             .pad1 = 0.0f,
-            .pad2 = 0.0f
-        };
+            .pad2 = 0.0f};
 
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);

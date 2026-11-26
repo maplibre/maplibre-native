@@ -202,8 +202,8 @@ class WebAPIDataExample: UIViewController, MLNMapViewDelegate {
         var features = [MLNPointFeature]()
         for item in items {
             guard let label = item["itemLabel"] as? [String: AnyObject],
-                  let title = label["value"] as? String else { continue }
-            guard let coor = item["coor"] as? [String: AnyObject],
+                  let title = label["value"] as? String,
+                  let coor = item["coor"] as? [String: AnyObject],
                   let point = coor["value"] as? String else { continue }
 
             let parsedPoint = point.replacingOccurrences(of: "Point(", with: "").replacingOccurrences(of: ")", with: "")

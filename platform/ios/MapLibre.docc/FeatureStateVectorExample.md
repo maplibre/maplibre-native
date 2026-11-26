@@ -24,7 +24,7 @@ class FeatureStateVectorExampleUIKit: UIViewController, MLNMapViewDelegate {
     private var mapView: MLNMapView!
     private var countriesSource: MLNVectorTileSource!
 
-    // The source layer that holds the country polygons in the demo tiles.
+    /// The source layer that holds the country polygons in the demo tiles.
     private let countriesSourceLayer = "countries"
 
     override func viewDidLoad() {

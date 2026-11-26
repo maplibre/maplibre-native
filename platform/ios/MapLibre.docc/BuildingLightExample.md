@@ -31,7 +31,7 @@ class BuildingLightExample: UIViewController, MLNMapViewDelegate {
         addSlider()
     }
 
-    // Add a slider to the map view. This will be used to adjust the map's light object.
+    /// Add a slider to the map view. This will be used to adjust the map's light object.
     func addSlider() {
         slider = UISlider()
         slider.translatesAutoresizingMaskIntoConstraints = false

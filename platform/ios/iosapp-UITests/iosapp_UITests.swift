@@ -27,8 +27,8 @@ class iosapp_UITests: XCTestCase {
     }
 
     /// Launch `iosapp`, reset to XYZ = (0, 0, 0) and take a screenshot
-    func test_iosappScheme() throws {
-        /// Launch and take a screenshot
+    func test_iosappScheme() {
+        // Launch and take a screenshot
         mapSettingsButton.tap()
         app.tables/*@START_MENU_TOKEN@*/ .staticTexts["Reset position"]/*[[".cells.staticTexts[\"Reset position\"]",".staticTexts[\"Reset position\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
         sleep(1)
@@ -42,7 +42,7 @@ class iosapp_UITests: XCTestCase {
 
         mapSettingsButton.tap()
 
-        /// setup initial conditions for position (0,0) and debug settings
+        // setup initial conditions for position (0,0) and debug settings
         let tablesQuery = app.tables
         tablesQuery/*@START_MENU_TOKEN@*/ .staticTexts["Show zoom level ornament"]/*[[".cells.staticTexts[\"Show zoom level ornament\"]",".staticTexts[\"Show zoom level ornament\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
         mapSettingsButton.tap()
@@ -64,8 +64,10 @@ class iosapp_UITests: XCTestCase {
         add(screenshot(name: "Null Island, Zoom=0"))
     }
 
-    // The navigation bar is titled after the current style, so do not match on it.
-    var mapSettingsButton: XCUIElement { app.navigationBars.firstMatch.buttons["Map settings"] }
+    /// The navigation bar is titled after the current style, so do not match on it.
+    var mapSettingsButton: XCUIElement {
+        app.navigationBars.firstMatch.buttons["Map settings"]
+    }
 
     /// Open and close the secondary map view a few times to ensure that the dynamic layout adjustment doesn't crash
     func testSecondMap() {
@@ -183,12 +185,10 @@ class iosapp_UITests: XCTestCase {
 
         // See `bestLanguageForUser`
         for loc in ["ar", "de", "en", "es", "fr", "ja", "ko", "pt", "ru", "zh", "zh-Hans", "zh-Hant"] {
-            if let name = NSLocale(localeIdentifier: loc).displayName(forKey: .identifier, value: loc) {
-                if let item = staticItemIfExists("Show Labels in " + name) {
-                    item.tap()
-                    sleep(1)
-                    mapSettingsButton.tap()
-                }
+            if let name = NSLocale(localeIdentifier: loc).displayName(forKey: .identifier, value: loc), let item = staticItemIfExists("Show Labels in " + name) {
+                item.tap()
+                sleep(1)
+                mapSettingsButton.tap()
             }
         }
 
@@ -228,12 +228,12 @@ class iosapp_UITests: XCTestCase {
     }
 
     func testRecord() {
-        /// Use recording to get started writing UI tests.
-        ///   Use `Editor` > `Start Recording UI Test` while your cursor is in this `func`
-        /// Use XCTAssert and related functions to verify your tests produce the correct results.
+        // Use recording to get started writing UI tests.
+        //   Use `Editor` > `Start Recording UI Test` while your cursor is in this `func`
+        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
-    func testLaunchPerformance() throws {
+    func testLaunchPerformance() {
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
             // This measures how long it takes to launch your application.
             measure(metrics: [XCTApplicationLaunchMetric()]) {

@@ -74,7 +74,9 @@ final class NgonModel: ObservableObject {
     @Published var ngon = Ngon()
 
     func randomize() {
-        func rounded(_ value: Double) -> Double { (value * 100).rounded() / 100 }
+        func rounded(_ value: Double) -> Double {
+            (value * 100).rounded() / 100
+        }
         func color() -> String {
             Color(
                 hue: .random(in: 0 ... 1), saturation: .random(in: 0.45 ... 0.9), brightness: .random(in: 0.6 ... 0.95)
@@ -182,7 +184,9 @@ private struct NgonMap: UIViewRepresentable {
     @ObservedObject var model: NgonModel
     var status: DemoStatus
 
-    func makeCoordinator() -> Coordinator { Coordinator(model: model, status: status) }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(model: model, status: status)
+    }
 
     func makeUIView(context: Context) -> MLNMapView {
         let mapView = MLNMapView.demoMap(style: "ngons")

@@ -10,7 +10,7 @@
 
 namespace mln {
 
-class MLNCoreLoggingObserver : public Log ::Observer {
+class MLNCoreLoggingObserver : public Log::Observer {
 public:
   // Return true not print messages at core level, and filter at platform level.
   bool onRecord(EventSeverity severity, Event event, int64_t code,

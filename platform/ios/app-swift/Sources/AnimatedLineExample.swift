@@ -2,7 +2,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(AnimatedLineExample)
+/// #-example-code(AnimatedLineExample)
 class AnimatedLineExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
     var timer: Timer?
@@ -28,7 +28,7 @@ class AnimatedLineExample: UIViewController, MLNMapViewDelegate {
         allCoordinates = coordinates
     }
 
-    // Wait until the map is loaded before adding to the map.
+    /// Wait until the map is loaded before adding to the map.
     func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {
         addPolyline(to: mapView.style!)
         animatePolyline()

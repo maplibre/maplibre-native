@@ -9,10 +9,10 @@ To constrain the map to a certain area, you need to implement the ``MLNMapViewDe
 <!-- include-example(BlockingGesturesExample) -->
 
 ```swift
-// Denver, Colorado
+/// Denver, Colorado
 private let center = CLLocationCoordinate2D(latitude: 39.748947, longitude: -104.995882)
 
-// Colorado’s bounds
+/// Colorado’s bounds
 private let colorado = MLNCoordinateBounds(
     sw: CLLocationCoordinate2D(latitude: 36.986207, longitude: -109.049896),
     ne: CLLocationCoordinate2D(latitude: 40.989329, longitude: -102.062592)

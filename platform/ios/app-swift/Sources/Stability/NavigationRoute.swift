@@ -24,7 +24,9 @@ class NavigationRoute {
     private(set) var path: RoutePath
 
     /// Coordinates currently in the route line
-    var geometry: [CLLocationCoordinate2D] { path.coordinates }
+    var geometry: [CLLocationCoordinate2D] {
+        path.coordinates
+    }
 
     private(set) var displayedPointCount = 0
 
@@ -47,7 +49,7 @@ class NavigationRoute {
     private var isUpdatingDisplayedGeometry = false
     private var queuedTrimDistance: Double?
 
-    // only set once on first use
+    /// only set once on first use
     private static let polyline6: Void = {
         Polyline.setCompressionAlgorithm(CompressionAlgorithm.Polyline6)
     }()
@@ -215,8 +217,12 @@ class NavigationRoute {
 
     /// The easing used by `flyTo` when zoom doesn't change
     private static func vanWijkGroundProgress(_ k: Double) -> Double {
-        if k <= 0 { return 0 }
-        if k >= 1 { return 1 }
+        if k <= 0 {
+            return 0
+        }
+        if k >= 1 {
+            return 1
+        }
         let r0 = log(sqrt(2.0) - 1.0)
         return 0.5 * (cosh(r0) * tanh(r0 + k * (-r0 - r0)) - sinh(r0))
     }

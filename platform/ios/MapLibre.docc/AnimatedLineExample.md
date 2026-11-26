@@ -35,7 +35,7 @@ class AnimatedLineExample: UIViewController, MLNMapViewDelegate {
         allCoordinates = coordinates
     }
 
-    // Wait until the map is loaded before adding to the map.
+    /// Wait until the map is loaded before adding to the map.
     func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {
         addPolyline(to: mapView.style!)
         animatePolyline()
