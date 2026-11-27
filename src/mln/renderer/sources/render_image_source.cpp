@@ -12,6 +12,7 @@
 #include <mln/util/logging.hpp>
 #include <mln/util/tile_coordinate.hpp>
 #include <mln/util/tile_cover.hpp>
+#include <mln/util/tile_range.hpp>
 
 #include <algorithm>
 
@@ -135,15 +136,14 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
         imageBounds.extend(coords[2]);
         imageBounds.extend(coords[3]);
         tileCover = util::tileCover(imageBounds, zoom);
-    } else if (nePoint.x > 0 && nePoint.y > 0 && swPoint.x < 1 && swPoint.y < 1) {
+    } else {
         // The tiles of the corners' rectangle in the world square, where the lat/lng box of the corners can be far off.
-        const double tiles = std::pow(2.0, zoom);
-        const auto tileAt = [&](double world) {
-            return static_cast<uint32_t>(util::clamp(std::floor(world * tiles), 0.0, tiles - 1));
-        };
-        for (uint32_t y = tileAt(swPoint.y); y <= tileAt(nePoint.y); ++y) {
-            for (uint32_t x = tileAt(swPoint.x); x <= tileAt(nePoint.x); ++x) {
-                tileCover.emplace_back(zoom, x, y);
+        const auto tiles = util::TileRange::fromWorldBox({swPoint.x, swPoint.y, nePoint.x, nePoint.y}, zoom, zoom);
+        if (tiles.zoomRange.min <= tiles.zoomRange.max) {
+            for (auto y = tiles.range.min.y; y <= tiles.range.max.y; ++y) {
+                for (auto x = tiles.range.min.x; x <= tiles.range.max.x; ++x) {
+                    tileCover.emplace_back(zoom, x, y);
+                }
             }
         }
     }
