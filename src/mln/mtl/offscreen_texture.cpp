@@ -91,13 +91,20 @@ public:
     void swap() override {
         assert(commandBuffer);
         commandBuffer->commit();
-        commandBuffer->waitUntilCompleted();
+        lastCommitted = commandBuffer;
         commandBuffer.reset();
         renderPassDescriptor.reset();
     }
 
     PremultipliedImage readStillImage() {
         assert(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
+
+        // Wait for the last pass committed on this texture. Metal tracks the texture, so the passes that
+        // wrote it before that one have finished too.
+        if (lastCommitted) {
+            lastCommitted->waitUntilCompleted();
+            lastCommitted.reset();
+        }
 
         auto data = std::make_unique<uint8_t[]>(colorTexture->getDataSize());
         MTL::Region region = MTL::Region::Make2D(0, 0, size.width, size.height);
@@ -134,6 +141,7 @@ private:
     gfx::Texture2DPtr depthTexture;
     gfx::Texture2DPtr stencilTexture;
     MTLCommandBufferPtr commandBuffer;
+    MTLCommandBufferPtr lastCommitted;
     MTLRenderPassDescriptorPtr renderPassDescriptor;
 };
 

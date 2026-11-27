@@ -26,7 +26,13 @@ public:
 
     void bind() override { offscreenTexture->getResource<RenderableResource>().bind(); }
 
-    void swap() override { offscreenTexture->getResource<RenderableResource>().swap(); }
+    void swap() override {
+        auto& resource = offscreenTexture->getResource<RenderableResource>();
+        const MTLCommandBufferPtr commandBuffer = resource.getCommandBuffer();
+        resource.swap();
+        // Nothing presents a headless frame, so wait for it here to pace continuous rendering.
+        commandBuffer->waitUntilCompleted();
+    }
 
     PremultipliedImage readStillImage() { return offscreenTexture->readStillImage(); }
 
