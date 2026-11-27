@@ -2,6 +2,7 @@
 
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/geojson_options.hpp>
+#include <mln/style/conversion/source.hpp>
 
 #include <mln/util/logging.hpp>
 
@@ -80,4 +81,15 @@ TEST(GeoJSONOptions, FullConversion) {
     ASSERT_EQ(converted.clusterProperties.count("max"), 1);
     ASSERT_EQ(converted.clusterProperties.count("sum"), 1);
     ASSERT_EQ(converted.clusterProperties.count("has_island"), 1);
+}
+
+// Converting a source with inline data also replaces its impl through setGeoJSON, so the attribution must outlive that.
+TEST(GeoJSONOptions, SourceAttribution) {
+    Error error;
+    const auto source = convertJSON<std::unique_ptr<Source>>(
+        R"JSON({ "type": "geojson", "attribution": "Example data", "data": { "type": "FeatureCollection", "features": [] } })JSON",
+        error,
+        "geojson");
+    ASSERT_TRUE(source) << error.message;
+    ASSERT_EQ("Example data", (*source)->getAttribution());
 }
