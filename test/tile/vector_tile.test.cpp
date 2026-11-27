@@ -52,6 +52,78 @@ TEST(VectorTile, Issue8542) {
     tile.querySourceFeatures(result, {{{"layer"}}, {}}, nullptr);
 }
 
+TEST(VectorTile, HoldForFadeLastsTheFadeDuration) {
+    VectorTileTest test;
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+    const Duration fadeDuration = Milliseconds(300);
+    const TimePoint start = TimePoint() + Seconds(10);
+
+    EXPECT_FALSE(tile.holdForFade());
+
+    // The tile leaves the ideal set and is held for its symbols to fade out.
+    tile.markRenderedPreviously();
+    EXPECT_TRUE(tile.holdForFade());
+
+    // While new tiles arrive, placement runs every 30 ms. The fade starts with the first placement and the tile
+    // must be held until it has run its whole course, not just for two placements.
+    for (int ms = 0; ms < 300; ms += 30) {
+        tile.performedFadePlacement(start + Milliseconds(ms), fadeDuration);
+        EXPECT_TRUE(tile.holdForFade()) << "placement at " << ms << " ms";
+    }
+
+    tile.performedFadePlacement(start + Milliseconds(300), fadeDuration);
+    EXPECT_FALSE(tile.holdForFade());
+}
+
+TEST(VectorTile, HoldForFadeTwoPlacementsAtTheUsualPeriod) {
+    VectorTileTest test;
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+    const Duration fadeDuration = Milliseconds(300);
+    const TimePoint start = TimePoint() + Seconds(10);
+
+    // When placements are a fade duration apart, the tile goes after the second, as before.
+    tile.markRenderedPreviously();
+    tile.performedFadePlacement(start, fadeDuration);
+    EXPECT_TRUE(tile.holdForFade());
+    tile.performedFadePlacement(start + fadeDuration, fadeDuration);
+    EXPECT_FALSE(tile.holdForFade());
+}
+
+TEST(VectorTile, HoldForFadeWithoutFade) {
+    VectorTileTest test;
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+    const TimePoint start = TimePoint() + Seconds(10);
+
+    // Without a fade the tile is still kept for two placements.
+    tile.markRenderedPreviously();
+    tile.performedFadePlacement(start, Duration::zero());
+    EXPECT_TRUE(tile.holdForFade());
+    tile.performedFadePlacement(start, Duration::zero());
+    EXPECT_FALSE(tile.holdForFade());
+}
+
+TEST(VectorTile, HoldForFadeRestartsWhenIdealAgain) {
+    VectorTileTest test;
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+    const Duration fadeDuration = Milliseconds(300);
+    const TimePoint start = TimePoint() + Seconds(10);
+
+    tile.markRenderedPreviously();
+    tile.performedFadePlacement(start, fadeDuration);
+
+    // Back in the ideal set: no longer held.
+    tile.markRenderedIdeal();
+    EXPECT_FALSE(tile.holdForFade());
+
+    // Leaving again starts a new fade, timed from the next placement.
+    tile.markRenderedPreviously();
+    tile.performedFadePlacement(start + Milliseconds(400), fadeDuration);
+    tile.performedFadePlacement(start + Milliseconds(600), fadeDuration);
+    EXPECT_TRUE(tile.holdForFade());
+    tile.performedFadePlacement(start + Milliseconds(700), fadeDuration);
+    EXPECT_FALSE(tile.holdForFade());
+}
+
 TEST(VectorTileData, ParseResults) {
     VectorMVTTileData data(std::make_shared<std::string>(util::read_file("test/fixtures/map/issue12432/0-0-0.mvt")));
 

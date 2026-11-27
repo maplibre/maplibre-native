@@ -37,7 +37,7 @@ public:
 
     std::unique_ptr<RenderItem> createRenderItem() override;
     void prepare(const SourcePrepareParameters&) final;
-    void updateFadingTiles() final {}
+    void updateFadingTiles(TimePoint, Duration) final {}
     bool hasFadingTiles() const final { return false; }
 
     void update(Immutable<style::Source::Impl>,

@@ -478,8 +478,8 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
     renderTiles = std::move(tiles);
 }
 
-void RenderTileSource::updateFadingTiles() {
-    tilePyramid.updateFadingTiles();
+void RenderTileSource::updateFadingTiles(TimePoint placementTime, Duration fadeDuration) {
+    tilePyramid.updateFadingTiles(placementTime, fadeDuration);
 }
 
 bool RenderTileSource::hasFadingTiles() const {

@@ -21,7 +21,7 @@ public:
 
     std::unique_ptr<RenderItem> createRenderItem() override;
     void prepare(const SourcePrepareParameters&) override;
-    void updateFadingTiles() override;
+    void updateFadingTiles(TimePoint placementTime, Duration fadeDuration) override;
     bool hasFadingTiles() const override;
 
     RenderTiles getRenderTiles() const override;

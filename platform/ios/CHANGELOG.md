@@ -2,6 +2,12 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+### Bug fixes
+
+- Labels fade out when the map zooms out, as they fade in, instead of vanishing at once: a tile replaced by tiles of another zoom level is kept until its labels have faded out, as in MapLibre GL JS ([#5126](https://github.com/maplibre/maplibre-native/pull/5126)).
+
 ## 7.1.0
 
 ### Features

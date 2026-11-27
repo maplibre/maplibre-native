@@ -447,13 +447,13 @@ void TilePyramid::addRenderTile(const UnwrappedTileID& tileID, Tile& tile) {
     renderedTiles.emplace(tileID, tile);
 }
 
-void TilePyramid::updateFadingTiles() {
+void TilePyramid::updateFadingTiles(TimePoint placementTime, Duration fadeDuration) {
     fadingTiles = false;
     for (auto& entry : renderedTiles) {
         Tile& tile = entry.second;
         if (tile.holdForFade()) {
             fadingTiles = true;
-            tile.performedFadePlacement();
+            tile.performedFadePlacement(placementTime, fadeDuration);
         }
     }
 }
