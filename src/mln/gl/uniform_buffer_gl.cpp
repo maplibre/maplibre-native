@@ -136,7 +136,7 @@ void UniformBufferGL::update(const void* data, std::size_t dataSize) {
         return;
     }
 
-    if (std::memcmp(data, managedBuffer.getContents().data(), dataSize) == 0) {
+    if (isManagedAllocation && std::memcmp(data, managedBuffer.getContents().data(), dataSize) == 0) {
         return;
     }
 
