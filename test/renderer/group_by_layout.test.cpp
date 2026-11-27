@@ -98,3 +98,27 @@ TEST(GroupByLayout, ManyEqualFiltersCollapseToOneGroupPerDistinctFilter) {
     }
     EXPECT_EQ(3u, groupCount(layers));
 }
+
+TEST(GroupByLayout, DifferentFiltersHashApart) {
+    // Layers that differ only in their filter must not share a hash slot, or grouping compares
+    // every such layer with every other one.
+    auto street = makeLine("street", roadFilter);
+    auto streetAgain = makeLine("street-again", roadFilter);
+    auto motorway = makeLine("motorway", R"(["==", ["get", "class"], "motorway"])");
+
+    const auto key = [](const LineLayer& layer) {
+        const auto& impl = *layer.baseImpl;
+        return LayoutGroupKey{.typeInfo = impl.getTypeInfo(),
+                              .source = impl.source,
+                              .sourceLayer = impl.sourceLayer,
+                              .minZoom = impl.minZoom,
+                              .maxZoom = impl.maxZoom,
+                              .visibility = impl.visibility,
+                              .filterExpression = impl.filter.expression.value_or(nullptr),
+                              .filterHash = impl.filter.hash(),
+                              .impl = &impl};
+    };
+    const std::hash<LayoutGroupKey> hasher;
+    EXPECT_EQ(hasher(key(*street)), hasher(key(*streetAgain)));
+    EXPECT_NE(hasher(key(*street)), hasher(key(*motorway)));
+}

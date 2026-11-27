@@ -18,8 +18,10 @@ struct LayoutGroupKey {
     float maxZoom;
     style::VisibilityType visibility;
 
-    // Filter - use shared_ptr for identity comparison
+    // Filter: the expression (compared by address first, then by contents) and the hash of its
+    // contents, so layers with equal filters parsed separately still meet in one hash slot.
     std::shared_ptr<const style::expression::Expression> filterExpression;
+    std::size_t filterHash;
 
     // Reference to impl for layout comparison
     const style::Layer::Impl* impl;
