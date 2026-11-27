@@ -461,6 +461,7 @@ public:
   std::unique_ptr<MLNRenderFrontend> _rendererFrontend;
 
   BOOL _opaque;
+  CGFloat _pixelRatioOverride;
 
   MLNAnnotationTagContextMap _annotationContextsByAnnotationTag;
   MLNAnnotationObjectTagMap _annotationTagsByAnnotation;
@@ -683,12 +684,17 @@ public:
   return _rendererFrontend->getRenderer();
 }
 
+- (CGFloat)pixelRatioOverride {
+  return _pixelRatioOverride;
+}
+
 - (void)commonInitWithOptions:(MLNMapOptions *)mlnMapoptions {
   if (mlnMapoptions == nil) {
     mlnMapoptions = [[MLNMapOptions alloc] init];
   }
 
   _opaque = NO;
+  _pixelRatioOverride = mlnMapoptions.pixelRatio > 0 ? mlnMapoptions.pixelRatio : 0;
 
   // setup accessibility
   //  self.isAccessibilityElement = YES;
@@ -728,8 +734,9 @@ public:
       config.localFontFamilyName
           ? std::optional<std::string>(std::string(config.localFontFamilyName.UTF8String))
           : std::nullopt;
-  auto renderer = std::make_unique<mln::Renderer>(_mbglView->getRendererBackend(),
-                                                  config.scaleFactor, localFontFamilyName);
+  const float pixelRatio = _pixelRatioOverride > 0 ? _pixelRatioOverride : config.scaleFactor;
+  auto renderer = std::make_unique<mln::Renderer>(_mbglView->getRendererBackend(), pixelRatio,
+                                                  localFontFamilyName);
   BOOL enableCrossSourceCollisions = !config.perSourceCollisions;
   _rendererFrontend = std::make_unique<MLNRenderFrontend>(std::move(renderer), self,
                                                           _mbglView->getRendererBackend());
@@ -737,7 +744,7 @@ public:
   mln::MapOptions mapOptions;
   mapOptions.withMapMode(mln::MapMode::Continuous)
       .withSize(self.size)
-      .withPixelRatio(config.scaleFactor)
+      .withPixelRatio(pixelRatio)
       .withConstrainMode(mln::ConstrainMode::None)
       .withViewportMode(mln::ViewportMode::Default)
       .withCrossSourceCollisions(enableCrossSourceCollisions)
