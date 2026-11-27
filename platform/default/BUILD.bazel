@@ -1,6 +1,16 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
+# The OpenGL function table, for the platforms that render with OpenGL.
+filegroup(
+    name = "gl-functions",
+    srcs = ["src/mln/gl/gl_functions.cpp"],
+    visibility = [
+        "//platform/darwin:__pkg__",
+        "//platform/linux:__pkg__",
+    ],
+)
+
 cc_library(
     name = "standalone-layer-manager",
     srcs = ["src/mln/layermanager/layer_manager.cpp"],

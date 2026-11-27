@@ -1,7 +1,9 @@
+include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
+
 target_include_directories(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/ios/src
+        ${CMAKE_CURRENT_LIST_DIR}/src
 )
 
 set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES)

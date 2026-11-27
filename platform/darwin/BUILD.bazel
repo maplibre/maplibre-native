@@ -281,7 +281,7 @@ objc_library(
         "core/timer.cpp",
     ] + select({
         "//:metal_renderer": [],
-        "//conditions:default": ["src/gl_functions.cpp"],
+        "//conditions:default": ["//platform/default:gl-functions"],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = [

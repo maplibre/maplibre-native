@@ -1,14 +1,14 @@
 add_executable(
     mbgl-expression-test
-    ${PROJECT_SOURCE_DIR}/expression-test/expression_test_logger.cpp
-    ${PROJECT_SOURCE_DIR}/expression-test/expression_test_logger.hpp
-    ${PROJECT_SOURCE_DIR}/expression-test/expression_test_parser.cpp
-    ${PROJECT_SOURCE_DIR}/expression-test/expression_test_parser.hpp
-    ${PROJECT_SOURCE_DIR}/expression-test/expression_test_runner.cpp
-    ${PROJECT_SOURCE_DIR}/expression-test/expression_test_runner.hpp
-    ${PROJECT_SOURCE_DIR}/expression-test/test_runner_common.cpp
-    ${PROJECT_SOURCE_DIR}/expression-test/test_runner_common.hpp
-    ${PROJECT_SOURCE_DIR}/expression-test/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/expression_test_logger.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/expression_test_logger.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/expression_test_parser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/expression_test_parser.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/expression_test_runner.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/expression_test_runner.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/test_runner_common.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/test_runner_common.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/main.cpp
 )
 
 # FIXME: Should not use core private interface
@@ -36,10 +36,4 @@ add_test(
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 
-if(MSVC)
-    target_link_libraries(
-        mbgl-expression-test
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
-endif()
+target_link_libraries(mbgl-expression-test PRIVATE ${MLN_LIBUV_LIBRARIES})

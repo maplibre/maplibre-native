@@ -1,138 +1,138 @@
 add_library(
     mbgl-test STATIC EXCLUDE_FROM_ALL
-    ${PROJECT_SOURCE_DIR}/test/actor/actor.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/actor/actor_ref.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/algorithm/update_renderables.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/algorithm/update_tile_masks.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/api/annotations.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/api/api_misuse.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/api/custom_geometry_source.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/api/location_indicator.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/api/query.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/api/recycle_map.cpp
-    ${PROJECT_SOURCE_DIR}/test/geometry/dem_data.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/geometry/line_atlas.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/map/map.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/map/prefetch.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/map/transform.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/math/clamp.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/math/minmax.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/math/wrap.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/platform/settings.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/plugin/plugin.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/renderer/dynamic_texture_atlas.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/renderer/fill_bucket.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/renderer/feature_tracking.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/renderer/hillshade_layer.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/renderer/renderable.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/renderer/source_state.test.cpp
-    $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
-    ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/sprite/sprite_parser.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mln/test/fixture_log_observer.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mln/test/getrss.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mln/test/sqlite3_test_fs.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mln/test/stub_file_source.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mln/test/test.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mln/test/util.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/asset_file_source.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/database_file_source.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/headers.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/http_file_source.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/local_file_source.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/main_resource_loader.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/mbtiles_file_source.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/offline.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/offline_database.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/offline_download.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/online_file_source.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/pmtiles_file_source.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/resource.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/storage/sqlite.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/conversion_impl.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/function.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/geojson_options.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/layer.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/light.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/padding.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/property_value.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/source_options.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/stringify.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/tileset.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/expression/dependency.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/expression/expression.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/expression/semiliteral.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/expression/global_state.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/expression/util.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/expression/utf8_op_helpers.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/filter.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/properties.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/property_expression.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/source.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/style.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/style_image.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/style_layer.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/style_parser.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/variable_anchor_offset_collection.test.cpp
-    $<$<AND:$<NOT:$<BOOL:MBGL_WITH_QT>>,$<NOT:$<PLATFORM_ID:Windows>>>:${PROJECT_SOURCE_DIR}/test/text/bidi.test.cpp>
-    ${PROJECT_SOURCE_DIR}/test/text/calculate_tile_distances.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/text/cross_tile_symbol_index.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/text/formatted.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/text/get_anchors.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/text/glyph_manager.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/text/glyph_pbf.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/text/language_tag.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/text/local_glyph_rasterizer.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/text/quads.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/text/shaping.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/text/tagged_string.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/tile/custom_geometry_tile.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/tile/geojson_tile.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/tile/geometry_tile_data.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/tile/raster_dem_tile.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/tile/raster_tile.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/tile/tile_cache.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/tile/tile_coordinate.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/tile/tile_id.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/tile/tile_lod.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/tile/vector_tile.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/action_journal.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/async_task.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/bounding_volumes.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/camera.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/color.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/geo.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/grid_index.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/hash.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/http_timeout.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/image.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/mapbox.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/mat3.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/memory.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/merge_lines.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/number_conversions.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/padding.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/position.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/projection.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/rotation.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/run_loop.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/string.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/string_indexer.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/text_conversions.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/thread.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/thread_local.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/tile_cover.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/tile_range.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/timer.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/tiny_map.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/token.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/lru_cache.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/vectors.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/actor/actor.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/actor/actor_ref.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/algorithm/update_renderables.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/algorithm/update_tile_masks.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/api/annotations.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/api/api_misuse.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/api/custom_geometry_source.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/api/location_indicator.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/api/query.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/api/recycle_map.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/geometry/dem_data.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/geometry/line_atlas.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/map/map.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/map/prefetch.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/map/transform.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/math/clamp.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/math/minmax.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/math/wrap.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/platform/settings.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/plugin/plugin.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/renderer/dynamic_texture_atlas.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/renderer/fill_bucket.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/renderer/feature_tracking.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/renderer/hillshade_layer.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/renderer/image_manager.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/renderer/pattern_atlas.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/renderer/renderable.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/renderer/shader_registry.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/renderer/source_state.test.cpp
+    $<$<BOOL:${MLN_WITH_WEBGPU}>:${CMAKE_CURRENT_LIST_DIR}/renderer/wgsl_preprocessor.test.cpp>
+    ${CMAKE_CURRENT_LIST_DIR}/sprite/sprite_loader.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/sprite/sprite_parser.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/mln/test/fixture_log_observer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/mln/test/getrss.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/mln/test/sqlite3_test_fs.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/mln/test/stub_file_source.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/mln/test/test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/mln/test/util.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/asset_file_source.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/database_file_source.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/headers.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/http_file_source.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/local_file_source.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/main_resource_loader.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/mbtiles_file_source.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/offline.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/offline_database.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/offline_download.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/online_file_source.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/pmtiles_file_source.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/resource.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/storage/sqlite.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/conversion/conversion_impl.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/conversion/function.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/conversion/geojson_options.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/conversion/layer.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/conversion/light.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/conversion/padding.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/conversion/property_value.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/conversion/source_options.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/conversion/stringify.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/conversion/tileset.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/expression/dependency.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/expression/expression.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/expression/semiliteral.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/expression/global_state.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/expression/util.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/expression/utf8_op_helpers.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/filter.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/properties.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/property_expression.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/source.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/style.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/style_image.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/style_layer.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/style_parser.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/style/variable_anchor_offset_collection.test.cpp
+    $<$<AND:$<NOT:$<BOOL:MBGL_WITH_QT>>,$<NOT:$<PLATFORM_ID:Windows>>>:${CMAKE_CURRENT_LIST_DIR}/text/bidi.test.cpp>
+    ${CMAKE_CURRENT_LIST_DIR}/text/calculate_tile_distances.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/cross_tile_symbol_index.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/formatted.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/get_anchors.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/glyph_manager.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/glyph_pbf.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/language_tag.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/local_glyph_rasterizer.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/quads.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/shaping.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/text/tagged_string.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/tile/custom_geometry_tile.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/tile/geojson_tile.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/tile/geometry_tile_data.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/tile/raster_dem_tile.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/tile/raster_tile.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/tile/tile_cache.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/tile/tile_coordinate.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/tile/tile_id.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/tile/tile_lod.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/tile/vector_tile.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/action_journal.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/async_task.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/bounding_volumes.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/camera.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/color.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/geo.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/grid_index.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/hash.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/http_timeout.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/image.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/mapbox.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/mat3.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/memory.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/merge_lines.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/number_conversions.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/padding.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/position.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/projection.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/rotation.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/run_loop.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/string.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/string_indexer.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/text_conversions.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/thread.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/thread_local.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/tile_cover.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/tile_range.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/timer.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/tiny_map.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/token.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/url.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/tile_server_options.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/lru_cache.test.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/vectors.test.cpp
 )
 
 # MapSnapshotter uses headless backend that is rendering image on a background thread. QT / macOS adaptation for headless backend creates
@@ -142,7 +142,7 @@ if(NOT (MLN_WITH_QT AND CMAKE_SYSTEM_NAME STREQUAL Darwin))
     target_sources(
         mbgl-test
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/map/map_snapshotter.cpp ${PROJECT_SOURCE_DIR}/test/map/map_snapshotter.test.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/map/map_snapshotter.cpp ${CMAKE_CURRENT_LIST_DIR}/map/map_snapshotter.test.cpp
     )
 endif()
 
@@ -150,16 +150,16 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-test
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/gl/bucket.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/gl/enum.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/gl/drawable.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/gl/gl_functions.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/gl/object.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/gl/resource_pool.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/api/custom_layer.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/gl/bucket.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/gl/enum.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/gl/context.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/gl/drawable.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/gl/gl_functions.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/gl/object.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/gl/resource_pool.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/renderer/backend_scope.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/util/offscreen_texture.test.cpp
     )
 endif()
 
@@ -168,7 +168,7 @@ if(MLN_WITH_METAL)
     target_sources(
         mbgl-test
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/test/renderer/metal_renderable.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/renderer/metal_renderable.test.cpp
     )
 endif()
 
@@ -176,10 +176,10 @@ if(MLN_WITH_VULKAN)
     target_sources(
         mbgl-test
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/renderer/vulkan_acquire.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/api/custom_layer.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/renderer/backend_scope.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/renderer/vulkan_acquire.test.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/util/offscreen_texture.test.cpp
     )
 endif()
 
@@ -191,16 +191,16 @@ else()
     set(MLN_TEST_HAS_TEST_SERVER 1)
     target_sources(
         mbgl-test
-        PRIVATE ${PROJECT_SOURCE_DIR}/test/src/mln/test/http_server.cpp
+        PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src/mln/test/http_server.cpp
     )
     set_source_files_properties(
-        ${PROJECT_SOURCE_DIR}/test/src/mln/test/http_server.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/test/http_server.cpp
         PROPERTIES
         COMPILE_FLAGS
         $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wno-shadow>
     )
     set_source_files_properties(
-        ${PROJECT_SOURCE_DIR}/test/src/mln/test/http_server.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/mln/test/http_server.cpp
         PROPERTIES
         COMPILE_OPTIONS
         $<$<STREQUAL:${CMAKE_SYSTEM_NAME},iOS>:-Wno-shorten-64-to-32>
@@ -220,12 +220,12 @@ target_compile_definitions(
 
 target_include_directories(
     mbgl-test
-    PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/test/src
+    PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include ${PROJECT_SOURCE_DIR}/src ${CMAKE_CURRENT_LIST_DIR}/src
 )
 
 target_include_directories(
     mbgl-test
-    PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/test/include
+    PUBLIC ${PROJECT_SOURCE_DIR}/include ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/cpp-httplib.cmake)
@@ -241,15 +241,7 @@ if(MLN_WITH_PLUGINS)
     )
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    set_target_properties(mbgl-test mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
-    set_target_properties(mbgl-test mbgl-vendor-googletest
-        PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-    )
-endif()
+mln_test_library_properties(mbgl-test mbgl-vendor-googletest)
 
 # Needed for testing private classes
 get_target_property(MLN_CORE_PRIVATE_LIBRARIES mbgl-core LINK_LIBRARIES)

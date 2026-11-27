@@ -76,6 +76,11 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
                                     targets(target)
                                 }
 
+                                // The test and benchmark libraries are only configured with the tests.
+                                if (nativeTargets.any { it != "maplibre" }) {
+                                    arguments.add("-DMLN_WITH_TESTS=ON")
+                                }
+
                                 if (abi != "all") {
                                     abiFilters.addAll(abi.split(" "))
                                 } else {
@@ -124,6 +129,11 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
 
                                 for (target in nativeTargets) {
                                     targets(target)
+                                }
+
+                                // The test and benchmark libraries are only configured with the tests.
+                                if (nativeTargets.any { it != "maplibre" }) {
+                                    arguments.add("-DMLN_WITH_TESTS=ON")
                                 }
 
                                 if (abi != "all") {

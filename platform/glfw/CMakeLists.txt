@@ -1,6 +1,5 @@
 if(WIN32)
     find_package(glfw3 REQUIRED)
-    find_package(libuv REQUIRED)
 else()
     find_package(PkgConfig REQUIRED)
 
@@ -9,24 +8,24 @@ endif()
 
 add_executable(
     mbgl-glfw
-    ${PROJECT_SOURCE_DIR}/platform/glfw/main.cpp
-    ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_view.cpp
-    ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_renderer_frontend.cpp
-    ${PROJECT_SOURCE_DIR}/platform/glfw/settings_json.cpp
-    ${PROJECT_SOURCE_DIR}/platform/glfw/test_writer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/glfw_view.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/glfw_renderer_frontend.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/settings_json.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/test_writer.cpp
     ${PROJECT_SOURCE_DIR}/platform/default/src/mln/map/map_snapshotter.cpp
 )
 
 
 set_property(
-    SOURCE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_view.cpp
-    PROPERTY COMPILE_DEFINITIONS MLN_ASSETS_PATH=\"${PROJECT_SOURCE_DIR}/platform/glfw/assets/\"
+    SOURCE ${CMAKE_CURRENT_LIST_DIR}/glfw_view.cpp
+    PROPERTY COMPILE_DEFINITIONS MLN_ASSETS_PATH=\"${CMAKE_CURRENT_LIST_DIR}/assets/\"
 )
 
 if(APPLE)
     target_sources(
         mbgl-glfw
-        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_apple_init.mm
+        PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glfw_apple_init.mm
     )
 endif()
 
@@ -34,7 +33,7 @@ if(MLN_WITH_OPENGL)
     find_package(OpenGL REQUIRED)
     target_sources(
         mbgl-glfw
-        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_gl_backend.cpp
+        PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glfw_gl_backend.cpp
     )
 endif()
 
@@ -48,7 +47,7 @@ endif()
 if(MLN_WITH_VULKAN)
     target_sources(
         mbgl-glfw
-        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_vulkan_backend.cpp
+        PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glfw_vulkan_backend.cpp
     )
 endif()
 
@@ -56,10 +55,10 @@ if(MLN_WITH_METAL)
     target_sources(
         mbgl-glfw
         PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_metal_backend.mm
-        ${PROJECT_SOURCE_DIR}/platform/glfw/metal_backend.mm
-        ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_metal_backend.h
-        ${PROJECT_SOURCE_DIR}/platform/glfw/metal_backend.h
+        ${CMAKE_CURRENT_LIST_DIR}/glfw_metal_backend.mm
+        ${CMAKE_CURRENT_LIST_DIR}/metal_backend.mm
+        ${CMAKE_CURRENT_LIST_DIR}/glfw_metal_backend.h
+        ${CMAKE_CURRENT_LIST_DIR}/metal_backend.h
     )
     target_link_libraries(
         mbgl-glfw
@@ -72,12 +71,12 @@ if(MLN_WITH_WEBGPU)
     if(APPLE)
         target_sources(
             mbgl-glfw
-            PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.mm
+            PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glfw_webgpu_backend.mm
         )
     else()
         target_sources(
             mbgl-glfw
-            PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.cpp
+            PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glfw_webgpu_backend.cpp
         )
     endif()
     if(TARGET mbgl-vendor-dawn)
@@ -128,7 +127,7 @@ if(WIN32)
         mbgl-glfw
         PRIVATE
             glfw
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+            ${MLN_LIBUV_LIBRARIES}
     )
 else()
     target_link_libraries(

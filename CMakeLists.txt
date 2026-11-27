@@ -1,20 +1,81 @@
 cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
+if(WIN32 AND NOT DEFINED ENV{MSYSTEM} AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
+endif()
+
+# Load the toolchain and identify the target OS before choosing deployment defaults.
+# Enable compilers only after the policy is applied, including for core-only builds.
+project("MapLibre Native" LANGUAGES NONE)
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
+
 option(MLN_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
+option(MLN_WITH_QT "Build MapLibre Native Qt bindings" OFF)
+
+# The platform, as the directory under `platform/` with its build rules.
+if(MLN_WITH_CORE_ONLY)
+    # No platform: just the core.
+elseif(MLN_WITH_QT)
+    set(MLN_PLATFORM qt)
+elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
+    set(MLN_PLATFORM android)
+elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    set(MLN_PLATFORM linux)
+elseif(CMAKE_SYSTEM_NAME STREQUAL OHOS)
+    set(MLN_PLATFORM ohos)
+elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set(MLN_PLATFORM macos)
+elseif(CMAKE_SYSTEM_NAME STREQUAL iOS)
+    set(MLN_PLATFORM ios)
+elseif(WIN32)
+    set(MLN_PLATFORM windows)
+else()
+    message(FATAL_ERROR "Unsupported target platform: " ${CMAKE_SYSTEM_NAME})
+endif()
+
+# The platform's directory.
+if(DEFINED MLN_PLATFORM)
+    set(MLN_PLATFORM_DIR ${PROJECT_SOURCE_DIR}/platform/${MLN_PLATFORM})
+endif()
+
+# The defaults of the options that depend on the platform: from its own
+# `option-defaults.cmake`, or else the default one.
+if(DEFINED MLN_PLATFORM_DIR AND EXISTS ${MLN_PLATFORM_DIR}/option-defaults.cmake)
+    include(${MLN_PLATFORM_DIR}/option-defaults.cmake)
+else()
+    include(${PROJECT_SOURCE_DIR}/platform/default/option-defaults.cmake)
+endif()
+
+# The options that depend on the platform, declared only where it gives them a
+# default.
+function(mln_platform_option name description)
+    if(DEFINED ${name}_DEFAULT)
+        option(${name} "${description}" ${${name}_DEFAULT})
+    endif()
+endfunction()
+
+mln_platform_option(MLN_WITH_OPENGL "Build with OpenGL renderer")
+mln_platform_option(MLN_WITH_EGL "Build with EGL renderer")
+mln_platform_option(MLN_WITH_VULKAN "Build with Vulkan renderer")
+mln_platform_option(MLN_WITH_METAL "Build with Metal renderer")
+mln_platform_option(MLN_WITH_WEBGPU "Build with WebGPU renderer")
+mln_platform_option(MLN_WITH_NODE "Build MapLibre Native Node.js bindings")
+mln_platform_option(MLN_WITH_GLFW "Set up targets for GLFW platform")
+mln_platform_option(MLN_WITH_X11 "Build with X11 Support")
+mln_platform_option(MLN_WITH_WAYLAND "Build with Wayland Support")
+
 option(MLN_WITH_PLUGINS "Build source-bound native plugin layers" OFF)
 option(MLN_WITH_LEGACY_ANNOTATIONS "Build the legacy annotation API and add its source and layer to every style" ON)
 option(MLN_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
 option(MLN_WITH_COVERAGE "Enable code coverage collection" OFF)
-option(MLN_WITH_QT "Build MapLibre Native Qt bindings" OFF)
-option(MLN_WITH_NODE "Build MapLibre Native Node.js bindings" OFF)
-option(MLN_WITH_GLFW "Set up targets for GLFW platform" ON)
 option(MLN_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MLN_WITH_RTTI "Compile with runtime type information" OFF)
-option(MLN_WITH_OPENGL "Build with OpenGL renderer" OFF)
-option(MLN_WITH_EGL "Build with EGL renderer" OFF)
-option(MLN_WITH_VULKAN "Build with Vulkan renderer" OFF)
-option(MLN_WITH_METAL "Build with Metal renderer" OFF)
-option(MLN_WITH_WEBGPU "Build with WebGPU renderer" OFF)
 option(MLN_WITH_PMTILES "Build with PMTiles support" ON)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_WITH_TOOLS "Build the command line tools in bin/" OFF)
@@ -24,17 +85,15 @@ option(MLN_USE_RUST "Use components in Rust" OFF)
 option(MLN_TEXT_SHAPING_HARFBUZZ "Use haffbuzz to shape complex text" ON)
 option(MLN_CREATE_AUTORELEASEPOOL "Create autoreleasepool in render loop" OFF)
 option(MLN_CREATE_AMALGAMATION "Create static amalgamation of core (requires amerge)" OFF)
+option(MLN_WITH_TESTS "Build the tests, benchmarks and test runners" OFF)
+
+# The tests, run by ctest from the build directory.
+if(MLN_WITH_TESTS)
+    enable_testing()
+endif()
 
 include(cmake/validate-backend-options.cmake)
 include(cmake/clang-tidy.cmake)
-
-if(WIN32 AND NOT DEFINED ENV{MSYSTEM} AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
-    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
-endif()
-
-# Load the toolchain and identify the target OS before choosing deployment defaults.
-# Enable compilers only after the policy is applied, including for core-only builds.
-project("MapLibre Native" LANGUAGES NONE)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     # Keep the existing macOS minimum; the iOS 15.5 release-equivalent (12.4) is lower.
@@ -57,15 +116,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL OHOS)
         $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>
         $<$<COMPILE_LANGUAGE:CXX>:-fexperimental-library>
     )
-endif()
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
-
-include(CTest)
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
 endif()
 
 add_library(
@@ -1296,7 +1346,8 @@ add_library(
     Mapbox::Map ALIAS mbgl-core
 )
 
-if(MLN_WITH_CORE_ONLY)
+if(NOT DEFINED MLN_PLATFORM)
+    # This is the MLN_WITH_CORE_ONLY case
     return()
 endif()
 
@@ -1304,30 +1355,80 @@ include(${PROJECT_SOURCE_DIR}/scripts/license.cmake)
 
 include(${PROJECT_SOURCE_DIR}/platform/default/sources.cmake)
 
-if(MLN_WITH_QT)
-    include(${PROJECT_SOURCE_DIR}/platform/qt/qt.cmake)
-elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
-    include(${PROJECT_SOURCE_DIR}/platform/android/android.cmake)
-elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
-    include(${PROJECT_SOURCE_DIR}/platform/linux/linux.cmake)
-elseif(CMAKE_SYSTEM_NAME STREQUAL OHOS)
-    include(${PROJECT_SOURCE_DIR}/platform/ohos/ohos.cmake)
-elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
-    include(${PROJECT_SOURCE_DIR}/platform/macos/macos.cmake)
-elseif(CMAKE_SYSTEM_NAME STREQUAL iOS)
-    include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
-    include(${PROJECT_SOURCE_DIR}/platform/ios/ios.cmake)
-elseif(WIN32)
-    include(${PROJECT_SOURCE_DIR}/platform/windows/windows.cmake)
-else()
-    message(FATAL_ERROR "Unsupported target platform: " ${CMAKE_SYSTEM_NAME})
+include(${MLN_PLATFORM_DIR}/${MLN_PLATFORM}.cmake)
+
+# The default run loop, with libuv, for the platforms that use it. On Windows, Node
+# provides libuv, so there the core links it only without Node.
+if(MLN_USE_LIBUV)
+    include(${PROJECT_SOURCE_DIR}/cmake/dependency/libuv.cmake)
+    target_sources(mbgl-core PRIVATE ${MLN_DEFAULT_LIBUV_RUN_LOOP_SOURCES})
+    target_include_directories(mbgl-core PRIVATE ${LIBUV_INCLUDE_DIRS})
+    if(NOT (WIN32 AND MLN_WITH_NODE))
+        target_link_libraries(mbgl-core PRIVATE ${MLN_LIBUV_LIBRARIES})
+    endif()
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
-add_subdirectory(${PROJECT_SOURCE_DIR}/test)
-add_subdirectory(${PROJECT_SOURCE_DIR}/benchmark)
-add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)
+
+# GLFW and Node, where the platform defines their options.
+if(MLN_WITH_GLFW)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
+endif()
+if(MLN_WITH_NODE)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
+endif()
+
+if(MLN_WITH_TESTS)
+    # What the Apple platforms want of the libraries of the tests, benchmarks and
+    # render tests, and the vendored ones they link.
+    function(mln_test_library_properties)
+        if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+            set_target_properties(
+                ${ARGN}
+                PROPERTIES
+                    XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>
+                    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+                    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+                    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+            )
+        elseif(CMAKE_SYSTEM_NAME STREQUAL iOS)
+            set_target_properties(
+                ${ARGN}
+                PROPERTIES
+                    XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}"
+                    XCODE_ATTRIBUTE_ENABLE_BITCODE "YES"
+                    XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE bitcode
+                    XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>
+            )
+        endif()
+    endfunction()
+
+    add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/benchmark)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)
+
+    # The expression test and the default platform's runners, where the platform
+    # sets MLN_DEFAULT_TEST_RUNNERS, with what the runners have in common.
+    if(MLN_DEFAULT_TEST_RUNNERS)
+        add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
+        add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/test)
+        add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark)
+        add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test)
+        set_target_properties(
+            mbgl-test-runner
+            mbgl-benchmark-runner
+            mbgl-render-test-runner
+            PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+                FOLDER Executables
+                XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[variant=Debug] "YES"
+        )
+        foreach(runner IN ITEMS mbgl-test-runner mbgl-benchmark-runner mbgl-render-test-runner)
+            target_link_libraries(${runner} PRIVATE ${MLN_LIBUV_LIBRARIES})
+        endforeach()
+    endif()
+endif()
+
 if(MLN_WITH_PLUGINS)
     add_subdirectory(plugins)
 endif()

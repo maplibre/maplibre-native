@@ -34,21 +34,21 @@ target_link_libraries(
 target_sources(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/android/src/async_task.cpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/attach_env.cpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/attach_env.hpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap.cpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap.hpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap_factory.cpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap_factory.hpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/image.cpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/jni.cpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/jni.hpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/run_loop.cpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/run_loop_impl.hpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/string_util.cpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/thread.cpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/timer.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/async_task.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/attach_env.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/attach_env.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/bitmap.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/bitmap.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/bitmap_factory.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/bitmap_factory.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/image.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/jni.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/jni.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/run_loop.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/run_loop_impl.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/string_util.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/thread.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/timer.cpp
         ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
         ${MLN_DEFAULT_HEADLESS_SOURCES}
         ${MLN_DEFAULT_UNICODE_SOURCES}
@@ -64,8 +64,8 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
-            ${PROJECT_SOURCE_DIR}/platform/android/src/gl_functions.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend_egl.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/gl_functions.cpp
     )
 endif()
 
@@ -99,7 +99,7 @@ target_link_libraries(
 
 add_library(
     example-custom-layer MODULE
-    ${PROJECT_SOURCE_DIR}/platform/android/src/example_custom_layer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/example_custom_layer.cpp
 )
 
 target_include_directories(
@@ -119,7 +119,7 @@ target_link_libraries(
 if(MLN_WITH_VULKAN)
     add_library(
         example-vulkan-custom-layer MODULE
-        ${PROJECT_SOURCE_DIR}/platform/android/src/example_vulkan_custom_layer.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/example_vulkan_custom_layer.cpp
     )
 
     target_include_directories(

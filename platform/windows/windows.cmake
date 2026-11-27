@@ -25,10 +25,8 @@ if(MSVC)
     find_package(CURL REQUIRED)
     find_package(ICU OPTIONAL_COMPONENTS i18n uc)
     find_package(JPEG REQUIRED)
-    find_package(libuv REQUIRED)
     find_package(PNG REQUIRED)
     find_package(WebP REQUIRED)
-    find_path(LIBUV_INCLUDE_DIRS uv.h)
 elseif(DEFINED ENV{MSYSTEM})
     set(MSYS 1)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
@@ -43,7 +41,6 @@ elseif(DEFINED ENV{MSYSTEM})
     find_package(PkgConfig REQUIRED)
 
     pkg_search_module(WEBP libwebp REQUIRED)
-    pkg_search_module(LIBUV libuv REQUIRED)
     pkg_search_module(CURL libcurl REQUIRED)
 else()
     message(FATAL_ERROR "Unsupported build system: " ${CMAKE_SYSTEM_NAME})
@@ -55,7 +52,6 @@ target_sources(
         ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
         ${MLN_DEFAULT_HEADLESS_SOURCES}
         ${MLN_DEFAULT_IMAGE_DECODER_SOURCES}
-        ${MLN_DEFAULT_LIBUV_RUN_LOOP_SOURCES}
         ${MLN_DEFAULT_LOCALE_SOURCES}
         ${MLN_DEFAULT_UNICODE_SOURCES}
         ${MLN_DEFAULT_UTIL_SOURCES}
@@ -65,8 +61,8 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/local_glyph_rasterizer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/logging_stderr.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_writer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/windows/src/thread.cpp
-        ${PROJECT_SOURCE_DIR}/platform/windows/src/thread_local.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/thread.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/thread_local.cpp
 )
 
 target_compile_definitions(
@@ -99,26 +95,20 @@ if(MLN_WITH_EGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/windows/src/headless_backend_egl.cpp
-            ${PROJECT_SOURCE_DIR}/platform/windows/src/gl_functions.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/headless_backend_egl.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/gl_functions.cpp
     )
     target_compile_definitions(
         mbgl-core
         PRIVATE
             KHRONOS_STATIC
     )
-elseif(MLN_WITH_VULKAN)
-    target_include_directories(
-         mbgl-core
-         PRIVATE
-            ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include
-    )
-else()
+elseif(NOT MLN_WITH_VULKAN)
     find_package(OpenGL REQUIRED)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/windows/src/headless_backend_wgl.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/headless_backend_wgl.cpp
     )
     target_compile_definitions(
         mbgl-core
@@ -132,24 +122,14 @@ else()
     )
 endif()
 
-if (DEFINED ENV{CI})
-    message("Building for CI")
-    target_compile_definitions(
-        mbgl-core
-        PRIVATE
-            CI_BUILD=1
-    )
-endif()
-
 # FIXME: Should not be needed, but now needed by node because of the headless frontend.
 target_include_directories(
     mbgl-core
     PUBLIC ${PROJECT_SOURCE_DIR}/platform/default/include
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/windows/include
+        ${CMAKE_CURRENT_LIST_DIR}/include
         ${CURL_INCLUDE_DIRS}
         ${JPEG_INCLUDE_DIRS}
-        ${LIBUV_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
 )
 
@@ -217,26 +197,9 @@ target_link_libraries(
         mbgl-vendor-sqlite
 )
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
-if(MLN_WITH_GLFW)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
-endif()
-if(MLN_WITH_NODE)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
-elseif(MSVC)
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
-elseif(MSYS)
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            ${LIBUV_LIBRARIES}
-    )
-endif()
+# The expression test and the default platform's runners work here, and are
+# added at the top level.
+set(MLN_DEFAULT_TEST_RUNNERS TRUE)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/test)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test)
+# The default run loop, with libuv, which the top level adds.
+set(MLN_USE_LIBUV TRUE)

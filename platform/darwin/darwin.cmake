@@ -24,38 +24,27 @@ if(TARGET mbgl-vendor-dawn)
     )
 endif()
 
-if(MLN_DARWIN_USE_LIBUV)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(LIBUV REQUIRED IMPORTED_TARGET libuv)
-
-    target_link_libraries(mbgl-core
-        PRIVATE
-            PkgConfig::LIBUV
-    )
-endif()
+# The default run loop, with libuv, which the top level adds, or Darwin's own.
+set(MLN_USE_LIBUV ${MLN_DARWIN_USE_LIBUV})
 
 target_sources(
     mbgl-core
     PRIVATE
-        $<$<BOOL:${MLN_DARWIN_USE_LIBUV}>:
-            ${MLN_DEFAULT_LIBUV_RUN_LOOP_SOURCES}
-        >
-
         $<$<NOT:$<BOOL:${MLN_DARWIN_USE_LIBUV}>>:
-            ${PROJECT_SOURCE_DIR}/platform/darwin/core/async_task.mm
-            ${PROJECT_SOURCE_DIR}/platform/darwin/core/run_loop.cpp
-            ${PROJECT_SOURCE_DIR}/platform/darwin/core/timer.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/core/async_task.mm
+            ${CMAKE_CURRENT_LIST_DIR}/core/run_loop.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/core/timer.cpp
         >
 
-        ${PROJECT_SOURCE_DIR}/platform/darwin/core/collator.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/core/http_file_source.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/core/image.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/core/local_glyph_rasterizer.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/core/logging_nslog.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/core/native_apple_interface.m
-        ${PROJECT_SOURCE_DIR}/platform/darwin/core/nsthread.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/core/number_format.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/core/string_nsstring.mm
+        ${CMAKE_CURRENT_LIST_DIR}/core/collator.mm
+        ${CMAKE_CURRENT_LIST_DIR}/core/http_file_source.mm
+        ${CMAKE_CURRENT_LIST_DIR}/core/image.mm
+        ${CMAKE_CURRENT_LIST_DIR}/core/local_glyph_rasterizer.mm
+        ${CMAKE_CURRENT_LIST_DIR}/core/logging_nslog.mm
+        ${CMAKE_CURRENT_LIST_DIR}/core/native_apple_interface.m
+        ${CMAKE_CURRENT_LIST_DIR}/core/nsthread.mm
+        ${CMAKE_CURRENT_LIST_DIR}/core/number_format.mm
+        ${CMAKE_CURRENT_LIST_DIR}/core/string_nsstring.mm
         ${MLN_DEFAULT_FILE_SOURCE_SOURCES}
         ${MLN_DEFAULT_HEADLESS_SOURCES}
         ${MLN_DEFAULT_UNICODE_SOURCES}
@@ -70,10 +59,10 @@ target_sources(
 target_include_directories(
     mbgl-core
     PUBLIC
-        ${PROJECT_SOURCE_DIR}/platform/darwin/include
+        ${CMAKE_CURRENT_LIST_DIR}/include
         ${PROJECT_SOURCE_DIR}/platform/default/include
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src ${PROJECT_SOURCE_DIR}/platform/macos/src
+        ${CMAKE_CURRENT_LIST_DIR}/src ${PROJECT_SOURCE_DIR}/platform/macos/src
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
