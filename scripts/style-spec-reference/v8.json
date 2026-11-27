@@ -6791,6 +6791,26 @@
         ]
       },
       "property-type": "color-ramp"
+    },
+    "line-intersection-rounded-corner-distance": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "units": "meters",
+      "doc": "The distance from the intersection to the point where the corner rounding begins.",
+      "sdk-support": {
+        "basic functionality": {
+          "android": "13.7.0",
+          "ios": "7.1.0"
+        }
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "paint_circle": {

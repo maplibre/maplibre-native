@@ -137,7 +137,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .floorwidth = (expressionMask & LineExpressionMask::FloorWidth) ? LineFloorWidth::defaultValue()
                                                                             : evaluate<LineFloorWidth>(parameters),
             .expressionMask = expressionMask,
-            .pad1 = 0};
+            .intersection_rounded_corner_distance = evaluated.get<LineIntersectionRoundedCornerDistance>()};
 #elif MLN_RENDER_BACKEND_WEBGPU
         expressionMask = LineExpressionMask::None;
         if (evaluated.get<LineColor>().isConstant()) {
@@ -171,17 +171,18 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .width = evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
             .floorwidth = evaluated.get<LineFloorWidth>().constantOr(LineFloorWidth::defaultValue()),
             .expressionMask = expressionMask,
-            .pad1 = 0};
+            .intersection_rounded_corner_distance = evaluated.get<LineIntersectionRoundedCornerDistance>()};
 #else
-        const LineEvaluatedPropsUBO propsUBO{.color = evaluate<LineColor>(parameters),
-                                             .blur = evaluate<LineBlur>(parameters),
-                                             .opacity = evaluate<LineOpacity>(parameters),
-                                             .gapwidth = evaluate<LineGapWidth>(parameters),
-                                             .offset = evaluate<LineOffset>(parameters),
-                                             .width = evaluate<LineWidth>(parameters),
-                                             .floorwidth = evaluate<LineFloorWidth>(parameters),
-                                             .expressionMask = LineExpressionMask::None,
-                                             .pad1 = 0};
+        const LineEvaluatedPropsUBO propsUBO{
+            .color = evaluate<LineColor>(parameters),
+            .blur = evaluate<LineBlur>(parameters),
+            .opacity = evaluate<LineOpacity>(parameters),
+            .gapwidth = evaluate<LineGapWidth>(parameters),
+            .offset = evaluate<LineOffset>(parameters),
+            .width = evaluate<LineWidth>(parameters),
+            .floorwidth = evaluate<LineFloorWidth>(parameters),
+            .expressionMask = LineExpressionMask::None,
+            .intersection_rounded_corner_distance = evaluated.get<LineIntersectionRoundedCornerDistance>()};
 #endif // MLN_RENDER_BACKEND_METAL
 
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);

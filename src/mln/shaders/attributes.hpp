@@ -25,8 +25,13 @@ MBGL_DEFINE_ATTRIBUTE(float, 2, shift);
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, decimals_ed);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, normal2d);
 
+// fill polygon rounded corner
 MBGL_DEFINE_ATTRIBUTE(uint32_t, 3, triangle_indices);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, prev_next_offset);
+
+// line intersection rounded corner
+MBGL_DEFINE_ATTRIBUTE(uint32_t, 3, triangle_vertices);
+MBGL_DEFINE_ATTRIBUTE(uint32_t, 2, data_indices);
 
 #if MLN_USE_SYMBOL_INSTANCING
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 1, sorted_instance);

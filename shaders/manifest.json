@@ -159,6 +159,13 @@
         "uses_ubos": true
     },
     {
+        "name": "LineIntersectionShader",
+        "header": "line_intersection",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "LineGradientShader",
         "header": "line_gradient",
         "glsl_vert": "line_gradient.vertex.glsl",
@@ -166,10 +173,24 @@
         "uses_ubos": true
     },
     {
+        "name": "LineGradientSDFShader",
+        "header": "line_gradient_sdf",
+        "glsl_vert": "line_gradient_sdf.vertex.glsl",
+        "glsl_frag": "line_gradient_sdf.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "LinePatternShader",
         "header": "line_pattern",
         "glsl_vert": "line_pattern.vertex.glsl",
         "glsl_frag": "line_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "LineSDFShader",
+        "header": "line_sdf",
+        "glsl_vert": "line_sdf.vertex.glsl",
+        "glsl_frag": "line_sdf.fragment.glsl",
         "uses_ubos": true
     },
     {
@@ -184,20 +205,6 @@
         "header": "location_indicator_textured",
         "glsl_vert": "location_indicator_textured.vertex.glsl",
         "glsl_frag": "location_indicator_textured.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LineSDFShader",
-        "header": "line_sdf",
-        "glsl_vert": "line_sdf.vertex.glsl",
-        "glsl_frag": "line_sdf.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LineGradientSDFShader",
-        "header": "line_gradient_sdf",
-        "glsl_vert": "line_gradient_sdf.vertex.glsl",
-        "glsl_frag": "line_gradient_sdf.fragment.glsl",
         "uses_ubos": true
     },
     {

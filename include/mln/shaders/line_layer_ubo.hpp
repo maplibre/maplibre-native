@@ -147,7 +147,7 @@ struct alignas(16) LineEvaluatedPropsUBO {
     /* 32 */ float width;
     /* 36 */ float floorwidth;
     /* 40 */ LineExpressionMask expressionMask;
-    /* 44 */ float pad1;
+    /* 44 */ float intersection_rounded_corner_distance;
     /* 48 */
 };
 static_assert(sizeof(LineEvaluatedPropsUBO) == 3 * 16);

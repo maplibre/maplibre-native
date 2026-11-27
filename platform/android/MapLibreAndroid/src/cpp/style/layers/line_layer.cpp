@@ -372,6 +372,17 @@ jni::Local<jni::Object<>> LineLayer::getLineGradient(jni::JNIEnv& env) {
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineGradient()));
 }
 
+jni::Local<jni::Object<>> LineLayer::getLineIntersectionRoundedCornerDistance(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(
+            env, style::LineLayer::getDefaultLineIntersectionRoundedCornerDistance()));
+    }
+    return std::move(
+        *convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineIntersectionRoundedCornerDistance()));
+}
+
 // LineJavaLayerPeerFactory
 
 LineJavaLayerPeerFactory::~LineJavaLayerPeerFactory() = default;
@@ -445,7 +456,8 @@ void LineJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&LineLayer::getLinePatternTransition, "nativeGetLinePatternTransition"),
         METHOD(&LineLayer::setLinePatternTransition, "nativeSetLinePatternTransition"),
         METHOD(&LineLayer::getLinePattern, "nativeGetLinePattern"),
-        METHOD(&LineLayer::getLineGradient, "nativeGetLineGradient"));
+        METHOD(&LineLayer::getLineGradient, "nativeGetLineGradient"),
+        METHOD(&LineLayer::getLineIntersectionRoundedCornerDistance, "nativeGetLineIntersectionRoundedCornerDistance"));
 }
 
 } // namespace android

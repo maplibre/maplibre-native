@@ -592,4 +592,17 @@ public class LineLayerTest extends BaseLayerTest {
     layer.setProperties(linePattern(expression));
     assertEquals(layer.getLinePattern().getExpression(), expression);
   }
+
+  @Test
+  @UiThreadTest
+  public void testLineIntersectionRoundedCornerDistanceAsConstant() {
+    Timber.i("line-intersection-rounded-corner-distance");
+    assertNotNull(layer);
+    assertNull(layer.getLineIntersectionRoundedCornerDistance().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(lineIntersectionRoundedCornerDistance(propertyValue));
+    assertEquals(layer.getLineIntersectionRoundedCornerDistance().getValue(), propertyValue);
+  }
 }

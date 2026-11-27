@@ -180,6 +180,11 @@ enum {
 };
 
 enum {
+    idLineDataVertexDrawableUBO = getEnumValue(lineLayerUBOCount, drawableSSBOStartId),
+    lineDrawableSSBOCount
+};
+
+enum {
 #if MLN_USE_SYMBOL_INSTANCING
     idSymbolInstancedDrawableUBO = getEnumValue(symbolLayerUBOCount, drawableSSBOStartId),
     idSymbolDynamicInstancedDrawableUBO,
@@ -194,6 +199,7 @@ enum {
 static constexpr uint32_t drawableUBOStartId = std::max({static_cast<uint32_t>(drawableSSBOStartId),
                                                          static_cast<uint32_t>(fillDrawableSSBOCount),
                                                          static_cast<uint32_t>(fillExtrusionDrawableSSBOCount),
+                                                         static_cast<uint32_t>(lineDrawableSSBOCount),
                                                          static_cast<uint32_t>(symbolDrawableSSBOCount)});
 
 enum {
@@ -484,6 +490,8 @@ enum {
 enum {
     idLinePosNormalVertexAttribute,
     idLineDataVertexAttribute,
+    idLineTriangleVerticesAttribute,
+    idLineDataIndicesAttribute,
 
     // Data driven
     idLineColorVertexAttribute,

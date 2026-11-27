@@ -76,6 +76,12 @@ public:
     void setLineGradientTransition(const TransitionOptions&);
     TransitionOptions getLineGradientTransition() const;
 
+    static PropertyValue<float> getDefaultLineIntersectionRoundedCornerDistance();
+    const PropertyValue<float>& getLineIntersectionRoundedCornerDistance() const;
+    void setLineIntersectionRoundedCornerDistance(const PropertyValue<float>&);
+    void setLineIntersectionRoundedCornerDistanceTransition(const TransitionOptions&);
+    TransitionOptions getLineIntersectionRoundedCornerDistanceTransition() const;
+
     static PropertyValue<float> getDefaultLineOffset();
     const PropertyValue<float>& getLineOffset() const;
     void setLineOffset(const PropertyValue<float>&);

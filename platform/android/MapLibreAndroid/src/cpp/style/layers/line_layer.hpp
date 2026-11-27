@@ -76,6 +76,8 @@ public:
 
     jni::Local<jni::Object<jni::ObjectTag>> getLineGradient(jni::JNIEnv&);
 
+    jni::Local<jni::Object<jni::ObjectTag>> getLineIntersectionRoundedCornerDistance(jni::JNIEnv&);
+
 }; // class LineLayer
 
 class LineJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::LineLayerFactory {

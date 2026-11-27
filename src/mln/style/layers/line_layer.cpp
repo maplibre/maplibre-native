@@ -282,6 +282,34 @@ TransitionOptions LineLayer::getLineGradientTransition() const {
     return impl().paint.template get<LineGradient>().options;
 }
 
+PropertyValue<float> LineLayer::getDefaultLineIntersectionRoundedCornerDistance() {
+    return {0.f};
+}
+
+const PropertyValue<float>& LineLayer::getLineIntersectionRoundedCornerDistance() const {
+    return impl().paint.template get<LineIntersectionRoundedCornerDistance>().value;
+}
+
+void LineLayer::setLineIntersectionRoundedCornerDistance(const PropertyValue<float>& value) {
+    if (value == getLineIntersectionRoundedCornerDistance())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<LineIntersectionRoundedCornerDistance>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void LineLayer::setLineIntersectionRoundedCornerDistanceTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<LineIntersectionRoundedCornerDistance>().options = options;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+TransitionOptions LineLayer::getLineIntersectionRoundedCornerDistanceTransition() const {
+    return impl().paint.template get<LineIntersectionRoundedCornerDistance>().options;
+}
+
 PropertyValue<float> LineLayer::getDefaultLineOffset() {
     return {0.f};
 }
@@ -455,7 +483,7 @@ using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 22u;
+constexpr uint8_t kPaintPropertyCount = 24u;
 
 enum class Property : uint8_t {
     LineBlur,
@@ -463,6 +491,7 @@ enum class Property : uint8_t {
     LineDasharray,
     LineGapWidth,
     LineGradient,
+    LineIntersectionRoundedCornerDistance,
     LineOffset,
     LineOpacity,
     LinePattern,
@@ -474,6 +503,7 @@ enum class Property : uint8_t {
     LineDasharrayTransition,
     LineGapWidthTransition,
     LineGradientTransition,
+    LineIntersectionRoundedCornerDistanceTransition,
     LineOffsetTransition,
     LineOpacityTransition,
     LinePatternTransition,
@@ -498,6 +528,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"line-dasharray", toUint8(Property::LineDasharray)},
      {"line-gap-width", toUint8(Property::LineGapWidth)},
      {"line-gradient", toUint8(Property::LineGradient)},
+     {"line-intersection-rounded-corner-distance", toUint8(Property::LineIntersectionRoundedCornerDistance)},
      {"line-offset", toUint8(Property::LineOffset)},
      {"line-opacity", toUint8(Property::LineOpacity)},
      {"line-pattern", toUint8(Property::LinePattern)},
@@ -509,6 +540,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"line-dasharray-transition", toUint8(Property::LineDasharrayTransition)},
      {"line-gap-width-transition", toUint8(Property::LineGapWidthTransition)},
      {"line-gradient-transition", toUint8(Property::LineGradientTransition)},
+     {"line-intersection-rounded-corner-distance-transition", toUint8(Property::LineIntersectionRoundedCornerDistanceTransition)},
      {"line-offset-transition", toUint8(Property::LineOffsetTransition)},
      {"line-opacity-transition", toUint8(Property::LineOpacityTransition)},
      {"line-pattern-transition", toUint8(Property::LinePatternTransition)},
@@ -533,6 +565,8 @@ StyleProperty getLayerProperty(const LineLayer& layer, Property property) {
             return makeStyleProperty(layer.getLineGapWidth());
         case Property::LineGradient:
             return makeStyleProperty(layer.getLineGradient());
+        case Property::LineIntersectionRoundedCornerDistance:
+            return makeStyleProperty(layer.getLineIntersectionRoundedCornerDistance());
         case Property::LineOffset:
             return makeStyleProperty(layer.getLineOffset());
         case Property::LineOpacity:
@@ -555,6 +589,8 @@ StyleProperty getLayerProperty(const LineLayer& layer, Property property) {
             return makeStyleProperty(layer.getLineGapWidthTransition());
         case Property::LineGradientTransition:
             return makeStyleProperty(layer.getLineGradientTransition());
+        case Property::LineIntersectionRoundedCornerDistanceTransition:
+            return makeStyleProperty(layer.getLineIntersectionRoundedCornerDistanceTransition());
         case Property::LineOffsetTransition:
             return makeStyleProperty(layer.getLineOffsetTransition());
         case Property::LineOpacityTransition:
@@ -676,6 +712,29 @@ std::optional<Error> LineLayer::setPropertyInternal(const std::string& name, con
         setLineGradient(*typedValue);
         return std::nullopt;
     }
+    if (property == Property::LineIntersectionRoundedCornerDistance || property == Property::LineMiterLimit ||
+        property == Property::LineRoundLimit) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        if (property == Property::LineIntersectionRoundedCornerDistance) {
+            setLineIntersectionRoundedCornerDistance(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::LineMiterLimit) {
+            setLineMiterLimit(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::LineRoundLimit) {
+            setLineRoundLimit(*typedValue);
+            return std::nullopt;
+        }
+    }
     if (property == Property::LinePattern) {
         Error error;
         const auto& typedValue = convert<PropertyValue<expression::Image>>(value, error, true, false);
@@ -726,23 +785,6 @@ std::optional<Error> LineLayer::setPropertyInternal(const std::string& name, con
         setLineJoin(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::LineMiterLimit || property == Property::LineRoundLimit) {
-        Error error;
-        const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
-        if (!typedValue) {
-            return error;
-        }
-
-        if (property == Property::LineMiterLimit) {
-            setLineMiterLimit(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::LineRoundLimit) {
-            setLineRoundLimit(*typedValue);
-            return std::nullopt;
-        }
-    }
 
     Error error;
     std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
@@ -772,6 +814,11 @@ std::optional<Error> LineLayer::setPropertyInternal(const std::string& name, con
 
     if (property == Property::LineGradientTransition) {
         setLineGradientTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::LineIntersectionRoundedCornerDistanceTransition) {
+        setLineIntersectionRoundedCornerDistanceTransition(*transition);
         return std::nullopt;
     }
 

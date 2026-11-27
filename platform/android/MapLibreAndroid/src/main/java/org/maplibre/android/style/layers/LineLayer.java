@@ -558,6 +558,18 @@ public class LineLayer extends Layer {
     }
   }
 
+  /**
+   * Get the LineIntersectionRoundedCornerDistance property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getLineIntersectionRoundedCornerDistance() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("line-intersection-rounded-corner-distance", nativeGetLineIntersectionRoundedCornerDistance());
+  }
+
   @NonNull
   @Keep
   private native Object nativeGetLineCap();
@@ -684,6 +696,10 @@ public class LineLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetLineGradient();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetLineIntersectionRoundedCornerDistance();
 
   @Override
   @Keep

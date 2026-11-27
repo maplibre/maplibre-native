@@ -625,6 +625,78 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             for (auto& drawable : builder->clearDrawables()) {
                 addDrawable(std::move(drawable), LineLayerTweaker::LineType::Simple);
             }
+
+            // line intersection
+            if (!bucket.isIntersectionRoundedCornerEnabled() || bucket.sharedTriangleInstances->empty()) {
+                continue;
+            }
+
+            if (!lineIntersectionShaderGroup) {
+                lineIntersectionShaderGroup = shaders.getShaderGroup("LineIntersectionShader");
+                if (!lineIntersectionShaderGroup) {
+                    continue;
+                }
+            }
+
+            StringIDSetsPair intersectionPropertiesAsUniforms;
+            auto intersectionVertexAttrs = context.createVertexAttributeArray();
+            intersectionVertexAttrs->readDataDrivenPaintProperties<LineColor,
+                                                                   LineBlur,
+                                                                   LineOpacity,
+                                                                   LineGapWidth,
+                                                                   LineOffset,
+                                                                   LineWidth,
+                                                                   LineFloorWidth,
+                                                                   LinePattern>(
+                paintPropertyBinders, evaluated, intersectionPropertiesAsUniforms, idLineColorVertexAttribute);
+
+            auto intersectionShader = lineIntersectionShaderGroup->getOrCreateShader(
+                context, intersectionPropertiesAsUniforms, posNormalAttribName);
+            if (!intersectionShader) {
+                continue;
+            }
+
+            auto intersectionBuilder = createLineBuilder("lineIntersection", std::move(intersectionShader));
+
+            // vertices, attributes and segments
+            const auto vertexCount = 3;
+            intersectionBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
+
+            if (const auto& attr = intersectionVertexAttrs->set(idLinePosNormalVertexAttribute)) {
+                attr->setSharedRawData(bucket.sharedVertices,
+                                       offsetof(LineLayoutVertex, a1),
+                                       /*vertexOffset=*/0,
+                                       sizeof(LineLayoutVertex),
+                                       gfx::AttributeDataType::Short2);
+            }
+            intersectionBuilder->setVertexAttributes(std::move(intersectionVertexAttrs));
+
+            auto intersectionInstanceAttrs = context.createVertexAttributeArray();
+            if (const auto& attr = intersectionInstanceAttrs->set(idLineTriangleVerticesAttribute)) {
+                attr->setSharedRawData(bucket.sharedTriangleInstances,
+                                       offsetof(LineTriangleInstance, a1),
+                                       /*vertexOffset=*/0,
+                                       sizeof(LineTriangleInstance),
+                                       gfx::AttributeDataType::UInt3);
+            }
+            if (const auto& attr = intersectionInstanceAttrs->set(idLineDataIndicesAttribute)) {
+                attr->setSharedRawData(bucket.sharedTriangleInstances,
+                                       offsetof(LineTriangleInstance, a2),
+                                       /*vertexOffset=*/0,
+                                       sizeof(LineTriangleInstance),
+                                       gfx::AttributeDataType::UInt2);
+            }
+            intersectionBuilder->setInstanceAttributes(std::move(intersectionInstanceAttrs));
+
+            intersectionBuilder->setSegments(gfx::Triangles(),
+                                             bucket.sharedIntersectionTriangles,
+                                             bucket.intersectionSegments.data(),
+                                             bucket.intersectionSegments.size());
+
+            intersectionBuilder->flush(context);
+            for (auto& drawable : intersectionBuilder->clearDrawables()) {
+                addDrawable(std::move(drawable), LineLayerTweaker::LineType::Simple);
+            }
         }
     }
 }

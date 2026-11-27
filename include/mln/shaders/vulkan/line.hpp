@@ -8,10 +8,126 @@ namespace shaders {
 
 constexpr auto lineShadePrelude = R"(
 
-#define idLineDrawableUBO           idDrawableReservedVertexOnlyUBO
-#define idLineTilePropsUBO          idDrawableReservedFragmentOnlyUBO
-#define idLineEvaluatedPropsUBO     layerUBOStartId
+#define idLineDrawableUBO               idDrawableReservedVertexOnlyUBO
+#define idLineTilePropsUBO              idDrawableReservedFragmentOnlyUBO
+#define idLineEvaluatedPropsUBO         layerUBOStartId
+#define idLineDataVertexDrawableUBO     drawableSSBOStartId
 
+float sdCircle(vec2 p, float r) {
+    return length(p) - r;
+}
+
+float sdPlane(vec2 p, vec2 n, float h) {
+    // n must be normalized
+    return dot(p, n) + h;
+}
+
+float dot2(vec2 v) {
+    return dot(v, v);
+}
+
+float opUnion(float a, float b) {
+    return min(a, b);
+}
+
+float opSmoothUnion(float d1, float d2, float k) {
+    float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
+    return mix(d2, d1, h) - k * h * (1.0 - h);
+}
+
+float opIntersection(float a, float b) {
+    return max(a, b);
+}
+
+float opSubtraction(float a, float b) {
+    return max(a, -b);
+}
+
+vec2 bisector(vec2 v0, vec2 v1, vec2 v2) {
+    vec2 v01 = normalize(v1 - v0);
+    vec2 v02 = normalize(v2 - v0);
+    return normalize(v01 + v02);
+}
+
+float cotHalf(float cosTheta) {
+    float sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
+    return (1.0 + cosTheta) / sinTheta;
+}
+
+void fitCircle(vec2 v0, vec2 v1, vec2 v2, float radius, inout float angle, inout float distance) {
+    float cosTheta = dot(normalize(v1 - v0), normalize(v2 - v0));
+    float sinHalf = sqrt((1.0 - cosTheta) * 0.5);
+
+    angle = sinHalf;
+    distance = radius / sinHalf;
+}
+
+float dRoundedTri(vec2 p, inout float dTri, vec2 v0, vec2 v1, vec2 v2, float radius) {
+    // circle distance from vertex
+    float angle;
+    float distance;
+    fitCircle(v0, v1, v2, radius, angle, distance);
+
+    // circle used to round it
+    vec2 bisect = bisector(v0, v1, v2);
+    vec2 circlePos = v0 + bisect * distance;
+    float dCircle = sdCircle(p - circlePos, radius);
+
+    // plane to isolate the two halfs of the circle (make the circle cutout asymmetrical)
+    float dPlaneIn = sdPlane(p - circlePos, -bisect, -radius * angle);
+
+    // mask based on plane
+    dTri = opIntersection(dTri, dPlaneIn);
+
+    return dCircle;
+}
+
+float cross2(vec2 a, vec2 b) {
+    return a.x * b.y - a.y * b.x;
+}
+
+float computeRadius(vec2 prevPoint, vec2 cornerPoint, vec2 nextPoint, float desiredCornerDistance) {
+    float maxEdgeLenPercent = 1.0;
+    float sinParallelTreshold = sin(5 * M_PI / 180);
+
+    float edge1Len = distance(prevPoint, cornerPoint);
+    float edge2Len = distance(nextPoint, cornerPoint);
+    if (edge1Len == 0.0 || edge2Len == 0.0) {
+        return 0;
+    }
+
+    // Compute the start and end points of the rounded corner
+    vec2 edge1Vector = normalize(cornerPoint - prevPoint);
+    vec2 edge2Vector = normalize(nextPoint - cornerPoint);
+
+    float edge1MaxCornerDistance = edge1Len * maxEdgeLenPercent;
+    float edge2MaxCornerDistance = edge2Len * maxEdgeLenPercent;
+    float cornerDistance = min(desiredCornerDistance, min(edge1MaxCornerDistance, edge2MaxCornerDistance));
+
+    vec2 startPoint = cornerPoint - edge1Vector * cornerDistance;
+    vec2 endPoint = cornerPoint + edge2Vector * cornerDistance;
+
+    // Perpendicular directions
+    vec2 perp1Vector = vec2(-edge1Vector.y, edge1Vector.x);
+    vec2 perp2Vector = vec2(-edge2Vector.y, edge2Vector.x);
+
+    // Ensure perpendiculars point toward same side
+    if (cross2(edge1Vector, edge2Vector) < 0) {
+        perp1Vector *= -1.0;
+        perp2Vector *= -1.0;
+    }
+
+    // Center = intersection of perpendiculars
+    float perpCrossProduct = cross2(perp1Vector, perp2Vector);
+    if (abs(perpCrossProduct) < sinParallelTreshold) {
+        return 0;
+    }
+    float t = cross2(endPoint - startPoint, perp2Vector) / perpCrossProduct;
+    vec2 centerPoint = startPoint + perp1Vector * t;
+
+    float radius = distance(startPoint, centerPoint);
+    return radius;
+}
 )";
 
 template <>
@@ -84,7 +200,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(location = 0) out lowp vec2 frag_normal;
@@ -211,7 +327,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 void main() {
@@ -249,6 +365,318 @@ void main() {
     float alpha = clamp(min(dist - (frag_width2.t - blur2), frag_width2.s - dist) / blur2, 0.0, 1.0);
 
     out_color = color * (alpha * opacity);
+}
+)";
+};
+
+template <>
+struct ShaderSource<BuiltIn::LineIntersectionShader, gfx::Backend::Type::Vulkan> {
+    static constexpr const char* name = "LineIntersectionShader";
+
+    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 2> instanceAttributes;
+    static const std::array<TextureInfo, 0> textures;
+
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto vertex = R"(
+
+layout(location = 7) in uvec3 in_triangle_vertices;
+layout(location = 8) in uvec2 in_data_indices;
+
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct LineDrawableUBO {
+    mat4 matrix;
+    mediump float ratio;
+    // Interpolations
+    float color_t;
+    float blur_t;
+    float opacity_t;
+    float gapwidth_t;
+    float offset_t;
+    float width_t;
+    float pad1;
+    vec4 pad2;
+    vec4 pad3;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LineDrawableUBOVector {
+    LineDrawableUBO drawable_ubo[];
+} drawableVector;
+
+#if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_blur) || !defined(HAS_UNIFORM_u_opacity) || !defined(HAS_UNIFORM_u_gapwidth) || !defined(HAS_UNIFORM_u_offset) || !defined(HAS_UNIFORM_u_width)
+// Same order as in LinePaintProperties
+struct DataVertex {
+#if !defined(HAS_UNIFORM_u_color)
+    float color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_blur)
+    float blur[2];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity[2];
+#endif
+#if !defined(HAS_UNIFORM_u_gapwidth)
+    float gapwidth[2];
+#endif
+#if !defined(HAS_UNIFORM_u_offset)
+    float offset[2];
+#endif
+#if !defined(HAS_UNIFORM_u_width)
+    float width[2];
+#endif
+};
+
+layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idLineDataVertexDrawableUBO) readonly buffer DataVertexDrawableUBOVector {
+    DataVertex vertex[];
+} dataVertexVector;
+#endif
+
+layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
+    vec4 color;
+    float blur;
+    float opacity;
+    float gapwidth;
+    float offset;
+    float width;
+    float floorwidth;
+    uint expressionMask;
+    float intersection_rounded_corner_distance;
+} props;
+
+struct FragmentData {
+    vec2 triangle_corner_prev;
+    vec2 triangle_corner_pos;
+    vec2 triangle_corner_next;
+    float triangle_corner_radius;
+
+#if !defined(HAS_UNIFORM_u_color)
+    lowp vec4 color1;
+    lowp vec4 color2;
+#endif
+
+#if !defined(HAS_UNIFORM_u_opacity)
+    lowp float opacity1;
+    lowp float opacity2;
+#endif
+};
+layout(location = 0) out vec2 frag_triangle_pos;
+layout(location = 1) flat out FragmentData frag_data;
+
+void main() {
+    const LineDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+
+    frag_triangle_pos = vec2(0.0);
+
+    frag_data.triangle_corner_prev = vec2(0.0);
+    frag_data.triangle_corner_pos = vec2(0.0);
+    frag_data.triangle_corner_next = vec2(0.0);
+    frag_data.triangle_corner_radius = 0.0;
+
+#ifndef HAS_UNIFORM_u_color
+    frag_data.color1 = vec4(0.0);
+    frag_data.color2 = vec4(0.0);
+#endif
+#ifndef HAS_UNIFORM_u_opacity
+    frag_data.opacity1 = 0.0;
+    frag_data.opacity2 = 0.0;
+#endif
+    gl_Position = vec4(0.0);
+
+    if (props.intersection_rounded_corner_distance <= 0.0) {
+        return;
+    }
+
+    vec2 initial_vertex_pos[3];
+    vec2 triangle_vertex_pos[3];
+    float triangle_corner_radius;
+
+    for (int i = 0; i < 3; i++) {
+        int pos_x = int(in_triangle_vertices[i]) >> 16;
+        int pos_y = (int(in_triangle_vertices[i]) << 16) >> 16;
+
+        initial_vertex_pos[i] = vec2(pos_x, pos_y);
+        triangle_vertex_pos[i] = initial_vertex_pos[i];
+    }
+
+    vec2 edgePrev = normalize(triangle_vertex_pos[0] - triangle_vertex_pos[1]);
+    vec2 edgeNext = normalize(triangle_vertex_pos[2] - triangle_vertex_pos[1]);
+    float sinAngle = cross2(edgeNext, edgePrev);
+
+    vec2 perpEdgePrev = vec2(-edgePrev.y, edgePrev.x);
+    vec2 perpEdgeNext = vec2(-edgeNext.y, edgeNext.x);
+
+    for (int i = 0; i < 2; i++) {
+        uint dataIndex = in_data_indices[i] / 2u;
+        float direction = (float(in_data_indices[i] % 2u) * 2.0 - 1.0);
+
+#ifndef HAS_UNIFORM_u_gapwidth
+        const mediump float gapwidth = unpack_mix_float(dataVertexVector.vertex[dataIndex].gapwidth, drawable.gapwidth_t) / 2.0;
+#else
+        const mediump float gapwidth = props.gapwidth / 2.0;
+#endif
+
+#ifndef HAS_UNIFORM_u_offset
+        const lowp float offset = unpack_mix_float(dataVertexVector.vertex[dataIndex].offset, drawable.offset_t);
+#else
+        const lowp float offset = props.offset;
+#endif
+
+#ifndef HAS_UNIFORM_u_width
+        mediump float width = unpack_mix_float(dataVertexVector.vertex[dataIndex].width, drawable.width_t);
+#else
+        mediump float width = props.width;
+#endif
+
+#ifndef HAS_UNIFORM_u_blur
+        lowp float blur = unpack_mix_float(dataVertexVector.vertex[dataIndex].blur, drawable.blur_t);
+#else
+        lowp float blur = props.blur;
+#endif
+
+        const float halfwidth = width / 2.0;
+        const float outset = max(gapwidth + halfwidth * (gapwidth > 0.0 ? 2.0 : 1.0) - blur, 0.0);
+
+        vec2 outsetVector = (i == 0 ? edgeNext : edgePrev);
+        vec2 offsetVector = (i == 0 ? -edgeNext : edgePrev);
+        const vec2 distCorner = (outset * outsetVector + offset * direction * offsetVector) / sinAngle;
+
+        triangle_vertex_pos[1] = triangle_vertex_pos[1] + distCorner / drawable.ratio;
+
+        vec2 outsetPerpVector = (i == 0 ? -perpEdgePrev : perpEdgeNext);
+        vec2 offsetPerpVector = (i == 0 ? perpEdgePrev : perpEdgeNext);
+        const vec2 distPerp = outset * outsetPerpVector + offset * direction * offsetPerpVector;
+
+        triangle_vertex_pos[i * 2] = triangle_vertex_pos[i * 2] + distPerp / drawable.ratio;
+    }
+
+    for (int i = 0; i < 3; i+=2) {
+        vec2 perpEdgeVector = triangle_vertex_pos[i] - initial_vertex_pos[i];
+        vec2 initialCornerVector = initial_vertex_pos[1] - initial_vertex_pos[i];
+        vec2 finalCornerVector = triangle_vertex_pos[1] - initial_vertex_pos[i];
+
+        float initialCornerSide = cross2(perpEdgeVector, initialCornerVector);
+        float finalCornerSide = cross2(perpEdgeVector, finalCornerVector);
+
+        if (initialCornerSide * finalCornerSide <= 0) {
+            return;
+        }
+    }
+
+    triangle_corner_radius = computeRadius(triangle_vertex_pos[0],
+                                           triangle_vertex_pos[1],
+                                           triangle_vertex_pos[2],
+                                           props.intersection_rounded_corner_distance);
+
+    vec2 position = triangle_vertex_pos[gl_VertexIndex];
+    uint dataIndex1 = in_data_indices[0] / 2;
+    uint dataIndex2 = in_data_indices[1] / 2;
+
+    frag_triangle_pos = position;
+
+    frag_data.triangle_corner_prev = triangle_vertex_pos[0];
+    frag_data.triangle_corner_pos = triangle_vertex_pos[1];
+    frag_data.triangle_corner_next = triangle_vertex_pos[2];
+    frag_data.triangle_corner_radius = triangle_corner_radius;
+
+#ifndef HAS_UNIFORM_u_color
+    frag_data.color1 = unpack_mix_float(dataVertexVector.vertex[dataIndex1].color, drawable.color_t);
+    frag_data.color2 = unpack_mix_float(dataVertexVector.vertex[dataIndex2].color, drawable.color_t);;
+#endif
+#ifndef HAS_UNIFORM_u_opacity
+    frag_data.opacity1 = unpack_mix_float(dataVertexVector.vertex[dataIndex1].opacity, drawable.opacity_t);
+    frag_data.opacity2 = unpack_mix_float(dataVertexVector.vertex[dataIndex2].opacity, drawable.opacity_t);
+#endif
+    gl_Position = drawable.matrix * vec4(position, 0.0, 1.0);
+    applySurfaceTransform();
+}
+)";
+
+    static constexpr auto fragment = R"(
+
+struct FragmentData {
+    vec2 triangle_corner_prev;
+    vec2 triangle_corner_pos;
+    vec2 triangle_corner_next;
+    float triangle_corner_radius;
+
+#if !defined(HAS_UNIFORM_u_color)
+    lowp vec4 color1;
+    lowp vec4 color2;
+#endif
+
+#if !defined(HAS_UNIFORM_u_opacity)
+    lowp float opacity1;
+    lowp float opacity2;
+#endif
+};
+layout(location = 0) in vec2 frag_triangle_pos;
+layout(location = 1) flat in FragmentData frag_data;
+
+layout(location = 0) out vec4 out_color;
+
+layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
+    vec4 color;
+    float blur;
+    float opacity;
+    float gapwidth;
+    float offset;
+    float width;
+    float floorwidth;
+    uint expressionMask;
+    float intersection_rounded_corner_distance;
+} props;
+
+void main() {
+
+#ifdef OVERDRAW_INSPECTOR
+    out_color = vec4(1.0);
+    return;
+#endif
+
+    out_color = vec4(0.0);
+
+    if (frag_data.triangle_corner_radius <= 0.0) {
+        return;
+    }
+
+#if !defined(HAS_UNIFORM_u_color) || !defined(HAS_UNIFORM_u_opacity)
+    vec2 vPos = frag_triangle_pos - frag_data.triangle_corner_pos;
+    vec2 vPrev = frag_data.triangle_corner_prev - frag_data.triangle_corner_pos;
+    vec2 vNext = frag_data.triangle_corner_next - frag_data.triangle_corner_pos;
+
+    float angle = atan2(cross2(vPos, vPrev), dot(vPos, vPrev));
+    float angleMax = atan2(cross2(vNext, vPrev), dot(vNext, vPrev));
+#endif
+
+#ifdef HAS_UNIFORM_u_color
+    highp vec4 color = props.color;
+#else
+    highp vec4 color = mix(frag_data.color1, frag_data.color2, angle / angleMax);
+#endif
+
+#ifdef HAS_UNIFORM_u_opacity
+    lowp float opacity = props.opacity;
+#else
+    lowp float opacity = mix(frag_data.opacity1, frag_data.opacity2, angle / angleMax);
+#endif
+
+    float dTri = -1.0;
+
+    float d0 = dRoundedTri(frag_triangle_pos, dTri,
+                           frag_data.triangle_corner_pos,
+                           frag_data.triangle_corner_prev,
+                           frag_data.triangle_corner_next,
+                           frag_data.triangle_corner_radius);
+    dTri = opUnion(dTri, d0);
+
+    if (dTri < 0.0) {
+        return;
+    }
+
+    out_color = color * opacity;
 }
 )";
 };
@@ -319,7 +747,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(location = 0) out lowp vec2 frag_normal;
@@ -439,7 +867,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 void main() {
@@ -556,7 +984,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(location = 0) out lowp vec2 frag_normal;
@@ -723,7 +1151,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
@@ -886,7 +1314,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(location = 0) out lowp vec2 frag_normal;
@@ -1055,7 +1483,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
@@ -1185,7 +1613,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(location = 0) out lowp vec2 frag_normal;
@@ -1345,7 +1773,7 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float width;
     float floorwidth;
     uint expressionMask;
-    float pad1;
+    float intersection_rounded_corner_distance;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
