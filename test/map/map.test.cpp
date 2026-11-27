@@ -46,6 +46,7 @@
 #include <mln/util/async_task.hpp>
 #include <mln/util/client_options.hpp>
 #include <mln/util/color.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/image.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/io.hpp>
@@ -53,6 +54,7 @@
 #include <mln/util/run_loop.hpp>
 #include <mln/util/timer.hpp>
 
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <memory>
@@ -418,26 +420,110 @@ TEST(Map, FreeCameraInARegisteredProjectionIsPlacedByItsLatLngAndAltitude) {
     removeProjection("test:polar-free-camera");
 }
 
-TEST(Map, GeoJSONTiledForAnotherProjectionWarnsOnce) {
+namespace {
+
+constexpr auto geoJSONPoint = R"({"type": "Point", "coordinates": [45, 45]})";
+
+std::unique_ptr<style::Projection> identityProjection() {
+    auto identity = std::make_unique<style::Projection>();
+    const JSValue identityName("identity");
+    EXPECT_FALSE(identity->setProperty("type", &identityName));
+    return identity;
+}
+
+/// Renders the map centered on `place` at zoom 0 and checks that each point it draws, queried over the whole view, is
+/// there to within a unit of the zoom 0 tile, where the query takes it from.
+void expectPointsDrawnAt(MapTest<>& test, const LatLng& place, std::size_t count) {
+    constexpr double tileUnitInDegrees = 360.0 / util::EXTENT;
+    test.map.jumpTo(CameraOptions().withCenter(place).withZoom(0));
+    test.frontend.render(test.map);
+    const Size size = test.frontend.getSize();
+    const auto features = test.frontend.getRenderer()->queryRenderedFeatures(
+        ScreenBox{{0, 0}, {static_cast<double>(size.width), static_cast<double>(size.height)}});
+    EXPECT_EQ(count, features.size());
+    for (const auto& feature : features) {
+        const auto& point = feature.geometry.get<Point<double>>();
+        EXPECT_NEAR(place.longitude(), point.x, tileUnitInDegrees) << feature.source;
+        EXPECT_NEAR(place.latitude(), point.y, tileUnitInDegrees) << feature.source;
+    }
+}
+
+std::size_t warningCount(const FixtureLog& log) {
+    const auto messages = log.unchecked();
+    return std::ranges::count_if(
+        messages, [](const FixtureLog::Message& message) { return message.severity == EventSeverity::Warning; });
+}
+
+} // namespace
+
+TEST(Map, GeoJSONTiledForAnotherProjectionIsNotDrawn) {
+    // As on Android, where a source that joins a style in a registered projection can first get the data it tiled in
+    // lat/lng before it joined, and then the same data tiled in the projection.
     FixtureLog log;
     MapTest<> test;
     test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"},
-        "sources": {"points": {"type": "geojson", "data": {"type": "Point", "coordinates": [45, 45]}}},
+        "sources": {"points": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}},
         "layers": [{"id": "points", "type": "circle", "source": "points"}]})");
-    test.frontend.render(test.map);
-    const FixtureLog::Message warning{
-        EventSeverity::Warning,
-        Event::General,
-        -1,
-        "GeoJSON source \"points\" is drawn in the wrong place: its data was tiled in the \"identity\" projection, so "
-        "set it again after changing the projection."};
-    EXPECT_EQ(0u, log.count(warning));
+    const auto point = mapbox::geojson::parse(geoJSONPoint);
+    auto& source = *test.map.getStyle().getSource("points")->as<GeoJSONSource>();
+    const LatLng place{45, 45};
+
+    source.setGeoJSONData(GeoJSONData::create(point, Scheduler::GetSequenced()));
+    expectPointsDrawnAt(test, place, 0);
+
+    source.setGeoJSONData(GeoJSONSource::Impl::createData(point,
+                                                          Scheduler::GetSequenced(),
+                                                          GeoJSONOptions::defaultOptions(),
+                                                          GeoJSONSource::Impl::registeredProjection(source)));
+    expectPointsDrawnAt(test, place, 1);
+    EXPECT_EQ(0u, warningCount(log));
+}
+
+TEST(Map, GeoJSONIsTiledAgainWhenTheProjectionChanges) {
+    FixtureLog log;
+    MapTest<> test;
+    test.fileSource->sourceResponse = [](const Resource&) {
+        Response response;
+        response.data = std::make_shared<std::string>(geoJSONPoint);
+        return response;
+    };
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"},
+        "sources": {
+            "inline": {"type": "geojson", "data": {"type": "Point", "coordinates": [45, 45]}},
+            "set": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}},
+            "url": {"type": "geojson", "data": "http://example.com/point.geojson"}},
+        "layers": [
+            {"id": "inline", "type": "circle", "source": "inline"},
+            {"id": "set", "type": "circle", "source": "set"},
+            {"id": "url", "type": "circle", "source": "url"}]})");
+    test.map.getStyle().getSource("set")->as<GeoJSONSource>()->setGeoJSON(mapbox::geojson::parse(geoJSONPoint));
+    const LatLng place{45, 45};
+    expectPointsDrawnAt(test, place, 3);
 
     test.map.getStyle().setProjection(std::make_unique<style::Projection>());
-    test.frontend.render(test.map);
-    test.frontend.render(test.map);
+    expectPointsDrawnAt(test, place, 3);
 
-    EXPECT_EQ(1u, log.count(warning));
+    test.map.getStyle().setProjection(identityProjection());
+    expectPointsDrawnAt(test, place, 3);
+    EXPECT_EQ(0u, warningCount(log));
+}
+
+TEST(Map, GeoJSONFromAURLIsTiledInTheProjectionSetWhileItLoads) {
+    FixtureLog log;
+    MapTest<> test;
+    test.fileSource->sourceResponse = [&](const Resource&) {
+        // This runs before the source tiles the response in the background, and the change comes before the result.
+        test.runLoop.schedule([&] { test.map.getStyle().setProjection(std::make_unique<style::Projection>()); });
+        Response response;
+        response.data = std::make_shared<std::string>(geoJSONPoint);
+        return response;
+    };
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"},
+        "sources": {"url": {"type": "geojson", "data": "http://example.com/point.geojson"}},
+        "layers": [{"id": "url", "type": "circle", "source": "url"}]})");
+
+    expectPointsDrawnAt(test, {45, 45}, 1);
+    EXPECT_EQ(0u, warningCount(log));
 }
 
 TEST(Map, GeoJSONSetAfterItsProjectionIsRemovedIsTiledInIt) {

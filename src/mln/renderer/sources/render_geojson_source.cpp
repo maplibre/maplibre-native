@@ -5,7 +5,6 @@
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/tile/geojson_tile.hpp>
 #include <mln/renderer/tile_parameters.hpp>
-#include <mln/util/logging.hpp>
 
 #include <mapbox/eternal.hpp>
 
@@ -65,6 +64,12 @@ FeatureExtensionValue getClusterExpansionZoom(std::shared_ptr<style::GeoJSONData
 constexpr const auto extensionGetters = mapbox::eternal::hash_map<mapbox::eternal::string, FeatureExtensionGetterPtr>(
     {{"children", &getChildren}, {"leaves", &getLeaves}, {"expansion-zoom", &getClusterExpansionZoom}});
 
+/// Whether the data is tiled where the map's projection draws it: in lat/lng for a projection that wraps, as Mercator
+/// does, or in the registered projection itself.
+bool isTiledFor(const WorldCoordinateHelper& helper, const style::GeoJSONData& data) {
+    return helper.wraps() ? data.getProjection().empty() : data.getProjection() == helper.name();
+}
+
 } // namespace
 
 RenderGeoJSONSource::RenderGeoJSONSource(Immutable<style::GeoJSONSource::Impl> impl_,
@@ -87,6 +92,13 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
     enabled = needsRendering;
 
     auto data_ = impl().getData().lock();
+    if (data_ && !isTiledFor(parameters.transformState.getProjection().worldCoordinateHelper(), *data_)) {
+        // It would draw in the wrong place, so nothing is drawn until data tiled in the map's projection comes.
+        data.reset();
+        tilePyramid.clearAll();
+        return;
+    }
+
     if (data.lock() != data_) {
         data = data_;
         if (parameters.mode != MapMode::Continuous) {
@@ -105,18 +117,6 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
     }
 
     if (!data_) return;
-
-    if (!warnedAboutProjection) {
-        const auto& helper = parameters.transformState.getProjection().worldCoordinateHelper();
-        const auto& tiledIn = data_->getProjection();
-        if (helper.wraps() ? !tiledIn.empty() : tiledIn != helper.name()) {
-            Log::Warning(Event::General,
-                         "GeoJSON source \"" + impl().id + "\" is drawn in the wrong place: its data was tiled in " +
-                             (tiledIn.empty() ? "lat/lng" : "the \"" + tiledIn + "\" projection") +
-                             ", so set it again after changing the projection.");
-            warnedAboutProjection = true;
-        }
-    }
 
     tilePyramid.update(layers,
                        needsRendering,

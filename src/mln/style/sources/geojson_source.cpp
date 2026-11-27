@@ -15,6 +15,16 @@
 namespace mln {
 namespace style {
 
+namespace {
+
+/// A GeoJSON response tiled in the background: the source's new impl and the GeoJSON it was tiled from.
+struct TiledGeoJSON {
+    Immutable<Source::Impl> impl;
+    std::shared_ptr<const GeoJSON> geoJSON;
+};
+
+} // namespace
+
 // static
 Immutable<GeoJSONOptions> GeoJSONOptions::defaultOptions() {
     static Immutable<GeoJSONOptions> options = makeMutable<GeoJSONOptions>();
@@ -48,36 +58,38 @@ void GeoJSONSource::setURL(const std::string& url_) {
 }
 
 void GeoJSONSource::setGeoJSON(const mapbox::geojson::geojson& geoJSON) {
-    if (!projection) {
-        pendingGeoJSON = std::make_unique<GeoJSON>(geoJSON);
-        return;
-    }
-    setGeoJSONData(
-        Impl::createData(geoJSON, sequencedScheduler, impl().getOptions(), (*projection)->registeredProjection));
+    setGeoJSON(GeoJSON(geoJSON));
 }
 
 void GeoJSONSource::setGeoJSON(mapbox::geojson::geojson&& geoJSON) {
-    if (!projection) {
-        pendingGeoJSON = std::make_unique<GeoJSON>(std::move(geoJSON));
-        return;
+    req.reset();
+    keptGeoJSON = std::make_shared<const GeoJSON>(std::move(geoJSON));
+    if (projection) {
+        tileKeptGeoJSON();
+        observer->onSourceChanged(*this);
     }
-    setGeoJSONData(
-        Impl::createData(geoJSON, sequencedScheduler, impl().getOptions(), (*projection)->registeredProjection));
 }
 
 void GeoJSONSource::setGeoJSONData(std::shared_ptr<GeoJSONData> geoJSONData) {
-    pendingGeoJSON.reset();
+    keptGeoJSON.reset();
     req.reset();
     baseImpl = makeMutable<Impl>(impl(), std::move(geoJSONData));
     observer->onSourceChanged(*this);
 }
 
 void GeoJSONSource::setProjection(Immutable<Projection::Impl> projection_) {
+    const bool tiledInIt = projection && (*projection)->registeredProjection == projection_->registeredProjection;
     projection = std::move(projection_);
-    if (pendingGeoJSON) {
-        setGeoJSONData(Impl::createData(
-            *pendingGeoJSON, sequencedScheduler, impl().getOptions(), (*projection)->registeredProjection));
+    if (keptGeoJSON && !tiledInIt) {
+        tileKeptGeoJSON();
+        observer->onSourceChanged(*this);
     }
+}
+
+void GeoJSONSource::tileKeptGeoJSON() {
+    baseImpl = makeMutable<Impl>(
+        impl(),
+        Impl::createData(*keptGeoJSON, sequencedScheduler, impl().getOptions(), Impl::registeredProjection(*this)));
 }
 
 std::optional<std::string> GeoJSONSource::getURL() const {
@@ -108,36 +120,40 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
         } else {
             // Note: This task appears to be safe enough to schedule on the generic background queue.
             // This task does not reference other objects who's lifetimes are coupled with a map.
+            const auto registeredProjection = Impl::registeredProjection(*this);
             Scheduler::GetBackground()->scheduleAndReplyValue(
                 util::SimpleIdentity::Empty,
                 /* makeImplInBackground */
-                [currentImpl = baseImpl,
-                 data = res.data,
-                 seqScheduler{sequencedScheduler},
-                 registeredProjection = projection ? (*projection)->registeredProjection
-                                                   : nullptr]() -> Immutable<Source::Impl> {
+                [currentImpl = baseImpl, data = res.data, seqScheduler{sequencedScheduler}, registeredProjection]()
+                    -> TiledGeoJSON {
                     assert(data);
                     auto& current = static_cast<const Impl&>(*currentImpl);
                     conversion::Error error;
+                    std::shared_ptr<const GeoJSON> parsed;
                     std::shared_ptr<GeoJSONData> geoJSONData;
                     if (std::optional<GeoJSON> geoJSON = conversion::convertJSON<GeoJSON>(*data, error)) {
+                        parsed = std::make_shared<const GeoJSON>(std::move(*geoJSON));
                         geoJSONData = Impl::createData(
-                            *geoJSON, std::move(seqScheduler), current.getOptions(), registeredProjection);
+                            *parsed, std::move(seqScheduler), current.getOptions(), registeredProjection);
                     } else {
                         // Create an empty GeoJSON VT object to make sure we're not
                         // infinitely waiting for tiles to load.
                         Log::Error(Event::ParseStyle, "Failed to parse GeoJSON data: " + error.message);
                     }
-                    return makeMutable<Impl>(current, std::move(geoJSONData));
+                    return {.impl = makeMutable<Impl>(current, std::move(geoJSONData)), .geoJSON = std::move(parsed)};
                 },
                 /* onImplReady */
-                [this, self = makeWeakPtr(), capturedReqGeneration = ++requestGeneration](
-                    Immutable<Source::Impl> newImpl) {
+                [this, self = makeWeakPtr(), capturedReqGeneration = ++requestGeneration, registeredProjection](
+                    const TiledGeoJSON& tiled) {
                     assert(capturedReqGeneration);
                     if (auto guard = self.lock(); self) {
                         if (capturedReqGeneration ==
                             requestGeneration) { // If a new request is being processed, ignore this impl.
-                            baseImpl = std::move(newImpl);
+                            baseImpl = tiled.impl;
+                            keptGeoJSON = tiled.geoJSON;
+                            if (keptGeoJSON && Impl::registeredProjection(*this) != registeredProjection) {
+                                tileKeptGeoJSON();
+                            }
                             loaded = true;
                             observer->onSourceLoaded(*this);
                         }

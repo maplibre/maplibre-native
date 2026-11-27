@@ -99,13 +99,18 @@ protected:
 private:
     friend class Style;
     /// Tiles the data in the projection of the style the source is in. The style calls it when the source joins it and
-    /// when its projection changes, and data the source was given before it joined a style is tiled then.
+    /// when its projection changes, and the source then tiles the GeoJSON it keeps again in a projection it has not
+    /// tiled it in.
     void setProjection(Immutable<Projection::Impl>);
+    /// Tiles `keptGeoJSON` in the projection of the style the source is in, or in lat/lng before it joins one.
+    void tileKeptGeoJSON();
 
     std::optional<std::string> url;
     /// The projection of the style the source is in, empty until it joins one.
     std::optional<Immutable<Projection::Impl>> projection;
-    std::unique_ptr<GeoJSON> pendingGeoJSON;
+    /// The GeoJSON set or loaded from `url`, kept to tile it again when the projection changes. Empty when the data
+    /// was given as `GeoJSONData`.
+    std::shared_ptr<const GeoJSON> keptGeoJSON;
     std::unique_ptr<AsyncRequest> req;
     std::atomic<uint64_t> requestGeneration{0};
     std::shared_ptr<Scheduler> sequencedScheduler;
