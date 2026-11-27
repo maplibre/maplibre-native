@@ -57,7 +57,8 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNInvalidDatasourceExceptio
 /**
  Fetch features for a tile. This method will not be invoked on the main queue, it
  will be invoked on the caller's `requestQueue`.
- @param bounds The bounds to fetch data for.
+ @param bounds The tile's bounds in the map's projection. In a registered projection, they are the
+   box around the tile's four corners.
  @param zoomLevel Tile zoom level.
  */
 - (NSArray<MLNShape<MLNFeature> *> *)featuresInCoordinateBounds:(MLNCoordinateBounds)bounds

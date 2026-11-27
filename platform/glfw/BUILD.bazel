@@ -73,3 +73,7 @@ cc_binary(
         "//conditions:default": [],
     }),
 )
+
+exports_files([
+    "assets/arctic.json",
+])

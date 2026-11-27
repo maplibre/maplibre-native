@@ -415,6 +415,18 @@
                                     <action selector="showStyle:" target="-1" id="oaR-08-VOQ"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Arctic Sea Ice (EPSG:3413)" id="A3k-34-1Pm">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showArcticStyle:" target="-1" id="A3k-34-1Pn"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="National Grid Crosshairs (EPSG:27700)" id="N6g-27-7Pm">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showNationalGridStyle:" target="-1" id="N6g-27-7Pn"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Custom Style…" id="L0h-86-2cU">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>

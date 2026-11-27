@@ -77,6 +77,8 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 
 - (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude
                                      zoomLevel:(double)zoomLevel;
+- (CLLocationDistance)metersPerPointAtCoordinate:(CLLocationCoordinate2D)coordinate
+                                       zoomLevel:(double)zoomLevel;
 
 /** Triggers another render pass even when it is not necessary. */
 - (void)setNeedsRerender;

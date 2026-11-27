@@ -298,6 +298,9 @@ objc_library(
     name = "iosapp_objcpp_srcs",
     srcs = [
         "//platform/darwin:app/CustomStyleLayerExample.h",
+        "//platform/darwin:app/MBXArcticProjection.h",
+        "//platform/darwin:app/MBXNationalGridProjection.h",
+        "//platform/darwin:app/MBXNationalGridProjection.mm",
         "//platform/darwin:app/PluginLayerExample.h",
         "//platform/darwin:app/PluginLayerExample.mm",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
@@ -313,6 +316,7 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":ios-sdk",
+        "//test:national_grid",
     ],
 )
 
@@ -321,6 +325,8 @@ objc_library(
     srcs = [
         "//platform/darwin:app/CustomStyleLayerExample.h",
         "//platform/darwin:app/CustomStyleLayerExample.m",
+        "//platform/darwin:app/MBXArcticProjection.h",
+        "//platform/darwin:app/MBXArcticProjection.m",
         "//platform/ios:ios_app_srcs",
     ],
     defines = ["GLES_SILENCE_DEPRECATION"],

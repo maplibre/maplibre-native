@@ -26,6 +26,7 @@
 #import "MLNVectorTileSource_Private.h"
 
 #import "MLNAttributionInfo_Private.h"
+#import "MLNCoordinateReferenceSystem_Private.h"
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNStyleValue_Private.h"
 
@@ -38,6 +39,9 @@
 #include <mln/style/sources/raster_source.hpp>
 #include <mln/style/sources/vector_source.hpp>
 #include <mln/style/style.hpp>
+#include <mln/util/crs.hpp>
+
+#include <stdexcept>
 
 #import "NSDate+MLNAdditions.h"
 
@@ -121,6 +125,41 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
     }
   }
   return nil;
+}
+
+// MARK: Projections
+
+static NSError *MLNProjectionError(const std::invalid_argument &error) {
+  return [NSError errorWithDomain:MLNErrorDomain
+                             code:MLNErrorCodeInvalidProjection
+                         userInfo:@{
+                           NSLocalizedDescriptionKey : @(error.what())
+                         }];
+}
+
++ (BOOL)addProjection:(MLNCoordinateReferenceSystem *)projection
+                error:(NSError *__nullable *__nullable)outError {
+  try {
+    mln::addProjection(projection.mbglCRS);
+  } catch (const std::invalid_argument &error) {
+    if (outError) {
+      *outError = MLNProjectionError(error);
+    }
+    return NO;
+  }
+  return YES;
+}
+
++ (BOOL)removeProjectionNamed:(NSString *)name error:(NSError *__nullable *__nullable)outError {
+  try {
+    mln::removeProjection(name.UTF8String);
+  } catch (const std::invalid_argument &error) {
+    if (outError) {
+      *outError = MLNProjectionError(error);
+    }
+    return NO;
+  }
+  return YES;
 }
 
 // MARK: -

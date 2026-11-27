@@ -4,8 +4,10 @@
 
 #import "MBXAnnotationView.h"
 #import "MBXAppDelegate.h"
+#import "MBXArcticProjection.h"
 #import "MBXCustomCalloutView.h"
 #import "MBXEmbeddedMapViewController.h"
+#import "MBXNationalGridProjection.h"
 #import "MBXOfflinePacksTableViewController.h"
 #import "MBXOrnamentsViewController.h"
 #import "MBXSnapshotTestViewController.h"
@@ -2540,6 +2542,34 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.styleURLs addObject:url];
   }
 
+  /// A map in a registered projection: NASA GIBS imagery of the Arctic in EPSG:3413
+  NSURL *arcticURL = [[NSBundle mainBundle] URLForResource:@"arctic" withExtension:@"json"];
+  if (arcticURL) {
+    static dispatch_once_t registerArcticProjection;
+    dispatch_once(&registerArcticProjection, ^{
+      NSError *error;
+      if (![MLNStyle addProjection:MBXArcticProjection() error:&error]) {
+        NSLog(@"%@", error.localizedDescription);
+      }
+    });
+    [self.styleNames addObject:@"Arctic sea ice (EPSG:3413)"];
+    [self.styleURLs addObject:arcticURL];
+  }
+
+  /// The British National Grid render test's crosshairs, from tiles in the app bundle
+  NSURL *nationalGridURL = MBXNationalGridCrosshairsStyleURL([NSBundle mainBundle]);
+  if (nationalGridURL) {
+    static dispatch_once_t registerNationalGrid;
+    dispatch_once(&registerNationalGrid, ^{
+      NSError *error;
+      if (![MLNStyle addProjection:MBXNationalGridProjection() error:&error]) {
+        NSLog(@"%@", error.localizedDescription);
+      }
+    });
+    [self.styleNames addObject:@"National Grid crosshairs (EPSG:27700)"];
+    [self.styleURLs addObject:nationalGridURL];
+  }
+
   /// Add MapLibre Styles if an `apiKey` exists
   NSString *apiKey = [MLNSettings apiKey];
   if (apiKey.length) {
@@ -2912,6 +2942,13 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   // that a device with an English-language locale is already effectively
   // using locale-based country labels.
   _localizingLabels = [[self bestLanguageForUser] isEqualToString:@"en"];
+
+  // A Web Mercator camera can lie far outside a registered projection's grid, so start from the
+  // style's own view.
+  if ([style.name isEqualToString:@"Arctic sea ice (EPSG:3413)"] ||
+      [style.name isEqualToString:@"National Grid crosshairs (EPSG:27700)"]) {
+    [mapView resetPosition];
+  }
 }
 
 - (BOOL)mapView:(MLNMapView *)mapView

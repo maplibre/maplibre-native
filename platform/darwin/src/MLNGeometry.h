@@ -227,6 +227,9 @@ FOUNDATION_EXTERN MLN_EXPORT MLNMapPoint MLNMapPointForCoordinate(CLLocationCoor
 
 /** Converts a map zoom level to a camera altitude.
 
+ The conversion is for Web Mercator. A map in a projection registered with
+ ``MLNStyle/addProjection:error:`` counts the projection's units as meters instead.
+
  @param zoomLevel The zoom level to convert.
  @param pitch The camera pitch, measured in degrees.
  @param latitude The latitude of the point at the center of the viewport.
@@ -238,6 +241,9 @@ FOUNDATION_EXTERN MLN_EXPORT CLLocationDistance MLNAltitudeForZoomLevel(double z
                                                                         CGSize size);
 
 /** Converts a camera altitude to a map zoom level.
+
+ The conversion is for Web Mercator. A map in a projection registered with
+ ``MLNStyle/addProjection:error:`` counts the projection's units as meters instead.
 
  @param altitude The altitude to convert, measured in meters.
  @param pitch The camera pitch, measured in degrees.

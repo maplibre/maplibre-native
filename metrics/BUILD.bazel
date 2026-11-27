@@ -40,3 +40,14 @@ filegroup(
         "//expression-test:__pkg__",
     ],
 )
+
+exports_files(
+    ["integration/render-tests/projection/national-grid/crosshairs/style.json"],
+    visibility = ["//platform:__subpackages__"],
+)
+
+filegroup(
+    name = "national-grid-tiles",
+    srcs = glob(["integration/tiles/*.national-grid.png"]),
+    visibility = ["//platform:__subpackages__"],
+)

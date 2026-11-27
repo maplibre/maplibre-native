@@ -13,13 +13,24 @@ cc_library(
     name = "testutils",
     hdrs = glob(
         ["include/mln/test/*.hpp"],
-        exclude = ["include/mln/test/national_grid.hpp"],
+        exclude = [
+            "include/mln/test/crs.hpp",
+            "include/mln/test/national_grid.hpp",
+        ],
     ),
     strip_include_prefix = "include",
     deps = [
+        ":crs",
         ":national_grid",
         "@googletest//:gtest",
     ],
+)
+
+cc_library(
+    name = "crs",
+    hdrs = ["include/mln/test/crs.hpp"],
+    strip_include_prefix = "include",
+    visibility = ["//platform:__subpackages__"],
 )
 
 cc_library(
@@ -27,7 +38,7 @@ cc_library(
     hdrs = ["include/mln/test/national_grid.hpp"],
     strip_include_prefix = "include",
     visibility = [
-        "//platform/glfw:__pkg__",
+        "//platform:__subpackages__",
         "//render-test:__pkg__",
     ],
 )

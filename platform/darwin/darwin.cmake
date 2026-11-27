@@ -166,6 +166,8 @@ endfunction()
 if(NOT MLN_WITH_WEBGPU)
     set(_custom_layer_sources
         "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
+        "${CMAKE_CURRENT_LIST_DIR}/app/MBXArcticProjection.m"
+        "${CMAKE_CURRENT_LIST_DIR}/app/MBXNationalGridProjection.mm"
         "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
     )
     if(MLN_WITH_METAL)
@@ -190,5 +192,6 @@ if(NOT MLN_WITH_WEBGPU)
             "${CMAKE_CURRENT_LIST_DIR}/app"
         PRIVATE
             "${PROJECT_SOURCE_DIR}/src" # FIXME: should not use private headers
+            "${PROJECT_SOURCE_DIR}/test/include"
     )
 endif()

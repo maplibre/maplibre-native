@@ -1,5 +1,7 @@
 #import "AppDelegate.h"
 
+#import "MBXArcticProjection.h"
+#import "MBXNationalGridProjection.h"
 #import "MapDocument.h"
 
 NSString * const MLNApiKeyDefaultsKey = @"MLNApiKey";
@@ -101,6 +103,16 @@ NSString * const MLNLastMapDebugMaskDefaultsKey = @"MLNLastMapDebugMask";
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification {
+    // Maps in registered projections, NASA GIBS imagery of the Arctic in EPSG:3413 and the British
+    // National Grid render test's crosshairs, are in the View menu. Register them before any
+    // document restores a style that names one.
+    for (MLNCoordinateReferenceSystem *projection in @[MBXArcticProjection(), MBXNationalGridProjection()]) {
+        NSError *error;
+        if (![MLNStyle addProjection:projection error:&error]) {
+            NSLog(@"%@", error.localizedDescription);
+        }
+    }
+
     [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self
                                                        andSelector:@selector(handleGetURLEvent:withReplyEvent:)
                                                      forEventClass:kInternetEventClass
