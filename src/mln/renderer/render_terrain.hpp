@@ -492,6 +492,11 @@ public:
     /// far-plane placeholder while the depth pass has not rendered yet
     const std::shared_ptr<gfx::Texture2D>& getDepthTexture(gfx::Context&);
 
+    /// The depth texture once the depth pass has drawn into a target of `size`, else null. A custom
+    /// layer is handed this rather than getDepthTexture(), which may still return the 1x1 far-plane
+    /// placeholder, and for which no backend texture exists before the first draw.
+    gfx::Texture2D* getDrawnDepthTexture(gfx::Context&, const Size& size);
+
     /// Layer group holding the terrain depth-pass drawables (not part of the
     /// orchestrator; rendered only by renderDepth)
     const LayerGroupBasePtr& getDepthLayerGroup() const { return depthLayerGroup; }
