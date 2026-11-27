@@ -8,6 +8,7 @@
 #include <functional>
 #include <future>
 #include <memory>
+#include <optional>
 #include <thread>
 
 using namespace mln;
@@ -303,6 +304,18 @@ TEST(Actor, AskVoid) {
 
     actor.self().ask(&TestActor::doIt).get();
     EXPECT_TRUE(executed);
+}
+
+TEST(Actor, ActorRefExpiresWithItsActor) {
+    struct TestActor {};
+
+    std::optional<ActorRef<TestActor>> ref;
+    {
+        Actor<TestActor> actor(Scheduler::GetBackground());
+        ref.emplace(actor.self());
+        EXPECT_FALSE(ref->expired());
+    }
+    EXPECT_TRUE(ref->expired());
 }
 
 TEST(Actor, NoSelfActorRef) {
