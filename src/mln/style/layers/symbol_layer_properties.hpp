@@ -51,6 +51,11 @@ struct IconOptional : LayoutProperty<bool> {
     static bool defaultValue() { return false; }
 };
 
+struct IconOverlap : LayoutProperty<IconOverlapType> {
+    static constexpr const char *name() { return "icon-overlap"; }
+    static IconOverlapType defaultValue() { return IconOverlapType::Undefined; }
+};
+
 struct IconPadding : DataDrivenLayoutProperty<Padding> {
     static constexpr const char *name() { return "icon-padding"; }
     static Padding defaultValue() { return {2}; }
@@ -181,6 +186,11 @@ struct TextOptional : LayoutProperty<bool> {
     static bool defaultValue() { return false; }
 };
 
+struct TextOverlap : LayoutProperty<TextOverlapType> {
+    static constexpr const char *name() { return "text-overlap"; }
+    static TextOverlapType defaultValue() { return TextOverlapType::Undefined; }
+};
+
 struct TextPadding : LayoutProperty<float> {
     static constexpr const char *name() { return "text-padding"; }
     static float defaultValue() { return 2.f; }
@@ -298,6 +308,7 @@ class SymbolLayoutProperties : public Properties<
     IconKeepUpright,
     IconOffset,
     IconOptional,
+    IconOverlap,
     IconPadding,
     IconPitchAlignment,
     IconRotate,
@@ -324,6 +335,7 @@ class SymbolLayoutProperties : public Properties<
     TextMaxWidth,
     TextOffset,
     TextOptional,
+    TextOverlap,
     TextPadding,
     TextPitchAlignment,
     TextRadialOffset,

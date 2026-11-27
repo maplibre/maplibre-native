@@ -129,6 +129,17 @@ enum class TextWritingModeType : uint8_t {
     Vertical
 };
 
+// Style-spec `icon-overlap` / `text-overlap`. `Undefined` means the property is
+// not set, in which case the deprecated `-allow-overlap` boolean is used.
+enum class IconOverlapType : uint8_t {
+    Undefined,
+    Never,
+    Always,
+    Cooperative
+};
+
+using TextOverlapType = IconOverlapType;
+
 enum class LightAnchorType : bool {
     Map,
     Viewport
