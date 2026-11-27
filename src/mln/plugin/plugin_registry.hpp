@@ -110,6 +110,8 @@ struct LayerType {
     bool explicitDrawPasses = false;
     bool enableNearClippedMatrix = false;
     mln_plugin_should_animate_fn shouldAnimate = nullptr;
+    mln_plugin_create_resource_fn createResource = nullptr;
+    mln_plugin_destroy_resource_fn destroyResource = nullptr;
     bool operator==(const LayerType&) const = default;
 
     const PropertyDefinition* findProperty(const std::string& name) const;

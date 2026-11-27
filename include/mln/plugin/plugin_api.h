@@ -71,6 +71,11 @@ typedef enum mln_plugin_value_type {
      * its features when it is laid out, and feature state changes without a
      * new layout. */
     MLN_PLUGIN_VALUE_IMAGE = 6,
+    /* Layout only. The URL of a resource for the host to load, such as
+     * "asset://car.glb", possibly through a feature expression such as
+     * ["get", "model_url"]. An empty URL names no resource. Represented by
+     * data.resource_value. */
+    MLN_PLUGIN_VALUE_RESOURCE = 7,
 } mln_plugin_value_type;
 
 /* Expression dependencies accepted by a plugin property. */
@@ -110,6 +115,17 @@ typedef struct mln_plugin_color {
     float a;
 } mln_plugin_color;
 
+/* A RESOURCE value. url comes first, so that it shares its place with
+ * string_value. */
+typedef struct mln_plugin_resource_value {
+    mln_plugin_string url;
+    /* What create_resource returned for the resource at url. Null when url is
+     * empty, when the resource failed to load or to be created, in
+     * create_layout for a value that depends on the feature, and outside
+     * layout callbacks. */
+    void* handle;
+} mln_plugin_resource_value;
+
 typedef union mln_plugin_value_data {
     float float_value;
     /* Must be 0 or 1. */
@@ -117,6 +133,7 @@ typedef union mln_plugin_value_data {
     mln_plugin_float2 float2_value;
     mln_plugin_color color_value;
     mln_plugin_string string_value;
+    mln_plugin_resource_value resource_value;
 } mln_plugin_value_data;
 
 typedef struct mln_plugin_value {
@@ -141,8 +158,11 @@ typedef struct mln_plugin_property_descriptor_v1 {
     /* Optional allowed string values. */
     const mln_plugin_string* enum_values;
     size_t enum_value_count;
-    /* 0 = paint, 1 = layout. Layout values may use camera expressions only,
-     * never transition, and are evaluated at tile zoom before create_layout. */
+    /* 0 = paint, 1 = layout. Layout values are evaluated at tile zoom: once
+     * for the tile, passed to create_layout, and once for each feature, passed
+     * to layout_feature (see mln_plugin_feature_v1::layout_properties). They
+     * may use camera, feature and composite expressions, but not feature
+     * state, and never transition. */
     uint8_t is_layout;
 } mln_plugin_property_descriptor_v1;
 
@@ -332,6 +352,10 @@ typedef struct mln_plugin_feature_v1 {
     /* path_offsets has path_count + 1 entries and ends at point_count. */
     const uint32_t* path_offsets;
     size_t path_count;
+    /* The layout properties evaluated for this feature, in registration order.
+     * Set for layout_feature only; null with a zero count otherwise. */
+    const mln_plugin_property_value_v1* layout_properties;
+    size_t layout_property_count;
 } mln_plugin_feature_v1;
 
 /* Worker-thread input. Paint evaluation is owned by the host binders. */
@@ -339,6 +363,8 @@ typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
+    /* The layout properties evaluated at tile zoom without a feature, in
+     * registration order. A feature-dependent value is its default here. */
     const mln_plugin_property_value_v1* properties;
     size_t property_count;
     /* 1 when the map renders a still image or a tile, 0 for a continuous map. A continuous map draws a point only in
@@ -539,6 +565,25 @@ typedef mln_plugin_status (*mln_plugin_evaluate_layer_fn)(const mln_plugin_prope
  * maps. */
 typedef uint8_t (*mln_plugin_should_animate_fn)(const mln_plugin_property_value_v1* properties, size_t property_count);
 
+/*
+ * Resources at the URLs of RESOURCE properties. The host loads each URL through its
+ * file source (cache, URL transformation, asset://, file://) on the render
+ * thread, and lays a tile out only after the resources its features name have
+ * arrived, as it does for sprite images. Before the layout, on a tile worker,
+ * it calls create_resource once per loaded resource and layer type; url and
+ * data are borrowed for the call. The handle reaches create_layout and
+ * layout_feature through RESOURCE values, possibly on several workers at once,
+ * so what it points to must not change. Every non-null handle transfers to the
+ * host regardless of the status code: destroy_resource runs exactly once for
+ * it, on any thread, when no tile uses the resource any more. A failed
+ * creation is not retried for that load.
+ */
+typedef mln_plugin_status (*mln_plugin_create_resource_fn)(mln_plugin_string url,
+                                                           const uint8_t* data,
+                                                           size_t data_size,
+                                                           void** handle);
+typedef void (*mln_plugin_destroy_resource_fn)(void* handle);
+
 /* The name of a layer type cannot be the name of a built-in layer type or of a layer type of another plugin, which
  * registration rejects with MLN_PLUGIN_STATUS_CONFLICT. A reverse domain name prefix, as in org.maplibre.circle, keeps
  * it unique. */
@@ -565,6 +610,9 @@ typedef struct mln_plugin_layer_type_v1 {
     /* Unaligned projection with near-clip adjustment; translation is host-owned. */
     uint8_t enable_near_clipped_matrix;
     mln_plugin_should_animate_fn should_animate;
+    /* Required by, and only by, a layer type with a RESOURCE property. */
+    mln_plugin_create_resource_fn create_resource;
+    mln_plugin_destroy_resource_fn destroy_resource;
 } mln_plugin_layer_type_v1;
 
 typedef struct mln_plugin_descriptor_v1 {

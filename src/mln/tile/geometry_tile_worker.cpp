@@ -23,6 +23,7 @@
 #include <mln/util/string.hpp>
 #include <mln/util/thread_pool.hpp>
 
+#include <optional>
 #include <utility>
 
 namespace mln {
@@ -240,6 +241,11 @@ void GeometryTileWorker::setShowCollisionBoxes(bool showCollisionBoxes_, uint64_
 void GeometryTileWorker::symbolDependenciesChanged() {
     MLN_TRACE_FUNC();
 
+    // `parse` finalizes once it has requested every dependency.
+    if (parsing) {
+        return;
+    }
+
     try {
         switch (state) {
             case Idle:
@@ -376,6 +382,18 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
     symbolDependenciesChanged();
 }
 
+#if MLN_WITH_PLUGINS
+void GeometryTileWorker::onLayoutResourcesAvailable(LayoutResourceMap resources) {
+    MLN_TRACE_FUNC();
+
+    for (auto& [url, resource] : resources) {
+        // A reply for a URL that the current layouts no longer need is dropped.
+        if (pendingResourceDependencies.erase(url) != 0) resourceMap.insert_or_assign(url, std::move(resource));
+    }
+    symbolDependenciesChanged();
+}
+#endif
+
 void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependencies) {
     MLN_TRACE_FUNC();
 
@@ -412,6 +430,24 @@ void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependen
     }
 }
 
+#if MLN_WITH_PLUGINS
+void GeometryTileWorker::requestNewResources(const LayoutResourceDependencies& resourceDependencies) {
+    MLN_TRACE_FUNC();
+
+    // Keep only what the current layouts use, so that a resource no tile needs any more can be released.
+    std::erase_if(resourceMap, [&](const auto& entry) { return !resourceDependencies.contains(entry.first); });
+    std::erase_if(pendingResourceDependencies, [&](const auto& url) { return !resourceDependencies.contains(url); });
+
+    LayoutResourceDependencies missing;
+    for (const auto& url : resourceDependencies) {
+        if (!resourceMap.contains(url) && pendingResourceDependencies.insert(url).second) missing.insert(url);
+    }
+    if (!missing.empty()) {
+        parent.invoke(&GeometryTile::getLayoutResources, std::move(missing));
+    }
+}
+#endif
+
 void GeometryTileWorker::setObserver(TileObserver* observer_) {
     observer = observer_;
 }
@@ -426,6 +462,16 @@ void GeometryTileWorker::parse() {
     // The layouts created below check the symbols they build; report through the tile's observer,
     // called on this worker thread.
     const ErrorScope errorScope{observer};
+
+    struct ParsingScope {
+        bool& flag;
+        explicit ParsingScope(bool& flag_)
+            : flag(flag_) {
+            flag = true;
+        }
+        ~ParsingScope() { flag = false; }
+    };
+    std::optional<ParsingScope> parsingScope{std::in_place, parsing};
 
     MBGL_TIMING_START(watch)
 
@@ -443,6 +489,9 @@ void GeometryTileWorker::parse() {
 
     GlyphDependencies glyphDependencies;
     ImageDependencies imageDependencies;
+#if MLN_WITH_PLUGINS
+    LayoutResourceDependencies resourceDependencies;
+#endif
 
     // Create render layers and group by layout
     GroupMap groupMap = groupLayers(*layers);
@@ -485,13 +534,18 @@ void GeometryTileWorker::parse() {
         // images/glyphs are used, or the Layout is stored until the
         // images/glyphs are available to add the features to the buckets.
         if (leaderImpl.getTypeInfo()->layout == LayerTypeInfo::Layout::Required) {
-            std::unique_ptr<Layout> layout = LayerManager::get()->createLayout({.bucketParameters = parameters,
-                                                                                .fontFaces = fontFaces,
-                                                                                .glyphDependencies = glyphDependencies,
-                                                                                .imageDependencies = imageDependencies,
-                                                                                .availableImages = *availableImages},
-                                                                               std::move(geometryLayer),
-                                                                               group);
+            std::unique_ptr<Layout> layout = LayerManager::get()->createLayout(
+                {.bucketParameters = parameters,
+                 .fontFaces = fontFaces,
+                 .glyphDependencies = glyphDependencies,
+                 .imageDependencies = imageDependencies,
+                 .availableImages = *availableImages,
+#if MLN_WITH_PLUGINS
+                 .resourceDependencies = resourceDependencies
+#endif
+                },
+                std::move(geometryLayer),
+                group);
             if (layout->hasDependencies()) {
                 layouts.push_back(std::move(layout));
             } else {
@@ -532,7 +586,11 @@ void GeometryTileWorker::parse() {
 
     requestNewGlyphs(glyphDependencies);
     requestNewImages(imageDependencies);
+#if MLN_WITH_PLUGINS
+    requestNewResources(resourceDependencies);
+#endif
 
+    parsingScope.reset();
     MBGL_TIMING_FINISH(watch,
                        " Action: " << "Parsing,"
                                    << " SourceID: " << sourceID.c_str()
@@ -547,6 +605,11 @@ bool GeometryTileWorker::hasPendingDependencies() const {
             return true;
         }
     }
+#if MLN_WITH_PLUGINS
+    if (!pendingResourceDependencies.empty()) {
+        return true;
+    }
+#endif
     return !pendingImageDependencies.empty();
 }
 
@@ -584,6 +647,9 @@ void GeometryTileWorker::finalizeLayout() {
             }
 
             layout->prepareSymbols(glyphMap, glyphAtlas.glyphPositions, iconMap, imageAtlas.iconPositions);
+#if MLN_WITH_PLUGINS
+            layout->prepareResources(resourceMap);
+#endif
 
             if (!layout->hasSymbolInstances()) {
                 continue;

@@ -1,11 +1,25 @@
 #include <mln/plugin/plugin_registry.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/style/image_impl.hpp>
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/layer.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/renderer/image_manager.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/storage/response.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/text/glyph_manager.hpp>
+#include <mln/tile/geojson_tile.hpp>
+#include <mln/util/run_loop.hpp>
 #include <gtest/gtest.h>
 
+#include <array>
 #include <cstdlib>
+#include <map>
 #include <cstring>
 #include <memory>
 
@@ -412,9 +426,11 @@ TEST(PluginApi, LayoutPropertiesValidateScopeSerializeAndInvalidateGeometry) {
     input.property.supports_transitions = 1;
     input.expectRejected();
     input.property.supports_transitions = 0;
-    input.property.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE;
+    input.property.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
     input.expectRejected();
-    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    // Feature-dependent layout values are evaluated per feature and need no shader binding.
+    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
+                                             MLN_PLUGIN_EXPRESSION_COMPOSITE;
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
     style::conversion::Error error;
     auto parse = [&](const std::string& section, int value) {
@@ -463,4 +479,294 @@ TEST(PluginApi, NormalizedColorEncodingValidatesAttributesAndUniformFootprint) {
     input.expectRejected(); // Two endpoints cannot share one attribute ID.
     input.binding.maximum_attribute_id = 2;
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+}
+
+namespace {
+
+struct ResourceDescriptor : Descriptor {
+    explicit ResourceDescriptor(std::string id_)
+        : Descriptor(std::move(id_)) {
+        properties[0].struct_size = sizeof(properties[0]);
+        properties[0].is_layout = 1;
+        properties[0].name = view(modelName);
+        properties[0].type = MLN_PLUGIN_VALUE_RESOURCE;
+        properties[0].default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_RESOURCE, {}};
+        properties[0].expression_capabilities = MLN_PLUGIN_EXPRESSION_FEATURE;
+        layer.properties = properties.data();
+        layer.property_count = properties.size();
+        shader.property_binding_count = 0;
+        layer.create_resource = [](mln_plugin_string, const uint8_t*, size_t, void**) {
+            return MLN_PLUGIN_STATUS_OK;
+        };
+        layer.destroy_resource = [](void*) {
+        };
+    }
+
+    std::string modelName = "test-model";
+    std::array<mln_plugin_property_descriptor_v1, 1> properties{};
+};
+
+} // namespace
+
+TEST(PluginApi, ResourcePropertiesValidateTheirDescriptorAndCallbacks) {
+    ResourceDescriptor input("test.resources");
+    input.layer.create_resource = nullptr;
+    input.expectRejected(); // A RESOURCE property needs both callbacks.
+    input.layer.create_resource = ResourceDescriptor("test.resources.callbacks").layer.create_resource;
+
+    input.properties[0].is_layout = 0;
+    input.expectRejected(); // Resource properties are layout properties.
+    input.properties[0].is_layout = 1;
+
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+    const auto registration = plugin::PluginRegistry::get().findLayerType(input.type);
+    ASSERT_TRUE(registration);
+    EXPECT_TRUE(registration->createResource);
+    EXPECT_TRUE(registration->destroyResource);
+
+    // Resource callbacks without a RESOURCE property are rejected too.
+    Descriptor plain("test.resources.unused");
+    plain.layer.create_resource = input.layer.create_resource;
+    plain.layer.destroy_resource = input.layer.destroy_resource;
+    plain.expectRejected();
+}
+
+TEST(PluginApi, ResourcePropertyParsesSerializesAndInvalidatesLayout) {
+    ResourceDescriptor input("test.resources-style");
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+    style::conversion::Error error;
+    auto parse = [&](const std::string& layout) {
+        return style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+            R"({"id":"test","source":"s","type":")" + input.type + R"(","layout":)" + layout + "}", error);
+    };
+    EXPECT_FALSE(parse(R"({"test-model":{"car":"asset://car.glb"}})"));
+    EXPECT_FALSE(parse(R"({"test-model":["feature-state","url"]})"));
+
+    auto a = parse(R"({"test-model":"asset://car.glb"})");
+    auto b = parse(R"({"test-model":"asset://truck.glb"})");
+    auto c = parse(R"({"test-model":["get","url"]})");
+    ASSERT_TRUE(a) << error.message;
+    ASSERT_TRUE(b) << error.message;
+    ASSERT_TRUE(c) << error.message;
+    const auto& ai = static_cast<style::PluginStyleLayer&>(**a).impl();
+    const auto& bi = static_cast<style::PluginStyleLayer&>(**b).impl();
+    const auto& ci = static_cast<style::PluginStyleLayer&>(**c).impl();
+    EXPECT_TRUE(ai.hasLayoutDifference(bi));
+    EXPECT_TRUE(ai.hasLayoutDifference(ci));
+    EXPECT_FALSE(ai.hasLayoutDifference(ai));
+
+    const auto property = (*a)->getProperty("test-model");
+    EXPECT_EQ(style::StyleProperty::Kind::Constant, property.getKind());
+    ASSERT_TRUE(property.getValue().getString());
+    EXPECT_EQ("asset://car.glb", *property.getValue().getString());
+
+    const auto serialized = (*a)->serialize();
+    const auto& layout = *serialized.getObject()->at("layout").getObject();
+    EXPECT_EQ("asset://car.glb", *layout.at("test-model").getString());
+}
+
+namespace {
+
+class PointData final : public style::GeoJSONData {
+public:
+    explicit PointData(mapbox::feature::feature_collection<int16_t> features_)
+        : features(std::move(features_)) {}
+    void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>& fn, bool) override { fn(features); }
+    Features getChildren(std::uint32_t) override { return {}; }
+    Features getLeaves(std::uint32_t, std::uint32_t, std::uint32_t) override { return {}; }
+    std::uint8_t getClusterExpansionZoom(std::uint32_t) override { return 0; }
+
+private:
+    TileFeatures features;
+};
+
+struct TileResourceRecord {
+    std::vector<std::string> created;
+    unsigned destroyed = 0;
+    std::vector<void*> featureHandles;
+} tileResources;
+
+} // namespace
+
+TEST(PluginApi, LaysATileOutOnceTheResourcesItsFeaturesNameHaveLoaded) {
+    tileResources = {};
+    ResourceDescriptor input("test.resources-tile");
+    input.layer.create_layout = [](const mln_plugin_layout_context_v1*, void** instance) {
+        static int layout = 0;
+        *instance = &layout;
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.layout_feature = [](void*, const mln_plugin_feature_v1* feature) {
+        EXPECT_EQ(1u, feature->layout_property_count);
+        if (feature->layout_property_count == 1) {
+            tileResources.featureHandles.push_back(feature->layout_properties[0].value.data.resource_value.handle);
+        }
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
+        *output = {};
+        output->struct_size = sizeof(*output);
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.create_resource = [](mln_plugin_string, const uint8_t* data, size_t size, void** handle) {
+        tileResources.created.emplace_back(reinterpret_cast<const char*>(data), size);
+        *handle = new std::string(tileResources.created.back());
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.destroy_resource = [](void* handle) {
+        ++tileResources.destroyed;
+        delete static_cast<std::string*>(handle);
+    };
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(StubFileSource::ResponseType::Manual);
+    std::vector<std::string> requested;
+    fileSource->response = [&](const Resource& resource) -> std::optional<Response> {
+        requested.push_back(resource.url);
+        Response response;
+        response.data = std::make_shared<std::string>("glb of " + resource.url);
+        return response;
+    };
+    TransformState transformState;
+    util::SimpleIdentity uniqueID;
+    TileParameters parameters{.pixelRatio = 1.0,
+                              .debugOptions = MapDebugOptions(),
+                              .transformState = transformState,
+                              .fileSource = fileSource,
+                              .mode = MapMode::Continuous,
+                              .annotationManager = {},
+                              .imageManager = ImageManager::create(),
+                              .glyphManager = std::make_shared<GlyphManager>(),
+                              .prefetchZoomDelta = 0,
+                              .threadPool = {Scheduler::GetBackground(), uniqueID},
+                              .isUpdateSynchronous = true};
+
+    style::conversion::Error error;
+    const auto layer = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+        R"({"id":"models","source":"points","type":")" + input.type +
+            R"(","layout":{"test-model":)"
+            R"(["match",["get","kind"],"car","asset://car.glb","truck","asset://truck.glb",""]}})",
+        error);
+    ASSERT_TRUE(layer) << error.message;
+    const std::vector<Immutable<style::LayerProperties>> layers{makeMutable<style::PluginStyleLayerProperties>(
+        staticImmutableCast<style::PluginStyleLayer::Impl>((*layer)->baseImpl))};
+
+    mapbox::feature::feature_collection<int16_t> features;
+    mapbox::feature::feature<int16_t> car{mapbox::geometry::point<int16_t>(100, 100)};
+    car.properties = {{"kind", std::string("car")}};
+    features.push_back(std::move(car));
+    // A feature whose URL evaluates to the empty string names no resource.
+    mapbox::feature::feature<int16_t> unknown{mapbox::geometry::point<int16_t>(200, 200)};
+    unknown.properties = {{"kind", std::string("bus")}};
+    features.push_back(std::move(unknown));
+    {
+        GeoJSONTile tile(OverscaledTileID(0, 0, 0), "points", parameters, std::make_shared<PointData>(features));
+        tile.setLayers(layers, nullptr);
+        // The tile waits for the model its feature names; the layer's other model is not loaded.
+        EXPECT_FALSE(tile.isComplete());
+        EXPECT_TRUE(tileResources.featureHandles.empty());
+
+        fileSource->respondToAll();
+        EXPECT_EQ((std::vector<std::string>{"asset://car.glb"}), requested);
+        EXPECT_TRUE(tile.isComplete());
+        EXPECT_EQ((std::vector<std::string>{"glb of asset://car.glb"}), tileResources.created);
+        ASSERT_EQ(2u, tileResources.featureHandles.size());
+        ASSERT_NE(nullptr, tileResources.featureHandles[0]);
+        EXPECT_EQ("glb of asset://car.glb", *static_cast<std::string*>(tileResources.featureHandles[0]));
+        EXPECT_EQ(nullptr, tileResources.featureHandles[1]);
+        EXPECT_EQ(0u, tileResources.destroyed);
+    }
+    // No tile uses the model any more.
+    EXPECT_EQ(1u, tileResources.destroyed);
+}
+
+// parse() requests the images before the resources. An image that is already loaded is answered while parse() still
+// runs, and that answer must not lay the tile out before the resources are requested and have arrived.
+TEST(PluginApi, WaitsForResourcesWhenAnImageIsAnsweredDuringParse) {
+    tileResources = {};
+    ResourceDescriptor input("test.resources-image");
+    input.layer.create_layout = [](const mln_plugin_layout_context_v1*, void** instance) {
+        static int layout = 0;
+        *instance = &layout;
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.layout_feature = [](void*, const mln_plugin_feature_v1* feature) {
+        if (feature->layout_property_count == 1) {
+            tileResources.featureHandles.push_back(feature->layout_properties[0].value.data.resource_value.handle);
+        }
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
+        *output = {};
+        output->struct_size = sizeof(*output);
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.create_resource = [](mln_plugin_string, const uint8_t* data, size_t size, void** handle) {
+        tileResources.created.emplace_back(reinterpret_cast<const char*>(data), size);
+        *handle = new std::string(tileResources.created.back());
+        return MLN_PLUGIN_STATUS_OK;
+    };
+    input.layer.destroy_resource = [](void* handle) {
+        ++tileResources.destroyed;
+        delete static_cast<std::string*>(handle);
+    };
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>(StubFileSource::ResponseType::Manual);
+    fileSource->response = [&](const Resource& resource) -> std::optional<Response> {
+        Response response;
+        response.data = std::make_shared<std::string>("glb of " + resource.url);
+        return response;
+    };
+    // The icon is already loaded, so the image manager answers as soon as the tile asks.
+    auto imageManager = ImageManager::create();
+    imageManager->addImage(makeMutable<style::Image::Impl>("pin", PremultipliedImage({4, 4}), 1.0f));
+    imageManager->setLoaded(true);
+    TransformState transformState;
+    util::SimpleIdentity uniqueID;
+    TileParameters parameters{.pixelRatio = 1.0,
+                              .debugOptions = MapDebugOptions(),
+                              .transformState = transformState,
+                              .fileSource = fileSource,
+                              .mode = MapMode::Continuous,
+                              .annotationManager = {},
+                              .imageManager = imageManager,
+                              .glyphManager = std::make_shared<GlyphManager>(),
+                              .prefetchZoomDelta = 0,
+                              .threadPool = {Scheduler::GetBackground(), uniqueID},
+                              .isUpdateSynchronous = true};
+
+    style::conversion::Error error;
+    const auto models = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+        R"({"id":"models","source":"points","type":")" + input.type + R"(","layout":{"test-model":["get","url"]}})",
+        error);
+    ASSERT_TRUE(models) << error.message;
+    const auto pins = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+        R"({"id":"pins","source":"points","type":"symbol","layout":{"icon-image":"pin"}})", error);
+    ASSERT_TRUE(pins) << error.message;
+    const std::vector<Immutable<style::LayerProperties>> layers{
+        makeMutable<style::PluginStyleLayerProperties>(
+            staticImmutableCast<style::PluginStyleLayer::Impl>((*models)->baseImpl)),
+        makeMutable<style::SymbolLayerProperties>(staticImmutableCast<style::SymbolLayer::Impl>((*pins)->baseImpl))};
+
+    mapbox::feature::feature_collection<int16_t> features;
+    mapbox::feature::feature<int16_t> car{mapbox::geometry::point<int16_t>(100, 100)};
+    car.properties = {{"url", std::string("asset://car.glb")}};
+    features.push_back(std::move(car));
+    {
+        GeoJSONTile tile(OverscaledTileID(0, 0, 0), "points", parameters, std::make_shared<PointData>(features));
+        tile.setLayers(layers, nullptr);
+        // The image answered during parse(), but the model has not arrived, so nothing is laid out yet.
+        EXPECT_FALSE(tile.isComplete());
+        EXPECT_TRUE(tileResources.featureHandles.empty());
+
+        fileSource->respondToAll();
+        EXPECT_TRUE(tile.isComplete());
+        ASSERT_EQ(1u, tileResources.featureHandles.size());
+        ASSERT_NE(nullptr, tileResources.featureHandles[0]);
+        EXPECT_EQ("glb of asset://car.glb", *static_cast<std::string*>(tileResources.featureHandles[0]));
+    }
+    EXPECT_EQ(1u, tileResources.destroyed);
 }

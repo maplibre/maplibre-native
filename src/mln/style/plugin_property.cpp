@@ -114,6 +114,8 @@ auto withPropertyType(mln_plugin_value_type type, Fn&& fn) {
         case MLN_PLUGIN_VALUE_COLOR:
             return fn.template operator()<Color>();
         case MLN_PLUGIN_VALUE_STRING:
+        // A RESOURCE is held as its URL.
+        case MLN_PLUGIN_VALUE_RESOURCE:
             return fn.template operator()<std::string>();
     }
     throw std::logic_error("Invalid plugin property type");
@@ -239,8 +241,15 @@ float PluginPropertyValue::interpolationFactor(float bucketZoom, float currentZo
 mln_plugin_value PluginPropertyValue::evaluate(const expression::EvaluationContext& context,
                                                const plugin::PropertyDefinition& definition,
                                                EvaluationStorage& storage) const {
-    return std::visit(
+    auto result = std::visit(
         [&](const auto& typed) { return toPluginValue(evaluateTyped(typed, context, definition), storage); }, value);
+    if (definition.type == MLN_PLUGIN_VALUE_RESOURCE) {
+        // The layout, which has the loaded resources, fills in the handle.
+        const auto url = result.data.string_value;
+        result.type = MLN_PLUGIN_VALUE_RESOURCE;
+        result.data.resource_value = {url, nullptr};
+    }
+    return result;
 }
 
 mln_plugin_value PluginPropertyValue::evaluate(float zoom,
