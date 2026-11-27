@@ -45,12 +45,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static org.maplibre.android.location.LocationComponentConstants.COMPASS_MIN_ANIMATED_CHANGE_DEGREES;
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_FASTEST_INTERVAL_MILLIS;
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_INTERVAL_MILLIS;
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_PADDING_ANIM_DURATION;
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_TILT_ANIM_DURATION;
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_ZOOM_ANIM_DURATION;
 import static org.maplibre.android.location.LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS;
+import static org.maplibre.android.location.Utils.normalize;
 import static org.maplibre.android.location.modes.RenderMode.GPS;
 
 
@@ -134,6 +136,23 @@ public final class LocationComponent {
    */
   @Nullable
   private Location lastLocation;
+
+  /**
+   * Copy of the last location given to the animators, so that updates which would not change what is shown can be
+   * skipped. A copy, because callers may reuse and modify the same {@link Location} object. {@code null} while the
+   * animations are stopped, after the render or camera mode changed, after a camera transition, and after a
+   * multi-point update.
+   */
+  @Nullable
+  private Location lastAnimatedLocation;
+
+  /**
+   * The last compass heading given to the animators. {@code null} while the animations are stopped, after the render
+   * or camera mode changed, and after a camera transition.
+   */
+  @Nullable
+  private Float lastAnimatedCompassHeading;
+
   private CameraPosition lastCameraPosition;
 
   /**
@@ -418,6 +437,9 @@ public final class LocationComponent {
     }
 
     private void reset(@CameraMode.Mode int cameraMode) {
+      // The camera ignored values given during the transition, so the next location and heading are given again.
+      lastAnimatedLocation = null;
+      lastAnimatedCompassHeading = null;
       locationAnimatorCoordinator.resetAllCameraAnimations(maplibreMap.getCameraPosition(),
         cameraMode == CameraMode.TRACKING_GPS_NORTH);
     }
@@ -1187,6 +1209,8 @@ public final class LocationComponent {
 
     stopPulsingLocationCircle();
     locationAnimatorCoordinator.cancelAllAnimations();
+    lastAnimatedLocation = null;
+    lastAnimatedCompassHeading = null;
     if (locationEngine != null) {
       locationEngine.removeLocationUpdates(currentLocationEngineListener);
     }
@@ -1325,19 +1349,41 @@ public final class LocationComponent {
     if (!fromLastLocation) {
       staleStateManager.updateLatestLocationTime();
     }
-    CameraPosition currentCameraPosition = maplibreMap.getCameraPosition();
-    boolean isGpsNorth = getCameraMode() == CameraMode.TRACKING_GPS_NORTH;
-    if (intermediatePoints != null) {
-      locationAnimatorCoordinator.feedNewLocation(
-        getTargetLocationWithIntermediates(location, intermediatePoints),
-        currentCameraPosition,
-        isGpsNorth,
-        lookAheadUpdate);
-    } else {
-      locationAnimatorCoordinator.feedNewLocation(location, currentCameraPosition, isGpsNorth);
+
+    // Don't give the animators a location that wouldn't change what is shown. A new animation towards the same values
+    // would update the location layer, or move the tracking camera, on every frame and keep the map rendering.
+    boolean samePosition = !fromLastLocation && intermediatePoints == null
+      && isSamePosition(lastAnimatedLocation, location);
+    if (samePosition && location.getAccuracy() == lastAnimatedLocation.getAccuracy()) {
+      lastLocation = location;
+      return;
+    }
+
+    if (!samePosition) {
+      CameraPosition currentCameraPosition = maplibreMap.getCameraPosition();
+      boolean isGpsNorth = getCameraMode() == CameraMode.TRACKING_GPS_NORTH;
+      if (intermediatePoints != null) {
+        locationAnimatorCoordinator.feedNewLocation(
+          getTargetLocationWithIntermediates(location, intermediatePoints),
+          currentCameraPosition,
+          isGpsNorth,
+          lookAheadUpdate);
+      } else {
+        locationAnimatorCoordinator.feedNewLocation(location, currentCameraPosition, isGpsNorth);
+      }
     }
     updateAccuracyRadius(location, false);
     lastLocation = location;
+    // After a multi-point update the animation still follows the intermediate points, so the next location is always
+    // given, even if it equals the last point.
+    lastAnimatedLocation = intermediatePoints == null ? new Location(location) : null;
+  }
+
+  private static boolean isSamePosition(@Nullable Location previous, @NonNull Location location) {
+    return previous != null
+      && previous.getLatitude() == location.getLatitude()
+      && previous.getLongitude() == location.getLongitude()
+      && previous.getBearing() == location.getBearing();
   }
 
   private Location[] getTargetLocationWithIntermediates(Location location, List<Location> intermediatePoints) {
@@ -1360,7 +1406,14 @@ public final class LocationComponent {
   }
 
   private void updateCompassHeading(float heading) {
+    // Compass sensors report small changes even while the device lies still. Like unchanged locations, changes too
+    // small to see are not given to the animators.
+    if (lastAnimatedCompassHeading != null
+      && Math.abs(normalize(heading - lastAnimatedCompassHeading + 180) - 180) < COMPASS_MIN_ANIMATED_CHANGE_DEGREES) {
+      return;
+    }
     locationAnimatorCoordinator.feedNewCompassBearing(heading, maplibreMap.getCameraPosition());
+    lastAnimatedCompassHeading = heading;
   }
 
   /**
@@ -1420,6 +1473,11 @@ public final class LocationComponent {
   }
 
   private void updateAnimatorListenerHolders() {
+    // Animators that start listening now may not have a value yet, so the next location and heading are given to the
+    // animators even if they didn't change.
+    lastAnimatedLocation = null;
+    lastAnimatedCompassHeading = null;
+
     Set<AnimatorListenerHolder> animationsValueChangeListeners = new HashSet<>();
     animationsValueChangeListeners.addAll(locationLayerController.getAnimationListeners());
     animationsValueChangeListeners.addAll(locationCameraController.getAnimationListeners());

@@ -14,6 +14,7 @@
 
 ### 🐞 Bug fixes
 
+- Stop the location component from keeping the map rendering at full frame rate while nothing changes. Locations with an unchanged position and accuracy, and compass heading changes below 0.1°, are no longer given to the puck and camera animators ([#4882](https://github.com/maplibre/maplibre-native/pull/4882)).
 - `raster` and `raster-dem` sources loaded from a `url` take the style's inline `minzoom` and `maxzoom` over the TileJSON's, as `vector` sources and maplibre-gl-js already do. A `raster-dem` source with an invalid `encoding`, `minzoom` or `maxzoom`, or a `raster` source with an invalid `minzoom` or `maxzoom`, is now rejected with an error, as a `vector` source is. Before, such a `raster-dem` source still loaded, decoded as Mapbox whatever its `encoding` ([#4557](https://github.com/maplibre/maplibre-native/pull/4557)).
 - Color property getters return whole-number channels, as MapLibre GL JS prints colors: a color set to `rgba(240,245,255,1)` reads back as set instead of `rgba(240.00001525878906,245.00001525878906,255,1)` ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
 - Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).
