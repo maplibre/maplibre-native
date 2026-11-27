@@ -23,7 +23,8 @@ public:
 
     void querySourceFeatures(std::vector<Feature>& result,
                              const SourceQueryOptions&,
-                             const GlobalStateMap* globalState) override;
+                             const GlobalStateMap* globalState,
+                             const WorldCoordinateHelper&) override;
 
 private:
     std::shared_ptr<style::GeoJSONData> data;

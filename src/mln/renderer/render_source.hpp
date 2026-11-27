@@ -34,6 +34,7 @@ class TileParameters;
 class TransformParameters;
 class TransformState;
 class UpdateParameters;
+class WorldCoordinateHelper;
 
 namespace gfx {
 class UploadPass;
@@ -90,7 +91,9 @@ public:
         const GlobalStateMap* globalState,
         const mat4& projMatrix) const = 0;
 
-    virtual std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const = 0;
+    virtual std::vector<Feature> querySourceFeatures(const SourceQueryOptions&,
+                                                     const GlobalStateMap*,
+                                                     const WorldCoordinateHelper&) const = 0;
 
     virtual FeatureExtensionValue queryFeatureExtensions(const Feature&,
                                                          const std::string&,

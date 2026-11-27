@@ -1,5 +1,6 @@
 #include <gmock/gmock.h>
 
+#include <mln/test/crs.hpp>
 #include <mln/test/util.hpp>
 #include <mln/test/stub_file_source.hpp>
 #include <mln/test/stub_map_observer.hpp>
@@ -33,6 +34,7 @@
 #include <mln/style/layers/location_indicator_layer.hpp>
 #include <mln/style/layers/raster_layer.hpp>
 #include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/projection.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/sources/image_source.hpp>
@@ -49,7 +51,11 @@
 #include <mln/util/run_loop.hpp>
 #include <mln/util/timer.hpp>
 
+#include <array>
 #include <atomic>
+#include <memory>
+#include <span>
+#include <vector>
 
 using namespace mln;
 using namespace mln::style;
@@ -201,6 +207,213 @@ TEST(Map, LatLngBoundsToCamera) {
     CameraOptions virtualCamera = test.map.cameraForLatLngBounds(bounds, {});
     ASSERT_TRUE(bounds.contains(*virtualCamera.center));
     EXPECT_NEAR(*virtualCamera.zoom, 1.55467, 1e-5);
+}
+
+TEST(Map, LatLngBoundsToCameraInAPolarProjection) {
+    CRS crs = test::northPolarStereographic("test:polar-fit");
+    auto forwardCalls = std::make_shared<std::vector<std::size_t>>();
+    crs.forward = [forward = crs.forward, forwardCalls](std::span<const std::array<double, 2>> lngLats,
+                                                        std::span<std::array<double, 2>> positions) {
+        forwardCalls->push_back(lngLats.size());
+        forward(lngLats, positions);
+    };
+    addProjection(std::move(crs));
+    {
+        MapTest<> test;
+        test.map.getStyle().loadJSON(
+            R"({"version": 8, "projection": {"type": "test:polar-fit"}, "sources": {}, "layers": []})");
+        forwardCalls->clear();
+
+        // Its corners are the pole and one point on its edge, but the cap north of 60N is a disc around the pole.
+        CameraOptions camera = test.map.cameraForLatLngBounds(LatLngBounds::hull({60, -180}, {90, 180}), {});
+        ASSERT_TRUE(camera.center);
+        EXPECT_NEAR(90, camera.center->latitude(), 1e-6);
+        // The box is fitted by its 17 by 17 samples, which go through the converter in one call.
+        EXPECT_THAT(*forwardCalls, testing::Contains(289u));
+        EXPECT_LT(forwardCalls->size(), 289u);
+    }
+    removeProjection("test:polar-fit");
+}
+
+TEST(Map, MetersPerPixelInMercatorIsItsScaleAtTheLatitude) {
+    MapTest<> test;
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{40, -74}).withZoom(10.5));
+
+    EXPECT_EQ(mln::Projection::getMetersPerPixelAtLatitude(55, 10.5), test.map.getMetersPerPixelAt({55, 20}));
+    const MapProjection projection(test.map);
+    EXPECT_EQ(test.map.getMetersPerPixelAt({55, 20}), projection.getMetersPerPixelAt({55, 20}));
+    EXPECT_FALSE(projection.getRegisteredProjectionMetersPerPixel(3));
+}
+
+TEST(Map, MetersPerPixelInARegisteredProjection) {
+    addProjection(test::polarStereographic("test:polar-scale"));
+    {
+        MapTest<> test;
+        test.map.getStyle().loadJSON(
+            R"({"version": 8, "projection": {"type": "test:polar-scale"}, "sources": {}, "layers": []})");
+        struct Camera {
+            LatLng center;
+            double zoom;
+            LatLng location;
+            double metersPerPixel;
+        };
+        // GL JS's numbers for the same projection, from its own `Map.project`, `Map.unproject` and
+        // `LngLat.distanceTo` as its geolocate control calls them: the distance from the location to the point 100
+        // pixels to its right, over 100. At bearing 0 and pitch 0 those are 100 pixels along the projection's x axis.
+        const std::array cameras = {
+            Camera{{70, -45}, 4, {70, -45}, 1022.8325840486776},
+            Camera{{80, 30}, 6, {81, 40}, 261.9986619836209},
+            Camera{{60, -100}, 8, {60.1, -100.2}, 61.535774394909105},
+        };
+        constexpr double relativeTolerance = 1e-9;
+        for (const auto& camera : cameras) {
+            test.map.jumpTo(
+                CameraOptions().withCenter(camera.center).withZoom(camera.zoom).withBearing(0).withPitch(0));
+            const double metersPerPixel = test.map.getMetersPerPixelAt(camera.location);
+            EXPECT_NEAR(camera.metersPerPixel, metersPerPixel, camera.metersPerPixel * relativeTolerance);
+
+            const MapProjection projection(test.map);
+            EXPECT_EQ(metersPerPixel, projection.getMetersPerPixelAt(camera.location));
+            EXPECT_EQ(test.map.getRegisteredProjectionMetersPerPixel(camera.zoom),
+                      projection.getRegisteredProjectionMetersPerPixel(camera.zoom));
+        }
+
+        // The measure runs along the projection's x axis whichever way the camera looks.
+        const Camera& first = cameras.front();
+        test.map.jumpTo(CameraOptions().withCenter(first.center).withZoom(first.zoom).withBearing(30).withPitch(45));
+        EXPECT_NEAR(first.metersPerPixel,
+                    test.map.getMetersPerPixelAt(first.location),
+                    first.metersPerPixel * relativeTolerance);
+    }
+    removeProjection("test:polar-scale");
+}
+
+TEST(Map, RegisteredProjectionMetersPerPixelIsItsUnitsAcrossAPixel) {
+    addProjection(test::polarStereographic("test:polar-camera"));
+    {
+        MapTest<> test;
+        EXPECT_FALSE(test.map.getRegisteredProjectionMetersPerPixel(3));
+
+        test.map.getStyle().loadJSON(
+            R"({"version": 8, "projection": {"type": "test:polar-camera"}, "sources": {}, "layers": []})");
+        test.map.jumpTo(CameraOptions().withCenter(LatLng{80, -45}).withZoom(4));
+
+        EXPECT_DOUBLE_EQ(8388608 / mln::Projection::worldSize(std::pow(2.0, 3)),
+                         test.map.getRegisteredProjectionMetersPerPixel(3).value());
+    }
+    removeProjection("test:polar-camera");
+}
+
+TEST(Map, TilesLoadAgainWhenTheProjectionChanges) {
+    // As in GL JS, a new projection loads every source's tiles again, since a tile ID names other ground in another
+    // projection's tile grid. Each request's `{bbox}` is in the grid it was made for.
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version": 8,
+        "sources": {"raster": {"type": "raster", "tiles": ["raster/{z}/{x}/{y}?bbox={bbox}"]},
+                    "vector": {"type": "vector", "tiles": ["vector/{z}/{x}/{y}?bbox={bbox}"]}},
+        "layers": [{"id": "raster", "type": "raster", "source": "raster"},
+                   {"id": "vector", "type": "fill", "source": "vector", "source-layer": "water"}]})");
+    std::vector<std::string> requested;
+    test.fileSource->tileResponse = [&](const Resource& resource) {
+        requested.push_back(resource.url);
+        Response response;
+        response.noContent = true;
+        return response;
+    };
+    const auto render = [&] {
+        requested.clear();
+        test.frontend.render(test.map);
+        return requested;
+    };
+    const std::string mercatorBox =
+        "?bbox=-20037508.342789244,-20037508.342789244,20037508.342789244,20037508.342789244";
+    const auto inMercator = testing::UnorderedElementsAre("raster/0/0/0" + mercatorBox, "vector/0/0/0" + mercatorBox);
+    EXPECT_THAT(render(), inMercator);
+
+    test.map.getStyle().setProjection(std::make_unique<style::Projection>());
+    EXPECT_THAT(render(), testing::IsEmpty());
+
+    auto identity = std::make_unique<style::Projection>();
+    const JSValue identityName("identity");
+    ASSERT_FALSE(identity->setProperty("type", &identityName));
+    test.map.getStyle().setProjection(std::move(identity));
+    EXPECT_THAT(render(),
+                testing::UnorderedElementsAre("raster/0/0/0?bbox=-90,-90,90,90", "vector/0/0/0?bbox=-90,-90,90,90"));
+
+    test.map.getStyle().setProjection(std::make_unique<style::Projection>());
+    EXPECT_THAT(render(), inMercator);
+}
+
+TEST(Map, FreeCameraInARegisteredProjectionIsPlacedByItsLatLngAndAltitude) {
+    addProjection(test::polarStereographic("test:polar-free-camera"));
+    {
+        MapTest<> test;
+        test.map.getStyle().loadJSON(
+            R"({"version": 8, "projection": {"type": "test:polar-free-camera"}, "sources": {}, "layers": []})");
+        // GL JS's numbers for the same projection on a 256 by 256 map, from its own
+        // `calculateCameraOptionsFromCameraLngLatAltRotation` and the camera position its camera math reads.
+        constexpr double tolerance = 1e-9;
+        const auto expectNear = [&](const auto& expected, const auto& actual) {
+            for (std::size_t i = 0; i < expected.size(); ++i) {
+                EXPECT_NEAR(expected[i], actual[i], std::max(1.0, std::abs(expected[i])) * tolerance) << i;
+            }
+        };
+
+        test.map.jumpTo(CameraOptions().withBearing(30).withPitch(40));
+        FreeCameraOptions placed;
+        placed.orientation = test.map.getFreeCameraOptions().orientation;
+        placed.setLocation({.location = {75, 20}, .altitude = 600000});
+        test.map.setFreeCameraOptions(placed);
+        const CameraOptions camera = test.map.getCameraOptions();
+        EXPECT_NEAR(73.93194983693965, camera.center->latitude(), tolerance);
+        EXPECT_NEAR(36.69149821787511, camera.center->longitude(), tolerance);
+        EXPECT_NEAR(3.005859525185552, *camera.zoom, tolerance);
+        EXPECT_NEAR(30, *camera.bearing, tolerance);
+        EXPECT_NEAR(40, *camera.pitch, tolerance);
+        const auto location = test.map.getFreeCameraOptions().getLocation();
+        ASSERT_TRUE(location);
+        EXPECT_NEAR(75, location->location.latitude(), tolerance);
+        EXPECT_NEAR(20, location->location.longitude(), tolerance);
+        EXPECT_NEAR(600000, location->altitude, 600000 * tolerance);
+
+        struct View {
+            CameraOptions camera;
+            LatLngAltitude cameraLocation;
+            LatLng centerFromCamera;
+        };
+        const std::array views = {
+            View{
+                .camera = CameraOptions().withCenter(LatLng{75, 20}).withZoom(5).withBearing(30).withPitch(40),
+                .cameraLocation = {.location = {75.05575243852425, 15.550080695737407}, .altitude = 150610.46587273604},
+                .centerFromCamera = {75, 19.999999999999986}},
+            View{.camera = CameraOptions().withCenter(LatLng{88, 100}).withZoom(6).withBearing(-60).withPitch(50),
+                 .cameraLocation = {.location = {87.82528364994329, 81.3686612806135}, .altitude = 63188.59318262557},
+                 .centerFromCamera = {88, 99.99999999999994}},
+            View{.camera = CameraOptions().withCenter(LatLng{90, 0}).withZoom(3).withBearing(0).withPitch(0),
+                 .cameraLocation = {.location = {90, 135}, .altitude = 786432},
+                 .centerFromCamera = {90, 135}},
+        };
+        for (const View& view : views) {
+            test.map.jumpTo(view.camera);
+            const FreeCameraOptions freeCamera = test.map.getFreeCameraOptions();
+            FreeCameraOptions expected;
+            expected.setLocation(view.cameraLocation);
+            expectNear(*expected.position, *freeCamera.position);
+
+            test.map.jumpTo(CameraOptions().withCenter(LatLng{70, -45}).withZoom(2).withBearing(0).withPitch(0));
+            test.map.setFreeCameraOptions(freeCamera);
+            const CameraOptions back = test.map.getCameraOptions();
+            EXPECT_NEAR(view.centerFromCamera.latitude(), back.center->latitude(), tolerance);
+            EXPECT_NEAR(view.centerFromCamera.longitude(), back.center->longitude(), tolerance);
+            EXPECT_NEAR(*view.camera.zoom, *back.zoom, tolerance);
+            EXPECT_NEAR(*view.camera.bearing, *back.bearing, tolerance);
+            EXPECT_NEAR(*view.camera.pitch, *back.pitch, tolerance);
+            const FreeCameraOptions again = test.map.getFreeCameraOptions();
+            expectNear(*freeCamera.position, *again.position);
+            expectNear(*freeCamera.orientation, *again.orientation);
+        }
+    }
+    removeProjection("test:polar-free-camera");
 }
 
 TEST(Map, LatLngBoundsToCameraWithExcessivePadding) {

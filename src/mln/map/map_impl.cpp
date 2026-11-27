@@ -2,6 +2,7 @@
 #include <mln/map/map_impl.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source.hpp>
+#include <mln/style/projection_impl.hpp>
 #include <mln/style/style_impl.hpp>
 #include <mln/util/exception.hpp>
 #include <mln/util/logging.hpp>
@@ -114,6 +115,7 @@ void Map::Impl::onUpdate() {
     TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
     transform.updateTransitions(timePoint);
+    transform.setRegisteredProjection(style->impl->getProjection()->impl->registeredProjection);
 
     UpdateParameters params = {.styleLoaded = style->impl->isLoaded(),
                                .mode = mode,
@@ -318,6 +320,8 @@ void Map::Impl::onDidFinishRenderingMap() {
 
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
+    // The style's projection decides how the camera is constrained, so it has to be in place first.
+    transform.setRegisteredProjection(style->impl->getProjection()->impl->registeredProjection);
     transform.jumpTo(camera);
     onUpdate();
 }

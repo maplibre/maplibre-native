@@ -139,7 +139,8 @@ struct AnimationOptions {
    controlling of the camera while also being fully compatible and
    interchangeable with CameraOptions. All fields are optional. */
 struct FreeCameraOptions {
-    /** Position of the camera in slightly modified web mercator coordinates
+    /** Position of the camera in slightly modified web mercator coordinates. A map in a registered projection places
+       the camera by the lat/lng and altitude the position stands for
         - The size of 1 unit is the width of the projected world instead of the
        "mercator meter". Coordinate [0, 0, 0] is the north-west corner and [1,
        1, 0] is the south-east corner.
@@ -169,7 +170,8 @@ struct FreeCameraOptions {
 
     /** Helper function for setting orientation of the camera by defining a
        focus point on the map. Up vector is required in certain scenarios where
-       bearing can't be deduced from the viewing direction */
+       bearing can't be deduced from the viewing direction. The direction is found in web mercator, so on a map in a
+       registered projection, where bearings count from the projection's grid north, the camera need not look at it */
     void lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector = std::nullopt) noexcept;
 
     /** Helper function for setting the orientation of the camera as a roll, pitch, and

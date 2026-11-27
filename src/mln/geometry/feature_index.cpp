@@ -192,7 +192,8 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
                    transformState,
                    pixelsToTileUnits,
                    posMatrix,
-                   &sourceFeatureState);
+                   &sourceFeatureState,
+                   transformState.getProjection().worldCoordinateHelper());
     }
 }
 
@@ -202,7 +203,8 @@ std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbol
     const GlobalStateMap* globalState,
     const std::unordered_map<std::string, const RenderLayer*>& layers,
     const OverscaledTileID& tileID,
-    const FeatureSortOrder& featureSortOrder) const {
+    const FeatureSortOrder& featureSortOrder,
+    const WorldCoordinateHelper& worldCoordinateHelper) const {
     std::unordered_map<std::string, std::vector<Feature>> result;
     if (!tileData) {
         return result;
@@ -245,7 +247,8 @@ std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbol
                    {},
                    0,
                    unusedMatrix,
-                   nullptr);
+                   nullptr,
+                   worldCoordinateHelper);
     }
     return result;
 }
@@ -260,7 +263,8 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
                               const TransformState& transformState,
                               const float pixelsToTileUnits,
                               const mat4& posMatrix,
-                              const SourceFeatureState* sourceFeatureState) const {
+                              const SourceFeatureState* sourceFeatureState,
+                              const WorldCoordinateHelper& worldCoordinateHelper) const {
     // Lazily calculated.
     std::unique_ptr<GeometryTileLayer> sourceLayer;
     std::unique_ptr<GeometryTileFeature> geometryTileFeature;
@@ -302,7 +306,7 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
             continue;
         }
 
-        Feature feature = convertFeature(*geometryTileFeature, tileID);
+        Feature feature = convertFeature(*geometryTileFeature, tileID, worldCoordinateHelper);
         feature.source = renderLayer->baseImpl->source;
         feature.sourceLayer = sourceLayer->getName();
         feature.state = state;

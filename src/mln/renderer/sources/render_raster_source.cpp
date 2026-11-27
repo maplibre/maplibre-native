@@ -52,7 +52,9 @@ std::unordered_map<std::string, std::vector<Feature>> RenderRasterSource::queryR
     return std::unordered_map<std::string, std::vector<Feature>>{};
 }
 
-std::vector<Feature> RenderRasterSource::querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const {
+std::vector<Feature> RenderRasterSource::querySourceFeatures(const SourceQueryOptions&,
+                                                             const GlobalStateMap*,
+                                                             const WorldCoordinateHelper&) const {
     return {};
 }
 

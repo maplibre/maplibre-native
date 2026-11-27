@@ -5,7 +5,9 @@
 #include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/context.hpp>
 #include <mln/gfx/renderer_backend.hpp>
+#include <mln/map/projection_base.hpp>
 #include <mln/map/transform_state.hpp>
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/image_manager.hpp>
@@ -586,12 +588,23 @@ protected:
         return point;
     }
 
+    /// The place of a location in world pixels at the state's scale, in the registered projection when the map is in
+    /// one.
     static Point<double> project(const LatLng& c, const TransformState& s) {
+        const auto& projection = s.getProjection();
+        if (!isMercator(projection.worldCoordinateHelper())) {
+            return projection.project(c, s.getScale());
+        }
         return Projection::project(s.latLngNearCenter(c), s.getScale());
     }
 
-    static Point<double> unproject(const LatLng& c, const TransformState& s) {
-        return Projection::project(s.latLngNearCenter(c), s.getScale());
+    /// The location at a place in world pixels: the inverse of `project`.
+    static LatLng unproject(const Point<double>& p, const TransformState& s) {
+        const auto& projection = s.getProjection();
+        if (!isMercator(projection.worldCoordinateHelper())) {
+            return projection.unproject(p, s.getScale(), LatLng::Unwrapped);
+        }
+        return Projection::unproject(p, s.getScale());
     }
 
     void updateRadius(const mln::LocationIndicatorRenderParameters& params) {
@@ -659,12 +672,11 @@ protected:
     }
 
     static vec2 directionAtPositionScreen(const LatLng& position, float bearing, const TransformState& s) {
-        const double scale = s.getScale();
         const vec2 rot = vec2(0.0, -1.0).rotated(-bearing);
         Point<double> posMerc = project(position, s);
         Point<double> posMercDelta = posMerc + rot.toPoint();
         ScreenCoordinate posScreen = latLngToScreenCoordinate(position, s);
-        ScreenCoordinate posScreenDelta = latLngToScreenCoordinate(Projection::unproject(posMercDelta, scale), s);
+        ScreenCoordinate posScreenDelta = latLngToScreenCoordinate(unproject(posMercDelta, s), s);
         return vec2(posScreenDelta - posScreen).normalized();
     }
 

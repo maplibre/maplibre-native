@@ -3,6 +3,7 @@
 #include <mln/storage/response.hpp>
 #include <mln/util/bitmask_operations.hpp>
 #include <mln/util/font_stack.hpp>
+#include <mln/util/tile_matrix_set.hpp>
 #include <mln/util/tileset.hpp>
 
 #include <string>
@@ -72,13 +73,16 @@ public:
 
     static Resource style(const std::string& url);
     static Resource source(const std::string& url);
+    /// `tileMatrixSet` is the grid the `{bbox}` token is in, the map projection's; `{bbox-epsg-3857}` is always in
+    /// Mercator's.
     static Resource tile(const std::string& urlTemplate,
                          float pixelRatio,
                          int32_t x,
                          int32_t y,
                          int8_t z,
                          Tileset::Scheme scheme,
-                         LoadingMethod = LoadingMethod::All);
+                         LoadingMethod = LoadingMethod::All,
+                         const TileMatrixSet& tileMatrixSet = mercatorTileMatrixSet);
     static Resource glyphs(const std::string& urlTemplate,
                            const FontStack& fontStack,
                            const std::pair<uint16_t, uint16_t>& glyphRange);

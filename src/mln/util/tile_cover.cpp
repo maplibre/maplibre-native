@@ -230,10 +230,12 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     std::vector<ResultTile> result;
     stack.reserve(128);
 
-    // World copies shall be rendered three times on both sides from closest to farthest
-    for (int i = 1; i <= 3; i++) {
-        stack.push_back(newRootTile(-i));
-        stack.push_back(newRootTile(i));
+    // World copies shall be rendered three times on both sides from closest to farthest, in a world that wraps
+    if (transform.getProjection().worldCoordinateHelper().wraps()) {
+        for (int i = 1; i <= 3; i++) {
+            stack.push_back(newRootTile(-i));
+            stack.push_back(newRootTile(i));
+        }
     }
 
     stack.push_back(newRootTile(0));

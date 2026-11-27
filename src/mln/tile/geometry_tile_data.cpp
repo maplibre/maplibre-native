@@ -126,7 +126,12 @@ void limitHoles(GeometryCollection& polygon, uint32_t maxHoles) {
     }
 }
 
-Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFeature, const CanonicalTileID& tileID) {
+namespace {
+
+/// Tile coordinates to lat/lng in Mercator, or else to the world square.
+Feature::geometry_type tileGeometry(const GeometryTileFeature& geometryTileFeature,
+                                    const CanonicalTileID& tileID,
+                                    bool mercator) {
     MLN_TRACE_FUNC();
 
     const double size = util::EXTENT * std::pow(2, tileID.z);
@@ -134,6 +139,9 @@ Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFe
     const double y0 = util::EXTENT * static_cast<double>(tileID.y);
 
     auto tileCoordinatesToLatLng = [&](const Point<int16_t>& p) {
+        if (!mercator) {
+            return Point<double>((p.x + x0) / size, (p.y + y0) / size);
+        }
         double y2 = 180 - (p.y + y0) * 360 / size;
         return Point<double>((p.x + x0) * 360 / size - 180, std::atan(std::exp(y2 * pi / 180)) * 360.0 / pi - 90.0);
     };
@@ -197,6 +205,22 @@ Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFe
 
     // Unreachable, but placate GCC.
     return Point<double>();
+}
+
+} // namespace
+
+Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFeature,
+                                       const CanonicalTileID& tileID,
+                                       const WorldCoordinateHelper& helper) {
+    if (isMercator(helper)) {
+        return tileGeometry(geometryTileFeature, tileID, true);
+    }
+    Feature::geometry_type geometry = tileGeometry(geometryTileFeature, tileID, false);
+    convertPoints([&](PointBatcher& batcher) { mapbox::geometry::for_each_point(geometry, batcher); },
+                  [&](std::span<const std::array<double, 2>> world, std::span<std::array<double, 2>> lngLats) {
+                      helper.lngLatsFromWorld(world, lngLats);
+                  });
+    return geometry;
 }
 
 GeometryCollection convertGeometry(const Feature::geometry_type& geometryTileFeature, const CanonicalTileID& tileID) {
@@ -282,10 +306,12 @@ GeometryCollection convertGeometry(const Feature::geometry_type& geometryTileFea
         [](const auto&) -> GeometryCollection { return GeometryCollection(); });
 }
 
-Feature convertFeature(const GeometryTileFeature& geometryTileFeature, const CanonicalTileID& tileID) {
+Feature convertFeature(const GeometryTileFeature& geometryTileFeature,
+                       const CanonicalTileID& tileID,
+                       const WorldCoordinateHelper& helper) {
     MLN_TRACE_FUNC();
 
-    Feature feature{convertGeometry(geometryTileFeature, tileID)};
+    Feature feature{convertGeometry(geometryTileFeature, tileID, helper)};
     feature.properties = geometryTileFeature.getProperties();
     feature.id = geometryTileFeature.getID();
     return feature;

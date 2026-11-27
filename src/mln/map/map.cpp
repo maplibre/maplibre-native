@@ -3,7 +3,9 @@
 #include <mln/map/camera.hpp>
 #include <mln/map/map.hpp>
 #include <mln/map/map_impl.hpp>
+#include <mln/map/projection_base.hpp>
 #include <mln/map/transform.hpp>
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/math/log2.hpp>
 #include <mln/renderer/renderer_frontend.hpp>
@@ -188,6 +190,10 @@ CameraOptions Map::cameraForLatLngBounds(const LatLngBounds& bounds,
                                          const EdgeInsets& padding,
                                          const std::optional<double>& bearing,
                                          const std::optional<double>& pitch) const {
+    // In a world that does not wrap the box's edges can curve, as a parallel does around a pole: fit all of it.
+    if (!impl->transform.getState().getProjection().worldCoordinateHelper().wraps()) {
+        return cameraForLatLngs(latLngBoxSamples(bounds), padding, bearing, pitch);
+    }
     return cameraForLatLngs(
         {
             bounds.northwest(),
@@ -210,8 +216,7 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
     // Calculate the bounds of the possibly rotated shape with respect to the viewport.
     ScreenCoordinate nePixel = {-INFINITY, -INFINITY};
     ScreenCoordinate swPixel = {INFINITY, INFINITY};
-    for (LatLng latLng : latLngs) {
-        ScreenCoordinate pixel = transform.latLngToScreenCoordinate(latLng);
+    for (const ScreenCoordinate& pixel : transform.latLngsToScreenCoordinates(latLngs)) {
         swPixel.x = std::min(swPixel.x, pixel.x);
         nePixel.x = std::max(nePixel.x, pixel.x);
         swPixel.y = std::min(swPixel.y, pixel.y);
@@ -448,6 +453,14 @@ std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& s
         ret.emplace_back(latLngForPixel(point, wrapMode));
     }
     return ret;
+}
+
+double Map::getMetersPerPixelAt(const LatLng& latLng) const {
+    return impl->transform.getState().getMetersPerPixelAt(latLng);
+}
+
+std::optional<double> Map::getRegisteredProjectionMetersPerPixel(double zoom) const {
+    return impl->transform.getState().getRegisteredProjectionMetersPerPixel(zoom);
 }
 
 // MARK: - Transform

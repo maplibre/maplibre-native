@@ -23,6 +23,14 @@ LatLng MapProjection::latLngForPixel(const ScreenCoordinate& pixel, LatLng::Wrap
     return transform->screenCoordinateToLatLng(pixel, wrapMode);
 }
 
+double MapProjection::getMetersPerPixelAt(const LatLng& latLng) const {
+    return transform->getState().getMetersPerPixelAt(latLng);
+}
+
+std::optional<double> MapProjection::getRegisteredProjectionMetersPerPixel(double zoom) const {
+    return transform->getState().getRegisteredProjectionMetersPerPixel(zoom);
+}
+
 void MapProjection::setCamera(const CameraOptions& camera) {
     transform->jumpTo(camera);
 }

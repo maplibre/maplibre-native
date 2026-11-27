@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/util/geometry.hpp>
 #include <mln/util/feature.hpp>
 
@@ -98,12 +99,15 @@ std::vector<GeometryCollection> classifyRings(const GeometryCollection&);
 // Truncate polygon to the largest `maxHoles` inner rings by area.
 void limitHoles(GeometryCollection&, uint32_t maxHoles);
 
-Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFeature, const CanonicalTileID& tileID);
+/// Tile coordinates to lat/lng through the map projection's world coordinate helper.
+Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFeature,
+                                       const CanonicalTileID& tileID,
+                                       const WorldCoordinateHelper& = *mercatorWorldCoordinateHelper());
 
 GeometryCollection convertGeometry(const Feature::geometry_type& geometryTileFeature, const CanonicalTileID& tileID);
 
 // convert from GeometryTileFeature to Feature (eventually we should eliminate GeometryTileFeature)
-Feature convertFeature(const GeometryTileFeature&, const CanonicalTileID&);
+Feature convertFeature(const GeometryTileFeature&, const CanonicalTileID&, const WorldCoordinateHelper&);
 
 // Fix up possibly-non-V2-compliant polygon geometry using angus clipper.
 // The result is guaranteed to have correctly wound, strictly simple rings.

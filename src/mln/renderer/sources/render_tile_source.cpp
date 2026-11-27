@@ -539,8 +539,9 @@ std::unordered_map<std::string, std::vector<Feature>> RenderTileSource::queryRen
 }
 
 std::vector<Feature> RenderTileSource::querySourceFeatures(const SourceQueryOptions& options,
-                                                           const GlobalStateMap* globalState) const {
-    return tilePyramid.querySourceFeatures(options, globalState);
+                                                           const GlobalStateMap* globalState,
+                                                           const WorldCoordinateHelper& worldCoordinateHelper) const {
+    return tilePyramid.querySourceFeatures(options, globalState, worldCoordinateHelper);
 }
 
 void RenderTileSource::setFeatureState(const std::optional<std::string>& sourceLayerID,

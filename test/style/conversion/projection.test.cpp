@@ -1,9 +1,11 @@
+#include <mln/test/crs.hpp>
 #include <mln/test/fixture_log_observer.hpp>
 #include <mln/test/util.hpp>
 
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/projection.hpp>
 #include <mln/style/conversion_impl.hpp>
+#include <mln/style/projection_impl.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/util/rapidjson.hpp>
 
@@ -11,18 +13,49 @@ using namespace mln;
 using namespace mln::style;
 using namespace mln::style::conversion;
 
+TEST(StyleConversion, RegisteredProjection) {
+    FixtureLog log;
+    Error error;
+    auto parseProjection = [&](const std::string& src) {
+        return convertJSON<Projection>(src, error);
+    };
+
+    for (const std::string name : {"identity", "EPSG:3413"}) {
+        auto projection = parseProjection(R"({"type":")" + name + R"("})");
+        ASSERT_TRUE(projection) << error.message;
+        EXPECT_EQ(name == "identity", projection->impl->registeredProjection != nullptr);
+        EXPECT_EQ(StyleProperty::Kind::Constant, projection->getProperty("type").getKind());
+        EXPECT_EQ(mln::Value(name), projection->getProperty("type").getValue());
+
+        const mln::JSValue mercator("mercator");
+        EXPECT_FALSE(projection->setProperty("type", &mercator));
+        EXPECT_EQ(nullptr, projection->impl->registeredProjection);
+    }
+    EXPECT_EQ(1u,
+              log.count({EventSeverity::Warning,
+                         Event::General,
+                         -1,
+                         "Unknown projection name \"EPSG:3413\". Falling back to mercator projection."}));
+
+    EXPECT_FALSE(parseProjection(R"({"type":"equal-earth"})"));
+}
+
 TEST(StyleConversion, ProjectionExpressionDrawsAsMercator) {
     FixtureLog log;
     Error error;
 
-    // Without the globe, every projection an expression or a transition can choose draws as Mercator.
-    for (const std::string type : {R"(["step",["zoom"],"vertical-perspective",10,"mercator"])",
-                                   R"(["mercator","vertical-perspective",0.25])",
+    // Without the globe, every projection an expression or a transition can choose draws as Mercator. A registered one
+    // only works as a plain name.
+    addProjection(test::polarStereographic("test:in-a-transition"));
+    for (const std::string type : {R"(["step",["zoom"],"identity",10,"mercator"])",
+                                   R"(["mercator","test:in-a-transition",0.25])",
                                    R"(["interpolate",["linear"],["zoom"],10,"vertical-perspective",12,"mercator"])"}) {
         auto projection = convertJSON<Projection>(R"({"type":)" + type + "}", error);
         ASSERT_TRUE(projection) << error.message;
         EXPECT_EQ(StyleProperty::Kind::Undefined, projection->getProperty("type").getKind());
+        EXPECT_EQ(nullptr, projection->impl->registeredProjection);
     }
+    removeProjection("test:in-a-transition");
 
     EXPECT_EQ(3u,
               log.count({EventSeverity::Warning,
@@ -51,6 +84,7 @@ TEST(StyleConversion, Projection) {
         ASSERT_TRUE(projection) << error.message;
         EXPECT_EQ(StyleProperty::Kind::Constant, projection->getProperty("type").getKind());
         EXPECT_EQ(mln::Value(type), projection->getProperty("type").getValue());
+        EXPECT_EQ(nullptr, projection->impl->registeredProjection);
     }
     EXPECT_EQ(2u,
               log.count({EventSeverity::Warning,

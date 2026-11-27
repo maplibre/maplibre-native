@@ -37,7 +37,9 @@ public:
         const GlobalStateMap* globalState,
         const mat4& projMatrix) const override;
 
-    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const override;
+    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&,
+                                             const GlobalStateMap*,
+                                             const WorldCoordinateHelper&) const override;
 
     void setFeatureState(const std::optional<std::string>&, const std::string&, const FeatureState&) override;
 

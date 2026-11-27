@@ -15,6 +15,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/map/map.test.cpp
     ${PROJECT_SOURCE_DIR}/test/map/prefetch.test.cpp
     ${PROJECT_SOURCE_DIR}/test/map/transform.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/map/transform_crs.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/map/world_coordinate_helper.test.cpp
     ${PROJECT_SOURCE_DIR}/test/math/clamp.test.cpp
     ${PROJECT_SOURCE_DIR}/test/math/minmax.test.cpp
     ${PROJECT_SOURCE_DIR}/test/math/wrap.test.cpp
