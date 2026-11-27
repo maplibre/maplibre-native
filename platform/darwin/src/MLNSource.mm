@@ -26,7 +26,7 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
 
 @implementation MLNSource {
   std::unique_ptr<mln::style::Source> _pendingSource;
-  mapbox::base::WeakPtr<mln::style::Source> _weakSource;
+  mln::util::TrackedPtr<mln::style::Source> _trackedSource;
 }
 
 - (instancetype)initWithIdentifier:(NSString *)identifier {
@@ -40,7 +40,7 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
                          stylable:(id<MLNStylable>)stylable {
   NSString *identifier = @(rawSource->getID().c_str());
   if (self = [self initWithIdentifier:identifier]) {
-    _weakSource = rawSource->makeWeakPtr();
+    _trackedSource = rawSource->makeTrackedPtr();
     rawSource->peer = SourceWrapper{self};
     _stylable = stylable;
   }
@@ -48,7 +48,7 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
 }
 
 - (mln::style::Source *)rawSource {
-  return _weakSource.get();
+  return _trackedSource.get();
 }
 
 - (instancetype)initWithPendingSource:(std::unique_ptr<mln::style::Source>)pendingSource {

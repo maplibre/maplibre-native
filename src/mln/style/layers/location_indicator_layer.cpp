@@ -39,9 +39,7 @@ LocationIndicatorLayer::LocationIndicatorLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-LocationIndicatorLayer::~LocationIndicatorLayer() {
-    weakFactory.invalidateWeakPtrs();
-}
+LocationIndicatorLayer::~LocationIndicatorLayer() = default;
 
 const LocationIndicatorLayer::Impl& LocationIndicatorLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

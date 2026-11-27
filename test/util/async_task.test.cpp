@@ -16,7 +16,7 @@ namespace {
 
 class TestWorker {
 public:
-    TestWorker(AsyncTask *async_)
+    TestWorker(AsyncTask* async_)
         : async(async_) {}
 
     void run() {
@@ -36,7 +36,7 @@ public:
     void sync(std::promise<void> barrier) { barrier.set_value(); }
 
 private:
-    AsyncTask *async;
+    AsyncTask* async;
 };
 
 } // namespace
@@ -172,6 +172,27 @@ TEST(AsyncTask, scheduleAndReplyValue) {
     std::shared_ptr<Scheduler> scheduler = Scheduler::GetBackground();
     scheduler->scheduleAndReplyValue(util::SimpleIdentity::Empty, runInBackground, onResult);
     loop.run();
+}
+
+TEST(AsyncTask, scheduleAndReplyValueMovesTheResult) {
+    struct CopyCounter {
+        explicit CopyCounter(std::atomic<int>& copies_)
+            : copies(&copies_) {}
+        CopyCounter(const CopyCounter& other)
+            : copies(other.copies) {
+            ++*copies;
+        }
+        CopyCounter(CopyCounter&&) = default;
+        std::atomic<int>* copies;
+    };
+
+    RunLoop loop;
+    std::atomic<int> copies{0};
+    std::shared_ptr<Scheduler> scheduler = Scheduler::GetBackground();
+    scheduler->scheduleAndReplyValue(
+        util::SimpleIdentity::Empty, [&] { return CopyCounter(copies); }, [&](CopyCounter) { loop.stop(); });
+    loop.run();
+    EXPECT_EQ(0, copies);
 }
 
 TEST(AsyncTask, SequencedScheduler) {

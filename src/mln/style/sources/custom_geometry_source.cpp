@@ -19,7 +19,11 @@ CustomGeometrySource::CustomGeometrySource(std::string id, const CustomGeometryS
       loader(std::make_unique<Actor<CustomTileLoader>>(
           Scheduler::GetBackground(), options.fetchTileFunction, options.cancelTileFunction)) {}
 
-CustomGeometrySource::~CustomGeometrySource() = default;
+CustomGeometrySource::~CustomGeometrySource() {
+    // Destroying the loader waits for a tile fetch, which a platform binding may use to read this source on another
+    // thread.
+    endTracking();
+}
 
 const CustomGeometrySource::Impl& CustomGeometrySource::impl() const {
     return static_cast<const CustomGeometrySource::Impl&>(*baseImpl);

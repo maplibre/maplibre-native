@@ -39,9 +39,7 @@ RasterLayer::RasterLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-RasterLayer::~RasterLayer() {
-    weakFactory.invalidateWeakPtrs();
-}
+RasterLayer::~RasterLayer() = default;
 
 const RasterLayer::Impl& RasterLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

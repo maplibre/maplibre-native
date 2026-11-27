@@ -24,11 +24,6 @@ RasterDEMSource::RasterDEMSource(std::string id,
                    options_ ? options_->maxzoom : std::nullopt),
       options(std::move(options_)) {}
 
-RasterDEMSource::~RasterDEMSource() {
-    // Invalidate weak pointers before RasterDEMSource members are destroyed
-    invalidateWeakPtrsEarly();
-}
-
 bool RasterDEMSource::supportsLayerType(const mln::style::LayerTypeInfo* info) const {
     return mln::underlying_type(Tile::Kind::RasterDEM) == mln::underlying_type(info->tileKind);
 }

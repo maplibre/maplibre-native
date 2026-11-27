@@ -5,6 +5,7 @@
 #include <mln/map/map_observer.hpp>
 
 #include <fstream>
+#include <mutex>
 
 namespace mln {
 

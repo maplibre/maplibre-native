@@ -81,7 +81,6 @@ TEST(Actor, DestructionBlocksOnReceive) {
 TEST(Actor, DestructionBlocksOnSend) {
     // Destruction blocks until the actor is not being sent a message.
 
-    // NOTE: Any derived class must invalidate `weakFactory` in the destructor
     struct TestScheduler final : public Scheduler {
         std::promise<void> promise;
         std::future<void> future;
@@ -92,7 +91,7 @@ TEST(Actor, DestructionBlocksOnSend) {
               future(std::move(future_)),
               waited(false) {}
 
-        ~TestScheduler() override { EXPECT_TRUE(waited.load()); }
+        ~TestScheduler() override { expireWeakSchedulers(); }
 
         void waitForEmpty(const util::SimpleIdentity) override { assert(false); }
 
@@ -106,11 +105,6 @@ TEST(Actor, DestructionBlocksOnSend) {
         void schedule(const util::SimpleIdentity, std::function<void()>&& fn) override final {
             schedule(std::move(fn));
         }
-
-        mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
-
-        mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
-        // Do not add members here, see `WeakPtrFactory`
     };
 
     struct TestActor {
@@ -133,6 +127,7 @@ TEST(Actor, DestructionBlocksOnSend) {
     exitingPromise.set_value();
 
     actor.reset();
+    EXPECT_TRUE(scheduler->waited.load());
     scheduler.reset();
 
     thread.join();

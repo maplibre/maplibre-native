@@ -109,7 +109,7 @@ void Map::setStyle(std::unique_ptr<Style> style) {
     impl->onStyleLoading();
     impl->style = std::move(style);
     if (LayerManager::annotationsEnabled) {
-        impl->annotationManager.setStyle(*impl->style);
+        impl->annotationManager->setStyle(*impl->style);
     }
 }
 
@@ -463,26 +463,26 @@ TransformState Map::getTransfromState() const {
 
 void Map::addAnnotationImage(std::unique_ptr<style::Image> image) {
     if (LayerManager::annotationsEnabled) {
-        impl->annotationManager.addImage(std::move(image));
+        impl->annotationManager->addImage(std::move(image));
     }
 }
 
 void Map::removeAnnotationImage(const std::string& id) {
     if (LayerManager::annotationsEnabled) {
-        impl->annotationManager.removeImage(id);
+        impl->annotationManager->removeImage(id);
     }
 }
 
 double Map::getTopOffsetPixelsForAnnotationImage(const std::string& id) {
     if (LayerManager::annotationsEnabled) {
-        return impl->annotationManager.getTopOffsetPixelsForImage(id);
+        return impl->annotationManager->getTopOffsetPixelsForImage(id);
     }
     return 0.0;
 }
 
 AnnotationID Map::addAnnotation(const Annotation& annotation) {
     if (LayerManager::annotationsEnabled) {
-        auto result = impl->annotationManager.addAnnotation(annotation);
+        auto result = impl->annotationManager->addAnnotation(annotation);
         impl->onUpdate();
         return result;
     }
@@ -491,7 +491,7 @@ AnnotationID Map::addAnnotation(const Annotation& annotation) {
 
 void Map::updateAnnotation(AnnotationID id, const Annotation& annotation) {
     if (LayerManager::annotationsEnabled) {
-        if (impl->annotationManager.updateAnnotation(id, annotation)) {
+        if (impl->annotationManager->updateAnnotation(id, annotation)) {
             impl->onUpdate();
         }
     }
@@ -499,7 +499,7 @@ void Map::updateAnnotation(AnnotationID id, const Annotation& annotation) {
 
 void Map::removeAnnotation(AnnotationID annotation) {
     if (LayerManager::annotationsEnabled) {
-        impl->annotationManager.removeAnnotation(annotation);
+        impl->annotationManager->removeAnnotation(annotation);
         impl->onUpdate();
     }
 }

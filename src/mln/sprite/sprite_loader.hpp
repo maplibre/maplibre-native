@@ -3,18 +3,18 @@
 #include <mln/actor/scheduler.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/sprite.hpp>
-#include <mapbox/std/weak.hpp>
+#include <mln/util/callback_scope.hpp>
 
 #include <string>
 #include <map>
 #include <memory>
+#include <mutex>
 
 namespace mln {
 
 class FileSource;
 class SpriteLoaderObserver;
 
-// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class SpriteLoader final {
 public:
     SpriteLoader(float pixelRatio, const TaggedScheduler& threadPool_);
@@ -38,8 +38,7 @@ private:
 
     SpriteLoaderObserver* observer = nullptr;
     TaggedScheduler threadPool;
-    mapbox::base::WeakPtrFactory<SpriteLoader> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
+    util::CallbackScope callbacks;
 };
 
 } // namespace mln

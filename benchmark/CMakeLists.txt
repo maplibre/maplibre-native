@@ -1,5 +1,6 @@
 add_library(
     mbgl-benchmark STATIC EXCLUDE_FROM_ALL
+    ${PROJECT_SOURCE_DIR}/benchmark/actor/mailbox.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/api/query.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/api/render.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/function/camera_function.benchmark.cpp

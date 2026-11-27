@@ -493,3 +493,12 @@ TEST(Layer, SymbolLayerOverrides) {
         EXPECT_EQ(*Color::parse("red"), evaluated);
     }
 }
+
+TEST(Layer, TrackedPtrIsNullOnceDestroyed) {
+    auto layer = std::make_unique<BackgroundLayer>("background");
+    const auto tracked = layer->makeTrackedPtr();
+    EXPECT_EQ(layer.get(), tracked.get());
+
+    layer.reset();
+    EXPECT_EQ(nullptr, tracked.get());
+}

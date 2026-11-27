@@ -16,14 +16,12 @@ struct SourceOptions {
     std::optional<uint8_t> maxzoom = std::nullopt;
 };
 
-// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class RasterDEMSource final : public RasterSource {
 public:
     RasterDEMSource(std::string id,
                     variant<std::string, Tileset> urlOrTileset,
                     uint16_t tileSize,
                     std::optional<SourceOptions> options = std::nullopt);
-    ~RasterDEMSource() override;
     bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 
 protected:

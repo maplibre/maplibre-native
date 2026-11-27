@@ -73,7 +73,9 @@ std::shared_ptr<Mailbox> MapRenderer::MailboxData::getMailbox() const noexcept {
     return mailbox;
 }
 
-MapRenderer::~MapRenderer() = default;
+MapRenderer::~MapRenderer() {
+    expireWeakSchedulers();
+}
 
 void MapRenderer::reset() {
     try {

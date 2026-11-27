@@ -45,6 +45,7 @@ RunLoop::RunLoop(Type type)
 RunLoop::~RunLoop() {
     MBGL_VERIFY_THREAD(tid);
 
+    expireWeakSchedulers();
     Scheduler::SetCurrent(nullptr);
 }
 

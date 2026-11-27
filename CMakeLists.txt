@@ -425,6 +425,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/util/action_journal.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/async_request.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/async_task.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/util/callback_scope.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/char_array_buffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/chrono.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/client_options.hpp
@@ -472,6 +473,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/util/tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/timer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/tiny_unordered_map.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/util/tracked_ptr.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/traits.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/type_list.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/unitbezier.hpp

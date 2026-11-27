@@ -2,8 +2,8 @@
 
 #include <mln/util/identity.hpp>
 
-#include <mapbox/std/weak.hpp>
-
+#include <cassert>
+#include <exception>
 #include <functional>
 #include <memory>
 #include <type_traits>
@@ -11,6 +11,37 @@
 namespace mln {
 
 class Mailbox;
+class Scheduler;
+
+/// A handle that schedules work on a `Scheduler` for as long as the scheduler exists.
+///
+/// It can be used from any thread: destroying the scheduler waits for calls to `schedule()` that are in progress.
+class WeakScheduler {
+public:
+    WeakScheduler() = default;
+
+    /// Enqueues `fn` and returns true, or returns false and leaves `fn` untouched if the scheduler is gone.
+    bool schedule(std::function<void()>&& fn) const;
+    bool schedule(util::SimpleIdentity tag, std::function<void()>&& fn) const;
+
+    /// Returns true if the scheduler is gone, or if this handle is empty. A false result can be out of date by the time
+    /// it is used.
+    bool expired() const noexcept { return anchor.expired(); }
+
+    /// Returns true if both handles refer to the same scheduler, or are both empty.
+    friend bool operator==(const WeakScheduler& lhs, const WeakScheduler& rhs) noexcept {
+        return !lhs.anchor.owner_before(rhs.anchor) && !rhs.anchor.owner_before(lhs.anchor);
+    }
+
+private:
+    friend class Scheduler;
+    struct Anchor;
+
+    explicit WeakScheduler(std::weak_ptr<Anchor> anchor_) noexcept
+        : anchor(std::move(anchor_)) {}
+
+    std::weak_ptr<Anchor> anchor;
+};
 
 /**
     A `Scheduler` is responsible for coordinating the processing of messages by
@@ -36,14 +67,22 @@ class Mailbox;
 */
 class Scheduler {
 public:
-    virtual ~Scheduler() = default;
+    Scheduler();
+    Scheduler(const Scheduler&) = delete;
+    Scheduler& operator=(const Scheduler&) = delete;
+
+    // Inline, so that Scheduler has no key function and code built with RTTI emits its type info.
+    virtual ~Scheduler() {
+        assert(!anchor && "Call expireWeakSchedulers() first in the destructor of every concrete scheduler");
+        expireWeakSchedulers();
+    }
 
     /// Enqueues a function for execution.
     virtual void schedule(std::function<void()>&&) = 0;
     virtual void schedule(const util::SimpleIdentity, std::function<void()>&&) = 0;
 
-    /// Makes a weak pointer to this Scheduler.
-    virtual mapbox::base::WeakPtr<Scheduler> makeWeakPtr() = 0;
+    /// Makes a handle that schedules work on this scheduler for as long as it exists.
+    WeakScheduler makeWeak() const noexcept { return WeakScheduler(anchor); }
     /// Enqueues a function for execution on the render thread owned by the given tag.
     virtual void runOnRenderThread(const util::SimpleIdentity, std::function<void()>&&) {}
     /// Run render thread jobs for the given tag
@@ -59,20 +98,19 @@ public:
     ///
     /// If this scheduler is already deleted by the time the returnded closure
     /// is first invoked, the call is ignored.
-    std::function<void()> bindOnce(std::function<void()>);
+    std::function<void()> bindOnce(std::function<void()>) const;
 
     /// Enqueues the given |task| for execution into this scheduler's task queue
     /// and then enqueues the |reply| with the captured task result to the
     /// current task queue.
     ///
     /// The |TaskFn| return type must be compatible with the |ReplyFn| argument
-    /// type. Note: the task result is copied and passed by value.
+    /// type. Note: the task result is moved to the reply.
     template <typename TaskFn, typename ReplyFn>
     void scheduleAndReplyValue(const util::SimpleIdentity tag, TaskFn&& task, ReplyFn&& reply) {
         assert(GetCurrent());
         static_assert(std::is_invocable_v<TaskFn>);
-        scheduleAndReplyValue(
-            tag, std::forward<TaskFn>(task), std::forward<ReplyFn>(reply), GetCurrent()->makeWeakPtr());
+        scheduleAndReplyValue(tag, std::forward<TaskFn>(task), std::forward<ReplyFn>(reply), GetCurrent()->makeWeak());
     }
 
     /// Wait until there's nothing pending or in process
@@ -106,6 +144,11 @@ public:
     void setExceptionHandler(std::function<void(const std::exception_ptr)> handler_) { handler = std::move(handler_); }
 
 protected:
+    /// Expires the handles made by `makeWeak()`, waiting for calls to `WeakScheduler::schedule()` that are in progress.
+    /// Every concrete scheduler calls it first in its destructor, so that no work is scheduled while its members are
+    /// destroyed.
+    void expireWeakSchedulers();
+
     std::function<void(const std::exception_ptr)> handler;
 
 private:
@@ -113,13 +156,21 @@ private:
     void scheduleAndReplyValue(const util::SimpleIdentity tag,
                                TaskFn&& task,
                                ReplyFn&& reply,
-                               mapbox::base::WeakPtr<Scheduler> replyScheduler) {
-        schedule(tag, [replyScheduler = std::move(replyScheduler), tag, task, reply] {
-            if (auto guard = replyScheduler.lock(); replyScheduler) {
-                replyScheduler->schedule(tag, [reply, result = task()] { reply(result); });
-            }
-        });
+                               WeakScheduler replyScheduler) {
+        schedule(tag,
+                 [replyScheduler = std::move(replyScheduler),
+                  tag,
+                  task = std::forward<TaskFn>(task),
+                  reply = std::forward<ReplyFn>(reply)]() mutable {
+                     if (replyScheduler.expired()) {
+                         return;
+                     }
+                     replyScheduler.schedule(
+                         tag, [reply = std::move(reply), result = task()]() mutable { reply(std::move(result)); });
+                 });
     }
+
+    std::shared_ptr<WeakScheduler::Anchor> anchor;
 };
 
 /// @brief A TaggedScheduler pairs a scheduler with an identifier. Tasklets submitted via a TaggedScheduler
@@ -141,10 +192,10 @@ public:
     void runRenderJobs(bool closeQueue = false) { scheduler->runRenderJobs(tag, closeQueue); }
     void waitForEmpty() const noexcept { scheduler->waitForEmpty(tag); }
 
-    /// type. Note: the task result is copied and passed by value.
+    /// type. Note: the task result is moved to the reply.
     template <typename TaskFn, typename ReplyFn>
     void scheduleAndReplyValue(TaskFn&& task, ReplyFn&& reply) {
-        scheduler->scheduleAndReplyValue(tag, task, reply);
+        scheduler->scheduleAndReplyValue(tag, std::forward<TaskFn>(task), std::forward<ReplyFn>(reply));
     }
 
     const mln::util::SimpleIdentity tag;

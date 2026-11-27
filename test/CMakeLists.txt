@@ -2,6 +2,7 @@ add_library(
     mbgl-test STATIC EXCLUDE_FROM_ALL
     ${PROJECT_SOURCE_DIR}/test/actor/actor.test.cpp
     ${PROJECT_SOURCE_DIR}/test/actor/actor_ref.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/actor/weak_scheduler.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/update_renderables.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/update_tile_masks.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/annotations.test.cpp
@@ -102,6 +103,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/action_journal.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/async_task.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/bounding_volumes.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/callback_scope.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/camera.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/color.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/geo.test.cpp
@@ -129,6 +131,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/timer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tiny_map.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/token.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/tracked_ptr.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/lru_cache.test.cpp

@@ -6,7 +6,6 @@
 #include <optional>
 #include <queue>
 
-#include <mapbox/std/weak.hpp>
 #include <mln/actor/scheduler.hpp>
 
 namespace mln {
@@ -49,7 +48,7 @@ private:
     };
 
     util::SimpleIdentity schedulerTag = util::SimpleIdentity::Empty;
-    mapbox::base::WeakPtr<Scheduler> weakScheduler;
+    WeakScheduler weakScheduler;
 
     std::recursive_mutex receivingMutex;
     std::mutex pushingMutex;

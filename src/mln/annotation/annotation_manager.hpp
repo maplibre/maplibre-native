@@ -5,8 +5,6 @@
 #include <mln/style/image.hpp>
 #include <mln/util/noncopyable.hpp>
 
-#include <mapbox/std/weak.hpp>
-
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -24,7 +22,6 @@ namespace style {
 class Style;
 } // namespace style
 
-// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class AnnotationManager final : private util::noncopyable {
 public:
     AnnotationManager(style::Style&);
@@ -49,8 +46,6 @@ public:
     static const std::string SourceID;
     static const std::string PointLayerID;
     static const std::string ShapeLayerID;
-
-    mapbox::base::WeakPtr<AnnotationManager> makeWeakPtr() { return weakFactory.makeWeakPtr(); }
 
 private:
     void add(const AnnotationID&, const SymbolAnnotation&);
@@ -90,8 +85,6 @@ private:
     ImageMap images;
 
     std::unordered_set<AnnotationTile*> tiles;
-    mapbox::base::WeakPtrFactory<AnnotationManager> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace mln

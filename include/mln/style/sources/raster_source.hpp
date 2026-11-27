@@ -20,20 +20,12 @@ public:
 
     bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
-
 protected:
     void setTilesetOverrides(Tileset& tileset) override;
-
-    // Allows derived classes (e.g. RasterDEMSource) to invalidate weak pointers
-    // early in their destructor before their own members are torn down.
-    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
 
 private:
     std::optional<uint8_t> minzoomOverride;
     std::optional<uint8_t> maxzoomOverride;
-
-    mapbox::base::WeakPtrFactory<Source> weakFactory{this}; // Must remain last
 };
 
 template <>

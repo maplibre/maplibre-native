@@ -27,5 +27,4 @@ endfunction()
 
 create_test("compatibility")
 create_test("io")
-create_test("std")
 create_test("util")

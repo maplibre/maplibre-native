@@ -17,7 +17,6 @@ namespace util {
 
 using LOOP_HANDLE = void*;
 
-// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class RunLoop final : public Scheduler, private util::noncopyable {
 public:
     enum class Type : uint8_t {
@@ -82,15 +81,10 @@ public:
 
     void schedule(std::function<void()>&& fn) override { invoke(std::move(fn)); }
     void schedule(const util::SimpleIdentity, std::function<void()>&& fn) override { schedule(std::move(fn)); }
-    ::mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     void waitForEmpty(const util::SimpleIdentity = util::SimpleIdentity::Empty) override;
 
     class Impl;
-
-    // Allows derived classes to invalidate weak pointers in
-    // their destructor before their own members are torn down.
-    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
 
 private:
     MBGL_STORE_THREAD(tid)
@@ -142,8 +136,6 @@ private:
     std::mutex mutex;
 
     std::unique_ptr<Impl> impl;
-    ::mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace util

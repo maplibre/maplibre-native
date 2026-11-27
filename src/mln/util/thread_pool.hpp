@@ -7,6 +7,7 @@
 #include <mln/util/identity.hpp>
 #include <mln/util/instrumentation.hpp>
 
+#include <cassert>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
@@ -141,13 +142,6 @@ public:
         }
     }
 
-    mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
-
-protected:
-    // Allows derived classes to invalidate weak pointers in
-    // their destructor before their own members are torn down.
-    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
-
 private:
     std::vector<std::thread> threads;
 
@@ -157,30 +151,27 @@ private:
     };
     mln::unordered_map<util::SimpleIdentity, std::shared_ptr<RenderQueue>> taggedRenderQueue;
     std::mutex taggedRenderQueueLock;
-
-    mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
 };
 
 class SequencedScheduler final : public ThreadedScheduler {
 public:
     SequencedScheduler()
         : ThreadedScheduler(1) {}
-    ~SequencedScheduler() override { invalidateWeakPtrsEarly(); }
+    ~SequencedScheduler() override { expireWeakSchedulers(); }
 };
 
 class ParallelScheduler : public ThreadedScheduler {
 public:
     ParallelScheduler(std::size_t extra)
         : ThreadedScheduler(1 + extra) {}
-    ~ParallelScheduler() override { invalidateWeakPtrsEarly(); }
+    ~ParallelScheduler() override { expireWeakSchedulers(); }
 };
 
 class ThreadPool final : public ParallelScheduler {
 public:
     ThreadPool()
         : ParallelScheduler(3) {}
-    ~ThreadPool() override { invalidateWeakPtrsEarly(); }
+    ~ThreadPool() override { expireWeakSchedulers(); }
 };
 
 } // namespace mln

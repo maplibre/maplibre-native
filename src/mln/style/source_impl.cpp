@@ -2,6 +2,8 @@
 #include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 
+#include <algorithm>
+
 namespace mln {
 namespace style {
 

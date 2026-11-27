@@ -39,9 +39,7 @@ HillshadeLayer::HillshadeLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-HillshadeLayer::~HillshadeLayer() {
-    weakFactory.invalidateWeakPtrs();
-}
+HillshadeLayer::~HillshadeLayer() = default;
 
 const HillshadeLayer::Impl& HillshadeLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

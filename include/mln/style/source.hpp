@@ -3,13 +3,14 @@
 #include <mln/style/types.hpp>
 #include <mln/util/chrono.hpp>
 #include <mln/util/immutable.hpp>
+#include <mln/util/tracked_ptr.hpp>
 
-#include <mapbox/std/weak.hpp>
 #include <mapbox/util/type_wrapper.hpp>
 
 #include <memory>
 #include <string>
 #include <optional>
+#include <type_traits>
 
 namespace mln {
 
@@ -127,11 +128,19 @@ public:
     // share identical platform-native peers.
     mapbox::base::TypeWrapper peer;
 
-    virtual mapbox::base::WeakPtr<Source> makeWeakPtr() = 0;
+    /// Returns a pointer to this source that turns null once the source starts being destroyed.
+    util::TrackedPtr<Source> makeTrackedPtr() { return tracker.track(*this); }
 
 protected:
     explicit Source(Immutable<Impl>);
     virtual Mutable<Impl> createMutable() const noexcept = 0;
+
+    /// Turns the pointers from `makeTrackedPtr()` null before the source is destroyed. A source whose destructor waits
+    /// for work that reads it on another thread calls this first in its destructor.
+    void endTracking() noexcept { tracker.end(); }
+
+private:
+    util::PointerTracker tracker;
 };
 
 } // namespace style

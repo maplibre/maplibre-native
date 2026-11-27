@@ -107,15 +107,13 @@ void SpriteLoader::emitSpriteLoadedIfComplete(style::Sprite sprite) {
             }
         },
         /* resultClosure */
-        [this, sprite = sprite, factory = weakFactory.makeWeakPtr()](ParseResult result) {
-            if (auto guard = factory.lock(); factory) {
-                if (result.error) {
-                    observer->onSpriteError(std::optional(sprite), result.error);
-                } else {
-                    observer->onSpriteLoaded(std::optional(sprite), std::move(result.images));
-                }
+        callbacks.bind([this, sprite = sprite](ParseResult result) {
+            if (result.error) {
+                observer->onSpriteError(std::optional(sprite), result.error);
+            } else {
+                observer->onSpriteLoaded(std::optional(sprite), std::move(result.images));
             }
-        });
+        }));
 }
 
 void SpriteLoader::setObserver(SpriteLoaderObserver* observer_) {

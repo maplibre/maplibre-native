@@ -102,7 +102,7 @@ public:
     std::shared_ptr<FileSource> fileSource;
 
     std::unique_ptr<style::Style> style;
-    AnnotationManager annotationManager;
+    std::shared_ptr<AnnotationManager> annotationManager;
 
     bool cameraMutated = false;
 

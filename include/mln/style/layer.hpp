@@ -5,8 +5,8 @@
 #include <mln/style/types.hpp>
 #include <mln/util/feature.hpp>
 #include <mln/util/immutable.hpp>
+#include <mln/util/tracked_ptr.hpp>
 
-#include <mapbox/std/weak.hpp>
 #include <mapbox/util/type_wrapper.hpp>
 
 #include <cassert>
@@ -109,8 +109,6 @@ bool layerTypeInfoEquals(const mln::style::LayerTypeInfo* one, const mln::style:
  * create an instance of the desired type, calling `LayerManager`:
  *
  *     auto circleLayer = LayerManager::get()->createLayer("circle", ...);
- *
- * NOTE: Derived class must invalidate `weakFactory` in their destructor
  */
 class Layer {
 public:
@@ -180,7 +178,8 @@ public:
 
     const LayerTypeInfo* getTypeInfo() const noexcept;
 
-    mapbox::base::WeakPtr<Layer> makeWeakPtr() { return weakFactory.makeWeakPtr(); }
+    /// Returns a pointer to this layer that turns null once the layer starts being destroyed.
+    util::TrackedPtr<Layer> makeTrackedPtr() { return tracker.track(*this); }
 
     /// Collect dependencies
     expression::Dependency getDependencies() const noexcept;
@@ -190,14 +189,14 @@ private:
     std::optional<conversion::Error> setMinZoom(const conversion::Convertible& value);
     std::optional<conversion::Error> setMaxZoom(const conversion::Convertible& value);
 
+    util::PointerTracker tracker;
+
 protected:
     virtual Mutable<Impl> mutableBaseImpl() const = 0;
     void serializeProperty(Value&, const StyleProperty&, const char* propertyName, bool isPaint) const;
     virtual std::optional<conversion::Error> setPropertyInternal(const std::string& name,
                                                                  const conversion::Convertible& value) = 0;
     LayerObserver* observer;
-    mapbox::base::WeakPtrFactory<Layer> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace style

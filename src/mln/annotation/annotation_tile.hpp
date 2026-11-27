@@ -15,7 +15,7 @@ public:
     ~AnnotationTile() override;
 
 private:
-    mapbox::base::WeakPtr<AnnotationManager> annotationManager;
+    std::weak_ptr<AnnotationManager> annotationManager;
 };
 
 class AnnotationTileFeatureData;

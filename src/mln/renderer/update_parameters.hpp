@@ -11,10 +11,9 @@
 #include <mln/util/feature.hpp>
 #include <mln/util/immutable.hpp>
 
+#include <memory>
 #include <numbers>
 #include <vector>
-
-#include <mapbox/std/weak.hpp>
 
 namespace mln {
 
@@ -42,7 +41,7 @@ public:
     // The style's global state, used by "global-state" expressions.
     const std::shared_ptr<const GlobalStateMap> globalState;
 
-    mapbox::base::WeakPtr<AnnotationManager> annotationManager;
+    std::weak_ptr<AnnotationManager> annotationManager;
     std::shared_ptr<FileSource> fileSource;
 
     const uint8_t prefetchZoomDelta;

@@ -103,6 +103,7 @@ RunLoop::RunLoop(Type type)
 }
 
 RunLoop::~RunLoop() {
+    expireWeakSchedulers();
     Scheduler::SetCurrent(nullptr);
 
     // Close the dummy handle that we have

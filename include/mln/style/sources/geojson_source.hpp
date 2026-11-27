@@ -3,9 +3,11 @@
 #include <mln/style/expression/expression.hpp>
 #include <mln/style/source.hpp>
 #include <mln/tile/tile_id.hpp>
+#include <mln/util/callback_scope.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/geojson.hpp>
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <utility>
@@ -57,7 +59,6 @@ public:
     virtual std::uint8_t getClusterExpansionZoom(std::uint32_t) = 0;
 };
 
-// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class GeoJSONSource final : public Source {
 public:
     GeoJSONSource(std::string id, Immutable<GeoJSONOptions> = GeoJSONOptions::defaultOptions());
@@ -77,8 +78,6 @@ public:
 
     bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
-
     bool isUpdateSynchronous() const noexcept;
     void setOverrideSynchronousUpdate(bool) const noexcept;
 
@@ -90,8 +89,7 @@ private:
     std::unique_ptr<AsyncRequest> req;
     std::atomic<uint64_t> requestGeneration{0};
     std::shared_ptr<Scheduler> sequencedScheduler;
-    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
+    util::CallbackScope callbacks;
 };
 
 template <>
