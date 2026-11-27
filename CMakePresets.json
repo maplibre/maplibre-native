@@ -13,6 +13,7 @@
       "description": "Base iOS preset",
       "toolchainFile": "${sourceDir}/platform/ios/ios.toolchain.cmake",
       "cacheVariables": {
+        "MLN_WITH_TESTS": "ON",
         "CMAKE_SYSTEM_NAME": "iOS",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "CMAKE_OSX_DEPLOYMENT_TARGET": "15.5"
@@ -57,6 +58,7 @@
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
+        "MLN_WITH_TESTS": "ON",
         "CMAKE_SYSTEM_NAME": "Darwin",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "CMAKE_OSX_DEPLOYMENT_TARGET": "14.3",
@@ -146,6 +148,7 @@
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
+        "MLN_WITH_TESTS": "ON",
         "CMAKE_SYSTEM_NAME": "Linux",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "OFF",
@@ -225,6 +228,7 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-android-webgpu-dawn",
       "cacheVariables": {
+        "MLN_WITH_TESTS": "ON",
         "CMAKE_TOOLCHAIN_FILE": "$env{ANDROID_NDK}/build/cmake/android.toolchain.cmake",
         "CMAKE_ANDROID_NDK": "$env{ANDROID_NDK}",
         "ANDROID_ABI": "arm64-v8a",
@@ -240,6 +244,7 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-android-webgpu-wgpu",
       "cacheVariables": {
+        "MLN_WITH_TESTS": "ON",
         "CMAKE_TOOLCHAIN_FILE": "$env{ANDROID_NDK}/build/cmake/android.toolchain.cmake",
         "CMAKE_ANDROID_NDK": "$env{ANDROID_NDK}",
         "ANDROID_ABI": "arm64-v8a",
@@ -274,6 +279,7 @@
         "rhs": ""
       },
       "cacheVariables": {
+        "MLN_WITH_TESTS": "ON",
         "CMAKE_TOOLCHAIN_FILE": "$env{OHOS_SDK_NATIVE}/build/cmake/ohos.toolchain.cmake",
         "OHOS_SDK_NATIVE": "$env{OHOS_SDK_NATIVE}",
         "OHOS_ARCH": "arm64-v8a",
@@ -308,6 +314,7 @@
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
+        "MLN_WITH_TESTS": "ON",
         "CMAKE_SYSTEM_NAME": "Windows",
         "MLN_WITH_OPENGL": "OFF",
         "MLN_WITH_EGL": "OFF",
@@ -377,6 +384,7 @@
         "VSCMD_ARG_TGT_ARCH": "arm64"
       },
       "cacheVariables": {
+        "MLN_WITH_TESTS": "ON",
         "CMAKE_SYSTEM_NAME": "Windows",
         "MLN_WITH_OPENGL": "OFF",
         "MLN_WITH_EGL": "OFF",
