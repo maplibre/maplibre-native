@@ -2,7 +2,6 @@ package org.maplibre.android.testapp.projection
 
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.RectF
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -90,15 +89,16 @@ class NationalGridTest : BaseTest() {
 
     @Test
     fun ringSetFromKotlinLandsOnItsCrosshair() {
-        awaitRings()
-        val image = snapshot()
         val pixelsPerDp = rule.activity.resources.displayMetrics.density
         val window = (WINDOW_DP * pixelsPerDp).toInt()
         val armGap = ARM_GAP_DP * pixelsPerDp
         var worst = 0.0
         for ((easting, northing) in CROSSHAIRS) {
             val (latitude, longitude) = NationalGrid.wgs84FromEastingNorthing(easting, northing)
-            val expected = onMain { maplibreMap.projection.toScreenLocation(LatLng(latitude, longitude)) }
+            val crosshair = LatLng(latitude, longitude)
+            awaitRingAt(crosshair)
+            val image = snapshot()
+            val expected = onMain { maplibreMap.projection.toScreenLocation(crosshair) }
             val ex = expected.x.toDouble()
             val ey = expected.y.toDouble()
             var vertical = Centroid()
@@ -135,31 +135,25 @@ class NationalGridTest : BaseTest() {
     }
 
     /**
-     * Centers the map on the crosshairs at the core fixture's zoom, where a tile's pixel is a point on the screen,
-     * and waits until the rings the activity sets from Kotlin are drawn.
+     * Centers the map on a crosshair at [ZOOM], so the square measured around it is on screen whatever the map's size,
+     * and waits until the ring the activity sets from Kotlin there is drawn.
      */
-    private fun awaitRings() {
+    private fun awaitRingAt(crosshair: LatLng) {
         val latch = CountDownLatch(1)
         val onIdle = MapView.OnDidBecomeIdleListener {
-            val view = RectF(0f, 0f, mapView.width.toFloat(), mapView.height.toFloat())
-            if (maplibreMap.queryRenderedFeatures(view, RINGS_LAYER).size >= CROSSHAIRS.size) {
+            val where = maplibreMap.projection.toScreenLocation(crosshair)
+            if (maplibreMap.queryRenderedFeatures(where, RINGS_LAYER).isNotEmpty()) {
                 latch.countDown()
             }
         }
-        val eastings = CROSSHAIRS.map { it.first }
-        val northings = CROSSHAIRS.map { it.second }
-        val (latitude, longitude) = NationalGrid.wgs84FromEastingNorthing(
-            (eastings.min() + eastings.max()) / 2,
-            (northings.min() + northings.max()) / 2
-        )
         rule.runOnUiThread {
             mapView.addOnDidBecomeIdleListener(onIdle)
-            maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), 2.0))
+            maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crosshair, ZOOM))
             maplibreMap.triggerRepaint()
         }
         val drawn = latch.await(WAIT_SECONDS, TimeUnit.SECONDS)
         rule.runOnUiThread { mapView.removeOnDidBecomeIdleListener(onIdle) }
-        assertTrue("The rings are drawn", drawn)
+        assertTrue("The ring at $crosshair is drawn", drawn)
     }
 
     private fun snapshot(): Bitmap {
@@ -183,6 +177,9 @@ class NationalGridTest : BaseTest() {
 
     private companion object {
         const val WAIT_SECONDS = 30L
+
+        /** The core fixture's zoom, where a tile's pixel is a point on the screen. */
+        const val ZOOM = 2.0
 
         const val MICROMETER = 1e-6
 
