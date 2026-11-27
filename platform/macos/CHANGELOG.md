@@ -37,6 +37,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
   </details>
 - Export `MLNPluginStyleLayer` and `MLNBackendResource` from the dynamic framework ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
+- Add `MLNMapOptions.keepUprightMargin`, for `-[MLNMapView initWithFrame:options:]`, off by default: with a margin in degrees, a line label with `text-keep-upright` keeps the reading direction it was drawn with until it reads more than the margin past the vertical, so labels on lines close to the vertical of a rotating map no longer flip back and forth. Icons are not affected ([#4904](https://github.com/maplibre/maplibre-native/pull/4904)).
 
 ## 6.27.0
 

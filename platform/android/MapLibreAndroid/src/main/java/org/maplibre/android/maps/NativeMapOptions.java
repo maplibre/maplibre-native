@@ -4,6 +4,7 @@ public class NativeMapOptions {
 
   private final float pixelRatio;
   private final boolean crossSourceCollisions;
+  private final float keepUprightMargin;
 
   private final boolean actionJournalEnabled;
   private final String actionJournalPath;
@@ -17,6 +18,7 @@ public class NativeMapOptions {
   public NativeMapOptions(MapLibreMapOptions options) {
     pixelRatio = options.getPixelRatio();
     crossSourceCollisions = options.getCrossSourceCollisions();
+    keepUprightMargin = options.getKeepUprightMargin();
 
     actionJournalEnabled = options.getActionJournalEnabled();
     actionJournalPath = options.getActionJournalPath();
@@ -31,6 +33,7 @@ public class NativeMapOptions {
   public NativeMapOptions(float pixelRatio, boolean crossSourceCollisions) {
     this.pixelRatio = pixelRatio;
     this.crossSourceCollisions = crossSourceCollisions;
+    keepUprightMargin = 0f;
 
     actionJournalEnabled = false;
     actionJournalPath = "";
@@ -49,6 +52,10 @@ public class NativeMapOptions {
 
   public boolean crossSourceCollisions() {
     return crossSourceCollisions;
+  }
+
+  public float keepUprightMargin() {
+    return keepUprightMargin;
   }
 
   public boolean actionJournalEnabled() {

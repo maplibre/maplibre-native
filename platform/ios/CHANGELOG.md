@@ -2,6 +2,12 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+### Features
+
+- Add `MLNMapOptions.keepUprightMargin` (or the `keepUprightMargin` inspectable of a map view in Interface Builder), off by default: with a margin in degrees, a line label with `text-keep-upright` keeps the reading direction it was drawn with until it reads more than the margin past the vertical, so labels on lines close to the vertical, such as the road ahead in a map turned with the direction of travel, no longer flip back and forth while the map rotates. Icons are not affected ([#4904](https://github.com/maplibre/maplibre-native/pull/4904)).
+
 ## 7.1.0
 
 ### Features

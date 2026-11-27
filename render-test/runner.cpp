@@ -1,3 +1,4 @@
+#include <mln/gfx/backend_scope.hpp>
 #include <mln/map/camera.hpp>
 #include <mln/map/map_observer.hpp>
 #include <mln/renderer/renderer.hpp>
@@ -702,7 +703,8 @@ TestRunner::Impl::Impl(const TestMetadata& metadata,
               .withMapMode(metadata.mapMode)
               .withSize(metadata.size)
               .withPixelRatio(metadata.pixelRatio)
-              .withCrossSourceCollisions(metadata.crossSourceCollisions),
+              .withCrossSourceCollisions(metadata.crossSourceCollisions)
+              .withKeepUprightMargin(metadata.keepUprightMargin),
           resourceOptions,
           clientOptions) {
     if (metadata.maxPitch) {
@@ -753,7 +755,8 @@ void TestRunner::run(TestMetadata& metadata) {
     }
 
     std::string key = mln::util::toString(uint32_t(metadata.mapMode)) + "/" + mln::util::toString(metadata.pixelRatio) +
-                      "/" + mln::util::toString(uint32_t(metadata.crossSourceCollisions));
+                      "/" + mln::util::toString(uint32_t(metadata.crossSourceCollisions)) + "/" +
+                      mln::util::toString(metadata.keepUprightMargin);
 
     if (!maps.contains(key)) {
         maps[key] = std::make_unique<TestRunner::Impl>(
@@ -939,7 +942,15 @@ mln::HeadlessFrontend::RenderResult TestRunner::runTest(TestMetadata& metadata, 
     }
 
     try {
-        if (metadata.outputsImage) result = ctx.getFrontend().render(ctx.getMap());
+        if (metadata.outputsImage && metadata.mapMode == MapMode::Continuous) {
+            // A still image cannot be requested in continuous mode: the last frame of the settled map.
+            if (renderUntilIdle(ctx)) {
+                gfx::BackendScope guard{*ctx.getFrontend().getBackend()};
+                result.image = ctx.getFrontend().readStillImage();
+            }
+        } else if (metadata.outputsImage) {
+            result = ctx.getFrontend().render(ctx.getMap());
+        }
     } catch (const std::exception& e) {
         ctx.getMetadata().errorMessage = std::string("Renering raised an exception: ") + e.what();
     }

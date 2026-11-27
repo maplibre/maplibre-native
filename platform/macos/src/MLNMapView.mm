@@ -334,7 +334,8 @@ public:
       .withPixelRatio(config.scaleFactor)
       .withConstrainMode(mln::ConstrainMode::None)
       .withViewportMode(mln::ViewportMode::Default)
-      .withCrossSourceCollisions(enableCrossSourceCollisions);
+      .withCrossSourceCollisions(enableCrossSourceCollisions)
+      .withKeepUprightMargin(mlnMapoptions.keepUprightMargin);
 
   auto tileServerOptions = [[MLNSettings sharedSettings] tileServerOptionsInternal];
   mln::ResourceOptions resourceOptions;

@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### ✨ Features and improvements
+
+- Add `MapLibreMapOptions.keepUprightMargin()` (or `app:maplibre_keepUprightMargin`), off by default: with a margin in degrees, a line label with `text-keep-upright` keeps the reading direction it was drawn with until it reads more than the margin past the vertical, so labels on lines close to the vertical, such as the road ahead in a map turned with the direction of travel, no longer flip back and forth while the map rotates. Icons are not affected ([#4904](https://github.com/maplibre/maplibre-native/pull/4904)).
+
 ## 13.8.0
 
 ### ✨ Features and improvements

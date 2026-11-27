@@ -10,6 +10,7 @@
 #include <mln/util/instrumentation.hpp>
 #include <mln/util/math.hpp>
 
+#include <algorithm>
 #include <list>
 #include <utility>
 
@@ -184,6 +185,9 @@ Placement::Placement(std::shared_ptr<const UpdateParameters> updateParameters_,
       transitionOptions(updateParameters->transitionOptions),
       commitTime(updateParameters->timePoint),
       placementZoom(static_cast<float>(updateParameters->transformState.getZoom())),
+      // Continuous mode only. A second guard: in static and tile mode the cross tile index is reset for
+      // every image, so every bucket enters it anew and the directions it holds are not used anyway.
+      keepUprightMargin(updateParameters->mode == MapMode::Continuous ? updateParameters->keepUprightMargin : 0.0f),
       collisionGroups(updateParameters->crossSourceCollisions),
       prevPlacement(std::move(prevPlacement_)),
       showCollisionBoxes(updateParameters->debugOptions & MapDebugOptions::Collision) {
@@ -750,6 +754,10 @@ void Placement::commit() {
 }
 
 void Placement::updateLayerBuckets(const RenderLayer& layer, const TransformState& state, bool updateOpacities) const {
+    if (updateOpacities) {
+        // Before the opacities change which copy is drawn.
+        syncLineLabelDirections(layer.getID(), layer.getPlacementData());
+    }
     std::set<uint32_t> seenCrossTileIDs;
     for (const auto& item : layer.getPlacementData()) {
         if (!item.sortKeyRange || item.sortKeyRange->isFirstRange()) {
@@ -772,6 +780,126 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
             (shiftY / textBoxScale + textOffset[1]) * renderTextSize};
 }
 } // namespace
+
+namespace {
+// The placed horizontal texts of a symbol (its vertical text is placed by its own rule).
+template <typename F>
+void forEachPlacedLineText(const SymbolInstance& symbol, std::size_t placedSymbolCount, F&& f) {
+    for (const auto& index :
+         {symbol.getPlacedRightTextIndex(), symbol.getPlacedCenterTextIndex(), symbol.getPlacedLeftTextIndex()}) {
+        if (index && *index < placedSymbolCount) {
+            f(*index);
+        }
+    }
+}
+
+// Whether the bucket's text is placed along lines, rotated with the map and kept upright: the labels
+// that reprojectLineLabels() turns over.
+bool hasLineLabelsKeptUpright(const SymbolBucket& bucket) {
+    const auto& layout = *bucket.layout;
+    return bucket.hasTextData() && layout.get<style::SymbolPlacement>() != style::SymbolPlacementType::Point &&
+           layout.get<style::TextRotationAlignment>() == style::AlignmentType::Map &&
+           layout.get<style::TextKeepUpright>();
+}
+
+// The direction of the line of a placed label at its anchor, in tile coordinates: the label reads this
+// way when it is drawn unflipped. (0, 0) when unknown.
+Point<float> lineDirectionAtAnchor(const PlacedSymbol& placed) {
+    if (placed.segment + 1 >= placed.line.size()) {
+        return {0.0f, 0.0f};
+    }
+    const GeometryCoordinate& from = placed.line[placed.segment];
+    const GeometryCoordinate& to = placed.line[placed.segment + 1];
+    return {static_cast<float>(to.x - from.x), static_cast<float>(to.y - from.y)};
+}
+} // namespace
+
+void LineLabelDirections::remember(const SymbolBucket& bucket) {
+    if (bucket.lineLabelDirectionsStale) return;
+    for (const SymbolInstance& symbol : bucket.symbolInstances) {
+        const uint32_t crossTileID = symbol.getCrossTileID();
+        if (crossTileID == SymbolInstance::invalidCrossTileID) continue;
+        forEachPlacedLineText(symbol, bucket.text.placedSymbols.size(), [&](std::size_t index) {
+            const PlacedSymbol& placed = bucket.text.placedSymbols[index];
+            // A hidden copy is not drawn, so its direction may be out of date (one copy at most is not
+            // hidden: the others are duplicates, see Placement::updateBucketOpacities).
+            if (placed.hidden || !placed.keepUprightFlipped) return;
+            const Point<float> line = lineDirectionAtAnchor(placed);
+            if (line.x == 0.0f && line.y == 0.0f) return;
+            directions[crossTileID] = *placed.keepUprightFlipped ? Point<float>{-line.x, -line.y} : line;
+        });
+    }
+}
+
+void LineLabelDirections::restore(SymbolBucket& bucket, const LineLabelDirections* older) const {
+    for (const SymbolInstance& symbol : bucket.symbolInstances) {
+        const uint32_t crossTileID = symbol.getCrossTileID();
+        if (crossTileID == SymbolInstance::invalidCrossTileID) continue;
+        std::optional<Point<float>> reading = readingDirection(crossTileID);
+        if (!reading && older) {
+            reading = older->readingDirection(crossTileID);
+        }
+        // Overwritten even when the placed symbol has a direction of its own: a copy that was not drawn
+        // (hidden, or its tile back from the cache) would bring back an old one.
+        forEachPlacedLineText(symbol, bucket.text.placedSymbols.size(), [&](std::size_t index) {
+            PlacedSymbol& placed = bucket.text.placedSymbols[index];
+            std::optional<bool> flipped;
+            if (reading) {
+                // Flipped where this copy's line runs against the reading direction.
+                const Point<float> line = lineDirectionAtAnchor(placed);
+                const float alongLine = line.x * reading->x + line.y * reading->y;
+                if (alongLine != 0.0f) {
+                    flipped = alongLine < 0.0f;
+                }
+            }
+            placed.keepUprightFlipped = flipped;
+        });
+    }
+    bucket.lineLabelDirectionsStale = false;
+    bucket.crossTileIDsReassigned = false;
+}
+
+std::optional<Point<float>> LineLabelDirections::readingDirection(uint32_t crossTileID) const {
+    if (auto found = directions.find(crossTileID); found != directions.end()) {
+        return found->second;
+    }
+    return std::nullopt;
+}
+
+void Placement::syncLineLabelDirections(const std::string& layerID, const LayerPlacementData& placementData) const {
+    if (keepUprightMargin <= 0.0f) return;
+    const auto forEachBucket = [&placementData](auto&& f) {
+        for (const auto& item : placementData) {
+            // A bucket is listed once per sort key range; placement data only holds symbol buckets.
+            if (item.sortKeyRange && !item.sortKeyRange->isFirstRange()) continue;
+            auto& bucket = static_cast<SymbolBucket&>(item.bucket.get());
+            if (hasLineLabelsKeptUpright(bucket)) {
+                f(bucket);
+            }
+        }
+    };
+    // Which copy of a label is drawn only changes with the placement or the buckets: skip the layer
+    // when neither has changed since its last sync.
+    std::vector<uint32_t> buckets;
+    bool idsChanged = false;
+    forEachBucket([&](const SymbolBucket& bucket) {
+        buckets.push_back(bucket.bucketInstanceId);
+        idsChanged = idsChanged || bucket.lineLabelDirectionsStale || bucket.crossTileIDsReassigned;
+    });
+    std::sort(buckets.begin(), buckets.end());
+    if (auto synced = lineLabelSyncedBuckets.find(layerID);
+        synced != lineLabelSyncedBuckets.end() && !idsChanged && synced->second == buckets) {
+        return;
+    }
+    lineLabelSyncedBuckets[layerID] = std::move(buckets);
+
+    // All copies of a label are in the same layer, but in any order: first remember the directions
+    // of the copies that were drawn, then hand them to all copies.
+    forEachBucket([this](const SymbolBucket& bucket) { lineLabelDirections.remember(bucket); });
+    const Placement* prev = getPrevPlacement();
+    const LineLabelDirections* older = prev ? &prev->lineLabelDirections : nullptr;
+    forEachBucket([this, older](SymbolBucket& bucket) { lineLabelDirections.restore(bucket, older); });
+}
 
 bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                                  const TransformState& state,
@@ -796,6 +924,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     pitchWithMap,
                                     true /*rotateWithMap*/,
                                     keepUpright,
+                                    0.0f /*keepUprightMargin: text only*/,
                                     tile,
                                     *bucket.iconSizeBinder,
                                     state);
@@ -808,6 +937,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     pitchWithMap,
                                     true /*rotateWithMap*/,
                                     keepUpright,
+                                    0.0f /*keepUprightMargin: text only*/,
                                     tile,
                                     *bucket.iconSizeBinder,
                                     state);
@@ -824,6 +954,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                 pitchWithMap,
                                 true /*rotateWithMap*/,
                                 keepUpright,
+                                keepUprightMargin,
                                 tile,
                                 *bucket.textSizeBinder,
                                 state);

@@ -139,6 +139,11 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
         }
     }
 
+    if (previousIndex == thisZoomIndexes.end() || previousIndex->second.bucketInstanceId != bucket.bucketInstanceId) {
+        // New to the index, not just updated: a new bucket, or its tile back from the cache.
+        bucket.lineLabelDirectionsStale = true;
+    }
+
     bucket.hasUninitializedSymbols = false;
 
     if (tileID.overscaleFactor() > 1u) {
@@ -146,6 +151,10 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
         // so we filter out the off-screen symbols to improve the performance.
         for (auto& symbolInstance : bucket.symbolInstances) {
             if (symbolInstance.check(SYM_GUARD_LOC) && isInVewport(tileMatrix, symbolInstance.getAnchor().point)) {
+                if (symbolInstance.getCrossTileID() == SymbolInstance::invalidCrossTileID) {
+                    // Back in view: it gets an id again, maybe the one of a copy in another tile.
+                    bucket.crossTileIDsReassigned = true;
+                }
                 symbolInstance.setCrossTileID(0u);
             } else {
                 symbolInstance.setCrossTileID(SymbolInstance::invalidCrossTileID);

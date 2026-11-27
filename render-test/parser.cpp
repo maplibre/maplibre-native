@@ -43,6 +43,7 @@
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/ostream_iterator.hpp>
 
+#include <chrono>
 #include <regex>
 #include <sstream>
 
@@ -499,6 +500,12 @@ TestMetadata parseTestMetadata(const TestPaths& paths, const mln::TestStyleTrans
         }
     }
 
+    // A continuous-mode test outputs no image unless it asks for one: the frame of the settled map.
+    if (testValue.HasMember("outputsImage")) {
+        assert(testValue["outputsImage"].IsBool());
+        metadata.outputsImage = testValue["outputsImage"].GetBool();
+    }
+
     if (testValue.HasMember("width")) {
         assert(testValue["width"].IsNumber());
         if (metadata.mapMode == mln::MapMode::Tile) {
@@ -555,6 +562,11 @@ TestMetadata parseTestMetadata(const TestPaths& paths, const mln::TestStyleTrans
     if (testValue.HasMember("crossSourceCollisions")) {
         assert(testValue["crossSourceCollisions"].IsBool());
         metadata.crossSourceCollisions = testValue["crossSourceCollisions"].GetBool();
+    }
+
+    if (testValue.HasMember("keepUprightMargin")) {
+        assert(testValue["keepUprightMargin"].IsNumber());
+        metadata.keepUprightMargin = testValue["keepUprightMargin"].GetFloat();
     }
 
     if (testValue.HasMember("axonometric")) {
@@ -707,6 +719,23 @@ mln::Value parseGlobalStateValue(const mln::JSValue& value) {
 
 } // namespace
 
+bool renderUntilIdle(TestContext& ctx) {
+    auto& observer = ctx.getObserver();
+    observer.reset();
+    // A settled map renders no frame on its own, and idle is reported after a frame: ask for one.
+    ctx.getMap().triggerRepaint();
+    // A map that never settles fails the test rather than hanging the runner. The limit is a time, not
+    // a number of frames: while symbols fade, for 300 ms after each new placement, the map asks for the
+    // next frame as soon as one is done, so the number of frames grows with the speed of the machine.
+    // Each wait of the continuous-mode tests settles within a second (measured with llvmpipe: 300 to
+    // 900 ms, 420 to 2,530 frames); ten seconds leave room for slower machines.
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+    while (!observer.idle && !observer.mapLoadFailure && std::chrono::steady_clock::now() < deadline) {
+        ctx.getFrontend().renderOnce(ctx.getMap());
+    }
+    return observer.idle && !observer.mapLoadFailure;
+}
+
 TestOperations parseTestOperations(TestMetadata& metadata) {
     TestOperations result;
     if (!metadata.document.HasMember("metadata") || !metadata.document["metadata"].HasMember("test") ||
@@ -719,10 +748,15 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
     if (operationsArray.Empty()) {
         return result;
     }
+    const bool continuous = metadata.mapMode == mln::MapMode::Continuous;
     for (auto& operationArray : operationsArray) {
         assert(operationArray.Size() >= 1u);
 
-        if (operationArray[0].GetString() == waitOp) {
+        if (operationArray[0].GetString() == waitOp && continuous) {
+            // wait, in continuous mode: render frames until the map is idle, so the next operation
+            // starts from a settled frame (a still image cannot be requested in this mode)
+            result.emplace_back([](TestContext& ctx) { return renderUntilIdle(ctx); });
+        } else if (operationArray[0].GetString() == waitOp) {
             // wait
             result.emplace_back([](TestContext& ctx) {
                 try {
