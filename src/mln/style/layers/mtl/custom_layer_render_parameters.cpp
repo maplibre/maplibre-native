@@ -1,6 +1,5 @@
 #include <mln/style/layers/mtl/custom_layer_render_parameters.hpp>
 #include <mln/renderer/paint_parameters.hpp>
-#include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/render_terrain.hpp>
 #include <mln/mtl/render_pass.hpp>
 #include <mln/mtl/renderer_backend.hpp>
@@ -27,16 +26,9 @@ CustomLayerRenderParameters::CustomLayerRenderParameters(const mln::PaintParamet
         const mln::mtl::RenderPass& metalRenderPass = static_cast<mln::mtl::RenderPass&>(*paintParameters.renderPass);
         encoder = metalRenderPass.getMetalEncoder();
 
-        // RenderTerrain::renderDepth draws the depth target before the main pass whenever the
-        // terrain has depth drawables. Before it has drawn at this size there is no Metal texture
-        // behind it, and getDepthTexture may still hand back its 1x1 far-plane placeholder.
         if (auto* terrain = paintParameters.terrain) {
-            const auto& depthLayerGroup = terrain->getDepthLayerGroup();
-            if (depthLayerGroup && !depthLayerGroup->empty()) {
-                const auto& depthTexture = terrain->getDepthTexture(paintParameters.context);
-                if (depthTexture && depthTexture->getSize() == renderable.getSize()) {
-                    terrainDepthTexture = static_cast<mln::mtl::Texture2D&>(*depthTexture).getMetalTexture();
-                }
+            if (auto* depthTexture = terrain->getDrawnDepthTexture(paintParameters.context, renderable.getSize())) {
+                terrainDepthTexture = static_cast<mln::mtl::Texture2D&>(*depthTexture).getMetalTexture();
             }
         }
     }

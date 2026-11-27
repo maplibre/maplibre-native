@@ -1882,9 +1882,11 @@ off, so the layer draws on screen in the main pass, after the terrain mesh (`TER
 with the mesh's depth in the attached depth buffer. A layer that sets its own depth test is hidden by
 the terrain in front of it. Its `projectionMatrix` is GL clip space; off GL the layer applies the
 mesh's remap, z' = (z + w) / 2, itself. `CustomLayerRenderParameters` carries the terrain
-exaggeration (0 with terrain off), and on Metal the packed depth texture `RenderTerrain::renderDepth`
-draws before the main pass (null until it has drawn); iOS hands them over as
-`MLNStyleLayerDrawingContext.terrainExaggeration` and `MLNCustomStyleLayer.terrainDepthTexture`.
+exaggeration (0 with terrain off), and the packed depth texture `RenderTerrain::renderDepth` draws
+before the main pass (null until it has drawn): `terrainDepthTexture` on the Metal parameters, the
+texture name on `style::gl::CustomLayerRenderParameters`, and the image view, sampler and layout on the
+Vulkan ones. iOS hands them over as `MLNStyleLayerDrawingContext.terrainExaggeration` and
+`MLNCustomStyleLayer.terrainDepthTexture`. WebGPU has no custom layers yet, and the default layer manager registers them on OpenGL and Vulkan only.
 
 ## References
 

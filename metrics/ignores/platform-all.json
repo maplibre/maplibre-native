@@ -154,6 +154,5 @@
     "render-tests/terrain/tile-stiching": "graded against maplibre-gl-js; native's tile zoom rule differs from gl-js's on tilted views: native draws 193 tiles all at zoom 14, gl-js 45 tiles at zooms 11 to 15",
     "render-tests/terrain/rtt-mipmap-minification/pitch-70": "graded against maplibre-gl-js; native's tile zoom rule differs from gl-js's on tilted views: native draws 33 tiles at zooms 8 to 14, gl-js 33 tiles at zooms 4 to 15",
     "render-tests/terrain/fill-extrusion-vertical-gradient-pattern": "native now draws the patterned fill-extrusion on terrain, but the pattern on its walls is shifted against maplibre-gl-js (about half a pattern period up and a few pixels sideways); cause not found yet",
-    "render-tests/terrain/low-zoom": "native draws a black frame at zoom 0 with exaggeration 1000 until https://github.com/maplibre/maplibre-native/pull/5045; with it, native requests raster tiles gl-js does not, which are not in the fixtures",
-    "render-tests/terrain/fill-extrusion-multiple": "since #4971 (DEM sampled at pixel centres) a fill-extrusion on terrain shows a step across its roof, about 2 px at exaggeration 1 and in proportion to the exaggeration; seen on macOS Metal and WebGPU, cause not found yet"
+    "render-tests/terrain/low-zoom": "native draws a black frame at zoom 0 with exaggeration 1000 until https://github.com/maplibre/maplibre-native/pull/5045; with it, native requests raster tiles gl-js does not, which are not in the fixtures"
 }

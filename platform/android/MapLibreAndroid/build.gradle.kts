@@ -244,6 +244,7 @@ val syncPrefabHeaders by tasks.registering(Sync::class) {
         include("mln/style/layers/custom_layer_host.hpp")
         include("mln/style/layers/custom_layer_init_parameters.hpp")
         include("mln/style/layers/custom_layer_render_parameters.hpp")
+        include("mln/style/layers/gl/custom_layer_render_parameters.hpp")
         include("mln/style/layers/vulkan/custom_layer_init_parameters.hpp")
         include("mln/style/layers/vulkan/custom_layer_render_parameters.hpp")
         include("mln/plugin/plugin_api.h")

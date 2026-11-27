@@ -78,7 +78,7 @@ LayerManagerDefault::LayerManagerDefault() {
 #if !defined(MBGL_LAYER_HEATMAP_DISABLE_ALL)
     addLayerType(std::make_unique<HeatmapLayerFactory>());
 #endif
-#ifdef MLN_RENDER_BACKEND_OPENGL
+#if MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN
 #if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     addLayerType(std::make_unique<CustomLayerFactory>());
 #endif
