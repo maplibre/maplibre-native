@@ -384,3 +384,57 @@ TEST(Filter, LegacyExpressionInvalidType) {
     std::optional<Filter> result = conversion::convert<Filter>(conversion::Convertible(&value), error);
     EXPECT_FALSE(result);
 }
+
+TEST(Filter, EqualityComparesExpressionContents) {
+    const auto parse = [](const char* json) {
+        conversion::Error error;
+        auto parsed = conversion::convertJSON<Filter>(json, error);
+        EXPECT_TRUE(bool(parsed));
+        return *parsed;
+    };
+
+    // Separate parses build separate expression objects.
+    const Filter a = parse(R"(["==", ["get", "class"], "street"])");
+    const Filter b = parse(R"(["==", ["get", "class"], "street"])");
+    const Filter c = parse(R"(["==", ["get", "class"], "path"])");
+
+    EXPECT_NE(a.expression->get(), b.expression->get());
+    EXPECT_TRUE(a == b);
+    EXPECT_FALSE(a != b);
+    EXPECT_TRUE(a != c);
+    EXPECT_TRUE(a == a);
+
+    const Filter none;
+    EXPECT_TRUE(none == Filter());
+    EXPECT_TRUE(none != a);
+    EXPECT_TRUE(a != none);
+}
+
+TEST(Filter, HashFollowsExpressionContents) {
+    const auto parse = [](const char* json) {
+        conversion::Error error;
+        auto parsed = conversion::convertJSON<Filter>(json, error);
+        EXPECT_TRUE(bool(parsed));
+        return *parsed;
+    };
+
+    // Separate parses of the same text hash equal; different contents hash apart.
+    const Filter a = parse(R"(["all", ["==", ["get", "class"], "street"], [">=", ["zoom"], 12]])");
+    const Filter b = parse(R"(["all", ["==", ["get", "class"], "street"], [">=", ["zoom"], 12]])");
+    const Filter otherLiteral = parse(R"(["all", ["==", ["get", "class"], "street"], [">=", ["zoom"], 13]])");
+    const Filter otherOperator = parse(R"(["all", ["!=", ["get", "class"], "street"], [">=", ["zoom"], 12]])");
+    const Filter legacy = parse(R"(["==", "class", "street"])");
+    const Filter legacyAgain = parse(R"(["==", "class", "street"])");
+
+    EXPECT_EQ(a.hash(), b.hash());
+    EXPECT_NE(a.hash(), otherLiteral.hash());
+    EXPECT_NE(a.hash(), otherOperator.hash());
+    EXPECT_EQ(legacy.hash(), legacyAgain.hash());
+    EXPECT_TRUE(legacy == legacyAgain);
+    EXPECT_FALSE(a == otherLiteral);
+
+    // Copies keep the hash.
+    const Filter copy = a; // NOLINT(performance-unnecessary-copy-initialization)
+    EXPECT_EQ(a.hash(), copy.hash());
+    EXPECT_EQ(0u, Filter().hash());
+}

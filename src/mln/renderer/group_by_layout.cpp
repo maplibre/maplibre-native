@@ -22,9 +22,10 @@ bool LayoutGroupKey::operator==(const LayoutGroupKey& other) const {
     if (source != other.source) return false;
     if (sourceLayer != other.sourceLayer) return false;
 
-    // Filter comparison - prefer pointer equality
+    // Filter comparison - prefer pointer equality, then the content hash
     if (filterExpression != other.filterExpression) {
         if (!filterExpression || !other.filterExpression) return false;
+        if (filterHash != other.filterHash) return false;
         // Deep comparison if pointers differ
         if (*filterExpression != *other.filterExpression) return false;
     }
@@ -43,6 +44,7 @@ LayoutGroupKey createGroupKey(const style::Layer::Impl& impl) {
     key.maxZoom = impl.maxZoom;
     key.visibility = impl.visibility;
     key.filterExpression = impl.filter.expression.value_or(nullptr);
+    key.filterHash = impl.filter.hash();
     key.impl = &impl;
     return key;
 }
@@ -69,14 +71,16 @@ std::size_t std::hash<mln::LayoutGroupKey>::operator()(const mln::LayoutGroupKey
 
     std::size_t seed = 0;
 
-    // Hash stable pointers and scalars only (NOT layout)
+    // Hash stable pointers, scalars and the filter's content hash (NOT layout)
     hash_combine(seed, reinterpret_cast<std::size_t>(key.typeInfo));
     hash_combine(seed, std::hash<std::string>{}(key.source));
     hash_combine(seed, std::hash<std::string>{}(key.sourceLayer));
     hash_combine(seed, std::hash<float>{}(key.minZoom));
     hash_combine(seed, std::hash<float>{}(key.maxZoom));
     hash_combine(seed, static_cast<bool>(key.visibility));
-    hash_combine(seed, reinterpret_cast<std::size_t>(key.filterExpression.get()));
+    // The filter's address differs between layers with equal filters, since every layer parses its
+    // own; its content hash does not.
+    hash_combine(seed, key.filterHash);
 
     // Note: We intentionally DON'T hash the layout here
     // This means keys with same source/zoom/type/filter but different layouts
