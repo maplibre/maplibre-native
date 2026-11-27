@@ -3,6 +3,9 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cmath>
+#include <numbers>
+#include <vector>
 
 using namespace mln;
 using namespace mln::test::national_grid;
@@ -77,4 +80,35 @@ TEST(NationalGrid, RegisteredProjectionConvertsTheHelmertExampleAtSeaLevel) {
     crs.forward(back, again);
     EXPECT_NEAR(position[0][0], again[0][0], centimeter);
     EXPECT_NEAR(position[0][1], again[0][1], centimeter);
+}
+
+TEST(NationalGrid, RegisteredProjectionsInverseUndoesItsForward) {
+    // A camera move takes its anchor to lat/lng and back on every step, so any gap between the two adds up over a
+    // pinch.
+    constexpr double micrometer = 1e-6;
+    constexpr double metersPerDegree = 6371008.8 * std::numbers::pi / 180;
+    const CRS crs = test::nationalGrid("EPSG:27700");
+    std::vector<std::array<double, 2>> positions;
+    for (double easting = 0; easting <= 700000; easting += 50000) {
+        for (double northing = 0; northing <= 1250000; northing += 50000) {
+            positions.push_back({easting, northing});
+        }
+    }
+    std::vector<std::array<double, 2>> lngLats(positions.size());
+    std::vector<std::array<double, 2>> again(positions.size());
+    std::vector<std::array<double, 2>> lngLatsAgain(positions.size());
+    crs.inverse(positions, lngLats);
+    crs.forward(lngLats, again);
+    crs.inverse(again, lngLatsAgain);
+
+    for (std::size_t i = 0; i < positions.size(); ++i) {
+        EXPECT_LT(std::hypot(again[i][0] - positions[i][0], again[i][1] - positions[i][1]), micrometer)
+            << positions[i][0] << " E " << positions[i][1] << " N";
+        const double latitude = lngLats[i][1] * radiansPerDegree;
+        EXPECT_LT(
+            std::hypot((lngLatsAgain[i][0] - lngLats[i][0]) * std::cos(latitude), lngLatsAgain[i][1] - lngLats[i][1]) *
+                metersPerDegree,
+            micrometer)
+            << positions[i][0] << " E " << positions[i][1] << " N";
+    }
 }

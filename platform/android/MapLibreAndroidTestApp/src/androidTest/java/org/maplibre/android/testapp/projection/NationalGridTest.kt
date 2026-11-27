@@ -17,7 +17,9 @@ import org.maplibre.android.testapp.activity.projection.NationalGridActivity.Com
 import org.maplibre.android.testapp.activity.projection.NationalGridActivity.Companion.RINGS_LAYER
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
@@ -33,13 +35,14 @@ class NationalGridTest : BaseTest() {
 
     @Test
     fun convertsAsTheCoreTestProjectionDoes() {
-        // The core test projection's answers for the same crosshairs (`w11/fixture-points.json` in the core fixture's
-        // notes), and its forward of the guide's Helmert example at sea level, 422297.7979 E 412878.7399 N.
+        // The core test projection's answers for the same crosshairs, where the render test
+        // `projection/national-grid/crosshairs` puts its rings, and its forward of the guide's Helmert example at sea
+        // level, 422297.7979 E 412878.7399 N.
         val crosshairs = listOf(
-            LatLng(53.368860648334653, -3.3477024864059799),
-            LatLng(52.407393941121825, -1.2239561421480576),
-            LatLng(50.71190226649788, 0.99416090786370237),
-            LatLng(51.62259499994537, -3.8130780753904916)
+            LatLng(53.368860650404621, -3.347702452627864),
+            LatLng(52.407393940926873, -1.2239561059133772),
+            LatLng(50.711902262780129, 0.9941609476954022),
+            LatLng(51.622594999864035, -3.8130780437971459)
         )
         for ((crosshair, expected) in CROSSHAIRS.zip(crosshairs)) {
             val (latitude, longitude) = NationalGrid.wgs84FromEastingNorthing(crosshair.first, crosshair.second)
@@ -52,6 +55,37 @@ class NationalGridTest : BaseTest() {
         )
         assertEquals(422297.7979, easting, 1e-3)
         assertEquals(412878.7399, northing, 1e-3)
+    }
+
+    @Test
+    fun inverseUndoesForward() {
+        // A camera move takes its anchor to lat/lng and back on every step, so any gap between the two adds up over a
+        // pinch.
+        val positions = mutableListOf<Double>()
+        for (easting in 0..700000 step 50000) {
+            for (northing in 0..1250000 step 50000) {
+                positions += easting.toDouble()
+                positions += northing.toDouble()
+            }
+        }
+        val count = positions.size / 2
+        val projection = NationalGrid.coordinateReferenceSystem.projection
+        val lngLats = DoubleArray(2 * count)
+        val again = DoubleArray(2 * count)
+        val lngLatsAgain = DoubleArray(2 * count)
+        projection.inverse(positions.toDoubleArray(), lngLats, count)
+        projection.forward(lngLats, again, count)
+        projection.inverse(again, lngLatsAgain, count)
+        for (i in 0 until count) {
+            val (x, y) = 2 * i to 2 * i + 1
+            val where = "${positions[x]} E ${positions[y]} N"
+            val missed = hypot(again[x] - positions[x], again[y] - positions[y])
+            assertTrue("forward(inverse(p)) is $missed m from p at $where", missed < MICROMETER)
+            val latitude = lngLats[y] * PI / 180
+            val moved = hypot((lngLatsAgain[x] - lngLats[x]) * cos(latitude), lngLatsAgain[y] - lngLats[y]) *
+                METERS_PER_DEGREE
+            assertTrue("inverse(forward(q)) is $moved m from q at $where", moved < MICROMETER)
+        }
     }
 
     @Test
@@ -149,6 +183,10 @@ class NationalGridTest : BaseTest() {
 
     private companion object {
         const val WAIT_SECONDS = 30L
+
+        const val MICROMETER = 1e-6
+
+        const val METERS_PER_DEGREE = 6371008.8 * PI / 180
 
         /** Half the side of the square around a crosshair that is measured, and the crosshair's arms are 20 dp. */
         const val WINDOW_DP = 30

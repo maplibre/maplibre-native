@@ -208,14 +208,36 @@ inline std::array<double, 2> eastingNorthingFromWgs84(double latitude, double lo
     return nationalGridProjection.forward(osgb36.latitude, osgb36.longitude);
 }
 
-/// A National Grid easting and northing to WGS84 latitude and longitude.
-inline std::array<double, 2> wgs84FromEastingNorthing(double easting, double northing) {
+/// The guide's way back from a National Grid easting and northing to WGS84: the projection's inverse series, then the
+/// Helmert transformation reversed. Over Britain it lands a few millimeters from the point `eastingNorthingFromWgs84`
+/// takes there, since the reversed transformation is not quite the inverse and the height it leaves out is not zero.
+inline std::array<double, 2> approximateWgs84FromEastingNorthing(double easting, double northing) {
     const auto [latitude, longitude] = nationalGridProjection.inverse(easting, northing);
     const LatLngHeight wgs84 = latLngHeightFromCartesian(
         grs80,
         etrs89ToOsgb36.reversed()(
             cartesianFromLatLngHeight(airy1830, {.latitude = latitude, .longitude = longitude, .height = 0})));
     return {wgs84.latitude, wgs84.longitude};
+}
+
+/// A National Grid easting and northing to the WGS84 latitude and longitude that `eastingNorthingFromWgs84` takes back
+/// to it within a micrometer. Each step moves the target of the guide's way back by what is left.
+inline std::array<double, 2> wgs84FromEastingNorthing(double easting, double northing) {
+    constexpr double tolerance = 1e-6;
+    constexpr int maxSteps = 8;
+    std::array<double, 2> target{easting, northing};
+    std::array<double, 2> latLng = approximateWgs84FromEastingNorthing(easting, northing);
+    for (int step = 0; step < maxSteps; ++step) {
+        const auto [reachedEasting, reachedNorthing] = eastingNorthingFromWgs84(latLng[0], latLng[1]);
+        const double eastingLeft = easting - reachedEasting;
+        const double northingLeft = northing - reachedNorthing;
+        if (std::hypot(eastingLeft, northingLeft) < tolerance) {
+            break;
+        }
+        target = {target[0] + eastingLeft, target[1] + northingLeft};
+        latLng = approximateWgs84FromEastingNorthing(target[0], target[1]);
+    }
+    return latLng;
 }
 
 /// The side of an Ordnance Survey level 0 tile in meters. Level 0 is 5 by 6 of them from E -238375, N 1376256.

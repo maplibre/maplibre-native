@@ -23,10 +23,10 @@
       "data": {
         "type": "FeatureCollection",
         "features": [
-          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [-3.34770248640598, 53.36886064833465]}},
-          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [-1.2239561421480576, 52.407393941121825]}},
-          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [0.9941609078637024, 50.71190226649788]}},
-          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [-3.8130780753904916, 51.62259499994537]}}
+          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [-3.347702452627864, 53.36886065040462]}},
+          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [-1.2239561059133772, 52.40739394092687]}},
+          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [0.9941609476954022, 50.71190226278013]}},
+          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [-3.813078043797146, 51.622594999864035]}}
         ]
       }
     }

@@ -200,14 +200,43 @@ object NationalGrid {
         return Projection.forward(osgb36.latitude, osgb36.longitude)
     }
 
-    /** A National Grid easting and northing to WGS 84 latitude and longitude. */
-    fun wgs84FromEastingNorthing(easting: Double, northing: Double): DoubleArray {
+    /**
+     * The guide's way back from a National Grid easting and northing to WGS 84: the projection's inverse series, then
+     * the Helmert transformation reversed. Over Britain it lands a few millimeters from the point
+     * [eastingNorthingFromWgs84] takes there, since the reversed transformation is not quite the inverse and the height
+     * it leaves out is not zero.
+     */
+    private fun approximateWgs84FromEastingNorthing(easting: Double, northing: Double): DoubleArray {
         val (latitude, longitude) = Projection.inverse(easting, northing)
         val wgs84 = latLngHeightFromCartesian(
             grs80,
             osgb36ToEtrs89.transform(cartesianFromLatLngHeight(airy1830, LatLngHeight(latitude, longitude, 0.0)))
         )
         return doubleArrayOf(wgs84.latitude, wgs84.longitude)
+    }
+
+    /**
+     * A National Grid easting and northing to the WGS 84 latitude and longitude that [eastingNorthingFromWgs84] takes
+     * back to it within a micrometer. Each step moves the target of the guide's way back by what is left.
+     */
+    fun wgs84FromEastingNorthing(easting: Double, northing: Double): DoubleArray {
+        val tolerance = 1e-6
+        val maxSteps = 8
+        var targetEasting = easting
+        var targetNorthing = northing
+        var latLng = approximateWgs84FromEastingNorthing(easting, northing)
+        for (step in 0 until maxSteps) {
+            val (reachedEasting, reachedNorthing) = eastingNorthingFromWgs84(latLng[0], latLng[1])
+            val eastingLeft = easting - reachedEasting
+            val northingLeft = northing - reachedNorthing
+            if (hypot(eastingLeft, northingLeft) < tolerance) {
+                break
+            }
+            targetEasting += eastingLeft
+            targetNorthing += northingLeft
+            latLng = approximateWgs84FromEastingNorthing(targetEasting, targetNorthing)
+        }
+        return latLng
     }
 
     val coordinateReferenceSystem = CoordinateReferenceSystem(
