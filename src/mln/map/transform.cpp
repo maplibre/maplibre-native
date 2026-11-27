@@ -111,8 +111,13 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     CameraOptions camera = inputCamera;
 
     Duration duration = animation.duration.value_or(Duration::zero());
-    if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
-        // reuse flyTo, without exaggerated animation, to achieve constant ground speed.
+    const bool zoomChanges = camera.zoom && *camera.zoom != getZoom();
+    // Reuse flyTo (without the zoom-out) for a timed ease so that panning keeps pace with a change
+    // in zoom. flyTo moves along the van Wijk path, whose ground speed at constant zoom is not
+    // constant (slow-fast-slow), so a constant-zoom ease with an explicit easing curve interpolates
+    // directly to follow that curve.
+    if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero() &&
+        (zoomChanges || !animation.easing)) {
         flyTo(camera, animation, true);
         return;
     }
