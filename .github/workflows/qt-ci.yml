@@ -69,7 +69,7 @@ jobs:
             qt_version: 6.9.1
             qt_target: desktop
             deployment_target: 14.3
-            deployment_arch: "x86_64;arm64"
+            deployment_arch: "arm64"
             compiler: ""
           # disabled due to https://github.com/llvm/llvm-project/issues/77653
           # https://github.com/maplibre/maplibre-native/pull/3879#issuecomment-3406495279
