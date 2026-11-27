@@ -793,7 +793,7 @@ GeoJSONData::TileFeatures rootTile(GeoJSONData& data) {
 
 std::string tiledIn(const Style& style, const std::string& sourceID) {
     const auto data = style.getSource(sourceID)->as<GeoJSONSource>()->impl().getData().lock();
-    return data ? data->getProjection() : "no data";
+    return data ? data->getProjectionName() : "no data";
 }
 
 constexpr auto identityStyle = R"({"version": 8, "projection": {"type": "identity"}, "sources": {}, "layers": []})";
@@ -807,7 +807,7 @@ TEST(Source, GeoJSONDataTilesTheDataWhereTheIdentityProjectionPutsIt) {
         GeoJSONOptions::defaultOptions(),
         getRegisteredProjection("identity"));
 
-    EXPECT_EQ("identity", data->getProjection());
+    EXPECT_EQ("identity", data->getProjectionName());
     const auto features = rootTile(*data);
     ASSERT_EQ(1u, features.size());
     EXPECT_EQ((mapbox::geometry::point<int16_t>{6144, 2048}),

@@ -235,7 +235,7 @@ void GeoJSONSource::giveLastData() {
         return;
     }
     const auto projection = styleProjection();
-    const std::string tiledIn = lastData ? lastData->getProjection() : std::string();
+    const std::string tiledIn = lastData ? lastData->getProjectionName() : std::string();
     if (tiledIn == (projection ? projection->name() : std::string())) {
         source.as<style::GeoJSONSource>()->setGeoJSONData(std::move(lastData));
     } else if (!awaitingUpdate) {

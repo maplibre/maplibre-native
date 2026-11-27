@@ -122,7 +122,7 @@ std::shared_ptr<GeoJSONData> GeoJSONSource::Impl::createData(
     const GeoJSON& data = projection ? reprojected : geoJSON;
     const auto inProjection = [&](GeoJSONData* created) {
         if (projection) {
-            created->projection = projection->name();
+            created->projectionName = projection->name();
         }
         return std::shared_ptr<GeoJSONData>(created);
     };

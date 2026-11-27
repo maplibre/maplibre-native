@@ -67,7 +67,7 @@ constexpr const auto extensionGetters = mapbox::eternal::hash_map<mapbox::eterna
 /// Whether the data is tiled where the map's projection draws it: in lat/lng for a projection that wraps, as Mercator
 /// does, or in the registered projection itself.
 bool isTiledFor(const WorldCoordinateHelper& helper, const style::GeoJSONData& data) {
-    return helper.wraps() ? data.getProjection().empty() : data.getProjection() == helper.name();
+    return helper.wraps() ? data.getProjectionName().empty() : data.getProjectionName() == helper.name();
 }
 
 } // namespace

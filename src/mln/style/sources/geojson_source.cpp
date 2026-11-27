@@ -22,7 +22,7 @@ namespace {
 
 /// Whether the data is tiled where a style in the registered projection draws it, or in lat/lng for null.
 bool isTiledIn(const GeoJSONData& data, const CRSWorldCoordinateHelper* projection) {
-    return projection ? data.getProjection() == projection->name() : data.getProjection().empty();
+    return projection ? data.getProjectionName() == projection->name() : data.getProjectionName().empty();
 }
 
 void warnThatItDrawsNothing(const std::string& id) {
