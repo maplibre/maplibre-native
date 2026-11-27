@@ -1307,6 +1307,9 @@ public:
     }
   };
 
+  // Core animates camera properties independently (#4637). Cancel first so
+  // this partial command replaces the whole running animation, as before.
+  _mbglMap->cancelTransitions();
   [self willChangeValueForKey:@"centerCoordinate"];
   _mbglMap->easeTo(mln::CameraOptions()
                        .withCenter(MLNLatLngFromLocationCoordinate2D(centerCoordinate))
@@ -1359,6 +1362,9 @@ public:
 
 - (void)setZoomLevel:(double)zoomLevel animated:(BOOL)animated {
   MLNLogDebug(@"Setting zoomLevel: %f animated: %@", zoomLevel, MLNStringFromBOOL(animated));
+  // Core animates camera properties independently (#4637). Cancel first so
+  // this partial command replaces the whole running animation, as before.
+  _mbglMap->cancelTransitions();
   [self willChangeValueForKey:@"zoomLevel"];
   _mbglMap->easeTo(mln::CameraOptions().withZoom(zoomLevel).withPadding(
                        MLNEdgeInsetsFromNSEdgeInsets(self.contentInsets)),
@@ -1367,6 +1373,9 @@ public:
 }
 
 - (void)setZoomLevel:(double)zoomLevel atPoint:(NSPoint)point animated:(BOOL)animated {
+  // Core animates camera properties independently (#4637). Cancel first so
+  // this partial command replaces the whole running animation, as before.
+  _mbglMap->cancelTransitions();
   [self willChangeValueForKey:@"centerCoordinate"];
   [self willChangeValueForKey:@"zoomLevel"];
   MLNMapCamera *oldCamera = self.camera;
@@ -1430,6 +1439,9 @@ public:
 
 - (void)setDirection:(CLLocationDirection)direction animated:(BOOL)animated {
   MLNLogDebug(@"Setting direction: %f animated: %@", direction, MLNStringFromBOOL(animated));
+  // Core animates camera properties independently (#4637). Cancel first so
+  // this partial command replaces the whole running animation, as before.
+  _mbglMap->cancelTransitions();
   [self willChangeValueForKey:@"direction"];
   _mbglMap->easeTo(mln::CameraOptions().withBearing(direction).withPadding(
                        MLNEdgeInsetsFromNSEdgeInsets(self.contentInsets)),

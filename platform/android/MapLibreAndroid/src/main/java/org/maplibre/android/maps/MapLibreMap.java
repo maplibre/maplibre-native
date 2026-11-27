@@ -877,6 +877,9 @@ public final class MapLibreMap {
    */
   public void scrollBy(float x, float y, long duration) {
     notifyDeveloperAnimationListeners();
+    // Core animates camera properties independently (#4637). Cancel first so
+    // this partial command replaces the whole running animation, as before.
+    nativeMapView.cancelTransitions();
     nativeMapView.moveBy(x, y, duration);
   }
 
@@ -895,6 +898,9 @@ public final class MapLibreMap {
    */
   public void setZoom(double zoom, @NonNull PointF focalPoint, long duration ) {
     notifyDeveloperAnimationListeners();
+    // Core animates camera properties independently (#4637). Cancel first so
+    // this partial command replaces the whole running animation, as before.
+    nativeMapView.cancelTransitions();
     nativeMapView.setZoom(zoom, focalPoint, duration);
   }
 
@@ -920,6 +926,9 @@ public final class MapLibreMap {
    */
   public void setFocalBearing(double bearing, float focalX, float focalY, long duration) {
     notifyDeveloperAnimationListeners();
+    // Core animates camera properties independently (#4637). Cancel first so
+    // this partial command replaces the whole running animation, as before.
+    nativeMapView.cancelTransitions();
     transform.setBearing(bearing, focalX, focalY, duration);
   }
 
