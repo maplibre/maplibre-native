@@ -89,9 +89,10 @@ TEST(NationalGrid, RegisteredProjectionsInverseUndoesItsForward) {
     constexpr double metersPerDegree = 6371008.8 * std::numbers::pi / 180;
     const CRS crs = test::nationalGrid("EPSG:27700");
     std::vector<std::array<double, 2>> positions;
-    for (double easting = 0; easting <= 700000; easting += 50000) {
-        for (double northing = 0; northing <= 1250000; northing += 50000) {
-            positions.push_back({easting, northing});
+    constexpr double step = 50000;
+    for (int column = 0; column <= 14; ++column) {
+        for (int row = 0; row <= 25; ++row) {
+            positions.push_back({column * step, row * step});
         }
     }
     std::vector<std::array<double, 2>> lngLats(positions.size());
