@@ -479,4 +479,49 @@ class StyleTest : BaseTest() {
             )
         }
     }
+
+    @Test
+    fun testRemoveLayerByIdUsesCachedLayerReference() {
+        // Repro for maplibre-native#3101: getLayer → removeLayer(id) must call
+        // native removeLayer(Layer) so ownership returns to the same peer.
+        val layer = mockk<SymbolLayer>(relaxed = true)
+        every { layer.id } returns "water"
+        every { nativeMapView.getLayer("water") } returns layer
+        every { nativeMapView.removeLayer(layer) } returns true
+
+        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
+        maplibreMap.setStyle(builder)
+        maplibreMap.notifyStyleLoaded()
+
+        val fetched = maplibreMap.style!!.getLayer("water")
+        Assert.assertSame(layer, fetched)
+        // Second lookup should hit the Style cache, not native again
+        Assert.assertSame(layer, maplibreMap.style!!.getLayer("water"))
+        verify(exactly = 1) { nativeMapView.getLayer("water") }
+
+        Assert.assertTrue(maplibreMap.style!!.removeLayer("water"))
+        verify(exactly = 1) { nativeMapView.removeLayer(layer) }
+        verify(exactly = 0) { nativeMapView.removeLayer("water") }
+
+        // Reference remains usable for re-add
+        maplibreMap.style!!.addLayer(layer)
+        verify(exactly = 1) { nativeMapView.addLayer(layer) }
+        Assert.assertSame(layer, maplibreMap.style!!.getLayer("water"))
+    }
+
+    @Test
+    fun testRemoveLayerByIdUsesCachedAddedLayer() {
+        val layer = mockk<SymbolLayer>(relaxed = true)
+        every { layer.id } returns "my-layer"
+        every { nativeMapView.removeLayer(layer) } returns true
+
+        maplibreMap.setStyle(Style.Builder().fromJson("{}"))
+        maplibreMap.notifyStyleLoaded()
+        maplibreMap.style!!.addLayer(layer)
+
+        Assert.assertTrue(maplibreMap.style!!.removeLayer("my-layer"))
+        verify(exactly = 1) { nativeMapView.removeLayer(layer) }
+        verify(exactly = 0) { nativeMapView.removeLayer("my-layer") }
+    }
+
 }
