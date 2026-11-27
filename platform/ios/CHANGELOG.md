@@ -32,6 +32,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - A `%` that is not followed by two hex digits stays literal in `file://` and `mbtiles://` URLs, so a file such as `100%.json` is found ([#4926](https://github.com/maplibre/maplibre-native/pull/4926)).
 - Retry a rate-limited request right away when its `Retry-After` or `X-RateLimit-Reset` time has already passed. It was never retried ([#4923](https://github.com/maplibre/maplibre-native/pull/4923)).
 
+### 🐞 Bug fixes
+
+- Changing `fill-extrusion-rounded-corner-distance` at runtime now rebuilds the extrusions of tiles that are already loaded.
+
 ## 7.0.0
 
 ### 💥 Breaking changes
