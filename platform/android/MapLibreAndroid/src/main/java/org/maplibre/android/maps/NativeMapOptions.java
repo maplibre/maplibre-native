@@ -11,7 +11,6 @@ public class NativeMapOptions {
   private final long actionJournalLogFileCount;
   private final int actionJournalRenderingReportInterval;
   private final boolean asyncRendererCleanup;
-  private final boolean fastPFOREnabled;
   private final boolean featureInfoEnabled;
 
   public NativeMapOptions(MapLibreMapOptions options) {
@@ -24,7 +23,6 @@ public class NativeMapOptions {
     actionJournalLogFileCount = options.getActionJournalLogFileCount();
     actionJournalRenderingReportInterval = options.getActionJournalRenderingReportInterval();
     asyncRendererCleanup = options.getAsyncRendererCleanup();
-    fastPFOREnabled = options.getFastPFOREnabled();
     featureInfoEnabled = options.getFeatureInfoEnabled();
   }
 
@@ -39,7 +37,6 @@ public class NativeMapOptions {
     actionJournalRenderingReportInterval = 0;
 
     asyncRendererCleanup = false;
-    fastPFOREnabled = false;
     featureInfoEnabled = false;
   }
 
@@ -73,10 +70,6 @@ public class NativeMapOptions {
 
   public boolean asyncRendererCleanup() {
     return asyncRendererCleanup;
-  }
-
-  public boolean fastPFOREnabled() {
-    return fastPFOREnabled;
   }
 
   public boolean featureInfoEnabled() {

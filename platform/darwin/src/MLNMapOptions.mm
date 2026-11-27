@@ -13,11 +13,17 @@
     _styleJSON = nil;
     _pluginLayers = nil;
     _actionJournalOptions = [[MLNActionJournalOptions alloc] init];
-    _fastPFOREnabled = NO;
     _featureInfoEnabled = NO;
   }
 
   return self;
+}
+
+- (bool)fastPFOREnabled {
+  return true;
+}
+
+- (void)setFastPFOREnabled:(bool)fastPFOREnabled {
 }
 
 @end

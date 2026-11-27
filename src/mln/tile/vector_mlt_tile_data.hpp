@@ -10,7 +10,7 @@ namespace mln {
 
 class VectorMLTTileData : public GeometryTileData {
 public:
-    VectorMLTTileData(std::shared_ptr<const std::string> data, bool fastPFOREnabled);
+    explicit VectorMLTTileData(std::shared_ptr<const std::string> data);
     VectorMLTTileData(const VectorMLTTileData&);
     VectorMLTTileData(VectorMLTTileData&&) noexcept;
     ~VectorMLTTileData() override;

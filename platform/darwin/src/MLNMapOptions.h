@@ -38,9 +38,10 @@ MLN_EXPORT
 @property NSArray *pluginLayers;
 
 /**
-    Enable FastPFOR decoding for vector tiles. Defaults to `NO`.
+    Has no effect. FastPFOR decoding is always enabled for vector tiles.
  */
-@property (nonatomic) bool fastPFOREnabled;
+@property (nonatomic) bool fastPFOREnabled
+    __attribute__((deprecated("FastPFOR decoding is always enabled.")));
 
 /**
     Enable reporting of rendered feature IDs and bounds through frame statistics

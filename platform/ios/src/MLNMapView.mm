@@ -513,7 +513,6 @@ public:
   MLNRenderingStats *_renderingStats;
 
   BOOL _createdFromIB;
-  BOOL _fastPFOREnabled;
   BOOL _featureInfoEnabled;
 }
 
@@ -521,7 +520,6 @@ public:
 
 - (void)initDefaults {
   _createdFromIB = NO;
-  _fastPFOREnabled = NO;
   _featureInfoEnabled = NO;
 }
 
@@ -607,7 +605,6 @@ public:
   // ... options from IB set, continue initialization
   [super awakeFromNib];
   MLNMapOptions *options = [[MLNMapOptions alloc] init];
-  options.fastPFOREnabled = _fastPFOREnabled;
   options.featureInfoEnabled = _featureInfoEnabled;
   [self commonInitWithOptions:options];
   self.styleURL = nil;
@@ -741,7 +738,6 @@ public:
       .withConstrainMode(mln::ConstrainMode::None)
       .withViewportMode(mln::ViewportMode::Default)
       .withCrossSourceCollisions(enableCrossSourceCollisions)
-      .withFastPFOREnabled(mlnMapoptions.fastPFOREnabled)
       .withRenderedFeatureInfo(mlnMapoptions.featureInfoEnabled);
 
   mln::TileServerOptions *tileServerOptions =
@@ -7903,10 +7899,9 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (BOOL)fastPFOREnabled {
-  return _fastPFOREnabled;
+  return YES;
 }
 - (void)setFastPFOREnabled:(BOOL)fastPFOREnabled {
-  _fastPFOREnabled = fastPFOREnabled;
 }
 
 - (BOOL)featureInfoEnabled {

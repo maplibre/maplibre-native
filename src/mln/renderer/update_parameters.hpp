@@ -52,8 +52,6 @@ public:
 
     const bool crossSourceCollisions;
 
-    const bool fastPFOREnabled = false;
-
     const bool captureRenderedFeatures = false;
 
     double tileLodMinRadius = 3;

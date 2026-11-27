@@ -92,7 +92,6 @@ public:
     const MapMode mode;
     const float pixelRatio;
     const bool crossSourceCollisions;
-    const bool fastPFOREnabled;
     const bool captureRenderedFeatures;
 
     MapDebugOptions debugOptions{MapDebugOptions::NoDebug};
