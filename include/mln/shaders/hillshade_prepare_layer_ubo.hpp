@@ -16,9 +16,13 @@ struct alignas(16) HillshadePrepareTilePropsUBO {
     /* 16 */ std::array<float, 2> dimension;
     /* 24 */ float zoom;
     /* 28 */ float maxzoom;
-    /* 32 */
+    /* 32 */ float log2_world_width;
+    /* 36 */ float pad1;
+    /* 40 */ float pad2;
+    /* 44 */ float pad3;
+    /* 48 */
 };
-static_assert(sizeof(HillshadePrepareTilePropsUBO) == 2 * 16);
+static_assert(sizeof(HillshadePrepareTilePropsUBO) == 3 * 16);
 
 } // namespace shaders
 } // namespace mln

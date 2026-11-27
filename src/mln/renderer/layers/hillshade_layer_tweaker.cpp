@@ -117,14 +117,16 @@ int32_t methodToInt(HillshadeMethodType method) {
     return static_cast<int32_t>(method);
 }
 
-// Calculate latitude range for tile
-std::array<float, 2> getLatRange(const UnwrappedTileID& id) {
+} // namespace
+
+std::array<float, 2> hillshadeLatRange(const UnwrappedTileID& id, const WorldCoordinateHelper& helper) {
+    if (!helper.wraps()) {
+        return {{0, 0}};
+    }
     const LatLng latlng0 = LatLng(id);
     const LatLng latlng1 = LatLng(UnwrappedTileID(id.canonical.z, id.canonical.x, id.canonical.y + 1));
     return {{static_cast<float>(latlng0.latitude()), static_cast<float>(latlng1.latitude())}};
 }
-
-} // namespace
 
 void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) {
@@ -194,7 +196,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 #else
         const HillshadeTilePropsUBO tilePropsUBO = {
 #endif
-            .latrange = getLatRange(tileID),
+            .latrange = hillshadeLatRange(tileID, parameters.state.getProjection().worldCoordinateHelper()),
             .exaggeration = evaluated.get<HillshadeExaggeration>(),
             .method = methodToInt(evaluated.get<style::HillshadeMethod>()),
             .num_lights = static_cast<int32_t>(illumination.numSources()),

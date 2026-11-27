@@ -34,6 +34,10 @@ struct HillshadePrepareTilePropsUBO {
     dimension: vec2<f32>,
     zoom: f32,
     maxzoom: f32,
+    log2_world_width: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 @group(0) @binding(2) var<uniform> drawable: HillshadePrepareDrawableUBO;
@@ -61,6 +65,10 @@ struct HillshadePrepareTilePropsUBO {
     dimension: vec2<f32>,
     zoom: f32,
     maxzoom: f32,
+    log2_world_width: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 @group(0) @binding(4) var<uniform> tileProps: HillshadePrepareTilePropsUBO;
@@ -103,7 +111,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
         exaggeration = (tileProps.zoom - 15.0) * exaggerationFactor;
     }
 
-    let denom = pow(2.0, exaggeration + (28.2562 - tileProps.zoom));
+    let denom = pow(2.0, exaggeration + (3.0 + tileProps.log2_world_width - tileProps.zoom));
     let deriv = vec2<f32>((c + f + f + i) - (a + d + d + g),
                           (g + h + h + i) - (a + b + b + c)) * tileSize / denom;
 
