@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### ✨ Features and improvements
+
+- Add `RasterDemSource(id, uri, tileSize, encoding)` and `RasterDemSource.getEncoding()`, with the `ENCODING_MAPBOX` and `ENCODING_TERRARIUM` constants, so a `raster-dem` source created in code from a `url` or `pmtiles://` URI can decode Terrarium tiles. Before, only style JSON and `TileSet.encoding` could set it, and such a source decoded as Mapbox.
+
 ## 13.8.0
 
 ### ✨ Features and improvements

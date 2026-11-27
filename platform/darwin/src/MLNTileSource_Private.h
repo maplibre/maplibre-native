@@ -3,11 +3,11 @@
 #import "MLNFoundation.h"
 #import "MLNTileSource.h"
 
-NS_ASSUME_NONNULL_BEGIN
+#include <mln/util/tileset.hpp>
 
-namespace mln {
-class Tileset;
-}
+#include <optional>
+
+NS_ASSUME_NONNULL_BEGIN
 
 @class MLNAttributionInfo;
 
@@ -36,6 +36,14 @@ class Tileset;
 MLN_EXPORT
 mln::Tileset MLNTileSetFromTileURLTemplates(
     NSArray<NSString *> *tileURLTemplates,
+    NSDictionary<MLNTileSourceOption, id> *_Nullable options);
+
+/**
+ The raster-dem encoding that `MLNTileSourceOptionDEMEncoding` selects in `options`, or no value
+ if the option is absent. Raises `NSInvalidArgumentException` for a value of the wrong type.
+ */
+MLN_EXPORT
+std::optional<mln::Tileset::RasterEncoding> MLNRasterEncodingFromOptions(
     NSDictionary<MLNTileSourceOption, id> *_Nullable options);
 
 NS_ASSUME_NONNULL_END

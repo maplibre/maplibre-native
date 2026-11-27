@@ -14,11 +14,12 @@ public:
 
     static void registerNative(jni::JNIEnv&);
 
-    RasterDEMSource(jni::JNIEnv&, const jni::String&, const jni::Object<>&, jni::jint);
+    RasterDEMSource(jni::JNIEnv&, const jni::String&, const jni::Object<>&, jni::jint, const jni::String&);
     RasterDEMSource(jni::JNIEnv&, mln::style::Source&, AndroidRendererFrontend*);
     ~RasterDEMSource();
 
     jni::Local<jni::String> getURL(jni::JNIEnv&);
+    jni::Local<jni::String> getEncoding(jni::JNIEnv&);
 
 private:
     jni::Local<jni::Object<Source>> createJavaPeer(jni::JNIEnv&);

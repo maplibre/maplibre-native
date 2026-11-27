@@ -85,7 +85,7 @@ class RasterDemSource : Source {
      * @param uri the source uri
      */
     constructor(id: String?, uri: String?) : super() {
-        initialize(id, uri, DEFAULT_TILE_SIZE)
+        initialize(id, uri, DEFAULT_TILE_SIZE, null)
     }
 
     /**
@@ -115,7 +115,28 @@ class RasterDemSource : Source {
      * @param tileSize the tile size
      */
     constructor(id: String?, uri: String?, tileSize: Int) : super() {
-        initialize(id, uri, tileSize)
+        initialize(id, uri, tileSize, null)
+    }
+
+    /**
+     * Create the raster dem source from an URL with a specific tile size and elevation encoding.
+     *
+     *
+     * Use this for a source whose tiles are not Mapbox Terrain-RGB, for example a Terrarium
+     * tileset behind a `pmtiles://` URL, which has no [TileSet] to carry the encoding.
+     *
+     * @param id       the source id
+     * @param uri      the source url
+     * @param tileSize the tile size
+     * @param encoding the elevation encoding formula of the tiles, [ENCODING_MAPBOX] or
+     * [ENCODING_TERRARIUM]; null keeps the encoding the TileJSON gives, which is "mapbox" by default
+     * @throws IllegalArgumentException if the encoding is not one of the supported values
+     */
+    constructor(id: String?, uri: String?, tileSize: Int, encoding: String?) : super() {
+        require(encoding == null || encoding == ENCODING_MAPBOX || encoding == ENCODING_TERRARIUM) {
+            "Unsupported encoding \"$encoding\", use \"$ENCODING_MAPBOX\" or \"$ENCODING_TERRARIUM\""
+        }
+        initialize(id, uri, tileSize, encoding)
     }
 
     /**
@@ -125,7 +146,7 @@ class RasterDemSource : Source {
      * @param tileSet the [TileSet]
      */
     constructor(id: String?, tileSet: TileSet) : super() {
-        initialize(id, tileSet.toValueObject(), DEFAULT_TILE_SIZE)
+        initialize(id, tileSet.toValueObject(), DEFAULT_TILE_SIZE, null)
     }
 
     /**
@@ -136,7 +157,7 @@ class RasterDemSource : Source {
      * @param tileSize tje tile size
      */
     constructor(id: String?, tileSet: TileSet, tileSize: Int) : super() {
-        initialize(id, tileSet.toValueObject(), tileSize)
+        initialize(id, tileSet.toValueObject(), tileSize, null)
     }
 
     /**
@@ -160,8 +181,19 @@ class RasterDemSource : Source {
             return nativeGetUrl()
         }
 
+    /**
+     * Get the elevation encoding formula the source decodes its tiles with.
+     *
+     * @return "mapbox" or "terrarium"
+     */
+    val encoding: String
+        get() {
+            checkThread()
+            return nativeGetEncoding()
+        }
+
     @Keep
-    protected external fun initialize(layerId: String?, payload: Any?, tileSize: Int)
+    protected external fun initialize(layerId: String?, payload: Any?, tileSize: Int, encoding: String?)
 
     @Keep
     @Throws(Throwable::class)
@@ -170,7 +202,21 @@ class RasterDemSource : Source {
     @Keep
     private external fun nativeGetUrl(): String
 
+    @Keep
+    private external fun nativeGetEncoding(): String
+
     companion object {
         const val DEFAULT_TILE_SIZE = 512
+
+        /**
+         * The elevation encoding of [Mapbox Terrain-RGB](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb)
+         * tiles, the default.
+         */
+        const val ENCODING_MAPBOX = "mapbox"
+
+        /**
+         * The elevation encoding of [Mapzen Terrarium](https://aws.amazon.com/public-datasets/terrain/) tiles.
+         */
+        const val ENCODING_TERRARIUM = "terrarium"
     }
 }

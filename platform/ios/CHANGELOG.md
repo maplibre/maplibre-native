@@ -2,6 +2,12 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+### Features
+
+- Add `MLNRasterDEMSource -initWithIdentifier:configurationURL:tileSize:options:` and `MLNRasterDEMSource.encoding`, so `MLNTileSourceOptionDEMEncoding` also applies to a source created from a configuration or `pmtiles://` URL. Before, such a source decoded as Mapbox Terrain-RGB whatever the tiles were.
+
 ## 7.1.0
 
 ### Features
