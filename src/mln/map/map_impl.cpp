@@ -163,6 +163,8 @@ void Map::Impl::onStyleLoaded() {
     if (LayerManager::annotationsEnabled) {
         annotationManager.onStyleLoaded();
     }
+    // A parse that adds no layer publishes nothing else.
+    onUpdate();
 
     observer.onDidFinishLoadingStyle();
 
