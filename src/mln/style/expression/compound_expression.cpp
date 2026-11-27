@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <limits>
 #include <numbers>
 
@@ -300,6 +301,23 @@ std::optional<std::string> featureIdAsString(const EvaluationContext& params) {
     auto id = params.feature->getID();
     return id.match([](std::string value) { return value; }, [](const auto&) { return std::optional<std::string>(); });
 };
+
+// A legacy comparison filter compares a number to a numeric feature value and
+// a string to a string one. One signature takes either, rather than an overload
+// for each, because parsing tries every overload of an arity on each argument.
+template <typename AsDouble, typename AsString, typename Compare>
+Result<bool> compareLegacyFilterValue(const Value& lhs, AsDouble asDouble, AsString asString, Compare compare) {
+    return lhs.match(
+        [&](double value) -> Result<bool> {
+            const auto rhs = asDouble();
+            return rhs ? compare(*rhs, value) : false;
+        },
+        [&](const std::string& value) -> Result<bool> {
+            const auto rhs = asString();
+            return rhs ? compare(*rhs, value) : false;
+        },
+        [](const auto&) -> Result<bool> { return false; });
+}
 
 } // unnamed namespace
 
@@ -836,177 +854,113 @@ const auto& filterTypeEqualsCompoundExpression() {
     return signature;
 }
 
-const auto& filterLessThanNumberCompoundExpression() {
+const auto& filterLessThanCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-<",
-        [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
-            auto rhs = featurePropertyAsDouble(params, key);
-            return rhs ? rhs < lhs : false;
+        [](const EvaluationContext& params, const std::string& key, const Value& lhs) -> Result<bool> {
+            return compareLegacyFilterValue(
+                lhs,
+                [&] { return featurePropertyAsDouble(params, key); },
+                [&] { return featurePropertyAsString(params, key); },
+                std::less<>());
         },
         Dependency::Feature);
     return signature;
 }
 
-const auto& filterLessThanStringCompoundExpression() {
-    static auto signature = detail::makeSignature(
-        "filter-<",
-        [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
-            auto rhs = featurePropertyAsString(params, key);
-            return rhs ? rhs < lhs : false;
-        },
-        Dependency::Feature);
-    return signature;
-}
-
-const auto& filterIdLessThanNumberCompoundExpression() {
+const auto& filterIdLessThanCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id-<",
-        [](const EvaluationContext& params, double lhs) -> Result<bool> {
-            auto rhs = featureIdAsDouble(params);
-            return rhs ? rhs < lhs : false;
+        [](const EvaluationContext& params, const Value& lhs) -> Result<bool> {
+            return compareLegacyFilterValue(
+                lhs,
+                [&] { return featureIdAsDouble(params); },
+                [&] { return featureIdAsString(params); },
+                std::less<>());
         },
         Dependency::Feature);
     return signature;
 }
 
-const auto& filterIdLessThanStringCompoundExpression() {
-    static auto signature = detail::makeSignature(
-        "filter-id-<",
-        [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
-            auto rhs = featureIdAsString(params);
-            return rhs ? rhs < lhs : false;
-        },
-        Dependency::Feature);
-    return signature;
-}
-
-const auto& filterMoreThanNumberCompoundExpression() {
+const auto& filterMoreThanCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter->",
-        [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
-            auto rhs = featurePropertyAsDouble(params, key);
-            return rhs ? rhs > lhs : false;
+        [](const EvaluationContext& params, const std::string& key, const Value& lhs) -> Result<bool> {
+            return compareLegacyFilterValue(
+                lhs,
+                [&] { return featurePropertyAsDouble(params, key); },
+                [&] { return featurePropertyAsString(params, key); },
+                std::greater<>());
         },
         Dependency::Feature);
     return signature;
 }
 
-const auto& filterMoreThanStringCompoundExpression() {
-    static auto signature = detail::makeSignature(
-        "filter->",
-        [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
-            auto rhs = featurePropertyAsString(params, key);
-            return rhs ? rhs > lhs : false;
-        },
-        Dependency::Feature);
-    return signature;
-}
-
-const auto& filterIdMoreThanNumberCompoundExpression() {
+const auto& filterIdMoreThanCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id->",
-        [](const EvaluationContext& params, double lhs) -> Result<bool> {
-            auto rhs = featureIdAsDouble(params);
-            return rhs ? rhs > lhs : false;
+        [](const EvaluationContext& params, const Value& lhs) -> Result<bool> {
+            return compareLegacyFilterValue(
+                lhs,
+                [&] { return featureIdAsDouble(params); },
+                [&] { return featureIdAsString(params); },
+                std::greater<>());
         },
         Dependency::Feature);
     return signature;
 }
 
-const auto& filterIdMoreThanStringCompoundExpression() {
-    static auto signature = detail::makeSignature(
-        "filter-id->",
-        [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
-            auto rhs = featureIdAsString(params);
-            return rhs ? rhs > lhs : false;
-        },
-        Dependency::Feature);
-    return signature;
-}
-
-const auto& filterLessOrEqualThanNumberCompoundExpression() {
+const auto& filterLessOrEqualThanCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-<=",
-        [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
-            auto rhs = featurePropertyAsDouble(params, key);
-            return rhs ? rhs <= lhs : false;
+        [](const EvaluationContext& params, const std::string& key, const Value& lhs) -> Result<bool> {
+            return compareLegacyFilterValue(
+                lhs,
+                [&] { return featurePropertyAsDouble(params, key); },
+                [&] { return featurePropertyAsString(params, key); },
+                std::less_equal<>());
         },
         Dependency::Feature);
     return signature;
 }
 
-const auto& filterLessOrEqualThanStringCompoundExpression() {
-    static auto signature = detail::makeSignature(
-        "filter-<=",
-        [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
-            auto rhs = featurePropertyAsString(params, key);
-            return rhs ? rhs <= lhs : false;
-        },
-        Dependency::Feature);
-    return signature;
-}
-
-const auto& filterIdLessOrEqualThanNumberCompoundExpression() {
+const auto& filterIdLessOrEqualThanCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id-<=",
-        [](const EvaluationContext& params, double lhs) -> Result<bool> {
-            auto rhs = featureIdAsDouble(params);
-            return rhs ? rhs <= lhs : false;
+        [](const EvaluationContext& params, const Value& lhs) -> Result<bool> {
+            return compareLegacyFilterValue(
+                lhs,
+                [&] { return featureIdAsDouble(params); },
+                [&] { return featureIdAsString(params); },
+                std::less_equal<>());
         },
         Dependency::Feature);
     return signature;
 }
 
-const auto& filterIdLessOrEqualThanStringCompoundExpression() {
-    static auto signature = detail::makeSignature(
-        "filter-id-<=",
-        [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
-            auto rhs = featureIdAsString(params);
-            return rhs ? rhs <= lhs : false;
-        },
-        Dependency::Feature);
-    return signature;
-}
-
-const auto& filterGreaterOrEqualThanNumberCompoundExpression() {
+const auto& filterGreaterOrEqualThanCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter->=",
-        [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
-            auto rhs = featurePropertyAsDouble(params, key);
-            return rhs ? rhs >= lhs : false;
+        [](const EvaluationContext& params, const std::string& key, const Value& lhs) -> Result<bool> {
+            return compareLegacyFilterValue(
+                lhs,
+                [&] { return featurePropertyAsDouble(params, key); },
+                [&] { return featurePropertyAsString(params, key); },
+                std::greater_equal<>());
         },
         Dependency::Feature);
     return signature;
 }
 
-const auto& filterGreaterOrEqualThanStringCompoundExpression() {
-    static auto signature = detail::makeSignature(
-        "filter->=",
-        [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
-            auto rhs = featurePropertyAsString(params, key);
-            return rhs ? rhs >= lhs : false;
-        },
-        Dependency::Feature);
-    return signature;
-}
-
-const auto& filterIdGreaterOrEqualThanNumberCompoundExpression() {
+const auto& filterIdGreaterOrEqualThanCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id->=",
-        [](const EvaluationContext& params, double lhs) -> Result<bool> {
-            auto rhs = featureIdAsDouble(params);
-            return rhs ? rhs >= lhs : false;
-        },
-        Dependency::Feature);
-    return signature;
-}
-
-const auto& filterIdGreaterOrEqualThanStringCompoundExpression() {
-    static auto signature = detail::makeSignature(
-        "filter-id->=",
-        [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
-            auto rhs = featureIdAsString(params);
-            return rhs ? rhs >= lhs : false;
+        [](const EvaluationContext& params, const Value& lhs) -> Result<bool> {
+            return compareLegacyFilterValue(
+                lhs,
+                [&] { return featureIdAsDouble(params); },
+                [&] { return featureIdAsString(params); },
+                std::greater_equal<>());
         },
         Dependency::Feature);
     return signature;
@@ -1132,22 +1086,14 @@ constexpr const auto compoundExpressionRegistry =
         {"filter-==", filterEqualsCompoundExpression},
         {"filter-id-==", filterIdEqualsCompoundExpression},
         {"filter-type-==", filterTypeEqualsCompoundExpression},
-        {"filter-<", filterLessThanNumberCompoundExpression},
-        {"filter-<", filterLessThanStringCompoundExpression},
-        {"filter-id-<", filterIdLessThanNumberCompoundExpression},
-        {"filter-id-<", filterIdLessThanStringCompoundExpression},
-        {"filter->", filterMoreThanNumberCompoundExpression},
-        {"filter->", filterMoreThanStringCompoundExpression},
-        {"filter-id->", filterIdMoreThanNumberCompoundExpression},
-        {"filter-id->", filterIdMoreThanStringCompoundExpression},
-        {"filter-<=", filterLessOrEqualThanNumberCompoundExpression},
-        {"filter-<=", filterLessOrEqualThanStringCompoundExpression},
-        {"filter-id-<=", filterIdLessOrEqualThanNumberCompoundExpression},
-        {"filter-id-<=", filterIdLessOrEqualThanStringCompoundExpression},
-        {"filter->=", filterGreaterOrEqualThanNumberCompoundExpression},
-        {"filter->=", filterGreaterOrEqualThanStringCompoundExpression},
-        {"filter-id->=", filterIdGreaterOrEqualThanNumberCompoundExpression},
-        {"filter-id->=", filterIdGreaterOrEqualThanStringCompoundExpression},
+        {"filter-<", filterLessThanCompoundExpression},
+        {"filter-id-<", filterIdLessThanCompoundExpression},
+        {"filter->", filterMoreThanCompoundExpression},
+        {"filter-id->", filterIdMoreThanCompoundExpression},
+        {"filter-<=", filterLessOrEqualThanCompoundExpression},
+        {"filter-id-<=", filterIdLessOrEqualThanCompoundExpression},
+        {"filter->=", filterGreaterOrEqualThanCompoundExpression},
+        {"filter-id->=", filterIdGreaterOrEqualThanCompoundExpression},
         {"filter-has", filterHasCompoundExpression},
         {"filter-has-id", filterHasIdCompoundExpression},
         {"filter-type-in", filterTypeInCompoundExpression},
@@ -1275,11 +1221,17 @@ ParseResult parseCompoundExpression(const std::string& name, const Convertible& 
         return ParseResult();
     }
 
+    // Each failed overload parses its arguments, so two overloads of one arity
+    // would make parsing a nested chain of them exponential in its depth.
+    bool overloadMatchedArity = false;
     for (auto it = definitions.first; it != definitions.second; ++it) {
         const auto& signature = it->second();
 
         if (signature->params.is<VarargsType>() ||
             signature->params.get<std::vector<type::Type>>().size() == length - 1) {
+            assert(!overloadMatchedArity);
+            overloadMatchedArity = true;
+
             // First parse all the args, potentially coercing to the
             // types expected by this overload.
             ctx.clearErrors();
@@ -1311,8 +1263,14 @@ ParseResult parseCompoundExpression(const std::string& name, const Convertible& 
             }
         }
     }
-    // The args couldn't be coerced to any of the expected types.
-    // Parse the arguments again without expected types just for the error message
+    // The overload that takes this many arguments failed, and its errors say
+    // why. Parsing the arguments again would double the work at every level.
+    if (overloadMatchedArity) {
+        return ParseResult();
+    }
+
+    // No overload takes this many arguments.
+    // Parse the arguments without expected types just for the error message
     ctx.clearErrors();
     std::vector<std::unique_ptr<Expression>> args;
     args.reserve(length - 1);

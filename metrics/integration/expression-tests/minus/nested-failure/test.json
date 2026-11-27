@@ -1,0 +1,15 @@
+{
+  "expression": ["-", ["-", ["-", "a", 1], 1], 1],
+  "inputs": [[{}, {}]],
+  "expected": {
+    "compiled": {
+      "result": "error",
+      "errors": [
+        {
+          "key": "[1][1][1]",
+          "error": "Expected number but found string instead."
+        }
+      ]
+    }
+  }
+}
