@@ -1146,7 +1146,11 @@ std::optional<LatLng> RenderTerrain::pickLatLng(const TransformState& state, con
         return std::nullopt;
     }
     return pickTerrainSurface(
-        state, pixel, [&index](const LatLng& latLng) { return index->getElevation(latLng); }, index->getMaxElevation());
+        state,
+        pixel,
+        [&index](const LatLng& latLng) { return index->getElevation(latLng); },
+        index->getMaxElevation(),
+        index->getMinElevation());
 }
 
 bool RenderTerrain::ElevationGridCopy::isCopyOf(const DEMData* dem) const {

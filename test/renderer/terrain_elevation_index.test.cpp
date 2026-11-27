@@ -312,6 +312,17 @@ TEST(TerrainElevationIndex, KnowsItsHighestPoint) {
     EXPECT_NEAR(index.getMaxElevation(), 900.0 * 1.5, 0.01);
 }
 
+// The lowest point of the copied tiles, exaggerated, is where the pick ends its march; sea level
+// when no tile goes below it.
+TEST(TerrainElevationIndex, KnowsItsLowestPoint) {
+    const auto world = Projection::project(innsbruck, 4);
+    const UnwrappedTileID child(4, static_cast<uint32_t>(world.x), static_cast<uint32_t>(world.y));
+    TerrainElevationIndex below({{UnwrappedTileID(2, 2, 1), makeGrid(500.0)}, {child, makeGrid(-430.0)}}, 1.5f);
+    EXPECT_NEAR(below.getMinElevation(), -430.0 * 1.5, 0.01);
+    TerrainElevationIndex above({{UnwrappedTileID(2, 2, 1), makeGrid(500.0)}}, 1.5f);
+    EXPECT_EQ(above.getMinElevation(), 0.0);
+}
+
 namespace {
 
 // North-up and steeply pitched, so a point farther up the screen ray is farther north.
@@ -343,6 +354,43 @@ TEST(TerrainElevationIndex, PickFindsTheGroundWhenSeaLevelIsPastTheHeights) {
     const auto picked = pickTerrainSurface(state, pixel, elevationAt, plateau);
     ASSERT_TRUE(picked);
     EXPECT_NEAR(picked->latitude(), latitudeAt(state, pixel, plateau), 1e-4);
+}
+
+// Ground below sea level (the Dead Sea shore is about 430 m under it) is picked where it is, not at
+// the sea-level point of the ray, which at a 65 degree pitch lies depth * tan(pitch), some 900 m,
+// nearer the camera.
+TEST(TerrainElevationIndex, PickFindsGroundBelowSeaLevel) {
+    const TransformState state = pitchedNorthUp(14.0, 65.0);
+    const ScreenCoordinate pixel{128.0, 128.0};
+    const double shore = -430.0;
+    const auto elevationAt = [&](const LatLng&) -> std::optional<double> {
+        return shore;
+    };
+    ASSERT_GT(latitudeAt(state, pixel, shore) - latitudeAt(state, pixel, 0.0), 0.005);
+
+    const auto picked = pickTerrainSurface(state, pixel, elevationAt, 0.0, shore);
+    ASSERT_TRUE(picked);
+    EXPECT_NEAR(picked->latitude(), latitudeAt(state, pixel, shore), 1e-5);
+
+    // Told of no ground below sea level, the march ends there, as before
+    EXPECT_FALSE(pickTerrainSurface(state, pixel, elevationAt, 0.0));
+}
+
+// A cliff that rises above sea level in front of a depression still wins: the march above sea level
+// is the one a terrain without a depression gets.
+TEST(TerrainElevationIndex, PickFindsARidgeInFrontOfGroundBelowSeaLevel) {
+    const TransformState state = pitchedNorthUp(12.0, 65.0);
+    const ScreenCoordinate pixel{128.0, 100.0};
+    const double cliff = 300.0;
+    const double shore = -430.0;
+    // The cliff ends halfway between where the ray reaches its top and where it reaches sea level
+    const double edge = 0.5 * (latitudeAt(state, pixel, cliff) + latitudeAt(state, pixel, 0.0));
+    const auto elevationAt = [&](const LatLng& latLng) -> std::optional<double> {
+        return latLng.latitude() <= edge ? cliff : shore;
+    };
+    const auto picked = pickTerrainSurface(state, pixel, elevationAt, cliff, shore);
+    ASSERT_TRUE(picked);
+    EXPECT_NEAR(picked->latitude(), latitudeAt(state, pixel, cliff), 1e-4);
 }
 
 // A ridge the ray passes through only within one of the march's steps is found when the march

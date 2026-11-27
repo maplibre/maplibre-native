@@ -22,6 +22,7 @@ TerrainElevationIndex::Grid::Grid(const DEMData& dem)
                                           static_cast<int32_t>(std::numeric_limits<int16_t>::max()));
             heights[static_cast<size_t>(y + 1) * side + static_cast<size_t>(x + 1)] = static_cast<int16_t>(h);
             maxHeight = std::max(maxHeight, static_cast<int16_t>(h));
+            minHeight = std::min(minHeight, static_cast<int16_t>(h));
         }
     }
 }
@@ -40,6 +41,7 @@ TerrainElevationIndex::TerrainElevationIndex(std::vector<Tile> tiles_, float exa
         const int64_t x = static_cast<int64_t>(tile.id.wrap) * across + tile.id.canonical.x;
         level->tiles.emplace(key(x, tile.id.canonical.y), &tile);
         maxElevation = std::max(maxElevation, static_cast<double>(tile.grid->maxHeight) * exaggeration);
+        minElevation = std::min(minElevation, static_cast<double>(tile.grid->minHeight) * exaggeration);
     }
     std::sort(levels.begin(), levels.end(), [](const Level& a, const Level& b) { return a.z > b.z; });
 }
@@ -79,12 +81,15 @@ std::optional<double> TerrainElevationIndex::getElevation(const LatLng& latLng) 
 std::optional<LatLng> pickTerrainSurface(const TransformState& state,
                                          const ScreenCoordinate& pixel,
                                          const std::function<std::optional<double>(const LatLng&)>& elevationAt,
-                                         double maxElevation) {
+                                         double maxElevation,
+                                         double minElevation) {
     // TransformState unprojects y-up screen points; queries and the platform views hand us y-down
     ScreenCoordinate flipped = pixel;
     flipped.y = state.getSize().height - pixel.y;
+    // The lowest the surface can be: sea level, or the lowest terrain where it goes below it
+    const double bottom = std::min(0.0, minElevation);
     const auto camera = state.getFreeCameraOptions().getLocation();
-    if (!camera || camera->altitude <= 0.0) {
+    if (!camera || camera->altitude <= bottom) {
         return std::nullopt;
     }
     // Terrain height (exaggerated metres, the projection's z unit) where the ray crosses the
@@ -94,33 +99,49 @@ std::optional<LatLng> pickTerrainSurface(const TransformState& state,
         return elevationAt(out).value_or(0.0);
     };
     constexpr int steps = 64;
-    // Nothing is higher than the highest terrain, so start just above it, unless the camera is lower
-    const double top = std::min(camera->altitude * 0.999, maxElevation + 1.0);
-    if (top <= 0.0) {
-        return std::nullopt; // no terrain above sea level
+    // Nothing is higher than the highest terrain, so start just above it, unless the camera is
+    // lower. A camera below sea level (close over a depression) starts just under itself.
+    const double belowCamera = camera->altitude > 0.0 ? camera->altitude * 0.999
+                                                      : camera->altitude - 0.001 * (camera->altitude - bottom);
+    const double top = std::min(belowCamera, maxElevation + 1.0);
+    if (top <= bottom) {
+        return std::nullopt; // no terrain under the camera's height
     }
     double above = top; // last plane height known to be above the surface
     LatLng probe;
     if (surfaceHeightAt(above, probe) >= above) {
         return std::nullopt; // camera inside the terrain
     }
-    for (int i = 1; i <= steps; ++i) {
-        const double h = top * (1.0 - static_cast<double>(i) / steps);
-        if (surfaceHeightAt(h, probe) < h) {
-            above = h;
-            continue;
-        }
-        // Crossed between `above` and `h`: bisect onto the surface
-        double below = h;
-        for (int j = 0; j < 8; ++j) {
-            const double mid = 0.5 * (above + below);
-            if (surfaceHeightAt(mid, probe) < mid) {
-                above = mid;
-            } else {
-                below = mid;
+    // Marches the plane from `from` down to `to` and bisects the first crossing
+    const auto march = [&](double from, double to) -> std::optional<LatLng> {
+        for (int i = 1; i <= steps; ++i) {
+            const double h = to + (from - to) * (1.0 - static_cast<double>(i) / steps);
+            if (surfaceHeightAt(h, probe) < h) {
+                above = h;
+                continue;
             }
+            // Crossed between `above` and `h`: bisect onto the surface
+            double below = h;
+            for (int j = 0; j < 8; ++j) {
+                const double mid = 0.5 * (above + below);
+                if (surfaceHeightAt(mid, probe) < mid) {
+                    above = mid;
+                } else {
+                    below = mid;
+                }
+            }
+            return state.screenCoordinateToLatLng(flipped, 0.5 * (above + below), LatLng::Wrapped);
         }
-        return state.screenCoordinateToLatLng(flipped, 0.5 * (above + below), LatLng::Wrapped);
+        return std::nullopt;
+    };
+    if (top > 0.0) {
+        if (const auto surface = march(top, 0.0)) {
+            return surface;
+        }
+    }
+    if (bottom < 0.0) {
+        // The ray reached sea level over ground below it: go on down to the lowest terrain
+        return march(std::min(top, 0.0), bottom);
     }
     return std::nullopt;
 }
