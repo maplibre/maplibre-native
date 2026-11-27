@@ -226,6 +226,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   .imageManager = imageManager,
                                   .glyphManager = glyphManager,
                                   .prefetchZoomDelta = updateParameters->prefetchZoomDelta,
+                                  .cachedTileFallbackOptions = updateParameters->cachedTileFallbackOptions,
                                   .threadPool = threadPool,
                                   .tileLodMinRadius = updateParameters->tileLodMinRadius,
                                   .tileLodScale = updateParameters->tileLodScale,

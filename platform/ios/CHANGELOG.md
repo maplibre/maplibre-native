@@ -2,6 +2,12 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+### Features
+
+- Add `MLNMapView.cachedTileFallbackEnabled`: while a tile is loading, the map draws the tiles closest in zoom that are already in the in-memory tile cache for the same area, so a camera jump to a place or zoom seen before shows no empty areas. Cached child tiles are drawn up to `cachedTileFallbackMaxChildZoomDelta` levels below (default 2), over the nearest cached parent tile up to `cachedTileFallbackMaxParentZoomDelta` levels above (default all). No network requests are made for them. Off by default; `MLNSource.cachedTileFallbackEnabled` overrides it per source ([#5125](https://github.com/maplibre/maplibre-native/pull/5125)).
+
 ## 7.1.0
 
 ### Features

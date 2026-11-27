@@ -40,6 +40,20 @@ enum class TileLodMode : uint8_t {
     Distance ///< Distance-based TileLOD algorithm
 };
 
+/// Controls drawing tiles from the in-memory tile cache in place of ideal tiles
+/// that are still loading. See `Map::setCachedTileFallbackOptions`.
+struct CachedTileFallbackOptions {
+    /// Whether the fallback is enabled. Off by default.
+    bool enabled = false;
+    /// How many zoom levels above the ideal tile to look for a cached parent tile.
+    /// The search also stops at the source's minimum zoom.
+    uint8_t maxParentZoomDelta = 255;
+    /// How many zoom levels below the ideal tile to look for cached child tiles.
+    uint8_t maxChildZoomDelta = 2;
+
+    bool operator==(const CachedTileFallbackOptions&) const = default;
+};
+
 enum class MapDebugOptions : EnumType {
     NoDebug = 0,
     TileBorders = 1 << 1,

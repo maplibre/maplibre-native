@@ -107,6 +107,7 @@ public:
     bool cameraMutated = false;
 
     uint8_t prefetchZoomDelta = util::DEFAULT_PREFETCH_ZOOM_DELTA;
+    CachedTileFallbackOptions cachedTileFallbackOptions;
 
     bool loading = false;
     bool rendererFullyLoaded;

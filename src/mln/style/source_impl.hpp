@@ -21,6 +21,8 @@ public:
     virtual std::optional<std::string> getAttribution() const = 0;
     void setPrefetchZoomDelta(std::optional<uint8_t> delta) noexcept;
     std::optional<uint8_t> getPrefetchZoomDelta() const noexcept;
+    void setCachedTileFallbackEnabled(std::optional<bool> enabled) noexcept { cachedTileFallbackEnabled = enabled; }
+    std::optional<bool> getCachedTileFallbackEnabled() const noexcept { return cachedTileFallbackEnabled; }
     void setMinimumTileUpdateInterval(Duration interval) { minimumTileUpdateInterval = interval; }
     Duration getMinimumTileUpdateInterval() const { return minimumTileUpdateInterval; }
     void setMaxOverscaleFactorForParentTiles(std::optional<uint8_t> overscaleFactor) noexcept;
@@ -36,6 +38,7 @@ public:
 protected:
     std::optional<uint8_t> prefetchZoomDelta;
     std::optional<uint8_t> maxOverscaleFactor;
+    std::optional<bool> cachedTileFallbackEnabled;
     Duration minimumTileUpdateInterval{Duration::zero()};
     bool volatileFlag = false;
 

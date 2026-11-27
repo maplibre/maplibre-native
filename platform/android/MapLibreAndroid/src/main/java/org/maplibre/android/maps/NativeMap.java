@@ -267,6 +267,20 @@ interface NativeMap {
   @IntRange(from = 0)
   int getPrefetchZoomDelta();
 
+  void setCachedTileFallbackEnabled(boolean enabled);
+
+  boolean getCachedTileFallbackEnabled();
+
+  void setCachedTileFallbackMaxParentZoomDelta(@IntRange(from = 0, to = 255) int delta);
+
+  @IntRange(from = 0, to = 255)
+  int getCachedTileFallbackMaxParentZoomDelta();
+
+  void setCachedTileFallbackMaxChildZoomDelta(@IntRange(from = 0, to = 255) int delta);
+
+  @IntRange(from = 0, to = 255)
+  int getCachedTileFallbackMaxChildZoomDelta();
+
   void setTileCacheEnabled(boolean enabled);
 
   boolean getTileCacheEnabled();

@@ -33,6 +33,7 @@ public:
     std::shared_ptr<ImageManager> imageManager;
     std::shared_ptr<GlyphManager> glyphManager;
     const uint8_t prefetchZoomDelta;
+    CachedTileFallbackOptions cachedTileFallbackOptions{};
     TaggedScheduler threadPool;
     double tileLodMinRadius = 3;
     double tileLodScale = 1;

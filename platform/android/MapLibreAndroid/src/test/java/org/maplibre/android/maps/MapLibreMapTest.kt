@@ -174,6 +174,26 @@ class MapLibreMapTest : BaseTest() {
     }
 
     @Test
+    fun testSetCachedTileFallbackEnabled() {
+        maplibreMap.cachedTileFallbackEnabled = true
+        verify { nativeMapView.cachedTileFallbackEnabled = true }
+    }
+
+    @Test
+    fun testGetCachedTileFallbackEnabled() {
+        every { nativeMapView.cachedTileFallbackEnabled } answers { true }
+        assertEquals(true, maplibreMap.cachedTileFallbackEnabled)
+    }
+
+    @Test
+    fun testSetCachedTileFallbackZoomDeltas() {
+        maplibreMap.cachedTileFallbackMaxParentZoomDelta = 5
+        maplibreMap.cachedTileFallbackMaxChildZoomDelta = 1
+        verify { nativeMapView.cachedTileFallbackMaxParentZoomDelta = 5 }
+        verify { nativeMapView.cachedTileFallbackMaxChildZoomDelta = 1 }
+    }
+
+    @Test
     fun testCameraForLatLngBounds() {
         val bounds = LatLngBounds.Builder().include(LatLng()).include(LatLng(1.0, 1.0)).build()
         maplibreMap.setLatLngBoundsForCameraTarget(bounds)

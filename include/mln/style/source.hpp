@@ -93,6 +93,11 @@ public:
     void setPrefetchZoomDelta(std::optional<uint8_t> delta) noexcept;
     std::optional<uint8_t> getPrefetchZoomDelta() const noexcept;
 
+    /// Overrides `CachedTileFallbackOptions::enabled` of the map for this
+    /// source. `std::nullopt` (default) follows the map setting.
+    void setCachedTileFallbackEnabled(std::optional<bool> enabled) noexcept;
+    std::optional<bool> getCachedTileFallbackEnabled() const noexcept;
+
     // If the given source supports loading tiles from a server,
     // sets the minimum tile update interval.
     // Update network requests that are more frequent than the

@@ -488,6 +488,40 @@ MLN_EXPORT
 
 @property (nonatomic, assign) BOOL tileCacheEnabled;
 
+/**
+ A Boolean value indicating whether the map draws cached tiles in place of tiles
+ that are still loading.
+
+ When this property is set to `YES`, a tile that is still loading is replaced on
+ screen by the tiles closest in zoom that already sit in the in-memory tile
+ cache for the same area: cached child tiles up to
+ `cachedTileFallbackMaxChildZoomDelta` levels below, and under them the nearest
+ cached parent tile up to `cachedTileFallbackMaxParentZoomDelta` levels above.
+ The loading tile replaces them once it can be drawn. This avoids empty areas
+ after a camera jump to a place or zoom seen before. No network requests are
+ made for the cached tiles. A source can override this property with
+ `MLNSource.cachedTileFallbackEnabled`.
+
+ The default value of this property is `NO`.
+ */
+@property (nonatomic, assign) BOOL cachedTileFallbackEnabled;
+
+/**
+ How many zoom levels above a loading tile the cached tile fallback looks for a
+ cached parent tile. The search also stops at the source’s minimum zoom.
+
+ The default value of this property is 255, which means all levels.
+ */
+@property (nonatomic, assign) NSUInteger cachedTileFallbackMaxParentZoomDelta;
+
+/**
+ How many zoom levels below a loading tile the cached tile fallback looks for
+ cached child tiles.
+
+ The default value of this property is 2.
+ */
+@property (nonatomic, assign) NSUInteger cachedTileFallbackMaxChildZoomDelta;
+
 // MARK: Tile LOD controls
 
 /**

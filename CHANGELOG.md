@@ -5,6 +5,7 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+- [core] Add `Map::setCachedTileFallbackOptions` and `style::Source::setCachedTileFallbackEnabled`: while an ideal tile is loading, the map draws the tiles closest in zoom that are already in the in-memory tile cache for the same area (cached children below, over the nearest cached parent), so a camera jump to a place or zoom seen before shows no empty areas. Off by default; continuous mode only ([#5125](https://github.com/maplibre/maplibre-native/pull/5125)).
 - [core] Add support for colorizing SDF fill patterns with `fill-color` ([#4526](https://github.com/maplibre/maplibre-native/issues/4526)).
 - [core] Add support for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression and the root [`state`](https://maplibre.org/maplibre-style-spec/root/#state) style property in filters, layout properties, and paint properties, including the runtime API `style::Style::setGlobalStateProperty` / `style::Style::getGlobalState`. Calls to `setGlobalStateProperty` before the style has loaded are rejected, matching MapLibre GL JS ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
 - [core] Add `style::Style::isLoaded` to report whether style JSON has finished loading and parsing without waiting for source or sprite resources ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).

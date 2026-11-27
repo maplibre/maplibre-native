@@ -47,6 +47,8 @@ public:
 
     const uint8_t prefetchZoomDelta;
 
+    const CachedTileFallbackOptions cachedTileFallbackOptions{};
+
     // For still image requests, render requested
     const bool stillImageRequest;
 

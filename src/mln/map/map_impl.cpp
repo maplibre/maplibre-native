@@ -133,6 +133,7 @@ void Map::Impl::onUpdate() {
                                .annotationManager = annotationManager.makeWeakPtr(),
                                .fileSource = fileSource,
                                .prefetchZoomDelta = prefetchZoomDelta,
+                               .cachedTileFallbackOptions = cachedTileFallbackOptions,
                                .stillImageRequest = bool(stillImageRequest),
                                .crossSourceCollisions = crossSourceCollisions,
                                .fastPFOREnabled = fastPFOREnabled,

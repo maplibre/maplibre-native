@@ -3195,6 +3195,36 @@ static void *windowScreenContext = &windowScreenContext;
   return _rendererFrontend->getTileCacheEnabled();
 }
 
+- (void)setCachedTileFallbackEnabled:(BOOL)enabled {
+  auto options = self.mbglMap.getCachedTileFallbackOptions();
+  options.enabled = enabled;
+  self.mbglMap.setCachedTileFallbackOptions(options);
+}
+
+- (BOOL)cachedTileFallbackEnabled {
+  return self.mbglMap.getCachedTileFallbackOptions().enabled;
+}
+
+- (void)setCachedTileFallbackMaxParentZoomDelta:(NSUInteger)delta {
+  auto options = self.mbglMap.getCachedTileFallbackOptions();
+  options.maxParentZoomDelta = static_cast<uint8_t>(std::min<NSUInteger>(delta, 255));
+  self.mbglMap.setCachedTileFallbackOptions(options);
+}
+
+- (NSUInteger)cachedTileFallbackMaxParentZoomDelta {
+  return self.mbglMap.getCachedTileFallbackOptions().maxParentZoomDelta;
+}
+
+- (void)setCachedTileFallbackMaxChildZoomDelta:(NSUInteger)delta {
+  auto options = self.mbglMap.getCachedTileFallbackOptions();
+  options.maxChildZoomDelta = static_cast<uint8_t>(std::min<NSUInteger>(delta, 255));
+  self.mbglMap.setCachedTileFallbackOptions(options);
+}
+
+- (NSUInteger)cachedTileFallbackMaxChildZoomDelta {
+  return self.mbglMap.getCachedTileFallbackOptions().maxChildZoomDelta;
+}
+
 - (void)setTileLodMinRadius:(double)tileLodMinRadius {
   _mbglMap->setTileLodMinRadius(tileLodMinRadius);
 }

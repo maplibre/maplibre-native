@@ -1,5 +1,7 @@
 #include "native_map_view.hpp"
 
+#include <algorithm>
+
 #include <mln/map/map_options.hpp>
 #include <mln/map/map.hpp>
 #include <mln/math/minmax.hpp>
@@ -1287,6 +1289,36 @@ jni::jint NativeMapView::getPrefetchZoomDelta(JNIEnv&) {
     return jni::jint(map->getPrefetchZoomDelta());
 }
 
+void NativeMapView::setCachedTileFallbackEnabled(JNIEnv&, jni::jboolean enabled) {
+    auto options = map->getCachedTileFallbackOptions();
+    options.enabled = enabled;
+    map->setCachedTileFallbackOptions(options);
+}
+
+jni::jboolean NativeMapView::getCachedTileFallbackEnabled(JNIEnv&) {
+    return jni::jboolean(map->getCachedTileFallbackOptions().enabled);
+}
+
+void NativeMapView::setCachedTileFallbackMaxParentZoomDelta(JNIEnv&, jni::jint delta) {
+    auto options = map->getCachedTileFallbackOptions();
+    options.maxParentZoomDelta = static_cast<uint8_t>(std::clamp(delta, 0, 255));
+    map->setCachedTileFallbackOptions(options);
+}
+
+jni::jint NativeMapView::getCachedTileFallbackMaxParentZoomDelta(JNIEnv&) {
+    return jni::jint(map->getCachedTileFallbackOptions().maxParentZoomDelta);
+}
+
+void NativeMapView::setCachedTileFallbackMaxChildZoomDelta(JNIEnv&, jni::jint delta) {
+    auto options = map->getCachedTileFallbackOptions();
+    options.maxChildZoomDelta = static_cast<uint8_t>(std::clamp(delta, 0, 255));
+    map->setCachedTileFallbackOptions(options);
+}
+
+jni::jint NativeMapView::getCachedTileFallbackMaxChildZoomDelta(JNIEnv&) {
+    return jni::jint(map->getCachedTileFallbackOptions().maxChildZoomDelta);
+}
+
 void NativeMapView::setTileCacheEnabled(JNIEnv&, jni::jboolean enabled) {
     rendererFrontend->setTileCacheEnabled(enabled);
 }
@@ -1479,6 +1511,14 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getPrefetchTiles, "nativeGetPrefetchTiles"),
         METHOD(&NativeMapView::setPrefetchZoomDelta, "nativeSetPrefetchZoomDelta"),
         METHOD(&NativeMapView::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
+        METHOD(&NativeMapView::setCachedTileFallbackEnabled, "nativeSetCachedTileFallbackEnabled"),
+        METHOD(&NativeMapView::getCachedTileFallbackEnabled, "nativeGetCachedTileFallbackEnabled"),
+        METHOD(&NativeMapView::setCachedTileFallbackMaxParentZoomDelta,
+               "nativeSetCachedTileFallbackMaxParentZoomDelta"),
+        METHOD(&NativeMapView::getCachedTileFallbackMaxParentZoomDelta,
+               "nativeGetCachedTileFallbackMaxParentZoomDelta"),
+        METHOD(&NativeMapView::setCachedTileFallbackMaxChildZoomDelta, "nativeSetCachedTileFallbackMaxChildZoomDelta"),
+        METHOD(&NativeMapView::getCachedTileFallbackMaxChildZoomDelta, "nativeGetCachedTileFallbackMaxChildZoomDelta"),
         METHOD(&NativeMapView::setTileCacheEnabled, "nativeSetTileCacheEnabled"),
         METHOD(&NativeMapView::getTileCacheEnabled, "nativeGetTileCacheEnabled"),
         METHOD(&NativeMapView::setTileLodMinRadius, "nativeSetTileLodMinRadius"),

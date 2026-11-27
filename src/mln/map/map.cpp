@@ -533,6 +533,16 @@ uint8_t Map::getPrefetchZoomDelta() const {
     return impl->prefetchZoomDelta;
 }
 
+void Map::setCachedTileFallbackOptions(const CachedTileFallbackOptions& options) {
+    if (impl->cachedTileFallbackOptions == options) return;
+    impl->cachedTileFallbackOptions = options;
+    impl->onUpdate();
+}
+
+CachedTileFallbackOptions Map::getCachedTileFallbackOptions() const {
+    return impl->cachedTileFallbackOptions;
+}
+
 bool Map::isFullyLoaded() const {
     return impl->style->impl->isLoaded() && impl->rendererFullyLoaded;
 }

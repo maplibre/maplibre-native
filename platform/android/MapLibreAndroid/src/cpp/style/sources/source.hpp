@@ -52,6 +52,10 @@ public:
 
     jni::Local<jni::Integer> getPrefetchZoomDelta(jni::JNIEnv&);
 
+    void setCachedTileFallbackEnabled(jni::JNIEnv& env, jni::Boolean& enabled);
+
+    jni::Local<jni::Boolean> getCachedTileFallbackEnabled(jni::JNIEnv&);
+
     void setMaxOverscaleFactorForParentTiles(jni::JNIEnv& env, jni::Integer& delta);
 
     jni::Local<jni::Integer> getMaxOverscaleFactorForParentTiles(jni::JNIEnv&);

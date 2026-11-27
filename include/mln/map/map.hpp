@@ -146,6 +146,20 @@ public:
     void setPrefetchZoomDelta(uint8_t delta);
     uint8_t getPrefetchZoomDelta() const;
 
+    // Cached tile fallback
+    //
+    /// When enabled, a tile that is still loading is replaced on screen by the
+    /// tiles closest in zoom that already sit in the in-memory tile cache for
+    /// the same area: cached child tiles up to `maxChildZoomDelta` levels below,
+    /// and under them the nearest cached parent tile up to `maxParentZoomDelta`
+    /// levels above. The loading tile replaces them once it can be drawn. This
+    /// avoids empty areas after a camera jump to a place or zoom seen before.
+    /// Cached tiles are never requested from the network for this. Only applies
+    /// in `MapMode::Continuous`. Off by default; `style::Source` can override
+    /// `enabled` per source.
+    void setCachedTileFallbackOptions(const CachedTileFallbackOptions& options);
+    CachedTileFallbackOptions getCachedTileFallbackOptions() const;
+
     // Debug
     void setDebug(MapDebugOptions);
     MapDebugOptions getDebug() const;
