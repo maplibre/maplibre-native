@@ -1161,3 +1161,103 @@ TEST(OfflineDownload, NoFreezingOnNotFoundError) {
     test.loop.run();
     // Passes if does not freeze.
 }
+
+TEST(OfflineDownload, StyleWithoutContent) {
+    OfflineTest test;
+    auto region = test.createRegion();
+    ASSERT_TRUE(region);
+    OfflineDownload download(region->getID(),
+                             OfflineTilePyramidRegionDefinition(
+                                 "http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+                             test.db,
+                             test.fileSource);
+
+    test.fileSource.styleResponse = [&](const Resource&) {
+        Response response;
+        response.noContent = true;
+        return response;
+    };
+
+    auto observer = std::make_unique<MockObserver>();
+    int errors = 0;
+    observer->responseErrorFn = [&](Response::Error error) {
+        EXPECT_EQ(Response::Error::Reason::Other, error.reason);
+        errors++;
+    };
+    observer->statusChangedFn = [&](OfflineRegionStatus status) {
+        if (status.downloadState == OfflineRegionDownloadState::Inactive) {
+            EXPECT_TRUE(status.complete());
+            EXPECT_FALSE(status.requiredResourceCountIsPrecise);
+            test.loop.stop();
+        }
+    };
+
+    download.setObserver(std::move(observer));
+    download.setState(OfflineRegionDownloadState::Active);
+    test.loop.run();
+
+    EXPECT_EQ(1, errors);
+    OfflineRegionStatus status = download.getStatus();
+    EXPECT_TRUE(status.complete());
+    EXPECT_FALSE(status.requiredResourceCountIsPrecise);
+}
+
+TEST(OfflineDownload, SourcesWithoutContentOrTileURLs) {
+    OfflineTest test;
+    auto region = test.createRegion();
+    ASSERT_TRUE(region);
+    OfflineDownload download(region->getID(),
+                             OfflineTilePyramidRegionDefinition(
+                                 "http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+                             test.db,
+                             test.fileSource);
+
+    test.fileSource.styleResponse = [&](const Resource&) {
+        Response response;
+        response.data = std::make_shared<std::string>(R"({
+            "version": 8,
+            "sources": {
+                "empty": { "type": "vector", "url": "http://127.0.0.1:3000/empty.json" },
+                "untiled": { "type": "vector", "url": "http://127.0.0.1:3000/untiled.json" },
+                "inline": { "type": "vector", "tiles": [] }
+            },
+            "layers": []
+        })");
+        return response;
+    };
+
+    test.fileSource.sourceResponse = [&](const Resource& resource) {
+        Response response;
+        if (resource.url == "http://127.0.0.1:3000/empty.json") {
+            response.noContent = true;
+        } else {
+            response.data = std::make_shared<std::string>(R"({ "tilejson": "2.0.0", "tiles": [] })");
+        }
+        return response;
+    };
+
+    auto observer = std::make_unique<MockObserver>();
+    int errors = 0;
+    observer->responseErrorFn = [&](Response::Error error) {
+        EXPECT_EQ(Response::Error::Reason::Other, error.reason);
+        errors++;
+    };
+    observer->statusChangedFn = [&](OfflineRegionStatus status) {
+        if (status.downloadState == OfflineRegionDownloadState::Inactive) {
+            EXPECT_TRUE(status.complete());
+            EXPECT_EQ(0u, status.requiredTileCount);
+            EXPECT_FALSE(status.requiredResourceCountIsPrecise);
+            test.loop.stop();
+        }
+    };
+
+    download.setObserver(std::move(observer));
+    download.setState(OfflineRegionDownloadState::Active);
+    test.loop.run();
+
+    EXPECT_EQ(2, errors);
+    OfflineRegionStatus status = download.getStatus();
+    EXPECT_TRUE(status.complete());
+    EXPECT_EQ(0u, status.requiredTileCount);
+    EXPECT_FALSE(status.requiredResourceCountIsPrecise);
+}
