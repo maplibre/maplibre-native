@@ -19,7 +19,7 @@ add_executable(
 
 
 set_property(
-    SOURCE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_view.cpp
+    SOURCE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_view.cpp ${PROJECT_SOURCE_DIR}/platform/glfw/main.cpp
     PROPERTY COMPILE_DEFINITIONS MLN_ASSETS_PATH=\"${PROJECT_SOURCE_DIR}/platform/glfw/assets/\"
 )
 
@@ -108,6 +108,8 @@ target_include_directories(
         ${GLFW_INCLUDE_DIRS}
         # For /platform/default/src/mln/map/map_snapshotter.hpp
     PRIVATE ${PROJECT_SOURCE_DIR}/src
+        # For the National Grid's projection, mln/test/national_grid.hpp
+    PRIVATE ${PROJECT_SOURCE_DIR}/test/include
 )
 
 # Use target_link_directories when we move away from CMake 3.10.

@@ -1,3 +1,4 @@
+#include "arctic_projection.hpp"
 #include "glfw_view.hpp"
 #include "glfw_renderer_frontend.hpp"
 #include "settings_json.hpp"
@@ -6,7 +7,9 @@
 #include <mln/renderer/renderer.hpp>
 #include <mln/storage/database_file_source.hpp>
 #include <mln/storage/file_source_manager.hpp>
+#include <mln/storage/resource_transform.hpp>
 #include <mln/style/style.hpp>
+#include <mln/test/national_grid.hpp>
 #include <mln/util/action_journal.hpp>
 #include <mln/util/action_journal_options.hpp>
 #include <mln/util/logging.hpp>
@@ -20,13 +23,35 @@
 #include <ngon_layer.hpp>
 #endif
 
+#include <charconv>
 #include <csignal>
 #include <iostream>
 #include <cstdlib>
+#include <string>
+#include <string_view>
 
 namespace {
 
 GLFWView* view = nullptr;
+
+/// Ordnance Survey's tiles of Great Britain on the National Grid, which need the API key of an OS Data Hub project.
+constexpr std::string_view osTilePrefix = "https://api.os.uk/maps/raster/v1/zxy/Light_27700/";
+
+/// Where OS serves a tile the national grid style asks for: at its OS level, its tile zoom less
+/// `level0Zoom`, with the key.
+std::string osTileUrl(const std::string& url, const std::string& key) {
+    if (!url.starts_with(osTilePrefix)) {
+        return url;
+    }
+    const std::size_t zoomEnd = url.find('/', osTilePrefix.size());
+    int zoom = 0;
+    if (zoomEnd == std::string::npos ||
+        std::from_chars(url.data() + osTilePrefix.size(), url.data() + zoomEnd, zoom).ec != std::errc()) {
+        return url;
+    }
+    return std::string(osTilePrefix) + std::to_string(zoom - mln::test::national_grid::level0Zoom) +
+           url.substr(zoomEnd) + "?key=" + key;
+}
 
 } // namespace
 
@@ -139,12 +164,35 @@ int main(int argc, char* argv[]) {
     resourceOptions.withCachePath(cacheDB).withApiKey(apikey).withTileServerOptions(mapTilerConfiguration);
     mln::ClientOptions clientOptions;
     auto orderedStyles = mapTilerConfiguration.defaultStyles();
+    // A map in a registered projection: NASA GIBS imagery of the Arctic in EPSG:3413, last of the styles `S` cycles.
+    mln::addProjection(mln::epsg3413Projection());
+    orderedStyles.emplace_back("file://" MLN_ASSETS_PATH "arctic.json", "Arctic sea ice (EPSG:3413)", 1);
+    // Another, after it: Ordnance Survey's map of Great Britain on the National Grid, EPSG:27700, with an OS key.
+    mln::addProjection(mln::test::nationalGrid("EPSG:27700"));
+    const char* osApiKeyEnv = getenv("MLN_OS_API_KEY");
+    const std::string osApiKey = osApiKeyEnv ? osApiKeyEnv : std::string();
+    if (osApiKey.empty()) {
+        mln::Log::Info(mln::Event::Setup,
+                       "To add Ordnance Survey's map of Great Britain in EPSG:27700 to the styles `S` cycles, set "
+                       "MLN_OS_API_KEY to the API key of an OS Data Hub project (osdatahub.os.uk) with the OS Maps "
+                       "API.");
+    } else {
+        orderedStyles.emplace_back("file://" MLN_ASSETS_PATH "national_grid.json", "Great Britain (EPSG:27700)", 1);
+    }
 
     GLFWView backend(fullscreen, benchmark, resourceOptions, clientOptions);
     view = &backend;
 
     std::shared_ptr<mln::FileSource> onlineFileSource = mln::FileSourceManager::get()->getFileSource(
         mln::FileSourceType::Network, resourceOptions, clientOptions);
+    if (onlineFileSource && !osApiKey.empty()) {
+        onlineFileSource->setResourceTransform(
+            mln::ResourceTransform([osApiKey](mln::Resource::Kind kind,
+                                              const std::string& url,
+                                              const mln::ResourceTransform::FinishedCallback& finished) {
+                finished(kind == mln::Resource::Kind::Tile ? osTileUrl(url, osApiKey) : url);
+            }));
+    }
     if (!settings.online) {
         if (onlineFileSource) {
             onlineFileSource->setProperty("online-status", false);

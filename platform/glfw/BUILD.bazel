@@ -59,6 +59,7 @@ cc_binary(
     ],
     deps = [
         "//:maplibre_lib",
+        "//test:national_grid",
         "@glfw",
     ] + select({
         "//:plugins_enabled": [

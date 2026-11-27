@@ -26,7 +26,10 @@ cc_library(
     name = "national_grid",
     hdrs = ["include/mln/test/national_grid.hpp"],
     strip_include_prefix = "include",
-    visibility = ["//render-test:__pkg__"],
+    visibility = [
+        "//platform/glfw:__pkg__",
+        "//render-test:__pkg__",
+    ],
 )
 
 cc_library(

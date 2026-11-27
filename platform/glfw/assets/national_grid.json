@@ -1,0 +1,22 @@
+{
+  "version": 8,
+  "name": "Great Britain (EPSG:27700)",
+  "projection": {"type": "EPSG:27700"},
+  "center": [-2.5, 54.5],
+  "zoom": 2.5,
+  "sources": {
+    "os-light": {
+      "type": "raster",
+      "tiles": ["https://api.os.uk/maps/raster/v1/zxy/Light_27700/{z}/{x}/{y}.png"],
+      "tileSize": 256,
+      "minzoom": 3,
+      "maxzoom": 12,
+      "bounds": [-10.8, 49.91, 1.9, 61.3],
+      "attribution": "Contains OS data © Crown copyright and database rights 2026"
+    }
+  },
+  "layers": [
+    {"id": "background", "type": "background", "paint": {"background-color": "#dfe7ec"}},
+    {"id": "os-light", "type": "raster", "source": "os-light"}
+  ]
+}

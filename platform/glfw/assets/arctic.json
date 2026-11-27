@@ -1,0 +1,36 @@
+{
+  "version": 8,
+  "name": "Arctic sea ice (EPSG:3413)",
+  "projection": {"type": "EPSG:3413"},
+  "center": [-45, 90],
+  "zoom": 1,
+  "sources": {
+    "blue-marble": {
+      "type": "raster",
+      "tiles": [
+        "https://gibs.earthdata.nasa.gov/wms/epsg3413/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=BlueMarble_ShadedRelief_Bathymetry&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3413&BBOX={bbox}&WIDTH=512&HEIGHT=512"
+      ],
+      "tileSize": 512,
+      "attribution": "Imagery from NASA GIBS"
+    },
+    "sea-ice": {
+      "type": "raster",
+      "tiles": [
+        "https://gibs.earthdata.nasa.gov/wms/epsg3413/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=AMSRU2_Sea_Ice_Concentration_12km&STYLES=&FORMAT=image/png&TRANSPARENT=TRUE&TIME=2025-03-15&CRS=EPSG:3413&BBOX={bbox}&WIDTH=512&HEIGHT=512"
+      ],
+      "tileSize": 512
+    },
+    "coastlines": {
+      "type": "raster",
+      "tiles": [
+        "https://gibs.earthdata.nasa.gov/wms/epsg3413/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Coastlines&STYLES=&FORMAT=image/png&TRANSPARENT=TRUE&CRS=EPSG:3413&BBOX={bbox}&WIDTH=512&HEIGHT=512"
+      ],
+      "tileSize": 512
+    }
+  },
+  "layers": [
+    {"id": "blue-marble", "type": "raster", "source": "blue-marble"},
+    {"id": "sea-ice", "type": "raster", "source": "sea-ice", "paint": {"raster-opacity": 0.8}},
+    {"id": "coastlines", "type": "raster", "source": "coastlines"}
+  ]
+}
