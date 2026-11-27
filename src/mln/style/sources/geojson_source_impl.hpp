@@ -24,12 +24,12 @@ public:
     std::optional<std::string> getAttribution() const final;
 
     bool isUpdateSynchronous() const final;
-    void setOverrideSynchronousUpdate(bool newOverride) const;
+    void setUpdateSynchronous(bool value) { synchronousUpdate = value; }
 
 private:
     Immutable<GeoJSONOptions> options;
     std::shared_ptr<GeoJSONData> data;
-    mutable bool overrideSynchronousUpdate = false;
+    bool synchronousUpdate;
 };
 
 } // namespace style
