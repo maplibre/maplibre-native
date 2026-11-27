@@ -73,7 +73,7 @@ void RenderPass::endEncoding() {
 void RenderPass::resetState() {
     currentPipelineState.reset();
     currentDepthStencilState.reset();
-    currentStencilReferenceValue = 0;
+    currentStencilReferenceValue.reset();
     for (int i = 0; i < maxBinds; ++i) {
         vertexBinds[i].reset();
         fragmentBinds[i].reset();
@@ -83,8 +83,10 @@ void RenderPass::resetState() {
         vertexSamplerStates[i].reset();
     }
 
-    currentCullMode = MTL::CullModeNone;
-    currentWinding = MTL::WindingClockwise;
+    // Not their defaults: the encoder keeps what the last drawable set, and a cached default would
+    // make the next drawable that wants it skip the call.
+    currentCullMode.reset();
+    currentWinding.reset();
     currentScissorRect = {.x = 0, .y = 0, .width = 0, .height = 0};
     currentDepthRange.reset();
 }
@@ -177,9 +179,9 @@ void RenderPass::setDepthStencilState(const MTLDepthStencilStatePtr& state) {
 }
 
 void RenderPass::setStencilReference(int32_t referenceValue) {
-    if (referenceValue != currentStencilReferenceValue) {
+    if (!currentStencilReferenceValue || referenceValue != *currentStencilReferenceValue) {
         currentStencilReferenceValue = referenceValue;
-        encoder->setStencilReferenceValue(currentStencilReferenceValue);
+        encoder->setStencilReferenceValue(referenceValue);
     }
 }
 
@@ -232,14 +234,14 @@ void RenderPass::setRenderPipelineState(const MTLRenderPipelineStatePtr& pipelin
 }
 
 void RenderPass::setCullMode(const MTL::CullMode mode) {
-    if (mode != currentCullMode) {
+    if (!currentCullMode || mode != *currentCullMode) {
         encoder->setCullMode(mode);
         currentCullMode = mode;
     }
 }
 
 void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
-    if (winding != currentWinding) {
+    if (!currentWinding || winding != *currentWinding) {
         encoder->setFrontFacingWinding(winding);
         currentWinding = winding;
     }
