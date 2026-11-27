@@ -7,6 +7,8 @@
 #include <mln/vulkan/command_encoder.hpp>
 #include <mln/vulkan/render_pass.hpp>
 #include <mln/vulkan/renderable_resource.hpp>
+#include <mln/vulkan/texture2d.hpp>
+#include <mln/renderer/render_terrain.hpp>
 
 namespace mln {
 namespace style {
@@ -23,6 +25,15 @@ CustomLayerRenderParameters::CustomLayerRenderParameters(const mln::PaintParamet
     const auto& resource = renderable.getResource<mln::vulkan::RenderableResource>();
     renderPass = resource.getRenderPass().get();
     screenPreRotationRadiansClockwise = resource.getRotation();
+
+    if (auto* terrain = paintParameters.terrain) {
+        if (auto* depthTexture = terrain->getDrawnDepthTexture(paintParameters.context, renderable.getSize())) {
+            auto& texture = static_cast<mln::vulkan::Texture2D&>(*depthTexture);
+            terrainDepthImageView = texture.getVulkanImageView().get();
+            terrainDepthSampler = texture.getVulkanSampler();
+            terrainDepthImageLayout = texture.getVulkanImageLayout();
+        }
+    }
 }
 
 } // namespace vulkan

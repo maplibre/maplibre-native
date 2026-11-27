@@ -12,6 +12,8 @@
 #elif MLN_RENDER_BACKEND_VULKAN
 #include <mln/style/layers/vulkan/custom_layer_render_parameters.hpp>
 #include <mln/vulkan/render_pass.hpp>
+#elif MLN_RENDER_BACKEND_OPENGL
+#include <mln/style/layers/gl/custom_layer_render_parameters.hpp>
 #endif
 
 #include <memory>
@@ -39,6 +41,8 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);
 #elif MLN_RENDER_BACKEND_VULKAN
     style::vulkan::CustomLayerRenderParameters parameters(paintParameters);
+#elif MLN_RENDER_BACKEND_OPENGL
+    style::gl::CustomLayerRenderParameters parameters(paintParameters);
 #else
     style::CustomLayerRenderParameters parameters(paintParameters);
 #endif
