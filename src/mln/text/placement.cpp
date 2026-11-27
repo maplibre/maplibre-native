@@ -11,6 +11,7 @@
 #include <mln/util/math.hpp>
 
 #include <list>
+#include <numbers>
 #include <utility>
 
 namespace mln {
@@ -214,6 +215,16 @@ void Placement::placeLayer(const RenderLayer& layer, std::set<uint32_t>& seenCro
 }
 
 namespace {
+/// The shift along the label's own axes; collision projects it the way the label is aligned.
+Point<float> calculateVariableLayoutOffset(
+    style::SymbolAnchorType anchor, float width, float height, std::array<float, 2> offset, float textBoxScale) {
+    AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
+    float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
+    float shiftY = -(alignment.verticalAlign - 0.5f) * height;
+    return {shiftX + offset[0] * textBoxScale, shiftY + offset[1] * textBoxScale};
+}
+
+/// The shift as a screen-space offset, for the boxes that are not projected.
 Point<float> calculateVariableLayoutOffset(style::SymbolAnchorType anchor,
                                            float width,
                                            float height,
@@ -222,14 +233,8 @@ Point<float> calculateVariableLayoutOffset(style::SymbolAnchorType anchor,
                                            bool rotateWithMap,
                                            bool pitchWithMap,
                                            float bearing) {
-    AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
-    float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
-    float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    Point<float> shift{shiftX + offset[0] * textBoxScale, shiftY + offset[1] * textBoxScale};
-    if (rotateWithMap) {
-        shift = util::rotate(shift, pitchWithMap ? bearing : -bearing);
-    }
-    return shift;
+    const Point<float> shift = calculateVariableLayoutOffset(anchor, width, height, offset, textBoxScale);
+    return rotateWithMap ? util::rotate(shift, pitchWithMap ? bearing : -bearing) : shift;
 }
 } // namespace
 
@@ -329,7 +334,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                           style::TextWritingModeType orientation) {
                 textBoxes.clear();
                 auto placedFeature = collisionIndex.placeFeature(collisionFeature,
-                                                                 {},
+                                                                 std::nullopt,
                                                                  posMatrix,
                                                                  ctx.textLabelPlaneMatrix,
                                                                  ctx.pixelRatio,
@@ -338,6 +343,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                                  fontSize,
                                                                  ctx.textAllowOverlap,
                                                                  ctx.pitchTextWithMap,
+                                                                 ctx.rotateTextWithMap,
                                                                  showCollisionBoxes,
                                                                  ctx.avoidEdges,
                                                                  collisionGroup.second,
@@ -408,17 +414,19 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                     auto anchor = variableTextAnchors[i % anchorsSize];
                     auto variableTextOffset = symbolInstance.getTextVariableAnchorOffset()->getOffsetByAnchor(anchor);
                     const bool allowOverlap = (i >= anchorsSize);
-                    shift = calculateVariableLayoutOffset(anchor,
-                                                          width,
-                                                          height,
-                                                          variableTextOffset,
-                                                          textBoxScale,
-                                                          ctx.rotateTextWithMap,
-                                                          ctx.pitchTextWithMap,
-                                                          static_cast<float>(ctx.getTransformState().getBearing()));
+                    shift = calculateVariableLayoutOffset(anchor, width, height, variableTextOffset, textBoxScale);
                     textBoxes.clear();
+                    const Point<float> screenShift = calculateVariableLayoutOffset(
+                        anchor,
+                        width,
+                        height,
+                        variableTextOffset,
+                        textBoxScale,
+                        ctx.rotateTextWithMap,
+                        ctx.pitchTextWithMap,
+                        static_cast<float>(ctx.getTransformState().getBearing()));
                     if (!canPlaceAtVariableAnchor(
-                            textBox, anchor, shift, variableTextAnchors, posMatrix, ctx.pixelRatio)) {
+                            textBox, anchor, screenShift, variableTextAnchors, posMatrix, ctx.pixelRatio)) {
                         continue;
                     }
 
@@ -432,6 +440,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                                 fontSize,
                                                                 allowOverlap,
                                                                 ctx.pitchTextWithMap,
+                                                                ctx.rotateTextWithMap,
                                                                 showCollisionBoxes,
                                                                 ctx.avoidEdges,
                                                                 collisionGroup.second,
@@ -449,6 +458,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                             fontSize,
                             ctx.iconAllowOverlap,
                             ctx.pitchTextWithMap, // TODO: shall it be pitchIconWithMap?
+                            ctx.rotateTextWithMap,
                             showCollisionBoxes,
                             ctx.avoidEdges,
                             collisionGroup.second,
@@ -529,16 +539,17 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     }
 
     if (symbolInstance.getPlacedIconIndex()) {
-        if (!ctx.hasIconTextFit || !placeText || variableTextAnchors.empty()) {
-            shift = {0.0f, 0.0f};
-        }
+        // An icon fitted to text placed on a variable anchor follows the text's shift; no other icon has one.
+        const std::optional<Point<float>> iconShift = ctx.hasIconTextFit && placeText && !variableTextAnchors.empty()
+                                                          ? std::optional<Point<float>>(shift)
+                                                          : std::nullopt;
 
         const auto& iconBuffer = symbolInstance.hasSdfIcon() ? bucket.sdfIcon : bucket.icon;
         const PlacedSymbol& placedSymbol = iconBuffer.placedSymbols.at(*symbolInstance.getPlacedIconIndex());
         const float fontSize = evaluateSizeForFeature(ctx.partiallyEvaluatedIconSize, placedSymbol);
         const auto& placeIconFeature = [&](const CollisionFeature& collisionFeature) {
             return collisionIndex.placeFeature(collisionFeature,
-                                               shift,
+                                               iconShift,
                                                posMatrix,
                                                ctx.iconLabelPlaneMatrix,
                                                ctx.pixelRatio,
@@ -547,6 +558,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                fontSize,
                                                ctx.iconAllowOverlap,
                                                ctx.pitchTextWithMap,
+                                               ctx.rotateTextWithMap,
                                                showCollisionBoxes,
                                                ctx.avoidEdges,
                                                collisionGroup.second,
@@ -841,6 +853,16 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
         const auto labelPlaneMatrix = getLabelPlaneMatrix(
             tile.matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        // The shift runs along the label's own axes, as its collision box does.
+        Point<float> vecEast{1, 0};
+        Point<float> vecSouth{0, 1};
+        if (pitchWithMap && !rotateWithMap) {
+            vec2 east;
+            vec2 south;
+            getTileSkewVectors(state, east, south);
+            vecEast = {static_cast<float>(east[0]), static_cast<float>(east[1])};
+            vecSouth = {static_cast<float>(south[0]), static_cast<float>(south[1])};
+        }
         std::unordered_map<std::size_t, std::pair<std::size_t, Point<float>>> placedTextShifts;
 
         for (std::size_t i = 0; i < bucket.text.placedSymbols.size(); ++i) {
@@ -886,10 +908,16 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 // plane.
                 Point<float> shiftedAnchor;
                 if (pitchWithMap) {
-                    shiftedAnchor =
-                        project(Point<float>(tileAnchor.x + shift.x, tileAnchor.y + shift.y), labelPlaneMatrix).first;
+                    const Point<float> tileShift = vecEast * shift.x + vecSouth * shift.y;
+                    shiftedAnchor = project(tileAnchor + tileShift, labelPlaneMatrix).first;
                 } else if (rotateWithMap) {
-                    auto rotated = util::rotate(shift, -state.getPitch());
+                    // The label stays east-west aligned on the screen, so the shift follows the projected east vector.
+                    const Point<float> east =
+                        project(Point<float>(tileAnchor.x + 1, tileAnchor.y), labelPlaneMatrix).first;
+                    const float toEastX = east.x - projectedAnchor.first.x;
+                    const float toEastY = east.y - projectedAnchor.first.y;
+                    const float angle = std::atan(toEastY / toEastX) + (toEastX < 0 ? std::numbers::pi_v<float> : 0.f);
+                    const auto rotated = util::rotate(shift, angle);
                     shiftedAnchor = Point<float>(projectedAnchor.first.x + rotated.x,
                                                  projectedAnchor.first.y + rotated.y);
                 } else {
