@@ -470,6 +470,29 @@ TEST(OfflineDownload, GetStatusStyleAndSourceComplete) {
     EXPECT_FALSE(status.complete());
 }
 
+TEST(OfflineDownload, GetStatusInfiniteMaxZoom) {
+    OfflineTest test;
+    auto region = test.createRegion();
+    ASSERT_TRUE(region);
+    OfflineDownload download(region->getID(),
+                             OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json",
+                                                                LatLngBounds::hull({0.5, 0.5}, {0.5001, 0.5001}),
+                                                                14.0,
+                                                                INFINITY,
+                                                                1.0,
+                                                                true),
+                             test.db,
+                             test.fileSource);
+
+    test.db.putRegionResource(1, Resource::style("http://127.0.0.1:3000/style.json"), test.response("style.json"));
+    test.db.putRegionResource(1, Resource::source("http://127.0.0.1:3000/streets.json"), test.response("streets.json"));
+
+    OfflineRegionStatus status = download.getStatus();
+
+    // One tile at z14 and one at the source's maxzoom, z15.
+    EXPECT_EQ(2u, status.requiredTileCount);
+}
+
 TEST(OfflineDownload, RequestError) {
     OfflineTest test;
     auto region = test.createRegion();
