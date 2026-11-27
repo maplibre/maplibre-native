@@ -33,9 +33,11 @@ public:
     std::string attribution;
     Scheme scheme;
     std::optional<RasterEncoding> rasterEncoding;
+    /// The style spec's defaults for `redFactor`, `greenFactor`, `blueFactor` and `baseShift`.
+    static constexpr std::array<float, 4> defaultRasterCustomFactors{1, 1, 1, 0};
     /// The custom encoding's `redFactor`, `greenFactor`, `blueFactor` and `baseShift`: a pixel's elevation is
     /// red * redFactor + green * greenFactor + blue * blueFactor - baseShift, each channel from 0 to 255.
-    std::array<float, 4> rasterCustomFactors{1, 1, 1, 0};
+    std::array<float, 4> rasterCustomFactors = defaultRasterCustomFactors;
     std::optional<VectorEncoding> vectorEncoding;
     std::optional<LatLngBounds> bounds;
 

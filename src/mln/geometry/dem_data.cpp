@@ -27,7 +27,6 @@ DEMData::DEMData(const PremultipliedImage& _image,
     : dim(_image.size.height),
       // extra two pixels per row for border backfilling on either edge
       stride(dim + 2),
-      encoding(_encoding),
       unpackVector(unpackVectorFor(_encoding, customFactors)) {
     image = std::make_shared<PremultipliedImage>(Size(static_cast<uint32_t>(stride), static_cast<uint32_t>(stride)));
     if (_image.size.height != _image.size.width) {

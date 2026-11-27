@@ -25,7 +25,7 @@ class HillshadeBucket final : public Bucket {
 public:
     HillshadeBucket(PremultipliedImage&&,
                     Tileset::RasterEncoding encoding,
-                    const std::array<float, 4>& customFactors = {1, 1, 1, 0});
+                    const std::array<float, 4>& customFactors = Tileset::defaultRasterCustomFactors);
     HillshadeBucket(std::shared_ptr<PremultipliedImage>, Tileset::RasterEncoding encoding);
     HillshadeBucket(DEMData&&);
     ~HillshadeBucket() override;

@@ -39,7 +39,7 @@ std::optional<SourceOptions> Converter<SourceOptions>::operator()(const Converti
         } else if (encoding && *encoding == "mapbox") {
             options.rasterEncoding = Tileset::RasterEncoding::Mapbox;
         } else if (encoding && *encoding == "custom") {
-            std::array<float, 4> factors{1, 1, 1, 0};
+            std::array<float, 4> factors = Tileset::defaultRasterCustomFactors;
             const std::array<const char*, 4> names{"redFactor", "greenFactor", "blueFactor", "baseShift"};
             for (size_t i = 0; i < names.size(); ++i) {
                 if (const auto factorValue = objectMember(value, names[i])) {
