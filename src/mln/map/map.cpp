@@ -508,7 +508,8 @@ LatLng Map::latLngForPixelOnTerrain(const ScreenCoordinate& pixel) const {
                 impl->transform.getState(),
                 pixel,
                 [&](const LatLng& latLng) { return index->getElevation(latLng); },
-                index->getMaxElevation())) {
+                index->getMaxElevation(),
+                index->getMinElevation())) {
             return *surface;
         }
     }
