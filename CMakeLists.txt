@@ -20,7 +20,6 @@ option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_WITH_TOOLS "Build the command line tools in bin/" OFF)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
 option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
-option(MLN_USE_RUST "Use components in Rust" OFF)
 option(MLN_TEXT_SHAPING_HARFBUZZ "Use haffbuzz to shape complex text" ON)
 option(MLN_CREATE_AUTORELEASEPOOL "Create autoreleasepool in render loop" OFF)
 option(MLN_CREATE_AMALGAMATION "Create static amalgamation of core (requires amerge)" OFF)
@@ -954,7 +953,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/bounding_volumes.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/chrono.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/client_options.cpp
-    ${PROJECT_SOURCE_DIR}/src/mln/util/color$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
+    ${PROJECT_SOURCE_DIR}/src/mln/util/color.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/constants.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/convert.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/error_sink.cpp
@@ -1150,10 +1149,6 @@ include(${PROJECT_SOURCE_DIR}/vendor/supercluster.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/expected-lite.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
 
-if(MLN_USE_RUST)
-include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
-endif()
-
 target_link_libraries(
     mbgl-core
     PRIVATE
@@ -1163,6 +1158,7 @@ target_link_libraries(
         MapLibreNative::Base::cheap-ruler-cpp
         mbgl-compiler-options
         mbgl-vendor-boost
+        mbgl-vendor-csscolorparser
         mbgl-vendor-earcut.hpp
         mbgl-vendor-eternal
         mbgl-vendor-parsedate
@@ -1175,7 +1171,6 @@ target_link_libraries(
         mbgl-vendor-wagyu
         mlt-cpp
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
-        $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
         $<$<BOOL:${MLN_TEXT_SHAPING_HARFBUZZ}>:mbgl-freetype>
         $<$<BOOL:${MLN_TEXT_SHAPING_HARFBUZZ}>:mbgl-harfbuzz>
     PUBLIC
@@ -1205,6 +1200,7 @@ set(EXPORT_TARGETS
     maplibre-native-base-variant
     mbgl-compiler-options
     mbgl-vendor-boost
+    mbgl-vendor-csscolorparser
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
     mbgl-vendor-metal-cpp
@@ -1219,12 +1215,6 @@ set(EXPORT_TARGETS
     mlt-cpp
     unordered_dense
 )
-
-if(MLN_USE_RUST)
-    list(APPEND EXPORT_TARGETS mbgl-rustutils rustutils)
-else()
-    list(APPEND EXPORT_TARGETS mbgl-vendor-csscolorparser)
-endif()
 
 if(MLN_TEXT_SHAPING_HARFBUZZ)
     list(APPEND EXPORT_TARGETS mbgl-freetype mbgl-harfbuzz)

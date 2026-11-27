@@ -96,24 +96,6 @@ darwin_config(
     name = "darwin_config",
 )
 
-bazel_dep(name = "rules_rust", version = "0.74.0")
-bazel_dep(name = "cxx.rs", version = "1.0.202")
-
-rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-rust.toolchain(
-    edition = "2021",
-    extra_target_triples = [
-        "aarch64-apple-ios-sim",
-        "x86_64-apple-ios",
-        "aarch64-apple-ios",
-        "aarch64-apple-darwin",
-        "x86_64-apple-darwin",
-    ],
-)
-use_repo(rust, "rust_toolchains")
-
-register_toolchains("@rust_toolchains//:all")
-
 # Configure and register shell toolchains required by rules_shell.
 # Fixes: "No matching toolchains found for types: @@rules_shell+//shell:toolchain_type"
 sh_configure = use_extension("@rules_shell//shell/private/extensions:sh_configure.bzl", "sh_configure")
@@ -124,14 +106,6 @@ register_toolchains("@local_config_shell//:all")
 register_toolchains(
     "//bazel/tools/shell:osx_sh_toolchain_exec",
 )
-
-crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
-crate.from_cargo(
-    name = "crates",
-    cargo_lockfile = "//rustutils:Cargo.lock",
-    manifests = ["//rustutils:Cargo.toml"],
-)
-use_repo(crate, "crates")
 
 # Used by //platform:check-public-symbols-{ios,macos}.
 bazel_dep(name = "sourcekitten", version = "0.38.0", dev_dependency = True)
