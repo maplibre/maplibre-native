@@ -34,6 +34,13 @@ public:
     }
 
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
+        // A request cancelled while it waited in this thread's queue has no
+        // one left to answer. Skip the database read (and the access-time
+        // write that comes with it) instead of doing it for nothing.
+        if (req.expired()) {
+            return;
+        }
+
         std::optional<Response> offlineResponse = (resource.storagePolicy != Resource::StoragePolicy::Volatile)
                                                       ? db->get(resource)
                                                       : std::nullopt;
