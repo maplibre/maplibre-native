@@ -1,0 +1,12 @@
+# labeler.yml runs when this completes, with a token that can label fork PRs
+name: labeler-trigger
+
+on: pull_request
+
+permissions: {}
+
+jobs:
+  trigger:
+    runs-on: ubuntu-26.04
+    steps:
+      - run: echo "labeler.yml labels this PR"

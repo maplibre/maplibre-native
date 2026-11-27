@@ -27,6 +27,7 @@ env:
   # Mesa 26's gfxstream ICD leaks a pthread key per vkCreateInstance, which exhausts glibc's 1024 keys in the Vulkan render tests.
   VK_DRIVER_FILES: /usr/share/vulkan/icd.d/lvp_icd.json
   UBSAN_OPTIONS: print_stacktrace=1
+  download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com
 
 jobs:
   pre_job:
@@ -197,6 +198,103 @@ jobs:
       - name: Run expression test
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
+  linux-benchmark:
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.linux-build-and-test.result != 'skipped' }}
+    needs: linux-build-and-test
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    continue-on-error: true  # a failed report must not fail linux-ci
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - run: git submodule update --init --depth 1 vendor/benchmark
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: mbgl-benchmark-runner
+
+      - name: Download mbgl-benchmark-runner-main, set permissions
+        run: |
+          wget -O mbgl-benchmark-runner-main "${download_url}/mbgl-benchmark-runner-main"
+          chmod +x mbgl-benchmark-runner-main mbgl-benchmark-runner
+
+      # needed for compare.py
+      - name: Install scipy
+        run: pip3 install scipy
+
+      - name: Install dependencies
+        run: .github/scripts/install-linux-deps
+
+      - name: Run Benchmarks
+        # excluding the API tests because they hang https://github.com/maplibre/maplibre-native/issues/1808
+        run: python3 vendor/benchmark/tools/compare.py --no-color benchmarks ./mbgl-benchmark-runner-main ./mbgl-benchmark-runner --benchmark_filter='^[^A][^P][^I].*' > benchmark_out.txt
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: benchmark-results
+          path: benchmark_out.txt
+
+  linux-bloaty:
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.linux-build-and-test.result != 'skipped' }}
+    needs: linux-build-and-test
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    continue-on-error: true  # a failed report must not fail linux-ci
+    permissions:
+      contents: read
+    env:
+      legacy_maplibre_sha: d38709084a9865fe0bb8300aec70ebf8243b3d43  # also in pr-linux-tests.yml
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/actions
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: mbgl-render
+
+      - name: Download mbgl-render-main
+        run: wget -O mbgl-render-main "${download_url}/mbgl-render-main"
+
+      - name: Download mbgl-render-legacy
+        run: wget -O mbgl-render-legacy "${download_url}/mbgl-render-${legacy_maplibre_sha}"
+
+      - uses: ./.github/actions/setup-bloaty
+
+      - name: Run Bloaty McBloatface on main
+        run: bloaty/build/bloaty mbgl-render -- mbgl-render-main -n 0 -s vm -d compileunits > tlus_diff_main.txt
+
+      - name: Run Bloaty McBloatface on legacy
+        run: bloaty/build/bloaty mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff_legacy.txt
+
+      - name: Upload Bloaty results
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bloaty-results
+          path: |
+            tlus_diff_main.txt
+            tlus_diff_legacy.txt
+
+  # Saves the Bloaty build in main's cache scope, which pull requests restore from.
+  bloaty-cache:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/actions
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-bloaty
+
   linux-coverage:
     runs-on: ubuntu-26.04
     timeout-minutes: 60
@@ -253,11 +351,6 @@ jobs:
       - linux-build-and-test
       - linux-coverage
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - if: github.event_name == 'pull_request'
-        uses: ./.github/actions/save-pr-number
-
       - name: Mark result as failed
         if: needs.linux-build-and-test.result != 'success' || needs.linux-coverage.result != 'success'
         run: exit 1

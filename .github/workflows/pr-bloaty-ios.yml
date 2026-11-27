@@ -21,71 +21,44 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-26.04
     outputs:
-      should_skip: ${{ steps.parent_workflow.outputs.was_skipped_or_cancelled }}
+      pr-number: ${{ steps.get-pr-number.outputs.pr-number }}
+      artifacts: ${{ steps.artifacts.outputs.names }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          sparse-checkout: |
-            .github
-            .nvmrc
+          sparse-checkout: .github/actions
           persist-credentials: false
-
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: '.nvmrc'
-
-      - run: npm install
-
-      - name: Get parent workflow result
-        id: parent_workflow
-        run: node .github/scripts/check-job-skipped.ts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TEST_RUN_ID: ${{ github.event.workflow_run.id }}
-          JOB_NAME: ios-build
-
-  pr-bloaty-ios:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip == 'false'
-    runs-on: ubuntu-26.04
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Cache Bloaty
-        id: cache-bloaty
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: bloaty/build/bloaty
-          key: bloaty-${{ env.bloaty_sha }}
-
-      # because Google is not making a release...
-      # https://github.com/google/bloaty/issues/334
-      - name: Compile Bloaty
-        if: ${{ !steps.cache-bloaty.outputs.cache-hit }}
-        run: |
-          git clone https://github.com/google/bloaty.git
-          cd bloaty
-          git checkout "$bloaty_sha"
-          cmake -B build -G Ninja -S .
-          cmake --build build
-
-      - name: Download MapLibre_dynamic-main, MapLibre_DWARF-main
-        run: |
-          wget -O MapLibre_dynamic-main "${download_url}/size-test-ios/MapLibre_dynamic-main"
-          wget -O MapLibre_DWARF-main "${download_url}/size-test-ios/MapLibre_DWARF-main"
 
       - uses: ./.github/actions/get-pr-number
         id: get-pr-number
 
+      # results jobs that were skipped, cancelled or failed uploaded nothing
+      - name: List the results ios-ci uploaded
+        id: artifacts
+        run: echo "names=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts?per_page=100" --jq '[.artifacts[].name]')" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+
+  pr-bloaty-ios:
+    needs: pre_job
+    if: needs.pre_job.outputs.pr-number && contains(fromJSON(needs.pre_job.outputs.artifacts), 'ios-bloaty-results')
+    runs-on: ubuntu-26.04
+    env:
+      PR_NUMBER: ${{ needs.pre_job.outputs.pr-number }}
+    environment:
+      name: workflow-run
+      deployment: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/actions
+          persist-credentials: false
+
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
-          artifact-name: ios-size-test-files
-          expect-files: "MapLibre_dynamic,MapLibre_DWARF"
-
-      - name: Run Bloaty
-        run: bloaty/build/bloaty --debug-file MapLibre_DWARF --debug-file MapLibre_DWARF-main MapLibre_dynamic -n 0 -s vm -d compileunits -- MapLibre_dynamic-main > bloaty_diff.txt
+          artifact-name: ios-bloaty-results
+          files: "bloaty_diff.txt"
 
       - name: Configure AWS Credentials
         if: vars.OIDC_AWS_ROLE_TO_ASSUME
@@ -97,13 +70,13 @@ jobs:
 
       - name: Prepare Bloaty message
         run: |
-          report_path=bloaty-results-ios/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-main.txt
+          report_path="bloaty-results-ios/pr-${PR_NUMBER}-compared-to-main.txt"
           aws s3 cp bloaty_diff.txt s3://maplibre-native/"$report_path"
           {
             echo "# Bloaty Results (iOS) 🐋"
             echo 'Compared to main'
             echo '```'
-            awk 'NR <= 2; END { print }' bloaty_diff.txt
+            tr -d '`' < bloaty_diff.txt | awk 'NR <= 2; END { print }'
             echo '```'
             echo "Full report: $download_url/$report_path"
             echo "---"
@@ -112,6 +85,6 @@ jobs:
       - name: Leave a comment with Bloaty results
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
-          number: ${{ steps.get-pr-number.outputs.pr-number }}
+          number: ${{ env.PR_NUMBER }}
           header: bloaty-ios
           path: message.md

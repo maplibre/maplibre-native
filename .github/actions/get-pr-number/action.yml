@@ -1,19 +1,21 @@
 name: 'get-pr-number'
-description: 'Gets the PR number from an artifact'
+description: 'Finds the open pull request whose head is the commit the triggering workflow_run built'
 outputs:
   pr-number:
-    description: "PR number or empty string"
-    value: ${{ steps.cat.outputs.pr-number }}
+    description: "PR number, or empty when the run was not for a pull request or the PR has moved on"
+    value: ${{ steps.find.outputs.pr-number }}
 runs:
   using: "composite"
   steps:
-    - uses: ./.github/actions/download-workflow-run-artifact
-      with:
-        artifact-name: pr-number
-
-    - run: touch ./pr_number
+    # From the event rather than an artifact, because a fork controls the run's artifacts
+    - id: find
+      if: github.event.workflow_run.event == 'pull_request'
       shell: bash
-
-    - id: cat
-      run: echo pr-number="$(cat ./pr_number)" >> $GITHUB_OUTPUT
-      shell: bash
+      run: |
+        pr_number="$(gh api -X GET "repos/$GITHUB_REPOSITORY/pulls" -f head="$HEAD_LABEL" \
+          --jq 'map(select(.head.sha == env.HEAD_SHA))[0].number // empty')"
+        echo "pr-number=$pr_number" >> "$GITHUB_OUTPUT"
+      env:
+        GH_TOKEN: ${{ github.token }}
+        HEAD_LABEL: ${{ github.event.workflow_run.head_repository.owner.login }}:${{ github.event.workflow_run.head_branch }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}

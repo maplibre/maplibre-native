@@ -263,9 +263,6 @@ jobs:
           aws s3 cp MapLibre_DWARF s3://maplibre-native/size-test-ios/MapLibre_DWARF-main
           aws s3 cp MapLibre_dynamic s3://maplibre-native/size-test-ios/MapLibre_dynamic-main
 
-      - if: github.event_name == 'pull_request'
-        uses: ./.github/actions/save-pr-number
-
       - name: Build DocC documentation
         working-directory: .
         run: |
@@ -277,6 +274,42 @@ jobs:
           df -h "$HOME"
           bazel clean --expunge
           df -h "$HOME"
+
+  ios-bloaty:
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.ios-build.result != 'skipped' }}
+    needs: ios-build
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    continue-on-error: true  # a failed ios-ci run skips ios-device-test
+    permissions:
+      contents: read
+    env:
+      download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/actions
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ios-size-test-files
+
+      - name: Download MapLibre_dynamic-main, MapLibre_DWARF-main
+        run: |
+          wget -O MapLibre_dynamic-main "${download_url}/size-test-ios/MapLibre_dynamic-main"
+          wget -O MapLibre_DWARF-main "${download_url}/size-test-ios/MapLibre_DWARF-main"
+
+      - uses: ./.github/actions/setup-bloaty
+
+      - name: Run Bloaty
+        run: bloaty/build/bloaty --debug-file MapLibre_DWARF --debug-file MapLibre_DWARF-main MapLibre_dynamic -n 0 -s vm -d compileunits -- MapLibre_dynamic-main > bloaty_diff.txt
+
+      - name: Upload Bloaty results
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ios-bloaty-results
+          path: bloaty_diff.txt
 
   ios-build-cmake:
     needs: pre_job

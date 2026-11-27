@@ -16,7 +16,8 @@ async function run() {
   const jobName = process.env.JOB_NAME;
   if (!jobName) throw new Error("JOB_NAME not set");
 
-  const job = data.jobs.find(({name}) => name.startsWith(jobName));
+  // matrix jobs are named `job (values)`; a plain prefix would also match e.g. ios-build-cmake
+  const job = data.jobs.find(({name}) => name === jobName || name.startsWith(`${jobName} (`));
   if (!job) throw new Error(`job with name ${jobName} not found in workflow run with id ${run_id}`);
 
   core.setOutput('was_skipped', job.conclusion === 'skipped');
