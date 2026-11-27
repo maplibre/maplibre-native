@@ -118,6 +118,16 @@ static const CLLocationDistance MLNTestMetersPerPointAt70N = 1022.8325840486776;
     XCTAssertEqualWithAccuracy(projection.metersPerPoint, metersPerPoint, metersPerPoint * 1e-9);
 }
 
+- (void)testScaleBarHidesAtZoom22 {
+    // A point covers about 4 mm here, so half the view is shorter than the scale bar's shortest bar.
+    self.mapView.showsScale = YES;
+    [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(70, -45) zoomLevel:22 animated:NO];
+    [self.mapView layoutIfNeeded];
+
+    XCTAssertLessThan([self.mapView metersPerPointAtLatitude:70], 0.01);
+    XCTAssertEqual(self.mapView.scaleBar.alpha, 0);
+}
+
 - (void)testMetersPerPointAcrossTheAntimeridian {
     // The projection's inverse answers longitudes down to -225, so the center comes back as -190.
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(75, 170) zoomLevel:4 animated:NO];
