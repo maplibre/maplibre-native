@@ -40,6 +40,15 @@ struct CustomLayerRenderParameters : mln::style::CustomLayerRenderParameters {
     /// @attention dFdx, dFdy in shaders also need adjustments if used.
     float screenPreRotationRadiansClockwise = 0.0f;
 
+    /// The terrain depth pass's packed-RGBA output for this frame, or null handles when terrain is off or
+    /// the pass has not drawn yet. Pixel size is the drawable's. Each pixel holds the mesh's window depth in
+    /// [0, 1] packed as depth = r / 256^3 + g / 256^2 + b / 256 + a (decode with the engine's `unpack_depth`);
+    /// uncovered pixels are white. Sample it with the sampler given, which is nearest filtering.
+    /// The image is in `terrainDepthImageLayout` (shader read only) while the main render pass records.
+    vk::ImageView terrainDepthImageView;
+    vk::Sampler terrainDepthSampler;
+    vk::ImageLayout terrainDepthImageLayout = vk::ImageLayout::eUndefined;
+
     explicit CustomLayerRenderParameters(const PaintParameters&);
 };
 
