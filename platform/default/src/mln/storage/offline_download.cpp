@@ -482,30 +482,18 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
     *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=, this] {
         requests.erase(workRequestsIt);
         const auto resourceKind = resource.kind;
-        auto getResourceSizeInDatabase = [&]() -> std::optional<int64_t> {
-            std::optional<int64_t> result;
-            if (!callback) {
-                result = offlineDatabase.hasRegionResource(resource);
-            } else {
-                std::optional<std::pair<Response, uint64_t>> response = offlineDatabase.getRegionResource(resource);
-                if (response) {
-                    callback(response->first);
-                    result = response->second;
-                }
-            }
-
-            if (result) resourcesToBeMarkedAsUsed.emplace_back(resource);
-            return result;
-        };
-
-        std::optional<int64_t> offlineResponse = getResourceSizeInDatabase();
-        if (offlineResponse) {
-            assert(!resourcesToBeMarkedAsUsed.empty());
+        // Only a callback needs the stored data.
+        const std::optional<std::pair<Response, uint64_t>> stored = callback
+                                                                        ? offlineDatabase.getRegionResource(resource)
+                                                                        : offlineDatabase.hasRegionResource(resource);
+        if (stored && stored->first.isUsable()) {
+            if (callback) callback(stored->first);
+            resourcesToBeMarkedAsUsed.emplace_back(resource);
             status.completedResourceCount++;
-            status.completedResourceSize += *offlineResponse;
+            status.completedResourceSize += stored->second;
             if (resourceKind == Resource::Kind::Tile) {
                 status.completedTileCount += 1;
-                status.completedTileSize += *offlineResponse;
+                status.completedTileSize += stored->second;
             }
 
             observer->statusChanged(status);
@@ -513,13 +501,27 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
             return;
         }
 
-        if (offlineDatabase.exceedsOfflineMapboxTileCountLimit(resource)) {
+        // Revalidating a stored tile doesn't add a tile to the database.
+        const bool revalidating = stored.has_value();
+        if (!revalidating && offlineDatabase.exceedsOfflineMapboxTileCountLimit(resource)) {
             onMapboxTileCountLimitExceeded();
             return;
         }
 
+        // A stored resource that can't be used without revalidating it, such as one that
+        // invalidateRegion() marked, is requested with its caching headers, so that the
+        // server can answer 304 Not Modified. On a 304, the online file source responds
+        // with the prior data, which a callback needs.
+        Resource onlineResource = resource;
+        if (stored) {
+            onlineResource.priorEtag = stored->first.etag;
+            onlineResource.priorModified = stored->first.modified;
+            onlineResource.priorExpires = stored->first.expires;
+            onlineResource.priorData = stored->first.data;
+        }
+
         auto fileRequestsIt = requests.insert(requests.begin(), nullptr);
-        *fileRequestsIt = onlineFileSource.request(resource, [=, this](const Response& onlineResponse) {
+        *fileRequestsIt = onlineFileSource.request(onlineResource, [=, this](const Response& onlineResponse) {
             if (onlineResponse.error) {
                 observer->responseError(*onlineResponse.error);
                 if (onlineResponse.error->reason == Response::Error::Reason::NotFound) {
@@ -547,7 +549,7 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
             // TODO: Simplify the tile count limit check code path!
             if ((buffer.size() == kResourcesBatchSize || resourcesRemaining.empty()) && !flushResourcesBuffer()) return;
 
-            if (offlineDatabase.exceedsOfflineMapboxTileCountLimit(resource)) {
+            if (!revalidating && offlineDatabase.exceedsOfflineMapboxTileCountLimit(resource)) {
                 onMapboxTileCountLimitExceeded();
                 return;
             }

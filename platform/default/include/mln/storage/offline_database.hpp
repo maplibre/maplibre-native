@@ -78,7 +78,8 @@ public:
 
     // Return value is (response, stored size)
     std::optional<std::pair<Response, uint64_t>> getRegionResource(const Resource&);
-    std::optional<int64_t> hasRegionResource(const Resource&);
+    // Like getRegionResource(), but the response has only the caching headers, not the data.
+    std::optional<std::pair<Response, uint64_t>> hasRegionResource(const Resource&);
     uint64_t putRegionResource(int64_t regionID, const Resource&, const Response&);
     void putRegionResources(int64_t regionID, const std::list<std::tuple<Resource, Response>>&, OfflineRegionStatus&);
 
@@ -123,17 +124,17 @@ private:
     mapbox::sqlite::Statement& getStatement(const char*);
 
     std::optional<std::pair<Response, uint64_t>> getTile(const Resource::TileData&);
-    std::optional<int64_t> hasTile(const Resource::TileData&);
+    std::optional<std::pair<Response, uint64_t>> hasTile(const Resource::TileData&);
     bool putTile(const Resource::TileData&, const Response&, const std::string&, bool compressed);
 
     std::optional<std::pair<Response, uint64_t>> getResource(const Resource&);
-    std::optional<int64_t> hasResource(const Resource&);
+    std::optional<std::pair<Response, uint64_t>> hasResource(const Resource&);
     bool putResource(const Resource&, const Response&, const std::string&, bool compressed);
 
     uint64_t putRegionResourceInternal(int64_t regionID, const Resource&, const Response&);
 
     std::optional<std::pair<Response, uint64_t>> getInternal(const Resource&);
-    std::optional<int64_t> hasInternal(const Resource&);
+    std::optional<std::pair<Response, uint64_t>> hasInternal(const Resource&);
     std::pair<bool, uint64_t> putInternal(const Resource&, const Response&, bool evict);
 
     // Return value is true iff the resource was previously unused by any other regions.

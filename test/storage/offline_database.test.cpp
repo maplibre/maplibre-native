@@ -1307,7 +1307,7 @@ TEST(OfflineDatabase, HasRegionResource) {
 
     EXPECT_TRUE(bool(db.hasRegionResource(Resource::style("http://example.com/1"))));
     EXPECT_TRUE(bool(db.hasRegionResource(Resource::style("http://example.com/20"))));
-    EXPECT_EQ(1024, *(db.hasRegionResource(Resource::style("http://example.com/20"))));
+    EXPECT_EQ(1024u, db.hasRegionResource(Resource::style("http://example.com/20"))->second);
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1331,13 +1331,13 @@ TEST(OfflineDatabase, HasRegionResourceTile) {
     EXPECT_FALSE(bool(db.hasRegionResource(resource)));
     db.putRegionResource(region->getID(), resource, response);
     EXPECT_TRUE(bool(db.hasRegionResource(resource)));
-    EXPECT_EQ(5, *(db.hasRegionResource(resource)));
+    EXPECT_EQ(5u, db.hasRegionResource(resource)->second);
 
     auto anotherRegion = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(anotherRegion);
     EXPECT_LT(region->getID(), anotherRegion->getID());
     EXPECT_TRUE(bool(db.hasRegionResource(resource)));
-    EXPECT_EQ(5, *(db.hasRegionResource(resource)));
+    EXPECT_EQ(5u, db.hasRegionResource(resource)->second);
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
