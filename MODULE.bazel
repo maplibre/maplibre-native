@@ -30,6 +30,17 @@ single_version_override(
     version = "4.1.0",
 )
 
+# The rules_apple test runner looks for sanitizer runtimes in the UI test bundle
+# after moving that bundle into the XCTRunner app, so it never injects them and
+# Thread Sanitizer fails with "Interceptors are not working".
+# TODO: Remove this override once the upstream fix is released:
+# https://github.com/bazelbuild/rules_apple/pull/3149
+git_override(
+    module_name = "rules_apple",
+    commit = "ece83eb3493e8252d71d7a18afa6605d92938f93",
+    remote = "https://github.com/bazelbuild/rules_apple.git",
+)
+
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
 node.toolchain(node_version = "24.18.0")
 

@@ -22,6 +22,15 @@ const char* __ubsan_default_options(void) {
 }
 #endif
 
+#if __has_feature(thread_sanitizer)
+// UI tests run the app in its own process, so only a crash fails the test.
+// Thread Sanitizer calls this before it can handle instrumented code.
+__attribute__((no_sanitize("thread")))
+const char* __tsan_default_options(void) {
+    return "halt_on_error=1";
+}
+#endif
+
 @interface MBXAppDelegate()
 
 @end
