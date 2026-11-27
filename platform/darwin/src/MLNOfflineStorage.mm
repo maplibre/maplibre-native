@@ -120,6 +120,16 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
                   [NSURL URLWithString:[[NSString alloc] initWithBytes:url_.data()
                                                                 length:url_.length()
                                                               encoding:NSUTF8StringEncoding]];
+              // A resource identifier that is not a valid URL has no `NSURL`. The delegate is
+              // declared to receive a non-null URL, so handing it `nil` traps in callers that
+              // bridge the parameter into a non-optional Swift `URL`. Pass the resource through
+              // unchanged instead; loading it will fail the same way it would without a delegate.
+              if (!url) {
+                MLNLogError(@"Not transforming resource: '%s' is not a valid URL", url_.c_str());
+                cb(url_);
+                return;
+              }
+
               MLNResourceKind kind = MLNResourceKindUnknown;
               switch (kind_) {
                 case mln::Resource::Kind::Tile:
@@ -147,10 +157,12 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
                   kind = MLNResourceKindUnknown;
                   break;
               }
-              url = [offlineStorage.delegate offlineStorage:offlineStorage
-                                       URLForResourceOfKind:kind
-                                                    withURL:url];
-              cb(url.absoluteString.UTF8String);
+              NSURL *transformedURL = [offlineStorage.delegate offlineStorage:offlineStorage
+                                                         URLForResourceOfKind:kind
+                                                                      withURL:url];
+              // The delegate's return value is also part of the contract; falling back to the
+              // untransformed URL keeps a nil return from turning into an invalid resource.
+              cb(transformedURL.absoluteString.UTF8String ?: url_.c_str());
             });
 
     _mbglOnlineFileSource->setResourceTransform(
