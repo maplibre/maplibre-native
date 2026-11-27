@@ -24,6 +24,20 @@ TEST(DEMData, ConstructorMapbox) {
     EXPECT_EQ(demdata.getImage()->bytes(), size_t(18 * 18 * 4));
 };
 
+TEST(DEMData, CustomEncodingDecodesWithItsFactors) {
+    PremultipliedImage image({16, 16});
+    for (size_t i = 0; i < image.bytes(); i += 4) {
+        image.data[i] = 10;
+        image.data[i + 1] = 20;
+        image.data[i + 2] = 30;
+        image.data[i + 3] = 255;
+    }
+    DEMData demdata(image, Tileset::RasterEncoding::Custom, {1, 2, 3, 4});
+
+    EXPECT_EQ((std::array<float, 4>{1, 2, 3, 4}), demdata.getUnpackVector());
+    EXPECT_EQ(10 * 1 + 20 * 2 + 30 * 3 - 4, demdata.get(5, 5));
+};
+
 TEST(DEMData, ConstructorTerrarium) {
     PremultipliedImage image = fakeImage({16, 16});
     DEMData demdata(image, Tileset::RasterEncoding::Terrarium);

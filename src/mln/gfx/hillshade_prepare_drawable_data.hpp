@@ -1,8 +1,8 @@
 #pragma once
 
 #include <mln/gfx/drawable_data.hpp>
-#include <mln/util/tileset.hpp>
 
+#include <array>
 #include <memory>
 
 namespace mln {
@@ -11,13 +11,14 @@ namespace gfx {
 
 class HillshadePrepareDrawableData : public DrawableData {
 public:
-    HillshadePrepareDrawableData(int32_t stride_, Tileset::RasterEncoding encoding_, uint8_t maxzoom_)
+    HillshadePrepareDrawableData(int32_t stride_, const std::array<float, 4>& unpack_, uint8_t maxzoom_)
         : stride(stride_),
-          encoding(encoding_),
+          unpack(unpack_),
           maxzoom(maxzoom_) {}
 
     int32_t stride;
-    Tileset::RasterEncoding encoding;
+    /// Decodes a DEM pixel into its elevation, see `DEMData::getUnpackVector`.
+    std::array<float, 4> unpack;
     uint8_t maxzoom;
 };
 

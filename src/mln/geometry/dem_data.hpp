@@ -13,7 +13,9 @@ namespace mln {
 
 class DEMData {
 public:
-    DEMData(const PremultipliedImage& image, Tileset::RasterEncoding encoding);
+    DEMData(const PremultipliedImage& image,
+            Tileset::RasterEncoding encoding,
+            const std::array<float, 4>& customFactors = {1, 1, 1, 0});
     void backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy);
 
     int32_t get(int32_t x, int32_t y) const;
@@ -25,6 +27,8 @@ public:
     const int32_t dim;
     const int32_t stride;
     const Tileset::RasterEncoding encoding;
+    /// The red, green and blue factors and the shift that decode a pixel into its elevation.
+    const std::array<float, 4> unpackVector;
 
 private:
     std::shared_ptr<PremultipliedImage> image;

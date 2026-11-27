@@ -3,11 +3,32 @@
 
 namespace mln {
 
-DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _encoding)
+namespace {
+
+std::array<float, 4> unpackVectorFor(Tileset::RasterEncoding encoding, const std::array<float, 4>& customFactors) {
+    switch (encoding) {
+        case Tileset::RasterEncoding::Terrarium:
+            // https://aws.amazon.com/public-datasets/terrain/
+            return {{256.0f, 1.0f, 1.0f / 256.0f, 32768.0f}};
+        case Tileset::RasterEncoding::Custom:
+            return customFactors;
+        case Tileset::RasterEncoding::Mapbox:
+            break;
+    }
+    // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
+    return {{6553.6f, 25.6f, 0.1f, 10000.0f}};
+}
+
+} // namespace
+
+DEMData::DEMData(const PremultipliedImage& _image,
+                 Tileset::RasterEncoding _encoding,
+                 const std::array<float, 4>& customFactors)
     : dim(_image.size.height),
       // extra two pixels per row for border backfilling on either edge
       stride(dim + 2),
-      encoding(_encoding) {
+      encoding(_encoding),
+      unpackVector(unpackVectorFor(_encoding, customFactors)) {
     image = std::make_shared<PremultipliedImage>(Size(static_cast<uint32_t>(stride), static_cast<uint32_t>(stride)));
     if (_image.size.height != _image.size.width) {
         throw std::runtime_error("raster-dem tiles must be square.");
@@ -94,12 +115,7 @@ int32_t DEMData::get(const int32_t x, const int32_t y) const {
 }
 
 const std::array<float, 4>& DEMData::getUnpackVector() const {
-    // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
-    static const std::array<float, 4> unpackMapbox = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
-    // https://aws.amazon.com/public-datasets/terrain/
-    static const std::array<float, 4> unpackTerrarium = {{256.0f, 1.0f, 1.0f / 256.0f, 32768.0f}};
-
-    return encoding == Tileset::RasterEncoding::Terrarium ? unpackTerrarium : unpackMapbox;
+    return unpackVector;
 }
 
 } // namespace mln

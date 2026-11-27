@@ -51,6 +51,44 @@ TEST(SourceOptions, MapboxEncodingParsed) {
     ASSERT_FALSE(converted.value().vectorEncoding);
 }
 
+TEST(SourceOptions, CustomEncodingParsed) {
+    Error error;
+    auto converted = convertJSON<SourceOptions>(
+        R"JSON({
+        "encoding": "custom",
+        "redFactor": 0,
+        "greenFactor": 25.6,
+        "blueFactor": 0.1,
+        "baseShift": 3446.4
+    })JSON",
+        error);
+    ASSERT_EQ(converted.value().rasterEncoding, Tileset::RasterEncoding::Custom);
+    EXPECT_EQ(converted.value().rasterCustomFactors, (std::array<float, 4>{0, 25.6f, 0.1f, 3446.4f}));
+}
+
+TEST(SourceOptions, CustomEncodingDefaultFactors) {
+    Error error;
+    auto converted = convertJSON<SourceOptions>(
+        R"JSON({
+        "encoding": "custom"
+    })JSON",
+        error);
+    ASSERT_EQ(converted.value().rasterEncoding, Tileset::RasterEncoding::Custom);
+    EXPECT_EQ(converted.value().rasterCustomFactors, (std::array<float, 4>{1, 1, 1, 0}));
+}
+
+TEST(SourceOptions, CustomEncodingFactorNotANumber) {
+    Error error;
+    auto converted = convertJSON<SourceOptions>(
+        R"JSON({
+        "encoding": "custom",
+        "greenFactor": "25.6"
+    })JSON",
+        error);
+    ASSERT_FALSE(converted);
+    EXPECT_EQ("greenFactor must be a number", error.message);
+}
+
 TEST(SourceOptions, MVTEncodingParsed) {
     Error error;
     auto converted = convertJSON<SourceOptions>(

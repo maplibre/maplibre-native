@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <array>
 #include <optional>
 
 namespace mln {
@@ -20,6 +21,7 @@ public:
     enum class RasterEncoding : std::uint8_t {
         Mapbox,    // Mapbox DEM
         Terrarium, // Terrarium DEM
+        Custom,    // Decoded with `rasterCustomFactors`
     };
     enum class VectorEncoding : std::uint8_t {
         Mapbox, // Mapbox Vector Tiles (MVT)
@@ -31,6 +33,9 @@ public:
     std::string attribution;
     Scheme scheme;
     std::optional<RasterEncoding> rasterEncoding;
+    /// The custom encoding's `redFactor`, `greenFactor`, `blueFactor` and `baseShift`: a pixel's elevation is
+    /// red * redFactor + green * greenFactor + blue * blueFactor - baseShift, each channel from 0 to 255.
+    std::array<float, 4> rasterCustomFactors{1, 1, 1, 0};
     std::optional<VectorEncoding> vectorEncoding;
     std::optional<LatLngBounds> bounds;
 
