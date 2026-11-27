@@ -17,8 +17,13 @@ namespace mln {
 using namespace style;
 using namespace shaders;
 
+namespace {
+constexpr float mercatorLog2WorldWidth = 25.2562f;
+} // namespace
+
 float hillshadeLog2WorldWidth(const WorldCoordinateHelper& helper) {
-    return helper.wraps() ? 25.2562f : static_cast<float>(std::log2(helper.metersPerWorldUnit({0.5, 0.5})));
+    return helper.wraps() ? mercatorLog2WorldWidth
+                          : static_cast<float>(std::log2(helper.metersPerWorldUnit({0.5, 0.5})));
 }
 
 void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
