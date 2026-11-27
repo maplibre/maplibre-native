@@ -97,6 +97,7 @@ public:
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
                                      const StringIDSetsPair& propertiesAsUniforms,
+                                     gfx::ProjectionVariant,
                                      std::string_view) override {
         // The base hash covers attribute IDs only. Resource/pass switches also
         // affect generated source and must identify distinct cached programs.

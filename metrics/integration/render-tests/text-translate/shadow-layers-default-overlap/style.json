@@ -1,0 +1,198 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 256,
+      "height": 256
+    }
+  },
+  "center": [
+    0,
+    5
+  ],
+  "zoom": 1.5,
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "line": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -40,
+              -10
+            ],
+            [
+              40,
+              10
+            ]
+          ]
+        }
+      }
+    },
+    "anchor": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            10,
+            25
+          ]
+        }
+      }
+    },
+    "plain": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -18,
+            22
+          ]
+        }
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "line",
+      "type": "line",
+      "source": "line",
+      "paint": {
+        "line-color": "#88f"
+      }
+    },
+    {
+      "id": "line-shadow",
+      "type": "symbol",
+      "source": "line",
+      "layout": {
+        "text-field": "SHADOWED",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16,
+        "symbol-placement": "line"
+      },
+      "paint": {
+        "text-color": "#bbbbbb",
+        "text-translate": [
+          4,
+          4
+        ]
+      }
+    },
+    {
+      "id": "line-main",
+      "type": "symbol",
+      "source": "line",
+      "layout": {
+        "text-field": "SHADOWED",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16,
+        "symbol-placement": "line"
+      },
+      "paint": {
+        "text-color": "black"
+      }
+    },
+    {
+      "id": "anchor-shadow",
+      "type": "symbol",
+      "source": "anchor",
+      "layout": {
+        "text-field": "ANCHOR",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16,
+        "text-variable-anchor": [
+          "center"
+        ]
+      },
+      "paint": {
+        "text-color": "#bbbbbb",
+        "text-translate": [
+          4,
+          4
+        ]
+      }
+    },
+    {
+      "id": "anchor-main",
+      "type": "symbol",
+      "source": "anchor",
+      "layout": {
+        "text-field": "ANCHOR",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16,
+        "text-variable-anchor": [
+          "center"
+        ]
+      },
+      "paint": {
+        "text-color": "black"
+      }
+    },
+    {
+      "id": "plain-shadow",
+      "type": "symbol",
+      "source": "plain",
+      "layout": {
+        "text-field": "PLAIN",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16
+      },
+      "paint": {
+        "text-color": "#bbbbbb",
+        "text-translate": [
+          4,
+          4
+        ]
+      }
+    },
+    {
+      "id": "plain-main",
+      "type": "symbol",
+      "source": "plain",
+      "layout": {
+        "text-field": "PLAIN",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 16
+      },
+      "paint": {
+        "text-color": "black"
+      }
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 #include <mln/gfx/index_buffer.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/renderer/bucket.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 #include <mln/renderer/paint_property_binder.hpp>
 #include <mln/shaders/segment.hpp>
 #include <mln/style/image_impl.hpp>
@@ -24,6 +25,8 @@ public:
                float zoom,
                uint32_t overscaling);
     ~LineBucket() override;
+
+    void setSubdivisionGranularity(const SubdivisionGranularitySetting& value) { subdivisionGranularity = value; }
 
     void addFeature(const GeometryTileFeature&,
                     const GeometryCollection&,
@@ -99,6 +102,7 @@ private:
 
     const float zoom;
     const uint32_t overscaling;
+    SubdivisionGranularitySetting subdivisionGranularity;
 };
 
 } // namespace mln

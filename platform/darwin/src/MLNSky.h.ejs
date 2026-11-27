@@ -1,0 +1,44 @@
+<%
+  const properties = locals.properties;
+  const type = locals.type;
+  const doc = locals.doc;
+-%>
+// This file is generated.
+// Edit platform/darwin/scripts/generate-style-code.mjs, then run `make darwin-style-code`.
+
+#import <Foundation/Foundation.h>
+
+#import "MLNFoundation.h"
+#import "MLNStyleValue.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ <%- doc.wrap(80, 1) %>
+ */
+MLN_EXPORT
+@interface MLNSky : NSObject
+
+<% for (const property of properties) { -%>
+/**
+<%- propertyDoc(property.name, property, type, 'sky').wrap(80, 1) %>
+
+ This property corresponds to the <a
+ href="https://maplibre.org/maplibre-style-spec/sky/#<%- originalPropertyName(property) %>"><code><%- originalPropertyName(property) %></code></a>
+ sky property in the MapLibre Style Spec.
+ */
+@property (nonatomic, null_resettable) NSExpression *<%- camelizeWithLeadingLowercase(property.name) %>;
+
+<% if (property.transition) { -%>
+/**
+ The transition affecting changes to the `<%- camelizeWithLeadingLowercase(property.name) %>` property.
+
+ This property corresponds to the `<%- originalPropertyName(property) %>-transition` property in the style JSON file format.
+ */
+@property (nonatomic) MLNTransition <%- camelizeWithLeadingLowercase(property.name) %>Transition;
+
+<% } -%>
+<% } -%>
+@end
+
+NS_ASSUME_NONNULL_END

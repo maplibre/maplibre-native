@@ -797,6 +797,7 @@ public final class UiSettings {
    */
   public void setRotateGesturesEnabled(boolean rotateGesturesEnabled) {
     this.rotateGesturesEnabled = rotateGesturesEnabled;
+    projection.setGlobeFreeBearing(rotateGesturesEnabled);
   }
 
   /**

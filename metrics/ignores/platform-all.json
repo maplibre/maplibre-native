@@ -122,5 +122,6 @@
     "render-tests/feature-state/promote-id-fill-extrusion": "https://github.com/mapbox/mapbox-gl-js/pull/9202",
     "render-tests/line-pattern/with-dasharray":"https://github.com/mapbox/mapbox-gl-js/pull/9189",
     "render-tests/symbol-sort-key/placement-tile-boundary-right-then-left": "https://github.com/mapbox/mapbox-gl-js/pull/9054",
-    "render-tests/tile-mode/streets-v11": "ignored due to flaky metrics results"
+    "render-tests/tile-mode/streets-v11": "ignored due to flaky metrics results",
+    "render-tests/projection/globe/antimeridian-overdraw/line-gradient-dasharray": "Main drops line-gradient when line-dasharray is set, in Mercator too; #4725 fixes that and this test passes with it. Remove when #4725 lands."
 }

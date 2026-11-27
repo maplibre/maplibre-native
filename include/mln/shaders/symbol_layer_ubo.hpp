@@ -29,9 +29,15 @@ struct alignas(16) SymbolDrawableUBO {
     /* 248 */ float opacity_t;
     /* 252 */ float halo_width_t;
     /* 256 */ float halo_blur_t;
-    /* 260 */
+    /* 260 */ /*bool*/ int is_along_line;
+    /* 264 */ /*bool*/ int is_variable_anchor;
+    /* 268 */ float pitched_scale;
+    /* 272 */ std::array<float, 2> translation;
+    /* 280 */ float pad1;
+    /* 284 */ float pad2;
+    /* 288 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 17 * 16);
+static_assert(sizeof(SymbolDrawableUBO) == 18 * 16);
 
 struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;

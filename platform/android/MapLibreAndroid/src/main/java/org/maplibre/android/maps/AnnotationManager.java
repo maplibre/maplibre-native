@@ -84,6 +84,15 @@ class AnnotationManager {
   }
 
   void update() {
+    // As on iOS, a selected marker that turns behind the globe is deselected, which closes its info window.
+    if (!selectedMarkers.isEmpty()) {
+      Projection projection = maplibreMap.getProjection();
+      for (Marker marker : new ArrayList<>(selectedMarkers)) {
+        if (projection.isLocationOccluded(marker.getPosition())) {
+          deselectMarker(marker);
+        }
+      }
+    }
     infoWindowManager.update();
   }
 
@@ -244,6 +253,11 @@ class AnnotationManager {
 
   void selectMarker(@NonNull Marker marker) {
     if (selectedMarkers.contains(marker)) {
+      return;
+    }
+
+    // As on iOS, a marker behind the globe is not selected.
+    if (maplibreMap.getProjection().isLocationOccluded(marker.getPosition())) {
       return;
     }
 

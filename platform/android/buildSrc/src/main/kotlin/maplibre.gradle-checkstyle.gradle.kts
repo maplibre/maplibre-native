@@ -21,6 +21,7 @@ tasks.register<Checkstyle>("checkstyle") {
     exclude("**/style/layers/PropertyFactory.java")
     exclude("**/style/layers/*Layer.java")
     exclude("**/style/light/Light.java")
+    exclude("**/style/sky/Sky.java")
     exclude("**/log/LoggerDefinition.java")
     exclude("**/log/Logger.java")
     exclude("**/Expression.java")

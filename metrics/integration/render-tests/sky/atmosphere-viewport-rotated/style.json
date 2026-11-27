@@ -1,0 +1,41 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "A viewport light retains its screen direction after longitude, latitude and bearing changes. Zoom compensates for the globe radius latitude scaling, so the expected image is identical to atmosphere-viewport-origin. The 0.15% allowance covers translucent globe-edge PNG round-trip rounding.",
+      "width": 256,
+      "height": 256,
+      "allowed": 0.0015
+    }
+  },
+  "center": [
+    160,
+    30
+  ],
+  "zoom": 0.7924812503605783,
+  "bearing": 35,
+  "projection": {
+    "type": "globe"
+  },
+  "light": {
+    "anchor": "viewport",
+    "position": [
+      1.5,
+      90,
+      90
+    ]
+  },
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#16385f"
+      }
+    }
+  ],
+  "sky": {
+    "atmosphere-blend": 1
+  }
+}

@@ -79,6 +79,8 @@ public:
 
     // Map
     void jumpTo(const CameraOptions&);
+    /// The style's projection at the zoom; always Mercator in tile mode, whose tiles are Mercator tiles.
+    ProjectionDefinition projectionAt(double zoom) const;
 
     bool isRenderingStatsViewEnabled() const;
     void enableRenderingStatsView(bool value);

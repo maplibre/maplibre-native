@@ -1,5 +1,6 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/layers/render_plugin_style_layer.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/renderer/transition_parameters.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
@@ -182,7 +183,14 @@ TEST(PluginProperties, QueryFeatureGetsLayoutValues) {
     RenderLayer& base = renderLayer;
     base.evaluate(PropertyEvaluationParameters(10));
     const auto feature = source().getFeature(0);
-    EXPECT_TRUE(base.queryIntersectsFeature({{10, 20}}, *feature, 10, TransformState{}, 1, mat4{}, FeatureState{}));
+    const TransformState state;
+    EXPECT_TRUE(base.queryIntersectsFeature({{10, 20}},
+                                            *feature,
+                                            10,
+                                            state,
+                                            1,
+                                            TileProjector(state, UnwrappedTileID(0, 0, 0), ProjectionData{}),
+                                            FeatureState{}));
     EXPECT_EQ((std::pair{5.0f, false}), queriedProperties.at(paint.name));
     EXPECT_EQ((std::pair{7.0f, true}), queriedProperties.at(layout.name));
 }

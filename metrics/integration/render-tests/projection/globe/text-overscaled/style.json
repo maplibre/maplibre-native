@@ -1,0 +1,94 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "allowed": 0.0023,
+      "height": 256,
+      "width": 256
+    }
+  },
+  "zoom": 7,
+  "center": [
+    10,
+    20
+  ],
+  "projection": {
+    "type": "globe"
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "maxzoom": 5,
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "A"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                9.6,
+                20.3
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "B"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                10.4,
+                20.3
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "C"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                10,
+                19.7
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "text",
+      "type": "symbol",
+      "source": "geojson",
+      "layout": {
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 24
+      }
+    }
+  ]
+}

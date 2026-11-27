@@ -27,7 +27,7 @@ public:
                                 float,
                                 const TransformState&,
                                 float,
-                                const mat4&,
+                                const TileProjector&,
                                 const FeatureState&) const override;
 
 private:
@@ -39,6 +39,7 @@ private:
     bool hasTransition() const override;
     bool is3D() const override;
     bool hasCrossfade() const override;
+    bool needsGlobeDepth() const override { return is3D() || readWriteDepth; }
 
     std::map<std::string, style::PluginTransitioningPropertyValue> transitioningPaintProperties;
     style::PluginPropertyMap evaluatedPluginProperties;
@@ -46,6 +47,8 @@ private:
     std::map<std::string, gfx::ShaderGroupPtr> shaderGroups;
     /// True while the layer reports an active animation.
     bool animated = false;
+    /// True when the current tiles carry read/write depth drawables.
+    bool readWriteDepth = false;
 };
 
 } // namespace mln

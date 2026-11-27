@@ -15,6 +15,8 @@ export interface PointShader {
   properties: [name: string, type: PropertyType, min: number, max: number][];
   uniformFields: string;
   varyings: [type: string, name: string][];
+  /** Functions the vertex shader calls, in GLSL, placed before it. */
+  functions?: string;
   /** The vertex shader after the properties are evaluated: it reads POSITION, writes OUT_<varying> and `position`. */
   projection: string;
   /** The fragment shader: it reads IN_<varying> and writes `result`. */
@@ -24,7 +26,7 @@ export interface PointShader {
 const metal = (s: string) => s.replaceAll('mat4', 'float4x4').replace(/vec([234])/g, 'float$1')
   .replaceAll('atan(', 'atan2(').replaceAll('mod(', 'fmod(');
 
-export function shaderHeader({ name: layer, properties, uniformFields, varyings, projection, coverage }: PointShader): string {
+export function shaderHeader({ name: layer, properties, uniformFields, varyings, functions = '', projection, coverage }: PointShader): string {
   const Layer = layer.split('-').map((word) => word[0].toUpperCase() + word.slice(1)).join('');
   const camelLayer = Layer[0].toLowerCase() + Layer.slice(1);
   const propertyName = (name: string) => `${layer}-${name.replaceAll('_', '-')}`;
@@ -72,7 +74,7 @@ struct ${Layer}Varyings {
     float4 position [[position]];
 ${varyings.map(([t, n]) => `    ${metal(t)} ${n};`).join('\n')}
 };
-vertex ${Layer}Varyings ${camelLayer}Vertex(${Layer}Vertex in [[stage_in]],
+${functions ? `${metal(functions)}\n` : ''}vertex ${Layer}Varyings ${camelLayer}Vertex(${Layer}Vertex in [[stage_in]],
     constant ${Layer}DrawableUBO& u [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]]) {
     ${Layer}Varyings out;
 ${metal(vertexBody)}    out.position = position;
@@ -88,7 +90,7 @@ ${metal(coverage.replaceAll('IN_', 'in.'))}    return half4(result);
       const layout = backend === 'vulkan'
         ? 'layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = MLN_PLUGIN_UNIFORM_0_BINDING)'
         : 'layout(std140)';
-      emit(backend + 'Vertex', `${attributes(backend)}\n${layout} uniform ${Layer}DrawableUBO {${uniformFields}} u;\n${io('out')}
+      emit(backend + 'Vertex', `${attributes(backend)}\n${layout} uniform ${Layer}DrawableUBO {${uniformFields}} u;\n${io('out')}${functions}
 void main() {
 ${vertexBody}    gl_Position = position;
 ${backend === 'vulkan' ? '    applySurfaceTransform();\n' : ''}}

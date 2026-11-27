@@ -172,6 +172,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buff
     FillDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 struct PolygonVertex {
     int position;
 };
@@ -329,7 +333,7 @@ void main() {
     frag_opacity = unpack_mix_float(dataVertexVector.vertex[vertex_index].opacity, drawable.opacity_t);
 #endif
 
-    gl_Position = drawable.matrix * vec4(position, 0.0, 1.0);
+    gl_Position = projectTile(position, position, projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 }
 )";
@@ -483,6 +487,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buff
     FillOutlineDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 #if !defined(HAS_UNIFORM_u_outline_color)
 layout(location = 0) out vec4 frag_color;
 #endif
@@ -504,7 +512,7 @@ void main() {
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
 #endif
 
-    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = projectTile(vec2(in_position), vec2(in_position), projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 
     frag_position = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * paintParams.world_size;
@@ -601,6 +609,10 @@ struct FillPatternDrawableUBO {
 layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillPatternDrawableUBOVector {
     FillPatternDrawableUBO drawable_ubo[];
 } drawableVector;
+
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
 
 struct PolygonVertex {
     int position;
@@ -813,7 +825,7 @@ void main() {
     frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, position),
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, position),
 
-    gl_Position = drawable.matrix * vec4(position, 0.0, 1.0);
+    gl_Position = projectTile(position, position, projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 }
 )";
@@ -1044,6 +1056,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buff
     FillOutlinePatternDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 struct FillOutlinePatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
@@ -1127,7 +1143,7 @@ void main() {
     const vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
     const vec2 position2 = in_position.xy;
-    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = projectTile(vec2(in_position), vec2(in_position), projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 
     frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, position2),
@@ -1286,6 +1302,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buff
     FillOutlineTriangulatedDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 layout(location = 0) out float frag_width2;
 layout(location = 1) out vec2 frag_normal;
 layout(location = 2) out float frag_gamma_scale;
@@ -1317,8 +1337,8 @@ void main() {
     // of this vertex.
     mediump vec2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
 
-    vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
-    gl_Position = drawable.matrix * vec4(pos, 0.0, 1.0) + projected_extrude;
+    vec4 projected_extrude = projectionVector.projection_ubo[constant.ubo_index].fallback_matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
+    gl_Position = projectTile(pos, pos, projectionVector.projection_ubo[constant.ubo_index]) + projected_extrude;
     applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude

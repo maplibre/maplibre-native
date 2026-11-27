@@ -8,6 +8,6 @@ layout (std140) uniform HillshadeDrawableUBO {
 out vec2 v_pos;
 
 void main() {
-    gl_Position = u_matrix * vec4(a_pos, 0, 1);
+    gl_Position = projectTile(a_pos, a_pos);
     v_pos = a_texture_pos / 8192.0;
 }

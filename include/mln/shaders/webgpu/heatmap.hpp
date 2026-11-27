@@ -36,7 +36,7 @@ struct HeatmapDrawableUBO {
     extrude_scale: f32,
     weight_t: f32,
     radius_t: f32,
-    pad1: f32,
+    globe_extrude_scale: f32,
 };
 
 struct HeatmapEvaluatedPropsUBO {
@@ -53,7 +53,8 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<HeatmapDrawableUBO>;
-@group(0) @binding(4) var<uniform> props: HeatmapEvaluatedPropsUBO;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
+@group(0) @binding(5) var<uniform> props: HeatmapEvaluatedPropsUBO;
 
 const ZERO: f32 = 1.0 / 255.0 / 16.0;
 const GAUSS_COEF: f32 = 0.3989422804014327;
@@ -85,7 +86,13 @@ fn main(in: VertexInput) -> VertexOutput {
     let scaled_extrude = extrude * radius * drawable.extrude_scale;
 
     let base = floor(pos * 0.5);
+#ifdef PROJECTION_GLOBE
+    let center_vector = projectToSphere(base, vec2<f32>(0.0, 0.0), projectionVector[globalIndex.value]);
+    let corner_vector = globeRotateVector(center_vector, extrude * radius * drawable.globe_extrude_scale);
+    out.position = interpolateProjection(base + scaled_extrude, corner_vector, 0.0, projectionVector[globalIndex.value]);
+#else
     out.position = drawable.matrix * vec4<f32>(base + scaled_extrude, 0.0, 1.0);
+#endif
     out.weight = weight;
     out.extrude = extrude;
 
@@ -108,7 +115,7 @@ struct HeatmapEvaluatedPropsUBO {
 
 const GAUSS_COEF: f32 = 0.3989422804014327;
 
-@group(0) @binding(4) var<uniform> props: HeatmapEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: HeatmapEvaluatedPropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {

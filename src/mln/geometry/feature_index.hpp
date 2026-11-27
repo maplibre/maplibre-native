@@ -18,6 +18,7 @@ class RenderedQueryOptions;
 class RenderLayer;
 class TransformState;
 class SourceFeatureState;
+class TileProjector;
 
 class CollisionIndex;
 
@@ -121,7 +122,7 @@ public:
     void query(std::unordered_map<std::string, std::vector<Feature>>& result,
                const GeometryCoordinates& queryGeometry,
                const TransformState&,
-               const mat4& posMatrix,
+               const TileProjector& projector,
                double tileSize,
                double scale,
                const RenderedQueryOptions& options,
@@ -157,7 +158,7 @@ private:
                     const GeometryCoordinates& queryGeometry,
                     const TransformState& transformState,
                     float pixelsToTileUnits,
-                    const mat4& posMatrix,
+                    const TileProjector& projector,
                     const SourceFeatureState* sourceFeatureState) const;
 
     GridIndex<RefIndexedSubfeature> grid;

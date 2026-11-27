@@ -1,0 +1,47 @@
+[
+  {
+    "type": "Feature",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        120.0146484375,
+        -20.014645445341344
+      ]
+    },
+    "properties": {
+      "name": "west"
+    },
+    "source": "geojson",
+    "state": {}
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        169.98046875,
+        0.0
+      ]
+    },
+    "properties": {
+      "name": "middle"
+    },
+    "source": "geojson",
+    "state": {}
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        -160.0048828125,
+        10.012129557908139
+      ]
+    },
+    "properties": {
+      "name": "east"
+    },
+    "source": "geojson",
+    "state": {}
+  }
+]

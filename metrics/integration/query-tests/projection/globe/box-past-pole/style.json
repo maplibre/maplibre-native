@@ -1,0 +1,132 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 512,
+      "height": 512,
+      "queryGeometry": [
+        [
+          249,
+          54
+        ],
+        [
+          263,
+          80
+        ]
+      ]
+    }
+  },
+  "center": [
+    100,
+    60
+  ],
+  "zoom": 1,
+  "projection": {
+    "type": "globe"
+  },
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "inside"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -80,
+                80
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "west"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -60,
+                82
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "east"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -100,
+                82
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "far"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                100,
+                82
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "zero"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                82
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "antimeridian"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                180,
+                82
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "circle",
+      "type": "circle",
+      "source": "geojson",
+      "filter": [
+        "==",
+        [
+          "geometry-type"
+        ],
+        "Point"
+      ],
+      "paint": {
+        "circle-radius": 2
+      }
+    }
+  ]
+}

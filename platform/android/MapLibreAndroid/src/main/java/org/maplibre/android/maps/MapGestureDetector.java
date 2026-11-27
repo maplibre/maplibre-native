@@ -507,7 +507,7 @@ final class MapGestureDetector {
         }
 
         // Scroll the map
-        transform.moveBy(-distanceX, -distanceY, 0 /*no duration*/);
+        transform.moveBy(-distanceX, -distanceY, detector.getFocalPoint());
 
         notifyOnMoveListeners(detector);
       }

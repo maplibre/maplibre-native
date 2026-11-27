@@ -27,13 +27,12 @@ customers.
 
 ## Lack of support for other map projections except Web Mercator
 
-MapLibre Native supports Web Mercator (EPSG:3857) as its only
-supported projection. This fulfills most of the web and device map
-needs. At the time of writing, modern map renderers such as Google Maps
-and Mapbox GL offers 3D globe, conic, and rectangular projections too.
-At the time of writing, MapLibre Native renderer component does not
-have an architectural separation for supporting multiple projections and
-coordinate reference systems.
+MapLibre Native renders Web Mercator (EPSG:3857) and, through the
+style's `projection` property, a globe (the vertical perspective
+projection MapLibre GL JS uses). Both go through one seam,
+`ProjectionBase` behind `TransformState`, which is where a further
+projection would attach; conic and rectangular projections and other
+coordinate reference systems are still not supported.
 
 ## Inconsistency among platforms
 

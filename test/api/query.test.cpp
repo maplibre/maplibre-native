@@ -395,3 +395,26 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
     EXPECT_EQ(offsetLeaves3[1].properties["name"].get<std::string>(), "Cape Sable"s);
     EXPECT_EQ(offsetLeaves3[2].properties["name"].get<std::string>(), "Cape Cod"s);
 }
+
+TEST(Query, GlobeQueryOnAPolarCapReachesNoTile) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>();
+    HeadlessFrontend frontend{{512, 512}, 1};
+    MapAdapter map{frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
+    map.getStyle().loadJSON(R"STYLE({
+        "version": 8,
+        "projection": {"type": "vertical-perspective"},
+        "sources": {"arctic": {"type": "geojson", "data": {"type": "Polygon",
+            "coordinates": [[[-170, 60], [170, 60], [170, 89], [-170, 89], [-170, 60]]]}}},
+        "layers": [{"id": "arctic", "type": "fill", "source": "arctic"}]
+    })STYLE");
+    map.jumpTo(CameraOptions().withCenter(LatLng{75.0, 0.0}).withZoom(1.5));
+    frontend.render(map);
+
+    // Past 85.05° the globe closes the pole over Web Mercator's square, which holds no tile there.
+    EXPECT_EQ(1u, frontend.getRenderer()->queryRenderedFeatures(map.pixelForLatLng({80.0, 0.0})).size());
+    EXPECT_TRUE(frontend.getRenderer()->queryRenderedFeatures(map.pixelForLatLng({88.0, 0.0})).empty());
+}

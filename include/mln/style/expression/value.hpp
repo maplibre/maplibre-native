@@ -5,6 +5,7 @@
 #include <mln/style/expression/image.hpp>
 #include <mln/style/expression/type.hpp>
 #include <mln/style/position.hpp>
+#include <mln/style/projection_definition.hpp>
 #include <mln/style/rotation.hpp>
 #include <mln/style/types.hpp>
 #include <mln/style/variable_anchor_offset_collection.hpp>
@@ -34,6 +35,7 @@ using ValueBase = variant<NullValue,
                           Formatted,
                           Image,
                           Padding,
+                          ProjectionDefinition,
                           mapbox::util::recursive_wrapper<std::vector<Value>>,
                           mapbox::util::recursive_wrapper<std::unordered_map<std::string, Value>>>;
 struct Value : ValueBase {

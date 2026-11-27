@@ -1,0 +1,213 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 512,
+      "height": 512,
+      "queryGeometry": [
+        [
+          266,
+          240
+        ],
+        [
+          286,
+          272
+        ]
+      ]
+    }
+  },
+  "center": [
+    170,
+    0
+  ],
+  "zoom": 0.5,
+  "projection": {
+    "type": "globe"
+  },
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "band"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -179,
+                    -10
+                  ],
+                  [
+                    179,
+                    -10
+                  ],
+                  [
+                    179,
+                    10
+                  ],
+                  [
+                    -179,
+                    10
+                  ],
+                  [
+                    -179,
+                    -10
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "west"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    176.5,
+                    -0.5
+                  ],
+                  [
+                    177.5,
+                    -0.5
+                  ],
+                  [
+                    177.5,
+                    0.5
+                  ],
+                  [
+                    176.5,
+                    0.5
+                  ],
+                  [
+                    176.5,
+                    -0.5
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "east"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -177.5,
+                    -0.5
+                  ],
+                  [
+                    -176.5,
+                    -0.5
+                  ],
+                  [
+                    -176.5,
+                    0.5
+                  ],
+                  [
+                    -177.5,
+                    0.5
+                  ],
+                  [
+                    -177.5,
+                    -0.5
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "outside-west"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    159.5,
+                    -0.5
+                  ],
+                  [
+                    160.5,
+                    -0.5
+                  ],
+                  [
+                    160.5,
+                    0.5
+                  ],
+                  [
+                    159.5,
+                    0.5
+                  ],
+                  [
+                    159.5,
+                    -0.5
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "outside-east"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -160.5,
+                    -0.5
+                  ],
+                  [
+                    -159.5,
+                    -0.5
+                  ],
+                  [
+                    -159.5,
+                    0.5
+                  ],
+                  [
+                    -160.5,
+                    0.5
+                  ],
+                  [
+                    -160.5,
+                    -0.5
+                  ]
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "geojson",
+      "paint": {
+        "fill-color": "red",
+        "fill-opacity": 0.5
+      }
+    }
+  ]
+}

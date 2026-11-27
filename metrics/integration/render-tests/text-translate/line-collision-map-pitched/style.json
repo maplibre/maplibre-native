@@ -1,0 +1,125 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 256,
+      "height": 256
+    }
+  },
+  "center": [
+    0,
+    -3
+  ],
+  "zoom": 2,
+  "pitch": 40,
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "a": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -60,
+              0
+            ],
+            [
+              60,
+              0
+            ]
+          ]
+        }
+      }
+    },
+    "b": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -60,
+              -6
+            ],
+            [
+              60,
+              -6
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "line-a",
+      "type": "line",
+      "source": "a",
+      "paint": {
+        "line-color": "#f88"
+      }
+    },
+    {
+      "id": "line-b",
+      "type": "line",
+      "source": "b",
+      "paint": {
+        "line-color": "#88f"
+      }
+    },
+    {
+      "id": "text-a",
+      "type": "symbol",
+      "source": "a",
+      "layout": {
+        "symbol-placement": "line",
+        "symbol-spacing": 60,
+        "text-field": "OVERLAP",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 14,
+        "text-pitch-alignment": "map"
+      },
+      "paint": {
+        "text-color": "red"
+      }
+    },
+    {
+      "id": "text-b",
+      "type": "symbol",
+      "source": "b",
+      "layout": {
+        "symbol-placement": "line",
+        "symbol-spacing": 60,
+        "text-field": "OVERLAP",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 14,
+        "text-pitch-alignment": "map"
+      },
+      "paint": {
+        "text-color": "blue",
+        "text-translate": [
+          0,
+          -34
+        ]
+      }
+    }
+  ]
+}

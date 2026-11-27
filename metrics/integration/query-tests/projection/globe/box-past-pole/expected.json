@@ -1,0 +1,17 @@
+[
+  {
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        -80.00244140625,
+        80.00098426336268
+      ]
+    },
+    "type": "Feature",
+    "properties": {
+      "name": "inside"
+    },
+    "source": "geojson",
+    "state": {}
+  }
+]

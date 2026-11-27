@@ -4,6 +4,7 @@
 #include <mln/renderer/bucket_parameters.hpp>
 #include <mln/renderer/layers/render_fill_layer.hpp>
 #include <mln/style/layers/fill_layer_impl.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/math.hpp>
 
@@ -45,7 +46,12 @@ bool FillBucket::isSDFPattern(const std::string& layerID) const {
     return it != sdfPatterns.end() && it->second;
 }
 
-void FillBucket::generateBuffers(const GeometryCollection& geometry) {
+void FillBucket::generateBuffers(const GeometryCollection& geometry, const CanonicalTileID& canonical) {
+    const auto granularity = subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z);
+    // The globe's subdivided triangles carry no corners to round.
+    if (util::GLOBE_ENABLED && granularity >= 2) {
+        roundedCornerEnabled = false;
+    }
 // MLN_TRIANGULATE_FILL_OUTLINES is defined in fill_bucket.hpp
 #if MLN_TRIANGULATE_FILL_OUTLINES
     gfx::generateFillAndOutineBuffers(geometry,
@@ -59,7 +65,9 @@ void FillBucket::generateBuffers(const GeometryCollection& geometry) {
                                       lineIndexes,
                                       lineSegments,
                                       basicLines,
-                                      basicLineSegments);
+                                      basicLineSegments,
+                                      canonical,
+                                      granularity);
 #else
     gfx::generateFillAndOutineBuffers(geometry,
                                       vertices,
@@ -69,7 +77,9 @@ void FillBucket::generateBuffers(const GeometryCollection& geometry) {
                                       triangleSegments,
                                       roundedCornerEnabled,
                                       basicLines,
-                                      basicLineSegments);
+                                      basicLineSegments,
+                                      canonical,
+                                      granularity);
 #endif
 
     if (roundedCornerEnabled && triangles.empty()) {
@@ -101,7 +111,7 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                             const CanonicalTileID& canonical) {
     const auto vertexOffset = vertices.elements();
 
-    generateBuffers(geometry);
+    generateBuffers(geometry, canonical);
     populateBinders(feature, patternPositions, patternDependencies, index, canonical);
 
     if (retainFeaturesById) {

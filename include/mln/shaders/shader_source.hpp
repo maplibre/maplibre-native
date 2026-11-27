@@ -13,6 +13,8 @@ enum class BuiltIn {
     ClippingMaskProgram,
     BackgroundShader,
     BackgroundPatternShader,
+    SkyShader,
+    AtmosphereShader,
     CircleShader,
     CollisionBoxShader,
     CollisionCircleShader,
@@ -42,7 +44,8 @@ enum class BuiltIn {
     SymbolIconShader,
     SymbolSDFShader,
     SymbolTextAndIconShader,
-    WideVectorShader
+    WideVectorShader,
+    GlobeDepthShader
 };
 
 /// @brief Select shader source based on a program type and a desired

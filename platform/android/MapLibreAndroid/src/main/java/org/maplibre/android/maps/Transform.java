@@ -316,6 +316,13 @@ public class Transform implements MapView.OnCameraDidChangeListener {
     nativeMap.moveBy(offsetX, offsetY, duration);
   }
 
+  /**
+   * Moves the map as a drag that holds the focal point: on the globe the location under it follows it.
+   */
+  void moveBy(double offsetX, double offsetY, @NonNull PointF focalPoint) {
+    nativeMap.moveBy(offsetX, offsetY, focalPoint);
+  }
+
   //
   // Min & Max ZoomLevel
   //

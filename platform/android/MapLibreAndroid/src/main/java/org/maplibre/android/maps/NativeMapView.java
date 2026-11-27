@@ -36,6 +36,7 @@ import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
+import org.maplibre.android.style.sky.Sky;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.utils.BitmapUtils;
@@ -251,6 +252,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setGlobeFreeBearing(boolean freeBearing) {
+    if (checkState("setGlobeFreeBearing")) {
+      return;
+    }
+    nativeSetGlobeFreeBearing(freeBearing);
+  }
+
+  @Override
   public void moveBy(double dx, double dy, long duration) {
     if (checkState("moveBy")) {
       return;
@@ -261,6 +270,19 @@ final class NativeMapView implements NativeMap {
     } catch (java.lang.Error error) {
       // workaround for latitude must not be NaN issue
       // which is thrown when gl-native can't convert a screen coordinate to location
+      Logger.d(TAG, "Error when executing NativeMapView#moveBy", error);
+    }
+  }
+
+  @Override
+  public void moveBy(double dx, double dy, @NonNull PointF focalPoint) {
+    if (checkState("moveBy")) {
+      return;
+    }
+
+    try {
+      nativeMoveByAround(dx / pixelRatio, dy / pixelRatio, focalPoint.x / pixelRatio, focalPoint.y / pixelRatio);
+    } catch (java.lang.Error error) {
       Logger.d(TAG, "Error when executing NativeMapView#moveBy", error);
     }
   }
@@ -753,6 +775,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public boolean isLocationOccluded(@NonNull LatLng latLng) {
+    if (checkState("isLocationOccluded")) {
+      return false;
+    }
+    return nativeIsLocationOccluded(latLng.getLatitude(), latLng.getLongitude());
+  }
+
+  @Override
   public void latLngsForPixels(@NonNull double[] input, @NonNull double[] output) {
     if (!checkState("latLngsForPixels")) {
       nativeLatLngsForPixels(input, output, pixelRatio);
@@ -1204,6 +1234,23 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  @Nullable
+  public Sky getSky() {
+    if (checkState("getSky")) {
+      return null;
+    }
+    return nativeGetSky();
+  }
+
+  @Override
+  public void setSky(@Nullable Sky sky) {
+    if (checkState("setSky")) {
+      return;
+    }
+    nativeSetSky(sky);
+  }
+
+  @Override
   public float getPixelRatio() {
     return pixelRatio;
   }
@@ -1507,7 +1554,13 @@ final class NativeMapView implements NativeMap {
   private native void nativeSetGestureInProgress(boolean inProgress);
 
   @Keep
+  private native void nativeSetGlobeFreeBearing(boolean freeBearing);
+
+  @Keep
   private native void nativeMoveBy(double dx, double dy, long duration);
+
+  @Keep
+  private native void nativeMoveByAround(double dx, double dy, double x, double y);
 
   @Keep
   private native void nativeSetLatLng(double latitude, double longitude, double[] padding, long duration);
@@ -1657,6 +1710,8 @@ final class NativeMapView implements NativeMap {
   @NonNull
   @Keep
   private native PointF nativePixelForLatLng(double lat, double lon);
+
+  private native boolean nativeIsLocationOccluded(double lat, double lon);
 
   @Keep
   private native void nativePixelsForLatLngs(double[] input, double[] output, float pixelRatio);
@@ -1813,6 +1868,13 @@ final class NativeMapView implements NativeMap {
   @NonNull
   @Keep
   private native Light nativeGetLight();
+
+  @Nullable
+  @Keep
+  private native Sky nativeGetSky();
+
+  @Keep
+  private native void nativeSetSky(@Nullable Sky sky);
 
   @Keep
   private native void nativeSetPrefetchTiles(boolean enable);

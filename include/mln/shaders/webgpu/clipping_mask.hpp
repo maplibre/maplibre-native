@@ -42,12 +42,21 @@ struct ClipUBO {
     pad3: f32,
 };
 
+#ifdef PROJECTION_GLOBE
+@group(0) @binding(0) var<uniform> clip: ProjectionUBO;
+#else
 @group(0) @binding(0) var<uniform> clip: ClipUBO;
+#endif
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
+#ifdef PROJECTION_GLOBE
+    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    let clip_pos = projectTileWithPoles(pos, pos, clip);
+#else
     let clip_pos = clip.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+#endif
     out.position = vec4<f32>(clip_pos.x, clip_pos.y, clip_pos.z, clip_pos.w);
     return out;
 }
