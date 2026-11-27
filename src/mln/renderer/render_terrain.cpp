@@ -376,7 +376,15 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     if (updateParameters) {
         const size_t maxTiles = terrainLoadBudget(updateParameters->terrainLoadMode).maxMeshTiles;
         const auto origin = meshTileCapOrigin(state);
-        out = coarsenFarMeshTiles(std::move(out), maxTiles, demSource->getMaxZoom(), origin);
+        // The ground under the camera keeps a mesh vertex for every DEM pixel. Merged down to the
+        // DEM's zoom, its triangles skip every other height and stand up to a meter off the height
+        // getElevation reads, so a camera standing on that height can be inside the drawn ground.
+        const uint8_t demMaxZoom = demSource->getMaxZoom();
+        out = coarsenFarMeshTiles(std::move(out),
+                                  maxTiles,
+                                  demMaxZoom,
+                                  origin,
+                                  meshZoomForEveryDEMPixel(demMaxZoom, terrainCoverTileSize, zoomRange.max));
         // Up to the pitch threshold the cover has one zoom: at the threshold on a phone, 67 tiles
         // of the DEM's own zoom, which cannot merge. Dropping the farthest of them left the far
         // corners of the view to the sky.
@@ -477,10 +485,19 @@ std::set<UnwrappedTileID> RenderTerrain::nearestMeshTiles(std::set<UnwrappedTile
     return {sorted.begin(), sorted.begin() + static_cast<std::ptrdiff_t>(maxTiles)};
 }
 
+uint8_t RenderTerrain::meshZoomForEveryDEMPixel(const uint8_t demMaxZoom,
+                                                const uint16_t demTileSize,
+                                                const uint8_t meshMaxZoom) {
+    // Levels past the DEM until 128 cells * 2^levels reach its pixels: one for 256 px, two for 512
+    const auto levels = std::bit_width(static_cast<size_t>(std::max<uint16_t>(demTileSize, 1) - 1) / MESH_SIZE);
+    return static_cast<uint8_t>(std::min<int>(meshMaxZoom, demMaxZoom + levels));
+}
+
 std::set<UnwrappedTileID> RenderTerrain::coarsenFarMeshTiles(std::set<UnwrappedTileID> tiles,
                                                              size_t maxTiles,
                                                              uint8_t minZoom,
-                                                             const std::array<double, 2>& origin) {
+                                                             const std::array<double, 2>& origin,
+                                                             uint8_t originMinZoom) {
     if (maxTiles == 0 || tiles.size() <= maxTiles) {
         return tiles;
     }
@@ -507,8 +524,17 @@ std::set<UnwrappedTileID> RenderTerrain::coarsenFarMeshTiles(std::set<UnwrappedT
     };
     std::set<Candidate> ready;
 
+    // A parent that holds the origin and is shallower than originMinZoom never takes its
+    // children's place: the tile under the camera keeps its mesh fine enough for the DEM.
+    const auto holdsOrigin = [&](const UnwrappedTileID& id) {
+        const double across = std::exp2(static_cast<double>(id.canonical.z));
+        const double x = (origin[0] - id.wrap) * across - id.canonical.x;
+        const double y = origin[1] * across - id.canonical.y;
+        return x >= 0.0 && x < 1.0 && y >= 0.0 && y < 1.0;
+    };
     const auto refresh = [&](const UnwrappedTileID& id, Count& count) {
-        const bool isReady = count.children > 0 && count.deeper == 0;
+        const bool isReady = count.children > 0 && count.deeper == 0 &&
+                             !(id.canonical.z < originMinZoom && holdsOrigin(id));
         if (isReady == count.queued) {
             return;
         }
