@@ -4,6 +4,7 @@
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/layer.hpp>
 #include <mln/style/layers/background_layer_impl.hpp>
+#include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 
 #include <rapidjson/prettywriter.h>
 
@@ -162,4 +163,41 @@ TEST(StyleConversion, SetGenericProperties) {
     const JSValue newMaxZoom(22.0f);
     layer->setProperty("maxzoom", Convertible(&newMaxZoom));
     EXPECT_EQ(22.0f, layer->getMaxZoom());
+}
+
+// The `fill-extrusion-ambient-occlusion-*` paint properties are declared in scripts/style-spec.mjs
+// rather than in the vendored scripts/style-spec-reference/v8.json, because `npm run copy-style-spec`
+// replaces that file wholesale from the npm package. This test references the generated symbols by
+// name, so it stops compiling if the properties are ever dropped from the spec or the generator.
+TEST(StyleConversion, FillExtrusionAmbientOcclusion) {
+    // Off by default, with a 3 m radius
+    EXPECT_EQ(PropertyValue<float>(0.0f), FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionWallIntensity());
+    EXPECT_EQ(PropertyValue<float>(3.0f), FillExtrusionLayer::getDefaultFillExtrusionAmbientOcclusionWallRadius());
+
+    auto layer = parseLayer(R"JSON({
+        "type": "fill-extrusion",
+        "id": "occluded",
+        "source": "composite",
+        "paint": {
+            "fill-extrusion-ambient-occlusion-wall-intensity": 0.5,
+            "fill-extrusion-ambient-occlusion-wall-radius": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 4]
+        }
+    })JSON");
+    ASSERT_NE(nullptr, layer);
+    const auto* fillExtrusion = static_cast<const FillExtrusionLayer*>(layer.get());
+    EXPECT_EQ(PropertyValue<float>(0.5f), fillExtrusion->getFillExtrusionAmbientOcclusionWallIntensity());
+    // A taller radius when zoomed out
+    EXPECT_TRUE(fillExtrusion->getFillExtrusionAmbientOcclusionWallRadius().isExpression());
+
+    // Both survive a serialize/parse round trip
+    auto value = layer->serialize();
+    ASSERT_NE(nullptr, value.getObject());
+    EXPECT_EQ(2u, value.getObject()->at("paint").getObject()->size());
+    auto roundTripped = parseLayer(stringifyLayer(value));
+    ASSERT_NE(nullptr, roundTripped);
+    const auto* roundTrippedFillExtrusion = static_cast<const FillExtrusionLayer*>(roundTripped.get());
+    EXPECT_EQ(fillExtrusion->getFillExtrusionAmbientOcclusionWallIntensity(),
+              roundTrippedFillExtrusion->getFillExtrusionAmbientOcclusionWallIntensity());
+    EXPECT_EQ(fillExtrusion->getFillExtrusionAmbientOcclusionWallRadius(),
+              roundTrippedFillExtrusion->getFillExtrusionAmbientOcclusionWallRadius());
 }

@@ -394,6 +394,72 @@ public class FillExtrusionLayer extends Layer {
     return (PropertyValue<Boolean>) new PropertyValue("fill-extrusion-vertical-gradient", nativeGetFillExtrusionVerticalGradient());
   }
 
+  /**
+   * Get the FillExtrusionAmbientOcclusionWallIntensity property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getFillExtrusionAmbientOcclusionWallIntensity() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-ambient-occlusion-wall-intensity", nativeGetFillExtrusionAmbientOcclusionWallIntensity());
+  }
+
+  /**
+   * Get the FillExtrusionAmbientOcclusionWallIntensity property transition options
+   *
+   * @return transition options for Float
+   */
+  @NonNull
+  public TransitionOptions getFillExtrusionAmbientOcclusionWallIntensityTransition() {
+    checkThread();
+    return nativeGetFillExtrusionAmbientOcclusionWallIntensityTransition();
+  }
+
+  /**
+   * Set the FillExtrusionAmbientOcclusionWallIntensity property transition options
+   *
+   * @param options transition options for Float
+   */
+  public void setFillExtrusionAmbientOcclusionWallIntensityTransition(@NonNull TransitionOptions options) {
+    checkThread();
+    nativeSetFillExtrusionAmbientOcclusionWallIntensityTransition(options.getDuration(), options.getDelay());
+  }
+
+  /**
+   * Get the FillExtrusionAmbientOcclusionWallRadius property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getFillExtrusionAmbientOcclusionWallRadius() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-ambient-occlusion-wall-radius", nativeGetFillExtrusionAmbientOcclusionWallRadius());
+  }
+
+  /**
+   * Get the FillExtrusionAmbientOcclusionWallRadius property transition options
+   *
+   * @return transition options for Float
+   */
+  @NonNull
+  public TransitionOptions getFillExtrusionAmbientOcclusionWallRadiusTransition() {
+    checkThread();
+    return nativeGetFillExtrusionAmbientOcclusionWallRadiusTransition();
+  }
+
+  /**
+   * Set the FillExtrusionAmbientOcclusionWallRadius property transition options
+   *
+   * @param options transition options for Float
+   */
+  public void setFillExtrusionAmbientOcclusionWallRadiusTransition(@NonNull TransitionOptions options) {
+    checkThread();
+    nativeSetFillExtrusionAmbientOcclusionWallRadiusTransition(options.getDuration(), options.getDelay());
+  }
+
   @NonNull
   @Keep
   private native Object nativeGetFillExtrusionRoundedCornerDistance();
@@ -471,6 +537,28 @@ public class FillExtrusionLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetFillExtrusionVerticalGradient();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetFillExtrusionAmbientOcclusionWallIntensity();
+
+  @NonNull
+  @Keep
+  private native TransitionOptions nativeGetFillExtrusionAmbientOcclusionWallIntensityTransition();
+
+  @Keep
+  private native void nativeSetFillExtrusionAmbientOcclusionWallIntensityTransition(long duration, long delay);
+
+  @NonNull
+  @Keep
+  private native Object nativeGetFillExtrusionAmbientOcclusionWallRadius();
+
+  @NonNull
+  @Keep
+  private native TransitionOptions nativeGetFillExtrusionAmbientOcclusionWallRadiusTransition();
+
+  @Keep
+  private native void nativeSetFillExtrusionAmbientOcclusionWallRadiusTransition(long duration, long delay);
 
   @Override
   @Keep

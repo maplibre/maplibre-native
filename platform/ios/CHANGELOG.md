@@ -15,6 +15,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ### Bug fixes
 
+- Add `MLNFillExtrusionStyleLayer.fillExtrusionAmbientOcclusionWallIntensity` and `fillExtrusionAmbientOcclusionWallRadius`, with their transitions, for the new `fill-extrusion-ambient-occlusion-wall-intensity` and `fill-extrusion-ambient-occlusion-wall-radius` paint properties. They take ambient light away from the bottom of fill-extrusion walls ([#4909](https://github.com/maplibre/maplibre-native/pull/4909)).
 - Fix a crash when a multi-condition `case` expression has an `all`, `any` or `!` condition. Its conditions were serialized as raw `NSCompoundPredicate` objects instead of JSON ([#4872](https://github.com/maplibre/maplibre-native/issues/4872)).
 - Tiles whose labels need a glyph range that fails to load now render without those glyphs, and the range is requested again when a tile next needs it ([#4837](https://github.com/maplibre/maplibre-native/pull/4837)).
 - An `MLNColor` passed into a style value or an expression is written with whole-number channels, as MapLibre GL JS prints colors, so a fractional channel rounds to the nearest of 0-255 ([#4967](https://github.com/maplibre/maplibre-native/pull/4967)).
