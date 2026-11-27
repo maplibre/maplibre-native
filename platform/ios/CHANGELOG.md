@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- With a custom style layer (`MLNCustomStyleLayer`) or a plug-in layer below symbol layers and fill extrusions on the map, labels are no longer drawn with half of every glyph missing. The Metal render pass forgot the cull mode it had set when it handed the encoder to the layer, and the labels after it kept the back-face culling of the extrusions.
 - With 3D terrain, a map pitched at or just under the level-of-detail pitch threshold (60 degrees) no longer shows the sky through the far corners of the view. Such a view needs more mesh tiles than the load mode's cap when the mesh is no deeper than the DEM, and the farthest were dropped.
 - Add `MLNMapView.fieldOfView`, the vertical field of view of the map’s camera in degrees, and `-[MLNMapView setCenterCoordinate:centerAltitude:fromEyeCoordinate:eyeAltitude:]`, which puts the camera at an eye position looking at a point, above the eye included.
 - Text a tile was drawn without because its glyph range failed to load is drawn as soon as the range loads, instead of when the tile is next reloaded ([#5086](https://github.com/maplibre/maplibre-native/pull/5086)).

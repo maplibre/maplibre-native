@@ -58,6 +58,11 @@ void RenderPluginLayerTweaker::execute([[maybe_unused]] mln::gfx::Drawable& draw
 
     _plugInRenderer->render(paintParameters);
 
+#if MLN_RENDER_BACKEND_METAL
+    // The plug-in draws on the encoder directly: what the render pass remembers no longer holds.
+    mtlRenderPass->resetState();
+#endif
+
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.
     paintParameters.backend.getDefaultRenderable().getResource<gfx::RenderableResource>().bind();

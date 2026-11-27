@@ -86,7 +86,8 @@ private:
     MTLDepthStencilStatePtr currentDepthStencilState;
     MTLRenderPipelineStatePtr currentPipelineState;
 
-    int32_t currentStencilReferenceValue = 0;
+    // Unset means unknown: the encoder may hold any value, so the next call sets it.
+    std::optional<int32_t> currentStencilReferenceValue;
     std::vector<gfx::DebugGroup<gfx::RenderPass>> debugGroups;
 
     struct BindInfo {
@@ -105,8 +106,8 @@ private:
     std::array<MTLTexturePtr, maxBinds> vertexTextureBindings;
     std::array<MTLSamplerStatePtr, maxBinds> vertexSamplerStates;
 
-    MTL::CullMode currentCullMode = MTL::CullModeNone;
-    MTL::Winding currentWinding = MTL::WindingClockwise;
+    std::optional<MTL::CullMode> currentCullMode;
+    std::optional<MTL::Winding> currentWinding;
     MTL::ScissorRect currentScissorRect;
     std::optional<Range<float>> currentDepthRange;
 

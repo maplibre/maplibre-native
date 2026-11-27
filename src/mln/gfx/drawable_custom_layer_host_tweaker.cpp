@@ -49,6 +49,11 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
 
     host->render(parameters);
 
+#if MLN_RENDER_BACKEND_METAL
+    // The host draws on the encoder directly: what the render pass remembers no longer holds.
+    mtlRenderPass->resetState();
+#endif
+
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.
     paintParameters.backend.getDefaultRenderable().getResource<gfx::RenderableResource>().bind();
