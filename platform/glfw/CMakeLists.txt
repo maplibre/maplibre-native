@@ -142,7 +142,7 @@ target_link_libraries(
     mbgl-glfw
     PRIVATE
         mbgl-vendor-args
-        mbgl-vendor-rapidjson
+        mbgl-rapidjson
         Mapbox::Map
         mbgl-compiler-options
         MapLibreNative::Base::cheap-ruler-cpp

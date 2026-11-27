@@ -94,6 +94,7 @@ if(MLN_WITH_EGL)
             PRIVATE
                 ${EGL_LIBRARIES}
         )
+        mln_pkg_config_requires(angleproject)
     endif()
 
     target_sources(
@@ -130,6 +131,7 @@ else()
         PRIVATE
             OpenGL::GL
     )
+    mln_pkg_config_libs(-lopengl32)
 endif()
 
 if (DEFINED ENV{CI})
@@ -152,9 +154,13 @@ target_include_directories(
         ${LIBUV_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
 )
+mln_install_headers(
+    DIRECTORIES
+        ${PROJECT_SOURCE_DIR}/platform/default/include/
+)
 
-include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/nunicode.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/sqlite.cmake)
 
 if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
     message(STATUS "ICU not found, too old or MLN_USE_BUILTIN_ICU requestd, using builtin.")
@@ -202,6 +208,7 @@ elseif(MSYS)
             ${CURL_STATIC_LIBRARIES}
     )
 endif()
+mln_pkg_config_requires(libcurl)
 
 target_link_libraries(
     mbgl-core
@@ -213,9 +220,13 @@ target_link_libraries(
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::data>
         $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
         PNG::PNG
-        mbgl-vendor-nunicode
-        mbgl-vendor-sqlite
+        mbgl-nunicode
+        mbgl-sqlite
 )
+mln_pkg_config_requires(libjpeg libwebp libpng)
+if(NOT MLN_USE_BUILTIN_ICU)
+    mln_pkg_config_requires(icu-uc icu-i18n)
+endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 if(MLN_WITH_GLFW)
@@ -229,12 +240,14 @@ elseif(MSVC)
         PRIVATE
             $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
+    mln_pkg_config_requires(libuv)
 elseif(MSYS)
     target_link_libraries(
         mbgl-core
         PRIVATE
             ${LIBUV_LIBRARIES}
     )
+    mln_pkg_config_requires(libuv)
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/default/src/mln/test)

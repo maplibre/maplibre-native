@@ -8,6 +8,8 @@ else()
     add_library(mbgl-vendor-sqlite STATIC)
 endif()
 
+mln_install_libraries(mbgl-vendor-sqlite)
+
 target_sources(
     mbgl-vendor-sqlite PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/sqlite/src/sqlite3.c

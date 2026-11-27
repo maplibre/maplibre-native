@@ -63,6 +63,19 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
 
 include(CTest)
+include(GNUInstallDirs)
+
+# The tests, benchmarks and test runners: by default as `BUILD_TESTING` says, when this is the
+# top-level project, and not when it is included in another project, whose `BUILD_TESTING` is
+# for its own tests.
+block()
+    if(PROJECT_IS_TOP_LEVEL)
+        set(default ${BUILD_TESTING})
+    else()
+        set(default OFF)
+    endif()
+    option(MLN_WITH_TESTS "Build the tests, benchmarks and test runners" ${default})
+endblock()
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -145,6 +158,12 @@ if(MLN_WITH_QT)
 else()
     add_library(mbgl-core STATIC)
 endif()
+
+include(${PROJECT_SOURCE_DIR}/cmake/install.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/pkg-config.cmake)
+mln_install_libraries(mbgl-core)
+# At the end, when every dependency has been recorded.
+cmake_language(DEFER CALL mln_install_pkg_config)
 
 include(cmake/plugins.cmake)
 
@@ -1064,8 +1083,7 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
         mbgl-core
         PRIVATE MLN_TEXT_SHAPING_HARFBUZZ=1
     )
-    include(${PROJECT_SOURCE_DIR}/vendor/freetype.cmake)
-    include(${PROJECT_SOURCE_DIR}/vendor/harfbuzz.cmake)
+    include(${PROJECT_SOURCE_DIR}/cmake/dependency/harfbuzz.cmake)
 
     target_include_directories(
         mbgl-core SYSTEM
@@ -1127,27 +1145,28 @@ target_include_directories(
     mbgl-core
     PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
+mln_install_headers(DIRECTORIES ${PROJECT_SOURCE_DIR}/include/)
 
 include(${PROJECT_SOURCE_DIR}/vendor/args.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/boost.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/eternal.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/rapidjson.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/rapidjson.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/maplibre-native-base.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/parsedate.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/pmtiles.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/polylabel.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/protozero.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/protozero.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/tracy.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/supercluster.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/expected-lite.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/expected-lite.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
 
 if(MLN_USE_RUST)
@@ -1162,13 +1181,13 @@ target_link_libraries(
         MapLibreNative::Base::geojson-vt-cpp
         MapLibreNative::Base::cheap-ruler-cpp
         mbgl-compiler-options
-        mbgl-vendor-boost
+        mbgl-boost
         mbgl-vendor-earcut.hpp
         mbgl-vendor-eternal
         mbgl-vendor-parsedate
         mbgl-vendor-pmtiles
         mbgl-vendor-polylabel
-        mbgl-vendor-protozero
+        mbgl-protozero
         mbgl-vendor-supercluster
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
@@ -1180,20 +1199,19 @@ target_link_libraries(
         $<$<BOOL:${MLN_TEXT_SHAPING_HARFBUZZ}>:mbgl-harfbuzz>
     PUBLIC
         MapLibreNative::Base
-        mbgl-vendor-expected-lite
-        mbgl-vendor-rapidjson
+        mbgl-expected-lite
+        mbgl-rapidjson
         MapLibreNative::Base::geojson.hpp
         MapLibreNative::Base::geometry.hpp
         MapLibreNative::Base::variant
         $<$<BOOL:${MLN_USE_TRACY}>:TracyClient>
-        unordered_dense
+        mbgl-unordered_dense
 )
 
 set(EXPORT_TARGETS
     mbgl-core
     maplibre-native-base
     maplibre-native-base-cheap-ruler-cpp
-    mbgl-vendor-expected-lite
     mbgl-vendor-kdbush
     maplibre-native-base-geojson-vt-cpp
     maplibre-native-base-geojson.hpp
@@ -1204,21 +1222,32 @@ set(EXPORT_TARGETS
     mbgl-vendor-supercluster
     maplibre-native-base-variant
     mbgl-compiler-options
-    mbgl-vendor-boost
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
     mbgl-vendor-metal-cpp
-    mbgl-vendor-rapidjson
     mbgl-vendor-parsedate
     mbgl-vendor-pmtiles
     mbgl-vendor-polylabel
-    mbgl-vendor-protozero
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
     mlt-cpp
-    unordered_dense
 )
+if(MLN_USE_BUILTIN_BOOST)
+    list(APPEND EXPORT_TARGETS mbgl-vendor-boost)
+endif()
+if(MLN_USE_BUILTIN_EXPECTED_LITE)
+    list(APPEND EXPORT_TARGETS mbgl-vendor-expected-lite)
+endif()
+if(MLN_USE_BUILTIN_PROTOZERO)
+    list(APPEND EXPORT_TARGETS mbgl-vendor-protozero)
+endif()
+if(MLN_USE_BUILTIN_RAPIDJSON)
+    list(APPEND EXPORT_TARGETS mbgl-vendor-rapidjson)
+endif()
+if(MLN_USE_BUILTIN_UNORDERED_DENSE)
+    list(APPEND EXPORT_TARGETS unordered_dense)
+endif()
 
 if(MLN_USE_RUST)
     list(APPEND EXPORT_TARGETS mbgl-rustutils rustutils)
@@ -1226,7 +1255,7 @@ else()
     list(APPEND EXPORT_TARGETS mbgl-vendor-csscolorparser)
 endif()
 
-if(MLN_TEXT_SHAPING_HARFBUZZ)
+if(MLN_TEXT_SHAPING_HARFBUZZ AND MLN_USE_BUILTIN_HARFBUZZ)
     list(APPEND EXPORT_TARGETS mbgl-freetype mbgl-harfbuzz)
 endif()
 
@@ -1249,14 +1278,14 @@ if(_can_export)
 endif()
 
 if(MLN_WITH_VULKAN)
-    include(${PROJECT_SOURCE_DIR}/vendor/glslang.cmake)
-    include(${PROJECT_SOURCE_DIR}/vendor/vulkan.cmake)
+    include(${PROJECT_SOURCE_DIR}/cmake/dependency/glslang.cmake)
+    include(${PROJECT_SOURCE_DIR}/cmake/dependency/vulkan.cmake)
 
     target_link_libraries(
         mbgl-core
         PUBLIC
-            mbgl-vendor-vulkan-headers
-            mbgl-vendor-VulkanMemoryAllocator
+            mbgl-vulkan-headers
+            mbgl-vulkan-memory-allocator
             glslang
             SPIRV
             glslang-default-resource-limits

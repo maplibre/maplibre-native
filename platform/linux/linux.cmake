@@ -68,6 +68,7 @@ if(MLN_WITH_EGL)
         PRIVATE
             OpenGL::EGL
     )
+    mln_pkg_config_requires(egl)
     if (MLN_WITH_WAYLAND)
         target_compile_definitions(mbgl-core PUBLIC
                 EGL_NO_X11
@@ -94,6 +95,7 @@ else()
         PRIVATE
             OpenGL::GLX
     )
+    mln_pkg_config_requires(glx)
 endif()
 
 if (DEFINED ENV{CI})
@@ -116,9 +118,13 @@ target_include_directories(
         ${X11_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
 )
+mln_install_headers(
+    DIRECTORIES
+        ${PROJECT_SOURCE_DIR}/platform/default/include/
+)
 
-include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/nunicode.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/sqlite.cmake)
 
 if(NOT ICUUC_FOUND OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
     message(STATUS "ICU not found, too old or MLN_USE_BUILTIN_ICU requestd, using builtin.")
@@ -147,9 +153,19 @@ target_link_libraries(
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUI18N_LIBRARIES}>
         $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
         PNG::PNG
-        mbgl-vendor-nunicode
-        mbgl-vendor-sqlite
+        mbgl-nunicode
+        mbgl-sqlite
 )
+# zlib comes with PNG::PNG, but only privately with libpng's pkg-config module,
+# and the core uses it too.
+mln_pkg_config_requires(libcurl libjpeg libuv libwebp libpng zlib)
+mln_pkg_config_libs(${CMAKE_THREAD_LIBS_INIT})
+if(MLN_WITH_X11)
+    mln_pkg_config_requires(x11 xext)
+endif()
+if(NOT MLN_USE_BUILTIN_ICU)
+    mln_pkg_config_requires(icu-uc icu-i18n)
+endif()
 
 if(MLN_CREATE_AMALGAMATION)
     if(NOT ARMERGE)

@@ -10,6 +10,15 @@ else()
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glslang)
 endif()
 
+mln_install_libraries(
+    glslang
+    SPIRV
+    glslang-default-resource-limits
+    MachineIndependent
+    OSDependent
+    GenericCodeGen
+)
+
 get_target_property(glslang_inc glslang INTERFACE_INCLUDE_DIRECTORIES)
 set_target_properties(glslang PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${glslang_inc})
 if (NOT (WIN32 OR MINGW))

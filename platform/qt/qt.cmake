@@ -48,7 +48,7 @@ if(NOT MLN_QT_WITH_INTERNAL_SQLITE)
     find_package(Qt${QT_VERSION_MAJOR}Sql REQUIRED)
 else()
     message(STATUS "Using internal sqlite")
-    include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
+    include(${PROJECT_SOURCE_DIR}/cmake/dependency/sqlite.cmake)
 endif()
 
 # Debugging & ccache on Windows
@@ -122,7 +122,7 @@ target_include_directories(
     PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include
 )
 
-include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/dependency/nunicode.cmake)
 
 set_property(TARGET mbgl-core PROPERTY AUTOMOC ON)
 if (Qt6_FOUND AND COMMAND qt_enable_autogen_tool)
@@ -133,12 +133,12 @@ target_link_libraries(
     mbgl-core
     PUBLIC
         $<BUILD_INTERFACE:mbgl-vendor-parsedate>
-        $<BUILD_INTERFACE:mbgl-vendor-nunicode>
+        $<BUILD_INTERFACE:mbgl-nunicode>
         $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
         $<BUILD_INTERFACE:mlt-cpp>
         $<BUILD_INTERFACE:fastpfor-lib>
         $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
-        $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,$<BUILD_INTERFACE:mbgl-vendor-sqlite>,Qt${QT_VERSION_MAJOR}::Sql>
+        $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,$<BUILD_INTERFACE:mbgl-sqlite>,Qt${QT_VERSION_MAJOR}::Sql>
     PRIVATE
         $<$<PLATFORM_ID:Linux>:${CMAKE_THREAD_LIBS_INIT}>
         Qt${QT_VERSION_MAJOR}::Core
@@ -160,11 +160,11 @@ get_directory_property(MLN_QT_HAS_PARENT PARENT_DIRECTORY)
 if(MLN_QT_HAS_PARENT)
     set(MLN_QT_VENDOR_LIBRARIES
         mbgl-vendor-parsedate
-        mbgl-vendor-nunicode
+        mbgl-nunicode
         mbgl-vendor-csscolorparser
         mlt-cpp
         fastpfor-lib
-        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:mbgl-vendor-sqlite>
+        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:mbgl-sqlite>
         $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>>:mbgl-vendor-icu>
         PARENT_SCOPE
     )
