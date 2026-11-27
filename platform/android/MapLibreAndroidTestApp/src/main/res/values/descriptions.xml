@@ -6,6 +6,7 @@
     <string name="description_map_fragment">Showcase MapFragment</string>
     <string name="description_map_fragment_support">Showcase SupportMapFragment</string>
     <string name="description_map_fragment_backstack">Showcase using a Map Fragment with a fragment backstack</string>
+    <string name="description_reused_map_view">Reuse one MapView across screens, detaching and attaching it while navigating</string>
     <string name="description_long_running_maps">Showcase a long running scenario</string>
     <string name="description_disappearing_route">Trim a GeoJSON route line as a simulated location moves</string>
     <string name="description_multimap">Activity with multiple maps on screen</string>
