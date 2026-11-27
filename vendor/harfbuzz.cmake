@@ -29,4 +29,6 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
             INTERFACE_MAPLIBRE_AUTHOR ${CMAKE_CURRENT_LIST_DIR}/harfbuzz/AUTHORS
             INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/harfbuzz/COPYING
     )
+
+    mln_install_libraries(mbgl-harfbuzz)
 endif()
