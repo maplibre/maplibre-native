@@ -68,12 +68,12 @@ void GeoJSONSource::addToMap(JNIEnv& env,
                              mln::Map& map,
                              AndroidRendererFrontend& frontend) {
     Source::addToMap(env, obj, map, frontend);
-    convertAgainInStyleProjection();
+    giveLastData();
 }
 
 void GeoJSONSource::addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mln::style::Style& style) {
     Source::addToStyle(env, obj, style);
-    convertAgainInStyleProjection();
+    giveLastData();
 }
 
 void GeoJSONSource::setGeoJSONString(jni::JNIEnv& env, const jni::String& jString) {
@@ -201,21 +201,18 @@ void GeoJSONSource::setCollectionAsync(jni::JNIEnv& env, const jni::Object<JNITy
 void GeoJSONSource::setAsync(Update::Converter converterFn) {
     awaitingUpdate = std::make_unique<Update>(
         std::move(converterFn),
-        std::make_unique<Actor<GeoJSONDataCallback>>(
-            *Scheduler::GetCurrent(), [this](std::shared_ptr<style::GeoJSONData> geoJSONData) {
-                // conversion from Java features to core ones finished
-                android::UniqueEnv _env = android::AttachEnv();
+        std::make_unique<Actor<GeoJSONDataCallback>>(*Scheduler::GetCurrent(),
+                                                     [this](std::shared_ptr<style::GeoJSONData> geoJSONData) {
+                                                         // conversion from Java features to core ones finished
+                                                         android::UniqueEnv _env = android::AttachEnv();
 
-                // Update the core source
-                lastProjection = geoJSONData ? geoJSONData->getProjection() : std::string();
-                source.as<mln::style::GeoJSONSource>()->setGeoJSONData(std::move(geoJSONData));
-
-                lastUpdate = std::move(update);
-                if (!ownedSource) {
-                    convertAgainInStyleProjection();
-                }
-                runAwaitingUpdate();
-            }));
+                                                         lastUpdate = std::move(update);
+                                                         lastData = std::move(geoJSONData);
+                                                         if (!ownedSource) {
+                                                             giveLastData();
+                                                         }
+                                                         runAwaitingUpdate();
+                                                     }));
     runAwaitingUpdate();
 }
 
@@ -228,20 +225,25 @@ void GeoJSONSource::runAwaitingUpdate() {
         return;
     }
     lastUpdate.reset();
+    lastData.reset();
     update = std::move(awaitingUpdate);
     update->converterFn(update->callback->self(), styleProjection());
 }
 
-void GeoJSONSource::convertAgainInStyleProjection() {
-    if (!lastUpdate || update || awaitingUpdate) {
+void GeoJSONSource::giveLastData() {
+    if (!lastUpdate) {
         return;
     }
     const auto projection = styleProjection();
-    if ((projection ? projection->name() : std::string()) != lastProjection) {
+    const std::string tiledIn = lastData ? lastData->getProjection() : std::string();
+    if (tiledIn == (projection ? projection->name() : std::string())) {
+        source.as<style::GeoJSONSource>()->setGeoJSONData(std::move(lastData));
+    } else if (!awaitingUpdate) {
         awaitingUpdate = std::move(lastUpdate);
-        runAwaitingUpdate();
     }
     lastUpdate.reset();
+    lastData.reset();
+    runAwaitingUpdate();
 }
 
 jboolean GeoJSONSource::isUpdateSynchronous(jni::JNIEnv&) {

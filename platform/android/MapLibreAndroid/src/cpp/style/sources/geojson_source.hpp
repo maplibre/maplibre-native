@@ -83,10 +83,10 @@ private:
     jni::Local<jni::Object<Source>> createJavaPeer(jni::JNIEnv&);
     std::unique_ptr<Update> awaitingUpdate;
     std::unique_ptr<Update> update;
-    /// The update whose data the source has, kept until the source is in a style that the data is tiled for.
+    /// The last update and the data it made, held until the source is in a style, to give the core source the data
+    /// if it is tiled for the style and to convert it again if it is not.
     std::unique_ptr<Update> lastUpdate;
-    /// The registered projection the source's data was tiled in, or empty for lat/lng.
-    std::string lastProjection;
+    std::shared_ptr<style::GeoJSONData> lastData;
     std::shared_ptr<ThreadPool> threadPool;
     std::unique_ptr<OptionalActor<FeatureConverter>> converter;
 
@@ -101,9 +101,10 @@ private:
 
     void runAwaitingUpdate();
 
-    /// Converts the last data again if it was tiled in another projection than the style's, as data given before the
-    /// source joins a style in a registered projection is.
-    void convertAgainInStyleProjection();
+    /// Gives the core source the last data if it is tiled in the projection of the style the source is in, and
+    /// otherwise converts it again in that projection, as data converted before the source joins a style in a
+    /// registered projection is.
+    void giveLastData();
 
     template <class JNIType>
     void setCollectionSync(jni::JNIEnv&, const jni::Object<JNIType>&);

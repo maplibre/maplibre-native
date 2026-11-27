@@ -30,6 +30,7 @@
 #include <mln/style/image.hpp>
 #include <mln/style/layers/background_layer.hpp>
 #include <mln/style/layers/background_layer.hpp>
+#include <mln/style/layers/circle_layer.hpp>
 #include <mln/style/layers/fill_layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
 #include <mln/style/layers/location_indicator_layer.hpp>
@@ -424,11 +425,11 @@ namespace {
 
 constexpr auto geoJSONPoint = R"({"type": "Point", "coordinates": [45, 45]})";
 
-std::unique_ptr<style::Projection> identityProjection() {
-    auto identity = std::make_unique<style::Projection>();
-    const JSValue identityName("identity");
-    EXPECT_FALSE(identity->setProperty("type", &identityName));
-    return identity;
+std::unique_ptr<style::Projection> projectionOfType(const char* type) {
+    auto projection = std::make_unique<style::Projection>();
+    const JSValue name(rapidjson::StringRef(type));
+    EXPECT_FALSE(projection->setProperty("type", &name));
+    return projection;
 }
 
 /// Renders the map centered on `place` at zoom 0 and checks that each point it draws, queried over the whole view, is
@@ -454,11 +455,18 @@ std::size_t warningCount(const FixtureLog& log) {
         messages, [](const FixtureLog::Message& message) { return message.severity == EventSeverity::Warning; });
 }
 
+FixtureLog::Message drawsNothingWarning(const std::string& source) {
+    return {EventSeverity::Warning,
+            Event::General,
+            -1,
+            "GeoJSON source \"" + source +
+                "\" has data tiled for another projection and draws nothing; set its data again after changing the "
+                "projection."};
+}
+
 } // namespace
 
 TEST(Map, GeoJSONTiledForAnotherProjectionIsNotDrawn) {
-    // As on Android, where a source that joins a style in a registered projection can first get the data it tiled in
-    // lat/lng before it joined, and then the same data tiled in the projection.
     FixtureLog log;
     MapTest<> test;
     test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"},
@@ -470,6 +478,8 @@ TEST(Map, GeoJSONTiledForAnotherProjectionIsNotDrawn) {
 
     source.setGeoJSONData(GeoJSONData::create(point, Scheduler::GetSequenced()));
     expectPointsDrawnAt(test, place, 0);
+    expectPointsDrawnAt(test, place, 0);
+    EXPECT_EQ(1u, log.count(drawsNothingWarning("points")));
 
     source.setGeoJSONData(GeoJSONSource::Impl::createData(point,
                                                           Scheduler::GetSequenced(),
@@ -480,32 +490,36 @@ TEST(Map, GeoJSONTiledForAnotherProjectionIsNotDrawn) {
 }
 
 TEST(Map, GeoJSONIsTiledAgainWhenTheProjectionChanges) {
-    FixtureLog log;
-    MapTest<> test;
-    test.fileSource->sourceResponse = [](const Resource&) {
-        Response response;
-        response.data = std::make_shared<std::string>(geoJSONPoint);
-        return response;
-    };
-    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"},
-        "sources": {
-            "inline": {"type": "geojson", "data": {"type": "Point", "coordinates": [45, 45]}},
-            "set": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}},
-            "url": {"type": "geojson", "data": "http://example.com/point.geojson"}},
-        "layers": [
-            {"id": "inline", "type": "circle", "source": "inline"},
-            {"id": "set", "type": "circle", "source": "set"},
-            {"id": "url", "type": "circle", "source": "url"}]})");
-    test.map.getStyle().getSource("set")->as<GeoJSONSource>()->setGeoJSON(mapbox::geojson::parse(geoJSONPoint));
-    const LatLng place{45, 45};
-    expectPointsDrawnAt(test, place, 3);
+    addProjection(test::wideIdentity("test:wide-identity-again"));
+    {
+        FixtureLog log;
+        MapTest<> test;
+        test.fileSource->sourceResponse = [](const Resource&) {
+            Response response;
+            response.data = std::make_shared<std::string>(geoJSONPoint);
+            return response;
+        };
+        test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"},
+            "sources": {
+                "inline": {"type": "geojson", "data": {"type": "Point", "coordinates": [45, 45]}},
+                "set": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}},
+                "url": {"type": "geojson", "data": "http://example.com/point.geojson"}},
+            "layers": [
+                {"id": "inline", "type": "circle", "source": "inline"},
+                {"id": "set", "type": "circle", "source": "set"},
+                {"id": "url", "type": "circle", "source": "url"}]})");
+        test.map.getStyle().getSource("set")->as<GeoJSONSource>()->setGeoJSON(mapbox::geojson::parse(geoJSONPoint));
+        const LatLng place{45, 45};
+        expectPointsDrawnAt(test, place, 3);
 
-    test.map.getStyle().setProjection(std::make_unique<style::Projection>());
-    expectPointsDrawnAt(test, place, 3);
+        test.map.getStyle().setProjection(projectionOfType("test:wide-identity-again"));
+        expectPointsDrawnAt(test, place, 3);
 
-    test.map.getStyle().setProjection(identityProjection());
-    expectPointsDrawnAt(test, place, 3);
-    EXPECT_EQ(0u, warningCount(log));
+        test.map.getStyle().setProjection(std::make_unique<style::Projection>());
+        expectPointsDrawnAt(test, place, 3);
+        EXPECT_EQ(0u, warningCount(log));
+    }
+    removeProjection("test:wide-identity-again");
 }
 
 TEST(Map, GeoJSONFromAURLIsTiledInTheProjectionSetWhileItLoads) {
@@ -524,6 +538,85 @@ TEST(Map, GeoJSONFromAURLIsTiledInTheProjectionSetWhileItLoads) {
 
     expectPointsDrawnAt(test, {45, 45}, 1);
     EXPECT_EQ(0u, warningCount(log));
+}
+
+TEST(Map, GeoJSONTiledInMercatorIsNotKept) {
+    // Whether it came with the style, was set before or after the source joined it, or was kept for the registered
+    // projection the style was in before, the source keeps no GeoJSON once it has tiled it in Mercator. So after a
+    // switch to a registered projection it has nothing to tile, and draws nothing.
+    FixtureLog log;
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version": 8,
+        "sources": {
+            "inline": {"type": "geojson", "data": {"type": "Point", "coordinates": [45, 45]}},
+            "set": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}},
+        "layers": [
+            {"id": "inline", "type": "circle", "source": "inline"},
+            {"id": "set", "type": "circle", "source": "set"}]})");
+    auto& style = test.map.getStyle();
+    const auto point = mapbox::geojson::parse(geoJSONPoint);
+    style.getSource("set")->as<GeoJSONSource>()->setGeoJSON(point);
+    auto pending = std::make_unique<GeoJSONSource>("pending");
+    pending->setGeoJSON(point);
+    style.addSource(std::move(pending));
+    style.addLayer(std::make_unique<CircleLayer>("pending", "pending"));
+    const LatLng place{45, 45};
+    expectPointsDrawnAt(test, place, 3);
+
+    style.setProjection(projectionOfType("identity"));
+    expectPointsDrawnAt(test, place, 0);
+
+    for (const char* id : {"inline", "set", "pending"}) {
+        style.getSource(id)->as<GeoJSONSource>()->setGeoJSON(point);
+    }
+    expectPointsDrawnAt(test, place, 3);
+    style.setProjection(std::make_unique<style::Projection>());
+    expectPointsDrawnAt(test, place, 3);
+    style.setProjection(projectionOfType("identity"));
+    expectPointsDrawnAt(test, place, 0);
+    for (const char* id : {"inline", "set", "pending"}) {
+        EXPECT_EQ(2u, log.count(drawsNothingWarning(id))) << id;
+    }
+}
+
+TEST(Map, GeoJSONThatCannotBeTiledAgainWarnsOnce) {
+    addProjection(test::wideIdentity("test:wide-identity-warns"));
+    {
+        FixtureLog log;
+        MapTest<> test;
+        test.fileSource->sourceResponse = [](const Resource&) {
+            Response response;
+            response.data = std::make_shared<std::string>(geoJSONPoint);
+            return response;
+        };
+        test.map.getStyle().loadJSON(R"({"version": 8,
+            "sources": {
+                "inline": {"type": "geojson", "data": {"type": "Point", "coordinates": [45, 45]}},
+                "given": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}},
+                "url": {"type": "geojson", "data": "http://example.com/point.geojson"}},
+            "layers": [
+                {"id": "inline", "type": "circle", "source": "inline"},
+                {"id": "given", "type": "circle", "source": "given"},
+                {"id": "url", "type": "circle", "source": "url"}]})");
+        auto& style = test.map.getStyle();
+        style.getSource("given")->as<GeoJSONSource>()->setGeoJSONData(
+            GeoJSONData::create(mapbox::geojson::parse(geoJSONPoint), Scheduler::GetSequenced()));
+        const LatLng place{45, 45};
+        expectPointsDrawnAt(test, place, 3);
+
+        style.setProjection(projectionOfType("identity"));
+        expectPointsDrawnAt(test, place, 1);
+        style.setProjection(projectionOfType("test:wide-identity-warns"));
+        expectPointsDrawnAt(test, place, 1);
+        EXPECT_EQ(1u, log.count(drawsNothingWarning("inline")));
+        EXPECT_EQ(1u, log.count(drawsNothingWarning("given")));
+        EXPECT_EQ(0u, warningCount(log));
+
+        style.getSource("inline")->as<GeoJSONSource>()->setGeoJSON(mapbox::geojson::parse(geoJSONPoint));
+        expectPointsDrawnAt(test, place, 2);
+        EXPECT_EQ(0u, warningCount(log));
+    }
+    removeProjection("test:wide-identity-warns");
 }
 
 TEST(Map, GeoJSONSetAfterItsProjectionIsRemovedIsTiledInIt) {
