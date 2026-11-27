@@ -1245,6 +1245,24 @@ TEST(OfflineDatabase, PutFailsWhenEvictionInsuffices) {
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
+TEST(OfflineDatabase, PutSkipsZeroSizeAmbientCache) {
+    FixtureLog log;
+    OfflineDatabase db(":memory:", fixture::tileServerOptions);
+    db.setMaximumAmbientCacheSize(0);
+
+    // A region keeps the database enabled, so put() reaches the ambient cache.
+    OfflineTilePyramidRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, true};
+    ASSERT_TRUE(db.createRegion(definition, OfflineRegionMetadata()));
+
+    Response response;
+    response.data = randomString(1024);
+
+    EXPECT_FALSE(db.put(Resource::style("http://example.com/ambient"), response).first);
+    EXPECT_FALSE(bool(db.get(Resource::style("http://example.com/ambient"))));
+
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
 TEST(OfflineDatabase, GetRegionCompletedStatus) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
