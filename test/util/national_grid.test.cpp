@@ -1,10 +1,10 @@
 #include <mln/test/national_grid.hpp>
+#include <mln/util/constants.hpp>
 
 #include <gtest/gtest.h>
 
 #include <array>
 #include <cmath>
-#include <numbers>
 #include <vector>
 
 using namespace mln;
@@ -86,12 +86,15 @@ TEST(NationalGrid, RegisteredProjectionsInverseUndoesItsForward) {
     // A camera move takes its anchor to lat/lng and back on every step, so any gap between the two adds up over a
     // pinch.
     constexpr double micrometer = 1e-6;
-    constexpr double metersPerDegree = 6371008.8 * std::numbers::pi / 180;
+    constexpr double metersPerDegree = util::EARTH_RADIUS_M * radiansPerDegree;
     const CRS crs = test::nationalGrid("EPSG:27700");
-    std::vector<std::array<double, 2>> positions;
+    // Great Britain on the grid, every 50 km.
+    constexpr double maxEasting = 700000;
+    constexpr double maxNorthing = 1250000;
     constexpr double step = 50000;
-    for (int column = 0; column <= 14; ++column) {
-        for (int row = 0; row <= 25; ++row) {
+    std::vector<std::array<double, 2>> positions;
+    for (int column = 0; column * step <= maxEasting; ++column) {
+        for (int row = 0; row * step <= maxNorthing; ++row) {
             positions.push_back({column * step, row * step});
         }
     }

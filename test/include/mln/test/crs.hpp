@@ -25,6 +25,9 @@ inline std::array<double, 2> unchanged(const std::array<double, 2>& position) {
     return position;
 }
 
+/// EPSG:3413's tile matrix set in meters: tile 0/0/0 is 2^23 m wide, centered on the pole.
+inline constexpr TileMatrixSet epsg3413TileMatrixSet{.origin = {-4194304, 4194304}, .extentAtZoom0 = 8388608};
+
 /// A north polar stereographic projection of a sphere, with a tile matrix set the size of EPSG:3413's.
 inline CRS northPolarStereographic(std::string name) {
     constexpr double radius = 6378137;
@@ -39,7 +42,7 @@ inline CRS northPolarStereographic(std::string name) {
                 const double latitude = 90 - std::atan(rho / (2 * radius)) * 360 / std::numbers::pi;
                 return std::array<double, 2>{std::atan2(position[0], -position[1]) * 180 / std::numbers::pi, latitude};
             }),
-            .tileMatrixSet = {.origin = {-4194304, 4194304}, .extentAtZoom0 = 8388608}};
+            .tileMatrixSet = epsg3413TileMatrixSet};
 }
 
 /// GL JS's test polar stereographic projection: EPSG:3413's true scale at 70 N and central meridian at 45 W, on a
@@ -59,7 +62,7 @@ inline CRS polarStereographic(std::string name) {
                     centralLongitude + std::atan2(position[0], -position[1]) * degrees,
                     90 - 2 * std::atan(std::hypot(position[0], position[1]) / scale) * degrees};
             }),
-            .tileMatrixSet = {.origin = {-4194304, 4194304}, .extentAtZoom0 = 8388608}};
+            .tileMatrixSet = epsg3413TileMatrixSet};
 }
 
 /// Identity coordinates over a square twice as wide as the world, so a center can go past 180 degrees.
@@ -83,6 +86,22 @@ inline CRS disc(std::string name) {
             }),
             .tileMatrixSet = {.origin = {-90, 90}, .extentAtZoom0 = 180}};
 }
+
+/// Registers a projection until the end of its scope, so a test that stops at a failed assertion still removes it.
+class ScopedProjection {
+public:
+    explicit ScopedProjection(CRS crs)
+        : name(crs.name) {
+        addProjection(std::move(crs));
+    }
+    ~ScopedProjection() { removeProjection(name); }
+
+    ScopedProjection(const ScopedProjection&) = delete;
+    ScopedProjection& operator=(const ScopedProjection&) = delete;
+
+private:
+    std::string name;
+};
 
 } // namespace test
 } // namespace mln

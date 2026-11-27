@@ -114,9 +114,8 @@ TEST(AddProjection, NeedsAColonInTheName) {
 }
 
 TEST(AddProjection, RejectsATakenName) {
-    addProjection(test::disc("test:taken"));
+    const test::ScopedProjection registration(test::disc("test:taken"));
     EXPECT_THROW(addProjection(test::disc("test:taken")), std::invalid_argument);
-    removeProjection("test:taken");
 }
 
 TEST(AddProjection, NeedsAPositiveExtent) {
@@ -133,17 +132,16 @@ TEST(AddProjection, NeedsForwardAndInverse) {
 }
 
 TEST(RemoveProjection, RemovesARegisteredProjection) {
-    addProjection(test::disc("test:removed"));
+    const test::ScopedProjection registration(test::disc("test:removed"));
     const auto removed = getRegisteredProjection("test:removed");
     ASSERT_TRUE(removed);
     removeProjection("test:removed");
     EXPECT_FALSE(getRegisteredProjection("test:removed"));
 
     // As in GL JS, the name is free again, and whatever still holds the removed projection keeps it.
-    addProjection(test::wideIdentity("test:removed"));
+    const test::ScopedProjection again(test::wideIdentity("test:removed"));
     EXPECT_EQ(720, getRegisteredProjection("test:removed")->tileMatrixSet().extentAtZoom0);
     EXPECT_EQ(180, removed->tileMatrixSet().extentAtZoom0);
-    removeProjection("test:removed");
 }
 
 TEST(RemoveProjection, CannotRemoveTheIdentity) {

@@ -107,54 +107,51 @@ TEST(CustomGeometrySource, InARegisteredProjection) {
 }
 
 TEST(CustomGeometrySource, TileBoundsInARegisteredProjection) {
-    addProjection(test::polarStereographic("test:polar-tile-bounds"));
-    {
-        util::RunLoop loop;
+    const test::ScopedProjection registration(test::polarStereographic("test:polar-tile-bounds"));
+    util::RunLoop loop;
 
-        HeadlessFrontend frontend{1};
-        Map map(frontend,
-                MapObserver::nullObserver(),
-                MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
-                ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
-        map.getStyle().loadJSON(
-            R"({"version": 8, "projection": {"type": "test:polar-tile-bounds"}, "sources": {}, "layers": []})");
-        map.getStyle().addSource(std::make_unique<CustomGeometrySource>("custom", CustomGeometrySource::Options()));
-        const auto& source = *map.getStyle().getSource("custom")->as<CustomGeometrySource>();
+    HeadlessFrontend frontend{1};
+    Map map(frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
+    map.getStyle().loadJSON(
+        R"({"version": 8, "projection": {"type": "test:polar-tile-bounds"}, "sources": {}, "layers": []})");
+    map.getStyle().addSource(std::make_unique<CustomGeometrySource>("custom", CustomGeometrySource::Options()));
+    const auto& source = *map.getStyle().getSource("custom")->as<CustomGeometrySource>();
 
-        struct Tile {
-            CanonicalTileID id;
-            double west;
-            double south;
-            double east;
-            double north;
-        };
-        // GL JS's `tileIdToLngLatBounds` for the same tiles in the same projection, its box of the four corners. The
-        // pole is inside tile 0/0/0, so that box misses it, and it is the corner of each tile at zoom 1 and of 2/1/1.
-        const std::array tiles = {
-            Tile{{0, 0, 0}, -180, 38.76872677332668, 90, 38.76872677332668},
-            Tile{{1, 0, 0}, -180, 38.76872677332668, 135, 90},
-            Tile{{1, 1, 1}, -45, 38.76872677332668, 135, 90},
-            Tile{{2, 1, 1}, -180, 63.03804324805077, 135, 90},
-            Tile{{3, 4, 5}, -45, 68.53700782445765, 0, 80.31077447189598},
-            Tile{{5, 17, 20}, -33.690067525979785, 76.98061569283365, -18.43494882292201, 80.01406000287281},
-            Tile{{8, 130, 140}, -36.25383773744479, 85.95232966804826, -30.96375653207352, 86.30889476739338},
-        };
-        constexpr double toleranceDegrees = 1e-12;
-        for (const auto& tile : tiles) {
-            const LatLngBounds bounds = source.getTileBounds(tile.id);
-            EXPECT_NEAR(tile.west, bounds.west(), toleranceDegrees) << tile.id;
-            EXPECT_NEAR(tile.south, bounds.south(), toleranceDegrees) << tile.id;
-            EXPECT_NEAR(tile.east, bounds.east(), toleranceDegrees) << tile.id;
-            EXPECT_NEAR(tile.north, bounds.north(), toleranceDegrees) << tile.id;
-        }
-
-        // In Mercator, the style's default projection, the box is the tile's, as before.
-        map.getStyle().setProjection(std::make_unique<Projection>());
-        for (const auto& tile : tiles) {
-            EXPECT_EQ(LatLngBounds(tile.id), source.getTileBounds(tile.id)) << tile.id;
-        }
+    struct Tile {
+        CanonicalTileID id;
+        double west;
+        double south;
+        double east;
+        double north;
+    };
+    // GL JS's `tileIdToLngLatBounds` for the same tiles in the same projection, its box of the four corners. The
+    // pole is inside tile 0/0/0, so that box misses it, and it is the corner of each tile at zoom 1 and of 2/1/1.
+    const std::array tiles = {
+        Tile{{0, 0, 0}, -180, 38.76872677332668, 90, 38.76872677332668},
+        Tile{{1, 0, 0}, -180, 38.76872677332668, 135, 90},
+        Tile{{1, 1, 1}, -45, 38.76872677332668, 135, 90},
+        Tile{{2, 1, 1}, -180, 63.03804324805077, 135, 90},
+        Tile{{3, 4, 5}, -45, 68.53700782445765, 0, 80.31077447189598},
+        Tile{{5, 17, 20}, -33.690067525979785, 76.98061569283365, -18.43494882292201, 80.01406000287281},
+        Tile{{8, 130, 140}, -36.25383773744479, 85.95232966804826, -30.96375653207352, 86.30889476739338},
+    };
+    constexpr double toleranceDegrees = 1e-12;
+    for (const auto& tile : tiles) {
+        const LatLngBounds bounds = source.getTileBounds(tile.id);
+        EXPECT_NEAR(tile.west, bounds.west(), toleranceDegrees) << tile.id;
+        EXPECT_NEAR(tile.south, bounds.south(), toleranceDegrees) << tile.id;
+        EXPECT_NEAR(tile.east, bounds.east(), toleranceDegrees) << tile.id;
+        EXPECT_NEAR(tile.north, bounds.north(), toleranceDegrees) << tile.id;
     }
-    removeProjection("test:polar-tile-bounds");
+
+    // In Mercator, the style's default projection, the box is the tile's, as before.
+    map.getStyle().setProjection(std::make_unique<Projection>());
+    for (const auto& tile : tiles) {
+        EXPECT_EQ(LatLngBounds(tile.id), source.getTileBounds(tile.id)) << tile.id;
+    }
 }
 
 TEST(CustomGeometrySource, TileBoundsOutsideAStyleAreTheMercatorTiles) {

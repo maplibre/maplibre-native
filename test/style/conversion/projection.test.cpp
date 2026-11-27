@@ -46,7 +46,7 @@ TEST(StyleConversion, ProjectionExpressionDrawsAsMercator) {
 
     // Without the globe, every projection an expression or a transition can choose draws as Mercator. A registered one
     // only works as a plain name.
-    addProjection(test::polarStereographic("test:in-a-transition"));
+    const test::ScopedProjection registration(test::polarStereographic("test:in-a-transition"));
     for (const std::string type : {R"(["step",["zoom"],"identity",10,"mercator"])",
                                    R"(["mercator","test:in-a-transition",0.25])",
                                    R"(["interpolate",["linear"],["zoom"],10,"vertical-perspective",12,"mercator"])"}) {
@@ -55,7 +55,6 @@ TEST(StyleConversion, ProjectionExpressionDrawsAsMercator) {
         EXPECT_EQ(StyleProperty::Kind::Undefined, projection->getProperty("type").getKind());
         EXPECT_EQ(nullptr, projection->impl->registeredProjection);
     }
-    removeProjection("test:in-a-transition");
 
     EXPECT_EQ(3u,
               log.count({EventSeverity::Warning,
