@@ -153,8 +153,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     }
     const double startCenterAlt = state.getCenterAltitude();
 
-    const Point<double> startPoint = Projection::project(startLatLng, state.getScale());
-    const Point<double> endPoint = Projection::project(latLng, state.getScale());
+    const Point<double> startPoint = state.getProjection().project(startLatLng, state.getScale());
+    const Point<double> endPoint = state.getProjection().project(latLng, state.getScale());
 
     // Constrain camera options.
     zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
@@ -181,7 +181,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
         animation,
         [=, this](double t) {
             Point<double> framePoint = util::interpolate(startPoint, endPoint, t);
-            LatLng frameLatLng = Projection::unproject(framePoint, state.zoomScale(startZoom));
+            LatLng frameLatLng = state.getProjection().unproject(
+                framePoint, state.zoomScale(startZoom), LatLng::Unwrapped);
             double frameZoom = util::interpolate(startZoom, zoom, t);
             state.setLatLngZoom(frameLatLng, frameZoom);
             state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, t));
@@ -247,8 +248,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     startLatLng.unwrapForShortestPath(latLng);
     const double startCenterAlt = state.getCenterAltitude();
 
-    const Point<double> startPoint = Projection::project(startLatLng, state.getScale());
-    const Point<double> endPoint = Projection::project(latLng, state.getScale());
+    const Point<double> startPoint = state.getProjection().project(startLatLng, state.getScale());
+    const Point<double> endPoint = state.getProjection().project(latLng, state.getScale());
 
     // Constrain camera options.
     zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
@@ -374,7 +375,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
             }
 
             // Convert to geographic coordinates and set the new viewpoint.
-            LatLng frameLatLng = Projection::unproject(framePoint, startScale);
+            LatLng frameLatLng = state.getProjection().unproject(framePoint, startScale, LatLng::Unwrapped);
             state.setLatLngZoom(frameLatLng, frameZoom);
             state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, us));
             if (bearing != startBearing) {

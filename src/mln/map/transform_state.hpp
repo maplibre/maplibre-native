@@ -2,6 +2,7 @@
 
 #include <mln/map/camera.hpp>
 #include <mln/map/mode.hpp>
+#include <mln/map/projection_base.hpp>
 #include <mln/util/camera.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/geo.hpp>
@@ -13,6 +14,7 @@
 #include <cstdint>
 #include <array>
 #include <limits>
+#include <memory>
 #include <optional>
 
 namespace mln {
@@ -133,6 +135,7 @@ public:
     // Matrix
     void matrixFor(mat4&, const UnwrappedTileID&) const;
     void getProjMatrix(mat4& matrix, uint16_t nearZ = 1, bool aligned = false) const;
+    const ProjectionBase& getProjection() const { return *projection; }
 
     // Dimensions
     Size getSize() const;
@@ -301,6 +304,8 @@ private:
     const mat4& getInvertedMatrix() const;
 
 private:
+    std::shared_ptr<const ProjectionBase> projection;
+
     ConstrainMode constrainMode;
     ViewportMode viewportMode;
 

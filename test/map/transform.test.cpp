@@ -1310,3 +1310,183 @@ TEST(Camera, SetOrientationWithRollNoPitch) {
     EXPECT_NEAR(pitch, pitch_, 1.0e-9);
     EXPECT_NEAR(0.0, roll_, 1.0e-9);
 }
+
+namespace {
+
+struct LabeledAnswer {
+    std::string label;
+    double value;
+};
+
+// Relative tolerances for `MercatorBitIdentity`. An answer that goes through the screen passes through the projection
+// matrix or its inverse, which magnifies libm and fused multiply-add differences between platforms 1e3 to 1e4 times.
+constexpr double mercatorTolerance = 1e-12;
+constexpr double throughScreenTolerance = 1e-10;
+
+struct ExpectedAnswer {
+    std::string label;
+    double value;
+    double relativeTolerance = mercatorTolerance;
+};
+
+/// Answers of the Mercator transform on three cameras, labeled by camera and answer, for `MercatorBitIdentity`.
+std::vector<LabeledAnswer> mercatorTransformAnswers() {
+    struct Camera {
+        std::string name;
+        Size size;
+        LatLng center;
+        double zoom;
+        double bearing;
+        double pitch;
+        EdgeInsets padding;
+    };
+    const std::vector<Camera> cameras = {
+        {"San Francisco", {512, 512}, {37.7749, -122.4194}, 12.5, 30, 45, {}},
+        {"Sydney", {800, 600}, {-33.8688, 151.2093}, 3.2, -110, 0, {10, 20, 30, 40}},
+        {"Arctic", {1024, 768}, {79.5, 170.25}, 1.7, 10, 60, {}},
+    };
+    std::vector<LabeledAnswer> answers;
+    for (const auto& camera : cameras) {
+        const auto add = [&](const std::string& label, double value) {
+            answers.push_back({camera.name + " " + label, value});
+        };
+        Transform transform;
+        transform.resize(camera.size);
+        const auto options = CameraOptions()
+                                 .withCenter(camera.center)
+                                 .withZoom(camera.zoom)
+                                 .withBearing(camera.bearing)
+                                 .withPitch(camera.pitch)
+                                 .withPadding(camera.padding);
+        transform.jumpTo(options);
+        const TransformState& state = transform.getState();
+        add("center latitude", state.getLatLng().latitude());
+        add("center longitude", state.getLatLng().longitude());
+        const auto position = *state.getFreeCameraOptions().position;
+        add("camera x", position[0]);
+        add("camera y", position[1]);
+        add("camera z", position[2]);
+        const auto screen = state.latLngToScreenCoordinate(
+            {camera.center.latitude() + 0.001, camera.center.longitude() - 0.002});
+        add("screen x", screen.x);
+        add("screen y", screen.y);
+        const auto atScreen = state.screenCoordinateToLatLng({50, 60});
+        add("at screen latitude", atScreen.latitude());
+        add("at screen longitude", atScreen.longitude());
+        add("max pitch scale factor", state.maxPitchScaleFactor());
+
+        TransformState moved = state;
+        moved.moveLatLng({camera.center.latitude() + 0.01, camera.center.longitude() + 0.02}, {100, 150});
+        add("moved latitude", moved.getLatLng().latitude());
+        add("moved longitude", moved.getLatLng().longitude());
+
+        TransformState fromCamera = state;
+        fromCamera.setFreeCameraOptions(state.getFreeCameraOptions());
+        add("from camera latitude", fromCamera.getLatLng().latitude());
+        add("from camera longitude", fromCamera.getLatLng().longitude());
+        add("from camera zoom", fromCamera.getZoom());
+
+        const auto target = CameraOptions()
+                                .withCenter(LatLng{camera.center.latitude() + 2, camera.center.longitude() - 3})
+                                .withZoom(camera.zoom + 1.5)
+                                .withBearing(camera.bearing + 20)
+                                .withPitch(10);
+        transform.easeTo(target, AnimationOptions(Seconds(1)));
+        transform.updateTransitions(transform.getTransitionStart() + Milliseconds(500));
+        add("eased latitude", transform.getLatLng().latitude());
+        add("eased longitude", transform.getLatLng().longitude());
+        add("eased zoom", transform.getZoom());
+        transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+
+        transform.jumpTo(options);
+        transform.flyTo(target, AnimationOptions(Seconds(1)));
+        transform.updateTransitions(transform.getTransitionStart() + Milliseconds(500));
+        add("flown latitude", transform.getLatLng().latitude());
+        add("flown longitude", transform.getLatLng().longitude());
+        add("flown zoom", transform.getZoom());
+        transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+    }
+    return answers;
+}
+
+} // namespace
+
+// The Mercator transform's answers on three cameras as they were before the projection seam. The tolerances take in
+// libm and fused multiply-add differences between platforms, not a change to the math.
+TEST(Transform, MercatorBitIdentity) {
+    // For an answer that is exactly zero, which has no scale of its own.
+    constexpr double zeroTolerance = 1e-12;
+    const std::vector<ExpectedAnswer> expected = {
+        {"San Francisco center latitude", 37.7749},
+        {"San Francisco center longitude", -122.4194},
+        {"San Francisco camera x", 0.15985455837673615},
+        {"San Francisco camera y", 0.38667951070923756},
+        {"San Francisco camera z", 0.00018310546875},
+        {"San Francisco screen x", 236.53339845522552, throughScreenTolerance},
+        {"San Francisco screen y", 256.55682579549386, throughScreenTolerance},
+        {"San Francisco at screen latitude", 37.76442361680536, throughScreenTolerance},
+        {"San Francisco at screen longitude", -122.45005441561364, throughScreenTolerance},
+        {"San Francisco max pitch scale factor", 1.5},
+        {"San Francisco moved latitude", 37.789268353564324, throughScreenTolerance},
+        {"San Francisco moved longitude", -122.37699541782784, throughScreenTolerance},
+        {"San Francisco from camera latitude", 37.7749},
+        {"San Francisco from camera longitude", -122.4194},
+        {"San Francisco from camera zoom", 12.5},
+        {"San Francisco eased latitude", 39.70087219348297},
+        {"San Francisco eased longitude", -125.30683559592181},
+        {"San Francisco eased zoom", 13.73464861349504},
+        {"San Francisco flown latitude", 39.77424250791644},
+        {"San Francisco flown longitude", -125.41839970529496},
+        {"San Francisco flown zoom", 11.258193199328915},
+        {"Sydney center latitude", -33.86880000000002},
+        {"Sydney center longitude", 151.20929999999998},
+        {"Sydney camera x", 0.9200258333333332},
+        {"Sydney camera y", 0.6000922514587762},
+        {"Sydney camera z", 0.19128308275549602},
+        {"Sydney screen x", 390.02373135570593, throughScreenTolerance},
+        {"Sydney screen y", 310.0191793224831, throughScreenTolerance},
+        {"Sydney at screen latitude", -47.379211768724836, throughScreenTolerance},
+        {"Sydney at screen longitude", 178.0815126354354, throughScreenTolerance},
+        {"Sydney max pitch scale factor", 1.0},
+        {"Sydney moved latitude", -18.999444839858203, throughScreenTolerance},
+        {"Sydney moved longitude", 132.13644348452914, throughScreenTolerance},
+        {"Sydney from camera latitude", -33.86880000000002},
+        {"Sydney from camera longitude", 151.20929999999998},
+        {"Sydney from camera zoom", 3.2},
+        {"Sydney eased latitude", -31.94465358049049},
+        {"Sydney eased longitude", 148.3218644040781},
+        {"Sydney eased zoom", 4.434648613495041},
+        {"Sydney flown latitude", -31.996632184023433},
+        {"Sydney flown longitude", 148.39905272295135},
+        {"Sydney flown zoom", 4.431189851753509},
+        {"Arctic center latitude", 69.11501859456419},
+        {"Arctic center longitude", 170.25},
+        {"Arctic camera x", 0.8687731143749536},
+        {"Arctic camera y", 0.8214670122445704},
+        {"Arctic camera z", 0.3462593662532578},
+        {"Arctic screen x", 483.83151815022364, throughScreenTolerance},
+        {"Arctic screen y", 463.8522840953009, throughScreenTolerance},
+        {"Arctic at screen latitude", 15.513337760683484, throughScreenTolerance},
+        {"Arctic at screen longitude", 87.66527200559784, throughScreenTolerance},
+        {"Arctic max pitch scale factor", 1.1697441339492798},
+        {"Arctic moved latitude", 69.11501859456419, throughScreenTolerance},
+        {"Arctic moved longitude", -111.76530362546656, throughScreenTolerance},
+        {"Arctic from camera latitude", 69.11501859456419},
+        {"Arctic from camera longitude", 170.25},
+        {"Arctic from camera zoom", 1.7},
+        {"Arctic eased latitude", 80.84777514483919},
+        {"Arctic eased longitude", 167.3625644040781},
+        {"Arctic eased zoom", 2.934648613495041},
+        {"Arctic flown latitude", 80.69100736624185},
+        {"Arctic flown longitude", 167.4314661916626},
+        {"Arctic flown zoom", 2.895264021176888},
+    };
+    const std::vector<LabeledAnswer> answers = mercatorTransformAnswers();
+    ASSERT_EQ(expected.size(), answers.size());
+    for (std::size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(expected[i].label, answers[i].label);
+        const double tolerance = expected[i].value == 0 ? zeroTolerance
+                                                        : expected[i].relativeTolerance * std::abs(expected[i].value);
+        EXPECT_NEAR(expected[i].value, answers[i].value, tolerance) << expected[i].label;
+    }
+}
