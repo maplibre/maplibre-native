@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.TextureView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -586,6 +587,16 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     if (!isInEditMode() && nativeMapView != null) {
       // null-checking the nativeMapView, see #13277
       nativeMapView.resizeView(width, height);
+    }
+  }
+
+  @Override
+  protected void onWindowVisibilityChanged(int visibility) {
+    super.onWindowVisibilityChanged(visibility);
+    // TextureView can lose its last frame while its window is hidden (e.g. a dialog when
+    // backgrounded); request a redraw so an idle map doesn't stay blank.
+    if (visibility == VISIBLE && renderView instanceof TextureView && mapRenderer != null && !destroyed) {
+      mapRenderer.requestRender();
     }
   }
 

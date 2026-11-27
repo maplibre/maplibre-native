@@ -76,6 +76,7 @@
     <string name="activity_observer_activity">Log map observer events</string>
     <string name="activity_textureview_debug">TextureView debug</string>
     <string name="activity_textureview_resize">TextureView resize</string>
+    <string name="activity_textureview_dialog">TextureView in a dialog</string>
     <string name="activity_textureview_animate">TextureView animation</string>
     <string name="activity_textureview_transparent">TextureView transparent background</string>
     <string name="activity_surfaceview_resize">SurfaceView resize</string>
