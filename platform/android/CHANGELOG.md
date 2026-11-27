@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Redraw `TextureView` maps when their window becomes visible, fixing an idle map in a dialog staying blank after returning from the background.
+
 ## 13.8.0
 
 ### ✨ Features and improvements
