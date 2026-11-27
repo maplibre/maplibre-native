@@ -44,7 +44,7 @@ std::size_t Filter::hashExpression(const expression::Expression& expr) {
     return seed;
 }
 
-bool Filter::operator()(const expression::EvaluationContext &context) const {
+bool Filter::operator()(const expression::EvaluationContext& context) const {
     if (!this->expression) return true;
 
     const expression::EvaluationResult result = (*this->expression)->evaluate(context);
