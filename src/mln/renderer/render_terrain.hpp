@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <memory>
 #include <map>
 #include <set>
@@ -172,11 +173,19 @@ public:
     /// siblings with nothing deeper inside merge, so detail goes first in the distance, where a
     /// tile covers little of the screen, and the tiles still cover all the ground they did.
     /// Whatever is still over `maxTiles` once no tile is deeper than `minZoom`, nearestMeshTiles
-    /// drops.
+    /// drops. The tile holding `origin` never gives way to a parent shallower than
+    /// `originMinZoom` (meshZoomForEveryDEMPixel).
     static std::set<UnwrappedTileID> coarsenFarMeshTiles(std::set<UnwrappedTileID> tiles,
                                                          size_t maxTiles,
                                                          uint8_t minZoom,
-                                                         const std::array<double, 2>& origin);
+                                                         const std::array<double, 2>& origin,
+                                                         uint8_t originMinZoom = 0);
+
+    /// The shallowest mesh zoom, up to `meshMaxZoom`, at which the mesh has a vertex for every
+    /// pixel of a DEM of `demTileSize` px tiles that ends at `demMaxZoom`. At the DEM's own zoom a
+    /// 256 px DEM tile has two pixels to each of the mesh's 128 cells, so the mesh skips every
+    /// other height and can stand a meter or more off the height getElevation reads there.
+    static uint8_t meshZoomForEveryDEMPixel(uint8_t demMaxZoom, uint16_t demTileSize, uint8_t meshMaxZoom);
 
     /// Tiles a source may cover per tile of the mesh-tile cap (TileParameters::coverTileLimit).
     static constexpr size_t sourceTilesPerMeshTile = 4;
