@@ -9,6 +9,7 @@
 #include <mln/util/projection.hpp>
 #include <mln/util/tile_coordinate.hpp>
 
+#include <algorithm>
 #include <numbers>
 
 using namespace std::numbers;
@@ -148,8 +149,18 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
                                      (std::abs(std::cos(roll)) + std::abs(std::sin(roll)) * size.width / size.height);
     const double tanMultiple = util::clamp(tanFovAboveCenter * std::tan(limitedPitch), 0.0, 0.99);
     assert(tanMultiple < 1);
+
+    // As in GL JS's `_calculateNearFarZ`, the map ends at the horizon.
+    const double horizon = getMercatorHorizon();
+    const double horizonAngle = std::atan(horizon / cameraToCenterDistance);
+    const double minHorizonAngle = util::deg2rad(90.0) - maxMercatorHorizonAngle;
+    const double fovCenterToHorizon = horizonAngle > minHorizonAngle
+                                          ? 2.0 * horizonAngle * (0.5 + offset.y / (horizon * 2.0))
+                                          : minHorizonAngle;
+    const double horizonMultiple = util::clamp(std::tan(fovCenterToHorizon) * std::tan(limitedPitch), 0.0, 0.99);
+
     // Calculate z distance of the farthest fragment that should be rendered.
-    const double furthestDistance = cameraToSeaLevelDistance / (1 - tanMultiple);
+    const double furthestDistance = cameraToSeaLevelDistance / (1 - std::min(tanMultiple, horizonMultiple));
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
     const double farZ = furthestDistance * 1.01;
 
@@ -690,6 +701,11 @@ void TransformState::setRoll(double val) {
 
 float TransformState::getCameraToCenterDistance() const {
     return static_cast<float>(0.5 * size.height / std::tan(fov / 2.0));
+}
+
+double TransformState::getMercatorHorizon() const {
+    return getCameraToCenterDistance() *
+           std::min(std::tan(util::deg2rad(90.0) - pitch) * 0.85, std::tan(maxMercatorHorizonAngle - pitch));
 }
 
 double TransformState::getPitch() const {
