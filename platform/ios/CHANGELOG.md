@@ -2,6 +2,12 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+### Bug fixes
+
+- Text a tile was drawn without because its glyph range failed to load is drawn as soon as the range loads, instead of when the tile is next reloaded ([#5086](https://github.com/maplibre/maplibre-native/pull/5086)).
+
 ## 7.1.0
 
 ### Features

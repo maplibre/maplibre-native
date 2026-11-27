@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Text a tile was drawn without because its glyph range failed to load is drawn as soon as the range loads, instead of when the tile is next reloaded ([#5086](https://github.com/maplibre/maplibre-native/pull/5086)).
+
 ## 13.8.0
 
 ### ✨ Features and improvements
