@@ -1,3 +1,7 @@
+#ifdef GL_ES
+precision highp float;
+#endif
+
 in vec2 v_pos_a;
 in vec2 v_pos_b;
 in vec4 v_lighting;
