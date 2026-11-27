@@ -20,6 +20,10 @@ layout (std140) uniform HillshadePrepareTilePropsUBO {
     highp vec2 u_dimension;
     highp float u_zoom;
     highp float u_maxzoom;
+    highp float u_log2_world_width;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
+    lowp float tileprops_pad3;
 };
 
 out vec2 v_pos;
@@ -43,6 +47,10 @@ layout (std140) uniform HillshadePrepareTilePropsUBO {
     highp vec2 u_dimension;
     highp float u_zoom;
     highp float u_maxzoom;
+    highp float u_log2_world_width;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
+    lowp float tileprops_pad3;
 };
 
 float getElevation(vec2 coord, float bias) {
@@ -83,7 +91,7 @@ void main() {
 
     // Convert the raw pixel-space derivative (slope) into world-space slope.
     // The conversion factor is: tileSize / (8 * meters_per_pixel).
-    // meters_per_pixel is calculated as pow(2.0, 28.2562 - u_zoom).
+    // meters_per_pixel is calculated as pow(2.0, 3.0 + u_log2_world_width - u_zoom).
     // The exaggeration factor is applied to scale the effect at lower zooms.
     // See nickidlugash's awesome breakdown for more info
     // https://github.com/mapbox/mapbox-gl-js/pull/5286#discussion_r148419556
@@ -93,7 +101,7 @@ void main() {
     vec2 deriv = vec2(
         (c + f + f + i) - (a + d + d + g),
         (g + h + h + i) - (a + b + b + c)
-    ) * tileSize / pow(2.0, exaggeration + (28.2562 - u_zoom));
+    ) * tileSize / pow(2.0, exaggeration + (3.0 + u_log2_world_width - u_zoom));
 
     // Encode the derivative into the color channels (r and g)
     // The derivative is scaled from world-space slope to the range [0, 1] for texture storage.

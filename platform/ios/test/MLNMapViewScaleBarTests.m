@@ -67,4 +67,17 @@
 
     XCTAssertGreaterThan(scaleBar.alpha, 0);
     XCTAssertFalse(CGSizeEqualToSize(scaleBar.intrinsicContentSize, CGSizeZero));
-}@end
+}
+
+- (void)testHidesWhenHalfTheViewIsShorterThanTheFirstRow {
+    // At 80 N and zoom 22 a point covers about 3 mm, so half the view is shorter than the shortest
+    // bar (1 m, or 4 ft). The bar hides, as it does past the longest one.
+    self.mapView.showsScale = YES;
+    [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(80, 0) zoomLevel:22 animated:NO];
+    [self.mapView layoutIfNeeded];
+
+    XCTAssertLessThan([self.mapView metersPerPointAtLatitude:80], 0.01);
+    XCTAssertEqual(self.mapView.scaleBar.alpha, 0);
+}
+
+@end

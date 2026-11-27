@@ -1,0 +1,58 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "Raster tiles cut on Ordnance Survey's National Grid, EPSG:27700, which the runner registers with the Helmert transformation from WGS84. The tiles carry red crosshairs centered on 310425 E 386624 N, 452889 E 279104 N, 611481 E 94528 N, 274585 E 193088 N. Each blue ring is a GeoJSON circle at the WGS84 position the projection's inverse gives for one crosshair, so it centers on that crosshair. At zoom 2 the 256px zoom 3 tiles, OS level 0, draw at 896 m per pixel, and the center is the corner the four tiles share. The crosshair at 452889 E straddles the edge between tiles 3/2/4 and 3/3/4.",
+      "width": 512,
+      "height": 512
+    }
+  },
+  "center": [-1.2773320477729189, 51.96064818208741],
+  "zoom": 2,
+  "projection": {"type": "EPSG:27700"},
+  "sources": {
+    "grid": {
+      "type": "raster",
+      "tiles": ["local://tiles/{z}-{x}-{y}.national-grid.png"],
+      "minzoom": 3,
+      "maxzoom": 3,
+      "tileSize": 256
+    },
+    "crosshairs": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [-3.347702452627864, 53.36886065040462]}},
+          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [-1.2239561059133772, 52.40739394092687]}},
+          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [0.9941609476954022, 50.71190226278013]}},
+          {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [-3.813078043797146, 51.622594999864035]}}
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {"background-color": "white"}
+    },
+    {
+      "id": "grid",
+      "type": "raster",
+      "source": "grid",
+      "paint": {"raster-fade-duration": 0}
+    },
+    {
+      "id": "rings",
+      "type": "circle",
+      "source": "crosshairs",
+      "paint": {
+        "circle-radius": 8,
+        "circle-opacity": 0,
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#0000ff"
+      }
+    }
+  ]
+}

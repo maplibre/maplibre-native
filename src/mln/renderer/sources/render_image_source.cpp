@@ -12,6 +12,7 @@
 #include <mln/util/logging.hpp>
 #include <mln/util/tile_coordinate.hpp>
 #include <mln/util/tile_cover.hpp>
+#include <mln/util/tile_range.hpp>
 
 #include <algorithm>
 
@@ -73,7 +74,9 @@ std::unordered_map<std::string, std::vector<Feature>> RenderImageSource::queryRe
     return std::unordered_map<std::string, std::vector<Feature>>{};
 }
 
-std::vector<Feature> RenderImageSource::querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const {
+std::vector<Feature> RenderImageSource::querySourceFeatures(const SourceQueryOptions&,
+                                                            const GlobalStateMap*,
+                                                            const WorldCoordinateHelper&) const {
     return {};
 }
 
@@ -103,7 +106,7 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
     TileCoordinatePoint swPoint = {INFINITY, INFINITY};
     std::vector<TileCoordinatePoint> tileCoordinates;
     for (LatLng latLng : coords) {
-        auto point = TileCoordinate::fromLatLng(0, latLng).p;
+        auto point = transformState.getProjection().project(latLng, 1) / util::tileSize_D;
         tileCoordinates.push_back(point);
         swPoint.x = std::min(swPoint.x, point.x);
         nePoint.x = std::max(nePoint.x, point.x);
@@ -127,10 +130,23 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
         return;
     }
 
-    auto imageBounds = LatLngBounds::hull(coords[0], coords[1]);
-    imageBounds.extend(coords[2]);
-    imageBounds.extend(coords[3]);
-    auto tileCover = util::tileCover(imageBounds, zoom);
+    std::vector<UnwrappedTileID> tileCover;
+    if (transformState.getProjection().worldCoordinateHelper().wraps()) {
+        auto imageBounds = LatLngBounds::hull(coords[0], coords[1]);
+        imageBounds.extend(coords[2]);
+        imageBounds.extend(coords[3]);
+        tileCover = util::tileCover(imageBounds, zoom);
+    } else {
+        // The tiles of the corners' rectangle in the world square, where the lat/lng box of the corners can be far off.
+        const auto tiles = util::TileRange::fromWorldBox({swPoint.x, swPoint.y, nePoint.x, nePoint.y}, zoom, zoom);
+        if (tiles.zoomRange.min <= tiles.zoomRange.max) {
+            for (auto y = tiles.range.min.y; y <= tiles.range.max.y; ++y) {
+                for (auto x = tiles.range.min.x; x <= tiles.range.max.x; ++x) {
+                    tileCover.emplace_back(zoom, x, y);
+                }
+            }
+        }
+    }
     tileIds.clear();
     // The cover is empty, for example, when the image lies wholly outside the
     // latitudes a Web Mercator map can show (beyond about ±85.05°).

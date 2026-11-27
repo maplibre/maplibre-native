@@ -4,6 +4,7 @@ import android.graphics.PointF;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
+import androidx.annotation.RestrictTo;
 
 import org.maplibre.geojson.Point;
 import org.maplibre.android.constants.GeometryConstants;
@@ -83,6 +84,19 @@ public class Projection {
    */
   public double getMetersPerPixelAtLatitude(@FloatRange(from = -90, to = 90) double latitude) {
     return nativeMapView.getMetersPerPixelAtLatitude(latitude);
+  }
+
+  /**
+   * Returns the distance spanned by one pixel at the location and current zoom level. Unlike
+   * {@link #getMetersPerPixelAtLatitude(double)}, it measures at the location's longitude too, which a registered
+   * projection's scale can depend on.
+   *
+   * @param latLng The location for which to return the value.
+   * @return The distance measured in meters.
+   */
+  @RestrictTo(RestrictTo.Scope.LIBRARY)
+  public double getMetersPerPixelAt(@NonNull LatLng latLng) {
+    return nativeMapView.getMetersPerPixelAt(latLng);
   }
 
   /**

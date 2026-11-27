@@ -40,6 +40,8 @@ private:
     void invalidateTile(jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y);
     void invalidateBounds(jni::JNIEnv& env, const jni::Object<LatLngBounds>& bounds);
 
+    jni::Local<jni::Object<LatLngBounds>> getTileBounds(jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y);
+
     jni::Local<jni::Array<jni::Object<geojson::Feature>>> querySourceFeatures(jni::JNIEnv&,
                                                                               const jni::Array<jni::Object<>>&);
 

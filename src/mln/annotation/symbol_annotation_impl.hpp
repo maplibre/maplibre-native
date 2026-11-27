@@ -22,6 +22,7 @@ public:
     SymbolAnnotationImpl(AnnotationID, SymbolAnnotation);
 
     void updateLayer(const CanonicalTileID&, AnnotationTileLayer&) const;
+    void updateLayer(const CanonicalTileID&, AnnotationTileLayer&, const Point<double>& world) const;
 
     const AnnotationID id;
     const SymbolAnnotation annotation;

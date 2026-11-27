@@ -2,6 +2,7 @@
 
 #include <mln/map/camera.hpp>
 #include <mln/map/mode.hpp>
+#include <mln/map/projection_base.hpp>
 #include <mln/util/camera.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/geo.hpp>
@@ -13,7 +14,9 @@
 #include <cstdint>
 #include <array>
 #include <limits>
+#include <memory>
 #include <optional>
+#include <vector>
 
 namespace mln {
 
@@ -130,9 +133,24 @@ public:
 
     void setProperties(const TransformStateProperties& properties);
 
+    // Projection
+    /// Draws in a registered projection, see `addProjection`, or in Mercator for null.
+    void setRegisteredProjection(std::shared_ptr<const CRSWorldCoordinateHelper>);
+    const std::shared_ptr<const CRSWorldCoordinateHelper>& getRegisteredProjection() const {
+        return registeredProjection;
+    }
+    /// The meters on the ground a pixel spans at a location at the current zoom: Mercator's scale at its latitude, or
+    /// in a registered projection the distance from the location to the point 100 pixels along the projection's x axis,
+    /// over 100, as GL JS's geolocate control measures it.
+    double getMetersPerPixelAt(const LatLng&) const;
+    /// In a registered projection, the meters the camera counts across a pixel at a zoom: the projection's units, which
+    /// count as meters, as in GL JS. Empty in Mercator, where they depend on the latitude.
+    std::optional<double> getRegisteredProjectionMetersPerPixel(double zoom) const;
+
     // Matrix
     void matrixFor(mat4&, const UnwrappedTileID&) const;
     void getProjMatrix(mat4& matrix, uint16_t nearZ = 1, bool aligned = false) const;
+    const ProjectionBase& getProjection() const { return *projection; }
 
     // Dimensions
     Size getSize() const;
@@ -231,6 +249,8 @@ public:
     // Conversion
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&, vec4&) const;
+    /// `latLngToScreenCoordinate` for each lat/lng, converted in one batch in a registered projection.
+    std::vector<ScreenCoordinate> latLngsToScreenCoordinates(const std::vector<LatLng>&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Unwrapped) const;
     // Implements mapbox-gl-js pointCoordinate() : MercatorCoordinate.
     TileCoordinate screenCoordinateToTileCoordinate(const ScreenCoordinate&, uint8_t atZoom) const;
@@ -261,6 +281,7 @@ public:
 
 private:
     bool rotatedNorth() const;
+    double constrainedMinScale() const;
 
     // Viewport center offset, from [size.width / 2, size.height / 2], defined
     // by |edgeInsets| in screen coordinates, with top left origin.
@@ -301,6 +322,18 @@ private:
     const mat4& getInvertedMatrix() const;
 
 private:
+    void updateCenterWorldBox();
+    Point<double> centerWorldPoint() const;
+    double metersPerPixelAtCenter() const;
+
+    ScreenCoordinate projectedToScreenCoordinate(const Point<double>& projected, vec4&) const;
+
+    std::shared_ptr<const ProjectionBase> projection;
+    std::shared_ptr<const CRSWorldCoordinateHelper> registeredProjection;
+    /// Where a projection whose world does not wrap keeps the center, in world units: the max bounds as a rectangle
+    /// in its world square, or the whole square.
+    std::array<double, 4> centerWorldBox{0, 0, 1, 1};
+
     ConstrainMode constrainMode;
     ViewportMode viewportMode;
 

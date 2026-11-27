@@ -174,7 +174,7 @@ std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::string& i
         if (!geoJSON) {
             return std::nullopt;
         }
-        result->setGeoJSON(*geoJSON);
+        result->setGeoJSON(std::move(*geoJSON));
     } else if (toString(*dataValue)) {
         result->setURL(*toString(*dataValue));
     } else {

@@ -331,6 +331,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/light.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/position.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/property_value.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/source.hpp
@@ -397,6 +398,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/layers/symbol_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/light.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/position.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/property_expression.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/property_value.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/rotation.hpp
@@ -433,6 +435,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/util/constants.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/containers.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/convert.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/util/crs.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/default_style.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/enum.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/event.hpp
@@ -468,6 +471,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/util/string.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/symbol_error_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/thread.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/util/tile_matrix_set.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/tile_server_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/timer.hpp
@@ -566,10 +570,15 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/map/map_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/map_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/map_projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/mercator_projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/mercator_projection.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/projection_base.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform_state.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform_state.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/world_coordinate_helper.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/world_coordinate_helper.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/zoom_history.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/math/log2.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/platform/settings.cpp
@@ -719,6 +728,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/light.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/position.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/projection.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/property_value.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/hillshade_conversions.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/rotation.cpp
@@ -840,6 +850,9 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/paint_property.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/parser.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/parser.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/properties.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/property_expression.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/rapidjson_conversion.hpp
@@ -964,6 +977,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/font_stack.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/geo.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/geojson_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/geojson_reproject.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/geojson_reproject.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/geometry_util.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/geometry_util.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/grid_index.cpp

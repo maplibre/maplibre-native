@@ -19,6 +19,7 @@
 #include "geojson/multi_polygon.hpp"
 #include "geojson/point.hpp"
 #include "geojson/polygon.hpp"
+#include "geometry/coordinate_reference_system.hpp"
 #include "geometry/lat_lng.hpp"
 #include "geometry/lat_lng_bounds.hpp"
 #include "geometry/lat_lng_quad.hpp"
@@ -30,6 +31,7 @@
 #include "gson/json_object.hpp"
 #include "gson/json_primitive.hpp"
 #include "java_types.hpp"
+#include "map/style.hpp"
 #include "map_renderer.hpp"
 #include "map_renderer_runnable.hpp"
 #include "maplibre.hpp"
@@ -91,6 +93,7 @@ void registerNatives(JavaVM* vm) {
     geojson::Polygon::registerNative(env);
 
     // Geometry
+    CoordinateReferenceSystem::registerNative(env);
     LatLng::registerNative(env);
     LatLngBounds::registerNative(env);
     LatLngQuad::registerNative(env);
@@ -126,6 +129,7 @@ void registerNatives(JavaVM* vm) {
     LayerManagerAndroid::get()->registerNative(env);
     Source::registerNative(env);
     Light::registerNative(env);
+    Style::registerNative(env);
     Position::registerNative(env);
     Formatted::registerNative(env);
     FormattedSection::registerNative(env);

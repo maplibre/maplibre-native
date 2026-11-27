@@ -5,6 +5,9 @@
 #include <mln/util/geo.hpp>
 #include <mln/util/projection.hpp>
 
+#include <array>
+#include <cmath>
+
 namespace mln {
 namespace util {
 
@@ -30,6 +33,26 @@ public:
         const auto maxY = static_cast<uint32_t>(util::clamp(std::floor(swProj.y), 0.0, maxTile));
 
         return {{{minX, minY}, {maxX, maxY}}, {minZoom, maxZoom}};
+    }
+
+    /// The tiles a rectangle in the world square reaches into, as min x, min y, max x, max y in world units, as GL JS's
+    /// `TileBounds` counts them.
+    static TileRange fromWorldBox(const std::array<double, 4>& box, uint8_t minZoom, uint8_t maxZoom) noexcept {
+        if (minZoom > maxZoom) {
+            std::swap(minZoom, maxZoom);
+        }
+        if (box[2] <= 0 || box[3] <= 0 || box[0] >= 1 || box[1] >= 1) {
+            // Outside the square: no zoom range contains any tile.
+            return {{{0, 0}, {0, 0}}, {1, 0}};
+        }
+        const double maxTile = std::pow(2.0, maxZoom);
+        const auto first = [&](double world) {
+            return static_cast<uint32_t>(util::clamp(std::floor(world * maxTile), 0.0, maxTile - 1));
+        };
+        const auto last = [&](double world) {
+            return static_cast<uint32_t>(util::clamp(std::ceil(world * maxTile) - 1, 0.0, maxTile - 1));
+        };
+        return {{{first(box[0]), first(box[1])}, {last(box[2]), last(box[3])}}, {minZoom, maxZoom}};
     }
 
     // Compute the range of tiles covered by the bounds.

@@ -20,7 +20,9 @@ private:
         const GlobalStateMap* globalState,
         const mat4& projMatrix) const override;
 
-    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const override;
+    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&,
+                                             const GlobalStateMap*,
+                                             const WorldCoordinateHelper&) const override;
 
     // RenderTileSetSource overrides
     void updateInternal(const Tileset&,

@@ -58,7 +58,8 @@ std::unordered_map<std::string, std::vector<Feature>> RenderAnnotationSource::qu
 }
 
 std::vector<Feature> RenderAnnotationSource::querySourceFeatures(const SourceQueryOptions&,
-                                                                 const GlobalStateMap*) const {
+                                                                 const GlobalStateMap*,
+                                                                 const WorldCoordinateHelper&) const {
     return {};
 }
 

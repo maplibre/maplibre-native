@@ -1,5 +1,6 @@
 #include <gmock/gmock.h>
 
+#include <mln/test/crs.hpp>
 #include <mln/test/util.hpp>
 #include <mln/test/stub_file_source.hpp>
 #include <mln/test/stub_map_observer.hpp>
@@ -13,6 +14,7 @@
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/map/map_projection.hpp>
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/math/log2.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/renderer/update_parameters.hpp>
@@ -28,13 +30,16 @@
 #include <mln/style/image.hpp>
 #include <mln/style/layers/background_layer.hpp>
 #include <mln/style/layers/background_layer.hpp>
+#include <mln/style/layers/circle_layer.hpp>
 #include <mln/style/layers/fill_layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
 #include <mln/style/layers/location_indicator_layer.hpp>
 #include <mln/style/layers/raster_layer.hpp>
 #include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/projection.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/sources/geojson_source_impl.hpp>
 #include <mln/style/sources/image_source.hpp>
 #include <mln/style/sources/vector_source.hpp>
 #include <mln/style/style_impl.hpp>
@@ -42,6 +47,7 @@
 #include <mln/util/async_task.hpp>
 #include <mln/util/client_options.hpp>
 #include <mln/util/color.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/image.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/io.hpp>
@@ -49,7 +55,12 @@
 #include <mln/util/run_loop.hpp>
 #include <mln/util/timer.hpp>
 
+#include <algorithm>
+#include <array>
 #include <atomic>
+#include <memory>
+#include <span>
+#include <vector>
 
 using namespace mln;
 using namespace mln::style;
@@ -201,6 +212,444 @@ TEST(Map, LatLngBoundsToCamera) {
     CameraOptions virtualCamera = test.map.cameraForLatLngBounds(bounds, {});
     ASSERT_TRUE(bounds.contains(*virtualCamera.center));
     EXPECT_NEAR(*virtualCamera.zoom, 1.55467, 1e-5);
+}
+
+TEST(Map, LatLngBoundsToCameraInAPolarProjection) {
+    CRS crs = test::northPolarStereographic("test:polar-fit");
+    auto forwardCalls = std::make_shared<std::vector<std::size_t>>();
+    crs.forward = [forward = crs.forward, forwardCalls](std::span<const std::array<double, 2>> lngLats,
+                                                        std::span<std::array<double, 2>> positions) {
+        forwardCalls->push_back(lngLats.size());
+        forward(lngLats, positions);
+    };
+    const test::ScopedProjection registration(std::move(crs));
+    MapTest<> test;
+    test.map.getStyle().loadJSON(
+        R"({"version": 8, "projection": {"type": "test:polar-fit"}, "sources": {}, "layers": []})");
+    forwardCalls->clear();
+
+    // Its corners are the pole and one point on its edge, but the cap north of 60N is a disc around the pole.
+    CameraOptions camera = test.map.cameraForLatLngBounds(LatLngBounds::hull({60, -180}, {90, 180}), {});
+    ASSERT_TRUE(camera.center);
+    EXPECT_NEAR(90, camera.center->latitude(), 1e-6);
+    // The box is fitted by its 17 by 17 samples, which go through the converter in one call.
+    EXPECT_THAT(*forwardCalls, testing::Contains(289u));
+    EXPECT_LT(forwardCalls->size(), 289u);
+}
+
+TEST(Map, MetersPerPixelInMercatorIsItsScaleAtTheLatitude) {
+    MapTest<> test;
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{40, -74}).withZoom(10.5));
+
+    EXPECT_EQ(mln::Projection::getMetersPerPixelAtLatitude(55, 10.5), test.map.getMetersPerPixelAt({55, 20}));
+    const MapProjection projection(test.map);
+    EXPECT_EQ(test.map.getMetersPerPixelAt({55, 20}), projection.getMetersPerPixelAt({55, 20}));
+    EXPECT_FALSE(projection.getRegisteredProjectionMetersPerPixel(3));
+}
+
+TEST(Map, MetersPerPixelInARegisteredProjection) {
+    const test::ScopedProjection registration(test::polarStereographic("test:polar-scale"));
+    MapTest<> test;
+    test.map.getStyle().loadJSON(
+        R"({"version": 8, "projection": {"type": "test:polar-scale"}, "sources": {}, "layers": []})");
+    struct Camera {
+        LatLng center;
+        double zoom;
+        LatLng location;
+        double metersPerPixel;
+    };
+    // GL JS's numbers for the same projection, from its own `Map.project`, `Map.unproject` and
+    // `LngLat.distanceTo` as its geolocate control calls them: the distance from the location to the point 100
+    // pixels to its right, over 100. At bearing 0 and pitch 0 those are 100 pixels along the projection's x axis.
+    const std::array cameras = {
+        Camera{{70, -45}, 4, {70, -45}, 1022.8325840486776},
+        Camera{{80, 30}, 6, {81, 40}, 261.9986619836209},
+        Camera{{60, -100}, 8, {60.1, -100.2}, 61.535774394909105},
+    };
+    constexpr double relativeTolerance = 1e-9;
+    for (const auto& camera : cameras) {
+        test.map.jumpTo(CameraOptions().withCenter(camera.center).withZoom(camera.zoom).withBearing(0).withPitch(0));
+        const double metersPerPixel = test.map.getMetersPerPixelAt(camera.location);
+        EXPECT_NEAR(camera.metersPerPixel, metersPerPixel, camera.metersPerPixel * relativeTolerance);
+
+        const MapProjection projection(test.map);
+        EXPECT_EQ(metersPerPixel, projection.getMetersPerPixelAt(camera.location));
+        EXPECT_EQ(test.map.getRegisteredProjectionMetersPerPixel(camera.zoom),
+                  projection.getRegisteredProjectionMetersPerPixel(camera.zoom));
+    }
+
+    // The measure runs along the projection's x axis whichever way the camera looks.
+    const Camera& first = cameras.front();
+    test.map.jumpTo(CameraOptions().withCenter(first.center).withZoom(first.zoom).withBearing(30).withPitch(45));
+    EXPECT_NEAR(
+        first.metersPerPixel, test.map.getMetersPerPixelAt(first.location), first.metersPerPixel * relativeTolerance);
+}
+
+TEST(Map, RegisteredProjectionMetersPerPixelIsItsUnitsAcrossAPixel) {
+    const test::ScopedProjection registration(test::polarStereographic("test:polar-camera"));
+    MapTest<> test;
+    EXPECT_FALSE(test.map.getRegisteredProjectionMetersPerPixel(3));
+
+    test.map.getStyle().loadJSON(
+        R"({"version": 8, "projection": {"type": "test:polar-camera"}, "sources": {}, "layers": []})");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{80, -45}).withZoom(4));
+
+    EXPECT_DOUBLE_EQ(test::epsg3413TileMatrixSet.extentAtZoom0 / mln::Projection::worldSize(std::pow(2.0, 3)),
+                     test.map.getRegisteredProjectionMetersPerPixel(3).value());
+}
+
+TEST(Map, TilesLoadAgainWhenTheProjectionChanges) {
+    // As in GL JS, a new projection loads every source's tiles again, since a tile ID names other ground in another
+    // projection's tile grid. Each request's `{bbox}` is in the grid it was made for.
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version": 8,
+        "sources": {"raster": {"type": "raster", "tiles": ["raster/{z}/{x}/{y}?bbox={bbox}"]},
+                    "vector": {"type": "vector", "tiles": ["vector/{z}/{x}/{y}?bbox={bbox}"]}},
+        "layers": [{"id": "raster", "type": "raster", "source": "raster"},
+                   {"id": "vector", "type": "fill", "source": "vector", "source-layer": "water"}]})");
+    std::vector<std::string> requested;
+    test.fileSource->tileResponse = [&](const Resource& resource) {
+        requested.push_back(resource.url);
+        Response response;
+        response.noContent = true;
+        return response;
+    };
+    const auto render = [&] {
+        requested.clear();
+        test.frontend.render(test.map);
+        return requested;
+    };
+    const std::string mercatorBox =
+        "?bbox=-20037508.342789244,-20037508.342789244,20037508.342789244,20037508.342789244";
+    const auto inMercator = testing::UnorderedElementsAre("raster/0/0/0" + mercatorBox, "vector/0/0/0" + mercatorBox);
+    EXPECT_THAT(render(), inMercator);
+
+    test.map.getStyle().setProjection(std::make_unique<style::Projection>());
+    EXPECT_THAT(render(), testing::IsEmpty());
+
+    auto identity = std::make_unique<style::Projection>();
+    const JSValue identityName("identity");
+    ASSERT_FALSE(identity->setProperty("type", &identityName));
+    test.map.getStyle().setProjection(std::move(identity));
+    EXPECT_THAT(render(),
+                testing::UnorderedElementsAre("raster/0/0/0?bbox=-90,-90,90,90", "vector/0/0/0?bbox=-90,-90,90,90"));
+
+    test.map.getStyle().setProjection(std::make_unique<style::Projection>());
+    EXPECT_THAT(render(), inMercator);
+}
+
+TEST(Map, FreeCameraInARegisteredProjectionIsPlacedByItsLatLngAndAltitude) {
+    const test::ScopedProjection registration(test::polarStereographic("test:polar-free-camera"));
+    MapTest<> test;
+    test.map.getStyle().loadJSON(
+        R"({"version": 8, "projection": {"type": "test:polar-free-camera"}, "sources": {}, "layers": []})");
+    // GL JS's numbers for the same projection on a 256 by 256 map, from its own
+    // `calculateCameraOptionsFromCameraLngLatAltRotation` and the camera position its camera math reads.
+    constexpr double tolerance = 1e-9;
+    const auto expectNear = [&](const auto& expected, const auto& actual) {
+        for (std::size_t i = 0; i < expected.size(); ++i) {
+            EXPECT_NEAR(expected[i], actual[i], std::max(1.0, std::abs(expected[i])) * tolerance) << i;
+        }
+    };
+
+    test.map.jumpTo(CameraOptions().withBearing(30).withPitch(40));
+    FreeCameraOptions placed;
+    placed.orientation = test.map.getFreeCameraOptions().orientation;
+    placed.setLocation({.location = {75, 20}, .altitude = 600000});
+    test.map.setFreeCameraOptions(placed);
+    const CameraOptions camera = test.map.getCameraOptions();
+    EXPECT_NEAR(73.93194983693965, camera.center->latitude(), tolerance);
+    EXPECT_NEAR(36.69149821787511, camera.center->longitude(), tolerance);
+    EXPECT_NEAR(3.005859525185552, *camera.zoom, tolerance);
+    EXPECT_NEAR(30, *camera.bearing, tolerance);
+    EXPECT_NEAR(40, *camera.pitch, tolerance);
+    const auto location = test.map.getFreeCameraOptions().getLocation();
+    ASSERT_TRUE(location);
+    EXPECT_NEAR(75, location->location.latitude(), tolerance);
+    EXPECT_NEAR(20, location->location.longitude(), tolerance);
+    EXPECT_NEAR(600000, location->altitude, 600000 * tolerance);
+
+    struct View {
+        CameraOptions camera;
+        LatLngAltitude cameraLocation;
+        LatLng centerFromCamera;
+    };
+    const std::array views = {
+        View{.camera = CameraOptions().withCenter(LatLng{75, 20}).withZoom(5).withBearing(30).withPitch(40),
+             .cameraLocation = {.location = {75.05575243852425, 15.550080695737407}, .altitude = 150610.46587273604},
+             .centerFromCamera = {75, 19.999999999999986}},
+        View{.camera = CameraOptions().withCenter(LatLng{88, 100}).withZoom(6).withBearing(-60).withPitch(50),
+             .cameraLocation = {.location = {87.82528364994329, 81.3686612806135}, .altitude = 63188.59318262557},
+             .centerFromCamera = {88, 99.99999999999994}},
+        View{.camera = CameraOptions().withCenter(LatLng{90, 0}).withZoom(3).withBearing(0).withPitch(0),
+             .cameraLocation = {.location = {90, 135}, .altitude = 786432},
+             .centerFromCamera = {90, 135}},
+    };
+    for (const View& view : views) {
+        test.map.jumpTo(view.camera);
+        const FreeCameraOptions freeCamera = test.map.getFreeCameraOptions();
+        FreeCameraOptions expected;
+        expected.setLocation(view.cameraLocation);
+        expectNear(*expected.position, *freeCamera.position);
+
+        test.map.jumpTo(CameraOptions().withCenter(LatLng{70, -45}).withZoom(2).withBearing(0).withPitch(0));
+        test.map.setFreeCameraOptions(freeCamera);
+        const CameraOptions back = test.map.getCameraOptions();
+        EXPECT_NEAR(view.centerFromCamera.latitude(), back.center->latitude(), tolerance);
+        EXPECT_NEAR(view.centerFromCamera.longitude(), back.center->longitude(), tolerance);
+        EXPECT_NEAR(*view.camera.zoom, *back.zoom, tolerance);
+        EXPECT_NEAR(*view.camera.bearing, *back.bearing, tolerance);
+        EXPECT_NEAR(*view.camera.pitch, *back.pitch, tolerance);
+        const FreeCameraOptions again = test.map.getFreeCameraOptions();
+        expectNear(*freeCamera.position, *again.position);
+        expectNear(*freeCamera.orientation, *again.orientation);
+    }
+}
+
+namespace {
+
+constexpr auto geoJSONPoint = R"({"type": "Point", "coordinates": [45, 45]})";
+
+std::unique_ptr<style::Projection> projectionOfType(const char* type) {
+    auto projection = std::make_unique<style::Projection>();
+    const JSValue name(rapidjson::StringRef(type));
+    EXPECT_FALSE(projection->setProperty("type", &name));
+    return projection;
+}
+
+/// Renders the map centered on `place` at zoom 0 and checks that each point it draws, queried over the whole view, is
+/// there to within a unit of the zoom 0 tile, where the query takes it from.
+void expectPointsDrawnAt(MapTest<>& test, const LatLng& place, std::size_t count) {
+    constexpr double tileUnitInDegrees = 360.0 / util::EXTENT;
+    test.map.jumpTo(CameraOptions().withCenter(place).withZoom(0));
+    test.frontend.render(test.map);
+    const Size size = test.frontend.getSize();
+    const auto features = test.frontend.getRenderer()->queryRenderedFeatures(
+        ScreenBox{{0, 0}, {static_cast<double>(size.width), static_cast<double>(size.height)}});
+    EXPECT_EQ(count, features.size());
+    for (const auto& feature : features) {
+        const auto& point = feature.geometry.get<Point<double>>();
+        EXPECT_NEAR(place.longitude(), point.x, tileUnitInDegrees) << feature.source;
+        EXPECT_NEAR(place.latitude(), point.y, tileUnitInDegrees) << feature.source;
+    }
+}
+
+std::size_t warningCount(const FixtureLog& log) {
+    const auto messages = log.unchecked();
+    return std::ranges::count_if(
+        messages, [](const FixtureLog::Message& message) { return message.severity == EventSeverity::Warning; });
+}
+
+FixtureLog::Message drawsNothingWarning(const std::string& source) {
+    return {EventSeverity::Warning,
+            Event::General,
+            -1,
+            "GeoJSON source \"" + source +
+                "\" has data tiled for another projection and draws nothing; set its data again after changing the "
+                "projection."};
+}
+
+} // namespace
+
+TEST(Map, GeoJSONTiledForAnotherProjectionIsNotDrawn) {
+    FixtureLog log;
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"},
+        "sources": {"points": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}},
+        "layers": [{"id": "points", "type": "circle", "source": "points"}]})");
+    const auto point = mapbox::geojson::parse(geoJSONPoint);
+    auto& source = *test.map.getStyle().getSource("points")->as<GeoJSONSource>();
+    const LatLng place{45, 45};
+
+    source.setGeoJSONData(GeoJSONData::create(point, Scheduler::GetSequenced()));
+    expectPointsDrawnAt(test, place, 0);
+    expectPointsDrawnAt(test, place, 0);
+    EXPECT_EQ(1u, log.count(drawsNothingWarning("points")));
+
+    source.setGeoJSONData(GeoJSONSource::Impl::createData(point,
+                                                          Scheduler::GetSequenced(),
+                                                          GeoJSONOptions::defaultOptions(),
+                                                          GeoJSONSource::Impl::registeredProjection(source)));
+    expectPointsDrawnAt(test, place, 1);
+    EXPECT_EQ(0u, warningCount(log));
+}
+
+TEST(Map, GeoJSONIsTiledAgainWhenTheProjectionChanges) {
+    const test::ScopedProjection registration(test::wideIdentity("test:wide-identity-again"));
+    FixtureLog log;
+    MapTest<> test;
+    test.fileSource->sourceResponse = [](const Resource&) {
+        Response response;
+        response.data = std::make_shared<std::string>(geoJSONPoint);
+        return response;
+    };
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"},
+        "sources": {
+            "inline": {"type": "geojson", "data": {"type": "Point", "coordinates": [45, 45]}},
+            "set": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}},
+            "url": {"type": "geojson", "data": "http://example.com/point.geojson"}},
+        "layers": [
+            {"id": "inline", "type": "circle", "source": "inline"},
+            {"id": "set", "type": "circle", "source": "set"},
+            {"id": "url", "type": "circle", "source": "url"}]})");
+    test.map.getStyle().getSource("set")->as<GeoJSONSource>()->setGeoJSON(mapbox::geojson::parse(geoJSONPoint));
+    const LatLng place{45, 45};
+    expectPointsDrawnAt(test, place, 3);
+
+    test.map.getStyle().setProjection(projectionOfType("test:wide-identity-again"));
+    expectPointsDrawnAt(test, place, 3);
+
+    test.map.getStyle().setProjection(std::make_unique<style::Projection>());
+    expectPointsDrawnAt(test, place, 3);
+    EXPECT_EQ(0u, warningCount(log));
+}
+
+TEST(Map, GeoJSONFromAURLIsTiledInTheProjectionSetWhileItLoads) {
+    FixtureLog log;
+    MapTest<> test;
+    test.fileSource->sourceResponse = [&](const Resource&) {
+        // This runs before the source tiles the response in the background, and the change comes before the result.
+        test.runLoop.schedule([&] { test.map.getStyle().setProjection(std::make_unique<style::Projection>()); });
+        Response response;
+        response.data = std::make_shared<std::string>(geoJSONPoint);
+        return response;
+    };
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"},
+        "sources": {"url": {"type": "geojson", "data": "http://example.com/point.geojson"}},
+        "layers": [{"id": "url", "type": "circle", "source": "url"}]})");
+
+    expectPointsDrawnAt(test, {45, 45}, 1);
+    EXPECT_EQ(0u, warningCount(log));
+}
+
+TEST(Map, GeoJSONTiledInMercatorIsNotKept) {
+    // Whether it came with the style, was set before or after the source joined it, or was kept for the registered
+    // projection the style was in before, the source keeps no GeoJSON once it has tiled it in Mercator. So after a
+    // switch to a registered projection it has nothing to tile, and draws nothing.
+    FixtureLog log;
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version": 8,
+        "sources": {
+            "inline": {"type": "geojson", "data": {"type": "Point", "coordinates": [45, 45]}},
+            "set": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}},
+        "layers": [
+            {"id": "inline", "type": "circle", "source": "inline"},
+            {"id": "set", "type": "circle", "source": "set"}]})");
+    auto& style = test.map.getStyle();
+    const auto point = mapbox::geojson::parse(geoJSONPoint);
+    style.getSource("set")->as<GeoJSONSource>()->setGeoJSON(point);
+    auto pending = std::make_unique<GeoJSONSource>("pending");
+    pending->setGeoJSON(point);
+    style.addSource(std::move(pending));
+    style.addLayer(std::make_unique<CircleLayer>("pending", "pending"));
+    const LatLng place{45, 45};
+    expectPointsDrawnAt(test, place, 3);
+
+    style.setProjection(projectionOfType("identity"));
+    expectPointsDrawnAt(test, place, 0);
+
+    for (const char* id : {"inline", "set", "pending"}) {
+        style.getSource(id)->as<GeoJSONSource>()->setGeoJSON(point);
+    }
+    expectPointsDrawnAt(test, place, 3);
+    style.setProjection(std::make_unique<style::Projection>());
+    expectPointsDrawnAt(test, place, 3);
+    style.setProjection(projectionOfType("identity"));
+    expectPointsDrawnAt(test, place, 0);
+    for (const char* id : {"inline", "set", "pending"}) {
+        EXPECT_EQ(2u, log.count(drawsNothingWarning(id))) << id;
+    }
+}
+
+TEST(Map, GeoJSONThatCannotBeTiledAgainWarnsOnce) {
+    const test::ScopedProjection registration(test::wideIdentity("test:wide-identity-warns"));
+    FixtureLog log;
+    MapTest<> test;
+    test.fileSource->sourceResponse = [](const Resource&) {
+        Response response;
+        response.data = std::make_shared<std::string>(geoJSONPoint);
+        return response;
+    };
+    test.map.getStyle().loadJSON(R"({"version": 8,
+        "sources": {
+            "inline": {"type": "geojson", "data": {"type": "Point", "coordinates": [45, 45]}},
+            "given": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}},
+            "url": {"type": "geojson", "data": "http://example.com/point.geojson"}},
+        "layers": [
+            {"id": "inline", "type": "circle", "source": "inline"},
+            {"id": "given", "type": "circle", "source": "given"},
+            {"id": "url", "type": "circle", "source": "url"}]})");
+    auto& style = test.map.getStyle();
+    style.getSource("given")->as<GeoJSONSource>()->setGeoJSONData(
+        GeoJSONData::create(mapbox::geojson::parse(geoJSONPoint), Scheduler::GetSequenced()));
+    const LatLng place{45, 45};
+    expectPointsDrawnAt(test, place, 3);
+
+    style.setProjection(projectionOfType("identity"));
+    expectPointsDrawnAt(test, place, 1);
+    style.setProjection(projectionOfType("test:wide-identity-warns"));
+    expectPointsDrawnAt(test, place, 1);
+    EXPECT_EQ(1u, log.count(drawsNothingWarning("inline")));
+    EXPECT_EQ(1u, log.count(drawsNothingWarning("given")));
+    EXPECT_EQ(0u, warningCount(log));
+
+    style.getSource("inline")->as<GeoJSONSource>()->setGeoJSON(mapbox::geojson::parse(geoJSONPoint));
+    expectPointsDrawnAt(test, place, 2);
+    EXPECT_EQ(0u, warningCount(log));
+}
+
+TEST(Map, GeoJSONSetAfterItsProjectionIsRemovedIsTiledInIt) {
+    const test::ScopedProjection registration(test::polarStereographic("test:polar-removed"));
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "test:polar-removed"},
+        "sources": {"points": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}},
+        "layers": [{"id": "points", "type": "circle", "source": "points"}]})");
+    const LatLng place{75, 0};
+    test.map.jumpTo(CameraOptions().withCenter(place).withZoom(3));
+    test.frontend.render(test.map);
+
+    // The map keeps drawing in the projection, as GL JS's maps do, so data set now is tiled in it too.
+    removeProjection("test:polar-removed");
+    test.map.getStyle().getSource("points")->as<GeoJSONSource>()->setGeoJSON(
+        mapbox::geojson::parse(R"({"type": "Point", "coordinates": [0, 75]})"));
+    test.frontend.render(test.map);
+
+    const auto features = test.frontend.getRenderer()->queryRenderedFeatures(test.map.pixelForLatLng(place));
+    ASSERT_EQ(1u, features.size());
+    const auto& point = features[0].geometry.get<Point<double>>();
+    EXPECT_NEAR(0, point.x, 1e-3);
+    EXPECT_NEAR(75, point.y, 1e-3);
+}
+
+TEST(Map, GeoJSONDataCreatedInItsSourcesProjectionIsTiledInIt) {
+    const test::ScopedProjection registration(test::polarStereographic("test:polar-created"));
+    GeoJSONSource detached("detached");
+    EXPECT_FALSE(GeoJSONSource::Impl::registeredProjection(detached));
+
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "test:polar-created"},
+        "sources": {"points": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}},
+        "layers": [{"id": "points", "type": "circle", "source": "points"}]})");
+    const LatLng place{75, 0};
+    test.map.jumpTo(CameraOptions().withCenter(place).withZoom(3));
+
+    // As the Android binding does, the data is created off the source with the projection it reports.
+    auto& source = *test.map.getStyle().getSource("points")->as<GeoJSONSource>();
+    const auto projection = GeoJSONSource::Impl::registeredProjection(source);
+    ASSERT_TRUE(projection);
+    EXPECT_EQ("test:polar-created", projection->name());
+    source.setGeoJSONData(
+        GeoJSONSource::Impl::createData(mapbox::geojson::parse(R"({"type": "Point", "coordinates": [0, 75]})"),
+                                        Scheduler::GetSequenced(),
+                                        source.impl().getOptions(),
+                                        projection));
+    test.frontend.render(test.map);
+
+    const auto features = test.frontend.getRenderer()->queryRenderedFeatures(test.map.pixelForLatLng(place));
+    ASSERT_EQ(1u, features.size());
+    const auto& point = features[0].geometry.get<Point<double>>();
+    EXPECT_NEAR(0, point.x, 1e-3);
+    EXPECT_NEAR(75, point.y, 1e-3);
 }
 
 TEST(Map, LatLngBoundsToCameraWithExcessivePadding) {

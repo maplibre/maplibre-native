@@ -4,6 +4,8 @@
 #include <mln/storage/resource.hpp>
 #include <mln/storage/response.hpp>
 #include <mln/style/image_impl.hpp>
+#include <mln/style/projection.hpp>
+#include <mln/style/projection_impl.hpp>
 #include <mln/style/layer_impl.hpp>
 #include <mln/style/layers/background_layer.hpp>
 #include <mln/style/layers/circle_layer.hpp>
@@ -17,6 +19,8 @@
 #include <mln/style/observer.hpp>
 #include <mln/style/parser.hpp>
 #include <mln/style/source_impl.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/style_impl.hpp>
 #include <mln/style/transition_options.hpp>
 #include <mln/util/async_request.hpp>
@@ -34,9 +38,11 @@ Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio, con
     : fileSource(std::move(fileSource_)),
       spriteLoader(std::make_unique<SpriteLoader>(pixelRatio, threadPool_)),
       light(std::make_unique<Light>()),
+      projection(std::make_unique<Projection>()),
       observer(&nullObserver) {
     spriteLoader->setObserver(this);
     light->setObserver(this);
+    projection->setObserver(this);
 }
 
 Style::Impl::~Impl() = default;
@@ -109,6 +115,8 @@ void Style::Impl::parse(const std::string& json_) {
 
     globalStateDefaults = parser.globalStateDefaults;
     globalState = std::make_shared<const GlobalStateMap>(globalStateDefaults);
+
+    setProjection(std::make_unique<Projection>(parser.projection));
 
     for (auto& source : parser.sources) {
         addSource(std::move(source));
@@ -255,6 +263,7 @@ void Style::Impl::addSource(std::unique_ptr<Source> source) {
 
     source->setObserver(this);
     auto item = sources.add(std::move(source));
+    setSourceProjection(*item);
     if (fileSource) {
         item->loadDescription(*fileSource);
     }
@@ -337,6 +346,16 @@ void Style::Impl::setLight(std::unique_ptr<Light> light_) {
 
 Light* Style::Impl::getLight() const {
     return light.get();
+}
+
+void Style::Impl::setProjection(std::unique_ptr<Projection> projection_) {
+    projection = std::move(projection_);
+    projection->setObserver(this);
+    onProjectionChanged(*projection);
+}
+
+Projection* Style::Impl::getProjection() const {
+    return projection.get();
 }
 
 std::string Style::Impl::getName() const {
@@ -512,6 +531,21 @@ void Style::Impl::onLayerChanged(Layer& layer) {
 
 void Style::Impl::onLightChanged(const Light&) {
     observer->onUpdate();
+}
+
+void Style::Impl::onProjectionChanged(const Projection&) {
+    for (const auto& source : sources) {
+        setSourceProjection(*source);
+    }
+    observer->onUpdate();
+}
+
+void Style::Impl::setSourceProjection(Source& source) const {
+    if (auto* geoJSONSource = source.as<GeoJSONSource>()) {
+        geoJSONSource->setProjection(projection->impl);
+    } else if (auto* customGeometrySource = source.as<CustomGeometrySource>()) {
+        customGeometrySource->setProjection(projection->impl);
+    }
 }
 
 void Style::Impl::dumpDebugLogs() const {

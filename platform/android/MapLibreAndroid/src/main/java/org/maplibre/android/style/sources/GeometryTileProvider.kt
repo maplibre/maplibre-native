@@ -11,7 +11,7 @@ interface GeometryTileProvider {
     /***
      * Interface method called by [CustomGeometrySource] to request features for a tile.
      *
-     * @param bounds [LatLngBounds] of the tile.
+     * @param bounds [LatLngBounds] of the tile in the map's projection; in a registered one, the box of its corners.
      * @param zoomLevel Tile zoom level.
      * @return Return a @{link FeatureCollection} to be displayed in the requested tile.
      */

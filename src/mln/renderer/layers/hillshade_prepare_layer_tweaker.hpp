@@ -4,6 +4,13 @@
 
 namespace mln {
 
+class WorldCoordinateHelper;
+
+/// The log2 of the zoom 0 world's width in meters, from which the prepare shader gets the meters per DEM pixel. A
+/// registered projection's world is its zoom 0 extent wide; Mercator keeps 25.2562, which with the shader's 3 is the
+/// 28.2562 it always used (GL JS `getLog2WorldWidth`).
+float hillshadeLog2WorldWidth(const WorldCoordinateHelper&);
+
 /**
     Hillshade prepare layer specific tweaker
  */

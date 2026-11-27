@@ -1562,8 +1562,8 @@ public:
     CLLocationDegrees peakLatitude =
         (self.centerCoordinate.latitude + camera.centerCoordinate.latitude) / 2;
     CLLocationDegrees peakPitch = (self.camera.pitch + camera.pitch) / 2;
-    animationOptions.minZoom =
-        MLNZoomLevelForAltitude(peakAltitude, peakPitch, peakLatitude, self.frame.size);
+    animationOptions.minZoom = MLNZoomLevelForAltitudeInMap(_mbglMap.get(), peakAltitude, peakPitch,
+                                                            peakLatitude, self.frame.size);
   }
   if (completion) {
     animationOptions.transitionFinishFn = [completion]() {
@@ -1601,8 +1601,8 @@ public:
   mln::CameraOptions options;
   options.center = MLNLatLngFromLocationCoordinate2D(camera.centerCoordinate);
   options.padding = MLNEdgeInsetsFromNSEdgeInsets(edgePadding);
-  options.zoom = MLNZoomLevelForAltitude(camera.altitude, camera.pitch,
-                                         camera.centerCoordinate.latitude, self.frame.size);
+  options.zoom = MLNZoomLevelForAltitudeInMap(_mbglMap.get(), camera.altitude, camera.pitch,
+                                              camera.centerCoordinate.latitude, self.frame.size);
   if (camera.heading >= 0) {
     options.bearing = camera.heading;
   }
@@ -1737,8 +1737,8 @@ public:
   CLLocationDirection direction =
       cameraOptions.bearing ? mln::util::wrap(*cameraOptions.bearing, 0., 360.) : self.direction;
   CGFloat pitch = cameraOptions.pitch ? *cameraOptions.pitch : *mapCamera.pitch;
-  CLLocationDistance altitude =
-      MLNAltitudeForZoomLevel(zoomLevel, pitch, centerCoordinate.latitude, self.frame.size);
+  CLLocationDistance altitude = MLNAltitudeForZoomLevelInMap(
+      _mbglMap.get(), zoomLevel, pitch, centerCoordinate.latitude, self.frame.size);
   return [MLNMapCamera cameraLookingAtCenterCoordinate:centerCoordinate
                                               altitude:altitude
                                                  pitch:pitch
@@ -3401,7 +3401,9 @@ public:
 }
 
 - (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude {
-  return mln::Projection::getMetersPerPixelAtLatitude(latitude, self.zoomLevel);
+  return MLNMetersPerPointAtCoordinate(
+      _mbglMap.get(), CLLocationCoordinate2DMake(latitude, self.centerCoordinate.longitude),
+      self.zoomLevel);
 }
 
 // MARK: Debugging

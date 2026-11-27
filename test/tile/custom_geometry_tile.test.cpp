@@ -1,4 +1,5 @@
 #include <mln/test/util.hpp>
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/test/fake_file_source.hpp>
 #include <mln/test/stub_tile_observer.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
@@ -138,7 +139,7 @@ TEST(CustomGeometryTile, InvokeTileChanged) {
     tile.setLayers(layers, test.tileParameters.globalState);
     tile.setObserver(&observer);
     std::vector<Feature> result;
-    tile.querySourceFeatures(result, {}, nullptr);
+    tile.querySourceFeatures(result, {}, nullptr, *mercatorWorldCoordinateHelper());
     EXPECT_TRUE(result.empty());
 
     tile.setTileData(features);
@@ -147,7 +148,7 @@ TEST(CustomGeometryTile, InvokeTileChanged) {
         test.loop.runOnce();
     }
 
-    tile.querySourceFeatures(result, {}, nullptr);
+    tile.querySourceFeatures(result, {}, nullptr, *mercatorWorldCoordinateHelper());
     EXPECT_EQ(1u, result.size());
 }
 

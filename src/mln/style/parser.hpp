@@ -4,6 +4,7 @@
 #include <mln/style/sprite.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/light.hpp>
+#include <mln/style/projection.hpp>
 
 #include <mln/text/glyph.hpp>
 
@@ -40,6 +41,7 @@ public:
 
     TransitionOptions transition{{util::DEFAULT_TRANSITION_DURATION}};
     Light light;
+    Projection projection;
 
     // Default values of the root "state" property, keyed by state property
     // name, used by the "global-state" expression.
@@ -59,6 +61,7 @@ public:
 private:
     void parseTransition(const JSValue&);
     void parseLight(const JSValue&);
+    void parseProjection(const JSValue&);
     void parseState(const JSValue&);
     void parseSources(const JSValue&);
     void parseSprites(const JSValue&);

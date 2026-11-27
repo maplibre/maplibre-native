@@ -56,7 +56,9 @@ public:
         const GlobalStateMap* globalState,
         const mat4& projMatrix) const final;
 
-    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const final;
+    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&,
+                                             const GlobalStateMap*,
+                                             const WorldCoordinateHelper&) const final;
 
     void reduceMemoryUse() final {}
     void dumpDebugLogs() const final;

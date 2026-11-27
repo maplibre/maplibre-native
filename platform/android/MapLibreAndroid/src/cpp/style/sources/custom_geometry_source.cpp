@@ -157,6 +157,14 @@ void CustomGeometrySource::invalidateBounds(jni::JNIEnv& env, const jni::Object<
     source.as<mln::style::CustomGeometrySource>()->CustomGeometrySource::invalidateRegion(bounds);
 }
 
+jni::Local<jni::Object<LatLngBounds>> CustomGeometrySource::getTileBounds(jni::JNIEnv& env,
+                                                                          jni::jint z,
+                                                                          jni::jint x,
+                                                                          jni::jint y) {
+    return LatLngBounds::New(env,
+                             source.as<mln::style::CustomGeometrySource>()->getTileBounds(CanonicalTileID(z, x, y)));
+}
+
 jni::Local<jni::Array<jni::Object<geojson::Feature>>> CustomGeometrySource::querySourceFeatures(
     jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter) {
     using namespace mln::android::conversion;
@@ -208,7 +216,8 @@ void CustomGeometrySource::registerNative(jni::JNIEnv& env) {
         METHOD(&CustomGeometrySource::querySourceFeatures, "querySourceFeatures"),
         METHOD(&CustomGeometrySource::setTileData, "nativeSetTileData"),
         METHOD(&CustomGeometrySource::invalidateTile, "nativeInvalidateTile"),
-        METHOD(&CustomGeometrySource::invalidateBounds, "nativeInvalidateBounds"));
+        METHOD(&CustomGeometrySource::invalidateBounds, "nativeInvalidateBounds"),
+        METHOD(&CustomGeometrySource::getTileBounds, "nativeGetTileBounds"));
 }
 
 } // namespace android

@@ -119,7 +119,8 @@ std::unordered_map<std::string, std::vector<Feature>> RenderRasterDEMSource::que
 }
 
 std::vector<Feature> RenderRasterDEMSource::querySourceFeatures(const SourceQueryOptions&,
-                                                                const GlobalStateMap*) const {
+                                                                const GlobalStateMap*,
+                                                                const WorldCoordinateHelper&) const {
     return {};
 }
 

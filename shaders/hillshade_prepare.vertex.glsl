@@ -10,6 +10,10 @@ layout (std140) uniform HillshadePrepareTilePropsUBO {
     highp vec2 u_dimension;
     highp float u_zoom;
     highp float u_maxzoom;
+    highp float u_log2_world_width;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
+    lowp float tileprops_pad3;
 };
 
 out vec2 v_pos;

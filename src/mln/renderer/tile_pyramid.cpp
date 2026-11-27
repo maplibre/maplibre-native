@@ -4,6 +4,7 @@
 #include <mln/renderer/tile_parameters.hpp>
 #include <mln/renderer/query.hpp>
 #include <mln/map/transform.hpp>
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/math/clamp.hpp>
 #include <mln/actor/scheduler.hpp>
 #include <mln/util/tile_cover.hpp>
@@ -89,7 +90,15 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         return;
     }
 
-    handleWrapJump(static_cast<float>(parameters.transformState.getLatLng().longitude()));
+    const auto& helper = parameters.transformState.getProjection().worldCoordinateHelper();
+    // A tile ID names other ground in another projection's tile grid, so a new projection drops every tile.
+    if (helper.name() != projectionName) {
+        projectionName = helper.name();
+        boundsWorldBoxKey.reset();
+        clearAll();
+    }
+
+    handleWrapJump(helper.wraps() ? static_cast<float>(parameters.transformState.getLatLng().longitude()) : 0.0f);
 
     // Optionally shift the zoom level
     double zoom = util::clamp<double>(parameters.transformState.getZoom() + parameters.tileLodZoomShift,
@@ -180,7 +189,16 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         int32_t maxZoom = (parameters.tileLodMode == TileLodMode::Distance)
                               ? zoomRange.max
                               : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
-        tileRange = util::TileRange::fromLatLngBounds(*bounds, zoomRange.min, maxZoom);
+        if (helper.wraps()) {
+            tileRange = util::TileRange::fromLatLngBounds(*bounds, zoomRange.min, maxZoom);
+        } else {
+            // The bounds' edges can curve in the projection: as GL JS does, sample them into a box in its world square.
+            if (boundsWorldBoxKey != bounds) {
+                boundsWorldBoxKey = bounds;
+                boundsWorldBox = latLngBoxToWorldBox(helper, *bounds);
+            }
+            tileRange = util::TileRange::fromWorldBox(boundsWorldBox, zoomRange.min, maxZoom);
+        }
     }
     auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
         if (tileRange && !tileRange->contains(tileID.canonical)) {
@@ -407,11 +425,12 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
 }
 
 std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& options,
-                                                      const GlobalStateMap* globalState) const {
+                                                      const GlobalStateMap* globalState,
+                                                      const WorldCoordinateHelper& worldCoordinateHelper) const {
     std::vector<Feature> result;
 
     for (const auto& pair : tiles) {
-        pair.second->querySourceFeatures(result, options, globalState);
+        pair.second->querySourceFeatures(result, options, globalState, worldCoordinateHelper);
     }
 
     return result;

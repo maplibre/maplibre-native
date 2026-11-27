@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Location
 import android.os.Looper
 import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS
 import org.maplibre.android.location.engine.LocationEngine
 import org.maplibre.android.location.engine.LocationEngineRequest
@@ -459,7 +460,7 @@ class LocationComponentTest : BaseTest() {
         val location = Location("test")
         location.bearing = 50f
         val projection: Projection = mock(Projection::class.java)
-        `when`(projection.getMetersPerPixelAtLatitude(location.latitude)).thenReturn(10.0)
+        `when`(projection.getMetersPerPixelAt(LatLng(location))).thenReturn(10.0)
         `when`(maplibreMap.projection).thenReturn(projection)
         `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
@@ -606,7 +607,7 @@ class LocationComponentTest : BaseTest() {
         val location = Location("test")
         location.accuracy = 50f
         val projection: Projection = mock(Projection::class.java)
-        `when`(projection.getMetersPerPixelAtLatitude(location.latitude)).thenReturn(10.0)
+        `when`(projection.getMetersPerPixelAt(LatLng(location))).thenReturn(10.0)
         `when`(maplibreMap.projection).thenReturn(projection)
         locationComponent.activateLocationComponent(
             LocationComponentActivationOptions.builder(context, style)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mln/map/transform_state.hpp>
 #include <mln/renderer/tile_parameters.hpp>
 #include <mln/storage/file_source.hpp>
 #include <mln/tile/tile_loader.hpp>
@@ -27,7 +28,8 @@ TileLoader<T>::TileLoader(T& tile_,
                               id.canonical.y,
                               id.canonical.z,
                               tileset.scheme,
-                              Resource::LoadingMethod::CacheOnly)),
+                              Resource::LoadingMethod::CacheOnly,
+                              parameters.transformState.getProjection().worldCoordinateHelper().tileMatrixSet())),
       fileSource(parameters.fileSource) {
     assert(!request);
 

@@ -100,6 +100,9 @@ struct MapLibreNavigationView: View {
                     NavigationLink("MultipleImagesExample") {
                         MultipleImagesExampleUIViewControllerRepresentable().edgesIgnoringSafeArea(.all)
                     }
+                    NavigationLink("CoordinateReferenceSystemExample") {
+                        CoordinateReferenceSystemExampleUIViewControllerRepresentable().edgesIgnoringSafeArea(.all)
+                    }
                 }
             }
         }

@@ -80,6 +80,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/geojson/polygon.cpp
             ${PROJECT_SOURCE_DIR}/geojson/polygon.hpp
             ${PROJECT_SOURCE_DIR}/geojson/util.hpp
+            ${PROJECT_SOURCE_DIR}/geometry/coordinate_reference_system.cpp
+            ${PROJECT_SOURCE_DIR}/geometry/coordinate_reference_system.hpp
             ${PROJECT_SOURCE_DIR}/geometry/lat_lng.cpp
             ${PROJECT_SOURCE_DIR}/geometry/lat_lng.hpp
             ${PROJECT_SOURCE_DIR}/geometry/lat_lng_bounds.cpp
@@ -114,6 +116,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/map/camera_position.hpp
             ${PROJECT_SOURCE_DIR}/map/image.cpp
             ${PROJECT_SOURCE_DIR}/map/image.hpp
+            ${PROJECT_SOURCE_DIR}/map/style.cpp
+            ${PROJECT_SOURCE_DIR}/map/style.hpp
             ${PROJECT_SOURCE_DIR}/map_renderer.cpp
             ${PROJECT_SOURCE_DIR}/map_renderer.hpp
             ${PROJECT_SOURCE_DIR}/map_renderer_runnable.cpp

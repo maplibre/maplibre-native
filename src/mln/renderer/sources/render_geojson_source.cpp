@@ -1,4 +1,6 @@
 #include <mln/renderer/sources/render_geojson_source.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/tile/geojson_tile.hpp>
@@ -62,6 +64,12 @@ FeatureExtensionValue getClusterExpansionZoom(std::shared_ptr<style::GeoJSONData
 constexpr const auto extensionGetters = mapbox::eternal::hash_map<mapbox::eternal::string, FeatureExtensionGetterPtr>(
     {{"children", &getChildren}, {"leaves", &getLeaves}, {"expansion-zoom", &getClusterExpansionZoom}});
 
+/// Whether the data is tiled where the map's projection draws it: in lat/lng for a projection that wraps, as Mercator
+/// does, or in the registered projection itself.
+bool isTiledFor(const WorldCoordinateHelper& helper, const style::GeoJSONData& data) {
+    return helper.wraps() ? data.getProjectionName().empty() : data.getProjectionName() == helper.name();
+}
+
 } // namespace
 
 RenderGeoJSONSource::RenderGeoJSONSource(Immutable<style::GeoJSONSource::Impl> impl_,
@@ -84,6 +92,13 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
     enabled = needsRendering;
 
     auto data_ = impl().getData().lock();
+    if (data_ && !isTiledFor(parameters.transformState.getProjection().worldCoordinateHelper(), *data_)) {
+        // It would draw in the wrong place, so nothing is drawn until data tiled in the map's projection comes.
+        data.reset();
+        tilePyramid.clearAll();
+        return;
+    }
+
     if (data.lock() != data_) {
         data = data_;
         if (parameters.mode != MapMode::Continuous) {

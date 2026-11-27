@@ -60,6 +60,8 @@ typedef NS_ENUM(NSInteger, MLNErrorCode) {
   MLNErrorCodeSourceCannotBeRemovedFromStyle = 10,
   /** An error occurred while rendering */
   MLNErrorCodeRenderingError = 11,
+  /** A projection could not be added or removed. */
+  MLNErrorCodeInvalidProjection = 12,
 };
 
 /** Options for enabling debugging features in an ``MLNMapView`` instance. */

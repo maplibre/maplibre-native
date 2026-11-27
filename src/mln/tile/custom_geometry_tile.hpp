@@ -9,6 +9,7 @@
 namespace mln {
 
 class TileParameters;
+class CRSWorldCoordinateHelper;
 
 namespace style {
 class CustomTileLoader;
@@ -33,13 +34,16 @@ public:
 
     void querySourceFeatures(std::vector<Feature>& result,
                              const SourceQueryOptions&,
-                             const GlobalStateMap* globalState) override;
+                             const GlobalStateMap* globalState,
+                             const WorldCoordinateHelper&) override;
 
 private:
     bool stale = true;
     std::string sourceID;
     TileNecessity necessity;
     Immutable<style::CustomGeometrySource::TileOptions> options;
+    /// The registered projection the tile is cut in, or null in Mercator.
+    std::shared_ptr<const CRSWorldCoordinateHelper> projection;
     ActorRef<style::CustomTileLoader> loader;
     std::shared_ptr<Mailbox> mailbox;
     ActorRef<CustomGeometryTile> actorRef;

@@ -6,8 +6,12 @@ import com.google.gson.JsonPrimitive
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Style
+import android.graphics.Color
 import org.maplibre.android.style.layers.BackgroundLayer
+import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.PropertyFactory
+import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.geojson.Point
 import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import org.junit.Assert
 import org.junit.Assert.assertNotNull
@@ -65,6 +69,42 @@ class MapSnapshotterTest {
         if (!countDownLatch.await(30, TimeUnit.SECONDS)) {
             throw TimeoutException()
         }
+    }
+
+    @Test
+    fun mapSnapshotterDrawsGeoJsonGivenBeforeTheSourceIsAdded() {
+        var mapSnapshotter: MapSnapshotter?
+        var center = Color.TRANSPARENT
+        rule.activity.runOnUiThread {
+            val options = MapSnapshotter.Options(64, 64)
+                .withPixelRatio(1.0f)
+                .withStyleBuilder(
+                    Style.Builder()
+                        .fromUri("asset://snapshotter_global_state_style.json")
+                        .withSource(GeoJsonSource("point", Point.fromLngLat(0.0, 0.0)))
+                        .withLayer(
+                            CircleLayer("point", "point").withProperties(
+                                PropertyFactory.circleRadius(16f),
+                                PropertyFactory.circleColor(Color.RED)
+                            )
+                        )
+                )
+                .withCameraPosition(CameraPosition.Builder().zoom(1.0).target(LatLng(0.0, 0.0)).build())
+            mapSnapshotter = MapSnapshotter(rule.activity, options)
+            mapSnapshotter!!.start(
+                {
+                    center = it.bitmap.getPixel(32, 32)
+                    countDownLatch.countDown()
+                },
+                {
+                    Assert.fail(it)
+                }
+            )
+        }
+        if (!countDownLatch.await(30, TimeUnit.SECONDS)) {
+            throw TimeoutException()
+        }
+        Assert.assertEquals(Color.RED, center)
     }
 
     @Test

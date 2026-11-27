@@ -39,6 +39,9 @@ void RasterDEMSource::setTilesetOverrides(Tileset& tileset) {
         if (const auto encoding = options->rasterEncoding) {
             tileset.rasterEncoding = encoding;
         }
+        if (const auto factors = options->rasterCustomFactors) {
+            tileset.rasterCustomFactors = *factors;
+        }
     }
 }
 

@@ -5,6 +5,7 @@
 
 #import "MLNTypes.h"
 
+#import "MLNCoordinateReferenceSystem.h"
 #import "MLNDefaultStyle.h"
 #import "MLNSettings.h"
 #import "MLNTileServerOptions.h"
@@ -60,6 +61,39 @@ MLN_EXPORT
  @param withStyleName style name.
  */
 + (nullable MLNDefaultStyle *)predefinedStyle:(NSString *)withStyleName;
+
+// MARK: Registering Projections
+
+/**
+ Registers a coordinate reference system for every map, so a style can select it by name with its
+ `projection.type`. Register it before loading a style that names it.
+
+ > Note: This API is experimental and may change in a future release.
+
+ @param projection The coordinate reference system to register.
+ @param outError Upon return, if an error has occurred, a pointer to an `NSError` object
+    describing the error: the name has no colon, a projection with that name exists, or the tile
+    matrix set's `extentAtZoom0` is not positive. Pass in `NULL` to ignore any error.
+ @return `YES` if the projection was registered; otherwise, `NO`.
+ */
++ (BOOL)addProjection:(MLNCoordinateReferenceSystem *)projection
+                error:(NSError *__nullable *__nullable)outError NS_SWIFT_NAME(addProjection(_:));
+
+/**
+ Removes a projection registered with ``addProjection:error:``. A map already in the projection
+ keeps it until its projection changes. Built-in projections, whose names have no colon, cannot be
+ removed.
+
+ > Note: This API is experimental and may change in a future release.
+
+ @param name The name the projection was registered with.
+ @param outError Upon return, if the name has no colon, a pointer to an `NSError` object
+    describing the error. Pass in `NULL` to ignore any error.
+ @return `NO` if the name has no colon; otherwise, `YES`.
+ */
++ (BOOL)removeProjectionNamed:(NSString *)name
+                        error:(NSError *__nullable *__nullable)outError
+    NS_SWIFT_NAME(removeProjection(named:));
 
 // MARK: Accessing Metadata About the Style
 

@@ -4,6 +4,7 @@
 #include <mln/util/geo.hpp>
 
 #include <memory>
+#include <optional>
 
 namespace mln {
 
@@ -17,6 +18,10 @@ public:
 
     ScreenCoordinate pixelForLatLng(const LatLng&) const;
     LatLng latLngForPixel(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Wrapped) const;
+    /// `Map::getMetersPerPixelAt` for this camera.
+    double getMetersPerPixelAt(const LatLng&) const;
+    /// `Map::getRegisteredProjectionMetersPerPixel` for this camera's projection.
+    std::optional<double> getRegisteredProjectionMetersPerPixel(double zoom) const;
 
     void setCamera(const CameraOptions&);
     CameraOptions getCamera() const;

@@ -1,15 +1,16 @@
 #pragma once
 
+#include <mln/util/geo.hpp>
 #include <mln/util/size.hpp>
 #include <mln/util/quaternion.hpp>
 
 #include <optional>
 
 namespace mln {
-
-class LatLng;
-
 namespace util {
+
+/// A free camera's web mercator position as its lat/lng and altitude in meters, at any finite position.
+LatLngAltitude latLngAltitudeFromMercator(const vec3& position);
 
 class Camera {
 public:
@@ -17,7 +18,11 @@ public:
 
     vec3 getPosition() const noexcept;
     mat4 getCameraToWorld(double scale, bool flippedY) const noexcept;
-    mat4 getWorldToCamera(double scale, bool flippedY) const noexcept;
+    /// Heights are in meters: Mercator scales them at the camera's latitude, a projection with a constant scale
+    /// passes its meters per world unit.
+    mat4 getWorldToCamera(double scale,
+                          bool flippedY,
+                          std::optional<double> metersPerWorldUnit = std::nullopt) const noexcept;
     mat4 getCameraToClipPerspective(double fovy, double aspectRatio, double nearZ, double farZ) const noexcept;
 
     vec3 forward() const noexcept;

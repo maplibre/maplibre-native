@@ -239,6 +239,9 @@ _IOS_APPLICATION_RESOURCES = [
     "app/fill_filter_style.json",
     "//platform/darwin:app/PluginLayerTestStyle.json",
     "//platform/darwin:test/amsterdam.geojson",
+    "//platform/glfw:assets/arctic.json",
+    "//platform/darwin:national_grid_crosshairs_style",
+    "//metrics:national-grid-tiles",
 ] + glob([
     "app/*.lproj/**",
     "app/Assets.xcassets/**",

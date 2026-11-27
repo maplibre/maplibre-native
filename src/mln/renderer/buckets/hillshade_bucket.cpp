@@ -6,8 +6,10 @@ namespace mln {
 
 using namespace style;
 
-HillshadeBucket::HillshadeBucket(PremultipliedImage&& image_, Tileset::RasterEncoding encoding)
-    : demdata(image_, encoding) {}
+HillshadeBucket::HillshadeBucket(PremultipliedImage&& image_,
+                                 Tileset::RasterEncoding encoding,
+                                 const std::array<float, 4>& customFactors)
+    : demdata(image_, encoding, customFactors) {}
 
 HillshadeBucket::HillshadeBucket(DEMData&& demdata_)
     : demdata(std::move(demdata_)) {}

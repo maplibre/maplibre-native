@@ -25,6 +25,7 @@ RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_,
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(parameters.threadPool, ActorRef<RasterDEMTile>(*this, mailbox)) {
     encoding = tileset.rasterEncoding.value_or(Tileset::RasterEncoding::Mapbox);
+    customFactors = tileset.rasterCustomFactors;
     if (id.canonical.y == 0) {
         // this tile doesn't have upper neighboring tiles so marked those as backfilled
         neighboringTiles = neighboringTiles | DEMTileNeighbors::NoUpper;
@@ -73,7 +74,7 @@ void RasterDEMTile::setData(const std::shared_ptr<const std::string>& data) {
         }
 
         pending = true;
-        worker.self().invoke(&RasterDEMTileWorker::parse, data, correlationID, encoding);
+        worker.self().invoke(&RasterDEMTileWorker::parse, data, correlationID, encoding, customFactors);
     }
 }
 

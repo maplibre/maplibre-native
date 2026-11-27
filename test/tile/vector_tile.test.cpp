@@ -1,4 +1,5 @@
 #include <mln/test/util.hpp>
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/test/fake_file_source.hpp>
 #include <mln/tile/vector_mvt_tile.hpp>
 #include <mln/tile/vector_mvt_tile_data.hpp>
@@ -49,7 +50,7 @@ TEST(VectorTile, Issue8542) {
 
     // Query before data is set
     std::vector<Feature> result;
-    tile.querySourceFeatures(result, {{{"layer"}}, {}}, nullptr);
+    tile.querySourceFeatures(result, {{{"layer"}}, {}}, nullptr, *mercatorWorldCoordinateHelper());
 }
 
 TEST(VectorTileData, ParseResults) {

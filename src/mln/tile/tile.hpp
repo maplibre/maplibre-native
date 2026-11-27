@@ -30,6 +30,7 @@ class RenderedQueryOptions;
 class SourceQueryOptions;
 class CollisionIndex;
 class SourceFeatureState;
+class WorldCoordinateHelper;
 
 namespace gfx {
 class UploadPass;
@@ -95,7 +96,8 @@ public:
 
     virtual void querySourceFeatures(std::vector<Feature>& result,
                                      const SourceQueryOptions&,
-                                     const GlobalStateMap* globalState);
+                                     const GlobalStateMap* globalState,
+                                     const WorldCoordinateHelper&);
 
     virtual float getQueryPadding(const std::unordered_map<std::string, const RenderLayer*>&);
 

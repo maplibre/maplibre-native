@@ -38,7 +38,8 @@ void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool nee
 
 void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result,
                                       const SourceQueryOptions& options,
-                                      const GlobalStateMap* globalState) {
+                                      const GlobalStateMap* globalState,
+                                      const WorldCoordinateHelper& worldCoordinateHelper) {
     MLN_TRACE_FUNC();
 
     // Ignore the sourceLayer, there is only one
@@ -55,7 +56,7 @@ void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result,
                     continue;
                 }
 
-                result.push_back(convertFeature(*feature, id.canonical));
+                result.push_back(convertFeature(*feature, id.canonical, worldCoordinateHelper));
             }
         }
     }

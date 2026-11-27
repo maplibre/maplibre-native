@@ -1,14 +1,33 @@
 load("@rules_apple//apple:macos.bzl", "macos_application")
 load("@rules_cc//cc:defs.bzl", "objc_library")
+load("//bazel:flags.bzl", "CPP_FLAGS")
+
+objc_library(
+    name = "macos_app_objcpp_srcs",
+    srcs = [
+        "//platform/darwin:app/MBXNationalGridProjection.h",
+        "//platform/darwin:app/MBXNationalGridProjection.mm",
+    ],
+    copts = CPP_FLAGS + ["-Iplatform/darwin/app"],
+    deps = [
+        "//platform:macos-sdk",
+        "//test:national_grid",
+    ],
+)
 
 objc_library(
     name = "macos_app_lib",
     srcs = glob([
         "*.h",
         "*.m",
-    ]),
+    ]) + [
+        "//platform/darwin:app/MBXArcticProjection.h",
+        "//platform/darwin:app/MBXArcticProjection.m",
+    ],
+    copts = ["-Iplatform/darwin/app"],
     enable_modules = True,
     deps = [
+        ":macos_app_objcpp_srcs",
         "//platform:macos-sdk",
     ],
 )
@@ -23,7 +42,11 @@ macos_application(
     resources = glob([
         "*.lproj/**",
         "Assets.xcassets/**",
-    ]),
+    ]) + [
+        "//metrics:national-grid-tiles",
+        "//platform/darwin:national_grid_crosshairs_style",
+        "//platform/glfw:assets/arctic.json",
+    ],
     visibility = [
         "@rules_xcodeproj//xcodeproj:generated",
     ],

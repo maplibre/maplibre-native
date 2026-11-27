@@ -208,6 +208,85 @@ TEST(OfflineDownload, GeoJSONSource) {
     test.loop.run();
 }
 
+namespace {
+
+Response identityStyle() {
+    Response response;
+    response.data = std::make_shared<std::string>(R"({"version": 8, "projection": {"type": "identity"},
+        "sources": {"inline": {"type": "vector", "minzoom": 0, "maxzoom": 15,
+            "tiles": ["http://127.0.0.1:3000/{z}-{x}-{y}.vector.pbf?bbox={bbox}"]}},
+        "layers": [{"id": "fill", "type": "fill", "source": "inline", "source-layer": "water"}]})");
+    return response;
+}
+
+std::vector<std::string> downloadedTiles(OfflineTest& test, const OfflineRegionDefinition& definition) {
+    auto region = test.createRegion();
+    OfflineDownload download(region->getID(), definition, test.db, test.fileSource);
+    test.fileSource.styleResponse = [&](const Resource&) {
+        return identityStyle();
+    };
+    std::vector<std::string> tiles;
+    test.fileSource.tileResponse = [&](const Resource& resource) {
+        tiles.push_back(resource.url);
+        return test.response("0-0-0.vector.pbf");
+    };
+    auto observer = std::make_unique<MockObserver>();
+    observer->statusChangedFn = [&](OfflineRegionStatus status) {
+        if (status.complete()) {
+            test.loop.stop();
+        }
+    };
+    download.setObserver(std::move(observer));
+    download.setState(OfflineRegionDownloadState::Active);
+    test.loop.run();
+
+    download.setState(OfflineRegionDownloadState::Inactive);
+    EXPECT_EQ(tiles.size(), download.getStatus().requiredTileCount);
+    return tiles;
+}
+
+} // namespace
+
+TEST(OfflineDownload, CoversTheGridOfARegisteredProjection) {
+    OfflineTest test;
+    // From 60 to 80 N and 0 to 30 E is inside tile 2/2/0 of the identity grid; in Mercator it reaches into 2/2/1.
+    const auto tiles = downloadedTiles(
+        test,
+        OfflineTilePyramidRegionDefinition(
+            "http://127.0.0.1:3000/style.json", LatLngBounds::hull({60, 0}, {80, 30}), 2, 2, 1.0, false));
+
+    EXPECT_EQ(std::vector<std::string>{"http://127.0.0.1:3000/2-2-0.vector.pbf?bbox=0,45,45,90"}, tiles);
+}
+
+TEST(OfflineDownload, CoversTheGridOfARegisteredProjectionForAGeometry) {
+    OfflineTest test;
+    // 10 E, 50 N is in tile 2/2/0 of the identity grid and in 2/2/1 of Mercator's.
+    const auto tiles = downloadedTiles(
+        test,
+        OfflineGeometryRegionDefinition("http://127.0.0.1:3000/style.json", Point<double>{10, 50}, 2, 2, 1.0, false));
+
+    EXPECT_EQ(std::vector<std::string>{"http://127.0.0.1:3000/2-2-0.vector.pbf?bbox=0,45,45,90"}, tiles);
+}
+
+TEST(OfflineDownload, CountsTheWholeGridOfARegisteredProjection) {
+    OfflineTest test;
+    auto region = test.createRegion();
+    ASSERT_TRUE(region);
+    OfflineDownload download(region->getID(),
+                             OfflineTilePyramidRegionDefinition(
+                                 "http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0, 15, 1.0, false),
+                             test.db,
+                             test.fileSource);
+    test.db.putRegionResource(region->getID(), Resource::style("http://127.0.0.1:3000/style.json"), identityStyle());
+
+    // The identity grid has 4^z tiles at zoom z, and the source stops at 15.
+    uint64_t everyTile = 0;
+    for (uint8_t z = 0; z <= 15; ++z) {
+        everyTile += uint64_t{1} << (2 * z);
+    }
+    EXPECT_EQ(everyTile, download.getStatus().requiredTileCount);
+}
+
 TEST(OfflineDownload, Activate) {
     OfflineTest test;
     auto region = test.createRegion();

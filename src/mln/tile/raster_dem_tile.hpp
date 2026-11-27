@@ -100,6 +100,7 @@ private:
 
     uint64_t correlationID = 0;
     Tileset::RasterEncoding encoding;
+    std::array<float, 4> customFactors;
 
     // Contains the Bucket object for the tile. Buckets are render
     // objects and they get added by tile parsing operations.

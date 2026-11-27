@@ -592,8 +592,8 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 - (CGFloat)calculateAccuracyRingSize:(double)zoomLevel {
   // diameter in screen points
   return round(self.userLocation.location.horizontalAccuracy /
-               [self.mapView metersPerPointAtLatitude:self.userLocation.coordinate.latitude
-                                            zoomLevel:zoomLevel] *
+               [self.mapView metersPerPointAtCoordinate:self.userLocation.coordinate
+                                              zoomLevel:zoomLevel] *
                2.0);
 }
 

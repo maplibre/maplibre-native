@@ -3,6 +3,7 @@
 #import "AppDelegate.h"
 // #import "CustomStyleLayerExample.h"
 #import "DroppedPinAnnotation.h"
+#import "MBXNationalGridProjection.h"
 #import "MLNMapsnapshotter.h"
 
 #import "MLNStyle+MBXAdditions.h"
@@ -324,6 +325,18 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
 
     [self.undoManager removeAllActionsWithTarget:self];
     self.mapView.styleURL = styleURL;
+    [self.window.toolbar validateVisibleItems];
+}
+
+- (IBAction)showArcticStyle:(id)sender {
+    [self.undoManager removeAllActionsWithTarget:self];
+    self.mapView.styleURL = [[NSBundle mainBundle] URLForResource:@"arctic" withExtension:@"json"];
+    [self.window.toolbar validateVisibleItems];
+}
+
+- (IBAction)showNationalGridStyle:(id)sender {
+    [self.undoManager removeAllActionsWithTarget:self];
+    self.mapView.styleURL = MBXNationalGridCrosshairsStyleURL([NSBundle mainBundle]);
     [self.window.toolbar validateVisibleItems];
 }
 
@@ -1138,6 +1151,15 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
         }
         return NO;
     }
+    if (menuItem.action == @selector(showNationalGridStyle:)) {
+        menuItem.state = [self.mapView.style.name isEqualToString:@"National Grid crosshairs (EPSG:27700)"];
+        return [[NSBundle mainBundle] URLForResource:@"national_grid_crosshairs" withExtension:@"json"] != nil;
+    }
+    if (menuItem.action == @selector(showArcticStyle:)) {
+        NSURL *arcticURL = [[NSBundle mainBundle] URLForResource:@"arctic" withExtension:@"json"];
+        menuItem.state = arcticURL && [self.mapView.styleURL isEqual:arcticURL];
+        return arcticURL != nil;
+    }
     if (menuItem.action == @selector(chooseCustomStyle:)) {
         menuItem.state = self.indexOfStyleInToolbarItem == NSNotFound;
         return YES;
@@ -1383,6 +1405,16 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
 
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style {
     [self updateLabels];
+
+    // A Web Mercator camera can lie far outside a registered projection's grid, so start from the
+    // view each style sets.
+    if ([style.name isEqualToString:@"Arctic sea ice (EPSG:3413)"]) {
+        mapView.centerCoordinate = CLLocationCoordinate2DMake(90, -45);
+        mapView.zoomLevel = 1;
+    } else if ([style.name isEqualToString:@"National Grid crosshairs (EPSG:27700)"]) {
+        mapView.centerCoordinate = CLLocationCoordinate2DMake(51.96064818208741, -1.2773320477729189);
+        mapView.zoomLevel = 2;
+    }
 }
 
 - (BOOL)mapView:(MLNMapView *)mapView annotationCanShowCallout:(id <MLNAnnotation>)annotation {

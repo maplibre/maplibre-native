@@ -231,7 +231,7 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0;  // Arbitrary
 
   CGFloat width = self.row.distance / unitsPerPoint;
 
-  if (width <= MLNScaleBarMinimumBarWidth) {
+  if (width <= MLNScaleBarMinimumBarWidth || width > [self maximumWidth]) {
     return 0.0;
   }
 
@@ -282,9 +282,8 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0;  // Arbitrary
 
   while (row < table + count) {
     if (row->distance > maximumDistance) {
-      // use the previous row
-      NSAssert(row != table, @"");
-      return *(row - 1);
+      // Use the previous row. Under the first row, updateVisibility hides the bar.
+      return row == table ? *table : *(row - 1);
     }
     ++row;
   }
@@ -415,8 +414,12 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0;  // Arbitrary
   CLLocationDistance maximumDistance = [self maximumWidth] * [self unitsPerPoint];
   CLLocationDistance allowedDistance =
       metric ? MLNMetricTable[count - 1].distance : MLNImperialTable[count - 1].distance;
+  CLLocationDistance shortestDistance =
+      metric ? MLNMetricTable[0].distance : MLNImperialTable[0].distance;
 
-  CGFloat alpha = maximumDistance > allowedDistance ? .0f : 1.0f;
+  BOOL outsideTable = maximumDistance > allowedDistance ||
+                      (maximumDistance > 0 && maximumDistance < shortestDistance);
+  CGFloat alpha = outsideTable ? .0f : 1.0f;
 
   if (self.alpha != alpha) {
     [UIView animateWithDuration:.2f

@@ -311,6 +311,10 @@ exports_files(
         "test/MLNSDKTestHelpers.swift",
         "app/CustomStyleLayerExample.h",
         "app/CustomStyleLayerExample.m",
+        "app/MBXArcticProjection.h",
+        "app/MBXArcticProjection.m",
+        "app/MBXNationalGridProjection.h",
+        "app/MBXNationalGridProjection.mm",
         "include/mln/util/image+MLNAdditions.hpp",
     ] + MLN_DARWIN_PUBLIC_OBJC_SOURCE +
     MLN_DARWIN_PUBLIC_OBJCPP_SOURCE +
@@ -330,4 +334,12 @@ js_binary(
         "//:style-spec",
     ],
     entry_point = "scripts/generate-style-code.mjs",
+)
+
+genrule(
+    name = "national_grid_crosshairs_style",
+    srcs = ["//metrics:integration/render-tests/projection/national-grid/crosshairs/style.json"],
+    outs = ["app/national_grid_crosshairs.json"],
+    cmd = "cp $< $@",
+    visibility = ["//platform:__subpackages__"],
 )

@@ -1,7 +1,7 @@
 #include "geojson_source.hpp"
-#include <mln/style/sources/geojson_source_impl.hpp>
 #include "attach_env.hpp"
 
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/renderer/query.hpp>
 
 // Java -> C++ conversion
@@ -63,12 +63,26 @@ GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, mln::style::Source& coreSource, A
 
 GeoJSONSource::~GeoJSONSource() = default;
 
+void GeoJSONSource::addToMap(JNIEnv& env,
+                             const jni::Object<Source>& obj,
+                             mln::Map& map,
+                             AndroidRendererFrontend& frontend) {
+    Source::addToMap(env, obj, map, frontend);
+    giveLastData();
+}
+
+void GeoJSONSource::addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mln::style::Style& style) {
+    Source::addToStyle(env, obj, style);
+    giveLastData();
+}
+
 void GeoJSONSource::setGeoJSONString(jni::JNIEnv& env, const jni::String& jString) {
     std::shared_ptr<std::string> json = std::make_shared<std::string>(jni::Make<std::string>(env, jString));
 
     OptionalActorRef<FeatureConverter> converterRef = converter->self();
-    Update::Converter converterFn = [converterRef, json](ActorRef<GeoJSONDataCallback> _callback) {
-        converterRef.invoke(&FeatureConverter::convertJson, json, _callback);
+    Update::Converter converterFn = [converterRef, json](ActorRef<GeoJSONDataCallback> _callback,
+                                                         std::shared_ptr<const CRSWorldCoordinateHelper> projection) {
+        converterRef.invoke(&FeatureConverter::convertJson, json, std::move(projection), _callback);
     };
 
     setAsync(converterFn);
@@ -176,8 +190,9 @@ void GeoJSONSource::setCollectionAsync(jni::JNIEnv& env, const jni::Object<JNITy
     auto object = std::make_shared<decltype(global)>(std::move(global));
 
     OptionalActorRef<FeatureConverter> converterRef = converter->self();
-    Update::Converter converterFn = [converterRef, object](ActorRef<GeoJSONDataCallback> _callback) {
-        converterRef.invoke(&FeatureConverter::convertObject<JNIType>, object, _callback);
+    Update::Converter converterFn = [converterRef, object](ActorRef<GeoJSONDataCallback> _callback,
+                                                           std::shared_ptr<const CRSWorldCoordinateHelper> projection) {
+        converterRef.invoke(&FeatureConverter::convertObject<JNIType>, object, std::move(projection), _callback);
     };
 
     setAsync(converterFn);
@@ -186,31 +201,49 @@ void GeoJSONSource::setCollectionAsync(jni::JNIEnv& env, const jni::Object<JNITy
 void GeoJSONSource::setAsync(Update::Converter converterFn) {
     awaitingUpdate = std::make_unique<Update>(
         std::move(converterFn),
-        std::make_unique<Actor<GeoJSONDataCallback>>(
-            *Scheduler::GetCurrent(), [this](std::shared_ptr<style::GeoJSONData> geoJSONData) {
-                // conversion from Java features to core ones finished
-                android::UniqueEnv _env = android::AttachEnv();
+        std::make_unique<Actor<GeoJSONDataCallback>>(*Scheduler::GetCurrent(),
+                                                     [this](std::shared_ptr<style::GeoJSONData> geoJSONData) {
+                                                         // conversion from Java features to core ones finished
+                                                         android::UniqueEnv _env = android::AttachEnv();
 
-                // Update the core source
-                source.as<mln::style::GeoJSONSource>()->setGeoJSONData(std::move(geoJSONData));
+                                                         lastUpdate = std::move(update);
+                                                         lastData = std::move(geoJSONData);
+                                                         if (!ownedSource) {
+                                                             giveLastData();
+                                                         }
+                                                         runAwaitingUpdate();
+                                                     }));
+    runAwaitingUpdate();
+}
 
-                // if there is an awaiting update, execute it, otherwise, release resources
-                if (awaitingUpdate) {
-                    update = std::move(awaitingUpdate);
-                    update->converterFn(update->callback->self());
-                } else {
-                    update.reset();
-                }
-            }));
+std::shared_ptr<const CRSWorldCoordinateHelper> GeoJSONSource::styleProjection() const {
+    return style::GeoJSONSource::Impl::registeredProjection(*source.as<style::GeoJSONSource>());
+}
 
-    // If another update is running, wait
-    if (update) {
+void GeoJSONSource::runAwaitingUpdate() {
+    if (update || !awaitingUpdate) {
         return;
     }
-
-    // no updates are being processed, execute this one
+    lastUpdate.reset();
+    lastData.reset();
     update = std::move(awaitingUpdate);
-    update->converterFn(update->callback->self());
+    update->converterFn(update->callback->self(), styleProjection());
+}
+
+void GeoJSONSource::giveLastData() {
+    if (!lastUpdate) {
+        return;
+    }
+    const auto projection = styleProjection();
+    const std::string tiledIn = lastData ? lastData->getProjectionName() : std::string();
+    if (tiledIn == (projection ? projection->name() : std::string())) {
+        source.as<style::GeoJSONSource>()->setGeoJSONData(std::move(lastData));
+    } else if (!awaitingUpdate) {
+        awaitingUpdate = std::move(lastUpdate);
+    }
+    lastUpdate.reset();
+    lastData.reset();
+    runAwaitingUpdate();
 }
 
 jboolean GeoJSONSource::isUpdateSynchronous(jni::JNIEnv&) {
@@ -249,7 +282,9 @@ void GeoJSONSource::registerNative(jni::JNIEnv& env) {
         METHOD(&GeoJSONSource::setOverrideSynchronousUpdate, "nativeSetOverrideSynchronousUpdate"));
 }
 
-void FeatureConverter::convertJson(std::shared_ptr<std::string> json, ActorRef<GeoJSONDataCallback> callback) {
+void FeatureConverter::convertJson(std::shared_ptr<std::string> json,
+                                   std::shared_ptr<const CRSWorldCoordinateHelper> projection,
+                                   ActorRef<GeoJSONDataCallback> callback) {
     using namespace mln::style::conversion;
 
     android::UniqueEnv _env = android::AttachEnv();
@@ -261,21 +296,24 @@ void FeatureConverter::convertJson(std::shared_ptr<std::string> json, ActorRef<G
         return;
     }
 
-    callback.invoke(&GeoJSONDataCallback::operator(),
-                    style::GeoJSONData::create(*converted, sequencedScheduler, options));
+    callback.invoke(
+        &GeoJSONDataCallback::operator(),
+        style::GeoJSONSource::Impl::createData(*converted, sequencedScheduler, options, std::move(projection)));
 }
 
 template <class JNIType>
 void FeatureConverter::convertObject(
     std::shared_ptr<jni::Global<jni::Object<JNIType>, jni::EnvAttachingDeleter>> jObject,
+    std::shared_ptr<const CRSWorldCoordinateHelper> projection,
     ActorRef<GeoJSONDataCallback> callback) {
     using namespace mln::android::geojson;
 
     android::UniqueEnv _env = android::AttachEnv();
     // Convert the jni object
     auto geometry = JNIType::convert(*_env, *jObject);
-    callback.invoke(&GeoJSONDataCallback::operator(),
-                    style::GeoJSONData::create(geometry, sequencedScheduler, options));
+    callback.invoke(
+        &GeoJSONDataCallback::operator(),
+        style::GeoJSONSource::Impl::createData(geometry, sequencedScheduler, options, std::move(projection)));
 }
 
 Update::Update(Converter _converterFn, std::unique_ptr<Actor<GeoJSONDataCallback>> _callback)

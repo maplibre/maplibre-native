@@ -126,8 +126,12 @@ mln::style::CustomGeometrySource::Options MBGLCustomGeometrySourceOptionsFromDic
   } else if (self.dataSourceImplementsFeaturesForTile) {
     data = [self.dataSource featuresInTileAtX:self.x y:self.y zoomLevel:self.z];
   } else {
-    mln::CanonicalTileID tileID = mln::CanonicalTileID(self.z, self.x, self.y);
-    mln::LatLngBounds tileBounds = mln::LatLngBounds(tileID);
+    mln::style::CustomGeometrySource *rawSource = self.rawSource;
+    if (!rawSource) {
+      return;
+    }
+    mln::LatLngBounds tileBounds =
+        rawSource->getTileBounds(mln::CanonicalTileID(self.z, self.x, self.y));
     data =
         [self.dataSource featuresInCoordinateBounds:MLNCoordinateBoundsFromLatLngBounds(tileBounds)
                                           zoomLevel:self.z];

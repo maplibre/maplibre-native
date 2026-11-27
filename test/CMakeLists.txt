@@ -15,6 +15,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/map/map.test.cpp
     ${PROJECT_SOURCE_DIR}/test/map/prefetch.test.cpp
     ${PROJECT_SOURCE_DIR}/test/map/transform.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/map/transform_crs.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/map/world_coordinate_helper.test.cpp
     ${PROJECT_SOURCE_DIR}/test/math/clamp.test.cpp
     ${PROJECT_SOURCE_DIR}/test/math/minmax.test.cpp
     ${PROJECT_SOURCE_DIR}/test/math/wrap.test.cpp
@@ -22,6 +24,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/plugin/plugin.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/dynamic_texture_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/fill_bucket.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/hillshade_tweaker.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/feature_tracking.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/hillshade_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
@@ -58,6 +61,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/conversion/layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/light.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/padding.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/conversion/projection.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/property_value.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/source_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/stringify.test.cpp
@@ -105,6 +109,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/camera.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/color.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/geo.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/geojson_reproject.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/grid_index.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/hash.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/http_timeout.test.cpp
@@ -113,6 +118,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/mat3.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/memory.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/merge_lines.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/national_grid.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/number_conversions.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/padding.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/position.test.cpp
