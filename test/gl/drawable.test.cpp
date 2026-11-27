@@ -35,6 +35,7 @@ TEST(DrawableGL, DrawsWithReplacedIndexBuffer) {
     RenderStaticData staticData{std::make_unique<gfx::ShaderRegistry>()};
     LineAtlas lineAtlas;
     PatternAtlas patternAtlas;
+    TexturePool texturePool{256, 128};
     PaintParameters parameters{context,
                                1,
                                backend,
@@ -46,6 +47,7 @@ TEST(DrawableGL, DrawsWithReplacedIndexBuffer) {
                                staticData,
                                lineAtlas,
                                patternAtlas,
+                               texturePool,
                                0,
                                0,
                                1,
