@@ -86,6 +86,22 @@ class CoordinateReferenceSystemTest : BaseTest() {
     }
 
     @Test
+    fun measuresALatitudePastAPoleAtTheClampedLatitude() {
+        // In any projection, a latitude past a pole or NaN gets Mercator's scale at the latitude it clamps to.
+        withProjection(TestProjections.polarStereographic("test:polar-past-pole")) {
+            loadStyle("mercator", LatLng(70.0, -45.0), 4.0)
+            val atPole = onMain { maplibreMap.projection.getMetersPerPixelAtLatitude(90.0) }
+            for (projection in listOf("mercator", "test:polar-past-pole")) {
+                loadStyle(projection, LatLng(70.0, -45.0), 4.0)
+                for (latitude in listOf(100.0, -100.0, Double.NaN)) {
+                    val measured = onMain { maplibreMap.projection.getMetersPerPixelAtLatitude(latitude) }
+                    assertEquals("$latitude in $projection", atPole, measured, atPole * 1e-12)
+                }
+            }
+        }
+    }
+
+    @Test
     fun tilesGeoJsonFromKotlinInTheProjection() {
         withProjection(TestProjections.polarStereographic("test:polar-geojson")) {
             loadStyle("test:polar-geojson", LatLng(75.0, 0.0), 3.0)

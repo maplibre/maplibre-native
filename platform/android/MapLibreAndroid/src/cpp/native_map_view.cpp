@@ -47,6 +47,7 @@
 #include <android/native_window_jni.h>
 
 #include <cassert>
+#include <cmath>
 #include <cstdlib>
 #include <ctime>
 
@@ -703,6 +704,10 @@ jni::jdouble NativeMapView::getMetersPerPixelAtLatitude(JNIEnv& env, jni::jdoubl
 }
 
 jni::jdouble NativeMapView::getMetersPerPixelAt(JNIEnv&, jni::jdouble lat, jni::jdouble lng) {
+    // A place no LatLng can hold, like a latitude past a pole, gets Mercator's scale at the clamped latitude.
+    if (!(std::abs(lat) <= 90) || !std::isfinite(lng)) {
+        return mln::Projection::getMetersPerPixelAtLatitude(lat, *map->getCameraOptions().zoom);
+    }
     return map->getMetersPerPixelAt(mln::LatLng(lat, lng));
 }
 
