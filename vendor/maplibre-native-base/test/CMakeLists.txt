@@ -1,31 +1,31 @@
-include(${PROJECT_SOURCE_DIR}/extras/googletest.cmake)
+# The tests of MapLibre Native Base, with the googletest and expected-lite
+# MapLibre Native vendors.
+include(${PROJECT_SOURCE_DIR}/../expected-lite.cmake)
+include(${PROJECT_SOURCE_DIR}/../googletest.cmake)
+find_package(Threads REQUIRED)
 
 set(TEST_BINARY_PATH ${CMAKE_CURRENT_BINARY_DIR})
-configure_file(${PROJECT_SOURCE_DIR}/test/test_defines.hpp.in ${PROJECT_BINARY_DIR}/test_defines.hpp)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/test_defines.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/test_defines.hpp)
 
-function(create_test folder_name)
-    set (target_name "test_${folder_name}")
-    set (curr_folder "${PROJECT_SOURCE_DIR}/test/${folder_name}")
+add_executable(
+    maplibre-native-base-test
+    ${CMAKE_CURRENT_LIST_DIR}/compatibility/value.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/io/io.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/io/io_delete.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/std/weak.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/util/type_wrapper.cpp
+    ${PROJECT_SOURCE_DIR}/../googletest/googletest/src/gtest_main.cc
+)
 
-    file (GLOB_RECURSE test_files "${curr_folder}/*.cpp" "${curr_folder}/*.hpp")
-    message (STATUS "Adding test ${target_name}")
+target_include_directories(maplibre-native-base-test PRIVATE ${CMAKE_CURRENT_LIST_DIR}/io ${CMAKE_CURRENT_BINARY_DIR})
 
-    add_executable(${target_name} ${test_files})
-    target_link_libraries(${target_name} PRIVATE
+target_link_libraries(
+    maplibre-native-base-test
+    PRIVATE
         MapLibreNative::Base
-        gtest_all
-        pthread
-    )
+        mbgl-vendor-expected-lite
+        mbgl-vendor-googletest
+        Threads::Threads
+)
 
-    target_include_directories(${target_name} PRIVATE
-            ${curr_folder}
-            ${PROJECT_BINARY_DIR}
-    )
-
-    add_test(NAME ${target_name} COMMAND ${target_name} ${TEST_ARGUMENTS})
-endfunction()
-
-create_test("compatibility")
-create_test("io")
-create_test("std")
-create_test("util")
+add_test(NAME maplibre-native-base-test COMMAND maplibre-native-base-test)
