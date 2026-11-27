@@ -35,6 +35,11 @@ public:
         }
     }
 
+    /// Whether the actor has gone away, so that anything sent to it would be
+    /// dropped. Safe to call from any thread. A `false` answer can be out of
+    /// date by the time it is read.
+    bool expired() const { return weakMailbox.expired(); }
+
     template <typename Fn, class... Args>
     auto ask(Fn fn, Args&&... args) const {
         // Result type is deduced from the function's return type
