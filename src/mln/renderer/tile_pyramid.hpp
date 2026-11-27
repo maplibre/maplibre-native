@@ -90,9 +90,8 @@ private:
 
     float prevLng = 0;
 
-    /// The projection whose tile grid the tiles are in.
     std::string projectionName;
-    /// The source's bounds that `boundsWorldBox` holds in that projection's world square.
+    /// The source's bounds that `boundsWorldBox` holds in the world square of `projectionName`.
     std::optional<LatLngBounds> boundsWorldBoxKey;
     std::array<double, 4> boundsWorldBox{};
 

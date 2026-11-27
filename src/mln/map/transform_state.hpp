@@ -136,7 +136,6 @@ public:
     // Projection
     /// Draws in a registered projection, see `addProjection`, or in Mercator for null.
     void setRegisteredProjection(std::shared_ptr<const CRSWorldCoordinateHelper>);
-    /// The registered projection the map is in, or null.
     const std::shared_ptr<const CRSWorldCoordinateHelper>& getRegisteredProjection() const {
         return registeredProjection;
     }
@@ -324,9 +323,7 @@ private:
 
 private:
     void updateCenterWorldBox();
-    /// The center in the world square.
     Point<double> centerWorldPoint() const;
-    /// Meters per screen pixel at the center, at the current zoom.
     double metersPerPixelAtCenter() const;
 
     ScreenCoordinate projectedToScreenCoordinate(const Point<double>& projected, vec4&) const;

@@ -97,6 +97,8 @@ public:
     // Projection
     /// Draws in a registered projection, see `addProjection`, or in Mercator for null.
     void setRegisteredProjection(std::shared_ptr<const CRSWorldCoordinateHelper>);
+
+    // North Orientation
     void setNorthOrientation(NorthOrientation);
     NorthOrientation getNorthOrientation() const;
 

@@ -542,6 +542,8 @@ void Transform::setRegisteredProjection(std::shared_ptr<const CRSWorldCoordinate
     state.setRegisteredProjection(std::move(registered));
 }
 
+// MARK: - North Orientation
+
 void Transform::setNorthOrientation(NorthOrientation orientation) {
     state.setNorthOrientation(orientation);
     double scale{state.getScale()};

@@ -92,7 +92,7 @@ private:
     ShapeAnnotationMap shapeAnnotations;
     ImageMap images;
 
-    /// The registered projection the annotations are drawn in, or null for the built-in ones.
+    /// The registered projection the annotations are drawn in, or null in Mercator.
     std::shared_ptr<const CRSWorldCoordinateHelper> projection;
     /// The symbol annotations at their places in that projection's world square; empty until a tile needs them.
     std::vector<std::pair<Point<double>, std::shared_ptr<const SymbolAnnotationImpl>>> worldSymbols;

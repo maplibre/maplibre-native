@@ -170,8 +170,9 @@ struct FreeCameraOptions {
 
     /** Helper function for setting orientation of the camera by defining a
        focus point on the map. Up vector is required in certain scenarios where
-       bearing can't be deduced from the viewing direction. The direction is found in web mercator, so on a map in a
-       registered projection, where bearings count from the projection's grid north, the camera need not look at it */
+       bearing can't be deduced from the viewing direction. The orientation is the one that looks at the point in web
+       mercator, and a map in a registered projection applies the same rotation to its own grid, where bearings count
+       from grid north */
     void lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector = std::nullopt) noexcept;
 
     /** Helper function for setting the orientation of the camera as a roll, pitch, and

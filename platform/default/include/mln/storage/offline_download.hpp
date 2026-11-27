@@ -64,7 +64,7 @@ private:
     std::deque<Resource> resourcesRemaining;
     std::list<Resource> resourcesToBeMarkedAsUsed;
     std::list<std::tuple<Resource, Response>> buffer;
-    /// The registered projection the style is in, whose grid the region's tiles are cut in; null for the built-in ones.
+    /// The registered projection the style is in, whose grid the region's tiles are cut in; null in Mercator.
     std::shared_ptr<const CRSWorldCoordinateHelper> projection;
 
     void queueResource(Resource&&);

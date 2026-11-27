@@ -49,7 +49,8 @@ std::optional<conversion::Error> Projection::setProperty(const std::string& name
             Log::Warning(Event::Style,
                          "The globe projection is not supported yet, so the style's projection draws as Mercator");
         } else if (type != "mercator" && !isRegisteredProjectionName(type)) {
-            return conversion::Error{"projection type must be mercator, vertical-perspective or globe"};
+            return conversion::Error{
+                "projection type must be mercator, vertical-perspective, globe, identity or a name with a colon"};
         }
     } else if (isArray(value) || isObject(value)) {
         Log::Warning(Event::Style,

@@ -12,6 +12,9 @@ namespace style {
 /**
  * Parameters that define the current camera position for a
  * `CustomLayerHost::render()` function.
+ *
+ * In a projection registered with `addProjection`, the matrices take positions in the world square of its tile
+ * matrix set, with (0, 0) at the top-left corner of tile 0/0/0, in place of web mercator positions.
  */
 struct CustomLayerRenderParameters {
     double width;

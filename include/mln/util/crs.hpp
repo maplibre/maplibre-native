@@ -13,6 +13,7 @@ namespace mln {
 /// tiles that were cut in that system. Register it with `addProjection` and select it by name with the style's
 /// `projection.type`. Every tile source of the map is taken to be cut in `tileMatrixSet`, the tiles are drawn as they
 /// are, and CRS units count as meters wherever the map converts meters.
+/// This API is experimental and may change in a future release.
 struct CRS {
     /// The name `projection.type` takes, like `EPSG:2193`. It must contain a colon: names without one are reserved for
     /// built-in projections.
@@ -28,12 +29,14 @@ struct CRS {
     TileMatrixSet tileMatrixSet;
 };
 
-/// Registers a projection for every map. Throws `std::invalid_argument` if the name has no colon or is taken, or if
-/// `tileMatrixSet.extentAtZoom0` is not positive.
+/// Registers a projection for every map. Throws `std::invalid_argument` if the name has no colon or is taken, if
+/// `tileMatrixSet.extentAtZoom0` is not positive, or if `forward` or `inverse` is empty.
+/// This API is experimental and may change in a future release.
 void addProjection(CRS);
 
 /// Maps already in the projection keep it until their projection changes. Throws `std::invalid_argument` for a name
 /// without a colon, since built-in projections cannot be removed.
+/// This API is experimental and may change in a future release.
 void removeProjection(const std::string& name);
 
 } // namespace mln

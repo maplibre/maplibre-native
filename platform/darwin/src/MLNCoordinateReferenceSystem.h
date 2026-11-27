@@ -39,7 +39,8 @@ typedef struct __attribute__((objc_boxable)) MLNTileMatrixSet {
  The map calls ``forward`` and ``inverse`` from any thread, several at once, and they must return
  the same answer for the same input. They must not call back into the map or wait on the main
  thread. The last reference to the blocks can be released on any thread, so neither may capture
- an object whose `dealloc` must run on the main thread.
+ an object whose `dealloc` must run on the main thread. A block that raises an exception counts
+ as having no answer for that call.
 
  > Note: This API is experimental and may change in a future release.
  */

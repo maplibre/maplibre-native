@@ -103,7 +103,8 @@ TEST(StyleConversion, Projection) {
 
     {
         ASSERT_FALSE(parseProjection(R"({"type":"orthographic"})"));
-        ASSERT_EQ("projection type must be mercator, vertical-perspective or globe", error.message);
+        ASSERT_EQ("projection type must be mercator, vertical-perspective, globe, identity or a name with a colon",
+                  error.message);
     }
 
     {

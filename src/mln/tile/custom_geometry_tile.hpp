@@ -42,7 +42,7 @@ private:
     std::string sourceID;
     TileNecessity necessity;
     Immutable<style::CustomGeometrySource::TileOptions> options;
-    /// The registered projection the tile is cut in, or null for the built-in ones.
+    /// The registered projection the tile is cut in, or null in Mercator.
     std::shared_ptr<const CRSWorldCoordinateHelper> projection;
     ActorRef<style::CustomTileLoader> loader;
     std::shared_ptr<Mailbox> mailbox;

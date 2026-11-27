@@ -76,6 +76,8 @@ public:
     void setURL(const std::string& url);
     void setGeoJSON(const GeoJSON&);
     void setGeoJSON(GeoJSON&&);
+    /// Sets data that is already tiled. It draws only in the projection it was tiled in, so data from
+    /// `GeoJSONData::create`, which tiles in Mercator, draws nothing in a registered projection and logs a warning.
     void setGeoJSONData(std::shared_ptr<GeoJSONData>);
 
     std::optional<std::string> getURL() const;
