@@ -467,7 +467,8 @@ void SurfaceRenderableResource::recreateSwapchain(bool recreateSurface) {
 
     readTexture.reset();
 
-    init(extent.width, extent.height);
+    const auto size = backend.getDefaultRenderable().getSize();
+    init(size.width, size.height);
 }
 
 void SurfaceRenderableResource::destroyResources() {
