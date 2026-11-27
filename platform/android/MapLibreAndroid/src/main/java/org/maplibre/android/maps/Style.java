@@ -7,14 +7,17 @@ import android.util.DisplayMetrics;
 import android.util.Pair;
 
 import androidx.annotation.IntRange;
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import org.maplibre.android.LibraryLoader;
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.constants.MapLibreConstants;
+import org.maplibre.android.geometry.CoordinateReferenceSystem;
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.Layer;
@@ -1487,4 +1490,45 @@ public class Style {
     }
     throw new IllegalArgumentException("Could not find layer " + name);
   }
+
+  //
+  // Projections
+  //
+
+  /**
+   * Registers a projection for every map, so a style can select it by name with its {@code projection.type}.
+   * Register it before loading a style that names it.
+   * <p>
+   * This API is experimental and may change in a future release.
+   * </p>
+   *
+   * @param projection the coordinate reference system to register
+   * @throws IllegalArgumentException if the name has no colon or is taken, or if the tile matrix set's
+   *                                  {@code extentAtZoom0} is not positive
+   */
+  public static void addProjection(@NonNull CoordinateReferenceSystem projection) {
+    LibraryLoader.load();
+    nativeAddProjection(projection);
+  }
+
+  /**
+   * Removes a projection registered with {@link #addProjection(CoordinateReferenceSystem)}. A map already in the
+   * projection keeps it until its projection changes. Removing a name that was never registered does nothing.
+   * <p>
+   * This API is experimental and may change in a future release.
+   * </p>
+   *
+   * @param name the name the projection was registered with
+   * @throws IllegalArgumentException if the name has no colon, since built-in projections cannot be removed
+   */
+  public static void removeProjection(@NonNull String name) {
+    LibraryLoader.load();
+    nativeRemoveProjection(name);
+  }
+
+  @Keep
+  private static native void nativeAddProjection(@NonNull CoordinateReferenceSystem projection);
+
+  @Keep
+  private static native void nativeRemoveProjection(@NonNull String name);
 }

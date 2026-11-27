@@ -697,8 +697,13 @@ jni::jboolean NativeMapView::isFullyLoaded(JNIEnv&) {
     return map->isFullyLoaded();
 }
 
-jni::jdouble NativeMapView::getMetersPerPixelAtLatitude(JNIEnv&, jni::jdouble lat, jni::jdouble zoom) {
-    return mln::Projection::getMetersPerPixelAtLatitude(lat, zoom);
+jni::jdouble NativeMapView::getMetersPerPixelAtLatitude(JNIEnv& env, jni::jdouble lat) {
+    // A registered projection's scale also depends on the longitude: it is taken on the meridian through the center.
+    return getMetersPerPixelAt(env, lat, map->getCameraOptions(std::nullopt).center->longitude());
+}
+
+jni::jdouble NativeMapView::getMetersPerPixelAt(JNIEnv&, jni::jdouble lat, jni::jdouble lng) {
+    return map->getMetersPerPixelAt(mln::LatLng(lat, lng));
 }
 
 jni::Local<jni::Object<ProjectedMeters>> NativeMapView::projectedMetersForLatLng(JNIEnv& env,
@@ -1432,6 +1437,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::isFullyLoaded, "nativeIsFullyLoaded"),
         METHOD(&NativeMapView::onLowMemory, "nativeOnLowMemory"),
         METHOD(&NativeMapView::getMetersPerPixelAtLatitude, "nativeGetMetersPerPixelAtLatitude"),
+        METHOD(&NativeMapView::getMetersPerPixelAt, "nativeGetMetersPerPixelAt"),
         METHOD(&NativeMapView::projectedMetersForLatLng, "nativeProjectedMetersForLatLng"),
         METHOD(&NativeMapView::pixelForLatLng, "nativePixelForLatLng"),
         METHOD(&NativeMapView::pixelsForLatLngs, "nativePixelsForLatLngs"),

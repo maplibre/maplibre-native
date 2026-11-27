@@ -25,6 +25,10 @@ public:
                                                    const Immutable<GeoJSONOptions>&,
                                                    std::shared_ptr<const CRSWorldCoordinateHelper> projection);
 
+    /// The projection `setGeoJSON` would tile data set on `source` in now, for a platform that creates the data on
+    /// another thread: null in lat/lng, and before the source joins a style.
+    static std::shared_ptr<const CRSWorldCoordinateHelper> registeredProjection(const GeoJSONSource& source);
+
     Range<uint8_t> getZoomRange() const;
     std::weak_ptr<GeoJSONData> getData() const;
     const Immutable<GeoJSONOptions>& getOptions() const { return options; }

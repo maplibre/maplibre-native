@@ -1,0 +1,20 @@
+{
+  "version": 8,
+  "name": "National Grid crosshairs (EPSG:27700)",
+  "center": [-1.2773320477729189, 51.96064818208741],
+  "zoom": 2,
+  "projection": {"type": "EPSG:27700"},
+  "sources": {
+    "grid": {
+      "type": "raster",
+      "tiles": ["asset://national-grid/{z}-{x}-{y}.png"],
+      "minzoom": 3,
+      "maxzoom": 3,
+      "tileSize": 256
+    }
+  },
+  "layers": [
+    {"id": "background", "type": "background", "paint": {"background-color": "white"}},
+    {"id": "grid", "type": "raster", "source": "grid", "paint": {"raster-fade-duration": 0}}
+  ]
+}

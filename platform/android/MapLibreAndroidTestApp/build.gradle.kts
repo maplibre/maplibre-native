@@ -131,6 +131,11 @@ android {
         buildConfig = true
     }
 
+    sourceSets {
+        // The GLFW demo's styles, for the projection activities.
+        getByName("main").assets.srcDir("../../glfw/assets")
+    }
+
     namespace = "org.maplibre.android.testapp"
 
     lint {

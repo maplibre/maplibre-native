@@ -99,12 +99,14 @@ public final class Utils {
     if (location == null) {
       return 0;
     }
-    double metersPerPixel = maplibreMap.getProjection().getMetersPerPixelAtLatitude(location.getLatitude());
+    double metersPerPixel = maplibreMap.getProjection().getMetersPerPixelAt(new LatLng(location));
     return (float) (location.getAccuracy() * (1 / metersPerPixel));
   }
 
   static boolean immediateAnimation(@NonNull Projection projection, @NonNull LatLng current, @NonNull LatLng target) {
-    double metersPerPixel = projection.getMetersPerPixelAtLatitude((current.getLatitude() + target.getLatitude()) / 2);
+    LatLng midpoint = new LatLng((current.getLatitude() + target.getLatitude()) / 2,
+      (current.getLongitude() + target.getLongitude()) / 2);
+    double metersPerPixel = projection.getMetersPerPixelAt(midpoint);
     double distance = current.distanceTo(target);
     return distance / metersPerPixel > INSTANT_LOCATION_TRANSITION_THRESHOLD;
   }

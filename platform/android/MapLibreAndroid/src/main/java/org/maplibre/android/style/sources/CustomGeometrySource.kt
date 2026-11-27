@@ -6,7 +6,6 @@ import androidx.annotation.WorkerThread
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.android.geometry.LatLngBounds
-import org.maplibre.android.geometry.LatLngBounds.Companion.from
 import org.maplibre.android.style.expressions.Expression
 import java.lang.ref.WeakReference
 import java.util.Locale
@@ -123,6 +122,9 @@ class CustomGeometrySource @UiThread constructor(id: String?, options: CustomGeo
 
     @Keep
     private external fun nativeInvalidateBounds(bounds: LatLngBounds)
+
+    @Keep
+    private external fun nativeGetTileBounds(z: Int, x: Int, y: Int): LatLngBounds
 
     @Keep
     @Throws(Throwable::class)
@@ -293,10 +295,10 @@ class CustomGeometrySource @UiThread constructor(id: String?, options: CustomGeo
                     }
                 }
             }
-            if (!isCancelled()) {
-                val data = provider!!.getFeaturesForBounds(from(id.z, id.x, id.y), id.z)
-                val source = sourceRef.get()
-                if (!isCancelled() && source != null) {
+            val source = sourceRef.get()
+            if (!isCancelled() && source != null) {
+                val data = provider!!.getFeaturesForBounds(source.nativeGetTileBounds(id.z, id.x, id.y), id.z)
+                if (!isCancelled()) {
                     source.setTileData(id, data)
                 }
             }

@@ -1,4 +1,5 @@
 #include <mln/map/world_coordinate_helper.hpp>
+#include <mln/style/projection_impl.hpp>
 #include <mln/style/sources/geojson_source_impl.hpp>
 #include <mln/tile/tile_id.hpp>
 #include <mln/util/constants.hpp>
@@ -172,6 +173,11 @@ std::shared_ptr<GeoJSONData> GeoJSONSource::Impl::createData(
         vtOptions.wrap = false;
     }
     return inProjection(new GeoJSONVTData(data, vtOptions, std::move(sequencedScheduler)));
+}
+
+// static
+std::shared_ptr<const CRSWorldCoordinateHelper> GeoJSONSource::Impl::registeredProjection(const GeoJSONSource& source) {
+    return source.projection ? (*source.projection)->registeredProjection : nullptr;
 }
 
 GeoJSONSource::Impl::Impl(std::string id_, Immutable<GeoJSONOptions> options_)

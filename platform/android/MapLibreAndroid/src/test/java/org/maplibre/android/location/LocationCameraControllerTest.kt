@@ -1135,9 +1135,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1197,9 +1197,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1269,9 +1269,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1341,9 +1341,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1403,9 +1403,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1462,9 +1462,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1.0))
@@ -1520,9 +1520,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1579,9 +1579,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1631,9 +1631,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1683,9 +1683,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1781,9 +1781,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1828,9 +1828,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1879,9 +1879,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1920,9 +1920,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))
@@ -1985,9 +1985,9 @@ class LocationCameraControllerTest : BaseTest() {
         )
         Mockito.`when`(maplibreMap.projection).thenReturn(projection)
         Mockito.`when`(
-            projection.getMetersPerPixelAtLatitude(
+            projection.getMetersPerPixelAt(
                 ArgumentMatchers.any(
-                    Double::class.java
+                    LatLng::class.java
                 )
             )
         ).thenReturn(java.lang.Double.valueOf(1000.0))

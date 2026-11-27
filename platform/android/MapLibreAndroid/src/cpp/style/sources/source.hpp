@@ -56,7 +56,7 @@ public:
 
     jni::Local<jni::Integer> getMaxOverscaleFactorForParentTiles(jni::JNIEnv&);
 
-    void addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mln::style::Style& style);
+    virtual void addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mln::style::Style& style);
 
     jni::Local<jni::Boolean> isVolatile(JNIEnv&);
 

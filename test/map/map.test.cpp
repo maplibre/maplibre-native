@@ -14,6 +14,7 @@
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/map/map_projection.hpp>
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/math/log2.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/renderer/update_parameters.hpp>
@@ -37,6 +38,7 @@
 #include <mln/style/projection.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/sources/geojson_source_impl.hpp>
 #include <mln/style/sources/image_source.hpp>
 #include <mln/style/sources/vector_source.hpp>
 #include <mln/style/style_impl.hpp>
@@ -459,6 +461,40 @@ TEST(Map, GeoJSONSetAfterItsProjectionIsRemovedIsTiledInIt) {
     const auto& point = features[0].geometry.get<Point<double>>();
     EXPECT_NEAR(0, point.x, 1e-3);
     EXPECT_NEAR(75, point.y, 1e-3);
+}
+
+TEST(Map, GeoJSONDataCreatedInItsSourcesProjectionIsTiledInIt) {
+    addProjection(test::polarStereographic("test:polar-created"));
+    {
+        GeoJSONSource detached("detached");
+        EXPECT_FALSE(GeoJSONSource::Impl::registeredProjection(detached));
+
+        MapTest<> test;
+        test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "test:polar-created"},
+            "sources": {"points": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}},
+            "layers": [{"id": "points", "type": "circle", "source": "points"}]})");
+        const LatLng place{75, 0};
+        test.map.jumpTo(CameraOptions().withCenter(place).withZoom(3));
+
+        // As the Android binding does, the data is created off the source with the projection it reports.
+        auto& source = *test.map.getStyle().getSource("points")->as<GeoJSONSource>();
+        const auto projection = GeoJSONSource::Impl::registeredProjection(source);
+        ASSERT_TRUE(projection);
+        EXPECT_EQ("test:polar-created", projection->name());
+        source.setGeoJSONData(
+            GeoJSONSource::Impl::createData(mapbox::geojson::parse(R"({"type": "Point", "coordinates": [0, 75]})"),
+                                            Scheduler::GetSequenced(),
+                                            source.impl().getOptions(),
+                                            projection));
+        test.frontend.render(test.map);
+
+        const auto features = test.frontend.getRenderer()->queryRenderedFeatures(test.map.pixelForLatLng(place));
+        ASSERT_EQ(1u, features.size());
+        const auto& point = features[0].geometry.get<Point<double>>();
+        EXPECT_NEAR(0, point.x, 1e-3);
+        EXPECT_NEAR(75, point.y, 1e-3);
+    }
+    removeProjection("test:polar-created");
 }
 
 TEST(Map, LatLngBoundsToCameraWithExcessivePadding) {

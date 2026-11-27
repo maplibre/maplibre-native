@@ -46,7 +46,7 @@ class LocationAnimatorCoordinatorTest : BaseTest() {
             animatorProvider
         )
         configureAnimatorProvider()
-        every { projection.getMetersPerPixelAtLatitude(any()) } answers { 1.0 }
+        every { projection.getMetersPerPixelAt(any()) } answers { 1.0 }
         val startedAnimatorsSlot = slot<List<Animator>>()
         every { animatorSetProvider.startAnimation(capture(startedAnimatorsSlot), any(), any()) } answers {
             startedAnimatorsSlot.captured.forEach {
@@ -250,7 +250,7 @@ class LocationAnimatorCoordinatorTest : BaseTest() {
 
     @Test
     fun feedNewLocation_animatorValue_multiplePoints_animationDuration() {
-        every { projection.getMetersPerPixelAtLatitude(any()) } answers { 10000.0 } // disable snap
+        every { projection.getMetersPerPixelAt(any()) } answers { 10000.0 } // disable snap
         val locationInter = Location("")
         locationInter.latitude = 51.1
         locationInter.longitude = 17.1
@@ -279,7 +279,7 @@ class LocationAnimatorCoordinatorTest : BaseTest() {
 
     @Test
     fun feedNewLocation_animatorValue_multiplePoints_animationDuration_lookAhead() {
-        every { projection.getMetersPerPixelAtLatitude(any()) } answers { 10000.0 } // disable snap
+        every { projection.getMetersPerPixelAt(any()) } answers { 10000.0 } // disable snap
         val locationInter = Location("")
         locationInter.latitude = 51.1
         locationInter.longitude = 17.1
@@ -794,7 +794,7 @@ class LocationAnimatorCoordinatorTest : BaseTest() {
 
     @Test
     fun feedNewLocation_recordsAnimationClock() {
-        every { projection.getMetersPerPixelAtLatitude(any()) } answers { 10_000.0 }
+        every { projection.getMetersPerPixelAt(any()) } answers { 10_000.0 }
         locationAnimatorCoordinator.setTrackingAnimationDurationMultiplier(1f)
         assertEquals(0L, locationAnimatorCoordinator.userLocationAnimationReferenceTime)
         assertEquals(0L, locationAnimatorCoordinator.userLocationAnimationDuration)
