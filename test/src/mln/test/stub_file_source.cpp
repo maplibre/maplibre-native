@@ -82,12 +82,16 @@ void StubFileSource::respondToAll() {
     if (type != ResponseType::Manual) {
         throw std::runtime_error("this method can only be called with ResponseType::Manual");
     }
-    for (const auto& [key, value] : pending) {
+    // Explicit copy: a callback can cancel or start requests, which changes `pending`.
+    const auto pending_ = pending;
+    for (const auto& [key, value] : pending_) {
+        if (!pending.contains(key)) continue; // Cancelled by an earlier callback.
         auto& [resource, responseFunction, callback] = value;
+        // Removed before the callback, which can free the request and allocate another one at its address.
+        remove(key);
         if (const std::optional<Response> res = responseFunction(resource)) {
             callback(*res);
         }
-        pending.erase(key);
     }
 }
 

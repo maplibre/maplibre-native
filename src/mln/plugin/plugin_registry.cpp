@@ -35,6 +35,7 @@ Value copyValue(const mln_plugin_value& value) {
                                                   static_cast<double>(value.data.color_value.a)}};
         case MLN_PLUGIN_VALUE_IMAGE:
         case MLN_PLUGIN_VALUE_STRING:
+        case MLN_PLUGIN_VALUE_RESOURCE:
             return Value{copyString(value.data.string_value)};
     }
     return {};
@@ -321,21 +322,26 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
         if (property.struct_size < sizeof(mln_plugin_property_descriptor_v1) || !validString(property.name) ||
             property.default_value.struct_size < sizeof(mln_plugin_value) ||
             property.default_value.type != property.type ||
-            ((property.type == MLN_PLUGIN_VALUE_STRING || property.type == MLN_PLUGIN_VALUE_IMAGE) &&
+            ((property.type == MLN_PLUGIN_VALUE_STRING || property.type == MLN_PLUGIN_VALUE_IMAGE ||
+              property.type == MLN_PLUGIN_VALUE_RESOURCE) &&
              !validOptionalString(property.default_value.data.string_value)) ||
             (property.expression_capabilities & ~validExpressionCapabilities) != 0) {
             error = "plugin property descriptor is malformed";
             return false;
         }
         if (property.is_layout > 1 ||
-            (property.is_layout &&
-             (property.supports_transitions || (property.expression_capabilities & ~MLN_PLUGIN_EXPRESSION_CAMERA)))) {
-            error = "plugin layout properties support only camera expressions and cannot transition";
+            (property.is_layout && (property.supports_transitions ||
+                                    (property.expression_capabilities & MLN_PLUGIN_EXPRESSION_FEATURE_STATE)))) {
+            error = "plugin layout properties cannot depend on feature state or transition";
             return false;
         }
         if (property.type == MLN_PLUGIN_VALUE_IMAGE &&
             (property.expression_capabilities & MLN_PLUGIN_EXPRESSION_FEATURE_STATE)) {
             error = "plugin image properties cannot depend on feature state";
+            return false;
+        }
+        if (property.type == MLN_PLUGIN_VALUE_RESOURCE && !property.is_layout) {
+            error = "plugin resource properties must be layout properties";
             return false;
         }
         const bool transitionableType = property.type == MLN_PLUGIN_VALUE_FLOAT ||
@@ -517,6 +523,18 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
             return error.find("duplicate") != std::string::npos ? MLN_PLUGIN_STATUS_CONFLICT
                                                                 : MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
+        const bool usesResources = std::any_of(
+            copiedLayerType.properties.begin(), copiedLayerType.properties.end(), [](const auto& property) {
+                return property.type == MLN_PLUGIN_VALUE_RESOURCE;
+            });
+        const bool bothCallbacks = layerType.create_resource && layerType.destroy_resource;
+        const bool anyCallback = layerType.create_resource || layerType.destroy_resource;
+        if (usesResources ? !bothCallbacks : anyCallback) {
+            error = "plugin resource callbacks are required by, and only by, a layer type with resource properties";
+            return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+        }
+        copiedLayerType.createResource = layerType.create_resource;
+        copiedLayerType.destroyResource = layerType.destroy_resource;
         for (const auto& shader : copiedLayerType.shaders) {
             for (const auto& binding : shader.propertyBindings) {
                 const auto* property = copiedLayerType.findProperty(binding.propertyName);
@@ -545,7 +563,8 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         for (const auto& property : copiedLayerType.properties) {
             const auto dataDependencies = MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_COMPOSITE |
                                           MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
-            if ((property.expressionCapabilities & dataDependencies) == 0) continue;
+            // Layout properties are evaluated for each feature at layout time, without a shader binding.
+            if (property.isLayout || (property.expressionCapabilities & dataDependencies) == 0) continue;
             const bool bound = std::any_of(
                 copiedLayerType.shaders.begin(), copiedLayerType.shaders.end(), [&](const auto& shader) {
                     return std::any_of(shader.propertyBindings.begin(),
@@ -622,6 +641,7 @@ bool PluginRegistry::valueMatches(mln_plugin_value_type type, const Value& value
             return numeric();
         case MLN_PLUGIN_VALUE_IMAGE:
         case MLN_PLUGIN_VALUE_STRING:
+        case MLN_PLUGIN_VALUE_RESOURCE:
             return value.getString() != nullptr;
         case MLN_PLUGIN_VALUE_FLOAT2:
         case MLN_PLUGIN_VALUE_COLOR: {

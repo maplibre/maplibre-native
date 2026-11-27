@@ -1,0 +1,76 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 256,
+      "height": 256,
+      "description": "A feature without a model URL is not drawn"
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 17,
+  "pitch": 45,
+  "bearing": 0,
+  "sources": {
+    "boxes": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "model_url": "asset://plugins/gltf-layer/render-tests/assets/box-blue.glb"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0003,
+                0
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "kind": "green"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0003,
+                0
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#eef2f5"
+      }
+    },
+    {
+      "id": "boxes",
+      "type": "gltf",
+      "source": "boxes",
+      "layout": {
+        "model-url": [
+          "get",
+          "model_url"
+        ]
+      },
+      "paint": {
+        "model-scale": 30
+      }
+    }
+  ]
+}

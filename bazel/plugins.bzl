@@ -11,6 +11,7 @@ MLN_PLUGIN_HEADERS = [
     "src/mln/renderer/layers/render_plugin_style_layer.hpp",
     "src/mln/renderer/layers/plugin_layer_tweaker.hpp",
     "src/mln/plugin/plugin_drawable_data.hpp",
+    "src/mln/tile/layout_resource_manager.hpp",
 ]
 
 MLN_PLUGIN_SOURCE = [
@@ -23,4 +24,5 @@ MLN_PLUGIN_SOURCE = [
     "src/mln/style/plugin_property.cpp",
     "src/mln/renderer/layers/render_plugin_style_layer.cpp",
     "src/mln/renderer/layers/plugin_layer_tweaker.cpp",
+    "src/mln/tile/layout_resource_manager.cpp",
 ]

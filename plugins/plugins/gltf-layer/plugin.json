@@ -1,0 +1,4 @@
+{
+  "description": "3D glTF models drawn at the points of a source as the plugin layer type gltf",
+  "backends": ["metal"]
+}
