@@ -10,6 +10,13 @@ using namespace mln;
 
 namespace {
 
+Immutable<Glyph> makeGlyph(char16_t code) {
+    Glyph glyph;
+    glyph.id = GlyphID(code);
+    glyph.bitmap = AlphaImage({8, 8});
+    return makeMutable<Glyph>(std::move(glyph));
+}
+
 Immutable<style::Image::Impl> makeImage(const std::string& id, bool sdf, Size size = {16, 16}) {
     return makeMutable<style::Image::Impl>(id, PremultipliedImage(size), 1.0f, sdf);
 }
@@ -77,4 +84,15 @@ TEST_F(DynamicTextureAtlasTest, ReleasedRevisionGetsSameAllocation) {
     dynTexAtlas.removeTextures(imageAtlas.textureHandles, imageAtlas.dynamicTexture);
 
     EXPECT_EQ(releasedId, uploadPattern(image).textureHandles.at(0).getId());
+}
+
+TEST_F(DynamicTextureAtlasTest, GlyphsOfDifferentFontStacksDoNotShareAllocation) {
+    // These font stack hashes and code points once gave both glyphs the same bin id, as real font stack hashes often
+    // did in 32-bit builds, so one glyph drew as the other.
+    const auto a = makeGlyph(u'A');
+    const auto b = makeGlyph(u'B');
+    const auto glyphAtlas = dynTexAtlas.uploadGlyphs({{0, {{b->id, b}}}, {4, {{a->id, a}}}});
+
+    EXPECT_NE(glyphAtlas.glyphPositions.at(0).at(b->id).rect, glyphAtlas.glyphPositions.at(4).at(a->id).rect);
+    dynTexAtlas.removeTextures(glyphAtlas.textureHandles, glyphAtlas.dynamicTexture);
 }
