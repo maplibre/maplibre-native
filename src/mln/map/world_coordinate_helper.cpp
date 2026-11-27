@@ -60,6 +60,9 @@ constexpr double roundTripTolerance = 1e-3;
 // answer.
 constexpr int edgeSearchSteps = 30;
 
+// How many times as much as at the center of its tile matrix set a projection may stretch distances along the meridian.
+constexpr double maxMeridianStretch = 10;
+
 // How many parts a lat/lng box is cut into along each axis when it is sampled.
 constexpr int boxSampleSteps = 16;
 
@@ -265,6 +268,49 @@ void CRSWorldCoordinateHelper::answersTowardCenter(std::span<const Pair> world, 
         along[k] = alongAt(world[k], answered[k]);
     }
     ownAnswers(along, lngLats);
+}
+
+const std::array<double, 2>& CRSWorldCoordinateHelper::latitudeRange() const {
+    std::call_once(latitudeRangeFlag, [&] {
+        const LatLng center = latLngFromWorld({0.5, 0.5});
+        latitudeRange_ = {findLatitudeLimit(center, -90), findLatitudeLimit(center, 90)};
+    });
+    return latitudeRange_;
+}
+
+double CRSWorldCoordinateHelper::findLatitudeLimit(const LatLng& center, double pole) const {
+    const double step = pole > center.latitude() ? 1 : -1;
+    // Whole degrees from the center toward the pole, up to a degree short of it.
+    const int steps = std::max(0, static_cast<int>(std::ceil(std::abs(pole - center.latitude()) - 1)));
+    // How far a hundredth of a degree toward the equator moves a position on the center's meridian: at the center,
+    // then a degree further toward the pole from each whole degree, all in one batch.
+    std::vector<Pair> lngLats;
+    lngLats.reserve(2 * static_cast<std::size_t>(steps + 1));
+    const auto addStretch = [&](double latitude) {
+        lngLats.push_back({center.longitude(), latitude});
+        lngLats.push_back({center.longitude(), latitude >= 0 ? latitude - 0.01 : latitude + 0.01});
+    };
+    addStretch(center.latitude());
+    for (int i = 0; i < steps; ++i) {
+        addStretch(center.latitude() + (i * step) + step);
+    }
+    std::vector<Pair> positions(lngLats.size());
+    crs->forward(lngLats, positions);
+    const auto stretch = [&](int i) {
+        const Pair& position = positions[2 * i];
+        const Pair& towardEquator = positions[(2 * i) + 1];
+        return std::hypot(towardEquator[0] - position[0], towardEquator[1] - position[1]);
+    };
+    const double maxStretch = maxMeridianStretch * stretch(0);
+    if (!(maxStretch > 0)) {
+        return pole;
+    }
+    for (int i = 0; i < steps; ++i) {
+        if (!(stretch(i + 1) <= maxStretch)) {
+            return center.latitude() + (i * step);
+        }
+    }
+    return pole;
 }
 
 void PointBatcher::operator()(Point<double>& point) {

@@ -30,6 +30,7 @@ private:
     const style::GeoJSONSource::Impl& impl() const;
 
     std::weak_ptr<style::GeoJSONData> data;
+    bool warnedAboutProjection = false;
 };
 
 } // namespace mln

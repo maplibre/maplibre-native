@@ -72,7 +72,7 @@
 	url = https://github.com/mapbox/cheap-ruler-cpp.git
 [submodule "vendor/maplibre-native-base/deps/geojson-vt-cpp"]
 	path = vendor/maplibre-native-base/deps/geojson-vt-cpp
-	url = https://github.com/mapbox/geojson-vt-cpp.git
+	url = https://github.com/johncarmack1984/geojson-vt-cpp.git
 [submodule "vendor/maplibre-native-base/deps/geometry.hpp"]
 	path = vendor/maplibre-native-base/deps/geometry.hpp
 	url = https://github.com/mapbox/geometry.hpp.git
@@ -87,7 +87,7 @@
 	url = https://github.com/mapbox/shelf-pack-cpp.git
 [submodule "vendor/supercluster"]
 	path = vendor/supercluster
-	url = https://github.com/mapbox/supercluster.hpp.git
+	url = https://github.com/johncarmack1984/supercluster.hpp.git
 [submodule "vendor/maplibre-native-base/deps/variant"]
 	path = vendor/maplibre-native-base/deps/variant
 	url = https://github.com/mapbox/variant.git

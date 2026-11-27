@@ -575,6 +575,8 @@ MLN_CORE_SOURCE = [
     "src/mln/util/font_stack.cpp",
     "src/mln/util/geo.cpp",
     "src/mln/util/geojson_impl.cpp",
+    "src/mln/util/geojson_reproject.cpp",
+    "src/mln/util/geojson_reproject.hpp",
     "src/mln/util/geometry_util.cpp",
     "src/mln/util/geometry_util.hpp",
     "src/mln/util/grid_index.cpp",

@@ -977,6 +977,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/font_stack.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/geo.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/geojson_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/geojson_reproject.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/geojson_reproject.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/geometry_util.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/geometry_util.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/grid_index.cpp

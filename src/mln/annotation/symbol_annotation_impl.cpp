@@ -11,12 +11,17 @@ SymbolAnnotationImpl::SymbolAnnotationImpl(AnnotationID id_, SymbolAnnotation an
       annotation(std::move(annotation_)) {}
 
 void SymbolAnnotationImpl::updateLayer(const CanonicalTileID& tileID, AnnotationTileLayer& layer) const {
+    LatLng latLng{annotation.geometry.y, annotation.geometry.x};
+    updateLayer(tileID, layer, TileCoordinate::fromLatLng(0, latLng).p);
+}
+
+void SymbolAnnotationImpl::updateLayer(const CanonicalTileID& tileID,
+                                       AnnotationTileLayer& layer,
+                                       const Point<double>& world) const {
     std::unordered_map<std::string, std::string> featureProperties;
     featureProperties.emplace("sprite", annotation.icon.empty() ? std::string("default_marker") : annotation.icon);
 
-    LatLng latLng{annotation.geometry.y, annotation.geometry.x};
-    TileCoordinate coordinate = TileCoordinate::fromLatLng(0, latLng);
-    GeometryCoordinate tilePoint = TileCoordinate::toGeometryCoordinate(UnwrappedTileID(0, tileID), coordinate.p);
+    GeometryCoordinate tilePoint = TileCoordinate::toGeometryCoordinate(UnwrappedTileID(0, tileID), world);
     layer.addFeature(id, FeatureType::Point, GeometryCollection{{{{tilePoint}}}}, featureProperties);
 }
 

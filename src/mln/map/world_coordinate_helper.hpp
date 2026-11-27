@@ -57,6 +57,10 @@ public:
     bool wraps() const override { return false; }
     const TileMatrixSet& tileMatrixSet() const override { return crs->tileMatrixSet; }
 
+    /// The latitudes, south and north, from the center of the tile matrix set toward each pole, up to which the
+    /// projection stretches distances along the meridian less than ten times as much as at the center.
+    const std::array<double, 2>& latitudeRange() const;
+
 private:
     std::array<double, 2> crsPosition(const std::array<double, 2>& world) const;
     void finiteInverses(std::span<const std::array<double, 2>> positions,
@@ -64,11 +68,14 @@ private:
     void ownAnswers(std::span<const std::array<double, 2>> world, std::span<std::array<double, 2>> lngLats) const;
     void answersTowardCenter(std::span<const std::array<double, 2>> world,
                              std::span<std::array<double, 2>> lngLats) const;
+    double findLatitudeLimit(const LatLng& center, double pole) const;
 
     std::shared_ptr<const CRS> crs;
     double originX;
     double originY;
     double extent;
+    mutable std::once_flag latitudeRangeFlag;
+    mutable std::array<double, 2> latitudeRange_{};
 };
 
 /// The most positions `convertPoints` hands a converter in one call. A batch of a whole big geometry would need fresh
@@ -108,8 +115,8 @@ std::vector<LatLng> latLngBoxSamples(const LatLngBounds&);
 std::array<double, 4> latLngBoxToWorldBox(const WorldCoordinateHelper&, const LatLngBounds&);
 
 /// The helper for the projection registered under `name`, `identity` included, or null. A projection has one helper
-/// from `addProjection` on, and whatever is drawn in it holds that helper: a map keeps drawing in a removed projection
-/// until its projection changes.
+/// from `addProjection` on, so its latitude range is found once, and whatever is drawn in it holds that helper: a map
+/// keeps drawing in a removed projection until its projection changes.
 std::shared_ptr<const CRSWorldCoordinateHelper> getRegisteredProjection(const std::string& name);
 
 /// Mercator keeps the formulas each call site had, so its answers stay bit for bit what they were.

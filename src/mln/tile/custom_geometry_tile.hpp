@@ -9,6 +9,7 @@
 namespace mln {
 
 class TileParameters;
+class CRSWorldCoordinateHelper;
 
 namespace style {
 class CustomTileLoader;
@@ -41,6 +42,8 @@ private:
     std::string sourceID;
     TileNecessity necessity;
     Immutable<style::CustomGeometrySource::TileOptions> options;
+    /// The registered projection the tile is cut in, or null for the built-in ones.
+    std::shared_ptr<const CRSWorldCoordinateHelper> projection;
     ActorRef<style::CustomTileLoader> loader;
     std::shared_ptr<Mailbox> mailbox;
     ActorRef<CustomGeometryTile> actorRef;

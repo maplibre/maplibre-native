@@ -22,6 +22,8 @@ public:
     SymbolAnnotationImpl(AnnotationID, SymbolAnnotation);
 
     void updateLayer(const CanonicalTileID&, AnnotationTileLayer&) const;
+    /// Adds the annotation to a tile's layer at a place in the world square.
+    void updateLayer(const CanonicalTileID&, AnnotationTileLayer&, const Point<double>& world) const;
 
     const AnnotationID id;
     const SymbolAnnotation annotation;

@@ -96,6 +96,18 @@ TEST(CRSWorldCoordinateHelper, PassesOnWhatAConverterThrows) {
     EXPECT_THROW(helper.latLngFromWorld({0.5, 0.5}), std::bad_alloc);
 }
 
+TEST(CRSWorldCoordinateHelper, LatitudeRangeOfAPolarProjection) {
+    const CRSWorldCoordinateHelper helper(std::make_shared<const CRS>(test::northPolarStereographic("test:polar")));
+    // The opposite pole projects to infinity: the range ends where the meridian stretches ten times as much as at the
+    // north pole.
+    EXPECT_EQ((std::array<double, 2>{-53, 90}), helper.latitudeRange());
+}
+
+TEST(CRSWorldCoordinateHelper, LatitudeRangeOfTheIdentity) {
+    const CRSWorldCoordinateHelper& helper = *getRegisteredProjection("identity");
+    EXPECT_EQ((std::array<double, 2>{-90, 90}), helper.latitudeRange());
+}
+
 TEST(AddProjection, NeedsAColonInTheName) {
     EXPECT_THROW(addProjection(test::disc("disc")), std::invalid_argument);
     EXPECT_FALSE(getRegisteredProjection("disc"));

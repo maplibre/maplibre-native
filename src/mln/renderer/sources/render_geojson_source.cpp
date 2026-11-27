@@ -1,8 +1,11 @@
 #include <mln/renderer/sources/render_geojson_source.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/tile/geojson_tile.hpp>
 #include <mln/renderer/tile_parameters.hpp>
+#include <mln/util/logging.hpp>
 
 #include <mapbox/eternal.hpp>
 
@@ -102,6 +105,18 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
     }
 
     if (!data_) return;
+
+    if (!warnedAboutProjection) {
+        const auto& helper = parameters.transformState.getProjection().worldCoordinateHelper();
+        const auto& tiledIn = data_->getProjection();
+        if (helper.wraps() ? !tiledIn.empty() : tiledIn != helper.name()) {
+            Log::Warning(Event::General,
+                         "GeoJSON source \"" + impl().id + "\" is drawn in the wrong place: its data was tiled in " +
+                             (tiledIn.empty() ? "lat/lng" : "the \"" + tiledIn + "\" projection") +
+                             ", so set it again after changing the projection.");
+            warnedAboutProjection = true;
+        }
+    }
 
     tilePyramid.update(layers,
                        needsRendering,

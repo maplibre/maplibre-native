@@ -2,9 +2,12 @@
 
 #include <mln/render_test.hpp>
 #include <mln/storage/network_status.hpp>
+#include <mln/test/national_grid.hpp>
+#include <mln/util/crs.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/run_loop.hpp>
+#include <mln/util/scoped.hpp>
 
 #include <args.hxx>
 
@@ -216,6 +219,13 @@ int runRenderTests(int argc,
     }
 
     NetworkStatus::Set(online ? NetworkStatus::Status::Online : NetworkStatus::Status::Offline);
+
+    // The registered projection the render tests name, for as long as they run.
+    const std::string nationalGridName = "EPSG:27700";
+    addProjection(test::nationalGrid(nationalGridName));
+    const Scoped removeNationalGrid{[&] {
+        removeProjection(nationalGridName);
+    }};
 
 #if MLN_RENDER_BACKEND_METAL
     printf(ANSI_COLOR_YELLOW "Using GPU Expression Evaluation" ANSI_COLOR_RESET "\n");

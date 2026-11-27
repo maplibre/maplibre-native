@@ -1,7 +1,9 @@
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/style/sources/geojson_source_impl.hpp>
 #include <mln/tile/tile_id.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/feature.hpp>
+#include <mln/util/geojson_reproject.hpp>
 #include <mln/util/string.hpp>
 #include <mln/util/thread_pool.hpp>
 #include <mln/util/identity.hpp>
@@ -44,7 +46,7 @@ class GeoJSONVTData final : public GeoJSONData {
 
     std::uint8_t getClusterExpansionZoom(std::uint32_t) final { return 0; }
 
-    friend GeoJSONData;
+    friend GeoJSONSource::Impl;
     GeoJSONVTData(const GeoJSON& geoJSON,
                   const mapbox::geojsonvt::Options& options,
                   std::shared_ptr<Scheduler> sequencedScheduler_)
@@ -63,20 +65,29 @@ class SuperclusterData final : public GeoJSONData {
         fn(impl.getTile(id.z, id.x, id.y));
     }
 
-    Features getChildren(const std::uint32_t cluster_id) final { return impl.getChildren(cluster_id); }
+    Features getChildren(const std::uint32_t cluster_id) final { return toLatLng(impl.getChildren(cluster_id)); }
 
     Features getLeaves(const std::uint32_t cluster_id, const std::uint32_t limit, const std::uint32_t offset) final {
-        return impl.getLeaves(cluster_id, limit, offset);
+        return toLatLng(impl.getLeaves(cluster_id, limit, offset));
     }
 
     std::uint8_t getClusterExpansionZoom(std::uint32_t cluster_id) final {
         return impl.getClusterExpansionZoom(cluster_id);
     }
 
-    friend GeoJSONData;
-    SuperclusterData(const Features& features, const mapbox::supercluster::Options& options)
-        : impl(features, options) {}
+    friend GeoJSONSource::Impl;
+    SuperclusterData(const Features& features,
+                     const mapbox::supercluster::Options& options,
+                     std::shared_ptr<const WorldCoordinateHelper> helper_)
+        : impl(features, options),
+          helper(std::move(helper_)) {}
+
+    Features toLatLng(Features features) const {
+        return helper ? reprojectFeaturesFromWorld(std::move(features), *helper) : features;
+    }
+
     mapbox::supercluster::Supercluster impl;
+    std::shared_ptr<const WorldCoordinateHelper> helper;
 };
 
 template <class T>
@@ -97,8 +108,26 @@ T evaluateFeature(const mapbox::feature::feature<double>& f,
 std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
                                                  std::shared_ptr<Scheduler> sequencedScheduler,
                                                  const Immutable<GeoJSONOptions>& options) {
+    return GeoJSONSource::Impl::createData(geoJSON, std::move(sequencedScheduler), options, nullptr);
+}
+
+// static
+std::shared_ptr<GeoJSONData> GeoJSONSource::Impl::createData(
+    const GeoJSON& geoJSON,
+    std::shared_ptr<Scheduler> sequencedScheduler,
+    const Immutable<GeoJSONOptions>& options,
+    std::shared_ptr<const CRSWorldCoordinateHelper> projection) {
+    const GeoJSON reprojected = projection ? reprojectGeoJSONToWorld(geoJSON, *projection) : GeoJSON{};
+    const GeoJSON& data = projection ? reprojected : geoJSON;
+    const auto inProjection = [&](GeoJSONData* created) {
+        if (projection) {
+            created->projection = projection->name();
+        }
+        return std::shared_ptr<GeoJSONData>(created);
+    };
+
     constexpr double scale = util::EXTENT / util::tileSize_D;
-    if (options->cluster && geoJSON.is<Features>() && !geoJSON.get<Features>().empty()) {
+    if (options->cluster && data.is<GeoJSONData::Features>() && !data.get<GeoJSONData::Features>().empty()) {
         mapbox::supercluster::Options clusterOptions;
         clusterOptions.maxZoom = options->clusterMaxZoom;
         clusterOptions.extent = util::EXTENT;
@@ -125,7 +154,11 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
                 toReturn[p.first] = evaluateFeature<Value>(*feature, p.second.second, accumulated);
             }
         };
-        return std::shared_ptr<GeoJSONData>(new SuperclusterData(geoJSON.get<Features>(), clusterOptions));
+        if (projection) {
+            clusterOptions.coordinates = mapbox::supercluster::Coordinates::UnitSquare;
+            clusterOptions.wrap = false;
+        }
+        return inProjection(new SuperclusterData(data.get<GeoJSONData::Features>(), clusterOptions, projection));
     }
 
     mapbox::geojsonvt::Options vtOptions;
@@ -134,7 +167,11 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
     vtOptions.buffer = static_cast<uint16_t>(::round(scale * options->buffer));
     vtOptions.tolerance = scale * options->tolerance;
     vtOptions.lineMetrics = options->lineMetrics;
-    return std::shared_ptr<GeoJSONData>(new GeoJSONVTData(geoJSON, vtOptions, std::move(sequencedScheduler)));
+    if (projection) {
+        vtOptions.coordinates = mapbox::geojsonvt::Coordinates::UnitSquare;
+        vtOptions.wrap = false;
+    }
+    return inProjection(new GeoJSONVTData(data, vtOptions, std::move(sequencedScheduler)));
 }
 
 GeoJSONSource::Impl::Impl(std::string id_, Immutable<GeoJSONOptions> options_)

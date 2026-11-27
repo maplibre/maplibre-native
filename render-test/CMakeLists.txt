@@ -52,6 +52,12 @@ target_include_directories(
     PRIVATE ${PROJECT_SOURCE_DIR}/expression-test
 )
 
+# needed for the projections the render tests register
+target_include_directories(
+    mbgl-render-test
+    PRIVATE ${PROJECT_SOURCE_DIR}/test/include
+)
+
 include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 
 target_link_libraries(

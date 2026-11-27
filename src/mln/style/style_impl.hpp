@@ -120,6 +120,8 @@ public:
 
 private:
     void parse(const std::string&);
+    /// Gives the style's projection to a source that tiles in it.
+    void setSourceProjection(Source&) const;
 
     std::shared_ptr<FileSource> fileSource;
 

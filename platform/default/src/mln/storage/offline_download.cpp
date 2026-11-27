@@ -1,9 +1,11 @@
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/storage/offline_database.hpp>
 #include <mln/storage/offline_download.hpp>
 #include <mln/storage/resource.hpp>
 #include <mln/storage/response.hpp>
 #include <mln/storage/http_file_source.hpp>
 #include <mln/style/parser.hpp>
+#include <mln/style/projection_impl.hpp>
 #include <mln/style/sources/vector_source.hpp>
 #include <mln/style/sources/raster_source.hpp>
 #include <mln/style/sources/raster_dem_source.hpp>
@@ -17,6 +19,7 @@
 #include <mln/util/mapbox.hpp>
 #include <mln/util/run_loop.hpp>
 #include <mln/util/tile_cover.hpp>
+#include <mln/util/tile_range.hpp>
 #include <mln/util/tileset.hpp>
 
 #include <set>
@@ -57,16 +60,81 @@ void tileCover(const Geometry& geometry, uint8_t z, Fn&& fn) {
     }
 }
 
+/// The tiles of a registered projection's grid that bounds cover at a zoom level; its zoom range is empty when they
+/// miss the world.
+util::TileRange worldTileRange(const CRSWorldCoordinateHelper& projection, const LatLngBounds& bounds, uint8_t z) {
+    return util::TileRange::fromWorldBox(latLngBoxToWorldBox(projection, bounds), z, z);
+}
+
+/// The tiles of a registered projection's grid a region covers at a zoom level, in a world that does not wrap.
+template <class Fn>
+void tileCover(const OfflineRegionDefinition& definition,
+               const CRSWorldCoordinateHelper& projection,
+               uint8_t z,
+               Fn&& fn) {
+    std::visit(overloaded{[&](const OfflineTilePyramidRegionDefinition& reg) {
+                              const auto tiles = worldTileRange(projection, reg.bounds, z);
+                              if (tiles.zoomRange.min > tiles.zoomRange.max) {
+                                  return;
+                              }
+                              for (auto x = tiles.range.min.x; x <= tiles.range.max.x; ++x) {
+                                  for (auto y = tiles.range.min.y; y <= tiles.range.max.y; ++y) {
+                                      fn(CanonicalTileID(z, x, y));
+                                  }
+                              }
+                          },
+                          [&](const OfflineGeometryRegionDefinition& reg) {
+                              const double scale = std::pow(2.0, z);
+                              Geometry<double> world = reg.geometry;
+                              convertPoints(
+                                  [&](PointBatcher& batcher) { mapbox::geometry::for_each_point(world, batcher); },
+                                  [&](std::span<const std::array<double, 2>> lngLats,
+                                      std::span<std::array<double, 2>> positions) {
+                                      projection.worldFromLngLats(lngLats, positions);
+                                      for (auto& position : positions) {
+                                          position = {position[0] * scale, position[1] * scale};
+                                      }
+                                  });
+                              util::TileCover cover(world, z, false);
+                              while (cover.hasNext()) {
+                                  const auto tile = cover.next();
+                                  if (tile->wrap == 0) {
+                                      fn(tile->canonical);
+                                  }
+                              }
+                          }},
+               definition);
+}
+
+/// How many tiles of a registered projection's grid a region covers at a zoom level; a box is counted, not walked.
+uint64_t tileCount(const OfflineRegionDefinition& definition, const CRSWorldCoordinateHelper& projection, uint8_t z) {
+    if (const auto* reg = std::get_if<OfflineTilePyramidRegionDefinition>(&definition)) {
+        const auto tiles = worldTileRange(projection, reg->bounds, z);
+        if (tiles.zoomRange.min > tiles.zoomRange.max) {
+            return 0;
+        }
+        return uint64_t{tiles.range.max.x - tiles.range.min.x + 1} * (tiles.range.max.y - tiles.range.min.y + 1);
+    }
+    uint64_t count = 0;
+    tileCover(definition, projection, z, [&](const CanonicalTileID&) { ++count; });
+    return count;
+}
+
 template <class Fn>
 void tileCover(const OfflineRegionDefinition& definition,
                style::SourceType type,
                uint16_t tileSize,
                const Range<uint8_t>& zoomRange,
+               const CRSWorldCoordinateHelper* projection,
                Fn&& fn) {
     const Range<uint8_t> clampedZoomRange = std::visit(
         [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); }, definition);
 
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
+        if (projection) {
+            tileCover(definition, *projection, z, fn);
+            continue;
+        }
         std::visit(overloaded{[&](const OfflineTilePyramidRegionDefinition& reg) { tileCover(reg.bounds, z, fn); },
                               [&](const OfflineGeometryRegionDefinition& reg) {
                                   tileCover(reg.geometry, z, fn);
@@ -78,12 +146,17 @@ void tileCover(const OfflineRegionDefinition& definition,
 uint64_t tileCount(const OfflineRegionDefinition& definition,
                    style::SourceType type,
                    uint16_t tileSize,
-                   const Range<uint8_t>& zoomRange) {
+                   const Range<uint8_t>& zoomRange,
+                   const CRSWorldCoordinateHelper* projection) {
     const Range<uint8_t> clampedZoomRange = std::visit(
         [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); }, definition);
 
     uint64_t result{};
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
+        if (projection) {
+            result += tileCount(definition, *projection, z);
+            continue;
+        }
         result += std::visit(
             overloaded{[&](const OfflineTilePyramidRegionDefinition& reg) { return util::tileCount(reg.bounds, z); },
                        [&](const OfflineGeometryRegionDefinition& reg) {
@@ -151,6 +224,7 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
     style::Parser parser;
     parser.parse(*styleResponse->data);
+    const auto& styleProjection = parser.projection.impl->registeredProjection;
 
     result->requiredResourceCountIsPrecise = true;
 
@@ -159,7 +233,8 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
         auto handleTiledSource = [&](const variant<std::string, Tileset>& urlOrTileset, const uint16_t tileSize) {
             if (urlOrTileset.is<Tileset>()) {
-                uint64_t tileSourceCount = tileCount(definition, type, tileSize, urlOrTileset.get<Tileset>().zoomRange);
+                uint64_t tileSourceCount = tileCount(
+                    definition, type, tileSize, urlOrTileset.get<Tileset>().zoomRange, styleProjection.get());
                 result->requiredTileCount += tileSourceCount;
                 result->requiredResourceCount += tileSourceCount;
             } else {
@@ -171,7 +246,8 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
                     std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse->data,
                                                                                              error);
                     if (tileset) {
-                        uint64_t tileSourceCount = tileCount(definition, type, tileSize, (*tileset).zoomRange);
+                        uint64_t tileSourceCount = tileCount(
+                            definition, type, tileSize, (*tileset).zoomRange, styleProjection.get());
                         result->requiredTileCount += tileSourceCount;
                         result->requiredResourceCount += tileSourceCount;
                     }
@@ -254,6 +330,7 @@ void OfflineDownload::activateDownload() {
 
         style::Parser parser;
         parser.parse(*styleResponse.data);
+        projection = parser.projection.impl->registeredProjection;
 
         auto tileServerOptions = onlineFileSource.getResourceOptions().tileServerOptions();
         parser.glyphURL = util::mapbox::canonicalizeGlyphURL(tileServerOptions, parser.glyphURL);
@@ -451,7 +528,7 @@ void OfflineDownload::queueResource(Resource&& resource) {
 }
 
 void OfflineDownload::queueTiles(SourceType type, uint16_t tileSize, const Tileset& tileset) {
-    tileCover(definition, type, tileSize, tileset.zoomRange, [&](const auto& tile) {
+    tileCover(definition, type, tileSize, tileset.zoomRange, projection.get(), [&](const auto& tile) {
         status.requiredResourceCount++;
         status.requiredTileCount++;
 
@@ -460,7 +537,9 @@ void OfflineDownload::queueTiles(SourceType type, uint16_t tileSize, const Tiles
                                            tile.x,
                                            tile.y,
                                            tile.z,
-                                           tileset.scheme);
+                                           tileset.scheme,
+                                           Resource::LoadingMethod::All,
+                                           projection ? projection->tileMatrixSet() : mercatorTileMatrixSet);
 
         tileResource.setPriority(Resource::Priority::Low);
         tileResource.setUsage(Resource::Usage::Offline);

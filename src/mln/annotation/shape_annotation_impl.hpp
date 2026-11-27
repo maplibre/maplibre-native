@@ -14,6 +14,7 @@ namespace mln {
 
 class AnnotationTileData;
 class CanonicalTileID;
+class CRSWorldCoordinateHelper;
 
 class ShapeAnnotationImpl {
 public:
@@ -23,11 +24,16 @@ public:
     virtual void updateStyle(style::Style::Impl &) const = 0;
     virtual const ShapeAnnotationGeometry &geometry() const = 0;
 
-    void updateTileData(const CanonicalTileID &, AnnotationTileData &);
+    /// Adds the shape's part of a tile, cut in the registered projection's world square, or Mercator's when null.
+    void updateTileData(const CanonicalTileID &,
+                        AnnotationTileData &,
+                        const std::shared_ptr<const CRSWorldCoordinateHelper> &projection);
 
     const AnnotationID id;
     const std::string layerID;
     std::unique_ptr<mapbox::geojsonvt::GeoJSONVT> shapeTiler;
+    /// The registered projection `shapeTiler` was made for.
+    std::shared_ptr<const CRSWorldCoordinateHelper> shapeTilerProjection;
 };
 
 struct CloseShapeAnnotation {

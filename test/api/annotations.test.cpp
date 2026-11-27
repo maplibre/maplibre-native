@@ -388,6 +388,63 @@ TEST(Annotations, QueryRenderedFeatures) {
     EXPECT_EQ(features2[0].id, uint64_t(1));
 }
 
+TEST(Annotations, SymbolAnnotationInARegisteredProjection) {
+    AnnotationTest test;
+
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"}, "sources": {}, "layers": []})");
+    test.map.addAnnotationImage(namedMarker("default_marker"));
+    test.map.addAnnotation(SymbolAnnotation{Point<double>{10, 40}, "default_marker"});
+
+    test.frontend.render(test.map);
+
+    // The identity projection puts 10 E, 40 N about 50 pixels above where Mercator does.
+    auto features = test.frontend.getRenderer()->queryRenderedFeatures(test.map.pixelForLatLng({40, 10}));
+    ASSERT_EQ(features.size(), 1u);
+    EXPECT_EQ(features[0].id, uint64_t(0));
+}
+
+TEST(Annotations, FillAnnotationInARegisteredProjection) {
+    AnnotationTest test;
+
+    Polygon<double> polygon = {{{{0, 20}, {0, 40}, {20, 40}, {20, 20}}}};
+    FillAnnotation annotation{polygon};
+    annotation.color = Color::red();
+
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"}, "sources": {}, "layers": []})");
+    test.map.addAnnotation(annotation);
+
+    test.frontend.render(test.map);
+
+    // 10 E, 30 N is inside the box in the identity projection; in Mercator the whole box is drawn below that point.
+    auto features = test.frontend.getRenderer()->queryRenderedFeatures(test.map.pixelForLatLng({30, 10}));
+    ASSERT_EQ(features.size(), 1u);
+    EXPECT_EQ(features[0].id, uint64_t(0));
+}
+
+TEST(Annotations, AnnotationsFollowTheStyleIntoARegisteredProjection) {
+    AnnotationTest test;
+
+    Polygon<double> polygon = {{{{0, 20}, {0, 40}, {20, 40}, {20, 20}}}};
+    FillAnnotation annotation{polygon};
+    annotation.color = Color::red();
+
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+    test.map.addAnnotationImage(namedMarker("default_marker"));
+    test.map.addAnnotation(annotation);
+    test.map.addAnnotation(SymbolAnnotation{Point<double>{-30, 40}, "default_marker"});
+    test.frontend.render(test.map);
+
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"}, "sources": {}, "layers": []})");
+    test.frontend.render(test.map);
+
+    auto fill = test.frontend.getRenderer()->queryRenderedFeatures(test.map.pixelForLatLng({30, 10}));
+    ASSERT_EQ(fill.size(), 1u);
+    EXPECT_EQ(fill[0].id, uint64_t(0));
+    auto symbol = test.frontend.getRenderer()->queryRenderedFeatures(test.map.pixelForLatLng({40, -30}));
+    ASSERT_EQ(symbol.size(), 1u);
+    EXPECT_EQ(symbol[0].id, uint64_t(1));
+}
+
 TEST(Annotations, QueryFractionalZoomLevels) {
     AnnotationTest test;
 

@@ -16,6 +16,7 @@ class FileSource;
 class AsyncRequest;
 class Response;
 class Tileset;
+class CRSWorldCoordinateHelper;
 
 namespace style {
 class Parser;
@@ -63,6 +64,8 @@ private:
     std::deque<Resource> resourcesRemaining;
     std::list<Resource> resourcesToBeMarkedAsUsed;
     std::list<std::tuple<Resource, Response>> buffer;
+    /// The registered projection the style is in, whose grid the region's tiles are cut in; null for the built-in ones.
+    std::shared_ptr<const CRSWorldCoordinateHelper> projection;
 
     void queueResource(Resource&&);
     void queueTiles(style::SourceType, uint16_t tileSize, const Tileset&);

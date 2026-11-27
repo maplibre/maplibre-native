@@ -136,6 +136,10 @@ public:
     // Projection
     /// Draws in a registered projection, see `addProjection`, or in Mercator for null.
     void setRegisteredProjection(std::shared_ptr<const CRSWorldCoordinateHelper>);
+    /// The registered projection the map is in, or null.
+    const std::shared_ptr<const CRSWorldCoordinateHelper>& getRegisteredProjection() const {
+        return registeredProjection;
+    }
     /// The meters on the ground a pixel spans at a location at the current zoom: Mercator's scale at its latitude, or
     /// in a registered projection the distance from the location to the point 100 pixels along the projection's x axis,
     /// over 100, as GL JS's geolocate control measures it.

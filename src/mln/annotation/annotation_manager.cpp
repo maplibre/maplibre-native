@@ -5,6 +5,7 @@
 #include <mln/annotation/line_annotation_impl.hpp>
 #include <mln/annotation/symbol_annotation_impl.hpp>
 #include <mln/layermanager/layer_manager.hpp>
+#include <mln/map/world_coordinate_helper.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/expression/image.hpp>
 #include <mln/style/layers/symbol_layer.hpp>
@@ -78,6 +79,7 @@ void AnnotationManager::add(const AnnotationID& id, const SymbolAnnotation& anno
     auto impl = std::make_shared<SymbolAnnotationImpl>(id, annotation);
     symbolTree.insert(impl);
     symbolAnnotations.emplace(id, impl);
+    worldSymbolsValid = false;
 }
 
 void AnnotationManager::add(const AnnotationID& id, const LineAnnotation& annotation) {
@@ -138,6 +140,7 @@ void AnnotationManager::remove(const AnnotationID& id) {
     if (symbolAnnotations.contains(id)) {
         symbolTree.remove(symbolAnnotations.at(id));
         symbolAnnotations.erase(id);
+        worldSymbolsValid = false;
     } else if (shapeAnnotations.contains(id)) {
         auto it = shapeAnnotations.find(id);
         (void)*style.get().impl->removeLayer(it->second->layerID);
@@ -154,20 +157,49 @@ std::unique_ptr<AnnotationTileData> AnnotationManager::getTileData(const Canonic
 
     auto pointLayer = tileData->addLayer(PointLayerID);
 
-    LatLngBounds tileBounds(tileID);
-    // Hack for https://github.com/mapbox/mapbox-gl-native/issues/12472
-    // To handle precision issues, query a slightly larger area than the tile bounds
-    // Symbols at a border can be included in vector data for both tiles
-    // The rendering/querying logic will make sure the symbols show up in only one of the tiles
-    tileBounds.extend(LatLng(tileBounds.south() - 0.000000001, tileBounds.west() - 0.000000001));
-    tileBounds.extend(LatLng(tileBounds.north() + 0.000000001, tileBounds.east() + 0.000000001));
+    if (projection) {
+        // In a registered projection a tile's lat/lng box can miss part of the tile (a pole inside it), so symbols
+        // are matched to tiles by their places in the world square instead of through the lat/lng tree.
+        if (!worldSymbolsValid) {
+            std::vector<std::array<double, 2>> lngLats;
+            lngLats.reserve(symbolAnnotations.size());
+            for (const auto& [id, symbol] : symbolAnnotations) {
+                lngLats.push_back({symbol->annotation.geometry.x, symbol->annotation.geometry.y});
+            }
+            std::vector<std::array<double, 2>> world(lngLats.size());
+            projection->worldFromLngLats(lngLats, world);
+            worldSymbols.clear();
+            auto place = world.cbegin();
+            for (const auto& [id, symbol] : symbolAnnotations) {
+                worldSymbols.emplace_back(Point<double>{(*place)[0], (*place)[1]}, symbol);
+                ++place;
+            }
+            worldSymbolsValid = true;
+        }
+        const double scale = std::pow(2.0, tileID.z);
+        for (const auto& [world, symbol] : worldSymbols) {
+            const double x = (world.x * scale) - tileID.x;
+            const double y = (world.y * scale) - tileID.y;
+            if (x >= 0 && x <= 1 && y >= 0 && y <= 1) {
+                symbol->updateLayer(tileID, *pointLayer, world);
+            }
+        }
+    } else {
+        LatLngBounds tileBounds(tileID);
+        // Hack for https://github.com/mapbox/mapbox-gl-native/issues/12472
+        // To handle precision issues, query a slightly larger area than the tile bounds
+        // Symbols at a border can be included in vector data for both tiles
+        // The rendering/querying logic will make sure the symbols show up in only one of the tiles
+        tileBounds.extend(LatLng(tileBounds.south() - 0.000000001, tileBounds.west() - 0.000000001));
+        tileBounds.extend(LatLng(tileBounds.north() + 0.000000001, tileBounds.east() + 0.000000001));
 
-    symbolTree.query(
-        boost::geometry::index::intersects(tileBounds),
-        boost::make_function_output_iterator([&](const auto& val) { val->updateLayer(tileID, *pointLayer); }));
+        symbolTree.query(
+            boost::geometry::index::intersects(tileBounds),
+            boost::make_function_output_iterator([&](const auto& val) { val->updateLayer(tileID, *pointLayer); }));
+    }
 
     for (const auto& shape : shapeAnnotations) {
-        shape.second->updateTileData(tileID, *tileData);
+        shape.second->updateTileData(tileID, *tileData, projection);
     }
 
     return tileData;
@@ -210,9 +242,14 @@ void AnnotationManager::updateStyle() {
     }
 }
 
-void AnnotationManager::updateData() {
+void AnnotationManager::updateData(const std::shared_ptr<const CRSWorldCoordinateHelper>& registeredProjection) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
     std::scoped_lock lock(mutex);
+    if (projection != registeredProjection) {
+        projection = registeredProjection;
+        worldSymbolsValid = false;
+        dirty = true;
+    }
     if (dirty) {
         for (auto& tile : tiles) {
             tile->setData(getTileData(tile->id.canonical));

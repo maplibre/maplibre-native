@@ -416,6 +416,51 @@ TEST(Map, FreeCameraInARegisteredProjectionIsPlacedByItsLatLngAndAltitude) {
     removeProjection("test:polar-free-camera");
 }
 
+TEST(Map, GeoJSONTiledForAnotherProjectionWarnsOnce) {
+    FixtureLog log;
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "identity"},
+        "sources": {"points": {"type": "geojson", "data": {"type": "Point", "coordinates": [45, 45]}}},
+        "layers": [{"id": "points", "type": "circle", "source": "points"}]})");
+    test.frontend.render(test.map);
+    const FixtureLog::Message warning{
+        EventSeverity::Warning,
+        Event::General,
+        -1,
+        "GeoJSON source \"points\" is drawn in the wrong place: its data was tiled in the \"identity\" projection, so "
+        "set it again after changing the projection."};
+    EXPECT_EQ(0u, log.count(warning));
+
+    test.map.getStyle().setProjection(std::make_unique<style::Projection>());
+    test.frontend.render(test.map);
+    test.frontend.render(test.map);
+
+    EXPECT_EQ(1u, log.count(warning));
+}
+
+TEST(Map, GeoJSONSetAfterItsProjectionIsRemovedIsTiledInIt) {
+    addProjection(test::polarStereographic("test:polar-removed"));
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version": 8, "projection": {"type": "test:polar-removed"},
+        "sources": {"points": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}},
+        "layers": [{"id": "points", "type": "circle", "source": "points"}]})");
+    const LatLng place{75, 0};
+    test.map.jumpTo(CameraOptions().withCenter(place).withZoom(3));
+    test.frontend.render(test.map);
+
+    // The map keeps drawing in the projection, as GL JS's maps do, so data set now is tiled in it too.
+    removeProjection("test:polar-removed");
+    test.map.getStyle().getSource("points")->as<GeoJSONSource>()->setGeoJSON(
+        mapbox::geojson::parse(R"({"type": "Point", "coordinates": [0, 75]})"));
+    test.frontend.render(test.map);
+
+    const auto features = test.frontend.getRenderer()->queryRenderedFeatures(test.map.pixelForLatLng(place));
+    ASSERT_EQ(1u, features.size());
+    const auto& point = features[0].geometry.get<Point<double>>();
+    EXPECT_NEAR(0, point.x, 1e-3);
+    EXPECT_NEAR(75, point.y, 1e-3);
+}
+
 TEST(Map, LatLngBoundsToCameraWithExcessivePadding) {
     MapTest<> test;
 
