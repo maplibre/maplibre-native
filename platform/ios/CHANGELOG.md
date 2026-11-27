@@ -2,6 +2,12 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+### Bug fixes
+
+- Revalidate unusable cached resources when resuming an offline download ([#410](https://github.com/maplibre/maplibre-native/issues/410)).
+
 ## 7.1.0
 
 ### Features

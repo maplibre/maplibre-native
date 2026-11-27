@@ -1307,7 +1307,7 @@ TEST(OfflineDatabase, HasRegionResource) {
 
     EXPECT_TRUE(bool(db.hasRegionResource(Resource::style("http://example.com/1"))));
     EXPECT_TRUE(bool(db.hasRegionResource(Resource::style("http://example.com/20"))));
-    EXPECT_EQ(1024, *(db.hasRegionResource(Resource::style("http://example.com/20"))));
+    EXPECT_EQ(1024u, db.hasRegionResource(Resource::style("http://example.com/20"))->size);
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1331,13 +1331,29 @@ TEST(OfflineDatabase, HasRegionResourceTile) {
     EXPECT_FALSE(bool(db.hasRegionResource(resource)));
     db.putRegionResource(region->getID(), resource, response);
     EXPECT_TRUE(bool(db.hasRegionResource(resource)));
-    EXPECT_EQ(5, *(db.hasRegionResource(resource)));
+    EXPECT_EQ(5u, db.hasRegionResource(resource)->size);
+    EXPECT_TRUE(db.hasRegionResource(resource)->isUsable());
+
+    response.mustRevalidate = true;
+    response.expires = Timestamp(Seconds(0));
+    db.putRegionResource(region->getID(), resource, response);
+    auto expired = db.hasRegionResource(resource);
+    ASSERT_TRUE(expired);
+    EXPECT_TRUE(expired->mustRevalidate);
+    ASSERT_TRUE(expired->expires);
+    EXPECT_TRUE(*expired->expires == Timestamp(Seconds(0)));
+    EXPECT_FALSE(expired->isUsable());
+
+    response.mustRevalidate = false;
+    response.expires = std::nullopt;
+    db.putRegionResource(region->getID(), resource, response);
+    EXPECT_TRUE(db.hasRegionResource(resource)->isUsable());
 
     auto anotherRegion = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(anotherRegion);
     EXPECT_LT(region->getID(), anotherRegion->getID());
     EXPECT_TRUE(bool(db.hasRegionResource(resource)));
-    EXPECT_EQ(5, *(db.hasRegionResource(resource)));
+    EXPECT_EQ(5u, db.hasRegionResource(resource)->size);
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
