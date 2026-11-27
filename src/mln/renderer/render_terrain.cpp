@@ -534,7 +534,7 @@ std::set<UnwrappedTileID> RenderTerrain::coarsenFarMeshTiles(std::set<UnwrappedT
     };
     const auto refresh = [&](const UnwrappedTileID& id, Count& count) {
         const bool isReady = count.children > 0 && count.deeper == 0 &&
-                             !(id.canonical.z < originMinZoom && holdsOrigin(id));
+                             (id.canonical.z >= originMinZoom || !holdsOrigin(id));
         if (isReady == count.queued) {
             return;
         }
