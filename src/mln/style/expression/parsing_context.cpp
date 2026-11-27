@@ -128,6 +128,7 @@ constexpr const auto expressionRegistry = mapbox::eternal::hash_map<mapbox::eter
      {"interpolate-hcl", parseInterpolate},
      {"interpolate-lab", parseInterpolate},
      {"interpolate-oklch", parseInterpolate},
+     {"interpolate-oklab", parseInterpolate},
      {"length", Length::parse},
      {"let", Let::parse},
      {"literal", Literal::parse},

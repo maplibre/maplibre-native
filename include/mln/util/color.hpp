@@ -10,12 +10,13 @@
 namespace mln {
 
 // The space a color interpolation runs in: RGB blends the premultiplied channels, LAB and HCL the straight color,
-// OKLCH the premultiplied lightness and chroma.
+// OKLCH the premultiplied lightness and chroma, OKLAB the premultiplied lightness, a and b.
 enum class ColorSpace : uint8_t {
     RGB,
     LAB,
     HCL,
     OKLCH,
+    OKLAB,
 };
 
 // Stores a premultiplied color, with all four channels ranging from 0..1
