@@ -592,4 +592,30 @@ public class LineLayerTest extends BaseLayerTest {
     layer.setProperties(linePattern(expression));
     assertEquals(layer.getLinePattern().getExpression(), expression);
   }
+
+  @Test
+  @UiThreadTest
+  public void testLineFadeZoomAsConstant() {
+    Timber.i("line-fade-zoom");
+    assertNotNull(layer);
+    assertNull(layer.getLineFadeZoom().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(lineFadeZoom(propertyValue));
+    assertEquals(layer.getLineFadeZoom().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testLineFadeZoomAsExpression() {
+    Timber.i("line-fade-zoom-expression");
+    assertNotNull(layer);
+    assertNull(layer.getLineFadeZoom().getExpression());
+
+    // Set and Get
+    Expression expression = number(Expression.get("undefined"));
+    layer.setProperties(lineFadeZoom(expression));
+    assertEquals(layer.getLineFadeZoom().getExpression(), expression);
+  }
 }

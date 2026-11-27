@@ -227,6 +227,12 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     };
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
+    if (const auto version = renderTreeParameters.fadeZoomTable.getVersion();
+        !staticData->fadeZoomTableBuffer || staticData->fadeZoomTableVersion != version) {
+        const auto& values = renderTreeParameters.fadeZoomTable.getValues();
+        context.emplaceOrUpdateUniformBuffer(staticData->fadeZoomTableBuffer, &values);
+        staticData->fadeZoomTableVersion = version;
+    }
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();
 

@@ -372,6 +372,15 @@ jni::Local<jni::Object<>> LineLayer::getLineGradient(jni::JNIEnv& env) {
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineGradient()));
 }
 
+jni::Local<jni::Object<>> LineLayer::getLineFadeZoom(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineFadeZoom()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineFadeZoom()));
+}
+
 // LineJavaLayerPeerFactory
 
 LineJavaLayerPeerFactory::~LineJavaLayerPeerFactory() = default;
@@ -445,7 +454,8 @@ void LineJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&LineLayer::getLinePatternTransition, "nativeGetLinePatternTransition"),
         METHOD(&LineLayer::setLinePatternTransition, "nativeSetLinePatternTransition"),
         METHOD(&LineLayer::getLinePattern, "nativeGetLinePattern"),
-        METHOD(&LineLayer::getLineGradient, "nativeGetLineGradient"));
+        METHOD(&LineLayer::getLineGradient, "nativeGetLineGradient"),
+        METHOD(&LineLayer::getLineFadeZoom, "nativeGetLineFadeZoom"));
 }
 
 } // namespace android

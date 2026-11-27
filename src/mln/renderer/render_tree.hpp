@@ -1,5 +1,6 @@
 #pragma once
 #include <mln/gfx/drawable.hpp>
+#include <mln/renderer/fade_zoom_table.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/util/monotonic_timer.hpp>
 
@@ -80,6 +81,7 @@ public:
     uint32_t opaquePassCutOff = 0;
     Color backgroundColor;
     float symbolFadeChange = 0.0f;
+    FadeZoomTable fadeZoomTable;
     bool needsRepaint = false;
     bool loaded = false;
     bool placementChanged = false;

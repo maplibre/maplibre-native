@@ -100,6 +100,9 @@ public:
         };
         layerUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, context);
 
+        // Every line shader reads the fade zoom table. With fade zoom 0, debug lines are always drawn.
+        layerUniforms.set(idLineFadeZoomUBO, parameters.staticData.fadeZoomTableBuffer);
+
 #if MLN_UBO_CONSOLIDATION
         int i = 0;
         std::vector<LineDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
@@ -130,7 +133,7 @@ public:
                 .gapwidth_t = 0.f,
                 .offset_t = 0.f,
                 .width_t = 0.f,
-                .pad1 = 0
+                .fade_zoom_t = 0.f
             };
 
 #if MLN_UBO_CONSOLIDATION
@@ -201,13 +204,14 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     const auto createPolylineShader = [&]() -> gfx::ShaderPtr {
         gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
         const StringIDSetsPair propertiesAsUniforms{
-            {"a_color", "a_blur", "a_opacity", "a_gapwidth", "a_offset", "a_width"},
+            {"a_color", "a_blur", "a_opacity", "a_gapwidth", "a_offset", "a_width", "a_fade_zoom"},
             {idLineColorVertexAttribute,
              idLineBlurVertexAttribute,
              idLineOpacityVertexAttribute,
              idLineGapWidthVertexAttribute,
              idLineOffsetVertexAttribute,
-             idLineWidthVertexAttribute}};
+             idLineWidthVertexAttribute,
+             idLineFadeZoomVertexAttribute}};
         return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
     };
 
@@ -309,7 +313,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                                               .width = 4.f,
                                                               .floorwidth = 0,
                                                               .expressionMask = LineExpressionMask::None,
-                                                              .pad1 = 0};
+                                                              .fade_zoom = 0.f};
 
     // function to add polylines drawable
     const auto addPolylineDrawable = [&](TileLayerGroup* tileLayerGroup, const RenderTile& tile) {
@@ -467,6 +471,7 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
     MLN_ZONE_STR(baseImpl->id);
     bearing = static_cast<float>(parameters.transform.state.getBearing());
     filteredRenderTiles = nullptr;
+    allRenderTiles = nullptr;
     renderTilesSortedByY = nullptr;
     auto tiles = makeMutable<std::vector<RenderTile>>();
     tiles->reserve(tilePyramid.getRenderedTiles().size());
@@ -498,6 +503,16 @@ RenderTiles RenderTileSource::getRenderTiles() const {
         filteredRenderTiles = std::move(result);
     }
     return filteredRenderTiles;
+}
+
+RenderTiles RenderTileSource::getRenderTilesWithFadingTiles() const {
+    if (!allRenderTiles) {
+        // In tile ID order, as for getRenderTiles(): a tile's clipping mask is drawn after those of lower zoom
+        // levels, so a held child tile covers its new parent until it goes.
+        allRenderTiles = std::make_shared<std::vector<std::reference_wrapper<const RenderTile>>>(renderTiles->begin(),
+                                                                                                 renderTiles->end());
+    }
+    return allRenderTiles;
 }
 
 RenderTiles RenderTileSource::getRenderTilesSortedByYPosition() const {

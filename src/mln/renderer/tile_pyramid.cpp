@@ -288,8 +288,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
         const bool holdForFade = tile.holdForFade();
         for (const auto& layerProperties : layers) {
-            const auto* typeInfo = layerProperties->baseImpl->getTypeInfo();
-            if (holdForFade && typeInfo->fadingTiles == LayerTypeInfo::FadingTiles::NotRequired) {
+            if (holdForFade && !layerProperties->baseImpl->drawsFadingTiles()) {
                 continue;
             }
             tile.usedByRenderedLayers |= tile.layerPropertiesUpdated(layerProperties);

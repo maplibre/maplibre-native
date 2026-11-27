@@ -114,11 +114,13 @@ using FillShaderInfo = ShaderInfo<BuiltIn::FillShader, gfx::Backend::Type::OpenG
 const std::vector<UniformBlockInfo> FillShaderInfo::uniformBlocks = {
     UniformBlockInfo{"FillDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
+    UniformBlockInfo{"FillFadeZoomUBO", idFillFadeZoomUBO},
 };
 const std::vector<AttributeInfo> FillShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
     AttributeInfo{"a_color", idFillColorVertexAttribute},
     AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
+    AttributeInfo{"a_fade_zoom", idFillFadeZoomVertexAttribute},
 };
 const std::vector<TextureInfo> FillShaderInfo::textures = {};
 
@@ -129,11 +131,13 @@ const std::vector<UniformBlockInfo> FillOutlineShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"FillOutlineDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
+    UniformBlockInfo{"FillFadeZoomUBO", idFillFadeZoomUBO},
 };
 const std::vector<AttributeInfo> FillOutlineShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
     AttributeInfo{"a_outline_color", idFillOutlineColorVertexAttribute},
     AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
+    AttributeInfo{"a_fade_zoom", idFillFadeZoomVertexAttribute},
 };
 const std::vector<TextureInfo> FillOutlineShaderInfo::textures = {};
 
@@ -145,6 +149,7 @@ const std::vector<UniformBlockInfo> FillPatternShaderInfo::uniformBlocks = {
     UniformBlockInfo{"FillPatternDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillPatternTilePropsUBO", idFillTilePropsUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
+    UniformBlockInfo{"FillFadeZoomUBO", idFillFadeZoomUBO},
 };
 const std::vector<AttributeInfo> FillPatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
@@ -152,6 +157,7 @@ const std::vector<AttributeInfo> FillPatternShaderInfo::attributes = {
     AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
     AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
     AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
+    AttributeInfo{"a_fade_zoom", idFillFadeZoomVertexAttribute},
 };
 const std::vector<TextureInfo> FillPatternShaderInfo::textures = {
     TextureInfo{"u_image", idFillImageTexture},
@@ -165,6 +171,7 @@ const std::vector<UniformBlockInfo> FillOutlinePatternShaderInfo::uniformBlocks 
     UniformBlockInfo{"FillOutlinePatternDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillOutlinePatternTilePropsUBO", idFillTilePropsUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
+    UniformBlockInfo{"FillFadeZoomUBO", idFillFadeZoomUBO},
 };
 const std::vector<AttributeInfo> FillOutlinePatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
@@ -172,6 +179,7 @@ const std::vector<AttributeInfo> FillOutlinePatternShaderInfo::attributes = {
     AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
     AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
     AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
+    AttributeInfo{"a_fade_zoom", idFillFadeZoomVertexAttribute},
 };
 const std::vector<TextureInfo> FillOutlinePatternShaderInfo::textures = {
     TextureInfo{"u_image", idFillImageTexture},
@@ -185,6 +193,7 @@ const std::vector<UniformBlockInfo> FillOutlineTriangulatedShaderInfo::uniformBl
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"FillOutlineTriangulatedDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
+    UniformBlockInfo{"FillFadeZoomUBO", idFillFadeZoomUBO},
 };
 const std::vector<AttributeInfo> FillOutlineTriangulatedShaderInfo::attributes = {
     AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
@@ -317,6 +326,7 @@ const std::vector<UniformBlockInfo> LineShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"LineDrawableUBO", idLineDrawableUBO},
     UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
+    UniformBlockInfo{"LineFadeZoomUBO", idLineFadeZoomUBO},
 };
 const std::vector<AttributeInfo> LineShaderInfo::attributes = {
     AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
@@ -327,6 +337,7 @@ const std::vector<AttributeInfo> LineShaderInfo::attributes = {
     AttributeInfo{"a_gapwidth", idLineGapWidthVertexAttribute},
     AttributeInfo{"a_offset", idLineOffsetVertexAttribute},
     AttributeInfo{"a_width", idLineWidthVertexAttribute},
+    AttributeInfo{"a_fade_zoom", idLineFadeZoomVertexAttribute},
 };
 const std::vector<TextureInfo> LineShaderInfo::textures = {};
 
@@ -361,6 +372,7 @@ const std::vector<UniformBlockInfo> LineGradientShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"LineGradientDrawableUBO", idLineDrawableUBO},
     UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
+    UniformBlockInfo{"LineFadeZoomUBO", idLineFadeZoomUBO},
 };
 const std::vector<AttributeInfo> LineGradientShaderInfo::attributes = {
     AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
@@ -370,6 +382,7 @@ const std::vector<AttributeInfo> LineGradientShaderInfo::attributes = {
     AttributeInfo{"a_gapwidth", idLineGapWidthVertexAttribute},
     AttributeInfo{"a_offset", idLineOffsetVertexAttribute},
     AttributeInfo{"a_width", idLineWidthVertexAttribute},
+    AttributeInfo{"a_fade_zoom", idLineFadeZoomVertexAttribute},
 };
 const std::vector<TextureInfo> LineGradientShaderInfo::textures = {
     TextureInfo{"u_image", idLineImageTexture},
@@ -383,6 +396,7 @@ const std::vector<UniformBlockInfo> LinePatternShaderInfo::uniformBlocks = {
     UniformBlockInfo{"LinePatternDrawableUBO", idLineDrawableUBO},
     UniformBlockInfo{"LinePatternTilePropsUBO", idLineTilePropsUBO},
     UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
+    UniformBlockInfo{"LineFadeZoomUBO", idLineFadeZoomUBO},
 };
 const std::vector<AttributeInfo> LinePatternShaderInfo::attributes = {
     AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
@@ -394,6 +408,7 @@ const std::vector<AttributeInfo> LinePatternShaderInfo::attributes = {
     AttributeInfo{"a_width", idLineWidthVertexAttribute},
     AttributeInfo{"a_pattern_from", idLinePatternFromVertexAttribute},
     AttributeInfo{"a_pattern_to", idLinePatternToVertexAttribute},
+    AttributeInfo{"a_fade_zoom", idLineFadeZoomVertexAttribute},
 };
 const std::vector<TextureInfo> LinePatternShaderInfo::textures = {
     TextureInfo{"u_image", idLineImageTexture},
@@ -407,6 +422,7 @@ const std::vector<UniformBlockInfo> LineSDFShaderInfo::uniformBlocks = {
     UniformBlockInfo{"LineSDFDrawableUBO", idLineDrawableUBO},
     UniformBlockInfo{"LineSDFTilePropsUBO", idLineTilePropsUBO},
     UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
+    UniformBlockInfo{"LineFadeZoomUBO", idLineFadeZoomUBO},
 };
 const std::vector<AttributeInfo> LineSDFShaderInfo::attributes = {
     AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
@@ -418,6 +434,7 @@ const std::vector<AttributeInfo> LineSDFShaderInfo::attributes = {
     AttributeInfo{"a_offset", idLineOffsetVertexAttribute},
     AttributeInfo{"a_width", idLineWidthVertexAttribute},
     AttributeInfo{"a_floorwidth", idLineFloorWidthVertexAttribute},
+    AttributeInfo{"a_fade_zoom", idLineFadeZoomVertexAttribute},
 };
 const std::vector<TextureInfo> LineSDFShaderInfo::textures = {
     TextureInfo{"u_image", idLineImageTexture},
@@ -431,6 +448,7 @@ const std::vector<UniformBlockInfo> LineGradientSDFShaderInfo::uniformBlocks = {
     UniformBlockInfo{"LineSDFDrawableUBO", idLineDrawableUBO},
     UniformBlockInfo{"LineSDFTilePropsUBO", idLineTilePropsUBO},
     UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
+    UniformBlockInfo{"LineFadeZoomUBO", idLineFadeZoomUBO},
 };
 const std::vector<AttributeInfo> LineGradientSDFShaderInfo::attributes = {
     AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
@@ -441,6 +459,7 @@ const std::vector<AttributeInfo> LineGradientSDFShaderInfo::attributes = {
     AttributeInfo{"a_offset", idLineOffsetVertexAttribute},
     AttributeInfo{"a_width", idLineWidthVertexAttribute},
     AttributeInfo{"a_floorwidth", idLineFloorWidthVertexAttribute},
+    AttributeInfo{"a_fade_zoom", idLineFadeZoomVertexAttribute},
 };
 const std::vector<TextureInfo> LineGradientSDFShaderInfo::textures = {
     TextureInfo{"u_image", idLineImageTexture},

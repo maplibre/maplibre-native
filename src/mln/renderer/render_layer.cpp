@@ -61,7 +61,8 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source->isEnabled());
 
     sourceForState = params.source;
-    renderTiles = params.source->getRenderTiles();
+    renderTiles = baseImpl->drawsFadingTiles() ? params.source->getRenderTilesWithFadingTiles()
+                                               : params.source->getRenderTiles();
     renderTilesOwner = params.source->getRawRenderTiles();
 
     addRenderPassesFromTiles();

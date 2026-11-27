@@ -5,6 +5,7 @@
 #include <mln/gfx/renderable.hpp>
 #include <mln/gfx/renderer_backend.hpp>
 #include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/layers/render_fill_layer.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/renderer/render_tree.hpp>
@@ -46,7 +47,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .fade = crossfade.t,
             .from_scale = crossfade.fromScale,
             .to_scale = crossfade.toScale,
-            .pad1 = 0,
+            .fade_zoom = evaluated.get<FillFadeZoom>().constantOr(FillFadeZoom::defaultValue()),
             .pad2 = 0,
             .pad3 = 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
@@ -54,6 +55,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idFillEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+    layerUniforms.set(idFillFadeZoomUBO, parameters.staticData.fadeZoomTableBuffer);
 
     const auto& translation = evaluated.get<FillTranslate>();
     const auto anchor = evaluated.get<FillTranslateAnchor>();
@@ -122,7 +124,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
+                    .fade_zoom_t = std::get<0>(binders->get<FillFadeZoom>()->interpolationFactor(zoom)),
                     .pad2 = 0
                 };
 
@@ -141,7 +143,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     .outline_color_t = std::get<0>(binders->get<FillOutlineColor>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
+                    .fade_zoom_t = std::get<0>(binders->get<FillFadeZoom>()->interpolationFactor(zoom)),
                     .pad2 = 0
                 };
 
@@ -166,7 +168,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_to_t = std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
                     .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
+                    .fade_zoom_t = std::get<0>(binders->get<FillFadeZoom>()->interpolationFactor(zoom)),
                     .pad2 = 0,
                     .pad3 = 0
                 };
@@ -206,7 +208,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .pattern_to_t = std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
                     .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
+                    .fade_zoom_t = std::get<0>(binders->get<FillFadeZoom>()->interpolationFactor(zoom)),
                     .pad2 = 0,
                     .pad3 = 0
                 };

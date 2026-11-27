@@ -2,6 +2,7 @@
 
 #include <mln/util/ignore.hpp>
 
+#include <cstdint>
 #include <functional>
 #include <type_traits>
 
@@ -23,28 +24,26 @@ std::size_t hash(Args&&... args) noexcept {
 namespace detail {
 template <typename TIter>
 using TIterVal = std::enable_if_t<std::is_integral_v<typename TIter::value_type>, typename TIter::value_type>;
+
+/// Mixes the bits of `value` (the finaliser of splitmix64), so that sums of mixed values rarely collide.
+constexpr std::uint64_t mix(std::uint64_t value) noexcept {
+    value += 0x9e3779b97f4a7c15;
+    value = (value ^ (value >> 30)) * 0xbf58476d1ce4e5b9;
+    value = (value ^ (value >> 27)) * 0x94d049bb133111eb;
+    return value ^ (value >> 31);
+}
 } // namespace detail
 
-template <typename T>
-constexpr T factor() noexcept {
-    // Default factor prime value from 64-bit FNV hash.
-    if constexpr (sizeof(T) == 8) return 1099511628211;
-    // for 32-bit hash
-    return 16777619;
-}
-
 /// Generate a hash key from a collection of integer values which doesn't depend on their order.
-/// Adapted from https://stackoverflow.com/a/76993810/135138
-template <typename TIter, typename TKey = detail::TIterVal<TIter>, TKey factor = factor<TKey>()>
+/// Each value is mixed before it is added: with plain sums and products of the values, sets of ten small values
+/// already collided.
+template <typename TIter, typename TKey = detail::TIterVal<TIter>>
 TKey order_independent_hash(std::remove_const_t<TIter> cur, const TIter end) noexcept {
-    detail::TIterVal<TIter> sum = 0;
-    detail::TIterVal<TIter> product = 1;
+    std::uint64_t sum = 0;
     for (; cur != end; ++cur) {
-        const auto& value = *cur;
-        sum += value;
-        product *= (1 + value) * factor;
+        sum += detail::mix(static_cast<std::uint64_t>(*cur));
     }
-    return sum ^ product;
+    return static_cast<TKey>(sum);
 }
 
 } // namespace util

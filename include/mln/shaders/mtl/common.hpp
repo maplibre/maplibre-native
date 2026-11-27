@@ -225,6 +225,21 @@ struct alignas(16) GlobalPaintParamsUBO {
 };
 static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16, "wrong size");
 
+// Zoom fade table for `line-fade-zoom` and `fill-fade-zoom` (see `FadeZoomTable`).
+constant constexpr uint fadeZoomStepsPerZoom = 16;
+constant constexpr uint fadeZoomTableSize = 26 * fadeZoomStepsPerZoom;
+
+struct alignas(16) FadeZoomTableUBO {
+    float opacity[fadeZoomTableSize];
+};
+static_assert(sizeof(FadeZoomTableUBO) == fadeZoomTableSize * 4, "wrong size");
+
+/// Current opacity of the features with fade zoom `fadeZoom`, rounded as `FadeZoomTable::index` rounds it.
+inline float fadeZoomOpacity(device const FadeZoomTableUBO& table, float fadeZoom) {
+    const int index = clamp(int(floor(fadeZoom * float(fadeZoomStepsPerZoom) + 0.5)), 0, int(fadeZoomTableSize) - 1);
+    return table.opacity[index];
+}
+
 enum {
     idGlobalPaintParamsUBO,
     idGlobalUBOIndex,

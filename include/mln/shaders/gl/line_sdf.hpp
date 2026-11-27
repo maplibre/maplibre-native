@@ -50,7 +50,7 @@ layout (std140) uniform LineSDFDrawableUBO {
     lowp float u_offset_t;
     lowp float u_width_t;
     lowp float u_floorwidth_t;
-    lowp float drawable_pad1;
+    lowp float u_fade_zoom_t;
     lowp float drawable_pad2;
 };
 
@@ -63,8 +63,14 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     mediump float u_width;
     lowp float u_floorwidth;
     lowp float props_pad1;
-    lowp float props_pad2;
+    highp float u_fade_zoom;
 };
+
+layout (std140) uniform LineFadeZoomUBO {
+    highp vec4 u_fade_zoom_table[104];
+};
+
+out lowp float v_fade_zoom_opacity;
 
 out vec2 v_normal;
 out vec2 v_width2;
@@ -97,6 +103,9 @@ out mediump float width;
 #ifndef HAS_UNIFORM_u_floorwidth
 layout (location = 8) in lowp vec2 a_floorwidth;
 out lowp float floorwidth;
+#endif
+#ifndef HAS_UNIFORM_u_fade_zoom
+layout (location = 9) in highp vec2 a_fade_zoom;
 #endif
 
 void main() {
@@ -134,6 +143,11 @@ mediump float width = u_width;
 floorwidth = unpack_mix_vec2(a_floorwidth, u_floorwidth_t);
 #else
 lowp float floorwidth = u_floorwidth;
+#endif
+    #ifndef HAS_UNIFORM_u_fade_zoom
+highp float fade_zoom = unpack_mix_vec2(a_fade_zoom, u_fade_zoom_t);
+#else
+highp float fade_zoom = u_fade_zoom;
 #endif
 
     // the distance over which the line edge fades out.
@@ -186,6 +200,10 @@ lowp float floorwidth = u_floorwidth;
     v_tex_b = vec2(a_linesofar * u_patternscale_b.x / floorwidth, normal.y * u_patternscale_b.y + u_tex_y_b);
 
     v_width2 = vec2(outset, inset);
+
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    v_fade_zoom_opacity = u_fade_zoom_table[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform LineSDFTilePropsUBO {
@@ -204,8 +222,10 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     mediump float u_width;
     lowp float u_floorwidth;
     lowp float props_pad1;
-    lowp float props_pad2;
+    highp float u_fade_zoom;
 };
+
+in lowp float v_fade_zoom_opacity;
 
 uniform sampler2D u_image;
 
@@ -263,6 +283,8 @@ lowp float floorwidth = u_floorwidth;
     alpha *= smoothstep(0.5 - u_sdfgamma / floorwidth, 0.5 + u_sdfgamma / floorwidth, sdfdist);
 
     fragColor = color * (alpha * opacity);
+
+    fragColor *= v_fade_zoom_opacity;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

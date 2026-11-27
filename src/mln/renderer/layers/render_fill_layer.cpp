@@ -82,7 +82,8 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 
     passes = RenderPass::Translucent;
 
-    if (unevaluated.get<style::FillPattern>().isUndefined() &&
+    // A fill that fades in or out by zoom is not always opaque.
+    if (unevaluated.get<style::FillPattern>().isUndefined() && unevaluated.get<style::FillFadeZoom>().isUndefined() &&
         evaluated.get<style::FillColor>().constantOr(Color()).a >= 1.0f &&
         evaluated.get<style::FillOpacity>().constantOr(0) >= 1.0f) {
         // Supply both - evaluated based on opaquePassCutoff in render().
@@ -331,7 +332,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         // `Fill*Program` all use `style::FillPaintProperties`
         auto vertexAttrs = context.createVertexAttributeArray();
-        vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
+        vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern, FillFadeZoom>(
             binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
 
         // Outline always occurs in translucent pass, defaults to fill color
@@ -340,7 +341,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                                   unevaluated.get<FillOutlineColor>().isUndefined());
 #if MLN_TRIANGULATE_FILL_OUTLINES
         const bool dataDrivenOutline = !evaluated.get<FillOutlineColor>().isConstant() ||
-                                       !evaluated.get<FillOpacity>().isConstant();
+                                       !evaluated.get<FillOpacity>().isConstant() ||
+                                       !evaluated.get<FillFadeZoom>().isConstant();
 #endif
 
         const auto fillVertexCount = bucket.vertices.elements();
@@ -455,7 +457,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
                     // Only write opaque fills to the depth buffer, matching `fillRenderPass` in legacy rendering
                     const bool opaque = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
-                                         evaluated.get<FillOpacity>().constantOr(0) >= 1.0f);
+                                         evaluated.get<FillOpacity>().constantOr(0) >= 1.0f &&
+                                         unevaluated.get<FillFadeZoom>().isUndefined());
 
                     commonInit(*builder);
                     builder->setDepthType(opaque ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);

@@ -30,6 +30,9 @@ public:
     LineLayoutProperties::Unevaluated layout;
     LinePaintProperties::Transitionable paint;
 
+    // Features with a fade zoom fade out in a replaced tile, so the tile stays on screen until they have.
+    bool drawsFadingTiles() const noexcept override { return !paint.get<LineFadeZoom>().value.isUndefined(); }
+
     DECLARE_LAYER_TYPE_INFO;
 };
 

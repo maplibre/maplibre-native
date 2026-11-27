@@ -37,10 +37,16 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad1;
+    highp float u_fade_zoom;
     lowp float props_pad2;
     lowp float props_pad3;
 };
+
+layout (std140) uniform FillFadeZoomUBO {
+    highp vec4 u_fade_zoom_table[104];
+};
+
+out lowp float v_fade_zoom_opacity;
 
 out vec2 v_normal;
 out float v_width;
@@ -84,4 +90,9 @@ void main() {
     v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
     v_width = outset;
+
+    highp float fade_zoom = u_fade_zoom;
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    v_fade_zoom_opacity = u_fade_zoom_table[fade_zoom_index / 4][fade_zoom_index % 4];
 }

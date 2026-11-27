@@ -438,4 +438,30 @@ public class FillLayerTest extends BaseLayerTest {
     layer.setProperties(fillRoundedCornerDistance(propertyValue));
     assertEquals(layer.getFillRoundedCornerDistance().getValue(), propertyValue);
   }
+
+  @Test
+  @UiThreadTest
+  public void testFillFadeZoomAsConstant() {
+    Timber.i("fill-fade-zoom");
+    assertNotNull(layer);
+    assertNull(layer.getFillFadeZoom().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillFadeZoom(propertyValue));
+    assertEquals(layer.getFillFadeZoom().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillFadeZoomAsExpression() {
+    Timber.i("fill-fade-zoom-expression");
+    assertNotNull(layer);
+    assertNull(layer.getFillFadeZoom().getExpression());
+
+    // Set and Get
+    Expression expression = number(Expression.get("undefined"));
+    layer.setProperties(fillFadeZoom(expression));
+    assertEquals(layer.getFillFadeZoom().getExpression(), expression);
+  }
 }

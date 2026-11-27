@@ -6252,6 +6252,25 @@
         ]
       },
       "property-type": "data-constant"
+    },
+    "fill-fade-zoom": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "doc": "The zoom level from which a feature is drawn. When the map's zoom crosses this value, the feature fades in (when zooming in) or out (when zooming out) over the style's `transition` duration, as symbols do when their placement changes. While the map is still, a feature is either fully drawn or not drawn. Values are rounded to the nearest 1/16 of a zoom level. The fade also applies to the fill's outline.",
+      "transition": false,
+      "sdk-support": {
+        "basic functionality": {},
+        "data-driven styling": {}
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom",
+          "feature"
+        ]
+      },
+      "property-type": "data-driven"
     }
   },
   "paint_fill-extrusion": {
@@ -6791,6 +6810,25 @@
         ]
       },
       "property-type": "color-ramp"
+    },
+    "line-fade-zoom": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "doc": "The zoom level from which a feature is drawn. When the map's zoom crosses this value, the feature fades in (when zooming in) or out (when zooming out) over the style's `transition` duration, as symbols do when their placement changes. While the map is still, a feature is either fully drawn or not drawn. Values are rounded to the nearest 1/16 of a zoom level.",
+      "transition": false,
+      "sdk-support": {
+        "basic functionality": {},
+        "data-driven styling": {}
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom",
+          "feature"
+        ]
+      },
+      "property-type": "data-driven"
     }
   },
   "paint_circle": {

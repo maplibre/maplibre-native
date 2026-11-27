@@ -41,7 +41,7 @@ layout (std140) uniform LineDrawableUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
-    lowp float drawable_pad1;
+    lowp float u_fade_zoom_t;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -53,8 +53,14 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     mediump float u_width;
     lowp float u_floorwidth;
     lowp float props_pad1;
-    lowp float props_pad2;
+    highp float u_fade_zoom;
 };
+
+layout (std140) uniform LineFadeZoomUBO {
+    highp vec4 u_fade_zoom_table[104];
+};
+
+out lowp float v_fade_zoom_opacity;
 
 out vec2 v_normal;
 out vec2 v_width2;
@@ -81,6 +87,9 @@ layout (location = 6) in lowp vec2 a_offset;
 #endif
 #ifndef HAS_UNIFORM_u_width
 layout (location = 7) in mediump vec2 a_width;
+#endif
+#ifndef HAS_UNIFORM_u_fade_zoom
+layout (location = 8) in highp vec2 a_fade_zoom;
 #endif
 
 void main() {
@@ -113,6 +122,11 @@ lowp float offset = u_offset;
 mediump float width = unpack_mix_vec2(a_width, u_width_t);
 #else
 mediump float width = u_width;
+#endif
+    #ifndef HAS_UNIFORM_u_fade_zoom
+highp float fade_zoom = unpack_mix_vec2(a_fade_zoom, u_fade_zoom_t);
+#else
+highp float fade_zoom = u_fade_zoom;
 #endif
 
     // the distance over which the line edge fades out.
@@ -163,6 +177,10 @@ mediump float width = u_width;
     v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
     v_width2 = vec2(outset, inset);
+
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    v_fade_zoom_opacity = u_fade_zoom_table[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform LineEvaluatedPropsUBO {
@@ -174,8 +192,10 @@ mediump float width = u_width;
     mediump float u_width;
     lowp float u_floorwidth;
     lowp float props_pad1;
-    lowp float props_pad2;
+    highp float u_fade_zoom;
 };
+
+in lowp float v_fade_zoom_opacity;
 
 in vec2 v_width2;
 in vec2 v_normal;
@@ -212,6 +232,8 @@ lowp float opacity = u_opacity;
     float alpha = clamp(min(dist - (v_width2.t - blur2), v_width2.s - dist) / blur2, 0.0, 1.0);
 
     fragColor = color * (alpha * opacity);
+
+    fragColor *= v_fade_zoom_opacity;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

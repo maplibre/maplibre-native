@@ -36,7 +36,7 @@ layout (std140) uniform LinePatternDrawableUBO {
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;
     lowp float u_floorwidth_t;
-    lowp float drawable_pad1;
+    lowp float u_fade_zoom_t;
     lowp float drawable_pad2;
     lowp float drawable_pad3;
 };
@@ -59,8 +59,14 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     mediump float u_width;
     lowp float u_floorwidth;
     lowp float props_pad1;
-    lowp float props_pad2;
+    highp float u_fade_zoom;
 };
+
+layout (std140) uniform LineFadeZoomUBO {
+    highp vec4 u_fade_zoom_table[104];
+};
+
+out lowp float v_fade_zoom_opacity;
 
 out vec2 v_normal;
 out vec2 v_width2;
@@ -75,6 +81,7 @@ out float v_floorwidth;
 #pragma mapbox: define mediump float width
 #pragma mapbox: define lowp vec4 pattern_from
 #pragma mapbox: define lowp vec4 pattern_to
+#pragma mapbox: define highp float fade_zoom
 
 void main() {
     #pragma mapbox: initialize lowp float blur
@@ -84,6 +91,7 @@ void main() {
     #pragma mapbox: initialize mediump float width
     #pragma mapbox: initialize mediump vec4 pattern_from
     #pragma mapbox: initialize mediump vec4 pattern_to
+    #pragma mapbox: initialize highp float fade_zoom
 
 #ifndef HAS_UNIFORM_u_width
     v_floorwidth = unpack_mix_vec2(a_width, u_floorwidth_t);
@@ -139,4 +147,8 @@ void main() {
 
     v_linesofar = a_linesofar;
     v_width2 = vec2(outset, inset);
+
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    v_fade_zoom_opacity = u_fade_zoom_table[fade_zoom_index / 4][fade_zoom_index % 4];
 }

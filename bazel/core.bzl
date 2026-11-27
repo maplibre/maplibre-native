@@ -227,6 +227,8 @@ MLN_CORE_SOURCE = [
     "src/mln/renderer/cross_faded_property_evaluator.cpp",
     "src/mln/renderer/cross_faded_property_evaluator.hpp",
     "src/mln/renderer/data_driven_property_evaluator.hpp",
+    "src/mln/renderer/fade_zoom_table.cpp",
+    "src/mln/renderer/fade_zoom_table.hpp",
     "src/mln/renderer/group_by_layout.cpp",
     "src/mln/renderer/group_by_layout.hpp",
     "src/mln/renderer/image_manager.cpp",

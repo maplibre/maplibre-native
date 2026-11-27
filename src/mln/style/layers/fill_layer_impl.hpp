@@ -26,6 +26,9 @@ public:
     FillLayoutProperties::Unevaluated layout;
     FillPaintProperties::Transitionable paint;
 
+    // Features with a fade zoom fade out in a replaced tile, so the tile stays on screen until they have.
+    bool drawsFadingTiles() const noexcept override { return !paint.get<FillFadeZoom>().value.isUndefined(); }
+
     DECLARE_LAYER_TYPE_INFO;
 };
 

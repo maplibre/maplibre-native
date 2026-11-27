@@ -31,7 +31,7 @@ layout (std140) uniform LineDrawableUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
-    lowp float drawable_pad1;
+    lowp float u_fade_zoom_t;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -43,8 +43,14 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     mediump float u_width;
     lowp float u_floorwidth;
     lowp float props_pad1;
-    lowp float props_pad2;
+    highp float u_fade_zoom;
 };
+
+layout (std140) uniform LineFadeZoomUBO {
+    highp vec4 u_fade_zoom_table[104];
+};
+
+out lowp float v_fade_zoom_opacity;
 
 out vec2 v_normal;
 out vec2 v_width2;
@@ -57,6 +63,7 @@ out highp float v_linesofar;
 #pragma mapbox: define mediump float gapwidth
 #pragma mapbox: define lowp float offset
 #pragma mapbox: define mediump float width
+#pragma mapbox: define highp float fade_zoom
 
 void main() {
     #pragma mapbox: initialize highp vec4 color
@@ -65,6 +72,7 @@ void main() {
     #pragma mapbox: initialize mediump float gapwidth
     #pragma mapbox: initialize lowp float offset
     #pragma mapbox: initialize mediump float width
+    #pragma mapbox: initialize highp float fade_zoom
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -114,4 +122,8 @@ void main() {
     v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
     v_width2 = vec2(outset, inset);
+
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    v_fade_zoom_opacity = u_fade_zoom_table[fade_zoom_index / 4][fade_zoom_index % 4];
 }

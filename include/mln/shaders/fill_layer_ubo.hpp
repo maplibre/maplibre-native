@@ -14,7 +14,7 @@ struct alignas(16) FillDrawableUBO {
     // Interpolations
     /* 64 */ float color_t;
     /* 68 */ float opacity_t;
-    /* 72 */ float pad1;
+    /* 72 */ float fade_zoom_t;
     /* 76 */ float pad2;
     /* 80 */
 };
@@ -29,7 +29,7 @@ struct alignas(16) FillOutlineDrawableUBO {
     // Interpolations
     /* 64 */ float outline_color_t;
     /* 68 */ float opacity_t;
-    /* 72 */ float pad1;
+    /* 72 */ float fade_zoom_t;
     /* 76 */ float pad2;
     /* 80 */
 };
@@ -49,7 +49,7 @@ struct alignas(16) FillPatternDrawableUBO {
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
     /* 96 */ float color_t;
-    /*100 */ float pad1;
+    /*100 */ float fade_zoom_t;
     /*104 */ float pad2;
     /*108 */ float pad3;
     /*112 */
@@ -80,7 +80,7 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
     /* 96 */ float color_t;
-    /*100 */ float pad1;
+    /*100 */ float fade_zoom_t;
     /*104 */ float pad2;
     /*108 */ float pad3;
     /*112 */
@@ -119,7 +119,7 @@ struct alignas(16) FillEvaluatedPropsUBO {
     /* 40 */ float fade;
     /* 44 */ float from_scale;
     /* 48 */ float to_scale;
-    /* 52 */ float pad1;
+    /* 52 */ float fade_zoom;
     /* 56 */ float pad2;
     /* 60 */ float pad3;
     /* 64 */

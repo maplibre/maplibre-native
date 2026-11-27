@@ -31,6 +31,7 @@ MBGL_DEFINE_UNIFORM_SCALAR(float, floorwidth);
 MBGL_DEFINE_UNIFORM_SCALAR(float, gapwidth);
 MBGL_DEFINE_UNIFORM_SCALAR(float, offset);
 MBGL_DEFINE_UNIFORM_SCALAR(float, weight);
+MBGL_DEFINE_UNIFORM_SCALAR(float, fade_zoom);
 MBGL_DEFINE_UNIFORM_VECTOR(uint16_t, 4, pattern_from);
 MBGL_DEFINE_UNIFORM_VECTOR(uint16_t, 4, pattern_to);
 

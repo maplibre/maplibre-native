@@ -226,6 +226,34 @@ TransitionOptions LineLayer::getLineDasharrayTransition() const {
     return impl().paint.template get<LineDasharray>().options;
 }
 
+PropertyValue<float> LineLayer::getDefaultLineFadeZoom() {
+    return {0.f};
+}
+
+const PropertyValue<float>& LineLayer::getLineFadeZoom() const {
+    return impl().paint.template get<LineFadeZoom>().value;
+}
+
+void LineLayer::setLineFadeZoom(const PropertyValue<float>& value) {
+    if (value == getLineFadeZoom())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<LineFadeZoom>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void LineLayer::setLineFadeZoomTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<LineFadeZoom>().options = options;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+TransitionOptions LineLayer::getLineFadeZoomTransition() const {
+    return impl().paint.template get<LineFadeZoom>().options;
+}
+
 PropertyValue<float> LineLayer::getDefaultLineGapWidth() {
     return {0.f};
 }
@@ -455,12 +483,13 @@ using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 22u;
+constexpr uint8_t kPaintPropertyCount = 24u;
 
 enum class Property : uint8_t {
     LineBlur,
     LineColor,
     LineDasharray,
+    LineFadeZoom,
     LineGapWidth,
     LineGradient,
     LineOffset,
@@ -472,6 +501,7 @@ enum class Property : uint8_t {
     LineBlurTransition,
     LineColorTransition,
     LineDasharrayTransition,
+    LineFadeZoomTransition,
     LineGapWidthTransition,
     LineGradientTransition,
     LineOffsetTransition,
@@ -496,6 +526,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
     {{"line-blur", toUint8(Property::LineBlur)},
      {"line-color", toUint8(Property::LineColor)},
      {"line-dasharray", toUint8(Property::LineDasharray)},
+     {"line-fade-zoom", toUint8(Property::LineFadeZoom)},
      {"line-gap-width", toUint8(Property::LineGapWidth)},
      {"line-gradient", toUint8(Property::LineGradient)},
      {"line-offset", toUint8(Property::LineOffset)},
@@ -507,6 +538,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"line-blur-transition", toUint8(Property::LineBlurTransition)},
      {"line-color-transition", toUint8(Property::LineColorTransition)},
      {"line-dasharray-transition", toUint8(Property::LineDasharrayTransition)},
+     {"line-fade-zoom-transition", toUint8(Property::LineFadeZoomTransition)},
      {"line-gap-width-transition", toUint8(Property::LineGapWidthTransition)},
      {"line-gradient-transition", toUint8(Property::LineGradientTransition)},
      {"line-offset-transition", toUint8(Property::LineOffsetTransition)},
@@ -529,6 +561,8 @@ StyleProperty getLayerProperty(const LineLayer& layer, Property property) {
             return makeStyleProperty(layer.getLineColor());
         case Property::LineDasharray:
             return makeStyleProperty(layer.getLineDasharray());
+        case Property::LineFadeZoom:
+            return makeStyleProperty(layer.getLineFadeZoom());
         case Property::LineGapWidth:
             return makeStyleProperty(layer.getLineGapWidth());
         case Property::LineGradient:
@@ -551,6 +585,8 @@ StyleProperty getLayerProperty(const LineLayer& layer, Property property) {
             return makeStyleProperty(layer.getLineColorTransition());
         case Property::LineDasharrayTransition:
             return makeStyleProperty(layer.getLineDasharrayTransition());
+        case Property::LineFadeZoomTransition:
+            return makeStyleProperty(layer.getLineFadeZoomTransition());
         case Property::LineGapWidthTransition:
             return makeStyleProperty(layer.getLineGapWidthTransition());
         case Property::LineGradientTransition:
@@ -608,8 +644,9 @@ std::optional<Error> LineLayer::setPropertyInternal(const std::string& name, con
 
     auto property = static_cast<Property>(it->second);
 
-    if (property == Property::LineBlur || property == Property::LineGapWidth || property == Property::LineOffset ||
-        property == Property::LineOpacity || property == Property::LineWidth || property == Property::LineSortKey) {
+    if (property == Property::LineBlur || property == Property::LineFadeZoom || property == Property::LineGapWidth ||
+        property == Property::LineOffset || property == Property::LineOpacity || property == Property::LineWidth ||
+        property == Property::LineSortKey) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, true, false);
         if (!typedValue) {
@@ -618,6 +655,11 @@ std::optional<Error> LineLayer::setPropertyInternal(const std::string& name, con
 
         if (property == Property::LineBlur) {
             setLineBlur(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::LineFadeZoom) {
+            setLineFadeZoom(*typedValue);
             return std::nullopt;
         }
 
@@ -762,6 +804,11 @@ std::optional<Error> LineLayer::setPropertyInternal(const std::string& name, con
 
     if (property == Property::LineDasharrayTransition) {
         setLineDasharrayTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::LineFadeZoomTransition) {
+        setLineFadeZoomTransition(*transition);
         return std::nullopt;
     }
 

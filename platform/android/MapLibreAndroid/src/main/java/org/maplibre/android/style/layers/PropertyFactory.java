@@ -221,6 +221,26 @@ public class PropertyFactory {
   }
 
   /**
+   * The zoom level from which a feature is drawn. When the map's zoom crosses this value, the feature fades in (when zooming in) or out (when zooming out) over the style's `transition` duration, as symbols do when their placement changes. While the map is still, a feature is either fully drawn or not drawn. Values are rounded to the nearest 1/16 of a zoom level. The fade also applies to the fill's outline.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillFadeZoom(Float value) {
+    return new PaintPropertyValue<>("fill-fade-zoom", value);
+  }
+
+  /**
+   * The zoom level from which a feature is drawn. When the map's zoom crosses this value, the feature fades in (when zooming in) or out (when zooming out) over the style's `transition` duration, as symbols do when their placement changes. While the map is still, a feature is either fully drawn or not drawn. Values are rounded to the nearest 1/16 of a zoom level. The fade also applies to the fill's outline.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillFadeZoom(Expression expression) {
+    return new PaintPropertyValue<>("fill-fade-zoom", expression);
+  }
+
+  /**
    * The opacity at which the line will be drawn.
    *
    * @param value a Float value
@@ -458,6 +478,26 @@ public class PropertyFactory {
    */
   public static PropertyValue<Expression> lineGradient(Expression expression) {
     return new PaintPropertyValue<>("line-gradient", expression);
+  }
+
+  /**
+   * The zoom level from which a feature is drawn. When the map's zoom crosses this value, the feature fades in (when zooming in) or out (when zooming out) over the style's `transition` duration, as symbols do when their placement changes. While the map is still, a feature is either fully drawn or not drawn. Values are rounded to the nearest 1/16 of a zoom level.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> lineFadeZoom(Float value) {
+    return new PaintPropertyValue<>("line-fade-zoom", value);
+  }
+
+  /**
+   * The zoom level from which a feature is drawn. When the map's zoom crosses this value, the feature fades in (when zooming in) or out (when zooming out) over the style's `transition` duration, as symbols do when their placement changes. While the map is still, a feature is either fully drawn or not drawn. Values are rounded to the nearest 1/16 of a zoom level.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> lineFadeZoom(Expression expression) {
+    return new PaintPropertyValue<>("line-fade-zoom", expression);
   }
 
   /**

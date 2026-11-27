@@ -25,6 +25,7 @@ public:
     bool hasFadingTiles() const override;
 
     RenderTiles getRenderTiles() const override;
+    RenderTiles getRenderTilesWithFadingTiles() const override;
     RenderTiles getRenderTilesSortedByYPosition() const override;
     const Tile* getRenderedTile(const UnwrappedTileID&) const override;
     Immutable<std::vector<RenderTile>> getRawRenderTiles() const override { return renderTiles; }
@@ -56,6 +57,7 @@ protected:
     TilePyramid tilePyramid;
     Immutable<std::vector<RenderTile>> renderTiles;
     mutable RenderTiles filteredRenderTiles;
+    mutable RenderTiles allRenderTiles;
     mutable RenderTiles renderTilesSortedByY;
 
 private:

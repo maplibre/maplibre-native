@@ -53,6 +53,10 @@ struct LineDasharray : CrossFadedPaintProperty<std::vector<float>> {
     static std::vector<float> defaultValue() { return {}; }
 };
 
+struct LineFadeZoom : DataDrivenPaintProperty<float, attributes::fade_zoom, uniforms::fade_zoom> {
+    static float defaultValue() { return 0.f; }
+};
+
 struct LineFloorWidth : DataDrivenPaintProperty<float, attributes::floorwidth, uniforms::floorwidth> {
     static float defaultValue() { return 1.f; }
     using EvaluatorType = DataDrivenPropertyEvaluator<float, true>;
@@ -101,6 +105,7 @@ class LinePaintProperties : public Properties<
     LineBlur,
     LineColor,
     LineDasharray,
+    LineFadeZoom,
     LineFloorWidth,
     LineGapWidth,
     LineGradient,

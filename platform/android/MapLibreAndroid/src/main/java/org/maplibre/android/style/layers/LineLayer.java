@@ -558,6 +558,18 @@ public class LineLayer extends Layer {
     }
   }
 
+  /**
+   * Get the LineFadeZoom property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getLineFadeZoom() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("line-fade-zoom", nativeGetLineFadeZoom());
+  }
+
   @NonNull
   @Keep
   private native Object nativeGetLineCap();
@@ -684,6 +696,10 @@ public class LineLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetLineGradient();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetLineFadeZoom();
 
   @Override
   @Keep

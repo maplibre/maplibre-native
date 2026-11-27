@@ -10,7 +10,7 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillShader";
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -23,19 +23,21 @@ struct VertexInput {
 #ifndef HAS_UNIFORM_u_opacity
     @location(2) opacity: vec2<f32>,
 #endif
+    @location(3) fade_zoom: vec2<f32>,
 };
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
+    @location(2) fade_zoom_opacity: f32,
 };
 
 struct FillDrawableUBO {
     matrix: mat4x4<f32>,
     color_t: f32,
     opacity_t: f32,
-    pad1: f32,
+    fade_zoom_t: f32,
     pad2: f32,
 };
 
@@ -53,7 +55,7 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad1: f32,
+    fade_zoom: f32,
     pad2: f32,
     pad3: f32,
 };
@@ -66,6 +68,12 @@ struct GlobalIndexUBO {
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillDrawableUnionUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+
+struct FadeZoomTableUBO {
+    opacity: array<vec4<f32>, 104>,
+};
+
+@group(0) @binding(6) var<uniform> fadeZoomTable: FadeZoomTableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -93,6 +101,14 @@ fn main(in: VertexInput) -> VertexOutput {
     out.color = color;
     out.opacity = opacity;
 
+    var fade_zoom = props.fade_zoom;
+#ifndef HAS_UNIFORM_u_fade_zoom
+    fade_zoom = unpack_mix_float(in.fade_zoom, drawable.fade_zoom_t);
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    let fade_zoom_index = u32(clamp(floor(fade_zoom * 16.0 + 0.5), 0.0, 415.0));
+    out.fade_zoom_opacity = fadeZoomTable.opacity[fade_zoom_index / 4u][fade_zoom_index % 4u];
+
     return out;
 }
 )";
@@ -106,7 +122,7 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad1: f32,
+    fade_zoom: f32,
     pad2: f32,
     pad3: f32,
 };
@@ -116,6 +132,7 @@ struct FillEvaluatedPropsUBO {
 struct FragmentInput {
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
+    @location(2) fade_zoom_opacity: f32,
 };
 
 @fragment
@@ -134,7 +151,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     opacity = in.opacity;
 #endif
 
-    return color * opacity;
+    return (color * opacity) * in.fade_zoom_opacity;
 }
 )";
 };
@@ -142,7 +159,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillOutlineShader";
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -155,6 +172,7 @@ struct VertexInput {
 #ifndef HAS_UNIFORM_u_opacity
     @location(2) opacity: vec2<f32>,
 #endif
+    @location(3) fade_zoom: vec2<f32>,
 };
 
 struct VertexOutput {
@@ -162,13 +180,14 @@ struct VertexOutput {
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
     @location(2) pos: vec2<f32>,
+    @location(3) fade_zoom_opacity: f32,
 };
 
 struct FillOutlineDrawableUBO {
     matrix: mat4x4<f32>,
     outline_color_t: f32,
     opacity_t: f32,
-    pad1: f32,
+    fade_zoom_t: f32,
     pad2: f32,
 };
 
@@ -194,9 +213,13 @@ struct FillOutlineEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
+    rounded_corner_distance: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
+    fade_zoom: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct GlobalIndexUBO {
@@ -208,6 +231,12 @@ struct GlobalIndexUBO {
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineDrawableUnionUBO>;
 @group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
+
+struct FadeZoomTableUBO {
+    opacity: array<vec4<f32>, 104>,
+};
+
+@group(0) @binding(6) var<uniform> fadeZoomTable: FadeZoomTableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -238,6 +267,14 @@ fn main(in: VertexInput) -> VertexOutput {
     out.color = color;
     out.opacity = opacity;
 
+    var fade_zoom = props.fade_zoom;
+#ifndef HAS_UNIFORM_u_fade_zoom
+    fade_zoom = unpack_mix_float(in.fade_zoom, drawable.fade_zoom_t);
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    let fade_zoom_index = u32(clamp(floor(fade_zoom * 16.0 + 0.5), 0.0, 415.0));
+    out.fade_zoom_opacity = fadeZoomTable.opacity[fade_zoom_index / 4u][fade_zoom_index % 4u];
+
     return out;
 }
 )";
@@ -247,9 +284,13 @@ struct FillOutlineEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
+    rounded_corner_distance: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
+    fade_zoom: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 @group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
@@ -258,6 +299,7 @@ struct FragmentInput {
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
     @location(2) pos: vec2<f32>,
+    @location(3) fade_zoom_opacity: f32,
 };
 
 @fragment
@@ -276,7 +318,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     opacity = in.opacity;
 #endif
 
-    return color * opacity;
+    return (color * opacity) * in.fade_zoom_opacity;
 }
 )";
 };
@@ -284,7 +326,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillPatternShader";
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -303,6 +345,7 @@ struct VertexInput {
 #ifndef HAS_UNIFORM_u_pattern_to
     @location(8) pattern_to: vec4<u32>,
 #endif
+    @location(9) fade_zoom: vec2<f32>,
 };
 
 struct VertexOutput {
@@ -321,6 +364,7 @@ struct VertexOutput {
 #ifndef HAS_UNIFORM_u_pattern_to
     @location(5) pattern_to: vec4<f32>,
 #endif
+    @location(6) fade_zoom_opacity: f32,
 };
 
 struct FillPatternDrawableUBO {
@@ -332,7 +376,7 @@ struct FillPatternDrawableUBO {
     pattern_to_t: f32,
     opacity_t: f32,
     color_t: f32,
-    pad1: f32,
+    fade_zoom_t: f32,
     pad2: f32,
     pad3: f32,
 };
@@ -353,7 +397,7 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad1: f32,
+    fade_zoom: f32,
     pad2: f32,
     pad3: f32,
 };
@@ -380,6 +424,12 @@ struct GlobalIndexUBO {
 @group(0) @binding(4) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+
+struct FadeZoomTableUBO {
+    opacity: array<vec4<f32>, 104>,
+};
+
+@group(0) @binding(6) var<uniform> fadeZoomTable: FadeZoomTableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -451,6 +501,14 @@ fn main(in: VertexInput) -> VertexOutput {
     out.pattern_to = pattern_to;
 #endif
 
+    var fade_zoom = props.fade_zoom;
+#ifndef HAS_UNIFORM_u_fade_zoom
+    fade_zoom = unpack_mix_float(in.fade_zoom, drawable.fade_zoom_t);
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    let fade_zoom_index = u32(clamp(floor(fade_zoom * 16.0 + 0.5), 0.0, 415.0));
+    out.fade_zoom_opacity = fadeZoomTable.opacity[fade_zoom_index / 4u][fade_zoom_index % 4u];
+
     return out;
 }
 )";
@@ -471,6 +529,7 @@ struct FragmentInput {
 #ifndef HAS_UNIFORM_u_pattern_to
     @location(5) pattern_to: vec4<f32>,
 #endif
+    @location(6) fade_zoom_opacity: f32,
 };
 
 struct FillPatternTilePropsUBO {
@@ -489,7 +548,7 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad1: f32,
+    fade_zoom: f32,
     pad2: f32,
     pad3: f32,
 };
@@ -559,9 +618,9 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
         let sdf_gamma_b = max(fwidth(color_b.a) * 0.5, 1.0 / 255.0 / 16.0);
         let sdf_alpha_a = smoothstep(sdf_edge - sdf_gamma_a, sdf_edge + sdf_gamma_a, color_a.a);
         let sdf_alpha_b = smoothstep(sdf_edge - sdf_gamma_b, sdf_edge + sdf_gamma_b, color_b.a);
-        return mix(color * sdf_alpha_a, color * sdf_alpha_b, props.fade) * opacity;
+        return (mix(color * sdf_alpha_a, color * sdf_alpha_b, props.fade) * opacity) * in.fade_zoom_opacity;
     }
-    return mix(color_a, color_b, props.fade) * opacity;
+    return (mix(color_a, color_b, props.fade) * opacity) * in.fade_zoom_opacity;
 }
 )";
 };
@@ -569,7 +628,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillOutlinePatternShader";
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -588,6 +647,7 @@ struct VertexInput {
 #ifndef HAS_UNIFORM_u_pattern_to
     @location(8) pattern_to: vec4<u32>,
 #endif
+    @location(9) fade_zoom: vec2<f32>,
 };
 
 struct VertexOutput {
@@ -607,6 +667,7 @@ struct VertexOutput {
 #ifndef HAS_UNIFORM_u_pattern_to
     @location(6) pattern_to: vec4<f32>,
 #endif
+    @location(7) fade_zoom_opacity: f32,
 };
 
 struct FillOutlinePatternDrawableUBO {
@@ -618,7 +679,7 @@ struct FillOutlinePatternDrawableUBO {
     pattern_to_t: f32,
     opacity_t: f32,
     color_t: f32,
-    pad1: f32,
+    fade_zoom_t: f32,
     pad2: f32,
     pad3: f32,
 };
@@ -639,7 +700,7 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad1: f32,
+    fade_zoom: f32,
     pad2: f32,
     pad3: f32,
 };
@@ -666,6 +727,12 @@ struct GlobalIndexUBO {
 @group(0) @binding(4) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+
+struct FadeZoomTableUBO {
+    opacity: array<vec4<f32>, 104>,
+};
+
+@group(0) @binding(6) var<uniform> fadeZoomTable: FadeZoomTableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -742,6 +809,14 @@ fn main(in: VertexInput) -> VertexOutput {
     out.pattern_to = pattern_to;
 #endif
 
+    var fade_zoom = props.fade_zoom;
+#ifndef HAS_UNIFORM_u_fade_zoom
+    fade_zoom = unpack_mix_float(in.fade_zoom, drawable.fade_zoom_t);
+#endif
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    let fade_zoom_index = u32(clamp(floor(fade_zoom * 16.0 + 0.5), 0.0, 415.0));
+    out.fade_zoom_opacity = fadeZoomTable.opacity[fade_zoom_index / 4u][fade_zoom_index % 4u];
+
     return out;
 }
 )";
@@ -764,6 +839,7 @@ struct FragmentInput {
 #ifndef HAS_UNIFORM_u_pattern_to
     @location(6) pattern_to: vec4<f32>,
 #endif
+    @location(7) fade_zoom_opacity: f32,
 };
 
 struct FillOutlinePatternTilePropsUBO {
@@ -782,7 +858,7 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad1: f32,
+    fade_zoom: f32,
     pad2: f32,
     pad3: f32,
 };
@@ -855,9 +931,9 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
         let sdf_gamma_b = max(fwidth(color_b.a) * 0.5, 1.0 / 255.0 / 16.0);
         let sdf_alpha_a = smoothstep(sdf_edge - sdf_gamma_a, sdf_edge + sdf_gamma_a, color_a.a);
         let sdf_alpha_b = smoothstep(sdf_edge - sdf_gamma_b, sdf_edge + sdf_gamma_b, color_b.a);
-        return mix(color * sdf_alpha_a, color * sdf_alpha_b, props.fade) * alpha * opacity;
+        return (mix(color * sdf_alpha_a, color * sdf_alpha_b, props.fade) * alpha * opacity) * in.fade_zoom_opacity;
     }
-    return mix(color_a, color_b, props.fade) * opacity;
+    return (mix(color_a, color_b, props.fade) * opacity) * in.fade_zoom_opacity;
 }
 )";
 };
@@ -882,6 +958,7 @@ struct VertexOutput {
     @location(0) normal: vec2<f32>,
     @location(1) width: f32,
     @location(2) gamma_scale: f32,
+    @location(3) fade_zoom_opacity: f32,
 };
 
 struct FillOutlineTriangulatedDrawableUnionUBO {
@@ -914,6 +991,27 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineTriangulatedDrawableUnionUBO>;
+
+struct FillEvaluatedPropsUBO {
+    color: vec4<f32>,
+    outline_color: vec4<f32>,
+    opacity: f32,
+    rounded_corner_distance: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+    fade_zoom: f32,
+    pad2: f32,
+    pad3: f32,
+};
+
+@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+
+struct FadeZoomTableUBO {
+    opacity: array<vec4<f32>, 104>,
+};
+
+@group(0) @binding(6) var<uniform> fadeZoomTable: FadeZoomTableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -954,6 +1052,11 @@ fn main(in: VertexInput) -> VertexOutput {
     out.width = outset;
     out.gamma_scale = extrude_length_without_perspective / gamma_denom;
 
+    let fade_zoom = props.fade_zoom;
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    let fade_zoom_index = u32(clamp(floor(fade_zoom * 16.0 + 0.5), 0.0, 415.0));
+    out.fade_zoom_opacity = fadeZoomTable.opacity[fade_zoom_index / 4u][fade_zoom_index % 4u];
+
     return out;
 }
 )";
@@ -963,6 +1066,7 @@ struct FragmentInput {
     @location(0) normal: vec2<f32>,
     @location(1) width: f32,
     @location(2) gamma_scale: f32,
+    @location(3) fade_zoom_opacity: f32,
 };
 
 struct FillEvaluatedPropsUBO {
@@ -973,7 +1077,7 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad1: f32,
+    fade_zoom: f32,
     pad2: f32,
     pad3: f32,
 };
@@ -999,7 +1103,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let blur2 = (1.0 / paintParams.pixel_ratio) * in.gamma_scale;
     let denom = max(blur2, 1e-6);
     let alpha = clamp(min(dist + blur2, in.width - dist) / denom, 0.0, 1.0);
-    return props.outline_color * (alpha * props.opacity);
+    return (props.outline_color * (alpha * props.opacity)) * in.fade_zoom_opacity;
 }
 )";
 };

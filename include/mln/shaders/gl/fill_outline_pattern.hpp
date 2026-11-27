@@ -30,7 +30,7 @@ layout (std140) uniform FillOutlinePatternDrawableUBO {
     highp float u_pattern_to_t;
     highp float u_opacity_t;
     highp float u_color_t;
-    lowp float drawable_pad1;
+    lowp float u_fade_zoom_t;
     lowp float drawable_pad2;
     lowp float drawable_pad3;
 };
@@ -51,10 +51,16 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad1;
+    highp float u_fade_zoom;
     lowp float props_pad2;
     lowp float props_pad3;
 };
+
+layout (std140) uniform FillFadeZoomUBO {
+    highp vec4 u_fade_zoom_table[104];
+};
+
+out lowp float v_fade_zoom_opacity;
 
 layout (location = 0) in vec2 a_pos;
 
@@ -78,6 +84,9 @@ out lowp vec4 pattern_from;
 layout (location = 4) in lowp vec4 a_pattern_to;
 out lowp vec4 pattern_to;
 #endif
+#ifndef HAS_UNIFORM_u_fade_zoom
+layout (location = 5) in highp vec2 a_fade_zoom;
+#endif
 
 void main() {
     #ifndef HAS_UNIFORM_u_color
@@ -100,6 +109,11 @@ pattern_to = a_pattern_to;
 #else
 mediump vec4 pattern_to = u_pattern_to;
 #endif
+    #ifndef HAS_UNIFORM_u_fade_zoom
+highp float fade_zoom = unpack_mix_vec2(a_fade_zoom, u_fade_zoom_t);
+#else
+highp float fade_zoom = u_fade_zoom;
+#endif
 
     vec2 pattern_tl_a = pattern_from.xy;
     vec2 pattern_br_a = pattern_from.zw;
@@ -120,6 +134,10 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, toScale * display_size_b, tileRatio, a_pos);
 
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world_size;
+
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    v_fade_zoom_opacity = u_fade_zoom_table[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform FillOutlinePatternTilePropsUBO {
@@ -138,10 +156,12 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad1;
+    highp float u_fade_zoom;
     lowp float props_pad2;
     lowp float props_pad3;
 };
+
+in lowp float v_fade_zoom_opacity;
 
 uniform sampler2D u_image;
 
@@ -205,6 +225,8 @@ mediump vec4 pattern_to = u_pattern_to;
     } else {
         fragColor = mix(color1, color2, u_fade) * alpha * opacity;
     }
+
+    fragColor *= v_fade_zoom_opacity;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

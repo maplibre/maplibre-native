@@ -21,6 +21,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/platform/settings.test.cpp
     ${PROJECT_SOURCE_DIR}/test/plugin/plugin.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/dynamic_texture_atlas.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/fade_zoom_table.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/fill_bucket.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/feature_tracking.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/hillshade_layer.test.cpp

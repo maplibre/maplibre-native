@@ -599,6 +599,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/cross_faded_property_evaluator.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/cross_faded_property_evaluator.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/data_driven_property_evaluator.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/fade_zoom_table.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/fade_zoom_table.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/group_by_layout.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/group_by_layout.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/image_manager.cpp

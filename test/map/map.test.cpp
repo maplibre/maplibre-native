@@ -50,6 +50,7 @@
 #include <mln/util/timer.hpp>
 
 #include <atomic>
+#include <thread>
 
 using namespace mln;
 using namespace mln::style;
@@ -1076,6 +1077,152 @@ TEST(Map, Issue12432) {
     };
 
     test.runLoop.run();
+}
+
+// `fill-fade-zoom` and `line-fade-zoom`: when the map's zoom crosses a feature's fade zoom, the feature fades in
+// or out over the style's transition duration instead of appearing or disappearing at once.
+TEST(Map, FadeZoomFadesOverTime) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "transition": {"duration": 300, "delay": 0},
+      "sources": {
+        "world": {
+          "type": "geojson",
+          "data": {"type": "Polygon", "coordinates": [[[-170, -80], [170, -80], [170, 80], [-170, 80], [-170, -80]]]}
+        }
+      },
+      "layers": [
+        {"id": "background", "type": "background", "paint": {"background-color": "white"}},
+        {"id": "fill", "type": "fill", "source": "world",
+         "paint": {"fill-color": "red", "fill-antialias": false, "fill-fade-zoom": 2.5}}
+      ]
+    })STYLE");
+    // 2.4 and 2.6 are drawn from the same tiles, so no tile loads while the feature fades.
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{}).withZoom(2.4));
+
+    // Share of the fill drawn at the centre of the view: the background is white, the fill red.
+    const auto drawn = [&] {
+        // OpenGL reads the framebuffer of the current context.
+        gfx::BackendScope scope{*test.frontend.getBackend()};
+        const auto image = test.frontend.readStillImage();
+        const auto centre = ((image.size.height / 2) * image.size.width + image.size.width / 2) * 4;
+        return 1.0 - image.data[centre + 1] / 255.0;
+    };
+    const auto renderNow = [&] {
+        test.map.triggerRepaint();
+        test.frontend.renderFrame();
+        return drawn();
+    };
+    const auto wait = [](int ms) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    };
+
+    for (int i = 0; i < 500 && !test.map.isFullyLoaded(); ++i) {
+        test.runLoop.runOnce();
+        test.frontend.renderFrame();
+        wait(10);
+    }
+    ASSERT_TRUE(test.map.isFullyLoaded());
+    EXPECT_EQ(0.0, renderNow());
+
+    // Zooming in past the fade zoom starts the fade: nothing yet, part-way after 100 ms, whole after 400 ms.
+    test.map.jumpTo(CameraOptions().withZoom(2.6));
+    EXPECT_EQ(0.0, renderNow());
+    wait(100);
+    const double fadingIn = renderNow();
+    EXPECT_GT(fadingIn, 0.05);
+    EXPECT_LT(fadingIn, 0.95);
+    wait(300);
+    EXPECT_EQ(1.0, renderNow());
+
+    // Zooming back out fades it out the same way.
+    test.map.jumpTo(CameraOptions().withZoom(2.4));
+    EXPECT_EQ(1.0, renderNow());
+    wait(100);
+    const double fadingOut = renderNow();
+    EXPECT_GT(fadingOut, 0.05);
+    EXPECT_LT(fadingOut, 0.95);
+    wait(300);
+    EXPECT_EQ(0.0, renderNow());
+}
+
+// A feature that only the tiles of its fade zoom contain fades out when zooming out replaces those tiles: the
+// replaced tile stays on screen for the fade, as it does for symbols.
+TEST(Map, FadeZoomHoldsReplacedTile) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "transition": {"duration": 300, "delay": 0},
+      "sources": {},
+      "layers": [{"id": "background", "type": "background", "paint": {"background-color": "white"}}]
+    })STYLE");
+
+    // Tiles of zoom 3 and above are covered by a polygon; tiles below zoom 3 are empty.
+    CustomGeometrySource::Options options;
+    options.fetchTileFunction = [&test](const CanonicalTileID& tileID) {
+        FeatureCollection features;
+        if (tileID.z >= 3) {
+            const LatLngBounds bounds(tileID);
+            mapbox::geojson::polygon polygon{{{bounds.west(), bounds.south()},
+                                              {bounds.east(), bounds.south()},
+                                              {bounds.east(), bounds.north()},
+                                              {bounds.west(), bounds.north()},
+                                              {bounds.west(), bounds.south()}}};
+            features.emplace_back(polygon);
+        }
+        if (auto* source = static_cast<CustomGeometrySource*>(test.map.getStyle().getSource("custom"))) {
+            source->setTileData(tileID, features);
+        }
+    };
+    auto source = std::make_unique<CustomGeometrySource>("custom", std::move(options));
+    // The zoom 2 tiles are loaded beforehand, so they replace the zoom 3 tiles as soon as the map zooms out.
+    source->setPrefetchZoomDelta(1);
+    test.map.getStyle().addSource(std::move(source));
+    auto layer = std::make_unique<FillLayer>("fill", "custom");
+    layer->setFillColor(Color::red());
+    layer->setFillAntialias(false);
+    layer->setFillFadeZoom(3.0f);
+    test.map.getStyle().addLayer(std::move(layer));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{20, 20}).withZoom(3.2));
+
+    const auto drawn = [&] {
+        gfx::BackendScope scope{*test.frontend.getBackend()};
+        const auto image = test.frontend.readStillImage();
+        const auto centre = ((image.size.height / 2) * image.size.width + image.size.width / 2) * 4;
+        return 1.0 - image.data[centre + 1] / 255.0;
+    };
+    const auto renderNow = [&] {
+        test.map.triggerRepaint();
+        test.frontend.renderFrame();
+        return drawn();
+    };
+    const auto wait = [](int ms) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    };
+
+    for (int i = 0; i < 500 && !test.map.isFullyLoaded(); ++i) {
+        test.runLoop.runOnce();
+        test.frontend.renderFrame();
+        wait(10);
+    }
+    ASSERT_TRUE(test.map.isFullyLoaded());
+    EXPECT_EQ(1.0, renderNow());
+
+    // The zoom 2 tile has no polygon, so only the held zoom 3 tile can show it fading out.
+    test.map.jumpTo(CameraOptions().withZoom(2.8));
+    EXPECT_EQ(1.0, renderNow());
+    wait(100);
+    test.runLoop.runOnce();
+    const double fadingOut = renderNow();
+    EXPECT_GT(fadingOut, 0.05);
+    EXPECT_LT(fadingOut, 0.95);
+    for (int i = 0; i < 6; ++i) {
+        wait(100);
+        test.runLoop.runOnce();
+        renderNow();
+    }
+    EXPECT_EQ(0.0, renderNow());
 }
 
 // https://github.com/mapbox/mapbox-gl-native/issues/15216

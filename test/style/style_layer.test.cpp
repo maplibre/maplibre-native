@@ -55,6 +55,7 @@ const auto width = 1.0f;
 const auto gapWidth = 1.0f;
 const auto offset = 1.0f;
 const auto dashArray = std::vector<float>{};
+const auto fadeZoom = 7.0f;
 const auto hueRotate = 1.0f;
 const auto brightness = 1.0f;
 const auto saturation = 1.0f;
@@ -139,6 +140,10 @@ TEST(Layer, FillProperties) {
 
     layer->setFillTranslateAnchor(translateAnchor);
     EXPECT_EQ(layer->getFillTranslateAnchor(), translateAnchor);
+
+    EXPECT_EQ(FillLayer::getDefaultFillFadeZoom(), PropertyValue<float>(0.0f));
+    layer->setFillFadeZoom(fadeZoom);
+    EXPECT_EQ(layer->getFillFadeZoom(), fadeZoom);
 }
 
 TEST(Layer, LineProperties) {
@@ -190,6 +195,30 @@ TEST(Layer, LineProperties) {
 
     layer->setLinePattern(pattern);
     EXPECT_EQ(layer->getLinePattern(), pattern);
+
+    EXPECT_EQ(LineLayer::getDefaultLineFadeZoom(), PropertyValue<float>(0.0f));
+    layer->setLineFadeZoom(fadeZoom);
+    EXPECT_EQ(layer->getLineFadeZoom(), fadeZoom);
+}
+
+TEST(Layer, FadeZoomFromFeatureProperty) {
+    // A fade zoom read from each feature is data-driven, so each feature gets its own fade.
+    rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> document;
+    document.Parse<0>(R"(["get", "fz"])");
+    ASSERT_FALSE(document.HasParseError());
+    const JSValue* json = &document;
+
+    auto line = std::make_unique<LineLayer>("line", "source");
+    EXPECT_FALSE(line->setProperty("line-fade-zoom", Convertible(json)));
+    EXPECT_TRUE(line->getLineFadeZoom().isDataDriven());
+
+    auto fill = std::make_unique<FillLayer>("fill", "source");
+    EXPECT_FALSE(fill->setProperty("fill-fade-zoom", Convertible(json)));
+    EXPECT_TRUE(fill->getFillFadeZoom().isDataDriven());
+
+    // Not a number.
+    document.Parse<0>(R"("seven")");
+    EXPECT_TRUE(line->setProperty("line-fade-zoom", Convertible(json)));
 }
 
 TEST(Layer, RasterProperties) {

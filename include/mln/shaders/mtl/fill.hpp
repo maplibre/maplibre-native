@@ -13,6 +13,7 @@ enum {
     idFillDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idFillTilePropsUBO = drawableReservedUBOCount,
     idFillEvaluatedPropsUBO,
+    idFillFadeZoomUBO,
     fillUBOCount
 };
 
@@ -25,7 +26,7 @@ struct alignas(16) FillDrawableUBO {
     // Interpolations
     /* 64 */ float color_t;
     /* 68 */ float opacity_t;
-    /* 72 */ float pad1;
+    /* 72 */ float fade_zoom_t;
     /* 76 */ float pad2;
     /* 80 */
 };
@@ -40,7 +41,7 @@ struct alignas(16) FillOutlineDrawableUBO {
     // Interpolations
     /* 64 */ float outline_color_t;
     /* 68 */ float opacity_t;
-    /* 72 */ float pad1;
+    /* 72 */ float fade_zoom_t;
     /* 76 */ float pad2;
     /* 80 */
 };
@@ -60,7 +61,7 @@ struct alignas(16) FillPatternDrawableUBO {
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
     /* 96 */ float color_t;
-    /*100 */ float pad1;
+    /*100 */ float fade_zoom_t;
     /*104 */ float pad2;
     /*108 */ float pad3;
     /*112 */
@@ -91,7 +92,7 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
     /* 96 */ float color_t;
-    /*100 */ float pad1;
+    /*100 */ float fade_zoom_t;
     /*104 */ float pad2;
     /*108 */ float pad3;
     /*112 */
@@ -130,7 +131,7 @@ struct alignas(16) FillEvaluatedPropsUBO {
     /* 40 */ float fade;
     /* 44 */ float from_scale;
     /* 48 */ float to_scale;
-    /* 52 */ float pad1;
+    /* 52 */ float fade_zoom;
     /* 56 */ float pad2;
     /* 60 */ float pad3;
     /* 64 */
@@ -280,7 +281,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static const std::array<AttributeInfo, 1> instanceAttributes;
     static const std::array<TextureInfo, 0> textures;
 
@@ -308,6 +309,9 @@ struct NeighborVertex {
 struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
     float color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float fade_zoom[2];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity[2];
@@ -354,6 +358,7 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
 #endif
+    half fade_zoom_opacity;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -363,7 +368,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const PolygonVertex* polygon [[buffer(fillUBOCount + 0)]],
                                 device const NeighborVertex* neighbor [[buffer(fillUBOCount + 1)]],
                                 device const DataVertex* data [[buffer(fillUBOCount + 2)]],
-                                uint vertexID [[vertex_id]]) {
+                                uint vertexID [[vertex_id]]
+                                , device const FadeZoomTableUBO& fadeZoomTable [[buffer(idFillFadeZoomUBO)]]
+                                ) {
 
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
 
@@ -437,6 +444,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity  = half(unpack_mix_float(data[vertex_index].opacity, drawable.opacity_t)),
 #endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, unpack_mix_float(data[vertex_index].fade_zoom, drawable.fade_zoom_t))),
+#else
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, props.fade_zoom)),
+#endif
     };
 }
 
@@ -475,10 +487,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half4 color = in.color;
 #endif
 
+    const float fade_zoom_opacity = float(in.fade_zoom_opacity);
+
 #if defined(HAS_UNIFORM_u_opacity)
-    const half opacity = props.opacity;
+    const half opacity = half(props.opacity * fade_zoom_opacity);
 #else
-    const half opacity = in.opacity;
+    const half opacity = in.opacity * half(fade_zoom_opacity);
 #endif
 
     return half4(color * opacity);
@@ -492,7 +506,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -503,6 +517,9 @@ struct VertexStage {
     short2 position [[attribute(0)]];
     float4 outline_color [[attribute(1)]];
     float2 opacity [[attribute(2)]];
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float2 fade_zoom [[attribute(3)]];
+#endif
 };
 
 struct FragmentStage {
@@ -514,12 +531,15 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
 #endif
+    half fade_zoom_opacity;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
-                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]]) {
+                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
+                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
+                                device const FadeZoomTableUBO& fadeZoomTable [[buffer(idFillFadeZoomUBO)]]) {
 
     device const FillOutlineDrawableUBO& drawable = drawableVector[uboIndex].fillOutlineDrawableUBO;
 
@@ -532,6 +552,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
+#endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, unpack_mix_float(vertx.fade_zoom, drawable.fade_zoom_t))),
+#else
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, props.fade_zoom)),
 #endif
     };
 }
@@ -554,10 +579,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half4 color = in.outline_color;
 #endif
 
+    const float fade_zoom_opacity = float(in.fade_zoom_opacity);
+
 #if defined(HAS_UNIFORM_u_opacity)
-    const half opacity = props.opacity;
+    const half opacity = half(props.opacity * fade_zoom_opacity);
 #else
-    const half opacity = in.opacity;
+    const half opacity = in.opacity * half(fade_zoom_opacity);
 #endif
 
     return half4(color * opacity);
@@ -571,7 +598,7 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static const std::array<AttributeInfo, 1> instanceAttributes;
     static const std::array<TextureInfo, 1> textures;
 
@@ -599,6 +626,9 @@ struct NeighborVertex {
 struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
     float color[4];
+#endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float fade_zoom[2];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity[2];
@@ -653,6 +683,7 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_pattern_to)
     half4 pattern_to;
 #endif
+    half fade_zoom_opacity;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -664,7 +695,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const PolygonVertex* polygon [[buffer(fillUBOCount + 0)]],
                                 device const NeighborVertex* neighbor [[buffer(fillUBOCount + 1)]],
                                 device const DataVertex* data [[buffer(fillUBOCount + 2)]],
-                                uint vertexID [[vertex_id]]) {
+                                uint vertexID [[vertex_id]]
+                                , device const FadeZoomTableUBO& fadeZoomTable [[buffer(idFillFadeZoomUBO)]]
+                                ) {
 
     device const FillPatternDrawableUBO& drawable = drawableVector[uboIndex].fillPatternDrawableUBO;
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
@@ -779,6 +812,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_pattern_to)
         .pattern_to     = half4(pattern_to),
 #endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, unpack_mix_float(data[vertex_index].fade_zoom, drawable.fade_zoom_t))),
+#else
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, props.fade_zoom)),
+#endif
     };
 }
 
@@ -823,10 +861,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto color          = in.color;
 #endif
 
+    const float fade_zoom_opacity = float(in.fade_zoom_opacity);
+
 #if defined(HAS_UNIFORM_u_opacity)
-    const auto opacity        = props.opacity;
+    const auto opacity        = props.opacity * fade_zoom_opacity;
 #else
-    const auto opacity        = in.opacity;
+    const auto opacity        = in.opacity * half(fade_zoom_opacity);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
@@ -873,7 +913,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -895,6 +935,9 @@ struct VertexStage {
 #if !defined(HAS_UNIFORM_u_pattern_to)
     ushort4 pattern_to [[attribute(4)]];
 #endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float2 fade_zoom [[attribute(5)]];
+#endif
 };
 
 struct FragmentStage {
@@ -915,6 +958,7 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_pattern_to)
     half4 pattern_to;
 #endif
+    half fade_zoom_opacity;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -922,7 +966,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
                                 device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
-                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
+                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]
+                                , device const FadeZoomTableUBO& fadeZoomTable [[buffer(idFillFadeZoomUBO)]]
+                                ) {
 
     device const FillOutlinePatternDrawableUBO& drawable = drawableVector[uboIndex].fillOutlinePatternDrawableUBO;
     device const FillOutlinePatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillOutlinePatternTilePropsUBO;
@@ -977,6 +1023,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_pattern_to)
         .pattern_to     = half4(pattern_to),
 #endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, unpack_mix_float(vertx.fade_zoom, drawable.fade_zoom_t))),
+#else
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, props.fade_zoom)),
+#endif
     };
 }
 
@@ -998,10 +1049,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto color          = in.color;
 #endif
 
+    const float fade_zoom_opacity = float(in.fade_zoom_opacity);
+
 #if defined(HAS_UNIFORM_u_opacity)
-    const auto opacity        = props.opacity;
+    const auto opacity        = props.opacity * fade_zoom_opacity;
 #else
-    const auto opacity        = in.opacity;
+    const auto opacity        = in.opacity * half(fade_zoom_opacity);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
@@ -1069,12 +1122,15 @@ struct FragmentStage {
     float width2;
     float2 normal;
     half gamma_scale;
+    half fade_zoom_opacity;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
-                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]]) {
+                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
+                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
+                                device const FadeZoomTableUBO& fadeZoomTable [[buffer(idFillFadeZoomUBO)]]) {
 
     device const FillOutlineTriangulatedDrawableUBO& drawable = drawableVector[uboIndex].fillOutlineTriangulatedDrawableUBO;
 
@@ -1110,6 +1166,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .width2      = outset,
         .normal      = v_normal,
         .gamma_scale = half(extrude_length_without_perspective / extrude_length_with_perspective),
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, props.fade_zoom)),
     };
 }
 
@@ -1124,7 +1181,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
     const float alpha = clamp(min(dist + blur2, in.width2 - dist) / blur2, 0.0, 1.0);
 
-    return half4(props.outline_color * (alpha * props.opacity));
+    return half4(props.outline_color * (alpha * props.opacity * float(in.fade_zoom_opacity)));
 }
 )";
 };

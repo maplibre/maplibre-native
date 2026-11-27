@@ -1,0 +1,126 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 64,
+      "height": 64
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 2,
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "fz": 0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -5.0,
+                    -1.5
+                  ],
+                  [
+                    -5.0,
+                    1.5
+                  ],
+                  [
+                    -2.0,
+                    1.5
+                  ],
+                  [
+                    -2.0,
+                    -1.5
+                  ],
+                  [
+                    -5.0,
+                    -1.5
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "fz": 0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    1.0,
+                    -1.5
+                  ],
+                  [
+                    1.0,
+                    1.5
+                  ],
+                  [
+                    4.0,
+                    1.5
+                  ],
+                  [
+                    4.0,
+                    -1.5
+                  ],
+                  [
+                    1.0,
+                    -1.5
+                  ]
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "shown",
+      "type": "fill",
+      "source": "geojson",
+      "filter": [
+        "==",
+        [
+          "get",
+          "fz"
+        ],
+        0
+      ],
+      "paint": {
+        "fill-color": "#00c",
+        "fill-fade-zoom": 2
+      }
+    },
+    {
+      "id": "hidden",
+      "type": "fill",
+      "source": "geojson",
+      "paint": {
+        "fill-color": "#c00",
+        "fill-outline-color": "#000",
+        "fill-fade-zoom": 3
+      }
+    }
+  ]
+}

@@ -46,7 +46,7 @@ layout (std140) uniform LinePatternDrawableUBO {
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;
     lowp float u_floorwidth_t;
-    lowp float drawable_pad1;
+    lowp float u_fade_zoom_t;
     lowp float drawable_pad2;
     lowp float drawable_pad3;
 };
@@ -69,8 +69,14 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     mediump float u_width;
     lowp float u_floorwidth;
     lowp float props_pad1;
-    lowp float props_pad2;
+    highp float u_fade_zoom;
 };
+
+layout (std140) uniform LineFadeZoomUBO {
+    highp vec4 u_fade_zoom_table[104];
+};
+
+out lowp float v_fade_zoom_opacity;
 
 out vec2 v_normal;
 out vec2 v_width2;
@@ -102,6 +108,9 @@ out lowp vec4 pattern_from;
 #ifndef HAS_UNIFORM_u_pattern_to
 layout (location = 8) in lowp vec4 a_pattern_to;
 out lowp vec4 pattern_to;
+#endif
+#ifndef HAS_UNIFORM_u_fade_zoom
+layout (location = 9) in highp vec2 a_fade_zoom;
 #endif
 
 void main() {
@@ -139,6 +148,11 @@ mediump vec4 pattern_from = u_pattern_from;
 pattern_to = a_pattern_to;
 #else
 mediump vec4 pattern_to = u_pattern_to;
+#endif
+    #ifndef HAS_UNIFORM_u_fade_zoom
+highp float fade_zoom = unpack_mix_vec2(a_fade_zoom, u_fade_zoom_t);
+#else
+highp float fade_zoom = u_fade_zoom;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
@@ -195,6 +209,10 @@ mediump vec4 pattern_to = u_pattern_to;
 
     v_linesofar = a_linesofar;
     v_width2 = vec2(outset, inset);
+
+    // Fade opacity for this fade zoom: one table entry per 1/16 of a zoom level, packed four to a vec4.
+    int fade_zoom_index = clamp(int(floor(fade_zoom * 16.0 + 0.5)), 0, 415);
+    v_fade_zoom_opacity = u_fade_zoom_table[fade_zoom_index / 4][fade_zoom_index % 4];
 }
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform LinePatternTilePropsUBO {
@@ -215,8 +233,10 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     mediump float u_width;
     lowp float u_floorwidth;
     lowp float props_pad1;
-    lowp float props_pad2;
+    highp float u_fade_zoom;
 };
+
+in lowp float v_fade_zoom_opacity;
 
 uniform sampler2D u_image;
 
@@ -297,6 +317,8 @@ lowp float opacity = u_opacity;
     vec4 color = mix(texture(u_image, pos_a), texture(u_image, pos_b), u_fade);
 
     fragColor = color * alpha * opacity;
+
+    fragColor *= v_fade_zoom_opacity;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

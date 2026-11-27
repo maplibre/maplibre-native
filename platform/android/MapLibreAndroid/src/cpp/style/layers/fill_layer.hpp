@@ -54,6 +54,8 @@ public:
 
     jni::Local<jni::Object<jni::ObjectTag>> getFillRoundedCornerDistance(jni::JNIEnv&);
 
+    jni::Local<jni::Object<jni::ObjectTag>> getFillFadeZoom(jni::JNIEnv&);
+
 }; // class FillLayer
 
 class FillJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::FillLayerFactory {

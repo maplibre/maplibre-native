@@ -472,7 +472,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                    LineOffset,
                                                    LineWidth,
                                                    LineFloorWidth,
-                                                   LinePattern>(
+                                                   LinePattern,
+                                                   LineFadeZoom>(
             paintPropertyBinders, evaluated, propertiesAsUniforms, idLineColorVertexAttribute);
 
         if (!evaluated.get<LineDasharray>().from.empty() && !unevaluated.get<LineGradient>().getValue().isUndefined()) {

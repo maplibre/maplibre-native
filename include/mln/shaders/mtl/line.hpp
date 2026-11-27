@@ -14,6 +14,7 @@ enum {
     idLineTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
     idLineEvaluatedPropsUBO = drawableReservedUBOCount,
     idLineExpressionUBO,
+    idLineFadeZoomUBO,
     lineUBOCount
 };
 
@@ -31,7 +32,7 @@ struct alignas(16) LineDrawableUBO {
     /* 80 */ float gapwidth_t;
     /* 84 */ float offset_t;
     /* 88 */ float width_t;
-    /* 92 */ float pad1;
+    /* 92 */ float fade_zoom_t;
     /* 96 */
 };
 static_assert(sizeof(LineDrawableUBO) == 6 * 16, "wrong size");
@@ -49,7 +50,7 @@ struct alignas(16) LineGradientDrawableUBO {
     /* 76 */ float gapwidth_t;
     /* 80 */ float offset_t;
     /* 84 */ float width_t;
-    /* 88 */ float pad1;
+    /* 88 */ float fade_zoom_t;
     /* 92 */ float pad2;
     /* 96 */
 };
@@ -71,7 +72,7 @@ struct alignas(16) LinePatternDrawableUBO {
     /* 88 */ float pattern_from_t;
     /* 92 */ float pattern_to_t;
     /* 96 */ float floorwidth_t;
-    /* 100 */ float pad1;
+    /* 100 */ float fade_zoom_t;
     /* 104 */ float pad2;
     /* 108 */ float pad3;
     /* 112 */
@@ -108,7 +109,7 @@ struct alignas(16) LineSDFDrawableUBO {
     /* 108 */ float offset_t;
     /* 112 */ float width_t;
     /* 116 */ float floorwidth_t;
-    /* 120 */ float pad1;
+    /* 120 */ float fade_zoom_t;
     /* 124 */ float pad2;
     /* 128 */
 };
@@ -157,7 +158,7 @@ struct alignas(16) LineEvaluatedPropsUBO {
     /* 32 */ float width;
     /* 36 */ float floorwidth;
     /* 40 */ LineExpressionMask expressionMask;
-    /* 44 */ float pad1;
+    /* 44 */ float fade_zoom;
     /* 48 */
 };
 static_assert(sizeof(LineEvaluatedPropsUBO) == 3 * 16, "wrong size");
@@ -182,7 +183,7 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -211,6 +212,10 @@ struct VertexStage {
 #if !defined(HAS_UNIFORM_u_width)
     float2 width [[attribute(7)]];
 #endif
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float2 fade_zoom [[attribute(8)]];
+#endif
 };
 
 struct FragmentStage {
@@ -228,6 +233,8 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity;
 #endif
+
+    half fade_zoom_opacity;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -235,7 +242,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
-                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
+                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]
+                                , device const FadeZoomTableUBO& fadeZoomTable [[buffer(idLineFadeZoomUBO)]]
+                                ) {
 
     device const LineDrawableUBO& drawable = drawableVector[uboIndex].lineDrawableUBO;
 
@@ -311,6 +320,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity     = unpack_mix_float(vertx.opacity, drawable.opacity_t),
 #endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, unpack_mix_float(vertx.fade_zoom, drawable.fade_zoom_t))),
+#else
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, props.fade_zoom)),
+#endif
     };
 }
 
@@ -351,7 +365,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
     const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
 
-    return half4(color * (alpha * opacity));
+    const float fade_zoom_opacity = float(in.fade_zoom_opacity);
+
+    return half4((color * (alpha * opacity)) * fade_zoom_opacity);
 }
 )";
 };
@@ -362,7 +378,7 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -387,6 +403,10 @@ struct VertexStage {
 #if !defined(HAS_UNIFORM_u_width)
     float2 width [[attribute(6)]];
 #endif
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float2 fade_zoom [[attribute(7)]];
+#endif
 };
 
 struct FragmentStage {
@@ -402,13 +422,17 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
 #endif
+
+    half fade_zoom_opacity;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
-                                device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]]) {
+                                device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]]
+                                , device const FadeZoomTableUBO& fadeZoomTable [[buffer(idLineFadeZoomUBO)]]
+                                ) {
 
     device const LineGradientDrawableUBO& drawable = drawableVector[uboIndex].lineGradientDrawableUBO;
 
@@ -484,6 +508,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity      = half(opacity),
 #endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, unpack_mix_float(vertx.fade_zoom, drawable.fade_zoom_t))),
+#else
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, props.fade_zoom)),
+#endif
     };
 }
 
@@ -518,7 +547,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     constexpr sampler sampler2d(coord::normalized, filter::linear);
     const float4 color = gradientTexture.sample(sampler2d, float2(in.lineprogress, 0.5));
 
-    return half4(color * (alpha * opacity));
+    const float fade_zoom_opacity = float(in.fade_zoom_opacity);
+
+    return half4((color * (alpha * opacity)) * fade_zoom_opacity);
 }
 )";
 };
@@ -529,7 +560,7 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -561,6 +592,10 @@ struct VertexStage {
 #if !defined(HAS_UNIFORM_u_pattern_to)
     ushort4 pattern_to [[attribute(8)]];
 #endif
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float2 fade_zoom [[attribute(9)]];
+#endif
 };
 
 struct FragmentStage {
@@ -583,6 +618,8 @@ struct FragmentStage {
     half4 pattern_to;
 #endif
     float floorwidth;
+
+    half fade_zoom_opacity;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -590,7 +627,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
-                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
+                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]
+                                , device const FadeZoomTableUBO& fadeZoomTable [[buffer(idLineFadeZoomUBO)]]
+                                ) {
 
     device const LinePatternDrawableUBO& drawable = drawableVector[uboIndex].linePatternDrawableUBO;
 
@@ -680,6 +719,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .pattern_to   = half4(vertx.pattern_to),
 #endif
         .floorwidth   = floorwidth,
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, unpack_mix_float(vertx.fade_zoom, drawable.fade_zoom_t))),
+#else
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, props.fade_zoom)),
+#endif
     };
 }
 
@@ -766,7 +810,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     const float4 color = mix(image0.sample(image0_sampler, pos_a), image0.sample(image0_sampler, pos_b), tileProps.fade);
 
-    return half4(color * alpha * opacity);
+    const float fade_zoom_opacity = float(in.fade_zoom_opacity);
+
+    return half4((color * alpha * opacity) * fade_zoom_opacity);
 }
 )";
 };
@@ -777,7 +823,7 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -809,6 +855,10 @@ struct VertexStage {
 #if !defined(HAS_UNIFORM_u_floorwidth)
     float2 floorwidth [[attribute(8)]];
 #endif
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float2 fade_zoom [[attribute(9)]];
+#endif
 };
 
 struct FragmentStage {
@@ -831,6 +881,8 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_floorwidth)
     float floorwidth;
 #endif
+
+    half fade_zoom_opacity;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -838,7 +890,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
-                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
+                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]
+                                , device const FadeZoomTableUBO& fadeZoomTable [[buffer(idLineFadeZoomUBO)]]
+                                ) {
 
     device const LineSDFDrawableUBO& drawable = drawableVector[uboIndex].lineSDFDrawableUBO;
 
@@ -928,6 +982,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_floorwidth)
         .floorwidth   = floorwidth,
 #endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, unpack_mix_float(vertx.fade_zoom, drawable.fade_zoom_t))),
+#else
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, props.fade_zoom)),
+#endif
     };
 }
 
@@ -987,7 +1046,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0) *
                         smoothstep(0.5 - tileProps.sdfgamma / floorwidth, 0.5 + tileProps.sdfgamma / floorwidth, sdfdist);
 
-    return half4(color * (alpha * opacity));
+    const float fade_zoom_opacity = float(in.fade_zoom_opacity);
+
+    return half4((color * (alpha * opacity)) * fade_zoom_opacity);
 }
 )";
 };
@@ -998,7 +1059,7 @@ struct ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
@@ -1027,6 +1088,10 @@ struct VertexStage {
 #if !defined(HAS_UNIFORM_u_floorwidth)
     float2 floorwidth [[attribute(7)]];
 #endif
+
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+    float2 fade_zoom [[attribute(8)]];
+#endif
 };
 
 struct FragmentStage {
@@ -1047,6 +1112,8 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_floorwidth)
     float floorwidth;
 #endif
+
+    half fade_zoom_opacity;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -1054,7 +1121,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const LineDrawableUnionUBO* drawableVector [[buffer(idLineDrawableUBO)]],
                                 device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
-                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
+                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]
+                                , device const FadeZoomTableUBO& fadeZoomTable [[buffer(idLineFadeZoomUBO)]]
+                                ) {
 
     device const LineSDFDrawableUBO& drawable = drawableVector[uboIndex].lineSDFDrawableUBO;
 
@@ -1143,6 +1212,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_floorwidth)
         .floorwidth   = floorwidth,
 #endif
+#if !defined(HAS_UNIFORM_u_fade_zoom)
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, unpack_mix_float(vertx.fade_zoom, drawable.fade_zoom_t))),
+#else
+        .fade_zoom_opacity = half(fadeZoomOpacity(fadeZoomTable, props.fade_zoom)),
+#endif
     };
 }
 
@@ -1200,7 +1274,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     // The gradient ramp is stored in a texture indexed by the ratio along the entire line.
     const float4 color = gradientTexture.sample(gradientSampler, float2(in.lineprogress, 0.5));
 
-    return half4(color * (alpha * opacity));
+    const float fade_zoom_opacity = float(in.fade_zoom_opacity);
+
+    return half4((color * (alpha * opacity)) * fade_zoom_opacity);
 }
 )";
 };
