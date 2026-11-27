@@ -376,7 +376,8 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
     symbolDependenciesChanged();
 }
 
-void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependencies) {
+void GeometryTileWorker::requestNewDependencies(const GlyphDependencies& glyphDependencies,
+                                                const ImageDependencies& imageDependencies) {
     MLN_TRACE_FUNC();
 
     for (auto& fontDependencies : glyphDependencies.glyphs) {
@@ -397,16 +398,14 @@ void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependen
             }
         }
     }
+    // Record both before requesting either: a synchronous source delivers cached
+    // results inline, and layout would finalize without icons if the image
+    // dependencies were still unregistered.
+    pendingImageDependencies = imageDependencies;
+
     if (!pendingGlyphDependencies.glyphs.empty()) {
         parent.invoke(&GeometryTile::getGlyphs, pendingGlyphDependencies);
     }
-}
-
-void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependencies) {
-    MLN_TRACE_FUNC();
-
-    pendingImageDependencies = imageDependencies;
-
     if (!pendingImageDependencies.empty()) {
         parent.invoke(&GeometryTile::getImages, std::make_pair(pendingImageDependencies, ++imageCorrelationID));
     }
@@ -530,8 +529,7 @@ void GeometryTileWorker::parse() {
         }
     }
 
-    requestNewGlyphs(glyphDependencies);
-    requestNewImages(imageDependencies);
+    requestNewDependencies(glyphDependencies, imageDependencies);
 
     MBGL_TIMING_FINISH(watch,
                        " Action: " << "Parsing,"
