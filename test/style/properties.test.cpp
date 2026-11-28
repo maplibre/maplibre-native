@@ -1,6 +1,9 @@
 #include <mln/test/util.hpp>
 
 #include <mln/style/properties.hpp>
+#include <mln/style/layers/fill_layer_properties.hpp>
+#include <mln/style/layers/heatmap_layer_properties.hpp>
+#include <mln/style/light_impl.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/renderer/property_evaluator.hpp>
 #include <mln/renderer/data_driven_property_evaluator.hpp>
@@ -93,4 +96,29 @@ TEST(TransitioningDataDrivenPropertyValue, Evaluate) {
         << "A paint property transition to a data-driven evaluates immediately "
            "to the final value (see "
            "https://github.com/mapbox/mapbox-gl-native/issues/8237).";
+}
+
+TEST(TransitionableProperties, PropertyWithoutTransitionTakesNewValueAtOnce) {
+    static_assert(FillColor::SupportsTransition);
+    static_assert(!FillTranslateAnchor::SupportsTransition);
+    static_assert(!HeatmapColor::SupportsTransition);
+    static_assert(!LightAnchor::SupportsTransition);
+
+    FillPaintProperties::Transitionable paint;
+    auto unevaluated = paint.untransitioned();
+    paint.get<FillColor>().value = Color::red();
+    paint.get<FillTranslateAnchor>().value = TranslateAnchorType::Viewport;
+
+    TransitionOptions transition;
+    transition.duration = {1000ms};
+    unevaluated = paint.transitioned({.now = TimePoint::min(), .transition = transition}, std::move(unevaluated));
+
+    EXPECT_TRUE(unevaluated.get<FillColor>().hasTransition());
+    EXPECT_FALSE(unevaluated.get<FillTranslateAnchor>().hasTransition());
+
+    ZoomHistory zoomHistory;
+    zoomHistory.update(0, TimePoint::min());
+    const auto evaluated = unevaluated.evaluate(
+        PropertyEvaluationParameters{zoomHistory, TimePoint::min(), Duration::zero()});
+    EXPECT_EQ(TranslateAnchorType::Viewport, evaluated.get<FillTranslateAnchor>());
 }

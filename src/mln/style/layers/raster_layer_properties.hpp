@@ -18,34 +18,42 @@ namespace style {
 
 struct RasterBrightnessMax : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct RasterBrightnessMin : PaintProperty<float> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct RasterContrast : PaintProperty<float> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct RasterFadeDuration : PaintProperty<float> {
     static float defaultValue() { return 300.f; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct RasterHueRotate : PaintProperty<float> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct RasterOpacity : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct RasterResampling : PaintProperty<RasterResamplingType> {
     static RasterResamplingType defaultValue() { return RasterResamplingType::Linear; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct RasterSaturation : PaintProperty<float> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 class RasterPaintProperties : public Properties<

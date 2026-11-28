@@ -17,10 +17,12 @@ namespace mln {
 namespace style {
 
 struct ColorReliefColor : ColorRampProperty {
+    static constexpr bool SupportsTransition = false;
 };
 
 struct ColorReliefOpacity : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 class ColorReliefPaintProperties : public Properties<

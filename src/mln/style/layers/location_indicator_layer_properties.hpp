@@ -33,42 +33,52 @@ struct TopImage : LayoutProperty<expression::Image> {
 
 struct AccuracyRadius : PaintProperty<float> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct AccuracyRadiusBorderColor : PaintProperty<Color> {
     static Color defaultValue() { return Color::white(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct AccuracyRadiusColor : PaintProperty<Color> {
     static Color defaultValue() { return Color::white(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct Bearing : PaintProperty<Rotation> {
     static Rotation defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct BearingImageSize : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct ImageTiltDisplacement : PaintProperty<float> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct Location : PaintProperty<std::array<double, 3>> {
     static std::array<double, 3> defaultValue() { return {{0.f, 0.f, 0.f}}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct PerspectiveCompensation : PaintProperty<float> {
     static float defaultValue() { return 0.85f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct ShadowImageSize : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct TopImageSize : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 class LocationIndicatorLayoutProperties : public Properties<

@@ -6251,6 +6251,7 @@
           "zoom"
         ]
       },
+      "transition": true,
       "property-type": "data-constant"
     }
   },

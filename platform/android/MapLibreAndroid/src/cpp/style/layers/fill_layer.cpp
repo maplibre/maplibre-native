@@ -226,6 +226,27 @@ jni::Local<jni::Object<>> FillLayer::getFillRoundedCornerDistance(jni::JNIEnv& e
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillLayer(*layer).getFillRoundedCornerDistance()));
 }
 
+jni::Local<jni::Object<TransitionOptions>> FillLayer::getFillRoundedCornerDistanceTransition(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
+    }
+    mln::style::TransitionOptions options = toFillLayer(*layer).getFillRoundedCornerDistanceTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+}
+
+void FillLayer::setFillRoundedCornerDistanceTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
+    toFillLayer(*layer).setFillRoundedCornerDistanceTransition(options);
+}
+
 // FillJavaLayerPeerFactory
 
 FillJavaLayerPeerFactory::~FillJavaLayerPeerFactory() = default;
@@ -284,6 +305,8 @@ void FillJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&FillLayer::getFillPatternTransition, "nativeGetFillPatternTransition"),
         METHOD(&FillLayer::setFillPatternTransition, "nativeSetFillPatternTransition"),
         METHOD(&FillLayer::getFillPattern, "nativeGetFillPattern"),
+        METHOD(&FillLayer::getFillRoundedCornerDistanceTransition, "nativeGetFillRoundedCornerDistanceTransition"),
+        METHOD(&FillLayer::setFillRoundedCornerDistanceTransition, "nativeSetFillRoundedCornerDistanceTransition"),
         METHOD(&FillLayer::getFillRoundedCornerDistance, "nativeGetFillRoundedCornerDistance"));
 }
 

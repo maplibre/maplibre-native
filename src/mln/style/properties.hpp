@@ -463,7 +463,7 @@ public:
             : Tuple<TransitionableTypes>(std::forward<Us>(us)...) {}
 
         Unevaluated transitioned(const TransitionParameters& parameters, Unevaluated&& prior) const {
-            return Unevaluated{this->template get<Ps>().transition(parameters, std::move(prior.template get<Ps>()))...};
+            return Unevaluated{transitionProperty<Ps>(parameters, std::move(prior.template get<Ps>()))...};
         }
 
         Unevaluated untransitioned() const {
@@ -484,6 +484,17 @@ public:
         }
 
     protected:
+        /// A property the style spec does not let transition takes its new value at once.
+        template <class P>
+        typename P::UnevaluatedType transitionProperty(const TransitionParameters& parameters,
+                                                       typename P::UnevaluatedType&& prior) const {
+            if constexpr (P::SupportsTransition) {
+                return this->template get<P>().transition(parameters, std::move(prior));
+            } else {
+                return typename P::UnevaluatedType(this->template get<P>().value);
+            }
+        }
+
         template <typename P>
         Dependency getDependencies(const style::Transitionable<PropertyValue<P>>& v) const noexcept {
             return v.value.getDependencies();

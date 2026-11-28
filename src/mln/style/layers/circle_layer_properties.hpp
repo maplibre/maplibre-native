@@ -23,46 +23,57 @@ struct CircleSortKey : DataDrivenLayoutProperty<float> {
 
 struct CircleBlur : DataDrivenPaintProperty<float, attributes::blur, uniforms::blur> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct CircleColor : DataDrivenPaintProperty<Color, attributes::color, uniforms::color> {
     static Color defaultValue() { return Color::black(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct CircleOpacity : DataDrivenPaintProperty<float, attributes::opacity, uniforms::opacity> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct CirclePitchAlignment : PaintProperty<AlignmentType> {
     static AlignmentType defaultValue() { return AlignmentType::Viewport; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct CirclePitchScale : PaintProperty<CirclePitchScaleType> {
     static CirclePitchScaleType defaultValue() { return CirclePitchScaleType::Map; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct CircleRadius : DataDrivenPaintProperty<float, attributes::radius, uniforms::radius> {
     static float defaultValue() { return 5.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct CircleStrokeColor : DataDrivenPaintProperty<Color, attributes::stroke_color, uniforms::stroke_color> {
     static Color defaultValue() { return Color::black(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct CircleStrokeOpacity : DataDrivenPaintProperty<float, attributes::stroke_opacity, uniforms::stroke_opacity> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct CircleStrokeWidth : DataDrivenPaintProperty<float, attributes::stroke_width, uniforms::stroke_width> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct CircleTranslate : PaintProperty<std::array<float, 2>> {
     static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct CircleTranslateAnchor : PaintProperty<TranslateAnchorType> {
     static TranslateAnchorType defaultValue() { return TranslateAnchorType::Map; }
+    static constexpr bool SupportsTransition = false;
 };
 
 class CircleLayoutProperties : public Properties<

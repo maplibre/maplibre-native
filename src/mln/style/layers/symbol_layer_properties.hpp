@@ -233,34 +233,42 @@ struct TextWritingMode : LayoutProperty<std::vector<TextWritingModeType>> {
 
 struct IconColor : DataDrivenPaintProperty<Color, attributes::fill_color, uniforms::fill_color> {
     static Color defaultValue() { return Color::black(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct IconHaloBlur : DataDrivenPaintProperty<float, attributes::halo_blur, uniforms::halo_blur> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct IconHaloColor : DataDrivenPaintProperty<Color, attributes::halo_color, uniforms::halo_color> {
     static Color defaultValue() { return {}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct IconHaloWidth : DataDrivenPaintProperty<float, attributes::halo_width, uniforms::halo_width> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct IconOpacity : DataDrivenPaintProperty<float, attributes::opacity, uniforms::opacity> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct IconTranslate : PaintProperty<std::array<float, 2>> {
     static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct IconTranslateAnchor : PaintProperty<TranslateAnchorType> {
     static TranslateAnchorType defaultValue() { return TranslateAnchorType::Map; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct TextColor : DataDrivenPaintProperty<Color, attributes::fill_color, uniforms::fill_color, true> {
     static Color defaultValue() { return Color::black(); }
+    static constexpr bool SupportsTransition = true;
     static constexpr const char *name() { return "text-color"; }
     static constexpr auto expressionType() { return expression::type::ColorType{}; };
     template<typename T> static bool hasOverride(const T& t) { return !!t.textColor; };
@@ -268,26 +276,32 @@ struct TextColor : DataDrivenPaintProperty<Color, attributes::fill_color, unifor
 
 struct TextHaloBlur : DataDrivenPaintProperty<float, attributes::halo_blur, uniforms::halo_blur> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct TextHaloColor : DataDrivenPaintProperty<Color, attributes::halo_color, uniforms::halo_color> {
     static Color defaultValue() { return {}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct TextHaloWidth : DataDrivenPaintProperty<float, attributes::halo_width, uniforms::halo_width> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct TextOpacity : DataDrivenPaintProperty<float, attributes::opacity, uniforms::opacity> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct TextTranslate : PaintProperty<std::array<float, 2>> {
     static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct TextTranslateAnchor : PaintProperty<TranslateAnchorType> {
     static TranslateAnchorType defaultValue() { return TranslateAnchorType::Map; }
+    static constexpr bool SupportsTransition = false;
 };
 
 class SymbolLayoutProperties : public Properties<

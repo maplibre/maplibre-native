@@ -18,34 +18,42 @@ namespace style {
 
 struct HillshadeAccentColor : PaintProperty<Color> {
     static Color defaultValue() { return Color::black(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct HillshadeExaggeration : PaintProperty<float> {
     static float defaultValue() { return 0.5f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct HillshadeHighlightColor : PaintProperty<std::vector<Color>> {
     static std::vector<Color> defaultValue() { return {Color::white()}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct HillshadeIlluminationAltitude : PaintProperty<std::vector<float>> {
     static std::vector<float> defaultValue() { return {45.f}; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct HillshadeIlluminationAnchor : PaintProperty<HillshadeIlluminationAnchorType> {
     static HillshadeIlluminationAnchorType defaultValue() { return HillshadeIlluminationAnchorType::Viewport; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct HillshadeIlluminationDirection : PaintProperty<std::vector<float>> {
     static std::vector<float> defaultValue() { return {335.f}; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct HillshadeMethod : PaintProperty<HillshadeMethodType> {
     static HillshadeMethodType defaultValue() { return HillshadeMethodType::Standard; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct HillshadeShadowColor : PaintProperty<std::vector<Color>> {
     static std::vector<Color> defaultValue() { return {Color::black()}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 class HillshadePaintProperties : public Properties<

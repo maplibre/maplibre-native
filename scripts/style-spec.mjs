@@ -60,6 +60,7 @@ modifiedReferenceSpec["paint_location-indicator"] = {
               "zoom"
           ]
       },
+      "transition": true,
       "doc": "The amount of the perspective compensation, between 0 and 1. A value of 1 produces a location indicator of constant width across the screen. A value of 0 makes it scale naturally according to the viewing projection."
   },
   "image-tilt-displacement": {
@@ -73,6 +74,7 @@ modifiedReferenceSpec["paint_location-indicator"] = {
               "zoom"
           ]
       },
+      "transition": true,
       "doc": "The displacement off the center of the top image and the shadow image when the pitch of the map is greater than 0. This helps producing a three-dimensional appearance."
   },
   "bearing": {

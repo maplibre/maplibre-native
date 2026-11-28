@@ -428,6 +428,18 @@ public class FillLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testFillRoundedCornerDistanceTransition() {
+    Timber.i("fill-rounded-corner-distanceTransitionOptions");
+    assertNotNull(layer);
+
+    // Set and Get
+    TransitionOptions options = new TransitionOptions(300, 100);
+    layer.setFillRoundedCornerDistanceTransition(options);
+    assertEquals(layer.getFillRoundedCornerDistanceTransition(), options);
+  }
+
+  @Test
+  @UiThreadTest
   public void testFillRoundedCornerDistanceAsConstant() {
     Timber.i("fill-rounded-corner-distance");
     assertNotNull(layer);

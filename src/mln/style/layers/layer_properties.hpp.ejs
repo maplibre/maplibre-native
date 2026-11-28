@@ -31,10 +31,12 @@ struct <%- camelize(property.name) %> : <%- layoutPropertyType(property, type) %
 <% for (const property of paintProperties) { -%>
 <%   if (property['property-type'] === 'color-ramp') { -%>
 struct <%- camelize(property.name) %> : ColorRampProperty {
+    static constexpr bool SupportsTransition = <%- supportsTransition(property) %>;
 };
 <%   } else { -%>
 struct <%- camelize(property.name) %> : <%- paintPropertyType(property, type) %> {
     static <%- evaluatedType(property) %> defaultValue() { return <%- defaultValue(property) %>; }
+    static constexpr bool SupportsTransition = <%- supportsTransition(property) %>;
 <% if (property.name === 'line-floor-width') { -%>
     using EvaluatorType = DataDrivenPropertyEvaluator<float, true>;
 <% } -%>

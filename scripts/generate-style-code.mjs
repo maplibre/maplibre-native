@@ -201,6 +201,15 @@ function paintPropertyType(property, type) {
 };
 
 /**
+ * Whether the style spec lets the property transition; a property without a
+ * `transition` flag takes a new value at once.
+ * @param {any} property
+ */
+function supportsTransition(property) {
+  return property.transition === true;
+}
+
+/**
  * @param {any} property
  */
 function propertyValueType(property) {
@@ -362,6 +371,7 @@ function setupGlobalEjsHelpers() {
     expressionType,
     defaultValue,
     paintPropertyType,
+    supportsTransition,
     propertyValueType,
     camelize,
     camelizeWithLeadingLowercase

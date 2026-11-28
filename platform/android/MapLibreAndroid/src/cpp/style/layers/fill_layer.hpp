@@ -53,6 +53,8 @@ public:
     jni::Local<jni::Object<TransitionOptions>> getFillPatternTransition(jni::JNIEnv&);
 
     jni::Local<jni::Object<jni::ObjectTag>> getFillRoundedCornerDistance(jni::JNIEnv&);
+    void setFillRoundedCornerDistanceTransition(jni::JNIEnv&, jlong duration, jlong delay);
+    jni::Local<jni::Object<TransitionOptions>> getFillRoundedCornerDistanceTransition(jni::JNIEnv&);
 
 }; // class FillLayer
 

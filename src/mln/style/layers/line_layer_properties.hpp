@@ -43,50 +43,62 @@ struct LineSortKey : DataDrivenLayoutProperty<float> {
 
 struct LineBlur : DataDrivenPaintProperty<float, attributes::blur, uniforms::blur> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct LineColor : DataDrivenPaintProperty<Color, attributes::color, uniforms::color> {
     static Color defaultValue() { return Color::black(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct LineDasharray : CrossFadedPaintProperty<std::vector<float>> {
     static std::vector<float> defaultValue() { return {}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct LineFloorWidth : DataDrivenPaintProperty<float, attributes::floorwidth, uniforms::floorwidth> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = false;
     using EvaluatorType = DataDrivenPropertyEvaluator<float, true>;
 };
 
 struct LineGapWidth : DataDrivenPaintProperty<float, attributes::gapwidth, uniforms::gapwidth> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct LineGradient : ColorRampProperty {
+    static constexpr bool SupportsTransition = false;
 };
 
 struct LineOffset : DataDrivenPaintProperty<float, attributes::offset, uniforms::offset> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct LineOpacity : DataDrivenPaintProperty<float, attributes::opacity, uniforms::opacity> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct LinePattern : CrossFadedDataDrivenPaintProperty<expression::Image, attributes::pattern_to, uniforms::pattern_to, attributes::pattern_from, uniforms::pattern_from> {
     static expression::Image defaultValue() { return {}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct LineTranslate : PaintProperty<std::array<float, 2>> {
     static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct LineTranslateAnchor : PaintProperty<TranslateAnchorType> {
     static TranslateAnchorType defaultValue() { return TranslateAnchorType::Map; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct LineWidth : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 class LineLayoutProperties : public Properties<
