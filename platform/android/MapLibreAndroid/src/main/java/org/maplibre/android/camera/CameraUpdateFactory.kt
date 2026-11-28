@@ -432,7 +432,8 @@ object CameraUpdateFactory {
             return if (type != ZOOM_TO_POINT) {
                 CameraPosition.Builder(cameraPosition).zoom(transformZoom(cameraPosition.zoom)).build()
             } else {
-                CameraPosition.Builder(cameraPosition).zoom(transformZoom(cameraPosition.zoom)).target(maplibreMap.projection.fromScreenLocation(PointF(x, y))).build()
+                // A camera target, so on the centre's own plane: the terrain pick would put it on the ground in front of it
+                CameraPosition.Builder(cameraPosition).zoom(transformZoom(cameraPosition.zoom)).target(maplibreMap.projection.fromScreenLocationAtCenterAltitude(PointF(x, y))).build()
             }
         }
 

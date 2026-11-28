@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 256,
+      "maxPitch": 85,
+      "description": "A line that turns by 30 degrees, seen along the bend at pitch 80, turns by more than twice text-max-angle on the screen: its viewport-pitched label is left out. The label on the straight line is drawn. Both lines lie inside one tile."
+    }
+  },
+  "center": [
+    0.00275,
+    0.00275
+  ],
+  "zoom": 16,
+  "pitch": 80,
+  "sources": {
+    "lines": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "hairpin"
+            },
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  0.00226,
+                  0.00091
+                ],
+                [
+                  0.00275,
+                  0.00275
+                ],
+                [
+                  0.00226,
+                  0.00459
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "straight"
+            },
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  0.0008,
+                  0.0005
+                ],
+                [
+                  0.0047,
+                  0.0005
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "line",
+      "type": "line",
+      "source": "lines",
+      "paint": {
+        "line-color": "#888",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "text",
+      "type": "symbol",
+      "source": "lines",
+      "layout": {
+        "symbol-placement": "line-center",
+        "text-rotation-alignment": "map",
+        "text-pitch-alignment": "viewport",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "text-field": "{name}",
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ]
+      },
+      "paint": {
+        "text-opacity": 1
+      }
+    }
+  ]
+}

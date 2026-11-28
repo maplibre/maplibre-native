@@ -29,15 +29,15 @@ float getElevation(vec2 coord) {
     return dot(data, u_unpack);
 }
 
+// Both ramps are one texel per stop in a single row, and this shader interpolates between
+// stops itself, so these are exact index lookups rather than filtered samples.
 float getElevationStop(int stop) {
     // Elevation stops are plain float values, not terrain-RGB encoded
-    float x = (float(stop) + 0.5) / float(u_color_ramp_size);
-    return texture(u_elevation_stops, vec2(x, 0.5)).r;
+    return texelFetch(u_elevation_stops, ivec2(stop, 0), 0).r;
 }
 
 vec4 getColorStop(int stop) {
-    float x = (float(stop) + 0.5) / float(u_color_ramp_size);
-    return texture(u_color_stops, vec2(x, 0.5));
+    return texelFetch(u_color_stops, ivec2(stop, 0), 0);
 }
 
 void main() {

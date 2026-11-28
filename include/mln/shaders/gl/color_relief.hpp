@@ -8,7 +8,20 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "ColorReliefShader";
-    static constexpr const char* vertex = R"(layout(std140) uniform ColorReliefDrawableUBO {
+    static constexpr const char* vertex = R"(layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float u_map_zoom;
+    lowp float global_pad1;
+    highp vec4 u_drape_tile;
+};
+
+layout(std140) uniform ColorReliefDrawableUBO {
     highp mat4 u_matrix;
 };
 
@@ -25,9 +38,10 @@ out vec2 v_pos;
 
 void main() {
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
+    gl_Position = apply_drape_transform(gl_Position, u_matrix, u_drape_tile);
 
-    highp vec2 epsilon = 1.0 / u_dimension;
-    float scale = (u_dimension.x - 2.0) / u_dimension.x;
+    highp vec2 epsilon = 2.0 / u_dimension;
+    float scale = (u_dimension.x - 4.0) / u_dimension.x;
     v_pos = (a_texture_pos / 8192.0) * scale + epsilon;
 
     // Handle poles
@@ -66,15 +80,15 @@ float getElevation(vec2 coord) {
     return dot(data, u_unpack);
 }
 
+// Both ramps are one texel per stop in a single row, and this shader interpolates between
+// stops itself, so these are exact index lookups rather than filtered samples.
 float getElevationStop(int stop) {
     // Elevation stops are plain float values, not terrain-RGB encoded
-    float x = (float(stop) + 0.5) / float(u_color_ramp_size);
-    return texture(u_elevation_stops, vec2(x, 0.5)).r;
+    return texelFetch(u_elevation_stops, ivec2(stop, 0), 0).r;
 }
 
 vec4 getColorStop(int stop) {
-    float x = (float(stop) + 0.5) / float(u_color_ramp_size);
-    return texture(u_color_stops, vec2(x, 0.5));
+    return texelFetch(u_color_stops, ivec2(stop, 0), 0);
 }
 
 void main() {

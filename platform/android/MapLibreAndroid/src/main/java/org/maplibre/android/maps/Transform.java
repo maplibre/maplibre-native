@@ -309,6 +309,65 @@ public class Transform implements MapView.OnCameraDidChangeListener {
     }
   }
 
+  /**
+   * With terrain, moves the camera's centre along the line of sight onto the ground under it,
+   * so gestures turn round the terrain being looked at rather than a sea-level point behind it.
+   * The view does not change; the centre's lat/lng and zoom do. No-op without terrain.
+   */
+  void anchorCenterOnTerrain() {
+    nativeMap.anchorCenterOnTerrain();
+    // The centre and zoom changed in core: refresh the cached camera position.
+    invalidateCameraPosition();
+  }
+
+  boolean setCenterAltitudeKeepingView(double altitude) {
+    boolean moved = nativeMap.setCenterAltitudeKeepingView(altitude);
+    if (moved) {
+      invalidateCameraPosition();
+    }
+    return moved;
+  }
+
+  double getCenterAltitude() {
+    return nativeMap.getCenterAltitude();
+  }
+
+  @UiThread
+  void setFieldOfView(double degrees) {
+    jumpCamera(() -> nativeMap.setFieldOfView(degrees));
+  }
+
+  double getFieldOfView() {
+    return nativeMap.getFieldOfView();
+  }
+
+  @UiThread
+  void setCenterFromEye(@NonNull LatLng center, double centerAltitude, @NonNull LatLng eye,
+                        double eyeAltitude) {
+    jumpCamera(() -> nativeMap.setCenterFromEye(center.getLatitude(), center.getLongitude(),
+      centerAltitude, eye.getLatitude(), eye.getLongitude(), eyeAltitude));
+  }
+
+  /**
+   * Runs a native camera jump and reports it as moveCamera does: the ongoing transitions are
+   * cancelled (a pending animateCamera or easeCamera callback gets onCancel), the move starts, the
+   * cached camera position is refreshed, and the camera goes idle. Nothing is reported when the
+   * jump leaves the camera as it was, as when the eye and the center are the same point.
+   */
+  @UiThread
+  private void jumpCamera(Runnable nativeJump) {
+    final CameraPosition before = nativeMap.getCameraPosition();
+    nativeJump.run();
+    final CameraPosition after = nativeMap.getCameraPosition();
+    if (after == null || after.equals(before)) {
+      return;
+    }
+    cancelTransitions();
+    cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
+    invalidateCameraPosition();
+    cameraChangeDispatcher.onCameraIdle();
+  }
+
   void moveBy(double offsetX, double offsetY, long duration) {
     if (duration > 0) {
       mapView.addOnCameraDidChangeListener(moveByChangeListener);
@@ -345,7 +404,7 @@ public class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   void setMinPitch(double minPitch) {
-    if ((minPitch < MapLibreConstants.MINIMUM_PITCH) || (minPitch > MapLibreConstants.MAXIMUM_PITCH)) {
+    if ((minPitch < MapLibreConstants.MINIMUM_PITCH) || (minPitch > MapLibreConstants.MAXIMUM_PITCH_LIMIT)) {
       Logger.e(TAG, String.format("Not setting minPitchPreference, value is in unsupported range: %s", minPitch));
       return;
     }
@@ -357,7 +416,7 @@ public class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   void setMaxPitch(double maxPitch) {
-    if ((maxPitch < MapLibreConstants.MINIMUM_PITCH) || (maxPitch > MapLibreConstants.MAXIMUM_PITCH)) {
+    if ((maxPitch < MapLibreConstants.MINIMUM_PITCH) || (maxPitch > MapLibreConstants.MAXIMUM_PITCH_LIMIT)) {
       Logger.e(TAG, String.format("Not setting maxPitchPreference, value is in unsupported range: %s", maxPitch));
       return;
     }

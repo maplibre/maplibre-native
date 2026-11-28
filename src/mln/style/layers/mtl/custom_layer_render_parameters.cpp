@@ -1,8 +1,10 @@
 #include <mln/style/layers/mtl/custom_layer_render_parameters.hpp>
 #include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_terrain.hpp>
 #include <mln/mtl/render_pass.hpp>
 #include <mln/mtl/renderer_backend.hpp>
 #include <mln/mtl/renderable_resource.hpp>
+#include <mln/mtl/texture2d.hpp>
 
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
@@ -23,6 +25,12 @@ CustomLayerRenderParameters::CustomLayerRenderParameters(const mln::PaintParamet
     if (paintParameters.renderPass) {
         const mln::mtl::RenderPass& metalRenderPass = static_cast<mln::mtl::RenderPass&>(*paintParameters.renderPass);
         encoder = metalRenderPass.getMetalEncoder();
+
+        if (auto* terrain = paintParameters.terrain) {
+            if (auto* depthTexture = terrain->getDrawnDepthTexture(paintParameters.context, renderable.getSize())) {
+                terrainDepthTexture = static_cast<mln::mtl::Texture2D&>(*depthTexture).getMetalTexture();
+            }
+        }
     }
 }
 

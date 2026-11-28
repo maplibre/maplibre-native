@@ -93,13 +93,13 @@ vec3 Camera::getPosition() const noexcept {
     return {{p[0], p[1], p[2]}};
 }
 
-mat4 Camera::getCameraToWorld(double scale, bool flippedY) const noexcept {
+mat4 Camera::getCameraToWorld(double scale, bool flippedY, double latitude) const noexcept {
     mat4 cameraToWorld;
-    matrix::invert(cameraToWorld, getWorldToCamera(scale, flippedY));
+    matrix::invert(cameraToWorld, getWorldToCamera(scale, flippedY, latitude));
     return cameraToWorld;
 }
 
-mat4 Camera::getWorldToCamera(double scale, bool flippedY) const noexcept {
+mat4 Camera::getWorldToCamera(double scale, bool flippedY, double latitude) const noexcept {
     // transformation chain from world space to camera space:
     // 1. Height value (z) of renderables is in meters. Scale z coordinate by pixelsPerMeter
     // 2. Transform from pixel coordinates to camera space with cameraMatrix^-1
@@ -108,7 +108,9 @@ mat4 Camera::getWorldToCamera(double scale, bool flippedY) const noexcept {
     // worldToCamera: flip * cam^-1 * zScale
     // cameraToWorld: (flip * cam^-1 * zScale)^-1 => (zScale^-1 * cam * flip^-1)
     const double worldSize = Projection::worldSize(scale);
-    const double latitude = latFromMercatorY(getColumn(transform, 3)[1]);
+    // `latitude` is the map center's, as in maplibre-gl-js: the camera position's own latitude runs
+    // off the world at low zoom and a steep pitch (the camera sits a screen height behind the center,
+    // beyond the pole at zoom 0), blowing pixelsPerMeter up so any relief swallows the camera.
     const double pixelsPerMeter = worldSize / (std::cos(util::deg2rad(latitude)) * util::M2PI * util::EARTH_RADIUS_M);
 
     // Compute inverse of the camera matrix

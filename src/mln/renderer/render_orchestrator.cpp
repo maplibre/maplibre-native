@@ -1,5 +1,7 @@
 #include <mln/renderer/render_orchestrator.hpp>
 
+#include <mln/style/layers/raster_layer_impl.hpp>
+
 #include <mln/annotation/annotation_manager.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/renderer/change_request.hpp>
@@ -7,7 +9,10 @@
 #include <mln/renderer/render_source.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/renderer/render_static_data.hpp>
+#include <mln/renderer/render_target.hpp>
 #include <mln/renderer/render_tree.hpp>
+#include <mln/renderer/dem_elevation_provider.hpp>
+#include <mln/renderer/render_terrain.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/renderer/upload_parameters.hpp>
 #include <mln/renderer/pattern_atlas.hpp>
@@ -21,6 +26,7 @@
 #include <mln/renderer/image_manager.hpp>
 #include <mln/geometry/line_atlas.hpp>
 #include <mln/style/source_impl.hpp>
+#include <mln/style/sources/tile_source_impl.hpp>
 #include <mln/style/transition_options.hpp>
 #include <mln/text/glyph_manager.hpp>
 #include <mln/tile/tile.hpp>
@@ -92,6 +98,7 @@ public:
                    RenderLayerReferences layersNeedPlacement_,
                    Immutable<Placement> placement_,
                    bool updateSymbolOpacities_,
+                   const RenderTerrain* terrain_,
                    double startTime_)
         : RenderTree(std::move(parameters_), startTime_),
           layerRenderItems(std::move(layerRenderItems_)),
@@ -100,13 +107,14 @@ public:
           patternAtlas(patternAtlas_),
           layersNeedPlacement(std::move(layersNeedPlacement_)),
           placement(std::move(placement_)),
-          updateSymbolOpacities(updateSymbolOpacities_) {}
+          updateSymbolOpacities(updateSymbolOpacities_),
+          terrain(terrain_) {}
 
     void prepare() override {
         MLN_TRACE_FUNC();
 
         for (auto it = layersNeedPlacement.rbegin(); it != layersNeedPlacement.rend(); ++it) {
-            placement->updateLayerBuckets(*it, parameters->transformParams.state, updateSymbolOpacities);
+            placement->updateLayerBuckets(*it, parameters->transformParams.state, updateSymbolOpacities, terrain);
         }
     }
 
@@ -128,6 +136,7 @@ public:
     RenderLayerReferences layersNeedPlacement;
     Immutable<Placement> placement;
     bool updateSymbolOpacities;
+    const RenderTerrain* terrain;
 };
 
 } // namespace
@@ -251,6 +260,112 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         renderLight.evaluate(evaluationParameters);
     }
 
+    // Update terrain. The per-frame drawable/DEM update happens later in
+    // updateRenderTree once the render sources have been updated; here we only
+    // (re)create or drop the RenderTerrain to match the style.
+    //
+    // Unregister the mesh layer group before dropping a RenderTerrain, on replacement as
+    // well as on removal: the orchestrator holds its own reference and keeps drawing an
+    // orphaned mesh otherwise, and the layer index is a multimap key, so a replacement
+    // stacks up beside the old one rather than evicting it.
+    const auto dropRenderTerrain = [&] {
+        UniqueChangeRequestVec terrainChanges;
+        renderTerrain->deactivate(terrainChanges);
+        addChanges(terrainChanges);
+        renderTerrain.reset();
+    };
+
+    if (updateParameters->terrain) {
+        const auto& terrainImpl = *updateParameters->terrain;
+        const auto sourceImpl = [&](const auto& sources) -> const style::Source::Impl* {
+            const auto it = std::ranges::find_if(
+                *sources, [&](const auto& source) { return source->id == terrainImpl->sourceID; });
+            return it != sources->end() ? it->get() : nullptr;
+        };
+        // Whether the DEM is no longer the one the terrain was built from. What the terrain holds comes
+        // from the source's tiles, which depend on its tileset (tile URLs, encoding, zoom range, ...)
+        // and on nothing else: a setter such as setVolatile makes a new impl with the same tileset,
+        // and the source keeps its tiles. A tileset that arrives where there was none changes nothing
+        // unless the terrain already holds tiles, which happens when a source takes the place of
+        // another and its TileJSON is yet to load.
+        const auto demChanged = [&] {
+            const auto* before = sourceImpl(sourceImpls);
+            const auto* after = sourceImpl(updateParameters->sources);
+            if (before == after) {
+                return false;
+            }
+            const auto tilesetOf = [](const style::Source::Impl* impl) -> const std::optional<Tileset>* {
+                return impl && impl->type == style::SourceType::RasterDEM
+                           ? &static_cast<const style::TileSource::Impl*>(impl)->tileset
+                           : nullptr;
+            };
+            const auto* was = tilesetOf(before);
+            const auto* now = tilesetOf(after);
+            if (!was || !now) {
+                return true; // added, removed or put in under another type
+            }
+            return *now && *now != *was && (*was || renderTerrain->holdsDEMData());
+        };
+        if (renderTerrain) {
+            if (renderTerrain->getSourceID() != terrainImpl->sourceID || demChanged()) {
+                dropRenderTerrain();
+            } else if (renderTerrain->getImpl() != terrainImpl) {
+                // Only the exaggeration differs, and nothing built from the DEM depends on it.
+                renderTerrain->setImpl(terrainImpl);
+            }
+        }
+        if (!renderTerrain) {
+            renderTerrain = std::make_unique<RenderTerrain>(*updateParameters->terrain);
+        }
+    } else if (renderTerrain) {
+        dropRenderTerrain();
+    }
+
+    // Let every source's tile cover account for the height of the terrain, so that the
+    // sources are asked for the tiles the terrain mesh will need. Without this the cover
+    // is computed against the flat ground plane and relief leaning towards the camera -
+    // the near edge of the view, at high zoom - is judged off-screen, leaving the mesh
+    // there with an empty drape. Outlives the source update loop below.
+    //
+    // The elevation comes from every DEM tile the source has loaded, not from the ones it
+    // drew last frame: those depend on the cover, so the cover would feed back into itself
+    // and, with a still camera, alternate between two tile sets for good. This way it
+    // changes only when DEM data arrives, and the cover settles.
+    const bool terrainEnabled = renderTerrain && renderTerrain->isEnabled();
+    const DEMElevationProvider elevationProvider{
+        terrainEnabled ? getRenderSource(renderTerrain->getSourceID()) : nullptr,
+        terrainEnabled ? renderTerrain->getExaggeration() : 1.0};
+    tileParameters.elevationProvider = terrainEnabled ? &elevationProvider : nullptr;
+    // With the view pitched the finest tiles belong under the camera, where the screen is densest,
+    // not at the map centre far ahead of it: the point the mesh-tile cap measures from. Every
+    // source takes it, so they ask for what the mesh covers.
+    if (terrainEnabled) {
+        tileParameters.tileLodOrigin = RenderTerrain::meshTileCapOrigin(updateParameters->transformState);
+    }
+
+    // A source whose minzoom is deeper than the far field's zoom is covered at that minzoom out
+    // to the horizon: thousands of tiles at a steep pitch, each kept with its geometry for as
+    // long as the view holds. The terrain mesh is capped to the tiles nearest the camera
+    // (RenderTerrain::computeMeshCover), so keep the nearest few per mesh tile, measured from
+    // the same point. The DEM source keeps its own cover.
+    const size_t coverTileLimit = terrainEnabled ? terrainLoadBudget(updateParameters->terrainLoadMode).maxMeshTiles *
+                                                       RenderTerrain::sourceTilesPerMeshTile
+                                                 : 0;
+    tileParameters.coverTileLimitOrigin = RenderTerrain::meshTileCapOrigin(updateParameters->transformState);
+
+    // The ground under the camera's eye has to be known to keep the eye above it
+    // (Renderer::Impl::render), and its DEM tile lies outside the view's cover as often as not.
+    // So does the ground under the center, for the center clamp: with the center at sea level
+    // over high ground the eye sits just above the slope, the elevated cover keeps little more
+    // than the eye's tile, and the clamp never learned the height that would lift the camera.
+    std::vector<LatLng> terrainGroundToKnow;
+    if (terrainEnabled) {
+        if (const auto eye = updateParameters->transformState.getFreeCameraOptions().getLocation()) {
+            terrainGroundToKnow.push_back(eye->location);
+        }
+        terrainGroundToKnow.push_back(updateParameters->transformState.getLatLng());
+    }
+
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;
 
@@ -342,6 +457,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         const bool layerAddedOrChanged = layerDiff.added.contains(id) || layerDiff.changed.contains(id);
         evaluationParameters.layerChanged = layerAddedOrChanged;
         evaluationParameters.hasCrossfade = layer.hasCrossfade();
+        // A layer drawn into a terrain drape keeps what it was drawn with until its tiles change, so a
+        // drape target drawn while a pattern cross-fades after a zoom level change would keep the
+        // half-faded pattern for good, finer than its neighbors'. Skip the fade there. Unlike
+        // hasCrossfade, which says a fade is still running, this ends it.
+        evaluationParameters.crossfadeSettled = layer.settlesCrossfade(terrainEnabled);
 
         // Only re-evaluate on change of zoom if the style has some reference to it
         using expression::Dependency;
@@ -356,7 +476,20 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (layerAddedOrChanged || zoomChangedAndMatters || globalStateChangedAndMatters ||
             evaluationParameters.hasCrossfade || layer.hasTransition()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();
+            const bool wasInTransition = layer.hasTransition();
             layer.evaluate(evaluationParameters);
+            // A drape over terrain bakes a layer once per revision of its style
+            // (RenderLayer::styleRevision), on the frame the style changed. That is the frame a
+            // paint transition starts on, so the drape kept the paint the transition started
+            // from: a raster basemap whose brightness the app changed kept its old look. The
+            // paint a raster layer's transition ends on is another revision. Only a raster
+            // layer's: a fill-pattern layer baked again on this frame comes out without its
+            // pattern (TerrainDrape.APatternDrapedDuringAZoomLevelFadeSettlesOnTheFinalScale),
+            // and every layer ends a transition 300 ms after it is added.
+            if (wasInTransition && !layer.hasTransition() &&
+                layer.baseImpl->getTypeInfo() == style::RasterLayer::Impl::staticTypeInfo()) {
+                ++layer.styleRevision;
+            }
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
                 constantsMaskChanged.insert(id);
             }
@@ -472,7 +605,24 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                 updateList[index] = true;
             }
         }
+        // Mark DEM source as needed for terrain rendering
+        const bool isDemSource = renderTerrain && renderTerrain->isEnabled() &&
+                                 sourceImpl->id == renderTerrain->getSourceID();
+        if (isDemSource) {
+            sourceNeedsRendering = true;
+        }
+        tileParameters.coverTileLimit = isDemSource ? 0 : coverTileLimit;
+        tileParameters.coverMinZoomReach = terrainEnabled && !isDemSource ? RenderTerrain::sourceMinZoomReach()
+                                                                          : std::nullopt;
+        tileParameters.alsoCover = isDemSource ? terrainGroundToKnow : std::vector<LatLng>{};
+        tileParameters.leaveOutEmptyTiles = terrainEnabled && !isDemSource && RenderTerrain::leavesOutEmptyTiles();
+
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
+        // The DEM source additionally keeps the coarser ancestors of its cover that are already
+        // loaded, so that a tile another layer draws from - shallower far-field LOD tiles,
+        // overzoomed sources with a low maxzoom - can bind a DEM ancestor for elevation (see
+        // TileParameters).
+        tileParameters.retainAncestorLevels = isDemSource ? RenderTerrain::demAncestorLevels : 0;
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
 
@@ -483,6 +633,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             }
         }
         addChanges(changes);
+    }
+
+    // Enable 3D mode if terrain is present
+    if (renderTerrain && renderTerrain->isEnabled()) {
+        renderTreeParameters->has3D = true;
     }
 
     renderTreeParameters->loaded = updateParameters->styleLoaded && isLoaded();
@@ -511,7 +666,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                              .imageManager = *imageManager,
                              .patternAtlas = *patternAtlas,
                              .lineAtlas = *lineAtlas,
-                             .state = updateParameters->transformState});
+                             .state = updateParameters->transformState,
+                             .terrain = terrainEnabled});
         if (renderLayer.needsPlacement()) {
             layersNeedPlacement.emplace_back(renderLayer);
         }
@@ -532,7 +688,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (auto it = layersNeedPlacement.crbegin(); it != layersNeedPlacement.crend(); ++it) {
         MLN_TRACE_ZONE(placement layer);
         RenderLayer& layer = *it;
-        auto result = crossTileSymbolIndex.addLayer(layer, longitude);
+        auto result = crossTileSymbolIndex.addLayer(layer, longitude, terrainEnabled ? renderTerrain.get() : nullptr);
         if (isMapModeContinuous) {
             usedSymbolLayers.insert(layer.getID());
             symbolBucketsAdded = symbolBucketsAdded || (result & CrossTileSymbolIndex::AddLayerResult::BucketsAdded);
@@ -564,7 +720,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         symbolBucketsChanged |= renderTreeParameters->placementChanged;
         if (renderTreeParameters->placementChanged) {
             Mutable<Placement> placement = Placement::create(updateParameters, placementController.getPlacement());
+            placement->setTerrain(terrainEnabled ? renderTerrain.get() : nullptr);
             placement->placeLayers(layersNeedPlacement);
+            placement->setTerrain(nullptr); // so the kept Placement holds no pointer to it
             placementController.setPlacement(std::move(placement));
             crossTileSymbolIndex.pruneUnusedLayers(usedSymbolLayers);
             for (const auto& entry : renderSources) {
@@ -583,7 +741,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (renderTreeParameters->placementChanged) {
             Mutable<Placement> placement = Placement::create(updateParameters);
             placement->collectPlacedSymbolData(placedSymbolDataCollected);
+            placement->setTerrain(terrainEnabled ? renderTerrain.get() : nullptr);
             placement->placeLayers(layersNeedPlacement);
+            placement->setTerrain(nullptr); // so the kept Placement holds no pointer to it
             placementController.setPlacement(std::move(placement));
         }
         crossTileSymbolIndex.reset();
@@ -613,6 +773,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                             std::move(layersNeedPlacement),
                                             placementController.getPlacement(),
                                             symbolBucketsChanged,
+                                            terrainEnabled ? renderTerrain.get() : nullptr,
                                             startTime);
 }
 
@@ -703,11 +864,32 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     mat4 projMatrix;
     transformState.getProjMatrix(projMatrix);
 
+    // Tile-source and shape-annotation queries unproject the screen geometry at sea level. On
+    // 3D terrain a tapped pixel's ray meets the draped surface first, so substitute, for each
+    // point, the sea-level projection of the surface coordinate under it: the sea-level
+    // unprojection downstream then yields that surface coordinate. Symbols keep the original
+    // screen geometry - their collision boxes already sit at the terrain elevation - so a
+    // symbol-only query (queryPointAnnotations, which iOS runs every frame with annotation views)
+    // skips the picks.
+    const bool queriesBesidesSymbols = std::ranges::any_of(filteredLayers, [](const auto& pair) {
+        return pair.second->baseImpl->getTypeInfo()->crossTileIndex != style::LayerTypeInfo::CrossTileIndex::Required;
+    });
+    ScreenLineString surfaceGeometry = geometry;
+    if (renderTerrain && renderTerrain->isEnabled() && queriesBesidesSymbols) {
+        for (auto& point : surfaceGeometry) {
+            if (const auto surface = renderTerrain->pickLatLng(transformState, point)) {
+                ScreenCoordinate projected = transformState.latLngToScreenCoordinate(*surface);
+                projected.y = transformState.getSize().height - projected.y; // back to y-down
+                point = projected;
+            }
+        }
+    }
+
     std::unordered_map<std::string, std::vector<Feature>> resultsByLayer;
     for (const auto& sourceID : sourceIDs) {
         if (RenderSource* renderSource = getRenderSource(sourceID)) {
             auto sourceResults = renderSource->queryRenderedFeatures(
-                geometry, transformState, filteredLayers, options, globalState.get(), projMatrix);
+                surfaceGeometry, transformState, filteredLayers, options, globalState.get(), projMatrix);
             std::ranges::move(sourceResults, std::inserter(resultsByLayer, resultsByLayer.begin()));
         }
     }
@@ -719,7 +901,7 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
         const RenderLayer* layer = pair.second;
         layer->populateDynamicRenderFeatureIndex(dynamicIndex);
     }
-    dynamicIndex.query(resultsByLayer, geometry, transformState);
+    dynamicIndex.query(resultsByLayer, surfaceGeometry, transformState);
     std::vector<Feature> result;
 
     if (resultsByLayer.empty()) {
@@ -782,6 +964,7 @@ FeatureExtensionValue RenderOrchestrator::queryFeatureExtensions(
     return {};
 }
 
+// NOLINTNEXTLINE(readability-make-member-function-const): it changes the render source it points to
 void RenderOrchestrator::setFeatureState(const std::string& sourceID,
                                          const std::optional<std::string>& sourceLayerID,
                                          const std::string& featureID,
@@ -804,6 +987,7 @@ void RenderOrchestrator::getFeatureState(FeatureState& state,
     }
 }
 
+// NOLINTNEXTLINE(readability-make-member-function-const): it changes the render source it points to
 void RenderOrchestrator::removeFeatureState(const std::string& sourceID,
                                             const std::optional<std::string>& sourceLayerID,
                                             const std::optional<std::string>& featureID,
@@ -1011,7 +1195,8 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       const TransformState& state,
                                       const std::shared_ptr<UpdateParameters>& updateParameters,
                                       const PaintParameters& paintParameters,
-                                      const RenderTree& renderTree) {
+                                      const RenderTree& renderTree,
+                                      const TexturePool& texturePool) {
     MLN_TRACE_FUNC();
 
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
@@ -1028,6 +1213,13 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
 
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
+
+    // Progressive tile build: cap how many new tiles construct their drawables this frame so
+    // a burst of newly revealed tiles (tilt/pan/zoom-in) is spread over frames instead of
+    // stalling one. Layers consume from this budget before building a new tile (fill/line).
+    // The cap comes from the map's TerrainLoadMode; Quality (default) is unlimited.
+    const int tileBuildBudget = terrainLoadBudget(updateParameters->terrainLoadMode).newTileBuildsPerFrame;
+    context.resetNewTileBuildBudget(tileBuildBudget > 0 ? tileBuildBudget : (1 << 30));
 
     gfx::RenderingStats::FrameRenderedFeaturesMap allFeatures;
     allFeatures.reserve(items.size());
@@ -1064,6 +1256,12 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
             renderLayer.stats.renderedFeatures.clear();
         }
     }
+
+    // Update terrain if enabled
+    if (renderTerrain && renderTerrain->isEnabled()) {
+        renderTerrain->update(*this, shaders, context, texturePool, state, updateParameters, renderTree, changes);
+    }
+
     addChanges(changes);
 
     std::swap(frameRenderedFeatures, allFeatures);
@@ -1094,6 +1292,27 @@ bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget)
     } else {
         return false;
     }
+}
+
+void RenderOrchestrator::addRenderTargets(const TexturePool& texturePool) {
+    // The pool owns the terrain drape targets and drops them when their tile leaves
+    // the cover, so rebuild our drape entries from it each frame. Merely adding
+    // would keep every drape target ever created alive here, rendering forever.
+    //
+    // Non-drape targets (the hillshade prepare targets, added by change request) are
+    // owned by their tile's bucket. When only this list still references one, the
+    // bucket has been evicted, so drop it here too; otherwise its offscreen (prepare)
+    // and DEM input textures leak as hillshade tiles cycle in and out of the cover.
+    renderTargets.erase(std::remove_if(renderTargets.begin(),
+                                       renderTargets.end(),
+                                       [](const RenderTargetPtr& renderTarget) {
+                                           if (!renderTarget) return true;
+                                           if (renderTarget->getDrapeTileID().has_value()) return true;
+                                           return renderTarget.use_count() == 1;
+                                       }),
+                        renderTargets.end());
+    texturePool.visitRenderTargets(
+        [&](const RenderTargetPtr& renderTarget) { renderTargets.emplace_back(renderTarget); });
 }
 
 void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters) {

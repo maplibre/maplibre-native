@@ -22,10 +22,18 @@ struct alignas(16) HeatmapDrawableUBO {
     // Interpolations
     /* 68 */ float weight_t;
     /* 72 */ float radius_t;
-    /* 76 */ float pad1;
-    /* 80 */
+    /* 76 */ float depth_enabled;
+
+    // 3D terrain elevation
+    /*  80 */ float4 dem_coords;
+    /*  96 */ float4 dem_unpack;
+    /* 112 */ float dem_dim;
+    /* 116 */ float dem_exaggeration;
+    /* 120 */ float dem_enabled;
+    /* 124 */ float units_to_pixels_y;
+    /* 128 */
 };
-static_assert(sizeof(HeatmapDrawableUBO) == 5 * 16, "wrong size");
+static_assert(sizeof(HeatmapDrawableUBO) == 8 * 16, "wrong size");
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) HeatmapEvaluatedPropsUBO {
@@ -47,7 +55,7 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
 
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = heatmapShaderPrelude;
     static constexpr auto source = R"(
@@ -67,6 +75,7 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float weight;
     float2 extrude;
+    float visibility;
 };
 
 // Effective "0" in the kernel density texture to adjust the kernel size to;
@@ -80,7 +89,11 @@ constant const float ZERO = 1.0 / 255.0 / 16.0;
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const HeatmapDrawableUBO* drawableVector [[buffer(idHeatmapDrawableUBO)]],
-                                device const HeatmapEvaluatedPropsUBO& props [[buffer(idHeatmapEvaluatedPropsUBO)]]) {
+                                device const HeatmapEvaluatedPropsUBO& props [[buffer(idHeatmapEvaluatedPropsUBO)]],
+                                texture2d<float, access::sample> demTexture [[texture(0)]],
+                                sampler demSampler [[sampler(0)]],
+                                texture2d<float, access::sample> depthTexture [[texture(1)]],
+                                sampler depthSampler [[sampler(1)]]) {
 
     device const HeatmapDrawableUBO& drawable = drawableVector[uboIndex];
 
@@ -120,12 +133,32 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
-    const float4 pos = float4(floor(float2(vertx.pos) * 0.5) + scaled_extrude, 0, 1);
+    const float2 center = floor(float2(vertx.pos) * 0.5);
+
+    // With 3D terrain on, lift the kernel to the terrain height at its centre
+    const float ele = get_elevation(center,
+                                    demTexture,
+                                    demSampler,
+                                    drawable.dem_coords,
+                                    drawable.dem_unpack,
+                                    drawable.dem_dim,
+                                    drawable.dem_exaggeration,
+                                    drawable.dem_enabled);
+
+    const float4 pos = float4(center + scaled_extrude, ele, 1);
+
+    // A kernel whose centre is behind terrain adds nothing to the density texture
+    const float visibility = calculate_visibility(drawable.matrix * float4(center, ele, 1),
+                                                  depthTexture,
+                                                  depthSampler,
+                                                  drawable.depth_enabled,
+                                                  drawable.units_to_pixels_y);
 
     return {
         .position    = drawable.matrix * pos,
         .weight      = weight,
         .extrude     = extrude,
+        .visibility  = visibility,
     };
 }
 
@@ -137,7 +170,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // Kernel density estimation with a Gaussian kernel of size 5x5
     const float d = -0.5 * 3.0 * 3.0 * dot(in.extrude, in.extrude);
-    const float val = in.weight * props.intensity * GAUSS_COEF * exp(d);
+    const float val = in.weight * props.intensity * GAUSS_COEF * exp(d) * in.visibility;
 
     return half4(val, 1.0, 1.0, 1.0);
 }

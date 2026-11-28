@@ -376,6 +376,36 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
     symbolDependenciesChanged();
 }
 
+// A glyph range that failed to load when this tile was laid out has loaded since.
+void GeometryTileWorker::onLateGlyphsAvailable(uint64_t correlationID_) {
+    MLN_TRACE_FUNC();
+
+    try {
+        // The glyphs the tile was answered without are forgotten, so that the parse asks for them again.
+        for (auto& fontGlyphs : glyphMap) {
+            std::erase_if(fontGlyphs.second, [](const auto& glyph) { return !glyph.second; });
+        }
+        correlationID = correlationID_;
+
+        switch (state) {
+            case Idle:
+                parse();
+                coalesce();
+                break;
+
+            case Coalescing:
+            case NeedsSymbolLayout:
+                state = NeedsParse;
+                break;
+
+            case NeedsParse:
+                break;
+        }
+    } catch (...) {
+        parent.invoke(&GeometryTile::onError, std::current_exception(), correlationID);
+    }
+}
+
 void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependencies) {
     MLN_TRACE_FUNC();
 

@@ -16,11 +16,24 @@ public:
     DEMData(const PremultipliedImage& image, Tileset::RasterEncoding encoding);
     void backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy);
 
+    /// Height of pixel (x, y) in whole meters, cut towards zero: for the tile's elevation range.
     int32_t get(int32_t x, int32_t y) const;
+    /// Height of pixel (x, y) in meters, decoded as the terrain shaders decode it (Terrain-RGB
+    /// holds tenths of a meter). Heights that stand for the drawn ground read this one.
+    float getElevation(int32_t x, int32_t y) const;
     const std::array<float, 4>& getUnpackVector() const;
 
     const PremultipliedImage* getImage() const { return &*image; }
     const std::shared_ptr<PremultipliedImage>& getImagePtr() const { return image; }
+
+    /// Lowest elevation in the tile, in meters, excluding the backfilled border.
+    int32_t getMinElevation() const { return minElevation; }
+    /// Highest elevation in the tile, in meters, excluding the backfilled border.
+    int32_t getMaxElevation() const { return maxElevation; }
+
+    /// How many times a neighbouring tile has backfilled the border. The border is read at the
+    /// tile's edge, so a copy of the image uploaded earlier is stale once this changes.
+    uint32_t getBorderRevision() const { return borderRevision; }
 
     const int32_t dim;
     const int32_t stride;
@@ -28,13 +41,16 @@ public:
 
 private:
     std::shared_ptr<PremultipliedImage> image;
+    int32_t minElevation = 0;
+    int32_t maxElevation = 0;
+    uint32_t borderRevision = 0;
 
     size_t idx(const int32_t x, const int32_t y) const {
-        assert(x >= -1);
-        assert(x < dim + 1);
-        assert(y >= -1);
-        assert(y < dim + 1);
-        return (y + 1) * stride + (x + 1);
+        assert(x >= -2);
+        assert(x < dim + 2);
+        assert(y >= -2);
+        assert(y < dim + 2);
+        return (y + 2) * stride + (x + 2);
     }
 };
 

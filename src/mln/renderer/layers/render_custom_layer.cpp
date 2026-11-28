@@ -22,6 +22,8 @@
 #include <mln/style/layers/vulkan/custom_layer_init_parameters.hpp>
 #include <mln/style/layers/vulkan/custom_layer_render_parameters.hpp>
 #include <mln/vulkan/render_pass.hpp>
+#elif MLN_RENDER_BACKEND_OPENGL
+#include <mln/style/layers/gl/custom_layer_render_parameters.hpp>
 #endif
 
 // TODO: platform agnostic error checks
@@ -61,6 +63,8 @@ void callPreRender(const std::shared_ptr<style::CustomLayerHost>& host,
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);
 #elif MLN_RENDER_BACKEND_VULKAN
     style::vulkan::CustomLayerRenderParameters parameters(paintParameters);
+#elif MLN_RENDER_BACKEND_OPENGL
+    style::gl::CustomLayerRenderParameters parameters(paintParameters);
 #else
     style::CustomLayerRenderParameters parameters(paintParameters);
 #endif
@@ -111,7 +115,8 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     // create layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
+        // Drawn on screen after the terrain mesh, never into the drape (TERRAIN.md, "Custom layers")
+        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID(), false)) {
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }

@@ -425,6 +425,23 @@ void GeometryTile::onGlyphsAvailable(GlyphMap glyphMap, [[maybe_unused]] HBShape
     worker.self().invoke(&GeometryTileWorker::onGlyphsAvailable, std::move(glyphMap), std::move(results));
 }
 
+void GeometryTile::onLateGlyphsAvailable() {
+    MLN_TRACE_FUNC();
+
+    if (obsolete) {
+        return;
+    }
+
+    // As in setLayers: the tile is laid out again, and keeps drawing its last layout until then.
+    if (!pending) {
+        pending = true;
+        observer->onTileAction(id, sourceID, TileOperation::StartParse);
+    }
+
+    ++correlationID;
+    worker.self().invoke(&GeometryTileWorker::onLateGlyphsAvailable, correlationID);
+}
+
 void GeometryTile::getGlyphs(GlyphDependencies glyphDependencies) {
     MLN_TRACE_FUNC();
 

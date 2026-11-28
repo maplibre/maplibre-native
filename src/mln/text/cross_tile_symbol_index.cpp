@@ -2,6 +2,7 @@
 
 #include <mln/layout/symbol_instance.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/renderer/render_terrain.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/tile/tile.hpp>
 #include <mln/util/instrumentation.hpp>
@@ -107,8 +108,10 @@ void CrossTileSymbolLayerIndex::handleWrapJump(float newLng) {
 
 namespace {
 
-bool isInVewport(const mat4& posMatrix, const Point<float>& point) {
-    vec4 p = {{point.x, point.y, 0, 1}};
+// On terrain the point is lifted to the ground under it: at sea level, ground high above it near
+// the camera projects far below where it is drawn, and its labels were dropped while on screen.
+bool isInVewport(const mat4& posMatrix, const Point<float>& point, const SymbolElevationFn* getElevation) {
+    vec4 p = {{point.x, point.y, getElevation ? (*getElevation)(point) : 0.0, 1}};
     matrix::transformMat4(p, p, posMatrix);
 
     // buffer covers area of the next zoom level (current zoom - 1 covered area).
@@ -123,7 +126,8 @@ bool isInVewport(const mat4& posMatrix, const Point<float>& point) {
 
 bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
                                           const mat4& tileMatrix,
-                                          SymbolBucket& bucket) {
+                                          SymbolBucket& bucket,
+                                          const SymbolElevationFn* getElevation) {
     auto& thisZoomIndexes = indexes[tileID.overscaledZ];
     auto previousIndex = thisZoomIndexes.find(tileID);
     if (previousIndex != thisZoomIndexes.end()) {
@@ -145,7 +149,8 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
         // For overscaled tiles the viewport might be showing only a small part of the tile,
         // so we filter out the off-screen symbols to improve the performance.
         for (auto& symbolInstance : bucket.symbolInstances) {
-            if (symbolInstance.check(SYM_GUARD_LOC) && isInVewport(tileMatrix, symbolInstance.getAnchor().point)) {
+            if (symbolInstance.check(SYM_GUARD_LOC) &&
+                isInVewport(tileMatrix, symbolInstance.getAnchor().point, getElevation)) {
                 symbolInstance.setCrossTileID(0u);
             } else {
                 symbolInstance.setCrossTileID(SymbolInstance::invalidCrossTileID);
@@ -220,7 +225,8 @@ bool CrossTileSymbolLayerIndex::removeStaleBuckets(const std::unordered_set<uint
 
 CrossTileSymbolIndex::CrossTileSymbolIndex() = default;
 
-auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddLayerResult {
+auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng, const RenderTerrain* terrain)
+    -> AddLayerResult {
     MLN_TRACE_FUNC();
     MLN_ZONE_STR(layer.getID());
 
@@ -242,7 +248,12 @@ auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddL
     for (const auto& item : layer.getPlacementData()) {
         const RenderTile& renderTile = item.tile;
         Bucket& bucket = item.bucket;
-        auto pair = bucket.registerAtCrossTileIndex(layerIndex, renderTile);
+        // Only an overscaled tile's symbols are tested against the viewport.
+        std::optional<SymbolElevationFn> elevation;
+        if (terrain && renderTile.getOverscaledTileID().overscaleFactor() > 1u) {
+            elevation = terrain->elevationSampler(renderTile.id);
+        }
+        auto pair = bucket.registerAtCrossTileIndex(layerIndex, renderTile, elevation ? &*elevation : nullptr);
         assert(pair.first != 0u);
         if (pair.second) result |= AddLayerResult::BucketsAdded;
         currentBucketIDs.insert(pair.first);

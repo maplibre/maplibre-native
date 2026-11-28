@@ -4,13 +4,14 @@
 #include <mapbox/geometry/box.hpp>
 #include <mln/math/minmax.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <optional>
-#include <unordered_set>
 #include <vector>
 
 namespace mln {
@@ -70,8 +71,10 @@ public:
     std::vector<T> query(const BBox&) const;
     std::vector<std::pair<T, BBox>> queryWithBoxes(const BBox&) const;
 
-    bool hitTest(const BBox&, std::optional<std::function<bool(const T&)>> predicate = std::nullopt) const;
-    bool hitTest(const BCircle&, std::optional<std::function<bool(const T&)>> predicate = std::nullopt) const;
+    template <std::predicate<const T&> Predicate = std::function<bool(const T&)>>
+    bool hitTest(const BBox&, const std::optional<Predicate>& predicate = std::nullopt) const;
+    template <std::predicate<const T&> Predicate = std::function<bool(const T&)>>
+    bool hitTest(const BCircle&, const std::optional<Predicate>& predicate = std::nullopt) const;
 
     bool empty() const;
 
@@ -80,8 +83,16 @@ private:
     bool completeIntersection(const BBox& queryBBox) const;
     BBox convertToBox(const BCircle& circle) const;
 
-    void query(const BBox&, std::function<bool(const T&, const BBox&)>) const;
-    void query(const BCircle&, std::function<bool(const T&, const BBox&)>) const;
+    // Calls resultFn with each element the query finds and its box; returning true stops the query.
+    void visit(const BBox&, std::predicate<const T&, const BBox&> auto&& resultFn) const;
+    void visit(const BCircle&, std::predicate<const T&, const BBox&> auto&& resultFn) const;
+
+    // An element is listed in every cell it touches. A query that visits the cells from (cx1, cy1) on
+    // reports the element from the first of those cells only, so no element is reported twice.
+    bool isFirstVisit(const BBox& elementBBox, std::size_t cx1, std::size_t cy1, std::size_t x, std::size_t y) const {
+        return std::max(cx1, convertToXCellCoord(elementBBox.min.x)) == x &&
+               std::max(cy1, convertToYCellCoord(elementBBox.min.y)) == y;
+    }
 
     std::size_t convertToXCellCoord(float x) const;
     std::size_t convertToYCellCoord(float y) const;
@@ -170,7 +181,7 @@ void GridIndex<T>::insert(T&& t, const BCircle& bcircle) {
 template <class T>
 std::vector<T> GridIndex<T>::query(const BBox& queryBBox) const {
     std::vector<T> result;
-    query(queryBBox, [&](const T& t, const BBox&) -> bool {
+    visit(queryBBox, [&](const T& t, const BBox&) -> bool {
         result.push_back(t);
         return false;
     });
@@ -180,7 +191,7 @@ std::vector<T> GridIndex<T>::query(const BBox& queryBBox) const {
 template <class T>
 std::vector<std::pair<T, typename GridIndex<T>::BBox>> GridIndex<T>::queryWithBoxes(const BBox& queryBBox) const {
     std::vector<std::pair<T, BBox>> result;
-    query(queryBBox, [&](const T& t, const BBox& bbox) -> bool {
+    visit(queryBBox, [&](const T& t, const BBox& bbox) -> bool {
         result.push_back(std::make_pair(t, bbox));
         return false;
     });
@@ -188,9 +199,10 @@ std::vector<std::pair<T, typename GridIndex<T>::BBox>> GridIndex<T>::queryWithBo
 }
 
 template <class T>
-bool GridIndex<T>::hitTest(const BBox& queryBBox, std::optional<std::function<bool(const T&)>> predicate) const {
+template <std::predicate<const T&> Predicate>
+bool GridIndex<T>::hitTest(const BBox& queryBBox, const std::optional<Predicate>& predicate) const {
     bool hit = false;
-    query(queryBBox, [&](const T& t, const BBox&) -> bool {
+    visit(queryBBox, [&](const T& t, const BBox&) -> bool {
         if (!predicate || (*predicate)(t)) {
             hit = true;
             return true;
@@ -202,9 +214,10 @@ bool GridIndex<T>::hitTest(const BBox& queryBBox, std::optional<std::function<bo
 }
 
 template <class T>
-bool GridIndex<T>::hitTest(const BCircle& queryBCircle, std::optional<std::function<bool(const T&)>> predicate) const {
+template <std::predicate<const T&> Predicate>
+bool GridIndex<T>::hitTest(const BCircle& queryBCircle, const std::optional<Predicate>& predicate) const {
     bool hit = false;
-    query(queryBCircle, [&](const T& t, const BBox&) -> bool {
+    visit(queryBCircle, [&](const T& t, const BBox&) -> bool {
         if (!predicate || (*predicate)(t)) {
             hit = true;
             return true;
@@ -232,10 +245,7 @@ typename GridIndex<T>::BBox GridIndex<T>::convertToBox(const BCircle& circle) co
 }
 
 template <class T>
-void GridIndex<T>::query(const BBox& queryBBox, std::function<bool(const T&, const BBox&)> resultFn) const {
-    std::unordered_set<uint32_t> seenBoxes;
-    std::unordered_set<uint32_t> seenCircles;
-
+void GridIndex<T>::visit(const BBox& queryBBox, std::predicate<const T&, const BBox&> auto&& resultFn) const {
     if (noIntersection(queryBBox)) {
         return;
     } else if (completeIntersection(queryBBox)) {
@@ -265,11 +275,9 @@ void GridIndex<T>::query(const BBox& queryBBox, std::function<bool(const T&, con
             cellIndex = xCellCount * y + x;
             // Look up other boxes
             for (auto uid : boxCells[cellIndex]) {
-                if (!seenBoxes.contains(uid)) {
-                    seenBoxes.insert(uid);
-
-                    auto& pair = boxElements.at(uid);
-                    auto& bbox = pair.second;
+                auto& pair = boxElements.at(uid);
+                auto& bbox = pair.second;
+                if (isFirstVisit(bbox, cx1, cy1, x, y)) {
                     if (boxesCollide(queryBBox, bbox)) {
                         if (resultFn(pair.first, bbox)) {
                             return;
@@ -280,11 +288,9 @@ void GridIndex<T>::query(const BBox& queryBBox, std::function<bool(const T&, con
 
             // Look up circles
             for (auto uid : circleCells[cellIndex]) {
-                if (!seenCircles.contains(uid)) {
-                    seenCircles.insert(uid);
-
-                    auto& pair = circleElements.at(uid);
-                    auto& bcircle = pair.second;
+                auto& pair = circleElements.at(uid);
+                auto& bcircle = pair.second;
+                if (isFirstVisit(convertToBox(bcircle), cx1, cy1, x, y)) {
                     if (circleAndBoxCollide(bcircle, queryBBox)) {
                         if (resultFn(pair.first, convertToBox(bcircle))) {
                             return;
@@ -297,10 +303,7 @@ void GridIndex<T>::query(const BBox& queryBBox, std::function<bool(const T&, con
 }
 
 template <class T>
-void GridIndex<T>::query(const BCircle& queryBCircle, std::function<bool(const T&, const BBox&)> resultFn) const {
-    std::unordered_set<size_t> seenBoxes;
-    std::unordered_set<size_t> seenCircles;
-
+void GridIndex<T>::visit(const BCircle& queryBCircle, std::predicate<const T&, const BBox&> auto&& resultFn) const {
     BBox queryBBox = convertToBox(queryBCircle);
     if (noIntersection(queryBBox)) {
         return;
@@ -315,6 +318,7 @@ void GridIndex<T>::query(const BCircle& queryBCircle, std::function<bool(const T
                 return;
             }
         }
+        return;
     }
 
     auto cx1 = convertToXCellCoord(queryBCircle.center.x - queryBCircle.radius);
@@ -330,11 +334,9 @@ void GridIndex<T>::query(const BCircle& queryBCircle, std::function<bool(const T
             cellIndex = xCellCount * y + x;
             // Look up boxes
             for (auto uid : boxCells[cellIndex]) {
-                if (!seenBoxes.contains(uid)) {
-                    seenBoxes.insert(uid);
-
-                    auto& pair = boxElements.at(uid);
-                    auto& bbox = pair.second;
+                auto& pair = boxElements.at(uid);
+                auto& bbox = pair.second;
+                if (isFirstVisit(bbox, cx1, cy1, x, y)) {
                     if (circleAndBoxCollide(queryBCircle, bbox)) {
                         if (resultFn(pair.first, bbox)) {
                             return;
@@ -345,11 +347,9 @@ void GridIndex<T>::query(const BCircle& queryBCircle, std::function<bool(const T
 
             // Look up other circles
             for (auto uid : circleCells[cellIndex]) {
-                if (!seenCircles.contains(uid)) {
-                    seenCircles.insert(uid);
-
-                    auto& pair = circleElements.at(uid);
-                    auto& bcircle = pair.second;
+                auto& pair = circleElements.at(uid);
+                auto& bcircle = pair.second;
+                if (isFirstVisit(convertToBox(bcircle), cx1, cy1, x, y)) {
                     if (circlesCollide(queryBCircle, bcircle)) {
                         if (resultFn(pair.first, convertToBox(bcircle))) {
                             return;

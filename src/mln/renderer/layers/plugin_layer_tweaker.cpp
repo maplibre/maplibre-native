@@ -83,7 +83,8 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                            registration->enableNearClippedMatrix,
                                            false,
                                            drawable,
-                                           !registration->enableNearClippedMatrix);
+                                           !registration->enableNearClippedMatrix,
+                                           /*renderToTerrain=*/false);
             }
             auto callbackContext = frameContext;
             if (tileID) {

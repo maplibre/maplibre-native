@@ -45,6 +45,8 @@ public:
                 std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile);
 
     const std::map<UnwrappedTileID, std::reference_wrapper<Tile>>& getRenderedTiles() const { return renderedTiles; }
+    /// The tiles the last update left out for building none of the layers
+    const std::vector<UnwrappedTileID>& getEmptyTileIDs() const { return emptyTileIDs; }
     Tile* getTile(const OverscaledTileID&);
     const Tile* getRenderedTile(const UnwrappedTileID&) const;
 
@@ -68,6 +70,8 @@ public:
     void dumpDebugLogs() const;
 
     const std::map<OverscaledTileID, std::unique_ptr<Tile>>& getTiles() const { return tiles; }
+    /// Tiles that left the cover, kept for when it comes back to them.
+    const TileCache& getCache() const { return cache; }
     void clearAll();
 
     void updateFadingTiles();
@@ -80,6 +84,7 @@ private:
     TileCache cache;
 
     std::map<UnwrappedTileID, std::reference_wrapper<Tile>> renderedTiles; // Sorted by tile id.
+    std::vector<UnwrappedTileID> emptyTileIDs;
     TileObserver* observer = nullptr;
 
     float prevLng = 0;

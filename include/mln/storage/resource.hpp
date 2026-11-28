@@ -23,7 +23,16 @@ public:
         Image
     };
 
-    enum class Priority : bool {
+    // The order the online file source serves queued requests in: all High
+    // before any Regular, all Regular before any Low, first come first served
+    // within each. At most 32 High requests go ahead of the Regular requests
+    // already waiting, the rest queue behind them: a burst of High requests
+    // cannot bury the Regular requests already waiting, but it does not
+    // interleave them. A request that arrives after the burst waits behind all
+    // of it, and while High requests keep arriving as fast as slots free up, a
+    // waiting Regular request is not served.
+    enum class Priority : uint8_t {
+        High,
         Regular,
         Low
     };

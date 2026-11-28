@@ -10,15 +10,16 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionShader";
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(3) position: vec2<i32>,
     @location(4) decimals_ed: vec2<u32>,
     @location(5) normal2d: vec2<i32>,
+    @location(9) centroid: vec2<i32>,
 #ifndef HAS_UNIFORM_u_color
     @location(6) color: vec4<f32>,
 #endif
@@ -47,6 +48,12 @@ struct FillExtrusionDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     pad1: f32,
+    dem_coords: vec4<f32>,
+    dem_unpack: vec4<f32>,
+    dem_dim: f32,
+    dem_exaggeration: f32,
+    dem_enabled: f32,
+    pad2: f32,
 };
 
 struct FillExtrusionPropsUBO {
@@ -71,6 +78,26 @@ struct GlobalIndexUBO {
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionDrawableUBO>;
 @group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(1) @binding(0) var dem_sampler: sampler;
+@group(1) @binding(1) var dem_texture: texture_2d<f32>;
+
+// Terrain elevation (meters) at a tile-local coordinate, bilinear on DEM pixel
+// centers (2px backfilled border), matching maplibre-gl-js get_elevation().
+fn fillExtrusionElevation(pos: vec2<f32>, drawable: FillExtrusionDrawableUBO) -> f32 {
+    if (drawable.dem_enabled == 0.0) {
+        return 0.0;
+    }
+    let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.5;
+    let f = fract(coord);
+    let c = vec2<i32>(floor(coord));
+    let hi = vec2<i32>(textureDimensions(dem_texture, 0)) - vec2<i32>(1);
+    let tl = dem_texel(dem_texture, clamp(c, vec2<i32>(0), hi), drawable.dem_unpack);
+    let tr = dem_texel(dem_texture, clamp(c + vec2<i32>(1, 0), vec2<i32>(0), hi), drawable.dem_unpack);
+    let bl = dem_texel(dem_texture, clamp(c + vec2<i32>(0, 1), vec2<i32>(0), hi), drawable.dem_unpack);
+    let br = dem_texel(dem_texture, clamp(c + vec2<i32>(1, 1), vec2<i32>(0), hi), drawable.dem_unpack);
+    let elevation = mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
+    return elevation * drawable.dem_exaggeration;
+}
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -78,16 +105,22 @@ fn main(in: VertexInput) -> VertexOutput {
     let drawable = drawableVector[globalIndex.value];
 
 #ifndef HAS_UNIFORM_u_base
-    let baseValue = max(unpack_mix_float(in.base, drawable.base_t), 0.0);
+    let baseClamped = max(unpack_mix_float(in.base, drawable.base_t), 0.0);
 #else
-    let baseValue = max(props.light_position_base.w, 0.0);
+    let baseClamped = max(props.light_position_base.w, 0.0);
 #endif
 
 #ifndef HAS_UNIFORM_u_height
-    let heightValue = max(unpack_mix_float(in.height, drawable.height_t), 0.0);
+    let heightClamped = max(unpack_mix_float(in.height, drawable.height_t), 0.0);
 #else
-    let heightValue = max(props.height, 0.0);
+    let heightClamped = max(props.height, 0.0);
 #endif
+
+    // Raise the whole extrusion by the terrain elevation at the polygon centroid
+    // (one value per building), with gl-js's "basement" drop for ground-level floors.
+    let ele = fillExtrusionElevation(vec2<f32>(f32(in.centroid.x), f32(in.centroid.y)), drawable);
+    let baseValue = baseClamped + ele - select(10.0, 0.0, baseClamped > 0.0) * drawable.dem_enabled;
+    let heightValue = heightClamped + ele;
 
     let normal = vec3<f32>(vec2<f32>(in.normal2d) / 16384.0, select(0.0, 1.0, in.normal2d.x == 0 && in.normal2d.y == 0));
 
@@ -148,15 +181,16 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionPatternShader";
-    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(3) position: vec2<i32>,
     @location(4) decimals_ed: vec2<u32>,
     @location(5) normal2d: vec2<i32>,
+    @location(10) centroid: vec2<i32>,
 #ifndef HAS_UNIFORM_u_base
     @location(6) base: vec2<f32>,
 #endif
@@ -196,6 +230,12 @@ struct FillExtrusionPatternDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     pad1: f32,
+    dem_coords: vec4<f32>,
+    dem_unpack: vec4<f32>,
+    dem_dim: f32,
+    dem_exaggeration: f32,
+    dem_enabled: f32,
+    pad2: f32,
 };
 
 struct FillExtrusionPatternTilePropsUBO {
@@ -221,7 +261,16 @@ struct FillExtrusionPropsUBO {
 };
 
 struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
     pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -234,6 +283,26 @@ struct GlobalIndexUBO {
 @group(0) @binding(4) var<storage, read> tilePropsVector: array<FillExtrusionPatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(1) @binding(2) var dem_sampler: sampler;
+@group(1) @binding(3) var dem_texture: texture_2d<f32>;
+
+// Terrain elevation (meters) at a tile-local coordinate, bilinear on DEM pixel
+// centers (2px backfilled border), matching maplibre-gl-js get_elevation().
+fn fillExtrusionElevation(pos: vec2<f32>, drawable: FillExtrusionPatternDrawableUBO) -> f32 {
+    if (drawable.dem_enabled == 0.0) {
+        return 0.0;
+    }
+    let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.5;
+    let f = fract(coord);
+    let c = vec2<i32>(floor(coord));
+    let hi = vec2<i32>(textureDimensions(dem_texture, 0)) - vec2<i32>(1);
+    let tl = dem_texel(dem_texture, clamp(c, vec2<i32>(0), hi), drawable.dem_unpack);
+    let tr = dem_texel(dem_texture, clamp(c + vec2<i32>(1, 0), vec2<i32>(0), hi), drawable.dem_unpack);
+    let bl = dem_texel(dem_texture, clamp(c + vec2<i32>(0, 1), vec2<i32>(0), hi), drawable.dem_unpack);
+    let br = dem_texel(dem_texture, clamp(c + vec2<i32>(1, 1), vec2<i32>(0), hi), drawable.dem_unpack);
+    let elevation = mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
+    return elevation * drawable.dem_exaggeration;
+}
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -260,7 +329,14 @@ fn main(in: VertexInput) -> VertexOutput {
     let z = select(baseValue, heightValue, t > 0.0);
     let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
 
-    out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
+    // Raise the extrusion by the terrain elevation sampled once at the polygon centroid, and
+    // drop ground-level floors slightly so buildings don't hang off a slope (as the plain
+    // extrusion shader does). The pattern position and the side gradient keep the height
+    // above the ground, so the pattern does not shift with the terrain.
+    let ele = fillExtrusionElevation(vec2<f32>(f32(in.centroid.x), f32(in.centroid.y)), drawable);
+    let liftedZ = z + ele - select(10.0, 0.0, t > 0.0 || baseValue > 0.0) * drawable.dem_enabled;
+
+    out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, liftedZ, 1.0);
 
     var patternPos: vec2<f32>;
     if (normal.z == 1.0) {

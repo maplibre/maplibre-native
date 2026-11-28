@@ -19,9 +19,9 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionShader";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto vertex = R"(
@@ -41,6 +41,17 @@ layout(location = 3) in vec2 in_base;
 layout(location = 4) in vec2 in_height;
 #endif
 
+layout(location = 5) in ivec2 in_centroid;
+
+// 3D-terrain DEM for elevating the extrusion. NOTE: the Vulkan drawable binds
+// textures by their shader texture-id enum value (ImageDescriptorSet::update
+// uses the drawable texture slot as dstBinding), so the GLSL binding MUST be
+// idFillExtrusionDEMTexture (= 1), not the TextureInfo order. Declaring this
+// at binding 0 reads the backend's dummy texture instead - which unpacks to a
+// ~1.6e6 m elevation and moves every building out of the frustum (the failure
+// mode of the first two attempts, see TERRAIN.md backend parity).
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D dem_sampler;
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -58,6 +69,13 @@ struct FillExtrusionDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float pad1;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
@@ -84,15 +102,15 @@ void main() {
     const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
-    const float base = props.light_position_base.w;
+    float base = props.light_position_base.w;
 #else
-    const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
+    float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
-    const float height = props.height;
+    float height = props.height;
 #else
-    const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
+    float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
@@ -100,6 +118,15 @@ void main() {
 #else
     vec4 color = unpack_mix_color(in_color, drawable.color_t);
 #endif
+
+    // Raise the whole extrusion by the terrain elevation sampled once at the
+    // polygon centroid (so it doesn't shear across a slope), and drop
+    // ground-level floors slightly so buildings don't hang off a slope
+    // (mirrors the GL fill_extrusion.vertex.glsl / maplibre-gl-js)
+    const float ele = get_elevation(vec2(in_centroid), dem_sampler, drawable.dem_coords, drawable.dem_unpack,
+                                    drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    base += ele - (base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+    height += ele;
 
     const vec3 normal = vec3(0.0, 0.0, 1.0);
     const float t = 1.0;
@@ -169,7 +196,7 @@ struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::V
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 5> instanceAttributes;
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
 
@@ -189,6 +216,11 @@ layout(location = 4) in vec2 in_base;
 layout(location = 5) in vec2 in_height;
 #endif
 
+// 3D-terrain DEM. Binding MUST equal idFillExtrusionDEMTexture (= 1); the
+// Vulkan drawable binds textures by texture-id slot, see the non-instanced
+// variant's note.
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D dem_sampler;
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -206,6 +238,13 @@ struct FillExtrusionDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float pad1;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
@@ -226,9 +265,15 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     float pad2;
 } props;
 
+// This struct aliases the bucket's shared vertex buffer (FillExtrusionLayoutVertex)
+// directly - the C++ struct IS the SSBO record. centroid_pos packs two int16 in
+// one 32-bit word exactly like pos, keeping the std430 stride at 12 bytes to
+// match the C++ layout. An ivec2 here would align to 8 and desync the stride
+// (the failure mode of the first reverted attempt, see TERRAIN.md).
 struct OutlineInstance {
     int pos;
     uint decimals_ed;
+    int centroid_pos;
 };
 
 layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedDrawableUBO) readonly buffer FillExtrusionInstanceVector {
@@ -252,15 +297,15 @@ void main() {
     const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
-    const float base = props.light_position_base.w;
+    float base = props.light_position_base.w;
 #else
-    const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
+    float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
-    const float height = props.height;
+    float height = props.height;
 #else
-    const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
+    float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
@@ -268,6 +313,16 @@ void main() {
 #else
     vec4 color = unpack_mix_color(in_color, drawable.color_t);
 #endif
+
+    // Same rigid whole-building lift as the roof shader: elevation at the
+    // polygon centroid (from the aliased instance record), so walls and roof
+    // stay attached on a slope
+    const vec2 centroidPos = unpack_int(instanceVector.instance[gl_InstanceIndex].centroid_pos);
+    const float ele = get_elevation(centroidPos, dem_sampler, drawable.dem_coords, drawable.dem_unpack,
+                                    drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    base += ele - (base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+    height += ele;
+
     const vec2 nextInstancePos = unpack_int(instanceVector.instance[gl_InstanceIndex + 1].pos);
     const vec2 nextInstanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex + 1].decimals_ed);
 
@@ -341,9 +396,9 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionPatternShader";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto vertex = R"(
@@ -367,6 +422,13 @@ layout(location = 4) in uvec4 in_pattern_from;
 layout(location = 5) in uvec4 in_pattern_to;
 #endif
 
+layout(location = 6) in ivec2 in_centroid;
+
+// 3D-terrain DEM. Binding MUST equal idFillExtrusionDEMTexture (= 1); the
+// Vulkan drawable binds textures by texture-id slot, see the plain variant's
+// note.
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D dem_sampler;
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -384,6 +446,13 @@ struct FillExtrusionDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float pad1;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
@@ -449,7 +518,15 @@ void main() {
     const float z = t > 0.0 ? height : base;
     const vec2 decimals = unpack_float(floor(in_decimals_ed.x / 2)) / 128.0;
 
-    gl_Position = drawable.matrix * vec4(in_position + decimals, z, 1.0);
+    // Raise the extrusion by the terrain elevation sampled once at the polygon centroid, and
+    // drop ground-level floors slightly so buildings don't hang off a slope (as the plain
+    // extrusion shader does). The pattern position and the side gradient keep the height
+    // above the ground, so the pattern does not shift with the terrain.
+    const float ele = get_elevation(vec2(in_centroid), dem_sampler, drawable.dem_coords, drawable.dem_unpack,
+                                    drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const float lifted_z = z + ele - (t > 0.0 || base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+
+    gl_Position = drawable.matrix * vec4(in_position + decimals, lifted_z, 1.0);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -612,7 +689,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternInstancedShader, gfx::Backend::
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 6> instanceAttributes;
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto vertex = R"(
@@ -635,6 +712,11 @@ layout(location = 5) in uvec4 in_pattern_from;
 layout(location = 6) in uvec4 in_pattern_to;
 #endif
 
+// 3D-terrain DEM. Binding MUST equal idFillExtrusionDEMTexture (= 1); the
+// Vulkan drawable binds textures by texture-id slot, see the plain
+// non-instanced variant's note.
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D dem_sampler;
+
 layout(push_constant) uniform Constants {
     int ubo_index;
 } constant;
@@ -652,15 +734,25 @@ struct FillExtrusionDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float pad1;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
 
+// Must match the 12-byte FillExtrusionLayoutVertex this buffer aliases (see the
+// non-pattern instanced variant); centroid_pos packs two int16 in one int
 struct OutlineInstance {
     int pos;
     uint decimals_ed;
+    int centroid_pos;
 };
 
 layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedDrawableUBO) readonly buffer FillExtrusionInstanceVector {
@@ -741,7 +833,16 @@ void main() {
     const float t = float(in_position.y);
     const float z = t > 0.0 ? height : base;
 
-    gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
+
+    // Same rigid whole-building lift as the plain instanced shader: elevation at the polygon
+    // centroid (from the aliased instance record). The pattern position and the side gradient
+    // keep the height above the ground, so the pattern does not shift with the terrain.
+    const vec2 centroidPos = unpack_int(instanceVector.instance[gl_InstanceIndex].centroid_pos);
+    const float ele = get_elevation(centroidPos, dem_sampler, drawable.dem_coords, drawable.dem_unpack,
+                                    drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const float lifted_z = z + ele - (t > 0.0 || base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+
+    gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, lifted_z, 1.0);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)

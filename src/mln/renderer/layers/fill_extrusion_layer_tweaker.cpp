@@ -9,6 +9,7 @@
 #include <mln/renderer/render_tile.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_terrain.hpp>
 #include <mln/renderer/paint_property_binder.hpp>
 #include <mln/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mln/shaders/shader_program_base.hpp>
@@ -86,9 +87,27 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const auto& translation = evaluated.get<FillExtrusionTranslate>();
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-        constexpr bool nearClipped = true;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
+        // On terrain, the extrusion depth-tests against the terrain mesh, so it has to be
+        // projected the way the mesh is (TerrainLayerTweaker): the default near plane rather
+        // than the near-clipped one, or every extrusion lands in front of the ground.
+        const bool onTerrain = parameters.terrain != nullptr;
+        const bool nearClipped = !onTerrain;
+        // Fill extrusion is elevated, not draped
+        auto matrix = getTileMatrix(tileID,
+                                    parameters,
+                                    translation,
+                                    anchor,
+                                    nearClipped,
+                                    inViewportPixelUnits,
+                                    drawable,
+                                    /*aligned=*/false,
+                                    /*renderToTerrain=*/false);
+#if !MLN_RENDER_BACKEND_OPENGL
+        if (onTerrain) {
+            // The mesh's clip z is remapped from [-1, 1] to [0, 1] on these backends; match it.
+            matrix::remapClipZToUnitRange(matrix);
+        }
+#endif
 
         const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
         const auto zoomScale = state.zoomScale(tileID.canonical.z);
@@ -112,6 +131,18 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             binders->setPatternParameters(patternPosA, patternPosB, crossfade);
         }
 
+        // When terrain is enabled, bind the covering DEM tile so the vertex
+        // shader can displace the extrusion by the terrain elevation
+        std::optional<RenderTerrain::TerrainData> terrainData;
+        if (parameters.terrain && parameters.terrain->isEnabled()) {
+            terrainData = parameters.terrain->getTerrainData(tileID);
+        }
+        if (parameters.terrain) {
+            drawable.setTexture(
+                terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
+                idFillExtrusionDEMTexture);
+        }
+
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
 #else
@@ -128,7 +159,15 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             .color_t = std::get<0>(binders->get<FillExtrusionColor>()->interpolationFactor(zoom)),
             .pattern_from_t = std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
             .pattern_to_t = std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
-            .pad1 = 0
+            .pad1 = 0,
+
+            .dem_coords = terrainData ? terrainData->demCoords : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_unpack = parameters.terrain ? parameters.terrain->getDEMUnpackVector()
+                                             : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_dim = terrainData ? terrainData->demDim : 0.0f,
+            .dem_exaggeration = parameters.terrain ? parameters.terrain->getExaggeration() : 0.0f,
+            .dem_enabled = terrainData ? 1.0f : 0.0f,
+            .pad2 = 0
         };
 
 #if MLN_UBO_CONSOLIDATION

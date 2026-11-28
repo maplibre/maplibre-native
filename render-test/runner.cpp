@@ -44,7 +44,10 @@ GfxProbe::GfxProbe(const mln::gfx::RenderingStats& stats, const GfxProbe& prev)
       numTextures(stats.numActiveTextures),
       memIndexBuffers(stats.memIndexBuffers, std::max(stats.memIndexBuffers, prev.memIndexBuffers.peak)),
       memVertexBuffers(stats.memVertexBuffers, std::max(stats.memVertexBuffers, prev.memVertexBuffers.peak)),
-      memTextures(stats.memTextures, std::max(stats.memTextures, prev.memTextures.peak)) {}
+      // RenderingStats::memTextures is int64_t; GfxProbe::Memory tracks int (render
+      // tests never approach 2GB), so narrow to match its (int, int) constructor
+      memTextures(static_cast<int>(stats.memTextures),
+                  std::max(static_cast<int>(stats.memTextures), prev.memTextures.peak)) {}
 
 // static
 gfx::HeadlessBackend::SwapBehaviour swapBehavior(MapMode mode) {
@@ -131,7 +134,10 @@ void TestRunner::checkQueryTestResults(mln::PremultipliedImage&& actualImage,
     metadata.actual = mln::encodePNG(actualImage);
 
     if (actualImage.size.isEmpty()) {
-        metadata.errorMessage = "Invalid size for actual image";
+        // Keep the reason a render raised, if it did (runTest); the empty image is only its effect.
+        if (metadata.errorMessage.empty()) {
+            metadata.errorMessage = "Invalid size for actual image";
+        }
         metadata.renderErrored++;
         return;
     }
@@ -212,7 +218,10 @@ void TestRunner::checkRenderTestResults(mln::PremultipliedImage&& actualImage, T
         metadata.actual = mln::encodePNG(actualImage);
 
         if (actualImage.size.isEmpty()) {
-            metadata.errorMessage = "Invalid size for actual image";
+            // Keep the reason a render raised, if it did (runTest); the empty image is only its effect.
+            if (metadata.errorMessage.empty()) {
+                metadata.errorMessage = "Invalid size for actual image";
+            }
             metadata.renderErrored++;
             return;
         }
@@ -664,6 +673,8 @@ void resetContext(const TestMetadata& metadata, TestContext& ctx) {
                               .withXSkew(metadata.xSkew)
                               .withYSkew(metadata.ySkew));
     map.setDebug(metadata.debug);
+    map.setTerrainSkirtLength(metadata.terrainSkirtLength);
+    map.setCenterClampedToGround(metadata.centerClampedToGround);
     map.getStyle().loadJSON(serializeJsonValue(metadata.document));
 }
 
@@ -941,7 +952,7 @@ mln::HeadlessFrontend::RenderResult TestRunner::runTest(TestMetadata& metadata, 
     try {
         if (metadata.outputsImage) result = ctx.getFrontend().render(ctx.getMap());
     } catch (const std::exception& e) {
-        ctx.getMetadata().errorMessage = std::string("Renering raised an exception: ") + e.what();
+        ctx.getMetadata().errorMessage = std::string("Rendering raised an exception: ") + e.what();
     }
     return result;
 }

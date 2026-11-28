@@ -2,6 +2,20 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+- With 3D terrain, a map pitched at or just under the level-of-detail pitch threshold (60 degrees) no longer shows the sky through the far corners of the view. Such a view needs more mesh tiles than the load mode's cap when the mesh is no deeper than the DEM, and the farthest were dropped.
+- Add `MLNMapView.fieldOfView`, the vertical field of view of the map’s camera in degrees, and `-[MLNMapView setCenterCoordinate:centerAltitude:fromEyeCoordinate:eyeAltitude:]`, which puts the camera at an eye position looking at a point, above the eye included.
+- Text a tile was drawn without because its glyph range failed to load is drawn as soon as the range loads, instead of when the tile is next reloaded ([#5086](https://github.com/maplibre/maplibre-native/pull/5086)).
+- With 3D terrain on, an `MLNShapeSource` given a new shape or emptied of its features shows the change on the terrain at once, instead of keeping its old content until the next zoom level ([#4816](https://github.com/maplibre/maplibre-native/pull/4816)).
+- With 3D terrain, pinch, rotate and two-finger tilt gestures turn around the ground under the middle of the screen instead of a sea-level point beneath it, and a pan over high ground no longer jumps the map along the view. Removing the terrain brings the centre back to sea level without moving the camera. After a gesture with terrain, camera changes the app makes keep the centre altitude the gesture set; set the altitude explicitly to place the centre elsewhere ([#4711](https://github.com/maplibre/maplibre-native/pull/4711)).
+- Add `MLNMapView.centerAltitude` and `-[MLNMapView setCenterAltitudeKeepingView:]`. With 3D terrain, a center coordinate and zoom level describe the same view only at the same center altitude, so save the altitude with a camera and restore it before setting the camera back ([#4712](https://github.com/maplibre/maplibre-native/pull/4712)).
+- With 3D terrain on and the centre clamp enabled, the clamp no longer cancels a running camera animation; the camera is anchored to the ground once the animation ends ([#4768](https://github.com/maplibre/maplibre-native/pull/4768)).
+- With 3D terrain, annotation views, the user location view, callouts, line-placed labels and the collision index sit on the terrain surface instead of at sea level, so labels show, hide and overlap where they are drawn and pins on slopes can be selected. `-convertCoordinate:toPointToView:` and `-convertPoint:toCoordinateFromView:` answer on the terrain surface, from a copy of the terrain heights kept on the map side ([#4558](https://github.com/maplibre/maplibre-native/pull/4558)).
+- With 3D terrain, each height of the DEM stands at the centre of its pixel, where a hillshade or color-relief layer of the same source draws it, as in maplibre-gl-js. The terrain stood half a DEM pixel north-west of its data (about 6 m with 512 px tiles at zoom 12), so the shading of a hillshade did not line up with the slopes it shades ([#4971](https://github.com/maplibre/maplibre-native/pull/4971)).
+- A line label with `text-pitch-alignment: viewport` is no longer drawn folded over itself on a pitched map. Such a label follows its line as projected to the screen, where a bend that `text-max-angle` allowed at layout can be a hairpin: it is now left out once it turns by more than twice `text-max-angle` over three glyphs. While the camera moves, a label that was left out comes back only once it is within `text-max-angle` again, so it does not flicker; a map that is not pitched is unchanged ([#5030](https://github.com/maplibre/maplibre-native/pull/5030)).
+- Revalidate unusable cached resources when resuming an offline download ([#410](https://github.com/maplibre/maplibre-native/issues/410)).
+
 ## 7.1.0
 
 ### Features

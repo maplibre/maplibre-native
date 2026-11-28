@@ -138,4 +138,61 @@ typedef NS_ENUM(NSInteger, MLNOrnamentVisibility) {
   MLNOrnamentVisibilityVisible
 };
 
+/**
+ Constants indicating how much work the map does per frame while it loads and draws 3D terrain.
+
+ The mode trades the sharpness of the first view for smooth interaction on weaker GPUs, so it
+ is a per-map choice that depends on the hardware. It is not a style property. Besides spreading
+ the loading work over several frames, it sets how deep the terrain mesh goes past a coarse
+ elevation source and how many mesh tiles a frame may have, so it changes the final image:
+ close-ups are sharper in ``MLNTerrainLoadModeQuality``, and tilted views keep more detail in
+ the distance. It has no effect while the map is flat.
+ */
+typedef NS_ENUM(NSUInteger, MLNTerrainLoadMode) {
+  /**
+   No limit: all revealed tiles and drapes build at once. The sharpest first view, which may
+   stall a frame on a large burst, such as zooming in over new coverage. The terrain mesh
+   follows the view past a coarse elevation source, as MapLibre GL JS does, with up to 64 mesh
+   tiles. This is the default.
+   */
+  MLNTerrainLoadModeQuality,
+  /**
+   At most 32 new tiles and 16 drape re-renders per frame, a middle ground that keeps a
+   near-instant first view while smoothing the worst stalls. The terrain mesh reaches zoom
+   level 15 over a coarse elevation source, with up to 48 mesh tiles.
+   */
+  MLNTerrainLoadModeBalanced,
+  /**
+   At most 8 new tiles and 4 drape re-renders per frame, the smoothest interaction on weak
+   GPUs, with the most visible fill-in. The terrain mesh reaches zoom level 14 over a coarse
+   elevation source, with up to 24 mesh tiles.
+   */
+  MLNTerrainLoadModePerformance,
+};
+
+/**
+ Constants indicating whether the edges of 3D terrain tiles are skirted.
+
+ A skirt is a vertical curtain below a tile edge. Skirts hide the hairline gaps between
+ neighboring terrain tiles of different zoom levels, but they show as vertical artifacts where
+ the map has a transparent background. It has no effect while the map is flat.
+ */
+typedef NS_ENUM(NSUInteger, MLNTerrainSkirtLength) {
+  /**
+   Every tile edge gets a skirt about a fifth of the tile's width at the current zoom level.
+   This is the default.
+   */
+  MLNTerrainSkirtLengthAuto,
+  /**
+   No skirts. Nothing shows through a transparent background, but gaps can show between tiles of
+   different zoom levels.
+   */
+  MLNTerrainSkirtLengthNone,
+  /**
+   Skirt a tile edge only where another tile of the mesh lies beside it, so the stitches
+   close and the edges at the end of the mesh show no vertical artifacts.
+   */
+  MLNTerrainSkirtLengthShared,
+};
+
 NS_ASSUME_NONNULL_END

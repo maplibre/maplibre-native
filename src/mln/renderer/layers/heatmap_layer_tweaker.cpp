@@ -5,6 +5,7 @@
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_static_data.hpp>
+#include <mln/renderer/render_terrain.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/shaders/heatmap_layer_ubo.hpp>
 #include <mln/style/layers/heatmap_layer_properties.hpp>
@@ -66,8 +67,38 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits, drawable);
+        // Heatmap tile drawables render into the heatmap layer's own render
+        // target, never into the terrain drape targets (gl-js does not drape it)
+        const auto matrix = getTileMatrix(tileID,
+                                          parameters,
+                                          {0.f, 0.f},
+                                          TranslateAnchorType::Viewport,
+                                          nearClipped,
+                                          inViewportPixelUnits,
+                                          drawable,
+                                          /*aligned=*/false,
+                                          /*renderToTerrain=*/false);
+
+        // When terrain is enabled, bind the covering DEM tile so the vertex
+        // shader can lift each kernel to the terrain height at its centre
+        const bool terrainEnabled = parameters.terrain && parameters.terrain->isEnabled();
+        std::optional<RenderTerrain::TerrainData> terrainData;
+        if (terrainEnabled) {
+            terrainData = parameters.terrain->getTerrainData(tileID);
+        }
+        if (parameters.terrain) {
+            drawable.setTexture(
+                terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
+                idHeatmapDEMTexture);
+        }
+
+        // Kernels hidden behind terrain: packed terrain depth, read by calculate_visibility in the
+        // vertex shader as symbols and circles do.
+        float depthEnabled = 0.0f;
+        if (terrainEnabled) {
+            drawable.setTexture(parameters.terrain->getDepthTexture(context), idHeatmapDepthTexture);
+            depthEnabled = 1.0f;
+        }
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
@@ -79,7 +110,15 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
             .weight_t = std::get<0>(binders->get<HeatmapWeight>()->interpolationFactor(zoom)),
             .radius_t = std::get<0>(binders->get<HeatmapRadius>()->interpolationFactor(zoom)),
-            .pad1 = 0
+            .depth_enabled = depthEnabled,
+
+            .dem_coords = terrainData ? terrainData->demCoords : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_unpack = terrainEnabled ? parameters.terrain->getDEMUnpackVector()
+                                         : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_dim = terrainData ? terrainData->demDim : 0.0f,
+            .dem_exaggeration = terrainEnabled ? parameters.terrain->getExaggeration() : 0.0f,
+            .dem_enabled = terrainData ? 1.0f : 0.0f,
+            .units_to_pixels_y = parameters.pixelsToGLUnits[1] != 0.0f ? 1.0f / parameters.pixelsToGLUnits[1] : 0.0f
         };
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);

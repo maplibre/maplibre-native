@@ -8,6 +8,7 @@ layout (std140) uniform GlobalPaintParamsUBO {
     highp float u_pixel_ratio;
     highp float u_map_zoom;
     lowp float global_pad1;
+    highp vec4 u_drape_tile;
 };
 
 layout (std140) uniform BackgroundPatternPropsUBO {

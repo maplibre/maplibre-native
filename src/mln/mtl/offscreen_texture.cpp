@@ -54,6 +54,18 @@ public:
         }
 #endif
 
+        // Neither depth nor stencil is loaded from or stored to memory: depth is cleared when a pass begins and
+        // the stencil starts undefined until the clip masks write it. A tile-based GPU needs no memory behind them.
+        if (context.getBackend().isMemorylessTextureSupported()) {
+            for (const auto& texture : {depthTexture, stencilTexture}) {
+                if (texture) {
+                    auto& attachment = static_cast<Texture2D&>(*texture);
+                    attachment.setUsage(MTL::TextureUsageRenderTarget);
+                    attachment.setStorageMode(MTL::StorageModeMemoryless);
+                }
+            }
+        }
+
         context.renderingStats().numFrameBuffers++;
     }
 
@@ -72,12 +84,26 @@ public:
         renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::alloc()->init());
         if (auto* colorTarget = renderPassDescriptor->colorAttachments()->object(0)) {
             colorTarget->setTexture(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
+            // An offscreen texture exists to be sampled afterwards, so its colour
+            // MUST be written back to the texture. Metal defaults a colour
+            // attachment to MTL::StoreActionDontCare, which on a tile-based GPU
+            // leaves the resolved texture undefined once the pass ends. Depth
+            // below is deliberately DontCare - it is not read back.
+            // (Committed while chasing the black terrain bands, which turned out
+            // to be the missing 3D depth state in mtl::LayerGroup; this changed
+            // nothing there, but relying on the default is undefined behaviour
+            // regardless, so it stays.)
+            colorTarget->setStoreAction(MTL::StoreActionStore);
         }
 
         if (depthTexture) {
             depthTexture->create();
             if (auto* depthTarget = renderPassDescriptor->depthAttachment()) {
                 depthTarget->setTexture(static_cast<Texture2D*>(depthTexture.get())->getMetalTexture());
+                // Clear depth each frame; the drape's depth buffer is not read back.
+                depthTarget->setLoadAction(MTL::LoadActionClear);
+                depthTarget->setClearDepth(1.0);
+                depthTarget->setStoreAction(MTL::StoreActionDontCare);
             }
         }
         if (stencilTexture) {
@@ -88,8 +114,26 @@ public:
         }
     }
 
+    void setMipmapped(bool mipmapped_, uint8_t maxAnisotropy) {
+        mipmapped = mipmapped_;
+        colorTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                               .wrapU = gfx::TextureWrapType::Clamp,
+                                               .wrapV = gfx::TextureWrapType::Clamp,
+                                               .maxAnisotropy = mipmapped ? maxAnisotropy : uint8_t{1},
+                                               .mipmapped = mipmapped});
+    }
+
     void swap() override {
         assert(commandBuffer);
+        if (mipmapped) {
+            // The render pass that drew into the texture has ended; rebuild the chain from it before the
+            // buffer is committed. swap() runs once per render of the texture, not once per frame.
+            if (auto* blit = commandBuffer->blitCommandEncoder()) {
+                blit->generateMipmaps(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
+                blit->endEncoding();
+                context.renderingStats().numMipmapChainsBuilt++;
+            }
+        }
         commandBuffer->commit();
         lastCommitted = commandBuffer;
         commandBuffer.reset();
@@ -137,6 +181,7 @@ private:
     Context& context;
     const Size size;
     const gfx::TextureChannelDataType type;
+    bool mipmapped = false;
     gfx::Texture2DPtr colorTexture;
     gfx::Texture2DPtr depthTexture;
     gfx::Texture2DPtr stencilTexture;
@@ -156,6 +201,10 @@ bool OffscreenTexture::isRenderable() {
 
 PremultipliedImage OffscreenTexture::readStillImage() {
     return getResource<OffscreenTextureResource>().readStillImage();
+}
+
+void OffscreenTexture::setMipmapped(bool mipmapped, uint8_t maxAnisotropy) {
+    getResource<OffscreenTextureResource>().setMipmapped(mipmapped, maxAnisotropy);
 }
 
 const gfx::Texture2DPtr& OffscreenTexture::getTexture() {

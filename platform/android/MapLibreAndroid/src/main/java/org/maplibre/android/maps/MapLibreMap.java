@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
@@ -417,6 +418,240 @@ public final class MapLibreMap {
   }
 
   /**
+   * Selects the 3D-terrain progressive-loading budget. Trades initial-load sharpness for
+   * smoother interaction on weaker GPUs by spreading new-tile builds and drape re-renders
+   * across frames. The mode also sets how deep the terrain mesh goes past a coarse DEM and how
+   * many mesh tiles a frame may have (see {@link TerrainLoadMode}). Default is
+   * {@link TerrainLoadMode#QUALITY} (no budget). Has no effect when terrain is not enabled.
+   *
+   * @param mode the terrain load mode
+   */
+  public void setTerrainLoadMode(@NonNull TerrainLoadMode mode) {
+    nativeMapView.setTerrainLoadMode(mode.ordinal());
+  }
+
+  /**
+   * Debug: when enabled, the renderer logs the camera eye's clearance over the 3D terrain
+   * ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the per-frame
+   * elevation sampling is skipped entirely when off, so it has no cost unless enabled.
+   *
+   * @param enabled whether to emit the above-ground debug log
+   */
+  public void setDebugAboveGroundLog(boolean enabled) {
+    nativeMapView.setDebugAboveGroundLog(enabled);
+  }
+
+  /**
+   * @return the current terrain load mode
+   * @see MapLibreMap#setTerrainLoadMode(TerrainLoadMode)
+   */
+  @NonNull
+  public TerrainLoadMode getTerrainLoadMode() {
+    return TerrainLoadMode.values()[nativeMapView.getTerrainLoadMode()];
+  }
+
+  /**
+   * Selects whether terrain tiles are skirted. Default is {@link TerrainSkirtLength#AUTO}.
+   * {@link TerrainSkirtLength#NONE} suits a map drawn over a transparent background, where the
+   * skirts would show as vertical artifacts. Has no effect when terrain is not enabled.
+   *
+   * @param length the terrain skirt length
+   */
+  public void setTerrainSkirtLength(@NonNull TerrainSkirtLength length) {
+    nativeMapView.setTerrainSkirtLength(length.ordinal());
+  }
+
+  /**
+   * @return the current terrain skirt length
+   * @see MapLibreMap#setTerrainSkirtLength(TerrainSkirtLength)
+   */
+  @NonNull
+  public TerrainSkirtLength getTerrainSkirtLength() {
+    return TerrainSkirtLength.values()[nativeMapView.getTerrainSkirtLength()];
+  }
+
+  /**
+   * Sets the color far 3D terrain fades toward: distance haze that blends the far edge of the
+   * terrain into whatever is drawn behind the map, such as a sky the app paints under a
+   * transparent map view.
+   * <p>
+   * The color's alpha is the most the ground is blended toward it. The haze shows only while
+   * {@link #setTerrainHazeRange(float)} is above 1. The default is transparent, no haze. Has no
+   * effect when terrain is not enabled.
+   *
+   * @param color the haze color, as an ARGB color int
+   */
+  public void setTerrainHazeColor(@ColorInt int color) {
+    nativeMapView.setTerrainHazeColor(color);
+  }
+
+  /**
+   * @return the color far 3D terrain fades toward, as an ARGB color int
+   * @see MapLibreMap#setTerrainHazeColor(int)
+   */
+  @ColorInt
+  public int getTerrainHazeColor() {
+    return nativeMapView.getTerrainHazeColor();
+  }
+
+  /**
+   * Sets how far the distance haze reaches, in multiples of the map center's distance from the
+   * camera.
+   * <p>
+   * Ground that far away and beyond takes the full {@link #setTerrainHazeColor(int) haze color};
+   * nearer ground fades toward it as in maplibre-gl-js's terrain fog with a
+   * {@code fog-ground-blend} of 0.5, so with 3 the haze begins at one and a half times the
+   * center's distance. As in maplibre-gl-js, the haze fades in between pitches of 60 and 70
+   * degrees. A value of 1 or less turns the haze off, and one above 1000 is held at 1000; the
+   * default is 0. Has no effect when terrain is not enabled.
+   *
+   * @param range the haze range, in multiples of the center's distance from the camera
+   */
+  public void setTerrainHazeRange(float range) {
+    nativeMapView.setTerrainHazeRange(range);
+  }
+
+  /**
+   * @return the haze range as the map holds it: 0 when the haze is off, otherwise between above 1
+   * and 1000
+   * @see MapLibreMap#setTerrainHazeRange(float)
+   */
+  public float getTerrainHazeRange() {
+    return nativeMapView.getTerrainHazeRange();
+  }
+
+  /**
+   * Sets whether the map centre rides the 3D terrain surface rather than sea level. Off by
+   * default. When on, the centre altitude follows the rendered terrain height under the centre,
+   * so pitching over tall ground keeps the camera above it instead of sinking into it. Has no
+   * effect when terrain is not enabled. Experimental: this may change or go away.
+   *
+   * @param clamped whether to clamp the centre to the ground
+   */
+  public void setCenterClampedToGround(boolean clamped) {
+    nativeMapView.setCenterClampedToGround(clamped);
+  }
+
+  /**
+   * @return whether the map centre is clamped to the ground
+   * @see MapLibreMap#setCenterClampedToGround(boolean)
+   */
+  public boolean getCenterClampedToGround() {
+    return nativeMapView.getCenterClampedToGround();
+  }
+
+  /**
+   * Moves the camera's centre along the line of sight to {@code altitude} metres above sea level
+   * without moving the camera. Nothing on screen moves; the target and zoom of
+   * {@link #getCameraPosition()} change to describe the same view from the new centre. Pass 0 to
+   * put the centre back at sea level.
+   * <p>
+   * With 3D terrain, gestures move the centre up onto the terrain under it, and removing the
+   * terrain brings it back down. A target and zoom describe the same view only at the same centre
+   * altitude, so save {@link #getCenterAltitude()} with the camera position, and restore it with
+   * this method before moving the camera to the saved position.
+   *
+   * @param altitude the new centre altitude above sea level in metres, terrain exaggeration applied
+   * @return false if nothing moved: the centre is already at that altitude, the line of sight
+   * nearly grazes the ground at that altitude (a pitch over about 84 degrees) or meets it at (or
+   * nearly at) the camera, or the minimum or maximum zoom or the camera bounds would cut the move
+   * short
+   */
+  public boolean setCenterAltitudeKeepingView(double altitude) {
+    return transform.setCenterAltitudeKeepingView(altitude);
+  }
+
+  /**
+   * @return the altitude of the camera's centre above sea level in metres. With 3D terrain on,
+   * gestures raise it onto the terrain under the centre; the style's root centerAltitude and
+   * {@link #setCenterAltitudeKeepingView(double)} set it too
+   * @see MapLibreMap#setCenterAltitudeKeepingView(double)
+   */
+  public double getCenterAltitude() {
+    return transform.getCenterAltitude();
+  }
+
+  /**
+   * Sets the vertical field of view of the map's camera, in degrees.
+   * <p>
+   * The map keeps its center, zoom, tilt and bearing: the scale at the center stays the same, and a
+   * wider field of view moves the camera closer to the center, so a tilted map shows more of the
+   * distance, as a wide-angle lens does. The change is immediate.
+   * <p>
+   * The value is limited to the range from 0.1 to 150 degrees. The default is about 36.87 degrees.
+   * {@link CameraPosition#fov} reports the field of view of the camera.
+   *
+   * @param degrees the vertical field of view in degrees
+   */
+  public void setFieldOfView(double degrees) {
+    notifyDeveloperAnimationListeners();
+    transform.setFieldOfView(degrees);
+  }
+
+  /**
+   * @return the vertical field of view of the map's camera, in degrees
+   * @see MapLibreMap#setFieldOfView(double)
+   */
+  public double getFieldOfView() {
+    return transform.getFieldOfView();
+  }
+
+  /**
+   * Puts the camera at an eye position and points it at a point, without animation.
+   * <p>
+   * The map's center becomes {@code center} at {@code centerAltitude}. The zoom, bearing and tilt
+   * become those that place the camera at {@code eye} and {@code eyeAltitude} with the current
+   * {@link #getFieldOfView() field of view}. A center above the eye needs a tilt over 90 degrees.
+   * <p>
+   * The tilt is limited by the maximum pitch ({@link #setMaxPitchPreference(double)}, at most 85
+   * degrees) and the zoom by the minimum and maximum zoom; where a limit applies, the camera is not
+   * at the eye position, so a center above the eye is looked at from a tilt of at most 85 degrees.
+   * With 3D terrain, altitudes are in metres with the terrain exaggeration applied, and with
+   * {@link #setCenterClampedToGround(boolean) setCenterClampedToGround(true)} the center is moved
+   * onto the terrain after this call; turn it off to keep the camera where this method put it.
+   * <p>
+   * Set the field of view first; changing it afterwards moves the camera off the eye.
+   * Nothing moves if {@code eye} and {@code center} are the same point.
+   *
+   * @param center         the point the camera looks at
+   * @param centerAltitude the altitude of that point above sea level, in metres
+   * @param eye            the coordinate the camera is over
+   * @param eyeAltitude    the altitude of the camera above sea level, in metres
+   */
+  public void setCameraFromEye(@NonNull LatLng center, double centerAltitude, @NonNull LatLng eye,
+                               double eyeAltitude) {
+    notifyDeveloperAnimationListeners();
+    transform.setCenterFromEye(center, centerAltitude, eye, eyeAltitude);
+  }
+
+  /**
+   * Returns the height of the rendered 3D terrain under a coordinate, in metres with the style's
+   * terrain exaggeration applied, as the renderer last loaded it.
+   * <p>
+   * Returns null when terrain is not enabled, the DEM tile under the coordinate has not loaded
+   * yet, or the coordinate is not valid (a latitude outside -90 to 90, or a longitude outside
+   * -180 to 180). The same lookup positions markers and view annotations on the draped surface;
+   * a caller that needs the true elevation divides by the terrain's exaggeration.
+   * <p>
+   * The answer comes from a copy of the terrain heights kept on the map side, so the call does not
+   * wait on the render thread. Call it on the main thread.
+   *
+   * @param latLng the coordinate to sample
+   * @return the terrain height in metres, or null when there is none
+   */
+  @UiThread
+  @Nullable
+  public Double getTerrainElevation(@NonNull LatLng latLng) {
+    double latitude = latLng.getLatitude();
+    double longitude = latLng.getLongitude();
+    if (!(latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180)) {
+      return null;
+    }
+    double elevation = nativeMapView.getTerrainElevation(latitude, longitude);
+    return Double.isNaN(elevation) ? null : elevation;
+  }
+
+  /**
    * Camera based tile level of detail controls
    *
    * @param threshold pitch angle in radians above which LOD calculation is performed
@@ -537,7 +772,7 @@ public final class MapLibreMap {
    * @param minPitch The new minimum Pitch.
    */
   public void setMinPitchPreference(
-    @FloatRange(from = MapLibreConstants.MINIMUM_PITCH, to = MapLibreConstants.MAXIMUM_PITCH) double minPitch) {
+    @FloatRange(from = MapLibreConstants.MINIMUM_PITCH, to = MapLibreConstants.MAXIMUM_PITCH_LIMIT) double minPitch) {
     transform.setMinPitch(minPitch);
   }
 
@@ -561,13 +796,13 @@ public final class MapLibreMap {
    * Sets the maximum Pitch the map can be displayed at.
    * </p>
    * <p>
-   * The default and upper bound for maximum Pitch is 60.
+   * The default maximum Pitch is 60; values up to 85 are accepted.
    * </p>
    *
    * @param maxPitch The new maximum Pitch.
    */
   public void setMaxPitchPreference(@FloatRange(from = MapLibreConstants.MINIMUM_PITCH,
-    to = MapLibreConstants.MAXIMUM_PITCH) double maxPitch) {
+    to = MapLibreConstants.MAXIMUM_PITCH_LIMIT) double maxPitch) {
     transform.setMaxPitch(maxPitch);
   }
 

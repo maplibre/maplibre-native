@@ -12,7 +12,7 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "HeatmapShader";
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto vertex = R"(
 struct VertexInput {
@@ -29,6 +29,7 @@ struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) weight: f32,
     @location(1) extrude: vec2<f32>,
+    @location(2) visibility: f32,
 };
 
 struct HeatmapDrawableUBO {
@@ -36,7 +37,13 @@ struct HeatmapDrawableUBO {
     extrude_scale: f32,
     weight_t: f32,
     radius_t: f32,
-    pad1: f32,
+    depth_enabled: f32,
+    dem_coords: vec4<f32>,
+    dem_unpack: vec4<f32>,
+    dem_dim: f32,
+    dem_exaggeration: f32,
+    dem_enabled: f32,
+    units_to_pixels_y: f32,
 };
 
 struct HeatmapEvaluatedPropsUBO {
@@ -54,6 +61,10 @@ struct GlobalIndexUBO {
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<HeatmapDrawableUBO>;
 @group(0) @binding(4) var<uniform> props: HeatmapEvaluatedPropsUBO;
+@group(1) @binding(0) var dem_sampler: sampler;
+@group(1) @binding(1) var dem_texture: texture_2d<f32>;
+@group(1) @binding(2) var depth_sampler: sampler;
+@group(1) @binding(3) var depth_texture: texture_2d<f32>;
 
 const ZERO: f32 = 1.0 / 255.0 / 16.0;
 const GAUSS_COEF: f32 = 0.3989422804014327;
@@ -85,9 +96,15 @@ fn main(in: VertexInput) -> VertexOutput {
     let scaled_extrude = extrude * radius * drawable.extrude_scale;
 
     let base = floor(pos * 0.5);
-    out.position = drawable.matrix * vec4<f32>(base + scaled_extrude, 0.0, 1.0);
+
+    // With 3D terrain on, lift the kernel to the terrain height at its centre
+    let ele = get_elevation(base, dem_texture, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+
+    out.position = drawable.matrix * vec4<f32>(base + scaled_extrude, ele, 1.0);
     out.weight = weight;
     out.extrude = extrude;
+    // A kernel whose centre is behind terrain adds nothing to the density texture
+    out.visibility = calculate_visibility(drawable.matrix * vec4<f32>(base, ele, 1.0), depth_texture, depth_sampler, drawable.depth_enabled, drawable.units_to_pixels_y);
 
     return out;
 }
@@ -97,6 +114,7 @@ fn main(in: VertexInput) -> VertexOutput {
 struct FragmentInput {
     @location(0) weight: f32,
     @location(1) extrude: vec2<f32>,
+    @location(2) visibility: f32,
 };
 
 struct HeatmapEvaluatedPropsUBO {
@@ -116,7 +134,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     return vec4<f32>(1.0, 1.0, 1.0, 1.0);
 #else
     let d = -0.5 * 3.0 * 3.0 * dot(in.extrude, in.extrude);
-    let val = in.weight * props.intensity * GAUSS_COEF * exp(d);
+    let val = in.weight * props.intensity * GAUSS_COEF * exp(d) * in.visibility;
     return vec4<f32>(val, 1.0, 1.0, 1.0);
 #endif
 }

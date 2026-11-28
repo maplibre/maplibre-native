@@ -29,6 +29,7 @@ namespace webgpu {
 
 // Forward declaration
 class VertexBufferResource;
+class Texture2D;
 
 class Context : public gfx::Context {
 public:
@@ -45,7 +46,10 @@ public:
     void reduceMemoryUsage() override;
 
     // Resource creation
-    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size,
+                                                                  gfx::TextureChannelDataType,
+                                                                  bool,
+                                                                  bool) override;
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
     gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
@@ -56,11 +60,17 @@ public:
                                               bool ssbo = false) override;
     gfx::UniqueUniformBufferArray createLayerUniformBufferArray() override;
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
-    TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
-    LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
+    TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,
+                                           std::size_t initialCapacity,
+                                           std::string name,
+                                           bool renderToTerrain) override;
+    LayerGroupPtr createLayerGroup(int32_t layerIndex,
+                                   std::size_t initialCapacity,
+                                   std::string name,
+                                   bool renderToTerrain) override;
     gfx::Texture2DPtr createTexture2D() override;
     gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
-    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
+    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type, bool stencil) override;
 
     // State management
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
@@ -90,6 +100,12 @@ public:
     const BufferResource& getTileVertexBuffer();
     const BufferResource& getTileIndexBuffer();
 
+    /// A shared 1x1 fallback texture, bound whenever a shader declares a
+    /// texture binding but the drawable has no texture set for it. WebGPU
+    /// requires every bind group declared by a pipeline to be set on each draw,
+    /// so an unbound (optional) texture slot must still receive a valid texture
+    /// and sampler. Mirrors the Vulkan backend's getDummyTexture().
+    const std::shared_ptr<Texture2D>& getDummyTexture();
     /// A shared vertex buffer of at least `size` bytes holding the default value of `type`,
     /// for attributes a drawable doesn't provide
     const VertexBufferResource& getDefaultVertexBuffer(gfx::AttributeDataType type, std::size_t size);
@@ -131,6 +147,8 @@ private:
     std::optional<BufferResource> tileVertexBuffer;
     std::optional<BufferResource> tileIndexBuffer;
 
+    // Fallback texture for shader-declared but unbound texture slots
+    std::shared_ptr<Texture2D> dummyTexture;
     // Default attribute buffers by type, largest last. Bindings may still point at the smaller ones.
     std::map<gfx::AttributeDataType, std::vector<std::unique_ptr<VertexBufferResource>>> defaultVertexBuffers;
 

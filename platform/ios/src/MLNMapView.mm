@@ -80,6 +80,7 @@
 #import "MLNStyleLayerManager.h"
 #import "MLNStyleLayer_Private.h"
 #import "MLNStyle_Private.h"
+#import "MLNTerrain_Private.h"
 #import "MLNUserLocationAnnotationView.h"
 #import "MLNUserLocationAnnotationView_Private.h"
 #import "MLNUserLocation_Private.h"
@@ -2207,6 +2208,8 @@ public:
 
   if (pan.state == UIGestureRecognizerStateBegan) {
     self.userTrackingMode = MLNUserTrackingModeNone;
+    // With terrain, drag the ground being looked at, not a sea-level plane under it.
+    self.mbglMap.anchorCenterOnTerrain();
 
     [self notifyGestureDidBegin];
   } else if (pan.state == UIGestureRecognizerStateChanged) {
@@ -2279,6 +2282,8 @@ public:
   self.cameraChangeReasonBitmask |= MLNCameraChangeReasonGesturePinch;
 
   if (pinch.state == UIGestureRecognizerStateBegan) {
+    // With terrain, turn round the ground being looked at, not a sea-level point behind it.
+    self.mbglMap.anchorCenterOnTerrain();
     self.scale = powf(2, [self zoomLevel]);
 
     if (abs(pinch.velocity) > abs(self.rotate.velocity)) {
@@ -2388,6 +2393,10 @@ public:
     return;
   }
 
+  if (rotate.state == UIGestureRecognizerStateBegan) {
+    // With terrain, turn round the ground being looked at, not a sea-level point behind it.
+    self.mbglMap.anchorCenterOnTerrain();
+  }
   if (rotate.state == UIGestureRecognizerStateBegan || !self.isRotating) {
     self.angle = MLNRadiansFromDegrees(*self.mbglMap.getCameraOptions().bearing) * -1;
 
@@ -2669,6 +2678,8 @@ public:
   static CGFloat initialPitch;
 
   if (twoFingerDrag.state == UIGestureRecognizerStateBegan) {
+    // With terrain, turn round the ground being looked at, not a sea-level point behind it.
+    self.mbglMap.anchorCenterOnTerrain();
     CGPoint midPoint = [twoFingerDrag translationInView:twoFingerDrag.view];
     // In the following if and for the first execution middlePoint
     // will be equal to dragGestureMiddlePoint and the resulting
@@ -2732,8 +2743,11 @@ public:
 
   CGPoint centerPoint = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds));
   CGPoint endCameraPoint = CGPointMake(centerPoint.x - endPoint.x, centerPoint.y - endPoint.y);
-  CLLocationCoordinate2D panCoordinate = [self convertPoint:endCameraPoint
-                                       toCoordinateFromView:pan.view];
+  // A camera centre, so on the centre's own plane: the terrain pick would put it on the ground
+  // in front of it
+  CLLocationCoordinate2D panCoordinate =
+      MLNLocationCoordinate2DFromLatLng([self convertPoint:endCameraPoint
+                            toCenterAltitudeLatLngFromView:pan.view]);
 
   panCamera.centerCoordinate = panCoordinate;
 
@@ -3227,12 +3241,62 @@ static void *windowScreenContext = &windowScreenContext;
   return _mbglMap->getTileLodZoomShift();
 }
 
+- (void)setTerrainHazeColor:(nullable UIColor *)terrainHazeColor {
+  _mbglMap->setTerrainHaze((terrainHazeColor ?: UIColor.clearColor).mgl_color,
+                           _mbglMap->getTerrainHazeRange());
+}
+
+- (UIColor *)terrainHazeColor {
+  return [UIColor mgl_colorWithColor:_mbglMap->getTerrainHazeColor()];
+}
+
+- (void)setTerrainHazeRange:(CGFloat)terrainHazeRange {
+  _mbglMap->setTerrainHaze(_mbglMap->getTerrainHazeColor(), static_cast<float>(terrainHazeRange));
+}
+
+- (CGFloat)terrainHazeRange {
+  return _mbglMap->getTerrainHazeRange();
+}
+
+- (void)setTerrainLoadMode:(MLNTerrainLoadMode)terrainLoadMode {
+  _mbglMap->setTerrainLoadMode(MLNTerrainLoadModeToMBGL(terrainLoadMode));
+}
+
+- (MLNTerrainLoadMode)terrainLoadMode {
+  return MLNTerrainLoadModeFromMBGL(_mbglMap->getTerrainLoadMode());
+}
+
+- (void)setTerrainSkirtLength:(MLNTerrainSkirtLength)terrainSkirtLength {
+  _mbglMap->setTerrainSkirtLength(MLNTerrainSkirtLengthToMBGL(terrainSkirtLength));
+}
+
+- (MLNTerrainSkirtLength)terrainSkirtLength {
+  return MLNTerrainSkirtLengthFromMBGL(_mbglMap->getTerrainSkirtLength());
+}
+
 - (void)setFrustumOffset:(UIEdgeInsets)frustumOffset {
   _mbglMap->setFrustumOffset(MLNEdgeInsetsFromNSEdgeInsets(frustumOffset));
 }
 
 - (UIEdgeInsets)frustumOffset {
   return NSEdgeInsetsFromMLNEdgeInsets(_mbglMap->getFrustumOffset());
+}
+
+- (void)setCenterClampedToGround:(BOOL)centerClampedToGround {
+  _mbglMap->setCenterClampedToGround(centerClampedToGround);
+}
+
+- (BOOL)isCenterClampedToGround {
+  return _mbglMap->getCenterClampedToGround();
+}
+
+- (nullable NSNumber *)terrainElevationForCoordinate:(CLLocationCoordinate2D)coordinate {
+  if (!CLLocationCoordinate2DIsValid(coordinate)) {
+    return nil;
+  }
+  std::optional<double> elevation =
+      _mbglMap->getTerrainElevation(MLNLatLngFromLocationCoordinate2D(coordinate));
+  return elevation ? @(*elevation) : nil;
 }
 
 // MARK: - Accessibility -
@@ -3928,6 +3992,75 @@ static void *windowScreenContext = &windowScreenContext;
   [self setZoomLevel:zoomLevel animated:NO];
 }
 
+- (CLLocationDistance)centerAltitude {
+  return self.mbglMap.getCameraOptions().centerAltitude.value_or(0.0);
+}
+
+- (BOOL)setCenterAltitudeKeepingView:(CLLocationDistance)altitude {
+  MLNLogDebug(@"Setting centerAltitude keeping the view: %f", altitude);
+  // Set before the call, which reports the camera change; take it back if nothing moved, or it
+  // would show up in the reason of the next, unrelated change.
+  MLNCameraChangeReason previousReasons = self.cameraChangeReasonBitmask;
+  self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
+  BOOL moved = self.mbglMap.setCenterAltitudeKeepingView(altitude);
+  if (!moved) {
+    self.cameraChangeReasonBitmask = previousReasons;
+  }
+  return moved;
+}
+
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
+             centerAltitude:(CLLocationDistance)centerAltitude
+          fromEyeCoordinate:(CLLocationCoordinate2D)eyeCoordinate
+                eyeAltitude:(CLLocationDistance)eyeAltitude {
+  MLNLogDebug(@"Setting centerCoordinate: %@ centerAltitude: %f fromEyeCoordinate: %@ "
+              @"eyeAltitude: %f",
+              MLNStringFromCLLocationCoordinate2D(centerCoordinate), centerAltitude,
+              MLNStringFromCLLocationCoordinate2D(eyeCoordinate), eyeAltitude);
+  if (!_mbglMap) {
+    return;
+  }
+  const mln::LatLng center = MLNLatLngFromLocationCoordinate2D(centerCoordinate);
+  const mln::LatLng eye = MLNLatLngFromLocationCoordinate2D(eyeCoordinate);
+  // The camera sits `cameraToCenter` points from the center along the line of sight, and a
+  // point is as many meters up as along the ground at the center's latitude. So measure the
+  // eye's offset from the center in points of the world at zoom level 0, and the zoom level is
+  // the one that scales that offset to `cameraToCenter`.
+  const mln::Point<double> centerPoint = mln::Projection::project(center, 1.0);
+  const mln::Point<double> eyePoint = mln::Projection::project(eye, 1.0);
+  const double worldSize = mln::Projection::worldSize(1.0);
+  double east = centerPoint.x - eyePoint.x;
+  if (east > worldSize / 2) {
+    east -= worldSize;
+  } else if (east < -worldSize / 2) {
+    east += worldSize;
+  }
+  const double north = eyePoint.y - centerPoint.y;
+  const double along = std::hypot(east, north);
+  const double up = (eyeAltitude - centerAltitude) /
+                    mln::Projection::getMetersPerPixelAtLatitude(center.latitude(), 0);
+  const double offset = std::hypot(along, up);
+  const double fieldOfView = mln::util::deg2rad(self.fieldOfView);
+  const double cameraToCenter = 0.5 * self.bounds.size.height / std::tan(fieldOfView / 2);
+  if (!(offset > 0) || !(cameraToCenter > 0) || !std::isfinite(offset)) {
+    return;
+  }
+
+  mln::CameraOptions cameraOptions;
+  cameraOptions.center = center;
+  cameraOptions.centerAltitude = centerAltitude;
+  cameraOptions.zoom = std::log2(cameraToCenter / offset);
+  cameraOptions.pitch = mln::util::rad2deg(std::atan2(along, up));
+  if (along > 0) {
+    cameraOptions.bearing = mln::util::rad2deg(std::atan2(east, north));
+  }
+
+  [self cancelTransitions];
+  self.userTrackingMode = MLNUserTrackingModeNone;
+  self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
+  self.mbglMap.jumpTo(cameraOptions);
+}
+
 - (void)setZoomLevel:(double)zoomLevel animated:(BOOL)animated {
   MLNLogDebug(@"Setting zoomLevel: %f animated: %@", zoomLevel, MLNStringFromBOOL(animated));
   if (zoomLevel == self.zoomLevel) return;
@@ -3990,6 +4123,15 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)setMaximumPitch:(CGFloat)maximumPitch {
   MLNLogDebug(@"Setting maximumPitch: %f", maximumPitch);
   self.mbglMap.setBounds(mln::BoundOptions().withMaxPitch(maximumPitch));
+}
+
+- (CGFloat)fieldOfView {
+  return *self.mbglMap.getCameraOptions().fov;
+}
+
+- (void)setFieldOfView:(CGFloat)fieldOfView {
+  MLNLogDebug(@"Setting fieldOfView: %f", fieldOfView);
+  self.mbglMap.jumpTo(mln::CameraOptions().withFov(fieldOfView));
 }
 
 - (MLNCoordinateBounds)visibleCoordinateBounds {
@@ -4579,7 +4721,21 @@ static void *windowScreenContext = &windowScreenContext;
 /// Converts a point in the view’s coordinate system to a geographic coordinate.
 - (mln::LatLng)convertPoint:(CGPoint)point toLatLngFromView:(nullable UIView *)view {
   CGPoint convertedPoint = [self convertPoint:point fromView:view];
-  return self.mbglMap.latLngForPixel(mln::ScreenCoordinate(convertedPoint.x, convertedPoint.y))
+  // With 3D terrain, the pixel's view ray meets the draped surface before sea level, so the
+  // sea-level unprojection would land well past the spot under the finger. Inverse of
+  // convertLatLng:toPointToView:; sea level without terrain.
+  return self.mbglMap
+      .latLngForPixelOnTerrain(mln::ScreenCoordinate(convertedPoint.x, convertedPoint.y))
+      .wrapped();
+}
+
+/// Converts a point in the view’s coordinate system to the geographic coordinate on the plane the
+/// camera’s centre sits on, for code that turns a point into a camera centre. With 3D terrain,
+/// convertPoint:toLatLngFromView: answers on the surface in front of that plane instead.
+- (mln::LatLng)convertPoint:(CGPoint)point toCenterAltitudeLatLngFromView:(nullable UIView *)view {
+  CGPoint convertedPoint = [self convertPoint:point fromView:view];
+  return self.mbglMap
+      .latLngForPixelAtCenterAltitude(mln::ScreenCoordinate(convertedPoint.x, convertedPoint.y))
       .wrapped();
 }
 
@@ -4593,7 +4749,9 @@ static void *windowScreenContext = &windowScreenContext;
 
 /// Converts a geographic coordinate to a point in the view’s coordinate system.
 - (CGPoint)convertLatLng:(mln::LatLng)latLng toPointToView:(nullable UIView *)view {
-  mln::ScreenCoordinate pixel = self.mbglMap.pixelForLatLng(latLng);
+  // With 3D terrain, project onto the draped surface so annotation views, the user location
+  // view and callouts sit on the ground they mark instead of at sea level.
+  mln::ScreenCoordinate pixel = self.mbglMap.pixelForLatLngOnTerrain(latLng);
   return [self convertPoint:CGPointMake(pixel.x, pixel.y) toView:view];
 }
 
@@ -4614,7 +4772,7 @@ static void *windowScreenContext = &windowScreenContext;
   auto southeast = bounds.southeast();
 
   auto center = [self convertPoint:{CGRectGetMidX(view.bounds), CGRectGetMidY(view.bounds)}
-                  toLatLngFromView:view];
+      toCenterAltitudeLatLngFromView:view];
 
   // Extend bounds to account for the antimeridian
   northwest.unwrapForShortestPath(center);
@@ -5661,7 +5819,10 @@ static void *windowScreenContext = &windowScreenContext;
 
   if (moveIntoView) {
     CGPoint center = CGPointMake(CGRectGetMidX(constrainedRect), CGRectGetMidY(constrainedRect));
-    CLLocationCoordinate2D centerCoord = [self convertPoint:center toCoordinateFromView:self];
+    // The new camera centre, on the centre's own plane (see cameraByPanningWithTranslation:)
+    CLLocationCoordinate2D centerCoord =
+        MLNLocationCoordinate2DFromLatLng([self convertPoint:center
+                              toCenterAltitudeLatLngFromView:self]);
     [self setCenterCoordinate:centerCoord
                     zoomLevel:self.zoomLevel
                     direction:self.direction

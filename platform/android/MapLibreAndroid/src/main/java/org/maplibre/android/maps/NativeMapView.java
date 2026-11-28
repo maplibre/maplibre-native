@@ -36,6 +36,7 @@ import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
+import org.maplibre.android.style.terrain.Terrain;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.utils.BitmapUtils;
@@ -753,6 +754,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public LatLng latLngForPixelAtCenterAltitude(@NonNull PointF pixel) {
+    if (checkState("latLngForPixelAtCenterAltitude")) {
+      return new LatLng();
+    }
+    return nativeLatLngForPixelAtCenterAltitude(pixel.x / pixelRatio, pixel.y / pixelRatio);
+  }
+
+  @Override
   public void latLngsForPixels(@NonNull double[] input, @NonNull double[] output) {
     if (!checkState("latLngsForPixels")) {
       nativeLatLngsForPixels(input, output, pixelRatio);
@@ -888,6 +897,152 @@ final class NativeMapView implements NativeMap {
       return 0;
     }
     return nativeGetTileLodScale();
+  }
+
+  @Override
+  public void setTerrainLoadMode(int mode) {
+    if (checkState("setTerrainLoadMode")) {
+      return;
+    }
+    nativeSetTerrainLoadMode(mode);
+  }
+
+  @Override
+  public void setDebugAboveGroundLog(boolean enabled) {
+    if (checkState("setDebugAboveGroundLog")) {
+      return;
+    }
+    nativeSetDebugAboveGroundLog(enabled);
+  }
+
+  @Override
+  public int getTerrainLoadMode() {
+    if (checkState("getTerrainLoadMode")) {
+      return 0;
+    }
+    return nativeGetTerrainLoadMode();
+  }
+
+  @Override
+  public void anchorCenterOnTerrain() {
+    if (checkState("anchorCenterOnTerrain")) {
+      return;
+    }
+    nativeAnchorCenterOnTerrain();
+  }
+
+  @Override
+  public boolean setCenterAltitudeKeepingView(double altitude) {
+    if (checkState("setCenterAltitudeKeepingView")) {
+      return false;
+    }
+    return nativeSetCenterAltitudeKeepingView(altitude);
+  }
+
+  @Override
+  public double getCenterAltitude() {
+    if (checkState("getCenterAltitude")) {
+      return 0;
+    }
+    return nativeGetCenterAltitude();
+  }
+
+  @Override
+  public void setFieldOfView(double degrees) {
+    if (checkState("setFieldOfView")) {
+      return;
+    }
+    nativeSetFieldOfView(degrees);
+  }
+
+  @Override
+  public double getFieldOfView() {
+    if (checkState("getFieldOfView")) {
+      return 0;
+    }
+    return nativeGetFieldOfView();
+  }
+
+  @Override
+  public void setCenterFromEye(double centerLatitude, double centerLongitude, double centerAltitude,
+                               double eyeLatitude, double eyeLongitude, double eyeAltitude) {
+    if (checkState("setCenterFromEye")) {
+      return;
+    }
+    nativeSetCenterFromEye(centerLatitude, centerLongitude, centerAltitude, eyeLatitude, eyeLongitude,
+      eyeAltitude);
+  }
+
+  @Override
+  public double getTerrainElevation(double latitude, double longitude) {
+    if (checkState("getTerrainElevation")) {
+      return Double.NaN;
+    }
+    return nativeGetTerrainElevation(latitude, longitude);
+  }
+
+  @Override
+  public void setTerrainSkirtLength(int length) {
+    if (checkState("setTerrainSkirtLength")) {
+      return;
+    }
+    nativeSetTerrainSkirtLength(length);
+  }
+
+  @Override
+  public int getTerrainSkirtLength() {
+    if (checkState("getTerrainSkirtLength")) {
+      return 0;
+    }
+    return nativeGetTerrainSkirtLength();
+  }
+
+  @Override
+  public void setTerrainHazeColor(int color) {
+    if (checkState("setTerrainHazeColor")) {
+      return;
+    }
+    nativeSetTerrainHazeColor(color);
+  }
+
+  @Override
+  public int getTerrainHazeColor() {
+    if (checkState("getTerrainHazeColor")) {
+      return 0;
+    }
+    return nativeGetTerrainHazeColor();
+  }
+
+  @Override
+  public void setTerrainHazeRange(float range) {
+    if (checkState("setTerrainHazeRange")) {
+      return;
+    }
+    nativeSetTerrainHazeRange(range);
+  }
+
+  @Override
+  public float getTerrainHazeRange() {
+    if (checkState("getTerrainHazeRange")) {
+      return 0;
+    }
+    return nativeGetTerrainHazeRange();
+  }
+
+  @Override
+  public void setCenterClampedToGround(boolean clamped) {
+    if (checkState("setCenterClampedToGround")) {
+      return;
+    }
+    nativeSetCenterClampedToGround(clamped);
+  }
+
+  @Override
+  public boolean getCenterClampedToGround() {
+    if (checkState("getCenterClampedToGround")) {
+      return false;
+    }
+    return nativeGetCenterClampedToGround();
   }
 
   @Override
@@ -1201,6 +1356,31 @@ final class NativeMapView implements NativeMap {
       return null;
     }
     return nativeGetLight();
+  }
+
+  @Override
+  public void setTerrain(@Nullable Terrain terrain) {
+    if (checkState("setTerrain")) {
+      return;
+    }
+    if (terrain == null) {
+      nativeRemoveTerrain();
+    } else {
+      nativeSetTerrain(terrain.getSource(), terrain.getExaggeration());
+    }
+  }
+
+  @Override
+  @Nullable
+  public Terrain getTerrain() {
+    if (checkState("getTerrain")) {
+      return null;
+    }
+    String sourceId = nativeGetTerrainSourceId();
+    if (sourceId == null) {
+      return null;
+    }
+    return new Terrain(sourceId, nativeGetTerrainExaggeration());
   }
 
   @Override
@@ -1669,6 +1849,9 @@ final class NativeMapView implements NativeMap {
   private native LatLng nativeLatLngForPixel(float x, float y);
 
   @Keep
+  private native LatLng nativeLatLngForPixelAtCenterAltitude(float x, float y);
+
+  @Keep
   private native void nativeLatLngsForPixels(double[] input, double[] output, float pixelRatio);
 
   @Keep
@@ -1815,6 +1998,19 @@ final class NativeMapView implements NativeMap {
   private native Light nativeGetLight();
 
   @Keep
+  private native void nativeSetTerrain(String sourceId, float exaggeration);
+
+  @Keep
+  private native void nativeRemoveTerrain();
+
+  @Nullable
+  @Keep
+  private native String nativeGetTerrainSourceId();
+
+  @Keep
+  private native float nativeGetTerrainExaggeration();
+
+  @Keep
   private native void nativeSetPrefetchTiles(boolean enable);
 
   @Keep
@@ -1843,6 +2039,62 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native double nativeGetTileLodScale();
+
+  @Keep
+  private native void nativeSetTerrainLoadMode(int mode);
+
+  @Keep
+  private native void nativeSetDebugAboveGroundLog(boolean enabled);
+
+  @Keep
+  private native int nativeGetTerrainLoadMode();
+
+  @Keep
+  private native void nativeAnchorCenterOnTerrain();
+
+  @Keep
+  private native boolean nativeSetCenterAltitudeKeepingView(double altitude);
+
+  @Keep
+  private native double nativeGetCenterAltitude();
+
+  @Keep
+  private native void nativeSetFieldOfView(double degrees);
+
+  @Keep
+  private native double nativeGetFieldOfView();
+
+  @Keep
+  private native void nativeSetCenterFromEye(double centerLatitude, double centerLongitude,
+                                             double centerAltitude, double eyeLatitude,
+                                             double eyeLongitude, double eyeAltitude);
+
+  @Keep
+  private native double nativeGetTerrainElevation(double latitude, double longitude);
+
+  @Keep
+  private native void nativeSetTerrainSkirtLength(int length);
+
+  @Keep
+  private native int nativeGetTerrainSkirtLength();
+
+  @Keep
+  private native void nativeSetTerrainHazeColor(int color);
+
+  @Keep
+  private native int nativeGetTerrainHazeColor();
+
+  @Keep
+  private native void nativeSetTerrainHazeRange(float range);
+
+  @Keep
+  private native float nativeGetTerrainHazeRange();
+
+  @Keep
+  private native void nativeSetCenterClampedToGround(boolean clamped);
+
+  @Keep
+  private native boolean nativeGetCenterClampedToGround();
 
   @Keep
   private native void nativeSetTileLodPitchThreshold(double threshold);

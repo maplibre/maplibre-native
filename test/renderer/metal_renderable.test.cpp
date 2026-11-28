@@ -37,6 +37,25 @@ TEST(MetalRenderable, BindKeepsThePendingCommandBuffer) {
     resource.swap();
 }
 
+// Only the color of an offscreen target outlives its pass. Where the GPU can render depth and
+// stencil without memory behind them, the target holds the color texture alone.
+TEST(MetalRenderable, OffscreenDepthAndStencilTakeNoMemory) {
+    auto backend = gfx::HeadlessBackend::Create({256, 256});
+    gfx::BackendScope scope{*backend->getRendererBackend()};
+    auto& context = static_cast<mtl::Context&>(backend->getRendererBackend()->getContext());
+    if (!context.getBackend().isMemorylessTextureSupported()) {
+        GTEST_SKIP() << "This GPU has no memoryless textures";
+    }
+
+    const auto before = context.renderingStats().memTextures;
+    const auto target = context.createOffscreenTexture(
+        {512, 512}, gfx::TextureChannelDataType::UnsignedByte, /*depth=*/true, /*stencil=*/true);
+    auto& resource = target->getResource<mtl::RenderableResource>();
+    resource.bind();
+    EXPECT_EQ(context.renderingStats().memTextures - before, 512 * 512 * 4);
+    resource.swap();
+}
+
 // An offscreen pass must be committed without waiting for the GPU. Hold the queue on an event that only
 // the CPU signals, a second after the pass is committed: if swap waited, it would come back after that
 // second. Reading the image back still has to wait for the pass and return what it drew.

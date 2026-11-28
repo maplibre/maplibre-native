@@ -5,6 +5,9 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import io.mockk.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -207,5 +210,150 @@ class TransformTest : BaseTest() {
             }
         }
         transform.animateCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(expected), 500, callback)
+    }
+
+    @Test
+    fun testAnchorCenterOnTerrainRefreshesCameraPosition() {
+        transform.cameraPosition // cache the sea-level camera
+        // Anchoring moves the centre toward the camera and raises the zoom, keeping the view.
+        val anchored = CameraPosition.Builder().target(LatLng(1.0, 2.0)).zoom(13.5).tilt(60.0).build()
+        every { nativeMapView.anchorCenterOnTerrain() } answers {
+            every { nativeMapView.cameraPosition } returns anchored
+        }
+
+        transform.anchorCenterOnTerrain()
+
+        verify(exactly = 1) { nativeMapView.anchorCenterOnTerrain() }
+        assertEquals(anchored, transform.cameraPosition)
+    }
+
+    @Test
+    fun testSetCenterAltitudeKeepingViewRefreshesCameraPositionWhenMoved() {
+        transform.cameraPosition // cache the sea-level camera
+        val raised = CameraPosition.Builder().target(LatLng(1.0, 2.0)).zoom(13.5).tilt(60.0).build()
+        every { nativeMapView.setCenterAltitudeKeepingView(1500.0) } answers {
+            every { nativeMapView.cameraPosition } returns raised
+            true
+        }
+
+        assertTrue(transform.setCenterAltitudeKeepingView(1500.0))
+        assertEquals(raised, transform.cameraPosition)
+    }
+
+    @Test
+    fun testSetCenterAltitudeKeepingViewKeepsCameraPositionWhenNothingMoved() {
+        transform.cameraPosition
+        every { nativeMapView.setCenterAltitudeKeepingView(any()) } returns false
+
+        assertFalse(transform.setCenterAltitudeKeepingView(0.0))
+        verify(exactly = 1) { nativeMapView.cameraPosition }
+    }
+
+    @Test
+    fun testSetFieldOfViewReportsTheMoveAndRefreshesCameraPosition() {
+        transform.cameraPosition // cache the default camera
+        val wide = CameraPosition.Builder().target(LatLng(1.0, 2.0)).fov(70.0).build()
+        every { nativeMapView.setFieldOfView(70.0) } answers {
+            every { nativeMapView.cameraPosition } returns wide
+        }
+
+        transform.setFieldOfView(70.0)
+
+        verify(exactly = 1) { nativeMapView.setFieldOfView(70.0) }
+        verify(exactly = 1) { nativeMapView.cancelTransitions() }
+        verify(exactly = 1) { cameraChangeDispatcher.onCameraMoveStarted(any()) }
+        // Two idle notifications: one from cancelTransitions(), one from the end of the move.
+        verify(exactly = 2) { cameraChangeDispatcher.onCameraIdle() }
+        assertEquals(wide, transform.cameraPosition)
+    }
+
+    @Test
+    fun testSetFieldOfViewToTheSameValueReportsNothing() {
+        every { nativeMapView.setFieldOfView(any()) } answers {}
+
+        transform.setFieldOfView(36.87)
+
+        verify(exactly = 1) { nativeMapView.setFieldOfView(36.87) }
+        verify(exactly = 0) { nativeMapView.cancelTransitions() }
+        verify(exactly = 0) { cameraChangeDispatcher.onCameraMoveStarted(any()) }
+        verify(exactly = 0) { cameraChangeDispatcher.onCameraIdle() }
+    }
+
+    @Test
+    fun testSetFieldOfViewCancelsAPendingCameraCallback() {
+        val maplibreMap = mockk<MapLibreMap>()
+        every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
+        every { mapView.addOnCameraDidChangeListener(any()) } answers {} // the animation never ends
+        val callback = mockk<MapLibreMap.CancelableCallback>(relaxed = true)
+        val update = CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().target(LatLng(1.0, 2.0)).build())
+        transform.easeCamera(maplibreMap, update, 1000, false, callback)
+        val wide = CameraPosition.Builder().fov(70.0).build()
+        every { nativeMapView.setFieldOfView(70.0) } answers {
+            every { nativeMapView.cameraPosition } returns wide
+        }
+
+        transform.setFieldOfView(70.0)
+
+        mainLooper.idle()
+        verify(exactly = 1) { callback.onCancel() }
+        verify(exactly = 0) { callback.onFinish() }
+    }
+
+    @Test
+    fun testGetFieldOfViewAsksTheNativeMap() {
+        every { nativeMapView.fieldOfView } returns 55.0
+        assertEquals(55.0, transform.fieldOfView, 0.0)
+    }
+
+    @Test
+    fun testSetCenterFromEyeReportsTheMoveAndRefreshesCameraPosition() {
+        transform.cameraPosition // cache the default camera
+        val moved = CameraPosition.Builder().target(LatLng(38.72, -120.07)).tilt(48.0).build()
+        every { nativeMapView.setCenterFromEye(any(), any(), any(), any(), any(), any()) } answers {
+            every { nativeMapView.cameraPosition } returns moved
+        }
+
+        transform.setCenterFromEye(LatLng(38.72, -120.07), 1000.0, LatLng(38.70, -120.07), 3000.0)
+
+        verify(exactly = 1) { nativeMapView.setCenterFromEye(38.72, -120.07, 1000.0, 38.70, -120.07, 3000.0) }
+        verify(exactly = 1) { nativeMapView.cancelTransitions() }
+        verify(exactly = 1) { cameraChangeDispatcher.onCameraMoveStarted(any()) }
+        // Two idle notifications: one from cancelTransitions(), one from the end of the move.
+        verify(exactly = 2) { cameraChangeDispatcher.onCameraIdle() }
+        assertEquals(moved, transform.cameraPosition)
+    }
+
+    @Test
+    fun testSetCenterFromEyeThatLeavesTheCameraReportsNothing() {
+        // Core returns early, as when the eye and the center are the same point: the camera stays.
+        every { nativeMapView.setCenterFromEye(any(), any(), any(), any(), any(), any()) } answers {}
+
+        transform.setCenterFromEye(LatLng(38.7, -120.07), 1000.0, LatLng(38.7, -120.07), 1000.0)
+
+        verify(exactly = 1) { nativeMapView.setCenterFromEye(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { nativeMapView.cancelTransitions() }
+        verify(exactly = 0) { cameraChangeDispatcher.onCameraMoveStarted(any()) }
+        verify(exactly = 0) { cameraChangeDispatcher.onCameraMoveCanceled() }
+        verify(exactly = 0) { cameraChangeDispatcher.onCameraIdle() }
+    }
+
+    @Test
+    fun testSetCenterFromEyeCancelsAPendingCameraCallback() {
+        val maplibreMap = mockk<MapLibreMap>()
+        every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
+        every { mapView.addOnCameraDidChangeListener(any()) } answers {} // the animation never ends
+        val callback = mockk<MapLibreMap.CancelableCallback>(relaxed = true)
+        val update = CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().target(LatLng(1.0, 2.0)).build())
+        transform.easeCamera(maplibreMap, update, 1000, false, callback)
+        val moved = CameraPosition.Builder().target(LatLng(38.72, -120.07)).tilt(48.0).build()
+        every { nativeMapView.setCenterFromEye(any(), any(), any(), any(), any(), any()) } answers {
+            every { nativeMapView.cameraPosition } returns moved
+        }
+
+        transform.setCenterFromEye(LatLng(38.72, -120.07), 1000.0, LatLng(38.70, -120.07), 3000.0)
+
+        mainLooper.idle()
+        verify(exactly = 1) { callback.onCancel() }
+        verify(exactly = 0) { callback.onFinish() }
     }
 }

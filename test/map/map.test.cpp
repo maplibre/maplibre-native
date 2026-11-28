@@ -14,6 +14,7 @@
 #include <mln/map/map_options.hpp>
 #include <mln/map/map_projection.hpp>
 #include <mln/math/log2.hpp>
+#include <mln/renderer/query.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source_manager.hpp>
@@ -508,6 +509,78 @@ TEST(Map, SetStyleDefaultCamera) {
     test.map.jumpTo(test.map.getStyle().getDefaultCamera());
     camera = test.map.getCameraOptions();
     EXPECT_DOUBLE_EQ(*camera.zoom, 0.5);
+}
+
+// The terrain skirt setting is a per-map render option, not a style property, so it reaches
+// the renderer on UpdateParameters. Assert both ends: the accessor round-trips and the value
+// actually rides along to the frontend.
+// The map centre rides a plane at the centre altitude, not sea level. Driving the free camera
+// (an FPV/flight camera over terrain does this every frame) used to re-derive the centre from
+// the z = 0 intersection, which both zeroed the altitude and teleported the centre.
+TEST(Map, FreeCameraPreservesCentreAltitude) {
+    MapTest<> test;
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    const LatLng center{47.2692, 11.4041};
+    test.map.jumpTo(CameraOptions().withCenter(center).withZoom(13.0).withPitch(60.0));
+    test.map.jumpTo(CameraOptions().withCenterAltitude(1500.0));
+    test.runLoop.runOnce();
+    test.frontend.render(test.map);
+
+    const auto before = test.map.getCameraOptions({});
+    ASSERT_TRUE(before.centerAltitude.has_value());
+    ASSERT_DOUBLE_EQ(*before.centerAltitude, 1500.0);
+
+    // Nudge the camera so setFreeCameraOptions sees a real change and re-derives the state;
+    // an unchanged round trip is a no-op and would prove nothing.
+    auto freeCamera = test.map.getFreeCameraOptions();
+    ASSERT_TRUE(freeCamera.position.has_value());
+    auto position = *freeCamera.position;
+    position[2] *= 1.000001;
+    freeCamera.position = position;
+    test.map.setFreeCameraOptions(freeCamera);
+    test.runLoop.runOnce();
+    test.frontend.render(test.map);
+
+    const auto after = test.map.getCameraOptions({});
+    ASSERT_TRUE(after.centerAltitude.has_value());
+    // The altitude survives rather than collapsing to sea level.
+    EXPECT_NEAR(*after.centerAltitude, 1500.0, 1.0);
+    // And the centre stays put instead of jumping to where the ray met sea level, which for
+    // this camera was some 2.6 km north.
+    EXPECT_NEAR(after.center->latitude(), before.center->latitude(), 1e-4);
+    EXPECT_NEAR(after.center->longitude(), before.center->longitude(), 1e-4);
+    EXPECT_NEAR(*after.zoom, *before.zoom, 1e-3);
+}
+
+TEST(Map, TerrainSkirtLength) {
+    class ForwardingHeadlessFrontend : public HeadlessFrontend {
+    public:
+        using HeadlessFrontend::HeadlessFrontend;
+        ~ForwardingHeadlessFrontend() override = default;
+        void update(std::shared_ptr<UpdateParameters> params) override {
+            lastSkirtLength = params->terrainSkirtLength;
+            HeadlessFrontend::update(std::move(params));
+        }
+        std::optional<TerrainSkirtLength> lastSkirtLength;
+    };
+
+    MapTest<StubFileSource, ForwardingHeadlessFrontend> test;
+    EXPECT_EQ(test.map.getTerrainSkirtLength(), TerrainSkirtLength::Auto);
+
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+    test.map.setTerrainSkirtLength(TerrainSkirtLength::None);
+    EXPECT_EQ(test.map.getTerrainSkirtLength(), TerrainSkirtLength::None);
+
+    test.runLoop.runOnce();
+    test.frontend.render(test.map);
+    ASSERT_TRUE(test.frontend.lastSkirtLength.has_value());
+    EXPECT_EQ(*test.frontend.lastSkirtLength, TerrainSkirtLength::None);
+
+    test.map.setTerrainSkirtLength(TerrainSkirtLength::Auto);
+    test.runLoop.runOnce();
+    test.frontend.render(test.map);
+    EXPECT_EQ(*test.frontend.lastSkirtLength, TerrainSkirtLength::Auto);
 }
 
 TEST(Map, ProjectionMode) {
@@ -2426,4 +2499,48 @@ TEST(Map, TileSelectionOptionsPublishUpdates) {
     check(&Map::setTileLodPitchThreshold, &UpdateParameters::tileLodPitchThreshold, 0.5);
     check(&Map::setTileLodZoomShift, &UpdateParameters::tileLodZoomShift, 1.0);
     check(&Map::setTileLodMode, &UpdateParameters::tileLodMode, TileLodMode::Distance);
+}
+
+TEST(Map, TileDrawsItsMissingTextOnceTheGlyphRangeLoads) {
+    MapTest<> test;
+    bool fail = true;
+    test.fileSource->glyphsResponse = [&](const Resource&) {
+        Response response;
+        if (fail) {
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                               "Failed by the test case");
+        } else {
+            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        }
+        return response;
+    };
+
+    test.map.getStyle().loadJSON(R"({
+      "version": 8,
+      "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+      "sources": {
+        "a": {"type": "geojson", "data": {"type": "Point", "coordinates": [-60, 0]}},
+        "b": {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}}
+      },
+      "layers": [
+        {"id": "a", "type": "symbol", "source": "a", "layout": {"text-field": "a", "text-font": ["Test Stack"]}},
+        {"id": "b", "type": "symbol", "source": "b", "layout": {"text-field": "a", "text-font": ["Test Stack"]}}
+      ]
+    })");
+
+    // Source "a"'s tile is laid out while the glyph range fails to load, and the still render fails.
+    EXPECT_ANY_THROW(test.frontend.render(test.map));
+
+    // Source "b"'s new tile needs the range too, so the next still render waits until it loads.
+    fail = false;
+    static_cast<GeoJSONSource*>(test.map.getStyle().getSource("b"))->setGeoJSON(Geometry<double>{Point<double>{60, 0}});
+    test.frontend.render(test.map);
+
+    const auto size = test.frontend.getSize();
+    const ScreenBox screen{{0, 0}, {static_cast<double>(size.width), static_cast<double>(size.height)}};
+    const auto drawn = [&](const std::string& layer) {
+        return test.frontend.getRenderer()->queryRenderedFeatures(screen, {std::vector<std::string>{layer}}).size();
+    };
+    EXPECT_EQ(drawn("b"), 1u);
+    EXPECT_EQ(drawn("a"), 1u);
 }
