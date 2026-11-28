@@ -17,22 +17,27 @@ namespace mln {
 namespace style {
 
 struct HeatmapColor : ColorRampProperty {
+    static constexpr bool SupportsTransition = false;
 };
 
 struct HeatmapIntensity : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct HeatmapOpacity : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct HeatmapRadius : DataDrivenPaintProperty<float, attributes::radius, uniforms::radius> {
     static float defaultValue() { return 30.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct HeatmapWeight : DataDrivenPaintProperty<float, attributes::weight, uniforms::weight> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = false;
 };
 
 class HeatmapPaintProperties : public Properties<

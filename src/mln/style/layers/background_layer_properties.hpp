@@ -18,14 +18,17 @@ namespace style {
 
 struct BackgroundColor : PaintProperty<Color> {
     static Color defaultValue() { return Color::black(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct BackgroundOpacity : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct BackgroundPattern : CrossFadedPaintProperty<expression::Image> {
     static expression::Image defaultValue() { return {}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 class BackgroundPaintProperties : public Properties<

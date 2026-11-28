@@ -23,34 +23,42 @@ struct FillExtrusionRoundedCornerDistance : LayoutProperty<float> {
 
 struct FillExtrusionBase : DataDrivenPaintProperty<float, attributes::base, uniforms::base> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillExtrusionColor : DataDrivenPaintProperty<Color, attributes::color, uniforms::color> {
     static Color defaultValue() { return Color::black(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillExtrusionHeight : DataDrivenPaintProperty<float, attributes::height, uniforms::height> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillExtrusionOpacity : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillExtrusionPattern : CrossFadedDataDrivenPaintProperty<expression::Image, attributes::pattern_to, uniforms::pattern_to, attributes::pattern_from, uniforms::pattern_from> {
     static expression::Image defaultValue() { return {}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillExtrusionTranslate : PaintProperty<std::array<float, 2>> {
     static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillExtrusionTranslateAnchor : PaintProperty<TranslateAnchorType> {
     static TranslateAnchorType defaultValue() { return TranslateAnchorType::Map; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct FillExtrusionVerticalGradient : PaintProperty<bool> {
     static bool defaultValue() { return true; }
+    static constexpr bool SupportsTransition = false;
 };
 
 class FillExtrusionLayoutProperties : public Properties<

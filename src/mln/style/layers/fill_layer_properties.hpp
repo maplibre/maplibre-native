@@ -23,34 +23,42 @@ struct FillSortKey : DataDrivenLayoutProperty<float> {
 
 struct FillAntialias : PaintProperty<bool> {
     static bool defaultValue() { return true; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct FillColor : DataDrivenPaintProperty<Color, attributes::color, uniforms::color> {
     static Color defaultValue() { return Color::black(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillOpacity : DataDrivenPaintProperty<float, attributes::opacity, uniforms::opacity> {
     static float defaultValue() { return 1.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillOutlineColor : DataDrivenPaintProperty<Color, attributes::outline_color, uniforms::outline_color> {
     static Color defaultValue() { return {}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillPattern : CrossFadedDataDrivenPaintProperty<expression::Image, attributes::pattern_to, uniforms::pattern_to, attributes::pattern_from, uniforms::pattern_from> {
     static expression::Image defaultValue() { return {}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillRoundedCornerDistance : PaintProperty<float> {
     static float defaultValue() { return 0.f; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillTranslate : PaintProperty<std::array<float, 2>> {
     static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct FillTranslateAnchor : PaintProperty<TranslateAnchorType> {
     static TranslateAnchorType defaultValue() { return TranslateAnchorType::Map; }
+    static constexpr bool SupportsTransition = false;
 };
 
 class FillLayoutProperties : public Properties<

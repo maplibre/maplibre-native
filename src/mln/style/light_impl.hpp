@@ -26,6 +26,7 @@ public:
 
 struct LightAnchor : LightProperty<LightAnchorType> {
     static LightAnchorType defaultValue() { return LightAnchorType::Viewport; }
+    static constexpr bool SupportsTransition = false;
 };
 
 struct LightPosition : LightProperty<Position> {
@@ -33,14 +34,17 @@ struct LightPosition : LightProperty<Position> {
         std::array<float, 3> default_ = {{1.15f, 210.f, 30.f}};
         return Position{{default_}};
     }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct LightColor : LightProperty<Color> {
     static Color defaultValue() { return Color::white(); }
+    static constexpr bool SupportsTransition = true;
 };
 
 struct LightIntensity : LightProperty<float> {
     static float defaultValue() { return 0.5; }
+    static constexpr bool SupportsTransition = true;
 };
 
 using LightProperties = Properties<LightAnchor, LightPosition, LightColor, LightIntensity>;
