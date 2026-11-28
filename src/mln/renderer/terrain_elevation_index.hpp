@@ -24,16 +24,16 @@ class TransformState;
 /// DEMData lives in a bucket that is destroyed when its tile is evicted.
 class TerrainElevationIndex {
 public:
-    /// One DEM tile's heights in whole metres (DEMData::get), `dim + 2` square including the
+    /// One DEM tile's heights in metres (DEMData::getElevation), `dim + 2` square including the
     /// border texel on every side, which bilinear sampling between pixel centres reads within half
     /// a pixel of the tile's edge. `get` takes DEM pixel coordinates, -1 to `dim`.
     struct Grid {
         explicit Grid(const DEMData&);
 
         int32_t dim;
-        std::vector<int16_t> heights;
+        std::vector<float> heights;
         /// Highest of `heights`, unexaggerated
-        int16_t maxHeight = 0;
+        float maxHeight = 0.0f;
 
         float get(int32_t x, int32_t y) const {
             return heights[static_cast<size_t>(y + 1) * (dim + 2) + static_cast<size_t>(x + 1)];

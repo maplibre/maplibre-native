@@ -19,9 +19,11 @@
 #include <mln/style/conversion/light.hpp>
 #include <mln/style/conversion/source.hpp>
 #include <mln/style/conversion/sprite.hpp>
+#include <mln/style/conversion/terrain.hpp>
 #include <mln/style/layer.hpp>
 #include <mln/style/light.hpp>
 #include <mln/style/source.hpp>
+#include <mln/style/terrain.hpp>
 #include <mln/style/style.hpp>
 #include <mln/util/compression.hpp>
 #include <mln/util/io.hpp>
@@ -658,6 +660,9 @@ const std::string setBearingOp("setBearing");
 const std::string setPitchOp("setPitch");
 const std::string setRollOp("setRoll");
 const std::string setCenterAltitudeOp("setCenterElevation");
+const std::string setCenterClampedToGroundOp("setCenterClampedToGround");
+const std::string setTerrainOp("setTerrain");
+const std::string idleOp("idle");
 const std::string setFilterOp("setFilter");
 const std::string setLayerZoomRangeOp("setLayerZoomRange");
 const std::string setLightOp("setLight");
@@ -746,6 +751,17 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
 
         if (operationArray[0].GetString() == waitOp) {
             // wait
+            result.emplace_back([](TestContext& ctx) {
+                try {
+                    ctx.getFrontend().render(ctx.getMap());
+                    return true;
+                } catch (const std::exception&) {
+                    return false;
+                }
+            });
+        } else if (operationArray[0].GetString() == idleOp) {
+            // idle: gl-js waits for the map to go idle. A still render finishes only once everything
+            // is loaded and settled, so it is the same wait.
             result.emplace_back([](TestContext& ctx) {
                 try {
                     ctx.getFrontend().render(ctx.getMap());
@@ -907,6 +923,35 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 ctx.getMap().jumpTo(mln::CameraOptions().withCenterAltitude(centerAltitude));
                 return true;
             });
+        } else if (operationArray[0].GetString() == setCenterClampedToGroundOp) {
+            // setCenterClampedToGround
+            assert(operationArray.Size() >= 2u);
+            assert(operationArray[1].IsBool());
+            bool clamped = operationArray[1].GetBool();
+            result.emplace_back([clamped](TestContext& ctx) {
+                ctx.getMap().setCenterClampedToGround(clamped);
+                return true;
+            });
+        } else if (operationArray[0].GetString() == setTerrainOp) {
+            // setTerrain: no argument or null removes the terrain, as in gl-js
+            if (operationArray.Size() < 2u || operationArray[1].IsNull()) {
+                result.emplace_back([](TestContext& ctx) {
+                    ctx.getMap().getStyle().setTerrain(nullptr);
+                    return true;
+                });
+            } else {
+                assert(operationArray[1].IsObject());
+                mln::style::conversion::Error error;
+                auto converted = mln::style::conversion::convert<mln::style::Terrain>(operationArray[1], error);
+                if (!converted) {
+                    metadata.errorMessage = std::string("Unable to convert terrain: ") + error.message;
+                    return {};
+                }
+                result.emplace_back([terrain = *converted](TestContext& ctx) {
+                    ctx.getMap().getStyle().setTerrain(std::make_unique<mln::style::Terrain>(terrain));
+                    return true;
+                });
+            }
         } else if (operationArray[0].GetString() == setFilterOp) {
             // setFilter
             assert(operationArray.Size() >= 3u);
