@@ -390,6 +390,27 @@ public class FillLayer extends Layer {
     return (PropertyValue<Float>) new PropertyValue("fill-rounded-corner-distance", nativeGetFillRoundedCornerDistance());
   }
 
+  /**
+   * Get the FillRoundedCornerDistance property transition options
+   *
+   * @return transition options for Float
+   */
+  @NonNull
+  public TransitionOptions getFillRoundedCornerDistanceTransition() {
+    checkThread();
+    return nativeGetFillRoundedCornerDistanceTransition();
+  }
+
+  /**
+   * Set the FillRoundedCornerDistance property transition options
+   *
+   * @param options transition options for Float
+   */
+  public void setFillRoundedCornerDistanceTransition(@NonNull TransitionOptions options) {
+    checkThread();
+    nativeSetFillRoundedCornerDistanceTransition(options.getDuration(), options.getDelay());
+  }
+
   @NonNull
   @Keep
   private native Object nativeGetFillSortKey();
@@ -460,6 +481,13 @@ public class FillLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetFillRoundedCornerDistance();
+
+  @NonNull
+  @Keep
+  private native TransitionOptions nativeGetFillRoundedCornerDistanceTransition();
+
+  @Keep
+  private native void nativeSetFillRoundedCornerDistanceTransition(long duration, long delay);
 
   @Override
   @Keep
