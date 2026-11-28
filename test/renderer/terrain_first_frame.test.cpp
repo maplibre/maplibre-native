@@ -147,13 +147,16 @@ struct FirstFrameTest {
         return count;
     }
 
-    // The flat map once its tiles are in and drawn: the picture the first frame with terrain has to match.
+    // The flat map once every tile it asks for is in and drawn: the picture the first frame with terrain
+    // has to match. A frame with no gap is not enough, since a parent tile fills the gap of a tile
+    // still loading and a finer tile that arrives later redraws that part.
     PremultipliedImage flatFrame() {
         PremultipliedImage image;
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 500; ++i) {
             image = oneFrame();
-            if (opaquePixels(image) == image.bytes() / 4) {
-                break;
+            if (opaquePixels(image) == image.bytes() / 4 && map.isFullyLoaded()) {
+                // Tiles that finished loading during that frame show in this one
+                return oneFrame();
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
