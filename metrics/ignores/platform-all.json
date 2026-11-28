@@ -147,11 +147,11 @@
     "render-tests/terrain/symbol-height-offset-building": "needs the symbol-height-offset layout property, not in native",
     "render-tests/terrain/symbol-height-offset-occluded-ground": "needs the symbol-height-offset layout property, not in native",
     "render-tests/terrain/symbol-add-terrain": "graded against maplibre-gl-js; the runner now applies setTerrain, but after the terrain is removed and added again native draws the view nearer the ground than gl-js and the marker off the view centre (camera placement over high ground)",
-    "render-tests/terrain/field-of-view": "graded against maplibre-gl-js; native draws this pitched view over high ground nearer the ground than gl-js, so the horizon shows",
-    "render-tests/terrain/symbol": "graded against maplibre-gl-js; native draws this pitched view over high ground nearer the ground than gl-js, so the horizon shows",
-    "render-tests/terrain/symbol-line": "graded against maplibre-gl-js; native draws this pitched view over high ground nearer the ground than gl-js, so the horizon shows",
-    "render-tests/terrain/tile-stiching": "graded against maplibre-gl-js; native draws this pitched view over high ground nearer the ground than gl-js",
-    "render-tests/terrain/rtt-mipmap-minification/pitch-70": "graded against maplibre-gl-js; native draws this pitched view nearer the ground than gl-js, so the far drape differs",
+    "render-tests/terrain/field-of-view": "graded against maplibre-gl-js; native's tile zoom rule differs from gl-js's on tilted views: native draws 38 tiles all at zoom 17, gl-js 36 tiles at zooms 15 to 18",
+    "render-tests/terrain/symbol": "graded against maplibre-gl-js; native's tile zoom rule differs from gl-js's on tilted views: native draws 38 tiles all at zoom 17, gl-js 36 tiles at zooms 15 to 18",
+    "render-tests/terrain/symbol-line": "graded against maplibre-gl-js; native's tile zoom rule differs from gl-js's on tilted views: native draws 38 tiles all at zoom 17, gl-js 36 tiles at zooms 15 to 18",
+    "render-tests/terrain/tile-stiching": "graded against maplibre-gl-js; native's tile zoom rule differs from gl-js's on tilted views: native draws 193 tiles all at zoom 14, gl-js 45 tiles at zooms 11 to 15",
+    "render-tests/terrain/rtt-mipmap-minification/pitch-70": "graded against maplibre-gl-js; native's tile zoom rule differs from gl-js's on tilted views: native draws 33 tiles at zooms 8 to 14, gl-js 33 tiles at zooms 4 to 15",
     "render-tests/terrain/fill-extrusion-vertical-gradient-pattern": "native now draws the patterned fill-extrusion on terrain, but the pattern on its walls is shifted against maplibre-gl-js (about half a pattern period up and a few pixels sideways); cause not found yet",
     "render-tests/terrain/low-zoom": "native draws a black frame at zoom 0 with exaggeration 1000 until https://github.com/maplibre/maplibre-native/pull/5045; with it, native requests raster tiles gl-js does not, which are not in the fixtures"
 }
